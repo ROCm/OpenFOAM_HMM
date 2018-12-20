@@ -35,9 +35,9 @@ Foam::Boussinesq<Specie>::Boussinesq
 )
 :
     Specie(dict),
-    rho0_(readScalar(dict.subDict("equationOfState").lookup("rho0"))),
-    T0_(readScalar(dict.subDict("equationOfState").lookup("T0"))),
-    beta_(readScalar(dict.subDict("equationOfState").lookup("beta")))
+    rho0_(dict.subDict("equationOfState").get<scalar>("rho0")),
+    T0_(dict.subDict("equationOfState").get<scalar>("T0")),
+    beta_(dict.subDict("equationOfState").get<scalar>("beta"))
 {}
 
 
@@ -47,12 +47,15 @@ template<class Specie>
 void Foam::Boussinesq<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
-    dictionary dict("equationOfState");
-    dict.add("rho0", rho0_);
-    dict.add("T0", T0_);
-    dict.add("beta", beta_);
 
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("rho0", rho0_);
+        os.writeEntry("T0", T0_);
+        os.writeEntry("beta", beta_);
+        os.endBlock();
+    }
 }
 
 

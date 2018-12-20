@@ -15,12 +15,14 @@
 #
 # Description
 #     Setup for custom compiler versions for OpenFOAM
+#     Per-compiler overrides in "compiler-$WM_COMPILER" files
 #
 #------------------------------------------------------------------------------
 
 switch ("$WM_COMPILER_TYPE")
 case ThirdParty:
     # Default versions of GMP, MPFR, MPC - override as necessary
+
     set gmp_version=gmp-system
     set mpfr_version=mpfr-system
     set mpc_version=mpc-system
@@ -72,6 +74,9 @@ case ThirdParty:
     case Gcc81:
         set gcc_version=gcc-8.1.0
         breaksw
+    case Gcc82:
+        set gcc_version=gcc-8.2.0
+        breaksw
     case Clang:
     case Clang37:
         set clang_version=llvm-3.7.1
@@ -86,10 +91,10 @@ case ThirdParty:
         set clang_version=llvm-4.0.1
         breaksw
     case Clang50:
-        set clang_version=llvm-5.0.1
+        set clang_version=llvm-5.0.2
         breaksw
     case Clang60:
-        set clang_version=llvm-6.0.0
+        set clang_version=llvm-6.0.1
         breaksw
     default:
         /bin/cat << UNKNOWN_COMPILER
@@ -102,6 +107,9 @@ Please check your settings
 UNKNOWN_COMPILER
         breaksw
     endsw
+
+    # Per-compiler overrides in "compiler-$WM_COMPILER" files
+    _foamEtc -config "compiler-$WM_COMPILER"
     breaksw
 endsw
 

@@ -57,8 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class face;
 class triFace;
 
@@ -199,8 +198,8 @@ public:
         //- The unit normal
         inline vector unitNormal(const UList<point>& p) const;
 
-        //- Legacy name for areaNormal.
-        //  \deprecated Deprecated for new use (JUN-2018)
+        //- Legacy name for areaNormal()
+        //  \deprecated(2018-06) Deprecated for new use
         inline vector normal(const UList<point>& p) const
         {
             return areaNormal(p); // Legacy definition
@@ -213,20 +212,20 @@ public:
         //  The starting points of the original and reverse face are identical.
         face reverseFace() const;
 
-        //- Navigation through face vertices
+        // Navigation through face vertices
 
-            //- Return true if the global point label is found in face.
-            inline bool found(const label globalIndex) const;
+        //- Return true if the point label is found in face.
+        inline bool found(const label pointLabel) const;
 
-            //- Which local vertex on face given a global index.
-            //  returns -1 if not found
-            label which(const label globalIndex) const;
+        //- Find local index on face for the point label,
+        //  \return position in face (0,1,2,...) or -1 if not found.
+        inline label which(const label pointLabel) const;
 
-            //- Next vertex on face
-            inline label nextLabel(const label i) const;
+        //- Next vertex on face
+        inline label nextLabel(const label i) const;
 
-            //- Previous vertex on face
-            inline label prevLabel(const label i) const;
+        //- Previous vertex on face
+        inline label prevLabel(const label i) const;
 
 
         //- Return the volume swept out by the face when its points move
@@ -298,6 +297,20 @@ public:
             const UList<point>& meshPoints,
             label& nearType,
             label& nearLabel
+        ) const;
+
+        //- The sign for the side of the face plane the point is on,
+        //- using three evenly distributed face points for the estimated normal.
+        //  Uses the supplied tolerance for rounding around zero.
+        //  \return
+        //  -  0: on plane
+        //  - +1: front-side
+        //  - -1: back-side
+        int sign
+        (
+            const point& p,
+            const UList<point>& points,
+            const scalar tol = SMALL
         ) const;
 
         //- Return contact sphere diameter
@@ -403,6 +416,19 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Hash specialization for face
+template<>
+struct Hash<face>
+{
+    inline unsigned operator()(const face& obj, unsigned seed=0) const
+    {
+        return Hasher(obj.cdata(), obj.size()*sizeof(label), seed);
+    }
+};
+
+
 //- Specialization to offset faces, used in ListListOps::combineOffset
 template<>
 struct offsetOp<face>
@@ -415,25 +441,25 @@ struct offsetOp<face>
     {
         face result(x.size());
 
-        forAll(x, xI)
+        forAll(x, i)
         {
-            result[xI] = x[xI] + offset;
+            result[i] = x[i] + offset;
         }
         return result;
     }
 };
 
 
-// Global operators
+//- Deprecated(2017-04) find the longest edge on a face.
+//- Face point labels index into pts.
+//  \deprecated(2017-04) use class method instead
+label longestEdge(const face& f, const UList<point>& pts);
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
 inline bool operator==(const face& a, const face& b);
 inline bool operator!=(const face& a, const face& b);
-
-
-// Global functions
-
-//- Find the longest edge on a face. Face point labels index into pts.
-//  \deprecated use class method instead (APR-2017)
-label longestEdge(const face& f, const UList<point>& pts);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

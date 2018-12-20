@@ -39,8 +39,8 @@ namespace Foam
 Foam::specie::specie(const dictionary& dict)
 :
     name_(dict.dictName()),
-    Y_(dict.subDict("specie").lookupOrDefault("massFraction", 1.0)),
-    molWeight_(readScalar(dict.subDict("specie").lookup("molWeight")))
+    Y_(dict.subDict("specie").lookupOrDefault<scalar>("massFraction", 1)),
+    molWeight_(dict.subDict("specie").get<scalar>("molWeight"))
 {}
 
 
@@ -48,13 +48,13 @@ Foam::specie::specie(const dictionary& dict)
 
 void Foam::specie::write(Ostream& os) const
 {
-    dictionary dict("specie");
-    if (Y_ != 1)
+    // Entries in dictionary format
     {
-        dict.add("massFraction", Y_);
+        os.beginBlock("specie");
+        os.writeEntryIfDifferent<scalar>("massFraction", 1, Y_);
+        os.writeEntry("molWeight", molWeight_);
+        os.endBlock();
     }
-    dict.add("molWeight", molWeight_);
-    os  << indent << dict.dictName() << dict;
 }
 
 

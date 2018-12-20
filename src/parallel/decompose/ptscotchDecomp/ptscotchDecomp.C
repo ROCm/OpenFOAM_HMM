@@ -207,6 +207,7 @@ License
 #include "globalIndex.H"
 #include "SubField.H"
 
+// Avoid too many warnings from mpi.h
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 
 #include <cstdio>
@@ -221,6 +222,13 @@ License
     #endif
     #include <fenv.h>
 #endif
+
+// Provide a clear error message if we have a size mismatch
+static_assert
+(
+    sizeof(Foam::label) == sizeof(SCOTCH_Num),
+    "sizeof(Foam::label) == sizeof(SCOTCH_Num), check your scotch headers"
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

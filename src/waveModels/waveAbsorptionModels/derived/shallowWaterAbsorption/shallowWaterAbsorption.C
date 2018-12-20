@@ -101,12 +101,6 @@ Foam::waveModels::shallowWaterAbsorption::shallowWaterAbsorption
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::shallowWaterAbsorption::~shallowWaterAbsorption()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::shallowWaterAbsorption::readDict

@@ -83,7 +83,7 @@ Foam::lumpedPointTools::lumpedPointStates(Istream& is)
         (
             lumpedPointStateTuple
             (
-                readScalar(dict.lookup("time")),
+                dict.get<scalar>("time"),
                 lumpedPointState(dict)
             )
         );
@@ -142,7 +142,7 @@ Foam::labelList Foam::lumpedPointTools::lumpedPointPatchList
     autoPtr<pointVectorField> displacePtr = loadPointField<pointVectorField>
     (
         pMesh,
-        objects0.lookup("pointDisplacement")
+        objects0.findObject("pointDisplacement")
     );
 
     if (!displacePtr.valid())

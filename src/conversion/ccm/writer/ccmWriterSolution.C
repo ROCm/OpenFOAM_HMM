@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -352,7 +352,6 @@ void Foam::ccm::writer::writeSolution
         // Get time information
         const Time& runTime = mesh_.time();
         label timeIndex = 0;
-        // scalar timeValue = runTime.timeName();
         if
         (
             runTime.timeName() != runTime.constant()
@@ -372,21 +371,7 @@ void Foam::ccm::writer::writeSolution
 
             if (io.typeHeaderOk<IOdictionary>(true))
             {
-                IOdictionary timeObject
-                (
-                    IOobject
-                    (
-                        "time",
-                        runTime.timeName(),
-                        "uniform",
-                        runTime,
-                        IOobject::MUST_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    )
-                );
-
-                timeObject.lookup("index") >> timeIndex;
+                IOdictionary(io).readEntry("index", timeIndex);
             }
         }
 
@@ -463,7 +448,7 @@ void Foam::ccm::writer::writeSolution
         &phaseNode
     );
 
-    forAllConstIter(IOobjectList, objects, iter)
+    forAllConstIters(objects, iter)
     {
         word fieldName = (*iter()).name();
         bool variableGood =

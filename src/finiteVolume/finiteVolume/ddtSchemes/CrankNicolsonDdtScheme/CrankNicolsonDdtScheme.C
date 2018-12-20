@@ -171,10 +171,7 @@ CrankNicolsonDdtScheme<Type>::ddt0_
 
     DDt0Field<GeoField>& ddt0 = static_cast<DDt0Field<GeoField>&>
     (
-        const_cast<GeoField&>
-        (
-            mesh().objectRegistry::template lookupObject<GeoField>(name)
-        )
+        mesh().objectRegistry::template lookupObjectRef<GeoField>(name)
     );
 
     return ddt0;
@@ -311,10 +308,8 @@ CrankNicolsonDdtScheme<Type>::CrankNicolsonDdtScheme
         const scalar ocCoeff = firstToken.number();
         if (ocCoeff < 0 || ocCoeff > 1)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "Off-centreing coefficient = " << ocCoeff
+            FatalIOErrorInFunction(is)
+                << "Off-centreing coefficient = " << ocCoeff
                 << " should be >= 0 and <= 1"
                 << exit(FatalIOError);
         }

@@ -39,7 +39,7 @@ void Foam::pimpleControl::read()
 {
     solutionControl::read(false);
 
-    const dictionary& pimpleDict = dict();
+    const dictionary pimpleDict(dict());
 
     solveFlow_ = pimpleDict.lookupOrDefault("solveFlow", true);
     nCorrPIMPLE_ = pimpleDict.lookupOrDefault<label>("nOuterCorrectors", 1);

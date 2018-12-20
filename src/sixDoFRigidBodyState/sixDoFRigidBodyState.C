@@ -51,10 +51,10 @@ const Foam::Enum
     Foam::functionObjects::sixDoFRigidBodyState::angleTypes
 >
 Foam::functionObjects::sixDoFRigidBodyState::angleTypeNames_
-{
+({
     { angleTypes::RADIANS, "radians" },
-    { angleTypes::DEGREES, "degrees" }
-};
+    { angleTypes::DEGREES, "degrees" },
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

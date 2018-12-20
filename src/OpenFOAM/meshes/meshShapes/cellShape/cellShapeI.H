@@ -54,6 +54,23 @@ inline Foam::cellShape::cellShape
 
 inline Foam::cellShape::cellShape
 (
+    const cellModel& model,
+    labelUList&& labels,
+    const bool doCollapse
+)
+:
+    labelList(std::move(labels)),
+    m(&model)
+{
+    if (doCollapse)
+    {
+        collapse();
+    }
+}
+
+
+inline Foam::cellShape::cellShape
+(
     const word& modelName,
     const labelUList& labels,
     const bool doCollapse

@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Checks for multiple patch faces on same cell and combines them.
+    Checks for multiple patch faces on the same cell and combines them.
     Multiple patch faces can result from e.g. removal of refined
     neighbouring cells, leaving 4 exposed faces with same owner.
 
@@ -343,34 +343,46 @@ label mergeEdges(const scalar minCos, polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Checks for multiple patch faces on the same cell and combines them."
+    );
+
     #include "addOverwriteOption.H"
 
-    argList::addArgument("featureAngle [0..180]");
+    argList::addArgument
+    (
+        "featureAngle",
+        "in degrees [0-180]"
+    );
     argList::addOption
     (
         "concaveAngle",
         "degrees",
-        "specify concave angle [0..180] (default: 30 degrees)"
+        "Specify concave angle [0..180] (default: 30 degrees)"
     );
     argList::addBoolOption
     (
         "meshQuality",
-        "read user-defined mesh quality criterions from system/meshQualityDict"
+        "Read user-defined mesh quality criteria from system/meshQualityDict"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
-    const scalar featureAngle = args.read<scalar>(1);
+    const scalar featureAngle = args.get<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     // Sin of angle between two consecutive edges on a face.
     // If sin(angle) larger than this the face will be considered concave.
-    scalar concaveAngle = args.lookupOrDefault("concaveAngle", 30.0);
-    scalar concaveSin = Foam::sin(degToRad(concaveAngle));
+    const scalar concaveAngle = args.opt<scalar>("concaveAngle", 30);
+
+    const scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 
     const bool overwrite = args.found("overwrite");
     const bool meshQuality = args.found("meshQuality");
@@ -402,14 +414,14 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 )
-           )
+            )
         );
     }
 
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
 

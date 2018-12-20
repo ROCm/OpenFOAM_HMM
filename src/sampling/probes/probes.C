@@ -195,26 +195,24 @@ Foam::label Foam::probes::prepare()
             << endl;
 
 
-        fileName probeDir;
         fileName probeSubDir = name();
 
         if (mesh_.name() != polyMesh::defaultRegion)
         {
             probeSubDir = probeSubDir/mesh_.name();
         }
-        probeSubDir =
-            functionObject::outputPrefix/probeSubDir/mesh_.time().timeName();
 
-        if (Pstream::parRun())
-        {
-            // Put in undecomposed case
-            // (Note: gives problems for distributed data running)
-            probeDir = mesh_.time().path()/".."/probeSubDir;
-        }
-        else
-        {
-            probeDir = mesh_.time().path()/probeSubDir;
-        }
+        // Put in undecomposed case
+        // (Note: gives problems for distributed data running)
+
+        fileName probeDir =
+        (
+            mesh_.time().globalPath()
+          / functionObject::outputPrefix
+          / probeSubDir
+          / mesh_.time().timeName()
+        );
+
         probeDir.clean();  // Remove unneeded ".."
 
         // ignore known fields, close streams for fields that no longer exist
@@ -315,8 +313,8 @@ Foam::probes::probes
 
 bool Foam::probes::read(const dictionary& dict)
 {
-    dict.lookup("probeLocations") >> *this;
-    dict.lookup("fields") >> fieldSelection_;
+    dict.readEntry("probeLocations", static_cast<pointField&>(*this));
+    dict.readEntry("fields", fieldSelection_);
 
     dict.readIfPresent("fixedLocations", fixedLocations_);
     if (dict.readIfPresent("interpolationScheme", interpolationScheme_))

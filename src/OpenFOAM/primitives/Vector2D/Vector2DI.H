@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,6 +70,7 @@ inline const Cmpt& Foam::Vector2D<Cmpt>::x() const
     return this->v_[X];
 }
 
+
 template<class Cmpt>
 inline const Cmpt& Foam::Vector2D<Cmpt>::y() const
 {
@@ -83,10 +84,29 @@ inline Cmpt& Foam::Vector2D<Cmpt>::x()
     return this->v_[X];
 }
 
+
 template<class Cmpt>
 inline Cmpt& Foam::Vector2D<Cmpt>::y()
 {
     return this->v_[Y];
+}
+
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt>& Foam::Vector2D<Cmpt>::normalise()
+{
+    const scalar s(Foam::mag(*this));
+
+    if (s < ROOTVSMALL)
+    {
+        *this = Zero;
+    }
+    else
+    {
+        *this /= s;
+    }
+
+    return *this;
 }
 
 

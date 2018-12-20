@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,14 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains  4;
-
+numberOfSubdomains  8;
 
 method          hierarchical;
 
 coeffs
 {
-    n           (2 2 1);
+    n           (2 2 2);
    // delta       0.001;
    // order       xyz;
 }

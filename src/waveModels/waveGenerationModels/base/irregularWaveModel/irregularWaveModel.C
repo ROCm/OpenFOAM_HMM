@@ -24,9 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "irregularWaveModel.H"
-#include "mathematicalConstants.H"
-
-using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -70,12 +67,6 @@ Foam::waveModels::irregularWaveModel::irregularWaveModel
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::irregularWaveModel::~irregularWaveModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::irregularWaveModel::readDict
@@ -85,7 +76,7 @@ bool Foam::waveModels::irregularWaveModel::readDict
 {
     if (waveGenerationModel::readDict(overrideDict))
     {
-        lookup("rampTime") >> rampTime_;
+        readEntry("rampTime", rampTime_);
 
         return true;
     }

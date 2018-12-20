@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,11 +62,11 @@ const Foam::Enum
     Foam::fv::directionalPressureGradientExplicitSource::pressureDropModel
 >
 Foam::fv::directionalPressureGradientExplicitSource::pressureDropModelNames_
-{
+({
     { pressureDropModel::pVolumetricFlowRateTable, "volumetricFlowRateTable" },
     { pressureDropModel::pConstant, "constant" },
     { pressureDropModel::pDarcyForchheimer, "DarcyForchheimer" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -134,7 +134,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::writeProps
 ) const
 {
     // Only write on output time
-    if (mesh_.time().outputTime())
+    if (mesh_.time().writeTime())
     {
         IOdictionary propsDict
         (
@@ -166,27 +166,27 @@ directionalPressureGradientExplicitSource
 )
 :
     cellSetOption(sourceName, modelType, dict, mesh),
-    model_(pressureDropModelNames_.lookup("model", coeffs_)),
+    model_(pressureDropModelNames_.get("model", coeffs_)),
     gradP0_(cells_.size(), Zero),
     dGradP_(cells_.size(), Zero),
     gradPporous_(cells_.size(), Zero),
-    flowDir_(coeffs_.lookup("flowDir")),
+    flowDir_(coeffs_.get<vector>("flowDir")),
     invAPtr_(nullptr),
     D_(0),
     I_(0),
     length_(0),
     pressureDrop_(0),
     flowRate_(),
-    faceZoneName_(coeffs_.lookup("faceZone")),
+    faceZoneName_(coeffs_.get<word>("faceZone")),
     zoneID_(mesh_.faceZones().findZoneID(faceZoneName_)),
     faceId_(),
     facePatchId_(),
     relaxationFactor_(coeffs_.lookupOrDefault<scalar>("relaxationFactor",0.3)),
     cellFaceMap_(cells_.size(), -1)
 {
-    coeffs_.lookup("fields") >> fieldNames_;
+    coeffs_.readEntry("fields", fieldNames_);
 
-    flowDir_ /= mag(flowDir_);
+    flowDir_.normalise();
 
     if (fieldNames_.size() != 1)
     {
@@ -210,13 +210,13 @@ directionalPressureGradientExplicitSource
     }
     else if (model_ == pConstant)
     {
-        coeffs_.lookup("pressureDrop") >> pressureDrop_;
+        coeffs_.readEntry("pressureDrop", pressureDrop_);
     }
     else if (model_ == pDarcyForchheimer)
     {
-        coeffs_.lookup("D") >> D_;
-        coeffs_.lookup("I") >> I_;
-        coeffs_.lookup("length") >> length_;
+        coeffs_.readEntry("D", D_);
+        coeffs_.readEntry("I", I_);
+        coeffs_.readEntry("length", length_);
     }
     else
     {
@@ -240,7 +240,7 @@ directionalPressureGradientExplicitSource
     {
         Info<< "    Reading pressure gradient from file" << endl;
         dictionary propsDict(dictionary::null, propsFile);
-        propsDict.lookup("gradient") >> gradP0_;
+        propsDict.readEntry("gradient", gradP0_);
     }
 
     Info<< "    Initial pressure gradient = " << gradP0_ << nl << endl;
@@ -431,7 +431,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
     {
         label cellI = cells_[i];
 
-        const vector Ufnorm = UfCells[i]/mag(UfCells[i]);
+        const vector Ufnorm = UfCells[i]/(mag(UfCells[i]) + SMALL);
 
         const tensor D = rotationTensor(Ufnorm, flowDir_);
 
@@ -452,7 +452,6 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
             Info<< "UfCell:= " << UfCells[i] << "U : " << U[cellI] << endl;
         }
     }
-
     writeProps(gradP0_ + dGradP_);
 }
 
@@ -525,6 +524,43 @@ void Foam::fv::directionalPressureGradientExplicitSource::constrain
 
     gradP0_ += dGradP_;
     dGradP_ = Zero;
+}
+
+
+void Foam::fv::directionalPressureGradientExplicitSource::writeData
+(
+    Ostream& os
+) const
+{
+    NotImplemented;
+}
+
+
+bool Foam::fv::directionalPressureGradientExplicitSource::read
+(
+    const dictionary& dict
+)
+{
+    const dictionary coeffs(dict.subDict(typeName + "Coeffs"));
+
+    relaxationFactor_ =
+        coeffs.lookupOrDefault<scalar>("relaxationFactor", 0.3);
+
+    coeffs.readEntry("flowDir", flowDir_);
+    flowDir_.normalise();
+
+    if (model_ == pConstant)
+    {
+        coeffs.readEntry("pressureDrop", pressureDrop_);
+    }
+    else if (model_ == pDarcyForchheimer)
+    {
+        coeffs.readEntry("D", D_);
+        coeffs.readEntry("I", I_);
+        coeffs.readEntry("length", length_);
+    }
+
+    return false;
 }
 
 

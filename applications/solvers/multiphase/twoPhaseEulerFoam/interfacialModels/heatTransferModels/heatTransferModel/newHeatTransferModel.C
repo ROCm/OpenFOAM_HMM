@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
     const phasePair& pair
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting heatTransferModel for "
         << pair << ": " << modelType << endl;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(normalToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, normalToFace, word);
     addToRunTimeSelectionTable(topoSetSource, normalToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, normalToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, normalToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        normalToFace,
+        word,
+        normal
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        normalToFace,
+        istream,
+        normal
+    );
 }
 
 
@@ -51,9 +67,7 @@ Foam::topoSetSource::addToUsageTable Foam::normalToFace::usage_
 
 void Foam::normalToFace::setNormal()
 {
-    normal_ /= mag(normal_) + VSMALL;
-
-    Info<< "    normalToFace : Normalized vector to " << normal_ << endl;
+    normal_.normalise();
 
     if (tol_ < -1 || tol_ > 1)
     {
@@ -73,7 +87,7 @@ Foam::normalToFace::normalToFace
     const scalar tol
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     normal_(normal),
     tol_(tol)
 {
@@ -83,9 +97,12 @@ Foam::normalToFace::normalToFace
 
 Foam::normalToFace::normalToFace(const polyMesh& mesh, const dictionary& dict)
 :
-    topoSetSource(mesh),
-    normal_(dict.lookup("normal")),
-    tol_(readScalar(dict.lookup("cos")))
+    normalToFace
+    (
+        mesh,
+        dict.get<vector>("normal"),
+        dict.get<scalar>("cos")
+    )
 {
     setNormal();
 }
@@ -93,18 +110,12 @@ Foam::normalToFace::normalToFace(const polyMesh& mesh, const dictionary& dict)
 
 Foam::normalToFace::normalToFace(const polyMesh& mesh, Istream& is)
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     normal_(checkIs(is)),
     tol_(readScalar(checkIs(is)))
 {
     setNormal();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::normalToFace::~normalToFace()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -115,36 +126,37 @@ void Foam::normalToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces according to normal being aligned with "
-            << normal_ << " (to within " << tol_ << ") ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces according to normal being aligned with "
+                << normal_ << " (to within " << tol_ << ") ..." << endl;
+        }
 
         forAll(mesh_.faceAreas(), facei)
         {
-            vector n = mesh_.faceAreas()[facei];
-            n /= mag(n) + VSMALL;
+            const vector n = normalised(mesh_.faceAreas()[facei]);
 
             if (mag(1 - (n & normal_)) < tol_)
             {
-                set.insert(facei);
+                set.set(facei);
             }
         }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces according to normal being aligned with "
-            << normal_ << " (to within " << tol_ << ") ..." << endl;
-
+        if (verbose_)
+        {
+            Info<< "    Removing faces according to normal being aligned with "
+                << normal_ << " (to within " << tol_ << ") ..." << endl;
+        }
 
         DynamicList<label> toBeRemoved(set.size()/10);
 
-        forAllConstIter(topoSet, set, iter)
+        for (const label facei : static_cast<const labelHashSet&>(set))
         {
-            const label facei = iter.key();
-
-            vector n = mesh_.faceAreas()[facei];
-            n /= mag(n) + VSMALL;
+            const vector n = normalised(mesh_.faceAreas()[facei]);
 
             if (mag(1 - (n & normal_)) < tol_)
             {
@@ -152,7 +164,7 @@ void Foam::normalToFace::applyToSet
             }
         }
 
-        set.erase(toBeRemoved);
+        set.unset(toBeRemoved);
     }
 }
 

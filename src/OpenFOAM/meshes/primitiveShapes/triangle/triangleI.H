@@ -816,6 +816,19 @@ inline Foam::pointHit Foam::triangle<Point, PointRef>::nearestPoint
 
 
 template<class Point, class PointRef>
+inline int Foam::triangle<Point, PointRef>::sign
+(
+    const point& p,
+    const scalar tol
+) const
+{
+    const scalar dist = ((p - a_) & unitNormal());
+
+    return ((dist < -tol) ? -1 : (dist > tol) ? +1 : 0);
+}
+
+
+template<class Point, class PointRef>
 inline void Foam::triangle<Point, PointRef>::dummyOp::operator()
 (
     const triPoints&

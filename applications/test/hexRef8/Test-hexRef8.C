@@ -48,12 +48,6 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-bool notEqual(const scalar s1, const scalar s2, const scalar tol)
-{
-    return mag(s1-s2) > tol;
-}
-
-
 // Main program:
 int main(int argc, char *argv[])
 {
@@ -180,6 +174,8 @@ int main(int argc, char *argv[])
     // Construct refiner. Read initial cell and point levels.
     hexRef8 meshCutter(mesh);
 
+    // Comparison for inequality
+    const auto isNotEqual = notEqualOp<scalar>(1e-10);
 
     while (runTime.loop())
     {
@@ -345,7 +341,7 @@ int main(int argc, char *argv[])
             Info<< "Uniform one field min = " << min
                 << "  max = " << max << endl;
 
-            if (notEqual(max, 1.0, 1e-10) || notEqual(min, 1.0, 1e-10))
+            if (isNotEqual(min, 1) || isNotEqual(max, 1))
             {
                 FatalErrorInFunction
                     << "Uniform volVectorField not preserved."
@@ -369,7 +365,7 @@ int main(int argc, char *argv[])
             Info<< "Linear profile field min = " << min
                 << "  max = " << max << endl;
 
-            if (notEqual(max, 0.0, 1e-10) || notEqual(min, 0.0, 1e-10))
+            if (isNotEqual(min, 0) || isNotEqual(max, 0))
             {
                 Info<< "Linear profile not preserved."
                     << " Min and max should both be 0.0. min:" << min
@@ -390,7 +386,7 @@ int main(int argc, char *argv[])
             Info<< "Uniform surface field min = " << min
                 << "  max = " << max << endl;
 
-            if (notEqual(max, 1.0, 1e-10) || notEqual(min, 1.0, 1e-10))
+            if (isNotEqual(min, 1) || isNotEqual(max, 1))
             {
                 FatalErrorInFunction
                     << "Uniform surfaceScalarField not preserved."

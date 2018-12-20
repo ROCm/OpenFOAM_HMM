@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,21 @@ Description
     A surfaceWriter that writes the geometry via the MeshedSurfaceProxy, but
     which does not support any fields.
 
+    \heading Output file locations
+
+    The \c rootdir normally corresponds to something like
+    \c postProcessing/\<name\>
+
+    \subheading Geometry
+    \verbatim
+    rootdir
+    `-- timeName
+        `-- surfaceName.{obj|stl|..}
+    \endverbatim
+
+Note
+    The formatOptions for proxy are file-type dependent.
+
 SourceFiles
     proxySurfaceWriter.C
 
@@ -51,11 +66,14 @@ class proxySurfaceWriter
 :
     public surfaceWriter
 {
-
     // Private data
 
-        //- The associated file extension
-        word ext_;
+        //- The file extension associated with the proxy
+        word fileExtension_;
+
+        //- Format options
+        dictionary options_;
+
 
 public:
 
@@ -66,7 +84,10 @@ public:
     // Constructors
 
         //- Construct for a given extension
-        proxySurfaceWriter(const word& ext);
+        explicit proxySurfaceWriter(const word& fileExt);
+
+        //- Construct for a given extension, with some output options
+        proxySurfaceWriter(const word& fileExt, const dictionary& options);
 
 
     //- Destructor
@@ -87,10 +108,10 @@ public:
         //- Write single surface geometry to file.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 };
 

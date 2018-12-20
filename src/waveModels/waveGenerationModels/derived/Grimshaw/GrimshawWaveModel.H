@@ -117,7 +117,7 @@ public:
     );
 
     //- Destructor
-    virtual ~Grimshaw();
+    virtual ~Grimshaw() = default;
 
 
     // Public Member Functions

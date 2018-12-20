@@ -564,7 +564,7 @@ template<class Point, class PointRef>
 template<class AboveTetOp, class BelowTetOp>
 inline void Foam::tetrahedron<Point, PointRef>::tetSliceWithPlane
 (
-    const plane& pl,
+    const plane& pln,
     const tetPoints& tet,
     AboveTetOp& aboveOp,
     BelowTetOp& belowOp
@@ -575,8 +575,7 @@ inline void Foam::tetrahedron<Point, PointRef>::tetSliceWithPlane
     label nPos = 0;
     forAll(tet, i)
     {
-        // with plane unit-normal
-        d[i] = ((tet[i] - pl.refPoint()) & pl.normal());
+        d[i] = pln.signedDistance(tet[i]);
         if (d[i] > 0)
         {
             ++nPos;
@@ -589,8 +588,8 @@ inline void Foam::tetrahedron<Point, PointRef>::tetSliceWithPlane
     }
     else if (nPos == 3)
     {
-        // Sliced into below tet and above prism. Prism gets split into
-        // two tets.
+        // Sliced into below tet and above prism.
+        // Prism gets split into two tets.
 
         // Find the below tet
         label i0 = -1;

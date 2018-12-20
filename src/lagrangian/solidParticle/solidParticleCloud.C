@@ -50,9 +50,9 @@ Foam::solidParticleCloud::solidParticleCloud
             IOobject::NO_WRITE
         )
     ),
-    rhop_(dimensionedScalar(particleProperties_.lookup("rhop")).value()),
-    e_(dimensionedScalar(particleProperties_.lookup("e")).value()),
-    mu_(dimensionedScalar(particleProperties_.lookup("mu")).value())
+    rhop_(dimensionedScalar("rhop", particleProperties_).value()),
+    e_(dimensionedScalar("e", particleProperties_).value()),
+    mu_(dimensionedScalar("mu", particleProperties_).value())
 {
     if (readFields)
     {

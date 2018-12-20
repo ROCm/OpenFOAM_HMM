@@ -28,7 +28,7 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Solver for 2 incompressible, non-isothermal immiscible fluids with
+    Solver for two incompressible, non-isothermal immiscible fluids with
     phase-change (evaporation-condensation) between a fluid and its vapour.
     Uses a VOF (volume of fluid) phase-fraction based interface capturing
     approach.
@@ -56,10 +56,19 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for two incompressible, non-isothermal immiscible fluids with"
+        " phase-change,"
+        " using VOF phase-fraction based interface capturing.\n"
+        "With optional mesh motion and mesh topology changes including"
+        " adaptive re-meshing."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
@@ -85,7 +94,7 @@ int main(int argc, char *argv[])
         #include "CourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

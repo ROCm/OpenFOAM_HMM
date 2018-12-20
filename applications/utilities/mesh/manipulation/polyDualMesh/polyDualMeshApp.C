@@ -28,8 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Calculates the dual of a polyMesh. Adheres to all the feature and patch
-    edges.
+    Creates the dual of a polyMesh, adhering to all the feature and patch edges.
 
 Usage
     \b polyDualMesh featureAngle
@@ -47,8 +46,8 @@ Usage
         Normally only constructs a single face between two cells. This single
         face might be too distorted. splitAllFaces will create a single face for
         every original cell the face passes through. The mesh will thus have
-        multiple faces inbetween two cells! (so is not strictly upper-triangular
-        anymore - checkMesh will complain)
+        multiple faces in between two cells! (so is not strictly
+        upper-triangular anymore - checkMesh will complain)
 
       - \par -doNotPreserveFaceZones:
         By default all faceZones are preserved by marking all faces, edges and
@@ -140,7 +139,7 @@ void simpleMarkFeatures
         SubList<face>
         (
             mesh.faces(),
-            mesh.nFaces()-mesh.nInternalFaces(),
+            mesh.nBoundaryFaces(),
             mesh.nInternalFaces()
         ),
         mesh.points()
@@ -238,7 +237,7 @@ void simpleMarkFeatures
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Face centres that need inclusion in the dual mesh
-    labelHashSet featureFaceSet(mesh.nFaces()-mesh.nInternalFaces());
+    labelHashSet featureFaceSet(mesh.nBoundaryFaces());
     // A. boundary faces.
     for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
     {
@@ -360,25 +359,36 @@ void dumpFeatures
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Creates the dual of a polyMesh,"
+        " adhering to all the feature and patch edges."
+    );
+
     #include "addOverwriteOption.H"
     argList::noParallel();
 
-    argList::addArgument("featureAngle [0-180]");
+    argList::addArgument
+    (
+        "featureAngle",
+        "in degrees [0-180]"
+    );
+
     argList::addBoolOption
     (
         "splitAllFaces",
-        "have multiple faces inbetween cells"
+        "Have multiple faces in between cells"
     );
     argList::addBoolOption
     (
         "concaveMultiCells",
-        "split cells on concave boundary edges into multiple cells"
+        "Split cells on concave boundary edges into multiple cells"
     );
     argList::addBoolOption
     (
         "doNotPreserveFaceZones",
-        "disable the default behaviour of preserving faceZones by having"
-        " multiple faces inbetween cells"
+        "Disable the default behaviour of preserving faceZones by having"
+        " multiple faces in between cells"
     );
 
     #include "setRootCase.H"
@@ -401,7 +411,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    const scalar featureAngle = args.read<scalar>(1);
+    const scalar featureAngle = args.get<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     Info<< "Feature:" << featureAngle << endl
@@ -541,7 +551,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
     else
     {

@@ -50,10 +50,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class mapPolyMesh;
-
-// Forward declaration of friend functions and operators
-
 class faceZone;
 Ostream& operator<<(Ostream& os, const faceZone& zn);
 
@@ -80,7 +78,7 @@ class faceZone
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Flip map for all faces in the zone.
         //  Use true if the face needs flipping for the correct orientation.
@@ -119,7 +117,7 @@ protected:
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- The name associated with the zone-labels dictionary entry
         static const char * const labelsName;

@@ -203,20 +203,20 @@ inline Foam::PackedList<Width>::PackedList(Istream& is)
 
 
 template<unsigned Width>
-inline Foam::PackedList<Width>::PackedList(const PackedList<Width>& rhs)
+inline Foam::PackedList<Width>::PackedList(const PackedList<Width>& list)
 :
-    blocks_(rhs.blocks_),
-    size_(rhs.size_)
+    blocks_(list.blocks_),
+    size_(list.size_)
 {}
 
 
 template<unsigned Width>
-inline Foam::PackedList<Width>::PackedList(PackedList<Width>&& rhs)
+inline Foam::PackedList<Width>::PackedList(PackedList<Width>&& list)
 :
-    blocks_(std::move(rhs.blocks_)),
-    size_(rhs.size_)
+    blocks_(std::move(list.blocks_)),
+    size_(list.size_)
 {
-    rhs.size_ = 0;
+    list.size_ = 0;
 }
 
 
@@ -228,8 +228,8 @@ inline Foam::PackedList<Width>::PackedList(const labelUList& values)
 {
     const label len = values.size();
 
-    // Could add more intelligent filling (blockwise), but likely done
-    // fairly infrequently
+    // Could add more intelligent filling (blockwise),
+    // but likely done fairly infrequently
 
     for (label i = 0; i < len; ++i)
     {
@@ -247,8 +247,8 @@ inline Foam::PackedList<Width>::PackedList(const labelUIndList& values)
 {
     const label len = values.size();
 
-    // Could add more intelligent filling (blockwise), but likely done
-    // fairly infrequently
+    // Could add more intelligent filling (blockwise),
+    // but likely done fairly infrequently
 
     for (label i = 0; i < len; ++i)
     {
@@ -579,8 +579,7 @@ inline unsigned int Foam::PackedList<Width>::get(const label i) const
         }
         #endif
 
-        // Lazy evaluation - return 0 for out-of-range
-        return 0u;
+        return 0u;        // Out-of-bounds (lazy): return 0 (false)
     }
 
     return reference(const_cast<PackedList<Width>*>(this), i).get();
@@ -603,19 +602,16 @@ inline bool Foam::PackedList<Width>::set
             << endl;
         #endif
 
-        // Lazy evaluation - ignore out-of-bounds
-        return false;
+        return false;       // Out-of-bounds: ignore
     }
     else if (i >= size())
     {
-        if (!val)
+        if (!val)           // Unset out-of-bounds: ignore
         {
-            // Same as unset out-of-bounds = noop
             return false;
         }
 
-        // Lazy evaluation - increase size on assigment
-        resize(i + 1);
+        resize(i + 1);      // Lazy evaluation: adjust size for assign
     }
 
     return reference(this, i).set(val);
@@ -627,8 +623,7 @@ inline bool Foam::PackedList<Width>::unset(const label i)
 {
     if (i < 0 || i >= size())
     {
-        // Unset out-of-bounds = noop
-        return false;
+        return false;       // Unset out-of-bounds: ignore
     }
 
     return reference(this, i).set(0u);

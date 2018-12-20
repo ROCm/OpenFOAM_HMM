@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,12 +146,12 @@ Foam::polyPatch::polyPatch
         faceSubList
         (
             bm.mesh().faces(),
-            readLabel(dict.lookup("nFaces")),
-            readLabel(dict.lookup("startFace"))
+            dict.get<label>("nFaces"),
+            dict.get<label>("startFace")
         ),
         bm.mesh().points()
     ),
-    start_(readLabel(dict.lookup("startFace"))),
+    start_(dict.get<label>("startFace")),
     boundaryMesh_(bm),
     faceCellsPtr_(nullptr),
     mePtr_(nullptr)
@@ -290,6 +290,12 @@ Foam::wordList Foam::polyPatch::constraintTypes()
     cTypes.setSize(i);
 
     return cTypes;
+}
+
+
+Foam::label Foam::polyPatch::offset() const
+{
+    return start_ - boundaryMesh().start();
 }
 
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -19,10 +19,7 @@ newFromPatch
     type    faceSet;
     action  new;
     source  patchToFace;
-    sourceInfo
-    {
-        name outer;
-    }
+    patch   outer;
 }
 
 subsetNormal
@@ -30,10 +27,7 @@ subsetNormal
     type    faceSet;
     action  subset;
     source  normalToFace;
-    sourceInfo
-    {
-        cos     0.1;
-    }
+    cos     0.1;
 }
 
 actions
@@ -47,10 +41,7 @@ actions
     {
         name  outerx;
         $subsetNormal;
-        sourceInfo
-        {
-            normal (-1 0 0);
-        }
+        normal (-1 0 0);
     }
 
     // outery
@@ -62,10 +53,7 @@ actions
     {
         name  outery;
         $subsetNormal;
-        sourceInfo
-        {
-            normal (0 -1 0);
-        }
+        normal (0 -1 0);
     }
 
     // outerz
@@ -77,10 +65,7 @@ actions
     {
         name  outerz;
         $subsetNormal;
-        sourceInfo
-        {
-            normal (0 0 -1);
-        }
+        normal (0 0 -1);
     }
 
 );

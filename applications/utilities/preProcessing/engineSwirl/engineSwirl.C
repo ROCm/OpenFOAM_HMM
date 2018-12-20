@@ -28,17 +28,21 @@ Group
     grpPreProcessingUtilities
 
 Description
-    Generates a swirling flow for engine calulations.
+    Generate a swirl flow for engine calculations.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Generate a swirl flow for engine calculations"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -47,7 +51,7 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    scalar Vphi = (constant::mathematical::pi*swirlRPMRatio*rpm/30).value();
+    scalar Vphi = (swirlRPMRatio * rpm * rpmToRads()).value();
     scalar b1 = j1(swirlProfile).value();
     scalar b2 = 2.0*b1/swirlProfile.value() - j0(swirlProfile).value();
 

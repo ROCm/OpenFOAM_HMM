@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,16 @@ Class
     Foam::targetVolumeToCell
 
 Description
-    A topoSetSource to select cells based on the wanted volume of selected
+    A topoSetCellSource to select cells based on the wanted volume of selected
     cells. Adapts a plane until it has enough.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        volume      | The target volume (m^3)           | yes   |
+        normal      | The plane normal                  | yes   |
+        set         | Restrict to named cellSet         | no    | ""
+    \endtable
 
 SourceFiles
     targetVolumeToCell.C
@@ -36,13 +44,15 @@ SourceFiles
 #ifndef targetVolumeToCell_H
 #define targetVolumeToCell_H
 
-#include "topoSetSource.H"
-#include "bitSet.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declarations
+class bitSet;
 
 /*---------------------------------------------------------------------------*\
                          Class targetVolumeToCell Declaration
@@ -50,7 +60,7 @@ namespace Foam
 
 class targetVolumeToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -62,7 +72,7 @@ class targetVolumeToCell
         const scalar vol_;
 
         //- Normal of plane to sweep
-        const vector n_;
+        const vector normal_;
 
         //- Optional name of cellSet to calculate volume in
         const word maskSetName_;
@@ -70,7 +80,8 @@ class targetVolumeToCell
 
     // Private Member Functions
 
-        scalar volumeOfSet(const bitSet&) const;
+        //- The volume of the selected cells
+        scalar volumeOfSet(const bitSet& selected) const;
 
         label selectCells
         (
@@ -94,39 +105,27 @@ public:
         (
             const polyMesh& mesh,
             const scalar vol,
-            const vector&
+            const vector& normal,
+            const word& maskSetName = ""
         );
 
         //- Construct from dictionary
-        targetVolumeToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        targetVolumeToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        targetVolumeToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        targetVolumeToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~targetVolumeToCell();
+    virtual ~targetVolumeToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

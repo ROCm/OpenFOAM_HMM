@@ -98,10 +98,10 @@ LarsenBorgnakkeVariableHardSphere
 )
 :
     BinaryCollisionModel<CloudType>(dict, cloud, typeName),
-    Tref_(readScalar(this->coeffDict().lookup("Tref"))),
+    Tref_(this->coeffDict().getScalar("Tref")),
     relaxationCollisionNumber_
     (
-        readScalar(this->coeffDict().lookup("relaxationCollisionNumber"))
+        this->coeffDict().getScalar("relaxationCollisionNumber")
     )
 {}
 

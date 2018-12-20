@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -25,13 +25,13 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         0.5;
+endTime         1.5;
 
-deltaT          0.0001;
+deltaT          0.001;
 
 writeControl    adjustableRunTime;
 
-writeInterval   0.005;
+writeInterval   0.1;
 
 purgeWrite      0;
 
@@ -49,10 +49,20 @@ runTimeModifiable true;
 
 adjustTimeStep  yes;
 
-//maxCo           1;
-maxCo           5.0;
+
+maxCo           4.0;
 maxAlphaCo      5.0;
 maxDeltaT       1;
+functions
+{
+
+    minMax
+    {
+        type    fieldMinMax;
+        libs    ("libfieldFunctionObjects.so");
+        fields  (U);
+    }
+}
 
 
 // ************************************************************************* //

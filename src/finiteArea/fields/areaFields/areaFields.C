@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           |
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -28,24 +28,31 @@ License
 #include "faMesh.H"
 #include "areaFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTemplate2TypeNameAndDebug(areaScalarField::Internal, 0);
+    defineTemplate2TypeNameAndDebug(areaVectorField::Internal, 0);
+    defineTemplate2TypeNameAndDebug(areaSphericalTensorField::Internal, 0);
+    defineTemplate2TypeNameAndDebug(areaSymmTensorField::Internal, 0);
+    defineTemplate2TypeNameAndDebug(areaTensorField::Internal, 0);
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    defineTemplateTypeNameAndDebug(areaScalarField, 0);
+    defineTemplateTypeNameAndDebug(areaVectorField, 0);
+    defineTemplateTypeNameAndDebug(areaSphericalTensorField, 0);
+    defineTemplateTypeNameAndDebug(areaSymmTensorField, 0);
+    defineTemplateTypeNameAndDebug(areaTensorField, 0);
 
-defineTemplate2TypeNameAndDebug(areaScalarField::Internal, 0);
-defineTemplate2TypeNameAndDebug(areaVectorField::Internal, 0);
-defineTemplate2TypeNameAndDebug(areaSphericalTensorField::Internal, 0);
-defineTemplate2TypeNameAndDebug(areaSymmTensorField::Internal, 0);
-defineTemplate2TypeNameAndDebug(areaTensorField::Internal, 0);
+} // End namespace Foam
 
-defineTemplateTypeNameAndDebug(areaScalarField, 0);
-defineTemplateTypeNameAndDebug(areaVectorField, 0);
-defineTemplateTypeNameAndDebug(areaSphericalTensorField, 0);
-defineTemplateTypeNameAndDebug(areaSymmTensorField, 0);
-defineTemplateTypeNameAndDebug(areaTensorField, 0);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Specializations
+
+namespace Foam
+{
 
 template<>
 tmp<GeometricField<scalar, faPatchField, areaMesh>>
@@ -67,8 +74,21 @@ void GeometricField<scalar, faPatchField, areaMesh>::replace
     *this == gsf;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
+
+// Note hard-coded values are more reliable than other alternatives
+
+const Foam::wordList Foam::fieldTypes::area
+({
+    "areaScalarField",
+    "areaVectorField",
+    "areaSphericalTensorField",
+    "areaSymmTensorField",
+    "areaTensorField"
+});
+
+
+// ************************************************************************* //

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -25,10 +25,7 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-        sourceInfo
-        {
-            name    topBlock;
-        }
+        zone    topBlock;
     }
 
     // Create cellSet centralBlock from cellZone centralBlock created by blockMesh
@@ -37,22 +34,16 @@ actions
         type    cellSet;
         action  new;
         source  zoneToCell;
-        sourceInfo
-        {
-            name    centralBlock;
-        }
+        zone    centralBlock;
     }
 
     // Create cellSet bottomBlock from cellZone bottomBlock created by blockMesh
     {
-        name bottomBlockCells;
-        type cellSet;
-        action new;
-        source zoneToCell;
-        sourceInfo
-        {
-            name    bottomBlock;
-        }
+        name    bottomBlockCells;
+        type    cellSet;
+        action  new;
+        source  zoneToCell;
+        zone    bottomBlock;
     }
 
 
@@ -64,10 +55,7 @@ actions
         type    faceSet;
         action  new;
         source  patchToFace;
-        sourceInfo
-        {
-            name    top;
-        }
+        patch   top;
     }
 
     // Only keep those that border the top block topBlock
@@ -76,11 +64,8 @@ actions
         type    faceSet;
         action  subset;
         source  cellToFace;
-        sourceInfo
-        {
-            set     topBlockCells;
-            option  all;
-        }
+        set     topBlockCells;
+        option  all;
     }
 
     // Convert top from faceSet to faceZone
@@ -89,11 +74,8 @@ actions
         type    faceZoneSet;
         action  new;
         source  setAndNormalToFaceZone;
-        sourceInfo
-        {
-            faceSet top;
-            normal  (0 -1 0);
-        }
+        faceSet top;
+        normal  (0 -1 0);
     }
 
 
@@ -101,15 +83,12 @@ actions
 
     // Get all faces in topBlock
     {
-        name     centralTopFaces;
-        type     faceSet;
-        action   new;
-        source   cellToFace;
-        sourceInfo
-        {
-            set     topBlockCells;
-            option  all;
-        }
+        name    centralTopFaces;
+        type    faceSet;
+        action  new;
+        source  cellToFace;
+        set     topBlockCells;
+        option  all;
     }
 
     // Get the faces that border topBlock and centralBlock
@@ -118,11 +97,8 @@ actions
         type    faceSet;
         action  subset;
         source  cellToFace;
-        sourceInfo
-        {
-            set     centralBlockCells;
-            option  all;
-        }
+        set     centralBlockCells;
+        option  all;
     }
 
     // Convert topBlockFaces from faceSet to faceZone
@@ -131,11 +107,8 @@ actions
         type    faceZoneSet;
         action  new;
         source  setsToFaceZone;
-        sourceInfo
-        {
-            faceSet centralTopFaces;
-            cellSet topBlockCells;
-        }
+        faceSet centralTopFaces;
+        cellSet topBlockCells;
     }
 
 
@@ -144,15 +117,12 @@ actions
 
     // Get all faces in bottomBlock
     {
-        name centralBottomFaces;
-        type faceSet;
-        action new;
-        source cellToFace;
-        sourceInfo
-        {
-            set     bottomBlockCells;
-            option  all;
-        }
+        name    centralBottomFaces;
+        type    faceSet;
+        action  new;
+        source  cellToFace;
+        set     bottomBlockCells;
+        option  all;
     }
 
     // Get the faces that border centralBlock and bottomBlock
@@ -161,11 +131,8 @@ actions
         type    faceSet;
         action  subset;
         source  cellToFace;
-        sourceInfo
-        {
-            set     centralBlockCells;
-            option  all;
-        }
+        set     centralBlockCells;
+        option  all;
     }
 
     // Convert centralBottomFaces from faceSet to faceZone
@@ -174,11 +141,8 @@ actions
         type    faceZoneSet;
         action  new;
         source  setsToFaceZone;
-        sourceInfo
-        {
-            faceSet centralBottomFaces;
-            cellSet centralBlockCells;
-        }
+        faceSet centralBottomFaces;
+        cellSet centralBlockCells;
     }
 
 
@@ -190,10 +154,7 @@ actions
         type    faceSet;
         action  new;
         source  patchToFace;
-        sourceInfo
-        {
-            name    bottom;
-        }
+        patch   bottom;
     }
 
     // Only keep those that border the bottom block bottomBlockCells
@@ -202,11 +163,8 @@ actions
         type    faceSet;
         action  subset;
         source  cellToFace;
-        sourceInfo
-        {
-            set     bottomBlockCells;
-            option  all;
-        }
+        set     bottomBlockCells;
+        option  all;
     }
 
     // Convert bottom from faceSet to faceZone
@@ -215,11 +173,8 @@ actions
         type    faceZoneSet;
         action  new;
         source  setAndNormalToFaceZone;
-        sourceInfo
-        {
-            faceSet bottom;
-            normal  (0 1 0);
-        }
+        faceSet bottom;
+        normal  (0 1 0);
     }
 
 
@@ -233,42 +188,30 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set     topBlockCells;
-        }
+        set     topBlockCells;
     }
     {
         name    LARTopCells;
         type    cellSet;
         action  subset;
         source  boxToCell;
-        sourceInfo
-        {
-            box     (-100 0.95 -100)(100 100 100);
-        }
+        box     (-100 0.95 -100)(100 100 100);
     }
     {
         name    LARTopCells;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set     LARTopCells;
-        }
+        set     LARTopCells;
     }
 
     // upate old topBlock cellZone
     {
         name    topBlockCells;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
-        sourceInfo
-        {
-            set     LARTopCells;
-        }
+        set     LARTopCells;
     }
     {
         name    topBlock;
@@ -280,45 +223,33 @@ actions
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set     topBlockCells;
-        }
+        set     topBlockCells;
     }
 
     // generate face zone between LARTopCells and topBlockCells cellSets
     {
-        name LARTopFaces;
-        type faceSet;
-        action new;
-        source cellToFace;
-        sourceInfo
-        {
-            set     LARTopCells;
-            option  all;
-        }
+        name    LARTopFaces;
+        type    faceSet;
+        action  new;
+        source  cellToFace;
+        set     LARTopCells;
+        option  all;
     }
     {
         name    LARTopFaces;
         type    faceSet;
         action  subset;
         source  cellToFace;
-        sourceInfo
-        {
-            set     topBlockCells;
-            option  all;
-        }
+        set     topBlockCells;
+        option  all;
     }
     {
         name    LARTopFaces;
         type    faceZoneSet;
         action  new;
         source  setsToFaceZone;
-        sourceInfo
-        {
-            faceSet LARTopFaces;
-            cellSet topBlockCells;
-        }
+        faceSet LARTopFaces;
+        cellSet topBlockCells;
     }
 );
 

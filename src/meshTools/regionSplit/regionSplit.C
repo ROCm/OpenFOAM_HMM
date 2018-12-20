@@ -530,7 +530,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
     const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
     // Buffer for swapping boundary information
-    labelList nbrRegion(mesh().nFaces()-mesh().nInternalFaces());
+    labelList nbrRegion(mesh().nBoundaryFaces());
 
     do
     {

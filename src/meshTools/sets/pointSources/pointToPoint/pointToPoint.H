@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,17 @@ Class
     Foam::pointToPoint
 
 Description
-    A topoSetSource to select points based on usage in pointSet.
+    A topoSetPointSource to select the points from another pointSet.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        sets        | The input pointSet names          | possibly |
+        set         | The input pointSet name           | possibly |
+    \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     pointToPoint.C
@@ -35,7 +45,7 @@ SourceFiles
 #ifndef pointToPoint_H
 #define pointToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,15 +58,16 @@ namespace Foam
 
 class pointToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
     // Private data
 
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
+
 
 public:
 
@@ -66,42 +77,25 @@ public:
     // Constructors
 
         //- Construct from components
-        pointToPoint
-        (
-            const polyMesh& mesh,
-            const word& setName
-        );
+        pointToPoint(const polyMesh& mesh, const word& setName);
 
         //- Construct from dictionary
-        pointToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        pointToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        pointToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        pointToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~pointToPoint();
+    virtual ~pointToPoint() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

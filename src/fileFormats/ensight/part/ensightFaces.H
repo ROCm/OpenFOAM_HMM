@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ public:
         };
 
         //- Number of element types (3)
-        static const label nTypes;
+        static constexpr label nTypes = 3;
 
         //- The ensight element type names
         static const char* elemNames[3];
@@ -115,20 +115,23 @@ public:
 
     // Constructors
 
-        //- Construct null, optionally with index
-        ensightFaces(label partIndex = 0);
+        //- Construct null, with part index 0
+        ensightFaces();
+
+        //- Construct null, with specified part index
+        explicit ensightFaces(const label partIndex);
 
         //- Copy constructor. Needed for lists etc.
         ensightFaces(const ensightFaces& obj);
 
 
     //- Destructor
-    ~ensightFaces();
+    ~ensightFaces() = default;
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The index in a list.
         inline label index() const;
@@ -170,7 +173,7 @@ public:
         inline const boolList& flipMap() const;
 
 
-      // Edit
+    // Edit
 
         //- Classify the face types, set element list.
         void classify(const faceList& faces);
@@ -200,7 +203,7 @@ public:
         void sort();
 
 
-    // Member operators
+    // Member Operators
 
         //- Return element from linear-list.
         inline label operator[](const label i) const;

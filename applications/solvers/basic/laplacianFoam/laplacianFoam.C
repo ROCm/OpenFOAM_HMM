@@ -59,9 +59,13 @@ Description
 
 int main(int argc, char *argv[])
 {
-    #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    argList::addNote
+    (
+        "Laplace equation solver for a scalar quantity."
+    );
 
+    #include "addCheckCaseOptions.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
 

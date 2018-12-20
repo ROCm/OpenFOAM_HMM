@@ -35,7 +35,7 @@ Foam::MixedDiffuseSpecular<CloudType>::MixedDiffuseSpecular
 )
 :
     WallInteractionModel<CloudType>(dict, cloud, typeName),
-    diffuseFraction_(readScalar(this->coeffDict().lookup("diffuseFraction")))
+    diffuseFraction_(this->coeffDict().getScalar("diffuseFraction"))
 {}
 
 
@@ -66,8 +66,7 @@ void Foam::MixedDiffuseSpecular<CloudType>::correct
 
     label wppLocalFace = wpp.whichFace(p.face());
 
-    vector nw = p.normal();
-    nw /= mag(nw);
+    const vector nw = p.normal();
 
     // Normal velocity magnitude
     scalar U_dot_nw = U & nw;

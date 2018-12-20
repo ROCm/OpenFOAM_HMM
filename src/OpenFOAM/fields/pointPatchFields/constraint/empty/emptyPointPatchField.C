@@ -50,10 +50,8 @@ Foam::emptyPointPatchField<Type>::emptyPointPatchField
 {
     if (!isType<emptyPointPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not empty type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not empty type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

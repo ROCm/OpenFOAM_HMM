@@ -28,7 +28,7 @@ Group
     grpThermophysicalUtilities
 
 Description
-    Calculates the equilibrium level of carbon monoxide.
+    Calculate the equilibrium level of carbon monoxide.
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,10 +59,11 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Calculates the equilibrium level of carbon monoxide."
+        "Calculate the equilibrium level of carbon monoxide."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"

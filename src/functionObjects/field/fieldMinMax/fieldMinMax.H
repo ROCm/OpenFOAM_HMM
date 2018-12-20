@@ -156,6 +156,14 @@ protected:
         //- No copy assignment
         void operator=(const fieldMinMax&) = delete;
 
+        //- Calculate the field min/max for a given field type
+        template<class Type>
+        void calcMinMaxFieldType
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& field,
+            const word& outputFieldName
+        );
+
         //- Calculate the field min/max
         template<class Type>
         void calcMinMaxFields
@@ -183,7 +191,7 @@ public:
 
 
     //- Destructor
-    virtual ~fieldMinMax();
+    virtual ~fieldMinMax() = default;
 
 
     // Member Functions

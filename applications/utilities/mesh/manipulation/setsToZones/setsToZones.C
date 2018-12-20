@@ -60,16 +60,16 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    timeSelector::addOptions(true, false);
     argList::addNote
     (
-        "add point/face/cell Zones from similar named point/face/cell Sets"
+        "Add point/face/cell Zones from similarly named point/face/cell Sets"
     );
 
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
     argList::addBoolOption
     (
         "noFlipMap",
-        "ignore orientation of faceSet"
+        "Ignore orientation of faceSet"
     );
 
     #include "addRegionOption.H"
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "pointSets:" << pointObjects.names() << endl;
 
-    forAllConstIter(IOobjectList, pointObjects, iter)
+    forAllConstIters(pointObjects, iter)
     {
         // Not in memory. Load it.
         pointSet set(*iter());
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "faceSets:" << faceObjects.names() << endl;
 
-    forAllConstIter(IOobjectList, faceObjects, iter)
+    forAllConstIters(faceObjects, iter)
     {
         // Not in memory. Load it.
         faceSet set(*iter());
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
 
     //Pout<< "cellSets:" << cellObjects.names() << endl;
 
-    forAllConstIter(IOobjectList, cellObjects, iter)
+    forAllConstIters(cellObjects, iter)
     {
         if (!slaveCellSets.found(iter.key()))
         {

@@ -104,40 +104,40 @@ public:
             return fa::faD2dt2Scheme<Type>::mesh();
         }
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facD2dt2
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facD2dt2
         (
             const dimensioned<Type>
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facD2dt2
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facD2dt2
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facD2dt2
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facD2dt2
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facD2dt2
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facD2dt2
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famD2dt2
+        tmp<faMatrix<Type>> famD2dt2
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famD2dt2
+        tmp<faMatrix<Type>> famD2dt2
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famD2dt2
+        tmp<faMatrix<Type>> famD2dt2
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&

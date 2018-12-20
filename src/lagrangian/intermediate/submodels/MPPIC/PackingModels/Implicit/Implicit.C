@@ -60,8 +60,8 @@ Foam::PackingModels::Implicit<CloudType>::Implicit
     uCorrect_(nullptr),
     applyLimiting_(this->coeffDict().lookup("applyLimiting")),
     applyGravity_(this->coeffDict().lookup("applyGravity")),
-    alphaMin_(readScalar(this->coeffDict().lookup("alphaMin"))),
-    rhoMin_(readScalar(this->coeffDict().lookup("rhoMin")))
+    alphaMin_(this->coeffDict().getScalar("alphaMin")),
+    rhoMin_(this->coeffDict().getScalar("rhoMin"))
 {
     alpha_ = this->owner().theta();
     alpha_.oldTime();
@@ -344,7 +344,7 @@ Foam::vector Foam::PackingModels::Implicit<CloudType>::velocityCorrection
     const vector U = uCorrect_()[celli];
 
     // face geometry
-    vector nHat = mesh.faces()[facei].normal(mesh.points());
+    vector nHat = mesh.faces()[facei].areaNormal(mesh.points());
     const scalar nMag = mag(nHat);
     nHat /= nMag;
 

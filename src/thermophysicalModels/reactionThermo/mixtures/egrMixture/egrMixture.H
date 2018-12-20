@@ -93,8 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~egrMixture()
-    {}
+    virtual ~egrMixture() = default;
 
 
     // Member functions

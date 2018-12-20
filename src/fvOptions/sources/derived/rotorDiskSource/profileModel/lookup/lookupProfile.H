@@ -67,7 +67,6 @@ class lookupProfile
 :
     public profileModel
 {
-
 protected:
 
     // Protected data
@@ -103,13 +102,14 @@ public:
     //- Constructor
     lookupProfile(const dictionary& dict, const word& modelName);
 
+    //- Destructor
+    ~lookupProfile() = default;
 
-    // Member functions
 
-        // Evaluation
+    // Member Functions
 
-            //- Return the Cd and Cl for a given angle-of-attack
-            virtual void Cdl(const scalar alpha, scalar& Cd, scalar& Cl) const;
+        //- Return the Cd and Cl for a given angle-of-attack
+        virtual void Cdl(const scalar alpha, scalar& Cd, scalar& Cl) const;
 };
 
 

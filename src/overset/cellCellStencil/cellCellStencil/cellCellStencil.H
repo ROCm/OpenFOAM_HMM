@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,8 +43,8 @@ SourceFiles
 
 #include "scalarList.H"
 #include "mapDistribute.H"
-#include "fvMesh.H"
 #include "pointList.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,11 +86,19 @@ protected:
         //- Reference to the mesh
         const fvMesh& mesh_;
 
+        //- Set of fields that should not be interpolated
+        wordHashSet nonInterpolatedFields_;
+
 
     // Protected Member Functions
 
         //- Count ocurrences (in parallel)
         static labelList count(const label size, const labelUList& lst);
+
+        //- Helper: create volScalarField for postprocessing.
+        template<class Type>
+        tmp<volScalarField> createField(const word& name, UList<Type>&) const;
+
 
 private:
 
@@ -135,7 +143,8 @@ public:
         static autoPtr<cellCellStencil> New
         (
             const fvMesh&,
-            const dictionary& dict
+            const dictionary& dict,
+            const bool update = true
         );
 
 
@@ -176,6 +185,13 @@ public:
             scalarList& weights
         ) const = 0;
 
+        //- Return the names of any (stencil or mesh specific) fields that
+        //  should not be interpolated
+        virtual const wordHashSet& nonInterpolatedFields() const;
+
+        //- Return non-const non-interpolating fields
+        virtual wordHashSet& nonInterpolatedFields();
+
         //- Helper: is stencil fully local
         bool localStencil(const labelUList&) const;
 
@@ -195,6 +211,7 @@ public:
         (
             const globalIndex& gi,
             const polyMesh& mesh,
+            const boolList& isValidDonor,
             const labelList& selectedCells,
             labelListList& cellCells,
             pointListList& cellCellCentres
@@ -205,6 +222,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "cellCellStencilTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

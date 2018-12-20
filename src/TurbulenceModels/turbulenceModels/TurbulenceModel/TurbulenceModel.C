@@ -100,7 +100,7 @@ Foam::TurbulenceModel<Alpha, Rho, BasicTurbulenceModel, TransportModel>::New
                 IOobject::NO_WRITE,
                 false
             )
-        ).lookup("simulationType")
+        ).get<word>("simulationType")
     );
 
     Info<< "Selecting turbulence model type " << modelType << endl;

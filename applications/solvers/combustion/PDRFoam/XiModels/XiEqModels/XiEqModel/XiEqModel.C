@@ -48,7 +48,7 @@ Foam::XiEqModel::XiEqModel
     (
         XiEqProperties.subDict
         (
-            word(XiEqProperties.lookup("XiEqModel")) + "Coeffs"
+            XiEqProperties.get<word>("XiEqModel") + "Coeffs"
         )
     ),
     thermo_(thermo),
@@ -142,10 +142,10 @@ Foam::XiEqModel::calculateSchelkinEffect(const scalar uPrimeCoef) const
 
     const scalarField upLocal(uPrimeCoef*sqrt((U & CT & U)*cellWidth));
 
-    const scalarField deltaUp(upLocal*(max(scalar(1.0), pow(nr, 0.5)) - 1.0));
+    const scalarField deltaUp(upLocal*(max(scalar(1), pow(nr, 0.5)) - 1.0));
 
     // Re use tN
-    N.primitiveFieldRef() = upLocal*(max(scalar(1.0), pow(nr, 0.5)) - 1.0);
+    N.primitiveFieldRef() = upLocal*(max(scalar(1), pow(nr, 0.5)) - 1.0);
 
     return tN;
 }

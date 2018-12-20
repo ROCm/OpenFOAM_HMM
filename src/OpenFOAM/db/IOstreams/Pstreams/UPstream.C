@@ -41,11 +41,11 @@ const Foam::Enum
     Foam::UPstream::commsTypes
 >
 Foam::UPstream::commsTypeNames
-{
+({
     { commsTypes::blocking, "blocking" },
     { commsTypes::scheduled, "scheduled" },
     { commsTypes::nonBlocking, "nonBlocking" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -411,7 +411,7 @@ registerOptSwitch
 
 Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 (
-    commsTypeNames.lookup
+    commsTypeNames.get
     (
         "commsType",
         Foam::debug::optimisationSwitches()
@@ -436,10 +436,8 @@ namespace Foam
 
         virtual void readData(Foam::Istream& is)
         {
-            UPstream::defaultCommsType = UPstream::commsTypeNames.read
-            (
-                is
-            );
+            UPstream::defaultCommsType =
+                UPstream::commsTypeNames.read(is);
         }
 
         virtual void writeData(Foam::Ostream& os) const

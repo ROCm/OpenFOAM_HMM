@@ -45,11 +45,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for energy transport and thermodynamics on a frozen flow field"
+    );
+
     #define NO_CONTROL
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
@@ -82,7 +87,7 @@ int main(int argc, char *argv[])
 
         while (runTime.run())
         {
-            runTime++;
+            ++runTime;
 
             Info<< "Time = " << runTime.timeName() << nl << endl;
 

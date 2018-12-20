@@ -92,10 +92,13 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The output format type
         inline formatType fmt() const;
+
+        //- The file extension (legacy or xml) for the given content-type
+        inline word ext(vtk::fileTag contentType) const;
 
         //- True if writer uses legacy file format
         inline bool legacy() const;
@@ -116,7 +119,7 @@ public:
         inline unsigned precision() const;
 
 
-      // Edit
+    // Edit
 
         //- Toggle ASCII mode on/off.
         //  In XML append mode, this switches between base64 and raw binary.

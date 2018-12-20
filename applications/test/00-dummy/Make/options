@@ -1,0 +1,9 @@
+/* Without the normal defaults */
+PROJECT_INC     =
+PROJECT_LIBS    =
+
+
+EXE_INC = -Idummy
+
+EXE_LIBS = \
+    -lOpenFOAM-dummy

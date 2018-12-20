@@ -86,41 +86,42 @@ int main(int argc, char *argv[])
         "Translate OPENFOAM data to CCM format"
     );
 
-    Foam::timeSelector::addOptions();
+    timeSelector::addOptions();
     argList::noParallel();
     argList::addBoolOption
     (
         "mesh",
-        "convert mesh only"
+        "Convert mesh only"
     );
     argList::addOption
     (
         "name",
         "name",
-        "provide alternative base name. Default is <meshExport>."
+        "Provide alternative base name. Default is <meshExport>."
     );
     argList::addBoolOption
     (
         "overwrite",
-        "no backup of existing output files"
+        "No backup of existing output files"
     );
     argList::addOption
     (
         "remap",
         "name",
-        "use specified remapping dictionary instead of <constant/remapping>"
+        "Use specified remapping dictionary instead of <constant/remapping>"
     );
     argList::addBoolOption
     (
         "results",
-        "convert results only"
+        "Convert results only"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
-    // get times list
+    // The times list
     instantList timeDirs = Foam::timeSelector::select0(runTime, args);
 
     const bool optMesh      = args.found("mesh");

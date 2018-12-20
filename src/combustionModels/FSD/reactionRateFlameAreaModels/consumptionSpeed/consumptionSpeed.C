@@ -39,10 +39,10 @@ Foam::consumptionSpeed::consumptionSpeed
 (
     const dictionary& dict
 )
-:   omega0_(readScalar(dict.lookup("omega0"))),
-    eta_(readScalar(dict.lookup("eta"))),
-    sigmaExt_(readScalar(dict.lookup("sigmaExt"))),
-    omegaMin_(readScalar(dict.lookup("omegaMin")))
+:   omega0_(dict.get<scalar>("omega0")),
+    eta_(dict.get<scalar>("eta")),
+    sigmaExt_(dict.get<scalar>("sigmaExt")),
+    omegaMin_(dict.get<scalar>("omegaMin"))
 {}
 
 
@@ -127,10 +127,10 @@ Foam::tmp<Foam::volScalarField> Foam::consumptionSpeed::omega0Sigma
 
 void  Foam::consumptionSpeed::read(const dictionary& dict)
 {
-    dict.lookup("omega0") >> omega0_ ;
-    dict.lookup("eta") >> eta_ ;
-    dict.lookup("sigmaExt") >> sigmaExt_;
-    dict.lookup("omegaMin") >> omegaMin_;
+    dict.readEntry("omega0", omega0_);
+    dict.readEntry("eta", eta_);
+    dict.readEntry("sigmaExt", sigmaExt_);
+    dict.readEntry("omegaMin", omegaMin_);
 }
 
 

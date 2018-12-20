@@ -73,9 +73,9 @@ protected:
 
     // Protected Member Functions
 
-        //- Read from Istream using given Istream constructor class
+        //- Read from Istream using Istream constructor class
         template<class INew>
-        void read(Istream& is, const INew& inew);
+        void readIstream(Istream& is, const INew& inew);
 
         //- Delete the allocated entries, but retain the list size.
         inline void free();
@@ -154,6 +154,7 @@ public:
         inline bool set(const label i) const;
 
         //- Set element to given pointer and return old element (can be null)
+        //  No-op if the new pointer value is identical to the current content.
         inline autoPtr<T> set(label i, T* ptr);
 
         //- Set element to given autoPtr and return old element

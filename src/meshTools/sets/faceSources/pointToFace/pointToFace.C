@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(pointToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, pointToFace, word);
     addToRunTimeSelectionTable(topoSetSource, pointToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, pointToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, pointToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        pointToFace,
+        word,
+        point
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        pointToFace,
+        istream,
+        point
+    );
 }
 
 
@@ -53,31 +69,37 @@ const Foam::Enum
     Foam::pointToFace::pointAction
 >
 Foam::pointToFace::pointActionNames_
-{
+({
     { pointAction::ANY, "any" },
     { pointAction::ALL, "all" },
     { pointAction::EDGE, "edge" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::pointToFace::combine(topoSet& set, const bool add) const
+void Foam::pointToFace::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    pointSet loadedSet(mesh_, setName_);
+    pointSet loadedSet(mesh_, setName);
+
+    const labelHashSet& pointLabels = loadedSet;
 
     if (option_ == ANY)
     {
         // Add faces with any point in loadedSet
-        forAllConstIter(pointSet, loadedSet, iter)
+        for (const label pointi : pointLabels)
         {
-            const label pointi = iter.key();
             const labelList& pFaces = mesh_.pointFaces()[pointi];
 
-            forAll(pFaces, pFacei)
+            for (const label facei : pFaces)
             {
-                addOrDelete(set, pFaces[pFacei], add);
+                addOrDelete(set, facei, add);
             }
         }
     }
@@ -86,38 +108,27 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
         // Add all faces whose points are all in set.
 
         // Count number of points using face.
-        Map<label> numPoints(loadedSet.size());
+        Map<label> numPoints(pointLabels.size());
 
-        forAllConstIter(pointSet, loadedSet, iter)
+        for (const label pointi : pointLabels)
         {
-            const label pointi = iter.key();
             const labelList& pFaces = mesh_.pointFaces()[pointi];
 
-            forAll(pFaces, pFacei)
+            for (const label facei : pFaces)
             {
-                const label facei = pFaces[pFacei];
-
-                Map<label>::iterator fndFace = numPoints.find(facei);
-
-                if (fndFace == numPoints.end())
-                {
-                    numPoints.insert(facei, 1);
-                }
-                else
-                {
-                    fndFace()++;
-                }
+                ++(numPoints(facei, 0));
             }
         }
 
 
         // Include faces that are referenced as many times as there are points
         // in face -> all points of face
-        forAllConstIter(Map<label>, numPoints, iter)
+        forAllConstIters(numPoints, iter)
         {
             const label facei = iter.key();
+            const label count = iter.object();
 
-            if (iter() == mesh_.faces()[facei].size())
+            if (count == mesh_.faces()[facei].size())
             {
                 addOrDelete(set, facei, add);
             }
@@ -126,13 +137,18 @@ void Foam::pointToFace::combine(topoSet& set, const bool add) const
     else if (option_ == EDGE)
     {
         const faceList& faces = mesh_.faces();
+
         forAll(faces, facei)
         {
             const face& f = faces[facei];
 
             forAll(f, fp)
             {
-                if (loadedSet.found(f[fp]) && loadedSet.found(f.nextLabel(fp)))
+                if
+                (
+                    pointLabels.found(f[fp])
+                 && pointLabels.found(f.nextLabel(fp))
+                )
                 {
                     addOrDelete(set, facei, add);
                     break;
@@ -152,8 +168,8 @@ Foam::pointToFace::pointToFace
     const pointAction option
 )
 :
-    topoSetSource(mesh),
-    setName_(setName),
+    topoSetFaceSource(mesh),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -164,10 +180,17 @@ Foam::pointToFace::pointToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.lookup("set")),
-    option_(pointActionNames_.lookup("option", dict))
-{}
+    topoSetFaceSource(mesh),
+    names_(),
+    option_(pointActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::pointToFace::pointToFace
@@ -176,15 +199,9 @@ Foam::pointToFace::pointToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    setName_(checkIs(is)),
+    topoSetFaceSource(mesh),
+    names_(one(), word(checkIs(is))),
     option_(pointActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointToFace::~pointToFace()
 {}
 
 
@@ -196,19 +213,31 @@ void Foam::pointToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces according to pointSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces according to pointSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces according to pointSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces according to pointSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,17 @@ Class
     Foam::shapeToCell
 
 Description
-    A topoSetSource to select cells based on cell shape.
+    A topoSetCellSource to select cells based on cell shape.
 
     Handles all known ones from static collection in cellModel
     and splitHex with 10 degrees feature angle.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        shape       | The cell model (hex, ..)              | yes |
+        type        | Older specification for 'shape'       | no  |
+    \endtable
 
 SourceFiles
     shapeToCell.C
@@ -38,7 +45,7 @@ SourceFiles
 #ifndef shapeToCell_H
 #define shapeToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +58,7 @@ namespace Foam
 
 class shapeToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -59,8 +66,9 @@ class shapeToCell
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of cell type
-        word type_;
+        //- Name of cell shape/type
+        word shape_;
+
 
     // Private Member Functions
 
@@ -79,45 +87,29 @@ public:
         //- Cos of feature angle for polyHedral to be splitHex
         static scalar featureCos;
 
+
     // Constructors
 
         //- Construct from components
-        shapeToCell
-        (
-            const polyMesh& mesh,
-            const word& type
-        );
+        shapeToCell(const polyMesh& mesh, const word& shapeName);
 
         //- Construct from dictionary
-        shapeToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        shapeToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        shapeToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        shapeToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~shapeToCell();
+    virtual ~shapeToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

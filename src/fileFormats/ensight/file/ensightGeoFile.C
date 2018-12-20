@@ -24,12 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightGeoFile.H"
-#include "foamVersion.H"
-
-// Macros to stringify macro contents.
-#define STRINGIFY(content)      #content
-#define STRING_QUOTE(input)     STRINGIFY(input)
-
+#include "macros.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -43,9 +38,9 @@ void Foam::ensightGeoFile::initialize()
 
     // Description line 2
     #if OPENFOAM
-    write("Written by OpenFOAM-" STRING_QUOTE(OPENFOAM));
+    write("Written by OpenFOAM " STRING_QUOTE(OPENFOAM));
     #else
-    write(string("Written by OpenFOAM-" + string(Foam::FOAMversion)));
+    write("Written by OpenFOAM");
     #endif
     newline();
 
@@ -84,17 +79,11 @@ Foam::ensightGeoFile::ensightGeoFile
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightGeoFile::~ensightGeoFile()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::ensightGeoFile::writeKeyword(const keyType& key)
 {
-    // ensure we get ensightFile::write(const string&)
+    // Ensure we get ensightFile::write(const string&)
     write(static_cast<const string&>(key));
     newline();
 

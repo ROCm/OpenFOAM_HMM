@@ -129,8 +129,7 @@ public:
 
 
     //- Destructor
-    virtual ~singleStepReactingMixture()
-    {}
+    virtual ~singleStepReactingMixture() = default;
 
 
     // Member functions

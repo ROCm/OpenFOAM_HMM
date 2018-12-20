@@ -179,8 +179,11 @@ Foam::labelList Foam::structuredRenumber::renumber
 
     // Subset the layer of cells next to the patch
     {
-        fvMeshSubset subsetter(dynamic_cast<const fvMesh&>(mesh));
-        subsetter.setLargeCellSubset(patchCells);
+        fvMeshSubset subsetter
+        (
+            dynamic_cast<const fvMesh&>(mesh),
+            patchCells
+        );
         const fvMesh& subMesh = subsetter.subMesh();
 
         pointField subPoints(points, subsetter.cellMap());

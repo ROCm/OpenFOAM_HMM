@@ -142,8 +142,10 @@ protected:
 
     // Protected data
 
-        label  startTimeIndex_;
+        label startTimeIndex_;
+
         scalar startTime_;
+
         mutable scalar endTime_;
 
         mutable stopAtControls stopAt_;
@@ -152,7 +154,7 @@ protected:
 
         scalar writeInterval_;
 
-        label  purgeWrite_;
+        label purgeWrite_;
 
         mutable FIFOStack<word> previousWriteTimes_;
 
@@ -225,7 +227,7 @@ public:
         //- Construct given name of dictionary to read and argument list
         Time
         (
-            const word& name,
+            const word& ctrlDictName,
             const argList& args,
             const word& systemName = "system",
             const word& constantName = "constant"
@@ -234,12 +236,13 @@ public:
         //- Construct given name of dictionary to read, rootPath and casePath
         Time
         (
-            const word& name,
+            const word& ctrlDictName,
             const fileName& rootPath,
             const fileName& caseName,
             const word& systemName = "system",
             const word& constantName = "constant",
-            const bool enableFunctionObjects = true
+            const bool enableFunctionObjects = true,
+            const bool enableLibs = true
         );
 
         //- Construct given dictionary, rootPath and casePath
@@ -250,7 +253,8 @@ public:
             const fileName& caseName,
             const word& systemName = "system",
             const word& constantName = "constant",
-            const bool enableFunctionObjects = true
+            const bool enableFunctionObjects = true,
+            const bool enableLibs = true
         );
 
         //- Construct given endTime, rootPath and casePath
@@ -260,7 +264,8 @@ public:
             const fileName& caseName,
             const word& systemName = "system",
             const word& constantName = "constant",
-            const bool enableFunctionObjects = true
+            const bool enableFunctionObjects = true,
+            const bool enableLibs = true
         );
 
 
@@ -272,17 +277,14 @@ public:
 
         // Database functions
 
+            //- Return name from objectRegistry and not TimePaths
+            using objectRegistry::name;
+
             //- Return root path
-            const fileName& rootPath() const
-            {
-                return TimePaths::rootPath();
-            }
+            using TimePaths::rootPath;
 
             //- Return case name
-            const fileName& caseName() const
-            {
-                return TimePaths::caseName();
-            }
+            using TimePaths::caseName;
 
             //- Return path
             fileName path() const
@@ -290,6 +292,7 @@ public:
                 return rootPath()/caseName();
             }
 
+            //- Return read access to the controlDict dictionary
             const dictionary& controlDict() const
             {
                 return controlDict_;
@@ -343,7 +346,7 @@ public:
             void readModifiedObjects();
 
             //- Return the location of "dir" containing the file "name".
-            //  (eg, used in reading mesh data)
+            //- (eg, used in reading mesh data)
             //  If name is null, search for the directory "dir" only.
             //  Does not search beyond stopInstance (if set) or constant.
             word findInstance
@@ -354,11 +357,8 @@ public:
                 const word& stopInstance = word::null
             ) const;
 
-            //- Search the case for valid time directories
-            instantList times() const;
-
             //- Search the case for the time directory path
-            //  corresponding to the given instance
+            //- corresponding to the given instance
             word findInstancePath
             (
                 const fileName& directory,
@@ -366,19 +366,8 @@ public:
             ) const;
 
             //- Search the case for the time directory path
-            //  corresponding to the given instance
+            //- corresponding to the given instance
             word findInstancePath(const instant& t) const;
-
-            //- Search the case for the time closest to the given time
-            instant findClosestTime(const scalar t) const;
-
-            //- Search instantList for the time index closest to the given time
-            static label findClosestTimeIndex
-            (
-                const instantList& timeDirs,
-                const scalar t,
-                const word& constantName = "constant"
-            );
 
             //- Write time dictionary to the \<time\>/uniform directory
             virtual bool writeTimeDict() const;
@@ -392,8 +381,8 @@ public:
                 const bool valid
             ) const;
 
-            //- Write the objects now (not at end of iteration) and continue
-            //  the run
+            //- Write the objects immediately (not at end of iteration)
+            //- and continue the run
             bool writeNow();
 
             //- Write the objects now (not at end of iteration) and end the run
@@ -409,7 +398,7 @@ public:
         // Access
 
             //- Return time name of given scalar time
-            //  formatted with given precision
+            //- formatted with the given precision
             static word timeName
             (
                 const scalar t,
@@ -418,13 +407,6 @@ public:
 
             //- Return current time name
             virtual word timeName() const;
-
-            //- Search a given directory for valid time directories
-            static instantList findTimes
-            (
-                const fileName& directory,
-                const word& constantName = "constant"
-            );
 
             //- Return start time index
             virtual label startTimeIndex() const;
@@ -484,7 +466,7 @@ public:
             //  \code
             //      while (runTime.run())
             //      {
-            //          runTime++;
+            //          ++runTime;
             //          solve;
             //          runTime.write();
             //      }

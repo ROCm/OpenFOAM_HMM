@@ -28,8 +28,8 @@ Description
     A NamedEnum is a wrapper around a list of names that represent
     particular enumeration values.
 
-    \deprecated This class is retained for compatibility only and should
-    not normally be used for any new code.
+    \deprecated(2017-05) This class is retained for compatibility only and
+    should be used for any new code.
     The Foam::Enum class is robuster, more flexible, easier to use.
 
 See Also

@@ -42,25 +42,27 @@ const Foam::Enum
     Foam::cellCellStencil::cellType
 >
 Foam::cellCellStencil::cellTypeNames_
-{
+({
     { cellType::CALCULATED, "calculated" },
     { cellType::INTERPOLATED, "interpolated" },
     { cellType::HOLE, "hole" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cellCellStencil::cellCellStencil(const fvMesh& mesh)
 :
-    mesh_(mesh)
+    mesh_(mesh),
+    nonInterpolatedFields_({"zoneID"})
 {}
 
 
 Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
 (
     const fvMesh& mesh,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool update
 )
 {
     if (debug)
@@ -68,11 +70,11 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
         InfoInFunction << "Constructing cellCellStencil" << endl;
     }
 
-    const word stencilType(dict.lookup("method"));
+    const word stencilType(dict.get<word>("method"));
 
     auto cstrIter = meshConstructorTablePtr_->cfind(stencilType);
 
-    if (cstrIter == meshConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown cellCellStencil type "
@@ -82,7 +84,7 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
             << abort(FatalError);
     }
 
-    return autoPtr<cellCellStencil>(cstrIter()(mesh, dict, true));
+    return autoPtr<cellCellStencil>(cstrIter()(mesh, dict, update));
 }
 
 
@@ -153,6 +155,18 @@ Foam::labelList Foam::cellCellStencil::count
 }
 
 
+const Foam::wordHashSet& Foam::cellCellStencil::nonInterpolatedFields() const
+{
+    return nonInterpolatedFields_;
+}
+
+
+Foam::wordHashSet& Foam::cellCellStencil::nonInterpolatedFields()
+{
+    return nonInterpolatedFields_;
+}
+
+
 bool Foam::cellCellStencil::localStencil(const labelUList& slots) const
 {
     forAll(slots, i)
@@ -170,6 +184,7 @@ void Foam::cellCellStencil::globalCellCells
 (
     const globalIndex& gi,
     const polyMesh& mesh,
+    const boolList& isValidCell,
     const labelList& selectedCells,
     labelListList& cellCells,
     pointListList& cellCellCentres
@@ -185,11 +200,7 @@ void Foam::cellCellStencil::globalCellCells
 
     // 1. Determine global cell number on other side of coupled patches
 
-    labelList globalCellIDs(mesh.nCells());
-    forAll(globalCellIDs, celli)
-    {
-        globalCellIDs[celli] = gi.toGlobal(celli);
-    }
+    labelList globalCellIDs(identity(gi.localSize(), gi.localStart()));
 
     labelList nbrGlobalCellIDs;
     syncTools::swapBoundaryCellList
@@ -204,6 +215,14 @@ void Foam::cellCellStencil::globalCellCells
         mesh,
         cellCentres,
         nbrCellCentres
+    );
+
+    boolList nbrIsValidCell;
+    syncTools::swapBoundaryCellList
+    (
+        mesh,
+        isValidCell,
+        nbrIsValidCell
     );
 
 
@@ -224,8 +243,11 @@ void Foam::cellCellStencil::globalCellCells
         label compacti = 0;
 
         // First entry is cell itself
-        stencil[compacti] = globalCellIDs[celli];
-        stencilPoints[compacti++] = cellCentres[celli];
+        if (isValidCell[celli])
+        {
+            stencil[compacti] = globalCellIDs[celli];
+            stencilPoints[compacti++] = cellCentres[celli];
+        }
 
         // Other entries are cell neighbours
         forAll(cFaces, i)
@@ -235,10 +257,12 @@ void Foam::cellCellStencil::globalCellCells
             label own = faceOwner[facei];
             label nbrCelli;
             point nbrCc;
+            bool isValid = false;
             if (bFacei >= 0)
             {
                 nbrCelli = nbrGlobalCellIDs[bFacei];
                 nbrCc = nbrCellCentres[bFacei];
+                isValid = nbrIsValidCell[bFacei];
             }
             else
             {
@@ -246,20 +270,25 @@ void Foam::cellCellStencil::globalCellCells
                 {
                     nbrCelli = gi.toGlobal(own);
                     nbrCc = cellCentres[own];
+                    isValid = isValidCell[own];
                 }
                 else
                 {
                     label nei = faceNeighbour[facei];
                     nbrCelli = gi.toGlobal(nei);
                     nbrCc = cellCentres[nei];
+                    isValid = isValidCell[nei];
                 }
             }
 
-            SubList<label> current(stencil, compacti);
-            if (!current.found(nbrCelli))
+            if (isValid)
             {
-                stencil[compacti] = nbrCelli;
-                stencilPoints[compacti++] = nbrCc;
+                SubList<label> current(stencil, compacti);
+                if (!current.found(nbrCelli))
+                {
+                    stencil[compacti] = nbrCelli;
+                    stencilPoints[compacti++] = nbrCc;
+                }
             }
         }
         stencil.setSize(compacti);

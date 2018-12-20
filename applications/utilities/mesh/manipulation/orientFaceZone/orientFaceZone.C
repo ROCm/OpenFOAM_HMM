@@ -28,7 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Corrects orientation of faceZone.
+    Corrects the orientation of faceZone.
 
     - correct in parallel - excludes coupled faceZones from walk
     - correct for non-manifold faceZones - restarts walk
@@ -49,16 +49,20 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Corrects the orientation of faceZone"
+    );
     #include "addRegionOption.H"
     argList::addArgument("faceZone");
-    argList::addArgument("outsidePoint");
+    argList::addArgument("point", "A point outside of the mesh");
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedPolyMesh.H"
 
     const word zoneName  = args[1];
-    const point outsidePoint = args.read<point>(2);
+    const point outsidePoint = args.get<point>(2);
 
     Info<< "Orienting faceZone " << zoneName
         << " such that " << outsidePoint << " is outside"
@@ -295,11 +299,7 @@ int main(int argc, char *argv[])
     {
         const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
-        labelList neiStatus
-        (
-            mesh.nFaces()-mesh.nInternalFaces(),
-            orientedSurface::UNVISITED
-        );
+        labelList neiStatus(mesh.nBoundaryFaces(), orientedSurface::UNVISITED);
 
         forAll(faceLabels, i)
         {

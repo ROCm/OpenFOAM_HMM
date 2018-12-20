@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,17 @@ Class
     Foam::cylinderAnnulusToFace
 
 Description
-    A topoSetSource to select faces based on face centres inside a
+    A topoSetFaceSource to select faces based on face centres inside a
     cylinder annulus.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        p1          | Coordinate of endpoint            | yes   |
+        p2          | Coordinate of endpoint            | yes   |
+        outerRadius | Cylinder outer radius             | yes   |
+        innerRadius | Cylinder inner radius             | yes   |
+    \endtable
 
 SourceFiles
     cylinderAnnulusToFace.C
@@ -36,7 +45,7 @@ SourceFiles
 #ifndef cylinderAnnulusToFace_H
 #define cylinderAnnulusToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +58,7 @@ namespace Foam
 
 class cylinderAnnulusToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
     // Private data
@@ -58,15 +67,15 @@ class cylinderAnnulusToFace
         static addToUsageTable usage_;
 
         //- First point on cylinder axis
-        vector p1_;
+        point point1_;
 
         //- Second point on cylinder axis
-        vector p2_;
+        point point2_;
 
-        //- Outer Radius
-        scalar outerRadius_;
+        //- Outer radius
+        scalar radius_;
 
-        //- Inner Radius
+        //- Inner radius
         scalar innerRadius_;
 
 
@@ -87,36 +96,24 @@ public:
         cylinderAnnulusToFace
         (
             const polyMesh& mesh,
-            const vector& p1,
-            const vector& p2,
-            const scalar outerRadius,
-            const scalar innerRadius
+            const point& point1,
+            const point& point2,
+            const scalar radius,
+            const scalar innerRadius = 0
         );
 
         //- Construct from dictionary
-        cylinderAnnulusToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        cylinderAnnulusToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        cylinderAnnulusToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        cylinderAnnulusToFace(const polyMesh& mesh, Istream& is);
 
 
-    // Destructor
-    virtual ~cylinderAnnulusToFace();
+    //- Destructor
+    virtual ~cylinderAnnulusToFace() = default;
+
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

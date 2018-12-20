@@ -60,10 +60,10 @@ Foam::porosityModels::powerLawLopesdaCostaZone::powerLawLopesdaCostaZone
     vector zDir(coeffs.lookup("zDir"));
 
     // Span of the search for the cells in the porous region
-    scalar searchSpan(readScalar(coeffs.lookup("searchSpan")));
+    scalar searchSpan(coeffs.get<scalar>("searchSpan"));
 
     // Top surface file name defining the extent of the porous region
-    word topSurfaceFileName(coeffs.lookup("topSurface"));
+    const word topSurfaceFileName(coeffs.get<word>("topSurface"));
 
     // List of the ground patches defining the lower surface
     // of the porous region
@@ -305,8 +305,8 @@ Foam::porosityModels::powerLawLopesdaCosta::powerLawLopesdaCosta
         dict,
         powerLawLopesdaCostaZone::zoneName_
     ),
-    Cd_(readScalar(coeffs_.lookup("Cd"))),
-    C1_(readScalar(coeffs_.lookup("C1"))),
+    Cd_(coeffs_.get<scalar>("Cd")),
+    C1_(coeffs_.get<scalar>("C1")),
     rhoName_(coeffs_.lookupOrDefault<word>("rho", "rho"))
 {}
 
@@ -409,8 +409,7 @@ void Foam::porosityModels::powerLawLopesdaCosta::correct
 
 bool Foam::porosityModels::powerLawLopesdaCosta::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    dict_.writeEntry(name_, os);
 
     return true;
 }

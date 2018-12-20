@@ -32,10 +32,8 @@ inline Foam::word Foam::IOobject::groupName(StringType name, const word& group)
     {
         return name;
     }
-    else
-    {
-        return name + ('.' + group);
-    }
+
+    return name + ('.' + group);
 }
 
 
@@ -46,6 +44,18 @@ inline Foam::word Foam::IOobject::groupName(StringType name, const word& group)
 inline const Foam::word& Foam::IOobject::name() const
 {
     return name_;
+}
+
+
+inline Foam::word Foam::IOobject::group() const
+{
+    return name_.ext();
+}
+
+
+inline Foam::word Foam::IOobject::member() const
+{
+    return name_.lessExt();
 }
 
 
@@ -94,6 +104,21 @@ inline bool Foam::IOobject::globalObject() const
 inline bool& Foam::IOobject::globalObject()
 {
     return globalObject_;
+}
+
+
+// Checks
+
+inline bool Foam::IOobject::isHeaderClassName(const word& clsName) const
+{
+    return (clsName == headerClassName_);
+}
+
+
+template<class Type>
+inline bool Foam::IOobject::isHeaderClassName() const
+{
+    return (Type::typeName == headerClassName_);
 }
 
 

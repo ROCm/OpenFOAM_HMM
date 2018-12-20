@@ -120,10 +120,7 @@ bool Foam::functionObjects::yPlus::read(const dictionary& dict)
 bool Foam::functionObjects::yPlus::execute()
 {
     volScalarField& yPlus =
-        const_cast<volScalarField&>
-        (
-            lookupObject<volScalarField>(typeName)
-        );
+        lookupObjectRef<volScalarField>(typeName);
 
     if (foundObject<turbulenceModel>(turbulenceModel::propertiesName))
     {

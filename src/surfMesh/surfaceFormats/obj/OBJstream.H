@@ -40,7 +40,6 @@ SourceFiles
 #include "edge.H"
 #include "face.H"
 #include "triPointRef.H"
-#include "linePointRef.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

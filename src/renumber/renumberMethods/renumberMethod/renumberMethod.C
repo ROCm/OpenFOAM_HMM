@@ -44,7 +44,7 @@ Foam::autoPtr<Foam::renumberMethod> Foam::renumberMethod::New
     const dictionary& renumberDict
 )
 {
-    const word methodType(renumberDict.lookup("method"));
+    const word methodType(renumberDict.get<word>("method"));
 
     //Info<< "Selecting renumberMethod " << methodType << endl;
 

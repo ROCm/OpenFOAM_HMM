@@ -20,6 +20,7 @@ waveAbsorptionModels/derived/shallowWaterAbsorption/shallowWaterAbsorption.C
 
 derivedFvPatchFields/waveVelocity/waveVelocityFvPatchVectorField.C
 derivedFvPatchFields/waveAlpha/waveAlphaFvPatchScalarField.C
+derivedPointPatchFields/waveMaker/waveMakerPointPatchVectorField.C
 
 fvOptions/multiphaseMangrovesSource/multiphaseMangrovesSource.C
 fvOptions/multiphaseMangrovesTurbulenceModel/multiphaseMangrovesTurbulenceModel.C

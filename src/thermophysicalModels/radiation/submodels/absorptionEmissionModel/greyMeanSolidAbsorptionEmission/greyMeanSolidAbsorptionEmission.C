@@ -105,14 +105,16 @@ greyMeanSolidAbsorptionEmission
     label nFunc = 0;
     const dictionary& functionDicts = dict.optionalSubDict(typeName + "Coeffs");
 
-    forAllConstIter(dictionary, functionDicts, iter)
+    for (const entry& dEntry : functionDicts)
     {
-        // safety:
-        if (!iter().isDict())
+        if (!dEntry.isDict())  // safety
         {
             continue;
         }
-        const word& key = iter().keyword();
+
+        const word& key = dEntry.keyword();
+        const dictionary& dict = dEntry.dict();
+
         if (!mixture_.contains(key))
         {
             WarningInFunction
@@ -122,9 +124,9 @@ greyMeanSolidAbsorptionEmission
                 << nl << endl;
         }
         speciesNames_.insert(key, nFunc);
-        const dictionary& dict = iter().dict();
-        dict.lookup("absorptivity") >> solidData_[nFunc][absorptivity];
-        dict.lookup("emissivity") >> solidData_[nFunc][emissivity];
+
+        dict.readEntry("absorptivity", solidData_[nFunc][absorptivity]);
+        dict.readEntry("emissivity", solidData_[nFunc][emissivity]);
 
         nFunc++;
     }

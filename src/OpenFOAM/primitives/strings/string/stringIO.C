@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,27 +36,30 @@ Foam::string::string(Istream& is)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, string& s)
+Foam::Istream& Foam::operator>>(Istream& is, string& val)
 {
     token t(is);
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get string"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
 
     if (t.isString())
     {
-        s = t.stringToken();
+        val = t.stringToken();
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected string, found " << t.info()
+            << "Wrong token type - expected string, found "
+            << t.info()
             << exit(FatalIOError);
-
+        is.setBad();
         return is;
     }
 

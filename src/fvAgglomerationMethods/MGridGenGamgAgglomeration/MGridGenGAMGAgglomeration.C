@@ -170,14 +170,14 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
     fvMesh_(refCast<const fvMesh>(mesh))
 {
     // Min, max size of agglomerated cells
-    label minSize(readLabel(controlDict.lookup("minSize")));
-    label maxSize(readLabel(controlDict.lookup("maxSize")));
+    label minSize(controlDict.get<label>("minSize"));
+    label maxSize(controlDict.get<label>("maxSize"));
 
     // Number of iterations applied to improve agglomeration consistency across
     // processor boundaries
     label nProcConsistencyIter
     (
-        readLabel(controlDict.lookup("nProcConsistencyIter"))
+        controlDict.get<label>("nProcConsistencyIter")
     );
 
     // Start geometric agglomeration from the cell volumes and areas of the mesh

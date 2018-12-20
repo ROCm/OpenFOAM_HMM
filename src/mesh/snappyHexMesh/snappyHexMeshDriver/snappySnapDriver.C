@@ -1101,9 +1101,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
     //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //
     //{
-    //    const scalar cos45 = Foam::cos(degToRad(45.0));
-    //    vector n(cos45, cos45, cos45);
-    //    n /= mag(n);
+    //    const vector n = normalised(vector::one);
     //
     //    pointField start(14*pp.nPoints());
     //    pointField end(start.size());
@@ -2015,12 +2013,23 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurface
         {
             if (snapSurf[pointi] == -1)
             {
-                WarningInFunction
-                    << "For point:" << pointi
-                    << " coordinate:" << localPoints[pointi]
-                    << " did not find any surface within:"
-                    << minSnapDist[pointi]
-                    << " metre." << endl;
+                static label nWarn = 0;
+
+                if (nWarn < 100)
+                {
+                    WarningInFunction
+                        << "For point:" << pointi
+                        << " coordinate:" << localPoints[pointi]
+                        << " did not find any surface within:"
+                        << minSnapDist[pointi] << " metre." << endl;
+                    nWarn++;
+                    if (nWarn == 100)
+                    {
+                        WarningInFunction
+                            << "Reached warning limit " << nWarn
+                            << ". Suppressing further warnings." << endl;
+                    }
+                }
             }
         }
 
@@ -2447,10 +2456,11 @@ void Foam::snappySnapDriver::detectWarpedFaces
                     //Info<< "Splitting face:" << f << " into f0:" << f0
                     //    << " f1:" << f1 << endl;
 
-                    vector n0 = f0.normal(localPoints);
-                    scalar n0Mag = mag(n0);
-                    vector n1 = f1.normal(localPoints);
-                    scalar n1Mag = mag(n1);
+                    const vector n0 = f0.areaNormal(localPoints);
+                    const scalar n0Mag = mag(n0);
+
+                    const vector n1 = f1.areaNormal(localPoints);
+                    const scalar n1Mag = mag(n1);
 
                     if (n0Mag > ROOTVSMALL && n1Mag > ROOTVSMALL)
                     {

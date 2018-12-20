@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -19,10 +19,10 @@ functions
 {
     createVortex
     {
-        type            coded;
-        libs            ("libutilityFunctionObjects.so");
-        name            createVortices;
-        enabled         yes;
+        name    createVortices;
+        type    coded;
+        libs    ("libutilityFunctionObjects.so");
+        enabled yes;
 
         codeInclude
         #{
@@ -38,8 +38,7 @@ functions
             scalar gamma = 1.4;
             scalar A = -0.3*D*UInf;
             const dimensionedScalar rhoRef("rhoRef", dimDensity, 1);
-            const volScalarField& rho =
-                mesh().lookupObject<volScalarField>("rho");
+            const auto& rho = mesh().lookupObject<volScalarField>("rho");
 
             const vectorField& C = mesh().C();
             const scalarField x(C.component(0));
@@ -47,19 +46,15 @@ functions
             const scalar r2 = sqr(0.5*D/(Foam::sqrt(Foam::log(10.0))));
             const scalarField Psi(A*exp(-0.5/r2*(sqr(x) + sqr(y))));
 
-            volVectorField* Uptr =
-                mesh().lookupObjectRefPtr<volVectorField>("U");
-            volScalarField* pPtr =
-                mesh().lookupObjectRefPtr<volScalarField>("p");
-            volScalarField* TPtr =
-                mesh().lookupObjectRefPtr<volScalarField>("T");
-
+            auto* Uptr = mesh().getObjectPtr<volVectorField>("U");
+            auto* pPtr = mesh().getObjectPtr<volScalarField>("p");
+            auto* TPtr = mesh().getObjectPtr<volScalarField>("T");
 
             if (Uptr && pPtr && TPtr)
             {
-                volVectorField& U = *Uptr;
-                volScalarField& p = *pPtr;
-                volScalarField& T = *TPtr;
+                auto& U = *Uptr;
+                auto& p = *pPtr;
+                auto& T = *TPtr;
 
                 vectorField& Uc = U.primitiveFieldRef();
                 Uc.replace(0, UInf - rhoRef/rho()*Psi/r2*y);

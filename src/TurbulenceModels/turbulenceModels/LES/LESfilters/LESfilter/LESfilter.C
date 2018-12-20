@@ -44,7 +44,7 @@ Foam::autoPtr<Foam::LESfilter> Foam::LESfilter::New
     const word& filterDictName
 )
 {
-    const word filterType(dict.lookup(filterDictName));
+    const word filterType(dict.get<word>(filterDictName));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(filterType);
 

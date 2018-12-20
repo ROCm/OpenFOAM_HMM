@@ -212,7 +212,7 @@ updateCoeffs()
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
                 (
-                    Ir[faceI]*(scalar(1.0) - emissivity[faceI])
+                    Ir[faceI]*(scalar(1) - emissivity[faceI])
                   + emissivity[faceI]*physicoChemical::sigma.value()
                   * pow4(Tp[faceI])
                 )/pi;

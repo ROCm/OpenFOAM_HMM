@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,15 @@ Class
     Foam::fieldToCell
 
 Description
-    A topoSetSource to select cells based on field values.
+    A topoSetCellSource to select cells based on field values.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        field       | The (scalar, vector) field to use | yes   |
+        min         | The min value for the subset      | yes   |
+        max         | The max value for the subset      | yes   |
+    \endtable
 
 SourceFiles
     fieldToCell.C
@@ -35,7 +43,7 @@ SourceFiles
 #ifndef fieldToCell_H
 #define fieldToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +57,7 @@ namespace Foam
 
 class fieldToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -58,13 +66,13 @@ class fieldToCell
         static addToUsageTable usage_;
 
 
-        //- Name of volScalarField
+        //- Name of volScalarField, volVectorField
         word fieldName_;
 
         //- Min to subset field values with
         scalar min_;
 
-        //- Max ,,
+        //- Max to subset field values with
         scalar max_;
 
 
@@ -95,35 +103,22 @@ public:
         );
 
         //- Construct from dictionary
-        fieldToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        fieldToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        fieldToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        fieldToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~fieldToCell();
+    virtual ~fieldToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

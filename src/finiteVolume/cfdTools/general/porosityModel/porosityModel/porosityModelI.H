@@ -23,6 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+inline const Foam::coordinateSystem& Foam::porosityModel::csys() const
+{
+    return *csysPtr_;
+}
+
+
+inline Foam::label Foam::porosityModel::fieldIndex(const label i) const
+{
+    return (csysPtr_->uniform() ? 0 : i);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 inline const Foam::word& Foam::porosityModel::name() const
 {
     return name_;

@@ -71,10 +71,10 @@ doubleSigmoid::doubleSigmoid
     (
         energyScalingFunctionProperties.subDict(typeName + "Coeffs")
     ),
-    shift1_(readScalar(doubleSigmoidCoeffs_.lookup("shift1"))),
-    scale1_(readScalar(doubleSigmoidCoeffs_.lookup("scale1"))),
-    shift2_(readScalar(doubleSigmoidCoeffs_.lookup("shift2"))),
-    scale2_(readScalar(doubleSigmoidCoeffs_.lookup("scale2")))
+    shift1_(doubleSigmoidCoeffs_.get<scalar>("shift1")),
+    scale1_(doubleSigmoidCoeffs_.get<scalar>("scale1")),
+    shift2_(doubleSigmoidCoeffs_.get<scalar>("shift2")),
+    scale2_(doubleSigmoidCoeffs_.get<scalar>("scale2"))
 {}
 
 
@@ -93,10 +93,10 @@ bool doubleSigmoid::read(const dictionary& energyScalingFunctionProperties)
     doubleSigmoidCoeffs_ =
         energyScalingFunctionProperties.subDict(typeName + "Coeffs");
 
-    doubleSigmoidCoeffs_.lookup("shift1") >> shift1_;
-    doubleSigmoidCoeffs_.lookup("scale1") >> scale1_;
-    doubleSigmoidCoeffs_.lookup("shift2") >> shift2_;
-    doubleSigmoidCoeffs_.lookup("scale2") >> scale2_;
+    doubleSigmoidCoeffs_.readEntry("shift1", shift1_);
+    doubleSigmoidCoeffs_.readEntry("scale1", scale1_);
+    doubleSigmoidCoeffs_.readEntry("shift2", shift2_);
+    doubleSigmoidCoeffs_.readEntry("scale2", scale2_);
 
     return true;
 }

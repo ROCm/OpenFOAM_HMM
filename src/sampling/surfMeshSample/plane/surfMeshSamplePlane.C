@@ -27,7 +27,7 @@ License
 #include "dictionary.H"
 #include "polyMesh.H"
 #include "volFields.H"
-#include "coordinateSystem.H"
+#include "cartesianCS.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -45,6 +45,21 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::bitSet Foam::surfMeshSamplePlane::cellSelection(const bool warn) const
+{
+    return cuttingPlane::cellSelection
+    (
+        mesh(),
+        bounds_,
+        zoneNames_,
+        name(),
+        warn
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfMeshSamplePlane::surfMeshSamplePlane
@@ -52,21 +67,29 @@ Foam::surfMeshSamplePlane::surfMeshSamplePlane
     const word& name,
     const polyMesh& mesh,
     const plane& planeDesc,
-    const keyType& zoneKey,
+    const wordRes& zones,
     const bool triangulate
 )
 :
     surfMeshSample(name, mesh),
     SurfaceSource(planeDesc),
-    zoneKey_(zoneKey),
+    zoneNames_(zones),
     bounds_(),
     triangulate_(triangulate),
     needsUpdate_(true)
 {
-    if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) == -1)
+    if (debug)
     {
-        Info<< "cellZone(s) " << zoneKey_
-            << " not found - using entire mesh" << endl;
+        if (!zoneNames_.empty())
+        {
+            Info<< "cellZones " << flatOutput(zoneNames_);
+
+            if (-1 == mesh.cellZones().findIndex(zoneNames_))
+            {
+                Info<< " not found!";
+            }
+            Info<< endl;
+        }
     }
 }
 
@@ -80,28 +103,64 @@ Foam::surfMeshSamplePlane::surfMeshSamplePlane
 :
     surfMeshSample(name, mesh, dict),
     SurfaceSource(plane(dict)),
-    zoneKey_(dict.lookupOrDefault<keyType>("zone", keyType::null)),
+    zoneNames_(),
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
     triangulate_(dict.lookupOrDefault("triangulate", true)),
     needsUpdate_(true)
 {
-    // Make plane relative to the coordinateSystem (Cartesian)
-    // allow lookup from global coordinate systems
-    if (dict.found("coordinateSystem"))
+    if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))
     {
-        coordinateSystem cs(mesh, dict.subDict("coordinateSystem"));
-
-        const point  base = cs.globalPosition(planeDesc().refPoint());
-        const vector norm = cs.globalVector(planeDesc().normal());
-
-        // Assign the plane description
-        static_cast<plane&>(*this) = plane(base, norm);
+        zoneNames_.resize(1);
+        dict.readEntry("zone", zoneNames_.first());
     }
 
-    if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) == -1)
+
+    // Make plane relative to the coordinateSystem (Cartesian)
+    // allow lookup from global coordinate systems
+    if (dict.found(coordinateSystem::typeName_()))
     {
-        Info<< "cellZone(s) " << zoneKey_
-            << " not found - using entire mesh" << endl;
+        coordSystem::cartesian cs
+        (
+            coordinateSystem::New(mesh, dict, coordinateSystem::typeName_())
+        );
+        plane& pln = planeDesc();
+
+        const point  orig = cs.globalPosition(pln.origin());
+        const vector norm = cs.globalVector(pln.normal());
+
+        if (debug)
+        {
+            Info<< "plane " << name << " :"
+                << " origin:" << origin()
+                << " normal:" << normal()
+                << " defined within a local coordinateSystem" << endl;
+        }
+
+        // Reassign the plane
+        pln = plane(orig, norm);
+    }
+
+    if (debug)
+    {
+        Info<< "plane " << name << " :"
+            << " origin:" << origin()
+            << " normal:" << normal();
+
+        if (!bounds_.empty())
+        {
+            Info<< " bounds:" << bounds_;
+        }
+
+        if (!zoneNames_.empty())
+        {
+            Info<< " cellZones " << flatOutput(zoneNames_);
+
+            if (-1 == mesh.cellZones().findIndex(zoneNames_))
+            {
+                Info<< " not found!";
+            }
+        }
+        Info<< endl;
     }
 }
 
@@ -134,97 +193,7 @@ bool Foam::surfMeshSamplePlane::update()
         return false;
     }
 
-    const plane& pln = static_cast<const plane&>(*this);
-
-    // Verify specified bounding box
-    if (!bounds_.empty())
-    {
-        // Bounding box does not overlap with (global) mesh!
-        if (!bounds_.overlaps(mesh().bounds()))
-        {
-            WarningInFunction
-                << nl
-                << name() << " : "
-                << "Bounds " << bounds_
-                << " do not overlap the mesh bounding box " << mesh().bounds()
-                << nl << endl;
-        }
-
-        // Plane does not intersect the bounding box
-        if (!bounds_.intersects(pln))
-        {
-            WarningInFunction
-                << nl
-                << name() << " : "
-                << "Plane "<< pln << " does not intersect the bounds "
-                << bounds_
-                << nl << endl;
-        }
-    }
-
-    // Plane does not intersect the (global) mesh!
-    if (!mesh().bounds().intersects(pln))
-    {
-        WarningInFunction
-            << nl
-            << name() << " : "
-            << "Plane "<< pln << " does not intersect the mesh bounds "
-            << mesh().bounds()
-            << nl << endl;
-    }
-
-    labelList selectedCells
-    (
-        mesh().cellZones().findMatching(zoneKey_).sortedToc()
-    );
-
-    bool fullMesh = returnReduce(selectedCells.empty(), andOp<bool>());
-    if (!bounds_.empty())
-    {
-        const auto& cellCentres = static_cast<const fvMesh&>(mesh()).C();
-
-        if (fullMesh)
-        {
-            const label len = mesh().nCells();
-
-            selectedCells.setSize(len);
-
-            label count = 0;
-            for (label celli=0; celli < len; ++celli)
-            {
-                if (bounds_.contains(cellCentres[celli]))
-                {
-                    selectedCells[count++] = celli;
-                }
-            }
-
-            selectedCells.setSize(count);
-        }
-        else
-        {
-            label count = 0;
-            for (const label celli : selectedCells)
-            {
-                if (bounds_.contains(cellCentres[celli]))
-                {
-                    selectedCells[count++] = celli;
-                }
-            }
-
-            selectedCells.setSize(count);
-        }
-
-        fullMesh = false;
-    }
-
-    if (fullMesh)
-    {
-        reCut(mesh(), triangulate_);
-    }
-    else
-    {
-        reCut(mesh(), triangulate_, selectedCells);
-    }
+    performCut(mesh(), triangulate_, cellSelection(true));
 
     if (debug)
     {
@@ -263,11 +232,11 @@ bool Foam::surfMeshSamplePlane::sample
 void Foam::surfMeshSamplePlane::print(Ostream& os) const
 {
     os  << "surfMeshSamplePlane: " << name() << " :"
-        << "  base:" << cuttingPlane::refPoint()
-        << "  normal:" << cuttingPlane::normal()
-        << "  triangulate:" << triangulate_
-        << "  faces:"  << SurfaceSource::surfFaces().size()
-        << "  points:" << SurfaceSource::points().size();
+        << " base:" << plane::origin()
+        << " normal:" << plane::normal()
+        << " triangulate:" << triangulate_
+        << " faces:"  << SurfaceSource::surfFaces().size()
+        << " points:" << SurfaceSource::points().size();
 }
 
 

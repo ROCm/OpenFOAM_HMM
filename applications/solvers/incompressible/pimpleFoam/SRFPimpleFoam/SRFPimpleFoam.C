@@ -28,8 +28,8 @@ Group
     grpIncompressibleSolvers
 
 Description
-    Large time-step transient solver for incompressible, turbulent flow in a
-    single rotating frame.
+    Large time-step transient solver for incompressible flow
+    in a single rotating frame.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
@@ -46,10 +46,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Large time-step transient solver for incompressible flow"
+        " in a single rotating frame."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
@@ -69,7 +75,7 @@ int main(int argc, char *argv[])
         #include "CourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

@@ -37,8 +37,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Equilibrate and/or precondition molecular dynamics systems."
+    );
+
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
 

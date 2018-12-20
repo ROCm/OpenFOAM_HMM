@@ -1,0 +1,3 @@
+Test-vtkSeriesWriter.C
+
+EXE = $(FOAM_APPBIN)/Test-vtkSeriesWriter

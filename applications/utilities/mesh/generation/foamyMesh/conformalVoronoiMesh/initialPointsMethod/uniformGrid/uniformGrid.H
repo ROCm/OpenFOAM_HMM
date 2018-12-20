@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,6 @@ class uniformGrid
 :
     public initialPointsMethod
 {
-
 private:
 
     // Private data
@@ -86,8 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~uniformGrid()
-    {}
+    virtual ~uniformGrid() = default;
 
 
     // Member Functions

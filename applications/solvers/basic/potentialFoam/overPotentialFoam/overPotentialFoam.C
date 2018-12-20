@@ -97,6 +97,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Overset potential flow solver which solves for the velocity potential"
+    );
+
     argList::addOption
     (
         "pName",
@@ -125,10 +130,10 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "withFunctionObjects",
-        "execute functionObjects"
+        "Execute functionObjects"
     );
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createNamedDynamicFvMesh.H"
 

@@ -646,9 +646,7 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
 
         fileName vtkPath
         (
-            Pstream::parRun()
-          ? time_.path()/".."/functionObject::outputPrefix/"sets"/name()
-          : time_.path()/functionObject::outputPrefix/"sets"/name()
+            time_.globalPath()/functionObject::outputPrefix/"sets"/name()
         );
         if (mesh_.name() != fvMesh::defaultRegion)
         {
@@ -785,7 +783,11 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
     for (const word& fieldName : scalarNames_)
     {
         dictionary propsDict;
-        propsDict.add("file", scalarVtkFile);
+        propsDict.add
+        (
+            "file",
+            time_.relativePath(scalarVtkFile, true)
+        );
         setProperty(fieldName, propsDict);
     }
 
@@ -793,7 +795,11 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
     for (const word& fieldName : vectorNames_)
     {
         dictionary propsDict;
-        propsDict.add("file", vectorVtkFile);
+        propsDict.add
+        (
+            "file",
+            time_.relativePath(vectorVtkFile, true)
+        );
         setProperty(fieldName, propsDict);
     }
 
@@ -865,7 +871,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     if (fields_.empty())
     {
-        dict.lookup("fields") >> fields_;
+        dict.readEntry("fields", fields_);
 
         if (!fields_.found(UName_))
         {
@@ -878,8 +884,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     Info<< "    Employing velocity field " << UName_ << endl;
 
-    dict.lookup("trackForward") >> trackForward_;
-    dict.lookup("lifeTime") >> lifeTime_;
+    dict.readEntry("trackForward", trackForward_);
+    dict.readEntry("lifeTime", lifeTime_);
     if (lifeTime_ < 1)
     {
         FatalErrorInFunction
@@ -916,8 +922,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
     sampledSetPtr_.clear();
     sampledSetAxis_.clear();
 
-    scalarFormatterPtr_ = writer<scalar>::New(dict.lookup("setFormat"));
-    vectorFormatterPtr_ = writer<vector>::New(dict.lookup("setFormat"));
+    scalarFormatterPtr_ = writer<scalar>::New(dict.get<word>("setFormat"));
+    vectorFormatterPtr_ = writer<vector>::New(dict.get<word>("setFormat"));
 
     return true;
 }

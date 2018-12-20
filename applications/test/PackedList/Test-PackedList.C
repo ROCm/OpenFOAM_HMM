@@ -38,30 +38,30 @@ Description
 
 using namespace Foam;
 
-template<unsigned nBits>
+template<unsigned Width>
 inline void reportInfo()
 {
-    const unsigned offset = PackedList<nBits>::elem_per_block;
+    const unsigned offset = PackedList<Width>::elem_per_block;
 
-    unsigned useSHL = ((1u << (nBits * offset)) - 1);
-    unsigned useSHR = (~0u >> (sizeof(unsigned)*CHAR_BIT - nBits * offset));
+    unsigned useSHL = ((1u << (Width * offset)) - 1);
+    unsigned useSHR = (~0u >> (sizeof(unsigned)*CHAR_BIT - Width * offset));
 
     Info<< nl
-        << "PackedList<" << nBits << ">" << nl
-        << " max_value: " << PackedList<nBits>::max_value << nl
-        << " packing: " << PackedList<nBits>::elem_per_block << nl
-        << " utilization: " << (nBits * offset) << nl;
+        << "PackedList<" << Width << ">" << nl
+        << " max_value: " << PackedList<Width>::max_value << nl
+        << " packing: " << PackedList<Width>::elem_per_block << nl
+        << " utilization: " << (Width * offset) << nl;
 
     Info<< " Masking:" << nl
         << "  shift << "
-        << unsigned(nBits * offset) << nl
+        << unsigned(Width * offset) << nl
         << "  shift >> "
-        << unsigned((sizeof(unsigned)*CHAR_BIT) - nBits * offset)
+        << unsigned((sizeof(unsigned)*CHAR_BIT) - Width * offset)
         << nl;
 
     hex(Info);
     Info<< "   maskLower: "
-        << PackedList<nBits>::mask_lower(PackedList<nBits>::elem_per_block)
+        << PackedList<Width>::mask_lower(PackedList<Width>::elem_per_block)
         << nl
         << "      useSHL: " << useSHL << nl
         << "      useSHR: " << useSHR << nl;

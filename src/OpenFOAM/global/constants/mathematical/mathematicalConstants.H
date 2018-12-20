@@ -25,7 +25,7 @@ Namespace
     Foam::constant::mathematical
 
 Description
-    mathematical constants.
+    Mathematical constants.
 
 \*---------------------------------------------------------------------------*/
 

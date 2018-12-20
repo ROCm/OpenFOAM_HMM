@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ Class
     Foam::functionObjects::runTimePostPro::pointData
 
 Description
+    Visualisation of point data
 
 SourceFiles
     pointData.C
@@ -40,6 +41,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkActor;
 class vtkPolyData;
 class vtkPolyDataMapper;
@@ -72,17 +74,6 @@ public:
         static const Enum<representationType> representationTypeNames;
 
 
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        pointData(const pointData&) = delete;
-
-        //- No copy assignment
-        void operator=(const pointData&) = delete;
-
-
 protected:
 
     // Protected data
@@ -108,6 +99,12 @@ protected:
             vtkPolyData* data
         ) const;
 
+        //- No copy construct
+        pointData(const pointData&) = delete;
+
+        //- No copy assignment
+        void operator=(const pointData&) = delete;
+
 
 public:
 
@@ -125,7 +122,7 @@ public:
             (
                 const runTimePostProcessing& parent,
                 const dictionary& dict,
-                const HashPtrTable<Function1<vector>, word>& colours
+                const HashPtrTable<Function1<vector>>& colours
             ),
             (parent, dict, colours)
         );
@@ -138,7 +135,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 
@@ -149,7 +146,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours,
+            const HashPtrTable<Function1<vector>>& colours,
             const word& pointDataName
         );
 

@@ -52,10 +52,8 @@ Foam::functionObjects::regionFunctionObject::whichSubRegistry
     {
         return obr.lookupObject<objectRegistry>(subName);
     }
-    else
-    {
-        return obr;
-    }
+
+    return obr;
 }
 
 
@@ -71,22 +69,19 @@ bool Foam::functionObjects::regionFunctionObject::writeObject
     const word& fieldName
 )
 {
-    const regIOobject* objPtr =
-        this->lookupObjectPtr<regIOobject>(fieldName);
+    const regIOobject* obj = this->findObject<regIOobject>(fieldName);
 
-    if (objPtr)
+    if (obj)
     {
         Log << "    functionObjects::" << type() << " " << name()
-            << " writing field: " << objPtr->name() << endl;
+            << " writing field: " << obj->name() << endl;
 
-        objPtr->write();
+        obj->write();
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -95,12 +90,14 @@ bool Foam::functionObjects::regionFunctionObject::clearObject
     const word& fieldName
 )
 {
-    regIOobject* objPtr = lookupObjectRefPtr<regIOobject>(fieldName);
-    if (objPtr)
+    // Same as getObjectPtr, since the object is already non-const
+    regIOobject* obj = this->findObject<regIOobject>(fieldName);
+
+    if (obj)
     {
-        if (objPtr->ownedByRegistry())
+        if (obj->ownedByRegistry())
         {
-            return objPtr->checkOut();
+            return obj->checkOut();
         }
         else
         {

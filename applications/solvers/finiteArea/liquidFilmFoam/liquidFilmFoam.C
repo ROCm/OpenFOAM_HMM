@@ -47,7 +47,13 @@ Author
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
+    argList::addNote
+    (
+        "Transient solver for incompressible, laminar flow"
+        " of Newtonian fluids in liquid film formulation."
+    );
+
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFaMesh.H"
@@ -67,7 +73,7 @@ int main(int argc, char *argv[])
         #include "capillaryCourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
@@ -138,7 +144,7 @@ int main(int argc, char *argv[])
             Us.correctBoundaryConditions();
         }
 
-        if (runTime.outputTime())
+        if (runTime.writeTime())
         {
             vsm.mapToVolume(h, H.boundaryFieldRef());
             vsm.mapToVolume(Us, U.boundaryFieldRef());

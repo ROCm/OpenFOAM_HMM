@@ -37,10 +37,10 @@ COxidationKineticDiffusionLimitedRate
 )
 :
     SurfaceReactionModel<CloudType>(dict, owner, typeName),
-    Sb_(readScalar(this->coeffDict().lookup("Sb"))),
-    C1_(readScalar(this->coeffDict().lookup("C1"))),
-    C2_(readScalar(this->coeffDict().lookup("C2"))),
-    E_(readScalar(this->coeffDict().lookup("E"))),
+    Sb_(this->coeffDict().getScalar("Sb")),
+    C1_(this->coeffDict().getScalar("C1")),
+    C2_(this->coeffDict().getScalar("C2")),
+    E_(this->coeffDict().getScalar("E")),
     CsLocalId_(-1),
     O2GlobalId_(owner.composition().carrierId("O2")),
     CO2GlobalId_(owner.composition().carrierId("CO2")),

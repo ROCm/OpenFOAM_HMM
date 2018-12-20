@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,19 @@ Class
     Foam::faceZoneToCell
 
 Description
-    A topoSetSource to select cells based on side of faceZone.
+    A topoSetCellSource to select cells based on side of faceZone.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        option      | Selection type (master / slave)       | yes   |
+        zones       | The face zone names or regexs         | possibly |
+        zone        | The face zone name or regex           | possibly |
+        name        | Older specification for 'zone'        | no    |
+    \endtable
+
+Note
+    Must specify "zones", "zone" or "name" (highest to lowest precedence).
 
 SourceFiles
     faceZoneToCell.C
@@ -35,8 +47,8 @@ SourceFiles
 #ifndef faceZoneToCell_H
 #define faceZoneToCell_H
 
-#include "topoSetSource.H"
-#include "wordRe.H"
+#include "topoSetCellSource.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +61,7 @@ namespace Foam
 
 class faceZoneToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 public:
         //- Enumeration defining the valid options
@@ -68,8 +80,8 @@ private:
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of faceZone
-        wordRe zoneName_;
+        //- Matcher for face zones
+        wordRes selectedZones_;
 
         //- Option
         faceAction option_;
@@ -91,40 +103,27 @@ public:
         faceZoneToCell
         (
             const polyMesh& mesh,
-            const word& zoneName,
+            const wordRe& zoneName,
             const faceAction option
         );
 
         //- Construct from dictionary
-        faceZoneToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        faceZoneToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        faceZoneToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        faceZoneToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~faceZoneToCell();
+    virtual ~faceZoneToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

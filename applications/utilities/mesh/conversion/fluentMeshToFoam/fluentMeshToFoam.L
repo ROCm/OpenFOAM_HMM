@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a Fluent mesh to OpenFOAM format
+    Convert a Fluent mesh to OpenFOAM format,
     including multiple region and region boundary handling.
 
 \*---------------------------------------------------------------------------*/
@@ -865,29 +865,34 @@ label findFace(const primitiveMesh& mesh, const face& f)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a Fluent mesh to OpenFOAM format,"
+        " including multiple region and region boundary handling"
+    );
     argList::noParallel();
     argList::addArgument("Fluent mesh file");
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Geometry scaling factor - default is 1"
     );
     argList::addOption
     (
         "2D",
         "thickness",
-        "use when converting a 2-D mesh (applied before scale)"
+        "Use when converting a 2-D mesh (applied before scale)"
     );
     argList::addBoolOption
     (
         "writeSets",
-        "write cell zones and patches as sets"
+        "Write cell zones and patches as sets"
     );
     argList::addBoolOption
     (
         "writeZones",
-        "write cell zones as zones"
+        "Write cell zones as zones"
     );
 
     argList args(argc, argv);
@@ -897,7 +902,7 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    const scalar scaleFactor = args.lookupOrDefault("scale", 1.0);
+    const scalar scaleFactor = args.opt<scalar>("scale", 1);
 
     const bool writeSets  = args.found("writeSets");
     const bool writeZones = args.found("writeZones");
@@ -1386,7 +1391,7 @@ int main(int argc, char *argv[])
     DynamicList<polyPatch*> newPatches(nPatches);
 
     // For every boundary face the old patch.
-    labelList facePatchID(pShapeMesh.nFaces()-pShapeMesh.nInternalFaces(), -1);
+    labelList facePatchID(pShapeMesh.nBoundaryFaces(), -1);
     label cMeshFace = pShapeMesh.nInternalFaces();
     label nBoundaries = 0;
 

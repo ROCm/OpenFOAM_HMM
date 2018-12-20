@@ -42,10 +42,10 @@ const Foam::Enum
     Foam::lumpedPointMovement::outputFormatType
 >
 Foam::lumpedPointMovement::formatNames
-{
+({
     { outputFormatType::PLAIN, "plain" },
-    { outputFormatType::DICTIONARY, "dictionary" }
-};
+    { outputFormatType::DICTIONARY, "dictionary" },
+});
 
 
 const Foam::Enum
@@ -53,15 +53,15 @@ const Foam::Enum
     Foam::lumpedPointMovement::scalingType
 >
 Foam::lumpedPointMovement::scalingNames
-{
+({
     { scalingType::LENGTH, "length" },
     { scalingType::FORCE, "force" },
-    { scalingType::MOMENT, "moment" }
-};
+    { scalingType::MOMENT, "moment" },
+});
 
 
 const Foam::word
-Foam::lumpedPointMovement::dictionaryName("lumpedPointMovement");
+Foam::lumpedPointMovement::canonicalName("lumpedPointMovement");
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -115,31 +115,6 @@ static void writeList(Ostream& os, const string& header, const UList<T>& list)
 //! \endcond
 
 } // End namespace Foam
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::IOobject Foam::lumpedPointMovement::selectIO
-(
-    const IOobject& io,
-    const fileName& f
-)
-{
-    return
-    (
-        f.size()
-      ? IOobject        // construct from filePath instead
-        (
-            f,
-            io.db(),
-            io.readOpt(),
-            io.writeOpt(),
-            io.registerObject(),
-            io.globalObject()
-        )
-      : io
-    );
-}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -266,7 +241,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
     // assume the worst
     deleteDemandDrivenData(thresholdPtr_);
 
-    dict.lookup("axis") >> axis_;
+    dict.readEntry("axis", axis_);
 
     division_ = 0;
     if (dict.readIfPresent("division", division_))
@@ -283,7 +258,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 
     dict.readIfPresent("relax", relax_);
 
-    dict.lookup("locations") >> locations_;
+    dict.readEntry("locations", locations_);
 
     if (dict.readIfPresent("interpolationScheme", interpolationScheme_))
     {
@@ -304,28 +279,22 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
 
     // TODO: calcFrequency_  = dict.lookupOrDefault("calcFrequency", 1);
 
-    commDict.lookup("inputName")  >> inputName_;
-    commDict.lookup("outputName") >> outputName_;
+    commDict.readEntry("inputName", inputName_);
+    commDict.readEntry("outputName", outputName_);
     commDict.readIfPresent("logName", logName_);
 
-    inputFormat_ = lumpedPointState::formatNames.lookup
-    (
-        "inputFormat",
-        commDict
-    );
+    inputFormat_ =
+        lumpedPointState::formatNames.get("inputFormat", commDict);
 
-    outputFormat_ = lumpedPointMovement::formatNames.lookup
-    (
-        "outputFormat",
-        commDict
-    );
+    outputFormat_ =
+        lumpedPointMovement::formatNames.get("outputFormat", commDict);
 
     scaleInput_  = -1;
     scaleOutput_ = -1;
 
     const dictionary* scaleDict = nullptr;
 
-    if ((scaleDict = commDict.subDictPtr("scaleInput")))
+    if ((scaleDict = commDict.findDict("scaleInput")))
     {
         for (int i=0; i < scaleInput_.size(); ++i)
         {
@@ -343,7 +312,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
         }
     }
 
-    if ((scaleDict = commDict.subDictPtr("scaleOutput")))
+    if ((scaleDict = commDict.findDict("scaleOutput")))
     {
         for (int i=0; i < scaleOutput_.size(); ++i)
         {
@@ -512,8 +481,7 @@ bool Foam::lumpedPointMovement::forcesAndMoments
 
     const polyBoundaryMesh& patches = pmesh.boundaryMesh();
 
-    const word pName = forcesDict_.lookupOrDefault<word>("p", "p");
-
+    const word pName(forcesDict_.lookupOrDefault<word>("p", "p"));
     scalar pRef   = forcesDict_.lookupOrDefault<scalar>("pRef",   0.0);
     scalar rhoRef = forcesDict_.lookupOrDefault<scalar>("rhoRef", 1.0);
 
@@ -521,7 +489,7 @@ bool Foam::lumpedPointMovement::forcesAndMoments
     // Calculated force per patch - cache
     PtrMap<vectorField> forceOnPatches;
 
-    const volScalarField* pPtr = pmesh.lookupObjectPtr<volScalarField>(pName);
+    const volScalarField* pPtr = pmesh.findObject<volScalarField>(pName);
 
     // fvMesh and has pressure field
     if (isA<fvMesh>(pmesh) && pPtr)

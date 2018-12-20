@@ -25,7 +25,15 @@ Class
     Foam::searchablePlane
 
 Description
-    Searching on (infinite) plane. See plane.H
+    Searching on (infinite) plane.
+    The dictionary specifications are identical to the Foam::plane
+    requirements.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        type        | plane / searchablePlane           | selector |
+    \endtable
 
 SourceFiles
     searchablePlane.C
@@ -43,8 +51,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
 /*---------------------------------------------------------------------------*\
                            Class searchablePlane Declaration
 \*---------------------------------------------------------------------------*/
@@ -58,6 +64,7 @@ private:
 
     // Private Member Data
 
+        //- Names of regions
         mutable wordList regions_;
 
 
@@ -103,11 +110,12 @@ public:
         );
 
     //- Destructor
-    virtual ~searchablePlane();
+    virtual ~searchablePlane() = default;
 
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
         //- Whether supports volume type below
@@ -126,8 +134,7 @@ public:
         //  Usually the element centres (should be of length size()).
         virtual tmp<pointField> coordinates() const
         {
-            tmp<pointField> tCtrs(new pointField(1, refPoint()));
-            return tCtrs;
+            return tmp<pointField>::New(1, origin());
         }
 
         //- Get bounding spheres (centre and radius squared), one per element.
@@ -149,7 +156,6 @@ public:
         virtual bool overlaps(const boundBox& bb) const
         {
             NotImplemented;
-
             return false;
         }
 
@@ -199,8 +205,8 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for point.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
                 const pointField&,

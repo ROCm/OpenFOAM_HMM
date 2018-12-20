@@ -46,10 +46,8 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown reactionRateFlameArea type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown reactionRateFlameArea type "
             << modelType << nl << nl
             << "Valid reaction rate flame area types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()

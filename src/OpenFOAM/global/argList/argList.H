@@ -76,7 +76,7 @@ Description
 Note
     - The document browser used is defined by the \b FOAM_DOC_BROWSER
       environment variable or the <tt>Documentation/docBrowser</tt> entry
-      in the <tt>~OpenFOAM/controlDict</tt> file.
+      in the <tt>\<etc\>/controlDict</tt> file.
       The \%f token is used as a placeholder for the file name.
     - The valid (mandatory) arguments can be adjusted
       via the addArgument static method instead of directly
@@ -97,6 +97,7 @@ SourceFiles
 #include "stringList.H"
 #include "SubList.H"
 #include "SLList.H"
+#include "HashSet.H"
 #include "HashTable.H"
 #include "word.H"
 #include "fileName.H"
@@ -104,6 +105,9 @@ SourceFiles
 #include "OSspecific.H"
 #include "ITstream.H"
 #include <utility>
+
+// Transitional features - older style access (including 1712 release)
+#define Foam_argList_1712
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,14 +122,14 @@ class argList
 {
     // Private data
 
-        //- Track enabled/disabled mandatory arguments
+        //- Track if command arguments are mandatory/optional
         static bool argsMandatory_;
 
         //- Track enabled/disabled checking of processor directories state
         static bool checkProcessorDirectories_;
 
         //- Switch on/off parallel mode.
-        //  Must be first to be constructed so destructor is done last.
+        //  Construct first so destructor is done last.
         ParRunControl parRunControl_;
 
         //- The arguments after removing known options
@@ -136,10 +140,11 @@ class argList
 
         word executable_;
         fileName rootPath_;
-        bool distributed_;
         fileName globalCase_;
         fileName case_;
-        string argListStr_;
+
+        //- The command line options and arguments concatenated as a string
+        string commandLine_;
 
 
     // Private Member Functions
@@ -150,31 +155,37 @@ class argList
         //- Helper for resolving ignored options
         static int optionIgnore(const word& optName);
 
-        //- Helper function for printUsage
-        static void printOptionUsage
-        (
-            const label location,
-            const string& str
-        );
+        //- Check after reading if the input token stream has unconsumed
+        //- tokens remaining or if there were no tokens in the first place.
+        //  Emits Warning
+        static void checkITstream(const ITstream& is, const label index);
+
+        //- Check after reading if the input token stream has unconsumed
+        //- tokens remaining or if there were no tokens in the first place.
+        //  Emits Warning
+        static void checkITstream(const ITstream& is, const word& optName);
 
         //- Read a List of values from ITstream,
         //- treating a single entry like a list of size 1.
         template<class T>
         static inline void readList(ITstream& is, List<T>& list);
 
-        //- Get rootPath_ / globalCase_ from one of the following forms
+        //- Set rootPath_, globalCase_, case_ from one of the following forms
         //   * [-case dir]
         //   * cwd
         //
         // Also export FOAM_CASE and FOAM_CASENAME environment variables
         // so they can be used immediately (eg, in decomposeParDict), as well
         // as the FOAM_EXECUTABLE environment.
-        void getRootCase();
+        void setCasePaths();
 
         //- Transcribe argv into internal args_.
         //  Transform sequences with "(" ... ")" into string lists
         //  return true if any "(" ... ")" sequences were captured
         bool regroupArgv(int& argc, char**& argv);
+
+        //- Print option compatibility
+        void printManCompat() const;
 
 
 public:
@@ -183,6 +194,9 @@ public:
 
         //- A list of valid (mandatory) arguments
         static SLList<string> validArgs;
+
+        //- The "advanced" options are shown with -help-full (not with --help)
+        static HashSet<string> advancedOptions;
 
         //- A list of valid options
         static HashTable<string> validOptions;
@@ -198,26 +212,27 @@ public:
         //  Stored as (option = bool, version)
         static HashTable<std::pair<bool,int>> ignoreOptionsCompat;
 
-        //- Short usage information for validOptions
+        //- Short description for program arguments
+        static HashTable<string, label, Hash<label>> argUsage;
+
+        //- Short description for validOptions
         static HashTable<string> optionUsage;
 
-        //- Additional notes for usage
+        //- General usage notes
         static SLList<string> notes;
 
-        //- Min offset for displaying usage (default: 20)
-        static string::size_type usageMin;
+        //- Min indentation when displaying usage (default: 20)
+        static std::string::size_type usageMin;
 
-        //- Max screen width for displaying usage (default: 80)
-        static string::size_type usageMax;
+        //- Max screen width when displaying usage (default: 80)
+        static std::string::size_type usageMax;
 
         //- Standard name for the post-processing option
         static word postProcessOptionName;
 
         //! \cond internalClass
-        class initValidTables
+        struct initValidTables
         {
-        public:
-
             initValidTables();
         };
         //! \endcond
@@ -227,11 +242,15 @@ public:
 
         //- Construct from argc and argv
         //- checking the arguments and options as requested.
+        //
+        //  By default, the argument check respects the value of
+        //  argsMandatory() to decide if the arguments should be checked
+        //  (when they are mandatory) or not (when they are optional)
         argList
         (
             int& argc,
             char**& argv,
-            bool checkArgs = true,
+            bool checkArgs = argList::argsMandatory(),
             bool checkOpts = true,
             bool initialise = true
         );
@@ -253,16 +272,23 @@ public:
 
     // Member Functions
 
+    // Environment
+
+        //- Global case (directory) from environment variable
+        //
+        //  Returns the contents of the \c FOAM_CASE variable,
+        //  which has previously been set by argList or by Time.
+        //
+        //  This will normally be identical to the value of globalPath(),
+        //  but obtained via the environment.
+        static fileName envGlobalPath();
+
+
     // Low-level
 
         //- Scan for -help, -doc options etc prior to checking the validity
         //- of other args/opts and finally initialising.
-        void parse
-        (
-            bool checkArgs,
-            bool checkOpts,
-            bool initialise
-        );
+        void parse(bool checkArgs, bool checkOpts, bool initialise);
 
 
     // Access
@@ -270,24 +296,45 @@ public:
         //- Name of executable without the path
         inline const word& executable() const;
 
+        //- The command line options and arguments concatenated as a string
+        inline const string& commandLine() const;
+
         //- Return root path
         inline const fileName& rootPath() const;
+
+        //- Return case name (parallel run) or global case (serial run)
+        inline const fileName& caseName() const;
+
+        //- Return global case name
+        inline const fileName& globalCaseName() const;
+
+        //- Return the full path to the (processor local) case
+        //  \note This is guaranteed to be an absolute path
+        inline fileName path() const;
+
+        //- Return the full path to the global case
+        //  \note This is guaranteed to be an absolute path
+        inline fileName globalPath() const;
+
+        //- Return the input relative to the globalPath by stripping off
+        //- a leading value of the globalPath
+        //
+        //  \param input the directory or filename to make case-relative
+        //  \param caseTag replace globalPath with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        inline fileName relativePath
+        (
+            const fileName& input,
+            const bool caseTag = false
+        ) const;
 
         //- Return distributed flag
         //- (i.e. are rootPaths different on different machines)
         inline bool distributed() const;
 
-        //- Return case name (parallel run) or global case (serial run)
-        inline const fileName& caseName() const;
-
-        //- Return case name
-        inline const fileName& globalCaseName() const;
-
-        //- Return parRunControl
+        //- Return the ParRunControl
         inline const ParRunControl& parRunControl() const;
-
-        //- Return the path to the caseName
-        inline fileName path() const;
 
         //- Return the number of arguments
         inline label size() const;
@@ -304,15 +351,15 @@ public:
         //- Return non-const access to the command options
         inline HashTable<string>& options();
 
-        //- Read a value from the argument at index.
-        //  Index 1 is the first non-option argument.
+        //- Get a value from the argument at index.
+        //  Index 1 is the first (non-option) argument.
         template<class T>
-        inline T read(const label index) const;
+        inline T get(const label index) const;
 
         //- Read a value from the argument at index.
-        //  Index 1 is the first non-option argument.
+        //  Index 1 is the first (non-option) argument.
         template<class T>
-        inline List<T> readList(const label index) const;
+        inline List<T> getList(const label index) const;
 
         //- Return true if the named option is found
         inline bool found(const word& optName) const;
@@ -326,10 +373,15 @@ public:
         //- Return an input stream from the named option
         inline ITstream lookup(const word& optName) const;
 
-        //- Read a value from the named option
+        //- Get a value from the named option
         //  The default template parameter is string (ie, no conversion).
         template<class T=string>
         inline T opt(const word& optName) const;
+
+        //- Get a value from the named option if present, or return default.
+        //  Identical to lookupOrDefault().
+        template<class T>
+        inline T opt(const word& optName, const T& deflt) const;
 
         //- Read a value from the named option if present.
         //  \return true if the named option was found.
@@ -347,8 +399,7 @@ public:
             const T& deflt
         ) const;
 
-        //- Read a value from the named option if present.
-        //  Return supplied default otherwise.
+        //- Get a value from the named option if present, or return default.
         template<class T>
         inline T lookupOrDefault
         (
@@ -356,87 +407,36 @@ public:
             const T& deflt
         ) const;
 
-        //- Read a List of values from the named option,
+        //- Get a List of values from the named option,
         //- treating a single entry like a list of size 1.
+        //  \param optName  the option name to read from
+        //  \param mandatory if the option is non-mandatory, the behaviour
+        //      is similar to readListIfPresent().
         template<class T>
-        inline List<T> readList(const word& optName) const;
+        inline List<T> getList(const word& optName, bool mandatory=true) const;
 
-        //- If named option is present, read a List of values
+        //- If named option is present, get a List of values
         //- treating a single entry like a list of size 1.
         //  \return true if the named option was found.
         template<class T>
         inline bool readListIfPresent(const word& optName, List<T>& list) const;
 
 
-    // Older style access (including 1712 release)
-
-        //- Read a value from the argument at index.
-        //  Index 1 is the first non-option argument.
-        //  \deprecated in favour of read() - JAN-2018
-        template<class T>
-        inline T argRead(const label index) const;
-
-        //- Return true if the named option is found
-        //  \deprecated in favour of found() - JAN-2018
-        inline bool optionFound(const word& optName) const;
-
-        //- Return an input stream from the named option
-        //  \deprecated in favour of lookup() - JAN-2018
-        inline ITstream optionLookup(const word& optName) const;
-
-        //- Read a value from the named option
-        //  \deprecated in favour of opt() - JAN-2018
-        template<class T>
-        inline T optionRead(const word& optName) const;
-
-        //- Read a value from the named option if present.
-        //  Return true if the named option was found.
-        //  \deprecated in favour of readIfPresent() - JAN-2018
-        template<class T>
-        inline bool optionReadIfPresent
-        (
-            const word& optName,
-            T& val
-        ) const;
-
-        //- Read a value from the named option if present.
-        //  Return true if the named option was found, otherwise
-        //  use the supplied default and return false.
-        //  \deprecated in favour of readIfPresent() - JAN-2018
-        template<class T>
-        inline bool optionReadIfPresent
-        (
-            const word& optName,
-            T& val,
-            const T& deflt
-        ) const;
-
-        //- Read a value from the named option if present.
-        //  Return supplied default otherwise.
-        //  \deprecated in favour of lookupOrDefault() - JAN-2018
-        template<class T>
-        inline T optionLookupOrDefault
-        (
-            const word& optName,
-            const T& deflt
-        ) const;
-
-        //- Read a List of values from the named option
-        //  \deprecated in favour of readList() - JAN-2018
-        template<class T>
-        inline List<T> optionReadList(const word& optName) const;
-
-
     // Edit
 
         //- Append a (mandatory) argument to validArgs
-        static void addArgument(const string& argName);
+        static void addArgument
+        (
+            const string& argName,
+            const string& usage = ""
+        );
 
         //- Add a bool option to validOptions with usage information
         static void addBoolOption
         (
             const word& optName,
-            const string& usage = ""
+            const string& usage = "",
+            bool advanced = false
         );
 
         //- Add an option to validOptions with usage information
@@ -445,8 +445,12 @@ public:
         (
             const word& optName,
             const string& param = "",
-            const string& usage = ""
+            const string& usage = "",
+            bool advanced = false
         );
+
+        //- Set an existing option as being 'advanced' or normal
+        static void setAdvanced(const word& optName, bool advanced = true);
 
         //- Specify an alias for the option name.
         //
@@ -471,7 +475,7 @@ public:
         static void ignoreOptionCompat
         (
             std::pair<const char*,int> compat,
-            const bool expectArg
+            bool expectArg
         );
 
         //- Add option usage information to optionUsage
@@ -488,8 +492,11 @@ public:
         //- Remove option from validOptions and from optionUsage
         static void removeOption(const word& optName);
 
-        //- Flag command arguments as being non-mandatory
-        static void nonMandatoryArgs();
+        //- Flag command arguments as being optional (non-mandatory)
+        static void noMandatoryArgs();
+
+        //- Command arguments type (optional/mandatory).
+        static bool argsMandatory();
 
         //- Disable emitting the banner information.
         //  Adjusts the Foam::infoDetailLevel flag.
@@ -499,12 +506,15 @@ public:
         //  Queries the Foam::infoDetailLevel flag.
         static bool bannerEnabled();
 
-        //- Remove the 'noFunctionObjects' option,
-        //- optionally adding a 'withFunctionObjects' option instead
+        //- Remove '-noFunctionObjects' option and ignore any occurances.
+        //  Optionally add a '-withFunctionObjects' option instead
         static void noFunctionObjects(bool addWithOption = false);
 
         //- Suppress JobInfo, overriding controlDict setting
         static void noJobInfo();
+
+        //- Add the '-no-libs' command line option
+        static void noLibs();
 
         //- Remove the parallel options
         static void noParallel();
@@ -539,6 +549,9 @@ public:
         //- Print usage
         void printUsage(bool full=true) const;
 
+        //- Print usage as nroff-man format (Experimental)
+        void printMan() const;
+
         //- Display documentation in browser
         //  Optionally display the application source code
         void displayDoc(bool source=false) const;
@@ -546,8 +559,17 @@ public:
 
     // Check
 
-        //- Check argument list
-        bool check(bool checkArgs=true, bool checkOpts=true) const;
+        //- Check the parsed command-line for mandatory arguments and
+        //- that all the options are correct.
+        //
+        //  By default, the argument check respects the value of
+        //  argsMandatory() to decide if the arguments should be checked
+        //  (when they are mandatory) or not (when they are optional)
+        bool check
+        (
+            bool checkArgs = argList::argsMandatory(),
+            bool checkOpts = true
+        ) const;
 
         //- Check root path and case path
         bool checkRootCase() const;
@@ -557,11 +579,107 @@ public:
 
         //- The string corresponding to the argument index.
         //  Index 0 is the executable.
-        //  Index 1 is the first non-option argument.
+        //  Index 1 is the first (non-option) argument.
         inline const string& operator[](const label index) const;
 
         //- The string associated with the named option
         inline const string& operator[](const word& optName) const;
+
+
+    // Older style access (including 1712 release)
+
+    #ifdef Foam_argList_1712
+
+        //- Deprecated(2018-08) read a value from the argument at index.
+        //  Index 1 is the first (non-option) argument.
+        //  \deprecated(2018-08) - use get() method
+        template<class T>
+        inline T read(const label index) const
+        {
+            return this->get<T>(index);
+        }
+
+        //- Deprecated(2018-01) read a value from the argument at index.
+        //  Index 1 is the first (non-option) argument.
+        //  \deprecated(2018-01) - use get() method
+        template<class T>
+        inline T argRead(const label index) const
+        {
+            return this->get<T>(index);
+        }
+
+        //- Deprecated(2018-01) return true if the named option is found
+        //  \deprecated(2018-01) - use found() method
+        inline bool optionFound(const word& optName) const
+        {
+            return found(optName);
+        }
+
+        //- Deprecated(2018-01) return an input stream from the named option
+        //  \deprecated(2018-01) - use lookup() method
+        inline ITstream optionLookup(const word& optName) const
+        {
+            return lookup(optName);
+        }
+
+        //- Deprecated(2018-01) read a value from the named option
+        //  \deprecated(2018-01) - use opt() method
+        template<class T>
+        inline T optionRead(const word& optName) const
+        {
+            return opt<T>(optName);
+        }
+
+        //- Deprecated(2018-01) read a value from the named option if present.
+        //  Return true if the named option was found.
+        //  \deprecated(2018-01) - use readIfPresent() method
+        template<class T>
+        inline bool optionReadIfPresent
+        (
+            const word& optName,
+            T& val
+        ) const
+        {
+            return readIfPresent<T>(optName, val);
+        }
+
+        //- Deprecated(2018-01) read a value from the named option if present.
+        //  Return true if the named option was found, otherwise
+        //  use the supplied default and return false.
+        //  \deprecated(2018-01) - use readIfPresent() method
+        template<class T>
+        inline bool optionReadIfPresent
+        (
+            const word& optName,
+            T& val,
+            const T& deflt
+        ) const
+        {
+            return readIfPresent<T>(optName, val, deflt);
+        }
+
+        //- Deprecated(2018-01) read a value from the named option if present.
+        //  Return supplied default otherwise.
+        //  \deprecated(2018-01) - use lookupOrDefault() method
+        template<class T>
+        inline T optionLookupOrDefault
+        (
+            const word& optName,
+            const T& deflt
+        ) const
+        {
+            return lookupOrDefault<T>(optName, deflt);
+        }
+
+        //- Deprecated(2018-01) read a List of values from the named option
+        //  \deprecated(2018-01) - use getList() method
+        template<class T>
+        inline List<T> optionReadList(const word& optName) const
+        {
+            return this->getList<T>(optName);
+        }
+
+    #endif  /* Foam_argList_1712 */
 
 };
 

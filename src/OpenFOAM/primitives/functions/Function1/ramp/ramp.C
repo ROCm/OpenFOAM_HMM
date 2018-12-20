@@ -30,7 +30,7 @@ License
 void Foam::Function1Types::ramp::read(const dictionary& coeffs)
 {
     start_ = coeffs.lookupOrDefault<scalar>("start", 0);
-    duration_ = coeffs.get<scalar>("duration");
+    coeffs.readEntry("duration", duration_);
 }
 
 

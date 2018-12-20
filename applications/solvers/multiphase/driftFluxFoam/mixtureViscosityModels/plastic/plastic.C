@@ -119,9 +119,9 @@ bool Foam::mixtureViscosityModels::plastic::read
 
     plasticCoeffs_ = viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    plasticCoeffs_.lookup("k") >> plasticViscosityCoeff_;
-    plasticCoeffs_.lookup("n") >> plasticViscosityExponent_;
-    plasticCoeffs_.lookup("muMax") >> muMax_;
+    plasticCoeffs_.readEntry("k", plasticViscosityCoeff_);
+    plasticCoeffs_.readEntry("n", plasticViscosityExponent_);
+    plasticCoeffs_.readEntry("muMax", muMax_);
 
     return true;
 }

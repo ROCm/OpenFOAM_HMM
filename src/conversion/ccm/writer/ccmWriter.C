@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// name for the topology file reference
+// Name for the topology file reference
 Foam::string Foam::ccm::writer::defaultMeshName = "meshExport";
 
 
@@ -98,21 +98,17 @@ void Foam::ccm::writer::writeBoundaryRegion
     forAllConstIters(boundaryRegion_, iter)
     {
         const dictionary& dict = iter();
+        word nameEntry;
+        word typeEntry;
+
         if
         (
-            dict.found("Label")
-         && dict.found("BoundaryType")
+            dict.readIfPresent("Label", nameEntry)
+         && dict.readIfPresent("BoundaryType", typeEntry)
+         && !typeDict.found(nameEntry)
         )
         {
-            word nameEntry, typeEntry;
-
-            dict.lookup("Label") >> nameEntry;
-            dict.lookup("BoundaryType") >> typeEntry;
-
-            if (!typeDict.found(nameEntry))
-            {
-                typeDict.add(nameEntry, typeEntry);
-            }
+            typeDict.add(nameEntry, typeEntry);
         }
     }
 
@@ -160,7 +156,7 @@ void Foam::ccm::writer::writeBoundaryRegion
         }
         else if (defaultId == -1 || regionId < defaultId)
         {
-            regionId++;
+            ++regionId;
         }
 
         // Use BoundaryType from constant/boundaryRegion
@@ -223,15 +219,15 @@ void Foam::ccm::writer::writeCellTable
         );
 
         wordList toc = dict.toc();
-        forAll(toc, i)
+        for (const word& keyword : toc)
         {
-            word keyword = toc[i];
             int pos = keyword.find("Id");
 
             // Tags containing 'Id' are integers
             if (pos > 0)
             {
-                dict.lookup(keyword) >> intVal;
+                dict.readEntry(keyword, intVal);
+
                 CCMIOWriteOpti
                 (
                     nullptr,
@@ -242,8 +238,7 @@ void Foam::ccm::writer::writeCellTable
             }
             else if (pos < 0)
             {
-                word strVal;
-                dict.lookup(keyword) >> strVal;
+                const word strVal(dict.get<word>(keyword));
 
                 CCMIOWriteOptstr
                 (

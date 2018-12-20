@@ -33,7 +33,7 @@ Foam::kineticTheoryModels::viscosityModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("viscosityModel"));
+    const word modelType(dict.get<word>("viscosityModel"));
 
     Info<< "Selecting viscosityModel " << modelType << endl;
 

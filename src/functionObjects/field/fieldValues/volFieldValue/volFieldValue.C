@@ -48,7 +48,7 @@ const Foam::Enum
     Foam::functionObjects::fieldValues::volFieldValue::operationType
 >
 Foam::functionObjects::fieldValues::volFieldValue::operationTypeNames_
-{
+({
     // Normal operations
     { operationType::opNone, "none" },
     { operationType::opMin, "min" },
@@ -65,7 +65,7 @@ Foam::functionObjects::fieldValues::volFieldValue::operationTypeNames_
     { operationType::opWeightedAverage, "weightedAverage" },
     { operationType::opWeightedVolAverage, "weightedVolAverage" },
     { operationType::opWeightedVolIntegrate, "weightedVolIntegrate" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -205,7 +205,7 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
 :
     fieldValue(name, runTime, dict, typeName),
     volRegion(fieldValue::mesh_, dict),
-    operation_(operationTypeNames_.lookup("operation", dict)),
+    operation_(operationTypeNames_.get("operation", dict)),
     weightFieldName_("none")
 {
     read(dict);
@@ -222,7 +222,7 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
 :
     fieldValue(name, obr, dict, typeName),
     volRegion(fieldValue::mesh_, dict),
-    operation_(operationTypeNames_.lookup("operation", dict)),
+    operation_(operationTypeNames_.get("operation", dict)),
     weightFieldName_("none")
 {
     read(dict);

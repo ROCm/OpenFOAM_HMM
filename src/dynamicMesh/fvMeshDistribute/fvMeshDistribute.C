@@ -389,8 +389,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvMeshDistribute::generateTestField
     const fvMesh& mesh
 )
 {
-    vector testNormal(1, 1, 1);
-    testNormal /= mag(testNormal);
+    const vector testNormal = normalised(vector::one);
 
     tmp<surfaceScalarField> tfld
     (
@@ -440,8 +439,7 @@ void Foam::fvMeshDistribute::testField(const surfaceScalarField& fld)
 {
     const fvMesh& mesh = fld.mesh();
 
-    vector testNormal(1, 1, 1);
-    testNormal /= mag(testNormal);
+    const vector testNormal = normalised(vector::one);
 
     const surfaceVectorField n(mesh.Sf()/mesh.magSf());
 
@@ -502,7 +500,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::deleteProcPatches
 
     // New patchID per boundary faces to be repatched. Is -1 (no change)
     // or new patchID
-    labelList newPatchID(mesh_.nFaces() - mesh_.nInternalFaces(), -1);
+    labelList newPatchID(mesh_.nBoundaryFaces(), -1);
 
     label nProcPatches = 0;
 
@@ -793,7 +791,7 @@ void Foam::fvMeshDistribute::getCouplingData
     // Construct the coupling information for all (boundary) faces and
     // points
 
-    label nBnd = mesh_.nFaces() - mesh_.nInternalFaces();
+    const label nBnd = mesh_.nBoundaryFaces();
     sourceFace.setSize(nBnd);
     sourceProc.setSize(nBnd);
     sourcePatch.setSize(nBnd);
@@ -1000,10 +998,10 @@ void Foam::fvMeshDistribute::subsetCouplingData
     labelList& subPointMaster
 )
 {
-    subFace.setSize(mesh.nFaces() - mesh.nInternalFaces());
-    subProc.setSize(mesh.nFaces() - mesh.nInternalFaces());
-    subPatch.setSize(mesh.nFaces() - mesh.nInternalFaces());
-    subNewNbrProc.setSize(mesh.nFaces() - mesh.nInternalFaces());
+    subFace.setSize(mesh.nBoundaryFaces());
+    subProc.setSize(mesh.nBoundaryFaces());
+    subPatch.setSize(mesh.nBoundaryFaces());
+    subNewNbrProc.setSize(mesh.nBoundaryFaces());
 
     forAll(subFace, newBFacei)
     {
@@ -1134,7 +1132,7 @@ Foam::labelList Foam::fvMeshDistribute::mapBoundaryData
     const labelList& boundaryData1  // on added mesh
 )
 {
-    labelList newBoundaryData(mesh.nFaces() - mesh.nInternalFaces());
+    labelList newBoundaryData(mesh.nBoundaryFaces());
 
     forAll(boundaryData0, oldBFacei)
     {
@@ -1934,7 +1932,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             SubList<label>
             (
                 repatchMap().reverseFaceMap(),
-                mesh_.nFaces() - mesh_.nInternalFaces(),
+                mesh_.nBoundaryFaces(),
                 mesh_.nInternalFaces()
             )
           - mesh_.nInternalFaces()
@@ -2022,14 +2020,12 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             //OPstream str(Pstream::commsTypes::blocking, recvProc);
             UOPstream str(recvProc, pBufs);
 
-            // Mesh subsetting engine
-            fvMeshSubset subsetter(mesh_);
-
-            // Subset the cells of the current domain.
-            subsetter.setLargeCellSubset
+            // Mesh subsetting engine - subset the cells of the current domain.
+            fvMeshSubset subsetter
             (
-                distribution,
+                mesh_,
                 recvProc,
+                distribution,
                 oldInternalPatchi,  // oldInternalFaces patch
                 false               // no parallel sync
             );
@@ -2610,7 +2606,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 mesh_,
                 domainMesh,
                 couples,
-                false           // no parallel comms
+                false,          // no parallel comms
+                true            // fake complete mapping
             );
 
             // Update mesh data: sourceFace,sourceProc for added
@@ -2689,7 +2686,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             {
                 // Find out if any faces of domain mesh were flipped (boundary
                 // faces becoming internal)
-                label nBnd = domainMesh.nFaces()-domainMesh.nInternalFaces();
+                const label nBnd = domainMesh.nBoundaryFaces();
                 flippedAddedFaces.resize(nBnd/4);
 
                 for

@@ -45,7 +45,7 @@ Foam::autoPtr<Foam::twoPhaseSystem> Foam::twoPhaseSystem::New
                 IOobject::NO_WRITE,
                 false
             )
-        ).lookup("type")
+        ).get<word>("type")
     );
 
     Info<< "Selecting twoPhaseSystem " << systemType << endl;

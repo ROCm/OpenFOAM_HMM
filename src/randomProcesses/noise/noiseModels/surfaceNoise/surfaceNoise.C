@@ -27,6 +27,7 @@ License
 #include "surfaceReader.H"
 #include "surfaceWriter.H"
 #include "noiseFFT.H"
+#include "argList.H"
 #include "graph.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -428,22 +429,19 @@ bool surfaceNoise::read(const dictionary& dict)
 {
     if (noiseModel::read(dict))
     {
-        if (dict.found("file"))
+        if (!dict.readIfPresent("files", inputFileNames_))
         {
-            inputFileNames_.setSize(1);
-            dict.lookup("file") >> inputFileNames_[0];
-        }
-        else
-        {
-            dict.lookup("files") >> inputFileNames_;
+            inputFileNames_.resize(1);
+            dict.readEntry("file", inputFileNames_.first());
         }
 
         dict.readIfPresent("fftWriteInterval", fftWriteInterval_);
         dict.readIfPresent("p", pName_);
 
-        dict.lookup("reader") >> readerType_;
+        readerType_ = dict.get<word>("reader");
 
-        word writerType(dict.lookup("writer"));
+        const word writerType(dict.get<word>("writer"));
+
         dictionary optDict
         (
             dict.subOrEmptyDict("writeOptions").subOrEmptyDict(writerType)
@@ -467,10 +465,10 @@ void surfaceNoise::calculate()
 
         if (!fName.isAbsolute())
         {
-            fName = "$FOAM_CASE"/fName;
+            fName = argList::envGlobalPath()/fName;
         }
 
-        initialise(fName.expand());
+        initialise(fName);
 
         // Container for pressure time history data per face
         List<scalarField> pData;

@@ -120,8 +120,8 @@ int main(int argc, char *argv[])
         )
     );
 
-    scalar x0 = readScalar(function1Properties.lookup("x0"));
-    scalar x1 = readScalar(function1Properties.lookup("x1"));
+    scalar x0 = function1Properties.get<scalar>("x0");
+    scalar x1 = function1Properties.get<scalar>("x1");
 
     Info<< "Data entry type: " << function1().type() << nl << endl;
 

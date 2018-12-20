@@ -45,29 +45,33 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Foam::argList::addBoolOption
+    argList::addNote
+    (
+        "Conformal Voronoi automatic mesh generator"
+    );
+    argList::addBoolOption
     (
         "checkGeometry",
-        "check all surface geometry for quality"
+        "Check all surface geometry for quality"
     );
 
-    Foam::argList::addBoolOption
+    argList::addBoolOption
     (
         "conformationOnly",
-        "conform to the initial points without any point motion"
+        "Conform to the initial points without any point motion"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-
-    runTime.functionObjects().off();
 
     const bool checkGeometry = args.found("checkGeometry");
     const bool conformationOnly = args.found("conformationOnly");
 
     // Allow override of decomposeParDict location
-    fileName decompDictFile;
-    args.readIfPresent("decomposeParDict", decompDictFile);
+    const fileName decompDictFile =
+        args.opt<fileName>("decomposeParDict", "");
 
     IOdictionary foamyHexMeshDict
     (
@@ -128,7 +132,7 @@ int main(int argc, char *argv[])
     {
         mesh.initialiseForConformation();
 
-        runTime++;
+        ++runTime;
 
         mesh.writeMesh(runTime.timeName());
     }
@@ -138,7 +142,7 @@ int main(int argc, char *argv[])
 
         while (runTime.run())
         {
-            runTime++;
+            ++runTime;
 
             Info<< nl << "Time = " << runTime.timeName() << endl;
 

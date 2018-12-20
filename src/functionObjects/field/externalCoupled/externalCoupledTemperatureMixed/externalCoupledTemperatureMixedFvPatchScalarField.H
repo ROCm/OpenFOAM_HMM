@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,6 +87,14 @@ Description
     To be used in combination with the functionObjects::externalCoupled
     functionObject.
 
+Usage
+    \table
+        Property    | Description                           | Required | Default
+        outputTemperature | The output temperature: fluid/wall | yes |
+    \endtable
+
+Note the
+
 SeeAlso
     externalCoupledFunctionObject
     mixedFvPatchField
@@ -101,6 +109,7 @@ SourceFiles
 #define externalCoupledTemperatureMixedFvPatchScalarField_H
 
 #include "externalCoupledMixedFvPatchFields.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,6 +124,24 @@ class externalCoupledTemperatureMixedFvPatchScalarField
 :
     public externalCoupledMixedFvPatchField<scalar>
 {
+    // Data Types
+
+        //- Location for the ouput temperature
+        enum outputTemperatureType
+        {
+            FLUID,      //!< Use fluid (cell) temperature
+            WALL        //!< Use wall (patch) temperature
+        };
+
+        //- Names for outputTemperatureType
+        static const Enum<outputTemperatureType> outputTemperatureNames;
+
+
+    // Private Data
+
+        //- Location for the ouput temperature
+        enum outputTemperatureType outputTemperature_;
+
 
 public:
 
@@ -189,19 +216,22 @@ public:
 
 
     //- Destructor
-    virtual ~externalCoupledTemperatureMixedFvPatchScalarField();
+    virtual ~externalCoupledTemperatureMixedFvPatchScalarField() = default;
 
 
     // Member functions
 
         //- Write header
-        virtual void writeHeader(Ostream&) const;
+        virtual void writeHeader(Ostream& os) const;
 
         //- Write data
-        virtual void writeData(Ostream&) const;
+        virtual void writeData(Ostream& os) const;
 
         //- Read data
-        virtual void readData(Istream&);
+        virtual void readData(Istream& is);
+
+        //- Write
+        virtual void write(Ostream& os) const;
 };
 
 

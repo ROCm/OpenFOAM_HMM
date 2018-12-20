@@ -25,6 +25,9 @@
 #     For USERMPI, the user is responsible for supplying an appropriate
 #     wmake/rules/General/mplibUSERMPI file and managing all settings
 #
+#     For INTELMPI, note that the (I_MPI_CC, I_MPI_CCX) environment variables
+#     define the underlying compiler to be used
+#
 #------------------------------------------------------------------------------
 unset MPI_ARCH_PATH MPI_HOME
 export FOAM_MPI=dummy  # Fallback value
@@ -68,7 +71,7 @@ OPENMPI)
     # Inform openmpi where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
 
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using $WM_MPLIB" 1>&2
         echo "    FOAM_MPI    : $FOAM_MPI" 1>&2
@@ -168,7 +171,7 @@ CRAY-MPICH)
     export FOAM_MPI=cray-mpich
     export MPI_ARCH_PATH=$MPICH_DIR
 
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using $WM_MPLIB" 1>&2
         echo "    FOAM_MPI  : $FOAM_MPI" 1>&2
@@ -247,7 +250,7 @@ SGIMPI)
         echo "    Currently using '$MPI_ARCH_PATH'" 1>&2
     }
 
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using $WM_MPLIB" 1>&2
         echo "    FOAM_MPI : $FOAM_MPI" 1>&2
@@ -269,7 +272,7 @@ INTELMPI)
         # If subdirectory is version number only, prefix with 'impi-'
         case "$FOAM_MPI" in ([0-9]*) FOAM_MPI="impi-$FOAM_MPI";; esac
 
-        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
         then
             echo "Using $WM_MPLIB" 1>&2
             echo "    FOAM_MPI   : $FOAM_MPI" 1>&2
@@ -283,7 +286,7 @@ INTELMPI)
         # If subdirectory is version number only, prefix with 'impi-'
         case "$FOAM_MPI" in ([0-9]*) FOAM_MPI="impi-$FOAM_MPI";; esac
 
-        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
         then
             echo "Using $WM_MPLIB" 1>&2
             echo "    FOAM_MPI : $FOAM_MPI" 1>&2

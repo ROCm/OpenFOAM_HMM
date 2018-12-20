@@ -81,7 +81,7 @@ bool Foam::PDRDragModel::read(const dictionary& PDRProperties)
 {
     PDRDragModelCoeffs_ = PDRProperties.optionalSubDict(type() + "Coeffs");
 
-    PDRDragModelCoeffs_.read("drag", on_);
+    PDRDragModelCoeffs_.readEntry("drag", on_);
 
     return true;
 }

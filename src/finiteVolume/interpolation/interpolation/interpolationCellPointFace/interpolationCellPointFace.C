@@ -88,12 +88,9 @@ Type Foam::interpolationCellPointFace<Type>::interpolate
         label closestFace = -1;
         scalar minDistance = GREAT;
 
-        forAll(cellFaces, facei)
+        for (const label nFace : cellFaces)
         {
-            label nFace = cellFaces[facei];
-
-            vector normal = this->pMeshFaceAreas_[nFace];
-            normal /= mag(normal);
+            const vector normal = normalised(this->pMeshFaceAreas_[nFace]);
 
             const vector& faceCentreTmp = this->pMeshFaceCentres_[nFace];
 

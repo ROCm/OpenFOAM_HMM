@@ -44,7 +44,7 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(p, iF),
-    atmBoundaryLayer()
+    atmBoundaryLayer(iF.time(), p.patch())
 {}
 
 
@@ -57,7 +57,7 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(p, iF),
-    atmBoundaryLayer(patch().Cf(), dict)
+    atmBoundaryLayer(iF.time(), p.patch(), dict)
 {
     phiName_ = dict.lookupOrDefault<word>("phi", "phi");
 
@@ -86,7 +86,7 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 )
 :
     inletOutletFvPatchScalarField(psf, p, iF, mapper),
-    atmBoundaryLayer(psf, mapper)
+    atmBoundaryLayer(psf, p, mapper)
 {}
 
 
@@ -103,6 +103,19 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void atmBoundaryLayerInletEpsilonFvPatchScalarField::updateCoeffs()
+{
+    if (updated())
+    {
+        return;
+    }
+
+    refValue() = epsilon(patch().Cf());
+
+    inletOutletFvPatchScalarField::updateCoeffs();
+}
+
 
 void atmBoundaryLayerInletEpsilonFvPatchScalarField::autoMap
 (

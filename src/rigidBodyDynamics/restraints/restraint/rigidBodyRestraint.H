@@ -60,7 +60,7 @@ namespace RBD
 class rigidBodyModel;
 
 /*---------------------------------------------------------------------------*\
-                Class restraint Declaration
+                          Class restraint Declaration
 \*---------------------------------------------------------------------------*/
 
 class restraint

@@ -75,7 +75,7 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
         << "constructing faePatchField<Type>"
         << endl;
 
-    word patchFieldType(dict.lookup("type"));
+    const word patchFieldType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchFieldType);
 
@@ -83,7 +83,7 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
     {
         if (!disallowGenericFaePatchField)
         {
-            cstrIter = dictionaryConstructorTablePtr_->find("generic");
+            cstrIter = dictionaryConstructorTablePtr_->cfind("generic");
         }
 
         if (!cstrIter.found())
@@ -136,8 +136,7 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
             << exit(FatalError);
     }
 
-    typename patchMapperConstructorTable::iterator
-        patchTypeCstrIter = patchMapperConstructorTablePtr_->find(p.type());
+    auto patchTypeCstrIter = patchMapperConstructorTablePtr_->cfind(p.type());
 
     if (patchTypeCstrIter.found())
     {

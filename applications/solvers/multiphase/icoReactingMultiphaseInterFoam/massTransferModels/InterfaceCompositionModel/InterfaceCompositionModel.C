@@ -77,25 +77,23 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::getSpecieMassFraction
 {
     const fvMesh& mesh = fromThermo_.p().mesh();
 
-    tmp<volScalarField> tY
+    auto tY = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "tY",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "tY",
+            mesh.time().timeName(),
             mesh,
-            dimensionedScalar("zero", dimless, 0),
-            zeroGradientFvPatchScalarField::typeName
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedScalar(dimless, Zero),
+        zeroGradientFvPatchScalarField::typeName
     );
 
-    volScalarField& Ys = tY.ref();
+    auto& Ys = tY.ref();
+
     Ys = mixture.Y(speciesName);
 
     return tY;
@@ -113,25 +111,20 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::getSpecieMassFraction
 {
     const fvMesh& mesh = fromThermo_.p().mesh();
 
-    tmp<volScalarField> tY
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "tY",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "tY",
+            mesh.time().timeName(),
             mesh,
-            dimensionedScalar("zero", dimless, 1),
-            zeroGradientFvPatchScalarField::typeName
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedScalar("one", dimless, scalar(1)),
+        zeroGradientFvPatchScalarField::typeName
     );
-
-    return tY;
 }
 
 
@@ -145,30 +138,25 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::MwMixture
 {
     const fvMesh& mesh = fromThermo_.p().mesh();
 
-    tmp<volScalarField> tM
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "tM",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "tM",
+            mesh.time().timeName(),
             mesh,
-            dimensionedScalar
-            (
-                "Mw",
-                dimMass/dimMoles,
-                1e-3*mixture.cellMixture(0).W()
-            ),
-            zeroGradientFvPatchScalarField::typeName
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionedScalar
+        (
+            "Mw",
+            dimMass/dimMoles,
+            1e-3*mixture.cellMixture(0).W()
+        ),
+        zeroGradientFvPatchScalarField::typeName
     );
-
-    return tM;
 }
 
 
@@ -240,22 +228,19 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::D
 
     const volScalarField& T(fromThermo_.T());
 
-    tmp<volScalarField> tmpD
+    auto tmpD = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("D", pair_.name()),
-                p.time().timeName(),
-                p.mesh()
-            ),
-            p.mesh(),
-            dimensionedScalar("zero", dimArea/dimTime, 0)
-        )
+            IOobject::groupName("D", pair_.name()),
+            p.time().timeName(),
+            p.mesh()
+        ),
+        p.mesh(),
+        dimensionedScalar(dimArea/dimTime, Zero)
     );
 
-    volScalarField& D = tmpD.ref();
+    auto& D = tmpD.ref();
 
     forAll(p, cellI)
     {
@@ -286,23 +271,20 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::L
 
     const volScalarField& p(fromThermo_.p());
 
-    tmp<volScalarField> tmpL
+    auto tmpL = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("L", pair_.name()),
-                p.time().timeName(),
-                p.mesh()
-            ),
-            p.mesh(),
-            dimensionedScalar("zero", dimEnergy/dimMass, 0),
-            zeroGradientFvPatchScalarField::typeName
-        )
+            IOobject::groupName("L", pair_.name()),
+            p.time().timeName(),
+            p.mesh()
+        ),
+        p.mesh(),
+        dimensionedScalar(dimEnergy/dimMass, Zero),
+        zeroGradientFvPatchScalarField::typeName
     );
 
-    volScalarField& L = tmpL.ref();
+    auto& L = tmpL.ref();
 
     // from Thermo (from) to Thermo (to)
     forAll(p, cellI)
@@ -325,7 +307,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::dY
 ) const
 {
     NotImplemented;
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 
@@ -338,7 +320,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::Yf
 ) const
 {
     NotImplemented;
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 

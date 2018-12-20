@@ -94,7 +94,8 @@ mappedVelocityFluxFixedValueFvPatchField
 
     const mappedPatchBase& mpp = refCast<const mappedPatchBase>
     (
-        this->patch().patch()
+        this->patch().patch(),
+        dict
     );
     if (mpp.mode() == mappedPolyPatch::NEARESTCELL)
     {

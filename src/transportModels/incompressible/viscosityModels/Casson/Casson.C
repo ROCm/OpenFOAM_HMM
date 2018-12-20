@@ -114,10 +114,10 @@ bool Foam::viscosityModels::Casson::read
 
     CassonCoeffs_ = viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    CassonCoeffs_.lookup("m") >> m_;
-    CassonCoeffs_.lookup("tau0") >> tau0_;
-    CassonCoeffs_.lookup("nuMin_") >> nuMin_;
-    CassonCoeffs_.lookup("nuMax_") >> nuMax_;
+    CassonCoeffs_.readEntry("m", m_);
+    CassonCoeffs_.readEntry("tau0", tau0_);
+    CassonCoeffs_.readEntry("nuMin_", nuMin_);
+    CassonCoeffs_.readEntry("nuMax_", nuMax_);
 
     return true;
 }

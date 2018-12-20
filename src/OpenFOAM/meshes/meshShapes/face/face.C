@@ -622,22 +622,6 @@ Foam::face Foam::face::reverseFace() const
 }
 
 
-Foam::label Foam::face::which(const label globalIndex) const
-{
-    const labelUList& f = *this;
-
-    forAll(f, localIdx)
-    {
-        if (f[localIdx] == globalIndex)
-        {
-            return localIdx;
-        }
-    }
-
-    return -1;
-}
-
-
 Foam::scalar Foam::face::sweptVol
 (
     const UList<point>& oldPoints,

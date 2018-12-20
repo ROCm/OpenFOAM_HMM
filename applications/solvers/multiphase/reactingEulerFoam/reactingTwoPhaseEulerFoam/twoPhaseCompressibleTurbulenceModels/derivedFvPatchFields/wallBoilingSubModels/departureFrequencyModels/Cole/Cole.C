@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 #include "Cole.H"
 #include "addToRunTimeSelectionTable.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "compressibleTurbulenceModel.H"
 #include "ThermalDiffusivity.H"
 #include "PhaseCompressibleTurbulenceModel.H"
@@ -52,8 +52,10 @@ namespace departureFrequencyModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::wallBoilingModels::departureFrequencyModels::
-Cole::Cole(const dictionary& dict)
+Foam::wallBoilingModels::departureFrequencyModels::Cole::Cole
+(
+    const dictionary& dict
+)
 :
     departureFrequencyModel()
 {}
@@ -61,16 +63,14 @@ Cole::Cole(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::wallBoilingModels::departureFrequencyModels::
-Cole::~Cole()
+Foam::wallBoilingModels::departureFrequencyModels::Cole::~Cole()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
-Foam::wallBoilingModels::departureFrequencyModels::
-Cole::fDeparture
+Foam::wallBoilingModels::departureFrequencyModels::Cole::fDeparture
 (
     const phaseModel& liquid,
     const phaseModel& vapor,
@@ -80,7 +80,7 @@ Cole::fDeparture
 {
     // Gravitational acceleration
     const uniformDimensionedVectorField& g =
-        liquid.mesh().lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(liquid.mesh().time());
 
     const fvPatchScalarField& rhoLiquid =
         liquid.turbulence().rho().boundaryField()[patchi];

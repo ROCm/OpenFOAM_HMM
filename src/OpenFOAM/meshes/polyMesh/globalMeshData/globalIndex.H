@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ Description
     globalIndex globalFaces(mesh.nFaces());
     label globalFacei = globalFaces.toGlobal(facei);
 
-
 SourceFiles
     globalIndexI.H
     globalIndex.C
@@ -49,9 +48,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class globalIndex;
+class labelRange;
 
 Istream& operator>>(Istream& is, globalIndex& gi);
 Ostream& operator<<(Ostream& os, const globalIndex& gi);
@@ -76,48 +76,81 @@ public:
         //- Construct null
         globalIndex() = default;
 
-        //- Construct from local max size. Does communication with default
-        //  communicator and message tag.
-        globalIndex(const label localSize);
+        //- Construct from local max size.
+        //  Does communication with default communicator and message tag.
+        inline explicit globalIndex(const label localSize);
 
-        //- Construct from local max size. Does communication with given
-        //  communicator and message tag
-        globalIndex
+        //- Construct from local max size.
+        //  Does communication with given communicator and message tag
+        inline globalIndex
         (
             const label localSize,
-            const int tag,
-            const label comm,
-            const bool parallel     // use parallel comms
+            const int tag,          //!< message tag
+            const label comm,       //!< communicator
+            const bool parallel     //!< use parallel comms
         );
 
         //- Copy construct from list of labels
-        inline globalIndex(const labelUList& offsets);
+        inline explicit globalIndex(const labelUList& offsets);
 
         //- Move construct from list of labels
-        inline globalIndex(labelList&& offsets);
+        inline explicit globalIndex(labelList&& offsets);
 
         //- Construct from Istream
-        globalIndex(Istream& is);
+        explicit globalIndex(Istream& is);
 
 
     // Member Functions
 
-        // Edit
+        //- Check for null constructed or global sum == 0
+        inline bool empty() const;
 
-            //- Change after construction
-            inline labelList& offsets();
+        //- Const-access to the offsets
+        inline const labelList& offsets() const;
+
+
+    // Edit
+
+        //- Write-access to the offsets, for changing after construction
+        inline labelList& offsets();
+
+        //- Reset from local size.
+        //  Does communication with default communicator and message tag.
+        void reset(const label localSize);
+
+        //- Reset from local size.
+        //  Does communication with given communicator and message tag
+        void reset
+        (
+            const label localSize,
+            const int tag,          //!< message tag
+            const label comm,       //!< communicator
+            const bool parallel     //!< use parallel comms
+        );
 
 
         // Queries relating to my processor (using world communicator)
 
+            //- My local start
+            inline label localStart() const;
+
             //- My local size
             inline label localSize() const;
 
-            //- From local to global
-            inline label toGlobal(const label i) const;
+            //- Return start/size range of local processor data
+            inline labelRange range() const;
 
             //- Is on local processor
             inline bool isLocal(const label i) const;
+
+            //- From local to global index
+            inline label toGlobal(const label i) const;
+
+            //- From local to global index
+            inline labelList toGlobal(const labelUList& labels) const;
+
+            //- From local to global index (inplace)
+            inline void inplaceToGlobal(labelList& labels) const;
 
             //- From global to local on current processor.
             //  FatalError if not on local processor.
@@ -129,23 +162,44 @@ public:
             //- Global sum of localSizes
             inline label size() const;
 
+            //- Start of proci data
+            inline label offset(const label proci) const;
+
+            //- Start of proci data
+            inline label localStart(const label proci) const;
+
             //- Size of proci data
             inline label localSize(const label proci) const;
+
+            //- Return start/size range of proci data
+            inline labelRange range(const label proci) const;
+
+            //- Is on processor proci
+            inline bool isLocal(const label proci, const label i) const;
 
             //- From local to global on proci
             inline label toGlobal(const label proci, const label i) const;
 
-            //- Is on processor proci
-            inline bool isLocal(const label proci, const label i) const;
+            //- From local to global on proci
+            inline labelList toGlobal
+            (
+                const label proci,
+                const labelUList& labels
+            ) const;
+
+            //- From local to global index on proci (inplace)
+            inline void inplaceToGlobal
+            (
+                const label proci,
+                labelList& labels
+            ) const;
+
 
             //- From global to local on proci
             inline label toLocal(const label proci, const label i) const;
 
             //- Which processor does global come from? Binary search.
             inline label whichProcID(const label i) const;
-
-            //- Start of proci data
-            inline label offset(const label proci) const;
 
 
         // Other

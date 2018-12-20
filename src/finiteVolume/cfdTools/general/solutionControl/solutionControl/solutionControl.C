@@ -37,7 +37,7 @@ namespace Foam
 
 void Foam::solutionControl::read(const bool absTolOnly)
 {
-    const dictionary& solutionDict = this->dict();
+    const dictionary solutionDict(this->dict());
 
     // Read solution controls
     nNonOrthCorr_ =
@@ -56,9 +56,9 @@ void Foam::solutionControl::read(const bool absTolOnly)
 
     DynamicList<fieldData> data(residualControl_);
 
-    forAllConstIter(dictionary, residualDict, iter)
+    for (const entry& dEntry : residualDict)
     {
-        const word& fName = iter().keyword();
+        const word& fName = dEntry.keyword();
         const label fieldi = applyToField(fName, false);
         if (fieldi == -1)
         {
@@ -67,26 +67,23 @@ void Foam::solutionControl::read(const bool absTolOnly)
 
             if (absTolOnly)
             {
-                fd.absTol = readScalar(residualDict.lookup(fName));
+                fd.absTol = residualDict.get<scalar>(fName);
                 fd.relTol = -1;
                 fd.initialResidual = -1;
             }
+            else if (dEntry.isDict())
+            {
+                const dictionary& fieldDict = dEntry.dict();
+                fd.absTol = fieldDict.get<scalar>("tolerance");
+                fd.relTol = fieldDict.get<scalar>("relTol");
+                fd.initialResidual = 0.0;
+            }
             else
             {
-                if (iter().isDict())
-                {
-                    const dictionary& fieldDict(iter().dict());
-                    fd.absTol = readScalar(fieldDict.lookup("tolerance"));
-                    fd.relTol = readScalar(fieldDict.lookup("relTol"));
-                    fd.initialResidual = 0.0;
-                }
-                else
-                {
-                    FatalErrorInFunction
-                        << "Residual data for " << iter().keyword()
-                        << " must be specified as a dictionary"
-                        << exit(FatalError);
-                }
+                FatalErrorInFunction
+                    << "Residual data for " << dEntry.keyword()
+                    << " must be specified as a dictionary"
+                    << exit(FatalError);
             }
 
             data.append(fd);
@@ -96,23 +93,20 @@ void Foam::solutionControl::read(const bool absTolOnly)
             fieldData& fd = data[fieldi];
             if (absTolOnly)
             {
-                fd.absTol = readScalar(residualDict.lookup(fName));
+                fd.absTol = residualDict.get<scalar>(fName);
+            }
+            else if (dEntry.isDict())
+            {
+                const dictionary& fieldDict = dEntry.dict();
+                fd.absTol = fieldDict.get<scalar>("tolerance");
+                fd.relTol = fieldDict.get<scalar>("relTol");
             }
             else
             {
-                if (iter().isDict())
-                {
-                    const dictionary& fieldDict(iter().dict());
-                    fd.absTol = readScalar(fieldDict.lookup("tolerance"));
-                    fd.relTol = readScalar(fieldDict.lookup("relTol"));
-                }
-                else
-                {
-                    FatalErrorInFunction
-                        << "Residual data for " << iter().keyword()
-                        << " must be specified as a dictionary"
-                        << exit(FatalError);
-                }
+                FatalErrorInFunction
+                    << "Residual data for " << dEntry.keyword()
+                    << " must be specified as a dictionary"
+                    << exit(FatalError);
             }
         }
     }

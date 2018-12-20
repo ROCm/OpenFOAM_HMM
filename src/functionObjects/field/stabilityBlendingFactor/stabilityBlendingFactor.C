@@ -102,8 +102,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::calc()
 
 bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 {
-    const IOField<scalar>* residualPtr =
-        mesh_.lookupObjectPtr<IOField<scalar>>(residualName_);
+    const auto* residualPtr = mesh_.findObject<IOField<scalar>>(residualName_);
 
     if (residuals_)
     {
@@ -164,7 +163,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
     const volScalarField* nonOrthPtr =
-        mesh_.lookupObjectPtr<volScalarField>(nonOrthogonalityName_);
+        mesh_.findObject<volScalarField>(nonOrthogonalityName_);
 
     if (nonOrthogonality_)
     {
@@ -200,7 +199,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
     const volScalarField* skewnessPtr =
-        mesh_.lookupObjectPtr<volScalarField>(skewnessName_);
+        mesh_.findObject<volScalarField>(skewnessName_);
 
     if (skewness_)
     {
@@ -235,7 +234,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
     const volScalarField* faceWeightsPtr =
-        mesh_.lookupObjectPtr<volScalarField>(faceWeightName_);
+        mesh_.findObject<volScalarField>(faceWeightName_);
 
     if (faceWeight_)
     {
@@ -279,23 +278,21 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 << exit(FatalError);
         }
 
-        tmp<volScalarField> magGradCCPtr
+        auto tmagGradCC = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "magGradCC",
-                    time_.timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "magGradCC",
+                time_.timeName(),
                 mesh_,
-                dimensionedScalar(dimless, Zero),
-                zeroGradientFvPatchScalarField::typeName
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar(dimless, Zero),
+            zeroGradientFvPatchScalarField::typeName
         );
+        auto& magGradCC = tmagGradCC.ref();
 
         for (direction i=0; i<vector::nComponents; i++)
         {
@@ -316,12 +313,12 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             );
             cci = mesh_.C().component(i);
             cci.correctBoundaryConditions();
-            magGradCCPtr.ref() +=  mag(fvc::grad(cci)).ref();
+            magGradCC += mag(fvc::grad(cci)).ref();
         }
 
         if (first)
         {
-            Log << "    Max magGradCc :  " << max(magGradCCPtr.ref()).value()
+            Log << "    Max magGradCc :  " << max(magGradCC.ref()).value()
                 << endl;
         }
 
@@ -334,7 +331,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                     max
                     (
                         scalar(0),
-                        (magGradCCPtr.ref() - maxGradCc_)
+                        (magGradCC - maxGradCc_)
                       / (minGradCc_ - maxGradCc_)
                     ),
                     scalar(1)
@@ -344,7 +341,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
 
 
     const volVectorField* UNamePtr =
-        mesh_.lookupObjectPtr<volVectorField>(UName_);
+        mesh_.findObject<volVectorField>(UName_);
 
     if (Co_)
     {
@@ -355,25 +352,22 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 << exit(FatalError);
         }
 
-        tmp<volScalarField> CoPtr
+        auto CoPtr = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "Co",
-                    time_.timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                "Co",
+                time_.timeName(),
                 mesh_,
-                dimensionedScalar(dimless, Zero),
-                zeroGradientFvPatchScalarField::typeName
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar(dimless, Zero),
+            zeroGradientFvPatchScalarField::typeName
         );
 
-        volScalarField& Co = CoPtr.ref();
+        auto& Co = CoPtr.ref();
 
         Co.primitiveFieldRef() =
             mesh_.time().deltaT()*mag(*UNamePtr)/pow(mesh_.V(), 1.0/3.0);
@@ -417,12 +411,10 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     indicator_.max(0.0);
 
     // Update the blended surface field
-    surfaceScalarField* surBlendedPtr =
-    (
-        mesh_.lookupObjectRefPtr<surfaceScalarField>(resultName_)
-    );
+    surfaceScalarField& surBlended =
+        mesh_.lookupObjectRef<surfaceScalarField>(resultName_);
 
-    *surBlendedPtr = fvc::interpolate(indicator_);
+    surBlended = fvc::interpolate(indicator_);
 
     return true;
 }
@@ -511,26 +503,23 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     read(dict);
     setResultName(typeName, "");
 
-    tmp<surfaceScalarField> faceBlendedPtr
+    auto faceBlendedPtr = tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                resultName_,
-                time_.timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            resultName_,
+            time_.timeName(),
             mesh_,
-            dimensionedScalar(dimless, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimless, Zero)
     );
     store(resultName_, faceBlendedPtr);
 
     const volScalarField* nonOrthPtr =
-        mesh_.lookupObjectPtr<volScalarField>(nonOrthogonalityName_);
+        mesh_.findObject<volScalarField>(nonOrthogonalityName_);
 
     if (nonOrthogonality_)
     {
@@ -562,7 +551,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
 
     const volScalarField* faceWeightsPtr =
-        mesh_.lookupObjectPtr<volScalarField>(faceWeightName_);
+        mesh_.findObject<volScalarField>(faceWeightName_);
 
     if (faceWeight_)
     {
@@ -593,7 +582,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     }
 
     const volScalarField* skewnessPtr =
-        mesh_.lookupObjectPtr<volScalarField>(skewnessName_);
+        mesh_.findObject<volScalarField>(skewnessName_);
 
     if (skewness_)
     {
@@ -653,12 +642,12 @@ bool Foam::functionObjects::stabilityBlendingFactor::read
 {
     if (fieldExpression::read(dict) && writeFile::read(dict))
     {
-        dict.lookup("switchNonOrtho") >> nonOrthogonality_;
-        dict.lookup("switchGradCc") >> gradCc_;
-        dict.lookup("switchResiduals") >> residuals_;
-        dict.lookup("switchFaceWeight") >> faceWeight_;
-        dict.lookup("switchSkewness") >> skewness_;
-        dict.lookup("switchCo") >> Co_;
+        dict.readEntry("switchNonOrtho", nonOrthogonality_);
+        dict.readEntry("switchGradCc", gradCc_);
+        dict.readEntry("switchResiduals", residuals_);
+        dict.readEntry("switchFaceWeight", faceWeight_);
+        dict.readEntry("switchSkewness", skewness_);
+        dict.readEntry("switchCo", Co_);
 
         dict.readIfPresent("maxNonOrthogonality", maxNonOrthogonality_);
         dict.readIfPresent("maxGradCc", maxGradCc_);

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -61,8 +61,8 @@ phaseHydrostaticPressureFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     phaseFraction_(dict.lookupOrDefault<word>("phaseFraction", "alpha")),
-    rho_(readScalar(dict.lookup("rho"))),
-    pRefValue_(readScalar(dict.lookup("pRefValue"))),
+    rho_(dict.get<scalar>("rho")),
+    pRefValue_(dict.get<scalar>("pRefValue")),
     pRefPoint_(dict.lookup("pRefPoint"))
 {
     this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
@@ -145,12 +145,12 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::updateCoeffs()
         );
 
     const uniformDimensionedVectorField& g =
-        db().lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(db().time());
 
     // scalar rhor = 1000;
-    // scalarField alphap1 = max(min(alphap, 1.0), 0.0);
+    // scalarField alphap1 = max(min(alphap, scalar(1)), scalar(0));
     // valueFraction() = alphap1/(alphap1 + rhor*(1.0 - alphap1));
-    valueFraction() = max(min(alphap, scalar(1.0)), scalar(0.0));
+    valueFraction() = max(min(alphap, scalar(1)), scalar(0));
 
     refValue() =
         pRefValue_

@@ -5,9 +5,6 @@ cd ${0%/*} || exit 1                         # Run from this directory
 
 #------------------------------------------------------------------------------
 
-: ${FOAM_EXT_LIBBIN:=/usr/lib$WM_COMPILER_LIB_ARCH}  # Extra safety?
-export FOAM_EXT_LIBBIN
-
 if have_mgridgen
 then
     wmake $targetType MGridGenGamgAgglomeration

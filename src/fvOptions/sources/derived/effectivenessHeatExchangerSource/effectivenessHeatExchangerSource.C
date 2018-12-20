@@ -316,18 +316,17 @@ bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
         UName_ = coeffs_.lookupOrDefault<word>("U", "U");
         TName_ = coeffs_.lookupOrDefault<word>("T", "T");
         phiName_ = coeffs_.lookupOrDefault<word>("phi", "phi");
-        coeffs_.lookup("faceZone") >> faceZoneName_;
+        coeffs_.readEntry("faceZone", faceZoneName_);
 
-        coeffs_.lookup("secondaryMassFlowRate") >> secondaryMassFlowRate_;
-        coeffs_.lookup("secondaryInletT") >> secondaryInletT_;
+        coeffs_.readEntry("secondaryMassFlowRate", secondaryMassFlowRate_);
+        coeffs_.readEntry("secondaryInletT", secondaryInletT_);
 
         if (coeffs_.readIfPresent("primaryInletT", primaryInletT_))
         {
+            userPrimaryInletT_ = true;
             Info<< type() << " " << this->name() << ": " << indent << nl
                 << "employing user-specified primary flow inlet temperature: "
                 << primaryInletT_ << endl;
-
-            userPrimaryInletT_ = true;
         }
         else
         {
@@ -360,10 +359,8 @@ bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

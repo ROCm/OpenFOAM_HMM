@@ -1,8 +1,6 @@
-volScalarField rAU(1.0/UEqn.A());
-
 // Option 1: interpolate rAU, do not block out rAU on blocked cells
-//mesh.interpolate(rAU, false);
-//surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
+volScalarField rAU("rAU", 1.0/UEqn.A());
+mesh.interpolate(rAU);
 
 // Option 2: do not interpolate rAU but block out rAU
 //surfaceScalarField rAUf("rAUf", fvc::interpolate(blockedCells*rAU));
@@ -15,17 +13,22 @@ volScalarField rAU(1.0/UEqn.A());
 // H I C C C C
 //   H
 //
-
-surfaceScalarField faceMask(localMin<scalar>(mesh).interpolate(cellMask));
-surfaceScalarField rAUf("rAUf", faceMask*fvc::interpolate(rAU));
+surfaceScalarField rAUf("rAUf", fvc::interpolate(rAU));
+volVectorField H("H", UEqn.H());
 
 volVectorField HbyA("HbyA", U);
-HbyA = constrainHbyA(cellMask*rAU*UEqn.H(), U, p);
+HbyA = constrainHbyA(rAU*H, U, p);
 
-//mesh.interpolate(HbyA);
 if (massFluxInterpolation)
 {
     #include "interpolatedFaces.H"
+}
+
+if (runTime.outputTime())
+{
+    H.write();
+    rAU.write();
+    HbyA.write();
 }
 
 if (pimple.nCorrPISO() <= 1)
@@ -33,21 +36,27 @@ if (pimple.nCorrPISO() <= 1)
     tUEqn.clear();
 }
 
-surfaceScalarField phiHbyA("phiHbyA", fvc::flux(HbyA));
+phiHbyA = fvc::flux(HbyA);
 
 if (ddtCorr)
 {
-    phiHbyA += rAUf*fvc::ddtCorr(U, Uf);
+    surfaceScalarField faceMaskOld
+    (
+        localMin<scalar>(mesh).interpolate(cellMask.oldTime())
+    );
+    phiHbyA += rAUf*faceMaskOld*fvc::ddtCorr(U, Uf);
 }
 
 MRF.makeRelative(phiHbyA);
 
+// WIP
 if (p.needReference())
 {
     fvc::makeRelative(phiHbyA, U);
     adjustPhi(phiHbyA, U, p);
     fvc::makeAbsolute(phiHbyA, U);
 }
+
 
 if (adjustFringe)
 {
@@ -70,21 +79,24 @@ while (pimple.correctNonOrthogonal())
     if (pimple.finalNonOrthogonalIter())
     {
         phi = phiHbyA - pEqn.flux();
+        // option 2:
+        // rAUf*fvc::snGrad(p)*mesh.magSf();
     }
 }
+
 
 #include "continuityErrs.H"
 
 // Explicitly relax pressure for momentum corrector
 p.relax();
 volVectorField gradP(fvc::grad(p));
-//mesh.interpolate(gradP);
-
-// Option 1: leave velocity intact on blocked out cells
-//U = HbyA - rAU*gradP;
 
 // Option 2: zero out velocity on blocked out cells
-U = (HbyA - rAU*cellMask*gradP);
+//U = HbyA - rAU*cellMask*gradP;
+// Option 3: zero out velocity on blocked out cells
+// This is needed for the scalar Eq (k,epsilon, etc)
+// which can use U as source term
+U = cellMask*(HbyA - rAU*gradP);
 U.correctBoundaryConditions();
 
 fvOptions.correct(U);
@@ -97,3 +109,9 @@ fvOptions.correct(U);
 
 // Make the fluxes relative to the mesh motion
 fvc::makeRelative(phi, U);
+
+surfaceScalarField faceMask
+(
+    localMin<scalar>(mesh).interpolate(cellMask)
+);
+phi *= faceMask;

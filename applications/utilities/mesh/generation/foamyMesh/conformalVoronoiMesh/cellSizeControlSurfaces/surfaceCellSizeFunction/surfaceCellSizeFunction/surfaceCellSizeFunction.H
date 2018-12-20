@@ -128,7 +128,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceCellSizeFunction();
+    virtual ~surfaceCellSizeFunction() = default;
 
 
     // Member Functions

@@ -35,7 +35,7 @@ transmissivityModel::New
     const fvMesh& mesh
 )
 {
-    const word modelType(dict.lookup("transmissivityModel"));
+    const word modelType(dict.get<word>("transmissivityModel"));
 
     Info<< "Selecting transmissivityModel " << modelType << endl;
 

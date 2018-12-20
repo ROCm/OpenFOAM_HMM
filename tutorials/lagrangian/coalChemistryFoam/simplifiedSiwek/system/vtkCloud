@@ -19,7 +19,7 @@ cloudWrite1
     // format   ascii;
     // writePrecision 12;
 
-    //- Output directory name - Default="VTK"
+    //- Output directory name - Default postProcessing
     // directory       "VTK";
 
     //- Write more frequent than fields

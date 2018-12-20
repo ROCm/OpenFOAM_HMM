@@ -58,8 +58,8 @@ exponentialRepulsion::exponentialRepulsion
     (
         exponentialRepulsion.subDict(typeName + "Coeffs")
     ),
-    rm_(readScalar(exponentialRepulsionCoeffs_.lookup("rm"))),
-    epsilon_(readScalar(exponentialRepulsionCoeffs_.lookup("epsilon")))
+    rm_(exponentialRepulsionCoeffs_.get<scalar>("rm")),
+    epsilon_(exponentialRepulsionCoeffs_.get<scalar>("epsilon"))
 {
     setLookupTables();
 }
@@ -80,8 +80,8 @@ bool exponentialRepulsion::read(const dictionary& exponentialRepulsion)
     exponentialRepulsionCoeffs_ =
         exponentialRepulsion.subDict(typeName + "Coeffs");
 
-    exponentialRepulsionCoeffs_.lookup("rm") >> rm_;
-    exponentialRepulsionCoeffs_.lookup("epsilon") >> epsilon_;
+    exponentialRepulsionCoeffs_.readEntry("rm", rm_);
+    exponentialRepulsionCoeffs_.readEntry("epsilon", epsilon_);
 
     return true;
 }

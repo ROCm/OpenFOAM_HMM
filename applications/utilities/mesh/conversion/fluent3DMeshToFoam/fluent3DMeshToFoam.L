@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a Fluent mesh to OpenFOAM format.
+    Convert a Fluent mesh to OpenFOAM format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -80,8 +80,8 @@ labelList owner(0);
 labelList neighbour(0);
 
 // Group type and name
-Map<word> groupType(100);
-Map<word> groupName(100);
+Map<word> groupType(128);
+Map<word> groupName(128);
 
 // Point groups
 DynamicList<label> pointGroupZoneID;
@@ -773,31 +773,35 @@ endOfSection               {space}")"{space}
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a Fluent mesh to OpenFOAM format"
+    );
     argList::noParallel();
     argList::addArgument("Fluent mesh file");
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Geometry scaling factor - default is 1"
     );
     argList::addOption
     (
         "ignoreCellGroups",
         "names",
-        "specify cell groups to ignore"
+        "Specify cell groups to ignore"
     );
     argList::addOption
     (
         "ignoreFaceGroups",
         "names",
-        "specify face groups to ignore"
+        "Specify face groups to ignore"
     );
 
     argList::addBoolOption
     (
         "cubit",
-        "special parsing of (incorrect) cubit files"
+        "Special parsing of (incorrect) cubit files"
     );
 
     argList args(argc, argv);

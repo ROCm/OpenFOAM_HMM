@@ -99,7 +99,7 @@ void Foam::Time::readDict()
     // DebugSwitches
     if
     (
-        (localDict = controlDict_.subDictPtr("DebugSwitches")) != nullptr
+        (localDict = controlDict_.findDict("DebugSwitches")) != nullptr
      && localDict->size()
     )
     {
@@ -109,9 +109,9 @@ void Foam::Time::readDict()
 
         simpleObjectRegistry& objs = debug::debugObjects();
 
-        forAllConstIters(*localDict, iter)
+        for (const entry& dEntry : *localDict)
         {
-            const word& name = iter().keyword();
+            const word& name = dEntry.keyword();
 
             simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
 
@@ -119,14 +119,14 @@ void Foam::Time::readDict()
             {
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
-                DetailInfo << "    " << iter() << nl;
+                DetailInfo << "    " << dEntry << nl;
 
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
                         OStringStream os(IOstream::ASCII);
-                        os  << iter().dict();
+                        os  << dEntry.dict();
                         IStringStream is(os.str());
                         obj->readData(is);
                     }
@@ -135,7 +135,7 @@ void Foam::Time::readDict()
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
-                        obj->readData(iter().stream());
+                        obj->readData(dEntry.stream());
                     }
                 }
             }
@@ -146,7 +146,7 @@ void Foam::Time::readDict()
     // InfoSwitches
     if
     (
-        (localDict = controlDict_.subDictPtr("InfoSwitches")) != nullptr
+        (localDict = controlDict_.findDict("InfoSwitches")) != nullptr
      && localDict->size()
     )
     {
@@ -156,9 +156,9 @@ void Foam::Time::readDict()
 
         simpleObjectRegistry& objs = debug::infoObjects();
 
-        forAllConstIters(*localDict, iter)
+        for (const entry& dEntry : *localDict)
         {
-            const word& name = iter().keyword();
+            const word& name = dEntry.keyword();
 
             simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
 
@@ -166,14 +166,14 @@ void Foam::Time::readDict()
             {
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
-                DetailInfo << "    " << iter() << nl;
+                DetailInfo << "    " << dEntry << nl;
 
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
                         OStringStream os(IOstream::ASCII);
-                        os  << iter().dict();
+                        os  << dEntry.dict();
                         IStringStream is(os.str());
                         obj->readData(is);
                     }
@@ -182,7 +182,7 @@ void Foam::Time::readDict()
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
-                        obj->readData(iter().stream());
+                        obj->readData(dEntry.stream());
                     }
                 }
             }
@@ -192,7 +192,7 @@ void Foam::Time::readDict()
     // OptimisationSwitches
     if
     (
-        (localDict = controlDict_.subDictPtr("OptimisationSwitches")) != nullptr
+        (localDict = controlDict_.findDict("OptimisationSwitches")) != nullptr
      && localDict->size()
     )
     {
@@ -202,24 +202,24 @@ void Foam::Time::readDict()
 
         simpleObjectRegistry& objs = debug::optimisationObjects();
 
-        forAllConstIters(*localDict, iter)
+        for (const entry& dEntry : *localDict)
         {
-            const word& name = iter().keyword();
+            const word& name = dEntry.keyword();
 
             simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
 
             if (objPtr)
             {
-                DetailInfo << "    " << iter() << nl;
+                DetailInfo << "    " << dEntry << nl;
 
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
                         OStringStream os(IOstream::ASCII);
-                        os  << iter().dict();
+                        os  << dEntry.dict();
                         IStringStream is(os.str());
                         obj->readData(is);
                     }
@@ -228,7 +228,7 @@ void Foam::Time::readDict()
                 {
                     for (simpleRegIOobject* obj : objects)
                     {
-                        obj->readData(iter().stream());
+                        obj->readData(dEntry.stream());
                     }
                 }
             }
@@ -259,14 +259,7 @@ void Foam::Time::readDict()
         controlDict_.watchIndices().clear();
 
         // Installing the new handler
-        autoPtr<fileOperation> handler
-        (
-            fileOperation::New
-            (
-                fileHandlerName,
-                true
-            )
-        );
+        auto handler = fileOperation::New(fileHandlerName, true);
         Foam::fileHandler(handler);
 
         // Reinstall old watches
@@ -280,7 +273,7 @@ void Foam::Time::readDict()
     if
     (
 
-        (localDict = controlDict_.subDictPtr("DimensionedConstants")) != nullptr
+        (localDict = controlDict_.findDict("DimensionedConstants")) != nullptr
      && localDict->size()
     )
     {
@@ -317,7 +310,7 @@ void Foam::Time::readDict()
     // DimensionSets
     if
     (
-        (localDict = controlDict_.subDictPtr("DimensionSets")) != nullptr
+        (localDict = controlDict_.findDict("DimensionSets")) != nullptr
         && localDict->size()
     )
     {
@@ -351,17 +344,15 @@ void Foam::Time::readDict()
 
     if (!deltaTchanged_)
     {
-        deltaT_ = readScalar(controlDict_.lookup("deltaT"));
+        controlDict_.readEntry("deltaT", deltaT_);
     }
 
-    if (controlDict_.found("writeControl"))
-    {
-        writeControl_ = writeControlNames.lookup
-        (
-            "writeControl",
-            controlDict_
-        );
-    }
+    writeControlNames.readIfPresent
+    (
+        "writeControl",
+        controlDict_,
+        writeControl_
+    );
 
     scalar oldWriteInterval = writeInterval_;
 
@@ -376,7 +367,7 @@ void Foam::Time::readDict()
     }
     else
     {
-        controlDict_.lookup("writeFrequency") >> writeInterval_;
+        controlDict_.readEntry("writeFrequency", writeInterval_);
     }
 
 
@@ -416,7 +407,7 @@ void Foam::Time::readDict()
 
     if (controlDict_.found("timeFormat"))
     {
-        const word formatName(controlDict_.lookup("timeFormat"));
+        const word formatName(controlDict_.get<word>("timeFormat"));
 
         if (formatName == "general")
         {
@@ -442,13 +433,11 @@ void Foam::Time::readDict()
 
     // stopAt at 'endTime' or a specified value
     // if nothing is specified, the endTime is zero
-    if (controlDict_.found("stopAt"))
+    if (stopAtControlNames.readIfPresent("stopAt", controlDict_, stopAt_))
     {
-        stopAt_ = stopAtControlNames.lookup("stopAt", controlDict_);
-
         if (stopAt_ == saEndTime)
         {
-            controlDict_.lookup("endTime") >> endTime_;
+            controlDict_.readEntry("endTime", endTime_);
         }
         else
         {
@@ -468,21 +457,21 @@ void Foam::Time::readDict()
         (
             IOstreamOption::versionNumber
             (
-                controlDict_.lookup("writeVersion")
+                controlDict_.get<float>("writeVersion")
             )
         );
     }
 
     if (controlDict_.found("writeFormat"))
     {
-        writeStreamOption_.format(word(controlDict_.lookup("writeFormat")));
+        writeStreamOption_.format(controlDict_.get<word>("writeFormat"));
     }
 
     if (controlDict_.found("writePrecision"))
     {
         IOstream::defaultPrecision
         (
-            readUint(controlDict_.lookup("writePrecision"))
+            controlDict_.get<unsigned int>("writePrecision")
         );
 
         Sout.precision(IOstream::defaultPrecision());
@@ -502,7 +491,7 @@ void Foam::Time::readDict()
     {
         writeStreamOption_.compression
         (
-            word(controlDict_.lookup("writeCompression"))
+            controlDict_.get<word>("writeCompression")
         );
 
         if

@@ -335,7 +335,7 @@ Foam::Reaction<ReactionThermo>::Reaction
 {
     setLRhs
     (
-        IStringStream(dict.lookup("reaction"))(),
+        IStringStream(dict.getString("reaction"))(),
         species_,
         lhs_,
         rhs_
@@ -359,7 +359,7 @@ Foam::Reaction<ReactionThermo>::New
     const dictionary& dict
 )
 {
-    const word& reactionTypeName = dict.lookup("type");
+    const word reactionTypeName(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(reactionTypeName);
 

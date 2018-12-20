@@ -38,10 +38,10 @@ const Foam::Enum
     Foam::lumpedPointState::inputFormatType
 >
 Foam::lumpedPointState::formatNames
-{
+({
     { inputFormatType::PLAIN, "plain" },
-    { inputFormatType::DICTIONARY, "dictionary" }
-};
+    { inputFormatType::DICTIONARY, "dictionary" },
+});
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -83,8 +83,8 @@ void Foam::lumpedPointState::calcRotations() const
 
 void Foam::lumpedPointState::readDict(const dictionary& dict)
 {
-    dict.lookup("points") >> points_;
-    dict.lookup("angles") >> angles_;
+    dict.readEntry("points", points_);
+    dict.readEntry("angles", angles_);
     degrees_ = dict.lookupOrDefault("degrees", false);
     deleteDemandDrivenData(rotationPtr_);
 }
@@ -228,8 +228,8 @@ bool Foam::lumpedPointState::readPlain(Istream& is)
 
     points_.setSize(count);
     angles_.setSize(count);
-
     degrees_ = false;
+
     deleteDemandDrivenData(rotationPtr_);
 
     return count;

@@ -28,7 +28,7 @@ Group
     grpThermophysicalUtilities
 
 Description
-    Calculates the adiabatic flame temperature for a given fuel over a
+    Calculate adiabatic flame temperature for a given fuel over a
     range of unburnt temperatures and equivalence ratios.
 
 \*---------------------------------------------------------------------------*/
@@ -57,11 +57,13 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Calculates the adiabatic flame temperature for a given fuel\n"
-        "over a range of unburnt temperatures and equivalence ratios."
+        "Calculate the adiabatic flame temperature for a given fuel over a "
+        " range of unburnt temperatures and equivalence ratios."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
+
     argList::addArgument("controlFile");
 
     argList args(argc, argv);
@@ -82,12 +84,11 @@ int main(int argc, char *argv[])
     dictionary control(controlFile);
 
 
-    scalar P(readScalar(control.lookup("P")));
-    scalar T0(readScalar(control.lookup("T0")));
-    const word fuelName(control.lookup("fuel"));
-    scalar n(readScalar(control.lookup("n")));
-    scalar m(readScalar(control.lookup("m")));
-
+    const scalar P(control.get<scalar>("P"));
+    const scalar T0(control.get<scalar>("T0"));
+    const word fuelName(control.get<word>("fuel"));
+    const scalar n(control.get<scalar>("n"));
+    const scalar m(control.get<scalar>("m"));
 
     Info<< nl << "Reading thermodynamic data dictionary" << endl;
 

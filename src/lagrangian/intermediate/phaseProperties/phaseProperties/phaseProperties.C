@@ -32,12 +32,12 @@ const Foam::Enum
     Foam::phaseProperties::phaseType
 >
 Foam::phaseProperties::phaseTypeNames
-{
+({
     { phaseType::GAS, "gas" },
     { phaseType::LIQUID, "liquid" },
     { phaseType::SOLID, "solid" },
     { phaseType::UNKNOWN, "unknown" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -124,18 +124,18 @@ void Foam::phaseProperties::setCarrierIds
 
 void Foam::phaseProperties::checkTotalMassFraction() const
 {
-    scalar total = 0.0;
-    forAll(Y_, speciei)
+    scalar total = 0;
+    for (const scalar& val : Y_)
     {
-        total += Y_[speciei];
+        total += val;
     }
 
-    if (Y_.size() != 0 && mag(total - 1.0) > SMALL)
+    if (Y_.size() && mag(total - 1.0) > SMALL)
     {
         FatalErrorInFunction
             << "Specie fractions must total to unity for phase "
             << phaseTypeNames[phase_] << nl
-            << "Species: " << nl << names_ << nl
+            << "Species: " << nl << flatOutput(names_) << nl
             << exit(FatalError);
     }
 }
@@ -143,22 +143,21 @@ void Foam::phaseProperties::checkTotalMassFraction() const
 
 Foam::word Foam::phaseProperties::phaseToStateLabel(const phaseType pt) const
 {
-    word state = "(unknown)";
     switch (pt)
     {
         case GAS:
         {
-            state = "(g)";
+            return "(g)";
             break;
         }
         case LIQUID:
         {
-            state = "(l)";
+            return "(l)";
             break;
         }
         case SOLID:
         {
-            state = "(s)";
+            return "(s)";
             break;
         }
         default:
@@ -167,10 +166,11 @@ Foam::word Foam::phaseProperties::phaseToStateLabel(const phaseType pt) const
                 << "Invalid phase: " << phaseTypeNames[pt] << nl
                 << "    phase must be gas, liquid or solid" << nl
                 << exit(FatalError);
+            break;
         }
     }
 
-    return state;
+    return "(unknown)";
 }
 
 
@@ -180,9 +180,9 @@ Foam::phaseProperties::phaseProperties()
 :
     phase_(UNKNOWN),
     stateLabel_("(unknown)"),
-    names_(0),
-    Y_(0),
-    carrierIds_(0)
+    names_(),
+    Y_(),
+    carrierIds_()
 {}
 
 
@@ -193,12 +193,6 @@ Foam::phaseProperties::phaseProperties(const phaseProperties& pp)
     names_(pp.names_),
     Y_(pp.Y_),
     carrierIds_(pp.carrierIds_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::phaseProperties::~phaseProperties()
 {}
 
 
@@ -246,6 +240,7 @@ void Foam::phaseProperties::reorder
                 << "Invalid phase: " << phaseTypeNames[phase_] << nl
                 << "    phase must be gas, liquid or solid" << nl
                 << exit(FatalError);
+            break;
         }
     }
 }
@@ -317,15 +312,7 @@ const Foam::labelList& Foam::phaseProperties::carrierIds() const
 
 Foam::label Foam::phaseProperties::id(const word& specieName) const
 {
-    forAll(names_, speciei)
-    {
-        if (names_[speciei] == specieName)
-        {
-            return speciei;
-        }
-    }
-
-    return -1;
+    return names_.find(specieName);
 }
 
 

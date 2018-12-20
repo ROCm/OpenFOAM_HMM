@@ -37,7 +37,7 @@ Foam::Function1Types::TableFile<Type>::TableFile
     TableBase<Type>(entryName, dict),
     fName_("none")
 {
-    dict.lookup("file") >> fName_;
+    dict.readEntry("file", fName_);
 
     fileName expandedFile(fName_);
     //IFstream is(expandedFile.expand());
@@ -46,10 +46,8 @@ Foam::Function1Types::TableFile<Type>::TableFile
 
     if (!is.good())
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot open file." << exit(FatalIOError);
+        FatalIOErrorInFunction(is)
+            << "Cannot open file." << exit(FatalIOError);
     }
 
     is  >> this->table_;

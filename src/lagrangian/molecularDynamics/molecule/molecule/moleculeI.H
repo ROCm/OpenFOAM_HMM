@@ -90,9 +90,11 @@ inline Foam::molecule::constantProperties::constantProperties
 
         Info<< nl << "Linear molecule." << endl;
 
-        vector dir = siteReferencePositions_[1] - siteReferencePositions_[0];
-
-        dir /= mag(dir);
+        const vector dir =
+            normalised
+            (
+                siteReferencePositions_[1] - siteReferencePositions_[0]
+            );
 
         tensor Q = rotationTensor(dir, vector(1,0,0));
 
@@ -334,9 +336,11 @@ inline bool Foam::molecule::constantProperties::linearMoleculeTest() const
         return true;
     }
 
-    vector refDir = siteReferencePositions_[1] - siteReferencePositions_[0];
-
-    refDir /= mag(refDir);
+    const vector refDir =
+        normalised
+        (
+            siteReferencePositions_[1] - siteReferencePositions_[0]
+        );
 
     for
     (
@@ -345,9 +349,11 @@ inline bool Foam::molecule::constantProperties::linearMoleculeTest() const
         i++
     )
     {
-        vector dir = siteReferencePositions_[i] - siteReferencePositions_[i-1];
-
-        dir /= mag(dir);
+        const vector dir =
+            normalised
+            (
+                siteReferencePositions_[i] - siteReferencePositions_[i-1]
+            );
 
         if (mag(refDir & dir) < 1 - SMALL)
         {

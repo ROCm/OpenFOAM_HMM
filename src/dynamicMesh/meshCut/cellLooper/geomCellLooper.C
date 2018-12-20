@@ -159,9 +159,7 @@ void Foam::geomCellLooper::getBase(const vector& n, vector& e0, vector& e1)
 
 
     // Use component normal to n as base vector.
-    e0 = base - nComp*n;
-
-    e0 /= mag(e0) + VSMALL;
+    e0 = normalised(base - nComp * n);
 
     e1 = n ^ e0;
 
@@ -404,8 +402,7 @@ bool Foam::geomCellLooper::cut
 
     forAll(sortedAngles, i)
     {
-        vector toCtr(loopPoints[i] - ctr);
-        toCtr /= mag(toCtr);
+        const vector toCtr = normalised(loopPoints[i] - ctr);
 
         sortedAngles[i] = pseudoAngle(e0, e1, toCtr);
     }

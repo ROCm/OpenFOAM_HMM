@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,31 +41,38 @@ int main(int argc, char *argv[])
 
     dimensionedTensor dt2("dt2", dimLength, tensor(1, 1, 2, 3, 4, 5, 6, 7, 8));
 
-    Info<< "cmptMultiply(dt, dt2): " << cmptMultiply(dt, dt2) << endl;
-    Info<< "cmptDivide(dt, dt2): " << cmptDivide(dt, dt2) << endl;
+    Info<< nl
+        << "cmptMultiply(dt, dt2): " << cmptMultiply(dt, dt2) << nl
+        << "cmptDivide(dt, dt2): " << cmptDivide(dt, dt2) << endl;
 
     {
-        Pout<< "dimensionSet construct from is:"
-            << dimensionSet(IStringStream("[Pa m^2 s^-2]")())
+        string dimString("[Pa m^2 s^-2]");
+        IStringStream is("[Pa m^2 s^-2]");
+
+        Pout<< nl;
+        Pout<< "dimensionSet construct from (is) with contents "
+            << dimString << " = " << dimensionSet(is)
             << endl;
 
-        IStringStream is("[Pa m^2 s^-2]");
+        is.rewind();
+
         dimensionSet dset(dimless);
         is >> dset;
         Pout<< "dimensionSet read:" << dset << endl;
     }
 
     {
-        Pout<< "construct from is:"
+        Pout<< nl
+            << "construct from (is) = "
             << dimensionedScalar(IStringStream("bla [Pa mm^2 s^-2] 3.0")())
             << endl;
-        Pout<< "construct from name,is:"
+        Pout<< "construct from (name,is) = "
             <<  dimensionedScalar
                 (
                     "ABC",
                     IStringStream("[Pa mm^2 s^-2] 3.0")()
                 ) << endl;
-        Pout<< "construct from name,dimensionSet,is:"
+        Pout<< "construct from (name,dims,is) = "
             <<  dimensionedScalar
                 (
                     "ABC",
@@ -77,6 +84,14 @@ int main(int argc, char *argv[])
             dimensionedScalar ds;
             is >> ds;
             Pout<< "read:" << ds << endl;
+
+            Info<< "writeEntry:" << nl;
+
+            Info<< "abc> "; ds.writeEntry("abc", Info);
+            Info<< endl;
+
+            Info<< "bla> "; ds.writeEntry("bla", Info);
+            Info<< endl;
         }
     }
 

@@ -133,7 +133,7 @@ public:
     );
 
     //- Destructor
-    virtual ~McCowan();
+    virtual ~McCowan() = default;
 
 
     // Public Member Functions

@@ -205,7 +205,7 @@ Foam::cloudSet::cloudSet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    sampleCoords_(dict.lookup("points"))
+    sampleCoords_(dict.get<pointField>("points"))
 {
     genSamples();
 }

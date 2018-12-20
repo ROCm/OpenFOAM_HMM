@@ -80,7 +80,7 @@ Foam::DampingModel<CloudType>::New
     CloudType& owner
 )
 {
-    word modelType(dict.lookup(typeName));
+    const word modelType(dict.get<word>(typeName));
 
     Info<< "Selecting damping model " << modelType << endl;
 
@@ -96,11 +96,7 @@ Foam::DampingModel<CloudType>::New
             << exit(FatalError);
     }
 
-    return
-        autoPtr<DampingModel<CloudType>>
-        (
-            cstrIter()(dict, owner)
-        );
+    return autoPtr<DampingModel<CloudType>>(cstrIter()(dict, owner));
 }
 
 

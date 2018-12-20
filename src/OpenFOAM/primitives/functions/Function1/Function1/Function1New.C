@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,14 +31,20 @@ template<class Type>
 Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
 (
     const word& entryName,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& redirectType
 )
 {
     if (dict.isDict(entryName))
     {
         const dictionary& coeffsDict(dict.subDict(entryName));
 
-        const word Function1Type(coeffsDict.lookup("type"));
+        const word Function1Type
+        (
+            redirectType.empty()
+          ? coeffsDict.get<word>("type")
+          : coeffsDict.lookupOrDefault<word>("type", redirectType)
+        );
 
         auto cstrIter = dictionaryConstructorTablePtr_->cfind(Function1Type);
 
@@ -57,23 +63,36 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
     }
     else
     {
-        Istream& is(dict.lookup(entryName, false));
+        const dictionary::const_searcher finder
+        (
+            dict.csearch(entryName, keyType::REGEX)
+        );
 
-        token firstToken(is);
         word Function1Type;
-
-        if (!firstToken.isWord())
+        if (finder.found())
         {
-            is.putBack(firstToken);
-            return autoPtr<Function1<Type>>
-            (
-                new Function1Types::Constant<Type>(entryName, is)
-            );
+            Istream& is = finder.ref().stream();
+
+            token firstToken(is);
+
+            if (!firstToken.isWord())
+            {
+                is.putBack(firstToken);
+                return autoPtr<Function1<Type>>
+                (
+                    new Function1Types::Constant<Type>(entryName, is)
+                );
+            }
+            else
+            {
+                Function1Type = firstToken.wordToken();
+            }
         }
         else
         {
-            Function1Type = firstToken.wordToken();
+            Function1Type = redirectType;
         }
+
 
         auto cstrIter = dictionaryConstructorTablePtr_->cfind(Function1Type);
 

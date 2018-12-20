@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,16 @@ Class
     Foam::searchableCylinder
 
 Description
-    Searching on cylinder
+    Searching on a cylinder.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | cylinder / searchableCylinder     | selector |
+        point1      | coordinate of endpoint            | yes   |
+        point2      | coordinate of endpoint            | yes   |
+        radius      | cylinder radius                   | yes   |
+    \endtable
 
 SourceFiles
     searchableCylinder.C
@@ -55,10 +64,10 @@ private:
 
     // Private Member Data
 
-        //- 'left' point
+        //- The 'left' point
         const point point1_;
 
-        //- 'right' point
+        //- The 'right' point
         const point point2_;
 
         //- Length of vector point2-point1
@@ -67,7 +76,7 @@ private:
         //- Normalised vector point2-point1
         const vector unitDir_;
 
-        //- Radius squared
+        //- The radius
         const scalar radius_;
 
         //- Names of regions
@@ -119,8 +128,8 @@ public:
         searchableCylinder
         (
             const IOobject& io,
-            const point&,
-            const point&,
+            const point& point1,
+            const point& point2,
             const scalar radius
         );
 
@@ -131,12 +140,14 @@ public:
             const dictionary& dict
         );
 
+
     //- Destructor
-    virtual ~searchableCylinder();
+    virtual ~searchableCylinder() = default;
 
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
         //- Whether supports volume type below
@@ -170,7 +181,6 @@ public:
         virtual bool overlaps(const boundBox& bb) const
         {
             NotImplemented;
-
             return false;
         }
 
@@ -220,12 +230,12 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for point.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
+                const pointField& points,
+                List<volumeType>& volType
             ) const;
 
 

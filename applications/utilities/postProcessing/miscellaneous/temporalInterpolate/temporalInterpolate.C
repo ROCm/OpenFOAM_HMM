@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ class fieldInterpolator
     Time& runTime_;
     const fvMesh& mesh_;
     const IOobjectList& objects_;
-    const wordHashSet& selectedFields_;
+    const wordRes& selectedFields_;
     instant ti_;
     instant ti1_;
     const interpolationWeights& interpolator_;
@@ -67,7 +67,7 @@ public:
         Time& runTime,
         const fvMesh& mesh,
         const IOobjectList& objects,
-        const wordHashSet& selectedFields,
+        const wordRes& selectedFields,
         const instant& ti,
         const instant& ti1,
         const interpolationWeights& interpolator,
@@ -94,95 +94,93 @@ public:
 template<class GeoFieldType>
 void fieldInterpolator::interpolate()
 {
-    const word& fieldClassName = GeoFieldType::typeName;
+    const word& clsName = GeoFieldType::typeName;
 
-    IOobjectList fields = objects_.lookupClass(fieldClassName);
+    const wordList fieldNames =
+    (
+        selectedFields_.empty()
+      ? objects_.sortedNames(clsName)
+      : objects_.sortedNames(clsName, selectedFields_)
+    );
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    " << fieldClassName << "s:";
+        Info<< "    " << clsName << 's';
+    }
 
-        forAllConstIter(IOobjectList, fields, fieldIter)
+    for (const word& fieldName : fieldNames)
+    {
+        Info<< ' ' << fieldName << '(';
+
+        const scalar deltaT = (ti1_.value() - ti_.value())/(divisions_ + 1);
+
+        for (int j=0; j<divisions_; j++)
         {
-            if
-            (
-                selectedFields_.empty()
-             || selectedFields_.found(fieldIter()->name())
-            )
+            instant timej = instant(ti_.value() + (j + 1)*deltaT);
+
+            runTime_.setTime(instant(timej.name()), 0);
+
+            Info<< timej.name();
+
+            if (j < divisions_-1)
             {
-                Info<< " " << fieldIter()->name() << '(';
-
-                scalar deltaT = (ti1_.value() - ti_.value())/(divisions_ + 1);
-
-                for (int j=0; j<divisions_; j++)
-                {
-                    instant timej = instant(ti_.value() + (j + 1)*deltaT);
-
-                    runTime_.setTime(instant(timej.name()), 0);
-
-                    Info<< timej.name();
-
-                    if (j < divisions_-1)
-                    {
-                        Info<< " ";
-                    }
-
-                    // Calculate times to read and weights
-                    labelList indices;
-                    scalarField weights;
-                    interpolator_.valueWeights
-                    (
-                        runTime_.value(),
-                        indices,
-                        weights
-                    );
-
-                    const wordList selectedTimeNames
-                    (
-                        UIndirectList<word>(timeNames_, indices)()
-                    );
-
-                    //Info<< "For time " << runTime_.value()
-                    //    << " need times " << selectedTimeNames
-                    //    << " need weights " << weights << endl;
-
-
-                    // Read on the objectRegistry all the required fields
-                    ReadFields<GeoFieldType>
-                    (
-                        fieldIter()->name(),
-                        mesh_,
-                        selectedTimeNames
-                    );
-
-                    GeoFieldType fieldj
-                    (
-                        uniformInterpolate<GeoFieldType>
-                        (
-                            IOobject
-                            (
-                                fieldIter()->name(),
-                                runTime_.timeName(),
-                                fieldIter()->db(),
-                                IOobject::NO_READ,
-                                IOobject::NO_WRITE,
-                                false
-                            ),
-                            fieldIter()->name(),
-                            selectedTimeNames,
-                            weights
-                        )
-                    );
-
-                    fieldj.write();
-                }
-
-                Info<< ')';
+                Info<< " ";
             }
+
+            // Calculate times to read and weights
+            labelList indices;
+            scalarField weights;
+            interpolator_.valueWeights
+            (
+                runTime_.value(),
+                indices,
+                weights
+            );
+
+            const wordList selectedTimeNames
+            (
+                UIndirectList<word>(timeNames_, indices)()
+            );
+
+            //Info<< "For time " << runTime_.value()
+            //    << " need times " << selectedTimeNames
+            //    << " need weights " << weights << endl;
+
+
+            // Read on the objectRegistry all the required fields
+            ReadFields<GeoFieldType>
+            (
+                fieldName,
+                mesh_,
+                selectedTimeNames
+            );
+
+            GeoFieldType fieldj
+            (
+                uniformInterpolate<GeoFieldType>
+                (
+                    IOobject
+                    (
+                        fieldName,
+                        runTime_.timeName(),
+                        objects_[fieldName]->db(),
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    fieldName,
+                    selectedTimeNames,
+                    weights
+                )
+            );
+
+            fieldj.write();
         }
 
-        Info<< endl;
+        Info<< ')';
     }
+
+    if (fieldNames.size()) Info<< endl;
 }
 
 
@@ -190,58 +188,59 @@ void fieldInterpolator::interpolate()
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Interpolate fields between time-steps. Eg, for animation."
+    );
+
     timeSelector::addOptions();
     #include "addRegionOption.H"
     argList::addOption
     (
         "fields",
-        "list",
-        "specify a list of fields to be interpolated. Eg, '(U T p)' - "
-        "regular expressions not currently supported"
+        "wordRes",
+        "The fields (or field) to be interpolated."
+        " Eg, '(U T p \"Y.*\")' or a single field 'U'"
     );
     argList::addOption
     (
         "divisions",
         "integer",
-        "specify number of temporal sub-divisions to create (default = 1)."
+        "Specify number of temporal sub-divisions to create (default = 1)."
     );
     argList::addOption
     (
         "interpolationType",
         "word",
-        "specify type of interpolation (linear or spline)"
+        "The type of interpolation (linear or spline)"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
-    wordHashSet selectedFields;
-    args.readIfPresent("fields", selectedFields);
+    // Non-mandatory
+    const wordRes selectedFields(args.getList<wordRe>("fields", false));
 
-    if (selectedFields.size())
-    {
-        Info<< "Interpolating fields " << selectedFields << nl << endl;
-    }
-    else
+    if (selectedFields.empty())
     {
         Info<< "Interpolating all fields" << nl << endl;
     }
-
-
-    int divisions = 1;
-    if (args.found("divisions"))
+    else
     {
-        args.lookup("divisions")() >> divisions;
+        Info<< "Interpolating fields " << flatOutput(selectedFields)
+            << nl << endl;
     }
+
+
+    const int divisions = args.opt<int>("divisions", 1);
     Info<< "Using " << divisions << " per time interval" << nl << endl;
 
 
-    const word interpolationType = args.lookupOrDefault<word>
-    (
-        "interpolationType",
-        "linear"
-    );
+    const word interpolationType =
+        args.opt<word>("interpolationType", "linear");
+
     Info<< "Using interpolation " << interpolationType << nl << endl;
 
 

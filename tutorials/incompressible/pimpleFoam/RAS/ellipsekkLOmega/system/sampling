@@ -1,0 +1,100 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1812                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+plane0
+{
+    type            surfaces;
+    libs            ("libsampling.so");
+    writeControl    writeTime;
+
+    surfaceFormat   vtk;
+    fields          ( p U );
+
+    interpolationScheme cellPoint;
+
+    surfaces
+    (
+        plane0
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            interpolate     true;
+            pointAndNormalDict
+            {
+                point   (0 0 0);
+                normal  (1 0 0);
+            }
+        }
+    );
+}
+
+
+plane1
+{
+    ${plane0}
+
+    surfaces
+    (
+        plane1
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            interpolate     true;
+            pointAndNormalDict
+            {
+                point   (0.1 0 0);
+                normal  (1 0 0);
+            }
+        }
+    );
+}
+
+
+plane2
+{
+    ${plane0}
+
+    surfaces
+    (
+        plane2
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            interpolate     true;
+            pointAndNormalDict
+            {
+                point   (0.2 0 0);
+                normal  (1 0 0);
+            }
+        }
+    );
+}
+
+
+plane3
+{
+    ${plane0}
+
+    surfaces
+    (
+        plane3
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            interpolate     true;
+            pointAndNormalDict
+            {
+                point   (0.3 0 0);
+                normal  (1 0 0);
+            }
+        }
+    );
+}
+
+
+// ************************************************************************* //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,14 +43,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class piecewiseLinearRamp Declaration
+                     Class piecewiseLinearRamp Declaration
 \*---------------------------------------------------------------------------*/
 
 class piecewiseLinearRamp
 :
     public faceAreaWeightModel
 {
-
 private:
 
     // Private data
@@ -60,6 +59,7 @@ private:
 
         //- Face area fraction above which a which of 1 is returned
         scalar uAF_;
+
 
 public:
 
@@ -76,8 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~piecewiseLinearRamp()
-    {}
+    virtual ~piecewiseLinearRamp() = default;
 
 
     // Member Functions

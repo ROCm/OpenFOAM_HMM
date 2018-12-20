@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,32 +29,27 @@ Group
 
 Description
     Transforms a user-specified selection of fields from global Cartesian
-    co-ordinates to a local co-ordinate system.  The fields are run-time
-    modifiable.
+    coordinates to a local coordinate system.
+    The fields are run-time modifiable.
 
 Usage
     Example of function object specification:
     \verbatim
     fieldCoordinateSystemTransform1
     {
-        type        fieldCoordinateSystemTransform;
-        libs        ("libfieldFunctionObjects.so");
+        type    fieldCoordinateSystemTransform;
+        libs    ("libfieldFunctionObjects.so");
         ...
-        fields
-        (
-            U
-            UMean
-            UPrime2Mean
-        );
+        fields  ( U UMean UPrime2Mean );
 
         coordinateSystem
         {
             origin      (0.001 0 0);
-            coordinateRotation
+            rotation
             {
-                type        axesRotation;
-                e1          (1      0.15    0);
-                e3          (0      0      -1);
+                type    axes;
+                e1      (1 0.15 0);
+                e3      (0 0 -1);
             }
         }
     }
@@ -62,10 +57,10 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description             | Required    | Default value
+        Property     | Description                          | Required | Default value
         type         | type name: fieldCoordinateSystemTransform | yes |
-        fields       | list of fields to be transformed |yes |
-        coordinateSystem | local co-ordinate system | yes    |
+        fields       | list of fields to be transformed     | yes |
+        coordinateSystem | local coordinate system          | yes    |
     \endtable
 
 See also
@@ -102,13 +97,21 @@ class fieldCoordinateSystemTransform
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Fields to transform
         volFieldSelection fieldSet_;
 
-        //- Co-ordinate system to transform to
-        coordinateSystem coordSys_;
+        //- Coordinate system to transform to
+        autoPtr<coordinateSystem> csysPtr_;
+
+        //- Demand-driven non-uniform rotation field (surface fields)
+        //  Eg, for cylindrical coordinates
+        mutable autoPtr<surfaceTensorField> rotTensorSurface_;
+
+        //- Demand-driven non-uniform rotation field (volume fields)
+        //  Eg, for cylindrical coordinates
+        mutable autoPtr<volTensorField> rotTensorVolume_;
 
 
     // Protected Member Functions
@@ -116,9 +119,24 @@ protected:
         //- Return the name of the transformed field
         word transformFieldName(const word& fieldName) const;
 
+        //- Demand-driven non-uniform rotation field for surface fields
+        const surfaceTensorField& srotTensor() const;
+
+        //- Demand-driven non-uniform rotation field for volume fields
+        const volTensorField& vrotTensor() const;
+
+
         //- Transform the given field
         template<class FieldType>
         void transformField(const FieldType& field);
+
+        //- Transform the given field
+        template<class FieldType, class RotationFieldType>
+        void transformField
+        (
+            const RotationFieldType& rot,
+            const FieldType& field
+        );
 
         //- Transform the given field if has the specified element type
         template<class Type>
@@ -143,7 +161,7 @@ public:
 
 
     //- Destructor
-    virtual ~fieldCoordinateSystemTransform();
+    virtual ~fieldCoordinateSystemTransform() = default;
 
 
     // Member Functions

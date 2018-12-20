@@ -47,10 +47,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Incompressible Navier-Stokes solver with inclusion of a wave height"
+        " field to enable single-phase free-surface approximations."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
@@ -70,7 +76,7 @@ int main(int argc, char *argv[])
         #include "CourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

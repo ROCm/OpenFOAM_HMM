@@ -133,7 +133,7 @@ private:
         void triSliceWithPlane
         (
             const triPoints& tri,
-            const plane& p,
+            const plane& pln,
             FixedList<triPoints, 10>& tris,
             label& nTris,
             const scalar len

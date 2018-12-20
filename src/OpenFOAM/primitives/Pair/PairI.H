@@ -118,23 +118,21 @@ inline const T& Foam::Pair<T>::other(const T& a) const
     if (first() == second())
     {
         FatalErrorInFunction
-            << "Call to other only valid for Pair with differing"
-            << " elements:" << *this << abort(FatalError);
+            << "Call to other only valid for Pair with differing elements:"
+            << *this << abort(FatalError);
     }
     else if (a == first())
     {
         return second();
     }
-    else
+    else if (a != second())
     {
-        if (a != second())
-        {
-            FatalErrorInFunction
-                << "Pair " << *this
-                << " does not contain " << a << abort(FatalError);
-        }
-        return first();
+        FatalErrorInFunction
+            << "Pair " << *this
+            << " does not contain " << a << abort(FatalError);
     }
+
+    return first();
 }
 
 

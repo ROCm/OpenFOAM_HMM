@@ -434,7 +434,7 @@ HashSet<Key,Hash> operator^
 
 
 //- A HashSet with word keys.
-typedef HashSet<> wordHashSet;
+typedef HashSet<word> wordHashSet;
 
 //- A HashSet with label keys and label hasher.
 typedef HashSet<label, Hash<label>> labelHashSet;

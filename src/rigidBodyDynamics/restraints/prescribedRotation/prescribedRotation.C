@@ -164,7 +164,7 @@ bool Foam::RBD::restraints::prescribedRotation::read
 
     refQ_ = coeffs_.lookupOrDefault<tensor>("referenceOrientation", I);
 
-    if (mag(mag(refQ_) - sqrt(3.0)) > 1e-9)
+    if (mag(mag(refQ_) - sqrt(3.0)) > ROOTSMALL)
     {
         FatalErrorInFunction
             << "referenceOrientation " << refQ_ << " is not a rotation tensor. "

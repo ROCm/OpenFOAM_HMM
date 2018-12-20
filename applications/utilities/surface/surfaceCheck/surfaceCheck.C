@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Group
     grpSurfaceUtilities
 
 Description
-    Checks geometric and topological quality of a surface.
+    Check geometric and topological quality of a surface.
 
 Usage
     \b surfaceCheck [OPTION] surfaceFile
@@ -64,6 +64,9 @@ Usage
 #include "SortableList.H"
 #include "PatchTools.H"
 #include "vtkSurfaceWriter.H"
+#include "functionObject.H"
+#include "DynamicField.H"
+#include "edgeMesh.H"
 
 using namespace Foam;
 
@@ -123,6 +126,7 @@ labelList countBins
 
 void writeZoning
 (
+    const surfaceWriter& writer,
     const triSurface& surf,
     const labelList& faceZone,
     const word& fieldName,
@@ -138,9 +142,9 @@ void writeZoning
               + '_'
               + surfFileNameBase
               + '.'
-              + vtkSurfaceWriter::typeName
+              + writer.type()
             )
-        << "..." << endl << endl;
+        << " ..." << endl << endl;
 
     // Convert data
     scalarField scalarFaceZone(faceZone.size());
@@ -154,7 +158,7 @@ void writeZoning
         faces[i] = surf[i];
     }
 
-    vtkSurfaceWriter().write
+    writer.write
     (
         surfFilePath,
         surfFileNameBase,
@@ -275,48 +279,113 @@ void syncEdges(const triSurface& p, boolList& isMarkedEdge)
 }
 
 
+void writeEdgeSet
+(
+    const word& setName,
+    const triSurface& surf,
+    const labelUList& edgeSet
+)
+{
+    // Get compact edge mesh
+    labelList pointToCompact(surf.nPoints(), -1);
+    DynamicField<point> compactPoints(edgeSet.size());
+    DynamicList<edge> compactEdges(edgeSet.size());
+    for (label edgei : edgeSet)
+    {
+        const edge& e = surf.edges()[edgei];
+        edge compactEdge(-1, -1);
+        forAll(e, ep)
+        {
+            label& compacti = pointToCompact[e[ep]];
+            if (compacti == -1)
+            {
+                compacti = compactPoints.size();
+                label pointi = surf.meshPoints()[e[ep]];
+                compactPoints.append(surf.points()[pointi]);
+            }
+            compactEdge[ep] = compacti;
+        }
+        compactEdges.append(compactEdge);
+    }
+
+    edgeMesh eMesh(std::move(compactPoints), std::move(compactEdges));
+    eMesh.write(setName);
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Check geometric and topological quality of a surface"
+    );
+
     argList::noParallel();
-    argList::addArgument("surfaceFile");
+    argList::addArgument("input", "The input surface file");
+
     argList::addBoolOption
     (
         "checkSelfIntersection",
-        "also check for self-intersection"
+        "Also check for self-intersection"
     );
     argList::addBoolOption
     (
         "splitNonManifold",
-        "split surface along non-manifold edges"
-        " (default split is fully disconnected)"
+        "Split surface along non-manifold edges "
+        "(default split is fully disconnected)"
     );
     argList::addBoolOption
     (
         "verbose",
-        "verbose operation"
+        "Additional verbosity"
     );
     argList::addBoolOption
     (
         "blockMesh",
-        "write vertices/blocks for blockMeshDict"
+        "Write vertices/blocks for blockMeshDict"
     );
     argList::addOption
     (
         "outputThreshold",
         "number",
-        "upper limit on the number of files written."
-        " Default is 10, using 0 suppresses file writing."
+        "Upper limit on the number of files written. "
+        "Default is 10, using 0 suppresses file writing."
     );
+    argList::addOption
+    (
+        "writeSets",
+        "surfaceFormat",
+        "Reconstruct and write problem triangles/edges in selected format"
+    );
+
 
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
     const bool checkSelfIntersect = args.found("checkSelfIntersection");
     const bool splitNonManifold = args.found("splitNonManifold");
-    const label outputThreshold =
-        args.lookupOrDefault("outputThreshold", 10);
+    const label outputThreshold = args.opt<label>("outputThreshold", 10);
+    const word surfaceFormat = args.opt<word>("writeSets", "");
+    const bool writeSets = !surfaceFormat.empty();
+
+    autoPtr<surfaceWriter> surfWriter;
+    word edgeFormat;
+    if (writeSets)
+    {
+        surfWriter = surfaceWriter::New(surfaceFormat);
+        // Option1: hard-coded format
+        edgeFormat = "obj";
+        //// Option2: same type as surface format. Problem is e.g. .obj format
+        ////          is not a surfaceWriter format.
+        //edgeFormat = surfaceFormat;
+        //if (!edgeMesh::canWriteType(edgeFormat))
+        //{
+        //    edgeFormat = "obj";
+        //}
+    }
+
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
@@ -414,7 +483,8 @@ int main(int argc, char *argv[])
 
         forAll(surf, facei)
         {
-            if (!triSurfaceTools::validTri(surf, facei))
+            // Check silently
+            if (!triSurfaceTools::validTri(surf, facei, false))
             {
                 illegalFaces.append(facei);
             }
@@ -425,8 +495,71 @@ int main(int argc, char *argv[])
             Info<< "Surface has " << illegalFaces.size()
                 << " illegal triangles." << endl;
 
-            if (outputThreshold > 0)
+            if (surfWriter.valid())
             {
+                boolList isIllegalFace(surf.size(), false);
+                UIndirectList<bool>(isIllegalFace, illegalFaces) = true;
+
+                labelList pointMap;
+                labelList faceMap;
+                triSurface subSurf
+                (
+                    surf.subsetMesh
+                    (
+                        isIllegalFace,
+                        pointMap,
+                        faceMap
+                    )
+                );
+
+                const fileName qualityName
+                (
+                    surfFilePath
+                  / "illegal"
+                  + '_'
+                  + surfFileNameBase
+                  + '.'
+                  + surfWriter().type()
+                );
+                Info<< "Writing illegal triangles to "
+                    << qualityName << " ..." << endl << endl;
+
+                // Convert data
+                faceList faces(subSurf.size());
+                forAll(subSurf, i)
+                {
+                    faces[i] = subSurf[i];
+                }
+
+                surfWriter().write
+                (
+                    surfFilePath,
+                    surfFileNameBase,
+                    meshedSurfRef
+                    (
+                        subSurf.points(),
+                        faces
+                    ),
+                    "illegal",
+                    scalarField(subSurf.size(), 0.0),
+                    false               // face based data
+                );
+            }
+            else if (outputThreshold > 0)
+            {
+                forAll(illegalFaces, i)
+                {
+                    // Force warning message
+                    triSurfaceTools::validTri(surf, illegalFaces[i], true);
+                    if (i >= outputThreshold)
+                    {
+                        Info<< "Suppressing further warning messages."
+                            << " Use -outputThreshold to increase number"
+                            << " of warnings." << endl;
+                        break;
+                    }
+                }
+
                 OFstream str("illegalFaces");
                 Info<< "Dumping conflicting face labels to " << str.name()
                     << endl
@@ -502,12 +635,48 @@ int main(int argc, char *argv[])
         if (triQ[minIndex] < SMALL)
         {
             WarningInFunction
+                << "Minimum triangle quality is "
                 << triQ[minIndex] << ". This might give problems in"
                 << " self-intersection testing later on." << endl;
         }
 
         // Dump for subsetting
-        if (outputThreshold > 0)
+        if (surfWriter.valid())
+        {
+            const fileName qualityName
+            (
+                surfFilePath
+              / "quality"
+              + '_'
+              + surfFileNameBase
+              + '.'
+              + surfWriter().type()
+            );
+            Info<< "Writing triangle-quality to "
+                << qualityName << " ..." << endl << endl;
+
+            // Convert data
+            faceList faces(surf.size());
+            forAll(surf, i)
+            {
+                faces[i] = surf[i];
+            }
+
+            surfWriter().write
+            (
+                surfFilePath,
+                surfFileNameBase,
+                meshedSurfRef
+                (
+                    surf.points(),
+                    faces
+                ),
+                "quality",
+                triQ,
+                false               // face based data
+            );
+        }
+        else if (outputThreshold > 0)
         {
             DynamicList<label> problemFaces(surf.size()/100+1);
 
@@ -610,28 +779,37 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                nClose++;
+                if (nClose < outputThreshold)
+                {
+                    if (edgei == -1)
+                    {
+                        Info<< "    close unconnected points "
+                            << pti << ' ' << localPoints[pti]
+                            << " and " << prevPti << ' '
+                            << localPoints[prevPti]
+                            << " distance:"
+                            << mag(localPoints[pti] - localPoints[prevPti])
+                            << endl;
+                    }
+                    else
+                    {
+                        Info<< "    small edge between points "
+                            << pti << ' ' << localPoints[pti]
+                            << " and " << prevPti << ' '
+                            << localPoints[prevPti]
+                            << " distance:"
+                            << mag(localPoints[pti] - localPoints[prevPti])
+                            << endl;
+                    }
+                }
+                else if (nClose == outputThreshold)
+                {
+                    Info<< "Suppressing further warning messages."
+                        << " Use -outputThreshold to increase number"
+                        << " of warnings." << endl;
+                }
 
-                if (edgei == -1)
-                {
-                    Info<< "    close unconnected points "
-                        << pti << ' ' << localPoints[pti]
-                        << " and " << prevPti << ' '
-                        << localPoints[prevPti]
-                        << " distance:"
-                        << mag(localPoints[pti] - localPoints[prevPti])
-                        << endl;
-                }
-                else
-                {
-                    Info<< "    small edge between points "
-                        << pti << ' ' << localPoints[pti]
-                        << " and " << prevPti << ' '
-                        << localPoints[prevPti]
-                        << " distance:"
-                        << mag(localPoints[pti] - localPoints[prevPti])
-                        << endl;
-                }
+                nClose++;
             }
         }
 
@@ -645,10 +823,11 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~
 
     DynamicList<label> problemFaces(surf.size()/100 + 1);
+    DynamicList<label> openEdges(surf.nEdges()/100 + 1);
+    DynamicList<label> multipleEdges(surf.nEdges()/100 + 1);
 
     const labelListList& edgeFaces = surf.edgeFaces();
 
-    label nSingleEdges = 0;
     forAll(edgeFaces, edgei)
     {
         const labelList& myFaces = edgeFaces[edgei];
@@ -656,12 +835,10 @@ int main(int argc, char *argv[])
         if (myFaces.size() == 1)
         {
             problemFaces.append(myFaces[0]);
-
-            nSingleEdges++;
+            openEdges.append(edgei);
         }
     }
 
-    label nMultEdges = 0;
     forAll(edgeFaces, edgei)
     {
         const labelList& myFaces = edgeFaces[edgei];
@@ -672,30 +849,43 @@ int main(int argc, char *argv[])
             {
                 problemFaces.append(myFaces[myFacei]);
             }
-
-            nMultEdges++;
+            multipleEdges.append(edgei);
         }
     }
     problemFaces.shrink();
 
-    if ((nSingleEdges != 0) || (nMultEdges != 0))
+    if (openEdges.size() || multipleEdges.size())
     {
         Info<< "Surface is not closed since not all edges ("
             << edgeFaces.size() << ") connected to "
             << "two faces:" << endl
-            << "    connected to one face : " << nSingleEdges << endl
-            << "    connected to >2 faces : " << nMultEdges << endl;
+            << "    connected to one face : " << openEdges.size() << endl
+            << "    connected to >2 faces : " << multipleEdges.size() << endl;
 
         Info<< "Conflicting face labels:" << problemFaces.size() << endl;
 
-        if (outputThreshold > 0)
+        if (!edgeFormat.empty() && openEdges.size())
         {
-            OFstream str("problemFaces");
-
-            Info<< "Dumping conflicting face labels to " << str.name() << endl
-                << "Paste this into the input for surfaceSubset" << endl;
-
-            str << problemFaces;
+            const fileName openName
+            (
+                surfFileName.lessExt()
+              + "_open."
+              + edgeFormat
+            );
+            Info<< "Writing open edges to " << openName << " ..." << endl;
+            writeEdgeSet(openName, surf, openEdges);
+        }
+        if (!edgeFormat.empty() && multipleEdges.size())
+        {
+            const fileName multName
+            (
+                surfFileName.lessExt()
+              + "_multiply."
+              + edgeFormat
+            );
+            Info<< "Writing multiply connected edges to "
+                << multName << " ..." << endl;
+            writeEdgeSet(multName, surf, multipleEdges);
         }
     }
     else
@@ -732,7 +922,19 @@ int main(int argc, char *argv[])
         {
             Info<< "Splitting surface into parts ..." << endl << endl;
 
-            writeZoning(surf, faceZone, "zone", surfFilePath, surfFileNameBase);
+            if (!surfWriter.valid())
+            {
+                surfWriter.reset(new vtkSurfaceWriter());
+            }
+            writeZoning
+            (
+                surfWriter(),
+                surf,
+                faceZone,
+                "zone",
+                surfFilePath,
+                surfFileNameBase
+            );
 
             if (numZones > outputThreshold)
             {
@@ -785,8 +987,13 @@ int main(int argc, char *argv[])
 
         if (outputThreshold > 0)
         {
+            if (!surfWriter.valid())
+            {
+                surfWriter.reset(new vtkSurfaceWriter());
+            }
             writeZoning
             (
+                surfWriter(),
                 surf,
                 normalZone,
                 "normal",

@@ -110,10 +110,10 @@ bool Foam::viscosityModels::BirdCarreau::read
     BirdCarreauCoeffs_ =
         viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    BirdCarreauCoeffs_.lookup("nu0") >> nu0_;
-    BirdCarreauCoeffs_.lookup("nuInf") >> nuInf_;
-    BirdCarreauCoeffs_.lookup("k") >> k_;
-    BirdCarreauCoeffs_.lookup("n") >> n_;
+    BirdCarreauCoeffs_.readEntry("nu0", nu0_);
+    BirdCarreauCoeffs_.readEntry("nuInf", nuInf_);
+    BirdCarreauCoeffs_.readEntry("k", k_);
+    BirdCarreauCoeffs_.readEntry("n", n_);
     a_ = BirdCarreauCoeffs_.lookupOrDefault
     (
         "a",

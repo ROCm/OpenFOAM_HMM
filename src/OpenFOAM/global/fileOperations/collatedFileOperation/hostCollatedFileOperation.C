@@ -125,7 +125,7 @@ Foam::labelList Foam::fileOperations::hostCollatedFileOperation::subRanks
 
 Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
 (
-    const bool verbose
+    bool verbose
 )
 :
     collatedFileOperation
@@ -140,6 +140,8 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
         verbose
     )
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
         // Print a bit of information
@@ -150,12 +152,12 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
         }
         Pstream::gatherList(ioRanks);
 
-        Info<< "         IO nodes:" << endl;
-        forAll(ioRanks, proci)
+        Info<< "         IO nodes:" << nl;
+        for (const string& ranks : ioRanks)
         {
-            if (!ioRanks[proci].empty())
+            if (!ranks.empty())
             {
-                Info<< "             " << ioRanks[proci] << endl;
+                Info<< "             " << ranks << nl;
             }
         }
     }

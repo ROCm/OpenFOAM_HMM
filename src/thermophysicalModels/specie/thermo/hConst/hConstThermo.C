@@ -32,8 +32,8 @@ template<class EquationOfState>
 Foam::hConstThermo<EquationOfState>::hConstThermo(const dictionary& dict)
 :
     EquationOfState(dict),
-    Cp_(readScalar(dict.subDict("thermodynamics").lookup("Cp"))),
-    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf")))
+    Cp_(dict.subDict("thermodynamics").get<scalar>("Cp")),
+    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf"))
 {}
 
 
@@ -44,10 +44,13 @@ void Foam::hConstThermo<EquationOfState>::write(Ostream& os) const
 {
     EquationOfState::write(os);
 
-    dictionary dict("thermodynamics");
-    dict.add("Cp", Cp_);
-    dict.add("Hf", Hf_);
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("thermodynamics");
+        os.writeEntry("Cp", Cp_);
+        os.writeEntry("Hf", Hf_);
+        os.endBlock();
+    }
 }
 
 

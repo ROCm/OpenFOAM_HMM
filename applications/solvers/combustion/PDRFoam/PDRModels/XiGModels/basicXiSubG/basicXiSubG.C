@@ -49,7 +49,7 @@ Foam::XiGModels::basicSubGrid::basicSubGrid
 )
 :
     XiGModel(XiGProperties, thermo, turbulence, Su),
-    k1(readScalar(XiGModelCoeffs_.lookup("k1"))),
+    k1(XiGModelCoeffs_.get<scalar>("k1")),
     XiGModel_(XiGModel::New(XiGModelCoeffs_, thermo, turbulence, Su))
 {}
 
@@ -104,7 +104,7 @@ bool Foam::XiGModels::basicSubGrid::read(const dictionary& XiGProperties)
 {
     XiGModel::read(XiGProperties);
 
-    XiGModelCoeffs_.lookup("k1") >> k1;
+    XiGModelCoeffs_.readEntry("k1", k1);
 
     return true;
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,26 +36,23 @@ readField
     const dictionary& dict
 )
 {
+    DebugInFunction << nl;
+
     // Clear the boundary field if already initialised
     this->clear();
 
     this->setSize(bmesh_.size());
 
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
-
-
     label nUnset = this->size();
 
     // 1. Handle explicit patch names. Note that there can be only one explicit
     //    patch name since is key of dictionary.
-    forAllConstIter(dictionary, dict, iter)
+
+    for (const entry& dEntry : dict)
     {
-        if (iter().isDict() && !iter().keyword().isPattern())
+        if (dEntry.isDict() && dEntry.keyword().isLiteral())
         {
-            label patchi = bmesh_.findPatchID(iter().keyword());
+            const label patchi = bmesh_.findPatchID(dEntry.keyword());
 
             if (patchi != -1)
             {
@@ -66,7 +63,7 @@ readField
                     (
                         bmesh_[patchi],
                         field,
-                        iter().dict()
+                        dEntry.dict()
                     )
                 );
                 nUnset--;
@@ -85,42 +82,29 @@ readField
     // Note: in reverse order of entries in the dictionary (last
     // patchGroups wins). This is so it is consistent with dictionary wildcard
     // behaviour
-    if (dict.size())
+    for (auto iter = dict.crbegin(); iter != dict.crend(); ++iter)
     {
-        for
-        (
-            IDLList<entry>::const_reverse_iterator iter = dict.crbegin();
-            iter != dict.crend();
-            ++iter
-        )
+        const entry& dEntry = *iter;
+
+        if (dEntry.isDict() && dEntry.keyword().isLiteral())
         {
-            const entry& e = iter();
+            const labelList patchIds =
+                bmesh_.indices(dEntry.keyword(), true); // use patchGroups
 
-            if (e.isDict() && !e.keyword().isPattern())
+            for (const label patchi : patchIds)
             {
-                const labelList patchIDs = bmesh_.findIndices
-                (
-                    e.keyword(),
-                    true                    // use patchGroups
-                );
-
-                forAll(patchIDs, i)
+                if (!this->set(patchi))
                 {
-                    label patchi = patchIDs[i];
-
-                    if (!this->set(patchi))
-                    {
-                        this->set
+                    this->set
+                    (
+                        patchi,
+                        PatchField<Type>::New
                         (
-                            patchi,
-                            PatchField<Type>::New
-                            (
-                                bmesh_[patchi],
-                                field,
-                                e.dict()
-                            )
-                        );
-                    }
+                            bmesh_[patchi],
+                            field,
+                            dEntry.dict()
+                        )
+                    );
                 }
             }
         }
@@ -174,10 +158,8 @@ readField
         {
             if (bmesh_[patchi].type() == cyclicPolyPatch::typeName)
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Cannot find patchField entry for cyclic "
+                FatalIOErrorInFunction(dict)
+                    << "Cannot find patchField entry for cyclic "
                     << bmesh_[patchi].name() << endl
                     << "Is your field uptodate with split cyclics?" << endl
                     << "Run foamUpgradeCyclics to convert mesh and fields"
@@ -185,10 +167,8 @@ readField
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Cannot find patchField entry for "
+                FatalIOErrorInFunction(dict)
+                    << "Cannot find patchField entry for "
                     << bmesh_[patchi].name() << exit(FatalIOError);
             }
         }
@@ -222,10 +202,7 @@ Boundary
     FieldField<PatchField, Type>(bmesh.size()),
     bmesh_(bmesh)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     forAll(bmesh_, patchi)
     {
@@ -256,10 +233,7 @@ Boundary
     FieldField<PatchField, Type>(bmesh.size()),
     bmesh_(bmesh)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     if
     (
@@ -323,10 +297,7 @@ Boundary
     FieldField<PatchField, Type>(bmesh.size()),
     bmesh_(bmesh)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     forAll(bmesh_, patchi)
     {
@@ -347,10 +318,7 @@ Boundary
     FieldField<PatchField, Type>(btf.size()),
     bmesh_(btf.bmesh_)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     forAll(bmesh_, patchi)
     {
@@ -370,10 +338,7 @@ Boundary
     FieldField<PatchField, Type>(btf),
     bmesh_(btf.bmesh_)
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 }
 
 
@@ -399,10 +364,7 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::
 updateCoeffs()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     forAll(*this, patchi)
     {
@@ -415,10 +377,7 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::Boundary::
 evaluate()
 {
-    if (debug)
-    {
-        InfoInFunction << endl;
-    }
+    DebugInFunction << nl;
 
     if
     (
@@ -484,14 +443,14 @@ types() const
 {
     const FieldField<PatchField, Type>& pff = *this;
 
-    wordList Types(pff.size());
+    wordList list(pff.size());
 
     forAll(pff, patchi)
     {
-        Types[patchi] = pff[patchi].type();
+        list[patchi] = pff[patchi].type();
     }
 
-    return Types;
+    return list;
 }
 
 

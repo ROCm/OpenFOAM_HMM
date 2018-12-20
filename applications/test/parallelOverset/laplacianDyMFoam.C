@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
     Info<< "\nCorrecting boundary conditions on " << T.name() << nl << endl;
 
-    runTime++;
+    ++runTime;
 
     Info<< "Time = " << runTime.timeName() << nl << endl;
 

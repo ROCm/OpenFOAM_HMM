@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,9 +33,10 @@ void Foam::functionObjects::runTimePostProcessing::readObjects
 ) const
 {
     objects.clear();
-    forAllConstIter(dictionary, dict, iter)
+
+    for (const entry& dEntry : dict)
     {
-        if (!iter().isDict())
+        if (!dEntry.isDict())
         {
             FatalIOErrorInFunction(dict)
                 << dict.dictName()
@@ -43,12 +44,12 @@ void Foam::functionObjects::runTimePostProcessing::readObjects
                 << exit(FatalIOError);
         }
 
-        const dictionary& objectDict(iter().dict());
-        word objectType = objectDict.lookup("type");
+        const dictionary& objectDict = dEntry.dict();
+        const word objectType = objectDict.get<word>("type");
 
         objects.append
         (
-            Type::New(*this, iter().dict(), scene_.colours(), objectType)
+            Type::New(*this, objectDict, scene_.colours(), objectType)
         );
     }
 }

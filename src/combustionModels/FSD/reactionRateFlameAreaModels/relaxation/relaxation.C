@@ -57,11 +57,8 @@ Foam::reactionRateFlameAreaModels::relaxation::relaxation
 :
     reactionRateFlameArea(modelType, dict, mesh, combModel),
     correlation_(dict.optionalSubDict(typeName + "Coeffs").subDict(fuel_)),
-    C_(readScalar(dict.optionalSubDict(typeName + "Coeffs").lookup("C"))),
-    alpha_
-    (
-        readScalar(dict.optionalSubDict(typeName + "Coeffs").lookup("alpha"))
-    )
+    C_(dict.optionalSubDict(typeName + "Coeffs").get<scalar>("C")),
+    alpha_(dict.optionalSubDict(typeName + "Coeffs").get<scalar>("alpha"))
 {}
 
 
@@ -152,8 +149,8 @@ bool  Foam::reactionRateFlameAreaModels::relaxation::read
     if (reactionRateFlameArea::read(dict))
     {
         coeffDict_ = dict.optionalSubDict(typeName + "Coeffs");
-        coeffDict_.lookup("C") >> C_;
-        coeffDict_.lookup("alpha") >> alpha_;
+        coeffDict_.readEntry("C", C_);
+        coeffDict_.readEntry("alpha", alpha_);
         correlation_.read
         (
             coeffDict_.subDict(fuel_)

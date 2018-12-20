@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a KIVA3v grid to OpenFOAM format.
+    Convert a KIVA3v grid to OpenFOAM.
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,31 +58,34 @@ enum kivaVersions
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a KIVA3v grid to OpenFOAM"
+    );
     argList::noParallel();
     argList::addOption
     (
         "file",
         "name",
-        "specify alternative input file name - default is otape17"
+        "Specify alternative input file name - default is otape17"
     );
     argList::addOption
     (
         "version",
         "version",
-        "specify kiva version [kiva3|kiva3v] - default is '3v'"
+        "Specify kiva version [kiva3|kiva3v] - default is '3v'"
     );
     argList::addOption
     (
         "zHeadMin",
         "scalar",
-        "minimum z-height for transferring liner faces to cylinder-head"
+        "Minimum z-height for transferring liner faces to cylinder-head"
     );
 
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const fileName kivaFileName =
-        args.lookupOrDefault<fileName>("file", "otape17");
+    const fileName kivaFileName = args.opt<fileName>("file", "otape17");
 
     kivaVersions kivaVersion = kiva3v;
     if (args.found("version"))
@@ -108,8 +111,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    scalar zHeadMin = -GREAT;
-    args.readIfPresent("zHeadMin", zHeadMin);
+    const scalar zHeadMin = args.opt<scalar>("zHeadMin", -GREAT);
 
     #include "readKivaGrid.H"
 

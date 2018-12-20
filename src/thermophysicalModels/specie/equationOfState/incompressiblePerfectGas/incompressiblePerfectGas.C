@@ -35,7 +35,7 @@ Foam::incompressiblePerfectGas<Specie>::incompressiblePerfectGas
 )
 :
     Specie(dict),
-    pRef_(readScalar(dict.subDict("equationOfState").lookup("pRef")))
+    pRef_(dict.subDict("equationOfState").get<scalar>("pRef"))
 {}
 
 
@@ -45,10 +45,13 @@ template<class Specie>
 void Foam::incompressiblePerfectGas<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
-    dictionary dict("equationOfState");
-    dict.add("pRef", pRef_);
 
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("pRef", pRef_);
+        os.endBlock();
+    }
 }
 
 

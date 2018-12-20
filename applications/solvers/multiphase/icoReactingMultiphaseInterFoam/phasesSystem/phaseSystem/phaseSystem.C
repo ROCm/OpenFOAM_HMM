@@ -82,13 +82,10 @@ Foam::tmp<Foam::surfaceScalarField> Foam::phaseSystem::generatePhi
 {
     phaseModelTable::const_iterator phaseModelIter = phaseModels.begin();
 
-    tmp<surfaceScalarField> tmpPhi
+    auto tmpPhi = tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
-        (
-            "phi",
-            fvc::interpolate(phaseModelIter()())*phaseModelIter()->phi()
-        )
+        "phi",
+        fvc::interpolate(phaseModelIter()())*phaseModelIter()->phi()
     );
 
     ++phaseModelIter;
@@ -115,9 +112,9 @@ void Foam::phaseSystem::generatePairs(const dictTable& modelDicts)
         {
             // do nothing ...
         }
-        // new ordered pair
         else if (key.ordered())
         {
+            // New ordered pair
             phasePairs_.insert
             (
                 key,
@@ -131,10 +128,9 @@ void Foam::phaseSystem::generatePairs(const dictTable& modelDicts)
                 )
             );
         }
-
-        // new unordered pair
         else
         {
+            // New unordered pair
             phasePairs_.insert
             (
                 key,
@@ -221,7 +217,7 @@ Foam::phaseSystem::phaseSystem
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimVolume/dimTime, 0.0)
+        dimensionedScalar(dimVolume/dimTime, Zero)
     ),
     rhoPhi_
     (
@@ -234,7 +230,7 @@ Foam::phaseSystem::phaseSystem
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimMass/dimTime, 0.0)
+        dimensionedScalar(dimMass/dimTime, Zero)
     ),
     phaseModels_(generatePhaseModels(phaseNames_)),
     phasePairs_(),
@@ -289,7 +285,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::he
 ) const
 {
     NotImplemented;
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 
@@ -301,7 +297,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::he
 ) const
 {
     NotImplemented;
-    return tmp<scalarField>();
+    return nullptr;
 }
 
 
@@ -313,13 +309,12 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::he
 ) const
 {
     NotImplemented;
-    return tmp<scalarField>();
+    return nullptr;
 }
 
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::hc() const
 {
-
     phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
 
     tmp<volScalarField> tAlphaHc
@@ -346,7 +341,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::THE
 ) const
 {
     NotImplemented;
-    return tmp<scalarField>();
+    return nullptr;
 }
 
 
@@ -359,7 +354,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::THE
 ) const
 {
     NotImplemented;
-    return tmp<scalarField>();
+    return nullptr;
 }
 
 
@@ -621,7 +616,7 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::CpByCpv
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::W() const
 {
     NotImplemented;
-    return tmp<volScalarField>();
+    return nullptr;
 }
 
 
@@ -934,27 +929,19 @@ const Foam::fvMesh& Foam::phaseSystem::mesh() const
 Foam::tmp<Foam::surfaceScalarField>
 Foam::phaseSystem::surfaceTensionForce() const
 {
-    tmp<surfaceScalarField> tstf
+    auto tstf = tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                "surfaceTensionForce",
-                mesh_.time().timeName(),
-                mesh_
-            ),
-            mesh_,
-            dimensionedScalar
-            (
-                "surfaceTensionForce",
-                dimensionSet(1, -2, -2, 0, 0),
-                0.0
-            )
-        )
+            "surfaceTensionForce",
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedScalar(dimensionSet(1, -2, -2, 0, 0), Zero)
     );
 
-    surfaceScalarField& stf = tstf.ref();
+    auto& stf = tstf.ref();
     stf.setOriented();
 
     if (surfaceTensionModels_.size() > 0)
@@ -993,22 +980,19 @@ Foam::phaseSystem::surfaceTensionForce() const
 
 Foam::tmp<Foam::volVectorField> Foam::phaseSystem::U() const
 {
-    tmp<volVectorField> tstf
+    auto tstf = tmp<volVectorField>::New
     (
-        new volVectorField
+        IOobject
         (
-            IOobject
-            (
-                "U",
-                mesh_.time().timeName(),
-                mesh_
-            ),
-            mesh_,
-            dimensionedVector("U", dimVelocity, vector::zero)
-        )
+            "U",
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedVector("U", dimVelocity, Zero)
     );
 
-    volVectorField& stf = tstf.ref();
+    auto& stf = tstf.ref();
 
     forAllConstIter(phaseModelTable, phaseModels_, iter1)
     {
@@ -1045,7 +1029,7 @@ void Foam::phaseSystem::addInterfacePorosity(fvVectorMatrix& UEqn)
         const phaseModel& phasei = iteri();
 
         phaseModelTable::iterator iterk = iteri;
-        iterk++;
+        ++iterk;
         for
         (
             ;
@@ -1107,22 +1091,19 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface() const
 {
-    tmp<volScalarField> tnI
+    auto tnI = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "nearInterface",
-                mesh_.time().timeName(),
-                mesh_
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimless, 0.0)
-        )
+            "nearInterface",
+            mesh_.time().timeName(),
+            mesh_
+        ),
+        mesh_,
+        dimensionedScalar(dimless, Zero)
     );
 
-    volScalarField& nI = tnI.ref();
+    auto& nI = tnI.ref();
 
     forAllConstIter(phaseModelTable, phaseModels_, iter1)
     {
@@ -1190,10 +1171,8 @@ bool Foam::phaseSystem::read()
 
         return readOK;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

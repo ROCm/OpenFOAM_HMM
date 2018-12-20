@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,7 @@ Description
 namespace Foam
 {
 
+// Forward declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -64,7 +65,7 @@ public:
         };
 
         //- Number of element types (5)
-        static const label nTypes;
+        static constexpr label nTypes = 5;
 
         //- The ensight element type names
         static const char* elemNames[5];
@@ -108,20 +109,23 @@ public:
 
     // Constructors
 
-        //- Construct null, optionally with index
-        ensightCells(label partIndex = 0);
+        //- Construct null, with part index 0
+        ensightCells();
+
+        //- Construct null, with specified part index
+        explicit ensightCells(const label partIndex);
 
         //- Copy constructor. Needed for lists etc.
         ensightCells(const ensightCells& obj);
 
 
     //- Destructor
-    ~ensightCells();
+    ~ensightCells() = default;
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The index in a list.
         inline label index() const;
@@ -160,7 +164,7 @@ public:
         inline const labelUList& cellIds() const;
 
 
-      // Edit
+    // Edit
 
         //- Classify cell types and set the element lists.
         //  The optional indirect addressing can be used when classifying
@@ -182,7 +186,7 @@ public:
         void sort();
 
 
-    // Member operators
+    // Member Operators
 
         //- Return id from linear list of addressing.
         inline label operator[](const label i) const;

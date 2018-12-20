@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,21 +56,18 @@ fieldCoordinateSystemTransform
 :
     fvMeshFunctionObject(name, runTime, dict),
     fieldSet_(mesh_),
-    coordSys_(mesh_, dict.subDict("coordinateSystem"))
+    csysPtr_
+    (
+        coordinateSystem::New(mesh_, dict, coordinateSystem::typeName_())
+    )
 {
     read(dict);
 
     Info<< type() << " " << name << ":" << nl
-        << "   Applying transformation from global Cartesian to local "
-        << coordSys_ << nl << endl;
+        << "   Applying " << (csysPtr_->uniform() ? "" : "non-")
+        << "uniform transformation from global Cartesian to local "
+        << *csysPtr_ << nl << endl;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldCoordinateSystemTransform::
-~fieldCoordinateSystemTransform()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -82,6 +79,96 @@ Foam::functionObjects::fieldCoordinateSystemTransform::transformFieldName
 ) const
 {
     return fieldName + ":Transformed";
+}
+
+
+const Foam::surfaceTensorField&
+Foam::functionObjects::fieldCoordinateSystemTransform::srotTensor() const
+{
+    typedef surfaceTensorField FieldType;
+    typedef surfaceTensorField::Boundary BoundaryType;
+
+    if (!rotTensorSurface_.valid())
+    {
+        tensorField rotations(csysPtr_->R(mesh_.faceCentres()));
+
+        rotTensorSurface_.reset
+        (
+            new FieldType
+            (
+                IOobject
+                (
+                    "surfRotation",
+                    mesh_.objectRegistry::instance(),
+                    mesh_.objectRegistry::db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false // no register
+                ),
+                mesh_,
+                dimless,
+                std::move(rotations)
+                // calculatedType
+            )
+        );
+
+        auto& rot = *rotTensorSurface_;
+
+        // Boundaries
+        BoundaryType& bf = const_cast<BoundaryType&>(rot.boundaryField());
+
+        forAll(bf, patchi)
+        {
+            bf[patchi] = csysPtr_->R(bf[patchi].patch().patch().faceCentres());
+        }
+    }
+
+    return *rotTensorSurface_;
+}
+
+
+const Foam::volTensorField&
+Foam::functionObjects::fieldCoordinateSystemTransform::vrotTensor() const
+{
+    typedef volTensorField FieldType;
+    typedef volTensorField::Boundary BoundaryType;
+
+    if (!rotTensorVolume_.valid())
+    {
+        tensorField rotations(csysPtr_->R(mesh_.cellCentres()));
+
+        rotTensorVolume_.reset
+        (
+            new FieldType
+            (
+                IOobject
+                (
+                    "volRotation",
+                    mesh_.objectRegistry::instance(),
+                    mesh_.objectRegistry::db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false // no register
+                ),
+                mesh_,
+                dimless,
+                std::move(rotations)
+                // calculatedType
+            )
+        );
+
+        auto& rot = *rotTensorVolume_;
+
+        // Boundaries
+        BoundaryType& bf = const_cast<BoundaryType&>(rot.boundaryField());
+
+        forAll(bf, patchi)
+        {
+            bf[patchi] = csysPtr_->R(bf[patchi].patch().patch().faceCentres());
+        }
+    }
+
+    return *rotTensorVolume_;
 }
 
 
@@ -112,6 +199,10 @@ bool Foam::functionObjects::fieldCoordinateSystemTransform::execute()
         transform<symmTensor>(fieldName);
         transform<tensor>(fieldName);
     }
+
+    // Finished with these
+    rotTensorSurface_.clear();
+    rotTensorVolume_.clear();
 
     return true;
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -235,16 +235,21 @@ bool writeOptionalMeshObject
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Converts all IOobjects associated with a case into the format"
+        " specified in the controlDict"
+    );
     timeSelector::addOptions();
     argList::addBoolOption
     (
         "noConstant",
-        "exclude the 'constant/' dir in the times list"
+        "Exclude the 'constant/' dir in the times list"
     );
     argList::addBoolOption
     (
         "enableFunctionEntries",
-        "enable expansion of dictionary directives - #include, #codeStream etc"
+        "Enable expansion of dictionary directives - #include, #codeStream etc"
     );
 
     #include "addRegionOption.H"
@@ -351,7 +356,7 @@ int main(int argc, char *argv[])
         // Get list of objects from the database
         IOobjectList objects(runTime, runTime.timeName(), regionPrefix);
 
-        forAllConstIter(IOobjectList, objects, iter)
+        forAllConstIters(objects, iter)
         {
             const word& headerClassName = iter()->headerClassName();
 
@@ -461,13 +466,15 @@ int main(int argc, char *argv[])
 
 
                 // Do local scan for valid cloud objects
-                IOobjectList sprayObjs(runTime, runTime.timeName(), dir);
+                wordList cloudFields
+                (
+                    IOobjectList(runTime, runTime.timeName(), dir).sortedNames()
+                );
 
                 // Combine with all other cloud objects
-                wordList sprayFields(sprayObjs.sortedToc());
-                combineReduce(sprayFields, uniqueEqOp<word>());
+                combineReduce(cloudFields, uniqueEqOp<word>());
 
-                for (const word& name : sprayFields)
+                for (const word& name : cloudFields)
                 {
                     // Note: try the various field types. Make sure to
                     //       exit once successful conversion to avoid re-read

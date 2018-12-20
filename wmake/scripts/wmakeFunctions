@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -18,7 +18,14 @@
 
 # Ensure these variables are always defined
 MakeDir=Make
-: ${Script:=wmakeFunctions}
+: "${Script:=wmakeFunctions}"
+
+# Environment defaults
+if [ -z "$WM_DIR" ]
+then
+    WM_DIR="$WM_PROJECT_DIR/wmake"
+    export WM_DIR
+fi
 
 
 #------------------------------------------------------------------------------
@@ -27,13 +34,18 @@ MakeDir=Make
 
 checkEnv()
 {
+    local check failed
+
     for check in WM_PROJECT_DIR WM_OPTIONS WM_DIR
     do
-        eval test "\$$check" || {
-            echo "$Script error: environment variable \$$check not set" 1>&2
-            exit 1
-        }
+        eval test "\$$check" || failed="$failed $check"
     done
+
+    [ -z "$failed" ] || {
+        echo "$Script error: Environment variable(s) not set" 1>&2
+        echo "   $failed" 1>&2
+        exit 1
+    }
 }
 
 

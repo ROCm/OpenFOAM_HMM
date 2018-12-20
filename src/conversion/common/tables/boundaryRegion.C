@@ -272,7 +272,7 @@ void Foam::boundaryRegion::rename(const dictionary& mapDict)
         dictionary& dict = operator[](iter.key());
 
         Info<< "rename patch: " << iter()
-            << " <- " << word(dict.lookup("Label")) << nl;
+            << " <- " << dict.get<word>("Label") << nl;
 
         dict.set("Label", iter());
     }

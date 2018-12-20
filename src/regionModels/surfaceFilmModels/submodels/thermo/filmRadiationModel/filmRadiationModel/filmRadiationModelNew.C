@@ -42,7 +42,7 @@ autoPtr<filmRadiationModel> filmRadiationModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("radiationModel"));
+    const word modelType(dict.get<word>("radiationModel"));
 
     Info<< "    Selecting radiationModel " << modelType << endl;
 

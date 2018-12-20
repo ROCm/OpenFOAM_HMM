@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,18 @@ Class
     Foam::patchToFace
 
 Description
-    A topoSetSource to select faces based on usage in patches.
+    A topoSetFaceSource to select faces based on usage in patches.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        patches     | The patch names or regexs             | possibly |
+        patch       | The patch name or regex               | possibly |
+        name        | Older specification for 'patch'       | no    |
+    \endtable
+
+Note
+    Must specify "patches", "patch" or "name" (highest to lowest precedence).
 
 SourceFiles
     patchToFace.C
@@ -35,8 +46,8 @@ SourceFiles
 #ifndef patchToFace_H
 #define patchToFace_H
 
-#include "topoSetSource.H"
-#include "wordRe.H"
+#include "topoSetFaceSource.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +60,7 @@ namespace Foam
 
 class patchToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
     // Private data
@@ -57,8 +68,8 @@ class patchToFace
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of patch
-        wordRe patchName_;
+        //- Matcher for patches
+        wordRes selectedPatches_;
 
 
     // Private Member Functions
@@ -74,42 +85,25 @@ public:
     // Constructors
 
         //- Construct from components
-        patchToFace
-        (
-            const polyMesh& mesh,
-            const word& patchName
-        );
+        patchToFace(const polyMesh& mesh, const wordRe& patchName);
 
         //- Construct from dictionary
-        patchToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        patchToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        patchToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        patchToFace(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~patchToFace();
+    virtual ~patchToFace() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

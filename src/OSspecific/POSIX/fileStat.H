@@ -28,7 +28,7 @@ Description
     Wrapper for stat() and lstat() system calls.
 
 Warning
-    on Linux (an maybe on others) a stat() of an nfs mounted (remote)
+    On Linux (an maybe on others) a stat() of an nfs mounted (remote)
     file does never timeout and cannot be interrupted!
     So e.g. Foam::ping first and hope nfs is running.
 
@@ -79,16 +79,28 @@ public:
         fileStat();
 
         //- Construct from components.
-        // \param fName \n
-        // The file name or directory name to stat.
         //
-        // \param followLink \n
-        // If it is a link, get the status of the source file/directory.
+        //  \param fName The file name or directory name to stat.
+        //  \param followLink If it is a link, get the status of the source
+        //      file/directory.
+        //  \param maxTime The timeout value.
         //
-        // \param maxTime \n
-        // The timeout value.
+        //  \note An empty filename is a no-op.
+        fileStat
+        (
+            const char* fName,
+            const bool followLink = true,
+            const unsigned int maxTime = 0
+        );
+
+        //- Construct from components.
         //
-        // \note an empty filename is a no-op.
+        //  \param fName The file name or directory name to stat.
+        //  \param followLink If it is a link, get the status of the source
+        //      file/directory.
+        //  \param maxTime The timeout value.
+        //
+        //  \note An empty filename is a no-op.
         fileStat
         (
             const fileName& fName,

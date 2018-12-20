@@ -93,14 +93,10 @@ Foam::cellSizeAndAlignmentControls::cellSizeAndAlignmentControls
 {
     label functionI = 0;
 
-    forAllConstIter(dictionary, shapeControlDict_, iter)
+    for (const entry& dEntry : shapeControlDict_)
     {
-        word shapeControlEntryName = iter().keyword();
-
-        const dictionary& controlFunctionDict
-        (
-            shapeControlDict_.subDict(shapeControlEntryName)
-        );
+        const word& shapeControlEntryName = dEntry.keyword();
+        const dictionary& controlFunctionDict = dEntry.dict();
 
         Info<< nl << "Shape Control : " << shapeControlEntryName << endl;
         Info<< incrIndent;

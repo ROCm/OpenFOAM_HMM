@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 #include "solidificationMeltingSource.H"
 #include "fvMatrices.H"
 #include "basicThermo.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "zeroGradientFvPatchFields.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -54,10 +54,10 @@ const Foam::Enum
     Foam::fv::solidificationMeltingSource::thermoMode
 >
 Foam::fv::solidificationMeltingSource::thermoModeTypeNames_
-{
+({
     { thermoMode::mdThermo, "thermo" },
     { thermoMode::mdLookup, "lookup" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -79,7 +79,7 @@ Foam::fv::solidificationMeltingSource::Cp() const
         {
             if (CpName_ == "CpRef")
             {
-                scalar CpRef = readScalar(coeffs_.lookup("CpRef"));
+                const scalar CpRef = coeffs_.get<scalar>("CpRef");
 
                 return tmp<volScalarField>::New
                 (
@@ -117,19 +117,6 @@ Foam::fv::solidificationMeltingSource::Cp() const
     }
 
     return nullptr;
-}
-
-
-Foam::vector Foam::fv::solidificationMeltingSource::g() const
-{
-    if (mesh_.foundObject<uniformDimensionedVectorField>("g"))
-    {
-        const uniformDimensionedVectorField& value =
-            mesh_.lookupObject<uniformDimensionedVectorField>("g");
-        return value.value();
-    }
-
-    return coeffs_.lookup("g");
 }
 
 
@@ -179,18 +166,18 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
 )
 :
     cellSetOption(sourceName, modelType, dict, mesh),
-    Tmelt_(readScalar(coeffs_.lookup("Tmelt"))),
-    L_(readScalar(coeffs_.lookup("L"))),
+    Tmelt_(coeffs_.get<scalar>("Tmelt")),
+    L_(coeffs_.get<scalar>("L")),
     relax_(coeffs_.lookupOrDefault("relax", 0.9)),
-    mode_(thermoModeTypeNames_.lookup("thermoMode", coeffs_)),
-    rhoRef_(readScalar(coeffs_.lookup("rhoRef"))),
+    mode_(thermoModeTypeNames_.get("thermoMode", coeffs_)),
+    rhoRef_(coeffs_.get<scalar>("rhoRef")),
     TName_(coeffs_.lookupOrDefault<word>("T", "T")),
     CpName_(coeffs_.lookupOrDefault<word>("Cp", "Cp")),
     UName_(coeffs_.lookupOrDefault<word>("U", "U")),
     phiName_(coeffs_.lookupOrDefault<word>("phi", "phi")),
     Cu_(coeffs_.lookupOrDefault<scalar>("Cu", 100000)),
     q_(coeffs_.lookupOrDefault("q", 0.001)),
-    beta_(readScalar(coeffs_.lookup("beta"))),
+    beta_(coeffs_.get<scalar>("beta")),
     alpha1_
     (
         IOobject
@@ -276,7 +263,7 @@ void Foam::fv::solidificationMeltingSource::addSup
 
     update(Cp);
 
-    vector g = this->g();
+    const vector& g = meshObjects::gravity::New(mesh_.time()).value();
 
     scalarField& Sp = eqn.diag();
     vectorField& Su = eqn.source();
@@ -307,6 +294,33 @@ void Foam::fv::solidificationMeltingSource::addSup
 {
     // Momentum source uses a Boussinesq approximation - redirect
     addSup(eqn, fieldi);
+}
+
+
+bool Foam::fv::solidificationMeltingSource::read(const dictionary& dict)
+{
+    if (cellSetOption::read(dict))
+    {
+        coeffs_.readEntry("Tmelt", Tmelt_);
+        coeffs_.readEntry("L", L_);
+
+        coeffs_.readIfPresent("relax", relax_);
+
+        thermoModeTypeNames_.readEntry("thermoMode", coeffs_, mode_);
+
+        coeffs_.readEntry("rhoRef", rhoRef_);
+        coeffs_.readIfPresent("T", TName_);
+        coeffs_.readIfPresent("U", UName_);
+
+        coeffs_.readIfPresent("Cu", Cu_);
+        coeffs_.readIfPresent("q", q_);
+
+        coeffs_.readIfPresent("beta", beta_);
+
+        return true;
+    }
+
+    return false;
 }
 
 

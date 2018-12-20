@@ -62,8 +62,8 @@ Foam::rigidBodyMeshMotion::bodyMesh::bodyMesh
     bodyID_(bodyID),
     patches_(dict.lookup("patches")),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
-    di_(readScalar(dict.lookup("innerDistance"))),
-    do_(readScalar(dict.lookup("outerDistance"))),
+    di_(dict.get<scalar>("innerDistance")),
+    do_(dict.get<scalar>("outerDistance")),
     weight_
     (
         IOobject
@@ -122,7 +122,7 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
 {
     if (rhoName_ == "rhoInf")
     {
-        rhoInf_ = readScalar(coeffDict().lookup("rhoInf"));
+        readEntry("rhoInf", rhoInf_);
     }
 
     if (coeffDict().found("ramp"))
@@ -136,18 +136,19 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
 
     const dictionary& bodiesDict = coeffDict().subDict("bodies");
 
-    forAllConstIter(IDLList<entry>, bodiesDict, iter)
+    for (const entry& dEntry : bodiesDict)
     {
-        const dictionary& bodyDict = iter().dict();
+        const keyType& bodyName = dEntry.keyword();
+        const dictionary& bodyDict = dEntry.dict();
 
         if (bodyDict.found("patches"))
         {
-            const label bodyID = model_.bodyID(iter().keyword());
+            const label bodyID = model_.bodyID(bodyName);
 
             if (bodyID == -1)
             {
                 FatalErrorInFunction
-                    << "Body " << iter().keyword()
+                    << "Body " << bodyName
                     << " has been merged with another body"
                        " and cannot be assigned a set of patches"
                     << exit(FatalError);
@@ -158,7 +159,7 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
                 new bodyMesh
                 (
                     mesh,
-                    iter().keyword(),
+                    bodyName,
                     bodyID,
                     bodyDict
                 )
@@ -240,15 +241,15 @@ void Foam::rigidBodyMeshMotion::solve()
 
     const scalar ramp = ramp_->value(t.value());
 
-    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    if (t.foundObject<uniformDimensionedVectorField>("g"))
     {
         model_.g() =
-            ramp*db().lookupObject<uniformDimensionedVectorField>("g").value();
+            ramp*t.lookupObject<uniformDimensionedVectorField>("g").value();
     }
 
     if (test_)
     {
-        label nIter(readLabel(coeffDict().lookup("nIter")));
+        const label nIter(coeffDict().get<label>("nIter"));
 
         for (label i=0; i<nIter; i++)
         {
@@ -263,7 +264,7 @@ void Foam::rigidBodyMeshMotion::solve()
     }
     else
     {
-        label nIter(coeffDict().lookupOrDefault("nIter", 1));
+        const label nIter(coeffDict().lookupOrDefault("nIter", 1));
 
         for (label i=0; i<nIter; i++)
         {

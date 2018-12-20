@@ -335,6 +335,11 @@ label selectOutsideCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Select cells in relation to surface"
+    );
+
     argList::noParallel();
 
     #include "setRootCase.H"
@@ -357,13 +362,13 @@ int main(int argc, char *argv[])
         )
     );
 
-    fileName surfName(refineDict.lookup("surface"));
+    fileName surfName(refineDict.get<fileName>("surface"));
     pointField outsidePts(refineDict.lookup("outsidePoints"));
-    bool useSurface(readBool(refineDict.lookup("useSurface")));
-    bool selectCut(readBool(refineDict.lookup("selectCut")));
-    bool selectInside(readBool(refineDict.lookup("selectInside")));
-    bool selectOutside(readBool(refineDict.lookup("selectOutside")));
-    scalar nearDist(readScalar(refineDict.lookup("nearDistance")));
+    const bool useSurface(refineDict.get<bool>("useSurface"));
+    const bool selectCut(refineDict.get<bool>("selectCut"));
+    const bool selectInside(refineDict.get<bool>("selectInside"));
+    const bool selectOutside(refineDict.get<bool>("selectOutside"));
+    const scalar nearDist(refineDict.get<scalar>("nearDistance"));
 
 
     if (useSurface)

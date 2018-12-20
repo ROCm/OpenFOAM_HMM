@@ -43,6 +43,13 @@ Note
     }
     \endverbatim
 
+    \heading Dictionary parameters
+    \table
+        Property | Description                              | Required | Default
+        type     | subTriSurfaceMesh                        | selector |
+        surface  | Name of the underlying surface           | yes   |
+        patches  | List of surface region names or regexs   | yes   |
+    \endtable
 
 SourceFiles
     subTriSurfaceMesh.C
@@ -76,7 +83,7 @@ class subTriSurfaceMesh
         static labelList selectedRegions
         (
             const triSurface& s,
-            const UList<wordRe>& regionNames
+            const wordRes& regionNameMatcher
         );
 
         //- Subset triSurface based on regions
@@ -101,6 +108,7 @@ public:
 
     //- Destructor
     virtual ~subTriSurfaceMesh() = default;
+
 };
 
 

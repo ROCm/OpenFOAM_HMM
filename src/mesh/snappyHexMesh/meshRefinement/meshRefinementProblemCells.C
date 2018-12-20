@@ -243,8 +243,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
     {
         label facei = candidateFaces[i];
 
-        vector n = mesh_.faceAreas()[facei];
-        n /= mag(n);
+        const vector n = normalised(mesh_.faceAreas()[facei]);
 
         label region = surfaces_.globalRegion
         (
@@ -296,7 +295,7 @@ bool Foam::meshRefinement::isCollapsedFace
     const scalar severeNonorthogonalityThreshold =
         ::cos(degToRad(maxNonOrtho));
 
-    vector s = mesh_.faces()[facei].normal(points);
+    vector s = mesh_.faces()[facei].areaNormal(points);
     scalar magS = mag(s);
 
     // Check face area
@@ -521,8 +520,8 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     labelList facePatch(mesh_.nFaces(), -1);
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
 
@@ -634,8 +633,8 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     if (checkCollapse)
     {
-        minArea = readScalar(motionDict.lookup("minArea"));
-        maxNonOrtho = readScalar(motionDict.lookup("maxNonOrtho"));
+        motionDict.readEntry("minArea", minArea);
+        motionDict.readEntry("maxNonOrtho", maxNonOrtho);
 
         Info<< "markFacesOnProblemCells :"
             << " Deleting all-anchor surface cells only if"
@@ -1206,7 +1205,8 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             const labelList allFaces(identity(mesh_.nFaces()));
             label nWrongFaces = 0;
 
-            //const scalar minV(readScalar(motionDict.lookup("minVol", true)));
+            //const scalar minV
+            //(motionDict.get<scalar>("minVol", keyType::REGEX_RECURSIVE));
             //if (minV > -GREAT)
             //{
             //    polyMeshGeometry::checkFacePyramids
@@ -1235,7 +1235,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             //    nWrongFaces = nNewWrongFaces;
             //}
 
-            scalar minArea(readScalar(motionDict.lookup("minArea")));
+            scalar minArea(motionDict.get<scalar>("minArea"));
             if (minArea > -SMALL)
             {
                 polyMeshGeometry::checkFaceArea
@@ -1262,7 +1262,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
                 nWrongFaces = nNewWrongFaces;
             }
 
-            scalar minDet(readScalar(motionDict.lookup("minDeterminant")));
+            scalar minDet(motionDict.get<scalar>("minDeterminant"));
             if (minDet > -1)
             {
                 polyMeshGeometry::checkCellDeterminant

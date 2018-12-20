@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "reads surface and applies surface regioning to a mesh"
+        "Reads surface and applies surface regioning to a mesh"
     );
 
     argList::noParallel();
@@ -180,13 +180,13 @@ int main(int argc, char *argv[])
     (
         "faceSet",
         "name",
-        "only repatch the faces in specified faceSet"
+        "Only repatch the faces in specified faceSet"
     );
     argList::addOption
     (
         "tol",
         "scalar",
-        "search tolerance as fraction of mesh size (default 1e-3)"
+        "Search tolerance as fraction of mesh size (default 1e-3)"
     );
 
     #include "setRootCase.H"
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
             << " triangle ..." << endl;
     }
 
-    const scalar searchTol = args.lookupOrDefault("tol", 1e-3);
+    const scalar searchTol = args.opt<scalar>("tol", 1e-3);
 
     // Get search box. Anything not within this box will not be considered.
     const boundBox& meshBb = mesh.bounds();
@@ -324,7 +324,7 @@ int main(int argc, char *argv[])
         Info<< endl;
 
 
-        runTime++;
+        ++runTime;
 
         // Write resulting mesh
         Info<< "Writing modified mesh to time " << runTime.value() << endl;

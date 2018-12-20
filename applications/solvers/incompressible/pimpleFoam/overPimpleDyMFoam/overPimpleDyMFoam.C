@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Group
     grpIncompressibleSolvers grpMovingMeshSolvers
 
 Description
-    Transient solver for incompressible, flow of Newtonian fluids
+    Transient solver for incompressible flow of Newtonian fluids
     on a moving mesh using the PIMPLE (merged PISO-SIMPLE) algorithm.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
@@ -54,9 +54,15 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for incompressible, turbulent flow"
+        " on a moving mesh."
+    );
+
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
@@ -84,7 +90,7 @@ int main(int argc, char *argv[])
 
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
@@ -94,13 +100,30 @@ int main(int argc, char *argv[])
         {
             #include "setCellMask.H"
             #include "setInterpolatedCells.H"
+
+            surfaceScalarField faceMaskOld
+            (
+                localMin<scalar>(mesh).interpolate(cellMask.oldTime())
+            );
+
+            // Zero Uf on old faceMask (H-I)
+            Uf *= faceMaskOld;
+            // Update Uf and phi on new C-I faces
+            Uf += (1-faceMaskOld)*fvc::interpolate(U);
+            phi = mesh.Sf() & Uf;
+
+            // Zero phi on current H-I
+            surfaceScalarField faceMask
+            (
+                localMin<scalar>(mesh).interpolate(cellMask)
+            );
+            phi *= faceMask;
         }
 
-        // Calculate absolute flux from the mapped surface velocity
-        phi = mesh.Sf() & Uf;
 
         if (mesh.changing() && correctPhi)
         {
+            // Calculate absolute flux from the mapped surface velocity
             #include "correctPhi.H"
         }
 

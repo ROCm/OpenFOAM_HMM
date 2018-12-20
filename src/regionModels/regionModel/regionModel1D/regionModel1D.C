@@ -250,7 +250,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
             vectorField newDelta(cells.size() + 1, vector::zero);
 
             label j = 0;
-            forAllReverse (cells, i)
+            forAllReverse(cells, i)
             {
                 const label celli = cells[i];
                 newDelta[j+1] = (deltaV[celli]/mag(sf))*n + newDelta[j];

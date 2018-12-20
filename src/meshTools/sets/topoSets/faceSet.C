@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,22 +24,20 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faceSet.H"
-#include "mapPolyMesh.H"
 #include "polyMesh.H"
+#include "mapPolyMesh.H"
 #include "syncTools.H"
 #include "mapDistributePolyMesh.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(faceSet, 0);
-
-addToRunTimeSelectionTable(topoSet, faceSet, word);
-addToRunTimeSelectionTable(topoSet, faceSet, size);
-addToRunTimeSelectionTable(topoSet, faceSet, set);
+    defineTypeNameAndDebug(faceSet, 0);
+    addToRunTimeSelectionTable(topoSet, faceSet, word);
+    addToRunTimeSelectionTable(topoSet, faceSet, size);
+    addToRunTimeSelectionTable(topoSet, faceSet, set);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -92,11 +90,11 @@ Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
-    const labelHashSet& set,
+    const labelHashSet& labels,
     writeOption w
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, labels, w)
 {}
 
 
@@ -104,17 +102,23 @@ Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
-    const labelUList& set,
+    labelHashSet&& labels,
     writeOption w
 )
 :
-    topoSet(mesh, name, set, w)
+    topoSet(mesh, name, std::move(labels), w)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceSet::~faceSet()
+Foam::faceSet::faceSet
+(
+    const polyMesh& mesh,
+    const word& name,
+    const labelUList& labels,
+    writeOption w
+)
+:
+    topoSet(mesh, name, labels, w)
 {}
 
 
@@ -122,39 +126,31 @@ Foam::faceSet::~faceSet()
 
 void Foam::faceSet::sync(const polyMesh& mesh)
 {
-    boolList set(mesh.nFaces(), false);
+    labelHashSet& labels = *this;
 
-    forAllConstIter(faceSet, *this, iter)
+    // Convert to boolList
+    // TBD: could change to using bitSet for the synchronization
+
+    const label len = mesh.nFaces();
+
+    boolList contents(len, false);
+
+    for (const label facei : labels)
     {
-        set[iter.key()] = true;
-    }
-    syncTools::syncFaceList(mesh, set, orEqOp<bool>());
-
-    label nAdded = 0;
-
-    forAll(set, facei)
-    {
-        if (set[facei])
-        {
-            if (insert(facei))
-            {
-                nAdded++;
-            }
-        }
-        else if (found(facei))
-        {
-            FatalErrorInFunction
-                << "Problem : syncing removed faces from set."
-                << abort(FatalError);
-        }
+        contents.set(facei);
     }
 
-    reduce(nAdded, sumOp<label>());
-    if (debug && nAdded > 0)
+    syncTools::syncFaceList(mesh, contents, orEqOp<bool>());
+
+
+    // Update labelHashSet
+
+    for (label i=0; i < len; ++i)
     {
-        Info<< "Added an additional " << nAdded
-            << " faces on coupled patches. "
-            << "(processorPolyPatch, cyclicPolyPatch)" << endl;
+        if (contents.test(i))
+        {
+            labels.set(i);
+        }
     }
 }
 
@@ -173,30 +169,40 @@ void Foam::faceSet::updateMesh(const mapPolyMesh& morphMap)
 
 void Foam::faceSet::distribute(const mapDistributePolyMesh& map)
 {
-    boolList inSet(map.nOldFaces());
-    forAllConstIter(faceSet, *this, iter)
-    {
-        inSet[iter.key()] = true;
-    }
-    map.distributeFaceData(inSet);
+    labelHashSet& labels = *this;
 
-    // Count
-    label n = 0;
-    forAll(inSet, facei)
+    boolList contents(map.nOldFaces(), false);
+
+    for (const label facei : labels)
     {
-        if (inSet[facei])
+        contents.set(facei);
+    }
+
+    map.distributeFaceData(contents);
+
+    // The new length
+    const label len = contents.size();
+
+    // Count - as per BitOps::count(contents)
+    label n = 0;
+    for (label i=0; i < len; ++i)
+    {
+        if (contents.test(i))
         {
-            n++;
+            ++n;
         }
     }
 
-    clear();
-    resize(n);
-    forAll(inSet, facei)
+    // Update labelHashSet
+
+    labels.clear();
+    labels.resize(2*n);
+
+    for (label i=0; i < len; ++i)
     {
-        if (inSet[facei])
+        if (contents.test(i))
         {
-            insert(facei);
+            labels.set(i);
         }
     }
 }

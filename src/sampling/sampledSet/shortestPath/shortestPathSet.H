@@ -73,6 +73,7 @@ SourceFiles
 #define shortestPathSet_H
 
 #include "sampledSet.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -106,11 +107,81 @@ class shortestPathSet
             const polyMesh& mesh,
             const label cellI,
             const List<topoDistanceData>& allFaceInfo,
+            const PackedBoolList& isLeakPoint,
+            const bool minDistance,
             const point& origin
         );
 
-        //- Generate whole path
-        void genSamples(const polyMesh& mesh);
+        //- Sync the leak path data
+        void sync
+        (
+            const polyMesh& mesh,
+            PackedBoolList& isLeakFace,
+            PackedBoolList& isLeakPoint,
+            const label celli,
+            point& origin,
+            bool& findMinDistance
+        ) const;
+
+        //- Calculate (topological) distance to cellI
+        void calculateDistance
+        (
+            const label iter,
+            const polyMesh& mesh,
+            const label cellI,
+
+            List<topoDistanceData>& allFaceInfo,
+            List<topoDistanceData>& allCellInfo
+        ) const;
+
+        //- Checks if face uses a leak point
+        bool touchesWall
+        (
+            const polyMesh& mesh,
+            const label facei,
+
+            PackedBoolList& isLeakFace,
+            const PackedBoolList& isLeakPoint
+        ) const;
+
+        //- Calculate path between insideCelli (-1 if not on current processor)
+        //  and outsidePoint. Appends cellcentres on path to track.
+        //      isLeakCell  : track passes through cell
+        //      isLeakFace  : faces of leak cells that are also on boundary
+        //      isLeakPoint : points  of leak faces       ,,
+        void genSamples
+        (
+            const bool markLeakPath,
+            const label maxIter,
+            const polyMesh& mesh,
+            const boolList& isBlockedFace,
+            const point& insidePoint,
+            const label insideCelli,
+            const point& outsidePoint,
+
+            DynamicList<point>& samplingPts,
+            DynamicList<label>& samplingCells,
+            DynamicList<label>& samplingFaces,
+            DynamicList<label>& samplingSegments,
+            DynamicList<scalar>& samplingCurveDist,
+            PackedBoolList& isLeakCell,
+            PackedBoolList& isLeakFace,
+            PackedBoolList& isLeakPoint
+        ) const;
+
+        //- Generate whole path. With markLeakPath it will block all faces
+        //  along the whole path so will maximise the chances of finding
+        //  multiple gaps. With markLeakPath=false it will only block any
+        //  faces connected to a boundary. This makes for the nicest
+        //  hole-filling.
+        void genSamples
+        (
+            const bool markLeakPath,    // mark all cells along path
+            const label maxIter,
+            const polyMesh& mesh,
+            const labelUList& wallPatches,
+            const boolList& blockedFace
+        );
 
 
 public:
@@ -121,15 +192,20 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from components. blockedFace is an optional specification
+        //  of face that behave as if a wall
         shortestPathSet
         (
             const word& name,
             const polyMesh& mesh,
             const meshSearch& searchEngine,
             const word& axis,
+            const bool markLeakPath,
+            const label maxIter,
+            const labelUList& wallPatches,
             const pointField& insidePoints,
-            const pointField& outsidePoints
+            const pointField& outsidePoints,
+            const boolList& blockedFace
         );
 
         //- Construct from dictionary

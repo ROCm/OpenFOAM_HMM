@@ -54,12 +54,22 @@ class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Return a word representation of an int32
+//- A word representation of int32 value
 inline word name(const int32_t val)
 {
-    // No stripping required
-    return word(std::to_string(val), false);
+    return word(std::to_string(val), false); // Needs no stripping
 }
+
+
+//- A word representation of int32 value
+template<>
+struct nameOp<int32_t>
+{
+    inline word operator()(const int32_t val) const
+    {
+        return word(std::to_string(val), false); // Needs no stripping
+    }
+};
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //

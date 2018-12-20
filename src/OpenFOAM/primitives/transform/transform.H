@@ -142,31 +142,68 @@ inline tensor Ra(const vector& a, const scalar omega)
 }
 
 
-inline label transform(const tensor&, const bool i)
+//- No-op rotational transform of a bool
+inline bool transform(const tensor&, const bool b)
 {
-    return i;
+    return b;
 }
 
 
+//- No-op inverse rotational transform of a bool
+inline bool invTransform(const tensor&, const bool b)
+{
+    return b;
+}
+
+
+//- No-op rotational transform of a label
 inline label transform(const tensor&, const label i)
 {
     return i;
 }
 
 
+//- No-op inverse rotational transform of a label
+inline label invTransform(const tensor&, const label i)
+{
+    return i;
+}
+
+
+//- No-op rotational transform of a scalar
 inline scalar transform(const tensor&, const scalar s)
 {
     return s;
 }
 
 
-template<class Cmpt>
-inline Vector<Cmpt> transform(const tensor& tt, const Vector<Cmpt>& v)
+//- No-op inverse rotational transform of a scalar
+inline scalar invTransform(const tensor&, const scalar s)
 {
-    return tt & v;
+    return s;
 }
 
 
+//- Use rotational tensor to transform a vector.
+//  Same as (rot & v)
+template<class Cmpt>
+inline Vector<Cmpt> transform(const tensor& tt, const Vector<Cmpt>& v)
+{
+    return (tt & v);
+}
+
+
+//- Use rotational tensor to inverse transform a vector.
+//  Same as (v & rot)
+template<class Cmpt>
+inline Vector<Cmpt> invTransform(const tensor& tt, const Vector<Cmpt>& v)
+{
+    return (v & tt);
+}
+
+
+//- Use rotational tensor to transform a tensor.
+//  Same as (rot & input & rot.T())
 template<class Cmpt>
 inline Tensor<Cmpt> transform(const tensor& tt, const Tensor<Cmpt>& t)
 {
@@ -211,6 +248,53 @@ inline Tensor<Cmpt> transform(const tensor& tt, const Tensor<Cmpt>& t)
 }
 
 
+//- Use rotational tensor to inverse transform a tensor.
+//  Same as (rot.T() & input & rot)
+template<class Cmpt>
+inline Tensor<Cmpt> invTransform(const tensor& tt, const Tensor<Cmpt>& t)
+{
+    return Tensor<Cmpt>
+    (
+        (tt.xx()*t.xx() + tt.yx()*t.yx() + tt.zx()*t.zx())*tt.xx()
+      + (tt.xx()*t.xy() + tt.yx()*t.yy() + tt.zx()*t.zy())*tt.yx()
+      + (tt.xx()*t.xz() + tt.yx()*t.yz() + tt.zx()*t.zz())*tt.zx(),
+
+        (tt.xx()*t.xx() + tt.yx()*t.yx() + tt.zx()*t.zx())*tt.xy()
+      + (tt.xx()*t.xy() + tt.yx()*t.yy() + tt.zx()*t.zy())*tt.yy()
+      + (tt.xx()*t.xz() + tt.yx()*t.yz() + tt.zx()*t.zz())*tt.zy(),
+
+        (tt.xx()*t.xx() + tt.yx()*t.yx() + tt.zx()*t.zx())*tt.xz()
+      + (tt.xx()*t.xy() + tt.yx()*t.yy() + tt.zx()*t.zy())*tt.yz()
+      + (tt.xx()*t.xz() + tt.yx()*t.yz() + tt.zx()*t.zz())*tt.zz(),
+
+        (tt.xy()*t.xx() + tt.yy()*t.yx() + tt.zy()*t.zx())*tt.xx()
+      + (tt.xy()*t.xy() + tt.yy()*t.yy() + tt.zy()*t.zy())*tt.yx()
+      + (tt.xy()*t.xz() + tt.yy()*t.yz() + tt.zy()*t.zz())*tt.zx(),
+
+        (tt.xy()*t.xx() + tt.yy()*t.yx() + tt.zy()*t.zx())*tt.xy()
+      + (tt.xy()*t.xy() + tt.yy()*t.yy() + tt.zy()*t.zy())*tt.yy()
+      + (tt.xy()*t.xz() + tt.yy()*t.yz() + tt.zy()*t.zz())*tt.zy(),
+
+        (tt.xy()*t.xx() + tt.yy()*t.yx() + tt.zy()*t.zx())*tt.xz()
+      + (tt.xy()*t.xy() + tt.yy()*t.yy() + tt.zy()*t.zy())*tt.yz()
+      + (tt.xy()*t.xz() + tt.yy()*t.yz() + tt.zy()*t.zz())*tt.zz(),
+
+        (tt.xz()*t.xx() + tt.yz()*t.yx() + tt.zz()*t.zx())*tt.xx()
+      + (tt.xz()*t.xy() + tt.yz()*t.yy() + tt.zz()*t.zy())*tt.yx()
+      + (tt.xz()*t.xz() + tt.yz()*t.yz() + tt.zz()*t.zz())*tt.zx(),
+
+        (tt.xz()*t.xx() + tt.yz()*t.yx() + tt.zz()*t.zx())*tt.xy()
+      + (tt.xz()*t.xy() + tt.yz()*t.yy() + tt.zz()*t.zy())*tt.yy()
+      + (tt.xz()*t.xz() + tt.yz()*t.yz() + tt.zz()*t.zz())*tt.zy(),
+
+        (tt.xz()*t.xx() + tt.yz()*t.yx() + tt.zz()*t.zx())*tt.xz()
+      + (tt.xz()*t.xy() + tt.yz()*t.yy() + tt.zz()*t.zy())*tt.yz()
+      + (tt.xz()*t.xz() + tt.yz()*t.yz() + tt.zz()*t.zz())*tt.zz()
+    );
+}
+
+
+//- Use rotational tensor to transform a spherical tensor (no-op).
 template<class Cmpt>
 inline SphericalTensor<Cmpt> transform
 (
@@ -222,6 +306,20 @@ inline SphericalTensor<Cmpt> transform
 }
 
 
+//- Use rotational tensor to inverse transform a spherical tensor (no-op).
+template<class Cmpt>
+inline SphericalTensor<Cmpt> invTransform
+(
+    const tensor& tt,
+    const SphericalTensor<Cmpt>& st
+)
+{
+    return st;
+}
+
+
+//- Use rotational tensor to transform a symmetrical tensor.
+//  Same as (rot & input & rot.T())
 template<class Cmpt>
 inline SymmTensor<Cmpt> transform(const tensor& tt, const SymmTensor<Cmpt>& st)
 {
@@ -250,6 +348,41 @@ inline SymmTensor<Cmpt> transform(const tensor& tt, const SymmTensor<Cmpt>& st)
         (tt.zx()*st.xx() + tt.zy()*st.xy() + tt.zz()*st.xz())*tt.zx()
       + (tt.zx()*st.xy() + tt.zy()*st.yy() + tt.zz()*st.yz())*tt.zy()
       + (tt.zx()*st.xz() + tt.zy()*st.yz() + tt.zz()*st.zz())*tt.zz()
+    );
+}
+
+
+//- Use rotational tensor to inverse transform a symmetrical tensor.
+//  Same as (rot.T() & input & rot)
+template<class Cmpt>
+inline SymmTensor<Cmpt>
+invTransform(const tensor& tt, const SymmTensor<Cmpt>& st)
+{
+    return SymmTensor<Cmpt>
+    (
+        (tt.xx()*st.xx() + tt.yx()*st.xy() + tt.zx()*st.xz())*tt.xx()
+      + (tt.xx()*st.xy() + tt.yx()*st.yy() + tt.zx()*st.yz())*tt.yx()
+      + (tt.xx()*st.xz() + tt.yx()*st.yz() + tt.zx()*st.zz())*tt.zx(),
+
+        (tt.xx()*st.xx() + tt.yx()*st.xy() + tt.zx()*st.xz())*tt.xy()
+      + (tt.xx()*st.xy() + tt.yx()*st.yy() + tt.zx()*st.yz())*tt.yy()
+      + (tt.xx()*st.xz() + tt.yx()*st.yz() + tt.zx()*st.zz())*tt.zy(),
+
+        (tt.xx()*st.xx() + tt.yx()*st.xy() + tt.zx()*st.xz())*tt.xz()
+      + (tt.xx()*st.xy() + tt.yx()*st.yy() + tt.zx()*st.yz())*tt.yz()
+      + (tt.xx()*st.xz() + tt.yx()*st.yz() + tt.zx()*st.zz())*tt.zz(),
+
+        (tt.xy()*st.xx() + tt.yy()*st.xy() + tt.zy()*st.xz())*tt.xy()
+      + (tt.xy()*st.xy() + tt.yy()*st.yy() + tt.zy()*st.yz())*tt.yy()
+      + (tt.xy()*st.xz() + tt.yy()*st.yz() + tt.zy()*st.zz())*tt.zy(),
+
+        (tt.xy()*st.xx() + tt.yy()*st.xy() + tt.zy()*st.xz())*tt.xz()
+      + (tt.xy()*st.xy() + tt.yy()*st.yy() + tt.zy()*st.yz())*tt.yz()
+      + (tt.xy()*st.xz() + tt.yy()*st.yz() + tt.zy()*st.zz())*tt.zz(),
+
+        (tt.xz()*st.xx() + tt.yz()*st.xy() + tt.zz()*st.xz())*tt.xz()
+      + (tt.xz()*st.xy() + tt.yz()*st.yy() + tt.zz()*st.yz())*tt.yz()
+      + (tt.xz()*st.xz() + tt.yz()*st.yz() + tt.zz()*st.zz())*tt.zz()
     );
 }
 
@@ -292,16 +425,16 @@ inline scalar pseudoAngle
     const vector& vec
 )
 {
-    scalar cos = vec & e0;
-    scalar sin = vec & e1;
+    const scalar cos_angle = vec & e0;
+    const scalar sin_angle = vec & e1;
 
-    if (sin < -SMALL)
+    if (sin_angle < -SMALL)
     {
-        return (3.0 + cos)*constant::mathematical::piByTwo;
+        return (3.0 + cos_angle)*constant::mathematical::piByTwo;
     }
     else
     {
-        return (1.0 - cos)*constant::mathematical::piByTwo;
+        return (1.0 - cos_angle)*constant::mathematical::piByTwo;
     }
 }
 

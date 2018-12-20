@@ -56,7 +56,7 @@ Foam::fv::patchMeanVelocityForce::patchMeanVelocityForce
 )
 :
     meanVelocityForce(sourceName, modelType, dict, mesh),
-    patch_(coeffs_.lookup("patch")),
+    patch_(coeffs_.get<word>("patch")),
     patchi_(mesh.boundaryMesh().findPatchID(patch_))
 {
     if (patchi_ < 0)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fixedCoeff.H"
 #include "fvMatrices.H"
+#include "pointIndList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -78,7 +79,6 @@ void Foam::porosityModels::fixedCoeff::apply
     const scalar rho
 ) const
 {
-
     forAll(cellZoneIDs_, zoneI)
     {
         const tensorField& alphaZones = alpha_[zoneI];
@@ -123,62 +123,45 @@ Foam::porosityModels::fixedCoeff::fixedCoeff
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::porosityModels::fixedCoeff::~fixedCoeff()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::porosityModels::fixedCoeff::calcTransformModelData()
 {
-    if (coordSys_.R().uniform())
+    // The alpha coefficient as a tensor
+    tensor alphaCoeff(Zero);
+    alphaCoeff.xx() = alphaXYZ_.value().x();
+    alphaCoeff.yy() = alphaXYZ_.value().y();
+    alphaCoeff.zz() = alphaXYZ_.value().z();
+
+    // The beta coefficient as a tensor
+    tensor betaCoeff(Zero);
+    betaCoeff.xx() = betaXYZ_.value().x();
+    betaCoeff.yy() = betaXYZ_.value().y();
+    betaCoeff.zz() = betaXYZ_.value().z();
+
+    if (csys().uniform())
     {
-        forAll(cellZoneIDs_, zoneI)
+        forAll(cellZoneIDs_, zonei)
         {
-            alpha_[zoneI].setSize(1);
-            beta_[zoneI].setSize(1);
+            alpha_[zonei].resize(1);
+            beta_[zonei].resize(1);
 
-            alpha_[zoneI][0] = Zero;
-            alpha_[zoneI][0].xx() = alphaXYZ_.value().x();
-            alpha_[zoneI][0].yy() = alphaXYZ_.value().y();
-            alpha_[zoneI][0].zz() = alphaXYZ_.value().z();
-            alpha_[zoneI][0] = coordSys_.R().transformTensor(alpha_[zoneI][0]);
-
-            beta_[zoneI][0] = Zero;
-            beta_[zoneI][0].xx() = betaXYZ_.value().x();
-            beta_[zoneI][0].yy() = betaXYZ_.value().y();
-            beta_[zoneI][0].zz() = betaXYZ_.value().z();
-            beta_[zoneI][0] = coordSys_.R().transformTensor(beta_[zoneI][0]);
+            alpha_[zonei] = csys().transform(alphaCoeff);
+            beta_[zonei] = csys().transform(betaCoeff);
         }
     }
     else
     {
-        forAll(cellZoneIDs_, zoneI)
+        forAll(cellZoneIDs_, zonei)
         {
-            const labelList& cells = mesh_.cellZones()[cellZoneIDs_[zoneI]];
+            const pointUIndList cc
+            (
+                mesh_.cellCentres(),
+                mesh_.cellZones()[cellZoneIDs_[zonei]]
+            );
 
-            alpha_[zoneI].setSize(cells.size());
-            beta_[zoneI].setSize(cells.size());
-
-            forAll(cells, i)
-            {
-                alpha_[zoneI][i] = Zero;
-                alpha_[zoneI][i].xx() = alphaXYZ_.value().x();
-                alpha_[zoneI][i].yy() = alphaXYZ_.value().y();
-                alpha_[zoneI][i].zz() = alphaXYZ_.value().z();
-
-                beta_[zoneI][i] = Zero;
-                beta_[zoneI][i].xx() = betaXYZ_.value().x();
-                beta_[zoneI][i].yy() = betaXYZ_.value().y();
-                beta_[zoneI][i].zz() = betaXYZ_.value().z();
-            }
-
-            const coordinateRotation& R = coordSys_.R(mesh_, cells);
-
-            alpha_[zoneI] = R.transformTensor(alpha_[zoneI], cells);
-            beta_[zoneI] = R.transformTensor(beta_[zoneI], cells);
+            alpha_[zonei] = csys().transform(cc, alphaCoeff);
+            beta_[zonei] = csys().transform(cc, betaCoeff);
         }
     }
 }
@@ -195,7 +178,7 @@ void Foam::porosityModels::fixedCoeff::calcForce
     scalarField Udiag(U.size(), 0.0);
     vectorField Usource(U.size(), Zero);
     const scalarField& V = mesh_.V();
-    scalar rhoRef = readScalar(coeffs_.lookup("rhoRef"));
+    const scalar rhoRef = coeffs_.get<scalar>("rhoRef");
 
     apply(Udiag, Usource, V, U, rhoRef);
 
@@ -216,7 +199,7 @@ void Foam::porosityModels::fixedCoeff::correct
     scalar rho = 1.0;
     if (UEqn.dimensions() == dimForce)
     {
-        coeffs_.lookup("rhoRef") >> rho;
+        coeffs_.readEntry("rhoRef", rho);
     }
 
     apply(Udiag, Usource, V, U, rho);
@@ -238,7 +221,7 @@ void Foam::porosityModels::fixedCoeff::correct
     scalar rho = 1.0;
     if (UEqn.dimensions() == dimForce)
     {
-        coeffs_.lookup("rhoRef") >> rho;
+        coeffs_.readEntry("rhoRef", rho);
     }
 
     apply(Udiag, Usource, V, U, rho);
@@ -256,7 +239,7 @@ void Foam::porosityModels::fixedCoeff::correct
     scalar rho = 1.0;
     if (UEqn.dimensions() == dimForce)
     {
-        coeffs_.lookup("rhoRef") >> rho;
+        coeffs_.readEntry("rhoRef", rho);
     }
 
     apply(AU, U, rho);
@@ -265,8 +248,7 @@ void Foam::porosityModels::fixedCoeff::correct
 
 bool Foam::porosityModels::fixedCoeff::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    dict_.writeEntry(name_, os);
 
     return true;
 }

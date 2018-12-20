@@ -50,12 +50,6 @@ Foam::radiation::noScatter::noScatter
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::noScatter::~noScatter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField> Foam::radiation::noScatter::sigmaEff() const

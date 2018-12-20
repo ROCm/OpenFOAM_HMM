@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,8 @@ Class
     Foam::functionObjects::runTimePostPro::text
 
 Description
+    Define text element for runTimePostProcessing
+
     Example of text object specification:
     \verbatim
     text1
@@ -32,16 +34,41 @@ Description
         string      "text to display";
         position    (0.1 0.05);
         size        18;
+        // halign      left;  // (left | centre | right)
         bold        yes;
+        // Optional entry
+
+        shadow      false;
         visible     yes;
 
         // Optionally override default colour
         // colour    (0 1 1);
 
         // Optional entry
-        timeStamp   yes; //Append solution time to string
+        timeStamp   yes; // Append solution time to string
     }
     \endverbatim
+
+    Dictionary controls
+    \table
+        Property    | Description                          | Required | Default
+        string      | Text to display                      | yes |
+        position    | The (x y) viewport position          | yes |
+        size        | The font size in points              | yes |
+        halign      | Text justification (left/centre/ right) | no | left
+        bold        | Use bold font                        | yes |
+        italic      | Use italic font                      | no  | false
+        shadow      | Add text shadow                      | no  | false
+        colour      | Override default text colour         | no  |
+        timeStamp   | Append solution timeName to string   | no  | false
+    \endtable
+
+    Inherited controls
+    \table
+        Property    | Description                          | Required | Default
+        visible     | Display the object                   | yes |
+        opacity     | Object opacity                       | no  | 1.0
+    \endtable
 
 SourceFiles
     text.C
@@ -56,6 +83,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkRenderer;
 
 namespace Foam
@@ -73,20 +101,25 @@ class text
 :
     public geometryBase
 {
-private:
+public:
 
-    // Private Member Functions
+    // Public enumerations
 
-        //- No copy construct
-        text(const text&) = delete;
+        //- Horizontal alignment type
+        enum halignType
+        {
+            LEFT   = 0,   //!< Left-justified text - default ("left")
+            CENTER = 1,   //!< Centred text ("center", "centre")
+            RIGHT  = 2    //!< Right-justified text  ("right")
+        };
 
-        //- No copy assignment
-        void operator=(const text&) = delete;
+        //- Horizontal alignment names (includes "center" and "centre")
+        static const Enum<halignType> halignTypeNames;
 
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Text
         string string_;
@@ -100,11 +133,29 @@ protected:
         //- Colour
         autoPtr<Function1<vector>> colour_;
 
+        //- Horizontal alignment
+        halignType halign_;
+
         //- Bold flag
         bool bold_;
 
+        //- Italic flag
+        bool italic_;
+
+        //- Shadow flag
+        bool shadow_;
+
         //- Time stamp flag
         bool timeStamp_;
+
+
+    // Protected Member Functions
+
+        //- No copy construct
+        text(const text&) = delete;
+
+        //- No copy assignment
+        void operator=(const text&) = delete;
 
 
 public:
@@ -116,7 +167,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 

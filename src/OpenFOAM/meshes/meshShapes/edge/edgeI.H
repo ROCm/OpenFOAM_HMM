@@ -114,6 +114,12 @@ inline Foam::label Foam::edge::maxVertex() const
 }
 
 
+inline bool Foam::edge::valid() const
+{
+    return (first() != second() && first() >= 0 && second() >= 0);
+}
+
+
 inline bool Foam::edge::found(const label pointLabel) const
 {
     // -1: always false
@@ -166,13 +172,13 @@ inline Foam::label Foam::edge::commonVertex(const edge& other) const
 }
 
 
-inline Foam::label Foam::edge::otherVertex(const label index) const
+inline Foam::label Foam::edge::otherVertex(const label pointLabel) const
 {
-    if (index == first())
+    if (pointLabel == first())
     {
         return second();
     }
-    if (index == second())
+    if (pointLabel == second())
     {
         return first();
     }
@@ -421,10 +427,10 @@ inline Foam::vector Foam::edge::unitVec(const UList<point>& pts) const
     }
     #endif
 
-    Foam::vector v = pts[second()] - pts[first()];
-    v /= ::Foam::mag(v) + VSMALL;
+    const vector v = (pts[second()] - pts[first()]);
+    const scalar s(Foam::mag(v));
 
-    return v;
+    return s < ROOTVSMALL ? Zero : v/s;
 }
 
 

@@ -38,7 +38,7 @@ Foam::interfaceCompositionModel::New
 {
     word interfaceCompositionModelType
     (
-        word(dict.lookup("type"))
+        dict.get<word>("type")
       + "<"
       + pair.phase1().thermo().type()
       + ","

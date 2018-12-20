@@ -48,15 +48,15 @@ Foam::IOobject Foam::IOporosityModelList::createIOobject
         Info<< "Creating porosity model list from " << io.name() << nl << endl;
 
         io.readOpt() = IOobject::MUST_READ_IF_MODIFIED;
-        return io;
     }
     else
     {
         Info<< "No porosity models present" << nl << endl;
 
         io.readOpt() = IOobject::NO_READ;
-        return io;
     }
+
+    return io;
 }
 
 
@@ -79,10 +79,8 @@ bool Foam::IOporosityModelList::read()
         porosityModelList::read(*this);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

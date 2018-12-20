@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Description
 
 SourceFiles
     parLagrangianRedistributor.C
-    parLagrangianRedistributorRedistributeFields.C
+    parLagrangianRedistributorFields.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class mapDistributePolyMesh;
 class mapDistributeBase;
 class IOobjectList;
@@ -126,41 +127,41 @@ public:
         static wordList filterObjects
         (
             const IOobjectList& objects,
-            const wordHashSet& selectedFields
+            const wordRes& selectedFields = wordRes()
         );
 
         //- Read, redistribute and write all/selected lagrangian fields
         template<class Type>
-        void redistributeLagrangianFields
+        label redistributeFields
         (
             const mapDistributeBase& map,
             const word& cloudName,
             const IOobjectList& objects,
-            const wordHashSet& selectedFields
+            const wordRes& selectedFields = wordRes()
         ) const;
 
         //- Read, redistribute and write all/selected lagrangian fieldFields
         template<class Type>
-        void redistributeLagrangianFieldFields
+        label redistributeFieldFields
         (
             const mapDistributeBase& map,
             const word& cloudName,
             const IOobjectList& objects,
-            const wordHashSet& selectedFields
+            const wordRes& selectedFields = wordRes()
         ) const;
 
         //- Read and store all fields of a cloud
         template<class Container>
-        static void readLagrangianFields
+        static label readFields
         (
             const passivePositionParticleCloud& cloud,
             const IOobjectList& objects,
-            const wordHashSet& selectedFields
+            const wordRes& selectedFields = wordRes()
         );
 
         //- Redistribute and write stored lagrangian fields
         template<class Container>
-        void redistributeStoredLagrangianFields
+        label redistributeStoredFields
         (
             const mapDistributeBase& map,
             passivePositionParticleCloud& cloud
@@ -176,7 +177,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "parLagrangianRedistributorRedistributeFields.C"
+#   include "parLagrangianRedistributorFields.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

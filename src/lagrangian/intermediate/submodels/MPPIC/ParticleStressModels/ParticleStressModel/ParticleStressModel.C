@@ -41,9 +41,8 @@ Foam::ParticleStressModel::ParticleStressModel
     const dictionary& dict
 )
 :
-    alphaPacked_(readScalar(dict.lookup("alphaPacked")))
-{
-}
+    alphaPacked_(dict.get<scalar>("alphaPacked"))
+{}
 
 
 Foam::ParticleStressModel::ParticleStressModel
@@ -52,8 +51,7 @@ Foam::ParticleStressModel::ParticleStressModel
 )
 :
     alphaPacked_(cm.alphaPacked_)
-{
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
@@ -63,7 +61,7 @@ Foam::autoPtr<Foam::ParticleStressModel> Foam::ParticleStressModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting particle stress model " << modelType << endl;
 

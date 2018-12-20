@@ -74,7 +74,7 @@ Foam::autoPtr<Foam::RBD::rigidBody> Foam::RBD::rigidBody::New
     const dictionary& dict
 )
 {
-    const word bodyType(dict.lookup("type"));
+    const word bodyType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(bodyType);
 

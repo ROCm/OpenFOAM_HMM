@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.opt<scalar>("scale", -1);
 
     const word outputFile(args.executable() + ".obj");
 

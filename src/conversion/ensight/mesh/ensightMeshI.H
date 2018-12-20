@@ -49,6 +49,12 @@ inline bool Foam::ensightMesh::useInternalMesh() const
 }
 
 
+inline bool Foam::ensightMesh::useBoundaryMesh() const
+{
+    return options_->useBoundaryMesh();
+}
+
+
 inline const Foam::ensightCells& Foam::ensightMesh::meshCells() const
 {
     return meshCells_;

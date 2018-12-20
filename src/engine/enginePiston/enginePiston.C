@@ -30,7 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::enginePiston::enginePiston
 (
     const polyMesh& mesh,
@@ -43,13 +42,12 @@ Foam::enginePiston::enginePiston
     mesh_(mesh),
     engineDB_(refCast<const engineTime>(mesh.time())),
     patchID_(pistonPatchName, mesh.boundaryMesh()),
-    csPtr_(pistonCS),
+    csysPtr_(pistonCS),
     minLayer_(minLayer),
     maxLayer_(maxLayer)
 {}
 
 
-// Construct from dictionary
 Foam::enginePiston::enginePiston
 (
     const polyMesh& mesh,
@@ -59,20 +57,13 @@ Foam::enginePiston::enginePiston
     mesh_(mesh),
     engineDB_(refCast<const engineTime>(mesh_.time())),
     patchID_(dict.lookup("patch"), mesh.boundaryMesh()),
-    csPtr_
+    csysPtr_
     (
-        coordinateSystem::New
-        (
-            mesh_,
-            dict.subDict("coordinateSystem")
-        )
+        coordinateSystem::New(mesh_, dict, coordinateSystem::typeName_())
     ),
-    minLayer_(readScalar(dict.lookup("minLayer"))),
-    maxLayer_(readScalar(dict.lookup("maxLayer")))
+    minLayer_(dict.get<scalar>("minLayer")),
+    maxLayer_(dict.get<scalar>("maxLayer"))
 {}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

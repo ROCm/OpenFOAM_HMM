@@ -45,7 +45,7 @@ Foam::cellAspectRatioControl::cellAspectRatioControl
     )
 {
     // Normalise the direction
-    aspectRatioDirection_ /= mag(aspectRatioDirection_) + SMALL;
+    aspectRatioDirection_.normalise();
 
     Info<< nl
         << "Cell Aspect Ratio Control" << nl

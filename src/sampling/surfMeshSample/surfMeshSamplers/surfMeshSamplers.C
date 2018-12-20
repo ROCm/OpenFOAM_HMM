@@ -109,7 +109,7 @@ bool Foam::surfMeshSamplers::add_rhoU(const word& derivedName)
 
     // rhoU = rho * U
 
-    const auto* rhoPtr = mesh_.lookupObjectPtr<volScalarField>("rho");
+    const auto* rhoPtr = mesh_.findObject<volScalarField>("rho");
     const volVectorField& U = mesh_.lookupObject<volVectorField>("U");
 
     tmp<volVectorField> tresult;
@@ -152,7 +152,7 @@ bool Foam::surfMeshSamplers::add_pTotal(const word& derivedName)
 
     // pTotal = p + rho * U^2 / 2
 
-    const auto* rhoPtr = mesh_.lookupObjectPtr<volScalarField>("rho");
+    const auto* rhoPtr = mesh_.findObject<volScalarField>("rho");
     const volScalarField& p = mesh_.lookupObject<volScalarField>("p");
     const volVectorField& U = mesh_.lookupObject<volVectorField>("U");
 
@@ -348,7 +348,7 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
     {
         sampleScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
 
-        dict.lookup("fields") >> fieldSelection_;
+        dict.readEntry("fields", fieldSelection_);
         fieldSelection_.uniq();
 
         Info<< type() << " fields:  " << flatOutput(fieldSelection_) << nl;

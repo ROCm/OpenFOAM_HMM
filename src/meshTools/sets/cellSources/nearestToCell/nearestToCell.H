@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,13 @@ Class
     Foam::nearestToCell
 
 Description
-    A topoSetSource to select cells nearest to points.
+    A topoSetCellSource to select cells nearest to points.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        points      | List of selection points          | yes   |
+    \endtable
 
 SourceFiles
     nearestToCell.C
@@ -35,7 +41,7 @@ SourceFiles
 #ifndef nearestToCell_H
 #define nearestToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +54,7 @@ namespace Foam
 
 class nearestToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -72,43 +78,29 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        nearestToCell
-        (
-            const polyMesh& mesh,
-            const pointField& points
-        );
+        //- Construct from components, copying points
+        nearestToCell(const polyMesh& mesh, const pointField& points);
+
+        //- Construct from components, moving points
+        nearestToCell(const polyMesh& mesh, pointField&& points);
 
         //- Construct from dictionary
-        nearestToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        nearestToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        nearestToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        nearestToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~nearestToCell();
+    virtual ~nearestToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

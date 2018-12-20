@@ -46,14 +46,14 @@ const Foam::Enum
     Foam::Time::stopAtControls
 >
 Foam::Time::stopAtControlNames
-{
+({
     { stopAtControls::saEndTime, "endTime" },
     { stopAtControls::saNoWriteNow, "noWriteNow" },
     { stopAtControls::saWriteNow, "writeNow" },
     { stopAtControls::saNextWrite, "nextWrite" },
     // NOTE: stopAtControls::saUnknown is left untabulated here so that it can
     // be used as fallback value to flag unknown settings
-};
+});
 
 
 const Foam::Enum
@@ -61,13 +61,13 @@ const Foam::Enum
     Foam::Time::writeControls
 >
 Foam::Time::writeControlNames
-{
+({
     { writeControls::wcTimeStep, "timeStep" },
     { writeControls::wcRunTime, "runTime" },
     { writeControls::wcAdjustableRunTime, "adjustableRunTime" },
     { writeControls::wcClockTime, "clockTime" },
     { writeControls::wcCpuTime, "cpuTime" },
-};
+});
 
 
 Foam::Time::fmtflags Foam::Time::format_(Foam::Time::general);
@@ -149,30 +149,29 @@ void Foam::Time::setControls()
 
     if (startFrom == "startTime")
     {
-        controlDict_.lookup("startTime") >> startTime_;
+        controlDict_.readEntry("startTime", startTime_);
     }
     else
     {
         // Search directory for valid time directories
         instantList timeDirs = findTimes(path(), constant());
 
+        const label nTimes = timeDirs.size();
+
         if (startFrom == "firstTime")
         {
-            if (timeDirs.size())
+            if (nTimes > 1 && timeDirs.first().name() == constant())
             {
-                if (timeDirs[0].name() == constant() && timeDirs.size() >= 2)
-                {
-                    startTime_ = timeDirs[1].value();
-                }
-                else
-                {
-                    startTime_ = timeDirs[0].value();
-                }
+                startTime_ = timeDirs[1].value();
+            }
+            else if (nTimes)
+            {
+                startTime_ = timeDirs.first().value();
             }
         }
         else if (startFrom == "latestTime")
         {
-            if (timeDirs.size())
+            if (nTimes)
             {
                 startTime_ = timeDirs.last().value();
             }
@@ -204,7 +203,7 @@ void Foam::Time::setControls()
         (
             precision_ = maxPrecision_;
             precision_ > oldPrecision;
-            precision_--
+            --precision_
         )
         {
             // Update the time formatting
@@ -343,11 +342,11 @@ void Foam::Time::setControls()
 
 void Foam::Time::setMonitoring(const bool forceProfiling)
 {
-    const dictionary* profilingDict = controlDict_.subDictPtr("profiling");
+    const dictionary* profilingDict = controlDict_.findDict("profiling");
     if (!profilingDict)
     {
         // ... or from etc/controlDict
-        profilingDict = debug::controlDict().subDictPtr("profiling");
+        profilingDict = debug::controlDict().findDict("profiling");
     }
 
     // initialize profiling on request
@@ -407,12 +406,13 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
 
 Foam::Time::Time
 (
-    const word& controlDictName,
+    const word& ctrlDictName,
     const fileName& rootPath,
     const fileName& caseName,
     const word& systemName,
     const word& constantName,
-    const bool enableFunctionObjects
+    const bool enableFunctionObjects,
+    const bool enableLibs
 )
 :
     TimePaths
@@ -432,7 +432,7 @@ Foam::Time::Time
     (
         IOobject
         (
-            controlDictName,
+            ctrlDictName,
             system(),
             *this,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -456,10 +456,17 @@ Foam::Time::Time
     writeStreamOption_(IOstream::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
-
-    functionObjects_(*this, enableFunctionObjects)
+    functionObjects_(*this, false)
 {
-    libs_.open(controlDict_, "libs");
+    if (enableFunctionObjects)
+    {
+        functionObjects_.on();
+    }
+
+    if (enableLibs)
+    {
+        libs_.open(controlDict_, "libs");
+    }
 
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
@@ -472,22 +479,13 @@ Foam::Time::Time
 
 Foam::Time::Time
 (
-    const word& controlDictName,
+    const word& ctrlDictName,
     const argList& args,
     const word& systemName,
     const word& constantName
 )
 :
-    TimePaths
-    (
-        args.parRunControl().parRun(),
-        args.rootPath(),
-        args.distributed(),
-        args.globalCaseName(),
-        args.caseName(),
-        systemName,
-        constantName
-    ),
+    TimePaths(args, systemName, constantName),
 
     objectRegistry(*this),
 
@@ -498,7 +496,7 @@ Foam::Time::Time
     (
         IOobject
         (
-            controlDictName,
+            ctrlDictName,
             system(),
             *this,
             IOobject::MUST_READ_IF_MODIFIED,
@@ -522,18 +520,38 @@ Foam::Time::Time
     writeStreamOption_(IOstream::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
-
-    functionObjects_
+    functionObjects_(*this, false)
+{
+    // Enable/disable functions
+    //
+    //  '-withFunctionObjects' exists and used = enable
+    //  '-noFunctionObjects' exists and used = disable
+    //  default: no functions if there is no way to enable/disable them
+    if
     (
-        *this,
         argList::validOptions.found("withFunctionObjects")
       ? args.found("withFunctionObjects")
       : argList::validOptions.found("noFunctionObjects")
       ? !args.found("noFunctionObjects")
       : false
     )
-{
-    libs_.open(controlDict_, "libs");
+    {
+        functionObjects_.on();
+    }
+
+    // Allow/disallow libs
+    //
+    //  '-no-libs' exists and used = disable
+    //  default: enable
+    if
+    (
+        argList::validOptions.found("no-libs")
+      ? !args.found("no-libs")
+      : true
+    )
+    {
+        libs_.open(controlDict_, "libs");
+    }
 
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
@@ -553,7 +571,8 @@ Foam::Time::Time
     const fileName& caseName,
     const word& systemName,
     const word& constantName,
-    const bool enableFunctionObjects
+    const bool enableFunctionObjects,
+    const bool enableLibs
 )
 :
     TimePaths
@@ -599,9 +618,18 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(false),
 
-    functionObjects_(*this, enableFunctionObjects)
+    functionObjects_(*this, false)
 {
-    libs_.open(controlDict_, "libs");
+    if (enableFunctionObjects)
+    {
+        functionObjects_.on();
+    }
+
+    if (enableLibs)
+    {
+        libs_.open(controlDict_, "libs");
+    }
+
 
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
@@ -621,7 +649,8 @@ Foam::Time::Time
     const fileName& caseName,
     const word& systemName,
     const word& constantName,
-    const bool enableFunctionObjects
+    const bool enableFunctionObjects,
+    const bool enableLibs
 )
 :
     TimePaths
@@ -664,9 +693,18 @@ Foam::Time::Time
     graphFormat_("raw"),
     runTimeModifiable_(false),
 
-    functionObjects_(*this, enableFunctionObjects)
+    functionObjects_(*this, false)
 {
-    libs_.open(controlDict_, "libs");
+    if (enableFunctionObjects)
+    {
+        functionObjects_.on();
+    }
+
+    if (enableLibs)
+    {
+        libs_.open(controlDict_, "libs");
+    }
+
     setMonitoring(); // for profiling etc
 }
 
@@ -705,12 +743,6 @@ Foam::word Foam::Time::timeName(const scalar t, const int precision)
 Foam::word Foam::Time::timeName() const
 {
     return dimensionedScalar::name();
-}
-
-
-Foam::instantList Foam::Time::times() const
-{
-    return findTimes(path(), constant());
 }
 
 
@@ -776,68 +808,6 @@ Foam::word Foam::Time::findInstancePath
 Foam::word Foam::Time::findInstancePath(const instant& t) const
 {
     return findInstancePath(path(), t);
-}
-
-
-Foam::instant Foam::Time::findClosestTime(const scalar t) const
-{
-    instantList timeDirs = findTimes(path(), constant());
-
-    // There is only one time (likely "constant") so return it
-    if (timeDirs.size() == 1)
-    {
-        return timeDirs[0];
-    }
-
-    if (t < timeDirs[1].value())
-    {
-        return timeDirs[1];
-    }
-    else if (t > timeDirs.last().value())
-    {
-        return timeDirs.last();
-    }
-
-    label nearestIndex = -1;
-    scalar deltaT = GREAT;
-
-    for (label timei=1; timei < timeDirs.size(); ++timei)
-    {
-        scalar diff = mag(timeDirs[timei].value() - t);
-        if (diff < deltaT)
-        {
-            deltaT = diff;
-            nearestIndex = timei;
-        }
-    }
-
-    return timeDirs[nearestIndex];
-}
-
-
-Foam::label Foam::Time::findClosestTimeIndex
-(
-    const instantList& timeDirs,
-    const scalar t,
-    const word& constantName
-)
-{
-    label nearestIndex = -1;
-    scalar deltaT = GREAT;
-
-    forAll(timeDirs, timei)
-    {
-        if (timeDirs[timei].name() == constantName) continue;
-
-        scalar diff = mag(timeDirs[timei].value() - t);
-        if (diff < deltaT)
-        {
-            deltaT = diff;
-            nearestIndex = timei;
-        }
-    }
-
-    return nearestIndex;
 }
 
 
@@ -968,7 +938,7 @@ bool Foam::Time::stopAt(const stopAtControls stopCtrl) const
     // Adjust endTime
     if (stopCtrl == stopAtControls::saEndTime)
     {
-        controlDict_.lookup("endTime") >> endTime_;
+        controlDict_.readEntry("endTime", endTime_);
     }
 
     return changed;

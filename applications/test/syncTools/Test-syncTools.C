@@ -195,7 +195,7 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         SubList<face>
         (
             mesh.faces(),
-            mesh.nFaces()-mesh.nInternalFaces(),
+            mesh.nBoundaryFaces(),
             mesh.nInternalFaces()
         ),
         mesh.points()

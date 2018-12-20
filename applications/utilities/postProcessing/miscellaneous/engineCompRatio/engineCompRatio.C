@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Calculate the geometric compression ratio.
+    Calculate the engine geometric compression ratio.
 
     Note: if you have valves and/or extra volumes it will not work,
           since it calculates the volume at BDC and TCD.
@@ -43,6 +43,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Calculate the engine geometric compression ratio"
+    );
+
     #include "setRootCase.H"
     #include "createEngineTime.H"
     #include "createEngineMesh.H"
@@ -65,7 +70,7 @@ int main(int argc, char *argv[])
     {
         scalar t0 = runTime.userTimeToTime(ca0 - runTime.theta());
         runTime.setDeltaT(t0);
-        runTime++;
+        ++runTime;
         Info<< "CA = " << runTime.theta() << endl;
         mesh.move();
     }
@@ -76,7 +81,7 @@ int main(int argc, char *argv[])
     {
         scalar t1 = runTime.userTimeToTime(ca1 - runTime.theta());
         runTime.setDeltaT(t1);
-        runTime++;
+        ++runTime;
         Info<< "CA = " << runTime.theta() << endl;
         mesh.move();
     }

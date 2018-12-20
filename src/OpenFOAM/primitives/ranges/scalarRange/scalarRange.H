@@ -30,6 +30,12 @@ Description
     The bound can be specified as an "MIN:MAX" range, as a "MIN:" or ":MAX"
     bound or simply as a single "VALUE".
 
+    When defined via the parse() method, the special string "none" can be
+    used to define an empty (inverse) range.
+
+SeeAlso
+    Foam::predicates::scalars
+
 SourceFiles
     scalarRange.C
 
@@ -103,6 +109,10 @@ public:
         //- Construct by parsing string content.
         //  A colon (:) is used as a range marker or when specifying
         //  greater-than or less-than bounds.
+        //
+        //  \note The special string "none" can be used define an empty
+        //      (inverse) range
+        //
         //  \return True if no parse problems were encountered.
         static bool parse(const std::string& str, scalarRange& range);
 
@@ -150,10 +160,13 @@ public:
         //  For GE, LE bounds it is the min/max value, respectively.
         inline scalar value() const;
 
+        //- True if the value matches the condition.
+        inline bool match(const scalar& value) const;
+
 
     // Member Operators
 
-        //- Unary predicate to test if the value is within the bounds
+        //- Identical to match(), for use as a predicate.
         inline bool operator()(const scalar& value) const;
 
         inline bool operator==(const scalarRange& rhs) const;

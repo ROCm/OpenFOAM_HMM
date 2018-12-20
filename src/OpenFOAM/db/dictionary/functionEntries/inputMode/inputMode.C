@@ -95,7 +95,7 @@ const Foam::Enum
     Foam::entry::inputMode
 >
 Foam::functionEntries::inputMode::selectableNames
-{
+({
     { entry::inputMode::MERGE,  "merge" },
     { entry::inputMode::OVERWRITE, "overwrite" },
     { entry::inputMode::PROTECT, "protect" },
@@ -103,7 +103,7 @@ Foam::functionEntries::inputMode::selectableNames
     { entry::inputMode::ERROR, "error" },
     // Aliases
     { entry::inputMode::MERGE, "default" },
-};
+});
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -116,7 +116,7 @@ bool Foam::functionEntries::inputMode::execute
 {
     const word modeName(is);
 
-    // Behaviour like Enum lookupOrFailsafe()
+    // Like Enum::lookupOrDefault() with failsafe behaviour
     if (selectableNames.found(modeName))
     {
         entry::globalInputMode = selectableNames[modeName];

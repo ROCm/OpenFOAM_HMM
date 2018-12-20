@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -209,7 +209,7 @@ void Foam::mergeAndWrite
     const polyMesh& mesh,
     const surfaceWriter& writer,
     const word& name,
-    const indirectPrimitivePatch setPatch,
+    const indirectPrimitivePatch& setPatch,
     const fileName& outputDir
 )
 {
@@ -284,8 +284,7 @@ void Foam::mergeAndWrite
 
     fileName outputDir
     (
-        set.time().path()
-      / (Pstream::parRun() ? ".." : "")
+        set.time().globalPath()
       / functionObject::outputPrefix
       / mesh.pointsInstance()
       / set.name()
@@ -314,7 +313,7 @@ void Foam::mergeAndWrite
     }
 
 
-    boolList bndInSet(mesh.nFaces()-mesh.nInternalFaces());
+    boolList bndInSet(mesh.nBoundaryFaces());
     forAll(pbm, patchi)
     {
         const polyPatch& pp = pbm[patchi];
@@ -378,8 +377,7 @@ void Foam::mergeAndWrite
 
     fileName outputDir
     (
-        set.time().path()
-      / (Pstream::parRun() ? ".." : "")
+        set.time().globalPath()
       / functionObject::outputPrefix
       / mesh.pointsInstance()
       / set.name()
@@ -416,11 +414,7 @@ void Foam::mergeAndWrite
 
         // Get renumbered local data
         pointField myPoints(mesh.points(), setPointIDs);
-        labelList myIDs(setPointIDs.size());
-        forAll(setPointIDs, i)
-        {
-            myIDs[i] = globalNumbering.toGlobal(setPointIDs[i]);
-        }
+        labelList myIDs(globalNumbering.toGlobal(setPointIDs));
 
         if (Pstream::master())
         {
@@ -482,8 +476,7 @@ void Foam::mergeAndWrite
         // postProcessing/<time>/p0.vtk
         fileName outputDir
         (
-            set.time().path()
-          / (Pstream::parRun() ? ".." : "")
+            set.time().globalPath()
           / functionObject::outputPrefix
           / mesh.pointsInstance()
           // set.name()

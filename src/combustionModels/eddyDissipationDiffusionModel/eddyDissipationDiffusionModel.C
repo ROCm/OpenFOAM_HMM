@@ -48,7 +48,7 @@ eddyDissipationDiffusionModel
         turb,
         combustionProperties
     ),
-    Cd_(readScalar(this->coeffs().lookup("Cd")))
+    Cd_(this->coeffs().getScalar("Cd"))
 {}
 
 
@@ -107,7 +107,7 @@ bool eddyDissipationDiffusionModel<ReactionThermo, ThermoType>::read()
 {
     if (eddyDissipationModelBase<ReactionThermo, ThermoType>::read())
     {
-        this->coeffs().lookup("Cd") >> Cd_;
+        this->coeffs().readEntry("Cd", Cd_);
         return true;
     }
     else

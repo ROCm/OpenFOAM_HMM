@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,9 +25,37 @@ License
 
 #include "VTKsurfaceFormatCore.H"
 #include "clock.H"
-#include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::vtk::outputOptions
+Foam::fileFormats::VTKsurfaceFormatCore::formatOptions
+(
+    const dictionary& dict,
+    vtk::outputOptions opts
+)
+{
+    opts.legacy(true);  // Legacy. Use VTPsurfaceFormat for non-legacy
+    opts.append(false); // No append format for legacy
+
+    const word formatName = dict.lookupOrDefault<word>("format", "");
+    if (formatName.size())
+    {
+        opts.ascii(IOstream::formatEnum(formatName) == IOstream::ASCII);
+    }
+
+    opts.precision
+    (
+        dict.lookupOrDefault
+        (
+            "precision",
+            IOstream::defaultPrecision()
+        )
+    );
+
+    return opts;
+}
+
 
 void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
 (
@@ -35,11 +63,10 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
     const UList<point>& pts
 )
 {
-    vtk::legacy::fileHeader
+    vtk::legacy::fileHeader<vtk::fileTag::POLY_DATA>
     (
         format,
-        ("surface written " + clock::dateTime()),
-        vtk::fileTag::POLY_DATA
+        ("surface written " + clock::dateTime())
     );
 
     vtk::legacy::beginPoints(format.os(), pts.size());
@@ -64,21 +91,8 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
         nFaces += z.size();
     }
 
-    vtk::legacy::dataHeader
-    (
-        format.os(),
-        vtk::fileTag::CELL_DATA,
-        nFaces,
-        1  // Only one field
-    );
-
-    vtk::legacy::intField
-    (
-        format.os(),
-        "region",
-        1, // nComponent
-        nFaces
-    );
+    vtk::legacy::beginCellData(format, nFaces, 1);      // 1 field
+    vtk::legacy::intField<1>(format, "region", nFaces); // 1 component
 
     label zoneId = 0;
     for (const surfZone& zone : zones)
@@ -104,21 +118,8 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
     // Number of faces
     const label nFaces = zoneIds.size();
 
-    vtk::legacy::dataHeader
-    (
-        format.os(),
-        vtk::fileTag::CELL_DATA,
-        nFaces,
-        1  // Only one field
-    );
-
-    vtk::legacy::intField
-    (
-        format.os(),
-        "region",
-        1, // nComponent
-        nFaces
-    );
+    vtk::legacy::beginCellData(format, nFaces, 1);      // 1 field
+    vtk::legacy::intField<1>(format, "region", nFaces); // 1 component
 
     vtk::writeList(format, zoneIds);
     format.flush();

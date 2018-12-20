@@ -115,25 +115,19 @@ public:
 
     // Member Functions
 
-        // Evaluate
+        //- Add explicit contribution to compressible energy equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<scalar>& eqn,
+            const label fieldi
+        );
 
-            //- Add explicit contribution to compressible energy equation
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<scalar>& eqn,
-                const label fieldi
-            );
-
-
-        // IO
-
-            //- Read source dictionary
-            virtual bool read(const dictionary& dict)
-            {
-                return true;
-            }
-
+        //- Read source dictionary
+        virtual bool read(const dictionary& dict)
+        {
+            return true;
+        }
 };
 
 

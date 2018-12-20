@@ -52,7 +52,7 @@ Foam::distanceSurface::distanceSurface
     (
         searchableSurface::New
         (
-            dict.lookup("surfaceType"),
+            dict.get<word>("surfaceType"),
             IOobject
             (
                 dict.lookupOrDefault("surfaceName", defaultSurfaceName),
@@ -65,12 +65,14 @@ Foam::distanceSurface::distanceSurface
             dict
         )
     ),
-    distance_(readScalar(dict.lookup("distance"))),
-    signed_(dict.get<bool>("signed")),
+    distance_(dict.get<scalar>("distance")),
+    signed_
+    (
+        distance_ < 0 || equal(distance_, Zero) || dict.get<bool>("signed")
+    ),
     cell_(dict.lookupOrDefault("cell", true)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
-    zoneKey_(keyType::null),
     isoSurfCellPtr_(nullptr),
     isoSurfPtr_(nullptr)
 {}
@@ -108,11 +110,13 @@ Foam::distanceSurface::distanceSurface
         )
     ),
     distance_(distance),
-    signed_(signedDistance),
+    signed_
+    (
+        signedDistance || distance_ < 0 || equal(distance_, Zero)
+    ),
     cell_(cell),
     regularise_(regularise),
     bounds_(bounds),
-    zoneKey_(keyType::null),
     isoSurfCellPtr_(nullptr),
     isoSurfPtr_(nullptr)
 {}
@@ -142,7 +146,7 @@ void Foam::distanceSurface::createGeometry()
         (
             IOobject
             (
-                "cellDistance",
+                "distanceSurface.cellDistance",
                 fvm.time().timeName(),
                 fvm.time(),
                 IOobject::NO_READ,
@@ -154,6 +158,18 @@ void Foam::distanceSurface::createGeometry()
         )
     );
     volScalarField& cellDistance = *cellDistancePtr_;
+
+    // For distance = 0 (and isoSurfaceCell) we apply additional filtering
+    // to limit the extent of open edges.
+
+    const bool isZeroDist  = equal(distance_, Zero);
+    const bool filterCells = (cell_ && isZeroDist);
+
+    bitSet ignoreCells;
+    if (filterCells)
+    {
+        ignoreCells.resize(fvm.nCells());
+    }
 
     // Internal field
     {
@@ -168,16 +184,34 @@ void Foam::distanceSurface::createGeometry()
             nearest
         );
 
-        if (signed_)
+        if (signed_ || isZeroDist)
         {
             vectorField norms;
             surfPtr_().getNormal(nearest, norms);
+
+            boundBox cellBb;
 
             forAll(norms, i)
             {
                 const point diff(cc[i] - nearest[i].hitPoint());
 
-                fld[i] = sign(diff & norms[i]) * Foam::mag(diff);
+                fld[i] =
+                (
+                    isZeroDist // Use normal distance
+                  ? (diff & norms[i])
+                  : Foam::sign(diff & norms[i]) * Foam::mag(diff)
+                );
+
+                if (filterCells)
+                {
+                    cellBb.clear();
+                    cellBb.add(fvm.points(), fvm.cellPoints(i));
+
+                    if (!cellBb.contains(nearest[i].hitPoint()))
+                    {
+                        ignoreCells.set(i);
+                    }
+                }
             }
         }
         else
@@ -185,15 +219,17 @@ void Foam::distanceSurface::createGeometry()
             forAll(nearest, i)
             {
                 fld[i] = Foam::mag(cc[i] - nearest[i].hitPoint());
+
+                // No filtering for unsigned or distance != 0.
             }
         }
     }
 
-    volScalarField::Boundary& cellDistanceBf =
-        cellDistance.boundaryFieldRef();
-
     // Patch fields
     {
+        volScalarField::Boundary& cellDistanceBf =
+            cellDistance.boundaryFieldRef();
+
         forAll(fvm.C().boundaryField(), patchi)
         {
             const pointField& cc = fvm.C().boundaryField()[patchi];
@@ -216,7 +252,12 @@ void Foam::distanceSurface::createGeometry()
                 {
                     const point diff(cc[i] - nearest[i].hitPoint());
 
-                    fld[i] = sign(diff & norms[i]) * Foam::mag(diff);
+                    fld[i] =
+                    (
+                        isZeroDist // Use normal distance
+                      ? (diff & norms[i])
+                      : Foam::sign(diff & norms[i]) * Foam::mag(diff)
+                    );
                 }
             }
             else
@@ -256,7 +297,12 @@ void Foam::distanceSurface::createGeometry()
             {
                 const point diff(pts[i] - nearest[i].hitPoint());
 
-                pointDistance_[i] = sign(diff & norms[i]) * Foam::mag(diff);
+                pointDistance_[i] =
+                (
+                    isZeroDist // Use normal distance
+                  ? (diff & norms[i])
+                  : Foam::sign(diff & norms[i]) * Foam::mag(diff)
+                );
             }
         }
         else
@@ -277,7 +323,7 @@ void Foam::distanceSurface::createGeometry()
         (
             IOobject
             (
-                "pointDistance",
+                "distanceSurface.pointDistance",
                 fvm.time().timeName(),
                 fvm.time(),
                 IOobject::NO_READ,
@@ -293,6 +339,12 @@ void Foam::distanceSurface::createGeometry()
         pDist.write();
     }
 
+    // Don't need ignoreCells if there is nothing to ignore.
+    if (!ignoreCells.any())
+    {
+        ignoreCells.clear();
+    }
+
 
     // Direct from cell field and point field.
     if (cell_)
@@ -306,7 +358,9 @@ void Foam::distanceSurface::createGeometry()
                 pointDistance_,
                 distance_,
                 regularise_,
-                bounds_
+                bounds_,
+                1e-6,  // mergeTol
+                ignoreCells
             )
         );
     }
@@ -320,7 +374,8 @@ void Foam::distanceSurface::createGeometry()
                 pointDistance_,
                 distance_,
                 regularise_,
-                bounds_
+                bounds_,
+                1e-6
             )
         );
     }

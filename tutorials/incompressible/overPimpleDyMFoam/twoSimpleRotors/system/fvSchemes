@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,18 +22,16 @@ ddtSchemes
 gradSchemes
 {
     default         Gauss linear;
-    grad(T)         Gauss linear;
 }
 
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss limitedLinearV 1;
-    div(phi,k)      Gauss limitedLinear 1;
+    div(phi,U)      Gauss upwind;
+
     div(phi,epsilon) Gauss limitedLinear 1;
-    div(phi,R)      Gauss limitedLinear 1;
-    div(R)          Gauss linear;
-    div(phi,nuTilda) Gauss limitedLinear 1;
+    div(phi,k)       Gauss limitedLinear 1;
+
     div((nuEff*dev2(T(grad(U))))) Gauss linear;
 }
 
@@ -55,7 +53,7 @@ snGradSchemes
 
 oversetInterpolation
 {
-    method          inverseDistance;
+    method          cellVolumeWeight;
 }
 
 fluxRequired
@@ -63,6 +61,12 @@ fluxRequired
     default         no;
     pcorr           ;
     p               ;
+}
+
+oversetInterpolationSuppressed
+{
+    grad(p);
+    surfaceIntegrate(phiHbyA);
 }
 
 // ************************************************************************* //

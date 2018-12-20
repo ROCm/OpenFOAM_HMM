@@ -32,7 +32,7 @@ template<class Specie>
 Foam::rhoConst<Specie>::rhoConst(const dictionary& dict)
 :
     Specie(dict),
-    rho_(readScalar(dict.subDict("equationOfState").lookup("rho")))
+    rho_(dict.subDict("equationOfState").get<scalar>("rho"))
 {}
 
 
@@ -43,10 +43,12 @@ void Foam::rhoConst<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
 
-    dictionary dict("equationOfState");
-    dict.add("rho", rho_);
-
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("rho", rho_);
+        os.endBlock();
+    }
 }
 
 

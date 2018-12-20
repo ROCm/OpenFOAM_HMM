@@ -37,11 +37,11 @@ const Foam::Enum
     typename Foam::ConeNozzleInjection<CloudType>::injectionMethod
 >
 Foam::ConeNozzleInjection<CloudType>::injectionMethodNames
-{
+({
     { injectionMethod::imPoint, "point" },
     { injectionMethod::imDisc, "disc" },
-    { injectionMethod::imMovingPoint, "movingPoint" }
-};
+    { injectionMethod::imMovingPoint, "movingPoint" },
+});
 
 template<class CloudType>
 const Foam::Enum
@@ -49,11 +49,11 @@ const Foam::Enum
     typename Foam::ConeNozzleInjection<CloudType>::flowType
 >
 Foam::ConeNozzleInjection<CloudType>::flowTypeNames
-{
+({
     { flowType::ftConstantVelocity, "constantVelocity" },
     { flowType::ftPressureDrivenVelocity, "pressureDrivenVelocity" },
-    { flowType::ftFlowRateAndDischarge, "flowRateAndDischarge" }
-};
+    { flowType::ftFlowRateAndDischarge, "flowRateAndDischarge" },
+});
 
 
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
@@ -92,7 +92,7 @@ void Foam::ConeNozzleInjection<CloudType>::setFlowType()
     {
         case flowType::ftConstantVelocity:
         {
-            this->coeffDict().lookup("UMag") >> UMag_;
+            this->coeffDict().readEntry("UMag", UMag_);
             break;
         }
         case flowType::ftPressureDrivenVelocity:
@@ -129,22 +129,19 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     InjectionModel<CloudType>(dict, owner, modelName, typeName),
     injectionMethod_
     (
-        injectionMethodNames.lookup("injectionMethod", this->coeffDict())
+        injectionMethodNames.get("injectionMethod", this->coeffDict())
     ),
-    flowType_(flowTypeNames.lookup("flowType", this->coeffDict())),
-    outerDiameter_(readScalar(this->coeffDict().lookup("outerDiameter"))),
-    innerDiameter_(readScalar(this->coeffDict().lookup("innerDiameter"))),
-    duration_(readScalar(this->coeffDict().lookup("duration"))),
+    flowType_(flowTypeNames.get("flowType", this->coeffDict())),
+    outerDiameter_(this->coeffDict().getScalar("outerDiameter")),
+    innerDiameter_(this->coeffDict().getScalar("innerDiameter")),
+    duration_(this->coeffDict().getScalar("duration")),
     positionVsTime_(owner.db().time(), "position"),
     position_(vector::zero),
     injectorCell_(-1),
     tetFacei_(-1),
     tetPti_(-1),
     direction_(this->coeffDict().lookup("direction")),
-    parcelsPerSecond_
-    (
-        readScalar(this->coeffDict().lookup("parcelsPerSecond"))
-    ),
+    parcelsPerSecond_(this->coeffDict().getScalar("parcelsPerSecond")),
     flowRateProfile_
     (
         TimeFunction1<scalar>
@@ -206,7 +203,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     Random& rndGen = this->owner().rndGen();
 
     // Normalise direction vector
-    direction_ /= mag(direction_);
+    direction_.normalise();
 
     // Determine direction vectors tangential to direction
     vector tangent = Zero;
@@ -436,7 +433,7 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
     vector normal = alpha*normal_;
     vector dirVec = dcorr*direction_;
     dirVec += normal;
-    dirVec /= mag(dirVec);
+    dirVec.normalise();
 
     switch (flowType_)
     {

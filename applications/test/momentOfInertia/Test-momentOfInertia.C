@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        const label celli = args.lookupOrDefault("cell", 0);
+        const label celli = args.opt<label>("cell", 0);
 
         tensorField mI(momentOfInertia::meshInertia(mesh));
 

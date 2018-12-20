@@ -48,7 +48,7 @@ Foam::XiGModel::XiGModel
     (
         XiGProperties.subDict
         (
-            word(XiGProperties.lookup("XiGModel")) + "Coeffs"
+            XiGProperties.get<word>("XiGModel") + "Coeffs"
         )
     ),
     thermo_(thermo),

@@ -32,7 +32,7 @@ License
 
 template<class T>
 template<class INew>
-void Foam::PtrList<T>::read(Istream& is, const INew& inew)
+void Foam::PtrList<T>::readIstream(Istream& is, const INew& inew)
 {
     clear();  // Delete old pointers and reset the list size
 
@@ -42,7 +42,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
     is.fatalCheck
     (
-        "PtrList::read(Istream&) : "
+        "PtrList::readIstream : "
         "reading first token"
     );
 
@@ -70,7 +70,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
                     is.fatalCheck
                     (
-                        "PtrList::read(Istream&) : "
+                        "PtrList::readIstream : "
                         "reading entry"
                     );
                 }
@@ -82,7 +82,7 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
                 is.fatalCheck
                 (
-                    "PtrList::read(Istream&) : "
+                    "PtrList::readIstream : "
                     "reading the single entry"
                 );
 
@@ -107,10 +107,8 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
     {
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "incorrect first token, '(', found " << firstToken.info()
+            FatalIOErrorInFunction(is)
+                << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
         }
 
@@ -129,10 +127,8 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
             if (is.eof())
             {
-                FatalIOErrorInFunction
-                (
-                    is
-                )   << "Premature EOF after reading " << lastToken.info()
+                FatalIOErrorInFunction(is)
+                    << "Premature EOF after reading " << lastToken.info()
                     << exit(FatalIOError);
             }
 
@@ -152,10 +148,8 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
         return;
     }
 
-    FatalIOErrorInFunction
-    (
-        is
-    )   << "incorrect first token, expected <int> or '(', found "
+    FatalIOErrorInFunction(is)
+        << "incorrect first token, expected <int> or '(', found "
         << firstToken.info()
         << exit(FatalIOError);
 }
@@ -167,14 +161,14 @@ template<class T>
 template<class INew>
 Foam::PtrList<T>::PtrList(Istream& is, const INew& inew)
 {
-    read(is, inew);
+    this->readIstream(is, inew);
 }
 
 
 template<class T>
 Foam::PtrList<T>::PtrList(Istream& is)
 {
-    read(is, INew<T>());
+    this->readIstream(is, INew<T>());
 }
 
 
@@ -183,7 +177,7 @@ Foam::PtrList<T>::PtrList(Istream& is)
 template<class T>
 Foam::Istream& Foam::operator>>(Istream& is, PtrList<T>& list)
 {
-    list.read(is, INew<T>());
+    list.readIstream(is, INew<T>());
     return is;
 }
 

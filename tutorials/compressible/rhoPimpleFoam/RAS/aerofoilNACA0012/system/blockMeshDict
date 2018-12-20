@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -55,7 +55,7 @@ geometry
     }
     cylinder
     {
-        type   searchableCylinder;
+        type   cylinder;
         point1 ($:aerofoil.xUpper -1e3 0);
         point2 ($:aerofoil.xUpper  1e3 0);
         radius $:domain.zMax;

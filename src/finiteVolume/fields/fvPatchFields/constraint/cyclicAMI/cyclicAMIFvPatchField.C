@@ -48,14 +48,12 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
 :
     cyclicAMILduInterfaceField(),
     coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
-    cyclicAMIPatch_(refCast<const cyclicAMIFvPatch>(p))
+    cyclicAMIPatch_(refCast<const cyclicAMIFvPatch>(p, dict))
 {
     if (!isA<cyclicAMIFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()

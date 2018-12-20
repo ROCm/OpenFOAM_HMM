@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -29,10 +29,16 @@
 #     Create a new case from a template for particular applications
 #     - requires rsync
 #
+# Environment
+#     WM_PROJECT_API
+#     WM_PROJECT_DIR
+#     WM_PROJECT_SITE
+#
 #------------------------------------------------------------------------------
-siteDir=${WM_PROJECT_SITE:-${WM_PROJECT_INST_DIR:-<unknown>}/site}
-userDir=$HOME/.OpenFOAM
-version=${WM_PROJECT_VERSION:-unknown}
+groupDir="${WM_PROJECT_SITE:-${WM_PROJECT_DIR:-<unknown>}/site}"
+userDir="$HOME/.OpenFOAM"
+projectApi="${WM_PROJECT_API:-unknown}"
+
 templateDir="appTemplates"
 
 #------------------------------------------------------------------------------
@@ -43,20 +49,22 @@ usage() {
 
 Usage: ${0##*/} [OPTION]
 options:
-  -app <name>       specify the application to use
-  -case <dir>       specify alternative case directory, default is the cwd
+  -app NAME         specify the application to use
+  -case DIR         specify alternative case directory, default is the cwd
   -list             list the applications available
-  -version <ver>    specify an alternative version (default: '$WM_PROJECT_VERSION')
+  -with-api=NUM     specify alternative api to use (default: \$WM_PROJECT_API)
+  -version VER      [obsolete]
+  -help             Print the usage
 
 clone initial application settings to the specified case from
-    $userDir/$templateDir/{$version,}/<APP>
-    $siteDir/$templateDir/{$version,}/<APP>
+    $userDir/$templateDir/{$projectApi,}/APP
+    $groupDir/$templateDir/{$projectApi,}/APP
 
 USAGE
     exit 1
 }
 #------------------------------------------------------------------------------
-unset appName caseName listOpt
+unset appName caseName optList
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -68,21 +76,23 @@ do
     -app)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         appName="$2"
-        shift 2
+        shift
         ;;
     -case)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         caseName="$2"
-        shift 2
+        shift
         ;;
     -l | -list)
-        listOpt=true
-        shift
+        optList=true
         ;;
     -v | -ver | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        version="$2"
-        shift 2
+        echo "ignored defunct option -version" 1>&2
+        shift
+        ;;
+    -with-api=*)
+        projectApi="${1#*=}"
         ;;
     -*)
         usage "unknown option: '$*'"
@@ -91,18 +101,15 @@ do
         usage "unexpected argument: '$*'"
         ;;
     esac
+    shift
 done
 
 # need rsync, except for when listing
-type rsync >/dev/null 2>&1 || [ "$listOpt" = true ] || usage "Error: 'rsync' seems to be missing"
+command -v rsync >/dev/null 2>&1 || \
+   [ "$optList" = true ] || usage "Error: 'rsync' seems to be missing"
 
 
 #------------------------------------------------------------------------------
-
-[ -n "$version" ] || {
-    echo "Error: no -version specified and \$WM_PROJECT_VERSION is not set"
-    exit 1
-}
 
 #
 # find apps in current directory
@@ -112,18 +119,23 @@ findApps()
 {
     for app in $(/bin/ls -d * 2>/dev/null)
     do
-        [ -d "$app/constant" -a -d "$app/system" ] && echo $app
+        [ -d "$app/constant" -a -d "$app/system" ] && echo "$app"
     done
 }
 
 
 appList=$(
-    for dir in $userDir/$templateDir $siteDir/$templateDir
+    for dir in "$userDir/$templateDir" "$groupDir/$templateDir"
     do
-        if cd $dir 2>/dev/null
+        if cd "$dir" 2>/dev/null
         then
             findApps                              ## generic
-            cd $version 2>/dev/null && findApps   ## version-specific
+
+            ## version-specific
+            if [ -n "$projectApi" ]
+            then
+                cd "$projectApi" 2>/dev/null && findApps
+            fi
         fi
     done | sort | uniq
 )
@@ -141,7 +153,7 @@ listApps()
 }
 
 
-if [ "$listOpt" = true ]
+if [ "$optList" = true ]
 then
     listApps
     exit 0
@@ -159,11 +171,11 @@ fi
 
 # get the corresponding srcDir name
 srcDir=$(
-    for dir in $userDir/$templateDir $siteDir/$templateDir
+    for dir in "$userDir/$templateDir" "$groupDir/$templateDir"
     do
         if [ -d $dir ]
         then
-            for appDir in $dir/$version/$appName $dir/$appName
+            for appDir in "$dir/$projectApi/$appName" "$dir/$appName"
             do
                 if [ -d $appDir -a -d $appDir/constant -a -d $appDir/system ]
                 then
@@ -209,21 +221,6 @@ echo "    target        $newDir"
 echo "    syncing ..."
 # sync updated files only, itemize changes so we know what is going on
 rsync -aui $srcDir/ $newDir
-
-
-#
-# reuse or create new FOAM_SETTINGS (useful for queuing systems)
-#
-if [ -e "$newDir/FOAM_SETTINGS" ]
-then
-    echo "    retaining     FOAM_SETTINGS"
-else
-    echo "    creating      FOAM_SETTINGS"
-    cat << SETTINGS > "$newDir/FOAM_SETTINGS"
-APPLICATION=$appName
-FOAM_VERSION=OpenFOAM-$version
-SETTINGS
-fi
 
 echo Done
 

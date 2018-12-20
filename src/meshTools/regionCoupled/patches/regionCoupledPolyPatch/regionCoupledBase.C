@@ -187,19 +187,15 @@ Foam::label Foam::regionCoupledBase::neighbPatchID() const
 {
     if (nbrPatchID_ == -1)
     {
-        if
-        (
-            patch_.boundaryMesh().mesh().time().foundObject<polyMesh>
+        const polyMesh* meshPtr =
+            patch_.boundaryMesh().mesh().time().findObject<polyMesh>
             (
                 nbrRegionName_
-            )
-        )
+            );
+
+        if (meshPtr)
         {
-            const polyMesh& mesh =
-                patch_.boundaryMesh().mesh().time().lookupObject<polyMesh>
-                (
-                    nbrRegionName_
-                );
+            const polyMesh& mesh = *meshPtr;
 
             nbrPatchID_ = mesh.boundaryMesh().findPatchID(nbrPatchName_);
 

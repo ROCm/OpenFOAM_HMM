@@ -109,26 +109,27 @@ void Foam::fv::optionList::reset(const dictionary& dict)
 {
     // Count number of active fvOptions
     label count = 0;
-    forAllConstIter(dictionary, dict, iter)
+    for (const entry& dEntry : dict)
     {
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
-            count++;
+            ++count;
         }
     }
 
-    this->setSize(count);
-    label i = 0;
-    forAllConstIter(dictionary, dict, iter)
+    this->resize(count);
+
+    count = 0;
+    for (const entry& dEntry : dict)
     {
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
-            const word& name = iter().keyword();
-            const dictionary& sourceDict = iter().dict();
+            const word& name = dEntry.keyword();
+            const dictionary& sourceDict = dEntry.dict();
 
             this->set
             (
-                i++,
+                count++,
                 option::New(name, sourceDict, mesh_)
             );
         }

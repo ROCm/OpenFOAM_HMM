@@ -106,10 +106,10 @@ void Foam::PressureGradientForce<CloudType>::cacheFields(const bool store)
 
         if (fieldExists)
         {
-            const volVectorField& DUcDt = this->mesh().template
-                lookupObject<volVectorField>(fName);
+            volVectorField& DUcDt =
+                this->mesh().template lookupObjectRef<volVectorField>(fName);
 
-            const_cast<volVectorField&>(DUcDt).checkOut();
+            DUcDt.checkOut();
         }
     }
 }

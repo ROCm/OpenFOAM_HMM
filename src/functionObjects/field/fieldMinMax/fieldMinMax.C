@@ -43,10 +43,10 @@ const Foam::Enum
     Foam::functionObjects::fieldMinMax::modeType
 >
 Foam::functionObjects::fieldMinMax::modeTypeNames_
-{
+({
     { modeType::mdMag,  "magnitude" },
     { modeType::mdCmpt, "component" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -121,12 +121,6 @@ Foam::functionObjects::fieldMinMax::fieldMinMax
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldMinMax::~fieldMinMax()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

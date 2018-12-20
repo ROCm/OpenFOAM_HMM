@@ -43,7 +43,6 @@ Description
 #include "refinementFeatures.H"
 #include "shellSurfaces.H"
 #include "decompositionMethod.H"
-#include "noDecomp.H"
 #include "fvMeshDistribute.H"
 #include "wallPolyPatch.H"
 #include "refinementParameters.H"
@@ -63,6 +62,7 @@ Description
 #include "fvMeshTools.H"
 #include "profiling.H"
 #include "processorMeshes.H"
+#include "vtkSetWriter.H"
 
 using namespace Foam;
 
@@ -125,7 +125,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     {
         const word& geomName = allGeometry.names()[geomi];
 
-        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
+        const entry* ePtr = surfacesDict.findEntry(geomName, keyType::REGEX);
 
         if (ePtr)
         {
@@ -525,7 +525,7 @@ void extractSurface
         fileName globalCasePath
         (
             runTime.processorCase()
-          ? runTime.path()/".."/outFileName
+          ? runTime.globalPath()/outFileName
           : runTime.path()/outFileName
         );
         globalCasePath.clean();
@@ -554,7 +554,7 @@ scalar getMergeDistance(const polyMesh& mesh, const scalar mergeTol)
     {
         const scalar writeTol = std::pow
         (
-            scalar(10.0),
+            scalar(10),
             -scalar(IOstream::defaultPrecision())
         );
 
@@ -677,37 +677,43 @@ void writeMesh
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Automatic split hex mesher. Refines and snaps to surface"
+    );
+
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
-    Foam::argList::addBoolOption
+    #include "addProfilingOption.H"
+    argList::addBoolOption
     (
         "checkGeometry",
-        "check all surface geometry for quality"
+        "Check all surface geometry for quality"
     );
-    Foam::argList::addOption
+    argList::addOption
     (
         "surfaceSimplify",
         "boundBox",
-        "simplify the surface using snappyHexMesh starting from a boundBox"
+        "Simplify the surface using snappyHexMesh starting from a boundBox"
     );
-    Foam::argList::addOption
+    argList::addOption
     (
         "patches",
         "(patch0 .. patchN)",
-        "only triangulate selected patches (wildcards supported)"
+        "Only triangulate selected patches (wildcards supported)"
     );
-    Foam::argList::addOption
+    argList::addOption
     (
         "outFile",
         "file",
-        "name of the file to save the simplified surface to"
+        "Name of the file to save the simplified surface to"
     );
-    #include "addProfilingOption.H"
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative snappyHexMeshDict");
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     const bool overwrite = args.found("overwrite");
     const bool checkGeometry = args.found("checkGeometry");
@@ -783,37 +789,48 @@ int main(int argc, char *argv[])
 
     const bool keepPatches(meshDict.lookupOrDefault("keepPatches", false));
 
+    // format to be used for writing lines
+    const word setFormat
+    (
+        meshDict.lookupOrDefault
+        (
+            "setFormat",
+            vtkSetWriter<scalar>::typeName
+        )
+    );
+    const autoPtr<writer<scalar>> setFormatter
+    (
+        writer<scalar>::New(setFormat)
+    );
+
 
     // Read decomposePar dictionary
     dictionary decomposeDict;
     if (Pstream::parRun())
     {
-        fileName decompDictFile;
-        args.readIfPresent("decomposeParDict", decompDictFile);
-
-        // A demand-driven decompositionMethod can have issues finding
-        // an alternative decomposeParDict location.
+        // Ensure demand-driven decompositionMethod finds alternative
+        // decomposeParDict location properly.
 
         IOdictionary* dictPtr = new IOdictionary
         (
-            decompositionModel::selectIO
+            IOobject::selectIO
             (
                 IOobject
                 (
-                    "decomposeParDict",
+                    decompositionModel::canonicalName,
                     runTime.system(),
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
-                decompDictFile
+                args.opt<fileName>("decomposeParDict", "")
             )
         );
 
         // Store it on the object registry, but to be found it must also
         // have the expected "decomposeParDict" name.
 
-        dictPtr->rename("decomposeParDict");
+        dictPtr->rename(decompositionModel::canonicalName);
         runTime.store(dictPtr);
 
         decomposeDict = *dictPtr;
@@ -878,24 +895,24 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Set output level
-    {
-        wordList flags;
-        if (meshDict.readIfPresent("outputFlags", flags))
-        {
-            meshRefinement::outputLevel
-            (
-                meshRefinement::outputType
-                (
-                    meshRefinement::readFlags
-                    (
-                        meshRefinement::outputTypeNames,
-                        flags
-                    )
-                )
-            );
-        }
-    }
+    //// Set output level
+    //{
+    //    wordList flags;
+    //    if (meshDict.readIfPresent("outputFlags", flags))
+    //    {
+    //        meshRefinement::outputLevel
+    //        (
+    //            meshRefinement::outputType
+    //            (
+    //                meshRefinement::readFlags
+    //                (
+    //                    meshRefinement::outputTypeNames,
+    //                    flags
+    //                )
+    //            )
+    //        );
+    //    }
+    //}
 
     // for the impatient who want to see some output files:
     profiling::writeNow();
@@ -1036,7 +1053,7 @@ int main(int argc, char *argv[])
         (
             100.0,      // max size ratio
             1e-9,       // intersection tolerance
-            autoPtr<writer<scalar>>(new vtkSetWriter<scalar>()),
+            setFormatter,
             0.01,       // min triangle quality
             true
         );
@@ -1425,7 +1442,7 @@ int main(int argc, char *argv[])
             decomposeDict
         )
     );
-    decompositionMethod& decomposer = decomposerPtr();
+    decompositionMethod& decomposer = *decomposerPtr;
 
     if (Pstream::parRun() && !decomposer.parallelAware())
     {
@@ -1474,7 +1491,8 @@ int main(int argc, char *argv[])
             decomposer,
             distributor,
             globalToMasterPatch,
-            globalToSlavePatch
+            globalToSlavePatch,
+            setFormatter
         );
 
 
@@ -1664,7 +1682,7 @@ int main(int argc, char *argv[])
         {
             includePatches = bMesh.patchSet
             (
-                args.readList<wordRe>("patches")
+                args.getList<wordRe>("patches")
             );
         }
         else
@@ -1682,7 +1700,7 @@ int main(int argc, char *argv[])
 
         fileName outFileName
         (
-            args.lookupOrDefault<fileName>
+            args.opt<fileName>
             (
                 "outFile",
                 "constant/triSurface/simplifiedSurface.stl"

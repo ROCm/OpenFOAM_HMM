@@ -94,8 +94,7 @@ void Foam::circleSet::calcSamples
     label nPoint = 1;
     while (theta < 360)
     {
-        axis1 = axis1*cosAlpha + (axis1^circleAxis_)*sinAlpha;
-        axis1 /= mag(axis1);
+        axis1 = normalised(axis1*cosAlpha + (axis1^circleAxis_)*sinAlpha);
         point pt = origin_ + radius*axis1;
 
         label celli = searchEngine().findCell(pt);
@@ -198,14 +197,11 @@ Foam::circleSet::circleSet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    origin_(dict.lookup("origin")),
-    circleAxis_(dict.lookup("circleAxis")),
-    startPoint_(dict.lookup("startPoint")),
+    origin_(dict.get<point>("origin")),
+    circleAxis_(normalised(dict.get<vector>("circleAxis"))),
+    startPoint_(dict.get<point>("startPoint")),
     dTheta_(dict.get<scalar>("dTheta"))
 {
-    // Normalise circleAxis
-    circleAxis_ /= mag(circleAxis_);
-
     genSamples();
 }
 

@@ -188,19 +188,17 @@ label findInternalFace(const primitiveMesh& mesh, const labelList& meshF)
 bool correctOrientation(const pointField& points, const cellShape& shape)
 {
     // Get centre of shape.
-    point cc(shape.centre(points));
+    const point cc(shape.centre(points));
 
     // Get outwards pointing faces.
     faceList faces(shape.faces());
 
-    forAll(faces, i)
+    for (const face& f : faces)
     {
-        const face& f = faces[i];
-
-        vector n(f.normal(points));
+        const vector areaNorm(f.areaNormal(points));
 
         // Check if vector from any point on face to cc points outwards
-        if (((points[f[0]] - cc) & n) < 0)
+        if (((points[f[0]] - cc) & areaNorm) < 0)
         {
             // Incorrectly oriented
             return false;
@@ -768,12 +766,17 @@ void readCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a gmsh .msh file to OpenFOAM"
+    );
+
     argList::noParallel();
     argList::addArgument(".msh file");
     argList::addBoolOption
     (
         "keepOrientation",
-        "retain raw orientation for prisms/hexs"
+        "Retain raw orientation for prisms/hexs"
     );
 
     #include "addRegionOption.H"
@@ -781,16 +784,11 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    Foam::word regionName;
+    word regionName = polyMesh::defaultRegion;
 
     if (args.readIfPresent("region", regionName))
     {
-        Foam::Info
-            << "Creating polyMesh for region " << regionName << endl;
-    }
-    else
-    {
-        regionName = Foam::polyMesh::defaultRegion;
+        Info<< "Creating polyMesh for region " << regionName << endl;
     }
 
     const bool keepOrientation = args.found("keepOrientation");

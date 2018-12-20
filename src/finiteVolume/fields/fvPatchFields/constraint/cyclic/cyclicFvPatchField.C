@@ -49,14 +49,12 @@ Foam::cyclicFvPatchField<Type>::cyclicFvPatchField
 )
 :
     coupledFvPatchField<Type>(p, iF, dict, false),
-    cyclicPatch_(refCast<const cyclicFvPatch>(p))
+    cyclicPatch_(refCast<const cyclicFvPatch>(p, dict))
 {
     if (!isA<cyclicFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()

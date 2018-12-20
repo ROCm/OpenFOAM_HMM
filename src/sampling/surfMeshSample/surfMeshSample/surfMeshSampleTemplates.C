@@ -76,7 +76,7 @@ Foam::surfMeshSample::getOrCreateSurfField
     const surfMesh& surf  = surface();
     const word& fieldName = vField.name();
 
-    SurfFieldType* ptr = surf.lookupObjectRefPtr<SurfFieldType>(fieldName);
+    SurfFieldType* ptr = surf.getObjectPtr<SurfFieldType>(fieldName);
     if (!ptr)
     {
         ptr = new SurfFieldType

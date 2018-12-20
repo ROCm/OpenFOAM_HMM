@@ -1,8 +1,13 @@
+AMIWeights/AMIWeights.C
+
+columnAverage/columnAverage.C
+
 fieldAverage/fieldAverage.C
 fieldAverage/fieldAverageItem/fieldAverageItem.C
 fieldAverage/fieldAverageItem/fieldAverageItemIO.C
 
 fieldCoordinateSystemTransform/fieldCoordinateSystemTransform.C
+fieldExtents/fieldExtents.C
 fieldMinMax/fieldMinMax.C
 
 fieldValues/fieldValue/fieldValue.C
@@ -47,6 +52,7 @@ components/components.C
 randomise/randomise.C
 div/div.C
 grad/grad.C
+ddt/ddt.C
 mag/mag.C
 magSqr/magSqr.C
 vorticity/vorticity.C
@@ -57,6 +63,7 @@ flowType/flowType.C
 CourantNo/CourantNo.C
 PecletNo/PecletNo.C
 blendingFactor/blendingFactor.C
+momentum/momentum.C
 pressure/pressure.C
 MachNo/MachNo.C
 Curle/Curle.C

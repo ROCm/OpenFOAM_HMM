@@ -104,8 +104,7 @@ void Foam::solidParticle::hitProcessorPatch
 
 void Foam::solidParticle::hitWallPatch(solidParticleCloud& cloud, trackingData&)
 {
-    vector nw = normal();
-    nw /= mag(nw);
+    const vector nw = normal();
 
     scalar Un = U_ & nw;
     vector Ut = U_ - Un*nw;

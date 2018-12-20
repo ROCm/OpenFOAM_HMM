@@ -262,8 +262,7 @@ Foam::label Foam::topoCellLooper::getAlignedNonFeatureEdge
             vector e0 = mesh().points()[e.start()] - ctr;
             vector e1 = mesh().points()[e.end()] - ctr;
 
-            vector n = e0 ^ e1;
-            n /= mag(n);
+            const vector n = normalised(e0 ^ e1);
 
             scalar cosAngle = mag(refDir & n);
 

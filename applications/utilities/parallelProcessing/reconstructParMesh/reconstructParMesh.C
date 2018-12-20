@@ -447,29 +447,29 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "reconstruct a mesh using geometric information only"
+        "Reconstruct a mesh using geometric information only"
     );
 
     // Enable -constant ... if someone really wants it
     // Enable -withZero to prevent accidentally trashing the initial fields
-    timeSelector::addOptions(true, true);
+    timeSelector::addOptions(true, true); // constant(true), zero(true)
+
     argList::noParallel();
     argList::addOption
     (
         "mergeTol",
         "scalar",
-        "specify the merge distance relative to the bounding box size "
-        "(default 1e-7)"
+        "The merge distance relative to the bounding box size (default 1e-7)"
     );
     argList::addBoolOption
     (
         "fullMatch",
-        "do (slower) geometric matching on all boundary faces"
+        "Do (slower) geometric matching on all boundary faces"
     );
     argList::addBoolOption
     (
         "cellDist",
-        "write cell distribution as a labelList - for use with 'manual' "
+        "Write cell distribution as a labelList - for use with 'manual' "
         "decomposition method or as a volScalarField for post-processing."
     );
 
@@ -506,8 +506,7 @@ int main(int argc, char *argv[])
         Info<< "Operating on region " << regionName << nl << endl;
     }
 
-    scalar mergeTol = defaultMergeTol;
-    args.readIfPresent("mergeTol", mergeTol);
+    const scalar mergeTol = args.opt<scalar>("mergeTol", defaultMergeTol);
 
     scalar writeTol = Foam::pow(10.0, -scalar(IOstream::defaultPrecision()));
 
@@ -551,7 +550,7 @@ int main(int argc, char *argv[])
     forAll(databases, proci)
     {
         Info<< "Reading database "
-            << args.caseName()/fileName(word("processor") + name(proci))
+            << args.caseName()/("processor" + Foam::name(proci))
             << endl;
 
         databases.set
@@ -561,7 +560,7 @@ int main(int argc, char *argv[])
             (
                 Time::controlDictName,
                 args.rootPath(),
-                args.caseName()/fileName(word("processor") + name(proci))
+                args.caseName()/("processor" + Foam::name(proci))
             )
         );
     }

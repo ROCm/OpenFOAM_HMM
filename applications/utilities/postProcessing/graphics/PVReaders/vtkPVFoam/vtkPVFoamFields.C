@@ -194,7 +194,6 @@ void Foam::vtkPVFoam::convertAreaFields()
     // Get objects (fields) for this time - only keep selected fields
     // the region name is already in the mesh db
     IOobjectList objects(mesh.mesh(), dbPtr_().timeName());
-
     objects.filterKeys(selectedFields);
 
     if (objects.empty())

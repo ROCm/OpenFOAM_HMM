@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IsotropyModel.H"
-
 #include "TimeScaleModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -84,7 +83,7 @@ Foam::IsotropyModel<CloudType>::New
     CloudType& owner
 )
 {
-    word modelType(dict.lookup(typeName));
+    const word modelType(dict.get<word>(typeName));
 
     Info<< "Selecting isotropy model " << modelType << endl;
 
@@ -100,11 +99,7 @@ Foam::IsotropyModel<CloudType>::New
             << exit(FatalError);
     }
 
-    return
-        autoPtr<IsotropyModel<CloudType>>
-        (
-            cstrIter()(dict, owner)
-        );
+    return autoPtr<IsotropyModel<CloudType>>(cstrIter()(dict, owner));
 }
 
 

@@ -111,10 +111,9 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
             << exit(FatalError);
     }
 
-    if (dict.found("thicknessLayers"))
+    if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
     {
-        dict.lookup("thicknessLayers") >> thicknessLayers_;
-        dict.lookup("kappaLayers") >> kappaLayers_;
+        dict.readEntry("kappaLayers", kappaLayers_);
 
         if (thicknessLayers_.size() > 0)
         {
@@ -241,7 +240,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
         {
             const basicThermo* thermo =
-                nbrMesh.lookupObjectPtr<basicThermo>(basicThermo::dictName);
+                nbrMesh.findObject<basicThermo>(basicThermo::dictName);
 
             if (thermo)
             {
@@ -270,7 +269,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         // Local inertia therm
         {
             const basicThermo* thermo =
-                mesh.lookupObjectPtr<basicThermo>(basicThermo::dictName);
+                mesh.findObject<basicThermo>(basicThermo::dictName);
 
             if (thermo)
             {

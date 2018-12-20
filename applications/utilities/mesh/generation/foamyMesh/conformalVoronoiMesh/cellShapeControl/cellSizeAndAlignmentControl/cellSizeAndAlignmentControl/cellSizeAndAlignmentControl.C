@@ -72,7 +72,7 @@ Foam::cellSizeAndAlignmentControl::New
     const scalar& defaultCellSize
 )
 {
-    const word controlType(controlFunctionDict.lookup("type"));
+    const word controlType(controlFunctionDict.get<word>("type"));
 
     Info<< indent << "Selecting cellSizeAndAlignmentControl "
         << controlType << endl;
@@ -101,12 +101,6 @@ Foam::cellSizeAndAlignmentControl::New
         )
     );
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellSizeAndAlignmentControl::~cellSizeAndAlignmentControl()
-{}
 
 
 // ************************************************************************* //

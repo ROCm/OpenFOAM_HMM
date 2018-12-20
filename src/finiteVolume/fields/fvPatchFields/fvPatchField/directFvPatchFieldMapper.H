@@ -93,6 +93,11 @@ public:
             return hasUnmapped_;
         }
 
+        bool& hasUnmapped()
+        {
+            return hasUnmapped_;
+        }
+
         const labelUList& directAddressing() const
         {
             return directAddressing_;

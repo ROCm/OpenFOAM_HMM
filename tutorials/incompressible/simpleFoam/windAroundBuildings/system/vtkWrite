@@ -15,15 +15,69 @@ vtkWrite
     //- Use legacy output format - Default=false
     // legacy  false;
 
-    //- Output directory name - Default="VTK"
+    //- Output directory name - Default="postProcessing/<name>"
     // directory       "VTK";
 
     //- Write cell ids as field - Default=true
-    writeIds        false;
+    writeIds    false;
 
     //- Write more frequent than fields
     writeControl    timeStep;
     writeInterval   25;
 }
+
+subset
+{
+    type    vtkWrite;
+    libs    ("libutilityFunctionObjects.so");
+    log     true;
+
+    // boundary    false;
+
+    interpolate true;
+
+    // Fields to output (words or regex)
+    fields      (U p);
+
+    //- Write cell ids as field - Default=true
+    writeIds    false;
+
+    //- Write more frequent than fields
+    writeControl    timeStep;
+    writeInterval   25;
+
+    // Region of interest
+    selection
+    {
+        dome
+        {
+            action  use;
+            source  sphere;
+            origin  (125 100 0);
+            radius  100;
+        }
+        cylinder
+        {
+            action  subtract;
+            source  cylinder;
+            p1      (125 100 0);
+            p2      (125 100 100);
+            radius  20;
+        }
+        outlet
+        {
+            action  add;
+            source  box;
+            box     (300 -100 -100) (330 250 100);
+        }
+        clipping
+        {
+            action  subset;
+            source  box;
+            box     (-1000 -1000 -1000) (1000 1000 50);
+        }
+    }
+}
+
 
 // ************************************************************************* //

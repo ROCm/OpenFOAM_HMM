@@ -16,7 +16,7 @@
 # Description
 #     Shell functions and variables used when sourcing the OpenFOAM environment
 #
-#     Some functionality is shadowed in bin/tools/lib-dir
+#     Some functionality mirrored by bin/tools/lib-dir
 #
 #------------------------------------------------------------------------------
 
@@ -28,32 +28,62 @@ then
     WM_SHELL_FUNCTIONS=loaded
 
     # Cleaning environment variables
-    foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
+    foamClean="$WM_PROJECT_DIR/bin/foamCleanPath"
 
     # Cleaning environment variables
+    unset -f _foamClean 2>/dev/null
     _foamClean()
     {
-         local var=$1
+         foamVar_name="$1"
          shift
-         eval $($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=$var "$@")
+         eval "$($foamClean -sh-env=$foamVar_name $@)"
+         unset "foamVar_name"
     }
 
+    # Echo values to stderr when FOAM_VERBOSE is on, no-op otherwise
+    unset -f _foamEcho 2>/dev/null
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
+    then
+        _foamEcho() { echo "$@" 1>&2; }
+    else
+        _foamEcho() { true; }
+    fi
+
+    # Source an etc file, possibly with some verbosity
+    # - use eval to avoid intermediate variables (ksh doesn't have 'local')
+    unset -f _foamEtc 2>/dev/null
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
+    then
+        _foamEtc()
+        {
+            eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh-verbose ${FOAM_CONFIG_NOUSER:+-mode=o} $@)";
+        }
+    else
+        _foamEtc()
+        {
+            eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh ${FOAM_CONFIG_NOUSER:+-mode=o} $@)";
+        }
+    fi
+
     # Prepend PATH
+    unset -f _foamAddPath 2>/dev/null
     _foamAddPath()
     {
-        [ -n "$1" ] && export PATH=$1:$PATH
+        [ -n "$1" ] && export PATH="$1:$PATH"
     }
 
     # Prepend MANPATH
+    unset -f _foamAddMan 2>/dev/null
     _foamAddMan()
     {
-        [ -n "$1" ] && export MANPATH=$1:$MANPATH
+        [ -n "$1" ] && export MANPATH="$1:$MANPATH"
     }
 
     # Prepend LD_LIBRARY_PATH
+    unset -f _foamAddLib 2>/dev/null
     _foamAddLib()
     {
-        [ -n "$1" ] && export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
+        [ -n "$1" ] && export LD_LIBRARY_PATH="$1:$LD_LIBRARY_PATH"
     }
 
     # Prepend to LD_LIBRARY_PATH with additional checking
@@ -67,6 +97,7 @@ then
     # 2) Use fallback if the previous failed
     #
     # Return 0 on success
+    unset -f _foamAddLibAuto 2>/dev/null
     _foamAddLibAuto()
     {
         # Note ksh does not have 'local' thus these ugly variable names
@@ -74,7 +105,7 @@ then
         foamVar_end="${1##*-}"
 
         # Do not add (none) or a system directory
-        if [ -z "$foamVar_prefix" -o "$foamVar_end" = none -o "$foamVar_end" = system ]
+        if [ -z "$foamVar_prefix" ] || [ "$foamVar_end" = none ] || [ "$foamVar_end" = system ]
         then
             unset foamVar_prefix foamVar_end
             return 1
@@ -84,7 +115,7 @@ then
             do
                 if [ -d "$foamVar_prefix/$foamVar_end" ]
                 then
-                    export LD_LIBRARY_PATH=$foamVar_prefix/$foamVar_end:$LD_LIBRARY_PATH
+                    export LD_LIBRARY_PATH="$foamVar_prefix/$foamVar_end:$LD_LIBRARY_PATH"
                     unset foamVar_prefix foamVar_end
                     return 0
                 fi
@@ -97,10 +128,10 @@ then
         then
             case "$foamVar_end" in
             /*)     # An absolute path
-                export LD_LIBRARY_PATH=$foamVar_end:$LD_LIBRARY_PATH
+                export LD_LIBRARY_PATH="$foamVar_end:$LD_LIBRARY_PATH"
                 ;;
             (*)     # Relative to prefix
-                export LD_LIBRARY_PATH=$foamVar_prefix/$foamVar_end:$LD_LIBRARY_PATH
+                export LD_LIBRARY_PATH="$foamVar_prefix/$foamVar_end:$LD_LIBRARY_PATH"
                 ;;
             esac
             unset foamVar_prefix foamVar_end
@@ -121,7 +152,7 @@ then
         # Prepend DYLD_LIBRARY_PATH
         _foamAddLib()
         {
-            [ -n "$1" ] && export DYLD_LIBRARY_PATH=$1:$DYLD_LIBRARY_PATH
+            [ -n "$1" ] && export DYLD_LIBRARY_PATH="$1:$DYLD_LIBRARY_PATH"
         }
 
         # Prepend to DYLD_LIBRARY_PATH with additional checking
@@ -133,47 +164,41 @@ then
     fi
 
 
-    # Source an etc file, possibly with some verbosity
-    # - use eval to avoid intermediate variables (ksh doesn't have 'local')
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
-    then
-        _foamEtc(){ eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh-verbose $@)"; }
-    else
-        _foamEtc(){ eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh $@)"; }
-    fi
-
     # Evaluate command-line parameters
+    unset -f _foamEval 2>/dev/null
     _foamEval()
     {
-        while [ $# -gt 0 ]
+        for i
         do
-            case "$1" in
+            case "$i" in
             -*)
                 # Stray option (not meant for us here) -> get out
                 break
                 ;;
             *=)
                 # name=       -> unset name
-                [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "unset ${1%=}" 1>&2
+                [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
+                    && echo "unset ${1%=}" 1>&2
                 eval "unset ${1%=}"
                 ;;
             *=*)
                 # name=value  -> export name=value
-                [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "export $1" 1>&2
-                eval "export $1"
+                [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
+                    && echo "export $i" 1>&2
+                eval "export $i"
                 ;;
             *)
                 # Filename: source it
-                if [ -f "$1" ]
+                if [ -f "$i" ]
                 then
-                    [ "$FOAM_VERBOSE" -a "$PS1" ] && echo "Using: $1" 1>&2
-                    . "$1"
+                    [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ] \
+                        && echo "Using: $i" 1>&2
+                    . "$i"
                 else
-                    _foamEtc -silent "$1"
+                    _foamEtc -silent "$i"
                 fi
                 ;;
             esac
-            shift
         done
     }
 
@@ -200,7 +225,7 @@ else
     # Was previously loaded/defined - now unset
 
     unset -f _foamAddPath _foamAddMan _foamAddLib _foamAddLibAuto 2>/dev/null
-    unset -f _foamClean _foamEtc _foamEval 2>/dev/null
+    unset -f _foamClean _foamEcho _foamEtc _foamEval 2>/dev/null
     unset foamClean
     unset WM_SHELL_FUNCTIONS
 

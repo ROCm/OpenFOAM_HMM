@@ -90,7 +90,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 
         // Collect cells to test for inside/outside in shell
         labelList cellToCompact(mesh_.nCells(), -1);
-        labelList bFaceToCompact(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
+        labelList bFaceToCompact(mesh_.nBoundaryFaces(), -1);
         List<FixedList<label, 3>> shellGapInfo;
         List<volumeType> shellGapMode;
         {

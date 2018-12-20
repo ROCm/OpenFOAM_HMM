@@ -59,11 +59,11 @@ const Foam::Enum
     Foam::distributedTriSurfaceMesh::distributionType
 >
 Foam::distributedTriSurfaceMesh::distributionTypeNames_
-{
+({
     { distributionType::FOLLOW, "follow" },
     { distributionType::INDEPENDENT, "independent" },
     { distributionType::FROZEN, "frozen" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -79,10 +79,10 @@ bool Foam::distributedTriSurfaceMesh::read()
     Pstream::scatterList(procBb_);
 
     // Distribution type
-    distType_ = distributionTypeNames_.lookup("distributionType", dict_);
+    distType_ = distributionTypeNames_.get("distributionType", dict_);
 
     // Merge distance
-    mergeDist_ = readScalar(dict_.lookup("mergeDistance"));
+    dict_.readEntry("mergeDistance", mergeDist_);
 
     return true;
 }
@@ -806,21 +806,17 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
     {
         // Use singleton decomposeParDict. Cannot use decompositionModel
         // here since we've only got Time and not a mesh.
-        if
-        (
-            searchableSurface::time().foundObject<IOdictionary>
+
+        const auto* dictPtr =
+            searchableSurface::time().findObject<IOdictionary>
             (
+                // == decompositionModel::canonicalName
                 "decomposeParDict"
-            )
-        )
-        {
-            decomposer_ = decompositionMethod::New
-            (
-                searchableSurface::time().lookupObject<IOdictionary>
-                (
-                    "decomposeParDict"
-                )
             );
+
+        if (dictPtr)
+        {
+            decomposer_ = decompositionMethod::New(*dictPtr);
         }
         else
         {
@@ -832,6 +828,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
                     (
                         IOobject
                         (
+                            // == decompositionModel::canonicalName
                             "decomposeParDict",
                             searchableSurface::time().system(),
                             searchableSurface::time(),
@@ -1894,8 +1891,7 @@ void Foam::distributedTriSurfaceMesh::getNormal
     forAll(triangleIndex, i)
     {
         label trii = triangleIndex[i];
-        normal[i] = s[trii].normal(s.points());
-        normal[i] /= mag(normal[i]) + VSMALL;
+        normal[i] = s[trii].unitNormal(s.points());
     }
 
 
@@ -1918,13 +1914,11 @@ void Foam::distributedTriSurfaceMesh::getField
         return;
     }
 
-    if (foundObject<triSurfaceLabelField>("values"))
-    {
-        const triSurfaceLabelField& fld = lookupObject<triSurfaceLabelField>
-        (
-            "values"
-        );
+    const auto* fldPtr = findObject<triSurfaceLabelField>("values");
 
+    if (fldPtr)
+    {
+        const triSurfaceLabelField& fld = *fldPtr;
 
         // Get query data (= local index of triangle)
         // ~~~~~~~~~~~~~~

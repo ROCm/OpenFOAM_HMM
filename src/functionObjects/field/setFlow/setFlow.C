@@ -53,12 +53,12 @@ const Foam::Enum
     Foam::functionObjects::setFlow::modeType
 >
 Foam::functionObjects::setFlow::modeTypeNames
-{
+({
     { functionObjects::setFlow::modeType::FUNCTION, "function" },
     { functionObjects::setFlow::modeType::ROTATION, "rotation" },
     { functionObjects::setFlow::modeType::VORTEX2D, "vortex2D" },
-    { functionObjects::setFlow::modeType::VORTEX3D, "vortex3D" }
-};
+    { functionObjects::setFlow::modeType::VORTEX3D, "vortex3D" },
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -66,7 +66,7 @@ Foam::functionObjects::setFlow::modeTypeNames
 void Foam::functionObjects::setFlow::setPhi(const volVectorField& U)
 {
     surfaceScalarField* phiptr =
-        mesh_.lookupObjectRefPtr<surfaceScalarField>(phiName_);
+        mesh_.getObjectPtr<surfaceScalarField>(phiName_);
 
     if (!phiptr)
     {
@@ -76,7 +76,7 @@ void Foam::functionObjects::setFlow::setPhi(const volVectorField& U)
     if (rhoName_ != "none")
     {
         const volScalarField* rhoptr =
-            mesh_.lookupObjectPtr<volScalarField>(rhoName_);
+            mesh_.findObject<volScalarField>(rhoName_);
 
         if (rhoptr)
         {
@@ -137,7 +137,8 @@ bool Foam::functionObjects::setFlow::read(const dictionary& dict)
     if (fvMeshFunctionObject::read(dict))
     {
         Info<< name() << ":" << endl;
-        mode_ = modeTypeNames.read(dict.lookup("mode"));
+
+        modeTypeNames.readEntry("mode", dict, mode_);
 
         Info<< "    operating mode: " << modeTypeNames[mode_] << endl;
 
@@ -176,22 +177,21 @@ bool Foam::functionObjects::setFlow::read(const dictionary& dict)
             case modeType::ROTATION:
             {
                 omegaPtr_ = Function1<scalar>::New("omega", dict);
-                dict.lookup("origin") >> origin_;
-                vector refDir(dict.lookup("refDir"));
-                refDir /= mag(refDir) + ROOTVSMALL;
-                vector axis(dict.lookup("axis"));
-                axis /= mag(axis) + ROOTVSMALL;
+
+                dict.readEntry("origin", origin_);
+                const vector refDir(dict.get<vector>("refDir").normalise());
+                const vector axis(dict.get<vector>("axis").normalise());
+
                 R_ = tensor(refDir, axis, refDir^axis);
                 break;
             }
             case modeType::VORTEX2D:
             case modeType::VORTEX3D:
             {
-                dict.lookup("origin") >> origin_;
-                vector refDir(dict.lookup("refDir"));
-                refDir /= mag(refDir) + ROOTVSMALL;
-                vector axis(dict.lookup("axis"));
-                axis /= mag(axis) + ROOTVSMALL;
+                dict.readEntry("origin", origin_);
+                const vector refDir(dict.get<vector>("refDir").normalise());
+                const vector axis(dict.get<vector>("axis").normalise());
+
                 R_ = tensor(refDir, axis, refDir^axis);
                 break;
             }
@@ -208,10 +208,11 @@ bool Foam::functionObjects::setFlow::read(const dictionary& dict)
 
 bool Foam::functionObjects::setFlow::execute()
 {
-    volVectorField* Uptr = mesh_.lookupObjectRefPtr<volVectorField>(UName_);
+    volVectorField* Uptr =
+        mesh_.getObjectPtr<volVectorField>(UName_);
 
     surfaceScalarField* phiptr =
-        mesh_.lookupObjectRefPtr<surfaceScalarField>(phiName_);
+        mesh_.getObjectPtr<surfaceScalarField>(phiName_);
 
     Log << nl << name() << ":" << nl;
 
@@ -432,13 +433,13 @@ bool Foam::functionObjects::setFlow::execute()
 
 bool Foam::functionObjects::setFlow::write()
 {
-    const auto& Uptr = mesh_.lookupObjectRefPtr<volVectorField>(UName_);
+    const auto* Uptr = mesh_.findObject<volVectorField>(UName_);
     if (Uptr)
     {
         Uptr->write();
     }
 
-    const auto& phiptr = mesh_.lookupObjectRefPtr<surfaceScalarField>(phiName_);
+    const auto* phiptr = mesh_.findObject<surfaceScalarField>(phiName_);
     if (phiptr)
     {
         phiptr->write();

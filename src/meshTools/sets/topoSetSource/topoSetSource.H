@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ Class
 Description
     Base class of a source for a topoSet.
 
-    Implementer has to modify the given set (see applyToSet) according to
+    Implementer must modify the given set (see applyToSet) according to
     its function and the setAction (one of add/delete/new)
 
 SourceFiles
@@ -39,21 +39,20 @@ SourceFiles
 #define topoSetSource_H
 
 #include "pointField.H"
-#include "word.H"
 #include "labelList.H"
 #include "faceList.H"
 #include "typeInfo.H"
-#include "runTimeSelectionTables.H"
 #include "autoPtr.H"
 #include "Enum.H"
 #include "HashTable.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyMesh;
 class topoSet;
 
@@ -70,27 +69,32 @@ public:
         //- Enumeration defining the types of sources
         enum sourceType
         {
-            CELLSETSOURCE,
-            FACESETSOURCE,
-            POINTSETSOURCE,
+            CELLSETSOURCE = 0x1,        //!< Cells
+            FACESETSOURCE = 0x2,        //!< Faces
+            POINTSETSOURCE = 0x4,       //!< Points
 
-            CELLZONESOURCE,
-            FACEZONESOURCE,
-            POINTZONESOURCE
+            CELLZONESOURCE = 0x11,      //!< Cells as zone
+            FACEZONESOURCE = 0x12,      //!< Faces as zone
+            POINTZONESOURCE = 0x14,     //!< Points as zone
         };
 
         //- Enumeration defining the valid actions
         enum setAction
         {
-            CLEAR,
-            NEW,
-            INVERT,
-            ADD,
-            DELETE,
-            SUBSET,
-            LIST,
-            REMOVE
+            ADD,                //!< Add elements to the set
+            SUBTRACT,           //!< Subtract elements from the set
+            SUBSET,             //!< Subset with elements in the set
+            INVERT,             //!< Invert the elements in the set
+            CLEAR,              //!< Clear the set, possibly creating it
+            NEW,                //!< Create a new set and ADD elements to it
+            REMOVE,             //!< Remove the set (from the file system)
+            LIST,               //!< Print contents of the set
+            DELETE = SUBTRACT,  //!< \deprecated(2018-10) Alias for SUBTRACT
         };
+
+        //- The setActions text representations
+        static const Enum<setAction> actionNames;
+
 
 protected:
 
@@ -122,17 +126,34 @@ protected:
         };
 
 
-    // Protected data
+    // Protected Data
 
+        //- Reference to the mesh
         const polyMesh& mesh_;
 
-        //- Add (if bool) celli to set or delete celli from set.
-        void addOrDelete(topoSet& set, const label celli, const bool) const;
+        //- Verbosity (default: true)
+        bool verbose_;
+
+
+    // Protected Member Functions
+
+        //- Detect and remove any values less than 0 or ge maxLabel.
+        //  \return false if invalid elements were detected (and removed)
+        static bool check(labelList& list, const label maxLabel);
+
+        //- Add or delete id from set. Add when 'add' is true
+        void addOrDelete(topoSet& set, const label id, const bool add) const;
+
+        //- Add or delete labels from set. Add when 'add' is true
+        void addOrDelete
+        (
+            topoSet& set,
+            const labelUList& labels,
+            const bool add
+        ) const;
 
 
 private:
-
-        static const Enum<setAction> actionNames_;
 
         static const string illegalSource_;
 
@@ -154,14 +175,16 @@ public:
 
     // Static Functions
 
-        //- Convert string to action
+        //- Deprecated(2018-07) convert string to action
+        //  \deprecated(2018-07) - use actionNames[] directly
         static setAction toAction(const word& actionName)
         {
-            return actionNames_[actionName];
+            return actionNames[actionName];
         }
 
         //- Check state of stream.
         static Istream& checkIs(Istream& is);
+
 
     // Declare run-time constructor selection table
 
@@ -207,9 +230,9 @@ public:
 
             autoPtr<topoSetSource> operator()(Istream& is) const
             {
-                word topoSetSourceType(is);
+                const word sourceTypeName(is);
                 dictionary dict(is);
-                return topoSetSource::New(topoSetSourceType, mesh_, dict);
+                return topoSetSource::New(sourceTypeName, mesh_, dict);
             }
         };
 
@@ -221,25 +244,16 @@ public:
                 usageTablePtr_ = new HashTable<string>();
             }
 
-            const HashTable<string>& usageTable = *usageTablePtr_;
-
-            if (usageTable.found(name))
-            {
-                return usageTable[name];
-            }
-            else
-            {
-                return illegalSource_;
-            }
+            return usageTablePtr_->lookup(name, illegalSource_);
         }
 
 
     // Constructors
 
         //- Construct from components
-        topoSetSource(const polyMesh& mesh);
+        explicit topoSetSource(const polyMesh& mesh);
 
-        //- Clone
+        //- Clone (disallowed)
         autoPtr<topoSetSource> clone() const
         {
             NotImplemented;
@@ -267,22 +281,41 @@ public:
 
 
     //- Destructor
-    virtual ~topoSetSource();
+    virtual ~topoSetSource() = default;
 
 
     // Member Functions
 
+        //- Reference to the mesh
         const polyMesh& mesh() const
         {
             return mesh_;
         }
 
+        //- Return the current verbosity
+        bool verbose() const
+        {
+            return verbose_;
+        }
+
+        //- Set the current verbosity
+        void verbose(bool on)
+        {
+            verbose_ = on;
+        }
+
 
     // Member Functions
 
+        //- The type of set being used by the source
         virtual sourceType setType() const = 0;
 
-        virtual void applyToSet(const setAction action, topoSet&) const = 0;
+        //- Apply specified action to the topoSet
+        virtual void applyToSet
+        (
+            const setAction action,
+            topoSet& set
+        ) const = 0;
 
 };
 

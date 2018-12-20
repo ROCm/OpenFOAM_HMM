@@ -570,17 +570,16 @@ labelList regionRenumber
 
     label celli = 0;
 
-    forAll(regionToCells, regionI)
+    forAll(regionToCells, regioni)
     {
-        Info<< "    region " << regionI << " starts at " << celli << endl;
+        Info<< "    region " << regioni << " starts at " << celli << endl;
 
         // Make sure no parallel comms
-        bool oldParRun = UPstream::parRun();
+        const bool oldParRun = UPstream::parRun();
         UPstream::parRun() = false;
 
         // Per region do a reordering.
-        fvMeshSubset subsetter(mesh);
-        subsetter.setLargeCellSubset(cellToRegion, regionI);
+        fvMeshSubset subsetter(mesh, regioni, cellToRegion);
 
         const fvMesh& subMesh = subsetter.subMesh();
 
@@ -612,23 +611,25 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Renumber mesh to minimise bandwidth"
+        "Renumber mesh cells to reduce the bandwidth"
     );
 
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
     #include "addTimeOptions.H"
-    #include "addDictOption.H"
+
+    argList::addOption("dict", "file", "Use alternative renumberMeshDict");
+
     argList::addBoolOption
     (
         "frontWidth",
-        "calculate the rms of the frontwidth"
+        "Calculate the rms of the front-width"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
 
     // Force linker to include zoltan symbols. This section is only needed since
@@ -648,6 +649,7 @@ int main(int argc, char *argv[])
     runTime.setTime(Times[startTime], startTime);
 
     #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const bool readDict = args.found("dict");
@@ -748,7 +750,7 @@ int main(int argc, char *argv[])
                 << endl;
         }
 
-        renumberDict.lookup("writeMaps") >> writeMaps;
+        renumberDict.readEntry("writeMaps", writeMaps);
         if (writeMaps)
         {
             Info<< "Writing renumber maps (new to old) to polyMesh." << nl
@@ -1050,7 +1052,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
 

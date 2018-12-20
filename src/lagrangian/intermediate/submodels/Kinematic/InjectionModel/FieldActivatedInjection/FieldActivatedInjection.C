@@ -40,22 +40,22 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
 )
 :
     InjectionModel<CloudType>(dict, owner, modelName, typeName),
-    factor_(readScalar(this->coeffDict().lookup("factor"))),
+    factor_(this->coeffDict().getScalar("factor")),
     referenceField_
     (
         owner.db().objectRegistry::template lookupObject<volScalarField>
         (
-            this->coeffDict().lookup("referenceField")
+            this->coeffDict().getWord("referenceField")
         )
     ),
     thresholdField_
     (
         owner.db().objectRegistry::template lookupObject<volScalarField>
         (
-            this->coeffDict().lookup("thresholdField")
+            this->coeffDict().getWord("thresholdField")
         )
     ),
-    positionsFile_(this->coeffDict().lookup("positionsFile")),
+    positionsFile_(this->coeffDict().getWord("positionsFile")),
     positions_
     (
         IOobject
@@ -72,10 +72,13 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
     injectorTetPts_(positions_.size()),
     nParcelsPerInjector_
     (
-        readLabel(this->coeffDict().lookup("parcelsPerInjector"))
+        this->coeffDict().getLabel("parcelsPerInjector")
     ),
-    nParcelsInjected_(positions_.size(), 0),
-    U0_(this->coeffDict().lookup("U0")),
+    nParcelsInjected_(positions_.size(), Zero),
+    U0_
+    (
+        this->coeffDict().template get<vector>("U0")
+    ),
     diameters_(positions_.size()),
     sizeDistribution_
     (

@@ -28,10 +28,10 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Utility to refine cells next to patches.
+    Refine cells next to specified patches.
 
     Arguments:
-        1: List of patch name regular expressions
+        1: List of patch names or regular expressions
         2: The size of the refined cells as a fraction of the edge-length.
 
     Examples:
@@ -61,28 +61,42 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Refine cells next to specified patches."
+    );
+
     #include "addOverwriteOption.H"
-    argList::addArgument("patches");
-    argList::addArgument("edgeFraction");
+    argList::addArgument
+    (
+        "patches",
+        "The list of patch names or regex - Eg, '(top \"Wall.\")'"
+    );
+    argList::addArgument
+    (
+        "edgeFraction",
+        "The size of the refined cells as a fraction of the edge-length"
+        " on a (0,1) interval"
+    );
 
     argList::addOption
     (
         "useSet",
         "name",
-        "restrict cells to refine based on specified cellSet name"
+        "Restrict cells to refine based on specified cellSet name"
     );
 
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
-
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     // Find set of patches from the list of regular expressions provided
-    const wordRes patches(args.readList<wordRe>(1));
-    const scalar weight  = args.read<scalar>(2);
+    const wordRes patches(args.getList<wordRe>(1));
+    const scalar weight  = args.get<scalar>(2);
     const bool overwrite = args.found("overwrite");
 
     const labelHashSet patchSet(mesh.boundaryMesh().patchSet(patches));
@@ -220,7 +234,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);

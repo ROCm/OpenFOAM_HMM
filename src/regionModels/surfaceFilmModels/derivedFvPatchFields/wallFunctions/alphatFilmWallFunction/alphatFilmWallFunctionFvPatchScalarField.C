@@ -142,27 +142,27 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    typedef regionModels::surfaceFilmModels::surfaceFilmRegionModel modelType;
+    const auto* filmModelPtr = db().time().findObject
+        <regionModels::surfaceFilmModels::surfaceFilmRegionModel>
+        (filmRegionName_);
+
+    if (!filmModelPtr)
+    {
+        // Do nothing on construction - film model doesn't exist yet
+        return;
+    }
+
+    const auto& filmModel = *filmModelPtr;
+
 
     // Since we're inside initEvaluate/evaluate there might be processor
     // comms underway. Change the tag we use.
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    bool foundFilm = db().time().foundObject<modelType>(filmRegionName_);
-
-    if (!foundFilm)
-    {
-        // Do nothing on construction - film model doesn't exist yet
-        return;
-    }
-
     const label patchi = patch().index();
 
     // Retrieve phase change mass from surface film model
-    const modelType& filmModel =
-        db().time().lookupObject<modelType>(filmRegionName_);
-
     const label filmPatchi = filmModel.regionPatchID(patchi);
 
     tmp<volScalarField> mDotFilm(filmModel.primaryMassTrans());

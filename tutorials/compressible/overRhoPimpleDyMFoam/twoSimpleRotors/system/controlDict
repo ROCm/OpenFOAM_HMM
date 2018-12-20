@@ -1,0 +1,127 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1812                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+libs            ("liboverset.so");
+
+DebugSwitches
+{
+    overset                 0;
+    dynamicOversetFvMesh    0;
+    cellVolumeWeight        0;
+}
+
+application     overRhoPimpleDyMFoam;
+
+startFrom       latestTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         1.0;
+
+deltaT          2e-5;
+
+writeControl    adjustableRunTime;
+
+writeInterval   0.01;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  10;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep  true;
+
+maxCo          0.2;
+
+functions
+{
+    // #include "catalyst"
+    probes
+    {
+        type            probes;
+        libs            ("libsampling.so");
+
+        // Name of the directory for probe data
+        name            probes;
+
+        // Write at same frequency as fields
+        writeControl    timeStep;
+        writeInterval   1;
+
+        // Fields to be probed
+        fields          (p U);
+
+        // Optional: interpolation scheme to use (default is cell)
+        interpolationScheme cell;
+
+        probeLocations
+        (
+            (0.015 0.005 0.005)
+        );
+
+    }
+
+    mass
+    {
+        type            volFieldValue;
+        libs            ("libfieldFunctionObjects.so");
+
+        writeControl    timeStep;
+        writeInterval   1;
+        writeFields     false;
+        log             true;
+
+        operation       volIntegrate;
+
+        fields
+        (
+            rho
+        );
+    }
+
+    rhoVol
+    {
+        libs            ("libutilityFunctionObjects.so");
+        type            coded;
+        name            rhoVolume;
+        writeControl    timeStep;
+        writeInterval   10;
+
+        codeWrite
+        #{
+
+            const volScalarField& rho =
+                mesh().lookupObject<volScalarField>("rho");
+
+            Info<< "rho volume = " << rho.weightedAverage(mesh().Vsc()) << endl;
+
+        #};
+    }
+}
+
+
+// ************************************************************************* //

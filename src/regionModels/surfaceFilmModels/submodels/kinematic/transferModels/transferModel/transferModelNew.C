@@ -45,14 +45,14 @@ autoPtr<transferModel> transferModel::New
 {
     Info<< "        " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown transferModel type " << modelType
-            << nl << nl << "Valid transferModel types are:" << nl
+            << "Unknown transferModel type "
+            << modelType << nl << nl
+            << "Valid transferModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }

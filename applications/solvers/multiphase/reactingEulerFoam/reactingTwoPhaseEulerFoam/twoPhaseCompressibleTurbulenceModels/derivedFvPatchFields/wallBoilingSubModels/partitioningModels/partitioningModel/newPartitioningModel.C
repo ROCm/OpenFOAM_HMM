@@ -33,7 +33,7 @@ Foam::wallBoilingModels::partitioningModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting partitioningModel: " << modelType << endl;
 

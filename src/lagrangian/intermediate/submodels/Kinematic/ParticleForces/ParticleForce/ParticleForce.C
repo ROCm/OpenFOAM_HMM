@@ -43,10 +43,8 @@ Foam::ParticleForce<CloudType>::ParticleForce
 {
     if (readCoeffs && (coeffs_.dictName() != forceType))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Force " << forceType << " must be specified as a dictionary"
+        FatalIOErrorInFunction(dict)
+            << "Force " << forceType << " must be specified as a dictionary"
             << exit(FatalIOError);
     }
 }

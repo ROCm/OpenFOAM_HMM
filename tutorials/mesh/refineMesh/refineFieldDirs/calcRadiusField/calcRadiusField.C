@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
                 ),
                 mesh.C()/magSqr(mesh.C())
             );
-            radialDirection.replace(vector::Z, scalar(0.0));
+            radialDirection.replace(vector::Z, scalar(0));
             radialDirection /= sqrt(magSqr(radialDirection));
             radialDirection.write();
 
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
                 ),
                 transform2Tangencial & mesh.C()
             );
-            angularDirection.replace(vector::Z, scalar(0.0));
+            angularDirection.replace(vector::Z, scalar(0));
             angularDirection /= sqrt(magSqr(angularDirection));
             angularDirection.write();
 

@@ -63,7 +63,7 @@ Foam::genericPolyPatch::genericPolyPatch
 )
 :
     polyPatch(name, dict, index, bm, patchType),
-    actualTypeName_(dict.lookup("type")),
+    actualTypeName_(dict.get<word>("type")),
     dict_(dict)
 {}
 
@@ -131,19 +131,21 @@ void Foam::genericPolyPatch::write(Ostream& os) const
     os.writeEntry("nFaces", size());
     os.writeEntry("startFace", start());
 
-    forAllConstIter(dictionary, dict_, iter)
+    for (const entry& e : dict_)
     {
+        const word& key = e.keyword();
+
         // Filter out any keywords already written by above
         if
         (
-            iter().keyword() != "type"
-         && iter().keyword() != "nFaces"
-         && iter().keyword() != "startFace"
-         && iter().keyword() != "physicalType"
-         && iter().keyword() != "inGroups"
+            key != "type"
+         && key != "nFaces"
+         && key != "startFace"
+         && key != "physicalType"
+         && key != "inGroups"
         )
         {
-            iter().write(os);
+            e.write(os);
         }
     }
 }

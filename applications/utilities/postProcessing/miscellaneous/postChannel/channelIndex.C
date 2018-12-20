@@ -38,9 +38,11 @@ const Foam::Enum
     Foam::vector::components
 >
 Foam::channelIndex::vectorComponentsNames_
-(
-    Foam::vector::components::X, { "x", "y", "z" }
-);
+({
+    { vector::components::X, "x" },
+    { vector::components::Y, "y" },
+    { vector::components::Z, "z" },
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -55,7 +57,7 @@ void Foam::channelIndex::walkOppositeFaces
 {
     const cellList& cells = mesh.cells();
     const faceList& faces = mesh.faces();
-    label nBnd = mesh.nFaces() - mesh.nInternalFaces();
+    const label nBnd = mesh.nBoundaryFaces();
 
     DynamicList<label> frontFaces(startFaces);
     forAll(frontFaces, i)
@@ -223,12 +225,12 @@ Foam::channelIndex::channelIndex
     const dictionary& dict
 )
 :
-    symmetric_(readBool(dict.lookup("symmetric"))),
-    dir_(vectorComponentsNames_.lookup("component", dict))
+    symmetric_(dict.get<bool>("symmetric")),
+    dir_(vectorComponentsNames_.get("component", dict))
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    const wordList patchNames(dict.lookup("patches"));
+    const wordList patchNames(dict.get<wordList>("patches"));
 
     label nFaces = 0;
 

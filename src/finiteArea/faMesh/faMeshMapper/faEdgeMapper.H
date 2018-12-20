@@ -67,7 +67,7 @@ class faEdgeMapper
         const faMesh& mesh_;
 
         //- Reference to mapPolyMesh
-        const mapPolyMesh& mpm_;
+        //const mapPolyMesh& mpm_;
 
         //- Old mesh size
         label sizeBeforeMapping_;

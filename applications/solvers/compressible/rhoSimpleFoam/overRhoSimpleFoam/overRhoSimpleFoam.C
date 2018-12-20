@@ -28,7 +28,7 @@ Group
     grpCompressibleSolvers
 
 Description
-    Overset steady-state solver for turbulent flow of compressible fluids.
+    Overset steady-state solver for compressible turbulent flow.
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,10 +47,15 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Overset steady-state solver for compressible turbulent flow"
+    );
+
     #define CREATE_MESH createUpdatedDynamicFvMesh.H
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createUpdatedDynamicFvMesh.H"
     #include "createControl.H"

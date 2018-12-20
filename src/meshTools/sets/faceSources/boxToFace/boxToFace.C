@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(boxToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, boxToFace, word);
     addToRunTimeSelectionTable(topoSetSource, boxToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, boxToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, boxToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boxToFace,
+        word,
+        box
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        boxToFace,
+        istream,
+        box
+    );
 }
 
 
@@ -51,13 +67,13 @@ void Foam::boxToFace::combine(topoSet& set, const bool add) const
 {
     const pointField& ctrs = mesh_.faceCentres();
 
-    forAll(ctrs, facei)
+    forAll(ctrs, elemi)
     {
-        forAll(bbs_, i)
+        for (const auto& bb : bbs_)
         {
-            if (bbs_[i].contains(ctrs[facei]))
+            if (bb.contains(ctrs[elemi]))
             {
-                addOrDelete(set, facei, add);
+                addOrDelete(set, elemi, add);
                 break;
             }
         }
@@ -73,8 +89,19 @@ Foam::boxToFace::boxToFace
     const treeBoundBoxList& bbs
 )
 :
-    topoSetSource(mesh),
+    topoSetFaceSource(mesh),
     bbs_(bbs)
+{}
+
+
+Foam::boxToFace::boxToFace
+(
+    const polyMesh& mesh,
+    treeBoundBoxList&& bbs
+)
+:
+    topoSetFaceSource(mesh),
+    bbs_(std::move(bbs))
 {}
 
 
@@ -84,14 +111,20 @@ Foam::boxToFace::boxToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    bbs_
-    (
-        dict.found("box")
-      ? treeBoundBoxList(1, treeBoundBox(dict.lookup("box")))
-      : dict.lookup("boxes")
-    )
-{}
+    topoSetFaceSource(mesh),
+    bbs_()
+{
+    // Accept 'boxes', 'box' or 'min/max'
+    if (!dict.readIfPresent("boxes", bbs_))
+    {
+        bbs_.resize(1);
+        if (!dict.readIfPresent("box", bbs_.first()))
+        {
+            dict.readEntry<point>("min", bbs_.first().min());
+            dict.readEntry<point>("max", bbs_.first().max());
+        }
+    }
+}
 
 
 Foam::boxToFace::boxToFace
@@ -100,14 +133,8 @@ Foam::boxToFace::boxToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    bbs_(1, treeBoundBox(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::boxToFace::~boxToFace()
+    topoSetFaceSource(mesh),
+    bbs_(one(), treeBoundBox(checkIs(is)))
 {}
 
 
@@ -119,15 +146,23 @@ void Foam::boxToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces with centre within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces with centre within boxes " << bbs_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces with centre within boxes "
+                << bbs_ << endl;
+        }
 
         combine(set, false);
     }

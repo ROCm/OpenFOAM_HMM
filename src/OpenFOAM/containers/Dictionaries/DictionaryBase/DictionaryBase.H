@@ -56,7 +56,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<class IDLListType, class T>
 class DictionaryBase;
@@ -96,34 +96,34 @@ public:
         DictionaryBase(const label size = 128);
 
         //- Copy construct
-        DictionaryBase(const DictionaryBase&);
+        DictionaryBase(const DictionaryBase& dict);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        DictionaryBase(Istream&, const INew&);
+        DictionaryBase(Istream& is, const INew& inew);
 
         //- Construct from Istream using default Istream constructor class
-        DictionaryBase(Istream&);
+        DictionaryBase(Istream& is);
 
 
     // Member functions
 
         // Search and lookup
 
-            //- Search DictionaryBase for given keyword
-            bool found(const word&) const;
+            //- Search for given keyword
+            bool found(const word& keyword) const;
 
             //- Find and return an entry if present, otherwise return nullptr
-            const T* lookupPtr(const word&) const;
+            const T* lookupPtr(const word& keyword) const;
 
             //- Find and return an entry if present, otherwise return nullptr
-            T* lookupPtr(const word&);
+            T* lookupPtr(const word& keyword);
 
             //- Find and return entry
-            const T* lookup(const word&) const;
+            const T* lookup(const word& keyword) const;
 
             //- Find and return entry
-            T* lookup(const word&);
+            T* lookup(const word& keyword);
 
             //- Return the table of contents
             wordList toc() const;

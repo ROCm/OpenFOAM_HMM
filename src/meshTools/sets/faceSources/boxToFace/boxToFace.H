@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,20 @@ Class
     Foam::boxToFace
 
 Description
-    A topoSetSource to select faces based on face centres inside box.
+    A topoSetFaceSource to select faces based on face centres inside box.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        boxes       | Multiple bounding boxes               | partly   |
+        box         | A single bounding box                 | partly   |
+        min         | Minimum point for a single box        | partly   |
+        max         | Maximum point for a single box        | partly   |
+    \endtable
+
+Note
+    Must specify "boxes", "box" or a "min/max" pair
+    (compatibility with searchable box) - highest to lowest precedence.
 
 SourceFiles
     boxToFace.C
@@ -35,7 +48,7 @@ SourceFiles
 #ifndef boxToFace_H
 #define boxToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 #include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +62,7 @@ namespace Foam
 
 class boxToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
     // Private data
 
@@ -72,43 +85,29 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        boxToFace
-        (
-            const polyMesh& mesh,
-            const treeBoundBoxList& bbs
-        );
+        //- Construct from components, copying bounding boxes
+        boxToFace(const polyMesh& mesh, const treeBoundBoxList& bbs);
+
+        //- Construct from components, moving bounding boxes
+        boxToFace(const polyMesh& mesh, treeBoundBoxList&& bbs);
 
         //- Construct from dictionary
-        boxToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        boxToFace(const polyMesh& mesh, const dictionary& dict);
 
-        //- Construct from Istream
-        boxToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        //- Construct from stream - a single box.
+        boxToFace(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~boxToFace();
+    virtual ~boxToFace() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 };
 

@@ -85,11 +85,11 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        dynamicMultiMotionSolverFvMesh(const IOobject& io);
+        explicit dynamicMultiMotionSolverFvMesh(const IOobject& io);
 
 
     //- Destructor
-    ~dynamicMultiMotionSolverFvMesh();
+    ~dynamicMultiMotionSolverFvMesh() = default;
 
 
     // Member Functions

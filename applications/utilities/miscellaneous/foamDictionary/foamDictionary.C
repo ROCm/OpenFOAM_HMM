@@ -25,7 +25,7 @@ Application
     foamDictionary
 
 Description
-    Interrogates and manipulates dictionaries.
+    Interrogate and manipulate dictionaries.
 
 Usage
     \b foamDictionary [OPTION] dictionary
@@ -170,9 +170,10 @@ class dictAndKeyword
     word key_;
 
 public:
+
     dictAndKeyword(const word& scopedName)
     {
-        string::size_type i = scopedName.rfind('/');
+        auto i = scopedName.rfind('/');
         if (i == string::npos)
         {
             i = scopedName.rfind('.');
@@ -212,7 +213,7 @@ const dictionary& lookupScopedDict
         return dict;
     }
 
-    const entry* eptr = dict.lookupScopedEntryPtr(subDictName, false, false);
+    const entry* eptr = dict.findScoped(subDictName, keyType::LITERAL);
 
     if (!eptr || !eptr->isDict())
     {
@@ -231,7 +232,7 @@ void removeDict(dictionary& dict, const dictionary& dictToRemove)
 {
     for (const entry& refEntry : dictToRemove)
     {
-        auto finder = dict.search(refEntry.keyword(), false, false);
+        auto finder = dict.search(refEntry.keyword(), keyType::LITERAL);
 
         bool purge = false;
 
@@ -261,13 +262,16 @@ void removeDict(dictionary& dict, const dictionary& dictToRemove)
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("manipulates dictionaries");
+    argList::addNote
+    (
+        "Interrogate and manipulate dictionaries"
+    );
 
     argList::noBanner();
     argList::noJobInfo();
-    argList::addArgument("dictionary");
+    argList::addArgument("dict", "The dictionary file to process");
     argList::addBoolOption("keywords", "List keywords");
-    argList::addOption("entry", "name", "report/select the named entry");
+    argList::addOption("entry", "name", "Report/select the named entry");
     argList::addBoolOption
     (
         "value",
@@ -288,7 +292,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "remove",
-        "Remove the entry."
+        "Remove the entry"
     );
     argList::addOption
     (
@@ -357,8 +361,7 @@ int main(int argc, char *argv[])
     bool changed = false;
 
     // Read but preserve headers
-    dictionary dict;
-    dict.read(dictFile(), true);
+    dictionary dict(dictFile(), true);
 
     if (listIncludes)
     {
@@ -455,12 +458,7 @@ int main(int argc, char *argv[])
             changed = true;
 
             // Print the changed entry
-            const auto finder = dict.csearchScoped
-            (
-                scopedName,
-                false,
-                true  // Support wildcards
-            );
+            const auto finder = dict.csearchScoped(scopedName, keyType::REGEX);
 
             if (finder.found())
             {
@@ -489,8 +487,8 @@ int main(int argc, char *argv[])
                 const dictionary& d1(lookupScopedDict(dict, dAk.dict()));
                 const dictionary& d2(lookupScopedDict(diffDict, dAk.dict()));
 
-                const entry* e1Ptr = d1.lookupEntryPtr(dAk.key(), false, true);
-                const entry* e2Ptr = d2.lookupEntryPtr(dAk.key(), false, true);
+                const entry* e1Ptr = d1.findEntry(dAk.key(), keyType::REGEX);
+                const entry* e2Ptr = d2.findEntry(dAk.key(), keyType::REGEX);
 
                 if (e1Ptr && e2Ptr)
                 {
@@ -509,12 +507,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-            const auto finder = dict.csearchScoped
-            (
-                scopedName,
-                false,
-                true  // Support wildcards
-            );
+            const auto finder = dict.csearchScoped(scopedName, keyType::REGEX);
 
             if (!finder.found())
             {

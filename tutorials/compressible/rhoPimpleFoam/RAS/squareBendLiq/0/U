@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,11 +20,6 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    Default_Boundary_Region
-    {
-        type            noSlip;
-    }
-
     inlet
     {
         type            flowRateInletVelocity;
@@ -36,6 +31,11 @@ boundaryField
     {
         type            pressureInletOutletVelocity;
         value           $internalField;
+    }
+
+    "(?i).*walls"
+    {
+        type            noSlip;
     }
 }
 

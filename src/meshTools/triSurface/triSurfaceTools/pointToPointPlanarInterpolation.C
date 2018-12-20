@@ -43,7 +43,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::coordinateSystem
+Foam::coordSystem::cartesian
 Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
 (
     const pointField& points
@@ -107,8 +107,7 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
             << exit(FatalError);
     }
 
-    vector n = e1^(points[index2]-p0);
-    n /= mag(n);
+    const vector n = normalised(e1 ^ (points[index2]-p0));
 
     if (debug)
     {
@@ -118,9 +117,8 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
             << " to define coordinate system with normal " << n << endl;
     }
 
-    return coordinateSystem
+    return coordSystem::cartesian
     (
-        "reference",
         p0,  // origin
         n,   // normal
         e1   // 0-axis
@@ -193,11 +191,8 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
     }
     else
     {
-        tmp<vectorField> tlocalVertices
-        (
-            referenceCS_.localPosition(sourcePoints)
-        );
-        vectorField& localVertices = tlocalVertices.ref();
+        auto tlocalVertices = referenceCS_.localPosition(sourcePoints);
+        auto& localVertices = tlocalVertices.ref();
 
         const boundBox bb(localVertices, true);
         const point bbMid(bb.midpoint());
@@ -229,13 +224,7 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
 
         triSurface s(triSurfaceTools::delaunay2D(localVertices2D));
 
-        tmp<pointField> tlocalFaceCentres
-        (
-            referenceCS_.localPosition
-            (
-                destPoints
-            )
-        );
+        auto tlocalFaceCentres = referenceCS_.localPosition(destPoints);
         const pointField& localFaceCentres = tlocalFaceCentres();
 
         if (debug)
@@ -325,12 +314,13 @@ Foam::pointToPointPlanarInterpolation::pointToPointPlanarInterpolation
 :
     perturb_(perturb),
     nearestOnly_(nearestOnly),
-    referenceCS_
-    (
-        nearestOnly ? coordinateSystem() : calcCoordinateSystem(sourcePoints)
-    ),
+    referenceCS_(),
     nPoints_(sourcePoints.size())
 {
+    if (!nearestOnly)
+    {
+        referenceCS_ = calcCoordinateSystem(sourcePoints);
+    }
     calcWeights(sourcePoints, destPoints);
 }
 

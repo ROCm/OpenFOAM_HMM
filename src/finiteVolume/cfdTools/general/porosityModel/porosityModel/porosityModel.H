@@ -91,12 +91,11 @@ protected:
         //- Cell zone IDs
         labelList cellZoneIDs_;
 
-        //- Local co-ordinate system
-        coordinateSystem coordSys_;
+        //- Local coordinate system
+        autoPtr<coordinateSystem> csysPtr_;
 
 
     // Protected Member Functions
-
 
         //- Transform the model data wrt mesh changes
         virtual void calcTransformModelData() = 0;
@@ -128,8 +127,12 @@ protected:
             volTensorField& AU
         ) const = 0;
 
+
+        //- Local coordinate system
+        inline const coordinateSystem& csys() const;
+
         //- Return label index
-        label fieldIndex(const label index) const;
+        inline label fieldIndex(const label index) const;
 
 
 public:
@@ -209,7 +212,7 @@ public:
     );
 
     //- Destructor
-    virtual ~porosityModel();
+    virtual ~porosityModel() = default;
 
 
     // Member Functions

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class appendBase64Formatter Declaration
+                 Class vtk::appendBase64Formatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class appendBase64Formatter
@@ -57,6 +57,9 @@ class appendBase64Formatter
 
         static const char* name_;
         static const outputOptions opts_;
+
+        //- The current offset for append data.
+        uint64_t offset_;
 
 
     // Private Member Functions
@@ -76,7 +79,7 @@ public:
         appendBase64Formatter(std::ostream& os);
 
 
-    //- Destructor
+    //- Destructor. Closes/flushes the underlying layer.
     virtual ~appendBase64Formatter();
 
 
@@ -88,6 +91,12 @@ public:
         //- Output name for XML type ("append")
         virtual const char* name() const;
 
+        //- Increase the append data offset by numbytes and sizeof(uint64_t).
+        //  The additional (uint64_t) size information is consistent with
+        //  writeSize().
+        //
+        //  \return The previous data offset
+        virtual uint64_t offset(const uint64_t numbytes);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

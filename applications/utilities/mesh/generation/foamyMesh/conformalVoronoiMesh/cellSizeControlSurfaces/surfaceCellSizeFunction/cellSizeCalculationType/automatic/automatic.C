@@ -26,7 +26,7 @@ License
 #include "automatic.H"
 #include "addToRunTimeSelectionTable.H"
 #include "triSurfaceMesh.H"
-#include "vtkSurfaceWriter.H"
+#include "foamVtkSurfaceWriter.H"
 #include "primitivePatchInterpolation.H"
 #include "Time.H"
 
@@ -120,11 +120,11 @@ Foam::automatic::automatic
 
     curvatureCellSizeCoeff_
     (
-        readScalar(coeffsDict_.lookup("curvatureCellSizeCoeff"))
+        coeffsDict_.get<scalar>("curvatureCellSizeCoeff")
     ),
     maximumCellSize_
     (
-        readScalar(coeffsDict_.lookup("maximumCellSizeCoeff"))*defaultCellSize
+        coeffsDict_.get<scalar>("maximumCellSizeCoeff") * defaultCellSize
     )
 {}
 
@@ -288,20 +288,23 @@ Foam::tmp<Foam::triSurfacePointScalarField> Foam::automatic::load()
             faces[fI] = surface_.triSurface::operator[](fI);
         }
 
-        vtkSurfaceWriter().write
+        vtk::surfaceWriter vtkWriter
         (
-            surface_.searchableSurface::time().constant()/"triSurface",
-            surfaceName_.nameLessExt(),
-            meshedSurfRef
+            surface_.points(),
+            faces,
             (
-                surface_.points(),
-                faces
-            ),
-            "cellSize",
-            pointCellSize,
-            true,
-            true
+                surface_.searchableSurface::time().constant()
+              / "triSurface"
+              / surfaceName_.nameLessExt() + "_cellSize"
+            )
         );
+
+
+        vtkWriter.writeGeometry();
+
+        vtkWriter.beginPointData(1);
+
+        vtkWriter.write("cellSize", pointCellSize);
     }
 
     return tPointCellSize;

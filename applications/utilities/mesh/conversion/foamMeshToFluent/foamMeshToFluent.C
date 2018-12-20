@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Writes out the OpenFOAM mesh in Fluent mesh format.
+    Write an OpenFOAM mesh in Fluent mesh format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,6 +42,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Write an OpenFOAM mesh in Fluent mesh format"
+    );
     argList::noParallel();
     #include "setRootCase.H"
     #include "createTime.H"

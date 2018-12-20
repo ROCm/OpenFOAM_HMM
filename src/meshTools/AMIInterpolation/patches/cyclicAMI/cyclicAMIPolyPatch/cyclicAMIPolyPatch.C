@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -197,8 +197,8 @@ void Foam::cyclicAMIPolyPatch::calcTransforms
                 reduce(n0, maxMagSqrOp<point>());
                 reduce(n1, maxMagSqrOp<point>());
 
-                n0 /= mag(n0) + VSMALL;
-                n1 /= mag(n1) + VSMALL;
+                n0.normalise();
+                n1.normalise();
 
                 // Extended tensor from two local coordinate systems calculated
                 // using normal and rotation axis
@@ -367,14 +367,14 @@ void Foam::cyclicAMIPolyPatch::calcTransforms()
     vectorField half0Areas(half0.size());
     forAll(half0, facei)
     {
-        half0Areas[facei] = half0[facei].normal(half0.points());
+        half0Areas[facei] = half0[facei].areaNormal(half0.points());
     }
 
     const cyclicAMIPolyPatch& half1 = neighbPatch();
     vectorField half1Areas(half1.size());
     forAll(half1, facei)
     {
-        half1Areas[facei] = half1[facei].normal(half1.points());
+        half1Areas[facei] = half1[facei].areaNormal(half1.points());
     }
 
     calcTransforms
@@ -403,21 +403,18 @@ void Foam::cyclicAMIPolyPatch::initGeometry(PstreamBuffers& pBufs)
     AMIPtr_.clear();
 
     polyPatch::initGeometry(pBufs);
+
+    // Early calculation of transforms so e.g. cyclicACMI can use them.
+    // Note: also triggers primitiveMesh face centre. Note that cell
+    // centres should -not- be calculated
+    // since e.g. cyclicACMI override face areas
+    calcTransforms();
 }
 
 
 void Foam::cyclicAMIPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 {
-    calcGeometry
-    (
-        *this,
-        faceCentres(),
-        faceAreas(),
-        faceCellCentres(),
-        neighbPatch().faceCentres(),
-        neighbPatch().faceAreas(),
-        neighbPatch().faceCellCentres()
-    );
+    // All geometry done inside initGeometry
 }
 
 
@@ -434,6 +431,9 @@ void Foam::cyclicAMIPolyPatch::initMovePoints
 
     // See below. Clear out any local geometry
     primitivePatch::movePoints(p);
+
+    // Early calculation of transforms. See above.
+    calcTransforms();
 }
 
 
@@ -445,7 +445,7 @@ void Foam::cyclicAMIPolyPatch::movePoints
 {
     polyPatch::movePoints(pBufs, p);
 
-    calcTransforms();
+    // All transformation tensors already done in initMovePoints
 }
 
 
@@ -546,19 +546,15 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
 {
     if (nbrPatchName_ == word::null && !coupleGroup_.valid())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "No \"neighbourPatch\" or \"coupleGroup\" provided."
+        FatalIOErrorInFunction(dict)
+            << "No \"neighbourPatch\" or \"coupleGroup\" provided."
             << exit(FatalIOError);
     }
 
     if (nbrPatchName_ == name)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Neighbour patch name " << nbrPatchName_
+        FatalIOErrorInFunction(dict)
+            << "Neighbour patch name " << nbrPatchName_
             << " cannot be the same as this patch " << name
             << exit(FatalIOError);
     }
@@ -567,8 +563,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     {
         case ROTATIONAL:
         {
-            dict.lookup("rotationAxis") >> rotationAxis_;
-            dict.lookup("rotationCentre") >> rotationCentre_;
+            dict.readEntry("rotationAxis", rotationAxis_);
+            dict.readEntry("rotationCentre", rotationCentre_);
             if (dict.readIfPresent("rotationAngle", rotationAngle_))
             {
                 rotationAngleDefined_ = true;
@@ -584,10 +580,8 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
             scalar magRot = mag(rotationAxis_);
             if (magRot < SMALL)
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Illegal rotationAxis " << rotationAxis_ << endl
+                FatalIOErrorInFunction(dict)
+                    << "Illegal rotationAxis " << rotationAxis_ << endl
                     << "Please supply a non-zero vector."
                     << exit(FatalIOError);
             }
@@ -597,7 +591,7 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
         }
         case TRANSLATIONAL:
         {
-            dict.lookup("separationVector") >> separationVector_;
+            dict.readEntry("separationVector", separationVector_);
             break;
         }
         default:
@@ -968,16 +962,7 @@ void Foam::cyclicAMIPolyPatch::calcGeometry
     const vectorField& nbrAreas,
     const pointField& nbrCc
 )
-{
-    calcTransforms
-    (
-        referPatch,
-        thisCtrs,
-        thisAreas,
-        nbrCtrs,
-        nbrAreas
-    );
-}
+{}
 
 
 void Foam::cyclicAMIPolyPatch::initOrder

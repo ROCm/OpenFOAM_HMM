@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,14 +56,14 @@ const Foam::Enum
     Foam::mappedPatchBase::sampleMode
 >
 Foam::mappedPatchBase::sampleModeNames_
-{
+({
     { sampleMode::NEARESTCELL, "nearestCell" },
     { sampleMode::NEARESTPATCHFACE, "nearestPatchFace" },
     { sampleMode::NEARESTPATCHFACEAMI, "nearestPatchFaceAMI" },
     { sampleMode::NEARESTPATCHPOINT, "nearestPatchPoint" },
     { sampleMode::NEARESTFACE, "nearestFace" },
     { sampleMode::NEARESTONLYCELL, "nearestOnlyCell" },
-};
+});
 
 
 const Foam::Enum
@@ -71,11 +71,11 @@ const Foam::Enum
     Foam::mappedPatchBase::offsetMode
 >
 Foam::mappedPatchBase::offsetModeNames_
-{
+({
     { offsetMode::UNIFORM, "uniform" },
     { offsetMode::NONUNIFORM, "nonuniform" },
     { offsetMode::NORMAL, "normal" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -884,7 +884,7 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::readListOrField
             else
             {
                 FatalIOErrorInFunction(dict)
-                    << "expected keyword 'uniform' or 'nonuniform', found "
+                    << "Expected keyword 'uniform' or 'nonuniform', found "
                     << firstToken.wordToken()
                     << exit(FatalIOError);
             }
@@ -892,7 +892,7 @@ Foam::tmp<Foam::pointField> Foam::mappedPatchBase::readListOrField
         else if (is.version() == IOstream::versionNumber(2,0))
         {
             IOWarningInFunction(dict)
-                << "expected keyword 'uniform' or 'nonuniform', "
+                << "Expected keyword 'uniform' or 'nonuniform', "
                    "assuming List format for backwards compatibility."
                    "Foam version 2.0." << endl;
 
@@ -1018,7 +1018,7 @@ Foam::mappedPatchBase::mappedPatchBase
 :
     patch_(pp),
     sampleRegion_(dict.lookupOrDefault<word>("sampleRegion", "")),
-    mode_(sampleModeNames_.lookup("sampleMode", dict)),
+    mode_(sampleModeNames_.get("sampleMode", dict)),
     samplePatch_(dict.lookupOrDefault<word>("samplePatch", "")),
     coupleGroup_(dict),
     offsetMode_(UNIFORM),
@@ -1042,15 +1042,13 @@ Foam::mappedPatchBase::mappedPatchBase
         }
     }
 
-    if (dict.found("offsetMode"))
+    if (offsetModeNames_.readIfPresent("offsetMode", dict, offsetMode_))
     {
-        offsetMode_ = offsetModeNames_.lookup("offsetMode", dict);
-
         switch (offsetMode_)
         {
             case UNIFORM:
             {
-                offset_ = point(dict.lookup("offset"));
+                dict.readEntry("offset", offset_);
             }
             break;
 
@@ -1063,15 +1061,14 @@ Foam::mappedPatchBase::mappedPatchBase
 
             case NORMAL:
             {
-                distance_ = readScalar(dict.lookup("distance"));
+                dict.readEntry("distance", distance_);
             }
             break;
         }
     }
-    else if (dict.found("offset"))
+    else if (dict.readIfPresent("offset", offset_))
     {
         offsetMode_ = UNIFORM;
-        offset_ = point(dict.lookup("offset"));
     }
     else if (dict.found("offsets"))
     {
@@ -1209,9 +1206,13 @@ void Foam::mappedPatchBase::clearOut()
 
 const Foam::polyMesh& Foam::mappedPatchBase::sampleMesh() const
 {
-    return patch_.boundaryMesh().mesh().time().lookupObject<polyMesh>
+    const polyMesh& thisMesh = patch_.boundaryMesh().mesh();
+
+    return
     (
-        sampleRegion()
+        sameRegion_
+      ? thisMesh
+      : thisMesh.time().lookupObject<polyMesh>(sampleRegion())
     );
 }
 

@@ -35,7 +35,7 @@ Foam::autoPtr<Foam::energyScalingFunction> Foam::energyScalingFunction::New
     const pairPotential& pairPot
 )
 {
-    const word scalingType(propDict.lookup("energyScalingFunction"));
+    const word scalingType(propDict.get<word>("energyScalingFunction"));
 
     Info<< "Selecting energy scaling function "
         << scalingType << " for "

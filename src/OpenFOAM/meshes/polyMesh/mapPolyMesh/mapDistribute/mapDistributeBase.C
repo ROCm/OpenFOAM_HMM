@@ -790,6 +790,58 @@ Foam::mapDistributeBase::mapDistributeBase
 }
 
 
+Foam::mapDistributeBase::mapDistributeBase
+(
+    labelListList&& subMap,
+    const bool subHasFlip,
+    const bool constructHasFlip
+)
+:
+    constructSize_(0),
+    subMap_(std::move(subMap)),
+    subHasFlip_(subHasFlip),
+    constructHasFlip_(constructHasFlip),
+    schedulePtr_()
+{
+    // Send over how many i need to receive.
+    labelList recvSizes;
+    Pstream::exchangeSizes(subMap_, recvSizes);
+
+    // Determine order of receiving
+    labelListList constructMap(Pstream::nProcs());
+
+    // My local segments first
+    label nLocal = recvSizes[Pstream::myProcNo()];
+    {
+        labelList& myMap = constructMap[Pstream::myProcNo()];
+        myMap.setSize(nLocal);
+        forAll(myMap, i)
+        {
+            myMap[i] = i;
+        }
+    }
+
+    label segmenti = nLocal;
+    forAll(constructMap, proci)
+    {
+        if (proci != Pstream::myProcNo())
+        {
+            // What i need to receive is what other processor is sending to me.
+            label nRecv = recvSizes[proci];
+            constructMap[proci].setSize(nRecv);
+
+            for (label i = 0; i < nRecv; i++)
+            {
+                constructMap[proci][i] = segmenti++;
+            }
+        }
+    }
+
+    constructSize_ = segmenti;
+    constructMap_.transfer(constructMap);
+}
+
+
 Foam::mapDistributeBase::mapDistributeBase(Istream& is)
 {
     is >> *this;

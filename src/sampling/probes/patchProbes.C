@@ -265,8 +265,8 @@ bool Foam::patchProbes::read(const dictionary& dict)
 {
     if (!dict.readIfPresent("patches", patchNames_))
     {
-        patchNames_.setSize(1);
-        patchNames_[0] = wordRe(word(dict.lookup("patch")));
+        patchNames_.resize(1);
+        patchNames_.first() = dict.get<word>("patch");
     }
 
     return probes::read(dict);

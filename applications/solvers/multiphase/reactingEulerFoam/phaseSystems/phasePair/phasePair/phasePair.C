@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "phasePair.H"
 #include "surfaceTensionModel.H"
+#include "gravityMeshObject.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -53,7 +54,7 @@ Foam::phasePair::phasePair
     phasePairKey(phase1.name(), phase2.name(), ordered),
     phase1_(phase1),
     phase2_(phase2),
-    g_(phase1.mesh().lookupObject<uniformDimensionedVectorField>("g"))
+    g_(meshObjects::gravity::New(phase1.db().time()))
 {}
 
 

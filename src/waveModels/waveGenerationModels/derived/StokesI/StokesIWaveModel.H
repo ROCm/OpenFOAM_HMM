@@ -121,7 +121,7 @@ public:
     );
 
     //- Destructor
-    virtual ~StokesI();
+    virtual ~StokesI() = default;
 
 
     // Public Member Functions

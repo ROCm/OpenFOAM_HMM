@@ -62,7 +62,7 @@ public:
 
     // Constructors
 
-        //- Construct from pathname
+        //- Construct from pathname. Default format is binary.
         ensightReadFile
         (
             const fileName& pathname,
@@ -71,7 +71,7 @@ public:
 
 
     //- Destructor
-    ~ensightReadFile();
+    ~ensightReadFile() = default;
 
 
     // Output

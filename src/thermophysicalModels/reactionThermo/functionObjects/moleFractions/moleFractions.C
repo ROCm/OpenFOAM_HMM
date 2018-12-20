@@ -64,12 +64,12 @@ Foam::moleFractions<ThermoType>::moleFractions
 :
     fvMeshFunctionObject(name, runTime, dict)
 {
-    if (mesh_.foundObject<ThermoType>(basicThermo::dictName))
-    {
-        const ThermoType& thermo =
-            mesh_.lookupObject<ThermoType>(basicThermo::dictName);
+    const ThermoType* thermo =
+        mesh_.findObject<ThermoType>(basicThermo::dictName);
 
-        const PtrList<volScalarField>& Y = thermo.composition().Y();
+    if (thermo)
+    {
+        const PtrList<volScalarField>& Y = thermo->composition().Y();
 
         X_.setSize(Y.size());
 

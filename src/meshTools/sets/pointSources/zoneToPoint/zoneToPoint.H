@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,18 @@ Class
     Foam::zoneToPoint
 
 Description
-    A topoSetSource to select points based on pointZone.
+    A topoSetPointSource to select points based on one or more pointZones.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        zones       | The point zone names or regexs        | possibly |
+        zone        | The point zone name or regex          | possibly |
+        name        | Older specification for 'zone'        | no    |
+    \endtable
+
+Note
+    Must specify "zones", "zone" or "name" (highest to lowest precedence).
 
 SourceFiles
     zoneToPoint.C
@@ -35,8 +46,8 @@ SourceFiles
 #ifndef zoneToPoint_H
 #define zoneToPoint_H
 
-#include "topoSetSource.H"
-#include "wordRe.H"
+#include "topoSetPointSource.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,12 +55,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class zoneToPoint Declaration
+                         Class zoneToPoint Declaration
 \*---------------------------------------------------------------------------*/
 
 class zoneToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -57,8 +68,8 @@ class zoneToPoint
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of zone
-        wordRe zoneName_;
+        //- Matcher for zones
+        wordRes selectedZones_;
 
 
     // Private Member Functions
@@ -74,42 +85,25 @@ public:
     // Constructors
 
         //- Construct from components
-        zoneToPoint
-        (
-            const polyMesh& mesh,
-            const word& zoneName
-        );
+        zoneToPoint(const polyMesh& mesh, const wordRe& zoneName);
 
         //- Construct from dictionary
-        zoneToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        zoneToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        zoneToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        zoneToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~zoneToPoint();
+    virtual ~zoneToPoint() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

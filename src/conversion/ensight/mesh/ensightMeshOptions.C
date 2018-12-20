@@ -25,14 +25,20 @@ License
 
 #include "ensightMesh.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ensightMesh::options::options()
+:
+    options(IOstream::streamFormat::BINARY)
+{}
+
 
 Foam::ensightMesh::options::options(IOstream::streamFormat format)
 :
     format_(format),
     lazy_(false),
-    noPatches_(false),
+    internal_(true),
+    boundary_(true),
     patchPatterns_(),
     faceZonePatterns_()
 {}
@@ -54,53 +60,54 @@ bool Foam::ensightMesh::options::lazy() const
 
 bool Foam::ensightMesh::options::useInternalMesh() const
 {
-    return noPatches_ ? true : !patchPatterns_.valid();
+    return internal_;
 }
 
 
-bool Foam::ensightMesh::options::usePatches() const
+bool Foam::ensightMesh::options::useBoundaryMesh() const
 {
-    return !noPatches_;
+    return boundary_;
 }
 
 
 bool Foam::ensightMesh::options::useFaceZones() const
 {
-    return faceZonePatterns_.valid();
-}
-
-
-bool Foam::ensightMesh::options::usePatchSelection() const
-{
-    return noPatches_ ? false : patchPatterns_.valid();
+    return faceZonePatterns_.size();
 }
 
 
 void Foam::ensightMesh::options::reset()
 {
-    noPatches_ = false;
+    internal_ = true;
+    boundary_ = true;
     patchPatterns_.clear();
     faceZonePatterns_.clear();
 }
 
 
-void Foam::ensightMesh::options::lazy(const bool b)
+void Foam::ensightMesh::options::lazy(bool beLazy)
 {
-    lazy_ = b;
+    lazy_ = beLazy;
 }
 
 
-void Foam::ensightMesh::options::noPatches(const bool b)
+void Foam::ensightMesh::options::useInternalMesh(bool on)
 {
-    noPatches_ = b;
+    internal_ = on;
+}
 
-    if (noPatches_ && patchPatterns_.valid())
+
+void Foam::ensightMesh::options::useBoundaryMesh(bool on)
+{
+    boundary_ = on;
+
+    if (!boundary_ && patchPatterns_.size())
     {
-        WarningInFunction
-            << " existing patch selection disabled"
-            << endl;
-
         patchPatterns_.clear();
+
+        WarningInFunction
+            << "Deactivating boundary and removing old patch selection"
+            << endl;
     }
 }
 
@@ -110,15 +117,33 @@ void Foam::ensightMesh::options::patchSelection
     const UList<wordRe>& patterns
 )
 {
-    if (noPatches_)
+    patchPatterns_ = wordRes(patterns);
+
+    if (!boundary_ && patchPatterns_.size())
     {
+        patchPatterns_.clear();
+
         WarningInFunction
-            << " patch selection specified, but noPatches was already active"
+            << "Ignoring patch selection, boundary is not active"
             << endl;
     }
-    else
+}
+
+
+void Foam::ensightMesh::options::patchSelection
+(
+    List<wordRe>&& patterns
+)
+{
+    patchPatterns_ = wordRes(std::move(patterns));
+
+    if (!boundary_ && patchPatterns_.size())
     {
-        patchPatterns_.reset(new wordRes(patterns));
+        patchPatterns_.clear();
+
+        WarningInFunction
+            << "Ignoring patch selection, boundary is not active"
+            << endl;
     }
 }
 
@@ -128,29 +153,28 @@ void Foam::ensightMesh::options::faceZoneSelection
     const UList<wordRe>& patterns
 )
 {
-    faceZonePatterns_.reset(new wordRes(patterns));
+    faceZonePatterns_ = wordRes(patterns);
+}
+
+
+void Foam::ensightMesh::options::faceZoneSelection
+(
+    List<wordRe>&& patterns
+)
+{
+    faceZonePatterns_ = wordRes(std::move(patterns));
 }
 
 
 const Foam::wordRes& Foam::ensightMesh::options::patchSelection() const
 {
-    if (usePatchSelection())
-    {
-        return *patchPatterns_;
-    }
-
-    return wordRes::null();
+    return patchPatterns_;
 }
 
 
 const Foam::wordRes& Foam::ensightMesh::options::faceZoneSelection() const
 {
-    if (faceZonePatterns_.valid())
-    {
-        return *faceZonePatterns_;
-    }
-
-    return wordRes::null();
+    return faceZonePatterns_;
 }
 
 

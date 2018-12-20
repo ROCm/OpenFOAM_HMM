@@ -28,7 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Solver for moving meshes.
+    A solver utility for moving meshes.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,6 +43,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "A solver utility for moving meshes"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"

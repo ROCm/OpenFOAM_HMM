@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,12 +77,12 @@ public:
         inline Pair(const FixedList<T, 2>& lst, const bool doSort);
 
         //- Construct from Istream
-        inline Pair(Istream& is);
+        inline explicit Pair(Istream& is);
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Return first element
         using FixedList<T, 2>::first;
@@ -100,13 +100,13 @@ public:
         inline const T& other(const T& a) const;
 
 
-     // Queries
+    // Queries
 
         //- True if first() is less-than second()
         inline bool sorted() const;
 
 
-     // Editing
+    // Editing
 
         //- Flip the Pair in-place.
         inline void flip();
@@ -115,7 +115,7 @@ public:
         inline void sort();
 
 
-     // Comparison
+    // Comparison
 
         //- Compare Pairs
         //  \return
@@ -123,6 +123,56 @@ public:
         //  - +1: identical values and order used
         //  - -1: identical values, but in reversed order
         static inline int compare(const Pair<T>& a, const Pair<T>& b);
+
+
+    // Hashing
+
+        //- Symmetrical hashing for Pair data.
+        //  The lower value is hashed first.
+        template<class HashT=Foam::Hash<T>>
+        struct SymmHash
+        {
+            inline unsigned operator()
+            (
+                const Pair<T>& obj,
+                unsigned seed=0
+            ) const
+            {
+                if (obj.first() < obj.second())
+                {
+                    seed = HashT()(obj.first(), seed);
+                    seed = HashT()(obj.second(), seed);
+                }
+                else
+                {
+                    seed = HashT()(obj.second(), seed);
+                    seed = HashT()(obj.first(), seed);
+                }
+                return seed;
+            }
+        };
+};
+
+
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+//- Hashing for Pair data, which uses Hasher for contiguous data and
+//- element-wise incrementally hashing otherwise.
+template<class T>
+struct Hash<Pair<T>>
+{
+    inline unsigned operator()(const Pair<T>& obj, unsigned seed=0) const
+    {
+        if (contiguous<T>())
+        {
+            return Hasher(obj.cdata(), sizeof(obj), seed);
+        }
+
+        seed = Hash<T>()(obj.first(), seed);
+        seed = Hash<T>()(obj.second(), seed);
+
+        return seed;
+    }
 };
 
 

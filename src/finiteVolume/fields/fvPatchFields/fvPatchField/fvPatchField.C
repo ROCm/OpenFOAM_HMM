@@ -125,10 +125,8 @@ Foam::fvPatchField<Type>::fvPatchField
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Essential entry 'value' missing"
+            FatalIOErrorInFunction(dict)
+                << "Essential entry 'value' missing"
                 << exit(FatalIOError);
         }
     }

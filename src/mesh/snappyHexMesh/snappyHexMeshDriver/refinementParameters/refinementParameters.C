@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,18 +34,18 @@ License
 
 Foam::refinementParameters::refinementParameters(const dictionary& dict)
 :
-    maxGlobalCells_(readLabel(dict.lookup("maxGlobalCells"))),
-    maxLocalCells_(readLabel(dict.lookup("maxLocalCells"))),
-    minRefineCells_(readLabel(dict.lookup("minRefinementCells"))),
+    maxGlobalCells_(dict.get<label>("maxGlobalCells")),
+    maxLocalCells_(dict.get<label>("maxLocalCells")),
+    minRefineCells_(dict.get<label>("minRefinementCells")),
     planarAngle_
     (
         dict.lookupOrDefault
         (
             "planarAngle",
-            readScalar(dict.lookup("resolveFeatureAngle"))
+            dict.get<scalar>("resolveFeatureAngle")
         )
     ),
-    nBufferLayers_(readLabel(dict.lookup("nCellsBetweenLevels"))),
+    nBufferLayers_(dict.get<label>("nCellsBetweenLevels")),
     locationsOutsideMesh_
     (
         dict.lookupOrDefault
@@ -84,10 +84,9 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
                 << exit(FatalIOError);
         }
     }
-
-    List<Tuple2<point, word>> pointsToZone;
-    if (dict.readIfPresent("locationsInMesh", pointsToZone))
+    else
     {
+        List<Tuple2<point, word>> pointsToZone(dict.lookup("locationsInMesh"));
         label nZones = locationsInMesh_.size();
         locationsInMesh_.setSize(nZones+pointsToZone.size());
         zonesInMesh_.setSize(locationsInMesh_.size());
@@ -105,7 +104,7 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     }
 
 
-    scalar featAngle(readScalar(dict.lookup("resolveFeatureAngle")));
+    const scalar featAngle(dict.get<scalar>("resolveFeatureAngle"));
 
     if (featAngle < 0 || featAngle > 180)
     {

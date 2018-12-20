@@ -122,23 +122,24 @@ Foam::rigidBodyMeshMotionSolver::rigidBodyMeshMotionSolver
 {
     if (rhoName_ == "rhoInf")
     {
-        rhoInf_ = readScalar(coeffDict().lookup("rhoInf"));
+        coeffDict().readEntry("rhoInf", rhoInf_);
     }
 
     const dictionary& bodiesDict = coeffDict().subDict("bodies");
 
-    forAllConstIter(IDLList<entry>, bodiesDict, iter)
+    for (const entry& dEntry : bodiesDict)
     {
-        const dictionary& bodyDict = iter().dict();
+        const keyType& bodyName = dEntry.keyword();
+        const dictionary& bodyDict = dEntry.dict();
 
         if (bodyDict.found("patches"))
         {
-            const label bodyID = model_.bodyID(iter().keyword());
+            const label bodyID = model_.bodyID(bodyName);
 
             if (bodyID == -1)
             {
                 FatalErrorInFunction
-                    << "Body " << iter().keyword()
+                    << "Body " << bodyName
                     << " has been merged with another body"
                        " and cannot be assigned a set of patches"
                     << exit(FatalError);
@@ -149,7 +150,7 @@ Foam::rigidBodyMeshMotionSolver::rigidBodyMeshMotionSolver
                 new bodyMesh
                 (
                     mesh,
-                    iter().keyword(),
+                    bodyName,
                     bodyID,
                     bodyDict
                 )
@@ -188,15 +189,14 @@ void Foam::rigidBodyMeshMotionSolver::solve()
         curTimeIndex_ = this->db().time().timeIndex();
     }
 
-    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    if (t.foundObject<uniformDimensionedVectorField>("g"))
     {
-        model_.g() =
-            db().lookupObject<uniformDimensionedVectorField>("g").value();
+        model_.g() = t.lookupObject<uniformDimensionedVectorField>("g").value();
     }
 
     if (test_)
     {
-        label nIter(readLabel(coeffDict().lookup("nIter")));
+        const label nIter(coeffDict().get<label>("nIter"));
 
         for (label i=0; i<nIter; i++)
         {

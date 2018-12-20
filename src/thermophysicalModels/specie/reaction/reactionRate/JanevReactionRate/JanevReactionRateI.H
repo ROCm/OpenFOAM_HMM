@@ -46,9 +46,9 @@ inline Foam::JanevReactionRate::JanevReactionRate
     const dictionary& dict
 )
 :
-    A_(readScalar(dict.lookup("A"))),
-    beta_(readScalar(dict.lookup("beta"))),
-    Ta_(readScalar(dict.lookup("Ta"))),
+    A_(dict.get<scalar>("A")),
+    beta_(dict.get<scalar>("beta")),
+    Ta_(dict.get<scalar>("Ta")),
     b_(dict.lookup("b"))
 {}
 

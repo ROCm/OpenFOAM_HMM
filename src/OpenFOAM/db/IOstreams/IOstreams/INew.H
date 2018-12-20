@@ -39,7 +39,7 @@ Description
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class Istream;
 
 /*---------------------------------------------------------------------------*\
@@ -49,32 +49,31 @@ class Istream;
 template<class T>
 class INew
 {
-
 public:
 
     //- Construct null
     INew()
     {}
 
-    //- Construct from Istream
+    //- New from Istream
     autoPtr<T> operator()(Istream& is) const
     {
         return T::New(is);
     }
 
-    //- Construct from word and Istream
+    //- New from word (unused) and Istream
     autoPtr<T> operator()(const word&, Istream& is) const
     {
         return T::New(is);
     }
 
-    //- Construct from dictionary
+    //- New from dictionary
     autoPtr<T> operator()(const dictionary& dict) const
     {
         return T::New(dict);
     }
 
-    //- Construct from word and dictionary
+    //- New from word (unused) and dictionary
     autoPtr<T> operator()(const word&, const dictionary& dict) const
     {
         return T::New(dict);

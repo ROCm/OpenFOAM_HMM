@@ -64,9 +64,9 @@ Foam::fv::tabulatedAccelerationSource::tabulatedAccelerationSource
     fieldNames_.setSize(1, UName_);
     applied_.setSize(1, false);
 
-    if (mesh.foundObject<uniformDimensionedVectorField>("g"))
+    if (mesh.time().foundObject<uniformDimensionedVectorField>("g"))
     {
-        g0_ = mesh.lookupObject<uniformDimensionedVectorField>("g");
+        g0_ = mesh.time().lookupObject<uniformDimensionedVectorField>("g");
     }
 }
 
@@ -100,10 +100,8 @@ bool Foam::fv::tabulatedAccelerationSource::read(const dictionary& dict)
     {
         return motion_.read(coeffs_);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

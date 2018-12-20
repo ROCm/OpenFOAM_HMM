@@ -28,8 +28,9 @@ Group
     grpCompressibleSolvers grpMovingMeshSolvers
 
 Description
-    Density-based compressible flow solver based on central-upwind schemes of
-    Kurganov and Tadmor with support for mesh-motion and topology changes.
+    Density-based compressible flow solver based on central-upwind
+    schemes of Kurganov and Tadmor
+    with support for mesh-motion and topology changes.
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,10 +48,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Density-based compressible flow solver based on central-upwind"
+        " schemes of Kurganov and Tadmor.\n"
+        "With support for mesh-motion and topology changes."
+    );
+
     #define NO_CONTROL
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "createFields.H"
@@ -76,7 +84,7 @@ int main(int argc, char *argv[])
         #include "readTimeControls.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

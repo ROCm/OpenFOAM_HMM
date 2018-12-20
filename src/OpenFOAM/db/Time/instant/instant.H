@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,112 +36,61 @@ SourceFiles
 #define instant_H
 
 #include "word.H"
-#include "scalar.H"
+#include "Instant.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
-class instant;
-
-Istream& operator>>(Istream& is, instant& inst);
-Ostream& operator<<(Ostream& os, const instant& inst);
-
-
 /*---------------------------------------------------------------------------*\
                            Class instant Declaration
 \*---------------------------------------------------------------------------*/
 
 class instant
+:
+    public Instant<word>
 {
-    // Private data
-
-        scalar value_;
-
-        word name_;
-
 public:
 
-    // Public classes
-
-        //- Less function class used in sorting instants
-        class less
-        {
-        public:
-
-            bool operator()(const instant& a, const instant& b) const
-            {
-                return a.value() < b.value();
-            }
-        };
-
-
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
 
 
     // Constructors
 
-        //- Construct null
-        instant();
+        //- Copy and move construct from components
+        using Instant<word>::Instant;
 
-        //- Construct from components
-        instant(const scalar val, const word& tname);
+        //- Construct null, with time-value = 0.
+        instant() = default;
 
-        //- Construct from time value
-        explicit instant(const scalar val);
+        //- Copy construct
+        instant(const instant&) = default;
 
-        //- Construct from time name
-        explicit instant(const word& tname);
+        //- Move construct
+        instant(instant&&) = default;
 
+        //- Construct from timeValue, auto generating the name
+        explicit instant(scalar timeValue);
 
-    // Member Functions
+        //- Construct from timeName, parsing timeName for a value
+        explicit instant(const word& timeName);
 
-        //- Value (const access)
-        scalar value() const
-        {
-            return value_;
-        }
-
-        //- Value (non-const access)
-        scalar& value()
-        {
-            return value_;
-        }
-
-        //- Name (const access)
-        const word& name() const
-        {
-            return name_;
-        }
-
-        //- Name (non-const access)
-        word& name()
-        {
-            return name_;
-        }
-
-        //- Compare instant values to be equal (includes SMALL for rounding)
-        bool equal(const scalar val) const;
+        //- Construct from timeName, parsing timeName for a value
+        explicit instant(word&& timeName);
 
 
-    // IOstream Operators
+    // Operators
 
-        friend Istream& operator>>(Istream& is, instant& inst);
-        friend Ostream& operator<<(Ostream& os, const instant& inst);
+        //- Copy assignment
+        instant& operator=(const instant&) = default;
+
+        //- Move assignment
+        instant& operator=(instant&&) = default;
+
 };
-
-
-// Global Operators
-
-bool operator==(const instant& a, const instant& b);
-bool operator!=(const instant& a, const instant& b);
-bool operator<(const instant& a, const instant& b);
-bool operator>(const instant& a, const instant& b);
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

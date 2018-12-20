@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a STARCD/PROSTAR (v4) mesh into OpenFOAM format.
+    Convert a STARCD/PROSTAR (v4) mesh into OpenFOAM format.
 
 Usage
     \b star4ToFoam [OPTION] prostarMesh
@@ -66,26 +66,26 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert STARCD/PROSTAR (v4) mesh to OpenFOAM"
+        "Convert STARCD/PROSTAR (v4) mesh to OpenFOAM"
     );
 
     argList::noParallel();
-    argList::addArgument("PROSTAR prefix");
+    argList::addArgument("prefix", "The prefix for the input PROSTAR files");
     argList::addBoolOption
     (
         "ascii",
-        "write in ASCII instead of binary format"
+        "Write in ASCII instead of binary format"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 0.001 ([mm] to [m])"
+        "Geometry scaling factor - default is 0.001 ([mm] to [m])"
     );
     argList::addBoolOption
     (
         "solids",
-        "retain solid cells and treat them like fluid cells"
+        "Retain solid cells and treat like fluid cells"
     );
 
 
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
         prefix,
         runTime,
         // Default rescale from [mm] to [m]
-        args.lookupOrDefault("scale", 0.001),
+        args.opt<scalar>("scale", 0.001),
         args.found("solids")
     );
 

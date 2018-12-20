@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,14 @@ Class
 
 Description
     Internal class used by the VTKsurfaceFormat
+    Format is LEGACY_ASCII
+
+    \heading Output Options
+    \table
+        Property    | Description                       | Required | Default
+        format      | ascii or binary format            | no | ascii
+        precision   | Write precision in ascii          | no | same as IOstream
+    \endtable
 
 SourceFiles
     VTKsurfaceFormatCore.C
@@ -35,9 +43,9 @@ SourceFiles
 #ifndef VTKsurfaceFormatCore_H
 #define VTKsurfaceFormatCore_H
 
-#include "foamVtkFormatter.H"
 #include "point.H"
 #include "surfZone.H"
+#include "foamVtkOutputOptions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,6 +63,13 @@ class VTKsurfaceFormatCore
 protected:
 
     // Protected Static Member Functions
+
+        //- Extract format options (default format LEGACY_ASCII)
+        static vtk::outputOptions formatOptions
+        (
+            const dictionary& dict,
+            vtk::outputOptions opts = vtk::formatType::LEGACY_ASCII
+        );
 
         //- Write header information with points
         static void writeHeader
@@ -76,7 +91,6 @@ protected:
             vtk::formatter& format,
             const labelUList& zoneIds
         );
-
 };
 
 

@@ -44,9 +44,9 @@ Foam::IOerror::IOerror(const string& title)
 Foam::IOerror::IOerror(const dictionary& errDict)
 :
     error(errDict),
-    ioFileName_(errDict.lookup("ioFileName")),
-    ioStartLineNumber_(readLabel(errDict.lookup("ioStartLineNumber"))),
-    ioEndLineNumber_(readLabel(errDict.lookup("ioEndLineNumber")))
+    ioFileName_(errDict.get<string>("ioFileName")),
+    ioStartLineNumber_(errDict.get<label>("ioStartLineNumber")),
+    ioEndLineNumber_(errDict.get<label>("ioEndLineNumber"))
 {}
 
 

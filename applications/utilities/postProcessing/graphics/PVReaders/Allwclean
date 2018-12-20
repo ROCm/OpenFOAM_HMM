@@ -1,10 +1,8 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
+cd ${0%/*} || exit 1                            # Run from this directory
+. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions  # Source wmake functions
 
-# Source the wmake functions
-. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions
-
-# Cleanup OpenFOAM libraries
+# Cleanup libraries
 wclean libso foamPv
 wclean libso vtkPVblockMesh
 wclean libso vtkPVFoam

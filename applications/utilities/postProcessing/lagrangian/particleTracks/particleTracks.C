@@ -28,8 +28,8 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Generates a VTK file of particle tracks for cases that were computed using
-    a tracked-parcel-type cloud.
+    Generate a legacy VTK file of particle tracks for cases that were
+    computed using a tracked-parcel-type cloud.
 
 \*---------------------------------------------------------------------------*/
 
@@ -49,6 +49,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Generate a legacy VTK file of particle tracks for cases that were"
+        " computed using a tracked-parcel-type cloud"
+    );
+
     timeSelector::addOptions();
     #include "addRegionOption.H"
 

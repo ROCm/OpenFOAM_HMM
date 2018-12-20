@@ -35,7 +35,7 @@ Foam::InjectionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("injectionModel"));
+    const word modelType(dict.get<word>("injectionModel"));
 
     Info<< "Selecting injection model " << modelType << endl;
 

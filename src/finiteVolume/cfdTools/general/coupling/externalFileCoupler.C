@@ -40,10 +40,11 @@ namespace Foam
 Foam::word Foam::externalFileCoupler::lockName = "OpenFOAM";
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
 namespace Foam
 {
 
-// file-scope
 // Read file contents and return a stop control as follows:
 // - contains "done" (should actually be status=done, but we are generous) :
 //   The master (OpenFOAM) has signalled that it is done. Report as <endTime>
@@ -85,6 +86,7 @@ static enum Time::stopAtControls getStopAction(const std::string& filename)
 }
 
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -150,7 +152,7 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
     // if things have already been initialized
     if (!initialized())
     {
-        dict.lookup("commsDir") >> commsDir_;
+        dict.readEntry("commsDir", commsDir_);
         commsDir_.expand();
         commsDir_.clean();
         slaveFirst_ = dict.lookupOrDefault("initByExternal", false);

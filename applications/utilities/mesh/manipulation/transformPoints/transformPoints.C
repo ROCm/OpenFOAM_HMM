@@ -280,8 +280,8 @@ int main(int argc, char *argv[])
         (
             args.lookup("rotate")()
         );
-        n1n2[0] /= mag(n1n2[0]);
-        n1n2[1] /= mag(n1n2[1]);
+        n1n2[0].normalise();
+        n1n2[1].normalise();
 
         const tensor rotT = rotationTensor(n1n2[0], n1n2[1]);
 
@@ -363,7 +363,7 @@ int main(int argc, char *argv[])
     List<scalar> scaling;
     if (args.readListIfPresent("scale", scaling))
     {
-        // readList handles single or multiple values
+        // readListIfPresent handles single or multiple values
 
         if (scaling.size() == 1)
         {

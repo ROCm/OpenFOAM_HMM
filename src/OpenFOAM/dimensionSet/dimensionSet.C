@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,18 +25,24 @@ License
 
 #include "dimensionSet.H"
 #include "dimensionedScalar.H"
-#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-defineTypeNameAndDebug(dimensionSet, 1);
-const scalar dimensionSet::smallExponent = SMALL;
+    defineTypeNameAndDebug(dimensionSet, 1);
 }
+
+const Foam::scalar Foam::dimensionSet::smallExponent = SMALL;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dimensionSet::dimensionSet()
+:
+    exponents_(Zero)
+{}
+
 
 Foam::dimensionSet::dimensionSet
 (
@@ -48,6 +54,8 @@ Foam::dimensionSet::dimensionSet
     const scalar current,
     const scalar luminousIntensity
 )
+:
+    exponents_()
 {
     exponents_[MASS] = mass;
     exponents_[LENGTH] = length;
@@ -66,23 +74,19 @@ Foam::dimensionSet::dimensionSet(const FixedList<scalar,7>& dims)
 
 
 Foam::dimensionSet::dimensionSet(const dimensionSet& ds)
-{
-    reset(ds);
-}
+:
+    exponents_(ds.exponents_)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::dimensionSet::dimensionless() const
 {
-    for (int d=0; d<nDimensions; ++d)
+    for (const scalar& val : exponents_)
     {
-        // ie, mag(exponents_[d]) > smallExponent
-        if
-        (
-            exponents_[d] > smallExponent
-         || exponents_[d] < -smallExponent
-        )
+        // ie, mag(val) > smallExponent
+        if ((val > smallExponent) || (val < -smallExponent))
         {
             return false;
         }
@@ -165,7 +169,7 @@ bool Foam::dimensionSet::operator=(const dimensionSet& ds) const
     if (dimensionSet::debug && *this != ds)
     {
         FatalErrorInFunction
-            << "Different dimensions for =" << endl
+            << "Different dimensions for =" << nl
             << "     dimensions : " << *this << " = " << ds << endl
             << abort(FatalError);
     }
@@ -179,7 +183,7 @@ bool Foam::dimensionSet::operator+=(const dimensionSet& ds) const
     if (dimensionSet::debug && *this != ds)
     {
         FatalErrorInFunction
-            << "Different dimensions for +=" << endl
+            << "Different dimensions for +=" << nl
             << "     dimensions : " << *this << " = " << ds << endl
             << abort(FatalError);
     }
@@ -193,7 +197,7 @@ bool Foam::dimensionSet::operator-=(const dimensionSet& ds) const
     if (dimensionSet::debug && *this != ds)
     {
         FatalErrorInFunction
-            << "Different dimensions for -=" << endl
+            << "Different dimensions for -=" << nl
             << "     dimensions : " << *this << " = " << ds << endl
             << abort(FatalError);
     }
@@ -218,14 +222,14 @@ bool Foam::dimensionSet::operator/=(const dimensionSet& ds)
 }
 
 
-// * * * * * * * * * * * * * * * Friend functions * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
 {
     if (dimensionSet::debug && ds1 != ds2)
     {
         FatalErrorInFunction
-            << "Arguments of max have different dimensions" << endl
+            << "Arguments of min have different dimensions" << nl
             << "     dimensions : " << ds1 << " and " << ds2 << endl
             << abort(FatalError);
     }
@@ -234,12 +238,12 @@ Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
 }
 
 
-Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
 {
     if (dimensionSet::debug && ds1 != ds2)
     {
         FatalErrorInFunction
-            << "Arguments of min have different dimensions" << endl
+            << "Arguments of max have different dimensions" << nl
             << "     dimensions : " << ds1 << " and " << ds2 << endl
             << abort(FatalError);
     }
@@ -270,7 +274,7 @@ Foam::dimensionSet Foam::cmptDivide
 
 Foam::dimensionSet Foam::pow(const dimensionSet& ds, const scalar p)
 {
-    dimensionSet dimPow
+    return dimensionSet
     (
         ds[dimensionSet::MASS]*p,
         ds[dimensionSet::LENGTH]*p,
@@ -280,8 +284,6 @@ Foam::dimensionSet Foam::pow(const dimensionSet& ds, const scalar p)
         ds[dimensionSet::CURRENT]*p,
         ds[dimensionSet::LUMINOUS_INTENSITY]*p
     );
-
-    return dimPow;
 }
 
 
@@ -294,22 +296,11 @@ Foam::dimensionSet Foam::pow
     if (dimensionSet::debug && !dS.dimensions().dimensionless())
     {
         FatalErrorInFunction
-            << "Exponent of pow is not dimensionless"
+            << "Exponent of pow is not dimensionless" << endl
             << abort(FatalError);
     }
 
-    dimensionSet dimPow
-    (
-        ds[dimensionSet::MASS]*dS.value(),
-        ds[dimensionSet::LENGTH]*dS.value(),
-        ds[dimensionSet::TIME]*dS.value(),
-        ds[dimensionSet::TEMPERATURE]*dS.value(),
-        ds[dimensionSet::MOLES]*dS.value(),
-        ds[dimensionSet::CURRENT]*dS.value(),
-        ds[dimensionSet::LUMINOUS_INTENSITY]*dS.value()
-    );
-
-    return dimPow;
+    return pow(ds, dS.value());
 }
 
 
@@ -341,6 +332,12 @@ Foam::dimensionSet Foam::sqr(const dimensionSet& ds)
 }
 
 
+Foam::dimensionSet Foam::pow2(const dimensionSet& ds)
+{
+    return pow(ds, 2);
+}
+
+
 Foam::dimensionSet Foam::pow3(const dimensionSet& ds)
 {
     return pow(ds, 3);
@@ -367,7 +364,7 @@ Foam::dimensionSet Foam::pow6(const dimensionSet& ds)
 
 Foam::dimensionSet Foam::pow025(const dimensionSet& ds)
 {
-    return sqrt(sqrt(ds));
+    return pow(ds, 0.25);
 }
 
 
@@ -439,7 +436,16 @@ Foam::dimensionSet Foam::negPart(const dimensionSet& ds)
 
 Foam::dimensionSet Foam::inv(const dimensionSet& ds)
 {
-    return dimless/ds;
+    return dimensionSet
+    (
+        -ds[dimensionSet::MASS],
+        -ds[dimensionSet::LENGTH],
+        -ds[dimensionSet::TIME],
+        -ds[dimensionSet::TEMPERATURE],
+        -ds[dimensionSet::MOLES],
+        -ds[dimensionSet::CURRENT],
+        -ds[dimensionSet::LUMINOUS_INTENSITY]
+    );
 }
 
 
@@ -448,7 +454,7 @@ Foam::dimensionSet Foam::trans(const dimensionSet& ds)
     if (dimensionSet::debug && !ds.dimensionless())
     {
         FatalErrorInFunction
-            << "Argument of trancendental function not dimensionless"
+            << "Argument of trancendental function not dimensionless" << nl
             << abort(FatalError);
     }
 
@@ -461,7 +467,7 @@ Foam::dimensionSet Foam::atan2(const dimensionSet& ds1, const dimensionSet& ds2)
     if (dimensionSet::debug && ds1 != ds2)
     {
         FatalErrorInFunction
-            << "Arguments of atan2 have different dimensions" << endl
+            << "Arguments of atan2 have different dimensions" << nl
             << "     dimensions : " << ds1 << " and " << ds2 << endl
             << abort(FatalError);
     }
@@ -476,7 +482,19 @@ Foam::dimensionSet Foam::transform(const dimensionSet& ds)
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+Foam::dimensionSet Foam::invTransform(const dimensionSet& ds)
+{
+    return ds;
+}
+
+
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
+
+Foam::dimensionSet Foam::operator~(const dimensionSet& ds)
+{
+    return inv(ds);
+}
+
 
 Foam::dimensionSet Foam::operator-(const dimensionSet& ds)
 {
@@ -490,17 +508,15 @@ Foam::dimensionSet Foam::operator+
     const dimensionSet& ds2
 )
 {
-    dimensionSet dimSum(ds1);
-
     if (dimensionSet::debug && ds1 != ds2)
     {
         FatalErrorInFunction
-            << "LHS and RHS of + have different dimensions" << endl
+            << "LHS and RHS of '+' have different dimensions" << nl
             << "     dimensions : " << ds1 << " + " << ds2 << endl
             << abort(FatalError);
     }
 
-    return dimSum;
+    return ds1;
 }
 
 
@@ -510,17 +526,15 @@ Foam::dimensionSet Foam::operator-
     const dimensionSet& ds2
 )
 {
-    dimensionSet dimDifference(ds1);
-
     if (dimensionSet::debug && ds1 != ds2)
     {
         FatalErrorInFunction
-            << "LHS and RHS of - have different dimensions" << endl
+            << "LHS and RHS of '-' have different dimensions" << nl
             << "     dimensions : " << ds1 << " - " << ds2 << endl
             << abort(FatalError);
     }
 
-    return dimDifference;
+    return ds1;
 }
 
 
@@ -530,14 +544,17 @@ Foam::dimensionSet Foam::operator*
     const dimensionSet& ds2
 )
 {
-    dimensionSet dimProduct(ds1);
+    dimensionSet result(ds1);
 
-    for (int d=0; d<dimensionSet::nDimensions; ++d)
+    auto rhs = ds2.values().begin();
+
+    for (scalar& val : result.values())
     {
-        dimProduct.exponents_[d] += ds2.exponents_[d];
+        val += *rhs;
+        ++rhs;
     }
 
-    return dimProduct;
+    return result;
 }
 
 
@@ -547,14 +564,17 @@ Foam::dimensionSet Foam::operator/
     const dimensionSet& ds2
 )
 {
-    dimensionSet dimQuotient(ds1);
+    dimensionSet result(ds1);
 
-    for (int d=0; d<dimensionSet::nDimensions; ++d)
+    auto rhs = ds2.values().begin();
+
+    for (scalar& val : result.values())
     {
-        dimQuotient.exponents_[d] -= ds2.exponents_[d];
+        val -= *rhs;
+        ++rhs;
     }
 
-    return dimQuotient;
+    return result;
 }
 
 

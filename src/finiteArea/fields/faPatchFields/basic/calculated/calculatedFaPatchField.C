@@ -103,8 +103,8 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::NewCalculatedType
     const faPatchField<Type2>& pf
 )
 {
-    typename patchConstructorTable::iterator patchTypeCstrIter =
-        patchConstructorTablePtr_->find(pf.patch().type());
+    auto patchTypeCstrIter =
+        patchConstructorTablePtr_->cfind(pf.patch().type());
 
     if (patchTypeCstrIter.found())
     {

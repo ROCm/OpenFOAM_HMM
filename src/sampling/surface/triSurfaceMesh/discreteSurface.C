@@ -40,11 +40,11 @@ const Foam::Enum
     Foam::discreteSurface::samplingSource
 >
 Foam::discreteSurface::samplingSourceNames_
-{
+({
     { samplingSource::cells, "cells" },
     { samplingSource::insideCells, "insideCells" },
     { samplingSource::boundaryFaces, "boundaryFaces" },
-};
+});
 
 
 namespace Foam
@@ -110,7 +110,7 @@ Foam::discreteSurface::nonCoupledboundaryTree() const
         // all non-coupled boundary faces (not just walls)
         const polyBoundaryMesh& patches = mesh().boundaryMesh();
 
-        labelList bndFaces(mesh().nFaces()-mesh().nInternalFaces());
+        labelList bndFaces(patches.nFaces());
         label bndI = 0;
         for (const polyPatch& pp : patches)
         {
@@ -651,8 +651,8 @@ Foam::discreteSurface::discreteSurface
     keepIds_(false),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 
@@ -675,7 +675,7 @@ Foam::discreteSurface::discreteSurface
     (
         IOobject
         (
-            dict.lookup("surface"),
+            dict.get<word>("surface"),
             mesh.time().constant(), // instance
             "triSurface",           // local
             mesh.time(),            // registry
@@ -684,13 +684,13 @@ Foam::discreteSurface::discreteSurface
             false
         )
     ),
-    sampleSource_(samplingSourceNames_.lookup("source", dict)),
+    sampleSource_(samplingSourceNames_.get("source", dict)),
     needsUpdate_(true),
     keepIds_(dict.lookupOrDefault("keepIds", false)),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 
@@ -726,8 +726,8 @@ Foam::discreteSurface::discreteSurface
     keepIds_(false),
     originalIds_(),
     zoneIds_(),
-    sampleElements_(0),
-    samplePoints_(0)
+    sampleElements_(),
+    samplePoints_()
 {}
 
 

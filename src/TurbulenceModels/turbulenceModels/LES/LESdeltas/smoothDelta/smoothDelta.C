@@ -161,10 +161,7 @@ Foam::LESModels::smoothDelta::smoothDelta
     ),
     maxDeltaRatio_
     (
-        readScalar
-        (
-            dict.optionalSubDict(type() + "Coeffs").lookup("maxDeltaRatio")
-        )
+        dict.optionalSubDict(type() + "Coeffs").get<scalar>("maxDeltaRatio")
     )
 {
     calcDelta();
@@ -178,7 +175,7 @@ void Foam::LESModels::smoothDelta::read(const dictionary& dict)
     const dictionary& coeffsDict(dict.optionalSubDict(type() + "Coeffs"));
 
     geometricDelta_().read(coeffsDict);
-    coeffsDict.lookup("maxDeltaRatio") >> maxDeltaRatio_;
+    coeffsDict.readEntry("maxDeltaRatio", maxDeltaRatio_);
     calcDelta();
 }
 

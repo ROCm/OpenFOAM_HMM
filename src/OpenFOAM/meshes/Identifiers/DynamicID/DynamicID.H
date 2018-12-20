@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,9 +44,8 @@ Description
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 template<class> class DynamicID;
-
 template<class ObjectType>
 Ostream& operator<<(Ostream&, const DynamicID<ObjectType>&);
 
@@ -74,18 +73,19 @@ public:
         DynamicID(const keyType& key, const ObjectType& obj)
         :
             key_(key),
-            indices_(obj.findIndices(key_))
+            indices_(obj.indices(key_))
         {}
 
         //- Construct from Istream
         DynamicID(Istream& is, const ObjectType& obj)
         :
             key_(is),
-            indices_(obj.findIndices(key_))
+            indices_(obj.indices(key_))
         {}
 
 
-    // Destructor - default
+    //- Destructor
+    ~DynamicID() = default;
 
 
     // Member Functions
@@ -107,7 +107,7 @@ public:
             //- Return index of first matching zone
             label index() const
             {
-                return indices_.empty() ? -1 : indices_[0];
+                return indices_.empty() ? -1 : indices_.first();
             }
 
             //- Has the zone been found
@@ -122,7 +122,7 @@ public:
             //- Update
             void update(const ObjectType& obj)
             {
-                indices_ = obj.findIndices(key_);
+                indices_ = obj.indices(key_);
             }
 
 

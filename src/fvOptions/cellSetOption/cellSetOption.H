@@ -101,7 +101,7 @@ protected:
         //- Cell selection mode
         selectionModeType selectionMode_;
 
-        //- Name of cell set for "cellSet" and "cellZone" selectionMode
+        //- Name of set/zone for "cellSet" and "cellZone" selectionMode
         word cellSetName_;
 
         //- List of points for "points" selectionMode
@@ -145,7 +145,7 @@ public:
 
 
     //- Destructor
-    virtual ~cellSetOption();
+    virtual ~cellSetOption() = default;
 
 
     // Member Functions

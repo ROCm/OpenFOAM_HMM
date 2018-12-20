@@ -52,11 +52,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 template<class T> class List;
 template<class T> class UList;
 typedef List<word> wordList;
 
-// Forward declaration of friend functions and operators
 class wordRe;
 class fileName;
 
@@ -80,13 +80,13 @@ class fileName
 
 public:
 
-    //- Enumerations to handle file types and modes.
+    //- Enumerations to handle directory entry types.
     enum Type
     {
-        UNDEFINED,  //!< Undefined file type.
-        FILE,       //!< A file
-        DIRECTORY,  //!< A directory
-        LINK        //!< A symlink
+        UNDEFINED = 0,  //!< Undefined type
+        FILE = 1,       //!< A file
+        DIRECTORY = 2,  //!< A directory
+        LINK = 4        //!< A symlink
     };
 
 
@@ -102,35 +102,46 @@ public:
     // Constructors
 
         //- Construct null
-        inline fileName();
+        fileName() = default;
 
-        //- Construct as copy
-        inline fileName(const fileName& fn);
+        //- Copy construct
+        fileName(const fileName&) = default;
 
-        //- Construct as copy of word
-        inline fileName(const word& w);
+        //- Move construct
+        fileName(fileName&&) = default;
 
-        //- Construct as copy of string
-        inline fileName(const string& s, const bool doStripInvalid=true);
+        //- Copy construct from word
+        inline fileName(const word& s);
 
-        //- Construct as copy of std::string
-        inline fileName(const std::string& s, const bool doStripInvalid=true);
+        //- Move construct from word
+        inline fileName(word&& s);
 
-        //- Construct as copy of character array
-        inline fileName(const char* s, const bool doStripInvalid=true);
+        //- Copy construct from string
+        inline fileName(const string& s, bool doStrip=true);
+
+        //- Move construct from string
+        inline fileName(string&& s, bool doStrip=true);
+
+        //- Copy construct from std::string
+        inline fileName(const std::string& s, bool doStrip=true);
+
+        //- Move construct from std::string
+        inline fileName(std::string&& s, bool doStrip=true);
+
+        //- Copy construct from character array
+        inline fileName(const char* s, bool doStrip=true);
 
         //- Construct by concatenating elements of wordList separated by '/'
-        explicit fileName(const UList<word>& lst);
+        explicit fileName(const UList<word>& list);
 
         //- Construct by concatenating words separated by '/'
-        explicit fileName(std::initializer_list<word> lst);
-
+        explicit fileName(std::initializer_list<word> list);
 
         //- Construct from Istream
-        fileName(Istream& is);
+        explicit fileName(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
@@ -145,7 +156,7 @@ public:
         );
 
         //- This is a specialized (possibly slower) version of compare()
-        //  that ignores duplicate or trailing slashes.
+        //- that ignores duplicate or trailing slashes.
         static bool equals(const std::string& s1, const std::string& s2);
 
 
@@ -188,11 +199,15 @@ public:
         fileName clean() const;
 
 
-      // Interrogation
+    // Interrogation
 
-        //- Return the file type: FILE, DIRECTORY, LINK or UNDEFINED.
-        //  LINK is only returned if followLink=false
-        Type type(const bool followLink = true) const;
+        //- Return the directory entry type:
+        //- UNDEFINED, FILE, DIRECTORY (or LINK).
+        //
+        //  \param followLink when false it will return LINK for a symlink
+        //     rather than following it.
+        //  \param checkGzip add an additional test for a gzip FILE
+        Type type(bool followLink=true, bool checkGzip=false) const;
 
         //- Return true if string starts with a '/'
         inline static bool isAbsolute(const std::string& str);
@@ -210,37 +225,39 @@ public:
         inline bool isBackup() const;
 
 
-      // Decomposition
+    // Decomposition
 
         //- Return basename (part beyond last /), including its extension
         //  The result normally corresponds to a Foam::word
         //
         // Behaviour compared to /usr/bin/basename:
         // \verbatim
-        //    input           name()    basename
-        //    -----           ------    --------
-        //    "foo"           "foo"     "foo"
-        //    "/"             ""        "/"
-        //    "/foo"          "foo"     "foo"
-        //    "foo/bar"       "bar"     "bar"
-        //    "/foo/bar"      "bar"     "bar"
-        //    "/foo/bar/"     ""        "bar"
+        //    input           name()          basename
+        //    -----           ------          --------
+        //    ""              ""              ""
+        //    "abc"           "abc"           "abc"
+        //    "/"             ""              "/"
+        //    "/abc"          "abc"           "abc"
+        //    "abc/def"       "def"           "def"
+        //    "/abc/def"      "def"           "def"
+        //    "/abc/def/"     ""              "def"
+        //    "/abc/../def"   "def"           "def"
         // \endverbatim
-        static std::string name(const std::string& str);
+        inline static std::string name(const std::string& str);
 
         //- Return basename (part beyond last /), including its extension
-        word name() const;
+        inline word name() const;
 
         //- Return basename, without extension
         //  The result normally corresponds to a Foam::word
         static std::string nameLessExt(const std::string& str);
 
         //- Return basename, without extension
-        word nameLessExt() const;
+        inline word nameLessExt() const;
 
-        //- Return basename, optionally without extension
-        // \deprecated in favour of name() or nameLessExt() which describe
-        //  their behaviour more explicitly (MAR-2017).
+        //- Deprecated(2017-03) return basename, optionally without extension
+        //  \deprecated(2017-03) - use name() or nameLessExt() methods
+        //      which describe their behaviour explicitly
         word name(const bool noExt) const
         {
             return noExt ? this->nameLessExt() : this->name();
@@ -249,41 +266,59 @@ public:
         //- Return directory path name (part before last /)
         //  The result normally coresponds to a Foam::fileName
         //
-        //  Behaviour compared to /usr/bin/dirname:
-        //  \verbatim
+        // Behaviour compared to /usr/bin/dirname:
+        // \verbatim
         //    input           path()          dirname
         //    -----           ------          -------
-        //    "foo"           "."             "."
+        //    ""              "."             "."
+        //    "abc"           "."             "."
         //    "/"             "/"             "/"
-        //    "/foo"          "/"             "foo"
-        //    "foo/bar"       "foo"           "foo"
-        //    "/foo/bar"      "/foo"          "/foo"
-        //    "/foo/bar/"     "/foo/bar/"     "/foo"
+        //    "/abc"          "/"             "/"
+        //    "abc/def"       "abc"           "abc"
+        //    "/abc/def"      "/abc"          "/abc"
+        //    "/abc/def/"     "/abc/def"      "/abc"
+        //    "/abc/../def"   "/abc/.."       "/abc/.."
         // \endverbatim
-        static std::string path(const std::string& str);
+        inline static std::string path(const std::string& str);
 
         //- Return directory path name (part before last /)
-        fileName path() const;
+        inline fileName path() const;
 
-        //- Return name after stripping off the parent directory
-        fileName relative(const fileName& parent) const;
+        //- Return true if it contains a '/' character
+        inline bool hasPath() const;
+
+        //- Remove leading path, returning true if string changed.
+        inline bool removePath();
+
+        //- Return a relative name by stripping off the parent directory
+        //- where possible.
+        //
+        //  \param parent the parent directory
+        //  \param caseTag replace the parent with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        fileName relative
+        (
+            const fileName& parent,
+            const bool caseTag = false
+        ) const;
 
         //- Return file name without extension (part before last .)
-        fileName lessExt() const;
+        inline fileName lessExt() const;
 
         //- Return file name extension (part after last .)
-        word ext() const;
+        inline word ext() const;
 
         //- Append a '.' and the ending, and return the object.
         //  The '.' and ending will not be added when the ending is empty,
         //  or when the file name is empty or ended with a '/'.
-        fileName& ext(const word& ending);
+        inline fileName& ext(const word& ending);
 
         //- Return true if it has an extension or simply ends with a '.'
         inline bool hasExt() const;
 
         //- Return true if the extension is the same as the given ending.
-        bool hasExt(const word& ending) const;
+        inline bool hasExt(const word& ending) const;
 
         //- Return true if the extension matches the given ending.
         bool hasExt(const wordRe& ending) const;
@@ -294,16 +329,18 @@ public:
 
         //- Return path components as wordList
         //
-        //  Behaviour:
-        //  \verbatim
-        //    Input           components()
-        //    -----           ------
-        //    "foo"           ("foo")
-        //    "/foo"          ("foo")
-        //    "foo/bar"       ("foo", "bar")
-        //    "/foo/bar"      ("foo", "bar")
-        //    "/foo/bar/"     ("foo", "bar")
-        //  \endverbatim
+        // Behaviour:
+        // \verbatim
+        //    input           components()
+        //    -----           ------------
+        //    ""              ()
+        //    "."             (".")
+        //    "abc"           ("abc")
+        //    "/abc"          ("abc")
+        //    "abc/def"       ("abc", "def")
+        //    "/abc/def"      ("abc", "def")
+        //    "/abc/def/"     ("abc", "def")
+        // \endverbatim
         wordList components(const char delimiter = '/') const;
 
         //- Return a single component of the path
@@ -316,22 +353,41 @@ public:
 
     // Member operators
 
-      // Assignment
+    // Assignment
 
-        //- Copy, no character validation required
-        void operator=(const fileName& str);
+        //- Copy assignment, no character validation required
+        fileName& operator=(const fileName&) = default;
 
-        //- Copy, no character validation required
-        void operator=(const word& str);
+        //- Move assignment, no character validation required
+        fileName& operator=(fileName&&) = default;
+
+        //- Copy assignment, no character validation required
+        inline fileName& operator=(const word& str);
+
+        //- Move assignment, no character validation required
+        inline fileName& operator=(word&& str);
+
+        //- Copy assignment, stripping invalid characters
+        inline fileName& operator=(const string& str);
+
+        //- Move assignment, stripping invalid characters
+        inline fileName& operator=(string&& str);
+
+        //- Copy assignment, stripping invalid characters
+        inline fileName& operator=(const std::string& str);
+
+        //- Move assignment, stripping invalid characters
+        inline fileName& operator=(std::string&& str);
 
         //- Copy, stripping invalid characters
-        void operator=(const string& str);
+        inline fileName& operator=(const char* str);
 
-        //- Copy, stripping invalid characters
-        void operator=(const std::string& str);
 
-        //- Copy, stripping invalid characters
-        void operator=(const char* str);
+    // Other operators
+
+        //- Append a path element with '/' separator.
+        //  No '/' separator is added if this or the argument are empty.
+        fileName& operator/=(const string& other);
 
 
     // IOstream operators

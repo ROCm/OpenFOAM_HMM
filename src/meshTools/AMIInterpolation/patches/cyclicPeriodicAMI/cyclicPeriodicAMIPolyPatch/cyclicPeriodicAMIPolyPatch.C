@@ -30,8 +30,10 @@ License
 #include "OBJstream.H"
 #include "PatchTools.H"
 #include "Time.H"
-//Note: cannot use vtkSurfaceWriter here - circular linkage
-//#include "vtkSurfaceWriter.H"
+// Note: cannot use vtkSurfaceWriter here - circular linkage
+// but foamVtkSurfaceWriter (vtk::surfaceWriter) would be okay.
+//
+// #include "foamVtkSurfaceWriter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -278,7 +280,7 @@ void Foam::cyclicPeriodicAMIPolyPatch::resetAMI
         {
             const Time& runTime = boundaryMesh().mesh().time();
 
-            fileName dir(runTime.rootPath()/runTime.globalCaseName());
+            fileName dir(runTime.globalPath());
             fileName postfix("_" + runTime.timeName()+"_expanded.obj");
 
             ownStr.reset(new OBJstream(dir/name() + postfix));

@@ -44,9 +44,14 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Direct numerical simulation for boxes of isotropic turbulence."
+    );
+
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMeshNoClear.H"
     #include "createControl.H"

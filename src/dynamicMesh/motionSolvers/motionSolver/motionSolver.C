@@ -26,6 +26,7 @@ License
 #include "motionSolver.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "dictionaryEntry.H"
 #include "dlLibraryTable.H"
 #include "twoDPointCorrector.H"
 
@@ -104,14 +105,14 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
     const IOdictionary& solverDict
 )
 {
+    // The change from "solver" to "motionSolver" has not been
+    // applied consistently. Accept both without complaint.
     const word solverName
     (
-        solverDict.found("motionSolver")
-      ? solverDict.lookup("motionSolver")
-      : solverDict.lookup("solver")
+        solverDict.getCompat<word>("motionSolver", {{"solver", -1612}})
     );
 
-    Info<< "Selecting motion solver: " << solverName << endl;
+    Info<< "Selecting motion solver: " << solverName << nl;
 
     const_cast<Time&>(mesh.time()).libs().open
     (
@@ -134,7 +135,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
         FatalErrorInFunction
             << "Unknown solver type "
             << solverName << nl << nl
-            << "Valid solver types :" << endl
+            << "Valid solver types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -172,7 +173,7 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::iNew::operator()
     Istream& is
 ) const
 {
-    dictionaryEntry dict(dictionary::null, is);
+    dictionaryEntry dictEntry(dictionary::null, is);
 
     return motionSolver::New
     (
@@ -181,11 +182,11 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::iNew::operator()
         (
             IOobject
             (
-                dict.name() + ":meshSolver",
+                dictEntry.name() + ":meshSolver",
                 mesh_.time().constant(),
                 mesh_
             ),
-            dict
+            dictEntry
         )
     );
 }
@@ -236,10 +237,8 @@ bool Foam::motionSolver::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

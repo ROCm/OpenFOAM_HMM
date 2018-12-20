@@ -84,10 +84,10 @@ void Foam::DSMCCloud<ParcelType>::initialise
 
     const scalar temperature
     (
-        readScalar(dsmcInitialiseDict.lookup("temperature"))
+        dsmcInitialiseDict.get<scalar>("temperature")
     );
 
-    const vector velocity(dsmcInitialiseDict.lookup("velocity"));
+    const vector velocity(dsmcInitialiseDict.get<vector>("velocity"));
 
     const dictionary& numberDensitiesDict
     (
@@ -100,10 +100,7 @@ void Foam::DSMCCloud<ParcelType>::initialise
 
     forAll(molecules, i)
     {
-        numberDensities[i] = readScalar
-        (
-            numberDensitiesDict.lookup(molecules[i])
-        );
+        numberDensities[i] = numberDensitiesDict.get<scalar>(molecules[i]);
     }
 
     numberDensities /= nParticle_;
@@ -491,7 +488,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
         )
     ),
     typeIdList_(particleProperties_.lookup("typeIdList")),
-    nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
+    nParticle_(particleProperties_.get<scalar>("nEquivalentParticles")),
     cellOccupancy_(mesh_.nCells()),
     sigmaTcRMax_
     (
@@ -722,7 +719,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
         )
     ),
     typeIdList_(particleProperties_.lookup("typeIdList")),
-    nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
+    nParticle_(particleProperties_.get<scalar>("nEquivalentParticles")),
     cellOccupancy_(),
     sigmaTcRMax_
     (

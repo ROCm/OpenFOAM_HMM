@@ -1,5 +1,5 @@
 Foam::argList::addBoolOption
 (
     "profiling",
-    "activate application-level profiling"
+    "Activate application-level profiling"
 );

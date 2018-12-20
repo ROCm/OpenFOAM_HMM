@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
         Info<<"now have valid=" << Switch(list.valid()).c_str();
 
-        if (list.valid())
+        if (list)
         {
             Info<< nl
                 << flatOutput(*list) << " @ " << long(list->cdata())
@@ -153,6 +153,22 @@ int main(int argc, char *argv[])
         {
             Info<< nl;
         }
+
+        // These should fail to compile
+        #if 0
+        label val0 = 0;
+
+        if (true)
+        {
+            val0 = list;
+        }
+
+        label val1 = 10;
+
+        if (val1 == list)
+        {
+        }
+        #endif
     }
 
     // Memory transfer

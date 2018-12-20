@@ -1,0 +1,13 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+
+# Can never be too certain ...
+# Compile tools for wmake
+( cd "${WM_DIR:-${WM_PROJECT_DIR}/wmake}/src" && make )
+
+#------------------------------------------------------------------------------
+
+wmake libso dummy
+wmake
+
+#------------------------------------------------------------------------------

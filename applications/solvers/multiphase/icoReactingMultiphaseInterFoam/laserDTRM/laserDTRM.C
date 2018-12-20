@@ -165,8 +165,7 @@ void Foam::radiation::laserDTRM::initialise()
 
     const scalar t = mesh_.time().value();
     const vector lPosition = focalLaserPosition_->value(t);
-    vector lDir = laserDirection_->value(t);
-    lDir /= mag(lDir);
+    const vector lDir = normalised(laserDirection_->value(t));
 
     if (debug)
     {
@@ -175,7 +174,7 @@ void Foam::radiation::laserDTRM::initialise()
     }
 
     // Find a vector on the area plane. Normal to laser direction
-    vector rArea = vector::zero;
+    vector rArea = Zero;
     scalar magr = 0.0;
 
     {
@@ -188,7 +187,7 @@ void Foam::radiation::laserDTRM::initialise()
             magr = mag(rArea);
         }
     }
-    rArea /= mag(rArea);
+    rArea.normalise();
 
     scalar dr =  focalLaserRadius_/ndr_;
     scalar dTheta =  mathematical::twoPi/ndTheta_;
@@ -199,7 +198,7 @@ void Foam::radiation::laserDTRM::initialise()
     {
         case pdGaussian:
         {
-            sigma_ = readScalar(lookup("sigma"));
+            sigma_ = get<scalar>("sigma");
             break;
         }
         case pdManual:
@@ -323,11 +322,11 @@ void Foam::radiation::laserDTRM::initialise()
 Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
 :
     radiationModel(typeName, T),
-    mode_(powerDistNames_.lookup("mode", *this)),
+    mode_(powerDistNames_.get("mode", *this)),
     DTRMCloud_(mesh_, "DTRMCloud", IDLList<DTRMParticle>()),
     nParticles_(0),
-    ndTheta_(readLabel(lookup("nTheta"))),
-    ndr_(readLabel(lookup("nr"))),
+    ndTheta_(get<label>("nTheta")),
+    ndr_(get<label>("nr")),
     maxTrackLength_(mesh_.bounds().mag()),
 
     focalLaserPosition_
@@ -340,7 +339,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
         Function1<vector>::New("laserDirection", *this)
     ),
 
-    focalLaserRadius_(readScalar(lookup("focalLaserRadius"))),
+    focalLaserRadius_(get<scalar>("focalLaserRadius")),
     qualityBeamLaser_
     (
         lookupOrDefault<scalar>("qualityBeamLaser", 0.0)
@@ -433,11 +432,11 @@ Foam::radiation::laserDTRM::laserDTRM
 )
 :
     radiationModel(typeName, dict, T),
-    mode_(powerDistNames_.lookup("mode", *this)),
+    mode_(powerDistNames_.get("mode", *this)),
     DTRMCloud_(mesh_, "DTRMCloud", IDLList<DTRMParticle>()),
     nParticles_(0),
-    ndTheta_(readLabel(lookup("nTheta"))),
-    ndr_(readLabel(lookup("nr"))),
+    ndTheta_(get<label>("nTheta")),
+    ndr_(get<label>("nr")),
     maxTrackLength_(mesh_.bounds().mag()),
 
     focalLaserPosition_
@@ -449,7 +448,7 @@ Foam::radiation::laserDTRM::laserDTRM
         Function1<vector>::New("laserDirection", *this)
     ),
 
-    focalLaserRadius_(readScalar(lookup("focalLaserRadius"))),
+    focalLaserRadius_(get<scalar>("focalLaserRadius")),
     qualityBeamLaser_
     (
         lookupOrDefault<scalar>("qualityBeamLaser", 0.0)
@@ -720,7 +719,7 @@ void Foam::radiation::laserDTRM::calculate()
         {
             const pointField& pos = positions[proci];
             const pointField& pfinal = p0[proci];
-            forAll (pos, i)
+            forAll(pos, i)
             {
                 meshTools::writeOBJ(osRef, pos[i]);
                 vertI++;

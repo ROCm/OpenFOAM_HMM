@@ -24,6 +24,29 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <algorithm>
+#include "FixedList.H"
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<unsigned N>
+Foam::bitSet::bitSet(const label n, const FixedList<label, N>& locations)
+:
+    bitSet(n)
+{
+
+    setMany(locations.begin(), locations.end());
+}
+
+
+template<unsigned N>
+Foam::bitSet::bitSet(const FixedList<label, N>& locations)
+:
+    bitSet()
+{
+
+    setMany(locations.begin(), locations.end());
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -67,6 +90,20 @@ Foam::label Foam::bitSet::unset(InputIter first, InputIter last)
     }
 
     return changed;
+}
+
+
+template<unsigned N>
+Foam::label Foam::bitSet::set(const FixedList<label, N>& locations)
+{
+    return setMany(locations.begin(), locations.end());
+}
+
+
+template<unsigned N>
+Foam::label Foam::bitSet::unset(const FixedList<label, N>& locations)
+{
+    return unset(locations.begin(), locations.end());
 }
 
 

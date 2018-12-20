@@ -123,10 +123,10 @@ typename Table::iterator Foam::basicThermo::lookupThermo
             // Construct the name of the thermo package from the components
             const word thermoTypeName
             (
-                word(thermoTypeDict.lookup("type")) + '<'
-              + word(thermoTypeDict.lookup("mixture")) + '<'
-              + word(thermoTypeDict.lookup("properties")) + ','
-              + word(thermoTypeDict.lookup("energy")) + ">>"
+                thermoTypeDict.get<word>("type") + '<'
+              + thermoTypeDict.get<word>("mixture") + '<'
+              + thermoTypeDict.get<word>("properties") + ','
+              + thermoTypeDict.get<word>("energy") + ">>"
             );
 
             return lookupThermo<Thermo, Table>
@@ -155,13 +155,13 @@ typename Table::iterator Foam::basicThermo::lookupThermo
             // Construct the name of the thermo package from the components
             const word thermoTypeName
             (
-                word(thermoTypeDict.lookup("type")) + '<'
-              + word(thermoTypeDict.lookup("mixture")) + '<'
-              + word(thermoTypeDict.lookup("transport")) + '<'
-              + word(thermoTypeDict.lookup("thermo")) + '<'
-              + word(thermoTypeDict.lookup("equationOfState")) + '<'
-              + word(thermoTypeDict.lookup("specie")) + ">>,"
-              + word(thermoTypeDict.lookup("energy")) + ">>>"
+                thermoTypeDict.get<word>("type") + '<'
+              + thermoTypeDict.get<word>("mixture") + '<'
+              + thermoTypeDict.get<word>("transport") + '<'
+              + thermoTypeDict.get<word>("thermo") + '<'
+              + thermoTypeDict.get<word>("equationOfState") + '<'
+              + thermoTypeDict.get<word>("specie") + ">>,"
+              + thermoTypeDict.get<word>("energy") + ">>>"
             );
 
             return lookupThermo<Thermo, Table>
@@ -176,7 +176,7 @@ typename Table::iterator Foam::basicThermo::lookupThermo
     }
     else
     {
-        const word thermoTypeName(thermoDict.lookup("thermoType"));
+        const word thermoTypeName(thermoDict.get<word>("thermoType"));
 
         Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
 

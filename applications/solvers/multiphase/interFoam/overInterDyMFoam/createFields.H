@@ -30,37 +30,31 @@ volVectorField U
 
 #include "createPhi.H"
 
+//- Overset specific
+
+// Add solver-specific interpolations
+{
+    wordHashSet& nonInt =
+        const_cast<wordHashSet&>(Stencil::New(mesh).nonInterpolatedFields());
+
+    nonInt.insert("HbyA");
+    nonInt.insert("grad(p_rgh)");
+    nonInt.insert("nHat");
+    nonInt.insert("surfaceIntegrate(phi)");
+    nonInt.insert("surfaceIntegrate(phiHbyA)");
+    nonInt.insert("cellMask");
+    nonInt.insert("cellDisplacement");
+    nonInt.insert("interpolatedCells");
+    nonInt.insert("cellInterpolationWeight");
+    nonInt.insert("pcorr");
+}
 
 
-    //- Overset specific
+// Mask field for zeroing out contributions on hole cells
+#include "createCellMask.H"
 
-    // Add solver-specific interpolations
-    {
-        dictionary oversetDict;
-        oversetDict.add("U", true);
-        oversetDict.add("p", true);
-        oversetDict.add("HbyA", true);
-        oversetDict.add("p_rgh", true);
-        oversetDict.add("alpha1", true);
-        oversetDict.add("minGradP", true);
-
-        const_cast<dictionary&>
-        (
-            mesh.schemesDict()
-        ).add
-        (
-            "oversetInterpolationRequired",
-            oversetDict,
-            true
-        );
-    }
-
-    // Mask field for zeroing out contributions on hole cells
-    #include "createCellMask.H"
-
-    // Create bool field with interpolated cells
-    #include "createInterpolatedCells.H"
-
+// Create bool field with interpolated cells
+#include "createInterpolatedCells.H"
 
 
 Info<< "Reading transportProperties\n" << endl;

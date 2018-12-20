@@ -209,11 +209,8 @@ public:
         //- Calculate the heat transfer coefficient
         virtual void calculateHtc();
 
-
-        // I-O
-
-            //- Read dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 

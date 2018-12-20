@@ -48,7 +48,7 @@ Foam::surfaceTensionModels::constant::constant
 )
 :
     surfaceTensionModel(mesh),
-    sigma_("sigma", dimensionSet(1, 0, -2, 0, 0), dict)
+    sigma_("sigma", dimMass/sqr(dimTime), dict)
 {}
 
 
@@ -63,22 +63,19 @@ Foam::surfaceTensionModels::constant::~constant()
 Foam::tmp<Foam::volScalarField>
 Foam::surfaceTensionModels::constant::sigma() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "sigma",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "sigma",
+            mesh_.time().timeName(),
             mesh_,
-            sigma_
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        sigma_
     );
 }
 
@@ -88,11 +85,11 @@ bool Foam::surfaceTensionModels::constant::readDict(const dictionary& dict)
     // Handle sub-dictionary format as a special case
     if (dict.isDict("sigma"))
     {
-        dict.subDict("sigma").lookup("sigma") >> sigma_;
+        dict.subDict("sigma").readEntry("sigma", sigma_);
     }
     else
     {
-        dict.lookup("sigma") >> sigma_;
+        dict.readEntry("sigma", sigma_);
     }
 
     return true;

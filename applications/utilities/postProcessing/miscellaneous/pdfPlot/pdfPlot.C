@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilitie
 
 Description
-    Generates a graph of a probability distribution function.
+    Generate a graph of a probability distribution function.
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,6 +41,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Generate a graph of a probability distribution function"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createFields.H"

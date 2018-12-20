@@ -67,7 +67,7 @@ Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
 {
     const word functionName
     (
-        surfaceCellSizeFunctionDict.lookup("surfaceCellSizeFunction")
+        surfaceCellSizeFunctionDict.get<word>("surfaceCellSizeFunction")
     );
 
     Info<< indent << "Selecting surfaceCellSizeFunction "
@@ -90,12 +90,6 @@ Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
         cstrIter()(surfaceCellSizeFunctionDict, surface, defaultCellSize)
     );
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfaceCellSizeFunction::~surfaceCellSizeFunction()
-{}
 
 
 // ************************************************************************* //

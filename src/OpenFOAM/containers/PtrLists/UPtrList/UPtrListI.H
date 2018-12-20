@@ -180,6 +180,10 @@ template<class T>
 inline T* Foam::UPtrList<T>::set(const label i, T* ptr)
 {
     T* old = ptrs_[i];
+    if (old == ptr)
+    {
+        return nullptr;  // Content did not change
+    }
     ptrs_[i] = ptr;
     return old;
 }
@@ -235,6 +239,13 @@ inline Foam::UPtrList<T>::iterator::iterator(T** ptr)
 :
     ptr_(ptr)
 {}
+
+
+template<class T>
+inline T* Foam::UPtrList<T>::iterator::get() const
+{
+    return *ptr_;
+}
 
 
 template<class T>
@@ -401,6 +412,13 @@ inline Foam::UPtrList<T>::const_iterator::const_iterator(const iterator& iter)
 :
     ptr_(iter.ptr_)
 {}
+
+
+template<class T>
+inline const T* Foam::UPtrList<T>::const_iterator::get() const
+{
+    return *ptr_;
+}
 
 
 template<class T>

@@ -38,7 +38,7 @@ Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
     const surfaceScalarField& phi
 )
 {
-    const word modelType(propDict.lookup("XiModel"));
+    const word modelType(propDict.get<word>("XiModel"));
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 

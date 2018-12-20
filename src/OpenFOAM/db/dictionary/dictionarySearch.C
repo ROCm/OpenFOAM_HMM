@@ -69,8 +69,7 @@ namespace
 Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
     auto scopePos = keyword.find('.');
@@ -78,8 +77,11 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
     if (scopePos == string::npos)
     {
         // Normal, non-scoped search
-        return csearch(keyword, recursive, patternMatch);
+        return csearch(keyword, matchOpt);
     }
+
+    // It is '.' scoped - force non-recusive searching
+    matchOpt = keyType::option(matchOpt & ~(keyType::RECURSIVE));
 
     if (scopePos == 0)
     {
@@ -113,8 +115,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
         return dictPtr->csearchDotScoped
         (
             keyword.substr(scopePos),
-            false,
-            patternMatch
+            matchOpt
         );
     }
 
@@ -122,8 +123,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
     const_searcher finder = csearchDotScoped
     (
         keyword.substr(0, scopePos),
-        false,
-        patternMatch
+        matchOpt
     );
 
     // Fall back to finding key with '.' so e.g. if keyword is
@@ -137,7 +137,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
             scopePos = keyword.find('.', scopePos+1);
 
             // Local entry:
-            finder = csearch(keyword.substr(0, scopePos), false, patternMatch);
+            finder = csearch(keyword.substr(0, scopePos), matchOpt);
 
             if (scopePos == string::npos)
             {
@@ -152,8 +152,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
         return finder.dict().csearchDotScoped
         (
             keyword.substr(scopePos),
-            false,
-            patternMatch
+            matchOpt
         );
     }
 
@@ -164,9 +163,13 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
 Foam::dictionary::const_searcher Foam::dictionary::csearchSlashScoped
 (
     const word& keyword,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
+
+    // With '/' scoping - recursive is never allowed
+    matchOpt = keyType::option(matchOpt & ~(keyType::RECURSIVE));
+
     const dictionary* dictPtr = this;
 
     const auto slash = keyword.find('/');
@@ -175,7 +178,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchSlashScoped
     {
         // No slashes:
         // Can use normal (non-scoped) search at the current dictionary level
-        return csearch(keyword, false, patternMatch);
+        return csearch(keyword, matchOpt);
     }
     else if (slash == 0)
     {
@@ -220,7 +223,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchSlashScoped
             // Find entry
             const word key = word::validate(cmpt);
 
-            auto finder = dictPtr->csearch(key, false, patternMatch);
+            auto finder = dictPtr->csearch(key, matchOpt);
 
             if (finder.found())
             {
@@ -259,8 +262,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchSlashScoped
 Foam::dictionary::const_searcher Foam::dictionary::csearch
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
     const_searcher finder(this);
@@ -273,27 +275,22 @@ Foam::dictionary::const_searcher Foam::dictionary::csearch
         return finder;
     }
 
-    if (patternMatch && patterns_.size())
+    if ((matchOpt & keyType::REGEX) && patterns_.size())
     {
         pattern_const_iterator wcLink = patterns_.begin();
         regexp_const_iterator  reLink = regexps_.begin();
 
         // Find in patterns using regular expressions only
-        if (findInPatterns(patternMatch, keyword, wcLink, reLink))
+        if (findInPatterns(true, keyword, wcLink, reLink))
         {
             finder.set(*wcLink);
             return finder;
         }
     }
 
-    if (recursive && &parent_ != &dictionary::null)
+    if ((matchOpt & keyType::RECURSIVE) && &parent_ != &dictionary::null)
     {
-        return parent_.csearch
-        (
-            keyword,
-            recursive,
-            patternMatch
-        );
+        return parent_.csearch(keyword, matchOpt);
     }
 
     return finder;
@@ -303,22 +300,20 @@ Foam::dictionary::const_searcher Foam::dictionary::csearch
 Foam::dictionary::const_searcher Foam::dictionary::search
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    return csearch(keyword, recursive, patternMatch);
+    return csearch(keyword, matchOpt);
 }
 
 
 Foam::dictionary::searcher Foam::dictionary::search
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 )
 {
-    const_searcher finder = csearch(keyword, recursive, patternMatch);
+    const_searcher finder = csearch(keyword, matchOpt);
 
     return static_cast<const searcher&>(finder);
 }
@@ -327,17 +322,19 @@ Foam::dictionary::searcher Foam::dictionary::search
 Foam::dictionary::const_searcher Foam::dictionary::csearchScoped
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
     if (keyword.find('/') != string::npos)
     {
-        return csearchSlashScoped(keyword, patternMatch);
+        return csearchSlashScoped(keyword, matchOpt);
     }
 
     if (keyword[0] == ':' || keyword[0] == '^')
     {
+        // It is ':' scoped - force non-recusive searching
+        matchOpt = keyType::option(matchOpt & ~(keyType::RECURSIVE));
+
         // Ascend to top-level
         const dictionary* dictPtr = this;
         while (&dictPtr->parent_ != &dictionary::null)
@@ -345,43 +342,36 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchScoped
             dictPtr = &dictPtr->parent_;
         }
 
-        return dictPtr->csearchDotScoped
-        (
-            keyword.substr(1),
-            false,
-            patternMatch
-        );
+        return dictPtr->csearchDotScoped(keyword.substr(1), matchOpt);
     }
 
-    return csearchDotScoped(keyword, recursive, patternMatch);
+    return csearchDotScoped(keyword, matchOpt);
 }
 
 
 Foam::dictionary::const_searcher Foam::dictionary::searchScoped
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 ) const
 {
-    return csearchScoped(keyword, recursive, patternMatch);
+    return csearchScoped(keyword, matchOpt);
 }
 
 
 Foam::dictionary::searcher Foam::dictionary::searchScoped
 (
     const word& keyword,
-    bool recursive,
-    bool patternMatch
+    enum keyType::option matchOpt
 )
 {
-    const_searcher finder = csearchScoped(keyword, recursive, patternMatch);
+    const_searcher finder = csearchScoped(keyword, matchOpt);
 
     return static_cast<const searcher&>(finder);
 }
 
 
-const Foam::dictionary* Foam::dictionary::cfindScopedDictPtr
+const Foam::dictionary* Foam::dictionary::cfindScopedDict
 (
     const fileName& dictPath
 ) const
@@ -466,26 +456,26 @@ const Foam::dictionary* Foam::dictionary::cfindScopedDictPtr
 }
 
 
-const Foam::dictionary* Foam::dictionary::findScopedDictPtr
+const Foam::dictionary* Foam::dictionary::findScopedDict
 (
     const fileName& dictPath
 ) const
 {
-    return cfindScopedDictPtr(dictPath);
+    return cfindScopedDict(dictPath);
 }
 
 
-Foam::dictionary* Foam::dictionary::findScopedDictPtr
+Foam::dictionary* Foam::dictionary::findScopedDict
 (
     const fileName& dictPath
 )
 {
-    const dictionary* ptr = cfindScopedDictPtr(dictPath);
+    const dictionary* ptr = cfindScopedDict(dictPath);
     return const_cast<dictionary*>(ptr);
 }
 
 
-Foam::dictionary* Foam::dictionary::makeScopedDictPtr(const fileName& dictPath)
+Foam::dictionary* Foam::dictionary::makeScopedDict(const fileName& dictPath)
 {
     // Or warning
     if (dictPath.empty())
@@ -536,7 +526,8 @@ Foam::dictionary* Foam::dictionary::makeScopedDictPtr(const fileName& dictPath)
         else
         {
             // Non-recursive, no patternMatch
-            // -> can do direct lookup, without csearch(cmptName, false, false);
+            // -> can do direct lookup,
+            // without csearch(cmptName, keyType::LITERAL);
             const word cmptName(cmpt.str(), false);
 
             auto iter = dictPtr->hashedEntries_.find(cmptName);
@@ -638,9 +629,8 @@ bool Foam::dictionary::changeKeyword
     if (iter()->keyword().isPattern())
     {
         FatalIOErrorInFunction(*this)
-            << "Old keyword "<< oldKeyword
-            << " is a pattern."
-            << "Pattern replacement not yet implemented."
+            << "Old keyword " << oldKeyword << " is a pattern." << nl
+            << "Pattern replacement is not supported." << nl
             << exit(FatalIOError);
     }
 
@@ -673,7 +663,7 @@ bool Foam::dictionary::changeKeyword
         else
         {
             IOWarningInFunction(*this)
-                << "cannot rename keyword "<< oldKeyword
+                << "Cannot rename keyword " << oldKeyword
                 << " to existing keyword " << newKeyword
                 << " in dictionary " << name() << endl;
             return false;
@@ -689,10 +679,7 @@ bool Foam::dictionary::changeKeyword
     if (newKeyword.isPattern())
     {
         patterns_.insert(iter());
-        regexps_.insert
-        (
-            autoPtr<regExp>(new regExp(newKeyword))
-        );
+        regexps_.insert(autoPtr<regExp>::New(newKeyword));
     }
 
     return true;

@@ -35,7 +35,7 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
     const volScalarField& Su
 )
 {
-    const word modelType(propDict.lookup("XiGModel"));
+    const word modelType(propDict.get<word>("XiGModel"));
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 

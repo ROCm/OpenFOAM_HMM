@@ -25,6 +25,7 @@ License
 
 #include "noiseModel.H"
 #include "functionObject.H"
+#include "argList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -140,17 +141,15 @@ Foam::label Foam::noiseModel::findStartTimeIndex
 
 Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
 {
-    fileName baseDir("$FOAM_CASE");
-    word datasetName("input" + Foam::name(dataseti));
-    baseDir =
-        baseDir.expand()
-       /functionObject::outputPrefix
-       /"noise"
-       /outputPrefix_
-       /type()
-       /datasetName;
-
-    return baseDir;
+    return
+    (
+        argList::envGlobalPath()
+      / functionObject::outputPrefix
+      / "noise"
+      / outputPrefix_
+      / type()
+      / ("input" + Foam::name(dataseti))
+    );
 }
 
 
@@ -181,12 +180,6 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
         read(dict);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::noiseModel::~noiseModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

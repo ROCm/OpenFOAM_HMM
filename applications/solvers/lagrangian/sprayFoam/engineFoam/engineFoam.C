@@ -46,11 +46,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for compressible, turbulent engine flow"
+        " with a spray particle cloud."
+    );
+
     #define CREATE_TIME createEngineTime.H
     #define CREATE_MESH createEngineMesh.H
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createEngineTime.H"
     #include "createEngineMesh.H"
     #include "createControl.H"
@@ -75,7 +81,7 @@ int main(int argc, char *argv[])
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Engine time = " << runTime.theta() << runTime.unit() << endl;
 

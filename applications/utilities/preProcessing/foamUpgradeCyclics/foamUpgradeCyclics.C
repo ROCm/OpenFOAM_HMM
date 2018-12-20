@@ -34,7 +34,7 @@ Usage
     \b foamUpgradeCyclics [OPTION]
 
     Options:
-      - \par -test
+      - \par -dry-run
         Suppress writing the updated files with split cyclics
 
       - \par -enableFunctionEntries
@@ -70,7 +70,7 @@ namespace Foam
 // Read boundary file without reading mesh
 void rewriteBoundary
 (
-    const bool isTestRun,
+    const bool dryrun,
     const IOobject& io,
     const fileName& regionPrefix,
     HashTable<word>& thisNames,
@@ -95,7 +95,7 @@ void rewriteBoundary
     {
         const dictionary& patchDict = patches[patchi].dict();
 
-        if (word(patchDict["type"]) == cyclicPolyPatch::typeName)
+        if (patchDict.get<word>("type") == cyclicPolyPatch::typeName)
         {
             if (!patchDict.found("neighbourPatch"))
             {
@@ -130,7 +130,7 @@ void rewriteBoundary
 
         if
         (
-            word(patchDict["type"]) == cyclicPolyPatch::typeName
+            patchDict.get<word>("type") == cyclicPolyPatch::typeName
         )
         {
             const word& name = oldPatches[patchi].keyword();
@@ -167,10 +167,10 @@ void rewriteBoundary
             }
             else
             {
-                label nFaces = readLabel(patchDict["nFaces"]);
-                label startFace = readLabel(patchDict["startFace"]);
+                label nFaces = patchDict.get<label>("nFaces");
+                label startFace = patchDict.get<label>("startFace");
 
-                Info<< "Detected old style " << word(patchDict["type"])
+                Info<< "Detected old style " << patchDict.get<word>("type")
                     << " patch " << name << " with" << nl
                     << "    nFaces    : " << nFaces << nl
                     << "    startFace : " << startFace << endl;
@@ -213,17 +213,15 @@ void rewriteBoundary
                 Info<< "Replaced with patches" << nl
                     << patches[patchi].keyword() << " with" << nl
                     << "    nFaces    : "
-                    << readLabel(thisPatchDict.lookup("nFaces"))
-                    << nl
+                    << thisPatchDict.get<label>("nFaces") << nl
                     << "    startFace : "
-                    << readLabel(thisPatchDict.lookup("startFace")) << nl
+                    << thisPatchDict.get<label>("startFace") << nl
                     << patches[addedPatchi].keyword() << " with" << nl
                     << "    nFaces    : "
-                    << readLabel(nbrPatchDict.lookup("nFaces"))
-                    << nl
+                    << nbrPatchDict.get<label>("nFaces") << nl
                     << "    startFace : "
-                    << readLabel(nbrPatchDict.lookup("startFace"))
-                    << nl << endl;
+                    << nbrPatchDict.get<label>("startFace") << nl
+                    << endl;
 
                 addedPatchi++;
             }
@@ -239,9 +237,9 @@ void rewriteBoundary
 
     if (returnReduce(nOldCyclics, sumOp<label>()) > 0)
     {
-        if (isTestRun)
+        if (dryrun)
         {
-            //Info<< "-test option: no changes made" << nl << endl;
+            //Info<< "-dry-run option: no changes made" << nl << endl;
         }
         else
         {
@@ -265,7 +263,7 @@ void rewriteBoundary
 
 void rewriteField
 (
-    const bool isTestRun,
+    const bool dryrun,
     const Time& runTime,
     const word& fieldName,
     const HashTable<word>& thisNames,
@@ -300,10 +298,10 @@ void rewriteField
 
     label nChanged = 0;
 
-    forAllConstIter(HashTable<word>, thisNames, iter)
+    forAllConstIters(thisNames, iter)
     {
         const word& patchName = iter.key();
-        const word& newName = iter();
+        const word& newName = iter.object();
 
         Info<< "Looking for entry for patch " << patchName << endl;
 
@@ -344,7 +342,7 @@ void rewriteField
 
     if (returnReduce(nChanged, sumOp<label>()) > 0)
     {
-        if (isTestRun)
+        if (dryrun)
         {
             //Info<< "-test option: no changes made" << endl;
         }
@@ -371,20 +369,20 @@ void rewriteField
 
 void rewriteFields
 (
-    const bool isTestRun,
+    const bool dryrun,
     const Time& runTime,
     const wordList& fieldNames,
     const HashTable<word>& thisNames,
     const HashTable<word>& nbrNames
 )
 {
-    forAll(fieldNames, i)
+    for (const word& fieldName : fieldNames)
     {
         rewriteField
         (
-            isTestRun,
+            dryrun,
             runTime,
-            fieldNames[i],
+            fieldName,
             thisNames,
             nbrNames
         );
@@ -395,13 +393,23 @@ void rewriteFields
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Tool to upgrade mesh and fields for split cyclics"
+    );
+
     timeSelector::addOptions();
 
-    argList::addBoolOption("test", "test only; do not change any files");
+    argList::addOptionCompat("dry-run", {"test", 1806});
+    argList::addBoolOption
+    (
+        "dry-run",
+        "Test only do not change any files"
+    );
     argList::addBoolOption
     (
         "enableFunctionEntries",
-        "enable expansion of dictionary directives - #include, #codeStream etc"
+        "Enable expansion of dictionary directives - #include, #codeStream etc"
     );
     #include "addRegionOption.H"
 
@@ -416,18 +424,16 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    const bool isTestRun = args.found("test");
-    if (isTestRun)
+    const bool dryrun = args.found("dry-run");
+    if (dryrun)
     {
-        Info<< "-test option: no changes made" << nl << endl;
+        Info<< "-dry-run option: no changes made" << nl << endl;
     }
     const bool enableEntries = args.found("enableFunctionEntries");
 
+    const word regionName = args.opt<word>("region", polyMesh::defaultRegion);
 
-    Foam::word regionName = polyMesh::defaultRegion;
-    args.readIfPresent("region", regionName);
-
-    fileName regionPrefix = "";
+    fileName regionPrefix;
     if (regionName != polyMesh::defaultRegion)
     {
         regionPrefix = regionName;
@@ -454,7 +460,7 @@ int main(int argc, char *argv[])
     {
         rewriteBoundary
         (
-            isTestRun,
+            dryrun,
             io,
             regionPrefix,
             thisNames,
@@ -488,7 +494,7 @@ int main(int argc, char *argv[])
         {
             rewriteBoundary
             (
-                isTestRun,
+                dryrun,
                 io,
                 regionPrefix,
                 thisNames,
@@ -512,7 +518,7 @@ int main(int argc, char *argv[])
 
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volScalarField::typeName),
             thisNames,
@@ -520,7 +526,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volVectorField::typeName),
             thisNames,
@@ -528,7 +534,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volSphericalTensorField::typeName),
             thisNames,
@@ -536,7 +542,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volSymmTensorField::typeName),
             thisNames,
@@ -544,7 +550,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(volTensorField::typeName),
             thisNames,
@@ -557,7 +563,7 @@ int main(int argc, char *argv[])
 
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointScalarField::typeName),
             thisNames,
@@ -565,7 +571,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointVectorField::typeName),
             thisNames,
@@ -573,7 +579,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointSphericalTensorField::typeName),
             thisNames,
@@ -581,7 +587,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointSymmTensorField::typeName),
             thisNames,
@@ -589,7 +595,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(pointTensorField::typeName),
             thisNames,
@@ -602,7 +608,7 @@ int main(int argc, char *argv[])
 
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceScalarField::typeName),
             thisNames,
@@ -610,7 +616,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceVectorField::typeName),
             thisNames,
@@ -618,7 +624,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceSphericalTensorField::typeName),
             thisNames,
@@ -626,7 +632,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceSymmTensorField::typeName),
             thisNames,
@@ -634,7 +640,7 @@ int main(int argc, char *argv[])
         );
         rewriteFields
         (
-            isTestRun,
+            dryrun,
             runTime,
             objects.names(surfaceTensorField::typeName),
             thisNames,

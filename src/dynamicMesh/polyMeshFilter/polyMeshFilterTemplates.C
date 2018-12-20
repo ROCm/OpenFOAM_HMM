@@ -52,7 +52,7 @@ void Foam::polyMeshFilter::updateSets(const mapPolyMesh& map)
 
     IOobjectList fileSets(Objects.lookupClass(SetType::typeName));
 
-    forAllConstIter(IOobjectList, fileSets, iter)
+    forAllConstIters(fileSets, iter)
     {
         if (!sets.found(iter.key()))
         {

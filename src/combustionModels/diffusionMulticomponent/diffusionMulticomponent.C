@@ -315,7 +315,7 @@ diffusionMulticomponent<ReactionThermo, ThermoType>::correct()
 
             Rijk.relax(alpha_);
 
-            if (this->mesh_.time().outputTime() && debug)
+            if (debug && this->mesh_.time().writeTime())
             {
                 Rijk.write();
                 ft.write();

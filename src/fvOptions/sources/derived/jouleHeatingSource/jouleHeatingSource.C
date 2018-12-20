@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,22 +48,21 @@ namespace fv
 }
 }
 
-
 const Foam::word Foam::fv::jouleHeatingSource::sigmaName(typeName + ":sigma");
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-const Foam::coordinateSystem& Foam::fv::jouleHeatingSource::coordSys() const
+const Foam::coordinateSystem& Foam::fv::jouleHeatingSource::csys() const
 {
-    if (!coordSysPtr_.valid())
+    if (!csysPtr_ || !csysPtr_.valid())
     {
         FatalErrorInFunction
-            << "Co-ordinate system invalid"
+            << "Coordinate system invalid"
             << abort(FatalError);
     }
 
-    return *coordSysPtr_;
+    return *csysPtr_;
 }
 
 
@@ -73,27 +72,33 @@ Foam::fv::jouleHeatingSource::transformSigma
     const volVectorField& sigmaLocal
 ) const
 {
-    tmp<volSymmTensorField> tsigma
+    auto tsigma = tmp<volSymmTensorField>::New
     (
-        new volSymmTensorField
+        IOobject
         (
-            IOobject
-            (
-                sigmaName,
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            sigmaName,
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedSymmTensor(sigmaLocal.dimensions(), Zero),
-            zeroGradientFvPatchField<symmTensor>::typeName
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedSymmTensor(sigmaLocal.dimensions(), Zero),
+        zeroGradientFvPatchField<symmTensor>::typeName
     );
+    auto& sigma = tsigma.ref();
 
-    volSymmTensorField& sigma = tsigma.ref();
-    sigma.primitiveFieldRef() = coordSys().R().transformVector(sigmaLocal);
+    if (csys().uniform())
+    {
+        sigma.primitiveFieldRef() =
+            csys().transformPrincipal(sigmaLocal);
+    }
+    else
+    {
+        sigma.primitiveFieldRef() =
+            csys().transformPrincipal(mesh_.cellCentres(), sigmaLocal);
+    }
 
     sigma.correctBoundaryConditions();
 
@@ -128,7 +133,7 @@ Foam::fv::jouleHeatingSource::jouleHeatingSource
     anisotropicElectricalConductivity_(false),
     scalarSigmaVsTPtr_(nullptr),
     vectorSigmaVsTPtr_(nullptr),
-    coordSysPtr_(nullptr),
+    csysPtr_(nullptr),
     curTimeIndex_(-1)
 {
     // Set the field name to that of the energy field from which the temperature
@@ -211,5 +216,41 @@ void Foam::fv::jouleHeatingSource::addSup
     }
 }
 
+
+bool Foam::fv::jouleHeatingSource::read(const dictionary& dict)
+{
+    if (option::read(dict))
+    {
+        coeffs_.readIfPresent("T", TName_);
+
+        anisotropicElectricalConductivity_ =
+            coeffs_.get<bool>("anisotropicElectricalConductivity");
+
+        if (anisotropicElectricalConductivity_)
+        {
+            Info<< "    Using vector electrical conductivity" << endl;
+
+            initialiseSigma(coeffs_, vectorSigmaVsTPtr_);
+
+            csysPtr_ =
+                coordinateSystem::New
+                (
+                    mesh_,
+                    coeffs_,
+                    coordinateSystem::typeName_()
+                );
+        }
+        else
+        {
+            Info<< "    Using scalar electrical conductivity" << endl;
+
+            initialiseSigma(coeffs_, scalarSigmaVsTPtr_);
+        }
+
+        return true;
+    }
+
+    return false;
+}
 
 // ************************************************************************* //

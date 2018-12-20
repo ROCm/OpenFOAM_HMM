@@ -84,7 +84,7 @@ Foam::faPatch::faPatch
 :
     labelList(dict.lookup("edgeLabels")),
     patchIdentifier(name, dict, index),
-    ngbPolyPatchIndex_(readInt(dict.lookup("ngbPolyPatchIndex"))),
+    ngbPolyPatchIndex_(dict.get<label>("ngbPolyPatchIndex")),
     boundaryMesh_(bm),
     edgeFacesPtr_(nullptr),
     pointLabelsPtr_(nullptr),
@@ -306,8 +306,8 @@ Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
 
 Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchFaceNormals() const
 {
-    tmp<vectorField> tfN(new vectorField());
-    vectorField& fN = tfN.ref();
+    auto tfN = tmp<vectorField>::New();
+    auto& fN = tfN.ref();
 
     if (ngbPolyPatchIndex() == -1)
     {
@@ -325,8 +325,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchFaceNormals() const
 
     forAll(fN, faceI)
     {
-        fN[faceI] = faces[ngbFaces[faceI]].normal(points)
-            /faces[ngbFaces[faceI]].mag(points);
+        fN[faceI] = faces[ngbFaces[faceI]].unitNormal(points);
     }
 
     return tfN;

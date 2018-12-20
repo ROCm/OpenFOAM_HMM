@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Utility to remove faces (combines cells on both sides).
+    Remove faces specified in faceSet by combining cells on both sides.
 
     Takes faceSet of candidates for removal and writes faceSet with faces that
     will actually be removed. (because e.g. would cause two faces between the
@@ -53,13 +53,19 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Remove faces specified in faceSet by combining cells on both sides"
+    );
     #include "addOverwriteOption.H"
     argList::addArgument("faceSet");
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const word setName = args[1];
@@ -170,7 +176,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
     else
     {

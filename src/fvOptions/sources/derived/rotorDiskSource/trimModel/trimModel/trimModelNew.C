@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::trimModel> Foam::trimModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup(typeName));
+    const word modelType(dict.get<word>(typeName));
 
     Info<< "    Selecting " << typeName << " " << modelType << endl;
 

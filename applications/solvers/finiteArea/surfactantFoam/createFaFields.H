@@ -29,10 +29,7 @@ IOdictionary transportProperties
 
 Info<< "Reading diffusivity D\n" << endl;
 
-dimensionedScalar Ds
-(
-    transportProperties.lookup("Ds")
-);
+dimensionedScalar Ds("Ds", dimViscosity, transportProperties);
 
 areaVectorField Us
 (

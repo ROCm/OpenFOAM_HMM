@@ -296,7 +296,11 @@ public:
 
         //- Helper: gather onto master and sort.
         //  \return (on master) gathered set and overall sort order
-        autoPtr<coordSet> gather(labelList& indexSet) const;
+        autoPtr<coordSet> gather
+        (
+            labelList& indexSet,
+            labelList& allSegments
+        ) const;
 };
 
 

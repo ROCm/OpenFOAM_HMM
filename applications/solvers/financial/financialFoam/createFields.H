@@ -16,21 +16,21 @@ dimensionedScalar strike
 (
     "strike",
     dimLength,
-    financialProperties.lookup("strike")
+    financialProperties
 );
 
 dimensionedScalar r
 (
     "r",
     dimless/dimTime,
-    financialProperties.lookup("r")
+    financialProperties
 );
 
 dimensionedScalar sigma
 (
     "sigma",
     dimensionSet(0, 0, -0.5, 0, 0),
-    financialProperties.lookup("sigma")
+    financialProperties
 );
 
 dimensionedScalar sigmaSqr = sqr(sigma);

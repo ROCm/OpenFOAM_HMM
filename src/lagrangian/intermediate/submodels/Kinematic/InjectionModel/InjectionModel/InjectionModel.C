@@ -307,8 +307,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     timeStep0_(this->template getModelProperty<scalar>("timeStep0")),
     minParticlesPerParcel_
     (
-        this->coeffDict().template
-            lookupOrDefault<scalar>("minParticlesPerParcel", 1)
+        this->coeffDict().lookupOrDefault("minParticlesPerParcel", scalar(1))
     ),
     delayedVolume_(0.0),
     injectorID_(this->coeffDict().lookupOrDefault("injectorID", -1))
@@ -328,8 +327,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
     {
         if (owner.solution().transient())
         {
-            this->coeffDict().lookup("massTotal") >> massTotal_;
-            this->coeffDict().lookup("SOI") >> SOI_;
+            this->coeffDict().readEntry("massTotal", massTotal_);
+            this->coeffDict().readEntry("SOI", SOI_);
         }
         else
         {
@@ -341,7 +340,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
 
     SOI_ = owner.db().time().userTimeToTime(SOI_);
 
-    const word parcelBasisType = this->coeffDict().lookup("parcelBasisType");
+    const word parcelBasisType(this->coeffDict().getWord("parcelBasisType"));
 
     if (parcelBasisType == "mass")
     {
@@ -354,12 +353,11 @@ Foam::InjectionModel<CloudType>::InjectionModel
     else if (parcelBasisType == "fixed")
     {
         parcelBasis_ = pbFixed;
+        this->coeffDict().readEntry("nParticle", nParticleFixed_);
 
         Info<< "    Choosing nParticle to be a fixed value, massTotal "
             << "variable now does not determine anything."
             << endl;
-
-        nParticleFixed_ = readScalar(this->coeffDict().lookup("nParticle"));
     }
     else
     {

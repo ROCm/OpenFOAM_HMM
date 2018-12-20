@@ -41,9 +41,10 @@ SourceFiles
 #include "label.H"
 #include "uLabel.H"
 #include "zero.H"
-#include "Hash.H"
+#include "contiguous.H"
 #include "autoPtr.H"
 #include "Swap.H"
+#include "HashFwd.H"
 #include "SLListFwd.H"
 
 #include <initializer_list>
@@ -135,19 +136,6 @@ public:
 
         //- Reverse iterator (const access)
         typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
-
-
-    //- Hashing function class.
-    //  Use Hasher directly for contiguous data. Otherwise hash incrementally.
-    template<class HashT=Hash<T>>
-    struct Hash
-    {
-        inline unsigned operator()
-        (
-            const FixedList<T, Size>& list,
-            unsigned seed = 0
-        ) const;
-    };
 
 
     // Static Member Functions
@@ -438,15 +426,68 @@ public:
             Ostream& os,
             const FixedList<T, Size>& list
         );
+
+
+    // Hashing
+
+        //- Hashing function class for FixedList
+        //  Normally use the global Hash specialization, but can also use
+        //  this one for inheritance in sub-classes
+        template<class HashT=Foam::Hash<T>>
+        struct Hash
+        {
+            inline unsigned operator()
+            (
+                const FixedList<T, Size>& obj,
+                unsigned seed=0
+            ) const
+            {
+                if (contiguous<T>())
+                {
+                    return Hasher(obj.cdata(), Size*sizeof(T), seed);
+                }
+
+                for (const T& val : obj)
+                {
+                    seed = HashT()(val, seed);
+                }
+                return seed;
+            }
+        };
 };
 
 
-// Global Functions
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Swap FixedList contents - see FixedList::swap().
 //  Internally this actually swaps the individual list elements
 template<class T, unsigned Size>
 inline void Swap(FixedList<T,Size>& lhs, FixedList<T,Size>& rhs);
+
+
+//- Hashing for FixedList data, which uses Hasher for contiguous data and
+//- element-wise incrementally hashing otherwise.
+template<class T, unsigned N>
+struct Hash<FixedList<T, N>>
+{
+    inline unsigned operator()
+    (
+        const FixedList<T, N>& obj,
+        unsigned seed=0
+    ) const
+    {
+        if (contiguous<T>())
+        {
+            return Hasher(obj.cdata(), N*sizeof(T), seed);
+        }
+
+        for (const T& val : obj)
+        {
+            seed = Hash<T>()(val, seed);
+        }
+        return seed;
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

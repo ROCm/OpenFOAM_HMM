@@ -53,11 +53,11 @@ void Foam::radiation::viewFactor::initialise()
 {
     const polyBoundaryMesh& coarsePatches = coarseMesh_.boundaryMesh();
 
-    selectedPatches_ = mesh_.boundaryMesh().findIndices(viewFactorWalls);
-    forAll(selectedPatches_, i)
+    selectedPatches_ = mesh_.boundaryMesh().indices(viewFactorWalls);
+
+    for (const label patchi : selectedPatches_)
     {
-        const label patchI = selectedPatches_[i];
-        nLocalCoarseFaces_ += coarsePatches[patchI].size();
+        nLocalCoarseFaces_ += coarsePatches[patchi].size();
     }
 
     if (debug)
@@ -155,8 +155,7 @@ void Foam::radiation::viewFactor::initialise()
         }
 
 
-        bool smoothing = readBool(coeffs_.lookup("smoothing"));
-        if (smoothing)
+        if (coeffs_.get<bool>("smoothing"))
         {
             if (debug)
             {
@@ -180,7 +179,7 @@ void Foam::radiation::viewFactor::initialise()
             }
         }
 
-        constEmissivity_ = readBool(coeffs_.lookup("constantEmissivity"));
+        coeffs_.readEntry("constantEmissivity", constEmissivity_);
         if (constEmissivity_)
         {
             CLU_.reset
@@ -192,10 +191,7 @@ void Foam::radiation::viewFactor::initialise()
         }
     }
 
-    if (this->found("useSolarLoad"))
-    {
-        this->lookup("useSolarLoad") >> useSolarLoad_;
-    }
+    this->readIfPresent("useSolarLoad", useSolarLoad_);
 
     if (useSolarLoad_)
     {
@@ -480,20 +476,13 @@ void Foam::radiation::viewFactor::calculate()
     map_->distribute(compactCoarseHo);
 
     // Distribute local global ID
-    labelList compactGlobalIds(map_->constructSize(), 0.0);
-
-    labelList localGlobalIds(nLocalCoarseFaces_);
-
-    for(label k = 0; k < nLocalCoarseFaces_; k++)
-    {
-        localGlobalIds[k] = globalNumbering.toGlobal(Pstream::myProcNo(), k);
-    }
+    labelList compactGlobalIds(map_->constructSize(), Zero);
 
     SubList<label>
     (
         compactGlobalIds,
         nLocalCoarseFaces_
-    ) = localGlobalIds;
+    ) = identity(globalNumbering.localSize(), globalNumbering.localStart());
 
     map_->distribute(compactGlobalIds);
 

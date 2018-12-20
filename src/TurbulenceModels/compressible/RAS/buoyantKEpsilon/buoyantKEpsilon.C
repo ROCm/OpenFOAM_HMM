@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "buoyantKEpsilon.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "fvcGrad.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -102,8 +102,7 @@ tmp<volScalarField>
 buoyantKEpsilon<BasicTurbulenceModel>::Gcoef() const
 {
     const uniformDimensionedVectorField& g =
-        this->mesh_.objectRegistry::template
-        lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(this->mesh_.time());
 
     return
         (Cg_*this->Cmu_)*this->alpha_*this->k_*(g & fvc::grad(this->rho_))
@@ -116,8 +115,7 @@ tmp<fvScalarMatrix>
 buoyantKEpsilon<BasicTurbulenceModel>::kSource() const
 {
     const uniformDimensionedVectorField& g =
-        this->mesh_.objectRegistry::template
-        lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(this->mesh_.time());
 
     if (mag(g.value()) > SMALL)
     {
@@ -135,8 +133,7 @@ tmp<fvScalarMatrix>
 buoyantKEpsilon<BasicTurbulenceModel>::epsilonSource() const
 {
     const uniformDimensionedVectorField& g =
-        this->mesh_.objectRegistry::template
-        lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(this->mesh_.time());
 
     if (mag(g.value()) > SMALL)
     {

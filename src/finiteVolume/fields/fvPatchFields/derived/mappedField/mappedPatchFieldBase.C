@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,15 +27,28 @@ License
 #include "mappedPatchBase.H"
 #include "interpolationCell.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+Type Foam::mappedPatchFieldBase<Type>::getAverage
+(
+    const dictionary& dict,
+    const bool mandatory
+)
 {
+    if (mandatory)
+    {
+        return dict.get<Type>("average");
+    }
+
+    return Zero;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-mappedPatchFieldBase<Type>::mappedPatchFieldBase
+Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
 (
     const mappedPatchBase& mapper,
     const fvPatchField<Type>& patchField,
@@ -55,7 +68,7 @@ mappedPatchFieldBase<Type>::mappedPatchFieldBase
 
 
 template<class Type>
-mappedPatchFieldBase<Type>::mappedPatchFieldBase
+Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
 (
     const mappedPatchBase& mapper,
     const fvPatchField<Type>& patchField,
@@ -72,19 +85,19 @@ mappedPatchFieldBase<Type>::mappedPatchFieldBase
             patchField_.internalField().name()
         )
     ),
-    setAverage_(readBool(dict.lookup("setAverage"))),
-    average_(pTraits<Type>(dict.lookup("average"))),
+    setAverage_(dict.lookupOrDefault("setAverage", false)),
+    average_(getAverage(dict, setAverage_)),
     interpolationScheme_(interpolationCell<Type>::typeName)
 {
     if (mapper_.mode() == mappedPatchBase::NEARESTCELL)
     {
-        dict.lookup("interpolationScheme") >> interpolationScheme_;
+        dict.readEntry("interpolationScheme", interpolationScheme_);
     }
 }
 
 
 template<class Type>
-mappedPatchFieldBase<Type>::mappedPatchFieldBase
+Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
 (
     const mappedPatchBase& mapper,
     const fvPatchField<Type>& patchField
@@ -100,7 +113,7 @@ mappedPatchFieldBase<Type>::mappedPatchFieldBase
 
 
 template<class Type>
-mappedPatchFieldBase<Type>::mappedPatchFieldBase
+Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
 (
     const mappedPatchFieldBase<Type>& mapper
 )
@@ -115,7 +128,7 @@ mappedPatchFieldBase<Type>::mappedPatchFieldBase
 
 
 template<class Type>
-mappedPatchFieldBase<Type>::mappedPatchFieldBase
+Foam::mappedPatchFieldBase<Type>::mappedPatchFieldBase
 (
     const mappedPatchBase& mapper,
     const fvPatchField<Type>& patchField,
@@ -134,12 +147,10 @@ mappedPatchFieldBase<Type>::mappedPatchFieldBase
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const GeometricField<Type, fvPatchField, volMesh>&
-mappedPatchFieldBase<Type>::sampleField() const
+const Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>&
+Foam::mappedPatchFieldBase<Type>::sampleField() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    const fvMesh& nbrMesh = refCast<const fvMesh>(mapper_.sampleMesh());
 
     if (mapper_.sameRegion())
     {
@@ -158,15 +169,15 @@ mappedPatchFieldBase<Type>::sampleField() const
             return thisMesh.template lookupObject<fieldType>(fieldName_);
         }
     }
-    else
-    {
-        return nbrMesh.template lookupObject<fieldType>(fieldName_);
-    }
+
+    const fvMesh& nbrMesh = refCast<const fvMesh>(mapper_.sampleMesh());
+    return nbrMesh.template lookupObject<fieldType>(fieldName_);
 }
 
 
 template<class Type>
-tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
+Foam::tmp<Foam::Field<Type>>
+Foam::mappedPatchFieldBase<Type>::mappedField() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
@@ -179,8 +190,8 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
     const fvMesh& nbrMesh = refCast<const fvMesh>(mapper_.sampleMesh());
 
     // Result of obtaining remote values
-    tmp<Field<Type>> tnewValues(new Field<Type>(0));
-    Field<Type>& newValues = tnewValues.ref();
+    auto tnewValues = tmp<Field<Type>>::New();
+    auto& newValues = tnewValues.ref();
 
     switch (mapper_.mode())
     {
@@ -203,15 +214,14 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
                     samples
                 );
 
-                autoPtr<interpolation<Type>> interpolator
-                (
+                auto interpolator =
                     interpolation<Type>::New
                     (
                         interpolationScheme_,
                         sampleField()
-                    )
-                );
-                const interpolation<Type>& interp = interpolator();
+                    );
+
+                const auto& interp = *interpolator;
 
                 newValues.setSize(samples.size(), pTraits<Type>::max);
                 forAll(samples, celli)
@@ -263,10 +273,8 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
 
             const fieldType& nbrField = sampleField();
 
-            forAll(nbrField.boundaryField(), patchi)
+            for (const fvPatchField<Type>& pf : nbrField.boundaryField())
             {
-                const fvPatchField<Type>& pf =
-                    nbrField.boundaryField()[patchi];
                 label faceStart = pf.patch().start();
 
                 forAll(pf, facei)
@@ -283,8 +291,8 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
         default:
         {
             FatalErrorInFunction
-             << "Unknown sampling mode: " << mapper_.mode()
-             << nl << abort(FatalError);
+                << "Unknown sampling mode: " << mapper_.mode() << nl
+                << abort(FatalError);
         }
     }
 
@@ -312,17 +320,18 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
 
 
 template<class Type>
-void mappedPatchFieldBase<Type>::write(Ostream& os) const
+void Foam::mappedPatchFieldBase<Type>::write(Ostream& os) const
 {
     os.writeEntry("field", fieldName_);
-    os.writeEntry("setAverage", setAverage_);
-    os.writeEntry("average", average_);
+
+    if (setAverage_)
+    {
+        os.writeEntry("setAverage", "true");
+        os.writeEntry("average", average_);
+    }
+
     os.writeEntry("interpolationScheme", interpolationScheme_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

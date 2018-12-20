@@ -30,7 +30,6 @@ License
 #include "StringStream.H"
 #include "faceTraits.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Face>

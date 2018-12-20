@@ -125,7 +125,7 @@ bool Foam::functionObjects::writeDictionary::read(const dictionary& dict)
 {
     regionFunctionObject::read(dict);
 
-    wordList dictNames(dict.lookup("dictNames"));
+    wordList dictNames(dict.get<wordList>("dictNames"));
     wordHashSet uniqueNames(dictNames);
     dictNames_ = uniqueNames.toc();
 
@@ -134,9 +134,9 @@ bool Foam::functionObjects::writeDictionary::read(const dictionary& dict)
     Info<< type() << " " << name() << ": monitoring dictionaries:" << nl;
     if (dictNames_.size())
     {
-        forAll(dictNames_, i)
+        for (const word & dictName : dictNames_)
         {
-            Info<< "    " << dictNames_[i] << endl;
+            Info<< "    " << dictName << endl;
         }
     }
     else
@@ -160,10 +160,12 @@ bool Foam::functionObjects::writeDictionary::write()
     bool firstDict = true;
     forAll(dictNames_, i)
     {
-        if (obr_.foundObject<dictionary>(dictNames_[i]))
+        const dictionary* dictptr =
+            obr_.findObject<dictionary>(dictNames_[i]);
+
+        if (dictptr)
         {
-            const dictionary& dict =
-                obr_.lookupObject<dictionary>(dictNames_[i]);
+            const dictionary& dict = *dictptr;
 
             if (dict.digest() != digests_[i])
             {

@@ -16,7 +16,7 @@ dimensionedScalar nu
 (
     "nu",
     dimViscosity,
-    transportProperties.lookup("nu")
+    transportProperties
 );
 
 Info<< "Reading field p\n" << endl;

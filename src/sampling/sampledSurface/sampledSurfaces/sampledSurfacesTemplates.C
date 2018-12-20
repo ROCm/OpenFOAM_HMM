@@ -95,8 +95,14 @@ void Foam::sampledSurfaces::writeSurface
         Pstream::scatter(sampleFile);
         if (sampleFile.size())
         {
+            // Case-local file name with "<case>" to make relocatable
+
             dictionary propsDict;
-            propsDict.add("file", sampleFile);
+            propsDict.add
+            (
+                "file",
+                time_.relativePath(sampleFile, true)
+            );
             setProperty(fieldName, propsDict);
         }
     }
@@ -116,8 +122,14 @@ void Foam::sampledSurfaces::writeSurface
                 s.interpolate()
             );
 
+            // Case-local file name with "<case>" to make relocatable
+
             dictionary propsDict;
-            propsDict.add("file", fName);
+            propsDict.add
+            (
+                "file",
+                time_.relativePath(fName, true)
+            );
             setProperty(fieldName, propsDict);
         }
     }

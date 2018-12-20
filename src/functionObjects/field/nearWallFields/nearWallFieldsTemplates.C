@@ -37,9 +37,9 @@ void Foam::functionObjects::nearWallFields::createFields
 
     HashTable<const VolFieldType*> flds(obr_.lookupClass<VolFieldType>());
 
-    forAllConstIter(typename HashTable<const VolFieldType*>, flds, iter)
+    forAllConstIters(flds, iter)
     {
-        const VolFieldType& fld = *iter();
+        const VolFieldType& fld = *(iter.object());
 
         if (fieldMap_.found(fld.name()))
         {

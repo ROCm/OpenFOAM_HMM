@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,51 +52,67 @@ inline void Foam::fileName::stripInvalid()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::fileName::fileName()
+inline Foam::fileName::fileName(const word& s)
 :
-    string()
+    string(s)
 {}
 
 
-inline Foam::fileName::fileName(const fileName& fn)
+inline Foam::fileName::fileName(word&& s)
 :
-    string(fn)
+    string(std::move(s))
 {}
 
 
-inline Foam::fileName::fileName(const word& w)
-:
-    string(w)
-{}
-
-
-inline Foam::fileName::fileName(const string& s, const bool doStripInvalid)
+inline Foam::fileName::fileName(const string& s, bool doStrip)
 :
     string(s)
 {
-    if (doStripInvalid)
+    if (doStrip)
     {
         stripInvalid();
     }
 }
 
 
-inline Foam::fileName::fileName(const std::string& s, const bool doStripInvalid)
+inline Foam::fileName::fileName(string&& s, bool doStrip)
 :
-    string(s)
+    string(std::move(s))
 {
-    if (doStripInvalid)
+    if (doStrip)
     {
         stripInvalid();
     }
 }
 
 
-inline Foam::fileName::fileName(const char* s, const bool doStripInvalid)
+inline Foam::fileName::fileName(const std::string& s, bool doStrip)
 :
     string(s)
 {
-    if (doStripInvalid)
+    if (doStrip)
+    {
+        stripInvalid();
+    }
+}
+
+
+inline Foam::fileName::fileName(std::string&& s, bool doStrip)
+:
+    string(std::move(s))
+{
+    if (doStrip)
+    {
+        stripInvalid();
+    }
+}
+
+
+inline Foam::fileName::fileName(const char* s, bool doStrip)
+:
+    string(s)
+{
+    if (doStrip)
     {
         stripInvalid();
     }
@@ -124,7 +140,7 @@ inline bool Foam::fileName::isAbsolute(const std::string& str)
 
 inline bool Foam::fileName::isAbsolute() const
 {
-    return !empty() && operator[](0) == '/';
+    return isAbsolute(*this);
 }
 
 
@@ -134,15 +150,163 @@ inline bool Foam::fileName::isBackup() const
 }
 
 
+inline bool Foam::fileName::hasPath() const
+{
+    return string::hasPath();
+}
+
+
 inline bool Foam::fileName::hasExt() const
 {
     return string::hasExt();
 }
 
 
+inline bool Foam::fileName::hasExt(const word& ending) const
+{
+    return string::hasExt(ending);
+}
+
+
+inline std::string Foam::fileName::path(const std::string& str)
+{
+    const auto i = str.rfind('/');
+
+    if (i == npos)
+    {
+        return ".";
+    }
+    else if (i)
+    {
+        return str.substr(0, i);
+    }
+
+    return "/";
+}
+
+
+inline Foam::fileName Foam::fileName::path() const
+{
+    return path(*this);
+}
+
+
+inline std::string Foam::fileName::name(const std::string& str)
+{
+    const auto i = str.rfind('/');
+
+    if (npos == i)
+    {
+        return str;
+    }
+
+    return str.substr(i+1);
+}
+
+
+inline Foam::word Foam::fileName::name() const
+{
+    return fileName::name(*this);
+}
+
+
+Foam::word Foam::fileName::ext() const
+{
+    return string::ext();
+}
+
+
+inline Foam::word Foam::fileName::nameLessExt() const
+{
+    return nameLessExt(*this);
+}
+
+
+inline Foam::fileName Foam::fileName::lessExt() const
+{
+    const auto i = find_ext();
+
+    if (i == npos)
+    {
+        return *this;
+    }
+
+    return substr(0, i);
+}
+
+
+inline bool Foam::fileName::removePath()
+{
+    return string::removePath();
+}
+
+
 inline bool Foam::fileName::removeExt()
 {
     return string::removeExt();
+}
+
+
+inline Foam::fileName& Foam::fileName::ext(const word& ending)
+{
+    string::ext(ending);
+    return *this;
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline Foam::fileName& Foam::fileName::operator=(const word& str)
+{
+    assign(str);
+    return *this;
+}
+
+
+inline Foam::fileName& Foam::fileName::operator=(word&& str)
+{
+    assign(std::move(str));
+    return *this;
+}
+
+
+inline Foam::fileName& Foam::fileName::operator=(const string& str)
+{
+    assign(str);
+    stripInvalid();
+    return *this;
+}
+
+
+inline Foam::fileName& Foam::fileName::operator=(string&& str)
+{
+    assign(std::move(str));
+    stripInvalid();
+    return *this;
+}
+
+
+inline Foam::fileName& Foam::fileName::operator=(const std::string& str)
+{
+    assign(str);
+    stripInvalid();
+    return *this;
+}
+
+
+inline Foam::fileName& Foam::fileName::operator=(std::string&& str)
+{
+    assign(std::move(str));
+    stripInvalid();
+    return *this;
+}
+
+
+inline Foam::fileName& Foam::fileName::operator=(const char* str)
+{
+    assign(str);
+    stripInvalid();
+    return *this;
 }
 
 

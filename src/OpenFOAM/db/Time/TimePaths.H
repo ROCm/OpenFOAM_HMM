@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::TimePaths
 
 Description
-    A class for addressing time paths without using the Time class.
+    Address the time paths without using the Time class.
 
 SourceFiles
     TimePaths.C
@@ -36,11 +36,15 @@ SourceFiles
 #define TimePaths_H
 
 #include "fileName.H"
+#include "instantList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declarations
+class argList;
 
 /*---------------------------------------------------------------------------*\
                            Class TimePaths Declaration
@@ -52,15 +56,16 @@ class TimePaths
     // Private data
 
         bool processorCase_;
-        const fileName rootPath_;
         bool distributed_;
+
+        const fileName rootPath_;
         fileName globalCaseName_;
         fileName case_;
         const word system_;
         const word constant_;
 
 
-    // Private Member functions
+    // Private Member Functions
 
         //- Determine from case name whether it is a processor directory
         bool detectProcessorCase();
@@ -70,13 +75,21 @@ public:
 
     // Constructors
 
+        //- Construct using characteristics given by the argList
+        TimePaths
+        (
+            const argList& args,
+            const word& systemName = "system",
+            const word& constantName = "constant"
+        );
+
         //- Construct given database name, rootPath and casePath
         TimePaths
         (
             const fileName& rootPath,
             const fileName& caseName,
-            const word& systemName,
-            const word& constantName
+            const word& systemName = "system",
+            const word& constantName = "constant"
         );
 
 
@@ -88,93 +101,107 @@ public:
             const bool distributed,
             const fileName& globalCaseName,
             const fileName& caseName,
-            const word& systemName,
-            const word& constantName
+            const word& systemName = "system",
+            const word& constantName = "constant"
         );
 
 
-    // Member functions
+    // Member Functions
 
-            //- Return true if this is a processor case
-            bool processorCase() const
-            {
-                return processorCase_;
-            }
+        //- True if case running with parallel distributed directories
+        //- (ie. not NFS mounted)
+        inline bool distributed() const;
 
-            //- Return root path
-            const fileName& rootPath() const
-            {
-                return rootPath_;
-            }
+        //- Return true if this is a processor case
+        inline bool processorCase() const;
 
-            //- Return global case name
-            const fileName& globalCaseName() const
-            {
-                return globalCaseName_;
-            }
+        //- Return root path
+        inline const fileName& rootPath() const;
 
-            //- Return case name
-            const fileName& caseName() const
-            {
-                return case_;
-            }
+        //- Return global case name
+        inline const fileName& globalCaseName() const;
 
-            //- Return case name
-            fileName& caseName()
-            {
-                return case_;
-            }
+        //- Return case name
+        inline const fileName& caseName() const;
 
-            //- Return system name
-            const word& system() const
-            {
-                return system_;
-            }
+        //- The case name for modification (use with caution)
+        inline fileName& caseName();
 
-            //- Return system name for the case
-            //  which for parallel runs returns ../system()
-            fileName caseSystem() const;
+        //- Return path for the case
+        inline fileName path() const;
 
-            //- Return constant name
-            const word& constant() const
-            {
-                return constant_;
-            }
+        //- Return global path for the case
+        inline fileName globalPath() const;
 
-            //- Is case running with parallel distributed directories
-            //  (i.e. not NFS mounted)
-            bool distributed() const
-            {
-                return distributed_;
-            }
+        //- Return the input relative to the globalPath by stripping off
+        //- a leading value of the globalPath
+        //
+        //  \param input the directory or filename to make case-relative
+        //  \param caseTag replace globalPath with \<case\> for later
+        //      use with expand(), or prefix \<case\> if the file name was
+        //      not an absolute location
+        inline fileName relativePath
+        (
+            const fileName& input,
+            const bool caseTag = false
+        ) const;
 
-            //- Return constant name for the case
-            //  which for parallel runs returns ../constant()
-            fileName caseConstant() const;
 
-            //- Return path
-            fileName path() const
-            {
-                return rootPath()/caseName();
-            }
+        //- Return constant name
+        inline const word& constant() const;
 
-            //- Return system path
-            fileName systemPath() const
-            {
-                return path()/system();
-            }
+        //- Return system name
+        inline const word& system() const;
 
-            //- Return constant path
-            fileName constantPath() const
-            {
-                return path()/constant();
-            }
+        //- Return the constant name for the case, which is
+        //- \c ../constant() for parallel runs.
+        inline fileName caseConstant() const;
+
+        //- Return the system name for the case, which is
+        //- \c ../system() for parallel runs.
+        inline fileName caseSystem() const;
+
+        //- Return constant path
+        inline fileName constantPath() const;
+
+        //- Return system path
+        inline fileName systemPath() const;
+
+
+    // Searching
+
+        //- Search a given directory for valid time directories
+        //  Forwards to the current fileHandler
+        static instantList findTimes
+        (
+            const fileName& directory,
+            const word& constantName = "constant"
+        );
+
+        //- Search instantList for the time index closest to the specified time
+        static label findClosestTimeIndex
+        (
+            const instantList& timeDirs,
+            const scalar t,
+            const word& constantName = "constant"
+        );
+
+        //- Search the case for valid time directories
+        instantList times() const;
+
+        //- Search the case for the time closest to the given time
+        instant findClosestTime(const scalar t) const;
+
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "TimePathsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

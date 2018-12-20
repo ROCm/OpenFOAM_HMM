@@ -52,14 +52,14 @@ bool Foam::timeSelector::selected(const instant& value) const
 
 Foam::List<bool> Foam::timeSelector::selected(const instantList& times) const
 {
-    List<bool> lst(times.size(), false);
+    List<bool> selectTimes(times.size(), false);
 
     // Check ranges, avoid false positive on constant/
     forAll(times, timei)
     {
         if (times[timei].name() != "constant" && selected(times[timei]))
         {
-            lst[timei] = true;
+            selectTimes[timei] = true;
         }
     }
 
@@ -70,29 +70,22 @@ Foam::List<bool> Foam::timeSelector::selected(const instantList& times) const
         {
             const scalar target = range.value();
 
-            int nearestIndex = -1;
-            scalar nearestDiff = Foam::GREAT;
+            const label nearestIndex =
+                TimePaths::findClosestTimeIndex(times, target);
 
-            forAll(times, timei)
-            {
-                if (times[timei].name() == "constant") continue;
-
-                scalar diff = fabs(times[timei].value() - target);
-                if (diff < nearestDiff)
-                {
-                    nearestDiff = diff;
-                    nearestIndex = timei;
-                }
-            }
+            // Note could also test if the index is too far away.
+            // Eg, for times (0 10 20 30 40) selecting 100 will currently
+            // return the closest time (40), but perhaps we should limit that
+            // to the last deltaT?
 
             if (nearestIndex >= 0)
             {
-                lst[nearestIndex] = true;
+                selectTimes[nearestIndex] = true;
             }
         }
     }
 
-    return lst;
+    return selectTimes;
 }
 
 
@@ -119,7 +112,7 @@ void Foam::timeSelector::addOptions
         argList::addBoolOption
         (
             "constant",
-            "include the 'constant/' dir in the times list"
+            "Include the 'constant/' dir in the times list"
         );
     }
     if (withZero)
@@ -127,13 +120,13 @@ void Foam::timeSelector::addOptions
         argList::addBoolOption
         (
             "withZero",
-            "include the '0/' dir in the times list"
+            "Include the '0/' dir in the times list"
         );
     }
     argList::addBoolOption
     (
         "noZero",
-        string("exclude the '0/' dir from the times list")
+        string("Exclude the '0/' dir from the times list")
       + (
             withZero
           ? ", has precedence over the -withZero option"
@@ -143,18 +136,13 @@ void Foam::timeSelector::addOptions
     argList::addBoolOption
     (
         "latestTime",
-        "select the latest time"
-    );
-    argList::addBoolOption
-    (
-        "newTimes",
-        "select the new times"
+        "Select the latest time"
     );
     argList::addOption
     (
         "time",
         "ranges",
-        "comma-separated time ranges - eg, ':10,20,40:70,1000:'"
+        "List of ranges. Eg, ':10,20 40:70 1000:', 'none', etc"
     );
 }
 
@@ -271,7 +259,7 @@ Foam::instantList Foam::timeSelector::select0
         times.append(instant(0, runTime.constant()));
     }
 
-    runTime.setTime(times[0], 0);
+    runTime.setTime(times.first(), 0);
 
     return times;
 }
@@ -296,38 +284,7 @@ Foam::instantList Foam::timeSelector::selectIfPresent
     }
 
     // No timeSelector option specified. Do not change runTime.
-    return instantList{ instant(runTime.value(), runTime.timeName()) };
-}
-
-
-Foam::instantList Foam::timeSelector::select
-(
-    Time& runTime,
-    const argList& args,
-    const word& fName
-)
-{
-    instantList times(timeSelector::select0(runTime, args));
-
-    if (times.size() && args.found("newTimes"))
-    {
-        List<bool> selectTimes(times.size(), true);
-
-        forAll(times, timei)
-        {
-            selectTimes[timei] =
-               !fileHandler().exists
-                (
-                    runTime.path()
-                  / times[timei].name()
-                  / fName
-                );
-        }
-
-        return subset(selectTimes, times);
-    }
-
-    return times;
+    return instantList(one(), instant(runTime.value(), runTime.timeName()));
 }
 
 

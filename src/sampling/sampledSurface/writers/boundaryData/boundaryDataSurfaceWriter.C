@@ -25,6 +25,7 @@ License
 
 #include "boundaryDataSurfaceWriter.H"
 #include "makeSurfaceWriterMethods.H"
+#include "argList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -32,6 +33,15 @@ namespace Foam
 {
     makeSurfaceWriterType(boundaryDataSurfaceWriter);
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing implementation
+#include "boundaryDataSurfaceWriterImpl.C"
+
+// Field writing methods
+defineSurfaceWriterWriteFields(Foam::boundaryDataSurfaceWriter);
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -44,20 +54,24 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::write
     const bool verbose
 ) const
 {
+    // geometry: rootdir/surfaceName/"points"
+    // field:    rootdir/surfaceName/time/field
+
     const fileName baseDir(outputDir.path()/surfaceName);
     const fileName timeName(outputDir.name());
 
     const pointField& points = surf.points();
 
-    // Construct dummy time to use as an objectRegistry
-    const fileName caseDir(getEnv("FOAM_CASE"));
+    // Dummy time to use as an objectRegistry
+    const fileName caseDir(argList::envGlobalPath());
+
     Time dummyTime
     (
-        caseDir.path(), //rootPath,
-        caseDir.name(), //caseName,
-        "system",       //systemName,
-        "constant",     //constantName,
-        false           //enableFunctionObjects
+        caseDir.path(), // root-path,
+        caseDir.name(), // case-name,
+        "system",       //
+        "constant",     //
+        false           // no function objects
     );
 
 
@@ -95,12 +109,6 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::write
 
     return baseDir;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// create write methods
-defineSurfaceWriterWriteFields(Foam::boundaryDataSurfaceWriter);
 
 
 // ************************************************************************* //

@@ -134,7 +134,7 @@ nutUTabulatedWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(p, iF, dict),
-    uPlusTableName_(dict.lookup("uPlusTable")),
+    uPlusTableName_(dict.get<word>("uPlusTable")),
     uPlusTable_
     (
         IOobject

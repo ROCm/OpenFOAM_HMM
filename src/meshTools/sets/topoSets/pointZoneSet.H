@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,6 @@ SourceFiles
 #define pointZoneSet_H
 
 #include "pointSet.H"
-#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pointZoneSet Declaration
+                        Class pointZoneSet Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointZoneSet
@@ -57,8 +56,6 @@ class pointZoneSet
         const polyMesh& mesh_;
 
         labelList addressing_;
-
-   // Private Member Functions
 
 
 public:
@@ -78,28 +75,27 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct from additional size of labelHashSet
+        //- Construct empty with initial size for labelHashSet
         pointZoneSet
         (
             const polyMesh& mesh,
             const word& name,
-            const label,
+            const label size,
             writeOption w=NO_WRITE
         );
 
-        //- Construct from existing set
+        //- Copy construct from existing set
         pointZoneSet
         (
             const polyMesh& mesh,
             const word& name,
-            const topoSet&,
+            const topoSet& set,
             writeOption w=NO_WRITE
         );
-
 
 
     //- Destructor
-    virtual ~pointZoneSet();
+    virtual ~pointZoneSet() = default;
 
 
     // Member functions
@@ -117,8 +113,8 @@ public:
         //- Sort addressing and make pointSet part consistent with addressing
         void updateSet();
 
-        //- Invert contents. (insert all members 0..maxLen-1 which were not in
-        //  set)
+        //- Invert contents.
+        //  Insert all members [0,maxLen) which were not in set
         virtual void invert(const label maxLen);
 
         //- Subset contents. Only elements present in both sets remain.
@@ -127,8 +123,8 @@ public:
         //- Add elements present in set.
         virtual void addSet(const topoSet& set);
 
-        //- Delete elements present in set.
-        virtual void deleteSet(const topoSet& set);
+        //- Subtract elements present in set.
+        virtual void subtractSet(const topoSet& set);
 
         //- Sync pointZoneSet across coupled patches.
         virtual void sync(const polyMesh& mesh);

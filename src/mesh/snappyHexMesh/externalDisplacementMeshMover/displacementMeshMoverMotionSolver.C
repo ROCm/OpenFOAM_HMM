@@ -69,7 +69,7 @@ Foam::displacementMeshMoverMotionSolver::meshMover() const
 {
     if (!meshMoverPtr_.valid())
     {
-        const word moverType(coeffDict().lookup("meshMover"));
+        const word moverType(coeffDict().get<word>("meshMover"));
 
         meshMoverPtr_ = externalDisplacementMeshMover::New
         (

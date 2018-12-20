@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,25 +20,27 @@ internalField   uniform 200;
 
 boundaryField
 {
-    Default_Boundary_Region
-    {
-        type            epsilonWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           $internalField;
-    }
     inlet
     {
         type            turbulentMixingLengthDissipationRateInlet;
         mixingLength    0.005;
         value           $internalField;
     }
+
     outlet
     {
         type            inletOutlet;
         value           $internalField;
         inletValue      $internalField;
+    }
+
+    "(?i).*walls"
+    {
+        type            epsilonWallFunction;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+        value           $internalField;
     }
 }
 

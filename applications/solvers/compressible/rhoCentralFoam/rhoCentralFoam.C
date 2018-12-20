@@ -28,8 +28,8 @@ Group
     grpCompressibleSolvers
 
 Description
-    Density-based compressible flow solver based on central-upwind schemes of
-    Kurganov and Tadmor.
+    Density-based compressible flow solver based on central-upwind
+    schemes of Kurganov and Tadmor.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,11 +45,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Density-based compressible flow solver based on central-upwind"
+        " schemes of Kurganov and Tadmor."
+    );
+
     #define NO_CONTROL
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
@@ -160,7 +166,7 @@ int main(int argc, char *argv[])
             #include "setDeltaT.H"
         }
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

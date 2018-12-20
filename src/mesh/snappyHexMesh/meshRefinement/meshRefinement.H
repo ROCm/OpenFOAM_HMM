@@ -56,6 +56,7 @@ SourceFiles
 #include "surfaceZonesInfo.H"
 #include "volumeType.H"
 #include "DynamicField.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,13 +99,13 @@ public:
 
         static const Enum<debugType> debugTypeNames;
 
-        //- Enumeration for what to output. Used as a bit-pattern.
-        enum outputType
-        {
-            OUTPUTLAYERINFO = (1 << 0)
-        };
-
-        static const Enum<outputType> outputTypeNames;
+        ////- Enumeration for what to output. Used as a bit-pattern.
+        //enum outputType
+        //{
+        //    OUTPUTLAYERINFO = (1 << 0)
+        //};
+        //
+        //static const Enum<outputType> outputTypeNames;
 
         //- Enumeration for what to write. Used as a bit-pattern.
         enum writeType
@@ -134,8 +135,8 @@ private:
         //- Control of writing level
         static writeType writeLevel_;
 
-        //- Control of output/log level
-        static outputType outputLevel_;
+        ////- Control of output/log level
+        //static outputType outputLevel_;
 
 
     // Private data
@@ -1053,7 +1054,6 @@ public:
                 const scalar maxLoadUnbalance
             );
 
-
             //- Calculate list of cells to directionally refine
             labelList directionalRefineCandidates
             (
@@ -1091,7 +1091,8 @@ public:
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
-                const pointField& locationsOutsideMesh
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter
             );
 
             //- Merge free-standing baffles
@@ -1107,7 +1108,8 @@ public:
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
-                const pointField& locationsOutsideMesh
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter
             );
 
             //- Split off (with optional buffer layers) unreachable areas
@@ -1121,7 +1123,8 @@ public:
 
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
-                const pointField& locationsOutsideMesh
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter
             );
 
             //- Remove cells from limitRegions if level -1
@@ -1279,8 +1282,10 @@ public:
                 const vector& perturbVec,
                 const pointField& locationsInMesh,
                 const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter,
                 const label nRegions,
-                labelList& cellRegion
+                labelList& cellRegion,
+                const boolList& blockedFace
             );
 
             //- Split mesh. Keep part containing point. Return empty map if
@@ -1290,7 +1295,8 @@ public:
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch,
                 const pointField& locationsInMesh,
-                const pointField& locationsOutsideMesh
+                const pointField& locationsOutsideMesh,
+                const writer<scalar>& leakPathFormatter
             );
 
             //- Split faces into two
@@ -1513,9 +1519,9 @@ public:
             static writeType writeLevel();
             static void writeLevel(const writeType);
 
-            //- Get/set output level
-            static outputType outputLevel();
-            static void outputLevel(const outputType);
+            ////- Get/set output level
+            //static outputType outputLevel();
+            //static void outputLevel(const outputType);
 
 
             //- Helper: convert wordList into bit pattern using provided Enum

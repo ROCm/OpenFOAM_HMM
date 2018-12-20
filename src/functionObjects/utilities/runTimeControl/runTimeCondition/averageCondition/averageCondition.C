@@ -53,9 +53,9 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    functionObjectName_(dict.lookup("functionObject")),
-    fieldNames_(dict.lookup("fields")),
-    tolerance_(readScalar(dict.lookup("tolerance"))),
+    functionObjectName_(dict.get<word>("functionObject")),
+    fieldNames_(dict.get<wordList>("fields")),
+    tolerance_(dict.get<scalar>("tolerance")),
     window_(dict.lookupOrDefault<scalar>("window", -1)),
     totalTime_(fieldNames_.size(), obr_.time().deltaTValue()),
     resetOnRestart_(false)
@@ -71,7 +71,7 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
             if (dict.found(fieldName))
             {
                 const dictionary& valueDict = dict.subDict(fieldName);
-                totalTime_[fieldi] = readScalar(valueDict.lookup("totalTime"));
+                valueDict.readEntry("totalTime", totalTime_[fieldi]);
             }
         }
     }

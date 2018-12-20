@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Manipulates mesh elements.
+    Manipulate mesh elements.
 
     Actions are:
         (boundary)points:
@@ -336,13 +336,20 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Manipulate mesh elements.\n"
+        "For example, moving points, splitting/collapsing edges etc."
+    );
     #include "addOverwriteOption.H"
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative modifyMeshDict");
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const bool overwrite = args.found("overwrite");
@@ -411,7 +418,7 @@ int main(int argc, char *argv[])
     const SubList<face> outsideFaces
     (
         mesh.faces(),
-        mesh.nFaces() - mesh.nInternalFaces(),
+        mesh.nBoundaryFaces(),
         mesh.nInternalFaces()
     );
 
@@ -554,7 +561,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
         else
         {
@@ -630,7 +637,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
         else
         {
@@ -675,7 +682,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
         else
         {

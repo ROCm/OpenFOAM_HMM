@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,18 @@ Class
     Foam::zoneToFace
 
 Description
-    A topoSetSource to select faces based on faceZone.
+    A topoSetFaceSource to select faces based on one of more faceZones.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        zones       | The face zone names or regexs         | possibly |
+        zone        | The face zone name or regex           | possibly |
+        name        | Older specification for 'zone'        | no    |
+    \endtable
+
+Note
+    Must specify "zones", "zone" or "name" (highest to lowest precedence).
 
 SourceFiles
     zoneToFace.C
@@ -35,8 +46,8 @@ SourceFiles
 #ifndef zoneToFace_H
 #define zoneToFace_H
 
-#include "topoSetSource.H"
-#include "wordRe.H"
+#include "topoSetFaceSource.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,12 +55,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class zoneToFace Declaration
+                         Class zoneToFace Declaration
 \*---------------------------------------------------------------------------*/
 
 class zoneToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
     // Private data
@@ -57,8 +68,8 @@ class zoneToFace
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name/regular expression of cellZone
-        wordRe zoneName_;
+        //- Matcher for zones
+        wordRes selectedZones_;
 
 
     // Private Member Functions
@@ -74,42 +85,25 @@ public:
     // Constructors
 
         //- Construct from components
-        zoneToFace
-        (
-            const polyMesh& mesh,
-            const word& zoneName
-        );
+        zoneToFace(const polyMesh& mesh, const wordRe& zoneName);
 
         //- Construct from dictionary
-        zoneToFace
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        zoneToFace(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        zoneToFace
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        zoneToFace(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~zoneToFace();
+    virtual ~zoneToFace() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

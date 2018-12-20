@@ -138,10 +138,8 @@ public:
         {
             if (limitCoeff_ < 0 || limitCoeff_ > 1)
             {
-                FatalIOErrorInFunction
-                (
-                    schemeData
-                )   << "limitCoeff is specified as " << limitCoeff_
+                FatalIOErrorInFunction(schemeData)
+                    << "limitCoeff is specified as " << limitCoeff_
                     << " but should be >= 0 && <= 1"
                     << exit(FatalIOError);
             }

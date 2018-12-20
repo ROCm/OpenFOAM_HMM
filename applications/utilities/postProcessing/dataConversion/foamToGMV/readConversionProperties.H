@@ -13,17 +13,17 @@ IOdictionary conversionProperties
 
 scalar startTime
 (
-    readScalar(conversionProperties.lookup("startTime"))
+    conversionProperties.get<scalar>("startTime")
 );
 
 word vComp
 (
-    conversionProperties.lookup("vector")
+    conversionProperties.get<word>("vector")
 );
 
 word format
 (
-    conversionProperties.lookup("format")
+    conversionProperties.get<word>("format")
 );
 
 if ((format != "ascii") && (format != "ieeei4r8"))
@@ -37,7 +37,7 @@ if ((format != "ascii") && (format != "ieeei4r8"))
 
 word cells
 (
-    conversionProperties.lookup("cells")
+    conversionProperties.get<word>("cells")
 );
 
 if

@@ -60,8 +60,7 @@ calcAddressing() const
 
     if (edgesPtr_ || faceFacesPtr_ || edgeFacesPtr_ || faceEdgesPtr_)
     {
-        // it is considered an error to attempt to recalculate
-        // if already allocated
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "addressing already calculated"
             << abort(FatalError);

@@ -78,14 +78,12 @@ bool Foam::phaseChangeTwoPhaseMixture::read()
     if (incompressibleTwoPhaseMixture::read())
     {
         phaseChangeTwoPhaseMixtureCoeffs_ = optionalSubDict(type() + "Coeffs");
-        lookup("pSat") >> pSat_;
+        readEntry("pSat", pSat_);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

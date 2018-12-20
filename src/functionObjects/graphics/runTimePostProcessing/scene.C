@@ -38,7 +38,6 @@ License
 #include "vtkRenderWindow.h"
 #include "vtkWindowToImageFilter.h"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::runTimePostPro::scene::readCamera
@@ -87,7 +86,7 @@ void Foam::functionObjects::runTimePostPro::scene::readCamera
     cameraUp_ = Function1<vector>::New("up", dict);
 
     dict.readIfPresent("clipBox", clipBox_);
-    dict.lookup("parallelProjection") >> parallelProjection_;
+    dict.readEntry("parallelProjection", parallelProjection_);
     if (!parallelProjection_)
     {
         if (dict.found("viewAngle"))
@@ -389,16 +388,12 @@ void Foam::functionObjects::runTimePostPro::scene::saveImage
 
     const Time& runTime = obr_.time();
 
-    const fileName relPath
+    const fileName prefix
     (
-        functionObject::outputPrefix/name_/obr_.time().timeName()
-    );
-
-    fileName prefix
-    (
-        Pstream::parRun() ?
-            runTime.path()/".."/relPath
-          : runTime.path()/relPath
+        runTime.globalPath()
+      / functionObject::outputPrefix
+      / name_
+      / runTime.timeName()
     );
 
     mkDir(prefix);

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,10 @@ Class
     Foam::tetDecomposer
 
 Description
-    Decomposes polyMesh into tets.
+    Decomposes polyMesh into tets or pyramids.
+
+    Cells neighbouring decomposed cells are not decomposed themselves
+    so will be polyhedral.
 
 SourceFiles
     tetDecomposer.C
@@ -36,7 +39,7 @@ SourceFiles
 #define tetDecomposer_H
 
 #include "DynamicList.H"
-#include "bitSet.H"
+#include "PackedBoolList.H"
 #include "boolList.H"
 #include "typeInfo.H"
 #include "Enum.H"
@@ -65,8 +68,8 @@ public:
         {
             FACE_CENTRE_TRIS, //- Faces decomposed into triangles
                               //  using face-centre
-
-            FACE_DIAG_TRIS    //- Faces decomposed into triangles diagonally
+            FACE_DIAG_TRIS,   //- Faces decomposed into triangles diagonally
+            PYRAMID           //- Faces not decomposed (generates pyramids)
         };
         static const Enum<decompositionType> decompositionTypeNames;
 
@@ -155,7 +158,7 @@ public:
                 return cellToPoint_;
             }
 
-            //- From face to tet point
+            //- From face to tet point (only for faceCentre)
             const labelList& faceToPoint() const
             {
                 return faceToPoint_;
@@ -163,14 +166,16 @@ public:
 
 
             //- Per face, per point (faceCentre) or triangle (faceDiag)
-            //  the added tet on the owner side
+            //  the added tet on the owner side. For non-face (pyramid)
+            //  size 1.
             const labelListList& faceOwnerCells() const
             {
                 return faceOwnerCells_;
             }
 
             //- Per face, per point (faceCentre) or triangle (faceDiag)
-            //  the added tet on the neighbour side
+            //  the added tet on the neighbour side. For non-face (pyramid)
+            //  size 1.
             const labelListList& faceNeighbourCells() const
             {
                 return faceNeighbourCells_;
@@ -184,6 +189,7 @@ public:
             void setRefinement
             (
                 const decompositionType decomposeType,
+                const PackedBoolList& decomposeCell,
                 polyTopoChange& meshMod
             );
 

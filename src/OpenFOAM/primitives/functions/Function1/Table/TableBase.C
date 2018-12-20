@@ -66,11 +66,12 @@ Foam::Function1Types::TableBase<Type>::TableBase
     name_(name),
     bounding_
     (
-        bounds::repeatableBoundingNames.lookupOrFailsafe
+        bounds::repeatableBoundingNames.lookupOrDefault
         (
             "outOfBounds",
             dict,
-            bounds::repeatableBounding::CLAMP
+            bounds::repeatableBounding::CLAMP,
+            true  // Failsafe behaviour
         )
     ),
     interpolationScheme_

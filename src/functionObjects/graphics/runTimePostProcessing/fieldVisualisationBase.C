@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,30 +49,35 @@ License
 
 const Foam::Enum
 <
-    Foam::functionObjects::fieldVisualisationBase::colourByType
+    Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+    colourByType
 >
-Foam::functionObjects::fieldVisualisationBase::colourByTypeNames
-{
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+colourByTypeNames
+({
     { colourByType::cbColour, "colour" },
     { colourByType::cbField, "field" },
-};
+});
 
 const Foam::Enum
 <
-    Foam::functionObjects::fieldVisualisationBase::colourMapType
+    Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+    colourMapType
 >
-Foam::functionObjects::fieldVisualisationBase::colourMapTypeNames
-{
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+colourMapTypeNames
+({
     { colourMapType::cmRainbow, "rainbow" },
     { colourMapType::cmBlueWhiteRed, "blueWhiteRed" },
     { colourMapType::cmFire, "fire" },
     { colourMapType::cmGreyscale, "greyscale" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::functionObjects::fieldVisualisationBase::setColourMap
+void Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+setColourMap
 (
     vtkLookupTable* lut
 ) const
@@ -130,7 +135,8 @@ void Foam::functionObjects::fieldVisualisationBase::setColourMap
 }
 
 
-void Foam::functionObjects::fieldVisualisationBase::addScalarBar
+void Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+addScalarBar
 (
     const scalar position,
     vtkRenderer* renderer,
@@ -239,7 +245,8 @@ void Foam::functionObjects::fieldVisualisationBase::addScalarBar
 }
 
 
-void Foam::functionObjects::fieldVisualisationBase::setField
+void Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+setField
 (
     const scalar position,
     const word& colourFieldName,
@@ -272,11 +279,11 @@ void Foam::functionObjects::fieldVisualisationBase::setField
             // Note: if both point and cell data exists, preferentially
             //       choosing point data.  This is often the case when using
             //       glyphs
-            if (pData->GetPointData()->HasArray(fieldName) == 1)
+            if (pData->GetPointData()->HasArray(fieldName))
             {
                 mapper->SetScalarModeToUsePointFieldData();
             }
-            else if (pData->GetCellData()->HasArray(fieldName) == 1)
+            else if (pData->GetCellData()->HasArray(fieldName))
             {
                 mapper->SetScalarModeToUseCellFieldData();
             }
@@ -302,8 +309,8 @@ void Foam::functionObjects::fieldVisualisationBase::setField
 }
 
 
-
-void Foam::functionObjects::fieldVisualisationBase::addGlyphs
+void Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+addGlyphs
 (
     const scalar position,
     const word& scaleFieldName,
@@ -320,20 +327,49 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
 
     glyph->SetInputData(data);
     glyph->ScalingOn();
-    bool ok = true;
+
+    bool needPointData = false;
 
     // Determine whether we have scalar or vector data
+    // and if we need to convert CellData -> PointData
+
     label nComponents = -1;
     const char* scaleFieldNameChar = scaleFieldName.c_str();
-    if (data->GetPointData()->HasArray(scaleFieldNameChar) == 1)
+    if (data->GetPointData()->HasArray(scaleFieldNameChar))
     {
         nComponents =
             data->GetPointData()->GetArray(scaleFieldNameChar)
                 ->GetNumberOfComponents();
     }
-    else if (data->GetCellData()->HasArray(scaleFieldNameChar) == 1)
+    else if (data->GetCellData()->HasArray(scaleFieldNameChar))
     {
-        // Need to convert cell data to point data
+        // Need to convert CellData to PointData
+        needPointData = true;
+
+        nComponents =
+            data->GetCellData()->GetArray(scaleFieldNameChar)
+                ->GetNumberOfComponents();
+    }
+    else
+    {
+        WarningInFunction
+            << "Cannot add glyphs. No such cell or point field: "
+            << scaleFieldName << endl;
+        return;
+    }
+
+
+    const bool ok = (nComponents == 1 || nComponents == 3);
+
+    if (!ok)
+    {
+        WarningInFunction
+            << "Glyphs can only be added to scalar or vector data. "
+            << "Unable to process field " << scaleFieldName << endl;
+        return;
+    }
+    else if (needPointData)
+    {
         auto cellToPoint = vtkSmartPointer<vtkCellDataToPointData>::New();
         cellToPoint->SetInputData(data);
         cellToPoint->Update();
@@ -342,16 +378,8 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
 
         // Store in main vtkPolyData
         data->GetPointData()->AddArray(pData);
+    }
 
-        nComponents = pData->GetNumberOfComponents();
-    }
-    else
-    {
-        WarningInFunction
-            << "Glyphs can only be added to scalar or vector data. "
-            << "Unable to process field " << scaleFieldName << endl;
-        return;
-    }
 
     if (nComponents == 1)
     {
@@ -367,18 +395,16 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
 
         if (maxGlyphLength > 0)
         {
-            double range[2];
+            // Can get range from point data:
 
-            // Can use values to find range
+            // double range[2];
             // vtkDataArray* values =
             //     data->GetPointData()->GetScalars(scaleFieldNameChar);
             // values->GetRange(range);
 
             // Set range according to user-supplied limits
-            range[0] = range_.first();
-            range[1] = range_.second();
             glyph->ClampingOn();
-            glyph->SetRange(range);
+            glyph->SetRange(range_.first(), range_.second());
 
             // If range[0] != min(value), maxGlyphLength behaviour will not
             // be correct...
@@ -450,15 +476,7 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
             scaleFieldNameChar
         );
     }
-    else
-    {
-        WarningInFunction
-            << "Glyphs can only be added to scalar and vector fields."
-            << " Field " << scaleFieldName << " has " << nComponents
-            << " components" << endl;
 
-        ok = false;
-    }
 
     if (ok)
     {
@@ -477,19 +495,20 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+fieldVisualisationBase
 (
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     colours_(colours),
-    fieldName_(dict.lookup("field")),
+    fieldName_(dict.get<word>("field")),
     colourBy_(cbColour),
     colourMap_(cmRainbow),
     range_()
 {
-    colourBy_ = colourByTypeNames.lookup("colourBy", dict);
+    colourByTypeNames.readEntry("colourBy", dict, colourBy_);
 
     switch (colourBy_)
     {
@@ -500,23 +519,21 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
         }
         case cbField:
         {
-            dict.lookup("range") >> range_;
+            dict.readEntry("range", range_);
 
-            if (dict.found("colourMap"))
-            {
-                colourMap_ = colourMapTypeNames.lookup("colourMap", dict);
-            }
+            colourMapTypeNames.readIfPresent("colourMap", dict, colourMap_);
 
-            const dictionary& sbarDict = dict.subDict("scalarBar");
-            sbarDict.lookup("visible") >> scalarBar_.visible_;
+            const dictionary& sbDict = dict.subDict("scalarBar");
+            sbDict.readEntry("visible", scalarBar_.visible_);
+
             if (scalarBar_.visible_)
             {
-                sbarDict.lookup("vertical") >> scalarBar_.vertical_;
-                sbarDict.lookup("position") >> scalarBar_.position_;
-                sbarDict.lookup("title") >> scalarBar_.title_;
-                sbarDict.lookup("fontSize") >> scalarBar_.fontSize_;
-                sbarDict.lookup("labelFormat") >> scalarBar_.labelFormat_;
-                sbarDict.lookup("numberOfLabels") >> scalarBar_.numberOfLabels_;
+                sbDict.readEntry("vertical", scalarBar_.vertical_);
+                sbDict.readEntry("position", scalarBar_.position_);
+                sbDict.readEntry("title", scalarBar_.title_);
+                sbDict.readEntry("fontSize", scalarBar_.fontSize_);
+                sbDict.readEntry("labelFormat", scalarBar_.labelFormat_);
+                sbDict.readEntry("numberOfLabels", scalarBar_.numberOfLabels_);
             }
             break;
         }
@@ -526,21 +543,23 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::functionObjects::fieldVisualisationBase::~fieldVisualisationBase()
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+~fieldVisualisationBase()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 const Foam::HashPtrTable<Foam::Function1<Foam::vector>, Foam::word>&
-Foam::functionObjects::fieldVisualisationBase::colours() const
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::colours() const
 {
     return colours_;
 }
 
 
 const Foam::word&
-Foam::functionObjects::fieldVisualisationBase::fieldName() const
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::fieldName()
+const
 {
     return fieldName_;
 }

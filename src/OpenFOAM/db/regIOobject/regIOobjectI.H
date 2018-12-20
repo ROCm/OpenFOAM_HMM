@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,36 +38,32 @@ inline void Foam::regIOobject::store()
 
 
 template<class Type>
-inline Type& Foam::regIOobject::store(Type* tPtr)
+inline Type& Foam::regIOobject::store(Type* p)
 {
-    if (!tPtr)
+    if (!p)
     {
         FatalErrorInFunction
             << "object deallocated"
             << abort(FatalError);
     }
 
-    tPtr->regIOobject::ownedByRegistry_ = true;
+    p->regIOobject::ownedByRegistry_ = true;
 
-    return *tPtr;
+    return *p;
 }
 
 
 template<class Type>
-inline Type& Foam::regIOobject::store(autoPtr<Type>& atPtr)
+inline Type& Foam::regIOobject::store(autoPtr<Type>& aptr)
 {
-    Type* tPtr = atPtr.ptr();
+    return store(aptr.ptr()); // release, pass management to regIOobject
+}
 
-    if (!tPtr)
-    {
-        FatalErrorInFunction
-                << "object deallocated"
-                << abort(FatalError);
-    }
 
-    tPtr->regIOobject::ownedByRegistry_ = true;
-
-    return *tPtr;
+template<class Type>
+inline Type& Foam::regIOobject::store(autoPtr<Type>&& aptr)
+{
+    return store(aptr.ptr()); // release, pass management to regIOobject
 }
 
 

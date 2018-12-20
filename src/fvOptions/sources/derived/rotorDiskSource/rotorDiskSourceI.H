@@ -27,25 +27,26 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::fv::rotorDiskSource::rhoRef() const
+inline Foam::scalar Foam::fv::rotorDiskSource::rhoRef() const
 {
     return rhoRef_;
 }
 
 
-Foam::scalar Foam::fv::rotorDiskSource::omega() const
+inline Foam::scalar Foam::fv::rotorDiskSource::omega() const
 {
     return omega_;
 }
 
 
-const Foam::List<Foam::point>& Foam::fv::rotorDiskSource::x() const
+inline const Foam::List<Foam::point>& Foam::fv::rotorDiskSource::x() const
 {
     return x_;
 }
 
 
-const Foam::cylindricalCS& Foam::fv::rotorDiskSource::coordSys() const
+inline const Foam::coordSystem::cylindrical&
+Foam::fv::rotorDiskSource::coordSys() const
 {
     return coordSys_;
 }

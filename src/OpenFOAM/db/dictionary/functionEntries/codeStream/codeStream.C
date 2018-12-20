@@ -203,10 +203,8 @@ Foam::functionEntries::codeStream::getFunction
 
                 if (!dynCode.copyOrCreateFiles(true))
                 {
-                    FatalIOErrorInFunction
-                    (
-                        parentDict
-                    )   << "Failed writing files for" << nl
+                    FatalIOErrorInFunction(parentDict)
+                        << "Failed writing files for" << nl
                         << dynCode.libRelPath() << nl
                         << exit(FatalIOError);
                 }
@@ -214,10 +212,8 @@ Foam::functionEntries::codeStream::getFunction
 
             if (!dynCode.wmakeLibso())
             {
-                FatalIOErrorInFunction
-                (
-                    parentDict
-                )   << "Failed wmake " << dynCode.libRelPath() << nl
+                FatalIOErrorInFunction(parentDict)
+                    << "Failed wmake " << dynCode.libRelPath() << nl
                     << exit(FatalIOError);
             }
         }
@@ -266,10 +262,8 @@ Foam::functionEntries::codeStream::getFunction
 
                 if (mySize < masterSize)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        parentDict
-                    )   << "Cannot read (NFS mounted) library " << nl
+                    FatalIOErrorInFunction(parentDict)
+                        << "Cannot read (NFS mounted) library " << nl
                         << libPath << nl
                         << "on processor " << Pstream::myProcNo()
                         << " detected size " << mySize
@@ -304,10 +298,8 @@ Foam::functionEntries::codeStream::getFunction
 
             if (!dlLibs.open(libPath, false))
             {
-                FatalIOErrorInFunction
-                (
-                    parentDict
-                )   << "Failed loading library " << libPath << nl
+                FatalIOErrorInFunction(parentDict)
+                    << "Failed loading library " << libPath << nl
                     << "Did you add all libraries to the 'libs' entry"
                     << " in system/controlDict?"
                     << exit(FatalIOError);
@@ -334,10 +326,8 @@ Foam::functionEntries::codeStream::getFunction
 
     if (!haveLib)
     {
-        FatalIOErrorInFunction
-        (
-            parentDict
-        )   << "Failed loading library " << libPath
+        FatalIOErrorInFunction(parentDict)
+            << "Failed loading library " << libPath
             << " on some processors."
             << exit(FatalIOError);
     }
@@ -353,10 +343,8 @@ Foam::functionEntries::codeStream::getFunction
 
     if (!function)
     {
-        FatalIOErrorInFunction
-        (
-            parentDict
-        )   << "Failed looking up symbol " << dynCode.codeName()
+        FatalIOErrorInFunction(parentDict)
+            << "Failed looking up symbol " << dynCode.codeName()
             << " in library " << lib << exit(FatalIOError);
     }
 

@@ -55,12 +55,12 @@ const Foam::Enum
     Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes
 >
 Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypeNames_
-{
+({
     { regionTypes::stFaceZone, "faceZone" },
     { regionTypes::stPatch, "patch" },
     { regionTypes::stSurface, "surface" },
     { regionTypes::stSampledSurface, "sampledSurface" },
-};
+});
 
 
 const Foam::Enum
@@ -68,7 +68,7 @@ const Foam::Enum
     Foam::functionObjects::fieldValues::surfaceFieldValue::operationType
 >
 Foam::functionObjects::fieldValues::surfaceFieldValue::operationTypeNames_
-{
+({
     // Normal operations
     { operationType::opNone, "none" },
     { operationType::opMin, "min" },
@@ -98,17 +98,17 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::operationTypeNames_
     { operationType::opAbsWeightedAreaAverage, "absWeightedAreaAverage" },
     { operationType::opAbsWeightedAreaIntegrate, "absWeightedAreaIntegrate" },
     { operationType::opAbsWeightedUniformity, "absWeightedUniformity" },
-};
+});
 
 const Foam::Enum
 <
     Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationType
 >
 Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationTypeNames_
-{
+({
     { postOperationType::postOpNone, "none" },
     { postOperationType::postOpSqrt, "sqrt" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -484,7 +484,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
     const dictionary& dict
 )
 {
-    dict.lookup("name") >> regionName_;
+    dict.readEntry("name", regionName_);
 
     switch (regionType_)
     {
@@ -616,7 +616,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
     surfaceWriterPtr_.clear();
     if (writeFields_)
     {
-        const word surfaceFormat(dict.lookup("surfaceFormat"));
+        const word surfaceFormat(dict.get<word>("surfaceFormat"));
 
         if (surfaceFormat != "none")
         {
@@ -687,12 +687,12 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
     {
         case opSumDirection:
         {
-            const vector n(dict_.lookup("direction"));
+            const vector n(dict_.get<vector>("direction"));
             return gSum(pos0(values*(Sf & n))*mag(values));
         }
         case opSumDirectionBalance:
         {
-            const vector n(dict_.lookup("direction"));
+            const vector n(dict_.get<vector>("direction"));
             const scalarField nv(values*(Sf & n));
 
             return gSum(pos0(nv)*mag(values) - neg(nv)*mag(values));
@@ -758,16 +758,14 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
     {
         case opSumDirection:
         {
-            vector n(dict_.lookup("direction"));
-            n /= mag(n) + ROOTVSMALL;
+            const vector n(dict_.get<vector>("direction").normalise());
 
             const scalarField nv(n & values);
             return gSum(pos0(nv)*n*(nv));
         }
         case opSumDirectionBalance:
         {
-            vector n(dict_.lookup("direction"));
-            n /= mag(n) + ROOTVSMALL;
+            const vector n(dict_.get<vector>("direction").normalise());
 
             const scalarField nv(n & values);
             return gSum(pos0(nv)*n*(nv));
@@ -903,15 +901,16 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
 )
 :
     fieldValue(name, runTime, dict, typeName),
-    regionType_(regionTypeNames_.lookup("regionType", dict)),
-    operation_(operationTypeNames_.lookup("operation", dict)),
+    regionType_(regionTypeNames_.get("regionType", dict)),
+    operation_(operationTypeNames_.get("operation", dict)),
     postOperation_
     (
         postOperationTypeNames_.lookupOrDefault
         (
             "postOperation",
             dict,
-            postOperationType::postOpNone
+            postOperationType::postOpNone,
+            true  // Failsafe behaviour
         )
     ),
     weightFieldName_("none"),
@@ -934,15 +933,16 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
 )
 :
     fieldValue(name, obr, dict, typeName),
-    regionType_(regionTypeNames_.lookup("regionType", dict)),
-    operation_(operationTypeNames_.lookup("operation", dict)),
+    regionType_(regionTypeNames_.get("regionType", dict)),
+    operation_(operationTypeNames_.get("operation", dict)),
     postOperation_
     (
         postOperationTypeNames_.lookupOrDefault
         (
             "postOperation",
             dict,
-            postOperationType::postOpNone
+            postOperationType::postOpNone,
+            true  // Failsafe behaviour
         )
     ),
     weightFieldName_("none"),

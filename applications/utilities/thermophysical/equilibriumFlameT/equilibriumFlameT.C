@@ -28,9 +28,9 @@ Group
     grpThermophysicalUtilities
 
 Description
-    Calculates the equilibrium flame temperature for a given fuel and
+    Calculate the equilibrium flame temperature for a given fuel and
     pressure for a range of unburnt gas temperatures and equivalence
-    ratios; includes the effects of dissociation on O2, H2O and CO2.
+    ratios. Includes the effects of dissociation on O2, H2O and CO2.
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,12 +59,14 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Calculates the equilibrium flame temperature for a given fuel\n"
-        "and pressure for a range of unburnt gas temperatures and equivalence\n"
-        "ratios; includes the effects of dissociation on O2, H2O and CO2."
+        "Calculate the equilibrium flame temperature for a given fuel and"
+        " pressure for a range of unburnt gas temperatures and equivalence"
+        " ratios.\n"
+        "Includes the effects of dissociation on O2, H2O and CO2."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     argList::addArgument("controlFile");
 
     argList args(argc, argv);
@@ -85,10 +87,10 @@ int main(int argc, char *argv[])
     dictionary control(controlFile);
 
 
-    scalar P(readScalar(control.lookup("P")));
-    const word fuelName(control.lookup("fuel"));
-    scalar n(readScalar(control.lookup("n")));
-    scalar m(readScalar(control.lookup("m")));
+    const scalar P(control.get<scalar>("P"));
+    const word fuelName(control.get<word>("fuel"));
+    const scalar n(control.get<scalar>("n"));
+    const scalar m(control.get<scalar>("m"));
 
 
     Info<< nl << "Reading thermodynamic data dictionary" << endl;

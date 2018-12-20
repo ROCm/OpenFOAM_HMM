@@ -110,7 +110,7 @@ private:
         //- Plane for 2D wedge case or -1.
         const label wedgePlane_;
 
-        //- pointZone with frozen points
+        //- Name of pointZone with frozen points
         const word frozenPointsZone_;
 
         //- Demand driven: surface to project

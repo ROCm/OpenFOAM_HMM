@@ -25,7 +25,6 @@ License
 
 #include "universalConstants.H"
 #include "mathematicalConstants.H"
-
 #include "dimensionedConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

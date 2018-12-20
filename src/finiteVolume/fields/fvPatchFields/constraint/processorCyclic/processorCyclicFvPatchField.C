@@ -51,14 +51,12 @@ Foam::processorCyclicFvPatchField<Type>::processorCyclicFvPatchField
 )
 :
     processorFvPatchField<Type>(p, iF, dict),
-    procPatch_(refCast<const processorCyclicFvPatch>(p))
+    procPatch_(refCast<const processorCyclicFvPatch>(p, dict))
 {
     if (!isType<processorCyclicFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "\n    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()

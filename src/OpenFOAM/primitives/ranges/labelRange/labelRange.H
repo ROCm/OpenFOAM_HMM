@@ -25,7 +25,7 @@ Class
     Foam::labelRange
 
 Description
-    An range or interval of labels defined by a start and a size.
+    A range or interval of labels defined by a start and a size.
 
 SourceFiles
     labelRange.C
@@ -46,6 +46,7 @@ namespace Foam
 class labelRange;
 class Istream;
 class Ostream;
+template<class T> class List;
 
 Istream& operator>>(Istream& is, labelRange& range);
 Ostream& operator<<(Ostream& os, const labelRange& range);
@@ -136,6 +137,9 @@ public:
         //- Is the range empty?
         inline bool empty() const noexcept;
 
+        //- Return the range as a list of labels
+        List<label> labels() const;
+
         //- Adjust the start to avoid negative indices.
         //  The size is decreased accordingly, but will never become negative.
         //  Eg, adjusting (-10, 15) becomes (0,5).
@@ -204,8 +208,8 @@ public:
         labelRange subset0(const label size) const;
 
 
-        //- Return const_iterator to element at in the range, with bounds
-        //- checking.
+        //- Return const_iterator to element in the range,
+        //- with bounds checking.
         //  \return iterator at the requested position, or end() if it is
         //      out of bounds
         inline const_iterator at(const label localIndex) const;
@@ -217,7 +221,7 @@ public:
         inline label operator[](const label localIndex) const noexcept;
 
         //- Return true if the (global) value is located within the range.
-        //  Behaviour identical to found().
+        //  Behaviour identical to found() - usable as a predicate
         inline bool operator()(const label value) const noexcept;
 
         //- Increase the size by 1.

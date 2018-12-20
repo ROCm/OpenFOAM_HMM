@@ -41,13 +41,10 @@ inline Foam::DSMCParcel<ParcelType>::constantProperties::constantProperties
     const dictionary& dict
 )
 :
-    mass_(readScalar(dict.lookup("mass"))),
-    d_(readScalar(dict.lookup("diameter"))),
-    internalDegreesOfFreedom_
-    (
-        readInt(dict.lookup("internalDegreesOfFreedom"))
-    ),
-    omega_(readScalar(dict.lookup("omega")))
+    mass_(dict.get<scalar>("mass")),
+    d_(dict.get<scalar>("diameter")),
+    internalDegreesOfFreedom_(dict.get<int>("internalDegreesOfFreedom")),
+    omega_(dict.get<scalar>("omega"))
 {}
 
 

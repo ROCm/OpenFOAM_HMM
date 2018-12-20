@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,9 @@ SourceFiles
 
 #include "wordPairHashTable.H"
 #include "labelList.H"
+#include "scalarField.H"
+#include "Tuple2.H"
+#include "writer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,6 +52,7 @@ class snapParameters;
 class meshRefinement;
 class decompositionMethod;
 class fvMeshDistribute;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class snappyRefineDriver Declaration
@@ -72,6 +76,9 @@ class snappyRefineDriver
 
         //- From surface region to patch
         const labelList globalToSlavePatch_;
+
+        //- How to write lines. Used e.g. when writing leak-paths
+        const writer<scalar>& setFormatter_;
 
 
     // Private Member Functions
@@ -142,7 +149,7 @@ class snappyRefineDriver
             const label maxIter
         );
 
-        // Directional refinement
+        // Directional refinement and smoothing
 
             //- Refine (directional) all cells inside/outside shell
             label directionalShellRefine
@@ -150,6 +157,18 @@ class snappyRefineDriver
                 const refinementParameters& refineParams,
                 const label maxIter
             );
+
+            //- Calculate local edge length from cell volumes
+            void mergeAndSmoothRatio
+            (
+                const scalarList& allSeedPointDist,
+                const label nSmoothExpansion,
+                List<Tuple2<scalar, scalar>>&  keyAndValue
+            );
+
+            //- Smooth the directional expansion ratio
+            label directionalSmooth(const refinementParameters& refineParams);
+
 
         //- Add baffles and remove unreachable cells
         void baffleAndSplitMesh
@@ -205,7 +224,8 @@ public:
             decompositionMethod& decomposer,
             fvMeshDistribute& distributor,
             const labelUList& globalToMasterPatch,
-            const labelUList& globalToSlavePatch
+            const labelUList& globalToSlavePatch,
+            const writer<scalar>& setFormatter
         );
 
 
@@ -229,7 +249,6 @@ public:
             const refinementParameters& refineParams,
             const HashTable<Pair<word>>& faceZoneToPatches
         );
-
 };
 
 

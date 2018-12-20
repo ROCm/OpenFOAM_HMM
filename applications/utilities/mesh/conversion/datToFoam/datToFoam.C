@@ -28,8 +28,8 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Reads in a datToFoam mesh file and outputs a points file.  Used in
-    conjunction with blockMesh.
+    Reads in a datToFoam mesh file and outputs a points file.
+    Used in conjunction with blockMesh.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,6 +45,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Reads in a datToFoam mesh file and outputs a points file.\n"
+        "Used in conjunction with blockMesh."
+    );
+
     argList::noParallel();
     argList::addArgument("dat file");
 

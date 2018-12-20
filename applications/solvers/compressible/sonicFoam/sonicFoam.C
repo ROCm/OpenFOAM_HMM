@@ -43,10 +43,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for trans-sonic/supersonic, turbulent flow"
+        " of a compressible gas."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"

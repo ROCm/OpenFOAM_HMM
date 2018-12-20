@@ -44,10 +44,10 @@ const Foam::Enum
     Foam::functionObjects::fieldAverageItem::baseType
 >
 Foam::functionObjects::fieldAverageItem::baseTypeNames_
-{
+({
     { baseType::ITER, "iteration" },
     { baseType::TIME, "time" },
-};
+});
 
 
 const Foam::Enum
@@ -55,11 +55,11 @@ const Foam::Enum
     Foam::functionObjects::fieldAverageItem::windowType
 >
 Foam::functionObjects::fieldAverageItem::windowTypeNames_
-{
+({
     { windowType::NONE, "none" },
     { windowType::APPROXIMATE, "approximate" },
     { windowType::EXACT, "exact" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -192,13 +192,13 @@ void Foam::functionObjects::fieldAverageItem::clear
 
 bool Foam::functionObjects::fieldAverageItem::readState(const dictionary& dict)
 {
-    dict.lookup("totalIter") >> totalIter_;
-    dict.lookup("totalTime") >> totalTime_;
+    dict.readEntry("totalIter", totalIter_);
+    dict.readEntry("totalTime", totalTime_);
 
     if (window_ > 0)
     {
-        dict.lookup("windowTimes") >> windowTimes_;
-        dict.lookup("windowFieldNames") >> windowFieldNames_;
+        dict.readEntry("windowTimes", windowTimes_);
+        dict.readEntry("windowFieldNames", windowFieldNames_);
     }
 
     return true;

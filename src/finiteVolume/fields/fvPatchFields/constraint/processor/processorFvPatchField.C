@@ -76,7 +76,7 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 )
 :
     coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
-    procPatch_(refCast<const processorFvPatch>(p)),
+    procPatch_(refCast<const processorFvPatch>(p, dict)),
     sendBuf_(0),
     receiveBuf_(0),
     outstandingSendRequest_(-1),
@@ -86,10 +86,8 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 {
     if (!isA<processorFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "\n    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()

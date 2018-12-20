@@ -87,6 +87,14 @@ Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 
 
 template<class T, class Key, class Hash>
+Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::remove(const Key& key)
+{
+    auto iter = this->find(key);
+    return this->remove(iter);
+}
+
+
+template<class T, class Key, class Hash>
 bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 {
     if (iter.found())

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,10 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::volFields
+Namespace
+    Foam::fieldTypes
 
 Description
+    Collection of common field types
 
 SourceFiles
     volFields.C
@@ -35,6 +36,7 @@ SourceFiles
 #define volFieldsFwd_H
 
 #include "fieldTypes.H"
+#include "wordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,6 +59,22 @@ typedef GeometricField<sphericalTensor, fvPatchField, volMesh>
     volSphericalTensorField;
 typedef GeometricField<symmTensor, fvPatchField, volMesh> volSymmTensorField;
 typedef GeometricField<tensor, fvPatchField, volMesh> volTensorField;
+
+
+/*---------------------------------------------------------------------------*\
+                       Namespace fieldTypes Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace fieldTypes
+{
+    //- Standard dimensioned field types (scalar, vector, tensor, etc)
+    extern const wordList internal;
+
+    //- Standard volume field types (scalar, vector, tensor, etc)
+    extern const wordList volume;
+
+} // End namespace fieldTypes
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class mapPolyMesh;
 class polyMesh;
 class primitiveMesh;
@@ -65,17 +66,16 @@ class topoSet
     public regIOobject,
     public labelHashSet
 {
-
 protected:
 
     // Protected Member Functions
 
-        //- Update map from map. Used to update cell/face labels
-        //  after morphing
-        void updateLabels(const labelList& map);
+        //- Update map from map.
+        //  Used to update cell/face labels after morphing
+        virtual void updateLabels(const labelUList& map);
 
-        //- Check validity of contents.
-        void check(const label maxLabel);
+        //- Check limits on addressable range.
+        virtual void check(const label maxSize);
 
         //- Write part of contents nicely formatted. Prints labels only.
         void writeDebug
@@ -106,12 +106,6 @@ protected:
         ) const;
 
 
-        //- No copy construct
-        topoSet(const topoSet&) = delete;
-
-
-protected:
-
         //- Helper for constructor - return IOobject in the polyMesh/sets
         static IOobject findIOobject
         (
@@ -129,6 +123,10 @@ protected:
             readOption r,
             writeOption w
         );
+
+
+        //- No copy construct
+        topoSet(const topoSet&) = delete;
 
 
 public:
@@ -196,13 +194,13 @@ public:
 
     // Constructors
 
-
         //- Construct from IOobject as explicitly passed type.
         //  Can't use typeName info here since subclasses not yet instantiated
         topoSet(const IOobject& obj, const word& wantedType);
 
-        //- Construct from polyMesh and name. Searches for a polyMesh/sets
-        //  directory but not beyond mesh.facesInstance.
+        //- Construct from polyMesh and name.
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
         topoSet
         (
             const polyMesh& mesh,
@@ -213,8 +211,8 @@ public:
         );
 
         //- Construct empty from additional size of labelHashSet.
-        //  Searches for a polyMesh/sets
-        //  directory but not beyond mesh.facesInstance.
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
         topoSet
         (
             const polyMesh& mesh,
@@ -223,34 +221,47 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from additional labelHashSet
-        //  Searches for a polyMesh/sets
-        //  directory but not beyond mesh.facesInstance.
+        //- Construct (no-read) with copy of labelHashSet
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
         topoSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelHashSet& set,
+            const labelHashSet& labels,
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from additional labelHashSet
-        //  Searches for a polyMesh/sets
-        //  directory but not beyond mesh.facesInstance.
+        //- Construct (no-read) with moving labelHashSet
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
         topoSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelUList& set,
+            labelHashSet&& labels,
             writeOption w=NO_WRITE
         );
 
-        //- Construct empty from IOobject and size.
-        topoSet(const IOobject&, const label size);
+        //- Construct (no-read) with copy of labels
+        //  Searches for a polyMesh/sets directory but not beyond the
+        //  mesh.facesInstance().
+        topoSet
+        (
+            const polyMesh& mesh,
+            const word& name,
+            const labelUList& labels,
+            writeOption w=NO_WRITE
+        );
 
-        //- Construct from IOobject and labelHashSet.
-        topoSet(const IOobject&, const labelHashSet&);
+        //- Construct empty from IOobject and HashSet size.
+        topoSet(const IOobject& io, const label size);
 
+        //- Construct from IOobject and copy of labelHashSet.
+        topoSet(const IOobject& io, const labelHashSet& labels);
+
+        //- Construct from IOobject and move labelHashSet.
+        topoSet(const IOobject& io, labelHashSet&& labels);
 
 
         //- Clone
@@ -295,13 +306,28 @@ public:
 
 
     //- Destructor
-    virtual ~topoSet();
+    virtual ~topoSet() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        //- Invert contents. (insert all members 0..maxLen-1 which were not in
-        //  set)
+        //- Has the given index?
+        virtual bool found(const label id) const;
+
+        //- Set an index
+        virtual bool set(const label id);
+
+        //- Unset an index
+        virtual bool unset(const label id);
+
+        //- Set multiple indices
+        virtual void set(const labelUList& labels);
+
+        //- Unset multiple indices
+        virtual void unset(const labelUList& labels);
+
+        //- Invert contents.
+        //  Insert all members [0,maxLen) which were not in set.
         virtual void invert(const label maxLen);
 
         //- Subset contents. Only elements present in both sets remain.
@@ -310,8 +336,8 @@ public:
         //- Add elements present in set.
         virtual void addSet(const topoSet& set);
 
-        //- Delete elements present in set.
-        virtual void deleteSet(const topoSet& set);
+        //- Subtract elements present in set.
+        virtual void subtractSet(const topoSet& set);
 
         //- Sync set across coupled patches.
         virtual void sync(const polyMesh& mesh);
@@ -320,7 +346,7 @@ public:
         virtual void writeDebug(Ostream& os, const label maxLen) const;
 
         //- Like above but also writes mesh related quantity
-        //  (usually coordinate).
+        //- (usually coordinate).
         virtual void writeDebug
         (
             Ostream& os,
@@ -358,11 +384,17 @@ public:
         static void removeFiles(const polyMesh&);
 
 
-    // Member operators
+    // Member Operators
 
         //- Copy labelHashSet part only
         void operator=(const topoSet&);
 
+
+    // Housekeeping
+
+        //- Deprecated(2018-10) subtract elements present in set.
+        //  \deprecated(2018-10) - use subtractSet instead
+        virtual void deleteSet(const topoSet& set);
 };
 
 

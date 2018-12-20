@@ -36,7 +36,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "fvCFD.H"
 #include "IOobjectList.H"
@@ -45,7 +45,6 @@ Description
 #include "fvMesh.H"
 #include "cellModel.H"
 #include "globalFoam.H"
-#include "foamVersion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

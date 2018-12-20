@@ -70,10 +70,10 @@ Foam::fileControl::fileControl
         geometryToConformTo,
         defaultCellSize
     ),
-    pointsFile_(controlFunctionDict.lookup("pointsFile")),
-    sizesFile_(controlFunctionDict.lookup("sizesFile")),
-    alignmentsFile_(controlFunctionDict.lookup("alignmentsFile")),
-    maxPriority_(readLabel(controlFunctionDict.lookup("priority")))
+    pointsFile_(controlFunctionDict.get<fileName>("pointsFile")),
+    sizesFile_(controlFunctionDict.get<fileName>("sizesFile")),
+    alignmentsFile_(controlFunctionDict.get<fileName>("alignmentsFile")),
+    maxPriority_(controlFunctionDict.get<label>("priority"))
 {
     Info<< indent << "Loading " << name << " from file:" << nl
         << indent << "    priority   : " << maxPriority_ << nl
@@ -82,12 +82,6 @@ Foam::fileControl::fileControl
         << indent << "    alignments : " << alignmentsFile_
         << endl;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileControl::~fileControl()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

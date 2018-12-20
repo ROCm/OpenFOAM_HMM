@@ -32,10 +32,10 @@ const Foam::Enum
     Foam::faceAreaIntersect::triangulationMode
 >
 Foam::faceAreaIntersect::triangulationModeNames_
-{
+({
     { triangulationMode::tmFan, "fan" },
-    { triangulationMode::tmMesh, "mesh" }
-};
+    { triangulationMode::tmMesh, "mesh" },
+});
 
 Foam::scalar Foam::faceAreaIntersect::tol = 1e-6;
 
@@ -44,7 +44,7 @@ Foam::scalar Foam::faceAreaIntersect::tol = 1e-6;
 void Foam::faceAreaIntersect::triSliceWithPlane
 (
     const triPoints& tri,
-    const plane& p,
+    const plane& pln,
     FixedList<triPoints, 10>& tris,
     label& nTris,
     const scalar len
@@ -61,7 +61,7 @@ void Foam::faceAreaIntersect::triSliceWithPlane
     label copI = -1;
     forAll(tri, i)
     {
-        d[i] = ((tri[i] - p.refPoint()) & p.normal());
+        d[i] = pln.signedDistance(tri[i]);
 
         if (mag(d[i]) < tol*len)
         {

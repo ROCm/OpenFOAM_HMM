@@ -86,7 +86,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    TnbrName_(dict.lookup("Tnbr")),
+    TnbrName_(dict.get<word>("Tnbr")),
     thicknessLayers_(0),
     kappaLayers_(0),
     contactRes_(0.0)
@@ -101,10 +101,9 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
             << exit(FatalError);
     }
 
-    if (dict.found("thicknessLayers"))
+    if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
     {
-        dict.lookup("thicknessLayers") >> thicknessLayers_;
-        dict.lookup("kappaLayers") >> kappaLayers_;
+        dict.readEntry("kappaLayers", kappaLayers_);
 
         if (thicknessLayers_.size() > 0)
         {

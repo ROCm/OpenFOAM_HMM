@@ -49,7 +49,7 @@ diffusion<ReactionThermo, ThermoType>::diffusion
         turb,
         combustionProperties
     ),
-    C_(readScalar(this->coeffs().lookup("C"))),
+    C_(this->coeffs().getScalar("C")),
     oxidantName_(this->coeffs().template lookupOrDefault<word>("oxidant", "O2"))
 {}
 
@@ -96,7 +96,7 @@ bool diffusion<ReactionThermo, ThermoType>::read()
 {
     if (singleStepCombustion<ReactionThermo, ThermoType>::read())
     {
-        this->coeffs().lookup("C") >> C_ ;
+        this->coeffs().readEntry("C", C_);
         this->coeffs().readIfPresent("oxidant", oxidantName_);
         return true;
     }

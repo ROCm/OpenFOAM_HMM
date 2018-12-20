@@ -40,12 +40,12 @@ const Foam::Enum
     Foam::alphaContactAngleFvPatchScalarField::limitControls
 >
 Foam::alphaContactAngleFvPatchScalarField::limitControlNames_
-{
+({
     { limitControls::lcNone, "none" },
     { limitControls::lcGradient, "gradient" },
     { limitControls::lcZeroGradient, "zeroGradient" },
     { limitControls::lcAlpha, "alpha" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -69,7 +69,7 @@ Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(p, iF),
-    limit_(limitControlNames_.lookup("limit", dict))
+    limit_(limitControlNames_.get("limit", dict))
 {
     if (dict.found("gradient"))
     {

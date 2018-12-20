@@ -21,9 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Fundamental dimensioned constants
-
 \*---------------------------------------------------------------------------*/
 
 #include "fundamentalConstants.H"
@@ -32,12 +29,9 @@ Description
 #include "electromagneticConstants.H"
 #include "atomicConstants.H"
 #include "physicoChemicalConstants.H"
-
 #include "dimensionedConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Universal constants
 
 namespace Foam
 {

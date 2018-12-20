@@ -53,10 +53,15 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::constant
 )
 :
     temperaturePhaseChangeTwoPhaseMixture(mixture, mesh),
-    coeffC_(subDict(type() + "Coeffs").lookup("coeffC")),
-    coeffE_(subDict(type() + "Coeffs").lookup("coeffE"))
-{
-}
+    coeffC_
+    (
+        "coeffC", dimless/dimTime/dimTemperature, subDict(type() + "Coeffs")
+    ),
+    coeffE_
+    (
+        "coeffE", dimless/dimTime/dimTemperature, subDict(type() + "Coeffs")
+    )
+{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -158,15 +163,13 @@ bool Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::read()
 {
     if (temperaturePhaseChangeTwoPhaseMixture::read())
     {
-        subDict(type() + "Coeffs").lookup("coeffC") >> coeffC_;
-        subDict(type() + "Coeffs").lookup("coeffE") >> coeffE_;
+        subDict(type() + "Coeffs").readEntry("coeffC", coeffC_);
+        subDict(type() + "Coeffs").readEntry("coeffE", coeffE_);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -33,28 +33,18 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        coeffs_.lookup("fields") >> fieldNames_;
+        coeffs_.readEntry("fields", fieldNames_);
         applied_.setSize(fieldNames_.size(), false);
 
-        // Backward compatibility
-        if (coeffs_.found("redirectType"))
-        {
-            coeffs_.lookup("redirectType") >> name_;
-        }
-        else
-        {
-            coeffs_.lookup("name") >> name_;
-        }
+        dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
         // Code snippets
         {
-            const entry& e = coeffs_.lookupEntry
-            (
-                "codeCorrect",
-                false,
-                false
-            );
-            codeCorrect_ = stringOps::trim(e.stream());
+            const entry& e =
+                coeffs_.lookupEntry("codeCorrect", keyType::LITERAL);
+
+            e.readEntry(codeCorrect_);
+            stringOps::inplaceTrim(codeCorrect_);
             stringOps::inplaceExpand(codeCorrect_, coeffs_);
             dynamicCodeContext::addLineDirective
             (
@@ -65,13 +55,11 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
         }
 
         {
-            const entry& e = coeffs_.lookupEntry
-            (
-                "codeAddSup",
-                false,
-                false
-            );
-            codeAddSup_ = stringOps::trim(e.stream());
+            const entry& e =
+                coeffs_.lookupEntry("codeAddSup", keyType::LITERAL);
+
+            e.readEntry(codeAddSup_);
+            stringOps::inplaceTrim(codeAddSup_);
             stringOps::inplaceExpand(codeAddSup_, coeffs_);
             dynamicCodeContext::addLineDirective
             (
@@ -82,13 +70,11 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
         }
 
         {
-            const entry& e = coeffs_.lookupEntry
-            (
-                "codeSetValue",
-                false,
-                false
-            );
-            codeSetValue_ = stringOps::trim(e.stream());
+            const entry& e =
+                coeffs_.lookupEntry("codeSetValue", keyType::LITERAL);
+
+            e.readEntry(codeSetValue_);
+            stringOps::inplaceTrim(codeSetValue_);
             stringOps::inplaceExpand(codeSetValue_, coeffs_);
             dynamicCodeContext::addLineDirective
             (
@@ -100,10 +86,8 @@ bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

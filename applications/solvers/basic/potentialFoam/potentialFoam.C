@@ -94,6 +94,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Potential flow solver which solves for the velocity potential"
+    );
+
     argList::addOption
     (
         "pName",
@@ -122,11 +127,11 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "withFunctionObjects",
-        "execute functionObjects"
+        "Execute functionObjects"
     );
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
 

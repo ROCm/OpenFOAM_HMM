@@ -69,13 +69,13 @@ class circleSet
 
         // Circle definition
 
-            //- Origin (x, y, z) in global cartesian co-ordinates
+            //- Origin (x, y, z) in global cartesian coordinates
             point origin_;
 
             //- Axis of the circle
             vector circleAxis_;
 
-            //- Point on circle (x, y, z) in global cartesian co-ordinates
+            //- Point on circle (x, y, z) in global cartesian coordinates
             //  Defines start point
             point startPoint_;
 

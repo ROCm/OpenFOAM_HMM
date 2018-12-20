@@ -28,8 +28,8 @@ Group
     grpCompressibleSolvers
 
 Description
-    Steady-state solver for turbulent flow of compressible fluids, with
-    implicit or explicit porosity treatment and optional sources.
+    Steady-state solver for compressible turbulent flow,
+    with implicit or explicit porosity treatment and optional sources.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,10 +45,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Steady-state solver for compressible turbulent flow,"
+        "with implicit or explicit porosity treatment and optional sources."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"

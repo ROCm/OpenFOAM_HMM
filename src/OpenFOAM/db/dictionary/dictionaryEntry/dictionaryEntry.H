@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class dictionaryEntry;
 Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
 
@@ -75,7 +75,8 @@ public:
 
     // Constructors
 
-        //- Construct from the parent dictionary and Istream
+        //- Construct from the parent dictionary and Istream.
+        //  The keyword is extracted from the stream
         dictionaryEntry(const dictionary& parentDict, Istream& is);
 
         //- Construct from the keyword, parent dictionary and a Istream
@@ -110,26 +111,26 @@ public:
     // Member functions
 
         //- Return the scoped dictionary name (eg, dictA.dictB.dictC)
-        const fileName& name() const
+        virtual const fileName& name() const
         {
             return dictionary::name();
         }
 
         //- Return the scoped dictionary name (eg, dictA.dictB.dictC)
-        fileName& name()
+        virtual fileName& name()
         {
             return dictionary::name();
         }
 
         //- Return line number of first token in dictionary
-        label startLineNumber() const;
+        virtual label startLineNumber() const;
 
         //- Return line number of last token in dictionary
-        label endLineNumber() const;
+        virtual label endLineNumber() const;
 
         //- This entry is not a primitive,
         //  calling this function generates a FatalError
-        ITstream& stream() const;
+        virtual ITstream& stream() const;
 
 
         //- Return pointer to this dictionary
@@ -139,14 +140,14 @@ public:
         virtual dictionary* dictPtr();
 
         //- Return dictionary
-        const dictionary& dict() const;
+        virtual const dictionary& dict() const;
 
         //- Return non-const access to dictionary
-        dictionary& dict();
+        virtual dictionary& dict();
 
 
         //- Write
-        void write(Ostream& os) const;
+        virtual void write(Ostream& os) const;
 
         //- Return info proxy.
         //  Used to print token information to a stream

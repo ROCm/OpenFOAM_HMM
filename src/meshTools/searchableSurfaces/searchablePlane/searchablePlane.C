@@ -31,10 +31,20 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchablePlane, 0);
-addToRunTimeSelectionTable(searchableSurface, searchablePlane, dict);
-
+    defineTypeNameAndDebug(searchablePlane, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchablePlane,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchablePlane,
+        dict,
+        plane
+    );
 }
 
 
@@ -115,12 +125,6 @@ Foam::searchablePlane::searchablePlane
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchablePlane::~searchablePlane()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::wordList& Foam::searchablePlane::regions() const
@@ -141,7 +145,7 @@ void Foam::searchablePlane::boundingSpheres
 ) const
 {
     centres.setSize(1);
-    centres[0] = refPoint();
+    centres[0] = origin();
 
     radiusSqr.setSize(1);
     radiusSqr[0] = Foam::sqr(GREAT);

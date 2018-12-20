@@ -181,10 +181,8 @@ void Foam::fileFormats::edgeMeshFormat::write
 
     if (!osPtr().good())
     {
-        FatalIOErrorInFunction
-        (
-            osPtr()
-        )   << "Cannot open file for writing " << filename
+        FatalIOErrorInFunction(osPtr())
+            << "Cannot open file for writing " << filename
             << exit(FatalIOError);
     }
 
@@ -193,10 +191,8 @@ void Foam::fileFormats::edgeMeshFormat::write
 
     if (!ok)
     {
-        FatalIOErrorInFunction
-        (
-            os
-        )   << "Cannot write header"
+        FatalIOErrorInFunction(os)
+            << "Cannot write header"
             << exit(FatalIOError);
     }
 

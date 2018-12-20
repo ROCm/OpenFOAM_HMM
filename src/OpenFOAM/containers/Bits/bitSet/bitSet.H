@@ -46,7 +46,6 @@ See also
 
 #include "className.H"
 #include "PackedList.H"
-#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -153,6 +152,15 @@ public:
         //- Move construct
         inline bitSet(bitSet&& bitset);
 
+        //- Copy construct a subset
+        bitSet(const bitSet& bitset, const labelUList& addr);
+
+        //- Copy construct a subset
+        bitSet(const bitSet& bitset, const labelUIndList& addr);
+
+        //- Copy construct a subset range
+        bitSet(const bitSet& bitset, const labelRange& range);
+
         //- Construct from a list of bools
         inline explicit bitSet(const UList<bool>& bools);
 
@@ -166,6 +174,11 @@ public:
 
         //- Construct with given size with all bits set to 0,
         //- subsequently add specified locations as 1.
+        template<unsigned N>
+        bitSet(const label n, const FixedList<label, N>& locations);
+
+        //- Construct with given size with all bits set to 0,
+        //- subsequently add specified locations as 1.
         inline bitSet(const label n, std::initializer_list<label> locations);
 
         //- Construct with automatic sizing (filled with 0),
@@ -175,6 +188,11 @@ public:
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
         inline explicit bitSet(const labelUIndList& locations);
+
+        //- Construct with automatic sizing (filled with 0),
+        //- and populate with specified locations as 1.
+        template<unsigned N>
+        explicit bitSet(const FixedList<label, N>& locations);
 
         //- Clone
         inline autoPtr<bitSet> clone() const;
@@ -248,6 +266,7 @@ public:
         inline labelList sortedToc() const;
 
         //- Return the bitset values as a boolList.
+        //  When the output is a bool, this is more efficient than unpack()
         List<bool> values() const;
 
 
@@ -365,6 +384,13 @@ public:
         //  \return number of locations changed
         inline label set(const labelUIndList& locations);
 
+        //- Set the listed locations to true.
+        //  Does auto-vivify for non-existent entries.
+        //
+        //  \return number of locations changed
+        template<unsigned N>
+        label set(const FixedList<label, N>& locations);
+
         //- Unset the locations listed by the iterator range,
         //- never auto-vivify entries.
         //
@@ -381,6 +407,12 @@ public:
         //
         //  \return number of locations changed
         inline label unset(const labelUIndList& locations);
+
+        //- Unset the listed locations, never auto-vivifies.
+        //
+        //  \return number of locations changed
+        template<unsigned N>
+        label unset(const FixedList<label, N>& locations);
 
 
     // Access helpers
@@ -461,6 +493,10 @@ public:
 
     // Member Operators
 
+        //- Test value at specified position, same as test()
+        //  Enables use as a predicate
+        inline bool operator()(const label pos) const;
+
         //- Identical to get() - get value at index.
         //  Never auto-vivify entries.
         inline unsigned int operator[](const label i) const;
@@ -522,17 +558,18 @@ public:
             return *this;
         }
 
+
     // Housekeeping
 
-        //- Identical to toc()
-        //  \deprecated compatibility method for PackedBoolList (APR-2018)
+        //- \deprecated(2018-04) compatibility name for PackedBoolList
+        //  \deprecated(2018-04) - use toc() method
         inline labelList used() const { return toc(); }
 
 };
 
 
 // Global Operators
-//
+
 Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
 Ostream& operator<<(Ostream& os, const bitSet& bitset);
 

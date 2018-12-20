@@ -62,7 +62,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::MassTransferPhaseSystem
                         IOobject::AUTO_WRITE
                     ),
                     this->mesh(),
-                    dimensionedScalar("zero", dimDensity/dimTime, 0)
+                    dimensionedScalar(dimDensity/dimTime, Zero)
                 )
             );
         }
@@ -95,7 +95,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::calculateL
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimMass, 0)
+            dimensionedScalar(dimEnergy/dimMass, Zero)
         )
     );
     volScalarField& L = tL.ref();
@@ -155,7 +155,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::dmdt
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimDensity/dimTime, 0)
+            dimensionedScalar(dimDensity/dimTime, Zero)
         )
     );
 
@@ -221,12 +221,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
                             IOobject::NO_WRITE
                         ),
                         this->mesh(),
-                        dimensionedScalar
-                        (
-                            "zero",
-                            dimDensity/dimTime,
-                            0
-                        )
+                        dimensionedScalar(dimDensity/dimTime, Zero)
                     )
                 );
                 volScalarField& dmdtNetki = tdmdtNetki.ref();

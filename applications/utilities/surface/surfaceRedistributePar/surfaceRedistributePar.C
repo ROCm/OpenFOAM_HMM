@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,8 @@ Description
     processor has all triangles that overlap its mesh.
 
 Note
-    - best decomposition option is hierarchGeomDecomp since
-      guarantees square decompositions.
+    - best decomposition option is hierarchical since it guarantees
+      square decompositions.
     - triangles might be present on multiple processors.
     - merging uses geometric tolerance so take care with writing precision.
 
@@ -104,9 +104,9 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Redistribute a triSurface. "
-        "The specified surface must be located in the constant/triSurface "
-        "directory"
+        "Redistribute a triSurface."
+        " The specified surface must be located in the constant/triSurface"
+        " directory"
     );
 
     argList::addArgument("triSurfaceMesh");
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "keepNonMapped",
-        "preserve surface outside of mesh bounds"
+        "Preserve surface outside of mesh bounds"
     );
 
     #include "setRootCase.H"
@@ -159,32 +159,29 @@ int main(int argc, char *argv[])
     // -decomposeParDict option.
     if (distType == distributedTriSurfaceMesh::INDEPENDENT)
     {
-        fileName decompDictFile;
-        args.readIfPresent("decomposeParDict", decompDictFile);
-
-        // A demand-driven decompositionMethod can have issues finding
-        // an alternative decomposeParDict location.
+        // Ensure demand-driven decompositionMethod finds alternative
+        // decomposeParDict location properly.
 
         IOdictionary* dictPtr = new IOdictionary
         (
-            decompositionModel::selectIO
+            IOobject::selectIO
             (
                 IOobject
                 (
-                    "decomposeParDict",
+                    decompositionModel::canonicalName,
                     runTime.system(),
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
-                decompDictFile
+                args.opt<fileName>("decomposeParDict", "")
             )
         );
 
         // Store it on the object registry, but to be found it must also
         // have the expected "decomposeParDict" name.
 
-        dictPtr->rename("decomposeParDict");
+        dictPtr->rename(decompositionModel::canonicalName);
         runTime.store(dictPtr);
     }
 

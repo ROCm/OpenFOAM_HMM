@@ -39,14 +39,14 @@ void Foam::readFields
 {
     typedef GeometricField<Type, PatchField, GeoMesh> GeoField;
 
-    // Search list of objects for fields of type GeomField
+    // Search list of objects for fields of type GeoField
     IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
 
     // Remove the cellDist field
-    IOobjectList::iterator celDistIter = fieldObjects.find("cellDist");
-    if (celDistIter != fieldObjects.end())
+    auto iter = fieldObjects.find("cellDist");
+    if (iter.found())
     {
-        fieldObjects.erase(celDistIter);
+        fieldObjects.erase(iter);
     }
 
     // Get sorted set of names (different processors might read objects in

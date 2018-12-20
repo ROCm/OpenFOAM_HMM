@@ -35,11 +35,11 @@ const Foam::Enum
     Foam::energyRegionCoupledFvPatchScalarField::kappaMethodType
 >
 Foam::energyRegionCoupledFvPatchScalarField::methodTypeNames_
-{
+({
     { kappaMethodType::SOLID, "solid" },
     { kappaMethodType::FLUID, "fluid" },
     { kappaMethodType::UNDEFINED, "undefined" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Private members  * * * * * * * * * * * * *//
@@ -67,23 +67,19 @@ void Foam::energyRegionCoupledFvPatchScalarField::setMethod() const
     if (!nbrThermoPtr_)
     {
         nbrThermoPtr_ =
-        (
-            &regionCoupledPatch_.nbrMesh().lookupObject<basicThermo>
+            regionCoupledPatch_.nbrMesh().findObject<basicThermo>
             (
                 basicThermo::dictName
-            )
-        );
+            );
     }
 
     if (!thermoPtr_)
     {
         thermoPtr_ =
-        (
-            &this->db().lookupObject<basicThermo>
+            this->db().findObject<basicThermo>
             (
                 basicThermo::dictName
-            )
-        );
+            );
     }
 }
 
@@ -236,7 +232,7 @@ energyRegionCoupledFvPatchScalarField
 )
 :
     coupledFvPatchField<scalar>(p, iF, dict),
-    regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p)),
+    regionCoupledPatch_(refCast<const regionCoupledBaseFvPatch>(p, dict)),
     method_(UNDEFINED),
     nbrThermoPtr_(nullptr),
     thermoPtr_(nullptr)

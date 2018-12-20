@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,19 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(searchableCylinder, 0);
-    addToRunTimeSelectionTable(searchableSurface, searchableCylinder, dict);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableCylinder,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableCylinder,
+        dict,
+        cylinder
+    );
 }
 
 
@@ -39,9 +51,7 @@ namespace Foam
 
 Foam::tmp<Foam::pointField> Foam::searchableCylinder::coordinates() const
 {
-    tmp<pointField> tCtrs(new pointField(1, 0.5*(point1_ + point2_)));
-
-    return tCtrs;
+    return tmp<pointField>::New(1, 0.5*(point1_ + point2_));
 }
 
 
@@ -64,13 +74,13 @@ void Foam::searchableCylinder::boundingSpheres
 
 Foam::tmp<Foam::pointField> Foam::searchableCylinder::points() const
 {
-    tmp<pointField> tPts(new pointField(2));
-    pointField& pts = tPts.ref();
+    auto tpts = tmp<pointField>::New(2);
+    auto& pts = tpts.ref();
 
     pts[0] = point1_;
     pts[1] = point2_;
 
-    return tPts;
+    return tpts;
 }
 
 
@@ -180,7 +190,7 @@ Foam::pointIndexHit Foam::searchableCylinder::findNearest
 Foam::scalar Foam::searchableCylinder::radius2(const point& pt) const
 {
     const vector x = (pt-point1_) ^ unitDir_;
-    return x&x;
+    return (x & x);
 }
 
 
@@ -500,20 +510,14 @@ Foam::searchableCylinder::searchableCylinder
 )
 :
     searchableSurface(io),
-    point1_(dict.lookup("point1")),
-    point2_(dict.lookup("point2")),
+    point1_(dict.get<point>("point1")),
+    point2_(dict.get<point>("point2")),
     magDir_(mag(point2_-point1_)),
     unitDir_((point2_-point1_)/magDir_),
-    radius_(readScalar(dict.lookup("radius")))
+    radius_(dict.get<scalar>("radius"))
 {
     bounds() = calcBounds();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableCylinder::~searchableCylinder()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -660,7 +664,7 @@ void Foam::searchableCylinder::getNormal
             vector v(info[i].hitPoint() - point1_);
 
             // Decompose sample-point1 into normal and parallel component
-            scalar parallel = (v & unitDir_);
+            const scalar parallel = (v & unitDir_);
 
             // Remove the parallel component and normalise
             v -= parallel*unitDir_;
@@ -728,25 +732,21 @@ void Foam::searchableCylinder::getVolumeType
 ) const
 {
     volType.setSize(points.size());
-    volType = volumeType::INSIDE;
 
     forAll(points, pointi)
     {
         const point& pt = points[pointi];
 
+        volType[pointi] = volumeType::OUTSIDE;
+
         vector v(pt - point1_);
 
         // Decompose sample-point1 into normal and parallel component
-        scalar parallel = v & unitDir_;
+        const scalar parallel = (v & unitDir_);
 
-        if (parallel < 0)
+        // Quick rejection. Left of point1 endcap, or right of point2 endcap
+        if (parallel < 0 || parallel > magDir_)
         {
-            // left of point1 endcap
-            volType[pointi] = volumeType::OUTSIDE;
-        }
-        else if (parallel > magDir_)
-        {
-            // right of point2 endcap
             volType[pointi] = volumeType::OUTSIDE;
         }
         else
@@ -754,14 +754,12 @@ void Foam::searchableCylinder::getVolumeType
             // Remove the parallel component
             v -= parallel*unitDir_;
 
-            if (mag(v) > radius_)
-            {
-                volType[pointi] = volumeType::OUTSIDE;
-            }
-            else
-            {
-                volType[pointi] = volumeType::INSIDE;
-            }
+            volType[pointi] =
+            (
+                mag(v) <= radius_
+              ? volumeType::INSIDE
+              : volumeType::OUTSIDE
+            );
         }
     }
 }

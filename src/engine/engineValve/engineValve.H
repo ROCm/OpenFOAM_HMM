@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyMesh;
 class engineTime;
 
@@ -67,7 +67,7 @@ class engineValve
         const engineTime& engineDB_;
 
         //- Coordinate system
-        autoPtr<coordinateSystem> csPtr_;
+        autoPtr<coordinateSystem> csysPtr_;
 
 
         // Patch and zone names
@@ -145,9 +145,6 @@ class engineValve
 
 public:
 
-    // Static data members
-
-
     // Constructors
 
         //- Construct from components
@@ -171,7 +168,6 @@ public:
             const scalar minBottomLayer,
             const scalar maxBottomLayer,
             const scalar diameter
-
         );
 
         //- Construct from dictionary
@@ -183,7 +179,8 @@ public:
         );
 
 
-    // Destructor - default
+    //- Destructor
+    ~engineValve() = default;
 
 
     // Member Functions
@@ -197,7 +194,7 @@ public:
         //- Return coordinate system
         const coordinateSystem& cs() const
         {
-            return *csPtr_;
+            return *csysPtr_;
         }
 
         //- Return lift profile
@@ -308,7 +305,7 @@ public:
 
 
         //- Write dictionary
-        void writeDict(Ostream&) const;
+        void writeDict(Ostream& os) const;
 };
 
 

@@ -336,7 +336,7 @@ void Foam::blockMesh::createCellShapes
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::polyMesh* Foam::blockMesh::createTopology
+Foam::autoPtr<Foam::polyMesh> Foam::blockMesh::createTopology
 (
     const IOdictionary& meshDescription,
     const word& regionName
@@ -350,7 +350,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
     // Read the names/types for the unassigned patch faces
     // this is a bit heavy handed (and ugly), but there is currently
     // no easy way to rename polyMesh patches subsequently
-    if (const dictionary* dictPtr = meshDescription.subDictPtr("defaultPatch"))
+    if (const dictionary* dictPtr = meshDescription.findDict("defaultPatch"))
     {
         dictPtr->readIfPresent("name", defaultPatchName);
         dictPtr->readIfPresent("type", defaultPatchType);
@@ -428,8 +428,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
     }
 
 
-
-    polyMesh* blockMeshPtr = nullptr;
+    autoPtr<polyMesh> blockMeshPtr;
 
     // Create the patches
 
@@ -494,12 +493,12 @@ Foam::polyMesh* Foam::blockMesh::createTopology
             {
                 dict.add("type", patchTypes[patchi], false);
             }
-            else if (word(dict.lookup("type")) != patchTypes[patchi])
+            else if (dict.get<word>("type") != patchTypes[patchi])
             {
                 FatalIOErrorInFunction(meshDescription)
                     << "For patch " << patchNames[patchi]
                     << " overriding type '" << patchTypes[patchi]
-                    << "' with '" << word(dict.lookup("type"))
+                    << "' with '" << dict.get<word>("type")
                     << "' (read from boundary file)"
                     << exit(FatalIOError);
             }
@@ -511,7 +510,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
             }
         }
 
-        blockMeshPtr = new polyMesh
+        blockMeshPtr = autoPtr<polyMesh>::New
         (
             IOobject
             (
@@ -550,7 +549,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology
         cellShapeList tmpBlockCells(blocks.size());
         createCellShapes(tmpBlockCells);
 
-        blockMeshPtr = new polyMesh
+        blockMeshPtr = autoPtr<polyMesh>::New
         (
             IOobject
             (

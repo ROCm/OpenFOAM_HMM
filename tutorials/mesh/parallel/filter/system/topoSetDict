@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -23,20 +23,14 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (1.5 -10 -10) (2 10 10);
-        }
+        box     (1.5 -10 -10) (2 10 10);
     }
     {
         name    filter;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set filterCells;
-        }
+        set     filterCells;
     }
 
 
@@ -45,40 +39,28 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (-10 -10 -10) (1.5 10 10);
-        }
+        box     (-10 -10 -10) (1.5 10 10);
     }
     {
         name    leftFluid;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set leftFluidCells;
-        }
+        set     leftFluidCells;
     }
     {
         name    rightFluidCells;
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (2 -1 -1) (10 10 10);
-        }
+        box     (2 -1 -1) (10 10 10);
     }
     {
         name    rightFluid;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set rightFluidCells;
-        }
+        set     rightFluidCells;
     }
 
 
@@ -88,22 +70,16 @@ actions
         type    faceSet;
         action  new;
         source  cellToFace;
-        sourceInfo
-        {
-            set     filterCells;
-            option  all;
-        }
+        set     filterCells;
+        option  all;
     }
     {
         name    cycLeftFaces;
         type    faceSet;
         action  subset;
         source  cellToFace;
-        sourceInfo
-        {
-            set     leftFluidCells;
-            option  all;
-        }
+        set     leftFluidCells;
+        option  all;
     }
     // Create faceZone from cycLeft
     {
@@ -111,10 +87,7 @@ actions
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet cycLeftFaces;    // name of faceSet
-        }
+        faceSet cycLeftFaces;    // name of faceSet
     }
 
     // cycRight
@@ -123,22 +96,16 @@ actions
         type    faceSet;
         action  new;
         source  cellToFace;
-        sourceInfo
-        {
-            set     filterCells;
-            option  all;
-        }
+        set     filterCells;
+        option  all;
     }
     {
         name    cycRightFaces;
         type    faceSet;
         action  subset;
         source  cellToFace;
-        sourceInfo
-        {
-            set     rightFluidCells;
-            option  all;
-        }
+        set     rightFluidCells;
+        option  all;
     }
     // Create faceZone from cycRight
     {
@@ -146,10 +113,7 @@ actions
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet cycRightFaces;   // name of faceSet
-        }
+        faceSet cycRightFaces;   // name of faceSet
     }
 
 );

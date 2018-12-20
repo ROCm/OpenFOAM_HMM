@@ -34,27 +34,38 @@ Description
     Must be run on maximum number of source and destination processors.
     Balances mesh and writes new mesh to new time directory.
 
+    Can optionally run in decompose/reconstruct mode to decompose/reconstruct
+    mesh and fields.
+
 Usage
+    \b redistributePar [OPTION]
 
-    - redistributePar [OPTION]
+    Options:
+      - \par -decompose
+        Remove any existing \a processor subdirectories and decomposes the
+        mesh. Equivalent to running without processor subdirectories.
 
-    \param -region regionName \n
-    Distribute named region.
+      - \par -reconstruct
+        Reconstruct mesh and fields (like reconstructParMesh+reconstructPar).
 
-    \param -decompose \n
-    Remove any existing \a processor subdirectories and decomposes the
-    geometry. Equivalent to running without processor subdirectories.
+      - \par -newTimes
+        (in combination with -reconstruct) reconstruct only new times.
 
-    \param -reconstruct \n
-    Reconstruct geometry (like reconstructParMesh). Equivalent to setting
-    numberOfSubdomains 1 in the decomposeParDict.
+      - \par -dry-run
+        (not in combination with -reconstruct) Test without actually
+        decomposing.
 
-    \param -newTimes \n
-    (in combination with -reconstruct) reconstruct only new times.
+      - \par -cellDist
+        not in combination with -reconstruct) Write the cell distribution
+        as a labelList, for use with 'manual'
+        decomposition method and as a volScalarField for visualization.
 
-    \param -cellDist \n
-    Write the cell distribution as a labelList, for use with 'manual'
-    decomposition method or as a volScalarField for post-processing.
+      - \par -region \<regionName\>
+        Distribute named region.
+
+      - \par -allRegions
+        Distribute all regions in regionProperties. Does not check for
+        existence of processor*.
 
 \*---------------------------------------------------------------------------*/
 
@@ -77,6 +88,7 @@ Usage
 #include "processorFvPatchField.H"
 #include "zeroGradientFvPatchFields.H"
 #include "topoSet.H"
+#include "regionProperties.H"
 
 #include "parFvFieldReconstructor.H"
 #include "parLagrangianRedistributor.H"
@@ -102,11 +114,10 @@ scalar getMergeDistance
     const boundBox& bb
 )
 {
-    scalar mergeTol = defaultMergeTol;
-    args.readIfPresent("mergeTol", mergeTol);
+    const scalar mergeTol = args.opt<scalar>("mergeTol", defaultMergeTol);
 
     const scalar writeTol =
-        Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
+        Foam::pow(scalar(10), -scalar(IOstream::defaultPrecision()));
 
     Info<< "Merge tolerance : " << mergeTol << nl
         << "Write tolerance : " << writeTol << endl;
@@ -124,7 +135,7 @@ scalar getMergeDistance
             << exit(FatalError);
     }
 
-    scalar mergeDist = mergeTol * bb.mag();
+    const scalar mergeDist = mergeTol * bb.mag();
 
     Info<< "Overall meshes bounding box : " << bb << nl
         << "Relative tolerance          : " << mergeTol << nl
@@ -160,7 +171,7 @@ void printMeshData(const polyMesh& mesh)
 
     // Print stats
 
-    globalIndex globalBoundaryFaces(mesh.nFaces()-mesh.nInternalFaces());
+    globalIndex globalBoundaryFaces(mesh.nBoundaryFaces());
 
     label maxProcCells = 0;
     label totProcFaces = 0;
@@ -324,14 +335,13 @@ void determineDecomposition
     {
         Info<< "Setting caseName to " << baseRunTime.caseName()
             << " to read decomposeParDict" << endl;
-        const_cast<Time&>(mesh.time()).TimePaths::caseName() =
-            baseRunTime.caseName();
+        const_cast<Time&>(mesh.time()).caseName() = baseRunTime.caseName();
     }
 
     scalarField cellWeights;
     if (method.found("weightField"))
     {
-        word weightName = method.lookup("weightField");
+        word weightName = method.get<word>("weightField");
 
         volScalarField weights
         (
@@ -354,8 +364,7 @@ void determineDecomposition
     if (Pstream::master() && decompose)
     {
         Info<< "Restoring caseName to " << proc0CaseName << endl;
-        const_cast<Time&>(mesh.time()).TimePaths::caseName() =
-            proc0CaseName;
+        const_cast<Time&>(mesh.time()).caseName() = proc0CaseName;
     }
 
     // Dump decomposition to volScalarField
@@ -371,10 +380,10 @@ void determineDecomposition
 
                 Time& tm = const_cast<Time&>(mesh.time());
 
-                tm.TimePaths::caseName() = baseRunTime.caseName();
+                tm.caseName() = baseRunTime.caseName();
                 writeDecomposition("cellDist", mesh, decomp);
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
-                tm.TimePaths::caseName() = proc0CaseName;
+                tm.caseName() = proc0CaseName;
             }
         }
         else
@@ -502,7 +511,7 @@ void writeProcAddressing
             UPstream::msgType()
         );
     }
-    else    // if (nDestProcs == 1)
+    else    // reconstruct
     {
         cellMap = identity(mesh.nCells());
         map.cellMap().reverseDistribute(map.nOldCells(), cellMap);
@@ -636,11 +645,11 @@ void readFields
     if (haveMesh[Pstream::myProcNo()] && objectNames != masterNames)
     {
         FatalErrorInFunction
-            << "differing fields of type " << GeoField::typeName
-            << " on processors." << nl
-            << "Master has:" << masterNames << endl
-            << Pstream::myProcNo() << " has:" << objectNames
-            << abort(FatalError);
+            << "Objects not synchronised across processors." << nl
+            << "Master has " << flatOutput(masterNames) << nl
+            << "Processor " << Pstream::myProcNo()
+            << " has " << flatOutput(objectNames)
+            << exit(FatalError);
     }
 
     fields.setSize(masterNames.size());
@@ -821,6 +830,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     const fileName& meshSubDir,
     const bool doReadFields,
     const bool decompose,       // decompose, i.e. read from undecomposed case
+    const bool reconstruct,
     const bool overwrite,
     const fileName& proc0CaseName,
     const label nDestProcs,
@@ -872,42 +882,35 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             // Find last non-processor patch.
             const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-            label nonProcI = -1;
+            const label nonProcI = (patches.nNonProcessor() - 1);
 
-            forAll(patches, patchI)
-            {
-                if (isA<processorPolyPatch>(patches[patchI]))
-                {
-                    break;
-                }
-                nonProcI++;
-            }
-
-            if (nonProcI == -1)
+            if (nonProcI < 0)
             {
                 FatalErrorInFunction
                     << "Cannot find non-processor patch on processor "
-                    << Pstream::myProcNo() << endl
+                    << Pstream::myProcNo() << nl
                     << " Current patches:" << patches.names()
                     << abort(FatalError);
             }
 
-            // Subset 0 cells, no parallel comms. This is used to create
-            // zero-sized fields.
-            subsetterPtr.reset(new fvMeshSubset(mesh));
-            subsetterPtr().setLargeCellSubset(labelHashSet(0), nonProcI, false);
+            // Subset 0 cells, no parallel comms.
+            // This is used to create zero-sized fields.
+            subsetterPtr.reset
+            (
+                new fvMeshSubset(mesh, bitSet(), nonProcI, false)
+            );
         }
 
 
         // Get original objects (before incrementing time!)
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
+            runTime.caseName() = baseRunTime.caseName();
         }
         IOobjectList objects(mesh, runTime.timeName());
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = proc0CaseName;
+            runTime.caseName() = proc0CaseName;
         }
 
         Info<< "From time " << runTime.timeName()
@@ -926,7 +929,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
+            runTime.caseName() = baseRunTime.caseName();
         }
         readFields
         (
@@ -1106,7 +1109,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = proc0CaseName;
+            runTime.caseName() = proc0CaseName;
         }
     }
 
@@ -1156,7 +1159,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
         mesh.setInstance(runTime.timeName());
     }
     else
@@ -1180,13 +1183,13 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     map.transfer(rawMap());
 
 
-    if (nDestProcs == 1)
+    if (reconstruct)
     {
         if (Pstream::master())
         {
             Info<< "Setting caseName to " << baseRunTime.caseName()
                 << " to write reconstructed mesh and fields." << endl;
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
+            runTime.caseName() = baseRunTime.caseName();
 
             mesh.write();
             topoSet::removeFiles(mesh);
@@ -1206,7 +1209,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
             // Now we've written all. Reset caseName on master
             Info<< "Restoring caseName to " << proc0CaseName << endl;
-            runTime.TimePaths::caseName() = proc0CaseName;
+            runTime.caseName() = proc0CaseName;
         }
     }
     else
@@ -1231,7 +1234,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         << endl;
 
 
-    if (decompose || nDestProcs == 1)
+    if (decompose || reconstruct)
     {
         // Decompose (1 -> N) or reconstruct (N -> 1)
         // so {boundary,cell,face,point}ProcAddressing have meaning
@@ -1252,7 +1255,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // Read refinement data
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
+            runTime.caseName() = baseRunTime.caseName();
         }
         IOobject io
         (
@@ -1268,7 +1271,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         hexRef8Data refData(io);
         if (Pstream::master() && decompose)
         {
-            runTime.TimePaths::caseName() = proc0CaseName;
+            runTime.caseName() = proc0CaseName;
         }
 
         // Make sure all processors have valid data (since only some will
@@ -1282,19 +1285,19 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // Now we've read refinement data we can remove it
         meshRefinement::removeFiles(mesh);
 
-        if (nDestProcs == 1)
+        if (reconstruct)
         {
             if (Pstream::master())
             {
                 Info<< "Setting caseName to " << baseRunTime.caseName()
                     << " to write reconstructed refinement data." << endl;
-                runTime.TimePaths::caseName() = baseRunTime.caseName();
+                runTime.caseName() = baseRunTime.caseName();
 
                 refData.write();
 
                 // Now we've written all. Reset caseName on master
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
-                runTime.TimePaths::caseName() = proc0CaseName;
+                runTime.caseName() = proc0CaseName;
             }
         }
         else
@@ -1308,7 +1311,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //    // Read sets
     //    if (Pstream::master() && decompose)
     //    {
-    //        runTime.TimePaths::caseName() = baseRunTime.caseName();
+    //        runTime.caseName() = baseRunTime.caseName();
     //    }
     //    IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
     //
@@ -1317,7 +1320,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //
     //    if (Pstream::master() && decompose)
     //    {
-    //        runTime.TimePaths::caseName() = proc0CaseName;
+    //        runTime.caseName() = proc0CaseName;
     //    }
     //
     //    forAll(cellSets, i)
@@ -1325,13 +1328,13 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //        cellSets[i].distribute(map);
     //    }
     //
-    //    if (nDestProcs == 1)
+    //    if (reconstruct)
     //    {
     //        if (Pstream::master())
     //        {
     //            Info<< "Setting caseName to " << baseRunTime.caseName()
     //                << " to write reconstructed refinement data." << endl;
-    //            runTime.TimePaths::caseName() = baseRunTime.caseName();
+    //            runTime.caseName() = baseRunTime.caseName();
     //
     //            forAll(cellSets, i)
     //            {
@@ -1340,7 +1343,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //
     //            // Now we've written all. Reset caseName on master
     //            Info<< "Restoring caseName to " << proc0CaseName << endl;
-    //            runTime.TimePaths::caseName() = proc0CaseName;
+    //            runTime.caseName() = proc0CaseName;
     //        }
     //    }
     //    else
@@ -1683,7 +1686,7 @@ void reconstructMeshFields
 (
     const parFvFieldReconstructor& fvReconstructor,
     const IOobjectList& objects,
-    const wordHashSet& selectedFields
+    const wordRes& selectedFields
 )
 {
     // Dimensioned fields
@@ -1780,7 +1783,7 @@ void reconstructLagrangian
     const fvMesh& baseMesh,
     const fvMesh& mesh,
     const mapDistributePolyMesh& distMap,
-    const wordHashSet& selectedLagrangianFields
+    const wordRes& selectedLagrangianFields
 )
 {
     // Clouds (note: might not be present on all processors)
@@ -1814,104 +1817,105 @@ void reconstructLagrangian
                 << cloudName << nl << endl;
 
             autoPtr<mapDistributeBase> lagrangianMapPtr =
-            lagrangianReconstructor.redistributeLagrangianPositions
-            (
-                cloudName
-            );
+                lagrangianReconstructor.redistributeLagrangianPositions
+                (
+                    cloudName
+                );
+
             const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
 
-            IOobjectList sprayObjs
+            IOobjectList cloudObjs
             (
                 mesh,
                 mesh.time().timeName(),
                 cloud::prefix/cloudName
             );
 
-            lagrangianReconstructor.redistributeLagrangianFields<label>
+            lagrangianReconstructor.redistributeFields<label>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields<label>
+            lagrangianReconstructor.redistributeFieldFields<label>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields<scalar>
+            lagrangianReconstructor.redistributeFields<scalar>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields<scalar>
+            lagrangianReconstructor.redistributeFieldFields<scalar>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields<vector>
+            lagrangianReconstructor.redistributeFields<vector>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields<vector>
+            lagrangianReconstructor.redistributeFieldFields<vector>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields
+            lagrangianReconstructor.redistributeFields
             <sphericalTensor>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields
+            lagrangianReconstructor.redistributeFieldFields
             <sphericalTensor>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields<symmTensor>
+            lagrangianReconstructor.redistributeFields<symmTensor>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields
+            lagrangianReconstructor.redistributeFieldFields
             <symmTensor>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFields<tensor>
+            lagrangianReconstructor.redistributeFields<tensor>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
-            lagrangianReconstructor.redistributeLagrangianFieldFields<tensor>
+            lagrangianReconstructor.redistributeFieldFields<tensor>
             (
                 lagrangianMap,
                 cloudName,
-                sprayObjs,
+                cloudObjs,
                 selectedLagrangianFields
             );
         }
@@ -1924,7 +1928,7 @@ void readLagrangian
 (
     const fvMesh& mesh,
     const wordList& cloudNames,
-    const wordHashSet& selectedLagrangianFields,
+    const wordRes& selectedLagrangianFields,
     PtrList<unmappedPassivePositionParticleCloud>& clouds
 )
 {
@@ -1954,144 +1958,144 @@ void readLagrangian
         //}
 
 
-        IOobjectList sprayObjs(clouds[i], clouds[i].time().timeName());
+        IOobjectList cloudObjs(clouds[i], clouds[i].time().timeName());
 
-        //Pout<< "Found clould objects:" << sprayObjs.names() << endl;
+        //Pout<< "Found clould objects:" << cloudObjs.names() << endl;
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<label>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<label>>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<label>, label>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<scalar>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<scalar>>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<scalar>, scalar>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<vector>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<vector>>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<vector>, vector>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<sphericalTensor>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<sphericalTensor>>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<sphericalTensor>, sphericalTensor>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<symmTensor>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<symmTensor>>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<symmTensor>, symmTensor>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
 
 
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<tensor>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <IOField<Field<tensor>>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
-        parLagrangianRedistributor::readLagrangianFields
+        parLagrangianRedistributor::readFields
         <CompactIOField<Field<tensor>, tensor>>
         (
             clouds[i],
-            sprayObjs,
+            cloudObjs,
             selectedLagrangianFields
         );
     }
@@ -2131,19 +2135,19 @@ void redistributeLagrangian
                 distributor.redistributeLagrangianPositions(clouds[i]);
             const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<label>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<label>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<label>, label>>
             (
                 lagrangianMap,
@@ -2151,19 +2155,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<scalar>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<scalar>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<scalar>, scalar>>
             (
                 lagrangianMap,
@@ -2171,19 +2175,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<vector>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<vector>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<vector>, vector>>
             (
                 lagrangianMap,
@@ -2191,19 +2195,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<sphericalTensor>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<sphericalTensor>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<sphericalTensor>, sphericalTensor>>
             (
                 lagrangianMap,
@@ -2211,19 +2215,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<symmTensor>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<symmTensor>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<symmTensor>, symmTensor>>
             (
                 lagrangianMap,
@@ -2231,19 +2235,19 @@ void redistributeLagrangian
             );
 
 
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<tensor>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <IOField<Field<tensor>>>
             (
                 lagrangianMap,
                 clouds[i]
             );
-            distributor.redistributeStoredLagrangianFields
+            distributor.redistributeStoredFields
             <CompactIOField<Field<tensor>, tensor>>
             (
                 lagrangianMap,
@@ -2256,30 +2260,49 @@ void redistributeLagrangian
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Redistribute decomposed mesh and fields according"
+        " to the decomposeParDict settings.\n"
+        "Optionally run in decompose/reconstruct mode"
+    );
+
+    argList::noFunctionObjects();  // Never use function objects
+
     // enable -constant ... if someone really wants it
     // enable -zeroTime to prevent accidentally trashing the initial fields
     timeSelector::addOptions(true, true);
     #include "addRegionOption.H"
+    argList::addBoolOption
+    (
+        "allRegions",
+        "operate on all regions in regionProperties"
+    );
     #include "addOverwriteOption.H"
-    argList::addBoolOption("decompose", "decompose case");
-    argList::addBoolOption("reconstruct", "reconstruct case");
+    argList::addBoolOption("decompose", "Decompose case");
+    argList::addBoolOption("reconstruct", "Reconstruct case");
+    argList::addBoolOption
+    (
+        "dry-run",
+        "Test without writing the decomposition. "
+        "Changes -cellDist to only write volScalarField."
+    );
     argList::addOption
     (
         "mergeTol",
         "scalar",
-        "specify the merge distance relative to the bounding box size "
-        "(default 1e-6)"
+        "The merge distance relative to the bounding box size (default 1e-6)"
     );
     argList::addBoolOption
     (
         "cellDist",
-        "write cell distribution as a labelList - for use with 'manual' "
+        "Write cell distribution as a labelList - for use with 'manual' "
         "decomposition method or as a volScalarField for post-processing."
     );
     argList::addBoolOption
     (
         "newTimes",
-        "only reconstruct new times (i.e. that do not exist already)"
+        "Only reconstruct new times (i.e. that do not exist already)"
     );
 
 
@@ -2290,6 +2313,7 @@ int main(int argc, char *argv[])
     Foam::argList args(argc, argv);
     const bool reconstruct = args.found("reconstruct");
     const bool writeCellDist = args.found("cellDist");
+    const bool dryrun = args.found("dry-run");
     const bool newTimes = args.found("newTimes");
 
     bool decompose = args.found("decompose");
@@ -2305,8 +2329,8 @@ int main(int argc, char *argv[])
     }
 
 
-    const wordHashSet selectedFields(0);
-    const wordHashSet selectedLagrangianFields(0);
+    const wordRes selectedFields;
+    const wordRes selectedLagrangianFields;
 
 
     if (decompose)
@@ -2413,7 +2437,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~
 
     #include "createTime.H"
-    runTime.functionObjects().off();
+    runTime.functionObjects().off();  // Extra safety?
 
 
     // Save local processor0 casename
@@ -2431,7 +2455,7 @@ int main(int argc, char *argv[])
             << " on all processors" << nl << endl;
         instantList timeDirs;
 
-        const fileName basePath(args.rootPath()/args.globalCaseName());
+        const fileName basePath(args.globalPath());
 
         if (Pstream::master())
         {
@@ -2471,19 +2495,23 @@ int main(int argc, char *argv[])
     }
 
 
-    // Determine any region
-    word regionName = polyMesh::defaultRegion;
-    fileName meshSubDir = polyMesh::meshSubDir;
-    if (args.readIfPresent("region", regionName))
-    {
-        meshSubDir = regionName/polyMesh::meshSubDir;
-    }
-    Info<< "Using mesh subdirectory " << meshSubDir << nl << endl;
-
-
     // Allow override of decomposeParDict location
-    fileName decompDictFile;
-    args.readIfPresent("decomposeParDict", decompDictFile);
+    const fileName decompDictFile = args.opt<fileName>("decomposeParDict", "");
+
+    // Get all region names
+    wordList regionNames;
+    if (args.found("allRegions"))
+    {
+        regionNames = regionProperties(runTime).names();
+
+        Info<< "Decomposing all regions in regionProperties" << nl
+            << "    " << flatOutput(regionNames) << nl << endl;
+    }
+    else
+    {
+        regionNames.resize(1);
+        regionNames.first() = args.opt<word>("region", fvMesh::defaultRegion);
+    }
 
 
     // Demand driven lagrangian mapper
@@ -2512,317 +2540,333 @@ int main(int argc, char *argv[])
         Info<< nl
             << "Pass1 : reconstructing mesh and addressing" << nl << endl;
 
-        // Loop over all times
-        forAll(timeDirs, timeI)
+
+        forAll(regionNames, regioni)
         {
-            // Set time for global database
-            runTime.setTime(timeDirs[timeI], timeI);
-            baseRunTime.setTime(timeDirs[timeI], timeI);
-
-            Info<< "Time = " << runTime.timeName() << endl << endl;
-
-
-            // See where the mesh is
-            fileName facesInstance = runTime.findInstance
+            const word& regionName = regionNames[regioni];
+            const fileName meshSubDir
             (
-                meshSubDir,
-                "faces",
-                IOobject::READ_IF_PRESENT
+                regionName == fvMesh::defaultRegion
+              ? fileName(polyMesh::meshSubDir)
+              : regionNames[regioni]/polyMesh::meshSubDir
             );
-            //Pout<< "facesInstance:" << facesInstance << endl;
 
-            Pstream::scatter(facesInstance);
+            Info<< "\n\nReconstructing mesh " << regionName << nl << endl;
 
-            // Check who has a mesh
-            const fileName meshPath =
-                runTime.path()/facesInstance/meshSubDir/"faces";
-
-            Info<< "Checking for mesh in " << meshPath << nl << endl;
-
-            boolList haveMesh(Pstream::nProcs(), false);
-            haveMesh[Pstream::myProcNo()] = isFile(meshPath);
-            Pstream::gatherList(haveMesh);
-            Pstream::scatterList(haveMesh);
-            Info<< "Per processor mesh availability:" << nl
-                << "    " << flatOutput(haveMesh) << nl << endl;
-
-
-            // Addressing back to reconstructed mesh as xxxProcAddressing.
-            // - all processors have consistent faceProcAddressing
-            // - processors with no mesh don't need faceProcAddressing
-
-
-            // Note: filePath searches up on processors that don't have
-            //       processor if instance = constant so explicitly check found
-            //       filename.
-            bool haveAddressing = false;
-            if (haveMesh[Pstream::myProcNo()])
+            // Loop over all times
+            forAll(timeDirs, timeI)
             {
-                // Read faces (just to know their size)
-                faceCompactIOList faces
-                (
-                    IOobject
-                    (
-                        "faces",
-                        facesInstance,
-                        meshSubDir,
-                        runTime,
-                        IOobject::MUST_READ
-                    )
-                );
+                // Set time for global database
+                runTime.setTime(timeDirs[timeI], timeI);
+                baseRunTime.setTime(timeDirs[timeI], timeI);
 
-                // Check faceProcAddressing
-                labelIOList faceProcAddressing
+                Info<< "Time = " << runTime.timeName() << endl << endl;
+
+
+                // See where the mesh is
+                fileName facesInstance = runTime.findInstance
                 (
-                    IOobject
-                    (
-                        "faceProcAddressing",
-                        facesInstance,
-                        meshSubDir,
-                        runTime,
-                        IOobject::READ_IF_PRESENT
-                    ),
-                    labelList()
+                    meshSubDir,
+                    "faces",
+                    IOobject::READ_IF_PRESENT
                 );
-                if
-                (
-                    faceProcAddressing.headerOk()
-                 && faceProcAddressing.size() == faces.size()
-                )
+                //Pout<< "facesInstance:" << facesInstance << endl;
+
+                Pstream::scatter(facesInstance);
+
+                // Check who has a mesh
+                const fileName meshPath =
+                    runTime.path()/facesInstance/meshSubDir/"faces";
+
+                Info<< "Checking for mesh in " << meshPath << nl << endl;
+
+                boolList haveMesh(Pstream::nProcs(), false);
+                haveMesh[Pstream::myProcNo()] = isFile(meshPath);
+                Pstream::gatherList(haveMesh);
+                Pstream::scatterList(haveMesh);
+                Info<< "Per processor mesh availability:" << nl
+                    << "    " << flatOutput(haveMesh) << nl << endl;
+
+
+                // Addressing back to reconstructed mesh as xxxProcAddressing.
+                // - all processors have consistent faceProcAddressing
+                // - processors with no mesh don't need faceProcAddressing
+
+
+                // Note: filePath searches up on processors that don't have
+                //       processor if instance = constant so explicitly check
+                //       found filename.
+                bool haveAddressing = false;
+                if (haveMesh[Pstream::myProcNo()])
                 {
+                    // Read faces (just to know their size)
+                    faceCompactIOList faces
+                    (
+                        IOobject
+                        (
+                            "faces",
+                            facesInstance,
+                            meshSubDir,
+                            runTime,
+                            IOobject::MUST_READ
+                        )
+                    );
+
+                    // Check faceProcAddressing
+                    labelIOList faceProcAddressing
+                    (
+                        IOobject
+                        (
+                            "faceProcAddressing",
+                            facesInstance,
+                            meshSubDir,
+                            runTime,
+                            IOobject::READ_IF_PRESENT
+                        ),
+                        labelList()
+                    );
+                    if
+                    (
+                        faceProcAddressing.headerOk()
+                     && faceProcAddressing.size() == faces.size()
+                    )
+                    {
+                        haveAddressing = true;
+                    }
+                }
+                else
+                {
+                    // Have no mesh. Don't need addressing
                     haveAddressing = true;
                 }
-            }
-            else
-            {
-                // Have no mesh. Don't need addressing
-                haveAddressing = true;
-            }
 
-            if (!returnReduce(haveAddressing, andOp<bool>()))
-            {
-                Info<< "loading mesh from " << facesInstance << endl;
-                autoPtr<fvMesh> meshPtr = loadOrCreateMesh
-                (
-                    IOobject
-                    (
-                        regionName,
-                        facesInstance,
-                        runTime,
-                        Foam::IOobject::MUST_READ
-                    )
-                );
-                fvMesh& mesh = meshPtr();
-
-                // Global matching tolerance
-                const scalar tolDim = getMergeDistance
-                (
-                    args,
-                    runTime,
-                    mesh.bounds()
-                );
-
-
-                // Determine decomposition
-                // ~~~~~~~~~~~~~~~~~~~~~~~
-
-                Info<< "Reconstructing mesh for time " << facesInstance << endl;
-
-                label nDestProcs = 1;
-                labelList finalDecomp = labelList(mesh.nCells(), 0);
-
-                redistributeAndWrite
-                (
-                    baseRunTime,
-                    tolDim,
-                    haveMesh,
-                    meshSubDir,
-                    false,      // do not read fields
-                    false,      // do not read undecomposed case on processor0
-                    overwrite,
-                    proc0CaseName,
-                    nDestProcs,
-                    finalDecomp,
-                    facesInstance,
-                    mesh
-                );
-            }
-        }
-
-
-        // Pass2 : read mesh and addressing and reconstruct fields
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        Info<< nl
-            << "Pass2 : reconstructing fields" << nl << endl;
-
-        runTime.setTime(timeDirs[0], 0);
-        baseRunTime.setTime(timeDirs[0], 0);
-        Info<< "Time = " << runTime.timeName() << endl << endl;
-
-
-        Info<< "Reading undecomposed mesh (on master)" << endl;
-        autoPtr<fvMesh> baseMeshPtr = fvMeshTools::newMesh
-        (
-            IOobject
-            (
-                regionName,
-                baseRunTime.timeName(),
-                baseRunTime,
-                IOobject::MUST_READ
-            ),
-            true            // read on master only
-        );
-
-        Info<< "Reading local, decomposed mesh" << endl;
-        autoPtr<fvMesh> meshPtr = loadOrCreateMesh
-        (
-            IOobject
-            (
-                regionName,
-                baseMeshPtr().facesInstance(),
-                runTime,
-                Foam::IOobject::MUST_READ
-            )
-        );
-        fvMesh& mesh = meshPtr();
-
-
-        // Read addressing back to base mesh
-        autoPtr<mapDistributePolyMesh> distMap;
-        readProcAddressing(mesh, baseMeshPtr, distMap);
-
-        // Construct field mapper
-        autoPtr<parFvFieldReconstructor> fvReconstructorPtr
-        (
-            new parFvFieldReconstructor
-            (
-                baseMeshPtr(),
-                mesh,
-                distMap(),
-                Pstream::master()       // do I need to write?
-            )
-        );
-
-
-
-        // Since we start from Times[0] and not runTime.timeName() we
-        // might overlook point motion in the first timestep
-        // (since mesh.readUpdate() below will not be triggered). Instead
-        // detect points by hand
-        if (mesh.pointsInstance() != mesh.facesInstance())
-        {
-            Info<< "    Detected initial mesh motion;"
-                << " reconstructing points" << nl
-                << endl;
-            fvReconstructorPtr().reconstructPoints();
-        }
-
-
-        // Loop over all times
-        forAll(timeDirs, timeI)
-        {
-            if (newTimes && masterTimeDirSet.found(timeDirs[timeI].name()))
-            {
-                Info<< "Skipping time " << timeDirs[timeI].name()
-                    << endl << endl;
-                continue;
-            }
-
-            // Set time for global database
-            runTime.setTime(timeDirs[timeI], timeI);
-            baseRunTime.setTime(timeDirs[timeI], timeI);
-
-            Info<< "Time = " << runTime.timeName() << endl << endl;
-
-
-            // Check if any new meshes need to be read.
-            fvMesh::readUpdateState procStat = mesh.readUpdate();
-
-            if (procStat == fvMesh::POINTS_MOVED)
-            {
-                Info<< "    Dected mesh motion; reconstructing points" << nl
-                    << endl;
-                fvReconstructorPtr().reconstructPoints();
-            }
-            else if
-            (
-                procStat == fvMesh::TOPO_CHANGE
-             || procStat == fvMesh::TOPO_PATCH_CHANGE
-            )
-            {
-                Info<< "    Detected topology change; reconstructing addressing"
-                    << nl << endl;
-
-                if (baseMeshPtr.valid())
+                if (!returnReduce(haveAddressing, andOp<bool>()))
                 {
-                    // Cannot do a baseMesh::readUpdate() since not all
-                    // processors will have mesh files. So instead just
-                    // recreate baseMesh
-                    baseMeshPtr.clear();
-                    baseMeshPtr = fvMeshTools::newMesh
+                    Info<< "loading mesh from " << facesInstance << endl;
+                    autoPtr<fvMesh> meshPtr = loadOrCreateMesh
                     (
                         IOobject
                         (
                             regionName,
-                            baseRunTime.timeName(),
-                            baseRunTime,
-                            IOobject::MUST_READ
-                        ),
-                        true            // read on master only
+                            facesInstance,
+                            runTime,
+                            Foam::IOobject::MUST_READ
+                        )
+                    );
+                    fvMesh& mesh = meshPtr();
+
+                    // Global matching tolerance
+                    const scalar tolDim = getMergeDistance
+                    (
+                        args,
+                        runTime,
+                        mesh.bounds()
+                    );
+
+
+                    // Determine decomposition
+                    // ~~~~~~~~~~~~~~~~~~~~~~~
+
+                    Info<< "Reconstructing mesh for time " << facesInstance
+                        << endl;
+
+                    label nDestProcs = 1;
+                    labelList finalDecomp = labelList(mesh.nCells(), 0);
+
+                    redistributeAndWrite
+                    (
+                        baseRunTime,
+                        tolDim,
+                        haveMesh,
+                        meshSubDir,
+                        false,      // do not read fields
+                        false,      // do not read undecomposed case on proc0
+                        true,       // write redistributed files to proc0
+                        overwrite,
+                        proc0CaseName,
+                        nDestProcs,
+                        finalDecomp,
+                        facesInstance,
+                        mesh
                     );
                 }
-
-                // Re-read procXXXaddressing
-                readProcAddressing(mesh, baseMeshPtr, distMap);
-
-                // Reset field mapper
-                fvReconstructorPtr.reset
-                (
-                    new parFvFieldReconstructor
-                    (
-                        baseMeshPtr(),
-                        mesh,
-                        distMap(),
-                        Pstream::master()
-                    )
-                );
-                lagrangianReconstructorPtr.clear();
             }
 
 
-            // Get list of objects
-            IOobjectList objects(mesh, runTime.timeName());
+            // Pass2 : read mesh and addressing and reconstruct fields
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            Info<< nl
+                << "Pass2 : reconstructing fields" << nl << endl;
+
+            runTime.setTime(timeDirs[0], 0);
+            baseRunTime.setTime(timeDirs[0], 0);
+            Info<< "Time = " << runTime.timeName() << endl << endl;
 
 
-            // Mesh fields (vol, surface, volInternal)
-            reconstructMeshFields
+            Info<< "Reading undecomposed mesh (on master)" << endl;
+            autoPtr<fvMesh> baseMeshPtr = fvMeshTools::newMesh
             (
-                fvReconstructorPtr(),
-                objects,
-                selectedFields
+                IOobject
+                (
+                    regionName,
+                    baseRunTime.timeName(),
+                    baseRunTime,
+                    IOobject::MUST_READ
+                ),
+                true            // read on master only
             );
 
-            // Clouds (note: might not be present on all processors)
-            reconstructLagrangian
+            Info<< "Reading local, decomposed mesh" << endl;
+            autoPtr<fvMesh> meshPtr = loadOrCreateMesh
             (
-                lagrangianReconstructorPtr,
-                baseMeshPtr(),
-                mesh,
-                distMap(),
-                selectedLagrangianFields
+                IOobject
+                (
+                    regionName,
+                    baseMeshPtr().facesInstance(),
+                    runTime,
+                    Foam::IOobject::MUST_READ
+                )
+            );
+            fvMesh& mesh = meshPtr();
+
+
+            // Read addressing back to base mesh
+            autoPtr<mapDistributePolyMesh> distMap;
+            readProcAddressing(mesh, baseMeshPtr, distMap);
+
+            // Construct field mapper
+            autoPtr<parFvFieldReconstructor> fvReconstructorPtr
+            (
+                new parFvFieldReconstructor
+                (
+                    baseMeshPtr(),
+                    mesh,
+                    distMap(),
+                    Pstream::master()       // do I need to write?
+                )
             );
 
-            // If there are any "uniform" directories copy them from
-            // the master processor
-            if (Pstream::master())
+
+
+            // Since we start from Times[0] and not runTime.timeName() we
+            // might overlook point motion in the first timestep
+            // (since mesh.readUpdate() below will not be triggered). Instead
+            // detect points by hand
+            if (mesh.pointsInstance() != mesh.facesInstance())
             {
-                fileName uniformDir0 = runTime.timePath()/"uniform";
-                if (isDir(uniformDir0))
+                Info<< "    Detected initial mesh motion;"
+                    << " reconstructing points" << nl
+                    << endl;
+                fvReconstructorPtr().reconstructPoints();
+            }
+
+
+            // Loop over all times
+            forAll(timeDirs, timeI)
+            {
+                if (newTimes && masterTimeDirSet.found(timeDirs[timeI].name()))
                 {
-                    Info<< "Detected additional non-decomposed files in "
-                        << uniformDir0 << endl;
-                    cp(uniformDir0, baseRunTime.timePath());
+                    Info<< "Skipping time " << timeDirs[timeI].name()
+                        << endl << endl;
+                    continue;
+                }
+
+                // Set time for global database
+                runTime.setTime(timeDirs[timeI], timeI);
+                baseRunTime.setTime(timeDirs[timeI], timeI);
+
+                Info<< "Time = " << runTime.timeName() << endl << endl;
+
+
+                // Check if any new meshes need to be read.
+                fvMesh::readUpdateState procStat = mesh.readUpdate();
+
+                if (procStat == fvMesh::POINTS_MOVED)
+                {
+                    Info<< "    Dected mesh motion; reconstructing points" << nl
+                        << endl;
+                    fvReconstructorPtr().reconstructPoints();
+                }
+                else if
+                (
+                    procStat == fvMesh::TOPO_CHANGE
+                 || procStat == fvMesh::TOPO_PATCH_CHANGE
+                )
+                {
+                    Info<< "    Detected topology change;"
+                        << " reconstructing addressing" << nl << endl;
+
+                    if (baseMeshPtr.valid())
+                    {
+                        // Cannot do a baseMesh::readUpdate() since not all
+                        // processors will have mesh files. So instead just
+                        // recreate baseMesh
+                        baseMeshPtr.clear();
+                        baseMeshPtr = fvMeshTools::newMesh
+                        (
+                            IOobject
+                            (
+                                regionName,
+                                baseRunTime.timeName(),
+                                baseRunTime,
+                                IOobject::MUST_READ
+                            ),
+                            true            // read on master only
+                        );
+                    }
+
+                    // Re-read procXXXaddressing
+                    readProcAddressing(mesh, baseMeshPtr, distMap);
+
+                    // Reset field mapper
+                    fvReconstructorPtr.reset
+                    (
+                        new parFvFieldReconstructor
+                        (
+                            baseMeshPtr(),
+                            mesh,
+                            distMap(),
+                            Pstream::master()
+                        )
+                    );
+                    lagrangianReconstructorPtr.clear();
+                }
+
+
+                // Get list of objects
+                IOobjectList objects(mesh, runTime.timeName());
+
+
+                // Mesh fields (vol, surface, volInternal)
+                reconstructMeshFields
+                (
+                    fvReconstructorPtr(),
+                    objects,
+                    selectedFields
+                );
+
+                // Clouds (note: might not be present on all processors)
+                reconstructLagrangian
+                (
+                    lagrangianReconstructorPtr,
+                    baseMeshPtr(),
+                    mesh,
+                    distMap(),
+                    selectedLagrangianFields
+                );
+
+                // If there are any "uniform" directories copy them from
+                // the master processor
+                if (Pstream::master())
+                {
+                    fileName uniformDir0 = runTime.timePath()/"uniform";
+                    if (isDir(uniformDir0))
+                    {
+                        Info<< "Detected additional non-decomposed files in "
+                            << uniformDir0 << endl;
+                        cp(uniformDir0, baseRunTime.timePath());
+                    }
                 }
             }
         }
@@ -2855,184 +2899,225 @@ int main(int argc, char *argv[])
         runTime.setTime(masterTime, 0);
 
 
-        // Get time instance directory
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // At this point we should be able to read at least a mesh on
-        // processor0. Note the changing of the processor0 casename to
-        // enforce it to read/write from the undecomposed case
 
-        fileName masterInstDir;
-        if (Pstream::master())
+        forAll(regionNames, regioni)
         {
+            const word& regionName = regionNames[regioni];
+            const fileName meshSubDir
+            (
+                regionName == fvMesh::defaultRegion
+              ? fileName(polyMesh::meshSubDir)
+              : regionNames[regioni]/polyMesh::meshSubDir
+            );
+
             if (decompose)
+            {
+                Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
+            }
+            else
+            {
+                Info<< "\n\nRedistributing mesh " << regionName << nl << endl;
+            }
+
+
+            // Get time instance directory
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // At this point we should be able to read at least a mesh on
+            // processor0. Note the changing of the processor0 casename to
+            // enforce it to read/write from the undecomposed case
+
+            fileName masterInstDir;
+            if (Pstream::master())
+            {
+                if (decompose)
+                {
+                    Info<< "Setting caseName to " << baseRunTime.caseName()
+                        << " to find undecomposed mesh" << endl;
+                    runTime.caseName() = baseRunTime.caseName();
+                }
+
+                masterInstDir = runTime.findInstance
+                (
+                    meshSubDir,
+                    "faces",
+                    IOobject::READ_IF_PRESENT
+                );
+
+                if (decompose)
+                {
+                    Info<< "Restoring caseName to " << proc0CaseName << endl;
+                    runTime.caseName() = proc0CaseName;
+                }
+            }
+            Pstream::scatter(masterInstDir);
+
+            // Check who has a mesh
+            const fileName meshPath =
+                runTime.path()/masterInstDir/meshSubDir/"faces";
+
+            Info<< "Checking for mesh in " << meshPath << nl << endl;
+
+
+            boolList haveMesh(Pstream::nProcs(), false);
+            haveMesh[Pstream::myProcNo()] = isFile(meshPath);
+            Pstream::gatherList(haveMesh);
+            Pstream::scatterList(haveMesh);
+            Info<< "Per processor mesh availability:" << nl
+                << "    " << flatOutput(haveMesh) << nl << endl;
+
+            // Load mesh (or create dummy one)
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            if (Pstream::master() && decompose)
             {
                 Info<< "Setting caseName to " << baseRunTime.caseName()
-                    << " to find undecomposed mesh" << endl;
-                runTime.TimePaths::caseName() = baseRunTime.caseName();
+                    << " to read undecomposed mesh" << endl;
+                runTime.caseName() = baseRunTime.caseName();
             }
 
-            masterInstDir = runTime.findInstance
+            autoPtr<fvMesh> meshPtr = loadOrCreateMesh
             (
-                meshSubDir,
-                "faces",
-                IOobject::READ_IF_PRESENT
+                IOobject
+                (
+                    regionName,
+                    masterInstDir,
+                    runTime,
+                    Foam::IOobject::MUST_READ
+                )
             );
 
-            if (decompose)
+            if (Pstream::master() && decompose)
             {
                 Info<< "Restoring caseName to " << proc0CaseName << endl;
-                runTime.TimePaths::caseName() = proc0CaseName;
+                runTime.caseName() = proc0CaseName;
             }
-        }
-        Pstream::scatter(masterInstDir);
 
-        // Check who has a mesh
-        const fileName meshPath =
-            runTime.path()/masterInstDir/meshSubDir/"faces";
-
-        Info<< "Checking for mesh in " << meshPath << nl << endl;
+            fvMesh& mesh = meshPtr();
 
 
-        boolList haveMesh(Pstream::nProcs(), false);
-        haveMesh[Pstream::myProcNo()] = isFile(meshPath);
-        Pstream::gatherList(haveMesh);
-        Pstream::scatterList(haveMesh);
-        Info<< "Per processor mesh availability:" << nl
-            << "    " << flatOutput(haveMesh) << nl << endl;
+            const label nOldCells = mesh.nCells();
+            //Pout<< "Loaded mesh : nCells:" << nOldCells
+            //    << " nPatches:" << mesh.boundaryMesh().size() << endl;
 
-        // Load mesh (or create dummy one)
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        if (Pstream::master() && decompose)
-        {
-            Info<< "Setting caseName to " << baseRunTime.caseName()
-                << " to read undecomposed mesh" << endl;
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
-        }
-
-        autoPtr<fvMesh> meshPtr = loadOrCreateMesh
-        (
-            IOobject
+            // Global matching tolerance
+            const scalar tolDim = getMergeDistance
             (
-                regionName,
-                masterInstDir,
+                args,
                 runTime,
-                Foam::IOobject::MUST_READ
-            )
-        );
-
-        if (Pstream::master() && decompose)
-        {
-            Info<< "Restoring caseName to " << proc0CaseName << endl;
-            runTime.TimePaths::caseName() = proc0CaseName;
-        }
-
-        fvMesh& mesh = meshPtr();
-
-
-        const label nOldCells = mesh.nCells();
-        //Pout<< "Loaded mesh : nCells:" << nOldCells
-        //    << " nPatches:" << mesh.boundaryMesh().size() << endl;
-
-
-        // Global matching tolerance
-        const scalar tolDim = getMergeDistance
-        (
-            args,
-            runTime,
-            mesh.bounds()
-        );
-
-        // Determine decomposition
-        // ~~~~~~~~~~~~~~~~~~~~~~~
-
-        label nDestProcs;
-        labelList finalDecomp;
-        determineDecomposition
-        (
-            baseRunTime,
-            decompDictFile,
-            decompose,
-            proc0CaseName,
-            mesh,
-            writeCellDist,
-
-            nDestProcs,
-            finalDecomp
-        );
-
-
-        wordList cloudNames;
-        List<wordList> fieldNames;
-
-        // Detect lagrangian fields
-        if (Pstream::master() && decompose)
-        {
-            runTime.TimePaths::caseName() = baseRunTime.caseName();
-        }
-        parLagrangianRedistributor::findClouds
-        (
-            mesh,
-            cloudNames,
-            fieldNames
-        );
-
-        // Read lagrangian fields and store on cloud (objectRegistry)
-        PtrList<unmappedPassivePositionParticleCloud> clouds(cloudNames.size());
-        readLagrangian
-        (
-            mesh,
-            cloudNames,
-            selectedLagrangianFields,
-            clouds
-        );
-        if (Pstream::master() && decompose)
-        {
-            runTime.TimePaths::caseName() = proc0CaseName;
-        }
-
-
-        // Load fields, do all distribution (mesh and fields - but not
-        // lagrangian fields; these are done later)
-        autoPtr<mapDistributePolyMesh> distMap = redistributeAndWrite
-        (
-            baseRunTime,
-            tolDim,
-            haveMesh,
-            meshSubDir,
-            true,           // read fields
-            decompose,      // decompose, i.e. read from undecomposed case
-            overwrite,
-            proc0CaseName,
-            nDestProcs,
-            finalDecomp,
-            masterInstDir,
-            mesh
-        );
-
-
-        // Redistribute any clouds
-        redistributeLagrangian
-        (
-            lagrangianReconstructorPtr,
-            mesh,
-            nOldCells,
-            distMap(),
-            clouds
-        );
-
-
-        // Copy any uniform data
-        const fileName uniformDir("uniform");
-        if (isDir(baseRunTime.timePath()/uniformDir))
-        {
-            Info<< "Detected additional non-decomposed files in "
-                << baseRunTime.timePath()/uniformDir << endl;
-            cp
-            (
-                baseRunTime.timePath()/uniformDir,
-                runTime.timePath()/uniformDir
+                mesh.bounds()
             );
+
+            // Determine decomposition
+            // ~~~~~~~~~~~~~~~~~~~~~~~
+
+            label nDestProcs;
+            labelList finalDecomp;
+            determineDecomposition
+            (
+                baseRunTime,
+                decompDictFile,
+                decompose,
+                proc0CaseName,
+                mesh,
+                writeCellDist,
+
+                nDestProcs,
+                finalDecomp
+            );
+
+            if (dryrun)
+            {
+                if (!Pstream::master() && !haveMesh[Pstream::myProcNo()])
+                {
+                    // Remove dummy mesh created by loadOrCreateMesh
+                    const bool oldParRun = Pstream::parRun();
+                    Pstream::parRun() = false;
+                    mesh.removeFiles();
+                    rmDir(mesh.objectRegistry::objectPath());
+                    Pstream::parRun() = oldParRun;
+                }
+                continue;
+            }
+
+
+
+            wordList cloudNames;
+            List<wordList> fieldNames;
+
+            // Detect lagrangian fields
+            if (Pstream::master() && decompose)
+            {
+                runTime.caseName() = baseRunTime.caseName();
+            }
+            parLagrangianRedistributor::findClouds
+            (
+                mesh,
+                cloudNames,
+                fieldNames
+            );
+
+            // Read lagrangian fields and store on cloud (objectRegistry)
+            PtrList<unmappedPassivePositionParticleCloud> clouds
+            (
+                cloudNames.size()
+            );
+            readLagrangian
+            (
+                mesh,
+                cloudNames,
+                selectedLagrangianFields,
+                clouds
+            );
+            if (Pstream::master() && decompose)
+            {
+                runTime.caseName() = proc0CaseName;
+            }
+
+
+            // Load fields, do all distribution (mesh and fields - but not
+            // lagrangian fields; these are done later)
+            autoPtr<mapDistributePolyMesh> distMap = redistributeAndWrite
+            (
+                baseRunTime,
+                tolDim,
+                haveMesh,
+                meshSubDir,
+                true,           // read fields
+                decompose,      // decompose, i.e. read from undecomposed case
+                false,          // no reconstruction
+                overwrite,
+                proc0CaseName,
+                nDestProcs,
+                finalDecomp,
+                masterInstDir,
+                mesh
+            );
+
+
+            // Redistribute any clouds
+            redistributeLagrangian
+            (
+                lagrangianReconstructorPtr,
+                mesh,
+                nOldCells,
+                distMap(),
+                clouds
+            );
+
+
+            // Copy any uniform data
+            const fileName uniformDir("uniform");
+            if (isDir(baseRunTime.timePath()/uniformDir))
+            {
+                Info<< "Detected additional non-decomposed files in "
+                    << baseRunTime.timePath()/uniformDir << endl;
+                cp
+                (
+                    baseRunTime.timePath()/uniformDir,
+                    runTime.timePath()/uniformDir
+                );
+            }
         }
     }
 

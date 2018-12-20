@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class fvMesh;
 class polyBoundaryMesh;
 
@@ -62,14 +64,15 @@ class fvBoundaryMesh
 
     // Private Member Functions
 
+        //- Add fvPatches corresponding to the given polyBoundaryMesh
+        void addPatches(const polyBoundaryMesh&);
+
+
         //- No copy construct
         fvBoundaryMesh(const fvBoundaryMesh&) = delete;
 
         //- No copy assignment
         void operator=(const fvBoundaryMesh&) = delete;
-
-        //- Add fvPatches corresponding to the given polyBoundaryMesh
-        void addPatches(const polyBoundaryMesh&);
 
 
 protected:
@@ -94,24 +97,21 @@ public:
 
     // Member Functions
 
-        // Access
+        //- Return the mesh reference
+        const fvMesh& mesh() const
+        {
+            return mesh_;
+        }
 
-            //- Return the mesh reference
-            const fvMesh& mesh() const
-            {
-                return mesh_;
-            }
+        //- Return a list of pointers for each patch
+        //  with only those pointing to interfaces being set
+        lduInterfacePtrsList interfaces() const;
 
-            //- Return a list of pointers for each patch
-            //  with only those pointing to interfaces being set
-            lduInterfacePtrsList interfaces() const;
+        //- Return patch indices for all matches.
+        labelList indices(const keyType& key, const bool useGroups) const;
 
-            //- Find patch index given a name
-            label findPatchID(const word& patchName) const;
-
-            //- Find patch indices given a name
-            labelList findIndices(const keyType&, const bool useGroups) const;
-
+        //- Find patch index given a name
+        label findPatchID(const word& patchName) const;
 
         //- Correct patches after moving points
         void movePoints();
@@ -127,6 +127,15 @@ public:
 
         //- Return reference to fvPatch by name.
         fvPatch& operator[](const word&);
+
+
+    // Housekeeping
+
+        //- Identical to the indices() method (AUG-2018)
+        labelList findIndices(const keyType& key, const bool useGroups) const
+        {
+            return indices(key, useGroups);
+        }
 };
 
 

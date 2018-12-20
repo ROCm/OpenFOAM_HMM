@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           |
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -50,7 +50,7 @@ void Foam::faMeshDecomposition::distributeFaces()
         (
             Time::controlDictName,
             time().rootPath(),
-            time().caseName()/fileName(word("processor") + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI))
         );
 
         fvMesh procMesh
@@ -112,7 +112,7 @@ void Foam::faMeshDecomposition::distributeFaces()
                 faceProcAddressingHash.insert(faceProcAddressing[i]);
             }
 
-            forAll (faceLabels(), faceI)
+            forAll(faceLabels(), faceI)
             {
                 if (faceProcAddressingHash.found(faceLabels()[faceI] + 1))
                 {
@@ -138,7 +138,7 @@ void Foam::faMeshDecomposition::distributeFaces()
                 )
             );
 
-            forAll (faceLabels(), faceI)
+            forAll(faceLabels(), faceI)
             {
                 if (faceProcAddressingHash.found(faceLabels()[faceI] + 1))
                 {
@@ -217,9 +217,9 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
     // Memory management
     {
-        List<SLList<label> > procFaceList(nProcs());
+        List<SLList<label>> procFaceList(nProcs());
 
-        forAll (faceToProc_, faceI)
+        forAll(faceToProc_, faceI)
         {
             if (faceToProc_[faceI] >= nProcs())
             {
@@ -235,7 +235,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         }
 
         // Convert linked lists into normal lists
-        forAll (procFaceList, procI)
+        forAll(procFaceList, procI)
         {
             procFaceAddressing_[procI] = procFaceList[procI];
         }
@@ -250,7 +250,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         (
             Time::controlDictName,
             time().rootPath(),
-            time().caseName()/fileName(word("processor") + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI))
         );
 
         fvMesh procFvMesh
@@ -337,7 +337,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
             edgesHash.insert(patch.edges()[curEdge], ++edgeI);
         }
 
-        forAll (boundary(), patchI)
+        forAll(boundary(), patchI)
         {
             // Include emptyFaPatch
 
@@ -345,7 +345,11 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
             for(int eI=0; eI<size; eI++)
             {
-                edgesHash.insert(patch.edges()[boundary()[patchI][eI]], ++edgeI);
+                edgesHash.insert
+                (
+                    patch.edges()[boundary()[patchI][eI]],
+                    ++edgeI
+                );
             }
         }
 
@@ -402,7 +406,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
     // Memory management
     {
-        List<SLList<label> > procEdgeList(nProcs());
+        List<SLList<label>> procEdgeList(nProcs());
 
         forAll(procEdgeList, procI)
         {
@@ -416,14 +420,14 @@ void Foam::faMeshDecomposition::decomposeMesh()
         // Detect inter-processor boundaries
 
         // Neighbour processor for each subdomain
-        List<SLList<label> > interProcBoundaries(nProcs());
+        List<SLList<label>> interProcBoundaries(nProcs());
 
         // Edge labels belonging to each inter-processor boundary
-        List<SLList<SLList<label> > > interProcBEdges(nProcs());
+        List<SLList<SLList<label>>> interProcBEdges(nProcs());
 
-        List<SLList<label> > procPatchIndex(nProcs());
+        List<SLList<label>> procPatchIndex(nProcs());
 
-        forAll (neighbour, edgeI)
+        forAll(neighbour, edgeI)
         {
             if (faceToProc_[owner[edgeI]] != faceToProc_[neighbour[edgeI]])
             {
@@ -437,7 +441,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                 SLList<label>::iterator curInterProcBdrsOwnIter =
                     interProcBoundaries[ownerProc].begin();
 
-                SLList<SLList<label> >::iterator curInterProcBEdgesOwnIter =
+                SLList<SLList<label>>::iterator curInterProcBEdgesOwnIter =
                     interProcBEdges[ownerProc].begin();
 
                 bool interProcBouFound = false;
@@ -464,7 +468,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                         SLList<label>::iterator curInterProcBdrsNeiIter =
                             interProcBoundaries[neighbourProc].begin();
 
-                        SLList<SLList<label> >::iterator
+                        SLList<SLList<label>>::iterator
                             curInterProcBEdgesNeiIter =
                             interProcBEdges[neighbourProc].begin();
 
@@ -536,16 +540,16 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
         // for all processors, set the size of start index and patch size
         // lists to the number of patches in the mesh
-        forAll (procPatchSize_, procI)
+        forAll(procPatchSize_, procI)
         {
             procPatchSize_[procI].setSize(patches.size());
             procPatchStartIndex_[procI].setSize(patches.size());
         }
 
-        forAll (patches, patchI)
+        forAll(patches, patchI)
         {
             // Reset size and start index for all processors
-            forAll (procPatchSize_, procI)
+            forAll(procPatchSize_, procI)
             {
                 procPatchSize_[procI][patchI] = 0;
                 procPatchStartIndex_[procI][patchI] =
@@ -571,7 +575,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                     patchEdgeFaces[eI] = eF[patches[patchI][eI]][0];
                 }
 
-                forAll (patchEdgeFaces, edgeI)
+                forAll(patchEdgeFaces, edgeI)
                 {
                     const label curProc = faceToProc_[patchEdgeFaces[edgeI]];
 
@@ -604,7 +608,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                     cycOffset
                 );
 
-                forAll (firstEdgeFaces, edgeI)
+                forAll(firstEdgeFaces, edgeI)
                 {
                     if
                     (
@@ -627,7 +631,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                         SLList<label>::iterator curInterProcBdrsOwnIter =
                             interProcBoundaries[ownerProc].begin();
 
-                        SLList<SLList<label> >::iterator
+                        SLList<SLList<label>>::iterator
                             curInterProcBEdgesOwnIter =
                             interProcBEdges[ownerProc].begin();
 
@@ -658,7 +662,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                                 SLList<label>::iterator curInterProcBdrsNeiIter
                                    = interProcBoundaries[neighbourProc].begin();
 
-                                SLList<SLList<label> >::iterator
+                                SLList<SLList<label>>::iterator
                                     curInterProcBEdgesNeiIter =
                                     interProcBEdges[neighbourProc].begin();
 
@@ -758,7 +762,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                 // Ordering in cyclic boundaries is important.
                 // Add the other half of cyclic edges for cyclic boundaries
                 // that remain on the processor
-                forAll (secondEdgeFaces, edgeI)
+                forAll(secondEdgeFaces, edgeI)
                 {
                     if
                     (
@@ -782,7 +786,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
         // Convert linked lists into normal lists
         // Add inter-processor boundaries and remember start indices
-        forAll (procEdgeList, procI)
+        forAll(procEdgeList, procI)
         {
             // Get internal and regular boundary processor faces
             SLList<label>& curProcEdges = procEdgeList[procI];
@@ -804,7 +808,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
             for
             (
-                SLList<SLList<label> >::iterator curInterProcBEdgesIter =
+                SLList<SLList<label>>::iterator curInterProcBEdgesIter =
                     interProcBEdges[procI].begin();
                 curInterProcBEdgesIter != interProcBEdges[procI].end();
                 ++curInterProcBEdgesIter
@@ -861,7 +865,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
             SLList<label>::iterator curInterProcBdrsIter =
                 interProcBoundaries[procI].begin();
 
-            SLList<SLList<label> >::iterator curInterProcBEdgesIter =
+            SLList<SLList<label>>::iterator curInterProcBEdgesIter =
                 interProcBEdges[procI].begin();
 
             for
@@ -900,13 +904,13 @@ void Foam::faMeshDecomposition::decomposeMesh()
                     if (faceToProc_[owner[curEdgesIter()]] == procI)
                     {
                         curProcEdgeAddressing[nEdges] = curEdgesIter();
-//                         curProcEdgeAddressing[nEdges] = curEdgesIter() + 1;
+//                      curProcEdgeAddressing[nEdges] = curEdgesIter() + 1;
                     }
                     else
                     {
                         // turning edge
                         curProcEdgeAddressing[nEdges] = curEdgesIter();
-//                         curProcEdgeAddressing[nEdges] = -(curEdgesIter() + 1);
+//                      curProcEdgeAddressing[nEdges] = -(curEdgesIter() + 1);
                     }
 
                     // increment the size
@@ -926,7 +930,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
     // are omitted. For processor patches, set index to -1.
     // At the same time, filter the procPatchSize_ and procPatchStartIndex_
     // lists to exclude zero-size patches
-    forAll (procPatchSize_, procI)
+    forAll(procPatchSize_, procI)
     {
         // Make a local copy of old lists
         const labelList oldPatchSizes = procPatchSize_[procI];
@@ -950,9 +954,11 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
         label nPatches = 0;
 
-        forAll (oldPatchSizes, patchI)
+        forAll(oldPatchSizes, patchI)
         {
-            if (oldPatchSizes[patchI] > 0)
+            //- Do not suppress zero sized patches since make parallel
+            //  actions inside patches near impossible.
+            //if (oldPatchSizes[patchI] > 0)
             {
                 curBoundaryAddressing[nPatches] = patchI;
 
@@ -968,7 +974,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         curPatchSizes.setSize(nPatches);
         curPatchStarts.setSize(nPatches);
 
-        forAll (curProcessorPatchSizes, procPatchI)
+        forAll(curProcessorPatchSizes, procPatchI)
         {
             curBoundaryAddressing[nPatches] = -1;
 
@@ -1013,7 +1019,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
             // Reset the lookup list
             pointsUsage = 0;
 
-            forAll (curProcessorPatchStarts, patchI)
+            forAll(curProcessorPatchStarts, patchI)
             {
                 const label curStart = curProcessorPatchStarts[patchI];
                 const label curEnd = curStart + curProcessorPatchSizes[patchI];
@@ -1031,7 +1037,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
                     const edge& e = edges[curE];
 
-                    forAll (e, pointI)
+                    forAll(e, pointI)
                     {
                         if (pointsUsage[e[pointI]] == 0)
                         {
@@ -1049,8 +1055,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
         }
 
         // Grab the result from the hash list
-        globallySharedPoints_ = gSharedPoints.toc();
-        sort(globallySharedPoints_);
+        globallySharedPoints_ = gSharedPoints.sortedToc();
     }
 
 
@@ -1060,8 +1065,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
     {
         fileName processorCasePath
         (
-            time().caseName()/fileName(word("processor")
-          + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI))
         );
 
         // create a database
@@ -1164,7 +1168,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
     // Make a lookup map for globally shared points
     Map<label> sharedPointLookup(2*globallySharedPoints_.size());
 
-    forAll (globallySharedPoints_, pointi)
+    forAll(globallySharedPoints_, pointi)
     {
         sharedPointLookup.insert(globallySharedPoints_[pointi], pointi);
     }
@@ -1180,7 +1184,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
 
         fileName processorCasePath
         (
-            time().caseName()/fileName(word("processor") + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI))
         );
 
         // create a database
@@ -1249,7 +1253,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
 
         label nPatches = 0;
 
-        forAll (curPatchSizes, patchi)
+        forAll(curPatchSizes, patchi)
         {
             const labelList& curEdgeLabels = curPatchEdgeLabels[nPatches];
 
@@ -1272,7 +1276,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
             nPatches++;
         }
 
-        forAll (curProcessorPatchSizes, procPatchI)
+        forAll(curProcessorPatchSizes, procPatchI)
         {
             const labelList& curEdgeLabels = curPatchEdgeLabels[nPatches];
 
@@ -1310,7 +1314,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
         label nProcPatches = 0;
         label nProcEdges = 0;
 
-        forAll (procMesh.boundary(), patchi)
+        forAll(procMesh.boundary(), patchi)
         {
             if
             (

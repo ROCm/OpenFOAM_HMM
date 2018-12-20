@@ -50,8 +50,7 @@ namespace Foam
             "fileHandler",
             //Foam::fileOperations::uncollatedFileOperation::typeName,
             "uncollated",
-            false,
-            false
+            keyType::LITERAL
         )
     );
 }
@@ -428,7 +427,7 @@ Foam::fileOperation::fileOperation(label comm)
 Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::New
 (
     const word& handlerType,
-    const bool verbose
+    bool verbose
 )
 {
     if (debug)
@@ -784,7 +783,11 @@ Foam::IOobject Foam::fileOperation::findInstance
     for (; instanceI >= 0; --instanceI)
     {
         // Shortcut: if actual directory is the timeName we've already tested it
-        if (ts[instanceI].name() == startIO.instance())
+        if
+        (
+            ts[instanceI].name() == startIO.instance()
+         && ts[instanceI].name() != stopInstance
+        )
         {
             continue;
         }
@@ -991,6 +994,17 @@ Foam::label Foam::fileOperation::nProcs
 }
 
 
+void Foam::fileOperation::flush() const
+{
+    if (debug)
+    {
+        Pout<< "fileOperation::flush : clearing processor directories cache"
+            << endl;
+    }
+    procsDirs_.clear();
+}
+
+
 Foam::fileName Foam::fileOperation::processorsCasePath
 (
     const IOobject& io,
@@ -1173,13 +1187,15 @@ Foam::label Foam::fileOperation::detectProcessorPath(const fileName& fName)
 }
 
 
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
 const Foam::fileOperation& Foam::fileHandler()
 {
     if (!fileOperation::fileHandlerPtr_.valid())
     {
         word handler(getEnv("FOAM_FILEHANDLER"));
 
-        if (!handler.size())
+        if (handler.empty())
         {
             handler = fileOperation::defaultFileHandler;
         }
@@ -1191,24 +1207,22 @@ const Foam::fileOperation& Foam::fileHandler()
 }
 
 
-void Foam::fileHandler(autoPtr<fileOperation>& newHandlerPtr)
+void Foam::fileHandler(autoPtr<fileOperation>& newHandler)
 {
-    if (fileOperation::fileHandlerPtr_.valid())
+    if
+    (
+        newHandler.valid() && fileOperation::fileHandlerPtr_.valid()
+     && newHandler->type() == fileOperation::fileHandlerPtr_->type()
+    )
     {
-        if
-        (
-            newHandlerPtr.valid()
-         && newHandlerPtr->type() == fileOperation::fileHandlerPtr_->type()
-        )
-        {
-            return;
-        }
+        return;
     }
+
     fileOperation::fileHandlerPtr_.clear();
 
-    if (newHandlerPtr.valid())
+    if (newHandler.valid())
     {
-        fileOperation::fileHandlerPtr_ = std::move(newHandlerPtr);
+        fileOperation::fileHandlerPtr_ = std::move(newHandler);
     }
 }
 

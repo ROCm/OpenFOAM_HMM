@@ -180,11 +180,11 @@ public:
             (
                 const BoundaryMesh& bmesh,
                 const Internal& field,
-                const dictionary&
+                const dictionary& dict
             );
 
 
-        // Member functions
+        // Member Functions
 
             //- Read the boundary field
             void readField
@@ -266,7 +266,7 @@ private:
     // Private Member Functions
 
         //- Read the field from the dictionary
-        void readFields(const dictionary&);
+        void readFields(const dictionary& dict);
 
         //- Read the field - create the field dictionary on-the-fly
         void readFields();
@@ -298,7 +298,7 @@ public:
             const IOobject& io,
             const Mesh& mesh,
             const dimensionSet& ds,
-            const word& patchFieldType=PatchField<Type>::calculatedType()
+            const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
         //- Construct given IOobject, mesh, dimensions and patch types.
@@ -321,7 +321,7 @@ public:
             const IOobject& io,
             const Mesh& mesh,
             const dimensioned<Type>& dt,
-            const word& patchFieldType=PatchField<Type>::calculatedType()
+            const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
         //- Construct given IOobject, mesh, dimensioned<Type> and patch types.
@@ -336,7 +336,7 @@ public:
             const wordList& actualPatchTypes = wordList()
         );
 
-        //- Constructor from components
+        //- Copy construct from components
         GeometricField
         (
             const IOobject& io,
@@ -344,7 +344,27 @@ public:
             const PtrList<PatchField<Type>>& ptfl
         );
 
-        //- Constructor from components
+        //- Copy construct from internal field, with specified patch type
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            const Field<Type>& iField,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Move construct from internal field, with specified patch type
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            Field<Type>&& iField,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Copy construct from components
         GeometricField
         (
             const IOobject& io,
@@ -376,7 +396,7 @@ public:
             const GeometricField<Type, PatchField, GeoMesh>& gf
         );
 
-        //- Construct as copy of tmp<GeometricField> deleting argument
+        //- Construct from tmp\<GeometricField\> deleting argument
         #ifndef NoConstructFromTmp
         GeometricField
         (
@@ -400,14 +420,14 @@ public:
         );
         #endif
 
-        //- Construct as copy resetting name
+        //- Copy construct with a new name
         GeometricField
         (
             const word& newName,
             const GeometricField<Type, PatchField, GeoMesh>& gf
         );
 
-        //- Construct as copy resetting name
+        //- Construct with a new name from tmp\<GeometricField\>
         #ifndef NoConstructFromTmp
         GeometricField
         (
@@ -455,30 +475,39 @@ public:
     // Member Functions
 
         //- Return a reference to the dimensioned internal field
-        //  Note: this increments the event counter and checks the
-        //  old-time fields; avoid in loops.
-        Internal& ref();
+        //  \param updateAccessTime update event counter and check
+        //      old-time fields
+        //
+        //  \note Should avoid using updateAccessTime = true within loops.
+        Internal& ref(const bool updateAccessTime = true);
 
         //- Return a const-reference to the dimensioned internal field
         inline const Internal& internalField() const;
 
         //- Return a const-reference to the dimensioned internal field
-        //  of a "vol" field.  Useful in the formulation of source-terms
-        //  for FV equations
+        //- of a "vol" field.
+        //  Useful in the formulation of source-terms for FV equations
         inline const Internal& v() const;
 
         //- Return a reference to the internal field
-        //  Note: this increments the event counter and checks the
-        //  old-time fields; avoid in loops.
-        typename Internal::FieldType& primitiveFieldRef();
+        //  \param updateAccessTime update event counter and check
+        //      old-time fields
+        //
+        //  \note Should avoid using updateAccessTime = true within loops.
+        typename Internal::FieldType& primitiveFieldRef
+        (
+            const bool updateAccessTime = true
+        );
 
         //- Return a const-reference to the  internal field
         inline const typename Internal::FieldType& primitiveField() const;
 
         //- Return a reference to the boundary field
-        //  Note: this increments the event counter and checks the
-        //  old-time fields; avoid in loops.
-        Boundary& boundaryFieldRef();
+        //  \param updateAccessTime update event counter and check
+        //      old-time fields
+        //
+        //  \note Should avoid using updateAccessTime = true within loops.
+        Boundary& boundaryFieldRef(const bool updateAccessTime = true);
 
         //- Return const-reference to the boundary field
         inline const Boundary& boundaryField() const;

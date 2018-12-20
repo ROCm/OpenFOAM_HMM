@@ -42,13 +42,19 @@ Description
 
     sphere
     {
-        type searchableSurfaceWithGaps;
-        // Underlying surface
-        surface sphere.stl;
-        // Perturb distance
-        gap 1e-3;
+        type    searchableSurfaceWithGaps;
+        surface sphere.stl;      // Underlying surface
+        gap     1e-3;            // Perturb distance
     }
     \endverbatim
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | searchableSurfaceWithGaps         | selector |
+        surface     | Name of the underlying surface    | yes   |
+        gap         | Gap tolerance in meters           | yes   |
+    \endtable
 
 SourceFiles
     searchableSurfaceWithGaps.C
@@ -66,8 +72,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                  Class searchableSurfaceWithGaps Declaration
@@ -137,23 +141,24 @@ public:
         );
 
     //- Destructor
-    virtual ~searchableSurfaceWithGaps();
+    virtual ~searchableSurfaceWithGaps() = default;
 
 
     // Member Functions
 
+        //- The underlying searchableSurface
         const searchableSurface& surface() const
         {
             return subGeom_[0];
         }
 
-
+        //- Name of regions
         virtual const wordList& regions() const
         {
             return surface().regions();
         }
 
-        //- Whether supports volume type below
+        //- Whether supports volume type (below)
         virtual bool hasVolumeType() const
         {
             return surface().hasVolumeType();
@@ -259,8 +264,8 @@ public:
                 surface().getNormal(info, normal);
             }
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for points.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
                 const pointField& samples,

@@ -97,7 +97,10 @@ solidBodyDisplacementLaplacianFvMotionSolver
     frozenPointsZone_
     (
         coeffDict().found("frozenPointsZone")
-      ? fvMesh_.pointZones().findZoneID(coeffDict().lookup("frozenPointsZone"))
+      ? fvMesh_.pointZones().findZoneID
+        (
+            coeffDict().get<word>("frozenPointsZone")
+        )
       : -1
     )
 {
@@ -183,7 +186,10 @@ solidBodyDisplacementLaplacianFvMotionSolver
     frozenPointsZone_
     (
         coeffDict().found("frozenPointsZone")
-      ? fvMesh_.pointZones().findZoneID(coeffDict().lookup("frozenPointsZone"))
+      ? fvMesh_.pointZones().findZoneID
+        (
+            coeffDict().get<word>("frozenPointsZone")
+        )
       : -1
     )
 {

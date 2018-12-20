@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -794,10 +794,10 @@ boundary
 /* optional
         surface
         {
-            type            searchableCylinder; // none
-            point1          (0 0 -1);
-            point2          (0 0 1);
-            radius          0.5;
+            type    cylinder; // none
+            point1  (0 0 -1);
+            point2  (0 0 1);
+            radius  0.5;
         }
 */
         faces
@@ -821,10 +821,10 @@ boundary
 /* optional
         surface
         {
-            type            searchableCylinder; // none
-            point1          (0 0 -1);
-            point2          (0 0 1);
-            radius          0.5;
+            type    cylinder; // none
+            point1  (0 0 -1);
+            point2  (0 0 1);
+            radius  0.5;
         }
 */
         faces

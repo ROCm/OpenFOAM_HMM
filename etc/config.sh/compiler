@@ -15,6 +15,7 @@
 #
 # Description
 #     Setup for custom compiler versions for OpenFOAM
+#     Per-compiler overrides in "compiler-$WM_COMPILER" files
 #
 #------------------------------------------------------------------------------
 
@@ -71,6 +72,9 @@ ThirdParty)
     Gcc81)
         gcc_version=gcc-8.1.0
         ;;
+    Gcc82)
+        gcc_version=gcc-8.2.0
+        ;;
     Clang | Clang37)
         clang_version=llvm-3.7.1
         ;;
@@ -84,10 +88,10 @@ ThirdParty)
         clang_version=llvm-4.0.1
         ;;
     Clang50)
-        clang_version=llvm-5.0.1
+        clang_version=llvm-5.0.2
         ;;
     Clang60)
-        clang_version=llvm-6.0.0
+        clang_version=llvm-6.0.1
         ;;
     *)
         /bin/cat << UNKNOWN_COMPILER 1>&2
@@ -100,6 +104,9 @@ Please check your settings
 UNKNOWN_COMPILER
         ;;
     esac
+
+    # Per-compiler overrides in "compiler-$WM_COMPILER" files
+    _foamEtc -config "compiler-$WM_COMPILER"
     ;;
 esac
 

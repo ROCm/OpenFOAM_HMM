@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,23 +28,55 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Watches for presence of the named file in the $FOAM_CASE directory
-    and aborts the calculation if it is present.
+    Watches for presence of the named trigger file in the case directory
+    and signals a simulation stop (or other) event if found.
 
-    The presence of the abort file is only checked on the master process.
+    The presence of the trigger file is only checked on the master process.
 
     Currently the following action types are supported:
     - noWriteNow
     - writeNow
     - nextWrite
 
+    Example of function object specification:
+    \verbatim
+    abort
+    {
+        type    abort;
+        libs    ("libutilityFunctionObjects.so");
+
+        file    "<case>/GOODBYE";
+        action  writeNow
+    }
+    \endverbatim
+
     \heading Function object usage
     \table
-        Property  | Description         | Required  | Default value
-        type      | Type name: abort    | yes       |
-        file      | The abort filename  | no        | $FOAM_CASE/name
-        action    | Abort action        | no        | nextWrite
+        Property  | Description                         | Required | Default
+        type      | Type name: abort                    | yes |
+        file      | The trigger filename                | no  | \<case\>/name
+        action    | The default action to trigger       | no  | nextWrite
     \endtable
+
+    When the trigger file is found, it is checked for the following
+    content which corresponds to actions.
+
+    - \c action=noWriteNow
+       : triggers Foam::Time::saNoWriteNow (stop without writing data)
+    - \c action=writeNow
+       : triggers Foam::Time::saWriteNow (stop and write data)
+    - \c action=nextWrite
+       : triggers Foam::Time::saNextWrite (stop after next normal data write)
+    - \c action=endTime
+       : triggers Foam::Time::saEndTime (continue simulation to the end)
+    - Anything else (empty file, no action=, ...)
+       : use the default action
+    .
+
+Note
+    The trigger file is considered "sticky". This means that once detected
+    and processed, the trigger is duly noted and the file will not be
+    rechecked. It is not possible or desirable to 'untrigger' an action.
 
 SourceFiles
     abort.C
@@ -72,18 +104,18 @@ class abort
 :
     public functionObject
 {
-    // Private data
+    // Private Data
 
         //- Reference to the Time
         const Time& time_;
 
-        //- The fully-qualified name of the abort file
-        fileName abortFile_;
+        //- The fully-qualified name of the trigger file
+        fileName file_;
 
-        //- The type of action
-        Time::stopAtControls action_;
+        //- The default action (defined in dictionary)
+        Time::stopAtControls defaultAction_;
 
-        //- Only trigger action once
+        //- Only trigger the action once
         bool triggered_;
 
 
@@ -122,13 +154,13 @@ public:
         //- Read the dictionary settings
         virtual bool read(const dictionary& dict);
 
-        //- Check existence of abort file and take action
+        //- Check existence of the file and take action
         virtual bool execute();
 
         //- No-op
         virtual bool write();
 
-        //- Remove abort file after the final time-loop.
+        //- Remove the trigger file after the final time-loop.
         virtual bool end();
 };
 

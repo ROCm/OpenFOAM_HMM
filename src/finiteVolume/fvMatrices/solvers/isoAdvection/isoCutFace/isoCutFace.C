@@ -735,12 +735,12 @@ void Foam::isoCutFace::quadAreaCoeffs
         if (Bx > 10*SMALL)
         {
             // If |AB| > 0 ABCD we use AB to define xhat
-            xhat = (B - A)/mag(B - A);
+            xhat = normalised(B - A);
         }
         else if (mag(C - D) > 10*SMALL)
         {
             // If |AB| ~ 0 ABCD is a triangle ACD and we use CD for xhat
-            xhat = (C - D)/mag(C - D);
+            xhat = normalised(C - D);
         }
         else
         {

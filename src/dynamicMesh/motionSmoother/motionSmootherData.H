@@ -66,16 +66,10 @@ public:
     // Constructors
 
         //- Construct read
-        motionSmootherData
-        (
-            const pointMesh&
-        );
+        explicit motionSmootherData(const pointMesh& pMesh);
 
         //- Construct from pointDisplacement
-        motionSmootherData
-        (
-            const pointVectorField&
-        );
+        explicit motionSmootherData(const pointVectorField& displacement);
 
 
     // Member Functions

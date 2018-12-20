@@ -242,7 +242,7 @@ bool Foam::fileOperations::collatedFileOperation::appendObject
 
 Foam::fileOperations::collatedFileOperation::collatedFileOperation
 (
-    const bool verbose
+    bool verbose
 )
 :
     masterUncollatedFileOperation
@@ -263,6 +263,8 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks())
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
         Info<< "I/O    : " << typeName
@@ -300,12 +302,12 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
             }
             Pstream::gatherList(ioRanks);
 
-            Info<< "         IO nodes:" << endl;
-            forAll(ioRanks, proci)
+            Info<< "         IO nodes:" << nl;
+            for (const string& ranks : ioRanks)
             {
-                if (!ioRanks[proci].empty())
+                if (!ranks.empty())
                 {
-                    Info<< "             " << ioRanks[proci] << endl;
+                    Info<< "             " << ranks << nl;
                 }
             }
         }
@@ -339,7 +341,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     const label comm,
     const labelList& ioRanks,
     const word& typeName,
-    const bool verbose
+    bool verbose
 )
 :
     masterUncollatedFileOperation(comm, false),
@@ -348,6 +350,8 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks)
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
         Info<< "I/O    : " << typeName
@@ -555,14 +559,32 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
         }
         else
         {
+            // Re-check static maxThreadFileBufferSize variable to see
+            // if needs to use threading
+            bool useThread = (maxThreadFileBufferSize > 0);
+
             if (debug)
             {
                 Pout<< "collatedFileOperation::writeObject :"
                     << " For object : " << io.name()
-                    << " starting collating output to " << pathName << endl;
+                    << " starting collating output to " << pathName
+                    << " useThread:" << useThread << endl;
             }
 
-            threadedCollatedOFstream os(writer_, pathName, fmt, ver, cmp);
+            if (!useThread)
+            {
+                writer_.waitAll();
+            }
+
+            threadedCollatedOFstream os
+            (
+                writer_,
+                pathName,
+                fmt,
+                ver,
+                cmp,
+                useThread
+            );
 
             // If any of these fail, return (leave error handling to Ostream
             // class)
@@ -587,6 +609,18 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
             return true;
         }
     }
+}
+
+void Foam::fileOperations::collatedFileOperation::flush() const
+{
+    if (debug)
+    {
+        Pout<< "collatedFileOperation::flush : clearing and waiting for thread"
+            << endl;
+    }
+    masterUncollatedFileOperation::flush();
+    // Wait for thread to finish (note: also removes thread)
+    writer_.waitAll();
 }
 
 

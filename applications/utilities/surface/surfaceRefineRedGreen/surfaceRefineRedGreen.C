@@ -54,9 +54,13 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Refine by splitting all three edges of triangle"
+    );
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("output", "The output surface file");
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];

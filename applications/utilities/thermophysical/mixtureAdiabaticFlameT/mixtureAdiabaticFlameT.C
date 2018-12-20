@@ -28,7 +28,7 @@ Group
     grpThermophysicalUtilities
 
 Description
-    Calculates the adiabatic flame temperature for a given mixture
+    Calculate adiabatic flame temperature for a given mixture
     at a given temperature.
 
 \*---------------------------------------------------------------------------*/
@@ -57,12 +57,14 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Calculates the adiabatic flame temperature for a given mixture\n"
-        "at a given temperature."
+        "Calculate adiabatic flame temperature for a given mixture"
+        " at a given temperature"
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     argList::addArgument("controlFile");
+
     argList args(argc, argv);
 
     const fileName controlFileName(args[1]);
@@ -81,8 +83,8 @@ int main(int argc, char *argv[])
     dictionary control(controlFile);
 
 
-    scalar P(readScalar(control.lookup("P")));
-    scalar T0(readScalar(control.lookup("T0")));
+    const scalar P(control.get<scalar>("P"));
+    const scalar T0(control.get<scalar>("T0"));
     mixture rMix(control.lookup("reactants"));
     mixture pMix(control.lookup("products"));
 

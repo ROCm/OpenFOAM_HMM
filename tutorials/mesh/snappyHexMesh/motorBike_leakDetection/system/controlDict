@@ -1,0 +1,98 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1812                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Where to load it from (if not already in solver)
+libs            ("libfieldFunctionObjects.so");
+
+DebugSwitches
+{
+    //shortestPath 1;
+}
+
+
+application     simpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         500;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   100;
+
+purgeWrite      0;
+
+writeFormat     binary;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    processorField
+    {
+        // Type of functionObject
+        type            processorField;
+
+        // Where to load it from (if not already in solver)
+        libs            ("libfieldFunctionObjects.so");
+
+        // Function object enabled flag
+        enabled         true;
+
+        // When to output the average fields
+        //writeControl    writeTime;
+    }
+
+    leakFind
+    {
+        type            sets;
+
+        writeControl    timeStep;
+        interpolationScheme cell;
+        setFormat       vtk;
+
+        sets
+        (
+            leakFind
+            {
+                type    shortestPath;
+                insidePoints   ((3.0001 3.0001 0.43));
+                outsidePoints  ((1 0 1.3));
+                axis    xyz;
+            }
+        );
+
+        // Needs at least one field
+        fields          ( processorID );
+    }
+}
+
+
+// ************************************************************************* //

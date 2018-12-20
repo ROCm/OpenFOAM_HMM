@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,12 +38,13 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noBanner();
-    argList::noParallel();
+    argList::noCheckProcessorDirectories(); // parallel OK, but without checks
+
     // argList::noFunctionObjects();
-    argList::removeOption("case");
     argList::addOption("label",  "value", "Test parsing of label");
     argList::addOption("scalar", "value", "Test parsing of scalar");
     argList::addOption("string", "value", "Test string lookup");
+    argList::addOption("relative", "PATH", "Test relativePath");
 
     // These are actually lies (never had -parseLabel, -parseScalar etc),
     // but good for testing...
@@ -69,13 +70,29 @@ int main(int argc, char *argv[])
     argList::addArgument("label");
     argList::addArgument("...");
     argList::addArgument("label");
-    argList::nonMandatoryArgs();
+    argList::noMandatoryArgs();
 
-    argList args(argc, argv, false, true);
+    #include "setRootCase.H"
 
+    Pout<< "command-line ("
+        << args.options().size() << " options, "
+        << args.args().size() << " args)" << nl
+        << "    " << args.commandLine().c_str() << nl << nl;
 
-    Info<<"have: "
-        <<args.count({"label", "scalar"}) << " options" << nl;
+    Pout<< "rootPath:   " << args.rootPath() << nl
+        << "globalCase: " << args.globalCaseName() << nl
+        << "globalPath: " << args.globalPath() << nl
+        << nl;
+
+    if (args.found("relative"))
+    {
+        Pout<< "input path: " << args["relative"] << nl
+            << "relative  : " << args.relativePath(args["relative"], true) << nl
+            << nl;
+    }
+
+    Info<< "have: "
+        << args.count({"label", "scalar"}) << " options" << nl;
 
     label ival;
     scalar sval;
@@ -108,7 +125,9 @@ int main(int argc, char *argv[])
     if (args.found("label"))
     {
         Info<< "-label = " << args.opt<label>("label")
+            #ifdef Foam_argList_1712
             << " or " << args.optionRead<label>("label")  // old-compat
+            #endif
             << " or " << readLabel(args["label"])         // with function
             << nl;
     }
@@ -116,7 +135,9 @@ int main(int argc, char *argv[])
     if (args.found("scalar"))
     {
         Info<< "-scalar = " << args.opt<scalar>("scalar")
+            #ifdef Foam_argList_1712
             << " or " << args.optionRead<scalar>("scalar") // old-compat
+            #endif
             << " or " << readScalar(args["scalar"])        // with function
             << nl;
     }
@@ -124,7 +145,9 @@ int main(int argc, char *argv[])
     if (args.found("string"))
     {
         Info<< "-string = " << args.opt("string")
+            #ifdef Foam_argList_1712
             << " or " << args.optionRead<scalar>("string")  // old-compat
+            #endif
             << nl;
     }
 
@@ -133,8 +156,11 @@ int main(int argc, char *argv[])
     Info<< nl;
     for (label argi=1; argi < args.size(); ++argi)
     {
-        Info<< "arg[" << argi << "] = " << args.read<string>(argi)
+        Info<< "arg[" << argi << "] = " << args.get<string>(argi)
+            #ifdef Foam_argList_1712
+            << " or " << args.read<label>(argi)     // old-compat
             << " or " << args.argRead<label>(argi)  // old-compat
+            #endif
             << nl;
     }
 

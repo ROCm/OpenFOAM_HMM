@@ -34,10 +34,7 @@ inline void Foam::LduMatrix<Type, DType, LUType>::solver::readControl
     const word& controlName
 )
 {
-    if (controlDict.found(controlName))
-    {
-        controlDict.lookup(controlName) >> control;
-    }
+    controlDict.readIfPresent(controlName, control);
 }
 
 

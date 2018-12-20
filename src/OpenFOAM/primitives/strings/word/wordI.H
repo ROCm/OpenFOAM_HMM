@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <cctype>
-#include <iostream>  // for std::cerr
+#include <iostream>  // For std::cerr
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -78,89 +78,66 @@ inline void Foam::word::stripInvalid()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::word::word()
-:
-    string()
-{}
-
-
-inline Foam::word::word(const word& w)
-:
-    string(w)
-{}
-
-
-inline Foam::word::word(const string& s, const bool doStripInvalid)
+inline Foam::word::word(const string& s, bool doStrip)
 :
     string(s)
 {
-    if (doStripInvalid)
+    if (doStrip)
     {
         stripInvalid();
     }
 }
 
 
-inline Foam::word::word(const std::string& s, const bool doStripInvalid)
+inline Foam::word::word(string&& s, bool doStrip)
 :
-    string(s)
+    string(std::move(s))
 {
-    if (doStripInvalid)
+    if (doStrip)
     {
         stripInvalid();
     }
 }
 
 
-inline Foam::word::word(const char* s, const bool doStripInvalid)
+inline Foam::word::word(std::string&& s, bool doStrip)
 :
-    string(s)
+    string(std::move(s))
 {
-    if (doStripInvalid)
+    if (doStrip)
     {
         stripInvalid();
     }
 }
 
 
-inline Foam::word::word
-(
-    const char* s,
-    const size_type len,
-    const bool doStripInvalid
-)
+inline Foam::word::word(const std::string& s, bool doStrip)
+:
+    string(s)
+{
+    if (doStrip)
+    {
+        stripInvalid();
+    }
+}
+
+
+inline Foam::word::word(const char* s, bool doStrip)
+:
+    string(s)
+{
+    if (doStrip)
+    {
+        stripInvalid();
+    }
+}
+
+
+inline Foam::word::word(const char* s, size_type len, bool doStrip)
 :
     string(s, len)
 {
-    if (doStripInvalid)
-    {
-        stripInvalid();
-    }
-}
-
-
-inline Foam::word::word(word&& w)
-:
-    string(std::move(w))
-{}
-
-
-inline Foam::word::word(string&& s, const bool doStripInvalid)
-:
-    string(std::move(s))
-{
-    if (doStripInvalid)
-    {
-        stripInvalid();
-    }
-}
-
-
-inline Foam::word::word(std::string&& s, const bool doStripInvalid)
-:
-    string(std::move(s))
-{
-    if (doStripInvalid)
+    if (doStrip)
     {
         stripInvalid();
     }
@@ -198,50 +175,43 @@ inline bool Foam::word::removeExt()
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::word::operator=(const word& w)
-{
-    assign(w);
-}
-
-
-inline void Foam::word::operator=(word&& w)
-{
-    assign(std::move(w));
-}
-
-
-inline void Foam::word::operator=(const string& s)
+inline Foam::word& Foam::word::operator=(const string& s)
 {
     assign(s);
     stripInvalid();
+    return *this;
 }
 
 
-inline void Foam::word::operator=(string&& s)
+inline Foam::word& Foam::word::operator=(string&& s)
 {
     assign(std::move(s));
     stripInvalid();
+    return *this;
 }
 
 
-inline void Foam::word::operator=(const std::string& s)
+inline Foam::word& Foam::word::operator=(const std::string& s)
 {
     assign(s);
     stripInvalid();
+    return *this;
 }
 
 
-inline void Foam::word::operator=(std::string&& s)
+inline Foam::word& Foam::word::operator=(std::string&& s)
 {
     assign(std::move(s));
     stripInvalid();
+    return *this;
 }
 
 
-inline void Foam::word::operator=(const char* s)
+inline Foam::word& Foam::word::operator=(const char* s)
 {
     assign(s);
     stripInvalid();
+    return *this;
 }
 
 

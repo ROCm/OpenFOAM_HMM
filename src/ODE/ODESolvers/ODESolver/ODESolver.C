@@ -64,7 +64,7 @@ Foam::ODESolver::ODESolver(const ODESystem& ode, const dictionary& dict)
     n_(ode.nEqns()),
     absTol_(n_, dict.lookupOrDefault<scalar>("absTol", SMALL)),
     relTol_(n_, dict.lookupOrDefault<scalar>("relTol", 1e-4)),
-    maxSteps_(dict.lookupOrDefault<scalar>("maxSteps", 10000))
+    maxSteps_(dict.lookupOrDefault<label>("maxSteps", 10000))
 {}
 
 
@@ -149,7 +149,7 @@ void Foam::ODESolver::solve
     stepState step(dxTry);
     scalar x = xStart;
 
-    for (label nStep=0; nStep<maxSteps_; nStep++)
+    for (label nStep=0; nStep<maxSteps_; ++nStep)
     {
         // Store previous iteration dxTry
         scalar dxTry0 = step.dxTry;

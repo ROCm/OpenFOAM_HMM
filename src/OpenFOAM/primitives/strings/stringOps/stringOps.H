@@ -49,6 +49,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class OSstream;
+
 /*---------------------------------------------------------------------------*\
                         Namespace stringOps Declaration
 \*---------------------------------------------------------------------------*/
@@ -216,34 +219,51 @@ namespace stringOps
     //  -# environment variables
     //    - "$VAR", "${VAR}"
     //  -# current directory
-    //    - leading "./" : the current directory
+    //    - leading "./"
+    //          : the current directory - Foam::cwd()
     //  -# leading tag expansion for commonly used directories
-    //    - \<etc\>/        : user/group/other OpenFOAM directory
-    //    - \<case\>/       : FOAM_CASE directory
-    //    - \<constant\>/   : FOAM_CASE/constant directory
-    //    - \<system\>/     : FOAM_CASE/system directory
+    //    - <b> \<etc\>/ </b>
+    //          : user/group/other OpenFOAM etc directory
+    //    - <b> \<etc:</b><em>[ugoa]+</em>)<b>\>/ </b>
+    //          : user/group/other etc with specified location mode
+    //    - <b> \<case\>/ </b>
+    //          : The \c $FOAM_CASE directory
+    //    - <b> \<constant\>/ </b>
+    //          : The \c $FOAM_CASE/constant directory
+    //    - <b> \<system\>/ </b>
+    //          : The \c $FOAM_CASE/system directory
     //  -# tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user
-    //    - leading "~OpenFOAM" : user/group/other OpenFOAM directory
     //
     //  Supports default and alternative values as per the POSIX shell.
     //  \code
-    //      a)  "${parameter:-defValue}"
-    //      b)  "${parameter:+altValue}"
+    //      1.  "${parameter:-defValue}"
+    //      2.  "${parameter:+altValue}"
     //  \endcode
-    //  a) If parameter is unset or null, the \c defValue is substituted.
-    //  Otherwise, the value of parameter is substituted.
+    //  -# If parameter is unset or null, the \c defValue is substituted.
+    //     Otherwise, the value of parameter is substituted.
+    //  -# If parameter is unset or null, nothing is substituted.
+    //     Otherwise the \c altValue is substituted.
+    //  .
     //
-    //  b) If parameter is unset or null, nothing is substituted.
-    //  Otherwise the \c altValue is substituted.
-    //
+    // General behavior:
     //  - Any unknown entries are removed silently, if allowEmpty is true.
     //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
-    //  are left as is.
+    //    are left as is.
+    //
+    //  An example of using the specified location mode
+    //  \code
+    //      fileName controlDict(stringOps::expand("<etc:o>/controlDict"));
+    //      // OR
+    //      fileName controlDict(findEtcFile("controlDict", false, 0007));
+    //  \endcode
+    //
+    //  \note Deprecated(2018-11) Use "<etc>" instead of the rarely used
+    //      "~OpenFOAM" expansion
     //
     //  \sa
-    //  Foam::findEtcFile
+    //  Foam::findEtcEntry(), Foam::findEtcEntries(),
     string expand
     (
         const string& original,
@@ -258,32 +278,41 @@ namespace stringOps
     //  -# current directory
     //    - leading "./" : the current directory
     //  -# leading tag expansion for commonly used directories
-    //    - \<etc\>/        : user/group/other OpenFOAM directory
-    //    - \<case\>/       : FOAM_CASE directory
-    //    - \<constant\>/   : FOAM_CASE/constant directory
-    //    - \<system\>/     : FOAM_CASE/system directory
+    //    - <b> \<etc\>/ </b>
+    //          : user/group/other OpenFOAM etc directory
+    //    - <b> \<etc:</b><em>[ugoa]+</em>)<b>\>/ </b>
+    //          : user/group/other etc with specified location mode
+    //    - <b> \<case\>/ </b>
+    //          : The \c $FOAM_CASE directory
+    //    - <b> \<constant\>/ </b>
+    //          : The \c $FOAM_CASE/constant directory
+    //    - <b> \<system\>/ </b>
+    //          : The \c $FOAM_CASE/system directory
     //  -# tilde expansion
     //    - leading "~/" : home directory
     //    - leading "~user" : home directory for specified user
-    //    - leading "~OpenFOAM" : user/group/other OpenFOAM directory
     //
     //  Supports default and alternative values as per the POSIX shell.
     //  \code
-    //      a)  "${parameter:-defValue}"
-    //      b)  "${parameter:+altValue}"
+    //      1.  "${parameter:-defValue}"
+    //      2.  "${parameter:+altValue}"
     //  \endcode
-    //  a) If parameter is unset or null, the \c defValue is substituted.
-    //  Otherwise, the value of parameter is substituted.
+    //  -# If parameter is unset or null, the \c defValue is substituted.
+    //     Otherwise, the value of parameter is substituted.
+    //  -# If parameter is unset or null, nothing is substituted.
+    //     Otherwise the \c altValue is substituted.
+    //  .
     //
-    //  b) If parameter is unset or null, nothing is substituted.
-    //  Otherwise the \c altValue is substituted.
-    //
+    // General behavior:
     //  - Any unknown entries are removed silently if allowEmpty is true.
     //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
-    //  are left as is.
+    //    are left as is.
+    //
+    //  \note Deprecated(2018-11) Use "<etc>" instead of the rarely used
+    //      "~OpenFOAM" expansion
     //
     //  \sa
-    //  Foam::findEtcFile
+    //  Foam::findEtcEntry(), Foam::findEtcEntries(),
     void inplaceExpand
     (
         std::string& s,
@@ -382,6 +411,22 @@ namespace stringOps
         const StringType& str
     );
 
+    //- Output string with text wrapping.
+    //  Always includes a trailing newline, unless the string itself is empty.
+    //
+    //  \param os the output stream
+    //  \param str the text to be output
+    //  \param width the max-width before wrapping
+    //  \param indent indentation for continued lines
+    //  \param escape escape any backslashes on output
+    void writeWrapped
+    (
+        OSstream& os,
+        const std::string& str,
+        const std::string::size_type width,
+        const std::string::size_type indent = 0,
+        const bool escape = false
+    );
 
 } // End namespace stringOps
 

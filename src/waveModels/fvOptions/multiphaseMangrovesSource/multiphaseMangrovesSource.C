@@ -53,7 +53,7 @@ namespace fv
 Foam::tmp<Foam::volScalarField>
 Foam::fv::multiphaseMangrovesSource::dragCoeff(const volVectorField& U) const
 {
-    tmp<volScalarField> tdragCoeff = tmp<volScalarField>::New
+    auto tdragCoeff = tmp<volScalarField>::New
     (
         IOobject
         (
@@ -64,10 +64,9 @@ Foam::fv::multiphaseMangrovesSource::dragCoeff(const volVectorField& U) const
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     );
-
-    volScalarField& dragCoeff = tdragCoeff.ref();
+    auto& dragCoeff = tdragCoeff.ref();
 
     forAll(zoneIDs_, i)
     {
@@ -99,7 +98,7 @@ Foam::fv::multiphaseMangrovesSource::dragCoeff(const volVectorField& U) const
 Foam::tmp<Foam::volScalarField>
 Foam::fv::multiphaseMangrovesSource::inertiaCoeff() const
 {
-    tmp<volScalarField> tinertiaCoeff = tmp<volScalarField>::New
+    auto tinertiaCoeff = tmp<volScalarField>::New
     (
         IOobject
         (
@@ -110,10 +109,9 @@ Foam::fv::multiphaseMangrovesSource::inertiaCoeff() const
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     );
-
-    volScalarField& inertiaCoeff = tinertiaCoeff.ref();
+    auto& inertiaCoeff = tinertiaCoeff.ref();
 
     const scalar pi = constant::mathematical::pi;
 
@@ -207,18 +205,10 @@ bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-        if (coeffs_.found("UNames"))
+        if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {
-            coeffs_.lookup("UNames") >> fieldNames_;
-        }
-        else if (coeffs_.found("U"))
-        {
-            word UName(coeffs_.lookup("U"));
-            fieldNames_ = wordList(1, UName);
-        }
-        else
-        {
-            fieldNames_ = wordList(1, "U");
+            fieldNames_.resize(1);
+            fieldNames_.first() = coeffs_.lookupOrDefault<word>("U", "U");
         }
 
         applied_.setSize(fieldNames_.size(), false);
@@ -237,8 +227,9 @@ bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
             const word& regionName = regionNames[i];
             const dictionary& modelDict = regionsDict.subDict(regionName);
 
-            const word& zoneName = modelDict.lookup("cellZone");
-            zoneIDs_[i] = mesh_.cellZones().findIndices(zoneName);
+            const word zoneName(modelDict.get<word>("cellZone"));
+
+            zoneIDs_[i] = mesh_.cellZones().indices(zoneName);
             if (zoneIDs_[i].empty())
             {
                 FatalErrorInFunction
@@ -247,18 +238,16 @@ bool Foam::fv::multiphaseMangrovesSource::read(const dictionary& dict)
                     << exit(FatalError);
             }
 
-            modelDict.lookup("a") >> aZone_[i];
-            modelDict.lookup("N") >> NZone_[i];
-            modelDict.lookup("Cm") >> CmZone_[i];
-            modelDict.lookup("Cd") >> CdZone_[i];
+            modelDict.readEntry("a", aZone_[i]);
+            modelDict.readEntry("N", NZone_[i]);
+            modelDict.readEntry("Cm", CmZone_[i]);
+            modelDict.readEntry("Cd", CdZone_[i]);
         }
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

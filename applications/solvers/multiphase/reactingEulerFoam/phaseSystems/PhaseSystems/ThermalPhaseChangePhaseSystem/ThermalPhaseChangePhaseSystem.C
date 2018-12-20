@@ -131,19 +131,15 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::heatTransfer() const
             dimensionedScalar(dimensionSet(1,-1,-3,0,0), Zero)
         );
 
-        if
-        (
-            otherPhase.mesh().foundObject<volScalarField>
+        const volScalarField* alphatPtr =
+            otherPhase.mesh().findObject<volScalarField>
             (
                 "alphat." +  otherPhase.name()
-            )
-        )
+            );
+
+        if (alphatPtr)
         {
-            const volScalarField& alphat =
-                otherPhase.mesh().lookupObject<volScalarField>
-                (
-                    "alphat." +  otherPhase.name()
-                );
+            const volScalarField& alphat = *alphatPtr;
 
             const fvPatchList& patches = this->mesh().boundary();
             forAll(patches, patchi)
@@ -427,19 +423,15 @@ void Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctThermo()
             dimensionedScalar(dimDensity/dimTime, Zero)
         );
 
-        if
-        (
-            phase2.mesh().foundObject<volScalarField>
+        const volScalarField* alphatPtr =
+            phase2.mesh().findObject<volScalarField>
             (
-                "alphat." +  phase2.name()
-            )
-        )
+                "alphat." + phase2.name()
+            );
+
+        if (alphatPtr)
         {
-            const volScalarField& alphat =
-                phase2.mesh().lookupObject<volScalarField>
-                (
-                    "alphat." +  phase2.name()
-                );
+            const volScalarField& alphat = *alphatPtr;
 
             const fvPatchList& patches = this->mesh().boundary();
             forAll(patches, patchi)

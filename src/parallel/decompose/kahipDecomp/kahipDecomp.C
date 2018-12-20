@@ -60,14 +60,14 @@ const Foam::Enum
     Foam::kahipDecomp::configs
 >
 Foam::kahipDecomp::configNames
-{
+({
     { kahipDecomp::configs::FAST, "fast" },
     { kahipDecomp::configs::ECO, "eco" },
     { kahipDecomp::configs::STRONG, "strong" },
     { kahipDecomp::configs::FASTSOCIAL, "fast-social" },
     { kahipDecomp::configs::ECOSOCIAL, "eco-social" },
     { kahipDecomp::configs::STRONGSOCIAL, "strong-social" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -130,9 +130,7 @@ Foam::label Foam::kahipDecomp::decomposeSerial
         }
     }
 
-    kahipConfig =
-        configNames.lookupOrDefault("config", coeffsDict_, kahipConfig);
-
+    configNames.readIfPresent("config", coeffsDict_, kahipConfig);
     coeffsDict_.readIfPresent("imbalance", imbalance);
     coeffsDict_.readIfPresent("verbose", verbose);
 

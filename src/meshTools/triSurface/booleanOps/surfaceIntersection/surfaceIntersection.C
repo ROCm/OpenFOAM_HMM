@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,11 +46,11 @@ const Foam::Enum
     Foam::surfaceIntersection::intersectionType
 >
 Foam::surfaceIntersection::selfIntersectionNames
-{
+({
     { intersectionType::SELF, "self" },
     { intersectionType::SELF_REGION, "region" },
     { intersectionType::NONE, "none" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -867,7 +867,7 @@ void Foam::surfaceIntersection::doCutEdges
 
                 maskFaces.append(pHit.index());
 
-                if (maskRegions[surf1[pHit.index()].region()])
+                if (maskRegions.test(surf1[pHit.index()].region()))
                 {
                     continue;
                 }

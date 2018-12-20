@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(pointToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, pointToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, pointToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, pointToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, pointToPoint, istream);
 }
 
 
@@ -54,8 +56,8 @@ Foam::pointToPoint::pointToPoint
     const word& setName
 )
 :
-    topoSetSource(mesh),
-    setName_(setName)
+    topoSetPointSource(mesh),
+    names_(one(), setName)
 {}
 
 
@@ -65,9 +67,16 @@ Foam::pointToPoint::pointToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.lookup("set"))
-{}
+    topoSetPointSource(mesh),
+    names_()
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::pointToPoint::pointToPoint
@@ -76,14 +85,8 @@ Foam::pointToPoint::pointToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    setName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointToPoint::~pointToPoint()
+    topoSetPointSource(mesh),
+    names_(one(), word(checkIs(is)))
 {}
 
 
@@ -95,23 +98,35 @@ void Foam::pointToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all from pointSet " << setName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all elements of pointSet "
+                << flatOutput(names_) << nl;
+        }
 
-        // Load the set
-        pointSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            pointSet loadedSet(mesh_, setName);
 
-        set.addSet(loadedSet);
+            set.addSet(loadedSet);
+        }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all from pointSet " << setName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all elements of pointSet "
+                << flatOutput(names_) << nl;
+        }
 
-        // Load the set
-        pointSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            pointSet loadedSet(mesh_, setName);
 
-        set.deleteSet(loadedSet);
+            set.subtractSet(loadedSet);
+        }
     }
 }
 

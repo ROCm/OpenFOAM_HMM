@@ -90,19 +90,13 @@ Foam::extrude2DMesh::extrude2DMesh
     dict_(dict),
     //patchDict_(dict.subDict("patchInfo")),
     model_(model),
-    modelType_(dict.lookup("extrudeModel")),
-    patchType_(dict.lookup("patchType")),
+    modelType_(dict.get<word>("extrudeModel")),
+    patchType_(dict.get<word>("patchType")),
     frontPatchi_(-1),
     backPatchi_(-1)
 {
     check2D();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::extrude2DMesh::~extrude2DMesh()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

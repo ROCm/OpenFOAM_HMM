@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,13 +32,17 @@ License
 
 template<class LListBase, class T>
 template<class INew>
-void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& inew)
+void Foam::LPtrList<LListBase, T>::readIstream(Istream& is, const INew& inew)
 {
     is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
-    is.fatalCheck("LPtrList::readList : reading first token");
+    is.fatalCheck
+    (
+        "LPtrList::readIstream : "
+        "reading first token"
+    );
 
     if (firstToken.isLabel())
     {
@@ -56,7 +60,11 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& inew)
                     T* p = inew(is).ptr();
                     this->append(p);
 
-                    is.fatalCheck("LPtrList::readList : reading entry");
+                    is.fatalCheck
+                    (
+                        "LPtrList::readIstream : "
+                        "reading entry"
+                    );
                 }
             }
             else
@@ -64,7 +72,11 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& inew)
                 T* p = inew(is).ptr();
                 this->append(p);
 
-                is.fatalCheck("LPtrList::readList : reading entry");
+                is.fatalCheck
+                (
+                    "LPtrList::readIstream : "
+                    "reading the single entry"
+                );
 
                 for (label i=1; i<len; ++i)
                 {
@@ -80,10 +92,8 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& inew)
     {
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "incorrect first token, '(', found " << firstToken.info()
+            FatalIOErrorInFunction(is)
+                << "incorrect first token, '(', found " << firstToken.info()
                 << exit(FatalIOError);
         }
 
@@ -107,10 +117,8 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& inew)
     }
     else
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "incorrect first token, expected <int> or '(', found "
+        FatalIOErrorInFunction(is)
+            << "incorrect first token, expected <int> or '(', found "
             << firstToken.info()
             << exit(FatalIOError);
     }
@@ -125,24 +133,24 @@ template<class LListBase, class T>
 template<class INew>
 Foam::LPtrList<LListBase, T>::LPtrList(Istream& is, const INew& inew)
 {
-    this->read(is, inew);
+    this->readIstream(is, inew);
 }
 
 
 template<class LListBase, class T>
 Foam::LPtrList<LListBase, T>::LPtrList(Istream& is)
 {
-    this->read(is, INew<T>());
+    this->readIstream(is, INew<T>());
 }
 
 
 // * * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-Foam::Istream& Foam::operator>>(Istream& is, LPtrList<LListBase, T>& L)
+Foam::Istream& Foam::operator>>(Istream& is, LPtrList<LListBase, T>& list)
 {
-    L.clear();
-    L.read(is, INew<T>());
+    list.clear();
+    list.readIstream(is, INew<T>());
 
     return is;
 }
@@ -151,13 +159,17 @@ Foam::Istream& Foam::operator>>(Istream& is, LPtrList<LListBase, T>& L)
 // * * * * * * * * * * * * * * * Ostream Operators * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const LPtrList<LListBase, T>& lst)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const LPtrList<LListBase, T>& list
+)
 {
     // Size and start delimiter
-    os << nl << lst.size() << nl << token::BEGIN_LIST << nl;
+    os << nl << list.size() << nl << token::BEGIN_LIST << nl;
 
     // Contents
-    for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
+    for (auto iter = list.cbegin(); iter != list.cend(); ++iter)
     {
         os << *iter << nl;
     }

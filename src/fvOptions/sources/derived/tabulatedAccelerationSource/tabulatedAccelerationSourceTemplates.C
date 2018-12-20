@@ -41,13 +41,10 @@ void Foam::fv::tabulatedAccelerationSource::addSup
     Vector<vector> acceleration(motion_.acceleration());
 
     // If gravitational force is present combine with the linear acceleration
-    if (mesh_.foundObject<uniformDimensionedVectorField>("g"))
+    if (mesh_.time().foundObject<uniformDimensionedVectorField>("g"))
     {
         uniformDimensionedVectorField& g =
-            const_cast<uniformDimensionedVectorField&>
-            (
-                mesh_.lookupObject<uniformDimensionedVectorField>("g")
-            );
+            mesh_.time().lookupObjectRef<uniformDimensionedVectorField>("g");
 
         const uniformDimensionedScalarField& hRef =
             mesh_.lookupObject<uniformDimensionedScalarField>("hRef");
@@ -61,15 +58,11 @@ void Foam::fv::tabulatedAccelerationSource::addSup
           : dimensionedScalar("ghRef", g.dimensions()*dimLength, 0)
         );
 
-        const_cast<volScalarField&>
-        (
-            mesh_.lookupObject<volScalarField>("gh")
-        ) = (g & mesh_.C()) - ghRef;
+        mesh_.lookupObjectRef<volScalarField>("gh")
+            = (g & mesh_.C()) - ghRef;
 
-        const_cast<surfaceScalarField&>
-        (
-            mesh_.lookupObject<surfaceScalarField>("ghf")
-        ) = (g & mesh_.Cf()) - ghRef;
+        mesh_.lookupObjectRef<surfaceScalarField>("ghf")
+            = (g & mesh_.Cf()) - ghRef;
     }
     // ... otherwise include explicitly in the momentum equation
     else

@@ -408,13 +408,13 @@ Foam::faMesh::faMesh
 
         faPatches[patchI].name_ = faPatchNames[patchI];
 
-        faPatches[patchI].type_ = word(curPatchDict.lookup("type"));
+        faPatches[patchI].type_ = curPatchDict.get<word>("type");
 
         faPatches[patchI].ownPolyPatchID_ =
-            pbm.findPatchID(word(curPatchDict.lookup("ownerPolyPatch")));
+            pbm.findPatchID(curPatchDict.get<word>("ownerPolyPatch"));
 
         faPatches[patchI].ngbPolyPatchID_ =
-            pbm.findPatchID(word(curPatchDict.lookup("neighbourPolyPatch")));
+            pbm.findPatchID(curPatchDict.get<word>("neighbourPolyPatch"));
     }
 
 

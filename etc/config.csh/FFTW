@@ -11,7 +11,7 @@
 #
 # File
 #     etc/config.csh/FFTW
-#     - sourced by OpenFOAM-*/etc/bashrc
+#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
 #     Setup for FFTW include/libraries (usually ThirdParty installation).

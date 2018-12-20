@@ -109,17 +109,17 @@
         #+begin_src C++
         //- Search for \em name
         //  in the following hierarchy:
-        //  -# personal settings:
+        //  -# user settings
         //    - ~/.OpenFOAM/\<VERSION\>/
         //      <em>for version-specific files</em>
         //    - ~/.OpenFOAM/
         //      <em>for version-independent files</em>
-        //  -# site-wide settings:
-        //    - $WM_PROJECT_INST_DIR/site/\<VERSION\>
+        //  -# group settings
+        //    - $WM_PROJECT_DIR/site/\<VERSION\>
         //      <em>for version-specific files</em>
-        //    - $WM_PROJECT_INST_DIR/site/
+        //    - $WM_PROJECT_DIR/site/
         //      <em>for version-independent files</em>
-        //  -# shipped settings:
+        //  -# other (shipped) settings
         //    - $WM_PROJECT_DIR/etc/
         //
         //  \return the full path name or fileName() if the name cannot be found

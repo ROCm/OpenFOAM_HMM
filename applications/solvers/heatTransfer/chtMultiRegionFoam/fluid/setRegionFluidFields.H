@@ -11,7 +11,7 @@
     label inertIndex = -1;
     if (Y.size())
     {
-        const word inertSpecie(thermo.lookup("inertSpecie"));
+        const word inertSpecie(thermo.get<word>("inertSpecie"));
         if (!composition.species().found(inertSpecie))
         {
             FatalIOErrorIn(args.executable().c_str(), thermo)
@@ -36,7 +36,6 @@
 
     volScalarField& p_rgh = p_rghFluid[i];
 
-    const dimensionedVector& g = gFluid[i];
     const volScalarField& gh = ghFluid[i];
     const surfaceScalarField& ghf = ghfFluid[i];
 

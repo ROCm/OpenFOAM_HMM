@@ -127,7 +127,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
             const bool posVol = (nbrTi.tet(mesh()).mag() > 0);
             const vector path(endPosition - localPosition_);
 
-            if (posVol == ((nbrTi.faceTri(mesh()).normal() & path) < 0))
+            if (posVol == ((nbrTi.faceTri(mesh()).areaNormal() & path) < 0))
             {
                 // Change into nbrCell. No need to change tetFace, tetPt.
                 //Pout<< "    crossed from cell:" << celli_
@@ -166,8 +166,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
         }
 
         const triFace tri(currentTetIndices().faceTriIs(mesh(), false));
-        vector n = tri.normal(mesh().points());
-        n /= mag(n);
+        const vector n = tri.unitNormal(mesh().points());
 
         point projectedEndPosition = endPosition;
 

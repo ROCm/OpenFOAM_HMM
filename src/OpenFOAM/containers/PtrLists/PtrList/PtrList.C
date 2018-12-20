@@ -68,7 +68,7 @@ Foam::PtrList<T>::PtrList(const SLPtrList<T>& list)
 template<class T>
 Foam::PtrList<T>::~PtrList()
 {
-    (this->ptrs_).free();
+    (this->ptrs_).free(); // free old pointers
 }
 
 

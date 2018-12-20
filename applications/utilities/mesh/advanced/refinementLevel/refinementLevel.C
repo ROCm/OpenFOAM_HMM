@@ -28,8 +28,8 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Tries to figure out what the refinement level is on refined cartesian
-    meshes. Run BEFORE snapping.
+    Attempt to determine the refinement levels of a refined cartesian mesh.
+    Run BEFORE snapping.
 
     Writes
     - volScalarField 'refinementLevel' with current refinement level.
@@ -98,13 +98,18 @@ bool limitRefinementLevel
 }
 
 
-
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Attempt to determine refinement levels of a refined cartesian mesh.\n"
+        "Run BEFORE snapping!"
+    );
+
     argList::addBoolOption
     (
         "readLevel",
-        "read level from refinementLevel file"
+        "Read level from refinementLevel file"
     );
 
     #include "setRootCase.H"

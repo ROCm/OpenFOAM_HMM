@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,7 +91,7 @@ class primitiveMesh
             //- Number of internal edges using 0 or 1 boundary points
             mutable label nInternal1Edges_;
 
-            //- Number of internal edges using 0,1 or 2boundary points
+            //- Number of internal edges using 0,1 or 2 boundary points
             mutable label nInternalEdges_;
 
             //- Number of edges
@@ -478,24 +478,39 @@ public:
 
             // Mesh size parameters
 
+                //- Number of mesh points
                 inline label nPoints() const;
+
+                //- Number of mesh edges
                 inline label nEdges() const;
-                inline label nInternalFaces() const;
+
+                //- Number of mesh faces
                 inline label nFaces() const;
+
+                //- Number of mesh cells
                 inline label nCells() const;
 
-                // If points are ordered (nInternalPoints != -1):
+                //- Number of internal faces
+                inline label nInternalFaces() const;
 
-                    //- Points not on boundary
-                    inline label nInternalPoints() const;
+                //- Number of boundary faces (== nFaces - nInternalFaces)
+                inline label nBoundaryFaces() const;
 
-                    //- Internal edges (i.e. not on boundary face) using
-                    //  no boundary point
-                    inline label nInternal0Edges() const;
-                    //- Internal edges using 0 or 1 boundary point
-                    inline label nInternal1Edges() const;
-                    //- Internal edges using 0,1 or 2 boundary points
-                    inline label nInternalEdges() const;
+
+            // If points are ordered (nInternalPoints != -1):
+
+                //- Points not on boundary
+                inline label nInternalPoints() const;
+
+                //- Internal edges (i.e. not on boundary face) using
+                //- no boundary point
+                inline label nInternal0Edges() const;
+
+                //- Internal edges using 0 or 1 boundary point
+                inline label nInternal1Edges() const;
+
+                //- Internal edges using 0,1 or 2 boundary points
+                inline label nInternalEdges() const;
 
 
             // Primitive mesh data

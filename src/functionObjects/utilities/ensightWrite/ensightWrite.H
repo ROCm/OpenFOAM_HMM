@@ -42,35 +42,80 @@ Description
 
         overwrite       true;
         width           12;
-        directory       "EnSight";
 
-        fields
-        (
-            U
-            p
-        );
+        fields          (U p);
+
+        selection
+        {
+            box
+            {
+                action  use;
+                source  box;
+                box     (-0.1 -0.01 -0.1) (0.1 0.30 0.1);
+            }
+            dome
+            {
+                action  add;
+                shape   sphere;
+                origin  (-0.1 -0.01 -0.1);
+                radius  0.25;
+            }
+            centre
+            {
+                action  subtract;
+                source  sphere;
+                origin  (-0.1 -0.01 -0.1);
+                radius  0.1;
+            }
+            blob
+            {
+                action  add;
+                source  surface;
+                surface triSurfaceMesh;
+                name    blob.stl;
+            }
+        }
     }
     \endverbatim
 
-    \heading Function object usage
+    \heading Basic Usage
     \table
-        Property     | Description                  | Required  | Default value
-        type         | Type name: ensightWrite      | yes       |
-        fields       | Fields to output             | yes       |
-        writeControl | Output control               | recommended | timeStep
-        directory    | The output directory name    | no        | "ensightWrite"
-        overwrite    | Remove existing directory    | no        | false
-        format       | Either ascii or binary       | no        | same as simulation
-        width        | Mask width for \c data/XXXX  | no        | 8
-        noPatches    | Suppress writing patches     | no        | false
-        patches      | Select patches to write      | no        |
-        faceZones    | Select faceZones to write    | no        |
-        consecutive  | Consecutive output numbering | no        | false
-        nodeValues   | Write values at nodes        | no        | false
+        Property    | Description                           | Required | Default
+        type        | Type name: ensightWrite               | yes |
+        fields      | Fields to output                      | yes |
+        boundary    | Convert boundary fields               | no  | true
+        internal    | Convert internal fields               | no  | true
+        nodeValues  | Write values at nodes                 | no  | false
     \endtable
 
-    Note that if the \c patches entry is an empty list, this will select all
-    patches and suppress writing the internalMesh.
+    \heading Ensight Output Options
+    \table
+        Property    | Description                           | Required | Default
+        format      | ascii or binary format        | no | same as simulation
+        width       | Mask width for \c data/XXXX           | no  | 8
+        directory   | The output directory name     | no | postProcessing/NAME
+        overwrite   | Remove existing directory             | no  | false
+        consecutive | Consecutive output numbering          | no  | false
+        nodeValues  | Write values at nodes                 | no  | false
+    \endtable
+
+    \heading Output Selection
+    \table
+        Property    | Description                           | Required | Default
+        region      | Name for a single region              | no  | region0
+        faceZones   | Select faceZones to write             | no  |
+        patches     | Limit to listed patches (wordRe list) | no  |
+        selection   | Cell selection (topoSet actions)      | no  | empty dict
+    \endtable
+
+Note
+    The region of interest is defined by the selection dictionary
+    as a set of actions (use,add,subtract,subset,invert).
+    Omitting the selection dictionary is the same as specifying the
+    conversion of all cells (in the selected regions).
+    Omitting the patches entry is the same as specifying the conversion of all
+    patches.
+
     Consecutive output numbering can be used in conjunction with \c overwrite.
 
 See also
@@ -94,6 +139,8 @@ SourceFiles
 #include "interpolation.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "fvMeshSubsetProxy.H"
+#include "searchableSurfaces.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -116,18 +163,29 @@ class ensightWrite
 {
     // Private data
 
-        //- Writer options
+        //- Ensight writer options
         ensightMesh::options writeOpts_;
+
+        //- Ensight case options
         ensightCase::options caseOpts_;
 
-        //- Name of fields to process
-        wordRes selectFields_;
-
-        //- Output directory name
-        fileName dirName_;
+        //- The output directory
+        fileName outputDir_;
 
         //- Consecutive output numbering
         bool consecutive_;
+
+        //- Track changes in mesh geometry
+        enum polyMesh::readUpdateState meshState_;
+
+        //- Requested names of fields to process
+        wordRes selectFields_;
+
+        //- Dictionary of volume selections
+        dictionary selection_;
+
+        //- Mesh subset handler
+        fvMeshSubset meshSubset_;
 
         //- Ensight case handler
         autoPtr<ensightCase> ensCase_;
@@ -151,12 +209,33 @@ class ensightWrite
         }
 
 
-        //- Apply for the volume field type
-        template<class Type>
-        int writeVolField(const word& inputName, int& state);
+        //- Update mesh subset according to zones, geometry, bounds
+        bool updateSubset(fvMeshSubset& subsetter) const;
 
-        //- Process by trying to apply for various volume field types.
-        int process(const word& inputName);
+        //- Read information for selections
+        bool readSelection(const dictionary& dict);
+
+        //- Update meshes, subMeshes etc.
+        bool update();
+
+
+    // Write
+
+        //- Write all volume fields
+        label writeAllVolFields
+        (
+            const fvMeshSubset& proxy,
+            const wordHashSet& acceptField
+        );
+
+        //- Write selected volume fields.
+        template<class Type>
+        label writeVolFields
+        (
+            const fvMeshSubset& proxy,
+            const wordHashSet& acceptField
+        );
+
 
         //- No copy construct
         ensightWrite(const ensightWrite&) = delete;

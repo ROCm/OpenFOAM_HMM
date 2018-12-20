@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(zoneToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, zoneToFace, word);
     addToRunTimeSelectionTable(topoSetSource, zoneToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, zoneToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, zoneToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        zoneToFace,
+        word,
+        zone
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        zoneToFace,
+        istream,
+        zone
+    );
 }
 
 
@@ -52,25 +68,26 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
 {
     bool hasMatched = false;
 
-    forAll(mesh_.faceZones(), i)
+    for (const faceZone& zone : mesh_.faceZones())
     {
-        const faceZone& zone = mesh_.faceZones()[i];
-
-        if (zoneName_.match(zone.name()))
+        if (selectedZones_.match(zone.name()))
         {
-            const labelList& faceLabels = mesh_.faceZones()[i];
-
-            Info<< "    Found matching zone " << zone.name()
-                << " with " << faceLabels.size() << " faces." << endl;
-
             hasMatched = true;
 
-            forAll(faceLabels, i)
+            const labelList& faceLabels = zone;
+
+            if (verbose_)
+            {
+                Info<< "    Found matching zone " << zone.name()
+                    << " with " << faceLabels.size() << " faces." << endl;
+            }
+
+            for (const label facei : faceLabels)
             {
                 // Only do active faces
-                if (faceLabels[i] < mesh_.nFaces())
+                if (facei >= 0 && facei < mesh_.nFaces())
                 {
-                    addOrDelete(set, faceLabels[i], add);
+                    addOrDelete(set, facei, add);
                 }
             }
         }
@@ -79,8 +96,10 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
     if (!hasMatched)
     {
         WarningInFunction
-            << "Cannot find any faceZone named " << zoneName_ << endl
-            << "Valid names are " << mesh_.faceZones().names() << endl;
+            << "Cannot find any faceZone matching "
+            << flatOutput(selectedZones_) << nl
+            << "Valid names are " << flatOutput(mesh_.faceZones().names())
+            << endl;
     }
 }
 
@@ -90,11 +109,11 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
 Foam::zoneToFace::zoneToFace
 (
     const polyMesh& mesh,
-    const word& zoneName
+    const wordRe& zoneName
 )
 :
-    topoSetSource(mesh),
-    zoneName_(zoneName)
+    topoSetFaceSource(mesh),
+    selectedZones_(one(), zoneName)
 {}
 
 
@@ -104,9 +123,17 @@ Foam::zoneToFace::zoneToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    zoneName_(dict.lookup("name"))
-{}
+    topoSetFaceSource(mesh),
+    selectedZones_()
+{
+    // Look for 'zones' and 'zone', but accept 'name' as well
+    if (!dict.readIfPresent("zones", selectedZones_))
+    {
+        selectedZones_.resize(1);
+        selectedZones_.first() =
+            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+    }
+}
 
 
 Foam::zoneToFace::zoneToFace
@@ -115,14 +142,8 @@ Foam::zoneToFace::zoneToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    zoneName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::zoneToFace::~zoneToFace()
+    topoSetFaceSource(mesh),
+    selectedZones_(one(), wordRe(checkIs(is)))
 {}
 
 
@@ -134,17 +155,23 @@ void Foam::zoneToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all faces of faceZone " << zoneName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all faces of face zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all faces of faceZone " << zoneName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all faces of face zones "
+                << flatOutput(selectedZones_) << " ..." << endl;
+        }
 
         combine(set, false);
     }

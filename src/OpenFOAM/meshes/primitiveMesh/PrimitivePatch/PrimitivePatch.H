@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,8 +152,8 @@ private:
         //- Labels of mesh points
         mutable labelList* meshPointsPtr_;
 
-        //- Mesh point map.  Given the global point index find its
-        //location in the patch
+        //- Mesh point map. Given the global point index find its
+        //- location in the patch
         mutable Map<label>* meshPointMapPtr_;
 
         //- Outside edge loops
@@ -301,7 +301,7 @@ public:
         }
 
 
-    // Access functions for demand driven data
+    // Access functions for demand-driven data
 
         // Topological data; no mesh required.
 
@@ -329,8 +329,7 @@ public:
                 return edgei < nInternalEdges();
             }
 
-            //- Return list of boundary points,
-            //  address into LOCAL point list
+            //- Return list of boundary points, address into LOCAL point list
             const labelList& boundaryPoints() const;
 
             //- Return face-face addressing
@@ -354,13 +353,13 @@ public:
 
         // Addressing into mesh
 
-            //- Return labelList of mesh points in patch. They are constructed
-            //  walking through the faces in incremental order and not sorted
-            //  anymore.
+            //- Return labelList of mesh points in patch.
+            //  They are constructed by walking through the faces in
+            //  incremental order and not sorted anymore.
             const labelList& meshPoints() const;
 
-            //- Mesh point map.  Given the global point index find its
-            //  location in the patch
+            //- Mesh point map.
+            //  Given the global point index find its location in the patch
             const Map<label>& meshPointMap() const;
 
             //- Return pointField of points in patch
@@ -374,11 +373,11 @@ public:
             label whichPoint(const label gp) const;
 
             //- Given an edge in local point labels, return its
-            //  index in the edge list.  If the edge is not found, return -1
+            //- index in the edge list.  If the edge is not found, return -1
             label whichEdge(const edge&) const;
 
             //- Return labels of patch edges in the global edge list using
-            //  cell addressing
+            //- cell addressing
             labelList meshEdges
             (
                 const edgeList& allEdges,
@@ -387,7 +386,7 @@ public:
             ) const;
 
             //- Return labels of patch edges in the global edge list using
-            //  basic edge addressing.
+            //- basic edge addressing.
             labelList meshEdges
             (
                 const edgeList& allEdges,
@@ -408,6 +407,14 @@ public:
 
             //- Return point normals for patch
             const Field<PointType>& pointNormals() const;
+
+
+        // Storage Management
+
+            inline bool hasFaceAreas() const { return faceAreasPtr_; }
+            inline bool hasFaceCentres() const { return faceCentresPtr_; }
+            inline bool hasFaceNormals() const { return faceNormalsPtr_; }
+            inline bool hasPointNormals() const { return pointNormalsPtr_; }
 
 
         // Other patch operations
@@ -475,7 +482,7 @@ public:
         virtual void movePoints(const Field<PointType>&);
 
 
-    // Member operators
+    // Member Operators
 
         //- Assignment
         void operator=

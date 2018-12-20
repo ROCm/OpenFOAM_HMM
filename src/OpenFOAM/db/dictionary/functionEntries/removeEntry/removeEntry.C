@@ -54,15 +54,14 @@ bool Foam::functionEntries::removeEntry::execute
     Istream& is
 )
 {
-    const List<keyType> patterns = functionEntry::readStringList<keyType>(is);
+    const wordRes patterns(functionEntry::readStringList<wordRe>(is));
 
-    for (const keyType& key : patterns)
+    for (const wordRe& key : patterns)
     {
-        if (key.find('/') != string::npos || !key.isPattern())
+        if (key.isLiteral() && key.find('/') != string::npos)
         {
             // Remove scoped keyword, or keyword in the local scope
-            dictionary::searcher finder =
-                parentDict.searchScoped(key, false, false);
+            auto finder(parentDict.searchScoped(key, keyType::LITERAL));
 
             if (finder.found())
             {
@@ -73,7 +72,7 @@ bool Foam::functionEntries::removeEntry::execute
         {
             // Remove by pattern
             const wordList dictKeys = parentDict.toc();
-            const labelList indices = findStrings(regExp(key), dictKeys);
+            const labelList indices = findStrings(key, dictKeys);
 
             for (const auto idx : indices)
             {

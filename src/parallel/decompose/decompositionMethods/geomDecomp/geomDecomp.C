@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,8 +30,7 @@ License
 void Foam::geomDecomp::readCoeffs()
 {
     coeffsDict_.readIfPresent("delta", delta_);
-
-    coeffsDict_.lookup("n") >> n_;
+    coeffsDict_.readEntry("n", n_);
 
     // Verify that the input makes sense
     if (nDomains_ != n_.x()*n_.y()*n_.z())
@@ -55,6 +54,26 @@ void Foam::geomDecomp::readCoeffs()
         a*d - a2*d,  a*a2 + d2,  -2*a*d,
         a*d2 + a2,   a*d - a2*d,  d2 - a2
     );
+}
+
+
+void Foam::geomDecomp::checkDecompositionDirections
+(
+    const Vector<label>& meshDirs
+) const
+{
+    for (direction dir = 0; dir < Vector<label>::nComponents; ++dir)
+    {
+        if (n_[dir] > 1 && meshDirs[dir] == -1)
+        {
+            WarningInFunction
+                << "Trying to decompose a 1/2D mesh"
+                << " into " << n_[dir]
+                << " parts in direction "
+                << Vector<label>::componentNames[dir]
+                << endl;
+        }
+    }
 }
 
 

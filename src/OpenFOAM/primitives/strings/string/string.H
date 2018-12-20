@@ -58,14 +58,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class word;
 class wordRe;
+class string;
 class Istream;
 class Ostream;
-
-// Forward declaration of friend functions and operators
-class string;
 Istream& operator>>(Istream& is, string& s);
 Ostream& operator<<(Ostream& os, const string& s);
 Ostream& operator<<(Ostream& os, const std::string& s);
@@ -119,6 +117,9 @@ protected:
         //  \return True if append occurred.
         bool ext(const word& ending);
 
+        //- Return true if it contains a '/' character
+        inline bool hasPath() const;
+
         //- Return true if it has an extension or simply ends with a '.'
         inline bool hasExt() const;
 
@@ -130,6 +131,9 @@ protected:
 
         //- Remove extension, returning true if string changed.
         inline bool removeExt();
+
+        //- Remove leading path, returning true if string changed.
+        inline bool removePath();
 
 
 public:
@@ -157,10 +161,13 @@ public:
     // Constructors
 
         //- Construct null
-        inline string();
+        string() = default;
 
-        //- Construct from std::string
+        //- Copy construct from std::string
         inline string(const std::string& str);
+
+        //- Move construct from std::string
+        inline string(std::string&& str);
 
         //- Construct as copy of character array
         inline string(const char* str);
@@ -174,11 +181,8 @@ public:
         //- Construct fill copies of a single character
         inline string(const size_type len, const char c);
 
-        //- Move construct from std::string
-        inline string(std::string&& str);
-
         //- Construct from Istream
-        string(Istream& is);
+        explicit string(Istream& is);
 
 
     // Member Functions

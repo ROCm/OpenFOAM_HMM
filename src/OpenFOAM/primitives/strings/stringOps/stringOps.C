@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +25,11 @@ License
 
 #include "stringOps.H"
 #include "typeInfo.H"
-#include "OSspecific.H"
 #include "etcFiles.H"
+#include "Pstream.H"
 #include "StringStream.H"
+#include "OSstream.H"
+#include "OSspecific.H"
 #include <cctype>
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -35,10 +37,35 @@ License
 namespace Foam
 {
 
+// Return the file location mode (string) as a numerical value.
+//
+// - u : location mask 0700
+// - g : location mask 0070
+// - o : location mask 0007
+// - a : location mask 0777
+//
+static inline unsigned short modeToLocation
+(
+    const std::string& mode,
+    std::size_t pos = 0
+)
+{
+    unsigned short where(0);
+
+    if (std::string::npos != mode.find('u', pos)) { where |= 0700; } // User
+    if (std::string::npos != mode.find('g', pos)) { where |= 0070; } // Group
+    if (std::string::npos != mode.find('o', pos)) { where |= 0007; } // Other
+    if (std::string::npos != mode.find('a', pos)) { where |= 0777; } // All
+
+    return where;
+}
+
+
 // Expand a leading <tag>/
 // Convenient for frequently used directories
 //
-//   <etc>/        => user/group/other OpenFOAM directory
+//   <etc>/        => user/group/other etc - findEtcEntry()
+//   <etc(:[ugoa]+)?>/ => user/group/other etc - findEtcEntry()
 //   <case>/       => FOAM_CASE directory
 //   <constant>/   => FOAM_CASE/constant directory
 //   <system>/     => FOAM_CASE/system directory
@@ -50,7 +77,7 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
     }
 
     auto delim = s.find(e);
-    if (delim == std::string::npos)
+    if (std::string::npos == delim)
     {
         return;  // Error: no closing delim - ignore expansion
     }
@@ -71,28 +98,35 @@ static void expandLeadingTag(std::string& s, const char b, const char e)
     }
 
     const std::string tag(s, 1, delim-2);
+    const auto tagLen = tag.length();
 
     // Note that file is also allowed to be an empty string.
 
     if (tag == "etc")
     {
-        s = findEtcFile(file);
+        s = findEtcEntry(file);
     }
     else if (tag == "case")
     {
-        s = fileName(getEnv("FOAM_CASE"))/file;
+        s = fileName(Foam::getEnv("FOAM_CASE"))/file;
     }
     else if (tag == "constant" || tag == "system")
     {
         s = fileName(Foam::getEnv("FOAM_CASE"))/tag/file;
+    }
+    else if (tagLen >= 4 && tag.compare(0, 4, "etc:") == 0)
+    {
+        // <etc:[ugoa]+> type of tag - convert "ugo" to numeric
+
+        s = findEtcEntry(file, modeToLocation(tag,4));
     }
 }
 
 
 // Expand a leading tilde
 //   ~/        => home directory
-//   ~OpenFOAM => user/group/other OpenFOAM directory
 //   ~user     => home directory for specified user
+//   Deprecated ~OpenFOAM => <etc> instead
 static void expandLeadingTilde(std::string& s)
 {
     if (s[0] != '~')
@@ -120,6 +154,24 @@ static void expandLeadingTilde(std::string& s)
 
     if (user == "OpenFOAM")
     {
+        // Compat Warning
+        const int version(1806);
+
+        // Single warning (on master) with guard to avoid Pstream::master()
+        // when Pstream has not yet been initialized
+        if (Pstream::parRun() ? Pstream::master() : true)
+        {
+            std::cerr
+                << nl
+                << "--> FOAM Warning :" << nl
+                << "    Found [v" << version << "] '"
+                << "~OpenFOAM" << "' string expansion instead of '"
+                << "<etc>" << "' in string\n\"" << s << "\"\n" << nl
+                << std::endl;
+
+            error::warnAboutAge("expansion", version);
+        }
+
         s = findEtcFile(file);
     }
     else
@@ -437,7 +489,7 @@ Foam::string Foam::stringOps::getVariable
 {
     string value;
 
-    const entry* eptr = dict.lookupScopedEntryPtr(name, true, false);
+    const entry* eptr = dict.findScoped(name, keyType::LITERAL_RECURSIVE);
 
     if (eptr)
     {
@@ -454,7 +506,7 @@ Foam::string Foam::stringOps::getVariable
     }
     else if (allowEnvVars)
     {
-        value = getEnv(name);
+        value = Foam::getEnv(name);
 
         if (value.empty() && !name.empty())
         {
@@ -467,7 +519,7 @@ Foam::string Foam::stringOps::getVariable
 
             if (altType)
             {
-                value = getEnv
+                value = Foam::getEnv
                 (
                     // var-name
                     word(name.substr(0, altPos), false)
@@ -487,18 +539,14 @@ Foam::string Foam::stringOps::getVariable
     {
         if (allowEnvVars)
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Cannot find dictionary or environment variable "
+            FatalIOErrorInFunction(dict)
+                << "Cannot find dictionary or environment variable "
                 << name << exit(FatalIOError);
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Cannot find dictionary variable "
+            FatalIOErrorInFunction(dict)
+                << "Cannot find dictionary variable "
                 << name << exit(FatalIOError);
         }
     }
@@ -720,20 +768,16 @@ void Foam::stringOps::inplaceExpand
                         varBeg + 1 + delim,
                         varEnd - varBeg - 2*delim
                     ),
-                    false
+                    false   // Already validated
                 );
 
 
                 // Lookup in the dictionary without wildcards.
                 // See note in primitiveEntry
-                const entry* eptr = dict.lookupScopedEntryPtr
-                (
-                    varName,
-                    true,
-                    false
-                );
+                const entry* eptr =
+                    dict.findScoped(varName, keyType::LITERAL_RECURSIVE);
 
-                // if defined - copy its entries
+                // Copy its entries if defined
                 if (eptr)
                 {
                     OStringStream buf;
@@ -879,7 +923,7 @@ void Foam::stringOps::inplaceExpand
                     );
                 }
 
-                const string varValue = getEnv(varName);
+                const string varValue = Foam::getEnv(varName);
                 if (varValue.size())
                 {
                     if (altPos != std::string::npos && altType == '+')
@@ -955,7 +999,7 @@ bool Foam::stringOps::inplaceReplaceVar(std::string& s, const word& varName)
         return false;
     }
 
-    const string content(getEnv(varName));
+    const string content(Foam::getEnv(varName));
     if (content.empty())
     {
         return false;
@@ -1094,6 +1138,111 @@ void Foam::stringOps::inplaceUpper(std::string& s)
         (
             std::toupper(static_cast<unsigned char>(*iter))
         );
+    }
+}
+
+
+void Foam::stringOps::writeWrapped
+(
+    OSstream& os,
+    const std::string& str,
+    const std::string::size_type width,
+    const std::string::size_type indent,
+    const bool escape
+)
+{
+    const auto len = str.length();
+
+    std::string::size_type pos = 0;
+
+    // Handle leading newlines
+    while (str[pos] == '\n' && pos < len)
+    {
+        os << '\n';
+        ++pos;
+    }
+
+    while (pos < len)
+    {
+        // Potential end point and next point
+        std::string::size_type end  = pos + width - 1;
+        std::string::size_type eol  = str.find('\n', pos);
+        std::string::size_type next = string::npos;
+
+        if (end >= len)
+        {
+            // No more wrapping needed
+            end = len;
+
+            if (std::string::npos != eol && eol <= end)
+            {
+                // Manual '\n' break, next follows it (default behaviour)
+                end = eol;
+            }
+        }
+        else if (std::string::npos != eol && eol <= end)
+        {
+            // Manual '\n' break, next follows it (default behaviour)
+            end = eol;
+        }
+        else if (isspace(str[end]))
+        {
+            // Ended on a space - can use this directly
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+        }
+        else if (isspace(str[end+1]))
+        {
+            // The next one is a space - so we are okay
+            ++end;  // Otherwise the length is wrong
+            next = str.find_first_not_of(" \t\n", end);     // Next non-space
+        }
+        else
+        {
+            // Line break will be mid-word
+            auto prev = str.find_last_of(" \t\n", end);     // Prev word break
+
+            if (std::string::npos != prev && prev > pos)
+            {
+                end = prev;
+                next = prev + 1;  // Continue from here
+            }
+        }
+
+        // The next position to continue from
+        if (std::string::npos == next)
+        {
+            next = end + 1;
+        }
+
+        // Has a length
+        if (end > pos)
+        {
+            // Indent following lines.
+            // The first one was already done prior to calling this routine.
+            if (pos)
+            {
+                for (std::string::size_type i = 0; i < indent; ++i)
+                {
+                    os <<' ';
+                }
+            }
+
+            while (pos < end)
+            {
+                const char c = str[pos];
+
+                if (escape && c == '\\')
+                {
+                    os << '\\';
+                }
+                os << c;
+
+                ++pos;
+            }
+            os << nl;
+        }
+
+        pos = next;
     }
 }
 

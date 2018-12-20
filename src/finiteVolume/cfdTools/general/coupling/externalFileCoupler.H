@@ -243,13 +243,13 @@ public:
         //  content which corresponds to particular return values:
         //  - \c status=done
         //  \return Foam::Time::saEndTime
+        //  - \c action=noWriteNow
+        //  \return Foam::Time::saNoWriteNow
         //  - \c action=writeNow
         //  \return Foam::Time::saWriteNow
         //  - \c action=nextWrite
         //  \return Foam::Time::saNextWrite
-        //  - \c action=noNextWrite
-        //  \return Foam::Time::saNoNextWrite
-        // - Anything else (empty file, no action= or status=, etc)
+        //  - Anything else (empty file, no action= or status=, etc)
         //  \return Foam::Time::saUnknown
         enum Time::stopAtControls waitForSlave() const;
 

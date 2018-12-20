@@ -25,12 +25,14 @@ License
 
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
+#include "argList.H"
 #include "stringOps.H"
 #include "Fstream.H"
 #include "IOstreams.H"
 #include "OSspecific.H"
 #include "etcFiles.H"
 #include "dictionary.H"
+#include "foamVersion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -63,28 +65,27 @@ void Foam::dynamicCode::checkSecurity
     if (isAdministrator())
     {
         FatalIOErrorInFunction(dict)
-            << "This code should not be executed by someone with administrator"
-            << " rights due to security reasons." << nl
-            << "(it writes a shared library which then gets loaded "
-            << "using dlopen)"
+            << "This code should not be executed by someone"
+            << " with administrator rights for security reasons." << nl
+            << "It generates a shared library which is loaded using dlopen"
+            << nl << endl
             << exit(FatalIOError);
     }
 
     if (!allowSystemOperations)
     {
         FatalIOErrorInFunction(dict)
-            << "Loading a shared library using case-supplied code is not"
-            << " enabled by default" << nl
-            << "because of security issues. If you trust the code you can"
-            << " enable this" << nl
-            << "facility be adding to the InfoSwitches setting in the system"
-            << " controlDict:" << nl << nl
+            << "Loading shared libraries using case-supplied code may have"
+            << " been disabled" << nl
+            << "by default for security reasons." << nl
+            << "If you trust the code, you may enable this by adding"
+            << nl << nl
             << "    allowSystemOperations 1" << nl << nl
-            << "The system controlDict is either" << nl << nl
-            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << nl << nl
-            << "or" << nl << nl
-            << "    $WM_PROJECT_DIR/etc/controlDict" << nl
-            << endl
+            << "to the InfoSwitches setting in the system controlDict." << nl
+            << "The system controlDict is any of" << nl << nl
+            << "    ~/.OpenFOAM/" << foamVersion::api << "/controlDict" << nl
+            << "    ~/.OpenFOAM/controlDict" << nl
+            << "    $WM_PROJECT_DIR/etc/controlDict" << nl << endl
             << exit(FatalIOError);
     }
 }
@@ -162,7 +163,7 @@ bool Foam::dynamicCode::resolveTemplates
             }
         }
 
-        // Not found - fallback to ~OpenFOAM expansion
+        // Not found - fallback to <etc> expansion
         if (file.empty())
         {
             file = findEtcFile(codeTemplateDirName/templateName);
@@ -292,8 +293,8 @@ bool Foam::dynamicCode::writeDigest(const std::string& sha1) const
 
 Foam::dynamicCode::dynamicCode(const word& codeName, const word& codeDirName)
 :
-    codeRoot_(stringOps::expand("$FOAM_CASE")/topDirName),
-    libSubDir_(stringOps::expand("platforms/$WM_OPTIONS/lib")),
+    codeRoot_(argList::envGlobalPath()/topDirName),
+    libSubDir_(stringOps::expand("platforms/${WM_OPTIONS}/lib")),
     codeName_(codeName),
     codeDirName_(codeDirName)
 {
@@ -423,7 +424,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
             << "Could not find the code template(s): "
             << badFiles << nl
             << "Under the $" << codeTemplateEnvName
-            << " directory or via via the ~OpenFOAM/"
+            << " directory or via via the <etc>/"
             << codeTemplateDirName << " expansion"
             << exit(FatalError);
     }

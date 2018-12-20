@@ -62,49 +62,47 @@ Foam::ParticleForceList<CloudType>::ParticleForceList
 {
     if (readFields)
     {
-        wordList modelNames(dict.toc());
-
         Info<< "Constructing particle forces" << endl;
 
-        if (modelNames.size() > 0)
-        {
-            this->setSize(modelNames.size());
+        this->resize(dict.size());
 
-            label i = 0;
-            forAllConstIter(IDLList<entry>, dict, iter)
+        label count = 0;
+        for (const entry& dEntry : dict)
+        {
+            const word& model = dEntry.keyword();
+            if (dEntry.isDict())
             {
-                const word& model = iter().keyword();
-                if (iter().isDict())
-                {
-                    this->set
+                this->set
+                (
+                    count,
+                    ParticleForce<CloudType>::New
                     (
-                        i++,
-                        ParticleForce<CloudType>::New
-                        (
-                            owner,
-                            mesh,
-                            iter().dict(),
-                            model
-                        )
-                    );
-                }
-                else
-                {
-                    this->set
-                    (
-                        i++,
-                        ParticleForce<CloudType>::New
-                        (
-                            owner,
-                            mesh,
-                            dict,
-                            model
-                        )
-                    );
-                }
+                        owner,
+                        mesh,
+                        dEntry.dict(),
+                        model
+                    )
+                );
             }
+            else
+            {
+                this->set
+                (
+                    count,
+                    ParticleForce<CloudType>::New
+                    (
+                        owner,
+                        mesh,
+                        dict,
+                        model
+                    )
+                );
+            }
+
+            ++count;
         }
-        else
+
+        if (!count)
         {
             Info<< "    none" << endl;
         }

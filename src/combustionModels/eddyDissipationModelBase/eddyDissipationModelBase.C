@@ -48,7 +48,7 @@ eddyDissipationModelBase<ReactionThermo, ThermoType>::eddyDissipationModelBase
         turb,
         combustionProperties
     ),
-    CEDC_(readScalar(this->coeffs().lookup("CEDC")))
+    CEDC_(this->coeffs().getScalar("CEDC"))
 {}
 
 
@@ -116,7 +116,7 @@ bool eddyDissipationModelBase<ReactionThermo, ThermoType>::read()
 {
     if (singleStepCombustion<ReactionThermo, ThermoType>::read())
     {
-        this->coeffs().lookup("CEDC") >> CEDC_;
+        this->coeffs().readEntry("CEDC", CEDC_);
         return true;
     }
     else

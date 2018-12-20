@@ -226,7 +226,7 @@ Foam::Field<Type>::Field
             else
             {
                 FatalIOErrorInFunction(dict)
-                    << "expected keyword 'uniform' or 'nonuniform', found "
+                    << "Expected keyword 'uniform' or 'nonuniform', found "
                     << firstToken.wordToken()
                     << exit(FatalIOError);
             }
@@ -234,7 +234,7 @@ Foam::Field<Type>::Field
         else if (is.version() == IOstream::versionNumber(2,0))
         {
             IOWarningInFunction(dict)
-                << "expected keyword 'uniform' or 'nonuniform', "
+                << "Expected keyword 'uniform' or 'nonuniform', "
                 "assuming deprecated Field format from "
                 "Foam version 2.0." << endl;
 
@@ -246,7 +246,7 @@ Foam::Field<Type>::Field
         else
         {
             FatalIOErrorInFunction(dict)
-                << "expected keyword 'uniform' or 'nonuniform', found "
+                << "Expected keyword 'uniform' or 'nonuniform', found "
                 << firstToken.info() << exit(FatalIOError);
         }
     }

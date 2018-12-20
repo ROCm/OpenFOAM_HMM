@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,7 +84,7 @@ protected:
         labelList interpolationCells_;
 
         //- Fetch interpolated cells
-        mapDistribute cellInterpolationMap_;
+        autoPtr<mapDistribute> cellInterpolationMap_;
 
         //- Interpolation stencil
         labelListList cellStencil_;
@@ -181,6 +181,14 @@ protected:
             labelList& allCellTypes
         ) const;
 
+        //- If multiple donors meshes: decide which is best
+        bool betterDonor
+        (
+            const label destMesh,
+            const label currentDonorMesh,
+            const label newDonorMesh
+        ) const;
+
         //- Determine donors for all tgt cells
         void markDonors
         (
@@ -188,6 +196,7 @@ protected:
             PstreamBuffers& pBufs,
             const PtrList<fvMeshSubset>& meshParts,
             const List<treeBoundBoxList>& meshBb,
+            const labelList& allCellTypes,
 
             const label srcI,
             const label tgtI,
@@ -293,7 +302,11 @@ public:
         //- Return a communication schedule
         virtual const mapDistribute& cellInterpolationMap() const
         {
-            return cellInterpolationMap_;
+            if (!cellInterpolationMap_.valid())
+            {
+                const_cast<inverseDistance&>(*this).update();
+            }
+            return cellInterpolationMap_();
         }
 
         //- Per interpolated cell the neighbour cells (in terms of slots as

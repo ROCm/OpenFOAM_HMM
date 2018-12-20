@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class legacyRawFormatter Declaration
+                   Class vtk::legacyRawFormatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class legacyRawFormatter
@@ -87,7 +87,7 @@ public:
 
 
     //- Destructor
-    virtual ~legacyRawFormatter();
+    virtual ~legacyRawFormatter() = default;
 
 
     // Member Functions
@@ -104,7 +104,8 @@ public:
 
 
         //- Write leading size - a no-op for legacy binary output
-        virtual void writeSize(const uint64_t ignored);
+        //  \return False - never used by this format
+        virtual bool writeSize(const uint64_t ignored);
 
         virtual void write(const uint8_t val);
         virtual void write(const label val);
@@ -113,6 +114,17 @@ public:
 
         //- Write a newline to the output
         virtual void flush();
+
+
+    // Disable some XML-only methods
+
+        inline virtual formatter& endTag(vtk::fileTag) { return *this; }
+        inline virtual formatter& endDataArray() { return *this; }
+        inline virtual formatter& endFieldData() { return *this; }
+        inline virtual formatter& endCellData() { return *this; }
+        inline virtual formatter& endPointData() { return *this; }
+        inline virtual formatter& endPiece() { return *this; }
+        inline virtual formatter& endVTKFile() { return *this; }
 
 };
 

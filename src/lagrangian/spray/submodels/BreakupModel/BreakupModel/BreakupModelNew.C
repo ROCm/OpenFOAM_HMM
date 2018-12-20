@@ -35,7 +35,7 @@ Foam::BreakupModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("breakupModel"));
+    const word modelType(dict.get<word>("breakupModel"));
 
     Info<< "Selecting breakupModel " << modelType << endl;
 

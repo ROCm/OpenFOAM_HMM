@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,17 @@ Class
     Foam::cellToCell
 
 Description
-    A topoSetSource to select the cells from another cellSet.
+    A topoSetCellSource to select the cells from another cellSet.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                          | Required | Default
+        sets        | The input cellSet names              | possibly |
+        set         | The input cellSet name               | possibly |
+    \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     cellToCell.C
@@ -35,7 +45,7 @@ SourceFiles
 #ifndef cellToCell_H
 #define cellToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,15 +58,16 @@ namespace Foam
 
 class cellToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
     // Private data
 
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
+
 
 public:
 
@@ -66,42 +77,25 @@ public:
     // Constructors
 
         //- Construct from components
-        cellToCell
-        (
-            const polyMesh& mesh,
-            const word& setName
-        );
+        cellToCell(const polyMesh& mesh, const word& setName);
 
         //- Construct from dictionary
-        cellToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        cellToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        cellToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        cellToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~cellToCell();
+    virtual ~cellToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

@@ -49,13 +49,13 @@ const Foam::Enum
     Foam::conformalVoronoiMesh::dualMeshPointType
 >
 Foam::conformalVoronoiMesh::dualMeshPointTypeNames_
-{
+({
     { dualMeshPointType::internal, "internal" },
     { dualMeshPointType::surface, "surface" },
     { dualMeshPointType::featureEdge, "featureEdge" },
     { dualMeshPointType::featurePoint, "featurePoint" },
     { dualMeshPointType::constrained, "constrained" },
-};
+});
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -516,10 +516,8 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
     const dictionary& motionControlDict
         = foamyHexMeshControls().foamyHexMeshDict().subDict("motionControl");
 
-    label nMaxIter = readLabel
-    (
-        motionControlDict.lookup("maxRefinementIterations")
-    );
+    const label nMaxIter =
+        motionControlDict.get<label>("maxRefinementIterations");
 
     Info<< "Maximum number of refinement iterations : " << nMaxIter << endl;
 
@@ -553,11 +551,10 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         }
     }
 
-    label maxSmoothingIterations = readLabel
+    meshAlignmentSmoother.smoothAlignments
     (
-        motionControlDict.lookup("maxSmoothingIterations")
+        motionControlDict.get<label>("maxSmoothingIterations")
     );
-    meshAlignmentSmoother.smoothAlignments(maxSmoothingIterations);
 
     Info<< "Background cell size and alignment mesh:" << endl;
     cellSizeMesh.printInfo(Info);
@@ -1140,7 +1137,7 @@ void Foam::conformalVoronoiMesh::move()
 
                         alignmentDirs[aA] = a + sign(dotProduct)*b;
 
-                        alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                        alignmentDirs[aA].normalise();
                     }
                 }
             }

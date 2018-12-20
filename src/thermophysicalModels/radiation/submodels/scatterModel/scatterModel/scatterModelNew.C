@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::radiation::scatterModel> Foam::radiation::scatterModel::New
     const fvMesh& mesh
 )
 {
-    const word modelType(dict.lookup("scatterModel"));
+    const word modelType(dict.get<word>("scatterModel"));
 
     Info<< "Selecting scatterModel " << modelType << endl;
 

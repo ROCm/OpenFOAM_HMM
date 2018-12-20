@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +40,6 @@ void Foam::fv::actuationDiskSource::addActuationDiskAxialInertialResistance
 {
     scalar a = 1.0 - Cp_/Ct_;
     vector uniDiskDir = diskDir_/mag(diskDir_);
-    tensor E(Zero);
-    E.xx() = uniDiskDir.x();
-    E.yy() = uniDiskDir.y();
-    E.zz() = uniDiskDir.z();
 
     vector upU = vector(VGREAT, VGREAT, VGREAT);
     scalar upRho = VGREAT;
@@ -55,11 +51,11 @@ void Foam::fv::actuationDiskSource::addActuationDiskAxialInertialResistance
     reduce(upU, minOp<vector>());
     reduce(upRho, minOp<scalar>());
 
-    scalar T = 2.0*upRho*diskArea_*mag(upU)*a*(1 - a);
+    scalar T = 2.0*upRho*diskArea_*sqr(mag(upU & uniDiskDir))*a*(1 - a);
 
-    forAll(cells, i)
+    for (const label celli : cells)
     {
-        Usource[cells[i]] += ((Vcells[cells[i]]/V())*T*E) & upU;
+        Usource[celli] += ((Vcells[celli]/V())*T)*uniDiskDir;
     }
 }
 

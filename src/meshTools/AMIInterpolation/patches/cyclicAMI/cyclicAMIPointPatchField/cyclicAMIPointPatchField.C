@@ -53,16 +53,14 @@ Foam::cyclicAMIPointPatchField<Type>::cyclicAMIPointPatchField
 )
 :
     coupledPointPatchField<Type>(p, iF, dict),
-    cyclicAMIPatch_(refCast<const cyclicAMIPointPatch>(p)),
+    cyclicAMIPatch_(refCast<const cyclicAMIPointPatch>(p, dict)),
     ppiPtr_(nullptr),
     nbrPpiPtr_(nullptr)
 {
     if (!isType<cyclicAMIPointPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not cyclicAMI type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not cyclicAMI type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

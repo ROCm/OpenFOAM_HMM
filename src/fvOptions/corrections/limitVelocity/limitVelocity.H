@@ -65,7 +65,6 @@ class limitVelocity
 :
     public cellSetOption
 {
-
 protected:
 
     // Protected data
@@ -107,8 +106,7 @@ public:
 
 
     //- Destructor
-    virtual ~limitVelocity()
-    {}
+    virtual ~limitVelocity() = default;
 
 
     // Member Functions

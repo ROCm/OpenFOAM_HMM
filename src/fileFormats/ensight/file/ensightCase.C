@@ -66,7 +66,8 @@ void Foam::ensightCase::initialize()
             }
             else
             {
-                Info<<"Warning: re-using existing directory" << nl
+                DetailInfo
+                    <<"Warning: re-using existing directory" << nl
                     << "    " << ensightDir_ << endl;
             }
         }

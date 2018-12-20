@@ -37,11 +37,11 @@ const Foam::Enum
     Foam::surfaceDisplacementPointPatchVectorField::projectMode
 >
 Foam::surfaceDisplacementPointPatchVectorField::projectModeNames_
-{
+({
     { projectMode::NEAREST, "nearest" },
     { projectMode::POINTNORMAL, "pointNormal" },
     { projectMode::FIXEDNORMAL, "fixedNormal" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -316,10 +316,10 @@ surfaceDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchVectorField(p, iF, dict),
-    velocity_(dict.lookup("velocity")),
+    velocity_(dict.get<vector>("velocity")),
     surfacesDict_(dict.subDict("geometry")),
-    projectMode_(projectModeNames_.lookup("projectMode", dict)),
-    projectDir_(dict.lookup("projectDirection")),
+    projectMode_(projectModeNames_.get("projectMode", dict)),
+    projectDir_(dict.get<vector>("projectDirection")),
     wedgePlane_(dict.lookupOrDefault("wedgePlane", -1)),
     frozenPointsZone_(dict.lookupOrDefault("frozenPointsZone", word::null))
 {

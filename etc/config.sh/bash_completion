@@ -37,7 +37,7 @@ then
     foamOldDirs="$(complete 2>/dev/null | sed -ne 's/^.*-F _of_.* \(..*\)$/\1/p')"
     for cleaned in $foamOldDirs
     do
-        complete -r $cleaned 2>/dev/null
+        complete -r "$cleaned" 2>/dev/null
     done
 fi
 
@@ -98,7 +98,7 @@ foamAddCompletion()
 # The respective options are generated on-the-fly from the application's
 # -help-full output and cached to the _of_complete_cache_ global associative
 # array with entries formatted as "argOpts.. | boolOpts ..".
-# The '|' character separates options with and without arguments.
+# The '|' character separates options with/without arguments.
 #
 unset -f _of_complete_ 2>/dev/null
 _of_complete_()
@@ -109,7 +109,7 @@ _of_complete_()
     local choices
 
     case ${prev} in
-    -help | -help-full | -doc | -doc-source)
+    -help | -help-compat | -help-full | -help-man | -doc | -doc-source)
         # These options are usage - we can stop now.
         COMPREPLY=()
         return 0
@@ -134,25 +134,41 @@ _of_complete_()
         choices="${_of_complete_cache_[$appName]}"
 
         # Not in cache, obtain by parsing application -help-full
+        # Extract all options of the format
+        #   -opt1         descrip
+        #   -opt2 <arg>   descrip
+        #   -help-full
+        # Ignore -help-man (internal option).
+        # Begin parsing after first appearance of "^[Oo]ptions:"
+        # Terminate parsing on first appearance of "-help-full"
+        # - options with '=' (eg, -mode=ugo) are not handled very well at all.
+        # - alternatives (eg, -a, -all) are not handled nicely either,
+        #   for these treat ',' like a space to catch the worst of them.
         if [ -z "$choices" ]
         then
-            # Treat ',' like space so '-a, -all' parses like '-a | -all'
-            # Options with '=' (Eg, -mode=ugo) are not handled very well.
             local helpText=$($appName -help-full 2>/dev/null | \
-                sed -n -e 's/,/ /g' -e 's/=.*$/=/' -e '/^  *-/p')
+                sed -ne '1,/^[Oo]ptions:/d' \
+                    -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d; /^-help-man/d;' \
+                    -e 'y/,/ /; s/=.*$/=/;' \
+                    -e '/^-[^ ]* </{ s/^\(-[^ ]* <\).*$/\1/; p; d }' \
+                    -e 's/^\(-[^ ]*\).*$/\1/; p; /^-help-full/q;' \
+                    )
 
-            if [ -n "$helpText" ]
+            # After this bit of sed, we have "-opt1" or "-opt2 <"
+            # for entries without or with arguments.
+
+            if [ -z "$helpText" ]
             then
-                # Array of options with args
-                local argOpts=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$helpText"))
-
-                # Array of options without args
-                local boolOpts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$helpText"))
-
-                choices="${argOpts[@]} | ${boolOpts[@]}"
-            else
                 echo "Error calling $appName" 1>&2
                 choices="false"  # Mark failure to prevent repeating again
+            else
+                # Array of options with args
+                local argOpts=($(awk '/</ {print $1}' <<< "$helpText"))
+
+                # Array of options without args
+                local boolOpts=($(awk '!/</ {print $1}' <<< "$helpText"))
+
+                choices="${argOpts[@]} | ${boolOpts[@]}"
             fi
             _of_complete_cache_[$appName]="$choices"
             ## echo "generated $appName = $choices" 1>&2   # Debugging
@@ -169,7 +185,7 @@ _of_complete_()
                 # Option with unknown type of arg - set to files.
                 # Not always correct but can still navigate path if needed...
                 COMPREPLY=($(compgen -f -- ${cur}))
-            elif [ -n "$cur" -a "${cur#-}" = "${cur}" ]
+            elif [ -n "$cur" ] && [ "${cur#-}" = "${cur}" ]
             then
                 # Already started a (non-empty) word that isn't an option,
                 # in which case revert to filenames.

@@ -36,12 +36,12 @@ const Foam::Enum
     Foam::solverTemplate::solverType
 >
 Foam::solverTemplate::solverTypeNames_
-{
+({
     { solverType::stCompressible, "compressible" },
     { solverType::stIncompressible, "incompressible" },
     { solverType::stBuoyant, "buoyant" },
     { solverType::stUnknown, "unknown" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -61,7 +61,7 @@ Foam::word Foam::solverTemplate::readFromDict
     }
 
     IOdictionary dict(dictHeader);
-    return dict.lookup(entryName);
+    return dict.get<word>(entryName);
 }
 
 
@@ -87,18 +87,17 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
     dictionary fieldTemplates = solverDict.subDict("fluidFields");
 
     const fileName turbModelDir(baseDir/"models"/"turbulence");
-    word turbulenceModel("laminar"); // default to laminar
 
     const dictionary fieldModels(solverDict.subDict("fluidModels"));
 
-    word turbulenceType = "none";
+    word turbulenceModel("laminar"); // default to laminar
+    word turbulenceType("none");
+
     if (fieldModels.readIfPresent("turbulenceModel", turbulenceType))
     {
-        word simulationType(word::null);
-
         if (turbulenceType == "turbulenceModel")
         {
-            IOdictionary turbulenceProperties
+            IOdictionary turbPropDict
             (
                 IOobject
                 (
@@ -112,26 +111,26 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
                 )
             );
 
-            turbulenceProperties.lookup("simulationType") >> simulationType;
+            const word modelType(turbPropDict.get<word>("simulationType"));
 
-            if (simulationType == "laminar")
+            if (modelType == "laminar")
             {
                 // Leave turbulenceModel as laminar
             }
-            else if (simulationType == "RAS")
+            else if (modelType == "RAS")
             {
-                turbulenceProperties.subDict(simulationType).lookup("RASModel")
-                    >> turbulenceModel;
+                turbPropDict.subDict(modelType)
+                    .readEntry("RASModel", turbulenceModel);
             }
-            else if (simulationType == "LES")
+            else if (modelType == "LES")
             {
-                turbulenceProperties.subDict(simulationType).lookup("LESModel")
-                    >> turbulenceModel;
+                turbPropDict.subDict(modelType)
+                    .readEntry("LESModel", turbulenceModel);
             }
             else
             {
                 FatalErrorInFunction
-                    << "Unhandled turbulence model option " << simulationType
+                    << "Unhandled turbulence model option " << modelType
                     << ". Valid options are laminar, RAS, LES"
                     << exit(FatalError);
             }
@@ -139,7 +138,7 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
         else
         {
             FatalErrorInFunction
-                << "Unhandled turbulence model option " << simulationType
+                << "Unhandled turbulence model option " << turbulenceType
                 << ". Valid options are turbulenceModel"
                 << exit(FatalError);
         }
@@ -218,7 +217,7 @@ void Foam::solverTemplate::setRegionProperties
         const word& fieldName = fieldNames_[regionI][i];
         const dictionary& dict = fieldDict.subDict(fieldName);
 
-        dict.lookup("type") >> fieldTypes_[regionI][i];
+        dict.readEntry("type", fieldTypes_[regionI][i]);
         fieldDimensions_[regionI].set
         (
             i,
@@ -256,10 +255,10 @@ Foam::solverTemplate::solverTemplate
 
     Info<< "Selecting " << solverName << ": ";
 
-    solverType_ = solverTypeNames_.lookup("solverType", solverDict);
-    Info<< solverTypeNames_[solverType_];
+    solverType_ = solverTypeNames_.get("solverType", solverDict);
+    multiRegion_ = solverDict.get<bool>("multiRegion");
 
-    multiRegion_ = readBool(solverDict.lookup("multiRegion"));
+    Info<< solverTypeNames_[solverType_];
     if (multiRegion_)
     {
         Info<< ", multi-region";

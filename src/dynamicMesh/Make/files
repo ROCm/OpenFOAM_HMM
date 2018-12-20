@@ -90,7 +90,7 @@ polyMeshAdder/polyMeshAdder.C
 fvMeshTools/fvMeshTools.C
 
 fvMeshSubset/fvMeshSubset.C
-meshSubsetHelper/meshSubsetHelper.C
+fvMeshSubsetProxy/fvMeshSubsetProxy.C
 
 motionSmoother/motionSmoother.C
 motionSmoother/motionSmootherAlgo.C

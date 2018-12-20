@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,9 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& d)
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get direction"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
@@ -53,11 +56,11 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& d)
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected direction, found " << t.info()
+            << "Wrong token type - expected label (direction), found "
+            << t.info()
             << exit(FatalIOError);
-
+        is.setBad();
         return is;
     }
 

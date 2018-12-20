@@ -68,9 +68,9 @@ void Foam::multiLevelDecomp::createMethodsDict()
     if
     (
         // non-recursive, no patterns
-        coeffsDict_.readIfPresent("method", defaultMethod, false, false)
+        coeffsDict_.readIfPresent("method", defaultMethod, keyType::LITERAL)
         // non-recursive, no patterns
-     && coeffsDict_.readIfPresent("domains", domains, false, false)
+     && coeffsDict_.readIfPresent("domains", domains, keyType::LITERAL)
     )
     {
         // Short-cut version specified by method, domains only
@@ -161,26 +161,26 @@ void Foam::multiLevelDecomp::createMethodsDict()
         // - Only consider sub-dictionaries with a "numberOfSubdomains" entry
         //   This automatically filters out any coeffs dictionaries
 
-        forAllConstIters(coeffsDict_, iter)
+        for (const entry& dEntry : coeffsDict_)
         {
             word methodName;
 
             if
             (
-                iter().isDict()
+                dEntry.isDict()
                 // non-recursive, no patterns
-             && iter().dict().found("numberOfSubdomains", false, false)
+             && dEntry.dict().found("numberOfSubdomains", keyType::LITERAL)
             )
             {
                 // No method specified? can use a default method?
 
                 const bool addDefaultMethod
                 (
-                    !(iter().dict().found("method", false, false))
+                    !(dEntry.dict().found("method", keyType::LITERAL))
                  && !defaultMethod.empty()
                 );
 
-                entry* e = methodsDict_.add(iter());
+                entry* e = methodsDict_.add(dEntry);
 
                 if (addDefaultMethod && e && e->isDict())
                 {
@@ -201,17 +201,17 @@ void Foam::multiLevelDecomp::setMethods()
 
     methods_.clear();
     methods_.setSize(methodsDict_.size());
-    forAllConstIters(methodsDict_, iter)
+    for (const entry& dEntry : methodsDict_)
     {
         // Dictionary entries only
         // - these method dictionaries are non-regional
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
             methods_.set
             (
                 nLevels++,
                 // non-verbose would be nicer
-                decompositionMethod::New(iter().dict())
+                decompositionMethod::New(dEntry.dict())
             );
         }
     }
@@ -397,7 +397,7 @@ void Foam::multiLevelDecomp::decompose
             Pout<< "Decomposition at level " << currLevel << " :" << endl;
         }
 
-        for (label domainI = 0; domainI < nCurrDomains; domainI++)
+        for (label domainI = 0; domainI < nCurrDomains; ++domainI)
         {
             // Extract elements for current domain
             const labelList domainPoints(findIndices(dist, domainI));
@@ -475,11 +475,11 @@ void Foam::multiLevelDecomp::decompose
 
             // Get original level0 dictionary and modify numberOfSubdomains
             dictionary level0Dict;
-            forAllConstIters(methodsDict_, iter)
+            for (const entry& dEntry : methodsDict_)
             {
-                if (iter().isDict())
+                if (dEntry.isDict())
                 {
-                    level0Dict = iter().dict();
+                    level0Dict = dEntry.dict();
                     break;
                 }
             }
@@ -505,12 +505,12 @@ void Foam::multiLevelDecomp::decompose
                 )
             );
 
-            for (label blockI = 0; blockI < nCurrDomains; blockI++)
+            for (label blockI = 0; blockI < nCurrDomains; ++blockI)
             {
                 // Count the number inbetween blocks of nNext size
 
                 label nPoints = 0;
-                labelList nOutsideConnections(nCurrDomains, 0);
+                labelList nOutsideConnections(nCurrDomains, Zero);
                 forAll(pointPoints, pointi)
                 {
                     if ((dist[pointi] / nNext) == blockI)
@@ -633,7 +633,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
     CompactListList<label> cellCells;
     calcCellCells(mesh, identity(cc.size()), cc.size(), true, cellCells);
 
-    labelList finalDecomp(cc.size(), 0);
+    labelList finalDecomp(cc.size(), Zero);
     labelList cellMap(identity(cc.size()));
 
     decompose
@@ -659,7 +659,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
     const scalarField& pointWeights
 ) const
 {
-    labelList finalDecomp(points.size(), 0);
+    labelList finalDecomp(points.size(), Zero);
     labelList pointMap(identity(points.size()));
 
     decompose

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,8 +48,8 @@ Foam::tmp<Foam::Field<Type>> Foam::windowModel::apply
     }
 
 
-    tmp<Field<Type>> tresult(new Field<Type>(nSamples, pTraits<Type>::zero));
-    Field<Type>& result = tresult.ref();
+    auto tresult = tmp<Field<Type>>::New(nSamples, Zero);
+    auto& result = tresult.ref();
 
     label nWindow = nWindowsTotal(fld.size());
     if (windowI >= nWindow)

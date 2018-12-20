@@ -224,6 +224,9 @@ $(derivedFvPatchFields)/plenumPressure/plenumPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/interfaceCompression/interfaceCompressionFvPatchScalarField.C
 $(derivedFvPatchFields)/swirlFanVelocity/swirlFanVelocityFvPatchField.C
 
+$(derivedFvPatchFields)/mappedField/Sampled/makeSampledPatchFunction1s.C
+
+
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
 
@@ -428,6 +431,7 @@ $(general)/bound/bound.C
 $(general)/CorrectPhi/correctUphiBCs.C
 $(general)/pressureControl/pressureControl.C
 $(general)/levelSet/levelSet.C
+$(general)/meshObjects/gravity/gravityMeshObject.C
 
 coupling = $(general)/coupling
 $(coupling)/externalFileCoupler.C

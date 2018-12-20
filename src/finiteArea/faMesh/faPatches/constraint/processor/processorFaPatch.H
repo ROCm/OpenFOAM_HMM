@@ -160,8 +160,8 @@ public:
         )
         :
             coupledFaPatch(name, dict, index, bm),
-            myProcNo_(readLabel(dict.lookup("myProcNo"))),
-            neighbProcNo_(readLabel(dict.lookup("neighbProcNo"))),
+            myProcNo_(dict.get<label>("myProcNo")),
+            neighbProcNo_(dict.get<label>("neighbProcNo")),
             neighbEdgeCentres_(),
             neighbEdgeLengths_(),
             neighbEdgeFaceCentres_(),

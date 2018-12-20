@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Reads an OpenFOAM mesh and writes the boundaries in a surface format.
+    Extract boundaries from an OpenFOAM mesh and write in a surface format
 
 Usage
     \b foamToSurface [OPTION]
@@ -56,28 +56,32 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Extract boundaries from an OpenFOAM mesh and write in a surface format"
+    );
     argList::noParallel();
-    argList::addArgument("outputFile.ext");
+    argList::addArgument("output", "The output surface file");
+
     timeSelector::addOptions();
 
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Geometry scaling factor - default is 1"
     );
     argList::addBoolOption
     (
         "tri",
-        "triangulate surface"
+        "Triangulate surface"
     );
 
     #include "setRootCase.H"
 
     fileName exportName = args[1];
 
-    scalar scaleFactor = 0;
-    args.readIfPresent<scalar>("scale", scaleFactor);
+    const scalar scaleFactor = args.opt<scalar>("scale", 0);
     const bool doTriangulate = args.found("tri");
 
     fileName exportBase = exportName.lessExt();

@@ -57,10 +57,8 @@ Foam::tmp<Foam::surfaceScalarField> Foam::functionObjects::PecletNo::rhoScale
     {
         return phi/fvc::interpolate(lookupObject<volScalarField>(rhoName_));
     }
-    else
-    {
-        return phi;
-    }
+
+    return phi;
 }
 
 
@@ -84,23 +82,19 @@ bool Foam::functionObjects::PecletNo::calc()
             const dictionary& model =
                 mesh_.lookupObject<dictionary>("transportProperties");
 
-            nuEff =
-                tmp<volScalarField>
+            nuEff = tmp<volScalarField>::New
+            (
+                IOobject
                 (
-                    new volScalarField
-                    (
-                        IOobject
-                        (
-                            "nuEff",
-                            mesh_.time().timeName(),
-                            mesh_,
-                            IOobject::NO_READ,
-                            IOobject::NO_WRITE
-                        ),
-                        mesh_,
-                        dimensionedScalar(model.lookup("nu"))
-                    )
-                );
+                    "nuEff",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh_,
+                dimensionedScalar("nu", dimViscosity, model)
+            );
         }
         else
         {

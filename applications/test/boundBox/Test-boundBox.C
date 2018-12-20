@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,9 @@ Description
 #include "boundBox.H"
 #include "treeBoundBox.H"
 #include "cellModel.H"
+#include "bitSet.H"
+#include "HashSet.H"
+#include "ListOps.H"
 
 using namespace Foam;
 
@@ -117,6 +120,29 @@ int main(int argc, char *argv[])
 
         box1.add(box4);
         Info<<"union with " << box4 << " => " << box1 << endl;
+
+        labelRange range(10, 25);
+        auto variousPoints = ListOps::create<point>
+        (
+            range.begin(),
+            range.end(),
+            [](const label val) { return vector(val, val, val); }
+        );
+
+        Info<< nl << nl;
+
+        labelHashSet select1{4, 5, 55};
+        bitSet select2(15, {1, 5, 20, 24, 34});
+
+        Info<< "From points: size=" << variousPoints.size() << " from "
+            << variousPoints.first() << " ... " << variousPoints.last() << nl;
+        Info<< "add points @ " << flatOutput(select1.sortedToc()) << nl;
+
+        box1.add(variousPoints, select1);
+        Info<< "box is now => " << box1 << endl;
+
+        box1.add(variousPoints, select2);
+        Info<< "box is now => " << box1 << endl;
     }
 
     return 0;

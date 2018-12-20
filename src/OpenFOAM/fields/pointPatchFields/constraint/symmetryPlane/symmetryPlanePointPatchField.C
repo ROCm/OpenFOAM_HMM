@@ -48,14 +48,12 @@ Foam::symmetryPlanePointPatchField<Type>::symmetryPlanePointPatchField
 )
 :
     basicSymmetryPointPatchField<Type>(p, iF, dict),
-    symmetryPlanePatch_(refCast<const symmetryPlanePointPatch>(p))
+    symmetryPlanePatch_(refCast<const symmetryPlanePointPatch>(p, dict))
 {
     if (!isType<symmetryPlanePointPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not symmetry type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not symmetry type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

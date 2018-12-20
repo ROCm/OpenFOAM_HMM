@@ -78,8 +78,7 @@ Foam::scalar Foam::primitiveMeshTools::boundaryFaceSkewness
 {
     vector Cpf = fCtrs[facei] - ownCc;
 
-    vector normal = fAreas[facei];
-    normal /= mag(normal) + ROOTVSMALL;
+    vector normal = normalised(fAreas[facei]);
     vector d = normal*(normal & Cpf);
 
 

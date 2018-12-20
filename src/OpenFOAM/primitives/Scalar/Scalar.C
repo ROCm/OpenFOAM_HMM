@@ -40,6 +40,7 @@ const Scalar pTraits<Scalar>::rootMax = ScalarROOTVGREAT;
 
 const char* const pTraits<Scalar>::componentNames[] = { "" };
 
+
 pTraits<Scalar>::pTraits(const Scalar& val)
 :
     p_(val)
@@ -132,6 +133,9 @@ Istream& operator>>(Istream& is, Scalar& val)
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get scalar value"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
@@ -139,16 +143,18 @@ Istream& operator>>(Istream& is, Scalar& val)
     if (t.isNumber())
     {
         val = t.number();
-        is.check(FUNCTION_NAME);
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected Scalar, found " << t.info()
+            << "Wrong token type - expected scalar value, found "
+            << t.info()
             << exit(FatalIOError);
+        is.setBad();
+        return is;
     }
 
+    is.check(FUNCTION_NAME);
     return is;
 }
 

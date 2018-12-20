@@ -25,7 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 inline Foam::scalar Foam::TimeState::timeOutputValue() const
 {
     return timeToUserTime(value());
@@ -63,12 +62,6 @@ inline Foam::dimensionedScalar Foam::TimeState::deltaT0() const
 
 
 inline bool Foam::TimeState::writeTime() const
-{
-    return writeTime_;
-}
-
-
-inline bool Foam::TimeState::outputTime() const
 {
     return writeTime_;
 }

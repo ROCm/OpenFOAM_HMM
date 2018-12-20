@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,17 +62,6 @@ class functionObjectBase
 :
     public fieldVisualisationBase
 {
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        functionObjectBase(const functionObjectBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const functionObjectBase&) = delete;
-
-
 protected:
 
     // Protected data
@@ -100,11 +89,11 @@ protected:
         //  \verbatim
         //      T
         //      {
-        //          file    "path/T_object.vtk";
+        //          file    "<case>/relpath/T_object.vtk";
         //      }
         //      defaultCloud
         //      {
-        //          file    "path/cloud_0001.vtp";
+        //          file    "<case>/relpath/cloud_0001.vtp";
         //          fields  (T U);
         //      }
         //  \endverbatim
@@ -120,6 +109,12 @@ protected:
         //  \note does not change the stateFunctionObject
         bool removeFile(const word& keyword, const word& subDictName);
 
+        //- No copy construct
+        functionObjectBase(const functionObjectBase&) = delete;
+
+        //- No copy assignment
+        void operator=(const functionObjectBase&) = delete;
+
 
 public:
 
@@ -134,12 +129,12 @@ public:
         (
             const stateFunctionObject& state,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
 
     //- Destructor
-    virtual ~functionObjectBase();
+    virtual ~functionObjectBase() = default;
 
 
     // Member Functions

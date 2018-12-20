@@ -49,7 +49,7 @@ Foam::processorPointPatchField<Type>::processorPointPatchField
 )
 :
     coupledPointPatchField<Type>(p, iF, dict),
-    procPatch_(refCast<const processorPointPatch>(p))
+    procPatch_(refCast<const processorPointPatch>(p, dict))
 {}
 
 

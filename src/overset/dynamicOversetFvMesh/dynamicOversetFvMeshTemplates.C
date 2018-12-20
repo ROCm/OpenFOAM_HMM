@@ -78,6 +78,34 @@ void Foam::dynamicOversetFvMesh::interpolate(GeoField& psi) const
 }
 
 
+template<class GeoField>
+void Foam::dynamicOversetFvMesh::interpolate(const wordHashSet& suppressed)
+{
+    auto flds(this->lookupClass<GeoField>());
+    for (auto fldPtr : flds)
+    {
+        const word& name = fldPtr->name();
+        if (!suppressed.found(baseName(name)))
+        {
+            if (debug)
+            {
+                Pout<< "dynamicOversetFvMesh::interpolate: interpolating : "
+                    << name << endl;
+            }
+            interpolate(fldPtr->primitiveFieldRef());
+        }
+        else
+        {
+            if (debug)
+            {
+                Pout<< "dynamicOversetFvMesh::interpolate: skipping : " << name
+                    << endl;
+            }
+        }
+    }
+}
+
+
 template<class GeoField, class PatchType>
 Foam::lduInterfaceFieldPtrsList
 Foam::dynamicOversetFvMesh::scalarInterfaces(const GeoField& psi) const

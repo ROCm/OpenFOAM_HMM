@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "pointNoise.H"
 #include "noiseFFT.H"
+#include "argList.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -226,12 +227,6 @@ pointNoise::pointNoise(const dictionary& dict, const bool readFields)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-pointNoise::~pointNoise()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void pointNoise::calculate()
@@ -242,16 +237,16 @@ void pointNoise::calculate()
         return;
     }
 
-
     forAll(inputFileNames_, filei)
     {
         fileName fName = inputFileNames_[filei];
         fName.expand();
+
         if (!fName.isAbsolute())
         {
-            fName = "$FOAM_CASE"/fName;
-            fName.expand();
+            fName = argList::envGlobalPath()/fName;
         }
+
         Function1Types::CSV<scalar> data("pressure", dict_, fName);
         processData(filei, data);
     }
@@ -264,10 +259,10 @@ bool pointNoise::read(const dictionary& dict)
     {
         if (!dict.readIfPresent("files", inputFileNames_))
         {
-            inputFileNames_.setSize(1);
+            inputFileNames_.resize(1);
 
             // Note: lookup uses same keyword as used by the CSV constructor
-            dict.lookup("file") >> inputFileNames_[0];
+            dict.readEntry("file", inputFileNames_.first());
         }
 
         return true;

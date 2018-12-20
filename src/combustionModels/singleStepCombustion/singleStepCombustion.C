@@ -57,7 +57,7 @@ singleStepCombustion<ReactionThermo, ThermoType>::singleStepCombustion
         this->mesh(),
         dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
     ),
-    semiImplicit_(readBool(this->coeffs_.lookup("semiImplicit")))
+    semiImplicit_(this->coeffs_.getBool("semiImplicit"))
 {
     if (isA<singleStepReactingMixture<ThermoType>>(this->thermo()))
     {

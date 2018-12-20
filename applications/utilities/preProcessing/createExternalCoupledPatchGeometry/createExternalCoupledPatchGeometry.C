@@ -28,7 +28,7 @@ Group
     grpPreProcessingUtilities
 
 Description
-    Application to generate the patch geometry (points and faces) for use
+    Generate the patch geometry (points and faces) for use
     with the externalCoupled functionObject.
 
 Usage
@@ -68,6 +68,12 @@ See also
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Generate the patch geometry (points and faces) for use"
+        " with the externalCoupled functionObject."
+    );
+
     #include "addRegionOption.H"
     #include "addRegionsOption.H"
     argList::addArgument("patchGroup");
@@ -75,18 +81,18 @@ int main(int argc, char *argv[])
     (
         "commsDir",
         "dir",
-        "specify alternate communications directory. default is 'comms'"
+        "Specify communications directory (default is 'comms')"
     );
     #include "setRootCase.H"
     #include "createTime.H"
 
     wordList regionNames(1, fvMesh::defaultRegion);
-    if (!args.readIfPresent("region", regionNames[0]))
+    if (!args.readIfPresent("region", regionNames.first()))
     {
         args.readIfPresent("regions", regionNames);
     }
 
-    const wordRe patchGroup(args.read<wordRe>(1));
+    const wordRe patchGroup(args.get<wordRe>(1));
 
     fileName commsDir(runTime.path()/"comms");
     args.readIfPresent("commsDir", commsDir);

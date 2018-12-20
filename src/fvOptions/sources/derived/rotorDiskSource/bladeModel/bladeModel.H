@@ -64,7 +64,6 @@ namespace Foam
 
 class bladeModel
 {
-
 protected:
 
     // Protected data
@@ -111,7 +110,7 @@ public:
 
 
     //- Destructor
-    virtual ~bladeModel();
+    virtual ~bladeModel() = default;
 
 
     // Member functions

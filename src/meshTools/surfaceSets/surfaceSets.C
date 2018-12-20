@@ -496,7 +496,7 @@ Foam::labelHashSet Foam::surfaceSets::getHangingCells
 //
 //    cellToCell deleteInsideSource(mesh, rawInside.name());
 //
-//    deleteInsideSource.applyToSet(topoSetSource::DELETE, cutCells);
+//    deleteInsideSource.applyToSet(topoSetSource::SUBTRACT, cutCells);
 //    Pout<< "Writing cut cells (" << cutCells.size() << ") to cellSet "
 //        << cutCells.instance()/cutCells.local()/cutCells.name()
 //        << endl << endl;
@@ -544,8 +544,8 @@ Foam::labelHashSet Foam::surfaceSets::getHangingCells
 //    cellSet inside(mesh, "inside", rawInside);
 //    cellSet outside(mesh, "outside", rawOutside);
 //
-//    pToCell.applyToSet(topoSetSource::DELETE, inside);
-//    pToCell.applyToSet(topoSetSource::DELETE, outside);
+//    pToCell.applyToSet(topoSetSource::SUBTRACT, inside);
+//    pToCell.applyToSet(topoSetSource::SUBTRACT, outside);
 //
 //    Pout<< nl
 //        << "Removed " << rawInside.size() - inside.size()

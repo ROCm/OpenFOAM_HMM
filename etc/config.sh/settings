@@ -18,7 +18,7 @@
 #
 #------------------------------------------------------------------------------
 export WM_ARCH=$(uname -s)                  # System name
-: ${WM_OSTYPE:=POSIX}; export WM_OSTYPE     # System type (POSIX is default)
+## : ${WM_OSTYPE:=POSIX}; export WM_OSTYPE     # System type (POSIX is default)
 
 # Default compiler = gcc/g++ and C++11
 export WM_CC="gcc"
@@ -131,73 +131,95 @@ esac
 
 #------------------------------------------------------------------------------
 
-# [FOAM_JOB_DIR] - unset is equivalent to ~/.OpenFOAM/jobControl
-## export FOAM_JOB_DIR="$HOME/.OpenFOAM/jobControl"
-
 # wmake configuration
-export WM_DIR=$WM_PROJECT_DIR/wmake
-export WM_LABEL_OPTION=Int$WM_LABEL_SIZE
-export WM_OPTIONS=$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION$WM_COMPILE_OPTION
+export WM_DIR="$WM_PROJECT_DIR/wmake"
+export WM_LABEL_OPTION="Int$WM_LABEL_SIZE"
+export WM_OPTIONS="$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION$WM_COMPILE_OPTION"
 
 # Base executables/libraries
-export FOAM_APPBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/bin
-export FOAM_LIBBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib
-
-# External (ThirdParty) libraries
-export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/lib
+export FOAM_APPBIN="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/bin"
+export FOAM_LIBBIN="$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib"
 
 # Site-specific (group) files
-if [ -n "$WM_PROJECT_SITE" ]
+
+# Default
+siteDir="$WM_PROJECT_DIR/site"
+
+# User override
+if [ -d "$WM_PROJECT_SITE" ] && [ "$WM_PROJECT_SITE" != "$siteDir" ]
 then
-    siteDir=$WM_PROJECT_SITE
+    siteDir="$WM_PROJECT_SITE"
+    export WM_PROJECT_SITE
 else
-    siteDir=$WM_PROJECT_INST_DIR/site
+    unset WM_PROJECT_SITE
 fi
 
 # Shared site (group) executables/libraries
-export FOAM_SITE_APPBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
-export FOAM_SITE_LIBBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
+export FOAM_SITE_APPBIN="$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin"
+export FOAM_SITE_LIBBIN="$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib"
 
 # User executables/libraries
-export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
-export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
+export FOAM_USER_APPBIN="$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin"
+export FOAM_USER_LIBBIN="$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib"
 
-# [FOAM_CODE_TEMPLATES] - dynamicCode templates
-# * fallback == "foamEtcFile -list codeTemplates/dynamicCode"
-# export FOAM_CODE_TEMPLATES=$WM_PROJECT_DIR/etc/codeTemplates/dynamicCode
 
-# Convenience
-export FOAM_ETC=$WM_PROJECT_DIR/etc
-export FOAM_APP=$WM_PROJECT_DIR/applications
-export FOAM_SRC=$WM_PROJECT_DIR/src
-export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
-export FOAM_UTILITIES=$WM_PROJECT_DIR/applications/utilities
-export FOAM_SOLVERS=$WM_PROJECT_DIR/applications/solvers
-export FOAM_RUN=$WM_PROJECT_USER_DIR/run
+# Prepend wmake to the path - not required for runtime-only environment
+foundDir="$WM_PROJECT_DIR/wmake"
+if [ -d "$WM_DIR" ]
+then
+    foundDir="${WM_DIR}"
+fi
+if [ -d "$foundDir" ]
+then
+    PATH="$foundDir:$PATH"
+else
+    unset WM_DIR
+fi
 
-# Add wmake to the path - not required for runtime-only environment
-[ -d "$WM_DIR" ] && PATH=$WM_DIR:$PATH
-# Add OpenFOAM scripts to the path
-export PATH=$WM_PROJECT_DIR/bin:$PATH
+# Prepend OpenFOAM scripts to the path
+export PATH="$WM_PROJECT_DIR/bin:$PATH"
 
-# Add site-specific scripts to path - only if they exist
+# Prepend site-specific scripts to path - only if they exist
 if [ -d "$siteDir/bin" ]                        # Generic
 then
     _foamAddPath "$siteDir/bin"
 fi
-if [ -d "$siteDir/$WM_PROJECT_VERSION/bin" ]    # Version-specific
+if [ -d "$siteDir/$WM_PROJECT_API/bin" ]        # API-specific
 then
-    _foamAddPath "$siteDir/$WM_PROJECT_VERSION/bin"
+    _foamAddPath "$siteDir/$WM_PROJECT_API/bin"
 fi
-unset siteDir
 
-_foamAddPath $FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN
-_foamAddLib  $FOAM_LIBBIN/dummy     # Dummy versions of external libraries last
-if [ -n "$FOAM_EXT_LIBBIN" ]        # External libraries (allowed to be unset)
+# OpenFOAM executables (user, group, standard)
+_foamAddPath "$FOAM_USER_APPBIN:$FOAM_SITE_APPBIN:$FOAM_APPBIN"
+
+# Dummy versions of external libraries. To be found last in LD_LIBRARY_PATH
+_foamAddLib  "$FOAM_LIBBIN/dummy"
+
+# External (ThirdParty) libraries. Also allowed to be unset
+if [ -d "$WM_THIRD_PARTY_DIR" ]
 then
-    _foamAddLib $FOAM_EXT_LIBBIN
+    export FOAM_EXT_LIBBIN="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/lib"
+    _foamAddLib "$FOAM_EXT_LIBBIN"
+else
+    unset FOAM_EXT_LIBBIN
 fi
-_foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN
+
+# OpenFOAM libraries (user, group, standard)
+_foamAddLib  "$FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN"
+
+
+#------------------------------------------------------------------------------
+
+# Convenience
+# ~~~~~~~~~~~
+
+export FOAM_ETC="$WM_PROJECT_DIR/etc"
+export FOAM_APP="$WM_PROJECT_DIR/applications"
+export FOAM_SRC="$WM_PROJECT_DIR/src"
+export FOAM_TUTORIALS="$WM_PROJECT_DIR/tutorials"
+export FOAM_UTILITIES="$WM_PROJECT_DIR/applications/utilities"
+export FOAM_SOLVERS="$WM_PROJECT_DIR/applications/solvers"
+export FOAM_RUN="$WM_PROJECT_USER_DIR/run"
 
 #------------------------------------------------------------------------------
 
@@ -228,7 +250,7 @@ Arm*)     # Arm system compilers
 esac
 
 # Clear prior to sourcing
-unset gcc_version gmp_version mpfr_version mpc_version
+unset gcc_version gmp_version mpfr_version mpc_version clang_version
 unset GMP_ARCH_PATH MPFR_ARCH_PATH
 
 # Load pre-defined compiler versions
@@ -236,7 +258,7 @@ unset GMP_ARCH_PATH MPFR_ARCH_PATH
 _foamEtc -config compiler
 
 # ThirdParty base for compilers
-archDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH
+archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER_ARCH"
 
 case "$WM_COMPILER_TYPE-$WM_COMPILER" in
 ThirdParty-Gcc*)
@@ -265,7 +287,7 @@ GCC_NOT_FOUND
 
     # Add gmp/mpfr/mpc libraries to run-time environment.
     # Require that they exist, automatically find lib64/ or lib/.
-    _foamAddLibAuto $gmpDir   && \
+    _foamAddLibAuto $gmpDir  && \
         export GMP_ARCH_PATH=$gmpDir    # For non-system CGAL
 
     _foamAddLibAuto $mpfrDir && \
@@ -273,7 +295,7 @@ GCC_NOT_FOUND
 
     _foamAddLibAuto $mpcDir
 
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using ThirdParty compiler"
         echo "    ${gccDir##*/}  (${gmpDir##*/}  $${mpfrDir##*/}  ${mpcDir##*/})"
@@ -299,7 +321,7 @@ CLANG_NOT_FOUND
     _foamAddPath    $clangDir/bin
     _foamAddLib     $clangDir/lib  # For things like libomp (openmp) etc
 
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
     then
         echo "Using ThirdParty compiler"
         echo "    ${clangDir##*/}"
@@ -324,7 +346,7 @@ esac
 
 # Cleanup
 # ~~~~~~~
-unset archDir
+unset archDir siteDir foundDir
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

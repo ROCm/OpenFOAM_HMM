@@ -81,7 +81,7 @@ surfaceAlignedSBRStressFvMotionSolver
     minAng_(coeffDict().lookupOrDefault<scalar>("minAng", 20.0)),
     accFactor_(coeffDict().lookupOrDefault<scalar>("accFactor", 1.0)),
     smoothFactor_(coeffDict().lookupOrDefault<scalar>("smoothFactor", 0.9)),
-    nNonOrthogonalCorr_(readLabel(coeffDict().lookup("nNonOrthogonalCorr"))),
+    nNonOrthogonalCorr_(coeffDict().get<label>("nNonOrthogonalCorr")),
     pointDisplacement_(pointDisplacement()),
     sigmaD_
     (

@@ -115,8 +115,8 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
 {
     functionObject::read(dict);
 
-    dict.lookup("fileToUpdate") >> fileToUpdate_;
-    dict.lookup("timeVsFile") >> timeVsFile_;
+    dict.readEntry("fileToUpdate", fileToUpdate_);
+    dict.readEntry("timeVsFile", timeVsFile_);
 
     lastIndex_ = -1;
     fileToUpdate_.expand();

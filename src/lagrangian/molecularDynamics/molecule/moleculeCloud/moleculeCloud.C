@@ -505,10 +505,13 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 const scalar temperature
                 (
-                    readScalar(zoneDict.lookup("temperature"))
+                    zoneDict.get<scalar>("temperature")
                 );
 
-                const vector bulkVelocity(zoneDict.lookup("bulkVelocity"));
+                const vector bulkVelocity
+                (
+                    zoneDict.get<vector>("bulkVelocity")
+                );
 
                 List<word> latticeIds
                 (
@@ -537,9 +540,9 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 if (zoneDict.found("numberDensity"))
                 {
-                    scalar numberDensity = readScalar
+                    const scalar numberDensity
                     (
-                        zoneDict.lookup("numberDensity")
+                        zoneDict.get<scalar>("numberDensity")
                     );
 
                     if (numberDensity < VSMALL)
@@ -570,9 +573,9 @@ void Foam::moleculeCloud::initialiseMolecules
                         unitCellMass += cP.mass();
                     }
 
-                    scalar massDensity = readScalar
+                    const scalar massDensity
                     (
-                        zoneDict.lookup("massDensity")
+                        zoneDict.get<scalar>("massDensity")
                     );
 
                     if (massDensity < VSMALL)
@@ -600,7 +603,7 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 latticeCellShape *= latticeCellScale;
 
-                vector anchor(zoneDict.lookup("anchor"));
+                vector anchor(zoneDict.get<vector>("anchor"));
 
                 bool tethered = false;
 
@@ -614,7 +617,7 @@ void Foam::moleculeCloud::initialiseMolecules
 
                 const vector orientationAngles
                 (
-                    zoneDict.lookup("orientationAngles")
+                    zoneDict.get<vector>("orientationAngles")
                 );
 
                 scalar phi(orientationAngles.x()*pi/180.0);

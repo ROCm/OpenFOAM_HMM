@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -33,7 +33,7 @@ boundaryField
         uniformValue    table
         (
             (0.0         (0 0 0))
-            (1.0         (0.31 0 0))
+            (1.0         (0.2 0 0))
             (2.0         (0 0 0))
         );
     }

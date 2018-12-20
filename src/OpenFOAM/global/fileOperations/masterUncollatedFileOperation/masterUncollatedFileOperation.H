@@ -495,10 +495,10 @@ public:
     // Constructors
 
         //- Construct null
-        masterUncollatedFileOperation(const bool verbose);
+        masterUncollatedFileOperation(bool verbose);
 
         //- Construct from communicator
-        masterUncollatedFileOperation(const label comm, const bool verbose);
+        masterUncollatedFileOperation(const label comm, bool verbose);
 
 
     //- Destructor
@@ -769,6 +769,9 @@ public:
 
             //- Callback for time change
             virtual void setTime(const Time&) const;
+
+            //- Forcibly wait until all output done. Flush any cached data
+            virtual void flush() const;
 
             //- Return cached times
             const HashPtrTable<instantList>& times() const

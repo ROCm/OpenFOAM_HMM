@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -180,9 +180,6 @@ private:
         //- Return the specific heat capacity field
         tmp<volScalarField> Cp() const;
 
-        //- Return the gravity vector
-        vector g() const;
-
         //- Update the model
         void update(const volScalarField& Cp);
 
@@ -218,40 +215,38 @@ public:
         );
 
 
+    //- Destructor
+    ~solidificationMeltingSource() = default;
+
+
     // Member Functions
 
-        // Add explicit and implicit contributions
+        //- Add explicit contribution to enthalpy equation
+        virtual void addSup(fvMatrix<scalar>& eqn, const label fieldi);
 
-            //- Add explicit contribution to enthalpy equation
-            virtual void addSup(fvMatrix<scalar>& eqn, const label fieldi);
-
-            //- Add implicit contribution to momentum equation
-            virtual void addSup(fvMatrix<vector>& eqn, const label fieldi);
+        //- Add implicit contribution to momentum equation
+        virtual void addSup(fvMatrix<vector>& eqn, const label fieldi);
 
 
-        // Add explicit and implicit contributions to compressible equation
+        //- Add explicit contribution to compressible enthalpy equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<scalar>& eqn,
+            const label fieldi
+        );
 
-            //- Add explicit contribution to compressible enthalpy equation
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<scalar>& eqn,
-                const label fieldi
-            );
-
-            //- Add implicit contribution to compressible momentum equation
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<vector>& eqn,
-                const label fieldi
-            );
+        //- Add implicit contribution to compressible momentum equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<vector>& eqn,
+            const label fieldi
+        );
 
 
-        // IO
-
-            //- Read source dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read source dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 

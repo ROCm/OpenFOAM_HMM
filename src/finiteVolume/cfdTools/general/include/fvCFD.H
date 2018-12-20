@@ -21,6 +21,7 @@
 #include "findRefCell.H"
 #include "IOMRFZoneList.H"
 #include "constants.H"
+#include "gravityMeshObject.H"
 
 #include "columnFvMesh.H"
 

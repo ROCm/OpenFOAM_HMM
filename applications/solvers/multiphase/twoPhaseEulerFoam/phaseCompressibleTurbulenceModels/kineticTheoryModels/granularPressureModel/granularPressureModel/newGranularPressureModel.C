@@ -33,7 +33,7 @@ Foam::kineticTheoryModels::granularPressureModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("granularPressureModel"));
+    const word modelType(dict.get<word>("granularPressureModel"));
 
     Info<< "Selecting granularPressureModel " << modelType << endl;
 

@@ -28,7 +28,7 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Solver for 2 incompressible, isothermal immiscible fluids using a VOF
+    Solver for two incompressible, isothermal immiscible fluids using a VOF
     (volume of fluid) phase-fraction based interface capturing approach,
     with optional mesh motion and mesh topology changes including adaptive
     re-meshing.
@@ -53,10 +53,18 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for two incompressible, isothermal immiscible fluids"
+        " using VOF phase-fraction based interface capturing.\n"
+        "With optional mesh motion and mesh topology changes including"
+        " adaptive re-meshing."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
@@ -92,7 +100,7 @@ int main(int argc, char *argv[])
             #include "setDeltaT.H"
         }
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

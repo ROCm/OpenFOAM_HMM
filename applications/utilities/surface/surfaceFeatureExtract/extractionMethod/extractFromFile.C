@@ -56,7 +56,7 @@ Foam::surfaceFeaturesExtraction::extractFromFile::extractFromFile
     const dictionary& coeffDict =
         dict.optionalSubDict("extractFromFileCoeffs");
 
-    coeffDict.lookup("featureEdgeFile") >> featureEdgeFile_;
+    coeffDict.readEntry("featureEdgeFile", featureEdgeFile_);
     coeffDict.readIfPresent("geometricTestOnly", geometricTestOnly_);
 }
 

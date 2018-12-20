@@ -28,8 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    For mesh debugging: writes mesh as three separate OBJ files which can
-    be viewed with e.g. javaview.
+    For mesh debugging: writes mesh as three separate OBJ files.
 
     meshPoints_XXX.obj : all points and edges as lines.
     meshFaceCentres_XXX.obj : all face centres.
@@ -60,6 +59,7 @@ void writeOBJ(const point& pt, Ostream& os)
 {
     os  << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
 }
+
 
 // All edges of mesh
 void writePoints(const polyMesh& mesh, const fileName& timeName)
@@ -376,55 +376,56 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "for mesh debugging: write mesh as separate OBJ files"
+        "For mesh debugging: write mesh as separate OBJ files"
     );
 
     timeSelector::addOptions();
     argList::addBoolOption
     (
         "patchFaces",
-        "write patch faces edges"
+        "Write patch faces edges"
     );
     argList::addBoolOption
     (
         "patchEdges",
-        "write patch boundary edges"
+        "Write patch boundary edges"
     );
     argList::addOption
     (
         "cell",
-        "int",
-        "write points for the specified cell"
+        "cellId",
+        "Write points for the specified cell"
     );
     argList::addOption
     (
         "face",
-        "int",
-        "write specified face"
+        "faceId",
+        "Write specified face"
     );
     argList::addOption
     (
         "point",
-        "int",
-        "write specified point"
+        "pointId",
+        "Write specified point"
     );
     argList::addOption
     (
         "cellSet",
         "name",
-        "write points for specified cellSet"
+        "Write points for specified cellSet"
     );
     argList::addOption
     (
         "faceSet",
         "name",
-        "write points for specified faceSet"
+        "Write points for specified faceSet"
     );
     #include "addRegionOption.H"
 
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     const bool patchFaces = args.found("patchFaces");
     const bool patchEdges = args.found("patchEdges");

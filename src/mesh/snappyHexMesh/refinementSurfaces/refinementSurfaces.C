@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,7 +184,8 @@ Foam::refinementSurfaces::refinementSurfaces
     {
         const word& geomName = allGeometry_.names()[geomI];
 
-        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
+        const entry* ePtr =
+            surfacesDict.findEntry(geomName, keyType::REGEX);
 
         if (ePtr)
         {
@@ -207,6 +208,7 @@ Foam::refinementSurfaces::refinementSurfaces
             (
                 globalMinLevel[surfI] < 0
              || globalMaxLevel[surfI] < globalMinLevel[surfI]
+             || globalMaxLevel[surfI] < 0
              || globalLevelIncr[surfI] < 0
             )
             {
@@ -227,14 +229,9 @@ Foam::refinementSurfaces::refinementSurfaces
                 "gapLevel",
                 nullGapLevel
             );
-            globalGapMode[surfI] = volumeType::names
-            [
-                dict.lookupOrDefault<word>
-                (
-                    "gapMode",
-                    volumeType::names[volumeType::MIXED]
-                )
-            ];
+            globalGapMode[surfI] =
+                volumeType("gapMode", dict, volumeType::MIXED);
+
             if
             (
                 globalGapMode[surfI] == volumeType::UNKNOWN
@@ -248,7 +245,7 @@ Foam::refinementSurfaces::refinementSurfaces
                     << "Illegal gapLevel specification for surface "
                     << names_[surfI]
                     << " : gapLevel:" << globalGapLevel[surfI]
-                    << " gapMode:" << volumeType::names[globalGapMode[surfI]]
+                    << " gapMode:" << globalGapMode[surfI].str()
                     << exit(FatalIOError);
             }
 
@@ -327,14 +324,9 @@ Foam::refinementSurfaces::refinementSurfaces
                         regionGapLevel[surfI].insert(regionI, gapSpec);
                         volumeType gapModeSpec
                         (
-                            volumeType::names
-                            [
-                                regionDict.lookupOrDefault<word>
-                                (
-                                    "gapMode",
-                                    volumeType::names[volumeType::MIXED]
-                                )
-                            ]
+                            "gapMode",
+                            regionDict,
+                            volumeType::MIXED
                         );
                         regionGapMode[surfI].insert(regionI, gapModeSpec);
                         if
@@ -350,7 +342,7 @@ Foam::refinementSurfaces::refinementSurfaces
                                 << "Illegal gapLevel specification for surface "
                                 << names_[surfI]
                                 << " : gapLevel:" << gapSpec
-                                << " gapMode:" << volumeType::names[gapModeSpec]
+                                << " gapMode:" << gapModeSpec.str()
                                 << exit(FatalIOError);
                         }
 
@@ -360,10 +352,7 @@ Foam::refinementSurfaces::refinementSurfaces
                             regionAngle[surfI].insert
                             (
                                 regionI,
-                                readScalar
-                                (
-                                    regionDict.lookup("perpendicularAngle")
-                                )
+                                regionDict.get<scalar>("perpendicularAngle")
                             );
                         }
 
@@ -384,10 +373,8 @@ Foam::refinementSurfaces::refinementSurfaces
 
     if (unmatchedKeys.size() > 0)
     {
-        IOWarningInFunction
-        (
-            surfacesDict
-        )   << "Not all entries in refinementSurfaces dictionary were used."
+        IOWarningInFunction(surfacesDict)
+            << "Not all entries in refinementSurfaces dictionary were used."
             << " The following entries were not used : "
             << unmatchedKeys.sortedToc()
             << endl;

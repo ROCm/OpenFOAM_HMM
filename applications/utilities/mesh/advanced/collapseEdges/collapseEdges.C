@@ -63,13 +63,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    timeSelector::addOptions(true, false);
     argList::addNote
     (
         "Collapses small edges to a point.\n"
         "Optionally collapse small faces to a point and thin faces to an edge."
     );
-
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
     argList::addBoolOption
     (
         "collapseFaces",
@@ -83,12 +82,15 @@ int main(int argc, char *argv[])
         "Collapse faces that are in the supplied face set"
     );
 
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative collapseDict");
+
     #include "addOverwriteOption.H"
+
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
 
-    runTime.functionObjects().off();
     instantList timeDirs = timeSelector::selectIfPresent(runTime, args);
 
     #include "createNamedMesh.H"
@@ -127,7 +129,6 @@ int main(int argc, char *argv[])
     {
         readFlag = IOobject::MUST_READ;
     }
-
 
 
     labelIOList pointPriority
@@ -240,7 +241,7 @@ int main(int argc, char *argv[])
         // Write resulting mesh
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
         else
         {

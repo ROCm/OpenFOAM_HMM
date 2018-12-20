@@ -71,7 +71,7 @@ Foam::TomiyamaLiftForce<CloudType>::TomiyamaLiftForce
 )
 :
     LiftForce<CloudType>(owner, mesh, dict, forceType),
-    sigma_(readScalar(this->coeffs().lookup("sigma")))
+    sigma_(this->coeffs().getScalar("sigma"))
 {}
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,13 +25,23 @@ Class
     Foam::surfaceToPoint
 
 Description
-    A topoSetSource to selects points based on relation to surface.
+    A topoSetPointSource to select points based on relation to surface.
 
     Select based on:
     - distance to surface
     - inside/outside status to surface
       (Uses normal of nearest surface triangle so requires valid surface
       topology!)
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        file        | The surface "filename"            | yes   |
+        scale       | surface scaling factor            | no    | -1
+        nearDistance   | Near distance to the surface   | yes   |
+        includeInside  | Include inside cells (bool)    | yes   |
+        includeOutside | Include outside cells (bool)   | yes   |
+    \endtable
 
 SourceFiles
     surfaceToPoint.C
@@ -41,13 +51,14 @@ SourceFiles
 #ifndef surfaceToPoint_H
 #define surfaceToPoint_H
 
-#include "topoSetSource.H"
-#include "Map.H"
+#include "topoSetPointSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declarations
 class triSurfaceSearch;
 
 /*---------------------------------------------------------------------------*\
@@ -56,7 +67,7 @@ class triSurfaceSearch;
 
 class surfaceToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -106,35 +117,22 @@ public:
         );
 
         //- Construct from dictionary
-        surfaceToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        surfaceToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        surfaceToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        surfaceToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~surfaceToPoint();
+    virtual ~surfaceToPoint() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

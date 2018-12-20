@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,8 @@ InClass
     Foam::readFields
 
 Description
+    Helper routines for reading a field or fields, optionally with
+    a mesh subset (using fvMeshSubsetProxy).
 
 SourceFiles
     readFields.C
@@ -34,26 +36,76 @@ SourceFiles
 #ifndef readFields_H
 #define readFields_H
 
-#include "meshSubsetHelper.H"
-#include "PtrList.H"
+#include "fvMeshSubsetProxy.H"
 #include "IOobjectList.H"
-#include "HashSet.H"
+#include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Read the fields, optionally subset, and place on the pointer list
+//- Get the field or return nullptr
 template<class GeoField>
-label readFields
+tmp<GeoField> getField
 (
-    const meshSubsetHelper& helper,
+    const IOobject* io,
+    const typename GeoField::Mesh& mesh,
+    const bool syncPar
+);
+
+
+//- Get the field and subset it, or return nullptr
+template<class GeoField>
+tmp<GeoField> getField
+(
+    const IOobject* io,
+    const fvMeshSubsetProxy& proxy,
+    const bool syncPar
+);
+
+
+//- Get the named field from the objects, or return nullptr.
+template<class GeoField>
+tmp<GeoField> getField
+(
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
-    const wordHashSet& selectedFields,
-    PtrList<const GeoField>& fields
+    const word& fieldName,
+    const bool syncPar
 );
+
+
+//- Get the named field from the objects and subset it, or return nullptr
+template<class GeoField>
+tmp<GeoField> getField
+(
+    const fvMeshSubsetProxy& proxy,
+    const IOobjectList& objects,
+    const word& fieldName,
+    const bool syncPar
+);
+
+
+//- Read the fields, and return as a pointer list
+template<class GeoField>
+PtrList<const GeoField> readFields
+(
+    const typename GeoField::Mesh& mesh,
+    const IOobjectList& objects,
+    const wordRes& selection
+);
+
+
+//- Read the fields, optionally subset, and return as a pointer list
+template<class GeoField>
+PtrList<const GeoField> readFields
+(
+    const fvMeshSubsetProxy& proxy,
+    const IOobjectList& objects,
+    const wordRes& selection
+);
+
 
 } // End namespace Foam
 

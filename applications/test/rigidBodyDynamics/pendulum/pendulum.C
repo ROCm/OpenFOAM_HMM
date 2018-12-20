@@ -36,6 +36,8 @@ Description
 #include "sphere.H"
 #include "joints.H"
 #include "IFstream.H"
+#include "argList.H"
+#include "Time.H"
 
 using namespace Foam;
 using namespace RBD;
@@ -44,6 +46,8 @@ using namespace RBD;
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
     /*
     bool testMerge = true;
 
@@ -82,7 +86,7 @@ int main(int argc, char *argv[])
     */
 
     // Create the pendulum model from dictionary
-    rigidBodyModel pendulum(dictionary(IFstream("pendulum")()));
+    rigidBodyModel pendulum(runTime, dictionary(IFstream("pendulum")()));
 
     Info<< pendulum << endl;
 

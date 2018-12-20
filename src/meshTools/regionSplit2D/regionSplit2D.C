@@ -111,10 +111,9 @@ Foam::regionSplit2D::regionSplit2D
 
     // In-place renumber the local regionI to global (compact) regionI
     globalIndex giCompact(compactRegionI);
-    forAllIter(Map<label>, regionToCompactAddr, iter)
+    forAllIters(regionToCompactAddr, iter)
     {
-        label compactRegionI = iter();
-        iter() = giCompact.toGlobal(compactRegionI);
+        *iter = giCompact.toGlobal(*iter);
     }
 
     // Ensure regionToCompactAddr consistent across all processors

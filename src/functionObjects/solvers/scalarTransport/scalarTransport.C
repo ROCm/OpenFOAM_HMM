@@ -58,20 +58,17 @@ Foam::volScalarField& Foam::functionObjects::scalarTransport::transportedField()
 {
     if (!foundObject<volScalarField>(fieldName_))
     {
-        tmp<volScalarField> tfldPtr
+        auto tfldPtr = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    fieldName_,
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh_
-            )
+                fieldName_,
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh_
         );
         store(fieldName_, tfldPtr);
 
@@ -81,10 +78,7 @@ Foam::volScalarField& Foam::functionObjects::scalarTransport::transportedField()
         }
     }
 
-    return const_cast<volScalarField&>
-    (
-        lookupObject<volScalarField>(fieldName_)
-    );
+    return lookupObjectRef<volScalarField>(fieldName_);
 }
 
 
@@ -94,10 +88,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
     const surfaceScalarField& phi
 ) const
 {
-    typedef incompressible::turbulenceModel icoModel;
-    typedef compressible::turbulenceModel cmpModel;
-
-    word Dname("D" + s.name());
+    const word Dname("D" + s.name());
 
     if (constantD_)
     {
@@ -115,38 +106,49 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
             dimensionedScalar(Dname, phi.dimensions()/dimLength, D_)
         );
     }
-    else if (nutName_ != "none")
+
+    if (nutName_ != "none")
     {
         const volScalarField& nutMean =
             mesh_.lookupObject<volScalarField>(nutName_);
 
         return tmp<volScalarField>::New(Dname, nutMean);
     }
-    else if (foundObject<icoModel>(turbulenceModel::propertiesName))
-    {
-        const icoModel& model = lookupObject<icoModel>
-        (
-            turbulenceModel::propertiesName
-        );
 
-        return tmp<volScalarField>::New
-        (
-            Dname,
-            alphaD_*model.nu() + alphaDt_*model.nut()
-        );
+    // Incompressible
+    {
+        const auto* turb =
+            findObject<incompressible::turbulenceModel>
+            (
+                turbulenceModel::propertiesName
+            );
+
+        if (turb)
+        {
+            return tmp<volScalarField>::New
+            (
+                Dname,
+                alphaD_ * turb->nu() + alphaDt_ * turb->nut()
+            );
+        }
     }
-    else if (foundObject<cmpModel>(turbulenceModel::propertiesName))
-    {
-        const cmpModel& model = lookupObject<cmpModel>
-        (
-            turbulenceModel::propertiesName
-        );
 
-        return tmp<volScalarField>::New
-        (
-            Dname,
-            alphaD_*model.mu() + alphaDt_*model.mut()
-        );
+    // Compressible
+    {
+        const auto* turb =
+            findObject<compressible::turbulenceModel>
+            (
+                turbulenceModel::propertiesName
+            );
+
+        if (turb)
+        {
+            return tmp<volScalarField>::New
+            (
+                Dname,
+                alphaD_ * turb->mu() + alphaDt_ * turb->mut()
+            );
+        }
     }
 
 

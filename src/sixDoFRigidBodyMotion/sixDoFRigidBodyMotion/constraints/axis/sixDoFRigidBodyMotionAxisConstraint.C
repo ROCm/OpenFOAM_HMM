@@ -92,7 +92,7 @@ bool Foam::sixDoFRigidBodyMotionConstraints::axis::read
 {
     sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
 
-    sDoFRBMCCoeffs_.lookup("axis") >> axis_;
+    sDoFRBMCCoeffs_.readEntry("axis", axis_);
 
     scalar magFixedAxis(mag(axis_));
 

@@ -29,7 +29,7 @@ License
     const dictionary& pimpleDict = pimple.dict();
 
     // Maximum flow Courant number
-    scalar maxCo(readScalar(pimpleDict.lookup("maxCo")));
+    scalar maxCo(pimpleDict.get<scalar>("maxCo"));
 
     // Maximum time scale
     scalar maxDeltaT(pimpleDict.lookupOrDefault<scalar>("maxDeltaT", GREAT));
@@ -121,7 +121,7 @@ License
         rDeltaT = max
         (
             rDeltaT,
-            (scalar(1.0) - rDeltaTDampingCoeff)*rDeltaT0
+            (scalar(1) - rDeltaTDampingCoeff)*rDeltaT0
         );
     }
 

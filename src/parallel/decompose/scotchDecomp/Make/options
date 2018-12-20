@@ -1,12 +1,4 @@
-/*
- * Note including of mplib compilation rules.
- * This is purely to avoid scotch.h including mpicxx.h, which causes problems.
- */
-sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
-sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
-
 EXE_INC = \
-    $(PFLAGS) $(PINC) \
     -I$(SCOTCH_INC_DIR) \
     -I../decompositionMethods/lnInclude
 

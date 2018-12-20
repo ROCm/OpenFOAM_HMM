@@ -621,6 +621,12 @@ inline Foam::bitSet& Foam::bitSet::extend(const bitSet& other)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
+inline bool Foam::bitSet::operator()(const label pos) const
+{
+    return test(pos);
+}
+
+
 inline unsigned int Foam::bitSet::operator[](const label i) const
 {
     return get(i);

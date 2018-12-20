@@ -22,11 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::preservePatchesConstraint
+    Foam::decompositionConstraints::preservePatches
 
 Description
     Constraint to keep owner and neighbour of (cyclic) patch on same
     processor.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        type        | preservePatches                   | yes   |
+        patches     | List of patch names or regexs     | yes   |
+    \endtable
 
 SourceFiles
     preservePatchesConstraint.C
@@ -48,10 +55,10 @@ namespace decompositionConstraints
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class preservePatchesConstraint Declaration
+                       Class preservePatches Declaration
 \*---------------------------------------------------------------------------*/
 
-class preservePatchesConstraint
+class preservePatches
 :
     public decompositionConstraint
 {
@@ -69,19 +76,15 @@ public:
 
     // Constructors
 
-        //- Construct with generic dictionary with optional entry for type
-        preservePatchesConstraint
-        (
-            const dictionary& constraintsDict,
-            const word& type
-        );
+        //- Construct with constraint dictionary
+        explicit preservePatches(const dictionary& dict);
 
         //- Construct from components
-        preservePatchesConstraint(const UList<wordRe>& patches);
+        explicit preservePatches(const UList<wordRe>& patches);
 
 
     //- Destructor
-    virtual ~preservePatchesConstraint() = default;
+    virtual ~preservePatches() = default;
 
 
     // Member Functions

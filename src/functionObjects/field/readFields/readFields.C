@@ -74,7 +74,7 @@ bool Foam::functionObjects::readFields::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.lookup("fields") >> fieldSet_;
+    dict.readEntry("fields", fieldSet_);
     dict.readIfPresent("readOnStart", readOnStart_);
 
     return true;

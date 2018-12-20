@@ -28,6 +28,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -79,10 +80,7 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
                 if (rMag > rInner_ && rMag < rOuter_)
                 {
                     magTangU[i] =
-                        deltaP[i]
-                       /rMag
-                       /fanEff_
-                       /(rpm_*constant::mathematical::pi/30.0);
+                        deltaP[i]/rMag/fanEff_/rpmToRads(rpm_);
                 }
             }
         }
@@ -96,7 +94,7 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
                     << exit(FatalError);
             }
             magTangU =
-                deltaP/rEff_/fanEff_/(rpm_*constant::mathematical::pi/30.0);
+                deltaP/rEff_/fanEff_/rpmToRads(rpm_);
         }
 
         // Calculate the tangential velocity
@@ -189,6 +187,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 :
     fixedJumpFvPatchField<vector>(ptf),
     phiName_(ptf.phiName_),
+    pName_(ptf.pName_),
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     rpm_(ptf.rpm_),
@@ -207,6 +206,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 :
     fixedJumpFvPatchField<vector>(ptf, iF),
     phiName_(ptf.phiName_),
+    pName_(ptf.pName_),
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     rpm_(ptf.rpm_),

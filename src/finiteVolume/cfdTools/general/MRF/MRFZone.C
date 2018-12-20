@@ -257,7 +257,7 @@ Foam::MRFZone::MRFZone
 {
     if (cellZoneName_ == word::null)
     {
-        coeffs_.lookup("cellZone") >> cellZoneName_;
+        coeffs_.readEntry("cellZone", cellZoneName_);
     }
 
     if (!active_)
@@ -593,7 +593,7 @@ bool Foam::MRFZone::read(const dictionary& dict)
     coeffs_ = dict;
 
     active_ = coeffs_.lookupOrDefault("active", true);
-    coeffs_.lookup("cellZone") >> cellZoneName_;
+    coeffs_.readEntry("cellZone", cellZoneName_);
     cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
 
     return true;

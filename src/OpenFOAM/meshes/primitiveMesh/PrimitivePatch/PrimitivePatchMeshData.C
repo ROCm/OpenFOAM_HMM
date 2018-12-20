@@ -47,10 +47,9 @@ calcMeshData() const
             << endl;
     }
 
-    // It is considered an error to attempt to recalculate meshPoints
-    // if they have already been calculated.
     if (meshPointsPtr_ || localFacesPtr_)
     {
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "meshPointsPtr_ or localFacesPtr_ already allocated"
             << abort(FatalError);
@@ -157,10 +156,9 @@ calcMeshPointMap() const
             << endl;
     }
 
-    // It is considered an error to attempt to recalculate meshPoints
-    // if they have already been calculated.
     if (meshPointMapPtr_)
     {
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "meshPointMapPtr_ already allocated"
             << abort(FatalError);
@@ -205,10 +203,9 @@ calcLocalPoints() const
             << endl;
     }
 
-    // It is considered an error to attempt to recalculate localPoints
-    // if they have already been calculated.
     if (localPointsPtr_)
     {
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "localPointsPtr_ already allocated"
             << abort(FatalError);
@@ -254,10 +251,9 @@ calcPointNormals() const
             << endl;
     }
 
-    // It is considered an error to attempt to recalculate pointNormals
-    // if they have already been calculated.
     if (pointNormalsPtr_)
     {
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "pointNormalsPtr_ already allocated"
             << abort(FatalError);
@@ -281,12 +277,12 @@ calcPointNormals() const
 
         const labelList& curFaces = pf[pointi];
 
-        forAll(curFaces, facei)
+        for (const label facei : curFaces)
         {
-            curNormal += faceUnitNormals[curFaces[facei]];
+            curNormal += faceUnitNormals[facei];
         }
 
-        curNormal /= mag(curNormal) + VSMALL;
+        curNormal.normalise();
     }
 
     if (debug)
@@ -318,10 +314,9 @@ calcFaceCentres() const
             << endl;
     }
 
-    // It is considered an error to attempt to recalculate faceCentres
-    // if they have already been calculated.
     if (faceCentresPtr_)
     {
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "faceCentresPtr_ already allocated"
             << abort(FatalError);
@@ -365,9 +360,9 @@ calcMagFaceAreas() const
             << endl;
     }
 
-    // It is an error to calculate these more than once.
     if (magFaceAreasPtr_)
     {
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "magFaceAreasPtr_ already allocated"
             << abort(FatalError);
@@ -410,10 +405,9 @@ calcFaceAreas() const
             << endl;
     }
 
-    // It is considered an error to attempt to recalculate faceNormals
-    // if they have already been calculated.
     if (faceAreasPtr_)
     {
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "faceAreasPtr_ already allocated"
             << abort(FatalError);
@@ -425,7 +419,7 @@ calcFaceAreas() const
 
     forAll(n, facei)
     {
-        n[facei] = this->operator[](facei).normal(points_);
+        n[facei] = this->operator[](facei).areaNormal(points_);
     }
 
     if (debug)
@@ -457,10 +451,9 @@ calcFaceNormals() const
             << endl;
     }
 
-    // It is considered an error to attempt to recalculate faceNormals
-    // if they have already been calculated.
     if (faceNormalsPtr_)
     {
+        // An error to recalculate if already allocated
         FatalErrorInFunction
             << "faceNormalsPtr_ already allocated"
             << abort(FatalError);
@@ -472,8 +465,7 @@ calcFaceNormals() const
 
     forAll(n, facei)
     {
-        n[facei] = this->operator[](facei).normal(points_);
-        n[facei] /= mag(n[facei]) + VSMALL;
+        n[facei] = this->operator[](facei).unitNormal(points_);
     }
 
     if (debug)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,26 +25,11 @@ Class
     Foam::functionEntries::includeEtcEntry
 
 Description
-    A dictionary directive for including a file found using the findEtcFile()
-    mechanism.
+    A dictionary directive for including a file found using the
+    Foam::findEtcFile() mechanism.
 
     Specify an etc file to include when reading dictionaries, expects a
     single string to follow.
-
-    Searches for files from user/group/shipped directories.
-    The search scheme allows for version-specific and
-    version-independent files using the following hierarchy:
-    - \b user settings:
-      - ~/.OpenFOAM/\<VERSION\>
-      - ~/.OpenFOAM/
-    - \b group (site) settings (when $WM_PROJECT_SITE is set):
-      - $WM_PROJECT_SITE/\<VERSION\>
-      - $WM_PROJECT_SITE
-    - \b group (site) settings (when $WM_PROJECT_SITE is not set):
-      - $WM_PROJECT_INST_DIR/site/\<VERSION\>
-      - $WM_PROJECT_INST_DIR/site/
-    - \b other (shipped) settings:
-      - $WM_PROJECT_DIR/etc/
 
     An example of the \c \#includeEtc directive:
     \verbatim

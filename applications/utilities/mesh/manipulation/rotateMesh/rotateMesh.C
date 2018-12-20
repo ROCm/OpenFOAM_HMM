@@ -54,7 +54,7 @@ void RotateFields
     // Objects of field type
     IOobjectList fields(objects.lookupClass(GeometricField::typeName));
 
-    forAllIter(IOobjectList, fields, fieldIter)
+    forAllConstIters(fields, fieldIter)
     {
         Info<< "    Rotating " << fieldIter()->name() << endl;
 
@@ -72,22 +72,19 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Rotate mesh points and vector/tensor fields\n"
-        "Rotation from the <n1> vector to the <n2> vector"
+        "Rotation from the <from> vector to the <to> vector"
     );
 
     timeSelector::addOptions();
 
-    argList::addArgument("n1");
-    argList::addArgument("n2");
+    argList::addArgument("from", "The vector to rotate from");
+    argList::addArgument("to",   "The vector to rotate to");
 
     #include "setRootCase.H"
     #include "createTime.H"
 
-    vector n1(args.read<vector>(1));
-    n1 /= mag(n1);
-
-    vector n2(args.read<vector>(2));
-    n2 /= mag(n2);
+    const vector n1(args.get<vector>(1).normalise());
+    const vector n2(args.get<vector>(2).normalise());
 
     const tensor rotT(rotationTensor(n1, n2));
 

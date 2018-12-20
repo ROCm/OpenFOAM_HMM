@@ -58,7 +58,7 @@ Foam::scalar Foam::sampledSurfaces::mergeTol_ = 1e-10;
 void Foam::sampledSurfaces::writeGeometry() const
 {
     // Write to time directory under outputPath_
-    // Skip surface without faces (eg, a failed cut-plane)
+    // Skip surfaces without faces (eg, a failed cut-plane)
 
     const fileName outputDir = outputPath_/time_.timeName();
 
@@ -95,23 +95,18 @@ void Foam::sampledSurfaces::writeOriginalIds()
     {
         const sampledSurface& s = operator[](surfi);
 
-        if (isA<sampledTriSurfaceMesh>(s))
+        if (s.hasFaceIds())
         {
-            const sampledTriSurfaceMesh& surf =
-                dynamicCast<const sampledTriSurfaceMesh&>(s);
+            const labelList& idLst = s.originalIds();
 
-            if (surf.keepIds())
+            // Transcribe from label to scalar
+            Field<scalar> ids(idLst.size());
+            forAll(idLst, i)
             {
-                const labelList& idLst = surf.originalIds();
-
-                Field<scalar> ids(idLst.size());
-                forAll(idLst, i)
-                {
-                    ids[i] = idLst[i];
-                }
-
-                writeSurface(ids, surfi, fieldName, outputDir);
+                ids[i] = idLst[i];
             }
+
+            writeSurface(ids, surfi, fieldName, outputDir);
         }
     }
 }
@@ -130,25 +125,17 @@ Foam::sampledSurfaces::sampledSurfaces
     PtrList<sampledSurface>(),
     mesh_(refCast<const fvMesh>(obr_)),
     loadFromFiles_(false),
-    outputPath_(fileName::null),
+    outputPath_
+    (
+        time_.globalPath()/functionObject::outputPrefix/name
+    ),
     fieldSelection_(),
-    sampleFaceScheme_(word::null),
-    sampleNodeScheme_(word::null),
+    sampleFaceScheme_(),
+    sampleNodeScheme_(),
     mergedList_(),
     changedGeom_(),
     formatter_(nullptr)
 {
-    const fileName relPath(functionObject::outputPrefix/name);
-
-    if (Pstream::parRun())
-    {
-        outputPath_ = mesh_.time().path()/".."/relPath;
-    }
-    else
-    {
-        outputPath_ = mesh_.time().path()/relPath;
-    }
-
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
@@ -167,37 +154,21 @@ Foam::sampledSurfaces::sampledSurfaces
     PtrList<sampledSurface>(),
     mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
-    outputPath_(fileName::null),
+    outputPath_
+    (
+        time_.globalPath()/functionObject::outputPrefix/name
+    ),
     fieldSelection_(),
-    sampleFaceScheme_(word::null),
-    sampleNodeScheme_(word::null),
+    sampleFaceScheme_(),
+    sampleNodeScheme_(),
     mergedList_(),
     changedGeom_(),
     formatter_(nullptr)
 {
-    read(dict);
-
-    const fileName relPath(functionObject::outputPrefix/name);
-
-    if (Pstream::parRun())
-    {
-        outputPath_ = time_.path()/".."/relPath;
-    }
-    else
-    {
-        outputPath_ = time_.path()/relPath;
-    }
-
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledSurfaces::~sampledSurfaces()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -259,11 +230,10 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
     {
         sampleFaceScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
 
-        dict.lookup("interpolationScheme") >> sampleNodeScheme_;
+        dict.readEntry("interpolationScheme", sampleNodeScheme_);
+        dict.readEntry("fields", fieldSelection_);
 
-        dict.lookup("fields") >> fieldSelection_;
-
-        const word writeType(dict.lookup("surfaceFormat"));
+        const word writeType(dict.get<word>("surfaceFormat"));
 
         // Define the surface formatter
         // Optionally defined extra controls for the output formats
@@ -389,12 +359,12 @@ bool Foam::sampledSurfaces::expire()
 
 bool Foam::sampledSurfaces::update()
 {
-    bool updated = false;
-
     if (!needsUpdate())
     {
-        return updated;
+        return false;
     }
+
+    bool updated = false;
 
     // Serial: quick and easy, no merging required
     if (!Pstream::parRun())

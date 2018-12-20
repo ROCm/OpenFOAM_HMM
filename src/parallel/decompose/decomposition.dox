@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -177,7 +177,7 @@ decomposition is termed a level. For example,
             method  hierarchical;
             coeffs
             {
-                n (16 4 2);
+                n   (16 4 2);
             }
         }
         cpus
@@ -228,53 +228,87 @@ For example,
 \verbatim
     constraints
     {
-        preserveBaffles
+        // Keep owner and neighbour of baffles on same processor
+        // (ie, keep it detectable as a baffle).
+        // Baffles are two boundary face sharing the same points
+        baffles
         {
-            // Keep owner and neighbour of baffles on same processor
-            // (ie, keep it detectable as a baffle).
-            // Baffles are two boundary face sharing the same points
-
             type    preserveBaffles;
+            enabled true;
         }
 
-        preserveFaceZones
+        // Keep owner and neighbour on same processor for faces in zones
+        faces
         {
-            // Keep owner and neighbour on same processor for faces in zones
-
             type    preserveFaceZones;
             zones   (".*");
+            enabled true;
         }
 
-        preservePatches
+        // Keep owner and neighbour on same processor for faces in patches
+        // (only makes sense for cyclic patches. Not suitable for e.g.
+        // cyclicAMI since these are not coupled on the patch level.
+        // Use singleProcessorFaceSets for those.
+        patches
         {
-            // Keep owner and neighbour on same processor for faces in patches
-            // (only makes sense for cyclic patches. Not suitable for e.g.
-            // cyclicAMI since these are not coupled on the patch level.
-            // Use singleProcessorFaceSets for those.
-
             type    preservePatches;
             patches (".*");
+            enabled true;
         }
 
-        singleProcessorFaceSets
+        // Keep all of faceSet on a single processor. This puts all cells
+        // connected with a point, edge or face on the same processor.
+        // (just having face connected cells might not guarantee a balanced
+        // decomposition)
+        // The processor can be -1 (the decompositionMethod chooses the
+        // processor for a good load balance) or explicitly provided (upsets
+        // balance)
+        processors
         {
-            // Keep all of faceSet on a single processor. This puts all cells
-            // connected with a point, edge or face on the same processor.
-            // (just having face connected cells might not guarantee a balanced
-            // decomposition)
-            // The processor can be -1 (the decompositionMethod chooses the
-            // processor for a good load balance) or explicitly provided (upsets
-            // balance)
-
             type    singleProcessorFaceSets;
-            singleProcessorFaceSets ((f1 -1));
+            sets    ((f1 -1));
+            enabled true;
         }
 
-        refinementHistory
+        // Decompose cells such that all cell originating from single cell
+        // end up on same processor
+        refinement
         {
-            // Decompose cells such that all cell originating from single cell
-            // end up on same processor
             type    refinementHistory;
+            enabled true;
+        }
+
+        // Prevent decomposition splitting of the geometric regions
+        // Uses any topoSetFaceSource for selecting the constrained faces
+        geometric
+        {
+            type    geometric;
+
+            grow    false;
+
+            selection
+            {
+                box1
+                {
+                    source  box;
+                    min     (-10 -10 -10);
+                    max     (1 1 1);
+                }
+
+                ball1
+                {
+                    source  sphere;
+                    origin  (-2 -2 1);
+                    radius  1;
+                }
+
+                arbitrary
+                {
+                    source  surface;
+                    surfaceType  triSurfaceMesh;
+                    surfaceName  blob.obj;
+                }
+            }
         }
     }
 \endverbatim

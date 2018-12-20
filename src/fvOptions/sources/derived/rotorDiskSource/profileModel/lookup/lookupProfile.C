@@ -50,7 +50,7 @@ void Foam::lookupProfile::interpolateWeights
 ) const
 {
     i2 = 0;
-    label nElem = values.size();
+    const label nElem = values.size();
 
     if (nElem == 1)
     {
@@ -108,10 +108,10 @@ Foam::lookupProfile::lookupProfile
     }
     else
     {
-        dict.lookup("data") >> data;
+        dict.readEntry("data", data);
     }
 
-    if (data.size() > 0)
+    if (data.size())
     {
         AOA_.setSize(data.size());
         Cd_.setSize(data.size());

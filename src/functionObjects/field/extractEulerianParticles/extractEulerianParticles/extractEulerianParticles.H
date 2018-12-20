@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,7 @@ License
 
 Class
     Foam::functionObjects::extractEulerianParticles
+
 Group
     grpFieldFunctionObjects
 
@@ -73,10 +74,8 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "polyMesh.H"
 #include "surfaceFieldsFwd.H"
-#include "vectorList.H"
 #include "globalIndex.H"
 #include "eulerianParticle.H"
-#include "IOdictionary.H"
 #include "injectedParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -153,9 +152,6 @@ protected:
             //- Region indices in faceZone faces from last iteration
             labelList regions0_;
 
-            //- Number of regions from last iteration
-            label nRegions0_;
-
             //- Particle properties (partial, being accumulated)
             List<eulerianParticle> particles_;
 
@@ -176,6 +172,9 @@ protected:
             //- Total number of collected particles
             label nCollectedParticles_;
 
+            //- Total collected volume [m3]
+            scalar collectedVolume_;
+
             //- Total number of discarded particles
             label nDiscardedParticles_;
 
@@ -184,9 +183,6 @@ protected:
 
 
     // Protected Member Functions
-
-        //- Return the base directory for dictionary output
-        virtual fileName dictBaseFileDir() const;
 
         //- Check that the faceZone is valid
         virtual void checkFaceZone();
@@ -206,19 +202,19 @@ protected:
         );
 
         //- Calculate the addressing between regions between iterations
+        //- Returns the number of active regions (particles)
         virtual void calculateAddressing
         (
-            const label nRegionsOld,
             const label nRegionsNew,
             const scalar time,
             labelList& regionFaceIDs
         );
 
         //- Collect particles that have passed through the faceZone
-        virtual void collectParticles
+        virtual void collectParticle
         (
             const scalar time,
-            const boolList& collectParticle
+            const label regioni
         );
 
         //- Process latest region information
@@ -265,7 +261,7 @@ public:
 
 
     //- Destructor
-    virtual ~extractEulerianParticles();
+    virtual ~extractEulerianParticles() = default;
 
 
     // Member Functions

@@ -35,9 +35,6 @@ namespace Foam
 {
     makeSurfaceWriterType(nastranSurfaceWriter);
     addToRunTimeSelectionTable(surfaceWriter, nastranSurfaceWriter, wordDict);
-
-    // Create write methods
-    defineSurfaceWriterWriteFields(nastranSurfaceWriter);
 }
 
 const Foam::Enum
@@ -45,11 +42,19 @@ const Foam::Enum
     Foam::nastranSurfaceWriter::loadFormat
 >
 Foam::nastranSurfaceWriter::loadFormatNames_
-{
+({
     { loadFormat::PLOAD2, "PLOAD2" },
     { loadFormat::PLOAD4, "PLOAD4" },
-};
+});
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing implementation
+#include "nastranSurfaceWriterImpl.C"
+
+// Field writing methods
+defineSurfaceWriterWriteFields(Foam::nastranSurfaceWriter);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -334,7 +339,7 @@ Foam::nastranSurfaceWriter::nastranSurfaceWriter(const dictionary& options)
         )
     ),
     fieldMap_(),
-    scale_(options.lookupOrDefault<scalar>("scale", 1.0)),
+    scale_(options.lookupOrDefault<scalar>("scale", 1)),
     separator_()
 {
     if (writeFormat_ == fieldFormat::FREE)
@@ -342,7 +347,8 @@ Foam::nastranSurfaceWriter::nastranSurfaceWriter(const dictionary& options)
         separator_ = ",";
     }
 
-    List<Pair<word>> fieldPairs(options.lookup("fields"));
+    List<Pair<word>> fieldPairs;
+    options.readEntry("fields", fieldPairs);
 
     for (const Pair<word>& item : fieldPairs)
     {
@@ -366,6 +372,8 @@ Foam::fileName Foam::nastranSurfaceWriter::write
     const bool verbose
 ) const
 {
+    // geometry:  rootdir/time/surfaceName.nas
+
     if (!isDir(outputDir))
     {
         mkDir(outputDir);

@@ -65,9 +65,9 @@ supersonicFreestreamFvPatchVectorField
     pName_(dict.lookupOrDefault<word>("p", "p")),
     psiName_(dict.lookupOrDefault<word>("psi", "thermo:psi")),
     UInf_(dict.lookup("UInf")),
-    pInf_(readScalar(dict.lookup("pInf"))),
-    TInf_(readScalar(dict.lookup("TInf"))),
-    gamma_(readScalar(dict.lookup("gamma")))
+    pInf_(dict.get<scalar>("pInf")),
+    TInf_(dict.get<scalar>("TInf")),
+    gamma_(dict.get<scalar>("gamma"))
 {
     patchType() = dict.lookupOrDefault<word>("patchType", word::null);
 
@@ -89,10 +89,8 @@ supersonicFreestreamFvPatchVectorField
 
     if (pInf_ < SMALL)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "    unphysical pInf specified (pInf <= 0.0)"
+        FatalIOErrorInFunction(dict)
+            << "    unphysical pInf specified (pInf <= 0.0)"
             << "\n    on patch " << this->patch().name()
             << " of field " << this->internalField().name()
             << " in file " << this->internalField().objectPath()

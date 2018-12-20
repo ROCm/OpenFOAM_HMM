@@ -355,7 +355,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::rho
 
     return
     (
-        alpha1p*rho1().value() + (scalar(1.0) - alpha1p)*rho2().value()
+        alpha1p*rho1().value() + (scalar(1) - alpha1p)*rho2().value()
     );
 }
 
@@ -581,14 +581,12 @@ bool Foam::twoPhaseMixtureEThermo::read()
 {
     if (basicThermo::read() && thermoIncompressibleTwoPhaseMixture::read())
     {
-        basicThermo::lookup("pDivU") >> pDivU_;
-        basicThermo::lookup("TSat") >> TSat_;
+        basicThermo::readEntry("pDivU", pDivU_);
+        basicThermo::readEntry("TSat", TSat_);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

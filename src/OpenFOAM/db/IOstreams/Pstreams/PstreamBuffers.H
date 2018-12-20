@@ -144,6 +144,11 @@ public:
             return tag_;
         }
 
+        label comm() const
+        {
+            return comm_;
+        }
+
         //- Mark all sends as having been done. This will start receives
         //  in non-blocking mode. If block will wait for all transfers to
         //  finish (only relevant for nonBlocking mode)

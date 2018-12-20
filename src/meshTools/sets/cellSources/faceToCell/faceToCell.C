@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(faceToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, faceToCell, word);
     addToRunTimeSelectionTable(topoSetSource, faceToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, faceToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, faceToCell, istream);
 }
 
 
@@ -51,27 +53,31 @@ const Foam::Enum
     Foam::faceToCell::faceAction
 >
 Foam::faceToCell::faceActionNames_
-{
-    { faceAction::NEIGHBOUR, "neighbour" },
-    { faceAction::OWNER, "owner" },
+({
     { faceAction::ANY, "any" },
     { faceAction::ALL, "all" },
-};
+    { faceAction::OWNER, "owner" },
+    { faceAction::NEIGHBOUR, "neighbour" },
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::faceToCell::combine(topoSet& set, const bool add) const
+void Foam::faceToCell::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    faceSet loadedSet(mesh_, setName_);
+    faceSet loadedSet(mesh_, setName);
 
+    const labelHashSet& faceLabels = loadedSet;
 
     // Handle owner/neighbour/any selection
-    forAllConstIter(faceSet, loadedSet, iter)
+    for (const label facei : faceLabels)
     {
-        const label facei = iter.key();
-
         if ((option_ == OWNER) || (option_ == ANY))
         {
             const label celli = mesh_.faceOwner()[facei];
@@ -97,46 +103,26 @@ void Foam::faceToCell::combine(topoSet& set, const bool add) const
 
         Map<label> facesPerCell(loadedSet.size());
 
-        forAllConstIter(faceSet, loadedSet, iter)
+        for (const label facei : faceLabels)
         {
-            const label facei = iter.key();
-            const label own = mesh_.faceOwner()[facei];
-
-            Map<label>::iterator fndOwn = facesPerCell.find(own);
-
-            if (fndOwn == facesPerCell.end())
-            {
-                facesPerCell.insert(own, 1);
-            }
-            else
-            {
-                fndOwn()++;
-            }
+            // Count faces on owner
+            ++(facesPerCell(mesh_.faceOwner()[facei], 0));
 
             if (mesh_.isInternalFace(facei))
             {
-                label nei = mesh_.faceNeighbour()[facei];
-
-                Map<label>::iterator fndNei = facesPerCell.find(nei);
-
-                if (fndNei == facesPerCell.end())
-                {
-                    facesPerCell.insert(nei, 1);
-                }
-                else
-                {
-                    fndNei()++;
-                }
+                // Count faces on neighbour
+                ++(facesPerCell(mesh_.faceNeighbour()[facei], 0));
             }
         }
 
         // Include cells that are referenced as many times as they have faces
         // -> all faces in set.
-        forAllConstIter(Map<label>, facesPerCell, iter)
+        forAllConstIters(facesPerCell, iter)
         {
             const label celli = iter.key();
+            const label count = iter.object();
 
-            if (iter() == mesh_.cells()[celli].size())
+            if (count == mesh_.cells()[celli].size())
             {
                 addOrDelete(set, celli, add);
             }
@@ -154,8 +140,8 @@ Foam::faceToCell::faceToCell
     const faceAction option
 )
 :
-    topoSetSource(mesh),
-    setName_(setName),
+    topoSetCellSource(mesh),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -166,10 +152,17 @@ Foam::faceToCell::faceToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.lookup("set")),
-    option_(faceActionNames_.lookup("option", dict))
-{}
+    topoSetCellSource(mesh),
+    names_(),
+    option_(faceActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::faceToCell::faceToCell
@@ -178,15 +171,9 @@ Foam::faceToCell::faceToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    setName_(checkIs(is)),
+    topoSetCellSource(mesh),
+    names_(one(), word(checkIs(is))),
     option_(faceActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceToCell::~faceToCell()
 {}
 
 
@@ -198,19 +185,31 @@ void Foam::faceToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells according to faceSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells according to faceSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells according to faceSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells according to faceSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

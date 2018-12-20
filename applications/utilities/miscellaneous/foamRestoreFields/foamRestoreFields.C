@@ -56,10 +56,11 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "autoPtr.H"
 #include "profiling.H"
 #include "timeSelector.H"
 #include "Enum.H"
-#include "Time.H"
+#include "TimePaths.H"
 
 using namespace Foam;
 
@@ -86,12 +87,12 @@ static const Enum<restoreMethod> methodEndings
 
 
 // Files in given directory at time instant
-wordList getFiles(const fileName& dir, const word& instance)
+inline wordList getFiles(const fileName& dir, const word& instance)
 {
     return ListOps::create<word>
     (
         Foam::readDir(dir/instance, fileName::FILE),
-        [](const fileName& f){ return f.name(); }
+        nameOp<fileName>()
     );
 }
 
@@ -187,14 +188,13 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Restore field names by removing the ending. The fields are "
-        "selected\n"
-        "automatically or can be specified as optional command arguments.\n"
+        "Restore field names by removing the ending. Fields are selected"
+        " automatically or can be specified as optional command arguments"
     );
 
     profiling::disable(); // Disable profiling (and its output)
     argList::noJobInfo();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     argList::addOption
     (
         "method",
@@ -221,11 +221,13 @@ int main(int argc, char *argv[])
         "Additional verbosity"
     );
 
-    // Non-mandatory arguments
+    // Arguments are optional (non-mandatory)
+    argList::noMandatoryArgs();
     argList::addArgument("fieldName ... fieldName");
 
-    timeSelector::addOptions(true, true);
-    #include "setRootCaseNonMandatoryArgs.H"
+    timeSelector::addOptions(true, true);  // constant(true), zero(true)
+
+    #include "setRootCase.H"
 
     dryrun = args.found("dry-run");
     verbose = args.found("verbose");
@@ -292,7 +294,7 @@ int main(int argc, char *argv[])
     // command-line options
 
     label nProcs = 0;
-    wordList timeDirs;
+    autoPtr<TimePaths> timePaths;
 
     if (args.found("processor") && !Pstream::parRun())
     {
@@ -308,45 +310,33 @@ int main(int argc, char *argv[])
 
         // Obtain time directory names from "processor0/" only
 
-        timeDirs = ListOps::create<word>
+        timePaths = autoPtr<TimePaths>::New
         (
-            timeSelector::select
-            (
-                Time
-                (
-                    Time::controlDictName,
-                    args.rootPath(),
-                    args.caseName()/"processor0"
-                ).times(),
-                args
-            ),
-            [](const instant& t){ return t.name(); }
+            args.rootPath(),
+            args.caseName()/"processor0"
         );
     }
     else
     {
-        timeDirs = ListOps::create<word>
+        timePaths = autoPtr<TimePaths>::New
         (
-            timeSelector::select
-            (
-                Time(Time::controlDictName, args).times(),
-                args
-            ),
-            [](const instant& t){ return t.name(); }
+            args.rootPath(),
+            args.caseName()
         );
-
-        Pstream::scatter(timeDirs);
     }
 
+    const instantList timeDirs(timeSelector::select(timePaths->times(), args));
 
     if (timeDirs.empty())
     {
         Info<< "no times selected" << nl;
     }
 
-    for (const word& dirName : timeDirs)
+    for (const instant& t : timeDirs)
     {
-        Info<< "\nTime = " << dirName << nl;
+        const word& timeName = t.name();
+
+        Info<< "\nTime = " << timeName << nl;
 
         label count = 0;
 
@@ -354,7 +344,7 @@ int main(int argc, char *argv[])
         {
             const wordHashSet files
             (
-                getFiles(args.path()/"processor0", dirName)
+                getFiles(args.path()/"processor0", timeName)
             );
 
             for (label proci=0; proci < nProcs; ++proci)
@@ -362,7 +352,7 @@ int main(int argc, char *argv[])
                 count += restoreFields
                 (
                     method,
-                    args.path()/("processor" + Foam::name(proci))/dirName,
+                    args.path()/("processor" + Foam::name(proci))/timeName,
                     files,
                     targetNames
                 );
@@ -373,14 +363,14 @@ int main(int argc, char *argv[])
             wordList files;
             if (Pstream::master())
             {
-                files = getFiles(args.path(), dirName);
+                files = getFiles(args.path(), timeName);
             }
             Pstream::scatter(files);
 
             count += restoreFields
             (
                 method,
-                args.path()/dirName,
+                args.path()/timeName,
                 wordHashSet(files),
                 targetNames
             );

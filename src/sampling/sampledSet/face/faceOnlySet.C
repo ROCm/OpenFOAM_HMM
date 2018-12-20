@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ namespace Foam
     addToRunTimeSelectionTable(sampledSet, faceOnlySet, word);
 }
 
-const Foam::scalar Foam::faceOnlySet::tol = 1e-6;
+const Foam::scalar Foam::faceOnlySet::tol = ROOTSMALL;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -359,8 +359,8 @@ Foam::faceOnlySet::faceOnlySet
 )
 :
     sampledSet(name, mesh, searchEngine, dict),
-    start_(dict.lookup("start")),
-    end_(dict.lookup("end"))
+    start_(dict.get<point>("start")),
+    end_(dict.get<point>("end"))
 {
     genSamples();
 }

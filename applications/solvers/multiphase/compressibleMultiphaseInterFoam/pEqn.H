@@ -25,12 +25,7 @@
     PtrList<fvScalarMatrix> p_rghEqnComps(mixture.phases().size());
 
     label phasei = 0;
-    forAllConstIter
-    (
-        PtrDictionary<phaseModel>,
-        mixture.phases(),
-        phase
-    )
+    forAllConstIters(mixture.phases(), phase)
     {
         const rhoThermo& thermo = phase().thermo();
         const volScalarField& rho = thermo.rho()();
@@ -61,12 +56,7 @@
         tmp<fvScalarMatrix> p_rghEqnComp;
 
         phasei = 0;
-        forAllConstIter
-        (
-            PtrDictionary<phaseModel>,
-            mixture.phases(),
-            phase
-        )
+        forAllConstIters(mixture.phases(), phase)
         {
             tmp<fvScalarMatrix> hmm
             (

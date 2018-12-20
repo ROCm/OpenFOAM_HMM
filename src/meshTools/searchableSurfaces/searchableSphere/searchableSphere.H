@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,15 @@ Class
 Description
     Searching on sphere
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        type        | sphere / searchableSphere             | selector |
+        origin      | The origin (centre) of the sphere     | yes   |
+        radius      | The (outside) radius of sphere        | yes   |
+        centre      | Alternative for 'origin'              | no    |
+    \endtable
+
 SourceFiles
     searchableSphere.C
 
@@ -43,10 +52,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-
 /*---------------------------------------------------------------------------*\
-                           Class searchableSphere Declaration
+                      Class searchableSphere Declaration
 \*---------------------------------------------------------------------------*/
 
 class searchableSphere
@@ -57,10 +64,10 @@ private:
 
     // Private Member Data
 
-        //- Centre point
-        const point centre_;
+        //- Centre point of the sphere
+        const point origin_;
 
-        //- Radius
+        //- The outer radius of the sphere
         const scalar radius_;
 
         //- Names of regions
@@ -105,7 +112,12 @@ public:
     // Constructors
 
         //- Construct from components
-        searchableSphere(const IOobject& io, const point&, const scalar radius);
+        searchableSphere
+        (
+            const IOobject& io,
+            const point& centre,
+            const scalar radius
+        );
 
         //- Construct from dictionary (used by searchableSurface)
         searchableSphere
@@ -114,15 +126,17 @@ public:
             const dictionary& dict
         );
 
+
     //- Destructor
-    virtual ~searchableSphere();
+    virtual ~searchableSphere() = default;
 
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
-        //- Whether supports volume type below
+        //- Whether supports volume type (below)
         virtual bool hasVolumeType() const
         {
             return true;
@@ -138,8 +152,7 @@ public:
         //  Usually the element centres (should be of length size()).
         virtual tmp<pointField> coordinates() const
         {
-            tmp<pointField> tCtrs(new pointField(1, centre_));
-            return tCtrs;
+            return tmp<pointField>::New(1, origin_);
         }
 
         //- Get bounding spheres (centre and radius squared), one per element.
@@ -205,12 +218,12 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for point.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
+                const pointField& points,
+                List<volumeType>& volType
             ) const;
 
 

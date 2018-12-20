@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
     const dictionary& dict
 )
 {
-    const word solverType(dict.lookup("solver"));
+    const word solverType(dict.get<word>("solver"));
     Info<< "Selecting ODE solver " << solverType << endl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverType);

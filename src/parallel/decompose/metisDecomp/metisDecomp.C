@@ -27,12 +27,23 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
 
-extern "C"
-{
-    #define OMPI_SKIP_MPICXX
-    #include "metis.h"
-}
+// Probably not needed...
+#define MPICH_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
 
+#include "metis.h"
+
+// Provide a clear error message if we have a size mismatch
+//
+// Metis has an 'idx_t' type, but the IDXTYPEWIDTH define is perhaps
+// more future-proof?
+#ifdef IDXTYPEWIDTH
+static_assert
+(
+    sizeof(Foam::label) == (IDXTYPEWIDTH/8),
+    "sizeof(Foam::label) == (IDXTYPEWIDTH/8), check your metis headers"
+);
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,8 +82,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
     // k-way: multi-level k-way
     word method("recursive");
 
-    const dictionary* coeffsDictPtr =
-        decompositionDict_.subDictPtr("metisCoeffs");
+    const dictionary* coeffsDictPtr = decompDict_.findDict("metisCoeffs");
 
     label numCells = xadj.size()-1;
 
@@ -133,7 +143,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
             {
                 FatalErrorInFunction
                     << "Method " << method << " in metisCoeffs in dictionary : "
-                    << decompositionDict_.name()
+                    << decompDict_.name()
                     << " should be 'recursive' or 'k-way'"
                     << exit(FatalError);
             }
@@ -148,7 +158,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
             {
                 FatalErrorInFunction
                     << "Number of options in metisCoeffs in dictionary : "
-                    << decompositionDict_.name()
+                    << decompDict_.name()
                     << " should be " << METIS_NOPTIONS
                     << exit(FatalError);
             }

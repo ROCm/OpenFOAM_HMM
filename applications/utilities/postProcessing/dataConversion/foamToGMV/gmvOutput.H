@@ -1,16 +1,14 @@
-for (label i=0; i < nTypes; i++)
+for (const word& fieldType : fieldTypes)
 {
-    wordList fieldNames = objects.names(fieldTypes[i]);
+    const wordList fieldNames = objects.sortedNames(fieldType);
 
-    if (fieldTypes[i] == "volScalarField")
+    if (fieldType == "volScalarField")
     {
         gmvFile << "variable" << nl;
     }
 
-    forAll(fieldNames, j)
+    for (const word& fieldName : fieldNames)
     {
-        const word& fieldName = fieldNames[j];
-
         IOobject fieldObject
         (
             fieldName,
@@ -20,18 +18,18 @@ for (label i=0; i < nTypes; i++)
             IOobject::NO_WRITE
         );
 
-        if (fieldTypes[i] == "volScalarField")
+        if (fieldType == "volScalarField")
         {
             volScalarField fld(fieldObject, mesh);
             gmvFile << fieldName << " 0" << nl;
-            for (label indx=0;indx<mesh.nCells();indx++)
+            for (label indx=0; indx<mesh.nCells(); ++indx)
             {
                 gmvFile << fld[indx] << " ";
             }
             gmvFile << nl;
         }
 
-        if (fieldTypes[i] == "volVectorField")
+        if (fieldType == "volVectorField")
         {
             if (fieldName == vComp)
             {
@@ -53,14 +51,14 @@ for (label i=0; i < nTypes; i++)
             }
         }
 
-        if (fieldTypes[i] == "surfaceScalarField")
+        if (fieldType == "surfaceScalarField")
         {
             // ...
         }
 
     }
 
-    if (fieldTypes[i] == cloud::prefix)
+    if (fieldType == cloud::prefix)
     {
         IOobject positionsHeader
         (
@@ -96,8 +94,8 @@ for (label i=0; i < nTypes; i++)
 
             IOobjectList objects(mesh, runTime.timeName(), cloud::prefix);
 
-            wordList lagrangianScalarNames = objects.names("scalarField");
-            wordList lagrangianVectorNames = objects.names("vectorField");
+            wordList lagrangianScalarNames(objects.sortedNames("scalarField"));
+            wordList lagrangianVectorNames(objects.sortedNames("vectorField"));
 
             if (particles.size())
             {
@@ -106,7 +104,7 @@ for (label i=0; i < nTypes; i++)
         }
     }
 
-    if (fieldTypes[i] == "volScalarField")
+    if (fieldType == "volScalarField")
     {
         gmvFile << "endvars" << nl;
     }

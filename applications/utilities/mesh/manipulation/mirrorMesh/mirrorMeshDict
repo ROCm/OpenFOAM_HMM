@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -18,8 +18,8 @@ planeType           pointAndNormal;
 
 pointAndNormalDict
 {
-    basePoint       (0 0 0);
-    normalVector    (0 1 0);
+    point   (0 0 0);
+    normal  (0 1 0);
 }
 
 planeTolerance      1e-3;

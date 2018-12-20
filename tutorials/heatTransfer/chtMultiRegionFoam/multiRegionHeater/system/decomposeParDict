@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -16,21 +16,16 @@ FoamFile
 
 numberOfSubdomains  4;
 
-//- Keep owner and neighbour on same processor for faces in zones:
-// preserveFaceZones (heater solid1 solid3);
-
 method          scotch;
-
 // method          hierarchical;
 // method          simple;
-// method          manual;
 
 regions
 {
     heater
     {
         numberOfSubdomains  1;
-        method          simple; // none;
+        method      simple; // none;
 
         coeffs
         {
@@ -43,5 +38,17 @@ coeffs
 {
     n       (2 2 1);
 }
+
+/*
+constraints
+{
+    //- Keep owner and neighbour on same processor for faces in zones:
+    faces
+    {
+        type    preserveFaceZones;
+        zones   (heater solid1 solid3);
+    }
+}
+*/
 
 // ************************************************************************* //

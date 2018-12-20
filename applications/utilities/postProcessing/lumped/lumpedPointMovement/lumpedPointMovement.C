@@ -27,6 +27,7 @@ Application
 Description
     This utility can be used to produce VTK files to visualize the response
     points/rotations and the corresponding movement of the building surfaces.
+
     Uses the tabulated responses from the specified file.
     Optionally, it can also be used to a dummy responder for the
     externalFileCoupler logic, which makes it useful as a debugging facility
@@ -52,8 +53,8 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Visualize lumpedPoint movements or provide a slave responder "
-        "for diagnostic purposes."
+        "Visualize lumpedPoint movements or provide a slave responder"
+        " for diagnostic purposes."
     );
 
     argList::noParallel();
@@ -62,41 +63,38 @@ int main(int argc, char *argv[])
     (
         "max",
         "N",
-        "maximum number of outputs"
+        "Maximum number of outputs"
     );
     argList::addOption
     (
         "span",
         "N",
-        "increment each input by factor N (default: 1)"
+        "Increment each input by factor N (default: 1)"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "relaxation/scaling factor for movement (default: 1)"
+        "Relaxation/scaling factor for movement (default: 1)"
     );
     argList::addBoolOption
     (
         "removeLock",
-        "remove lock-file on termination of slave"
+        "Remove lock-file on termination of slave"
     );
     argList::addBoolOption
     (
         "slave",
-        "invoke as a slave responder for testing"
+        "Invoke as a slave responder for testing"
     );
     argList::addArgument("responseFile");
 
     #include "setRootCase.H"
 
-    const label maxOut =
-        Foam::max(0, args.lookupOrDefault<label>("max", 0));
+    const label maxOut = Foam::max(0, args.opt<label>("max", 0));
+    const label span   = Foam::max(1, args.opt<label>("span", 1));
 
-    const label span =
-        Foam::max(1, args.lookupOrDefault<label>("span", 1));
-
-    const scalar relax = args.lookupOrDefault<scalar>("scale", 1);
+    const scalar relax = args.opt<scalar>("scale", 1);
 
     const bool slave = args.found("slave");
     const bool removeLock = args.found("removeLock");

@@ -64,15 +64,6 @@ class OFFsurfaceFormat
 :
     public MeshedSurface<Face>
 {
-    // Private Member Functions
-
-        //- No copy construct
-        OFFsurfaceFormat(const OFFsurfaceFormat&) = delete;
-
-        //- No copy assignment
-        void operator=(const OFFsurfaceFormat&) = delete;
-
-
 public:
 
     // Constructors
@@ -101,7 +92,7 @@ public:
         //- Read from file
         virtual bool read(const fileName& filename);
 
-        //- Write object
+        //- Write surface mesh to file
         virtual void write
         (
             const fileName& name,

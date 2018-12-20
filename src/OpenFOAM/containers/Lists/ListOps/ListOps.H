@@ -43,6 +43,7 @@ SourceFiles
 #define ListOps_H
 
 #include "FlatOutput.H"
+#include "labelPair.H"
 #include "labelList.H"
 #include "HashSet.H"
 #include "Map.H"
@@ -54,14 +55,14 @@ SourceFiles
 namespace Foam
 {
 
-extern const labelList emptyLabelList;
-
-//- Return reference to zero-sized list. Compare to List::null() which returns
-//  null pointer cast as list reference.
-template<class Type>
-static const List<Type>& emptyList()
+//- Deprecated(2018-07) reference to zero-sized list.
+//  Compare to List::null() which returns null pointer cast as list reference.
+//
+//  \deprecated(2018-07) This cast is disallowed with many modern compilers
+template<class T>
+static const List<T>& emptyList()
 {
-    return *reinterpret_cast<const List<Type>*>(&emptyLabelList);
+    return *reinterpret_cast<const List<T>*>(&emptyLabelList);
 }
 
 
@@ -244,35 +245,95 @@ void inplaceUniqueSort
 );
 
 
-//- Extract elements of List when select is true
-//  eg, to extract all selected elements:
+//- Extract elements of the input list when select is true.
+//
+//  \param[in] select the bool-list selector, for which the operator[]
+//      returns true or false.  A labelHashSet can also be used since
+//      it satisfies these requirements
+//  \param[in] input the list input values.
+//  \param[in] invert set as true to invert the selection logic
+//
+//  Eg, to extract all selected elements:
+//  \code
 //    subset<boolList, labelList>(selectedElems, list);
-//  Note a labelHashSet can also be used as the bool-list.
-//  Do not use FixedList for the input list, since it doesn't resize.
-template<class BoolListType, class ListType>
-ListType subset(const BoolListType& select, const ListType& input);
+//  \endcode
+//
+//  \return The subsetted list
+template<class BoolListType, class T>
+List<T> subset
+(
+    const BoolListType& select,
+    const UList<T>& input,
+    const bool invert=false
+);
 
-//- Inplace extract elements of List when select is true
-//  eg, to extract all selected elements:
-//    inplaceSubset<boolList, labelList>(selectedElems, list);
-//  Note a labelHashSet can also be used as the bool-list.
-//  Do not use FixedList for the input list, since it doesn't resize.
-template<class BoolListType, class ListType>
-void inplaceSubset(const BoolListType& select, ListType& input);
+//- Extract elements of the input list when select is true.
+//
+//  \param[in] select the selection as a bitSet.
+//  \param[in] input the list input values.
+//  \param[in] invert set as true to invert the selection logic
+//
+//  \return The subsetted list
+template<class T>
+List<T> subset
+(
+    const bitSet& select,
+    const UList<T>& input,
+    const bool invert=false
+);
 
+//- Inplace extract elements of the input list when select is true.
+//
+//  \param[in] select the bool-list selector, for which the operator[]
+//      returns true or false.  A labelHashSet can also be used since
+//      it satisfies these requirements
+//  \param[in,out] input the list input values.
+//      Cannot be a FixedList since it doesn't resize.
+//  \param[in] invert set as true to invert the selection logic
+template<class BoolListType, class ListType>
+void inplaceSubset
+(
+    const BoolListType& select,
+    ListType& input,
+    const bool invert=false
+);
+
+//- Inplace extract elements of the input list when select is true.
+//
+//  \param[in] select the selection as a bitSet.
+//  \param[in,out] input the list input values.
+//      Cannot be a FixedList since it doesn't resize.
+//  \param[in] invert set as true to invert the selection logic
+//
+//  \note Includes optimized handling of bitSet when invert=false.
+template<class ListType>
+void inplaceSubset
+(
+    const bitSet& select,
+    ListType& input,
+    const bool invert=false
+);
 
 //- Copy a subset of the input list when predicate is true.
-//  Do not use FixedList for the input list, since it doesn't resize.
-template<class ListType, class UnaryPredicate>
-ListType subsetList
+//
+//  \param[in,out] input the list input values.
+//  \param[in] pred the selection predicate
+//  \param[in] invert set as true to invert the selection logic
+template<class T, class UnaryPredicate>
+List<T> subsetList
 (
-    const ListType& input,
+    const UList<T>& input,
     const UnaryPredicate& pred,
     const bool invert=false
 );
 
+
 //- Inplace subset of the list when predicate is true.
-//  Do not use FixedList for the input list, since it doesn't resize.
+//
+//  \param[in,out] input the list input/output values.
+//       Cannot be a FixedList since it doesn't resize.
+//  \param[in] pred the selection predicate
+//  \param[in] invert set as true to invert the selection logic
 template<class ListType, class UnaryPredicate>
 void inplaceSubsetList
 (
@@ -315,9 +376,9 @@ List<OutputIntListType> invertManyToMany
 //  Optionally with an alternative start index, so that (map[i] == i+start)
 labelList identity(const label len, label start=0);
 
-//- Find first occurence of given element and return index,
-//  return -1 if not found. Linear search.
-//  \deprecated prefer UList find/found methods (deprecated Oct 2017)
+//- Deprecated(2017-10) search for first occurence of the given element.
+//  \return The index found or return -1 if not found.
+//  \deprecated(2017-10) - use the UList find/found methods
 template<class ListType>
 label findIndex
 (
@@ -330,7 +391,7 @@ label findIndex
 }
 
 
-//- Find all occurences of given element. Linear search.
+//- Linear search to find all occurences of given element.
 template<class ListType>
 labelList findIndices
 (
@@ -339,20 +400,60 @@ labelList findIndices
     label start=0
 );
 
-//- Find index of max element (and larger than given element).
-//  return -1 if not found. Linear search.
+
+//- Linear search for the index of the min element,
+//- similar to std::min_element but for lists and returns the index.
+//
+//  \tparam ListType  The input list type
+//
+//  \param input The list to search
+//  \param start The start index in the list (default: 0)
+//
+//  \return The min index or -1 on error.
 template<class ListType>
-label findMax(const ListType& input, const label start=0);
+label findMin(const ListType& input, label start=0);
 
-
-//- Find index of min element (and less than given element).
-//  return -1 if not found. Linear search.
+//- Linear search for the index of the max element,
+//- similar to std::max_element but for lists and returns the index.
+//
+//  \tparam ListType  The input list type
+//
+//  \param input The list to search
+//  \param start The start index in the list (default: 0)
+//
+//  \return The max index or -1 on error.
 template<class ListType>
-label findMin(const ListType& input, const label start=0);
+label findMax(const ListType& input, label start=0);
 
 
-//- Find first occurrence of given element in sorted list and return index,
-//  return -1 if not found. Binary search.
+//- Linear search for the index of the min/max element,
+//- similar to std::minmax_element but for lists and returns the index.
+//
+//  \tparam ListType  The input list type
+//
+//  \param input The list to search
+//  \param start The start index in the list (default: 0)
+//
+//  \return The min/max indices as a Pair (min is first max is second)
+//      or (-1,-1) on error.
+template<class ListType>
+labelPair findMinMax(const ListType& input, label start=0);
+
+
+//- Binary search to find the index of the last element in a sorted list
+//- that is less than value.
+//
+//  Uses the global <code> < </code> operator and thus
+//  <code> (list[i] < val) </code> for the test.
+//
+//  \tparam ListType  The input list type
+//  \tparam T  The value type (should normally be ListType::value_type)
+//
+//  \param input The sorted list to search
+//  \param val   The value for searching/comparing
+//  \param start The start index in the list (default: 0)
+//
+//  \return The index found or -1 if not found.
 template<class ListType>
 label findSortedIndex
 (
@@ -362,25 +463,53 @@ label findSortedIndex
 );
 
 
-//- Find last element < given value in sorted list and return index,
-//  return -1 if not found. Binary search.
-template<class ListType, class BinaryPredicate>
+//- Binary search to find the index of the last element in a sorted list
+//- that is less than value.
+//
+//  Uses <code> lessOp<T>() </code> and thus
+//  <code> lessOp<T>(list[i], val) </code> for the test.
+//
+//  \tparam ListType  The input list type
+//  \tparam T  The value type (is often the same as ListType::value_type)
+//  \tparam ComparePredicate  The type of the comparison functor that
+//      returns true for sorting below.
+//
+//  \param input The sorted list to search
+//  \param val   The value for searching/comparing
+//  \param start The start index in the list
+//  \param comp  The comparison functor for testing.
+//      Uses <code> comp(list[i], val) </code> for the test.
+//
+//  \return The index found or -1 if not found.
+template<class ListType, class T, class ComparePredicate>
 label findLower
 (
     const ListType& input,
-    typename ListType::const_reference val,
+    const T& val,
     const label start,
-    const BinaryPredicate& pred
+    const ComparePredicate& comp
 );
 
 
-//- Find last element < given value in sorted list and return index,
-//  return -1 if not found. Binary search.
-template<class ListType>
+//- Binary search to find the index of the last element in a sorted list
+//- that is less than value.
+//
+//  Uses <code> lessOp<T>() </code> and thus
+//  <code> lessOp<T>(list[i], val) </code> for the test.
+//
+//  \tparam ListType  The input list type
+//  \tparam T  The value type (should normally be ListType::value_type)
+//
+//  \param input The sorted list to search
+//  \param val   The value for searching/comparing
+//  \param start The start index in the list (default: 0)
+//
+//  \return The index found or -1 if not found.
+template<class ListType, class T>
 label findLower
 (
     const ListType& input,
-    typename ListType::const_reference val,
+    const T& val,
     const label start=0
 );
 
@@ -395,7 +524,8 @@ template<class ListType>
 void inplaceReverseList(ListType& input);
 
 
-//- Rotate a list by n places. If n is positive rotate clockwise/right/down.
+//- Rotate a list by n places.
+//  If n is positive rotate clockwise/right/down.
 //  If n is negative rotate anti-clockwise/left/up.
 template<class ListType>
 ListType rotateList(const ListType& list, const label n);

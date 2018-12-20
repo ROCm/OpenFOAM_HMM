@@ -81,10 +81,10 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
         )
       : coeffDict()
     ),
-    patches_(wordRes(coeffDict().lookup("patches"))),
+    patches_(coeffDict().get<wordRes>("patches")),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
-    di_(readScalar(coeffDict().lookup("innerDistance"))),
-    do_(readScalar(coeffDict().lookup("outerDistance"))),
+    di_(coeffDict().get<scalar>("innerDistance")),
+    do_(coeffDict().get<scalar>("outerDistance")),
     test_(coeffDict().lookupOrDefault("test", false)),
     rhoInf_(1.0),
     rhoName_(coeffDict().lookupOrDefault<word>("rho", "rho")),
@@ -106,7 +106,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
 {
     if (rhoName_ == "rhoInf")
     {
-        rhoInf_ = readScalar(coeffDict().lookup("rhoInf"));
+        coeffDict().readEntry("rhoInf", rhoInf_);
     }
 
     // Calculate scaling factor everywhere
@@ -189,13 +189,13 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
 
     dimensionedVector g("g", dimAcceleration, Zero);
 
-    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    if (db().time().foundObject<uniformDimensionedVectorField>("g"))
     {
-        g = db().lookupObject<uniformDimensionedVectorField>("g");
+        g = db().time().lookupObject<uniformDimensionedVectorField>("g");
     }
-    else if (coeffDict().found("g"))
+    else
     {
-        coeffDict().lookup("g") >> g;
+        coeffDict().readIfPresent("g", g);
     }
 
     // const scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);

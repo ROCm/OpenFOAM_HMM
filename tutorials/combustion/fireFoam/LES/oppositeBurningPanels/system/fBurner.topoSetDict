@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,10 +22,7 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.15 -0.001 -0.30) (0.15 0.001 0.30);
-        }
+        box     (-0.15 -0.001 -0.30) (0.15 0.001 0.30);
     }
 );
 

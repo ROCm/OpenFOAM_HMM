@@ -181,12 +181,12 @@ public:
 
     // Check
 
-        //- Check IOstream status for given operation
-        //  print IOstream state if error has occured
+        //- Check IOstream status for given operation.
+        //  Print IOstream state if error has occurred
         virtual bool check(const char* operation) const;
 
-        //- Check IOstream status for given operation
-        //  print IOstream state if error has occured and exit
+        //- Check IOstream status for given operation.
+        //  Print IOstream state if error has occurred and exit
         void fatalCheck(const char* operation) const;
 
         //- Return true if stream has been opened
@@ -225,12 +225,10 @@ public:
             return ioState_ & ios_base::badbit;
         }
 
-        //- Return non-zero if the stream has not failed
-        operator void*() const
+        //- Return true if the stream has not failed
+        explicit operator bool() const
         {
-            return fail()
-                ? reinterpret_cast<void*>(0)
-                : reinterpret_cast<void*>(-1);
+            return !fail();
         }
 
         //- Return true if the stream has failed

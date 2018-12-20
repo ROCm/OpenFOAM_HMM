@@ -14,15 +14,24 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR" 2>/dev/null || {
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
 #------------------------------------------------------------------------------
+# Preamble. Report compiler version
+case "$WM_COMPILER" in
+    Gcc*)    gcc --version 2>/dev/null | sed -ne '1p' ;;
+    Clang*)  clang --version 2>/dev/null | sed -ne '1p' ;;
+esac
+# Preamble. Report mpirun location
+command -v mpirun 2>/dev/null || true
+
 echo "========================================"
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
-echo "Starting ${WM_PROJECT_DIR##*/} ${0##*}"
+echo "Starting compile ${WM_PROJECT_DIR##*/} ${0##*}"
 echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
+echo "========================================"
 echo
 
-# Compile wmake tools
-(cd "${WM_DIR:-wmake}/src" && make)
+# Compile tools for wmake
+"${WM_DIR:-wmake}"/src/Allmake
 
 # Compile ThirdParty libraries and applications
 if [ -d "$WM_THIRD_PARTY_DIR" ]
@@ -51,6 +60,13 @@ then
     (cd $WM_PROJECT_DIR/modules 2>/dev/null && wmake -all)
 fi
 
+# Count files in given directory. Ignore "Test-*" binaries.
+_foamCountDirEntries()
+{
+    (cd "$1" 2>/dev/null && find -mindepth 1 -maxdepth 1 -type f 2>/dev/null) |\
+        sed -e '\@/Test-@d' | wc -l
+}
+
 # Some summary information
 echo
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
@@ -59,4 +75,11 @@ echo "  ${WM_PROJECT_DIR##*/}"
 echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
 echo
+echo "  api   = $(wmakeBuildInfo -show-api 2>/dev/null)"
+echo "  patch = $(wmakeBuildInfo -show-patch 2>/dev/null)"
+echo "  bin   = $(_foamCountDirEntries $FOAM_APPBIN) entries"
+echo "  lib   = $(_foamCountDirEntries $FOAM_LIBBIN) entries"
+echo
+echo "========================================"
+
 #------------------------------------------------------------------------------

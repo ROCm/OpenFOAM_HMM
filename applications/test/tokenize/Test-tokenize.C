@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    const label repeat = args.lookupOrDefault<label>("repeat", 1);
+    const label repeat = args.opt<label>("repeat", 1);
 
     const bool optVerbose = args.found("verbose");
 

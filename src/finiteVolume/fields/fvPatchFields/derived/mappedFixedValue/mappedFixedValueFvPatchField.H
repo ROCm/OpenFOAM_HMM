@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +36,11 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        field        | name of field to be mapped | no       | this field name
-        setAverage   | flag to activate setting of average value | yes |
-        average      | average value to apply if \c setAverage = yes | yes |
-        interpolationScheme | type of interpolation scheme | no |
+        Property     | Description                      | Required | Default
+        field        | Field name to be mapped          | no | this field name
+        setAverage   | Use average value                | no | false
+        average      | Average value to use if \c setAverage = yes | partly |
+        interpolationScheme | type of interpolation scheme | partly |
     \endtable
 
     Example of the boundary condition specification:

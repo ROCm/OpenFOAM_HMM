@@ -73,14 +73,22 @@ void collectFeatureEdges(const boundaryMesh& bMesh, labelList& markedEdges)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Divides external faces into patches based on feature angle"
+    );
+
     #include "addOverwriteOption.H"
+
     argList::noParallel();
-    argList::addArgument("feature angle[0-180]");
+    argList::noFunctionObjects();  // Never use function objects
+
+    argList::addArgument("featureAngle", "in degrees [0-180]");
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     Info<< "Mesh read in = "
@@ -88,7 +96,7 @@ int main(int argc, char *argv[])
         << " s\n" << endl << endl;
 
 
-    const scalar featureAngle = args.read<scalar>(1);
+    const scalar featureAngle = args.get<scalar>(1);
     const bool overwrite      = args.found("overwrite");
 
     const scalar minCos = Foam::cos(degToRad(featureAngle));
@@ -222,7 +230,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
 

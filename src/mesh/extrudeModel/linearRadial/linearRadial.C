@@ -43,7 +43,7 @@ addToRunTimeSelectionTable(extrudeModel, linearRadial, dictionary);
 linearRadial::linearRadial(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
-    R_(readScalar(coeffDict_.lookup("R"))),
+    R_(coeffDict_.get<scalar>("R")),
     Rsurface_(coeffDict_.lookupOrDefault<scalar>("Rsurface", -1))
 {}
 

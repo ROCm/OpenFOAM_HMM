@@ -25,7 +25,7 @@ export ADIOS2_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adio
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
-if [ "$FOAM_VERBOSE" -a "$PS1" ]
+if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
 then
     echo "Using adios ($adios2_version)  ->  $ADIOS2_ARCH_PATH" 1>&2
 fi

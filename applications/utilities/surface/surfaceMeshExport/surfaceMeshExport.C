@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,6 +67,7 @@ Note
 
 #include "MeshedSurfaces.H"
 #include "coordinateSystems.H"
+#include "cartesianCS.H"
 
 using namespace Foam;
 
@@ -76,55 +77,58 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "export from surfMesh to various third-party surface formats"
+        "Export from surfMesh to various third-party surface formats"
     );
 
     argList::noParallel();
-    argList::addArgument("outputFile");
+    argList::addArgument("output", "The output surface file");
 
     argList::addBoolOption
     (
         "clean",
-        "perform some surface checking/cleanup on the input surface"
+        "Perform some surface checking/cleanup on the input surface"
     );
     argList::addOption
     (
         "name",
         "name",
-        "specify an alternative surface name when reading - "
+        "Specify an alternative surface name when reading - "
         "default is 'default'"
     );
     argList::addOption
     (
         "scaleIn",
         "factor",
-        "geometry scaling factor on input - default is 1"
+        "Geometry scaling factor on input - default is 1"
     );
     argList::addOption
     (
         "scaleOut",
         "factor",
-        "geometry scaling factor on output - default is 1"
+        "Geometry scaling factor on output - default is 1"
     );
-    #include "addDictOption.H"
+    argList::addOption("dict", "file", "Use alternative coordinateSystems");
+
     argList::addOption
     (
         "from",
         "coordinateSystem",
-        "specify the source coordinate system, applied after '-scaleIn'"
+        "Specify the source coordinate system, applied after '-scaleIn'",
+        true // advanced
     );
     argList::addOption
     (
         "to",
         "coordinateSystem",
-        "specify the target coordinate system, applied before '-scaleOut'"
+        "Specify the target coordinate system, applied before '-scaleOut'",
+        true // advanced
     );
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
 
     const fileName exportName = args[1];
-    const word importName = args.lookupOrDefault<word>("name", "default");
+    const word importName = args.opt<word>("name", "default");
 
     // check that writing is supported
     if (!MeshedSurface<face>::canWriteType(exportName.ext(), true))
@@ -133,97 +137,74 @@ int main(int argc, char *argv[])
     }
 
 
-    // get the coordinate transformations
-    autoPtr<coordinateSystem> fromCsys;
-    autoPtr<coordinateSystem> toCsys;
+    // The coordinate transformations (must be cartesian)
+    autoPtr<coordSystem::cartesian> fromCsys;
+    autoPtr<coordSystem::cartesian> toCsys;
 
     if (args.found("from") || args.found("to"))
     {
-        autoPtr<IOobject> ioPtr;
-
-        if (args.found("dict"))
-        {
-            const fileName dictPath = args["dict"];
-
-            ioPtr.reset
+        IOobject ioCsys = IOobject::selectIO
+        (
+            IOobject
             (
-                new IOobject
-                (
-                    (
-                        isDir(dictPath)
-                      ? dictPath/coordinateSystems::typeName
-                      : dictPath
-                    ),
-                    runTime,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            );
-        }
-        else
-        {
-            ioPtr.reset
-            (
-                new IOobject
-                (
-                    coordinateSystems::typeName,
-                    runTime.constant(),
-                    runTime,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            );
-        }
+                coordinateSystems::typeName,
+                runTime.constant(),
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            args.opt<fileName>("dict", "")
+        );
 
-
-        if (!ioPtr->typeHeaderOk<coordinateSystems>(false))
+        if (!ioCsys.typeHeaderOk<coordinateSystems>(false))
         {
             FatalErrorInFunction
-                << ioPtr->objectPath() << nl
+                << ioCsys.objectPath() << nl
                 << exit(FatalError);
         }
 
-        coordinateSystems csLst(ioPtr());
+        coordinateSystems globalCoords(ioCsys);
 
         if (args.found("from"))
         {
-            const word csName = args["from"];
+            const word csName(args["from"]);
+            const auto* csPtr = globalCoords.lookupPtr(csName);
 
-            const label csIndex = csLst.findIndex(csName);
-            if (csIndex < 0)
+            if (!csPtr)
             {
                 FatalErrorInFunction
                     << "Cannot find -from " << csName << nl
-                    << "available coordinateSystems: " << csLst.toc() << nl
+                    << "available coordinateSystems: "
+                    << flatOutput(globalCoords.names()) << nl
                     << exit(FatalError);
             }
 
-            fromCsys.reset(new coordinateSystem(csLst[csIndex]));
+            fromCsys = autoPtr<coordSystem::cartesian>::New(*csPtr);
         }
 
         if (args.found("to"))
         {
-            const word csName = args["to"];
+            const word csName(args["to"]);
+            const auto* csPtr = globalCoords.lookupPtr(csName);
 
-            const label csIndex = csLst.findIndex(csName);
-            if (csIndex < 0)
+            if (!csPtr)
             {
                 FatalErrorInFunction
                     << "Cannot find -to " << csName << nl
-                    << "available coordinateSystems: " << csLst.toc() << nl
+                    << "available coordinateSystems: "
+                    << flatOutput(globalCoords.names()) << nl
                     << exit(FatalError);
             }
 
-            toCsys.reset(new coordinateSystem(csLst[csIndex]));
+            toCsys = autoPtr<coordSystem::cartesian>::New(*csPtr);
         }
 
-
-        // maybe fix this later
-        if (fromCsys.valid() && toCsys.valid())
+        // Maybe fix this later
+        if (fromCsys && toCsys)
         {
             FatalErrorInFunction
+                << "Only allowed '-from' or '-to' option at the moment."
                 << exit(FatalError);
         }
     }
@@ -256,28 +237,30 @@ int main(int argc, char *argv[])
     scalar scaleIn = 0;
     if (args.readIfPresent("scaleIn", scaleIn) && scaleIn > 0)
     {
-        Info<< " -scaleIn " << scaleIn << endl;
+        Info<< "scale input " << scaleIn << endl;
         surf.scalePoints(scaleIn);
     }
 
     if (fromCsys.valid())
     {
-        Info<< " -from " << fromCsys().name() << endl;
-        tmp<pointField> tpf = fromCsys().localPosition(surf.points());
+        Info<< "move points from coordinate system: "
+            << fromCsys->name() << endl;
+        tmp<pointField> tpf = fromCsys->localPosition(surf.points());
         surf.movePoints(tpf());
     }
 
     if (toCsys.valid())
     {
-        Info<< " -to " << toCsys().name() << endl;
-        tmp<pointField> tpf = toCsys().globalPosition(surf.points());
+        Info<< "move points to coordinate system: "
+            << toCsys->name() << endl;
+        tmp<pointField> tpf = toCsys->globalPosition(surf.points());
         surf.movePoints(tpf());
     }
 
     scalar scaleOut = 0;
     if (args.readIfPresent("scaleOut", scaleOut) && scaleOut > 0)
     {
-        Info<< " -scaleOut " << scaleOut << endl;
+        Info<< "scale output " << scaleOut << endl;
         surf.scalePoints(scaleOut);
     }
 

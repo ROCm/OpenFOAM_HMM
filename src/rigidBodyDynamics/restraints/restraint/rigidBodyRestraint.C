@@ -48,7 +48,7 @@ Foam::RBD::restraint::restraint
 )
 :
     name_(name),
-    bodyID_(model.bodyID(dict.lookup("body"))),
+    bodyID_(model.bodyID(dict.get<word>("body"))),
     bodyIndex_(model.master(bodyID_)),
     coeffs_(dict),
     model_(model)

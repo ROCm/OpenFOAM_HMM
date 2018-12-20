@@ -1,0 +1,48 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.sh/hypre
+#     [optional/experimental: not sourced by OpenFOAM-*/etc/bashrc]
+#
+# Description
+#     Setup for HYPRE include/libraries (usually ThirdParty installation).
+#
+#     To disable its use:               hypre_version=hypre-none
+#     For system-wide installations:    hypre_version=hypre-system
+#
+#     For central installations not located under ThirdParty:
+#       1. use hypre-system
+#       2. and provide full path for HYPRE_ARCH_PATH
+#
+#------------------------------------------------------------------------------
+# USER EDITABLE PART: Changes made here may be lost with the next upgrade
+
+hypre_version=hypre-2.11.2
+export HYPRE_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/$hypre_version
+
+# END OF (NORMAL) USER EDITABLE PART
+#------------------------------------------------------------------------------
+if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
+then
+    echo "Using hypre ($hypre_version)  ->  $HYPRE_ARCH_PATH" 1>&2
+fi
+
+if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing (not makeHYPRE)
+then
+
+    _foamAddLibAuto $HYPRE_ARCH_PATH
+
+    unset hypre_version
+
+fi
+
+#------------------------------------------------------------------------------

@@ -38,7 +38,7 @@ const Foam::Enum
     Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massTransferMode
 >
 Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massModeTypeNames_
-{
+({
     { massTransferMode::mtConstantMass, "constantMass" },
     { massTransferMode::mtCondensation, "condensation" },
     { massTransferMode::mtEvaporation, "evaporation" },
@@ -46,7 +46,7 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massModeTypeNames_
         massTransferMode::mtCondensationAndEvaporation,
         "condensationAndEvaporation"
     },
-};
+});
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -93,33 +93,28 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::thicknessField
     const fvMesh& mesh
 )
 {
-    if (!mesh.foundObject<volScalarField>(fieldName))
+    volScalarField* ptr = mesh.getObjectPtr<volScalarField>(fieldName);
+
+    if (!ptr)
     {
-        tmp<volScalarField> tField
+        ptr = new volScalarField
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    fieldName,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
+                fieldName,
+                mesh.time().timeName(),
                 mesh,
-                dimensionedScalar(dimLength, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar(dimLength, Zero)
         );
 
-        tField.ptr()->store();
+        ptr->store();
     }
 
-    return
-        const_cast<volScalarField&>
-        (
-            mesh.lookupObject<volScalarField>(fieldName)
-        );
+    return *ptr;
 }
 
 
@@ -245,9 +240,8 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 
-    if (dict.found("mode"))
+    if (massModeTypeNames_.readIfPresent("mode", dict, mode_))
     {
-        mode_ = massModeTypeNames_.lookup("mode", dict);
         fluid_ = true;
     }
 
@@ -267,9 +261,9 @@ humidityTemperatureCoupledMixedFvPatchScalarField
             case mtEvaporation:
             case mtCondensationAndEvaporation:
             {
-                Mcomp_ = readScalar(dict.lookup("carrierMolWeight"));
-                L_ = readScalar(dict.lookup("L"));
-                Tvap_ = readScalar(dict.lookup("Tvap"));
+                dict.readEntry("carrierMolWeight", Mcomp_);
+                dict.readEntry("L", L_);
+                dict.readEntry("Tvap", Tvap_);
                 liquidDict_ = dict.subDict("liquid");
                 liquid_ =
                     liquidProperties::New(liquidDict_.subDict(specieName_));

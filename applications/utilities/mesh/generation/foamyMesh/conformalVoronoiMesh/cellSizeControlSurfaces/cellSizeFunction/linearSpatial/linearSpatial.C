@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,20 +27,18 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volumeType.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(linearSpatial, 0);
-addToRunTimeSelectionTable(cellSizeFunction, linearSpatial, dictionary);
+    defineTypeNameAndDebug(linearSpatial, 0);
+    addToRunTimeSelectionTable(cellSizeFunction, linearSpatial, dictionary);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-linearSpatial::linearSpatial
+Foam::linearSpatial::linearSpatial
 (
     const dictionary& initialPointsDict,
     const searchableSurface& surface,
@@ -56,22 +54,28 @@ linearSpatial::linearSpatial
         defaultCellSize,
         regionIndices
     ),
-    referencePoint_(coeffsDict().lookup("referencePoint")),
+    referencePoint_
+    (
+        coeffsDict().get<point>("referencePoint")
+    ),
     referenceCellSize_
     (
-        readScalar(coeffsDict().lookup("referenceCellSizeCoeff"))
-       *defaultCellSize
+        coeffsDict().get<scalar>("referenceCellSizeCoeff") * defaultCellSize
     ),
-    direction_(coeffsDict().lookup("direction")),
-    cellSizeGradient_(readScalar(coeffsDict().lookup("cellSizeGradient")))
-{
-    direction_ /= mag(direction_);
-}
+    direction_
+    (
+        coeffsDict().get<vector>("direction").normalise()
+    ),
+    cellSizeGradient_
+    (
+        coeffsDict().get<scalar>("cellSizeGradient")
+    )
+{}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-scalar linearSpatial::sizeFunction(const point& pt) const
+Foam::scalar Foam::linearSpatial::sizeFunction(const point& pt) const
 {
     return
         referenceCellSize_
@@ -82,7 +86,7 @@ scalar linearSpatial::sizeFunction(const point& pt) const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool linearSpatial::sizeLocations
+bool Foam::linearSpatial::sizeLocations
 (
     const pointIndexHit& hitPt,
     const vector& n,
@@ -104,7 +108,7 @@ bool linearSpatial::sizeLocations
 }
 
 
-bool linearSpatial::cellSize
+bool Foam::linearSpatial::cellSize
 (
     const point& pt,
     scalar& size
@@ -169,12 +173,7 @@ bool linearSpatial::cellSize
     }
 
     return functionApplied;
-
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

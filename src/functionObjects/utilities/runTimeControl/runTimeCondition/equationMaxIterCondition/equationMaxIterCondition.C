@@ -60,8 +60,8 @@ equationMaxIterCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    fieldNames_(dict.lookup("fields")),
-    threshold_(readLabel(dict.lookup("threshold"))),
+    fieldNames_(dict.get<wordList>("fields")),
+    threshold_(dict.get<label>("threshold")),
     startIter_(dict.lookupOrDefault("startIter", 2))
 {
     if (!fieldNames_.size())

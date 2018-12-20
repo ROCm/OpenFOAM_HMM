@@ -1,12 +1,14 @@
 #!/bin/sh
-#
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
 # Dummy external solver to communicate with OpenFOAM via externalCoupled
 # functionObject
 #
 # Functionality is hard-coded for this particular test case
 # - patch temperatures increased by 1K on each step
 #
-cd ${0%/*} || exit 1    # Run from this directory
+# -----------------------------------------------------------------------------
 
 # Check for unassigned variables
 set -u
@@ -53,28 +55,44 @@ stopMasterNow()
 }
 
 
+# Patch size (heater/minY)
+nFaces1=$(getNumberOfPatchFaces minY heater) || exit $?
+
+# Patch size (topAir/minX)
+nFaces2=$(getNumberOfPatchFaces minX topAir) || exit $?
+
+
 init()
 {
     log "init - creating ${dataFile}.in"
     cat /dev/null >| "${dataFile}.in"
 
-    # Hard-coded for patch of size 8 (heater/minY)
-    local n1=8
-    local refValue1=500
+    # Local face counter, Local refValue
+    local nFaces refValue
 
-    log "init - adding $n1 data elements with refValue $refValue1"
-    for i in $(seq 1 $n1)
+    # Patch (heater/minY)
+    nFaces="$nFaces1"
+    refValue=500
+
+    log "init - adding $nFaces data elements with refValue $refValue"
+
+    while [ "$nFaces" -gt 0 ]
     do
-        echo "$refValue1 $refGrad $valueFraction"
+        nFaces=$((nFaces - 1))
+        echo "$refValue $refGrad $valueFraction"
     done >> "${dataFile}.in"
 
-    # Hard-coded for patch of size 40 (topAir/minX)
-    local n2=40
-    local refValue2=300
-    log "init - adding $n2 data elements with refValue $refValue2"
-    for i in $(seq 1 $n2)
+
+    # Patch (topAir/minX)
+    nFaces="$nFaces2"
+    refValue=300
+
+    log "init - adding $nFaces data elements with refValue $refValue"
+
+    while [ "$nFaces" -gt 0 ]
     do
-        echo "$refValue2 $refGrad $valueFraction"
+        nFaces=$((nFaces - 1))
+        echo "$refValue $refGrad $valueFraction"
     done >> "${dataFile}.in"
 
     # Verify line count?
@@ -151,5 +169,8 @@ log "done"
 
 # Remove the lock file too
 \rm -f $lockFile 2>/dev/null
+
+# For log collector:
+echo "End"
 
 #------------------------------------------------------------------------------

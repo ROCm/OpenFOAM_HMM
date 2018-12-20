@@ -68,7 +68,7 @@ bool Foam::heatTransferCoeffModels::fixedReferenceTemperature::read
 {
     if (heatTransferCoeffModel::read(dict))
     {
-        dict.lookup("TRef") >> TRef_;
+        dict.readEntry("TRef", TRef_);
 
         return true;
     }

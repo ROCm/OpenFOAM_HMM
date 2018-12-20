@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -82,17 +82,13 @@ PIMPLE
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
 
-    ddtCorr                     yes;
+    ddtCorr                    yes;
     correctPhi                 no;
-    massFluxInterpolation      no;
 
     moveMeshOuterCorrectors no;
     turbOnFinalIterOnly no;
 
     oversetAdjustPhi    no;
-
-    moveMeshOuterCorrectors no;
-    turbOnFinalIterOnly no;
 }
 
 relaxationFactors
@@ -107,8 +103,6 @@ relaxationFactors
 }
 
 cache
-{
-        grad(U);
-}
+{}
 
 // ************************************************************************* //

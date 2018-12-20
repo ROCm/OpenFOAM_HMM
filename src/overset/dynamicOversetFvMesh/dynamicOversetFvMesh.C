@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2014-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -225,8 +225,8 @@ Foam::dynamicOversetFvMesh::dynamicOversetFvMesh(const IOobject& io)
     dynamicMotionSolverFvMesh(io),
     active_(false)
 {
-    // Force loading zoneID field before time gets incremented
-    (void)cellCellStencil::zoneID(*this);
+    // Load stencil (but do not update)
+    (void)Stencil::New(*this, false);
 }
 
 
@@ -274,11 +274,54 @@ bool Foam::dynamicOversetFvMesh::update()
         // let demand-driven lduAddr() trigger it but just to make sure.
         updateAddressing();
 
+        // Addressing and/or weights have changed. Make interpolated cells
+        // up to date with donors
+        interpolateFields();
+
         return true;
     }
 
     return false;
 }
+
+
+Foam::word Foam::dynamicOversetFvMesh::baseName(const word& name)
+{
+    if (name.endsWith("_0"))
+    {
+        return baseName(name.substr(0, name.size()-2));
+    }
+    else
+    {
+        return name;
+    }
+}
+
+
+bool Foam::dynamicOversetFvMesh::interpolateFields()
+{
+    // Add the stencil suppression list
+    wordHashSet suppressed(Stencil::New(*this).nonInterpolatedFields());
+
+    // Use whatever the solver has set up as suppression list
+    const dictionary* dictPtr
+    (
+        this->schemesDict().findDict("oversetInterpolationSuppressed")
+    );
+    if (dictPtr)
+    {
+        suppressed.insert(dictPtr->toc());
+    }
+
+    interpolate<volScalarField>(suppressed);
+    interpolate<volVectorField>(suppressed);
+    interpolate<volSphericalTensorField>(suppressed);
+    interpolate<volSymmTensorField>(suppressed);
+    interpolate<volTensorField>(suppressed);
+
+    return true;
+}
+
 
 
 bool Foam::dynamicOversetFvMesh::writeObject
@@ -347,6 +390,59 @@ bool Foam::dynamicOversetFvMesh::writeObject
         volZoneID.correctBoundaryConditions();
         volZoneID.writeObject(fmt, ver, cmp, valid);
     }
+    if (debug)
+    {
+        const cellCellStencilObject& overlap = Stencil::New(*this);
+        const labelIOList& zoneID = overlap.zoneID();
+        const labelListList& cellStencil = overlap.cellStencil();
+
+        labelList donorZoneID(zoneID);
+        overlap.cellInterpolationMap().distribute(donorZoneID);
+
+        forAll(cellStencil, cellI)
+        {
+            const labelList& stencil = cellStencil[cellI];
+            if (stencil.size())
+            {
+                donorZoneID[cellI] = zoneID[stencil[0]];
+                for (label i = 1; i < stencil.size(); i++)
+                {
+                    if (zoneID[stencil[i]] != donorZoneID[cellI])
+                    {
+                        WarningInFunction << "Mixed donor meshes for cell "
+                            << cellI << " at " << C()[cellI]
+                            << " donors:" << UIndirectList<point>(C(), stencil)
+                            << endl;
+                        donorZoneID[cellI] = -2;
+                    }
+                }
+            }
+        }
+
+        volScalarField volDonorZoneID
+        (
+            IOobject
+            (
+                "donorZoneID",
+                this->time().timeName(),
+                *this,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            *this,
+            dimensionedScalar("minOne", dimless, scalar(-1)),
+            zeroGradientFvPatchScalarField::typeName
+        );
+        forAll(donorZoneID, celli)
+        {
+            volDonorZoneID[celli] = donorZoneID[celli];
+        }
+        //- Do not correctBoundaryConditions since re-interpolates!
+        //volDonorZoneID.correctBoundaryConditions();
+        volDonorZoneID.writeObject(fmt, ver, cmp, valid);
+    }
+
     return ok;
 }
 

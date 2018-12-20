@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,17 +47,15 @@ SourceFiles
 #define arraySet_H
 
 #include "sampledSet.H"
+#include "labelVector.H"
 #include "DynamicList.H"
-#include "coordinateSystem.H"
+#include "cartesianCS.H"
+#include "cylindricalCS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward declarations
-class passiveParticle;
-template<class Type> class particle;
 
 /*---------------------------------------------------------------------------*\
                            Class arraySet Declaration
@@ -69,14 +67,14 @@ class arraySet
 {
     // Private data
 
-        //- Coordinate system
-        coordinateSystem coordSys_;
+        //- Local Cartesian coordinate system
+        coordSystem::cartesian csys_;
 
         //- Point density vector
-        Vector<label> pointsDensity_;
+        labelVector pointsDensity_;
 
         //- Span box
-        Vector<scalar> spanBox_;
+        vector spanBox_;
 
 
     // Private Member Functions
@@ -110,7 +108,7 @@ public:
             const polyMesh& mesh,
             const meshSearch& searchEngine,
             const word& axis,
-            const coordinateSystem& coordSys,
+            const coordSystem::cartesian& csys,
             const Vector<label>& pointsDensity,
             const Vector<scalar>& spanBox
         );

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +63,7 @@ SourceFiles
 #define uniformFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "Function1.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,7 +81,7 @@ class uniformFixedValueFvPatchField
 {
     // Private data
 
-        autoPtr<Function1<Type>> uniformValue_;
+        autoPtr<PatchFunction1<Type>> uniformValue_;
 
 
 public:
@@ -161,6 +161,22 @@ public:
 
 
     // Member functions
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const fvPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchField<Type>&,
+                const labelList&
+            );
+
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

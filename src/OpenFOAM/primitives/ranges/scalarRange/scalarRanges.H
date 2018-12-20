@@ -27,6 +27,9 @@ Class
 Description
     A collection of scalar bounds to be used as a unary predicate.
 
+SeeAlso
+    Foam::predicates::scalars
+
 SourceFiles
     scalarRanges.C
 
@@ -55,17 +58,35 @@ public:
 
     // Constructors
 
+        //- Inherit constructors from List of scalarRange
+        using List<scalarRange>::List;
+
         //- Construct null
         inline scalarRanges();
 
-        //- Construct by parsing a string for scalar ranges
+        //- Construct by parsing string for scalar ranges
         //  The individual items are space, comma or semicolon delimited.
-        scalarRanges(const std::string& str);
+        //  Optionally report when any range failed to parse
+        inline scalarRanges(const std::string& str, bool verbose = true);
+
+
+    // Static Constructors
+
+        //- Construct by parsing string for scalar ranges
+        //  The individual items are space, comma or semicolon delimited.
+        static scalarRanges parse(const std::string& str, bool verbose = true);
+
+
+    // Member Functions
+
+        //- Match any condition in the list.
+        //  \return True if the value matches any condition in the list.
+        inline bool match(const scalar& value) const;
 
 
     // Member Operators
 
-        //- Unary predicate to test if the value is within any of the ranges
+        //- Identical to match(), for use as a predicate.
         inline bool operator()(const scalar& value) const;
 
 };

@@ -93,7 +93,10 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
     frozenPointsZone_
     (
         coeffDict().found("frozenPointsZone")
-      ? fvMesh_.pointZones().findZoneID(coeffDict().lookup("frozenPointsZone"))
+      ? fvMesh_.pointZones().findZoneID
+        (
+            coeffDict().get<word>("frozenPointsZone")
+        )
       : -1
     )
 {
@@ -178,7 +181,10 @@ displacementLaplacianFvMotionSolver
     frozenPointsZone_
     (
         coeffDict().found("frozenPointsZone")
-      ? fvMesh_.pointZones().findZoneID(coeffDict().lookup("frozenPointsZone"))
+      ? fvMesh_.pointZones().findZoneID
+        (
+            coeffDict().get<word>("frozenPointsZone")
+        )
       : -1
     )
 {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,8 +24,31 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
+#include "labelRange.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::globalIndex::globalIndex(const label localSize)
+:
+    globalIndex()
+{
+    reset(localSize);
+}
+
+
+inline Foam::globalIndex::globalIndex
+(
+    const label localSize,
+    const int tag,
+    const label comm,
+    const bool parallel
+)
+:
+    globalIndex()
+{
+    reset(localSize, tag, comm, parallel);
+}
+
 
 inline Foam::globalIndex::globalIndex(const labelUList& offsets)
 :
@@ -41,6 +64,18 @@ inline Foam::globalIndex::globalIndex(labelList&& offsets)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline bool Foam::globalIndex::empty() const
+{
+    return offsets_.empty() || offsets_.last() == 0;
+}
+
+
+inline const Foam::labelList& Foam::globalIndex::offsets() const
+{
+    return offsets_;
+}
+
+
 inline Foam::labelList& Foam::globalIndex::offsets()
 {
     return offsets_;
@@ -50,6 +85,18 @@ inline Foam::labelList& Foam::globalIndex::offsets()
 inline Foam::label Foam::globalIndex::offset(const label proci) const
 {
     return offsets_[proci];
+}
+
+
+inline Foam::label Foam::globalIndex::localStart(const label proci) const
+{
+    return offsets_[proci];
+}
+
+
+inline Foam::label Foam::globalIndex::localStart() const
+{
+    return localStart(Pstream::myProcNo());
 }
 
 
@@ -65,9 +112,33 @@ inline Foam::label Foam::globalIndex::localSize() const
 }
 
 
+inline Foam::labelRange Foam::globalIndex::range(const label proci) const
+{
+    return labelRange(offsets_[proci], offsets_[proci+1] - offsets_[proci]);
+}
+
+
+inline Foam::labelRange Foam::globalIndex::range() const
+{
+    return range(Pstream::myProcNo());
+}
+
+
 inline Foam::label Foam::globalIndex::size() const
 {
     return offsets_.last();
+}
+
+
+inline bool Foam::globalIndex::isLocal(const label proci, const label i) const
+{
+    return i >= offsets_[proci] && i < offsets_[proci+1];
+}
+
+
+inline bool Foam::globalIndex::isLocal(const label i) const
+{
+    return isLocal(Pstream::myProcNo(), i);
 }
 
 
@@ -87,32 +158,62 @@ inline Foam::label Foam::globalIndex::toGlobal(const label i) const
 }
 
 
-//- Is on local processor
-inline bool Foam::globalIndex::isLocal(const label proci, const label i) const
+inline Foam::labelList Foam::globalIndex::toGlobal
+(
+    const label proci,
+    const labelUList& labels
+) const
 {
-    return i >= offsets_[proci] && i < offsets_[proci+1];
+    labelList result(labels);
+    inplaceToGlobal(proci, result);
+
+    return result;
 }
 
 
-inline bool Foam::globalIndex::isLocal(const label i) const
+inline Foam::labelList Foam::globalIndex::toGlobal
+(
+    const labelUList& labels
+) const
 {
-    return isLocal(Pstream::myProcNo(), i);
+    return toGlobal(Pstream::myProcNo(), labels);
 }
 
 
-inline Foam::label Foam::globalIndex::toLocal(const label proci, const label i)
-const
+inline void Foam::globalIndex::inplaceToGlobal
+(
+    const label proci,
+    labelList& labels
+) const
 {
-    label localI = i - offsets_[proci];
+    const label off = offsets_[proci];
 
-    if (localI < 0 || i >= offsets_[proci+1])
+    for (label& val : labels)
+    {
+        val += off;
+    }
+}
+
+
+inline void Foam::globalIndex::inplaceToGlobal(labelList& labels) const
+{
+    inplaceToGlobal(Pstream::myProcNo(), labels);
+}
+
+
+inline Foam::label
+Foam::globalIndex::toLocal(const label proci, const label i) const
+{
+    const label locali = i - offsets_[proci];
+
+    if (locali < 0 || i >= offsets_[proci+1])
     {
         FatalErrorInFunction
             << "Global " << i << " does not belong on processor "
-            << proci << endl << "Offsets:" << offsets_
+            << proci << nl << "Offsets:" << offsets_
             << abort(FatalError);
     }
-    return localI;
+    return locali;
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(labelToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, labelToCell, word);
     addToRunTimeSelectionTable(topoSetSource, labelToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, labelToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, labelToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        labelToCell,
+        word,
+        label
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        labelToCell,
+        istream,
+        label
+    );
 }
 
 
@@ -45,17 +61,6 @@ Foam::topoSetSource::addToUsageTable Foam::labelToCell::usage_
 );
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::labelToCell::combine(topoSet& set, const bool add) const
-{
-    forAll(labels_, labelI)
-    {
-        addOrDelete(set, labels_[labelI], add);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::labelToCell::labelToCell
@@ -64,8 +69,19 @@ Foam::labelToCell::labelToCell
     const labelList& labels
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     labels_(labels)
+{}
+
+
+Foam::labelToCell::labelToCell
+(
+    const polyMesh& mesh,
+    labelList&& labels
+)
+:
+    topoSetCellSource(mesh),
+    labels_(std::move(labels))
 {}
 
 
@@ -75,8 +91,7 @@ Foam::labelToCell::labelToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    labels_(dict.lookup("value"))
+    labelToCell(mesh, dict.get<labelList>("value"))
 {}
 
 
@@ -86,15 +101,11 @@ Foam::labelToCell::labelToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     labels_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::labelToCell::~labelToCell()
-{}
+{
+    check(labels_, mesh.nCells());
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -105,17 +116,25 @@ void Foam::labelToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells mentioned in dictionary"
+                << " ..." << endl;
+        }
 
-        combine(set, true);
+        addOrDelete(set, labels_, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells mentioned in dictionary"
+                << " ..." << endl;
+        }
 
-        combine(set, false);
+        addOrDelete(set, labels_, false);
     }
 }
 

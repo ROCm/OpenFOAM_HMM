@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::surfaceToCell
 
 Description
-    A topoSetSource to select cells based on relation to surface.
+    A topoSetCellSource to select cells based on relation to surface.
 
     Selects:
     - all cells inside/outside/cut by surface
@@ -36,6 +36,20 @@ Description
       at nearest point to centre and cell-corners differing by
       more than YYY (i.e., point of high curvature)
 
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        file        | The surface "filename"            | yes   |
+        scale       | surface scaling factor            | no    | -1
+        nearDistance | Near distance to the surface     | yes   |
+        curvature    | surface curvature selection      | yes   |
+        outsidePoints| Points outside of surface        | yes   |
+        includeCut     | Include cut cells (bool)       | yes   |
+        includeInside  | Include inside cells (bool)    | yes   |
+        includeOutside | Include outside cells (bool)   | yes   |
+        useSurfaceOrientation | useSurfaceOrientation   | no    | false
+    \endtable
+
 SourceFiles
     surfaceToCell.C
 
@@ -44,7 +58,7 @@ SourceFiles
 #ifndef surfaceToCell_H
 #define surfaceToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -60,7 +74,7 @@ class triSurface;
 
 class surfaceToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -183,18 +197,10 @@ public:
         );
 
         //- Construct from dictionary
-        surfaceToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        surfaceToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        surfaceToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        surfaceToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
@@ -202,11 +208,6 @@ public:
 
 
     // Member Functions
-
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
 
         virtual void applyToSet
         (

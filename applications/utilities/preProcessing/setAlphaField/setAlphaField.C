@@ -65,16 +65,22 @@ const Foam::Enum
     shapeSelector::shapeType
 >
 shapeSelector::shapeTypeNames
-{
+({
     { shapeSelector::shapeType::PLANE, "plane" },
     { shapeSelector::shapeType::SPHERE, "sphere" },
     { shapeSelector::shapeType::CYLINDER, "cylinder" },
     { shapeSelector::shapeType::SIN, "sin" },
-};
+});
 
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Uses isoCutCell to create a volume fraction field from a"
+        " cylinder, sphere or a plane."
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
@@ -95,10 +101,10 @@ int main(int argc, char *argv[])
 
     const shapeSelector::shapeType surfType
     (
-        shapeSelector::shapeTypeNames.read(dict.lookup("type"))
+        shapeSelector::shapeTypeNames.get("type", dict)
     );
-    const vector centre(dict.lookup("centre"));
-    const word fieldName(dict.lookup("field"));
+    const vector origin(dict.getCompat<vector>("origin", {{"centre", 1806}}));
+    const word fieldName(dict.get<word>("field"));
 
     Info<< "Reading field " << fieldName << "\n" << endl;
     volScalarField alpha1
@@ -114,7 +120,7 @@ int main(int argc, char *argv[])
         mesh
     );
 
-    scalar f0 = 0.0;
+    scalar f0 = 0;
     scalarField f(mesh.points().size());
 
     Info<< "Processing type '" << shapeSelector::shapeTypeNames[surfType]
@@ -124,45 +130,45 @@ int main(int argc, char *argv[])
     {
         case shapeSelector::shapeType::PLANE:
         {
-            const vector direction(dict.lookup("direction"));
+            const vector direction(dict.get<vector>("direction"));
 
-            f = -(mesh.points() - centre) & (direction/mag(direction));
-            f0 = 0.0;
+            f = -(mesh.points() - origin) & (direction/mag(direction));
+            f0 = 0;
             break;
         }
         case shapeSelector::shapeType::SPHERE:
         {
-            const scalar radius(readScalar(dict.lookup("radius")));
+            const scalar radius(dict.get<scalar>("radius"));
 
-            f = -mag(mesh.points() - centre);
+            f = -mag(mesh.points() - origin);
             f0 = -radius;
             break;
         }
         case shapeSelector::shapeType::CYLINDER:
         {
-            const scalar radius(readScalar(dict.lookup("radius")));
-            const vector direction(dict.lookup("direction"));
+            const scalar radius(dict.get<scalar>("radius"));
+            const vector direction(dict.get<vector>("direction"));
 
             f = -sqrt
             (
-                sqr(mag(mesh.points() - centre))
-              - sqr(mag((mesh.points() - centre) & direction))
+                sqr(mag(mesh.points() - origin))
+              - sqr(mag((mesh.points() - origin) & direction))
             );
             f0 = -radius;
             break;
         }
         case shapeSelector::shapeType::SIN:
         {
-            const scalar period(readScalar(dict.lookup("period")));
-            const scalar amplitude(readScalar(dict.lookup("amplitude")));
-            const vector up(dict.lookup("up"));
-            const vector direction(dict.lookup("direction"));
+            const scalar period(dict.get<scalar>("period"));
+            const scalar amplitude(dict.get<scalar>("amplitude"));
+            const vector up(dict.get<vector>("up"));
+            const vector direction(dict.get<vector>("direction"));
 
             const scalarField xx
             (
-                (mesh.points() - centre) & direction/mag(direction)
+                (mesh.points() - origin) & direction/mag(direction)
             );
-            const scalarField zz((mesh.points() - centre) & up/mag(up));
+            const scalarField zz((mesh.points() - origin) & up/mag(up));
 
             f = amplitude*Foam::sin(2*mathematical::pi*xx/period) - zz;
             f0 = 0;
@@ -176,6 +182,11 @@ int main(int argc, char *argv[])
     // Calculating alpha1 volScalarField from f = f0 isosurface
     isoCutCell icc(mesh, f);
     icc.volumeOfFluid(alpha1, f0);
+
+    if (dict.lookupOrDefault("invertAlpha", false))
+    {
+        alpha1 = 1 - alpha1;
+    }
 
     // Writing volScalarField alpha1
     ISstream::defaultPrecision(18);

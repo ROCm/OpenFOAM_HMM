@@ -27,6 +27,44 @@ Class
 Description
     A surfaceWriter for VTK legacy format.
 
+    The formatOptions for vtk:
+    \table
+        Property    | Description                           | Required | Default
+        format      | [FUTURE] ascii or binary format       | no  | ascii
+        legacy      | [FUTURE] Legacy VTK output            | no  | true
+        precision   | Write precision in ascii         | no | same as IOstream
+    \endtable
+
+    For example,
+    \verbatim
+    formatOptions
+    {
+        vtk
+        {
+            precision  10;
+        }
+    }
+    \endverbatim
+
+    \heading Output file locations
+
+    The \c rootdir normally corresponds to something like
+    \c postProcessing/\<name\>
+
+    \subheading Geometry
+    \verbatim
+    rootdir
+    `-- timeName
+        `-- surfaceName.{vtk}
+    \endverbatim
+
+    \subheading Fields
+    \verbatim
+    rootdir
+    `-- timeName
+        `-- <field>_surfaceName.{vtk}
+    \endverbatim
+
 Note
     Uses ASCII-only output.
     All data are written as \c double due to portability issues
@@ -47,6 +85,12 @@ SourceFiles
 namespace Foam
 {
 
+namespace vtk
+{
+// Forward declarations
+class formatter;
+}
+
 /*---------------------------------------------------------------------------*\
                       Class vtkSurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
@@ -57,28 +101,42 @@ class vtkSurfaceWriter
 {
     // Private data
 
-        const unsigned int writePrecision_;
+        //- The VTK output format type.
+        //  Stored as a raw value to avoid a dependency on fileFormats
+        unsigned fmtType_;
+
+        //- ASCII write precision
+        unsigned precision_;
 
 
     // Private Member Functions
 
-        static void writeGeometry(Ostream&, const meshedSurf&);
+        static void writeGeometry
+        (
+            vtk::formatter& format,
+            const meshedSurf& surf,
+            std::string title = ""
+        );
 
         template<class Type>
-        static void writeData(Ostream&, const Field<Type>&);
+        static void writeField
+        (
+            vtk::formatter& format,
+            const Field<Type>& values
+        );
 
 
         //- Templated write operation
         template<class Type>
         fileName writeTemplate
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const word& fieldName,
-            const Field<Type>& values,
-            const bool isNodeValues,
-            const bool verbose
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<Type>& values,      //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const;
 
 
@@ -94,7 +152,7 @@ public:
         vtkSurfaceWriter();
 
         //- Construct with some output options
-        vtkSurfaceWriter(const dictionary& options);
+        explicit vtkSurfaceWriter(const dictionary& options);
 
 
     //- Destructor
@@ -106,90 +164,83 @@ public:
         //- Write single surface geometry to file.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
 
         //- Write scalarField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<scalar>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<scalar>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write vectorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<vector>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<vector>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write sphericalTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<sphericalTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<sphericalTensor>& values, //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write symmTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<symmTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<symmTensor>& values,//!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write tensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<tensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<tensor>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "vtkSurfaceWriterTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

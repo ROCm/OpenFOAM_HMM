@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 #include "polyMesh.H"
 #include "demandDrivenData.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -37,7 +36,7 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::sampledSurface::clearGeom() const
 {
@@ -54,7 +53,7 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
     const dictionary& dict
 )
 {
-    const word sampleType(dict.lookup("type"));
+    const word sampleType(dict.get<word>("type"));
 
     if (debug)
     {
@@ -78,6 +77,15 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::sampledSurface::sampledSurface(const word& name, std::nullptr_t)
+:
+    name_(name),
+    mesh_(NullObjectRef<polyMesh>()),
+    interpolate_(false),
+    area_(-1)
+{}
+
 
 Foam::sampledSurface::sampledSurface
 (
@@ -123,8 +131,7 @@ Foam::scalar Foam::sampledSurface::area() const
 {
     if (area_ < 0)
     {
-        area_ = sum(magSf());
-        reduce(area_, sumOp<scalar>());
+        area_ = gSum(magSf());
     }
 
     return area_;
@@ -187,7 +194,7 @@ void Foam::sampledSurface::print(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const sampledSurface& s)
 {

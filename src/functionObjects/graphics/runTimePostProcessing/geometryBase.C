@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "runTimePostProcessing.H"
 #include "Constant.H"
 
+// VTK includes
 #include "vtkActor.h"
 #include "vtkProperty.h"
 
@@ -37,11 +38,11 @@ const Foam::Enum
     Foam::functionObjects::runTimePostPro::geometryBase::renderModeType
 >
 Foam::functionObjects::runTimePostPro::geometryBase::renderModeTypeNames
-{
+({
     { renderModeType::rmFlat, "flat" },
     { renderModeType::rmGouraud, "gouraud" },
     { renderModeType::rmPhong, "phong" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -81,24 +82,22 @@ Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     parent_(parent),
     name_(dict.dictName()),
-    visible_(readBool(dict.lookup("visible"))),
-    renderMode_(rmGouraud),
+    visible_(dict.get<bool>("visible")),
+    renderMode_
+    (
+        renderModeTypeNames.lookupOrDefault("renderMode", dict, rmGouraud)
+    ),
     opacity_(nullptr),
     colours_(colours)
 {
-    if (dict.found("renderMode"))
-    {
-        renderMode_ = renderModeTypeNames.lookup("renderMode", dict);
-    }
-
     if (dict.found("opacity"))
     {
-        opacity_.reset(Function1<scalar>::New("opacity", dict).ptr());
+        opacity_.reset(Function1<scalar>::New("opacity", dict));
     }
     else
     {

@@ -74,11 +74,11 @@ Foam::crankConRod::crankConRod
         systemName,
         constantName
     ),
-    rpm_(dict_.lookup("rpm")),
-    conRodLength_(dimensionedScalar("conRodLength", dimLength, 0)),
-    bore_(dimensionedScalar("bore", dimLength, 0)),
-    stroke_(dimensionedScalar("stroke", dimLength, 0)),
-    clearance_(dimensionedScalar("clearance", dimLength, 0))
+    rpm_("rpm", dimless/dimTime, dict_),
+    conRodLength_("conRodLength", dimLength, Zero),
+    bore_("bore", dimLength, Zero),
+    stroke_("stroke", dimLength, Zero),
+    clearance_("clearance", dimLength, Zero)
 {
     // geometric parameters are not strictly required for Time
     dict_.readIfPresent("conRodLength", conRodLength_);
@@ -112,10 +112,8 @@ bool Foam::crankConRod::read()
         timeAdjustment();
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

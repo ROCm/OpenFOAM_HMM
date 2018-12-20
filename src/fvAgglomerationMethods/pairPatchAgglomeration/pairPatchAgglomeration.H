@@ -38,7 +38,7 @@ SourceFiles
 #include "mathematicalConstants.H"
 #include "indirectPrimitivePatch.H"
 #include "List.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

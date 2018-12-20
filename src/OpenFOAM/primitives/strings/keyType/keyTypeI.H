@@ -77,12 +77,11 @@ inline Foam::keyType::keyType(const char* s)
 {}
 
 
-inline Foam::keyType::keyType(const std::string& s, const bool isPattern)
+inline Foam::keyType::keyType(const std::string& s, bool isPattern)
 :
     word(s, false),
     isPattern_(isPattern)
 {}
-
 
 
 inline Foam::keyType::keyType(keyType&& s)
@@ -108,7 +107,7 @@ inline Foam::keyType::keyType(string&& s)
 {}
 
 
-inline Foam::keyType::keyType(std::string&& s, const bool isPattern)
+inline Foam::keyType::keyType(std::string&& s, bool isPattern)
 :
     word(std::move(s), false),
     isPattern_(isPattern)
@@ -116,6 +115,12 @@ inline Foam::keyType::keyType(std::string&& s, const bool isPattern)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool Foam::keyType::isLiteral() const
+{
+    return !isPattern_;
+}
+
 
 inline bool Foam::keyType::isPattern() const
 {
@@ -145,6 +150,13 @@ inline void Foam::keyType::operator=(const keyType& s)
 }
 
 
+inline void Foam::keyType::operator=(keyType&& s)
+{
+    clear();
+    swap(s);
+}
+
+
 inline void Foam::keyType::operator=(const word& s)
 {
     assign(s); // Bypasses char checking
@@ -163,13 +175,6 @@ inline void Foam::keyType::operator=(const char* s)
 {
     assign(s); // Bypasses char checking
     isPattern_ = false;
-}
-
-
-inline void Foam::keyType::operator=(keyType&& s)
-{
-    clear();
-    swap(s);
 }
 
 

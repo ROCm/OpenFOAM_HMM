@@ -34,7 +34,7 @@ Foam::autoPtr<Foam::liftModel> Foam::liftModel::New
     const phasePair& pair
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting liftModel for "
         << pair << ": " << modelType << endl;

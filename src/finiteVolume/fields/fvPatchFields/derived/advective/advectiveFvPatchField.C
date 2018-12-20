@@ -103,14 +103,12 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
 
     if (dict.readIfPresent("lInf", lInf_))
     {
-        dict.lookup("fieldInf") >> fieldInf_;
+        dict.readEntry("fieldInf", fieldInf_);
 
         if (lInf_ < 0.0)
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "unphysical lInf specified (lInf < 0)" << nl
+            FatalIOErrorInFunction(dict)
+                << "unphysical lInf specified (lInf < 0)" << nl
                 << "    on patch " << this->patch().name()
                 << " of field " << this->internalField().name()
                 << " in file " << this->internalField().objectPath()

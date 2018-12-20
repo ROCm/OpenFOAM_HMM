@@ -1,6 +1,6 @@
 Foam::autoPtr<Foam::fvMesh> meshPtr(nullptr);
 
-if (args.optionFound("dry-run") || args.optionFound("dry-run-write"))
+if (args.found("dry-run") || args.found("dry-run-write"))
 {
     Foam::Info
         << "Operating in 'dry-run' mode: case will run for 1 time step.  "
@@ -11,17 +11,18 @@ if (args.optionFound("dry-run") || args.optionFound("dry-run-write"))
     // Create a simplified 1D mesh and attempt to re-create boundary conditions
     meshPtr.reset(new Foam::simplifiedMeshes::columnFvMesh(runTime));
 
-    // Stopping after 1 iteration of the simplified mesh
-    // Note: using saNoWriteNow will only trigger the function object execute
-    // function and not the write function
-    runTime.stopAt(Foam::Time::saNoWriteNow);
+    // Stop after 1 iteration of the simplified mesh
 
-    if (args.optionFound("dry-run-write"))
+    if (args.found("dry-run-write"))
     {
-        // Stopping after 1 iteration of the simplified mesh
-        // Note: using saWriteNow to trigger writing/execution of function
-        // objects
+        // Using saWriteNow triggers function objects execute(), write()
         runTime.stopAt(Foam::Time::saWriteNow);
+    }
+    else
+    {
+        // Using saNoWriteNow triggers function objects execute(),
+        // but not write()
+        runTime.stopAt(Foam::Time::saNoWriteNow);
     }
 
     Foam::functionObject::outputPrefix = "postProcessing-dry-run";

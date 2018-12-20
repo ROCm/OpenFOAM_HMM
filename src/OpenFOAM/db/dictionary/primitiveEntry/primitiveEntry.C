@@ -78,7 +78,8 @@ bool Foam::primitiveEntry::expandVariable
     // The $internalField would be matched by the ".*" !!!
 
     // Recursive, non-patterns
-    const entry* eptr = dict.lookupScopedEntryPtr(varName, true, false);
+    const entry* eptr = dict.findScoped(varName, keyType::LITERAL_RECURSIVE);
+
     if (!eptr)
     {
         // Not found - revert to environment variable
@@ -86,10 +87,8 @@ bool Foam::primitiveEntry::expandVariable
 
         if (str.empty())
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Illegal dictionary entry or environment variable name "
+            FatalIOErrorInFunction(dict)
+                << "Illegal dictionary entry or environment variable name "
                 << varName << endl << "Valid dictionary entries are "
                 << dict.toc() << exit(FatalIOError);
 

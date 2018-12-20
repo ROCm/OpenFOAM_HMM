@@ -248,7 +248,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
         )
       ? GAMGProcAgglomeration::New
         (
-            controlDict.lookup("processorAgglomerator"),
+            controlDict.get<word>("processorAgglomerator"),
             *this,
             controlDict
         )

@@ -30,11 +30,12 @@ Group
 Description
     List regions from constant/regionProperties.
 
-    To simplify parsing of the output, the normal banner information
-    is suppressed.
-
 Usage
     \b foamListRegions [OPTION]
+
+Note
+    The OpenFOAM banner information is suppressed so that the output can be
+    piped into another command.
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,18 +49,22 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("List regions from constant/regionProperties");
+    argList::addNote
+    (
+        "List regions from constant/regionProperties"
+    );
 
     argList::noBanner();
     argList::noParallel();
     argList::noJobInfo();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     // No profiling since there is no time loop
 
-    // Non-mandatory arguments
+    // Arguments are optional (non-mandatory)
+    argList::noMandatoryArgs();
     argList::addArgument("regionType ... regionType");
 
-    #include "setRootCaseNonMandatoryArgs.H"
+    #include "setRootCase.H"
 
     // As per "createTime.H", but quieter.
     Time runTime(Time::controlDictName, args);

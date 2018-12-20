@@ -1,0 +1,191 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.csh/setup
+#     - sourced by OpenFOAM-*/etc/cshrc
+#
+# Description
+#     Finalize setup of OpenFOAM environment for C-shell (csh, tcsh)
+#
+# Environment
+#     FOAM_VERBOSE (set/unset)
+#         - add extra verbosity when sourcing files
+#     FOAM_CONFIG_NOUSER (set/unset)
+#         - suppress use of user/group configuration files
+#
+#------------------------------------------------------------------------------
+
+# [WM_PROJECT_API] - The API level for the project
+setenv WM_PROJECT_API `$WM_PROJECT_DIR/bin/foamEtcFile -show-api`
+
+# The installation parent directory
+set prefixDir="${WM_PROJECT_DIR:h}"
+
+# Load shell "functions" (actually aliases)
+source "$WM_PROJECT_DIR/etc/config.csh/functions"
+
+
+# [WM_THIRD_PARTY_DIR] - Location of third-party software components
+# \- This may be installed in a directory parallel to the OpenFOAM project
+#    directory, with the same version name or using the API value.
+#    It may also not be required at all, in which case a dummy "ThirdParty"
+#    directory inside of the OpenFOAM project directory.
+#
+# Note: only accept if the directory exists and contains either
+#   a "Allwmake" file (source) or a "platforms" directory (runtime-only)
+
+setenv WM_THIRD_PARTY_DIR
+set foundDir=''
+
+_foamEcho "Locating ThirdParty directory"
+
+foreach foamDir (\
+    "$WM_PROJECT_DIR/ThirdParty" \
+    "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
+    "$prefixDir/ThirdParty-v$WM_PROJECT_API" \
+    "$prefixDir/ThirdParty-$WM_PROJECT_API" \
+    "$prefixDir/ThirdParty-common" \
+)
+    _foamEcho "... $foamDir"
+    if ( -d "$foamDir" ) then
+        if ( -f "$foamDir/Allwmake" || -d "$foamDir/platforms" ) then
+            setenv WM_THIRD_PARTY_DIR "$foamDir"
+            set foundDir=true
+            break
+        endif
+    endif
+end
+
+if ( "${%foundDir}" ) then
+    _foamEcho "Using $WM_THIRD_PARTY_DIR"
+else
+    # Dummy fallback value
+    setenv WM_THIRD_PARTY_DIR "$WM_PROJECT_DIR/ThirdParty"
+    _foamEcho "Dummy $WM_THIRD_PARTY_DIR"
+endif
+# Done with ThirdParty discovery
+
+
+# Overrides via <prefs.csh>
+# 1. other (system) values
+_foamEtc -mode=o prefs.csh
+
+# 2. user or group values (unless disabled)
+if (! $?FOAM_CONFIG_NOUSER ) then
+    _foamEtc -mode=ug prefs.csh
+endif
+
+
+# Capture and evaluate any command-line parameters
+# These can be used to set/unset values, specify additional files etc.
+setenv FOAM_SETTINGS "${*}"
+
+while ( $#argv > 0 )
+    switch ($argv[1])
+    case -*:
+        # Stray option (not meant for us here) -> get out
+        break
+        breaksw
+    case *=:
+        # name=       -> unsetenv name
+        _foamEcho "unsetenv $argv[1]:s/=//"
+        eval "unsetenv $argv[1]:s/=//"
+        breaksw
+    case *=*:
+        # name=value  -> setenv name value
+        _foamEcho "setenv $argv[1]:s/=/ /"
+        eval "setenv $argv[1]:s/=/ /"
+        breaksw
+    default:
+        # Filename: source it
+        if ( -f "$argv[1]" ) then
+            _foamEcho "Using: $argv[1]"
+            source "$argv[1]"
+        else
+            _foamEtc -silent "$argv[1]"
+        endif
+        breaksw
+    endsw
+    shift
+end
+
+
+# Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Prevent local variables from shadowing setenv variables
+unset PATH MANPATH LD_LIBRARY_PATH LD_PRELOAD
+if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
+if (! $?MANPATH ) setenv MANPATH
+
+_foamClean PATH "$foamOldDirs"
+_foamClean MANPATH "$foamOldDirs"
+_foamClean LD_LIBRARY_PATH "$foamOldDirs"
+
+# Setup for OpenFOAM compilation etc
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_foamEtc -config  settings
+
+# Setup for third-party packages
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_foamEtc -config  mpi
+_foamEtc -config  paraview -- "$FOAM_SETTINGS"  # Pass through for evaluation
+_foamEtc -config  vtk
+_foamEtc -config  ensight
+## _foamEtc -config  ADIOS
+## _foamEtc -config  ADIOS2
+_foamEtc -config  CGAL
+_foamEtc -config  FFTW
+
+if ( -d "$WM_PROJECT_DIR/doc/man1" ) then
+    _foamAddMan "$WM_PROJECT_DIR/doc"
+endif
+
+# Interactive shell
+if ($?prompt) then
+    _foamEtc -config  aliases
+    _foamEtc -config  tcsh_completion
+endif
+
+
+# Clean environment paths again. Only remove duplicates
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+_foamClean PATH
+_foamClean MANPATH
+_foamClean LD_LIBRARY_PATH
+
+# Add trailing ':' for system manpages
+if ( $?MANPATH ) then
+    setenv MANPATH "${MANPATH}:"
+endif
+
+if ( $?LD_PRELOAD ) then
+    _foamClean LD_PRELOAD
+endif
+
+
+# Cleanup temporary information
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Unload shell "functions"
+unalias _foamClean
+unalias _foamEcho
+unalias _foamEtc
+unalias _foamAddPath
+unalias _foamAddMan
+unalias _foamAddLib
+unalias _foamAddLibAuto
+
+# Variables (done as final statement for a clean exit code)
+unset cleaned foamOldDirs foundDir foamDir prefixDir
+
+#------------------------------------------------------------------------------

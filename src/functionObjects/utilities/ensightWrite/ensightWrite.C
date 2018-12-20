@@ -47,17 +47,21 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-int Foam::functionObjects::ensightWrite::process(const word& fieldName)
+Foam::label Foam::functionObjects::ensightWrite::writeAllVolFields
+(
+    const fvMeshSubset& proxy,
+    const wordHashSet& acceptField
+)
 {
-    int state = 0;
+    label count = 0;
 
-    writeVolField<scalar>(fieldName, state);
-    writeVolField<vector>(fieldName, state);
-    writeVolField<sphericalTensor>(fieldName, state);
-    writeVolField<symmTensor>(fieldName, state);
-    writeVolField<tensor>(fieldName, state);
+    count += writeVolFields<scalar>(proxy, acceptField);
+    count += writeVolFields<vector>(proxy, acceptField);
+    count += writeVolFields<sphericalTensor>(proxy, acceptField);
+    count += writeVolFields<symmTensor>(proxy, acceptField);
+    count += writeVolFields<tensor>(proxy, acceptField);
 
-    return state;
+    return count;
 }
 
 
@@ -73,26 +77,33 @@ Foam::functionObjects::ensightWrite::ensightWrite
     fvMeshFunctionObject(name, runTime, dict),
     writeOpts_
     (
-        IOstreamOption::formatNames.lookupOrFailsafe
+        IOstreamOption::formatNames.lookupOrDefault
         (
             "format",
             dict,
-            runTime.writeFormat()
+            runTime.writeFormat(),
+            true  // Failsafe behaviour
         )
     ),
     caseOpts_(writeOpts_.format()),
+    outputDir_(),
+    consecutive_(false),
+    meshState_(polyMesh::TOPO_CHANGE),
     selectFields_(),
-    dirName_("ensightWrite"),
-    consecutive_(false)
+    selection_(),
+    meshSubset_(mesh_),
+    ensCase_(nullptr),
+    ensMesh_(nullptr)
 {
-    if (postProcess)
-    {
-        // Disable for post-process mode.
-        // Emit as FatalError for the try/catch in the caller.
-        FatalError
-            << type() << " disabled in post-process mode"
-            << exit(FatalError);
-    }
+    // May still want this? (OCT-2018)
+    // if (postProcess)
+    // {
+    //     // Disable for post-process mode.
+    //     // Emit as FatalError for the try/catch in the caller.
+    //     FatalError
+    //         << type() << " disabled in post-process mode"
+    //         << exit(FatalError);
+    // }
 
     read(dict);
 }
@@ -104,51 +115,73 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    //
-    // writer options
-    //
-    writeOpts_.noPatches(dict.lookupOrDefault("noPatches", false));
+    readSelection(dict);
 
-    if (dict.found("patches"))
+
+    // Writer options
+
+    consecutive_ = dict.lookupOrDefault("consecutive", false);
+
+    writeOpts_.useBoundaryMesh(dict.lookupOrDefault("boundary", true));
+    writeOpts_.useInternalMesh(dict.lookupOrDefault("internal", true));
+
+
+    // Warn if noPatches keyword (1806) exists and contradicts our settings
+    // Cannot readily use Compat since the boolean has the opposite value.
+    if
+    (
+        dict.lookupOrDefault("noPatches", false)
+     && writeOpts_.useBoundaryMesh()
+    )
     {
-        wordRes list(dict.lookup("patches"));
-        list.uniq();
+        WarningInFunction
+            << "Use 'boundary' instead of 'noPatches' to enable/disable "
+            << "conversion of the boundaries" << endl;
+    }
 
+    wordRes list;
+    if (dict.readIfPresent("patches", list))
+    {
+        list.uniq();
         writeOpts_.patchSelection(list);
     }
 
-    if (dict.found("faceZones"))
+    if (dict.readIfPresent("faceZones", list))
     {
-        wordRes list(dict.lookup("faceZones"));
         list.uniq();
-
         writeOpts_.faceZoneSelection(list);
     }
 
 
-    //
-    // case options
-    //
+    // Case options
 
     caseOpts_.nodeValues(dict.lookupOrDefault("nodeValues", false));
-
     caseOpts_.width(dict.lookupOrDefault<label>("width", 8));
-
-    // remove existing output directory
     caseOpts_.overwrite(dict.lookupOrDefault("overwrite", false));
 
-    //
-    // other options
-    //
-    dict.readIfPresent("directory", dirName_);
-    consecutive_ = dict.lookupOrDefault("consecutive", false);
 
+    // Output directory
 
-    //
-    // output fields
-    //
-    dict.lookup("fields") >> selectFields_;
-    selectFields_.uniq();
+    outputDir_.clear();
+    dict.readIfPresent("directory", outputDir_);
+
+    const Time& time_ = obr_.time();
+
+    if (outputDir_.size())
+    {
+        // User-defined output directory
+        outputDir_.expand();
+        if (!outputDir_.isAbsolute())
+        {
+            outputDir_ = time_.globalPath()/outputDir_;
+        }
+    }
+    else
+    {
+        // Standard postProcessing/ naming
+        outputDir_ = time_.globalPath()/functionObject::outputPrefix/name();
+    }
+    outputDir_.clean();
 
     return true;
 }
@@ -166,24 +199,9 @@ bool Foam::functionObjects::ensightWrite::write()
 
     if (!ensCase_.valid())
     {
-        // Define sub-directory name to use for EnSight data.
-        // The path to the ensight directory is at case level only
-        // - For parallel cases, data only written from master
-
-        fileName ensightDir = dirName_;
-        if (!ensightDir.isAbsolute())
-        {
-            ensightDir = t.rootPath()/t.globalCaseName()/ensightDir;
-        }
-
         ensCase_.reset
         (
-            new ensightCase
-            (
-                ensightDir,
-                t.globalCaseName(),
-                caseOpts_
-            )
+            new ensightCase(outputDir_, t.globalCaseName(), caseOpts_)
         );
     }
 
@@ -196,19 +214,8 @@ bool Foam::functionObjects::ensightWrite::write()
         ensCase().setTime(t.value(), t.timeIndex());
     }
 
-    bool writeGeom = false;
-    if (!ensMesh_.valid())
-    {
-        writeGeom = true;
-        ensMesh_.reset(new ensightMesh(mesh_, writeOpts_));
-    }
-    if (ensMesh_().needsUpdate())
-    {
-        writeGeom = true;
-        ensMesh_().correct();
-    }
 
-    if (writeGeom)
+    if (update())
     {
         // Treat all geometry as moving, since we do not know a priori
         // if the simulation has mesh motion later on.
@@ -216,47 +223,19 @@ bool Foam::functionObjects::ensightWrite::write()
         ensMesh_().write(os);
     }
 
+    wordHashSet acceptField(mesh_.names<void>(selectFields_));
+
+    // Prune restart fields
+    acceptField.filterKeys
+    (
+        [](const word& k){ return k.endsWith("_0"); },
+        true // prune
+    );
+
     Log << type() << " " << name() << " write: (";
+    writeAllVolFields(meshSubset_, acceptField);
 
-    wordHashSet candidates(subsetStrings(selectFields_, mesh_.names()));
-    DynamicList<word> missing(selectFields_.size());
-    DynamicList<word> ignored(selectFields_.size());
-
-    // check exact matches first
-    for (const wordRe& select : selectFields_)
-    {
-        if (!select.isPattern())
-        {
-            const word& fieldName = static_cast<const word&>(select);
-
-            if (!candidates.erase(fieldName))
-            {
-                missing.append(fieldName);
-            }
-            else if (process(fieldName) < 1)
-            {
-                ignored.append(fieldName);
-            }
-        }
-    }
-
-    for (const word& cand : candidates)
-    {
-        process(cand);
-    }
-
-    Log << " )" << endl;
-
-    if (missing.size())
-    {
-        WarningInFunction
-            << "Missing field " << missing << endl;
-    }
-    if (ignored.size())
-    {
-        WarningInFunction
-            << "Unprocessed field " << ignored << endl;
-    }
+    Log << " )" << nl;
 
     ensCase().write();  // Flush case information
 
@@ -267,28 +246,6 @@ bool Foam::functionObjects::ensightWrite::write()
 bool Foam::functionObjects::ensightWrite::end()
 {
     return true;
-}
-
-
-void Foam::functionObjects::ensightWrite::updateMesh(const mapPolyMesh& mpm)
-{
-    // fvMeshFunctionObject::updateMesh(mpm);
-
-    if (ensMesh_.valid())
-    {
-        ensMesh_->expire();
-    }
-}
-
-
-void Foam::functionObjects::ensightWrite::movePoints(const polyMesh& mpm)
-{
-    // fvMeshFunctionObject::updateMesh(mpm);
-
-    if (ensMesh_.valid())
-    {
-        ensMesh_->expire();
-    }
 }
 
 

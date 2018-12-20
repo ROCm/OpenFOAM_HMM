@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts neutral file format as written by Netgen v4.4.
+    Convert a neutral file format (Netgen v4.4) to OpenFOAM.
 
     Example:
 
@@ -92,6 +92,10 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Convert a neutral file format (Netgen v4.4) to OpenFOAM"
+    );
     argList::addArgument("Neutral file");
 
     #include "setRootCase.H"
@@ -166,7 +170,7 @@ int main(int argc, char *argv[])
     label maxPatch = 0;
 
     // Boundary faces as three vertices
-    HashTable<label, triFace, Hash<triFace>> vertsToBoundary(nFaces);
+    HashTable<label, triFace, triFace::Hash<>> vertsToBoundary(nFaces);
 
     forAll(boundaryFaces, facei)
     {
@@ -215,20 +219,20 @@ int main(int argc, char *argv[])
 
             // Is there any boundary face with same vertices?
             // (uses commutative hash)
-            HashTable<label, triFace, Hash<triFace>>::iterator iter =
-                vertsToBoundary.find(triFace(f[0], f[1], f[2]));
+            auto iter = vertsToBoundary.find(triFace(f[0], f[1], f[2]));
 
-            if (iter != vertsToBoundary.end())
+            if (iter.found())
             {
-                label facei = iter();
+                label facei = iter.object();
                 const triFace& tri = iter.key();
 
                 // Determine orientation of tri v.s. cell centre.
                 point cc(cll.centre(points));
                 point fc(tri.centre(points));
-                vector fn(tri.normal(points));
 
-                if (((fc - cc) & fn) < 0)
+                const vector areaNorm(tri.areaNormal(points));
+
+                if (((fc - cc) & areaNorm) < 0)
                 {
                     // Boundary face points inwards. Flip.
                     boundaryFaces[facei].flip();

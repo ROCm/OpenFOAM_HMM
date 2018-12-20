@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,8 @@ Class
     Foam::Hash
 
 Description
-    Hash function class for primitives.  All non-primitives used to hash
+    Hash function class.
+    The default definition is for primitives, non-primitives used to hash
     entries on hash tables likely need a specialized version of this class.
 
 \*---------------------------------------------------------------------------*/
@@ -36,7 +37,6 @@ Description
 #include "label.H"
 #include "uLabel.H"
 #include "Hasher.H"
-#include "pTraits.H"
 #include "fileName.H"
 #include "wordRe.H"
 
@@ -44,8 +44,6 @@ Description
 
 namespace Foam
 {
-//template<class Type> struct Hash;
-//template<> struct Hash<label>;
 
 /*---------------------------------------------------------------------------*\
                             Class Hash Declaration
@@ -54,134 +52,106 @@ namespace Foam
 template<class PrimitiveType>
 struct Hash
 {
-    unsigned operator()(const PrimitiveType& p, unsigned seed) const
+    inline unsigned operator()(const PrimitiveType& obj, unsigned seed=0) const
     {
-        return Hasher(&p, sizeof(p), seed);
+        return Hasher(&obj, sizeof(obj), seed);
     }
-
-    unsigned operator()(const PrimitiveType& p) const
-    {
-        return Hasher(&p, sizeof(p));
-    }
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Hash specialization for hashing labels
+//- Hash specialization for label
 template<>
 struct Hash<Foam::label>
 {
     //- Incrementally hash a label.
     //  This will necessarily return a different value than the
     //  non-incremental version.
-    unsigned operator()(const label p, unsigned seed) const
+    inline unsigned operator()(const label obj, unsigned seed) const
     {
-        return Hasher(&p, sizeof(label), seed);
+        return Hasher(&obj, sizeof(label), seed);
     }
 
     //- Return the unsigned representation of a label.
     //  This helps if people have relied on the hash value corresponding to
     //  the natural order.
-    unsigned operator()(const label p) const
+    inline unsigned operator()(const label obj) const
     {
-        return p;
+        return obj;
     }
 };
 
 
-//- Hash specialization for hashing strings
+//- Hash specialization for string
 template<>
 struct Hash<Foam::string>
 {
-    unsigned operator()(const string& p, unsigned seed) const
+    inline unsigned operator()(const string& obj, unsigned seed=0) const
     {
-        return string::hash()(p, seed);
-    }
-    unsigned operator()(const string& p) const
-    {
-        return string::hash()(p);
+        return string::hash()(obj, seed);
     }
 };
 
 
-//- Hash specialization for hashing words
+//- Hash specialization for word
 template<>
 struct Hash<Foam::word>
 {
-    unsigned operator()(const word& p, unsigned seed) const
+    inline unsigned operator()(const word& obj, unsigned seed=0) const
     {
-        return word::hash()(p, seed);
-    }
-    unsigned operator()(const word& p) const
-    {
-        return word::hash()(p);
+        return string::hash()(obj, seed);
     }
 };
 
 
-//- Hash specialization for hashing fileNames
+//- Hash specialization for fileName
 template<>
 struct Hash<Foam::fileName>
 {
-    unsigned operator()(const fileName& p, unsigned seed) const
+    inline unsigned operator()(const fileName& obj, unsigned seed=0) const
     {
-        return fileName::hash()(p, seed);
-    }
-    unsigned operator()(const fileName& p) const
-    {
-        return fileName::hash()(p);
+        return string::hash()(obj, seed);
     }
 };
 
 
-//- Hash specialization for hashing wordRes
+//- Hash specialization for wordRe
 template<>
 struct Hash<Foam::wordRe>
 {
-    unsigned operator()(const wordRe& p, unsigned seed) const
+    inline unsigned operator()(const wordRe& obj, unsigned seed=0) const
     {
-        return wordRe::hash()(p, seed);
-    }
-    unsigned operator()(const wordRe& p) const
-    {
-        return wordRe::hash()(p);
+        return string::hash()(obj, seed);
     }
 };
 
 
-//- Hash specialization for hashing keyTypes
+//- Hash specialization for keyType
 template<>
 struct Hash<Foam::keyType>
 {
-    unsigned operator()(const keyType& p, unsigned seed) const
+    inline unsigned operator()(const keyType& obj, unsigned seed=0) const
     {
-        return keyType::hash()(p, seed);
-    }
-    unsigned operator()(const keyType& p) const
-    {
-        return keyType::hash()(p);
+        return string::hash()(obj, seed);
     }
 };
 
 
-//- Hash specialization for hashing pointer addresses.
-//  Treat a pointer like a long.
-//  This should work for both 32-bit and 64-bit pointers.
+//- Hash specialization for pointers.
+//  Interpret pointer as a long (works for 32-bit and 64-bit pointers).
 template<>
 struct Hash<void*>
 {
-    unsigned operator()(const void* const& p, unsigned seed) const
+    inline unsigned operator()(const void* const& obj, unsigned seed) const
     {
-        return Hash<long>()(long(p), seed);
+        return Hash<long>()(long(obj), seed);
     }
 
-    unsigned operator()(const void* const& p) const
+    inline unsigned operator()(const void* const& obj) const
     {
-        return Hash<long>()(long(p));
+        return Hash<long>()(long(obj));
     }
-
 };
 
 

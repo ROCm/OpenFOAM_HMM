@@ -9,14 +9,15 @@ structuredDecomp/structuredDecomp.C
 noDecomp/noDecomp.C
 
 
-decompositionConstraints = decompositionConstraints
+constraints = decompositionConstraints
 
-$(decompositionConstraints)/decompositionConstraint/decompositionConstraint.C
-$(decompositionConstraints)/preserveBaffles/preserveBafflesConstraint.C
-$(decompositionConstraints)/preserveFaceZones/preserveFaceZonesConstraint.C
-$(decompositionConstraints)/preservePatches/preservePatchesConstraint.C
-$(decompositionConstraints)/singleProcessorFaceSets/singleProcessorFaceSetsConstraint.C
-$(decompositionConstraints)/refinementHistory/refinementHistoryConstraint.C
+$(constraints)/decompositionConstraint/decompositionConstraint.C
+$(constraints)/preserveBaffles/preserveBafflesConstraint.C
+$(constraints)/preserveFaceZones/preserveFaceZonesConstraint.C
+$(constraints)/preservePatches/preservePatchesConstraint.C
+$(constraints)/geometric/geometricConstraint.C
+$(constraints)/singleProcessorFaceSets/singleProcessorFaceSetsConstraint.C
+$(constraints)/refinementHistory/refinementHistoryConstraint.C
 
 
 LIB = $(FOAM_LIBBIN)/libdecompositionMethods

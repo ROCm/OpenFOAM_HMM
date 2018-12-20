@@ -36,7 +36,7 @@ Foam::LduMatrix<Type, DType, LUType>::smoother::New
     const dictionary& smootherDict
 )
 {
-    word smootherName = smootherDict.lookup("smoother");
+    const word smootherName(smootherDict.get<word>("smoother"));
 
     if (matrix.symmetric())
     {

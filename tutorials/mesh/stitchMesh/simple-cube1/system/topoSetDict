@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,13 +22,10 @@ actions
         type    cellSet;
         action  new;
         source  regionToCell;
-        sourceInfo
-        {
-            insidePoints
-            (
-                (0.99 0.99 0.99)
-            );
-        }
+        insidePoints
+        (
+            (0.99 0.99 0.99)
+        );
     }
 
     {
@@ -36,10 +33,7 @@ actions
         type    cellSet;
         action  new;
         source  boxToCell;
-        sourceInfo
-        {
-            box (-1 -1 -1)(0.5 0.5 0.5);
-        }
+        box     (-1 -1 -1)(0.5 0.5 0.5);
     }
 
     {
@@ -47,32 +41,23 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set corner;
-        }
+        set     corner;
     }
 
     {
         name    inner;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
-        sourceInfo
-        {
-            set outer;
-        }
+        set     outer;
     }
 
     {
         name    outer;
         type    cellSet;
-        action  delete;
+        action  subtract;
         source  cellToCell;
-        sourceInfo
-        {
-            set corner;
-        }
+        set     corner;
     }
 
     {
@@ -86,20 +71,14 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set outer;
-        }
+        set     outer;
     }
     {
         name    final;
         type    cellSet;
         action  add;
         source  cellToCell;
-        sourceInfo
-        {
-            set inner;
-        }
+        set     inner;
     }
 );
 

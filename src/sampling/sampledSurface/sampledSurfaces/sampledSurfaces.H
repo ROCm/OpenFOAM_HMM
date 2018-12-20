@@ -53,7 +53,13 @@ Description
 
         // Output surface format
         surfaceFormat   vtk;
-        formatOptions   { }
+        formatOptions
+        {
+            vtk
+            {
+                precision  10;
+            }
+        }
 
         surfaces
         (
@@ -178,6 +184,17 @@ class sampledSurfaces
 
     // Private Member Functions
 
+        //- Return the surfaces
+        const PtrList<sampledSurface>& surfaces() const
+        {
+            return *this;
+        }
+
+        //- Return the surfaces
+        PtrList<sampledSurface>& surfaces()
+        {
+            return *this;
+        }
 
         //- Return number of fields
         label classifyFields();
@@ -251,7 +268,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledSurfaces();
+    virtual ~sampledSurfaces() = default;
 
 
     // Member Functions

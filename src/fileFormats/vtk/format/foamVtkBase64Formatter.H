@@ -44,7 +44,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class base64Formatter Declaration
+                    Class vtk::base64Formatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class base64Formatter
@@ -74,7 +74,7 @@ public:
         base64Formatter(std::ostream& os);
 
 
-    //- Destructor
+    //- Destructor. Closes/flushes the underlying layer.
     virtual ~base64Formatter();
 
 

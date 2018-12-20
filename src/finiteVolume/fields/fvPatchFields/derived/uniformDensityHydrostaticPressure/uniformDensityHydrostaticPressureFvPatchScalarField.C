@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "surfaceFields.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -55,8 +54,8 @@ uniformDensityHydrostaticPressureFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict, false),
-    rho_(readScalar(dict.lookup("rho"))),
-    pRefValue_(readScalar(dict.lookup("pRefValue"))),
+    rho_(dict.get<scalar>("rho")),
+    pRefValue_(dict.get<scalar>("pRefValue")),
     pRefPoint_(dict.lookup("pRefPoint"))
 {
     if (dict.found("value"))
@@ -126,7 +125,7 @@ void Foam::uniformDensityHydrostaticPressureFvPatchScalarField::updateCoeffs()
     }
 
     const uniformDimensionedVectorField& g =
-        db().lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(db().time());
 
     operator==
     (

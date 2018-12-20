@@ -35,15 +35,18 @@ Foam::LISAAtomization<CloudType>::LISAAtomization
 )
 :
     AtomizationModel<CloudType>(dict, owner, typeName),
-    Cl_(readScalar(this->coeffDict().lookup("Cl"))),
-    cTau_(readScalar(this->coeffDict().lookup("cTau"))),
-    Q_(readScalar(this->coeffDict().lookup("Q"))),
-    lisaExp_(readScalar(this->coeffDict().lookup("lisaExp"))),
-    injectorDirection_(this->coeffDict().lookup("injectorDirection")),
-    SMDCalcMethod_(this->coeffDict().lookup("SMDCalculationMethod"))
+    Cl_(this->coeffDict().getScalar("Cl")),
+    cTau_(this->coeffDict().getScalar("cTau")),
+    Q_(this->coeffDict().getScalar("Q")),
+    lisaExp_(this->coeffDict().getScalar("lisaExp")),
+    injectorDirection_
+    (
+        this->coeffDict().template get<vector>("injectorDirection")
+    ),
+    SMDCalcMethod_(this->coeffDict().getWord("SMDCalculationMethod"))
 {
     // Note: Would be good if this could be picked up from the injector
-    injectorDirection_ /= mag(injectorDirection_);
+    injectorDirection_.normalise();
 
     if (SMDCalcMethod_ == "method1")
     {

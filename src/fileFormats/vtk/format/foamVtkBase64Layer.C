@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamVtkBase64Layer.H"
+#include <limits>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -67,9 +68,10 @@ const char* Foam::vtk::foamVtkBase64Layer::encoding() const
 }
 
 
-void Foam::vtk::foamVtkBase64Layer::writeSize(const uint64_t nBytes)
+bool Foam::vtk::foamVtkBase64Layer::writeSize(const uint64_t numbytes)
 {
-    write(reinterpret_cast<const char*>(&nBytes), sizeof(uint64_t));
+    write(reinterpret_cast<const char*>(&numbytes), sizeof(uint64_t));
+    return true;
 }
 
 
@@ -96,8 +98,21 @@ void Foam::vtk::foamVtkBase64Layer::write(const float val)
 void Foam::vtk::foamVtkBase64Layer::write(const double val)
 {
     // std::cerr<<"double as float=" << val << '\n';
-    float copy(val);
-    write(copy);
+
+    // Limit range of double to float conversion
+    if (val >= std::numeric_limits<float>::max())
+    {
+        write(std::numeric_limits<float>::max());
+    }
+    else if (val <= std::numeric_limits<float>::lowest())
+    {
+        write(std::numeric_limits<float>::lowest());
+    }
+    else
+    {
+        float copy(val);
+        write(copy);
+    }
 }
 
 
@@ -107,10 +122,7 @@ void Foam::vtk::foamVtkBase64Layer::flush()
 }
 
 
-std::size_t Foam::vtk::foamVtkBase64Layer::encodedLength
-(
-    std::size_t n
-) const
+std::size_t Foam::vtk::foamVtkBase64Layer::encodedLength(std::size_t n) const
 {
     return base64Layer::encodedLength(n);
 }

@@ -440,13 +440,15 @@ int main(int argc, char *argv[])
         "Makes internal faces into boundary faces.\n"
         "Does not duplicate points."
     );
-    #include "addDictOption.H"
+
+    argList::addOption("dict", "file", "Use alternative createBafflesDict");
     #include "addOverwriteOption.H"
-    #include "addDictOption.H"
     #include "addRegionOption.H"
+
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
 
 
@@ -471,27 +473,24 @@ int main(int argc, char *argv[])
 
         const dictionary& selectionsDict = dict.subDict("baffles");
 
-        label n = 0;
-        forAllConstIter(dictionary, selectionsDict, iter)
+        selectors.resize(selectionsDict.size());
+
+        label nselect = 0;
+        for (const entry& dEntry : selectionsDict)
         {
-            if (iter().isDict())
-            {
-                n++;
-            }
-        }
-        selectors.setSize(n);
-        n = 0;
-        forAllConstIter(dictionary, selectionsDict, iter)
-        {
-            if (iter().isDict())
+            if (dEntry.isDict())
             {
                 selectors.set
                 (
-                    n++,
-                    faceSelection::New(iter().keyword(), mesh, iter().dict())
+                    nselect,
+                    faceSelection::New(dEntry.keyword(), mesh, dEntry.dict())
                 );
+
+                ++nselect;
             }
         }
+
+        selectors.resize(nselect);
     }
 
 
@@ -638,10 +637,10 @@ int main(int argc, char *argv[])
 
             if (dict.found("patches"))
             {
-                const dictionary& patchSources = dict.subDict("patches");
-                forAllConstIter(dictionary, patchSources, iter)
+                for (const entry& dEntry : dict.subDict("patches"))
                 {
-                    const word patchName(iter().dict()["name"]);
+                    const word patchName(dEntry.dict().get<word>("name"));
+
                     bafflePatches.insert(patchName);
                 }
             }
@@ -649,6 +648,7 @@ int main(int argc, char *argv[])
             {
                 const word masterName = selectors[selectorI].name() + "_master";
                 bafflePatches.insert(masterName);
+
                 const word slaveName = selectors[selectorI].name() + "_slave";
                 bafflePatches.insert(slaveName);
             }
@@ -682,14 +682,15 @@ int main(int argc, char *argv[])
 
             if (dict.found("patches"))
             {
-                const dictionary& patchSources = dict.subDict("patches");
-                forAllConstIter(dictionary, patchSources, iter)
+                for (const entry& dEntry : dict.subDict("patches"))
                 {
-                    const word patchName(iter().dict()["name"]);
+                    const dictionary& dict = dEntry.dict();
+
+                    const word patchName(dict.get<word>("name"));
 
                     if (pbm.findPatchID(patchName) == -1)
                     {
-                        dictionary patchDict = iter().dict();
+                        dictionary patchDict = dict;
                         patchDict.set("nFaces", 0);
                         patchDict.set("startFace", 0);
 
@@ -784,13 +785,14 @@ int main(int argc, char *argv[])
 
         if (dict.found("patches"))
         {
-            const dictionary& patchSources = dict.subDict("patches");
-
             bool master = true;
-            forAllConstIter(dictionary, patchSources, iter)
+
+            for (const entry& dEntry : dict.subDict("patches"))
             {
-                const word patchName(iter().dict()["name"]);
-                label patchi = pbm.findPatchID(patchName);
+                const word patchName(dEntry.dict().get<word>("name"));
+
+                const label patchi = pbm.findPatchID(patchName);
+
                 if (master)
                 {
                     newMasterPatches.append(patchi);
@@ -832,7 +834,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     // Change the mesh. Change points directly (no inflation).
@@ -880,17 +882,18 @@ int main(int argc, char *argv[])
             const dictionary& dict = selectors[selectorI].dict();
             if (dict.found("patches"))
             {
-                const dictionary& patchSources = dict.subDict("patches");
-
-                forAllConstIter(dictionary, patchSources, iter)
+                for (const entry& dEntry : dict.subDict("patches"))
                 {
-                    const word patchName(iter().dict()["name"]);
+                    const dictionary& dict = dEntry.dict();
+
+                    const word patchName(dict.get<word>("name"));
+
                     label patchi = pbm.findPatchID(patchName);
 
-                    if (iter().dict().found("patchFields"))
+                    if (dEntry.dict().found("patchFields"))
                     {
                         const dictionary& patchFieldsDict =
-                            iter().dict().subDict
+                            dEntry.dict().subDict
                             (
                                 "patchFields"
                             );
@@ -923,11 +926,11 @@ int main(int argc, char *argv[])
                     if (sameGroup)
                     {
                         // Add coupleGroup to all entries
-                        forAllIter(dictionary, patchFieldsDict, iter)
+                        for (entry& dEntry : patchFieldsDict)
                         {
-                            if (iter().isDict())
+                            if (dEntry.isDict())
                             {
-                                dictionary& dict = iter().dict();
+                                dictionary& dict = dEntry.dict();
                                 dict.set("coupleGroup", groupName);
                             }
                         }

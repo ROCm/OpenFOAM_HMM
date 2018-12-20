@@ -380,6 +380,7 @@ inline typename powProduct<Form, 0>::type pow
     return 1.0;
 }
 
+
 // Form^1 = Form
 template<class Form, class Cmpt, direction Ncmpts>
 inline typename powProduct<Form, 1>::type pow
@@ -425,6 +426,17 @@ inline scalar mag
 )
 {
     return ::sqrt(magSqr(static_cast<const Form&>(vs)));
+}
+
+
+template<class Form, class Cmpt, direction Ncmpts>
+inline VectorSpace<Form, Cmpt, Ncmpts> normalised
+(
+    const VectorSpace<Form, Cmpt, Ncmpts>& vs
+)
+{
+    const scalar s(mag(vs));
+    return s < ROOTVSMALL ? Zero : vs/s;
 }
 
 
@@ -524,6 +536,7 @@ inline Cmpt cmptAv
 {
     return cmptSum(vs)/Ncmpts;
 }
+
 
 template<class Form, class Cmpt, direction Ncmpts>
 inline Cmpt cmptProduct

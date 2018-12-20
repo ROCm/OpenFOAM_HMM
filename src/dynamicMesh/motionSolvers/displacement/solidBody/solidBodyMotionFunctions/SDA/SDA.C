@@ -103,17 +103,17 @@ bool Foam::solidBodyMotionFunctions::SDA::read(const dictionary& SBMFCoeffs)
 {
     solidBodyMotionFunction::read(SBMFCoeffs);
 
-    SBMFCoeffs_.lookup("CofG") >> CofG_;
-    SBMFCoeffs_.lookup("lamda") >> lamda_;
-    SBMFCoeffs_.lookup("rollAmax") >> rollAmax_;
-    SBMFCoeffs_.lookup("rollAmin") >> rollAmin_;
-    SBMFCoeffs_.lookup("heaveA") >> heaveA_;
-    SBMFCoeffs_.lookup("swayA") >> swayA_;
-    SBMFCoeffs_.lookup("Q") >> Q_;
-    SBMFCoeffs_.lookup("Tp") >> Tp_;
-    SBMFCoeffs_.lookup("Tpn") >> Tpn_;
-    SBMFCoeffs_.lookup("dTi") >> dTi_;
-    SBMFCoeffs_.lookup("dTp") >> dTp_;
+    SBMFCoeffs_.readEntry("CofG", CofG_);
+    SBMFCoeffs_.readEntry("lamda", lamda_);
+    SBMFCoeffs_.readEntry("rollAmax", rollAmax_);
+    SBMFCoeffs_.readEntry("rollAmin", rollAmin_);
+    SBMFCoeffs_.readEntry("heaveA", heaveA_);
+    SBMFCoeffs_.readEntry("swayA", swayA_);
+    SBMFCoeffs_.readEntry("Q", Q_);
+    SBMFCoeffs_.readEntry("Tp", Tp_);
+    SBMFCoeffs_.readEntry("Tpn", Tpn_);
+    SBMFCoeffs_.readEntry("dTi", dTi_);
+    SBMFCoeffs_.readEntry("dTp", dTp_);
 
     // Rescale parameters according to the given scale parameter
     if (lamda_ > 1 + SMALL)

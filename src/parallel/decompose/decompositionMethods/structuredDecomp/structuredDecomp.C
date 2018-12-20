@@ -50,7 +50,7 @@ Foam::structuredDecomp::structuredDecomp(const dictionary& decompDict)
 :
     decompositionMethod(decompDict),
     methodDict_(findCoeffsDict(typeName + "Coeffs", selectionType::MANDATORY)),
-    patches_(methodDict_.lookup("patches"))
+    patches_(methodDict_.get<wordRes>("patches"))
 {
     methodDict_.set("numberOfSubdomains", nDomains());
     method_ = decompositionMethod::New(methodDict_);
@@ -89,8 +89,11 @@ Foam::labelList Foam::structuredDecomp::decompose
     }
 
     // Subset the layer of cells next to the patch
-    fvMeshSubset subsetter(dynamic_cast<const fvMesh&>(mesh));
-    subsetter.setLargeCellSubset(patchCells);
+    fvMeshSubset subsetter
+    (
+        dynamic_cast<const fvMesh&>(mesh),
+        patchCells
+    );
     const fvMesh& subMesh = subsetter.subMesh();
     pointField subCc(cc, subsetter.cellMap());
     scalarField subWeights(cWeights, subsetter.cellMap());
@@ -147,7 +150,7 @@ Foam::labelList Foam::structuredDecomp::decompose
             {
                 WarningInFunction
                     << "Did not visit some cells, e.g. cell " << celli
-                    << " at " << mesh.cellCentres()[celli] << endl
+                    << " at " << mesh.cellCentres()[celli] << nl
                     << "Assigning  these cells to domain 0." << endl;
                 haveWarned = true;
             }
@@ -160,19 +163,6 @@ Foam::labelList Foam::structuredDecomp::decompose
     }
 
     return finalDecomp;
-}
-
-
-Foam::labelList Foam::structuredDecomp::decompose
-(
-    const labelListList& globalCellCells,
-    const pointField& cc,
-    const scalarField& cWeights
-) const
-{
-    NotImplemented;
-
-    return labelList(0);
 }
 
 

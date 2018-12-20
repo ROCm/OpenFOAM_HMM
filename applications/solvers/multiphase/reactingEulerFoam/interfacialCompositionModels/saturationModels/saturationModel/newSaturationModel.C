@@ -32,7 +32,7 @@ Foam::autoPtr<Foam::saturationModel> Foam::saturationModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting saturationModel: " << modelType << endl;
 

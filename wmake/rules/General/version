@@ -2,11 +2,9 @@
 
 SUFFIXES += .Cver
 
-# Update version strings in C++ file and in $WM_PROJECT_DIR/.build file
+# Update strings in C++ file and in META-INFO files
 Cvertoo = \
-    sed -e 's!VERSION_STRING!$(shell wmakePrintBuild -major)!' \
-        -e 's!BUILD_STRING!$(shell wmakePrintBuild -update)!' \
-        $< > $(@D)/$(<F).C; \
+    wmakeBuildInfo -update -filter $< > $(@D)/$(<F).C; \
     $(CC) $(c++FLAGS) -c $(@D)/$(<F).C -o $@
 
 #------------------------------------------------------------------------------

@@ -107,46 +107,45 @@ const HashTable<dimensionedScalar>& unitSet()
                 << exit(FatalIOError);
         }
 
-        const word unitSetCoeffs(word(dict.lookup("unitSet")) + "Coeffs");
+        const word unitSetCoeffs(dict.get<word>("unitSet") + "Coeffs");
 
-        if (!dict.found(unitSetCoeffs))
+        const dictionary* unitDictPtr = dict.findDict(unitSetCoeffs);
+
+        if (!unitDictPtr)
         {
             FatalIOErrorInFunction(dict)
                 << "Cannot find " << unitSetCoeffs << " in dictionary "
-                << dict.name() << exit(FatalIOError);
+                << dict.name() << nl
+                << exit(FatalIOError);
         }
 
-        const dictionary& unitDict = dict.subDict(unitSetCoeffs);
+        const dictionary& unitDict = *unitDictPtr;
 
-        unitSetPtr_ = new HashTable<dimensionedScalar>(unitDict.size());
+        unitSetPtr_ = new HashTable<dimensionedScalar>(2*unitDict.size());
 
-        forAllConstIter(dictionary, unitDict, iter)
+        wordList writeUnitNames;
+
+        for (const entry& dEntry : unitDict)
         {
-            if (iter().keyword() != "writeUnits")
+            if ("writeUnits" == dEntry.keyword())
+            {
+                dEntry.readEntry(writeUnitNames);
+            }
+            else
             {
                 dimensionedScalar dt;
-                dt.read(iter().stream(), unitDict);
-                bool ok = unitSetPtr_->insert(iter().keyword(), dt);
+                dt.read(dEntry.stream(), unitDict);
+
+                bool ok = unitSetPtr_->insert(dEntry.keyword(), dt);
                 if (!ok)
                 {
                     FatalIOErrorInFunction(dict)
-                        << "Duplicate unit " << iter().keyword()
+                        << "Duplicate unit " << dEntry.keyword()
                         << " in DimensionSets dictionary"
                         << exit(FatalIOError);
                 }
             }
         }
-
-        wordList writeUnitNames
-        (
-            unitDict.lookupOrDefault<wordList>
-            (
-                "writeUnits",
-                wordList(0)
-            )
-        );
-
-        writeUnitSetPtr_ = new dimensionSets(*unitSetPtr_, writeUnitNames);
 
         if (writeUnitNames.size() != 0 && writeUnitNames.size() != 7)
         {
@@ -155,6 +154,9 @@ const HashTable<dimensionedScalar>& unitSet()
                 << " or it is not a wordList of size 7"
                 << exit(FatalIOError);
         }
+
+        writeUnitSetPtr_ = new dimensionSets(*unitSetPtr_, writeUnitNames);
+
     }
     return *unitSetPtr_;
 }

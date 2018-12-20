@@ -116,6 +116,18 @@ public:
 
     // Constructors
 
+        //- Construct from components. Optional cellSet/zone name.
+        block
+        (
+            const cellShape& bshape,
+            const pointField& vertices,
+            const blockEdgeList& edges,
+            const blockFaceList& faces,
+            const Vector<label>& density,
+            const UList<gradingDescriptors>& expand,
+            const word& zoneName = ""
+        );
+
         //- Construct from components with Istream
         block
         (

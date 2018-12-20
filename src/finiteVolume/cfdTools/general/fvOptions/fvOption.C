@@ -70,7 +70,7 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
     const fvMesh& mesh
 )
 {
-    const word modelType(coeffs.lookup("type"));
+    const word modelType(coeffs.get<word>("type"));
 
     Info<< indent
         << "Selecting finite volume options type " << modelType << endl;

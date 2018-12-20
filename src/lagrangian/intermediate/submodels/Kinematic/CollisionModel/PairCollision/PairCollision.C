@@ -238,15 +238,14 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                 if (nearest.distance() < r)
                 {
-                    vector normal = mesh.faceAreas()[realFacei];
-
-                    normal /= mag(normal);
+                    const vector normal =
+                        normalised(mesh.faceAreas()[realFacei]);
 
                     const vector& nearPt = nearest.rawPoint();
 
-                    vector pW = nearPt - pos;
+                    const vector pW = normalised(nearPt - pos);
 
-                    scalar normalAlignment = normal & pW/(mag(pW) + SMALL);
+                    const scalar normalAlignment = normal & pW;
 
                     // Find the patchIndex and wallData for WallSiteData object
                     label patchi = patchID[realFacei - mesh.nInternalFaces()];
@@ -315,15 +314,13 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                 if (nearest.distance() < r)
                 {
-                    vector normal = rwf.normal(pts);
-
-                    normal /= mag(normal);
+                    const vector normal = rwf.unitNormal(pts);
 
                     const vector& nearPt = nearest.rawPoint();
 
-                    vector pW = nearPt - pos;
+                    const vector pW = normalised(nearPt - pos);
 
-                    scalar normalAlignment = normal & pW/mag(pW);
+                    const scalar normalAlignment = normal & pW;
 
                     // Find the patchIndex and wallData for WallSiteData object
 
@@ -552,7 +549,7 @@ Foam::PairCollision<CloudType>::PairCollision
     il_
     (
         owner.mesh(),
-        readScalar(this->coeffDict().lookup("maxInteractionDistance")),
+        this->coeffDict().getScalar("maxInteractionDistance"),
         this->coeffDict().lookupOrDefault
         (
             "writeReferredParticleCloud",

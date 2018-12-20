@@ -8,7 +8,7 @@ unset COMP_FLAGS LINK_FLAGS
 
 if have_cgal
 then
-    wmake PolyhedronReader
+    wmake $targetType PolyhedronReader
     export COMP_FLAGS='-IPolyhedronReader'
     export LINK_FLAGS='${CGAL_LIBS} -lPolyhedronReader'
 else

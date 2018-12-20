@@ -58,8 +58,7 @@ public:
 
 
     //- Destructor
-    virtual ~unthreadedInitialise()
-    {}
+    virtual ~unthreadedInitialise() = default;
 
 
     // Member Functions

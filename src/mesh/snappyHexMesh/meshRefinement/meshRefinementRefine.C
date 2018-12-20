@@ -176,7 +176,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
 
         // 2. Boundary faces
 
-        boolList refinedBoundaryFace(mesh.nFaces()-nInternalFaces, false);
+        boolList refinedBoundaryFace(mesh.nBoundaryFaces(), false);
 
         forAll(mesh.boundaryMesh(), patchI)
         {
@@ -1871,9 +1871,9 @@ Foam::label Foam::meshRefinement::markProximityRefinement
     // 2. Find out a measure of surface curvature and region edges.
     // Send over surface region and surface normal to neighbour cell.
 
-    labelList neiBndMaxLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiBndMaxLocation(mesh_.nFaces()-mesh_.nInternalFaces());
-    vectorField neiBndMaxNormal(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiBndMaxLevel(mesh_.nBoundaryFaces());
+    pointField neiBndMaxLocation(mesh_.nBoundaryFaces());
+    vectorField neiBndMaxNormal(mesh_.nBoundaryFaces());
 
     for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
     {

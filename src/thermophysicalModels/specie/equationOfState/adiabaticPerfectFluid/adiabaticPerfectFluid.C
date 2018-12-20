@@ -35,10 +35,10 @@ Foam::adiabaticPerfectFluid<Specie>::adiabaticPerfectFluid
 )
 :
     Specie(dict),
-    p0_(readScalar(dict.subDict("equationOfState").lookup("p0"))),
-    rho0_(readScalar(dict.subDict("equationOfState").lookup("rho0"))),
-    gamma_(readScalar(dict.subDict("equationOfState").lookup("gamma"))),
-    B_(readScalar(dict.subDict("equationOfState").lookup("B")))
+    p0_(dict.subDict("equationOfState").get<scalar>("p0")),
+    rho0_(dict.subDict("equationOfState").get<scalar>("rho0")),
+    gamma_(dict.subDict("equationOfState").get<scalar>("gamma")),
+    B_(dict.subDict("equationOfState").get<scalar>("B"))
 {}
 
 
@@ -49,13 +49,15 @@ void Foam::adiabaticPerfectFluid<Specie>::write(Ostream& os) const
 {
     Specie::write(os);
 
-    dictionary dict("equationOfState");
-    dict.add("p0", p0_);
-    dict.add("rho0", rho0_);
-    dict.add("gamma", gamma_);
-    dict.add("B", B_);
-
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry("p0", p0_);
+        os.writeEntry("rho0", rho0_);
+        os.writeEntry("gamma", gamma_);
+        os.writeEntry("B", B_);
+        os.endBlock();
+    }
 }
 
 

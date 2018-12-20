@@ -43,20 +43,27 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Attach topologically detached mesh using prescribed mesh modifiers"
+    );
+
     #include "addOverwriteOption.H"
+
     argList::noParallel();
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const bool overwrite = args.found("overwrite");
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     Info<< "Time = " << runTime.timeName() << nl

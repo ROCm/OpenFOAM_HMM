@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,27 +22,10 @@ boundaryField
 {
     #includeEtc "caseDicts/setConstraintTypes"
 
-    "(walls|hole)"
+    "(walls|hole|outlet|inlet)"
     {
         type            zeroGradient;
     }
-
-   outlet
-   {
-       type            fixedValue;
-       value           uniform 0;
-   }
-   inlet
-   {
-       type            zeroGradient;
-   }
-//
-//    right1
-//    {
-//        type            fixedValue;   //calculated;
-//        value           $internalField;
-//    }
-
     overset
     {
         type            overset;

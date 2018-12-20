@@ -49,8 +49,8 @@ Foam::XiGModels::instabilityG::instabilityG
 )
 :
     XiGModel(XiGProperties, thermo, turbulence, Su),
-    GIn_(XiGModelCoeffs_.lookup("GIn")),
-    lambdaIn_(XiGModelCoeffs_.lookup("lambdaIn")),
+    GIn_("GIn", dimless/dimTime, XiGModelCoeffs_),
+    lambdaIn_("lambdaIn", dimLength, XiGModelCoeffs_),
     XiGModel_(XiGModel::New(XiGModelCoeffs_, thermo, turbulence, Su))
 {}
 
@@ -86,8 +86,8 @@ bool Foam::XiGModels::instabilityG::read(const dictionary& XiGProperties)
 {
     XiGModel::read(XiGProperties);
 
-    XiGModelCoeffs_.lookup("GIn") >> GIn_;
-    XiGModelCoeffs_.lookup("lambdaIn") >> lambdaIn_;
+    XiGModelCoeffs_.readEntry("GIn", GIn_);
+    XiGModelCoeffs_.readEntry("lambdaIn", lambdaIn_);
 
     return true;
 }

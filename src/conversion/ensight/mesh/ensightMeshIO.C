@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,31 +42,27 @@ Foam::cellShapeList& Foam::ensightMesh::renumberShapes
     const labelUList& pointToGlobal
 )
 {
-    forAll(shapes, i)
+    for (cellShape& shape : shapes)
     {
-        inplaceRenumber(pointToGlobal, shapes[i]);
+        inplaceRenumber(pointToGlobal, shape);
     }
 
     return shapes;
 }
 
 
-Foam::cellShapeList Foam::ensightMesh::map
+Foam::cellShapeList Foam::ensightMesh::renumberShapes
 (
     const cellShapeList& shapes,
     const labelUList& addr,
     const labelUList& pointToGlobal
 )
 {
-    cellShapeList lst(addr.size());
+    cellShapeList list(shapes, addr);
 
-    forAll(addr, i)
-    {
-        lst[i] = shapes[addr[i]];
-        inplaceRenumber(pointToGlobal, lst[i]);
-    }
+    renumberShapes(list, pointToGlobal);
 
-    return lst;
+    return list;
 }
 
 
@@ -76,13 +72,11 @@ void Foam::ensightMesh::writeFaceList
     ensightGeoFile& os
 )
 {
-    forAll(faceLst, i)
+    for (const face& f : faceLst)
     {
-        const face& f = faceLst[i];
-
-        forAll(f, fp)
+        for (const label labi : f)
         {
-            os.write(f[fp] + 1);
+            os.write(labi + 1);
         }
 
         os.newline();
@@ -96,17 +90,53 @@ void Foam::ensightMesh::writeFaceList
     ensightGeoFile& os
 )
 {
-    forAll(faceLst, i)
+    for (const face& f : faceLst)
     {
-        const face& f = faceLst[i];
-
-        forAll(f, fp)
+        for (const label labi : f)
         {
-            os.write(f[fp] + 1);
+            os.write(labi + 1);
         }
 
         os.newline();
     }
+}
+
+
+Foam::labelList Foam::ensightMesh::getFaceSizes
+(
+    const faceList& faceLst
+)
+{
+    labelList list(faceLst.size());
+
+    auto outIter = list.begin();
+
+    for (const face& f : faceLst)
+    {
+        *outIter = f.size();
+        ++outIter;
+    }
+
+    return list;
+}
+
+
+Foam::labelList Foam::ensightMesh::getFaceSizes
+(
+    const UIndirectList<face>& faceLst
+)
+{
+    labelList list(faceLst.size());
+
+    auto outIter = list.begin();
+
+    for (const face& f : faceLst)
+    {
+        *outIter = f.size();
+        ++outIter;
+    }
+
+    return list;
 }
 
 
@@ -116,10 +146,8 @@ void Foam::ensightMesh::writeFaceSizes
     ensightGeoFile& os
 )
 {
-    forAll(faceLst, i)
+    for (const face& f : faceLst)
     {
-        const face& f = faceLst[i];
-
         os.write(f.size());
         os.newline();
     }
@@ -132,10 +160,8 @@ void Foam::ensightMesh::writeFaceSizes
     ensightGeoFile& os
 )
 {
-    forAll(faceLst, i)
+    for (const face& f : faceLst)
     {
-        const face& f = faceLst[i];
-
         os.write(f.size());
         os.newline();
     }
@@ -148,17 +174,15 @@ void Foam::ensightMesh::writeCellShapes
     ensightGeoFile& os
 )
 {
-    forAll(shapes, i)
+    for (const cellShape& cellPoints : shapes)
     {
-        const cellShape& cellPoints = shapes[i];
-
-        // convert global -> local index
+        // Convert global -> local index
         // (note: Ensight indices start with 1)
 
         // In ASCII, write one cell per line
-        forAll(cellPoints, pointI)
+        for (const label pointi : cellPoints)
         {
-            os.write(cellPoints[pointI] + 1);
+            os.write(pointi + 1);
         }
 
         os.newline();
@@ -166,19 +190,40 @@ void Foam::ensightMesh::writeCellShapes
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+Foam::labelList Foam::ensightMesh::getPolysNFaces
+(
+    const labelUList& addr,
+    const cellList& cellFaces
+)
+{
+    labelList list(addr.size());
+
+    auto outIter = list.begin();
+
+    // The number of faces per element
+    for (const label cellId : addr)
+    {
+        const labelUList& cf = cellFaces[cellId];
+
+        *outIter = cf.size();
+        ++outIter;
+    }
+
+    return list;
+}
+
 
 void Foam::ensightMesh::writePolysNFaces
 (
-    const labelList& addr,
-    const cellList&  cellFaces,
+    const labelUList& addr,
+    const cellList& cellFaces,
     ensightGeoFile& os
-) const
+)
 {
-    // write the number of faces per element (1/line in ASCII)
-    forAll(addr, i)
+    // Write the number of faces per element (1/line in ASCII)
+    for (const label cellId : addr)
     {
-        const labelUList& cf = cellFaces[addr[i]];
+        const labelUList& cf = cellFaces[cellId];
 
         os.write(cf.size());
         os.newline();
@@ -186,45 +231,82 @@ void Foam::ensightMesh::writePolysNFaces
 }
 
 
+Foam::labelList Foam::ensightMesh::getPolysNPointsPerFace
+(
+    const labelUList& addr,
+    const cellList& cellFaces,
+    const faceList& faces
+)
+{
+    // Count the number of faces per element
+
+    label nTotFaces = 0;
+    for (const label cellId : addr)
+    {
+        const labelUList& cf = cellFaces[cellId];
+
+        nTotFaces += cf.size();
+    }
+
+    labelList list(nTotFaces);
+
+    auto outIter = list.begin();
+
+    // The number of points per element face
+    for (const label cellId : addr)
+    {
+        const labelUList& cf = cellFaces[cellId];
+
+        for (const label facei : cf)
+        {
+            *outIter = faces[facei].size();
+            ++outIter;
+        }
+    }
+
+    return list;
+}
+
+
 void Foam::ensightMesh::writePolysNPointsPerFace
 (
-    const labelList& addr,
+    const labelUList& addr,
     const cellList& cellFaces,
     const faceList& faces,
     ensightGeoFile& os
-) const
+)
 {
-    // write the number of points per element face (1/line in ASCII)
-    forAll(addr, i)
+    // Write the number of points per element face (1/line in ASCII)
+    for (const label cellId : addr)
     {
-        const labelUList& cf = cellFaces[addr[i]];
+        const labelUList& cf = cellFaces[cellId];
 
-        forAll(cf, facei)
+        for (const label facei : cf)
         {
-            os.write(faces[cf[facei]].size());
+            os.write(faces[facei].size());
             os.newline();
         }
     }
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::ensightMesh::writePolysPoints
 (
-    const labelList& addr,
+    const labelUList& addr,
     const cellList& cellFaces,
     const faceList& faces,
     const labelList& faceOwner,
     ensightGeoFile& os
-) const
+)
 {
-    forAll(addr, i)
+    for (const label cellId : addr)
     {
-        const label cellId = addr[i];
         const labelUList& cf = cellFaces[cellId];
 
-        forAll(cf, facei)
+        for (const label faceId : cf)
         {
-            const label faceId = cf[facei];
             const face& f = faces[faceId];  // face points (in global points)
 
             if (faceId < faceOwner.size() && faceOwner[faceId] != cellId)
@@ -234,16 +316,16 @@ void Foam::ensightMesh::writePolysPoints
                 // as per face::reverseFace(), but without copying
 
                 os.write(f[0] + 1);
-                for (label ptI = f.size()-1; ptI > 0; --ptI)
+                for (label pti = f.size()-1; pti > 0; --pti)
                 {
-                    os.write(f[ptI] + 1);
+                    os.write(f[pti] + 1);
                 }
             }
             else
             {
-                forAll(f, ptI)
+                for (const label labi : f)
                 {
-                    os.write(f[ptI] + 1);
+                    os.write(labi + 1);
                 }
             }
 
@@ -255,7 +337,7 @@ void Foam::ensightMesh::writePolysPoints
 
 void Foam::ensightMesh::writePolysConnectivity
 (
-    const labelList& addr,
+    const labelUList& addr,
     const labelList& pointToGlobal,
     ensightGeoFile& os
 ) const
@@ -264,10 +346,9 @@ void Foam::ensightMesh::writePolysConnectivity
     const faceList&  meshFaces = mesh_.faces();
     const labelList& faceOwner = mesh_.faceOwner();
 
+    // Number of faces for each poly cell
     if (Pstream::master())
     {
-        // Number of faces for each poly cell
-
         // Master
         writePolysNFaces(addr, cellFaces, os);
 
@@ -300,6 +381,7 @@ void Foam::ensightMesh::writePolysConnectivity
             meshFaces,
             os
         );
+
         // Slaves
         for (int slave=1; slave<Pstream::nProcs(); ++slave)
         {
@@ -329,9 +411,9 @@ void Foam::ensightMesh::writePolysConnectivity
 
     // Renumber faces to use global point numbers
     faceList faces(mesh_.faces());
-    forAll(faces, i)
+    for (face& f : faces)
     {
-        inplaceRenumber(pointToGlobal, faces[i]);
+        inplaceRenumber(pointToGlobal, f);
     }
 
     // List of points id for each face of the above list
@@ -346,6 +428,7 @@ void Foam::ensightMesh::writePolysConnectivity
             faceOwner,
             os
         );
+
         // Slaves
         for (int slave=1; slave<Pstream::nProcs(); ++slave)
         {
@@ -409,11 +492,14 @@ void Foam::ensightMesh::writeCellConnectivity
         }
         else
         {
-            const cellShapeList shapes = map
+            const cellShapeList shapes
             (
-                mesh_.cellShapes(),
-                addr,
-                pointToGlobal
+                renumberShapes
+                (
+                    mesh_.cellShapes(),
+                    addr,
+                    pointToGlobal
+                )
             );
 
 
@@ -424,9 +510,9 @@ void Foam::ensightMesh::writeCellConnectivity
                 for (int slave=1; slave<Pstream::nProcs(); ++slave)
                 {
                     IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                    cellShapeList received(fromSlave);
+                    cellShapeList recv(fromSlave);
 
-                    writeCellShapes(received, os);
+                    writeCellShapes(recv, os);
                 }
             }
             else
@@ -454,7 +540,8 @@ void Foam::ensightMesh::writeCellConnectivity
 {
     for (label typei=0; typei < ensightCells::nTypes; ++typei)
     {
-        const ensightCells::elemType what = ensightCells::elemType(typei);
+        const ensightCells::elemType what =
+            ensightCells::elemType(typei);
 
         writeCellConnectivity(what, ensCells, pointToGlobal, os);
     }
@@ -489,9 +576,9 @@ void Foam::ensightMesh::writeFaceConnectivity
                 for (int slave=1; slave<Pstream::nProcs(); ++slave)
                 {
                     IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                    faceList received(fromSlave);
+                    faceList recv(fromSlave);
 
-                    writeFaceSizes(received, os);
+                    writeFaceSizes(recv, os);
                 }
             }
             else
@@ -516,9 +603,9 @@ void Foam::ensightMesh::writeFaceConnectivity
             for (int slave=1; slave<Pstream::nProcs(); ++slave)
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                faceList received(fromSlave);
+                faceList recv(fromSlave);
 
-                writeFaceList(received, os);
+                writeFaceList(recv, os);
             }
         }
         else
@@ -541,7 +628,7 @@ void Foam::ensightMesh::writeFaceConnectivity
     ensightFaces::elemType elemType,
     const label nTotal,
     const faceList& faceLst,
-    const labelList& addr,
+    const labelUList& addr,
     ensightGeoFile& os
 ) const
 {
@@ -567,9 +654,9 @@ void Foam::ensightMesh::writeFaceConnectivity
                 for (int slave=1; slave<Pstream::nProcs(); ++slave)
                 {
                     IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                    faceList received(fromSlave);
+                    faceList recv(fromSlave);
 
-                    writeFaceSizes(received, os);
+                    writeFaceSizes(recv, os);
                 }
             }
             else
@@ -593,9 +680,9 @@ void Foam::ensightMesh::writeFaceConnectivity
             for (int slave=1; slave<Pstream::nProcs(); ++slave)
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                faceList received(fromSlave);
+                faceList recv(fromSlave);
 
-                writeFaceList(received, os);
+                writeFaceList(recv, os);
             }
         }
         else
@@ -621,12 +708,13 @@ void Foam::ensightMesh::writeFaceConnectivity
     const bool raw
 ) const
 {
-    if (raw)
+    for (label typei=0; typei < ensightFaces::nTypes; ++typei)
     {
-        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
-        {
-            const ensightFaces::elemType what = ensightFaces::elemType(typei);
+        const ensightFaces::elemType what =
+            ensightFaces::elemType(typei);
 
+        if (raw)
+        {
             writeFaceConnectivity
             (
                 what,
@@ -640,13 +728,8 @@ void Foam::ensightMesh::writeFaceConnectivity
                 os
             );
         }
-    }
-    else
-    {
-        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
+        else
         {
-            const ensightFaces::elemType what = ensightFaces::elemType(typei);
-
             writeFaceConnectivity
             (
                 what,
@@ -673,7 +756,7 @@ void Foam::ensightMesh::writeAllPoints
     {
         os.beginPart(partId, ensightPartName);
 
-        // write points
+        // Write points
         os.beginCoordinates(nPoints);
 
         for (direction cmpt=0; cmpt < point::nComponents; ++cmpt)
@@ -683,8 +766,8 @@ void Foam::ensightMesh::writeAllPoints
             for (int slave=1; slave<Pstream::nProcs(); ++slave)
             {
                 IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                scalarField received(fromSlave);
-                os.writeList(received);
+                scalarField recv(fromSlave);
+                os.writeList(recv);
             }
         }
     }

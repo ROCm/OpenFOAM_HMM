@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -49,13 +49,9 @@ functions
 {
     error
     {
-        // Load the library containing the 'coded' functionObject
-        libs            ("libutilityFunctionObjects.so");
-
-        type coded;
-
-        // Name of on-the-fly generated functionObject
-        name error;
+        name    error;
+        type    coded;
+        libs    ("libutilityFunctionObjects.so");
 
         codeEnd
         #{

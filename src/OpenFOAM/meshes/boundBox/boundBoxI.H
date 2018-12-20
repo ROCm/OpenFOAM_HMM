@@ -25,7 +25,6 @@ License
 
 #include "boundBox.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::boundBox::boundBox()
@@ -192,22 +191,6 @@ inline void Foam::boundBox::add(const tmp<pointField>& tpoints)
 {
     add(tpoints());
     tpoints.clear();
-}
-
-
-inline void Foam::boundBox::add
-(
-    const UList<point>& points,
-    const labelUList& indices
-)
-{
-    if (!points.empty())
-    {
-        forAll(indices, i)
-        {
-            add(points[indices[i]]);
-        }
-    }
 }
 
 

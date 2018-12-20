@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,11 +45,7 @@ bool Foam::objectRegistry::parentNotTime() const
 
 // * * * * * * * * * * * * * * * * Constructors *  * * * * * * * * * * * * * //
 
-Foam::objectRegistry::objectRegistry
-(
-    const Time& t,
-    const label nIoObjects
-)
+Foam::objectRegistry::objectRegistry(const Time& t, const label nObjects)
 :
     regIOobject
     (
@@ -64,7 +60,7 @@ Foam::objectRegistry::objectRegistry
         ),
         true    // to flag that this is the top-level regIOobject
     ),
-    HashTable<regIOobject*>(nIoObjects),
+    HashTable<regIOobject*>(nObjects),
     time_(t),
     parent_(t),
     dbDir_(name()),
@@ -72,14 +68,10 @@ Foam::objectRegistry::objectRegistry
 {}
 
 
-Foam::objectRegistry::objectRegistry
-(
-    const IOobject& io,
-    const label nIoObjects
-)
+Foam::objectRegistry::objectRegistry(const IOobject& io, const label nObjects)
 :
     regIOobject(io),
-    HashTable<regIOobject*>(nIoObjects),
+    HashTable<regIOobject*>(nObjects),
     time_(io.time()),
     parent_(io.db()),
     dbDir_(parent_.dbDir()/local()/name()),
@@ -94,17 +86,17 @@ Foam::objectRegistry::objectRegistry
 Foam::objectRegistry::~objectRegistry()
 {
     List<regIOobject*> myObjects(size());
-    label nMyObjects = 0;
+    label nObjects = 0;
 
     for (iterator iter = begin(); iter != end(); ++iter)
     {
-        if (iter()->ownedByRegistry())
+        if (iter.object()->ownedByRegistry())
         {
-            myObjects[nMyObjects++] = iter();
+            myObjects[nObjects++] = iter.object();
         }
     }
 
-    for (label i=0; i < nMyObjects; ++i)
+    for (label i=0; i < nObjects; ++i)
     {
         checkOut(*myObjects[i]);
     }
@@ -119,17 +111,10 @@ Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classes() const
 }
 
 
-Foam::HashTable<Foam::wordHashSet>
-Foam::objectRegistry::classes(const wordRe& matcher) const
+Foam::label Foam::objectRegistry::count(const char* clsName) const
 {
-    return classesImpl(*this, matcher);
-}
-
-
-Foam::HashTable<Foam::wordHashSet>
-Foam::objectRegistry::classes(const wordRes& matcher) const
-{
-    return classesImpl(*this, matcher);
+    // No nullptr check - only called with string literals
+    return count(static_cast<word>(clsName));
 }
 
 
@@ -145,31 +130,17 @@ Foam::wordList Foam::objectRegistry::sortedNames() const
 }
 
 
-Foam::wordList Foam::objectRegistry::names(const word& clsName) const
+Foam::wordList Foam::objectRegistry::names(const char* clsName) const
 {
-    wordList objNames(size());
-
-    label count=0;
-    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
-    {
-        if (iter()->type() == clsName)
-        {
-            objNames[count++] = iter.key();
-        }
-    }
-
-    objNames.setSize(count);
-
-    return objNames;
+    // No nullptr check - only called with string literals
+    return names(static_cast<word>(clsName));
 }
 
 
-Foam::wordList Foam::objectRegistry::sortedNames(const word& clsName) const
+Foam::wordList Foam::objectRegistry::sortedNames(const char* clsName) const
 {
-    wordList objNames = names(clsName);
-    Foam::sort(objNames);
-
-    return objNames;
+    // No nullptr check - only called with string literals
+    return sortedNames(static_cast<word>(clsName));
 }
 
 
@@ -217,7 +188,6 @@ Foam::label Foam::objectRegistry::getEvent() const
         // Reset event counter
         curEvent = 1;
         event_ = 2;
-
 
         // No need to reset dependent objects; overflow is now handled
         // in regIOobject::upToDate
@@ -299,8 +269,8 @@ void Foam::objectRegistry::rename(const word& newName)
 {
     regIOobject::rename(newName);
 
-    // adjust dbDir_ as well
-    string::size_type i = dbDir_.rfind('/');
+    // Adjust dbDir_ as well
+    const auto i = dbDir_.rfind('/');
 
     if (i == string::npos)
     {
@@ -315,7 +285,7 @@ void Foam::objectRegistry::rename(const word& newName)
 
 bool Foam::objectRegistry::modified() const
 {
-    forAllConstIter(HashTable<regIOobject*>, *this, iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if (iter()->modified())
         {
@@ -360,7 +330,7 @@ bool Foam::objectRegistry::writeObject
 {
     bool ok = true;
 
-    forAllConstIter(HashTable<regIOobject*>, *this, iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if (objectRegistry::debug)
         {

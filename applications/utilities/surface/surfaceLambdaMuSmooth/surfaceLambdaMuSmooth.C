@@ -28,7 +28,7 @@ Group
     grpSurfaceUtilities
 
 Description
-    Smooths a surface using lambda/mu smoothing.
+    Smooth a surface using lambda/mu smoothing.
 
     To get laplacian smoothing, set lambda to the relaxation factor and mu to
     zero.
@@ -131,24 +131,32 @@ void getFixedPoints
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Smooth a surface using lambda/mu smoothing.\n"
+        "For laplacian smoothing, set lambda to the relaxation factor"
+        " and mu to zero."
+    );
+
     argList::noParallel();
     argList::validOptions.clear();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("lambda (0..1)");
-    argList::addArgument("mu (0..1)");
-    argList::addArgument("iterations");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("lambda", "On the interval [0,1]");
+    argList::addArgument("mu", "On the interval [0,1]");
+    argList::addArgument("iterations", "The number of iterations to perform");
+    argList::addArgument("output", "The output surface file");
+
     argList::addOption
     (
         "featureFile",
-        "fix points from a file containing feature points and edges"
+        "Fix points from a file containing feature points and edges"
     );
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const scalar lambda = args.read<scalar>(2);
-    const scalar mu = args.read<scalar>(3);
-    const label  iters = args.read<label>(4);
+    const scalar lambda = args.get<scalar>(2);
+    const scalar mu = args.get<scalar>(3);
+    const label  iters = args.get<label>(4);
     const fileName outFileName = args[5];
 
     if (lambda < 0 || lambda > 1)

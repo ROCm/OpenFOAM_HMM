@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,9 @@ void Foam::fv::rotorDiskSource::calculate
     scalar AOAmin = GREAT;
     scalar AOAmax = -GREAT;
 
+    // Cached position-dependent rotations available?
+    const bool hasCache = Rcyl_.valid();
+
     forAll(cells_, i)
     {
         if (area_[i] > ROOTVSMALL)
@@ -58,11 +61,18 @@ void Foam::fv::rotorDiskSource::calculate
 
             const scalar radius = x_[i].x();
 
+            const tensor Rcyl =
+            (
+                hasCache
+              ? (*Rcyl_)[i]
+              : coordSys_.R(mesh_.C()[celli])
+            );
+
             // Transform velocity into local cylindrical reference frame
-            vector Uc = cylindrical_->invTransform(U[celli], i);
+            vector Uc = invTransform(Rcyl, U[celli]);
 
             // Transform velocity into local coning system
-            Uc = R_[i] & Uc;
+            Uc = transform(Rcone_[i], Uc);
 
             // Set radial component of velocity to zero
             Uc.x() = 0.0;
@@ -129,10 +139,10 @@ void Foam::fv::rotorDiskSource::calculate
             liftEff += rhoRef_*localForce.z();
 
             // Transform force from local coning system into rotor cylindrical
-            localForce = invR_[i] & localForce;
+            localForce = invTransform(Rcone_[i], localForce);
 
-            // Transform force into global Cartesian co-ordinate system
-            force[celli] = cylindrical_->transform(localForce, i);
+            // Transform force into global Cartesian coordinate system
+            force[celli] = transform(Rcyl, localForce);
 
             if (divideVolume)
             {
@@ -165,28 +175,25 @@ void Foam::fv::rotorDiskSource::writeField
     const bool writeNow
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+    typedef GeometricField<Type, fvPatchField, volMesh> FieldType;
 
     if (mesh_.time().writeTime() || writeNow)
     {
-        tmp<fieldType> tfield
+        auto tfield = tmp<FieldType>::New
         (
-            new fieldType
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
+                name,
+                mesh_.time().timeName(),
                 mesh_,
-                dimensioned<Type>(dimless, Zero)
-            )
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensioned<Type>(dimless, Zero)
         );
 
-        Field<Type>& field = tfield.ref().primitiveFieldRef();
+        auto& field = tfield.ref().primitiveFieldRef();
 
         if (cells_.size() != values.size())
         {

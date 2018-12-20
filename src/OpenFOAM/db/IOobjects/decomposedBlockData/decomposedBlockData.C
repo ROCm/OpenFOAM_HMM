@@ -211,7 +211,7 @@ void Foam::decomposedBlockData::writeHeader
     /*
     if (os.format() == IOstream::BINARY)
     {
-        os  << "    arch        " << Foam::FOAMbuildArch << ";\n";
+        os  << "    arch        " << foamVersion::buildArch << ";\n";
     }
     */
 
@@ -938,7 +938,7 @@ bool Foam::decomposedBlockData::writeBlocks
         label startProc = 1;
         label nSendProcs = nProcs-1;
 
-        while (nSendProcs > 0)
+        while (nSendProcs > 0 && startProc < nProcs)
         {
             nSendProcs = calcNumProcs
             (
@@ -952,7 +952,7 @@ bool Foam::decomposedBlockData::writeBlocks
                 startProc
             );
 
-            if (startProc == nProcs || nSendProcs == 0)
+            if (nSendProcs == 0)
             {
                 break;
             }
@@ -1166,8 +1166,14 @@ Foam::label Foam::decomposedBlockData::numBlocks(const fileName& fName)
     )
     {
         dictionary headerDict(is);
-        is.version(headerDict.lookup("version"));
-        is.format(headerDict.lookup("format"));
+        is.version
+        (
+            IOstreamOption::versionNumber
+            (
+                headerDict.get<float>("version")
+            )
+        );
+        is.format(headerDict.get<word>("format"));
 
         // Obtain number of blocks directly
         if (headerDict.readIfPresent("blocks", nBlocks))

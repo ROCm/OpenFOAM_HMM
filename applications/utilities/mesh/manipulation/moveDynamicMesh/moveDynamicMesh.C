@@ -36,9 +36,9 @@ Description
 #include "Time.H"
 #include "dynamicFvMesh.H"
 #include "pimpleControl.H"
-#include "vtkSurfaceWriter.H"
 #include "cyclicAMIPolyPatch.H"
 #include "PatchTools.H"
+#include "foamVtkSurfaceWriter.H"
 #include "functionObject.H"
 
 using namespace Foam;
@@ -53,11 +53,9 @@ void writeWeights
     const primitivePatch& patch,
     const fileName& directory,
     const fileName& prefix,
-    const word& timeName
+    const Time& runTime
 )
 {
-    vtkSurfaceWriter writer;
-
     // Collect geometry
     labelList pointToGlobal;
     labelList uniqueMeshPointLabels;
@@ -94,37 +92,41 @@ void writeWeights
         mergedWeights
     );
 
+    instant inst(runTime.value(), runTime.timeName());
+
     if (Pstream::master())
     {
-        writer.write
+        vtk::surfaceWriter writer
         (
-            directory,
-            prefix + "_" + timeName,
-            meshedSurfRef
-            (
-                mergedPoints,
-                mergedFaces
-            ),
-            "weightsSum",
-            mergedWeights,
-            false
+            mergedPoints,
+            mergedFaces,
+            (directory/prefix + "_" + inst.name()),
+            false // serial: master-only
         );
+
+        writer.setTime(inst);
+        writer.writeTimeValue();
+        writer.writeGeometry();
+
+        writer.beginCellData(1);
+        writer.write("weightsSum", mergedWeights);
     }
 }
 
 
 void writeWeights(const polyMesh& mesh)
 {
-    const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+    const fileName outputDir
+    (
+        mesh.time().globalPath()/functionObject::outputPrefix/"checkAMI"
+    );
 
-    const word tmName(mesh.time().timeName());
-
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : mesh.boundaryMesh())
     {
-        if (isA<cyclicAMIPolyPatch>(pbm[patchi]))
+        if (isA<cyclicAMIPolyPatch>(pp))
         {
             const cyclicAMIPolyPatch& cpp =
-                refCast<const cyclicAMIPolyPatch>(pbm[patchi]);
+                refCast<const cyclicAMIPolyPatch>(pp);
 
             if (cpp.owner())
             {
@@ -140,18 +142,18 @@ void writeWeights(const polyMesh& mesh)
                     mesh,
                     ami.tgtWeightsSum(),
                     cpp.neighbPatch(),
-                    functionObject::outputPrefix,
-                    "tgt",
-                    tmName
+                    outputDir,
+                    "patch" + Foam::name(pp.index()) + "-tgt",
+                    mesh.time()
                 );
                 writeWeights
                 (
                     mesh,
                     ami.srcWeightsSum(),
                     cpp,
-                    functionObject::outputPrefix,
-                    "src",
-                    tmName
+                    outputDir,
+                    "patch" + Foam::name(pp.index()) + "-src",
+                    mesh.time()
                 );
             }
         }
@@ -162,18 +164,23 @@ void writeWeights(const polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Mesh motion and topological mesh changes utility"
+    );
+
     #include "addRegionOption.H"
     argList::addBoolOption
     (
         "checkAMI",
-        "check AMI weights"
+        "Check AMI weights and write VTK files of the AMI patches"
     );
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedDynamicFvMesh.H"
 
-    const bool checkAMI  = args.found("checkAMI");
+    const bool checkAMI = args.found("checkAMI");
 
     if (checkAMI)
     {

@@ -50,7 +50,6 @@ class fixedTrim
 :
     public trimModel
 {
-
 protected:
 
     // Protected data
@@ -68,7 +67,7 @@ public:
     fixedTrim(const fv::rotorDiskSource& rotor, const dictionary& dict);
 
     //- Destructor
-    virtual ~fixedTrim();
+    virtual ~fixedTrim() = default;
 
 
     // Member functions

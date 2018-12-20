@@ -88,7 +88,7 @@ public:
     );
 
     //- Destructor
-    virtual ~shallowWaterAbsorption();
+    virtual ~shallowWaterAbsorption() = default;
 
 
     // Public Member Functions

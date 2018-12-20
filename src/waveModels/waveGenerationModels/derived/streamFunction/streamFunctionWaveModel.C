@@ -67,8 +67,7 @@ Foam::scalar Foam::waveModels::streamFunction::eta
    forAll(Ejs_, iterSF)
    {
         strfnAux +=
-            Ejs_[iterSF]*cos((iterSF + 1)
-		   *(kx*x + ky*y - omega*t + phase));
+            Ejs_[iterSF]*cos((iterSF + 1) *(kx*x + ky*y - omega*t + phase));
    }
 
    return (1/k)*strfnAux;
@@ -135,12 +134,12 @@ void Foam::waveModels::streamFunction::setLevel
             this->eta
             (
                 waterDepthRef_,
-        		waveKx,
+                waveKx,
                 waveKy,
                 wavePeriod_,
                 xPaddle_[paddlei],
                 yPaddle_[paddlei],
-		        waveOmega,
+                waveOmega,
                 t,
                 wavePhase_
             );
@@ -184,7 +183,7 @@ void Foam::waveModels::streamFunction::setVelocity
                 wavePeriod_,
                 xPaddle_[paddlei],
                 yPaddle_[paddlei],
-		        waveOmega,
+                waveOmega,
                 t,
                 wavePhase_,
                 z
@@ -218,22 +217,16 @@ Foam::waveModels::streamFunction::streamFunction
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::streamFunction::~streamFunction()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::streamFunction::readDict(const dictionary& overrideDict)
 {
     if (regularWaveModel::readDict(overrideDict))
     {
-	    overrideDict.lookup("uMean") >> uMean_;
-	    overrideDict.lookup("waveLength") >> waveLength_;
-	    overrideDict.lookup("Bjs") >> Bjs_;
-	    overrideDict.lookup("Ejs") >> Ejs_;
+        overrideDict.readEntry("uMean", uMean_);
+        overrideDict.readEntry("waveLength", waveLength_);
+        overrideDict.readEntry("Bjs", Bjs_);
+        overrideDict.readEntry("Ejs", Ejs_);
 
         return true;
     }

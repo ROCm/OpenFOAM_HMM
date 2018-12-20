@@ -64,9 +64,9 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
     {
         IOdictionary dict(io);
 
-        dict.lookup("data") >> *this;
-        dict.lookup("x0") >> x0_;
-        dict.lookup("dx") >> dx_;
+        dict.readEntry("data", *this);
+        dict.readEntry("x0", x0_);
+        dict.readEntry("dx", dx_);
         dict.readIfPresent("log10", log10_);
         dict.readIfPresent("bound", bound_);
     }
@@ -94,20 +94,20 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
         false // if used in BCs, could be used by multiple patches
     ),
     List<scalar>(2, 0.0),
-    x0_(readScalar(dict.lookup("x0"))),
-    dx_(readScalar(dict.lookup("dx"))),
+    x0_(dict.get<scalar>("x0")),
+    dx_(dict.get<scalar>("dx")),
     log10_(dict.lookupOrDefault<Switch>("log10", false)),
     bound_(dict.lookupOrDefault<Switch>("bound", false))
 {
     if (initialiseOnly)
     {
-        const scalar xMax = readScalar(dict.lookup("xMax"));
+        const scalar xMax = dict.get<scalar>("xMax");
         const label nIntervals = static_cast<label>(xMax - x0_)/dx_ + 1;
         this->setSize(nIntervals);
     }
     else
     {
-        dict.lookup("data") >> *this;
+        dict.readEntry("data", *this);
     }
 
     checkTable();

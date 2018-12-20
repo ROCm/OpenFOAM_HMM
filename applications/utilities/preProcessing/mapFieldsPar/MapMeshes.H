@@ -40,7 +40,7 @@ template<template<class> class CombineOp>
 void MapMesh
 (
     const meshToMesh& interp,
-    const wordHashSet& selectedFields,
+    const wordRes& selectedFields,
     const bool noLagrangian
 )
 {

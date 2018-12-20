@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "proxySurfaceWriter.H"
-
 #include "MeshedSurfaceProxy.H"
-#include "OFstream.H"
 #include "OSspecific.H"
-
 #include "makeSurfaceWriterMethods.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -41,10 +38,22 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::proxySurfaceWriter::proxySurfaceWriter(const word& ext)
+Foam::proxySurfaceWriter::proxySurfaceWriter(const word& fileExt)
 :
     surfaceWriter(),
-    ext_(ext)
+    fileExtension_(fileExt)
+{}
+
+
+Foam::proxySurfaceWriter::proxySurfaceWriter
+(
+    const word& fileExt,
+    const dictionary& options
+)
+:
+    surfaceWriter(),
+    fileExtension_(fileExt),
+    options_(options)
 {}
 
 
@@ -58,27 +67,36 @@ Foam::fileName Foam::proxySurfaceWriter::write
     const bool verbose
 ) const
 {
-    // avoid bad values
-    if (ext_.empty())
+    // Avoid bad values
+    if (fileExtension_.empty())
     {
         return fileName::null;
     }
 
-    if (!isDir(outputDir))
-    {
-        mkDir(outputDir);
-    }
+    fileName outputFile(outputDir/surfaceName + '.' + fileExtension_);
 
-    fileName outName(outputDir/surfaceName + "." + ext_);
+    if (!isDir(outputFile.path()))
+    {
+        mkDir(outputFile.path());
+    }
 
     if (verbose)
     {
-        Info<< "Writing geometry to " << outName << endl;
+        Info<< "Writing geometry to " << outputFile << endl;
     }
 
-    MeshedSurfaceProxy<face>(surf.points(), surf.faces()).write(outName);
+    MeshedSurfaceProxy<face>
+    (
+        surf.points(),
+        surf.faces()
+    ).write
+    (
+        outputFile,
+        fileExtension_,
+        options_
+    );
 
-    return outName;
+    return outputFile;
 }
 
 

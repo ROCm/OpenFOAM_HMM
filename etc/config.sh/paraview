@@ -16,25 +16,30 @@
 # Description
 #     Setup for PARAVIEW (partially cmake, qt too)
 #
-#     For system-wide cmake:            cmake_version=cmake-system
-#     For system-wide qt:               ParaView_QT=qt-system
+#     To disable use of the PV_PLUGIN_PATH:
+#         ParaView_VERSION=none
+#
+#     For system-wide installations:
+#         cmake_version=cmake-system
+#         ParaView_QT=qt-system
+#         ParaView_VERSION=system       [EXPERIMENTAL]
 #
 # Note
 #     The following env. variables are required for building plugins:
 #         ParaView_DIR
-#         ParaView_INCLUDE_DIR
 #         PV_PLUGIN_PATH
+#     The OpenFOAM plugin must be the first in PV_PLUGIN_PATH and have
+#     paraview-major.minor encoded in its name.
 #
 #     For central installations not located under ThirdParty, the environment
 #     values must be set manually. For example,
 #
-#         export ParaView_DIR=/opt/paraview/paraview-5.5.0
-#         export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-5.5
-#         export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-5.5
+#         export ParaView_DIR=/opt/paraview/paraview-5.6.0
+#         export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-5.6
 #
 #         export PATH=$ParaView_DIR/bin:$PATH
 #         export LD_LIBRARY_PATH=$ParaView_DIR/lib:$LD_LIBRARY_PATH
-#         unset ParaView_VERSION        # avoid using ThirdParty settings
+#         unset ParaView_VERSION        # skip ThirdParty settings
 #
 #     In paraview-5.4 and earlier, the libraries were in the sub-directory:
 #
@@ -46,7 +51,7 @@
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-ParaView_VERSION=5.5.2
+ParaView_VERSION=5.6.0
 ParaView_QT=qt-system
 cmake_version=cmake-system
 
@@ -58,67 +63,99 @@ pv_api=auto             # Either auto or pair of (major.minor) digits
 archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER"
 
 # Clean PATH and LD_LIBRARY_PATH
-eval $($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=PATH \
-    "$ParaView_DIR $archDir/ParaView- $archDir/qt- $archDir/cmake-")
+eval \
+    "$($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=PATH \
+    $ParaView_DIR $archDir/ParaView- $archDir/qt- $archDir/cmake-)"
 
-eval $($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=LD_LIBRARY_PATH \
-    "$ParaView_DIR $archDir/ParaView- $archDir/qt-")
+eval \
+    "$($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=LD_LIBRARY_PATH \
+    $ParaView_DIR $archDir/ParaView- $archDir/qt-)"
 
 # ThirdParty cmake
-cmake=$archDir/$cmake_version
-if [ -r $cmake/bin/cmake ]
+cmake="$archDir/$cmake_version"
+if [ -r "$cmake/bin/cmake" ]
 then
     # _foamAddPath not available when foamPV function is used
-    PATH=$cmake/bin:$PATH
+    PATH="$cmake/bin:$PATH"
 fi
 
 # Evaluate command-line parameters for ParaView
-_foamParaviewEval()
-{
-    while [ $# -gt 0 ]
-    do
-        case "$1" in
-        ParaView*=*)
-            # name=value  -> export name=value
-            eval "export $1"
-            ;;
-        esac
-        shift
-    done
-}
+for i
+do
+    case "$i" in
+    (ParaView*=*)
+        # name=value  -> export name=value
+        eval "export $i"
+        ;;
+    esac
+done
 
-# Evaluate command-line parameters
-_foamParaviewEval $@
+case "$ParaView_VERSION" in
+('')
+    # empty - do nothing
+    ;;
 
-# Require that ParaView_VERSION has not been unset.
-# Avoids conflict with an alternative (non-ThirdParty) installation.
-if [ -n "$ParaView_VERSION" ]
-then
+(none)
+    unset ParaView_DIR PV_PLUGIN_PATH
+
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
+    then
+        echo "Using paraview (disabled)" 1>&2
+    fi
+    ;;
+
+(system)
+    # Obtain major.minor from `paraview --version`
+    pv_api="$(paraview --version 2>/dev/null | \
+        sed -ne 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/p')"
+
+    if [ -n "$pv_api" ]
+    then
+        export PV_PLUGIN_PATH="$FOAM_LIBBIN/paraview-$pv_api"
+    else
+        unset ParaView_DIR PV_PLUGIN_PATH
+    fi
+
+    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
+    then
+        if [ -n "$PV_PLUGIN_PATH" ]
+        then
+            echo "Using paraview (system)" 1>&2
+            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH" 1>&2
+        else
+            echo "system paraview (not found)" 1>&2
+        fi
+    fi
+    ;;
+
+(*)
+    # ParaView_VERSION set and non-empty
 
     # Set API to correspond to VERSION
     # pv_api is <digits>.<digits> from ParaView_VERSION
     case "$ParaView_VERSION" in
-    "$pv_api".* )
+    ("$pv_api".*)
         # API and VERSION appear to correspond
         ;;
 
-    [0-9]*)
+    ([0-9]*)
         # Extract API from VERSION
-        pv_api=$(echo $ParaView_VERSION | \
-            sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
+        pv_api=$(echo "$ParaView_VERSION" | \
+            sed -ne 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/p')
         ;;
     esac
 
-    export ParaView_DIR=$archDir/ParaView-$ParaView_VERSION
+    export ParaView_DIR="$archDir/ParaView-$ParaView_VERSION"
 
     # Set paths if binaries are present
-    if [ -r $ParaView_DIR ]
+    if [ -r "$ParaView_DIR" ]
     then
-        export PATH=$ParaView_DIR/bin:$PATH
-        export ParaView_INCLUDE_DIR=$ParaView_DIR/include/paraview-$pv_api
-        export PV_PLUGIN_PATH=$FOAM_LIBBIN/paraview-$pv_api
+        # The OpenFOAM plugin directory must be the first in PV_PLUGIN_PATH
+        # and have paraview-major.minor encoded in its name
+        export PV_PLUGIN_PATH="$FOAM_LIBBIN/paraview-$pv_api"
 
-        pvLibDir=$ParaView_DIR/lib/paraview-$pv_api
+        export PATH="$ParaView_DIR/bin:$PATH"
+        pvLibDir="$ParaView_DIR/lib/paraview-$pv_api"
         #OBSOLETE? pvPython=$ParaView_DIR/Utilities/VTKPythonWrapping
 
         #OBSOLETE? # Python libraries as required
@@ -133,15 +170,15 @@ then
         if [ -d "$qtDir" ]
         then
             case "$ParaView_QT" in
-            *-5*)
-                export Qt5_DIR=$qtDir
+            (*-5*)
+                export Qt5_DIR="$qtDir"
                 ;;
             esac
-            for qtLibDir in $qtDir/lib$WM_COMPILER_LIB_ARCH $qtDir/lib
+            for qtLibDir in "$qtDir/lib$WM_COMPILER_LIB_ARCH" "$qtDir/lib"
             do
                 if [ -d "$qtLibDir" ]
                 then
-                    export LD_LIBRARY_PATH=$qtLibDir:$LD_LIBRARY_PATH
+                    export LD_LIBRARY_PATH="$qtLibDir:$LD_LIBRARY_PATH"
                     break
                 fi
             done
@@ -151,33 +188,32 @@ then
         # - 5.4 and earlier: lib/paraview-X.X
         # - 5.5 and later:   lib/
         case "$pv_api" in
-        5.[0-4]*)
-            export LD_LIBRARY_PATH=$pvLibDir:$LD_LIBRARY_PATH
+        (5.[0-4]*)
+            export LD_LIBRARY_PATH="$pvLibDir:$LD_LIBRARY_PATH"
             ;;
-        *)
-            export LD_LIBRARY_PATH=$ParaView_DIR/lib:$LD_LIBRARY_PATH
+        (*)
+            export LD_LIBRARY_PATH="$ParaView_DIR/lib:$LD_LIBRARY_PATH"
             ;;
         esac
 
-        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
         then
-            echo "Using paraview"
-            echo "    ParaView_DIR         : $ParaView_DIR"
-            echo "    ParaView_INCLUDE_DIR : $ParaView_INCLUDE_DIR"
-            echo "    library dir          : $pvLibDir"
-            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH"
+            echo "Using paraview" 1>&2
+            echo "    ParaView_DIR         : $ParaView_DIR" 1>&2
+            echo "    library dir          : $pvLibDir" 1>&2
+            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH" 1>&2
         fi
     else
-        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
         then
-            echo "No paraview found"
-            echo "    ParaView_DIR         : $ParaView_DIR"
+            echo "No paraview found" 1>&2
+            echo "    ParaView_DIR         : $ParaView_DIR" 1>&2
         fi
 
-        unset ParaView_DIR ParaView_INCLUDE_DIR PV_PLUGIN_PATH
+        unset ParaView_DIR PV_PLUGIN_PATH
     fi
-
-fi
+    ;;
+esac
 
 unset -f _foamParaviewEval 2> /dev/null
 unset cleaned archDir

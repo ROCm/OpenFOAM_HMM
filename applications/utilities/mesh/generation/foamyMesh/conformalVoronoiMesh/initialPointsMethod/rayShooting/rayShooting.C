@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,20 +27,18 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "triSurfaceMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(rayShooting, 0);
-addToRunTimeSelectionTable(initialPointsMethod, rayShooting, dictionary);
+    defineTypeNameAndDebug(rayShooting, 0);
+    addToRunTimeSelectionTable(initialPointsMethod, rayShooting, dictionary);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void rayShooting::splitLine
+void Foam::rayShooting::splitLine
 (
     const line<point, point>& l,
     const scalar& pert,
@@ -117,7 +115,7 @@ void rayShooting::splitLine
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-rayShooting::rayShooting
+Foam::rayShooting::rayShooting
 (
     const dictionary& initialPointsDict,
     const Time& runTime,
@@ -137,17 +135,17 @@ rayShooting::rayShooting
         cellShapeControls,
         decomposition
     ),
-    randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
+    randomiseInitialGrid_(detailsDict().get<Switch>("randomiseInitialGrid")),
     randomPerturbationCoeff_
     (
-        readScalar(detailsDict().lookup("randomPerturbationCoeff"))
+        detailsDict().get<scalar>("randomPerturbationCoeff")
     )
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-List<Vb::Point> rayShooting::initialPoints() const
+Foam::List<Vb::Point> Foam::rayShooting::initialPoints() const
 {
     // Loop over surface faces
     const searchableSurfaces& surfaces = geometryToConformTo().geometry();
@@ -274,9 +272,5 @@ List<Vb::Point> rayShooting::initialPoints() const
     return initialPoints.shrink();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

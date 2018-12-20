@@ -95,6 +95,14 @@ public:
         //- Construct from components
         inline cellShape
         (
+            const cellModel& model,
+            labelUList&& labels,
+            const bool doCollapse = false
+        );
+
+        //- Construct from components
+        inline cellShape
+        (
             const word& modelName,
             const labelUList& labels,
             const bool doCollapse = false

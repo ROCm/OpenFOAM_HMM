@@ -160,7 +160,7 @@ public:
     );
 
     //- Destructor
-    virtual ~cnoidal();
+    virtual ~cnoidal() = default;
 
 
     // Public Member Functions

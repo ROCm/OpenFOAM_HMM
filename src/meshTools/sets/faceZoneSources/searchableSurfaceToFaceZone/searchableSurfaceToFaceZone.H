@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,15 @@ Class
 Description
     A topoSetSource to select faces based on intersection (of cell-cell
     vector) with a surface.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        surfaceType | The searchable surface type           | yes   |
+        surfaceName | Name for the IOobject                 | no    | mesh-name
+        surface     | Same as 'surfaceType'                 | no    |
+        name        | Older specification for 'surfaceName' | no    |
+    \endtable
 
 SourceFiles
     searchableSurfaceToFaceZone.C
@@ -61,12 +70,34 @@ class searchableSurfaceToFaceZone
         //- Surface
         autoPtr<searchableSurface> surfacePtr_;
 
+
+protected:
+
+    // Protected Member Functions
+
+        //- Retrieve surface name from dictionary entry
+        static word getSurfaceName
+        (
+            const dictionary& dict,
+            const word& defaultName
+        );
+
+
 public:
 
     //- Runtime type information
     TypeName("searchableSurfaceToFaceZone");
 
     // Constructors
+
+        //- Construct surface-type from dictionary
+        searchableSurfaceToFaceZone
+        (
+            const word& surfaceType,
+            const polyMesh& mesh,
+            const dictionary& dict
+        );
+
 
         //- Construct from dictionary
         searchableSurfaceToFaceZone
@@ -77,12 +108,12 @@ public:
 
 
     //- Destructor
-    virtual ~searchableSurfaceToFaceZone();
+    virtual ~searchableSurfaceToFaceZone() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
+        virtual topoSetSource::sourceType setType() const
         {
             return FACEZONESOURCE;
         }
@@ -90,7 +121,7 @@ public:
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

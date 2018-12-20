@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,22 +95,22 @@ public:
 
         //- Construct given MatrixSpace of the same rank
         template<class Cmpt2>
-        inline Tensor(const MatrixSpace<Tensor<Cmpt2>, Cmpt2, 3, 3>&);
+        inline Tensor(const MatrixSpace<Tensor<Cmpt2>, Cmpt2, 3, 3>& vs);
 
         //- Construct given VectorSpace of the same rank
         template<class Cmpt2>
-        inline Tensor(const VectorSpace<Tensor<Cmpt2>, Cmpt2, 9>&);
+        inline Tensor(const VectorSpace<Tensor<Cmpt2>, Cmpt2, 9>& vs);
 
         //- Construct given SphericalTensor
-        inline Tensor(const SphericalTensor<Cmpt>&);
+        inline Tensor(const SphericalTensor<Cmpt>& st);
 
         //- Construct given SymmTensor
-        inline Tensor(const SymmTensor<Cmpt>&);
+        inline Tensor(const SymmTensor<Cmpt>& st);
 
-        //- Construct given triad
-        inline Tensor(const Vector<Vector<Cmpt>>&);
+        //- Construct given triad of row vectors
+        inline Tensor(const Vector<Vector<Cmpt>>& tr);
 
-        //- Construct given the three vector components
+        //- Construct given the three row vectors
         inline Tensor
         (
             const Vector<Cmpt>& x,
@@ -139,7 +139,7 @@ public:
         );
 
         //- Construct from Istream
-        inline Tensor(Istream&);
+        inline Tensor(Istream& is);
 
 
     // Member Functions
@@ -166,12 +166,72 @@ public:
             inline Cmpt& zy();
             inline Cmpt& zz();
 
+
+        // Column-vector access.
+
+            //- Extract vector for column 0
+            inline Vector<Cmpt> cx() const;
+
+            //- Extract vector for column 1
+            inline Vector<Cmpt> cy() const;
+
+            //- Extract vector for column 2
+            inline Vector<Cmpt> cz() const;
+
+            //- Extract vector for given column.
+            //  Compile-time check of column index.
+            template<direction Col>
+            inline Vector<Cmpt> col() const;
+
+            //- Extract vector for given column (0,1,2).
+            //  Runtime check of column index.
+            inline Vector<Cmpt> col(const direction c) const;
+
+            //- Set values of given column
+            //  Compile-time check of column index.
+            template<direction Col>
+            inline void col(const Vector<Cmpt>& v);
+
+            //- Set values of given column (0,1,2)
+            //  Runtime check of column index.
+            inline void col(const direction c, const Vector<Cmpt>& v);
+
+
         // Row-vector access.
 
+            //- Extract vector for row 0
             inline Vector<Cmpt> x() const;
+
+            //- Extract vector for row 1
             inline Vector<Cmpt> y() const;
+
+            //- Extract vector for row 2
             inline Vector<Cmpt> z() const;
-            inline Vector<Cmpt> vectorComponent(const direction) const;
+
+            //- Extract vector for given row.
+            //  Compile-time check of row index.
+            template<direction Row>
+            inline Vector<Cmpt> row() const;
+
+            //- Extract vector for given row (0,1,2)
+            //  Runtime check of row index.
+            inline Vector<Cmpt> row(const direction r) const;
+
+            //- Set values of given row
+            //  Compile-time check of row index.
+            template<direction Row>
+            inline void row(const Vector<Cmpt>& v);
+
+            //- Set values of given row (0,1,2)
+            //  Runtime check of row index.
+            inline void row(const direction r, const Vector<Cmpt>& v);
+
+            //- Return vector for given row (0,1,2)
+            //  Runtime check of row index.
+            inline Vector<Cmpt> vectorComponent(const direction cmpt) const;
+
+
+    // Tensor Operations
 
         //- Return transpose
         inline Tensor<Cmpt> T() const;
@@ -179,11 +239,17 @@ public:
         //- Return inverse
         inline Tensor<Cmpt> inv() const;
 
+        //- Inner-product of this with another Tensor.
+        inline Tensor<Cmpt> inner(const Tensor<Cmpt>& t2) const;
+
+        //- Schur-product of this with another Tensor.
+        inline Tensor<Cmpt> schur(const Tensor<Cmpt>& t2) const;
+
 
     // Member Operators
 
-        //- Inner-product with a Tensor
-        inline void operator&=(const Tensor<Cmpt>&);
+        //- Assign inner-product of this with another Tensor.
+        inline void operator&=(const Tensor<Cmpt>& t);
 
         //- Inherit MatrixSpace assignment operators
         using Tensor::msType::operator=;
@@ -198,7 +264,7 @@ public:
         //- Assign to a SymmTensor
         inline void operator=(const SymmTensor<Cmpt>&);
 
-        //- Assign to a triad
+        //- Assign to a triad of row vectors
         inline void operator=(const Vector<Vector<Cmpt>>&);
 };
 

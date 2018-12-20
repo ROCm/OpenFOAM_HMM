@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Specializations
 
 template<>
 tmp<GeometricField<scalar, fvPatchField, volMesh>>

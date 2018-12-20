@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Manipulate a cell/face/point/ set or zone interactively.
+    Manipulate a cell/face/point Set or Zone interactively.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,15 +43,12 @@ Description
 #include "topoSetSource.H"
 #include "Fstream.H"
 #include "demandDrivenData.H"
-#include "foamVtkWriteCellSetFaces.H"
-#include "foamVtkWriteFaceSet.H"
-#include "foamVtkWritePointSet.H"
+#include "foamVtkWriteTopoSet.H"
 #include "IOobjectList.H"
 #include "cellZoneSet.H"
 #include "faceZoneSet.H"
 #include "pointZoneSet.H"
 #include "timeSelector.H"
-#include "collatedFileOperation.H"
 
 #include <stdio.h>
 
@@ -71,47 +68,26 @@ using namespace Foam;
 void writeVTK
 (
     const polyMesh& mesh,
-    const topoSet& currentSet,
-    const fileName& vtkBaseName
+    const topoSet& currSet,
+    const fileName& outputName
 )
 {
-    if (isA<faceSet>(currentSet))
-    {
-        // Faces of set with OpenFOAM faceID as value
-        vtk::writeFaceSet
+    if
+    (
+        !vtk::writeTopoSet
         (
             mesh,
-            dynamicCast<const faceSet&>(currentSet),
-            mesh.time().path()/vtkBaseName,
-            vtk::formatType::LEGACY_BINARY
-        );
-    }
-    else if (isA<cellSet>(currentSet))
-    {
-        // External faces of cellset with OpenFOAM cellID as value
-        vtk::writeCellSetFaces
-        (
-            mesh,
-            dynamicCast<const cellSet&>(currentSet),
-            mesh.time().path()/vtkBaseName,
-            vtk::formatType::LEGACY_BINARY
-        );
-    }
-    else if (isA<pointSet>(currentSet))
-    {
-        vtk::writePointSet
-        (
-            mesh,
-            dynamicCast<const pointSet&>(currentSet),
-            mesh.time().path()/vtkBaseName,
-            vtk::formatType::LEGACY_BINARY
-        );
-    }
-    else
+            currSet,
+            vtk::formatType::INLINE_BASE64,     // XML-binary
+            // vtk::formatType::LEGACY_BINARY,
+            outputName,
+            false // Not parallel
+        )
+    )
     {
         WarningInFunction
-            << "Don't know how to handle set of type " << currentSet.type()
-            << endl;
+            << "Don't know how to handle set of type "
+            << currSet.type() << nl;
     }
 }
 
@@ -133,9 +109,9 @@ void printHelp(Ostream& os)
         << "    clear           - clears the set" << nl
         << "    invert          - inverts the set" << nl
         << "    remove          - remove the set" << nl
-        << "    new <source>    - sets to set to the source set" << nl
+        << "    new <source>    - use all elements from the source set" << nl
         << "    add <source>    - adds all elements from the source set" << nl
-        << "    delete <source> - deletes      ,," << nl
+        << "    subtract <source> - subtract the source set elements" << nl
         << "    subset <source> - combines current set with the source set"
         << nl
         << nl
@@ -193,7 +169,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (cellSets.size())
     {
         os  << "cellSets:" << endl;
-        forAllConstIter(IOobjectList, cellSets, iter)
+        forAllConstIters(cellSets, iter)
         {
             cellSet set(*iter());
             os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
@@ -203,7 +179,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (faceSets.size())
     {
         os  << "faceSets:" << endl;
-        forAllConstIter(IOobjectList, faceSets, iter)
+        forAllConstIters(faceSets, iter)
         {
             faceSet set(*iter());
             os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
@@ -213,7 +189,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (pointSets.size())
     {
         os  << "pointSets:" << endl;
-        forAllConstIter(IOobjectList, pointSets, iter)
+        forAllConstIters(pointSets, iter)
         {
             pointSet set(*iter());
             os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
@@ -224,9 +200,8 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (cellZones.size())
     {
         os  << "cellZones:" << endl;
-        forAll(cellZones, i)
+        for (const cellZone& zone : cellZones)
         {
-            const cellZone& zone = cellZones[i];
             os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
         }
     }
@@ -234,9 +209,8 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (faceZones.size())
     {
         os  << "faceZones:" << endl;
-        forAll(faceZones, i)
+        for (const faceZone& zone : faceZones)
         {
-            const faceZone& zone = faceZones[i];
             os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
         }
     }
@@ -244,9 +218,8 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
     if (pointZones.size())
     {
         os  << "pointZones:" << endl;
-        forAll(pointZones, i)
+        for (const pointZone& zone : pointZones)
         {
-            const pointZone& zone = pointZones[i];
             os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
         }
     }
@@ -282,7 +255,13 @@ void removeZone
         // Remove last element
         zones.setSize(zones.size()-1);
         zones.clearAddressing();
+        if (!zones.write())
+        {
+            WarningInFunction << "Failed writing zone " << setName << endl;
+        }
         zones.write();
+        // Force flushing so we know it has finished writing
+        fileHandler().flush();
     }
 }
 
@@ -384,7 +363,7 @@ bool doCommand
     try
     {
         topoSetSource::setAction action =
-            topoSetSource::toAction(actionName);
+            topoSetSource::actionNames[actionName];
 
 
         IOobject::readOption r;
@@ -500,42 +479,49 @@ bool doCommand
                 if (!noSync) currentSet.sync(mesh);
 
                 // Write
+                Info<< "    Writing " << currentSet.name()
+                    << " (size "
+                    << returnReduce(currentSet.size(), sumOp<label>())
+                    << ") to "
+                    << (
+                          currentSet.instance()/currentSet.local()
+                        / currentSet.name()
+                       );
+
+
                 if (writeVTKFile)
                 {
-                    mkDir(mesh.time().path()/"VTK"/currentSet.name());
-
-                    fileName vtkName
+                    fileName outputName
                     (
-                        "VTK"/currentSet.name()/currentSet.name()
-                      + "_"
-                      + name(mesh.time().timeIndex())
+                        mesh.time().path()/"VTK"/currentSet.name()
+                      / currentSet.name() + "_"
+                      + Foam::name(mesh.time().timeIndex())
                     );
+                    mkDir(outputName.path());
 
-                    Info<< "    Writing " << currentSet.name()
-                        << " (size "
-                        << returnReduce(currentSet.size(), sumOp<label>())
-                        << ") to "
-                        << currentSet.instance()/currentSet.local()
-                           /currentSet.name()
-                        << " and to vtk file " << vtkName << endl << endl;
+                    Info<< " and to vtk file "
+                        << outputName.relative(mesh.time().path())
+                        << nl << nl;
 
-                    writeVTK(mesh, currentSet, vtkName);
+                    writeVTK(mesh, currentSet, outputName);
                 }
                 else
                 {
-                    Info<< "    Writing " << currentSet.name()
-                        << " (size "
-                        << returnReduce(currentSet.size(), sumOp<label>())
-                        << ") to "
-                        << currentSet.instance()/currentSet.local()
-                           /currentSet.name() << endl << endl;
+                    Info<< nl << nl;
                 }
 
                 if (writeCurrentTime)
                 {
                     currentSet.instance() = mesh.time().timeName();
                 }
-                currentSet.write();
+                if (!currentSet.write())
+                {
+                    WarningInFunction
+                        << "Failed writing set "
+                        << currentSet.objectPath() << endl;
+                }
+                // Make sure writing is finished
+                fileHandler().flush();
             }
         }
     }
@@ -713,51 +699,41 @@ commandStatus parseType
 
 commandStatus parseAction(const word& actionName)
 {
-    commandStatus stat = INVALID;
-
-    if (actionName.size())
-    {
-        try
-        {
-            (void)topoSetSource::toAction(actionName);
-
-            stat = VALIDSETCMD;
-        }
-        catch (Foam::IOerror& fIOErr)
-        {
-            stat = INVALID;
-        }
-        catch (Foam::error& fErr)
-        {
-            stat = INVALID;
-        }
-    }
-    return stat;
+    return
+    (
+        actionName.size() && topoSetSource::actionNames.found(actionName)
+      ? VALIDSETCMD : INVALID
+    );
 }
 
 
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Manipulate a cell/face/point Set or Zone interactively."
+    );
+
     // Specific to topoSet/setSet: quite often we want to block upon writing
     // a set so we can immediately re-read it. So avoid use of threading
     // for set writing.
-    fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
 
-    timeSelector::addOptions(true, false);
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
+
     #include "addRegionOption.H"
-    argList::addBoolOption("noVTK", "do not write VTK files");
-    argList::addBoolOption("loop", "execute batch commands for all timesteps");
+    argList::addBoolOption("noVTK", "Do not write VTK files");
+    argList::addBoolOption("loop", "Execute batch commands for all timesteps");
     argList::addOption
     (
         "batch",
         "file",
-        "process in batch mode, using input from specified file"
+        "Process in batch mode, using input from specified file"
     );
     argList::addBoolOption
     (
         "noSync",
-        "do not synchronise selection across coupled patches"
+        "Do not synchronise selection across coupled patches"
     );
 
     #include "setRootCase.H"

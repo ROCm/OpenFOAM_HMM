@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(faceToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, faceToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, faceToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, faceToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, faceToPoint, istream);
 }
 
 Foam::topoSetSource::addToUsageTable Foam::faceToPoint::usage_
@@ -49,26 +51,32 @@ const Foam::Enum
     Foam::faceToPoint::faceAction
 >
 Foam::faceToPoint::faceActionNames_
-{
+({
     { faceAction::ALL, "all" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::faceToPoint::combine(topoSet& set, const bool add) const
+void Foam::faceToPoint::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    faceSet loadedSet(mesh_, setName_);
+    faceSet loadedSet(mesh_, setName);
+    const labelHashSet& faceLabels = loadedSet;
 
     // Add all points from faces in loadedSet
-    forAllConstIter(faceSet, loadedSet, iter)
+    for (const label facei : faceLabels)
     {
-        const face& f = mesh_.faces()[iter.key()];
+        const face& f = mesh_.faces()[facei];
 
-        forAll(f, fp)
+        for (const label pointi : f)
         {
-            addOrDelete(set, f[fp], add);
+            addOrDelete(set, pointi, add);
         }
     }
 }
@@ -83,8 +91,8 @@ Foam::faceToPoint::faceToPoint
     const faceAction option
 )
 :
-    topoSetSource(mesh),
-    setName_(setName),
+    topoSetPointSource(mesh),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -95,10 +103,17 @@ Foam::faceToPoint::faceToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.lookup("set")),
-    option_(faceActionNames_.lookup("option", dict))
-{}
+    topoSetPointSource(mesh),
+    names_(),
+    option_(faceActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::faceToPoint::faceToPoint
@@ -107,15 +122,9 @@ Foam::faceToPoint::faceToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    setName_(checkIs(is)),
+    topoSetPointSource(mesh),
+    names_(one(), word(checkIs(is))),
     option_(faceActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceToPoint::~faceToPoint()
 {}
 
 
@@ -127,19 +136,31 @@ void Foam::faceToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points from face in faceSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points from face in faceSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points from face in faceSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points from face in faceSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(sphereToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, sphereToCell, word);
     addToRunTimeSelectionTable(topoSetSource, sphereToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, sphereToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, sphereToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        sphereToCell,
+        word,
+        sphere
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        sphereToCell,
+        istream,
+        sphere
+    );
 }
 
 
@@ -51,14 +67,18 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 {
     const pointField& ctrs = mesh_.cellCentres();
 
-    const scalar radSquared = radius_*radius_;
+    const scalar orad2 = sqr(radius_);
+    const scalar irad2 = innerRadius_ > 0 ? sqr(innerRadius_) : -1;
 
-    forAll(ctrs, celli)
+    // Treat innerRadius == 0 like unspecified innerRadius (always accept)
+
+    forAll(ctrs, elemi)
     {
-        scalar offset = magSqr(centre_ - ctrs[celli]);
-        if (offset <= radSquared)
+        const scalar d2 = magSqr(ctrs[elemi] - origin_);
+
+        if ((d2 < orad2) && (d2 > irad2))
         {
-            addOrDelete(set, celli, add);
+            addOrDelete(set, elemi, add);
         }
     }
 }
@@ -69,13 +89,15 @@ void Foam::sphereToCell::combine(topoSet& set, const bool add) const
 Foam::sphereToCell::sphereToCell
 (
     const polyMesh& mesh,
-    const vector& centre,
-    const scalar radius
+    const point& origin,
+    const scalar radius,
+    const scalar innerRadius
 )
 :
-    topoSetSource(mesh),
-    centre_(centre),
-    radius_(radius)
+    topoSetCellSource(mesh),
+    origin_(origin),
+    radius_(radius),
+    innerRadius_(innerRadius)
 {}
 
 
@@ -85,9 +107,13 @@ Foam::sphereToCell::sphereToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    centre_(dict.lookup("centre")),
-    radius_(readScalar(dict.lookup("radius")))
+    sphereToCell
+    (
+        mesh,
+        dict.getCompat<vector>("origin", {{"centre", -1806}}),
+        dict.get<scalar>("radius"),
+        dict.lookupOrDefault<scalar>("innerRadius", 0)
+    )
 {}
 
 
@@ -97,15 +123,10 @@ Foam::sphereToCell::sphereToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    centre_(checkIs(is)),
-    radius_(readScalar(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sphereToCell::~sphereToCell()
+    topoSetCellSource(mesh),
+    origin_(checkIs(is)),
+    radius_(readScalar(checkIs(is))),
+    innerRadius_(0)
 {}
 
 
@@ -117,17 +138,37 @@ void Foam::sphereToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with centre within sphere, with centre = "
-            << centre_ << " and radius = " << radius_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells within sphere,"
+                << " origin = " << origin_ << ", radius = " << radius_;
+
+            if (innerRadius_ > 0)
+            {
+                Info<< ", innerRadius = " << innerRadius_;
+            }
+
+            Info<< endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with centre within sphere, with centre = "
-            << centre_ << " and radius = " << radius_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells within sphere,"
+                << " origin = " << origin_ << ", radius = " << radius_;
+
+            if (innerRadius_ > 0)
+            {
+                Info<< ", innerRadius = " << innerRadius_;
+            }
+
+            Info<< endl;
+        }
 
         combine(set, false);
     }

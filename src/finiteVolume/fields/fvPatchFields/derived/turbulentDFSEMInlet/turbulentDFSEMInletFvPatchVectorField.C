@@ -818,7 +818,7 @@ turbulentDFSEMInletFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict),
-    delta_(readScalar(dict.lookup("delta"))),
+    delta_(dict.get<scalar>("delta")),
     d_(dict.lookupOrDefault<scalar>("d", 1)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
 
@@ -1096,7 +1096,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
             writeEddyOBJ();
         }
 
-        if (debug && db().time().outputTime())
+        if (debug && db().time().writeTime())
         {
             writeLumleyCoeffs();
         }

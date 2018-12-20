@@ -67,10 +67,14 @@ template<class T> class IndirectList;
 template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
 
-template<class T> Istream& operator>>(Istream& is, List<T>& L);
+template<class T> Istream& operator>>(Istream& is, List<T>& list);
 
-// Commonly required list types
+// Common list types
 typedef List<char> charList;
+typedef List<label> labelList;
+
+//- A zero-sized list of labels
+extern const labelList emptyLabelList;
 
 
 /*---------------------------------------------------------------------------*\
@@ -82,17 +86,20 @@ class List
 :
     public UList<T>
 {
-    // Private member functions
+    // Private Member Functions
 
         //- Allocate list storage
-        inline void alloc();
+        inline void doAlloc();
 
         //- Reallocate list storage to the given size
         inline void reAlloc(const label len);
 
         //- Copy list of given type.
         template<class List2>
-        inline void copyList(const List2& lst);
+        inline void copyList(const List2& list);
+
+        //- Change allocation size of List. Backend for resize/setSize.
+        void doResize(const label newSize);
 
         //- Construct given begin/end iterators and number of elements
         //  Since the size is provided, the end iterator is actually ignored.
@@ -146,7 +153,7 @@ public:
         List(List<T>& a, bool reuse);
 
         //- Construct as subset
-        List(const UList<T>& lst, const labelUList& mapAddressing);
+        List(const UList<T>& list, const labelUList& mapAddressing);
 
         //- Construct given begin/end iterators.
         //  Uses std::distance for the size.
@@ -155,35 +162,35 @@ public:
 
         //- Construct as copy of FixedList<T, Size>
         template<unsigned Size>
-        explicit List(const FixedList<T, Size>& lst);
+        explicit List(const FixedList<T, Size>& list);
 
         //- Construct as copy of PtrList<T>
-        explicit List(const PtrList<T>& lst);
+        explicit List(const PtrList<T>& list);
 
         //- Construct as copy of SLList<T>
-        explicit List(const SLList<T>& lst);
+        explicit List(const SLList<T>& list);
 
         //- Construct as copy of UIndirectList<T>
-        explicit List(const UIndirectList<T>& lst);
+        explicit List(const UIndirectList<T>& list);
 
         //- Construct as copy of BiIndirectList<T>
-        explicit List(const BiIndirectList<T>& lst);
+        explicit List(const BiIndirectList<T>& list);
 
         //- Construct from an initializer list
-        List(std::initializer_list<T> lst);
+        List(std::initializer_list<T> list);
 
         //- Move construct from List
-        List(List<T>&& lst);
+        List(List<T>&& list);
 
         //- Move construct from DynamicList
         template<int SizeMin>
-        List(DynamicList<T, SizeMin>&& lst);
+        List(DynamicList<T, SizeMin>&& list);
 
         //- Move construct from SortableList
-        List(SortableList<T>&& lst);
+        List(SortableList<T>&& list);
 
         //- Move construct from SLList
-        List(SLList<T>&& lst);
+        List(SLList<T>&& list);
 
         //- Construct from Istream
         List(Istream& is);
@@ -206,17 +213,18 @@ public:
 
         // Edit
 
-            //- Alias for setSize(const label)
+            //- Adjust allocated size of list.
+            //  The boolList version fills new memory with false.
             inline void resize(const label newSize);
 
-            //- Alias for setSize(const label, const T&)
-            inline void resize(const label newSize, const T& val);
+            //- Adjust allocated size of list and set val for new elements
+            void resize(const label newSize, const T& val);
 
-            //- Reset size of List
-            void setSize(const label newSize);
+            //- Alias for resize(const label)
+            inline void setSize(const label newSize);
 
-            //- Reset size of List and value for new elements
-            void setSize(const label newSize, const T& val);
+            //- Alias for resize(const label, const T&)
+            inline void setSize(const label newSize, const T& val);
 
             //- Clear the list, i.e. set size to zero
             inline void clear();
@@ -228,23 +236,23 @@ public:
             inline void append(T&& val);
 
             //- Append a List to the end of this list
-            inline void append(const UList<T>& lst);
+            inline void append(const UList<T>& list);
 
             //- Append a UIndirectList at the end of this list
-            inline void append(const UIndirectList<T>& lst);
+            inline void append(const UIndirectList<T>& list);
 
             //- Transfer the contents of the argument List into this list
             //- and annul the argument list
-            void transfer(List<T>& lst);
+            void transfer(List<T>& list);
 
             //- Transfer the contents of the argument List into this list
             //- and annul the argument list
             template<int SizeMin>
-            void transfer(DynamicList<T, SizeMin>& lst);
+            void transfer(DynamicList<T, SizeMin>& list);
 
             //- Transfer the contents of the argument List into this list
             //- and annul the argument list
-            void transfer(SortableList<T>& lst);
+            void transfer(SortableList<T>& list);
 
             //- Return subscript-checked element of UList and resizing the list
             //- if required.
@@ -257,19 +265,19 @@ public:
         void operator=(const UList<T>& a);
 
         //- Assignment operator. Takes linear time
-        void operator=(const List<T>& lst);
+        void operator=(const List<T>& list);
 
         //- Assignment to SLList operator. Takes linear time
-        void operator=(const SLList<T>& lst);
+        void operator=(const SLList<T>& list);
 
         //- Assignment to UIndirectList operator. Takes linear time
-        void operator=(const UIndirectList<T>& lst);
+        void operator=(const UIndirectList<T>& list);
 
         //- Assignment to BiIndirectList operator. Takes linear time
-        void operator=(const BiIndirectList<T>& lst);
+        void operator=(const BiIndirectList<T>& list);
 
         //- Assignment to an initializer list
-        void operator=(std::initializer_list<T> lst);
+        void operator=(std::initializer_list<T> list);
 
         //- Assignment of all entries to the given value
         inline void operator=(const T& val);
@@ -278,17 +286,17 @@ public:
         inline void operator=(const zero);
 
         //- Move assignment. Takes constant time
-        void operator=(List<T>&& lst);
+        void operator=(List<T>&& list);
 
         //- Move assignment. Takes constant time.
         template<int SizeMin>
-        void operator=(DynamicList<T, SizeMin>&& lst);
+        void operator=(DynamicList<T, SizeMin>&& list);
 
         //- Move assignment. Takes constant time.
-        void operator=(SortableList<T>&& lst);
+        void operator=(SortableList<T>&& list);
 
         //- Move assignment. Takes constant time
-        void operator=(SLList<T>&& lst);
+        void operator=(SLList<T>&& list);
 
 
     // Istream Operator
@@ -297,7 +305,7 @@ public:
         friend Istream& operator>> <T>
         (
             Istream& is,
-            List<T>& L
+            List<T>& list
         );
 
 
@@ -305,6 +313,57 @@ public:
 
         //- No shallowCopy permitted
         void shallowCopy(const UList<T>&) = delete;
+
+
+    // Special Methods
+
+        //- A bitSet::set() method for a list of bool
+        //  Increases size when setting an out-of-bounds value.
+        //
+        //  \return True if value changed.
+        template<class TypeT = T>
+        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        inline set(const label i, bool val = true)
+        {
+            if (i < 0)
+            {
+                return false;               // Out-of-bounds: ignore
+            }
+            else if (i >= this->size())
+            {
+                if (!val)                   // Unset out-of-bounds: ignore
+                {
+                    return false;
+                }
+                this->resize(i+1, false);   // Adjust size for assign, fill 0
+            }
+
+            (*this)[i] = val;
+            return true;
+        }
+};
+
+
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+//- Hashing for List data, which uses Hasher for contiguous data and
+//- element-wise incrementally hashing otherwise.
+template<class T>
+struct Hash<List<T>>
+{
+    inline unsigned operator()(const UList<T>& obj, unsigned seed=0) const
+    {
+        if (contiguous<T>())
+        {
+            return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
+        }
+
+        for (const T& val : obj)
+        {
+            seed = Hash<T>()(val, seed);
+        }
+        return seed;
+    }
 };
 
 

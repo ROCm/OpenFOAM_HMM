@@ -49,7 +49,7 @@ Foam::patchInteractionDataList::patchInteractionDataList
     forAllReverse(items, i)
     {
         const keyType& patchName = items[i].patchName();
-        labelList ids = bMesh.findIndices(patchName);
+        labelList ids = bMesh.indices(patchName);
 
         if (ids.empty())
         {

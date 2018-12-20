@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,9 +74,9 @@ public:
             surfaceWriter,
             wordDict,
             (
-                const dictionary& optDict
+                const dictionary& options
             ),
-            (optDict)
+            (options)
         );
 
 
@@ -118,98 +118,98 @@ public:
         //  is improved.
         virtual void updateMesh
         (
-            const fileName& outputDir,
-            const fileName& surfaceName
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName     //!< Name of surface
         ) const
         {}
 
         //- Write single surface geometry to file.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const bool verbose = false      //!< Additional verbosity
         ) const
         {
             return fileName::null;
         }
 
         //- Write scalarField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<scalar>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<scalar>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const
         {
             return fileName::null;
         }
 
         //- Write vectorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<vector>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<vector>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const
         {
             return fileName::null;
         }
 
         //- Write sphericalTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<sphericalTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<sphericalTensor>& values, //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const
         {
             return fileName::null;
         }
 
         //- Write symmTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<symmTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<symmTensor>& values,//!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const
         {
             return fileName::null;
         }
 
         //- Write tensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<tensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<tensor>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const
         {
             return fileName::null;

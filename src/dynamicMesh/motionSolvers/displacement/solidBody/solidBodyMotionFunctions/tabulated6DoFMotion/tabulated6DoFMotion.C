@@ -157,7 +157,7 @@ bool Foam::solidBodyMotionFunctions::tabulated6DoFMotion::read
         }
     }
 
-    SBMFCoeffs_.lookup("CofG") >> CofG_;
+    SBMFCoeffs_.readEntry("CofG", CofG_);
 
     return true;
 }

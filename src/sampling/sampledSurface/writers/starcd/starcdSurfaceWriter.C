@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,8 @@ License
 
 #include "starcdSurfaceWriter.H"
 #include "MeshedSurfaceProxy.H"
+#include "OFstream.H"
+#include "OSspecific.H"
 #include "makeSurfaceWriterMethods.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -34,44 +36,11 @@ namespace Foam
     makeSurfaceWriterType(starcdSurfaceWriter);
 }
 
+// Field writing implementation
+#include "starcdSurfaceWriterImpl.C"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-namespace Foam
-{
-    template<>
-    inline void Foam::starcdSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const scalar& v
-    )
-    {
-        os  << v << nl;
-    }
-
-
-    template<>
-    inline void Foam::starcdSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const vector& v
-    )
-    {
-        os  << v[0] << ' ' << v[1] << ' ' << v[2] << nl;
-    }
-
-
-    template<>
-    inline void Foam::starcdSurfaceWriter::writeData
-    (
-        Ostream& os,
-        const sphericalTensor& v
-    )
-    {
-        os  << v[0] << nl;
-    }
-
-}
+// Field writing methods
+defineSurfaceWriterWriteFields(Foam::starcdSurfaceWriter);
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -84,28 +53,27 @@ Foam::fileName Foam::starcdSurfaceWriter::write
     const bool verbose
 ) const
 {
-    if (!isDir(outputDir))
-    {
-        mkDir(outputDir);
-    }
+    // geometry:  rootdir/time/surfaceName.{raw,vrt,inp}
 
-    fileName outName(outputDir/surfaceName + ".inp");
+    fileName outputFile(outputDir/surfaceName + ".inp");
 
     if (verbose)
     {
-        Info<< "Writing geometry to " << outName << endl;
+        Info<< "Writing geometry to " << outputFile << endl;
     }
 
-    MeshedSurfaceProxy<face>(surf.points(), surf.faces()).write(outName);
+    if (!isDir(outputFile.path()))
+    {
+        mkDir(outputFile.path());
+    }
 
-    return outName;
+    MeshedSurfaceProxy<face>(surf.points(), surf.faces()).write
+    (
+        outputFile
+    );
+
+    return outputFile;
 }
-
-
-// create write methods
-defineSurfaceWriterWriteField(Foam::starcdSurfaceWriter, scalar);
-defineSurfaceWriterWriteField(Foam::starcdSurfaceWriter, vector);
-defineSurfaceWriterWriteField(Foam::starcdSurfaceWriter, sphericalTensor);
 
 
 // ************************************************************************* //

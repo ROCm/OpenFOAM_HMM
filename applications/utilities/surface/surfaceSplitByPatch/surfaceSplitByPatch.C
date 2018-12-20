@@ -43,11 +43,11 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "write surface mesh regions to separate files"
+        "Write surface mesh regions to separate files"
     );
 
     argList::noParallel();
-    argList::addArgument("input surfaceFile");
+    argList::addArgument("input", "The input surface file");
     argList args(argc, argv);
 
     const fileName surfName = args[1];

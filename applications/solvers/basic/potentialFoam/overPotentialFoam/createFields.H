@@ -38,10 +38,9 @@ if (args.found("initialiseUBCs"))
 // Construct a pressure field
 // If it is available read it otherwise construct from the velocity BCs
 // converting fixed-value BCs to zero-gradient and vice versa.
-word pName("p");
 
-// Update name of the pressure field from the command-line option
-args.readIfPresent("pName", pName);
+// Allow override from command-line -pName option
+const word pName = args.opt<word>("pName", "p");
 
 // Infer the pressure BCs from the velocity
 wordList pBCTypes

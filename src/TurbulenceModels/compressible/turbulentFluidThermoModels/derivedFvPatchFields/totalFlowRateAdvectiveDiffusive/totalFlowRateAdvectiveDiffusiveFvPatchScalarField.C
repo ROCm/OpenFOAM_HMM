@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "IOobjectList.H"
 #include "turbulentFluidThermoModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -82,6 +81,7 @@ totalFlowRateAdvectiveDiffusiveFvPatchScalarField
     }
 }
 
+
 Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::
 totalFlowRateAdvectiveDiffusiveFvPatchScalarField
 (
@@ -109,6 +109,7 @@ totalFlowRateAdvectiveDiffusiveFvPatchScalarField
     rhoName_(tppsf.rhoName_),
     massFluxFraction_(tppsf.massFluxFraction_)
 {}
+
 
 Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::
 totalFlowRateAdvectiveDiffusiveFvPatchScalarField
@@ -154,11 +155,8 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
-    const LESModel<EddyDiffusivity<compressible::turbulenceModel>>& turbModel =
-        db().lookupObject
-        <
-            LESModel<EddyDiffusivity<compressible::turbulenceModel>>
-        >
+    const compressible::turbulenceModel& turbModel =
+        db().lookupObject<compressible::turbulenceModel>
         (
             IOobject::groupName
             (
@@ -177,10 +175,9 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
 
     valueFraction() =
         1.0
-        /
-        (
-            1.0 +
-            alphap*patch().deltaCoeffs()*patch().magSf()/max(mag(phip), SMALL)
+       /(
+            1.0
+          + alphap*patch().deltaCoeffs()*patch().magSf()/max(mag(phip), SMALL)
         );
 
     mixedFvPatchField<scalar>::updateCoeffs();
@@ -198,8 +195,10 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
 }
 
 
-void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::
-write(Ostream& os) const
+void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::write
+(
+    Ostream& os
+) const
 {
     fvPatchField<scalar>::write(os);
     os.writeEntry("phi", phiName_);

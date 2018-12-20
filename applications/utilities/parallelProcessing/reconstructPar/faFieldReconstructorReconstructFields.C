@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -36,19 +36,19 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
 Foam::faFieldReconstructor::reconstructFaAreaField
 (
     const IOobject& fieldIoObject
 )
 {
     // Read the field for all the processors
-    PtrList<GeometricField<Type, faPatchField, areaMesh> > procFields
+    PtrList<GeometricField<Type, faPatchField, areaMesh>> procFields
     (
         procMeshes_.size()
     );
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         procFields.set
         (
@@ -72,7 +72,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
     Field<Type> internalField(mesh_.nFaces());
 
     // Create the patch fields
-    PtrList<faPatchField<Type> > patchFields(mesh_.boundary().size());
+    PtrList<faPatchField<Type>> patchFields(mesh_.boundary().size());
 
 
     // Create global mesh patches starts
@@ -89,7 +89,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
         gStarts[i] = gStarts[i-1] + mesh_.boundary()[i-1].labelList::size();
     }
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         const GeometricField<Type, faPatchField, areaMesh>& procField =
             procFields[procI];
@@ -203,7 +203,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
 //                         label curBPatch = mesh_.boundary().whichPatch(curE);
                         label curBPatch = -1;
 
-                        forAll (mesh_.boundary(), pI)
+                        forAll(mesh_.boundary(), pI)
                         {
                             if
                             (
@@ -273,41 +273,38 @@ Foam::faFieldReconstructor::reconstructFaAreaField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>::New
     (
-        new GeometricField<Type, faPatchField, areaMesh>
+        IOobject
         (
-            IOobject
-            (
-                fieldIoObject.name(),
-                mesh_.time().timeName(),
-                mesh_(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            procFields[0].dimensions(),
-            internalField,
-            patchFields
-        )
+            fieldIoObject.name(),
+            mesh_.time().timeName(),
+            mesh_(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        procFields[0].dimensions(),
+        internalField,
+        patchFields
     );
 }
 
 
 template<class Type>
-Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh> >
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
 Foam::faFieldReconstructor::reconstructFaEdgeField
 (
     const IOobject& fieldIoObject
 )
 {
     // Read the field for all the processors
-    PtrList<GeometricField<Type, faePatchField, edgeMesh> > procFields
+    PtrList<GeometricField<Type, faePatchField, edgeMesh>> procFields
     (
         procMeshes_.size()
     );
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         procFields.set
         (
@@ -332,7 +329,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
     Field<Type> internalField(mesh_.nInternalEdges());
 
     // Create the patch fields
-    PtrList<faePatchField<Type> > patchFields(mesh_.boundary().size());
+    PtrList<faePatchField<Type>> patchFields(mesh_.boundary().size());
 
 
     labelList gStarts(mesh_.boundary().size(), -1);
@@ -348,7 +345,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
     }
 
 
-    forAll (procMeshes_, procI)
+    forAll(procMeshes_, procI)
     {
         const GeometricField<Type, faePatchField, edgeMesh>& procField =
             procFields[procI];
@@ -361,7 +358,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
         {
             labelList curAddr(edgeProcAddressing_[procI]);
 
-//             forAll (curAddr, addrI)
+//             forAll(curAddr, addrI)
 //             {
 //                 curAddr[addrI] -= 1;
 //             }
@@ -476,7 +473,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
 
                             label curBPatch = -1;
 
-                            forAll (mesh_.boundary(), pI)
+                            forAll(mesh_.boundary(), pI)
                             {
                                 if
                                 (
@@ -553,23 +550,20 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
 
     // Now construct and write the field
     // setting the internalField and patchFields
-    return tmp<GeometricField<Type, faePatchField, edgeMesh> >
+    return tmp<GeometricField<Type, faePatchField, edgeMesh>>::New
     (
-        new GeometricField<Type, faePatchField, edgeMesh>
+        IOobject
         (
-            IOobject
-            (
-                fieldIoObject.name(),
-                mesh_.time().timeName(),
-                mesh_(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            procFields[0].dimensions(),
-            internalField,
-            patchFields
-        )
+            fieldIoObject.name(),
+            mesh_.time().timeName(),
+            mesh_(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        procFields[0].dimensions(),
+        internalField,
+        patchFields
     );
 }
 
@@ -581,30 +575,25 @@ void Foam::faFieldReconstructor::reconstructFaAreaFields
     const IOobjectList& objects
 )
 {
-    const word& fieldClassName =
+    const word& clsName =
         GeometricField<Type, faPatchField, areaMesh>::typeName;
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    const wordList fieldNames = objects.sortedNames(clsName);
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
-
-        for
-        (
-            IOobjectList::const_iterator fieldIter = fields.begin();
-            fieldIter != fields.end();
-            ++fieldIter
-        )
-        {
-            Info << "        " << fieldIter()->name() << endl;
-
-            reconstructFaAreaField<Type>(*fieldIter())().write();
-        }
-
-        Info<< endl;
+        Info<< "    Reconstructing " << clsName << "s\n" << endl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info << "        " << fieldName << endl;
+        reconstructFaAreaField<Type>(*(objects[fieldName]))().write();
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
+
 
 // Reconstruct and write all edge fields
 template<class Type>
@@ -613,29 +602,24 @@ void Foam::faFieldReconstructor::reconstructFaEdgeFields
     const IOobjectList& objects
 )
 {
-    const word& fieldClassName =
+    const word& clsName =
         GeometricField<Type, faePatchField, edgeMesh>::typeName;
 
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    const wordList fieldNames = objects.sortedNames(clsName);
 
-    if (fields.size())
+    if (fieldNames.size())
     {
-        Info<< "    Reconstructing " << fieldClassName << "s\n" << endl;
-
-        for
-        (
-            IOobjectList::const_iterator fieldIter = fields.begin();
-            fieldIter != fields.end();
-            ++fieldIter
-        )
-        {
-            Info<< "        " << fieldIter()->name() << endl;
-
-            reconstructFaEdgeField<Type>(*fieldIter())().write();
-        }
-
-        Info<< endl;
+        Info<< "    Reconstructing " << clsName << "s\n" << endl;
     }
+
+    for (const word& fieldName : fieldNames)
+    {
+        Info << "        " << fieldName << endl;
+
+        reconstructFaEdgeField<Type>(*(objects[fieldName]))().write();
+    }
+
+    if (fieldNames.size()) Info<< endl;
 }
 
 

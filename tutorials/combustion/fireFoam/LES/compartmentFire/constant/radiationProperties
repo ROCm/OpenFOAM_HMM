@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -25,8 +25,8 @@ fvDOMCoeffs
 {
     nPhi    2;
     nTheta  4;
-    convergence 1e-5;
     maxIter 5;
+    tolerance 1e-5;
 }
 
 // Number of flow iterations per radiation iteration
@@ -36,9 +36,9 @@ absorptionEmissionModel greyMeanAbsorptionEmission;
 
 constantAbsorptionEmissionCoeffs
 {
-    absorptivity    absorptivity    [ m^-1 ]       0.1;
-    emissivity      emissivity      [ m^-1 ]        0.1;
-    E               E               [ kg m^-1 s^-3 ]  0;
+    absorptivity    [ m^-1 ]        0.1;
+    emissivity      [ m^-1 ]        0.1;
+    E               [ kg m^-1 s^-3 ]  0;
 }
 
 greyMeanAbsorptionEmissionCoeffs

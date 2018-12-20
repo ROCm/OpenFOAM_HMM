@@ -55,16 +55,24 @@ class arcEdge
 {
     // Private data
 
+        // Begin, mid, end points
         point p1_, p2_, p3_;
+
+        //- The arc angle (in degrees)
         scalar angle_;
+
+        //- The arc radius
         scalar radius_;
-        cylindricalCS cs_;
+
+        //- The local cylindrical coordinate system
+        coordSystem::cylindrical cs_;
 
 
     // Private Member Functions
 
-        //- Calculate the coordinate system, angle and radius
-        cylindricalCS calcAngle();
+        //- Calculate the angle, radius and axis
+        //  \return the cylindrical coordinate system
+        coordSystem::cylindrical calcAngle();
 
         //- No copy construct
         arcEdge(const arcEdge&) = delete;
@@ -85,7 +93,8 @@ public:
         arcEdge
         (
             const pointField& points,
-            const label start, const label end,
+            const label start,
+            const label end,
             const point& pMid
         );
 
@@ -101,17 +110,15 @@ public:
 
 
     //- Destructor
-    virtual ~arcEdge()
-    {}
+    virtual ~arcEdge() = default;
 
 
     // Member Functions
 
-        //- Return the point position corresponding to the curve parameter
-        //  0 <= lambda <= 1
-        point position(const scalar) const;
+        //- The point corresponding to the curve parameter [0-1]
+        point position(const scalar lambda) const;
 
-        //- Return the length of the curve
+        //- The length of the curve
         scalar length() const;
 };
 

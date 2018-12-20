@@ -38,14 +38,14 @@ Foam::polyMeshFilterSettings::polyMeshFilterSettings(const dictionary& dict)
     collapseEdgesCoeffDict_(dict_.subDict("collapseEdgesCoeffs")),
     collapseFacesCoeffDict_(dict_.subOrEmptyDict("collapseFacesCoeffs")),
     meshQualityCoeffDict_(dict_.subOrEmptyDict("controlMeshQualityCoeffs")),
-    minLen_(readScalar(collapseEdgesCoeffDict_.lookup("minimumEdgeLength"))),
+    minLen_(collapseEdgesCoeffDict_.get<scalar>("minimumEdgeLength")),
     maxCos_
     (
         ::cos
         (
             degToRad
             (
-                readScalar(collapseEdgesCoeffDict_.lookup("maximumMergeAngle"))
+                collapseEdgesCoeffDict_.get<scalar>("maximumMergeAngle")
             )
         )
     ),

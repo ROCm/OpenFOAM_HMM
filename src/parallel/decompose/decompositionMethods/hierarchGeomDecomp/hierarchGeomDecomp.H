@@ -111,7 +111,9 @@ class hierarchGeomDecomp
         //- Find midValue (at local index mid) such that the number of
         //  elements between mid and leftIndex are (globally summed) the
         //  wantedSize. Binary search.
-        static void findBinary
+        //
+        //  \Return False if the binary search completed
+        static bool findBinary
         (
             const label sizeTol,        // size difference considered acceptable
             const List<scalar>&,
@@ -126,7 +128,7 @@ class hierarchGeomDecomp
         //- Find midValue (at local index mid) such that the number of
         //  elements between mid and leftIndex are (globally summed) the
         //  wantedSize. Binary search.
-        static void findBinary
+        static bool findBinary
         (
             const label sizeTol,        // size difference considered acceptable
             const List<scalar>& sortedWeightedSizes,
@@ -140,7 +142,8 @@ class hierarchGeomDecomp
         );
 
         //- Recursively sort in x,y,z (or rather acc. to decompOrder_)
-        void sortComponent
+        //  \return the number of warnings from findBinary
+        label sortComponent
         (
             const label sizeTol,
             const pointField&,
@@ -152,7 +155,8 @@ class hierarchGeomDecomp
 
         //- Recursively sort in x,y,z (or rather acc. to decompOrder_)
         //- Using weighted points.
-        void sortComponent
+        //  \return the number of warnings from findBinary
+        label sortComponent
         (
             const label sizeTol,
             const scalarField& weights,
@@ -224,6 +228,7 @@ public:
             const scalarField& cWeights
         ) const
         {
+            checkDecompositionDirections(mesh.geometricD());
             return decompose(cc, cWeights);
         }
 
@@ -236,6 +241,7 @@ public:
             const pointField& cc
         ) const
         {
+            checkDecompositionDirections(mesh.geometricD());
             return decompose(cc);
         }
 

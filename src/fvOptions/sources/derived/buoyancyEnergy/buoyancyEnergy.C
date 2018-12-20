@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "buoyancyEnergy.H"
 #include "fvMatrices.H"
+#include "gravityMeshObject.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -58,7 +59,7 @@ Foam::fv::buoyancyEnergy::buoyancyEnergy
     option(sourceName, modelType, dict, mesh),
     UName_(coeffs_.lookupOrDefault<word>("U", "U"))
 {
-    coeffs_.lookup("fields") >> fieldNames_;
+    coeffs_.readEntry("fields", fieldNames_);
 
     if (fieldNames_.size() != 1)
     {
@@ -80,11 +81,19 @@ void Foam::fv::buoyancyEnergy::addSup
 )
 {
     const uniformDimensionedVectorField& g =
-        mesh_.lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(mesh_.time());
 
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
 
     eqn += rho*(U&g);
+}
+
+
+bool Foam::fv::buoyancyEnergy::read(const dictionary& dict)
+{
+    NotImplemented;
+
+    return false;
 }
 
 

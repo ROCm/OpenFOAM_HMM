@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,19 +97,6 @@ inline Foam::Tensor2D<Cmpt>::Tensor2D(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::x() const
-{
-    return Vector2D<Cmpt>(this->v_[XX], this->v_[XY]);
-}
-
-template<class Cmpt>
-inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::y() const
-{
-    return Vector2D<Cmpt>(this->v_[YX], this->v_[YY]);
-}
-
-
-template<class Cmpt>
 inline const Cmpt& Foam::Tensor2D<Cmpt>::xx() const
 {
     return this->v_[XX];
@@ -160,12 +147,71 @@ inline Cmpt& Foam::Tensor2D<Cmpt>::yy()
 
 
 template<class Cmpt>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::x() const
+{
+    return Vector2D<Cmpt>(this->v_[XX], this->v_[XY]);
+}
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::y() const
+{
+    return Vector2D<Cmpt>(this->v_[YX], this->v_[YY]);
+}
+
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::cx() const
+{
+    return Vector2D<Cmpt>(this->v_[XX], this->v_[YX]);
+}
+
+template<class Cmpt>
+inline Foam::Vector2D<Cmpt> Foam::Tensor2D<Cmpt>::cy() const
+{
+    return Vector2D<Cmpt>(this->v_[XY], this->v_[YY]);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operations * * * * * * * * * * * * * //
+
+template<class Cmpt>
 inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::T() const
 {
     return Tensor2D<Cmpt>
     (
         xx(), yx(),
         xy(), yy()
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor2D<Cmpt>
+Foam::Tensor2D<Cmpt>::inner(const Tensor2D<Cmpt>& t2) const
+{
+    const Tensor2D<Cmpt>& t1 = *this;
+
+    return Tensor2D<Cmpt>
+    (
+        t1.xx()*t2.xx() + t1.xy()*t2.yx(),
+        t1.xx()*t2.xy() + t1.xy()*t2.yy(),
+
+        t1.yx()*t2.xx() + t1.yy()*t2.yx(),
+        t1.yx()*t2.xy() + t1.yy()*t2.yy()
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor2D<Cmpt>
+Foam::Tensor2D<Cmpt>::schur(const Tensor2D<Cmpt>& t2) const
+{
+    const Tensor2D<Cmpt>& t1 = *this;
+
+    return Tensor2D<Cmpt>
+    (
+        t1.xx()*t2.xx(), t1.xy()*t2.xy(),
+        t1.yx()*t2.yx(), t1.yy()*t2.yy()
     );
 }
 
@@ -200,15 +246,9 @@ template<class Cmpt>
 inline typename innerProduct<Tensor2D<Cmpt>, Tensor2D<Cmpt>>::type
 operator&(const Tensor2D<Cmpt>& t1, const Tensor2D<Cmpt>& t2)
 {
-    return Tensor2D<Cmpt>
-    (
-        t1.xx()*t2.xx() + t1.xy()*t2.yx(),
-        t1.xx()*t2.xy() + t1.xy()*t2.yy(),
-
-        t1.yx()*t2.xx() + t1.yy()*t2.yx(),
-        t1.yx()*t2.xy() + t1.yy()*t2.yy()
-    );
+    return t1.inner(t2);
 }
+
 
 //- Inner-product between a tensor and a vector
 template<class Cmpt>

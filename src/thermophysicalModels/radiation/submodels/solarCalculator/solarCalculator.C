@@ -43,10 +43,10 @@ const Foam::Enum
     Foam::solarCalculator::sunDirModel
 >
 Foam::solarCalculator::sunDirectionModelTypeNames_
-{
+({
     { sunDirModel::mSunDirConstant, "sunDirConstant" },
     { sunDirModel::mSunDirTracking, "sunDirTracking" },
-};
+});
 
 
 const Foam::Enum
@@ -54,14 +54,14 @@ const Foam::Enum
     Foam::solarCalculator::sunLModel
 >
 Foam::solarCalculator::sunLoadModelTypeNames_
-{
+({
     { sunLModel::mSunLoadConstant, "sunLoadConstant" },
     {
         sunLModel::mSunLoadFairWeatherConditions,
         "sunLoadFairWeatherConditions"
     },
     { sunLModel::mSunLoadTheoreticalMaximum, "sunLoadTheoreticalMaximum" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -82,16 +82,17 @@ void Foam::solarCalculator::calculateBetaTetha()
         }
     }
 
-    scalar LSM = 15.0*(readScalar(dict_.lookup("localStandardMeridian")));
+    scalar LSM = 15.0*(dict_.get<scalar>("localStandardMeridian"));
 
-    scalar D = readScalar(dict_.lookup("startDay")) + runTime/86400.0;
+    scalar D = dict_.get<scalar>("startDay") + runTime/86400.0;
     scalar M = 6.24004 + 0.0172*D;
     scalar EOT = -7.659*sin(M) + 9.863*sin(2*M + 3.5932);
 
-    startTime_ = readScalar(dict_.lookup("startTime"));
+    dict_.readEntry("startTime", startTime_);
+
     scalar LST =  startTime_ + runTime/3600.0;
 
-    scalar LON = readScalar(dict_.lookup("longitude"));
+    scalar LON = dict_.get<scalar>("longitude");
 
     scalar AST = LST + EOT/60.0 + (LON - LSM)/15;
 
@@ -99,7 +100,7 @@ void Foam::solarCalculator::calculateBetaTetha()
 
     scalar H = degToRad(15*(AST - 12));
 
-    scalar L = degToRad(readScalar(dict_.lookup("latitude")));
+    scalar L = degToRad(dict_.get<scalar>("latitude"));
 
     scalar deltaRad = degToRad(delta);
     beta_ = max(asin(cos(L)*cos(deltaRad)*cos(H) + sin(L)*sin(deltaRad)), 1e-3);
@@ -123,12 +124,8 @@ void Foam::solarCalculator::calculateBetaTetha()
 
 void Foam::solarCalculator::calculateSunDirection()
 {
-
-    dict_.lookup("gridUp") >> gridUp_;
-    gridUp_ /= mag(gridUp_);
-
-    dict_.lookup("gridEast") >> eastDir_;
-    eastDir_ /= mag(eastDir_);
+    gridUp_  = normalised(dict_.get<vector>("gridUp"));
+    eastDir_ = normalised(dict_.get<vector>("gridEast"));
 
     coord_.reset
     (
@@ -140,7 +137,7 @@ void Foam::solarCalculator::calculateSunDirection()
     direction_.y() =  cos(beta_)*cos(tetha_); // South axis
     direction_.x() =  cos(beta_)*sin(tetha_); // West axis
 
-    direction_ /= mag(direction_);
+    direction_.normalise();
 
     if (debug)
     {
@@ -148,7 +145,7 @@ void Foam::solarCalculator::calculateSunDirection()
     }
 
     // Transform to actual coordinate system
-    direction_ = coord_->R().transform(direction_);
+    direction_ = coord_->transform(direction_);
 
     if (debug)
     {
@@ -163,10 +160,9 @@ void Foam::solarCalculator::init()
     {
         case mSunDirConstant:
         {
-            if (dict_.found("sunDirection"))
+            if (dict_.readIfPresent("sunDirection", direction_))
             {
-                dict_.lookup("sunDirection") >> direction_;
-                direction_ /= mag(direction_);
+                direction_.normalise();
             }
             else
             {
@@ -185,8 +181,11 @@ void Foam::solarCalculator::init()
                     << " case is steady " << nl << exit(FatalError);
             }
 
-            dict_.lookup("sunTrackingUpdateInterval") >>
-                sunTrackingUpdateInterval_;
+            dict_.readEntry
+            (
+                "sunTrackingUpdateInterval",
+                sunTrackingUpdateInterval_
+            );
 
             calculateBetaTetha();
             calculateSunDirection();
@@ -198,8 +197,8 @@ void Foam::solarCalculator::init()
     {
         case mSunLoadConstant:
         {
-            dict_.lookup("directSolarRad") >> directSolarRad_;
-            dict_.lookup("diffuseSolarRad") >> diffuseSolarRad_;
+            dict_.readEntry("directSolarRad", directSolarRad_);
+            dict_.readEntry("diffuseSolarRad", diffuseSolarRad_);
             break;
         }
         case mSunLoadFairWeatherConditions:
@@ -210,14 +209,10 @@ void Foam::solarCalculator::init()
                 skyCloudCoverFraction_
             );
 
-            A_ = readScalar(dict_.lookup("A"));
-            B_ = readScalar(dict_.lookup("B"));
+            dict_.readEntry("A", A_);
+            dict_.readEntry("B", B_);
 
-            if (dict_.found("beta"))
-            {
-                dict_.lookup("beta") >> beta_;
-            }
-            else
+            if (!dict_.readIfPresent("beta", beta_))
             {
                 calculateBetaTetha();
             }
@@ -226,19 +221,16 @@ void Foam::solarCalculator::init()
                 (1.0 - 0.75*pow(skyCloudCoverFraction_, 3.0))
               * A_/exp(B_/sin(beta_));
 
-            groundReflectivity_ =
-                readScalar(dict_.lookup("groundReflectivity"));
-
+            dict_.readEntry("groundReflectivity", groundReflectivity_);
             break;
         }
         case mSunLoadTheoreticalMaximum:
         {
-            Setrn_ = readScalar(dict_.lookup("Setrn"));
-            SunPrime_ = readScalar(dict_.lookup("SunPrime"));
+            dict_.readEntry("Setrn", Setrn_);
+            dict_.readEntry("SunPrime", SunPrime_);
             directSolarRad_ = Setrn_*SunPrime_;
 
-            groundReflectivity_ =
-                readScalar(dict_.lookup("groundReflectivity"));
+            dict_.readEntry("groundReflectivity", groundReflectivity_);
             break;
         }
     }
@@ -266,20 +258,16 @@ Foam::solarCalculator::solarCalculator
     skyCloudCoverFraction_(0.0),
     Setrn_(0.0),
     SunPrime_(0.0),
-    C_(readScalar(dict.lookup("C"))),
+    C_(dict.get<scalar>("C")),
     sunDirectionModel_
     (
-        sunDirectionModelTypeNames_.lookup("sunDirectionModel", dict)
+        sunDirectionModelTypeNames_.get("sunDirectionModel", dict)
     ),
-    sunLoadModel_
-    (
-        sunLoadModelTypeNames_.lookup("sunLoadModel", dict)
-    ),
+    sunLoadModel_(sunLoadModelTypeNames_.get("sunLoadModel", dict)),
     coord_()
 {
     init();
 }
-
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

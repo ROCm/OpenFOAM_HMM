@@ -64,14 +64,14 @@ public:
         PtrDictionary(const label size = 128);
 
         //- Copy construct
-        PtrDictionary(const PtrDictionary&);
+        PtrDictionary(const PtrDictionary& dict);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        PtrDictionary(Istream&, const INew&);
+        PtrDictionary(Istream& is, const INew& inew);
 
         //- Construct from Istream
-        PtrDictionary(Istream&);
+        PtrDictionary(Istream& is);
 
 
     // Member operators

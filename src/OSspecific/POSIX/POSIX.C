@@ -74,6 +74,8 @@ namespace Foam
     defineTypeNameAndDebug(POSIX, 0);
 }
 
+static bool cwdPreference_(Foam::debug::optimisationSwitch("cwd", 0));
+
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -280,7 +282,11 @@ Foam::fileName Foam::home(const std::string& userName)
 }
 
 
-Foam::fileName Foam::cwd()
+namespace Foam
+{
+
+//- The physical current working directory path name (pwd -P).
+static Foam::fileName cwd_P()
 {
     label pathLengthLimit = POSIX::pathLengthChunk;
     List<char> path(pathLengthLimit);
@@ -307,7 +313,7 @@ Foam::fileName Foam::cwd()
                     << exit(FatalError);
             }
 
-            path.setSize(pathLengthLimit);
+            path.resize(pathLengthLimit);
         }
         else
         {
@@ -319,7 +325,86 @@ Foam::fileName Foam::cwd()
         << "Couldn't get the current working directory"
         << exit(FatalError);
 
-    return fileName::null;
+    return fileName();
+}
+
+
+//- The logical current working directory path name.
+// From the PWD environment, same as pwd -L.
+static Foam::fileName cwd_L()
+{
+    const char* env = ::getenv("PWD");
+
+    // Basic check
+    if (!env || env[0] != '/')
+    {
+        WarningInFunction
+            << "PWD is invalid - reverting to physical description"
+            << nl;
+
+        return cwd_P();
+    }
+
+    fileName dir(env);
+
+    // Check for "/."
+    for
+    (
+        std::string::size_type pos = 0;
+        std::string::npos != (pos = dir.find("/.", pos));
+        /*nil*/
+    )
+    {
+        pos += 2;
+
+        if
+        (
+            // Ends in "/." or has "/./"
+            !dir[pos] || dir[pos] == '/'
+
+            // Ends in "/.." or has "/../"
+         || (dir[pos] == '.' && (!dir[pos+1] || dir[pos+1] == '/'))
+        )
+        {
+            WarningInFunction
+                << "PWD contains /. or /.. - reverting to physical description"
+                << nl;
+
+            return cwd_P();
+        }
+    }
+
+    // Finally, verify that PWD actually corresponds to the "." directory
+    if (!fileStat(dir, true).sameINode(fileStat(".", true)))
+    {
+        WarningInFunction
+            << "PWD is not the cwd() - reverting to physical description"
+            << nl;
+
+        return cwd_P();
+    }
+
+
+    return fileName(dir);
+}
+
+} // End namespace Foam
+
+
+Foam::fileName Foam::cwd()
+{
+    return cwd(cwdPreference_);
+}
+
+
+Foam::fileName Foam::cwd(bool logical)
+{
+    if (logical)
+    {
+        return cwd_L();
+    }
+
+    return cwd_P();
 }
 
 
@@ -824,7 +909,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
         {
-            destFile = destFile/src.name();
+            destFile /= src.name();
         }
 
         // Make sure the destination directory exists.
@@ -864,7 +949,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
         {
-            destFile = destFile/src.name();
+            destFile /= src.name();
         }
 
         // Make sure the destination directory exists.
@@ -880,7 +965,7 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         // If dest is a directory, create the destination file name.
         if (destFile.type() == fileName::DIRECTORY)
         {
-            destFile = destFile/src.components().last();
+            destFile /= src.components().last();
         }
 
         // Make sure the destination directory exists.

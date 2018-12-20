@@ -50,7 +50,6 @@ namespace Foam
 
 class trimModel
 {
-
 protected:
 
     // Protected data
@@ -108,7 +107,7 @@ public:
 
 
     //- Destructor
-    virtual ~trimModel();
+    virtual ~trimModel() = default;
 
 
     // Member functions

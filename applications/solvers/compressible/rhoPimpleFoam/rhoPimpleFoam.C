@@ -52,10 +52,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for compressible turbulent flow.\n"
+        "With optional mesh motion and mesh topology changes."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "createDyMControls.H"
@@ -106,7 +112,7 @@ int main(int argc, char *argv[])
             #include "setDeltaT.H"
         }
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

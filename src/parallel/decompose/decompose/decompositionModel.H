@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ Description
     MeshObject wrapper of decompositionMethod
 
 SourceFiles
+    decompositionModel.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class mapPolyMesh;
 class polyMesh;
 
@@ -62,7 +63,7 @@ class decompositionModel
     public IOdictionary
 {
 
-    // Private data
+    // Private Data
 
         mutable autoPtr<decompositionMethod> decomposerPtr_;
 
@@ -72,17 +73,21 @@ public:
     // Declare name of the class and its debug switch
     ClassName("decompositionModel");
 
+    //- The canonical name ("decomposeParDict") under which the
+    //- MeshObject is registered
+    static const word canonicalName;
+
 
     // Selectors
 
-        //- Read (optionally from absolute path) & register on mesh
+        //- Read (optionally from absolute path) and register on mesh
         static const decompositionModel& New
         (
             const polyMesh& mesh,
             const fileName& decompDictFile = ""
         );
 
-        //- Read (optionally from supplied dictionary) & register on mesh
+        //- Read (optionally from supplied dictionary) and register on mesh
         static const decompositionModel& New
         (
             const polyMesh& mesh,
@@ -126,9 +131,6 @@ public:
             return *decomposerPtr_;
         }
 
-        //- Helper: return IOobject with optionally absolute path provided
-        static IOobject selectIO(const IOobject& io, const fileName& f);
-
 
       // UpdateableMeshObject
 
@@ -139,6 +141,21 @@ public:
 
         virtual void updateMesh(const mapPolyMesh&)
         {}
+
+
+    // Housekeeping
+
+        //- Deprecated(2018-08) compatibility method
+        //  \deprecated(2018-08) - use IOobject::selectIO directly
+        static IOobject selectIO
+        (
+            const IOobject& io,
+            const fileName& altFile,
+            const word& ioName = ""
+        )
+        {
+            return IOobject::selectIO(io, altFile, ioName);
+        }
 
 };
 

@@ -36,12 +36,12 @@ const Foam::Enum
     Foam::surfaceZonesInfo::areaSelectionAlgo
 >
 Foam::surfaceZonesInfo::areaSelectionAlgoNames
-{
+({
     { areaSelectionAlgo::INSIDE, "inside" },
     { areaSelectionAlgo::OUTSIDE, "outside" },
     { areaSelectionAlgo::INSIDEPOINT, "insidePoint" },
     { areaSelectionAlgo::NONE, "none" },
-};
+});
 
 
 const Foam::Enum
@@ -49,11 +49,11 @@ const Foam::Enum
     Foam::surfaceZonesInfo::faceZoneType
 >
 Foam::surfaceZonesInfo::faceZoneTypeNames
-{
+({
     { faceZoneType::INTERNAL, "internal" },
     { faceZoneType::BAFFLE, "baffle" },
     { faceZoneType::BOUNDARY, "boundary" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -82,7 +82,7 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
             zoneInside_ = areaSelectionAlgoNames[method];
             if (zoneInside_ == INSIDEPOINT)
             {
-                surfacesDict.lookup("insidePoint") >> zoneInsidePoint_;
+                surfacesDict.readEntry("insidePoint", zoneInsidePoint_);
             }
 
         }
@@ -110,10 +110,8 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
             && !surface.hasVolumeType()
             )
             {
-                IOWarningInFunction
-                (
-                    surfacesDict
-                )   << "Illegal entry zoneInside "
+                IOWarningInFunction(surfacesDict)
+                    << "Illegal entry zoneInside "
                     << areaSelectionAlgoNames[zoneInside_]
                     << " for faceZone "
                     << faceZoneName_
@@ -122,10 +120,8 @@ Foam::surfaceZonesInfo::surfaceZonesInfo
         }
         else if (hasSide)
         {
-            IOWarningInFunction
-            (
-                surfacesDict
-            )   << "Unused entry zoneInside for faceZone "
+            IOWarningInFunction(surfacesDict)
+                << "Unused entry zoneInside for faceZone "
                 << faceZoneName_
                 << " since no cellZone specified."
                 << endl;

@@ -480,8 +480,10 @@ void Foam::ccm::reader::readCells
         auto dictIter = boundaryRegion_.find(info.ccmIndex);
         if (dictIter.found())
         {
-            word patchName(dictIter()["Label"]);
-            word patchType(dictIter()["BoundaryType"]);
+            dictionary& dict = dictIter.object();
+
+            const word patchName(dict.get<word>("Label"));
+            const word patchType(dict.get<word>("BoundaryType"));
 
             if (!patchName.empty())
             {
@@ -494,8 +496,8 @@ void Foam::ccm::reader::readCells
             }
 
             // Optional, but potentially useful information:
-            dictIter().add("BoundaryIndex", info.ccmIndex);
-            dictIter().add("size", info.size);
+            dict.add("BoundaryIndex", info.ccmIndex);
+            dict.add("size", info.size);
         }
 
         bndInfo.append(info);
@@ -1039,7 +1041,7 @@ void Foam::ccm::reader::readMonitoring
             word zoneName;
             if (iter.found())
             {
-                iter().lookup("Label") >> zoneName;
+                iter().readEntry("Label", zoneName);
             }
             else
             {
@@ -2415,7 +2417,7 @@ void Foam::ccm::reader::addPatches
     // provide some fallback values
     forAll(newPatches, patchI)
     {
-        word fallbackName("patch" + Foam::name(patchI));
+        const word fallbackName("patch" + Foam::name(patchI));
         word patchName;
         word patchType;
 
@@ -2423,8 +2425,8 @@ void Foam::ccm::reader::addPatches
 
         if (citer.found())
         {
-            citer().lookup("Label") >> patchName;
-            citer().lookup("BoundaryType") >> patchType;
+            citer().readEntry("Label", patchName);
+            citer().readEntry("BoundaryType", patchType);
         }
         else
         {

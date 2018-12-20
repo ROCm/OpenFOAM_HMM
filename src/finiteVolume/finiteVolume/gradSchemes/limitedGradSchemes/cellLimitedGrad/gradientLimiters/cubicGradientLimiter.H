@@ -105,10 +105,8 @@ public:
         {
             if (rt_ < 1)
             {
-                FatalIOErrorInFunction
-                (
-                    schemeData
-                )   << "coefficient = " << rt_
+                FatalIOErrorInFunction(schemeData)
+                    << "coefficient = " << rt_
                     << " should be > 1"
                     << exit(FatalIOError);
             }

@@ -82,8 +82,7 @@ bool Foam::functionObjects::externalCoupled::readData
     label nFound = 0;
     for (const fvMesh& mesh : meshes)
     {
-        const volFieldType* vfptr =
-            mesh.lookupObjectPtr<volFieldType>(fieldName);
+        const volFieldType* vfptr = mesh.findObject<volFieldType>(fieldName);
 
         if (!vfptr)
         {
@@ -278,8 +277,8 @@ Foam::functionObjects::externalCoupled::gatherAndCombine
     Pstream::gatherList(gatheredValues);
 
 
-    tmp<Field<Type>> tresult(new Field<Type>(0));
-    Field<Type>& result = tresult.ref();
+    auto tresult = tmp<Field<Type>>::New();
+    auto& result = tresult.ref();
 
     if (Pstream::master())
     {
@@ -358,8 +357,7 @@ bool Foam::functionObjects::externalCoupled::writeData
 
     for (const fvMesh& mesh : meshes)
     {
-        const volFieldType* vfptr =
-            mesh.lookupObjectPtr<volFieldType>(fieldName);
+        const volFieldType* vfptr = mesh.findObject<volFieldType>(fieldName);
 
         if (!vfptr)
         {

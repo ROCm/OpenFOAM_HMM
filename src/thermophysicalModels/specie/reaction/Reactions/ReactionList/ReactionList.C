@@ -82,19 +82,15 @@ Foam::ReactionList<ThermoType>::~ReactionList()
 template<class ThermoType>
 bool Foam::ReactionList<ThermoType>::readReactionDict()
 {
-    const dictionary& reactions(dict_.subDict("reactions"));
-
-    forAllConstIter(dictionary, reactions, iter)
+    for (const entry& dEntry : dict_.subDict("reactions"))
     {
-        const word reactionName = iter().keyword();
-
         this->append
         (
             Reaction<ThermoType>::New
             (
                 species_,
                 thermoDb_,
-                reactions.subDict(reactionName)
+                dEntry.dict()
             ).ptr()
         );
     }

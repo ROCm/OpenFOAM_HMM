@@ -55,28 +55,21 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
 )
 :
     CloudSubModelBase<CloudType>(modelName, owner, dict, typeName, objectType),
-    outputDir_(owner.mesh().time().path())
+    outputDir_()
 {
-    const fileName relPath
+    // Put in undecomposed case
+    // (Note: gives problems for distributed data running)
+
+    outputDir_ =
     (
-        functionObject::outputPrefix
-       /cloud::prefix
-       /owner.name()
-       /this->modelName()
+        owner.mesh().time().globalPath()
+      / functionObject::outputPrefix
+      / cloud::prefix
+      / owner.name()
+      / this->modelName()
     );
 
-
-    if (Pstream::parRun())
-    {
-        // Put in undecomposed case (Note: gives problems for
-        // distributed data running)
-        outputDir_ = outputDir_/".."/relPath;
-    }
-    else
-    {
-        outputDir_ = outputDir_/relPath;
-    }
-    outputDir_.clean();
+    outputDir_.clean();  // Remove unneeded ".."
 }
 
 

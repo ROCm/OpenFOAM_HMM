@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,26 +28,33 @@ Group
     grpPostProcessingUtilities
 
 Description
-    List times using timeSelector.
-    To simplify parsing of the output, the normal banner information
-    is suppressed.
+    List times using the timeSelector, or use to remove selected time
+    directories.
 
 Usage
     \b foamListTimes [OPTION]
 
     Options:
+      - \par -processor
+        List times from processor0/ directory
+
       - \par -rm
         Remove selected time directories
 
-      - \par -processor
-        List times from processor0/ directory
+      - \par -verbose
+        Report progress during removal
+
+Note
+    The OpenFOAM banner information is suppressed so that the output can be
+    piped into another command.
 
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "autoPtr.H"
 #include "profiling.H"
 #include "timeSelector.H"
-#include "Time.H"
+#include "TimePaths.H"
 
 using namespace Foam;
 
@@ -55,32 +62,44 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("List times using timeSelector");
-
-    timeSelector::addOptions(true, true);
+    argList::addNote
+    (
+        "List times using the timeSelector,"
+        " or use to remove selected time directories"
+    );
+    timeSelector::addOptions(true, true);  // constant(true), zero(true)
     argList::noBanner();
     argList::noParallel();
     argList::noJobInfo();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
     argList::addBoolOption
     (
         "processor",
-        "list times from processor0/ directory"
+        "List times from processor0/ directory"
     );
     argList::addBoolOption
     (
         "rm",
-        "remove selected time directories"
+        "Remove selected time directories"
+    );
+    argList::addBoolOption
+    (
+        "verbose",
+        "Report progress of -rm option"
     );
     profiling::disable(); // Disable profiling (and its output)
 
     #include "setRootCase.H"
 
+    const bool removeFiles(args.found("rm"));
+    const bool verbose(args.found("verbose"));
+
+
     // Get times list from the master processor and subset based on
     // command-line options
 
     label nProcs = 0;
-    instantList timeDirs;
+    autoPtr<TimePaths> timePaths;
 
     if (args.found("processor"))
     {
@@ -94,47 +113,48 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
 
-        timeDirs = timeSelector::select
+        timePaths = autoPtr<TimePaths>::New
         (
-            Time
-            (
-                Time::controlDictName,
-                args.rootPath(),
-                args.caseName()/"processor0"
-            ).times(),
-            args
+            args.rootPath(),
+            args.caseName()/"processor0"
         );
     }
     else
     {
-        timeDirs = timeSelector::select
+        timePaths = autoPtr<TimePaths>::New
         (
-            Time
-            (
-                Time::controlDictName,
-                args.rootPath(),
-                args.caseName()
-            ).times(),
-            args
+            args.rootPath(),
+            args.caseName()
         );
     }
 
 
-    if (args.found("rm"))
+    const instantList timeDirs(timeSelector::select(timePaths->times(), args));
+
+    const label nTimes = timeDirs.size();
+
+    if (removeFiles)
     {
         if (nProcs)
         {
-            // Serr<< "Remove " << timeDirs.size()
-            //     << " processor time directories" << nl;
+            if (verbose)
+            {
+                Info<< "Removing " << nTimes
+                    << " processor time directories" << endl;
+            }
 
             forAllReverse(timeDirs, timei)
             {
-                fileName path
-                (
-                    args.path()
-                  / "processors"
-                  / timeDirs[timei].name()
-                );
+                const word& timeName = timeDirs[timei].name();
+
+                if (verbose)
+                {
+                    Info<< "    rm " << timeName
+                        << " [" << (nTimes - timei) << '/' << nTimes << ']'
+                        << endl;
+                }
+
+                fileName path(args.path()/"processors"/timeName);
 
                 rmDir(path, true);
 
@@ -143,8 +163,8 @@ int main(int argc, char *argv[])
                     path =
                     (
                         args.path()
-                      / (word("processor") + name(proci))
-                      / timeDirs[timei].name()
+                      / ("processor" + Foam::name(proci))
+                      / timeName
                     );
 
                     rmDir(path, true);
@@ -153,24 +173,35 @@ int main(int argc, char *argv[])
         }
         else
         {
-            // Serr<< "Remove " << timeDirs.size()
-            //     << " time directories" << nl;
+            if (verbose)
+            {
+                Info<< "Removing " << nTimes
+                    << " time directories" << endl;
+            }
 
             forAllReverse(timeDirs, timei)
             {
-                rmDir(args.path()/timeDirs[timei].name(), true);
+                const word& timeName = timeDirs[timei].name();
+
+                if (verbose)
+                {
+                    Info<< "    rm " << timeName
+                        << " [" << (nTimes - timei) << '/' << nTimes << ']'
+                        << endl;
+                }
+
+                rmDir(args.path()/timeName, true);
             }
         }
     }
     else
     {
-        forAll(timeDirs, timei)
+        for (const instant& t : timeDirs)
         {
-            Info<< timeDirs[timei].name() << nl;
+            Info<< t.name() << nl;
         }
         Info<< flush;
     }
-
 
     return 0;
 }

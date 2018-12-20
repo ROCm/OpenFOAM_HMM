@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,20 @@ Description
     Plate defined as origin and span. One of the components of span has
     to be 0 which defines the normal direction. E.g.
 
+    \verbatim
     span    = (Sx Sy 0)     // plate in x-y plane
     origin  = (Ox Oy Oz)
+    \endverbatim
 
     now plane is from (Ox Oy Oz) to (Ox+Sx Oy+Sy Oz)
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | plate / searchablePlate           | selector |
+        origin      | centre of the plate               | yes   |
+        span        | The plate dimensions              | yes   |
+    \endtable
 
 SourceFiles
     searchablePlate.C
@@ -50,8 +60,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
 
 /*---------------------------------------------------------------------------*\
                        Class searchablePlate Declaration
@@ -72,6 +80,7 @@ private:
         //- Coordinate direction which is normal
         const direction normalDir_;
 
+        //- Names of regions
         mutable wordList regions_;
 
 
@@ -127,11 +136,12 @@ public:
 
 
     //- Destructor
-    virtual ~searchablePlate();
+    virtual ~searchablePlate() = default;
 
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
         //- Whether supports volume type below

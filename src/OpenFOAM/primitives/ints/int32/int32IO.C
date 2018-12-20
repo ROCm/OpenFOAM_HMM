@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,6 +80,9 @@ Foam::Istream& Foam::operator>>(Istream& is, int32_t& val)
 
     if (!t.good())
     {
+        FatalIOErrorInFunction(is)
+            << "Bad token - could not get int32"
+            << exit(FatalIOError);
         is.setBad();
         return is;
     }
@@ -90,11 +93,11 @@ Foam::Istream& Foam::operator>>(Istream& is, int32_t& val)
     }
     else
     {
-        is.setBad();
         FatalIOErrorInFunction(is)
-            << "wrong token type - expected int32_t, found " << t.info()
+            << "Wrong token type - expected label (int32), found "
+            << t.info()
             << exit(FatalIOError);
-
+        is.setBad();
         return is;
     }
 

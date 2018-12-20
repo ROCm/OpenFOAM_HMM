@@ -153,8 +153,7 @@ public:
 
 
     //- Destructor
-    virtual ~actuationDiskSource()
-    {}
+    virtual ~actuationDiskSource() = default;
 
 
     // Member Functions

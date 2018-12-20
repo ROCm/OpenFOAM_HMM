@@ -125,15 +125,8 @@ massTransfer() const
             this->massTransferModels_[key][phase.name()]->K()
         );
 
-        forAllConstIter
-        (
-            hashedWordList,
-            compositionModel.species(),
-            memberIter
-        )
+        for (const word& member : compositionModel.species())
         {
-            const word& member = *memberIter;
-
             const word name
             (
                 IOobject::groupName(member, phase.name())

@@ -1,0 +1,3 @@
+Test-dummyLib.C
+
+EXE = $(FOAM_APPBIN)/Test-dummyLib

@@ -135,8 +135,11 @@ bool largerAngle
     // Get cos between faceCentre and normal vector to determine in
     // which quadrant angle is. (Is correct for unwarped faces only!)
     // Correct for non-outwards pointing normal.
-    vector c1c0(mesh.faceCentres()[f1] - mesh.faceCentres()[f0]);
-    c1c0 /= mag(c1c0) + VSMALL;
+    const vector c1c0 =
+        normalised
+        (
+            mesh.faceCentres()[f1] - mesh.faceCentres()[f0]
+        );
 
     scalar fcCosAngle = n0 & c1c0;
 
@@ -319,8 +322,7 @@ bool splitCell
 {
     const edge& e = mesh.edges()[edgeI];
 
-    vector eVec = e.vec(mesh.points());
-    eVec /= mag(eVec);
+    const vector eVec = e.unitVec(mesh.points());
 
     vector planeN = eVec ^ halfNorm;
 
@@ -328,8 +330,7 @@ bool splitCell
     // halfway on fully regular meshes (since we want cuts
     // to be snapped to vertices)
     planeN += 0.01*halfNorm;
-
-    planeN /= mag(planeN);
+    planeN.normalise();
 
     // Define plane through edge
     plane cutPlane(mesh.points()[e.start()], planeN);
@@ -410,11 +411,8 @@ void collectCuts
             label f0, f1;
             meshTools::getEdgeFaces(mesh, celli, edgeI, f0, f1);
 
-            vector n0 = faceAreas[f0];
-            n0 /= mag(n0);
-
-            vector n1 = faceAreas[f1];
-            n1 /= mag(n1);
+            const vector n0 = normalised(faceAreas[f0]);
+            const vector n1 = normalised(faceAreas[f1]);
 
             if
             (
@@ -524,36 +522,43 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "split cells with flat faces"
+        "Split cells with flat faces"
     );
     #include "addOverwriteOption.H"
     argList::noParallel();
-    argList::addArgument("edgeAngle [0..360]");
+    argList::addArgument
+    (
+        "edgeAngle",
+        "in degrees [0-360]"
+    );
 
     argList::addOption
     (
         "set",
         "name",
-        "split cells from specified cellSet only"
+        "Split cells from specified cellSet only"
     );
     argList::addBoolOption
     (
         "geometry",
-        "use geometric cut for hexes as well"
+        "Use geometric cut for hexes as well"
     );
     argList::addOption
     (
         "tol",
-        "scalar", "edge snap tolerance (default 0.2)"
+        "scalar",
+        "Edge snap tolerance (default 0.2)"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
-    const scalar featureAngle = args.read<scalar>(1);
+    const scalar featureAngle = args.get<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
     const scalar minSin = Foam::sin(degToRad(featureAngle));
 
@@ -561,7 +566,7 @@ int main(int argc, char *argv[])
     const bool geometry  = args.found("geometry");
     const bool overwrite = args.found("overwrite");
 
-    const scalar edgeTol = args.lookupOrDefault("tol", 0.2);
+    const scalar edgeTol = args.opt<scalar>("tol", 0.2);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl
@@ -682,7 +687,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
 
         autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);

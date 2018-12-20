@@ -42,16 +42,13 @@ void Foam::blockMeshTools::read
     else if (t.isWord())
     {
         const word& varName = t.wordToken();
-        const entry* ePtr = dict.lookupScopedEntryPtr
-        (
-            varName,
-            true,
-            true
-        );
-        if (ePtr)
+        const entry* eptr =
+            dict.findScoped(varName, keyType::REGEX_RECURSIVE);
+
+        if (eptr)
         {
             // Read as label
-            val = Foam::readLabel(ePtr->stream());
+            val = Foam::readLabel(eptr->stream());
         }
         else
         {
@@ -92,14 +89,14 @@ void Foam::blockMeshTools::write
     const dictionary& dict
 )
 {
-    forAllConstIter(dictionary, dict, iter)
+    for (const entry& e : dict)
     {
-        if (iter().isStream())
+        if (e.isStream())
         {
-            label keyVal(Foam::readLabel(iter().stream()));
+            label keyVal(Foam::readLabel(e.stream()));
             if (keyVal == val)
             {
-                os << iter().keyword();
+                os << e.keyword();
                 return;
             }
         }
@@ -114,14 +111,14 @@ const Foam::keyType& Foam::blockMeshTools::findEntry
     const label val
 )
 {
-    forAllConstIter(dictionary, dict, iter)
+    for (const entry& e : dict)
     {
-        if (iter().isStream())
+        if (e.isStream())
         {
-            label keyVal(Foam::readLabel(iter().stream()));
+            label keyVal(Foam::readLabel(e.stream()));
             if (keyVal == val)
             {
-                return iter().keyword();
+                return e.keyword();
             }
         }
     }

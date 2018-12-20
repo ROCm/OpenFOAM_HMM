@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,6 @@ License
 #include "vtkRenderer.h"
 #include "vtkRenderWindow.h"
 #include "vtkSmartPointer.h"
-
 #include "vtkLight.h"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -58,6 +57,48 @@ namespace functionObjects
     );
 }
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+template<class Type>
+static void addGeometryToScene
+(
+    PtrList<Type>& objects,
+    const scalar position,
+    vtkRenderer* renderer
+)
+{
+    for (Type& obj : objects)
+    {
+        obj.addGeometryToScene(position, renderer);
+    }
+}
+
+
+template<class Type>
+static void updateActors(PtrList<Type>& objects, const scalar position)
+{
+    for (Type& obj : objects)
+    {
+        obj.updateActors(position);
+    }
+}
+
+
+template<class Type>
+static void cleanup(PtrList<Type>& objects)
+{
+    for (Type& obj : objects)
+    {
+        obj.clear();
+    }
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -80,12 +121,6 @@ Foam::functionObjects::runTimePostProcessing::runTimePostProcessing
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimePostProcessing::~runTimePostProcessing()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
@@ -97,31 +132,36 @@ bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
     scene_.read(dict);
 
     const dictionary& outputDict = dict.subDict("output");
-    outputDict.lookup("name") >> output_.name_;
-    outputDict.lookup("width") >> output_.width_;
-    outputDict.lookup("height") >> output_.height_;
-
+    outputDict.readEntry("name", output_.name_);
+    outputDict.readEntry("width", output_.width_);
+    outputDict.readEntry("height", output_.height_);
 
     readObjects(dict.subOrEmptyDict("points"), points_);
     readObjects(dict.subOrEmptyDict("lines"), lines_);
     readObjects(dict.subOrEmptyDict("surfaces"), surfaces_);
 
-
     const dictionary& textDict = dict.subDict("text");
-    forAllConstIter(dictionary, textDict, iter)
+
+    for (const entry& dEntry : textDict)
     {
-        if (!iter().isDict())
+        if (!dEntry.isDict())
         {
             FatalIOErrorInFunction(textDict)
+                << textDict.dictName()
                 << "text must be specified in dictionary format"
                 << exit(FatalIOError);
         }
 
-        text_.append(new runTimePostPro::text
+        const dictionary& objectDict = dEntry.dict();
+
+        text_.append
         (
-            *this,
-            iter().dict(),
-            scene_.colours())
+            new runTimePostPro::text
+            (
+                *this,
+                objectDict,
+                scene_.colours()
+            )
         );
     }
 
@@ -145,20 +185,21 @@ bool Foam::functionObjects::runTimePostProcessing::write()
     Info<< type() << " " << name() <<  " output:" << nl
         << "    Constructing scene" << endl;
 
-    // Unset any floating point trapping
+
+    // Disable any floating point trapping
     // (some low-level rendering functionality does not like it)
-    const bool oldFpe = sigFpe::active();
-    if (oldFpe)
-    {
-        sigFpe::unset();
-    }
+
+    sigFpe::ignore sigFpeHandling; //<- disable in local scope
 
     // Initialise render window
     auto renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
     renderWindow->OffScreenRenderingOn();
     renderWindow->SetSize(output_.width_, output_.height_);
-    #if (VTK_MAJOR_VERSION < 9)
-    renderWindow->SetAAFrames(10);  // Legacy rendering
+
+    // Legacy rendering - was deprecated for 8.1.0
+    #if (VTK_MAJOR_VERSION < 8) || \
+        ((VTK_MAJOR_VERSION == 8) && (VTK_MINOR_VERSION < 2))
+    renderWindow->SetAAFrames(10);
     #endif
     renderWindow->SetAlphaBitPlanes(true);
     renderWindow->SetMultiSamples(0);
@@ -169,82 +210,34 @@ bool Foam::functionObjects::runTimePostProcessing::write()
 
     renderWindow->AddRenderer(renderer);
 
-    // Add the points
-    forAll(points_, i)
-    {
-        points_[i].addGeometryToScene(0, renderer);
-    }
 
-    // Add the lines
-    forAll(lines_, i)
-    {
-        lines_[i].addGeometryToScene(0, renderer);
-    }
-
-    // Add the surfaces
-    forAll(surfaces_, i)
-    {
-        surfaces_[i].addGeometryToScene(0, renderer);
-    }
-
-    // Add the text
-    forAll(text_, i)
-    {
-        text_[i].addGeometryToScene(0, renderer);
-    }
+    addGeometryToScene(points_, 0, renderer);
+    addGeometryToScene(lines_, 0, renderer);
+    addGeometryToScene(surfaces_, 0, renderer);
+    addGeometryToScene(text_, 0, renderer);
 
     while (scene_.loop(renderer))
     {
-        scalar position = scene_.position();
+        const scalar position = scene_.position();
 
-        // Update the text
-        forAll(text_, i)
-        {
-            text_[i].updateActors(position);
-        }
-
-        // Update the points
-        forAll(points_, i)
-        {
-            points_[i].updateActors(position);
-        }
-
-        // Update the lines
-        forAll(lines_, i)
-        {
-            lines_[i].updateActors(position);
-        }
-
-        // Update the surfaces
-        forAll(surfaces_, i)
-        {
-            surfaces_[i].updateActors(position);
-        }
+        updateActors(text_, position);
+        updateActors(points_, position);
+        updateActors(lines_, position);
+        updateActors(surfaces_, position);
     }
 
-    // Clean up
-    forAll(text_, i)
-    {
-        text_[i].clear();
-    }
-    forAll(points_, i)
-    {
-        points_[i].clear();
-    }
-    forAll(lines_, i)
-    {
-        lines_[i].clear();
-    }
-    forAll(surfaces_, i)
-    {
-        surfaces_[i].clear();
-    }
+    // Cleanup
+    cleanup(text_);
+    cleanup(points_);
+    cleanup(lines_);
+    cleanup(surfaces_);
 
-    // Restore floating point trapping
-    if (oldFpe)
-    {
-        sigFpe::set();
-    }
+
+    // Instead of relying on the destructor, manually restore the previous
+    // SIGFPE state.
+    // This is only to avoid compiler complaints about unused variables.
+
+    sigFpeHandling.restore();
 
     return true;
 }

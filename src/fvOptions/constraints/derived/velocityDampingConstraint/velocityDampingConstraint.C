@@ -70,7 +70,7 @@ void Foam::fv::velocityDampingConstraint::addDamping(fvMatrix<vector>& eqn)
 
             diag[cellI] += scale*(magU-UMax_);
 
-            nDamped++;
+            ++nDamped;
         }
     }
 
@@ -104,7 +104,7 @@ Foam::fv::velocityDampingConstraint::velocityDampingConstraint
 void Foam::fv::velocityDampingConstraint::constrain
 (
     fvMatrix<vector>& eqn,
-    const label fieldI
+    const label fieldi
 )
 {
     addDamping(eqn);
@@ -113,8 +113,7 @@ void Foam::fv::velocityDampingConstraint::constrain
 
 void Foam::fv::velocityDampingConstraint::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    dict_.writeEntry(name_, os);
 }
 
 
@@ -122,30 +121,20 @@ bool Foam::fv::velocityDampingConstraint::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        UMax_ = readScalar(coeffs_.lookup("UMax"));
+        coeffs_.readEntry("UMax", UMax_);
 
-        if (coeffs_.found("UNames"))
+        if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {
-            coeffs_.lookup("UNames") >> fieldNames_;
-        }
-        else if (coeffs_.found("UName"))
-        {
-            word UName(coeffs_.lookup("UName"));
-            fieldNames_ = wordList(1, UName);
-        }
-        else
-        {
-            fieldNames_ = wordList(1, "U");
+            fieldNames_.resize(1);
+            fieldNames_.first() = coeffs_.lookupOrDefault<word>("U", "U");
         }
 
         applied_.setSize(fieldNames_.size(), false);
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

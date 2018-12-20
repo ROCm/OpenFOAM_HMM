@@ -123,6 +123,15 @@ class icoPolynomial
         Polynomial<PolySize> rhoCoeffs_;
 
 
+    // Private Member Functions
+
+        //- Coeffs name. Eg, "rhoCoeffs<10>"
+        inline static word coeffsName(const char* name)
+        {
+            return word(name + ("Coeffs<" + std::to_string(PolySize) + '>'));
+        }
+
+
 public:
 
     // Constructors

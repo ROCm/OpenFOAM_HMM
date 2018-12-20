@@ -213,11 +213,8 @@ Foam::label Foam::removePoints::countPointUsage
             label vLeft = e0.otherVertex(common);
             label vRight = e1.otherVertex(common);
 
-            vector e0Vec = points[common] - points[vLeft];
-            e0Vec /= mag(e0Vec) + VSMALL;
-
-            vector e1Vec = points[vRight] - points[common];
-            e1Vec /= mag(e1Vec) + VSMALL;
+            const vector e0Vec = normalised(points[common] - points[vLeft]);
+            const vector e1Vec = normalised(points[vRight] - points[common]);
 
             if ((e0Vec & e1Vec) > minCos)
             {
@@ -641,7 +638,7 @@ void Foam::removePoints::getUnrefimentSet
         // restoring. Note that this is over all saved faces, not just over
         // the ones in undoFaces.
 
-        boolListList faceVertexRestore(mesh_.nFaces()-mesh_.nInternalFaces());
+        boolListList faceVertexRestore(mesh_.nBoundaryFaces());
 
         // Populate with my local points-to-restore.
         forAll(savedFaces_, saveI)

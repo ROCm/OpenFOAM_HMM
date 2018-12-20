@@ -25,10 +25,15 @@ labelList receptorNeigCell(mesh.nInternalFaces(), -1);
     PtrList<fvMeshSubset> meshParts(nZones);
     labelList nCellsPerZone(nZones, 0);
 
-    forAll(nCellsPerZone, zoneI)
+    // A mesh subset for each zone
+    forAll(meshParts, zonei)
     {
-        meshParts.set(zoneI, new fvMeshSubset(mesh));
-        meshParts[zoneI].setLargeCellSubset(zoneID, zoneI);
+        meshParts.set
+        (
+            zonei,
+            // Select cells where the zoneID == zonei
+            new fvMeshSubset(mesh, zonei, zoneID)
+        );
     }
 
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
@@ -234,11 +239,9 @@ forAll(isNeiInterpolatedFace, faceI)
                 n1 = vector(-n.z(), 0, n.x());
             }
         }
+        n1.normalise();
 
-        n1 /= mag(n1);
-
-        vector n2 = n ^ n1;
-        n2 /= mag(n2);
+        const vector n2 = normalised(n ^ n1);
 
         tensor rot =
             tensor

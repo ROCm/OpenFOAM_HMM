@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,18 @@ Class
     Foam::cellToPoint
 
 Description
-    A topoSetSource to select points based on usage in cells.
+    A topoSetPointSource to select points based on usage in cells.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        sets        | The cellSet names to use          | possibly |
+        set         | The cellSet name to use           | possibly |
+        option      | Selection type (all)              | yes   |
+    \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     cellToPoint.C
@@ -35,7 +46,7 @@ SourceFiles
 #ifndef cellToPoint_H
 #define cellToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +60,7 @@ namespace Foam
 
 class cellToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
 public:
@@ -66,8 +77,8 @@ private:
 
         static const Enum<cellAction> cellActionNames_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
 
         //- Option
         cellAction option_;
@@ -76,7 +87,7 @@ private:
     // Private Member Functions
 
         //- Depending on face to cell option add to or delete from cellSet.
-        void combine(topoSet& set, const bool add) const;
+        void combine(topoSet& set, const bool add, const word& setName) const;
 
 
 public:
@@ -95,35 +106,22 @@ public:
         );
 
         //- Construct from dictionary
-        cellToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        cellToPoint(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        cellToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        cellToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~cellToPoint();
+    virtual ~cellToPoint() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

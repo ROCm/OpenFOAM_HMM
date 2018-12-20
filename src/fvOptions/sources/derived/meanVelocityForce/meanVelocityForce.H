@@ -51,8 +51,6 @@ SourceFiles
 #define meanVelocityForce_H
 
 #include "autoPtr.H"
-#include "topoSetSource.H"
-#include "cellSet.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "cellSetOption.H"

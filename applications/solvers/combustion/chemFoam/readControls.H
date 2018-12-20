@@ -1,3 +1,3 @@
-runTime.controlDict().read("adjustTimeStep", adjustTimeStep);
+runTime.controlDict().readEntry("adjustTimeStep", adjustTimeStep);
 
-runTime.controlDict().read("maxDeltaT", maxDeltaT);
+runTime.controlDict().readEntry("maxDeltaT", maxDeltaT);

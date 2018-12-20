@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Reads an OpenFOAM mesh and writes a STARCD/PROSTAR (v4) bnd/cel/vrt format.
+    Write an OpenFOAM mesh in STARCD/PROSTAR (v4) bnd/cel/vrt format.
 
 Usage
     \b foamToStarMesh [OPTION]
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "read OpenFOAM mesh and write a STARCD/PROSTAR (v4) bnd/cel/vrt format"
+        "Write an OpenFOAM mesh in STARCD/PROSTAR (v4) bnd/cel/vrt format"
     );
     argList::noParallel();
     timeSelector::addOptions();
@@ -76,12 +76,12 @@ int main(int argc, char *argv[])
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1000 ([m] to [mm])"
+        "Geometry scaling factor - default is 1000 ([m] to [mm])"
     );
     argList::addBoolOption
     (
         "noBnd",
-        "suppress writing a boundary (.bnd) file"
+        "Suppress writing a boundary (.bnd) file"
     );
 
     #include "setRootCase.H"
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     }
 
     // Default rescale from [m] to [mm]
-    const scalar scaleFactor = args.lookupOrDefault("scale", 1000.0);
+    const scalar scaleFactor = args.opt<scalar>("scale", 1000);
     const bool  writeBndFile = !args.found("noBnd");
 
     #include "createPolyMesh.H"

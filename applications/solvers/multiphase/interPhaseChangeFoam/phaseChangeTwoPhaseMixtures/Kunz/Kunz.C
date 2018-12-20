@@ -104,10 +104,10 @@ bool Foam::phaseChangeTwoPhaseMixtures::Kunz::read()
     {
         phaseChangeTwoPhaseMixtureCoeffs_ = optionalSubDict(type() + "Coeffs");
 
-        phaseChangeTwoPhaseMixtureCoeffs_.lookup("UInf") >> UInf_;
-        phaseChangeTwoPhaseMixtureCoeffs_.lookup("tInf") >> tInf_;
-        phaseChangeTwoPhaseMixtureCoeffs_.lookup("Cc") >> Cc_;
-        phaseChangeTwoPhaseMixtureCoeffs_.lookup("Cv") >> Cv_;
+        phaseChangeTwoPhaseMixtureCoeffs_.readEntry("UInf", UInf_);
+        phaseChangeTwoPhaseMixtureCoeffs_.readEntry("tInf", tInf_);
+        phaseChangeTwoPhaseMixtureCoeffs_.readEntry("Cc", Cc_);
+        phaseChangeTwoPhaseMixtureCoeffs_.readEntry("Cv", Cv_);
 
         mcCoeff_ = Cc_*rho2()/tInf_;
         mvCoeff_ = Cv_*rho2()/(0.5*rho1()*sqr(UInf_)*tInf_);

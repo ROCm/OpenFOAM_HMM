@@ -56,7 +56,7 @@ Foam::CorrectionLimitingMethod::New
     const dictionary& dict
 )
 {
-    word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting correction limiter " << modelType << endl;
 

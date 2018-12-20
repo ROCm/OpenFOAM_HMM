@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,9 +61,19 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF, dict, false),
-    uniformValue_(Function1<Type>::New("uniformValue", dict))
+    uniformValue_(PatchFunction1<Type>::New(p.patch(), "uniformValue", dict))
 {
-    this->evaluate();
+    if (dict.found("value"))
+    {
+        fvPatchField<Type>::operator=
+        (
+            Field<Type>("value", dict, p.size())
+        );
+    }
+    else
+    {
+        this->evaluate();
+    }
 }
 
 
@@ -77,10 +87,18 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),   // Don't map
-    uniformValue_(ptf.uniformValue_.clone())
+    uniformValue_(ptf.uniformValue_.clone(p.patch()))
 {
-    // Evaluate since value not mapped
-    this->evaluate();
+    if (mapper.direct() && !mapper.hasUnmapped())
+    {
+        // Use mapping instead of re-evaluation
+        this->map(ptf, mapper);
+    }
+    else
+    {
+        // Evaluate since value not mapped
+        this->evaluate();
+    }
 }
 
 
@@ -91,7 +109,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_.clone())
+    uniformValue_(ptf.uniformValue_.clone(this->patch().patch()))
 {}
 
 
@@ -103,17 +121,44 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_.clone())
+    uniformValue_(ptf.uniformValue_.clone(this->patch().patch()))
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::uniformFixedValueFvPatchField<Type>::autoMap
+(
+    const fvPatchFieldMapper& mapper
+)
 {
-    // Evaluate the profile if defined
-    if (ptf.uniformValue_.valid())
+    fixedValueFvPatchField<Type>::autoMap(mapper);
+    uniformValue_().autoMap(mapper);
+
+    if (uniformValue_().constant())
     {
+        // If mapper is not dependent on time we're ok to evaluate
         this->evaluate();
     }
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+template<class Type>
+void Foam::uniformFixedValueFvPatchField<Type>::rmap
+(
+    const fvPatchField<Type>& ptf,
+    const labelList& addr
+)
+{
+    fixedValueFvPatchField<Type>::rmap(ptf, addr);
+
+    const uniformFixedValueFvPatchField& tiptf =
+        refCast<const uniformFixedValueFvPatchField>(ptf);
+
+    uniformValue_().rmap(tiptf.uniformValue_(), addr);
+}
+
 
 template<class Type>
 void Foam::uniformFixedValueFvPatchField<Type>::updateCoeffs()
@@ -125,7 +170,6 @@ void Foam::uniformFixedValueFvPatchField<Type>::updateCoeffs()
 
     const scalar t = this->db().time().timeOutputValue();
     fvPatchField<Type>::operator==(uniformValue_->value(t));
-
     fixedValueFvPatchField<Type>::updateCoeffs();
 }
 

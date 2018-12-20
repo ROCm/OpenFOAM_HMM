@@ -98,7 +98,7 @@ public:
 
 
     //- Destructor
-    virtual ~tabulated6DoFAcceleration();
+    virtual ~tabulated6DoFAcceleration() = default;
 
 
     // Member Functions

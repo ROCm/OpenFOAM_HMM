@@ -297,9 +297,7 @@ reportExecutable()
 
 checkOpenFOAMEnvironment()
 {
-    [ -d "$WM_PROJECT_INST_DIR" ] && \
-    [ -d "$WM_PROJECT_DIR" ] && \
-    [ -d "$WM_THIRD_PARTY_DIR" ] || {
+    [ -d "$WM_PROJECT_DIR" ] && [ -d "$WM_THIRD_PARTY_DIR" ] || {
         echo ""
         echo "FATAL ERROR: OpenFOAM environment not configured."
         echo ""
@@ -389,7 +387,6 @@ COL5="Crit"
 hline
 echo "$COL1 $COL2 $COL3      $COL5"
 hline
-reportEnv '$WM_PROJECT_INST_DIR' noPath  yes
 reportEnv '$WM_PROJECT_USER_DIR' noPath  no
 reportEnv '$WM_THIRD_PARTY_DIR'  noPath  yes
 hline
@@ -404,7 +401,7 @@ echo ""
 reportEnv '$FOAM_APPBIN'      '$PATH'  yes
 reportEnv '$FOAM_SITE_APPBIN' '$PATH'  no
 reportEnv '$FOAM_USER_APPBIN' '$PATH'  no
-reportEnv '$WM_DIR'           '$PATH'  yes
+reportEnv '$WM_DIR'           '$PATH'  often
 hline
 
 #------------------------------------------------------------------------------
@@ -415,11 +412,12 @@ hline
 reportEnv '$FOAM_LIBBIN'      '$LD_LIBRARY_PATH'  yes
 reportEnv '$FOAM_SITE_LIBBIN' '$LD_LIBRARY_PATH'  no
 reportEnv '$FOAM_USER_LIBBIN' '$LD_LIBRARY_PATH'  no
+reportEnv '$FOAM_EXT_LIBBIN'  '$LD_LIBRARY_PATH'  maybe
 reportEnv '$MPI_ARCH_PATH'    '$LD_LIBRARY_PATH'  yes
 hline
 
 #------------------------------------------------------------------------------
-heading "Third-party software"
+heading "Software Components"
 hline
 echo "$(fixlen Software 9) $(fixlen Version 10) $(fixlen Location 10)"
 hline

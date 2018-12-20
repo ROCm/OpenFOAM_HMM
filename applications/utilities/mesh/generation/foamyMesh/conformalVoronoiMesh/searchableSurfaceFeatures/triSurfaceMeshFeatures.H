@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~triSurfaceMeshFeatures();
+    virtual ~triSurfaceMeshFeatures() = default;
 
 
     // Member Functions

@@ -25,11 +25,63 @@ Class
     Foam::lumpedPointMovement
 
 Description
-    The movement 'driver' that describes initial point locations, the
+    The movement \a driver that describes initial point locations, the
     segmentation for pressure integration, the current state of the
-    points/rotations, and forwarding to the communication
-    coordinator. The 'lumpedPointIOMovement' class is simply a
-    registered version of the same.
+    points/rotations, and forwarding to the externalFileCoupler
+    communication coordinator.
+
+    The lumpedPointIOMovement class is simply a registered version of
+    the same.
+
+    See externalFileCoupler for more information about some of
+    the communication parameters and setup.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        axis        | Reference axis for the locations      | yes |
+        locations   | List of lumped point locations        | yes |
+        centre      | Offset of patch points to locations   | no | automatic
+        division    | Division (0-1) for pressure forces    | no | 0
+        relax       | Relaxation/scaling for updating positions | no  |
+        interpolationScheme | The interpolation scheme      | yes |
+        forces      | Optional forces dictionary            | no |
+        communication | Required communication dictionary   | yes |
+    \endtable
+
+    \heading Parameters for communication dictionary
+    \table
+        Property    | Description                       | Required | Default
+        inputName   | Name of positions input file      | yes |
+        outputName  | Name of forces output file        | yes |
+        logName     | Name of log file                  | no  | movement.log
+        inputFormat | Input format: dictionary/plain    | yes |
+        outputFormat | Output format: dictionary/plain  | yes |
+        scaleInput  | Input scaling parameter dictionary | no |
+        scaleOutput | Output scaling parameter dictionary | no |
+    \endtable
+
+    \heading Parameters for optional communication/scaleInput dictionary
+    \table
+        Property    | Description                       | Required | Default
+        length      | Scaling for input positions       | no | 1
+    \endtable
+
+    \heading Parameters for optional communication/scaleOutput dictionary
+    \table
+        Property    | Description                       | Required | Default
+        length      | Scaling for output positions      | no  | 1
+        force       | Scaling for force                 | no  | 1
+        moment      | Scaling for moment                | no  | 1
+    \endtable
+
+    \heading Parameters for optional forces dictionary
+    \table
+        Property    | Description                           | Required | Default
+        p           | Name of the pressure field            | no  | p
+        pRef        | Reference pressure in Pa              | no  | 0
+        rhoRef      | Reference density for incompressible  | no  | 1
+    \endtable
 
 SourceFiles
     lumpedPointMovement.C
@@ -76,16 +128,16 @@ public:
     //- Output format types
     enum class outputFormatType
     {
-        PLAIN,
-        DICTIONARY
+        PLAIN,      //!< "plain" is a simple ASCII format
+        DICTIONARY  //!< "dictionary" is the OpenFOAM dictionary format
     };
 
     //- Output format types
     enum scalingType
     {
-        LENGTH = 0,
-        FORCE,
-        MOMENT
+        LENGTH = 0, //!< The "length" scaling
+        FORCE,      //!< The "force" scaling
+        MOMENT      //!< The "moment" scaling
     };
 
     // Static data
@@ -186,11 +238,8 @@ public:
 
     // Static data members
 
-        //- The standard dictionary name
-        static const word dictionaryName;
-
-        //- Helper: return IOobject with optionally absolute path provided
-        static IOobject selectIO(const IOobject&, const fileName&);
+        //- The canonical name ("lumpedPointMovement") for the dictionary
+        static const word canonicalName;
 
 
     // Constructors
@@ -408,6 +457,22 @@ public:
             const labelUList& patchLst,
             const pointField& points0
         ) const;
+
+
+    // Housekeeping
+
+        //- Deprecated(2018-08) compatibility method
+        //  \deprecated(2018-08) - use IOobject::selectIO directly
+        static IOobject selectIO
+        (
+            const IOobject& io,
+            const fileName& altFile,
+            const word& ioName = ""
+        )
+        {
+            return IOobject::selectIO(io, altFile, ioName);
+        }
+
 };
 
 

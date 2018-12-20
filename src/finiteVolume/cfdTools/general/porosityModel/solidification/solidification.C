@@ -99,7 +99,7 @@ void Foam::porosityModels::solidification::correct
 
     if (UEqn.dimensions() == dimForce)
     {
-        const volScalarField& rho = mesh_.lookupObject<volScalarField>
+        const auto& rho = mesh_.lookupObject<volScalarField>
         (
             IOobject::groupName(rhoName_, U.group())
         );
@@ -138,7 +138,7 @@ void Foam::porosityModels::solidification::correct
 
     if (UEqn.dimensions() == dimForce)
     {
-        const volScalarField& rho = mesh_.lookupObject<volScalarField>
+        const auto& rho = mesh_.lookupObject<volScalarField>
         (
             IOobject::groupName(rhoName_, U.group())
         );
@@ -154,8 +154,7 @@ void Foam::porosityModels::solidification::correct
 
 bool Foam::porosityModels::solidification::writeData(Ostream& os) const
 {
-    os  << indent << name_ << endl;
-    dict_.write(os);
+    dict_.writeEntry(name_, os);
 
     return true;
 }

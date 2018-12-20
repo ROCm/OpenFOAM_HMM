@@ -87,10 +87,7 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
     this->refGrad() = pTraits<Type>::zero;
     this->valueFraction() = 0.0;
 
-    if (dict.found("phi"))
-    {
-        dict.lookup("phi") >> phiName_;
-    }
+    dict.readIfPresent("phi", phiName_);
 }
 
 

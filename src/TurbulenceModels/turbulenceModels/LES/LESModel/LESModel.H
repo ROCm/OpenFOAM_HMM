@@ -93,11 +93,6 @@ protected:
         //- Print model coefficients
         virtual void printCoeffs(const word& type);
 
-
-private:
-
-    // Private Member Functions
-
         //- No copy construct
         LESModel(const LESModel&) = delete;
 
@@ -168,8 +163,7 @@ public:
 
 
     //- Destructor
-    virtual ~LESModel()
-    {}
+    virtual ~LESModel() = default;
 
 
     // Member Functions

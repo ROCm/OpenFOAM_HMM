@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,15 +33,13 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableSurfaceCollection, 0);
-addToRunTimeSelectionTable
-(
-    searchableSurface,
-    searchableSurfaceCollection,
-    dict
-);
-
+    defineTypeNameAndDebug(searchableSurfaceCollection, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableSurfaceCollection,
+        dict
+    );
 }
 
 
@@ -182,36 +180,48 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
     scale_(dict.size()),
     transform_(dict.size()),
     subGeom_(dict.size()),
-    mergeSubRegions_(dict.lookup("mergeSubRegions")),
+    mergeSubRegions_(dict.get<bool>("mergeSubRegions")),
     indexOffset_(dict.size()+1)
 {
     Info<< "SearchableCollection : " << name() << endl;
 
     label surfI = 0;
     label startIndex = 0;
-    forAllConstIter(dictionary, dict, iter)
+    for (const entry& dEntry : dict)
     {
-        if (dict.isDict(iter().keyword()))
+        if (dEntry.isDict())
         {
-            instance_[surfI] = iter().keyword();
+            instance_[surfI] = dEntry.keyword();
 
-            const dictionary& subDict = dict.subDict(instance_[surfI]);
+            const dictionary& sDict = dEntry.dict();
 
-            scale_[surfI] = subDict.lookup("scale");
-            transform_.set
-            (
-                surfI,
-                coordinateSystem::New
+            sDict.readEntry("scale", scale_[surfI]);
+
+            const dictionary& coordDict = sDict.subDict("transform");
+            if (coordDict.found("coordinateSystem"))
+            {
+                // Backwards compatibility: use coordinateSystem subdictionary
+                transform_.set
                 (
-                    subDict.subDict("transform")
-                )
-            );
+                    surfI,
+                    new coordSystem::cartesian(coordDict, "coordinateSystem")
+                );
+            }
+            else
+            {
+                // New form: directly set from dictionary
+                transform_.set
+                (
+                    surfI,
+                    new coordSystem::cartesian(sDict, "transform")
+                );
+            }
 
-            const word subGeomName(subDict.lookup("surface"));
+            const word subGeomName(sDict.get<word>("surface"));
             //Pout<< "Trying to find " << subGeomName << endl;
 
-            const searchableSurface& s =
-                io.db().lookupObject<searchableSurface>(subGeomName);
+            searchableSurface& s =
+                io.db().lookupObjectRef<searchableSurface>(subGeomName);
 
             // I don't know yet how to handle the globalSize combined with
             // regionOffset. Would cause non-consecutive indices locally
@@ -223,7 +233,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
                     << exit(FatalError);
             }
 
-            subGeom_.set(surfI, &const_cast<searchableSurface&>(s));
+            subGeom_.set(surfI, &s);
 
             indexOffset_[surfI] = startIndex;
             startIndex += subGeom_[surfI].size();
@@ -231,7 +241,7 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
             Info<< "    instance : " << instance_[surfI] << endl;
             Info<< "    surface  : " << s.name() << endl;
             Info<< "    scale    : " << scale_[surfI] << endl;
-            Info<< "    coordsys : " << transform_[surfI] << endl;
+            Info<< "    transform: " << transform_[surfI] << endl;
 
             surfI++;
         }
@@ -303,9 +313,9 @@ const Foam::wordList& Foam::searchableSurfaceCollection::regions() const
             {
                 const wordList& subRegions = subGeom_[surfI].regions();
 
-                forAll(subRegions, i)
+                for (const word& regionName : subRegions)
                 {
-                    allRegions.append(instance_[surfI] + "_" + subRegions[i]);
+                    allRegions.append(instance_[surfI] + "_" + regionName);
                 }
             }
         }
@@ -324,8 +334,8 @@ Foam::label Foam::searchableSurfaceCollection::size() const
 Foam::tmp<Foam::pointField>
 Foam::searchableSurfaceCollection::coordinates() const
 {
-    tmp<pointField> tCtrs(new pointField(size()));
-    pointField& ctrs = tCtrs.ref();
+    auto tctrs = tmp<pointField>::New(size());
+    auto& ctrs = tctrs.ref();
 
     // Append individual coordinates
     label coordI = 0;
@@ -347,7 +357,7 @@ Foam::searchableSurfaceCollection::coordinates() const
         }
     }
 
-    return tCtrs;
+    return tctrs;
 }
 
 
@@ -399,8 +409,8 @@ Foam::searchableSurfaceCollection::points() const
         nPoints += subGeom_[surfI].points()().size();
     }
 
-    tmp<pointField> tPts(new pointField(nPoints));
-    pointField& pts = tPts.ref();
+    auto tpts = tmp<pointField>::New(nPoints);
+    auto& pts = tpts.ref();
 
     // Append individual coordinates
     nPoints = 0;
@@ -422,7 +432,7 @@ Foam::searchableSurfaceCollection::points() const
         }
     }
 
-    return tPts;
+    return tpts;
 }
 
 
@@ -717,10 +727,7 @@ void Foam::searchableSurfaceCollection::distribute
         // pointField bbPoints =
         // cmptDivide
         // (
-        //     transform_[surfI].localPosition
-        //     (
-        //         bbs[i].points()
-        //     ),
+        //     transform_[surfI].localPosition(bbs[i].points()),
         //     scale_[surfI]
         // );
         // treeBoundBox newBb(bbPoints);

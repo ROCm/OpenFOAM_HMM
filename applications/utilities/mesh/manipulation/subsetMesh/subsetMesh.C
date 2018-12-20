@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,14 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Selects a section of mesh based on a cellSet.
+    Create a mesh subset for a particular region of interest based on a
+    cellSet or cellZone.
 
-    The utility sub-sets the mesh to choose only a part of interest. Check
-    the setSet/cellSet/topoSet utilities to see how to select cells based on
+    See setSet/topoSet utilities on how to define select cells based on
     various shapes.
 
-    The mesh will subset all points, faces and cells needed to make a sub-mesh
-    but will not preserve attached boundary types.
+    Will subset all points, faces and cells needed to make a sub-mesh,
+    but not preserve attached boundary types.
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,16 +55,33 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Get the exposed patchId or define the exposedPatchName in fvMeshSubset
+label getExposedPatchId(const polyMesh& mesh, const word& patchName)
+{
+    const label patchId = mesh.boundaryMesh().findPatchID(patchName);
+
+    if (patchId == -1)
+    {
+        fvMeshSubset::exposedPatchName = patchName;
+    }
+
+    Info<< "Adding exposed internal faces to "
+        << (patchId == -1 ? "new" : "existing")
+        << " patch \"" << patchName << "\"" << nl << endl;
+
+    return patchId;
+}
+
+
 labelList nearestPatch(const polyMesh& mesh, const labelList& patchIDs)
 {
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
 
     // Count number of faces in exposedPatchIDs
     label nFaces = 0;
-    forAll(patchIDs, i)
+    for (const label patchi : patchIDs)
     {
-        const polyPatch& pp = pbm[patchIDs[i]];
-        nFaces += pp.size();
+        nFaces += pbm[patchi].size();
     }
 
     // Field on cells and faces.
@@ -75,16 +92,15 @@ labelList nearestPatch(const polyMesh& mesh, const labelList& patchIDs)
     labelList patchFaces(nFaces);
     List<topoDistanceData> patchData(nFaces);
     nFaces = 0;
-    forAll(patchIDs, i)
+    for (const label patchi : patchIDs)
     {
-        label patchI = patchIDs[i];
-        const polyPatch& pp = pbm[patchI];
+        const polyPatch& pp = pbm[patchi];
 
         forAll(pp, i)
         {
             patchFaces[nFaces] = pp.start()+i;
-            patchData[nFaces] = topoDistanceData(patchI, 0);
-            nFaces++;
+            patchData[nFaces] = topoDistanceData(patchi, 0);
+            ++nFaces;
         }
     }
 
@@ -149,15 +165,17 @@ void subsetFields
 
     const fvMesh& baseMesh = subsetter.baseMesh();
 
-    if (fieldNames.empty())
+    label nFields = 0;
+    for (const word& fieldName : fieldNames)
     {
-        return;
-    }
-    Info<< "Subsetting " << fieldType << " (";
-    forAll(fieldNames, i)
-    {
-        const word& fieldName = fieldNames[i];
-        if (i) Info<< ' ';
+        if (!nFields)
+        {
+            Info<< "Subsetting " << fieldType << " (";
+        }
+        else
+        {
+            Info<< ' ';
+        }
         Info<< fieldName;
 
         FieldType fld
@@ -173,12 +191,18 @@ void subsetFields
             baseMesh
         );
 
-        subFields.set(i, subsetter.interpolate(fld));
+        subFields.set(nFields, subsetter.interpolate(fld));
 
         // Subsetting adds 'subset' prefix - rename to match original.
-        subFields[i].rename(fieldName);
+        subFields[nFields].rename(fieldName);
+
+        ++nFields;
     }
-    Info<< ")" << nl;
+
+    if (nFields)
+    {
+        Info<< ')' << nl;
+    }
 }
 
 
@@ -199,15 +223,17 @@ void subsetPointFields
 
     const fvMesh& baseMesh = subsetter.baseMesh();
 
-    if (fieldNames.empty())
+    label nFields = 0;
+    for (const word& fieldName : fieldNames)
     {
-        return;
-    }
-    Info<< "Subsetting " << fieldType << " (";
-    forAll(fieldNames, i)
-    {
-        const word& fieldName = fieldNames[i];
-        if (i) Info<< ' ';
+        if (!nFields)
+        {
+            Info<< "Subsetting " << fieldType << " (";
+        }
+        else
+        {
+            Info<< ' ';
+        }
         Info<< fieldName;
 
         FieldType fld
@@ -223,12 +249,18 @@ void subsetPointFields
             pMesh
         );
 
-        subFields.set(i, subsetter.interpolate(fld));
+        subFields.set(nFields, subsetter.interpolate(fld));
 
         // Subsetting adds 'subset' prefix - rename to match original.
-        subFields[i].rename(fieldName);
+        subFields[nFields].rename(fieldName);
+
+        ++nFields;
     }
-    Info<< ")" << nl;
+
+    if (nFields)
+    {
+        Info<< ')' << nl;
+    }
 }
 
 
@@ -248,15 +280,17 @@ void subsetDimensionedFields
 
     const fvMesh& baseMesh = subsetter.baseMesh();
 
-    if (fieldNames.empty())
+    label nFields = 0;
+    for (const word& fieldName : fieldNames)
     {
-        return;
-    }
-    Info<< "Subsetting " << fieldType << " (";
-    forAll(fieldNames, i)
-    {
-        const word& fieldName = fieldNames[i];
-        if (i) Info<< ' ';
+        if (!nFields)
+        {
+            Info<< "Subsetting " << fieldType << " (";
+        }
+        else
+        {
+            Info<< ' ';
+        }
         Info<< fieldName;
 
         FieldType fld
@@ -272,12 +306,18 @@ void subsetDimensionedFields
             baseMesh
         );
 
-        subFields.set(i, subsetter.interpolate(fld));
+        subFields.set(nFields, subsetter.interpolate(fld));
 
         // Subsetting adds 'subset' prefix - rename to match original.
-        subFields[i].rename(fieldName);
+        subFields[nFields].rename(fieldName);
+
+        ++nFields;
     }
-    Info<< ")" << nl;
+
+    if (nFields)
+    {
+        Info<< ')' << nl;
+    }
 }
 
 
@@ -285,7 +325,7 @@ template<class TopoSet>
 void subsetTopoSets
 (
     const fvMesh& mesh,
-    const IOobjectList& objectsList,
+    const IOobjectList& objects,
     const labelList& map,
     const fvMesh& subMesh,
     PtrList<TopoSet>& subSets
@@ -293,43 +333,36 @@ void subsetTopoSets
 {
     // Read original sets
     PtrList<TopoSet> sets;
-    ReadFields<TopoSet>(objectsList, sets);
+    ReadFields<TopoSet>(objects, sets);
 
     subSets.setSize(sets.size());
-    forAll(sets, i)
+    forAll(sets, seti)
     {
-        TopoSet& set = sets[i];
+        const TopoSet& set = sets[seti];
 
         Info<< "Subsetting " << set.type() << " " << set.name() << endl;
 
-        // Map the data
-        bitSet isSet(set.maxSize(mesh));
-        forAllConstIters(set, iter)
-        {
-            isSet.set(iter.key());
-        }
-        label nSet = 0;
+        labelHashSet subset(2*min(set.size(), map.size()));
+
         forAll(map, i)
         {
-            if (isSet[map[i]])
+            if (set.found(map[i]))
             {
-                ++nSet;
+                subset.insert(i);
             }
         }
 
         subSets.set
         (
-            i,
-            new TopoSet(subMesh, set.name(), nSet, IOobject::AUTO_WRITE)
+            seti,
+            new TopoSet
+            (
+                subMesh,
+                set.name(),
+                std::move(subset),
+                IOobject::AUTO_WRITE
+            )
         );
-        TopoSet& subSet = subSets[i];
-        forAll(map, i)
-        {
-            if (isSet[map[i]])
-            {
-                subSet.insert(i);
-            }
-        }
     }
 }
 
@@ -339,43 +372,63 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "select a mesh subset based on a cellSet"
+        "Create a mesh subset for a particular region of interest based on a"
+        " cellSet or cellZone(s) specified as the first command argument.\n"
+        "See setSet/topoSet utilities on how to select cells based on"
+        " various shapes."
     );
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::addArgument("cellSet");
+    argList::addArgument
+    (
+        "cell-selection",
+        "The cellSet name, but with the -zone option this is interpreted"
+        " to be a cellZone selection by name(s) or regex.\n"
+        "Eg 'mixer' or '( mixer \"moving.*\" )'"
+    );
+
     argList::addOption
     (
         "patch",
         "name",
-        "add exposed internal faces to specified patch instead of to "
-        "'oldInternalFaces'"
+        "Add exposed internal faces to specified patch"
+        " instead of \"oldInternalFaces\""
     );
     argList::addOption
     (
         "patches",
-        "names",
-        "add exposed internal faces to nearest of specified patches"
-        " instead of to 'oldInternalFaces'"
+        "wordRes",
+        "Add exposed internal faces to closest of specified patches"
+        " instead of \"oldInternalFaces\""
+    );
+    argList::addBoolOption
+    (
+        "zone",
+        "Subset with cellZone(s) instead of cellSet."
+        " The command argument may be a list of words or regexs"
     );
     argList::addOption
     (
         "resultTime",
         "time",
-        "specify a time for the resulting mesh"
+        "Specify a time for the resulting mesh"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     #include "createNamedMesh.H"
 
-    const word setName = args[1];
+    // arg[1] = word (cellSet) or wordRes (cellZone)
+    // const word selectionName = args[1];
 
     word meshInstance = mesh.pointsInstance();
     word fieldsInstance = runTime.timeName();
 
+    const bool useCellZone = args.found("zone");
     const bool overwrite = args.found("overwrite");
     const bool specifiedInstance = args.readIfPresent
     (
@@ -389,73 +442,123 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "Reading cell set from " << setName << nl << endl;
+    // Default exposed patch id
+    labelList exposedPatchIDs(one(), -1);
 
-    // Create mesh subsetting engine
-    fvMeshSubset subsetter(mesh);
-
-    labelList exposedPatchIDs;
-
-    if (args.found("patch"))
+    if (args.found("patches"))
     {
-        const word patchName = args["patch"];
+        const wordRes patchNames(args.getList<wordRe>("patches"));
 
-        exposedPatchIDs = { mesh.boundaryMesh().findPatchID(patchName) };
+        if (patchNames.size() == 1 && patchNames.first().isLiteral())
+        {
+            exposedPatchIDs.first() =
+                getExposedPatchId(mesh, patchNames.first());
+        }
+        else
+        {
+            exposedPatchIDs =
+                mesh.boundaryMesh().patchSet(patchNames).sortedToc();
 
-        if (exposedPatchIDs[0] == -1)
+            Info<< "Adding exposed internal faces to nearest of patches "
+                << flatOutput(patchNames) << nl << endl;
+
+            if (exposedPatchIDs.empty())
+            {
+                FatalErrorInFunction
+                    << nl << "No patches matched. Patches: "
+                    << mesh.boundaryMesh().names() << nl
+                    << exit(FatalError);
+            }
+        }
+    }
+    else if (args.found("patch"))
+    {
+        exposedPatchIDs.first() =
+            getExposedPatchId(mesh, args.opt<word>("patch"));
+    }
+    else
+    {
+        Info<< "Adding exposed internal faces to patch \""
+            << fvMeshSubset::exposedPatchName
+            << "\" (created if necessary)" << nl
+            << nl;
+    }
+
+
+    autoPtr<cellSet> cellSetPtr;
+
+    // arg[1] can be a word (for cellSet) or wordRes (for cellZone)
+
+    wordRes zoneNames;
+    if (useCellZone)
+    {
+        List<wordRe> selectionNames = args.getList<wordRe>(1);
+        zoneNames.transfer(selectionNames);
+
+        Info<< "Using cellZone " << flatOutput(zoneNames) << nl << endl;
+
+        if (mesh.cellZones().findIndex(zoneNames) == -1)
         {
             FatalErrorInFunction
-                << nl << "Valid patches are " << mesh.boundaryMesh().names()
+                << "No cellZones found: " << flatOutput(zoneNames) << nl << nl
                 << exit(FatalError);
         }
-
-        Info<< "Adding exposed internal faces to patch " << patchName
-            << nl << endl;
-    }
-    else if (args.found("patches"))
-    {
-        const wordRes patchNames(args.readList<wordRe>("patches"));
-
-        exposedPatchIDs = mesh.boundaryMesh().patchSet(patchNames).sortedToc();
-
-        Info<< "Adding exposed internal faces to nearest of patches "
-            << patchNames << nl << endl;
     }
     else
     {
-        Info<< "Adding exposed internal faces to a patch called"
-            << " \"oldInternalFaces\" (created if necessary)" << endl
-            << endl;
-        exposedPatchIDs = { -1 };
+        const word selectionName = args[1];
+
+        Info<< "Using cellSet " << selectionName << nl << endl;
+
+        cellSetPtr = autoPtr<cellSet>::New(mesh, selectionName);
     }
 
 
-    cellSet currentSet(mesh, setName);
+    // Mesh subsetting engine
+    fvMeshSubset subsetter(mesh);
 
-    if (exposedPatchIDs.size() == 1)
     {
-        subsetter.setLargeCellSubset(currentSet, exposedPatchIDs[0], true);
-    }
-    else
-    {
-        // Find per face the nearest patch
-        labelList nearestExposedPatch(nearestPatch(mesh, exposedPatchIDs));
+        bitSet selectedCells =
+        (
+            cellSetPtr
+          ? BitSetOps::create(mesh.nCells(), *cellSetPtr)
+          : mesh.cellZones().selection(zoneNames)
+        );
 
-        labelList region(mesh.nCells(), 0);
-        forAllConstIter(cellSet, currentSet, iter)
+        if (exposedPatchIDs.size() == 1)
         {
-            region[iter.key()] = 1;
+            // Single patch for exposed faces
+            subsetter.setCellSubset
+            (
+                selectedCells,
+                exposedPatchIDs.first(),
+                true
+            );
+        }
+        else
+        {
+            // The nearest patch per face
+            labelList nearestExposedPatch(nearestPatch(mesh, exposedPatchIDs));
+
+            labelList exposedFaces
+            (
+                subsetter.getExposedFaces(selectedCells, true)
+            );
+
+            subsetter.setCellSubset
+            (
+                selectedCells,
+                exposedFaces,
+                labelUIndList(nearestExposedPatch, exposedFaces)(),
+                true
+            );
         }
 
-        labelList exposedFaces(subsetter.getExposedFaces(region, 1, true));
-        subsetter.setLargeCellSubset
-        (
-            region,
-            1,
-            exposedFaces,
-            labelUIndList(nearestExposedPatch, exposedFaces)(),
-            true
-        );
+        Info<< "Subset "
+            << returnReduce(subsetter.subMesh().nCells(), sumOp<label>())
+            << " of "
+            << returnReduce(mesh.nCells(), sumOp<label>())
+            << " cells" << nl << nl;
     }
 
 
@@ -466,39 +569,39 @@ int main(int argc, char *argv[])
     // Read vol fields and subset
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    PtrList<volScalarField> scalarFlds;
-    subsetFields(subsetter, availableFields, scalarFlds);
+    PtrList<volScalarField> vScalarFlds;
+    subsetFields(subsetter, availableFields, vScalarFlds);
 
-    PtrList<volVectorField> vectorFlds;
-    subsetFields(subsetter, availableFields, vectorFlds);
+    PtrList<volVectorField> vVectorFlds;
+    subsetFields(subsetter, availableFields, vVectorFlds);
 
-    PtrList<volSphericalTensorField> sphTensorFlds;
-    subsetFields(subsetter, availableFields, sphTensorFlds);
+    PtrList<volSphericalTensorField> vSphTensorFlds;
+    subsetFields(subsetter, availableFields, vSphTensorFlds);
 
-    PtrList<volSymmTensorField> symmTensorFlds;
-    subsetFields(subsetter, availableFields, symmTensorFlds);
+    PtrList<volSymmTensorField> vSymmTensorFlds;
+    subsetFields(subsetter, availableFields, vSymmTensorFlds);
 
-    PtrList<volTensorField> tensorFlds;
-    subsetFields(subsetter, availableFields, tensorFlds);
+    PtrList<volTensorField> vTensorFlds;
+    subsetFields(subsetter, availableFields, vTensorFlds);
 
 
     // Read surface fields and subset
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    PtrList<surfaceScalarField> surfScalarFlds;
-    subsetFields(subsetter, availableFields, surfScalarFlds);
+    PtrList<surfaceScalarField> sScalarFlds;
+    subsetFields(subsetter, availableFields, sScalarFlds);
 
-    PtrList<surfaceVectorField> surfVectorFlds;
-    subsetFields(subsetter, availableFields, surfVectorFlds);
+    PtrList<surfaceVectorField> sVectorFlds;
+    subsetFields(subsetter, availableFields, sVectorFlds);
 
-    PtrList<surfaceSphericalTensorField> surfSphTensorFlds;
-    subsetFields(subsetter, availableFields, surfSphTensorFlds);
+    PtrList<surfaceSphericalTensorField> sSphTensorFlds;
+    subsetFields(subsetter, availableFields, sSphTensorFlds);
 
-    PtrList<surfaceSymmTensorField> surfSymmTensorFlds;
-    subsetFields(subsetter, availableFields, surfSymmTensorFlds);
+    PtrList<surfaceSymmTensorField> sSymmTensorFlds;
+    subsetFields(subsetter, availableFields, sSymmTensorFlds);
 
-    PtrList<surfaceTensorField> surfTensorFlds;
-    subsetFields(subsetter, availableFields, surfTensorFlds);
+    PtrList<surfaceTensorField> sTensorFlds;
+    subsetFields(subsetter, availableFields, sTensorFlds);
 
 
     // Read point fields and subset
@@ -506,43 +609,43 @@ int main(int argc, char *argv[])
 
     const pointMesh& pMesh = pointMesh::New(mesh);
 
-    PtrList<pointScalarField> pointScalarFlds;
-    subsetPointFields(subsetter, pMesh, availableFields, pointScalarFlds);
+    PtrList<pointScalarField> pScalarFlds;
+    subsetPointFields(subsetter, pMesh, availableFields, pScalarFlds);
 
-    PtrList<pointVectorField> pointVectorFlds;
-    subsetPointFields(subsetter, pMesh, availableFields, pointVectorFlds);
+    PtrList<pointVectorField> pVectorFlds;
+    subsetPointFields(subsetter, pMesh, availableFields, pVectorFlds);
 
-    PtrList<pointSphericalTensorField> pointSphTensorFlds;
-    subsetPointFields(subsetter, pMesh, availableFields, pointSphTensorFlds);
+    PtrList<pointSphericalTensorField> pSphTensorFlds;
+    subsetPointFields(subsetter, pMesh, availableFields, pSphTensorFlds);
 
-    PtrList<pointSymmTensorField> pointSymmTensorFlds;
-    subsetPointFields(subsetter, pMesh, availableFields, pointSymmTensorFlds);
+    PtrList<pointSymmTensorField> pSymmTensorFlds;
+    subsetPointFields(subsetter, pMesh, availableFields, pSymmTensorFlds);
 
-    PtrList<pointTensorField> pointTensorFlds;
-    subsetPointFields(subsetter, pMesh, availableFields, pointTensorFlds);
+    PtrList<pointTensorField> pTensorFlds;
+    subsetPointFields(subsetter, pMesh, availableFields, pTensorFlds);
 
 
     // Read dimensioned fields and subset
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    PtrList<volScalarField::Internal> scalarDimFlds;
-    subsetDimensionedFields(subsetter, availableFields, scalarDimFlds);
+    PtrList<volScalarField::Internal> dScalarFlds;
+    subsetDimensionedFields(subsetter, availableFields, dScalarFlds);
 
-    PtrList<volVectorField::Internal> vectorDimFlds;
-    subsetDimensionedFields(subsetter, availableFields, vectorDimFlds);
+    PtrList<volVectorField::Internal> dVectorFlds;
+    subsetDimensionedFields(subsetter, availableFields, dVectorFlds);
 
-    PtrList<volSphericalTensorField::Internal> sphTensorDimFlds;
-    subsetDimensionedFields(subsetter, availableFields, sphTensorDimFlds);
+    PtrList<volSphericalTensorField::Internal> dSphTensorFlds;
+    subsetDimensionedFields(subsetter, availableFields, dSphTensorFlds);
 
-    PtrList<volSymmTensorField::Internal> symmTensorDimFlds;
-    subsetDimensionedFields(subsetter, availableFields, symmTensorDimFlds);
+    PtrList<volSymmTensorField::Internal> dSymmTensorFlds;
+    subsetDimensionedFields(subsetter, availableFields, dSymmTensorFlds);
 
-    PtrList<volTensorField::Internal> tensorDimFlds;
-    subsetDimensionedFields(subsetter, availableFields, tensorDimFlds);
+    PtrList<volTensorField::Internal> dTensorFlds;
+    subsetDimensionedFields(subsetter, availableFields, dTensorFlds);
 
 
-    // topoSets and subset
-    // ~~~~~~~~~~~~~~~~~~~
+    // Read topoSets and subset
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
 
     PtrList<cellSet> cellSets;
     PtrList<faceSet> faceSets;
@@ -550,7 +653,10 @@ int main(int argc, char *argv[])
 
     {
         IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
-        objects.remove(currentSet);
+        if (cellSetPtr)
+        {
+            objects.remove(*cellSetPtr);
+        }
         subsetTopoSets
         (
             mesh,
@@ -591,7 +697,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        runTime++;
+        ++runTime;
         subsetter.subMesh().setInstance(runTime.timeName());
     }
 
@@ -602,94 +708,34 @@ int main(int argc, char *argv[])
 
 
     // Volume fields
-    forAll(scalarFlds, i)
-    {
-        scalarFlds[i].write();
-    }
-    forAll(vectorFlds, i)
-    {
-        vectorFlds[i].write();
-    }
-    forAll(sphTensorFlds, i)
-    {
-        sphTensorFlds[i].write();
-    }
-    forAll(symmTensorFlds, i)
-    {
-        symmTensorFlds[i].write();
-    }
-    forAll(tensorFlds, i)
-    {
-        tensorFlds[i].write();
-    }
+    for (const auto& fld : vScalarFlds)     { fld.write(); }
+    for (const auto& fld : vVectorFlds)     { fld.write(); }
+    for (const auto& fld : vSphTensorFlds)  { fld.write(); }
+    for (const auto& fld : vSymmTensorFlds) { fld.write(); }
+    for (const auto& fld : vTensorFlds)     { fld.write(); }
 
-    // Surface fields.
-    forAll(surfScalarFlds, i)
-    {
-        surfScalarFlds[i].write();
-    }
-    forAll(surfVectorFlds, i)
-    {
-        surfVectorFlds[i].write();
-    }
-    forAll(surfSphTensorFlds, i)
-    {
-        surfSphTensorFlds[i].write();
-    }
-    forAll(surfSymmTensorFlds, i)
-    {
-        surfSymmTensorFlds[i].write();
-    }
-    forAll(surfTensorFlds, i)
-    {
-        surfTensorFlds[i].write();
-    }
+    // Surface fields
+    for (const auto& fld : sScalarFlds)     { fld.write(); }
+    for (const auto& fld : sVectorFlds)     { fld.write(); }
+    for (const auto& fld : sSphTensorFlds)  { fld.write(); }
+    for (const auto& fld : sSymmTensorFlds) { fld.write(); }
+    for (const auto& fld : sTensorFlds)     { fld.write(); }
 
     // Point fields
-    forAll(pointScalarFlds, i)
-    {
-        pointScalarFlds[i].write();
-    }
-    forAll(pointVectorFlds, i)
-    {
-        pointVectorFlds[i].write();
-    }
-    forAll(pointSphTensorFlds, i)
-    {
-        pointSphTensorFlds[i].write();
-    }
-    forAll(pointSymmTensorFlds, i)
-    {
-        pointSymmTensorFlds[i].write();
-    }
-    forAll(pointTensorFlds, i)
-    {
-        pointTensorFlds[i].write();
-    }
+    for (const auto& fld : pScalarFlds)     { fld.write(); }
+    for (const auto& fld : pVectorFlds)     { fld.write(); }
+    for (const auto& fld : pSphTensorFlds)  { fld.write(); }
+    for (const auto& fld : pSymmTensorFlds) { fld.write(); }
+    for (const auto& fld : pTensorFlds)     { fld.write(); }
 
     // Dimensioned fields
-    forAll(scalarDimFlds, i)
-    {
-        scalarDimFlds[i].write();
-    }
-    forAll(vectorDimFlds, i)
-    {
-        vectorDimFlds[i].write();
-    }
-    forAll(sphTensorDimFlds, i)
-    {
-        sphTensorDimFlds[i].write();
-    }
-    forAll(symmTensorDimFlds, i)
-    {
-        symmTensorDimFlds[i].write();
-    }
-    forAll(tensorDimFlds, i)
-    {
-        tensorDimFlds[i].write();
-    }
+    for (const auto& fld : dScalarFlds)     { fld.write(); }
+    for (const auto& fld : dVectorFlds)     { fld.write(); }
+    for (const auto& fld : dSphTensorFlds)  { fld.write(); }
+    for (const auto& fld : dSymmTensorFlds) { fld.write(); }
+    for (const auto& fld : dTensorFlds)     { fld.write(); }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

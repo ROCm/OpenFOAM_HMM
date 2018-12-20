@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(cellToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, cellToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, cellToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, cellToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, cellToPoint, istream);
 }
 
 
@@ -50,31 +52,36 @@ const Foam::Enum
     Foam::cellToPoint::cellAction
 >
 Foam::cellToPoint::cellActionNames_
-{
+({
     { cellAction::ALL, "all" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::cellToPoint::combine(topoSet& set, const bool add) const
+void Foam::cellToPoint::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    cellSet loadedSet(mesh_, setName_);
+    cellSet loadedSet(mesh_, setName);
+    const labelHashSet& cellLabels = loadedSet;
 
     // Add all point from cells in loadedSet
-    forAllConstIter(cellSet, loadedSet, iter)
+    for (const label celli : cellLabels)
     {
-        const label celli = iter.key();
         const labelList& cFaces = mesh_.cells()[celli];
 
-        forAll(cFaces, cFacei)
+        for (const label facei : cFaces)
         {
-            const face& f = mesh_.faces()[cFaces[cFacei]];
+            const face& f = mesh_.faces()[facei];
 
-            forAll(f, fp)
+            for (const label pointi : f)
             {
-                addOrDelete(set, f[fp], add);
+                addOrDelete(set, pointi, add);
             }
         }
     }
@@ -90,8 +97,8 @@ Foam::cellToPoint::cellToPoint
     const cellAction option
 )
 :
-    topoSetSource(mesh),
-    setName_(setName),
+    topoSetPointSource(mesh),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -102,10 +109,17 @@ Foam::cellToPoint::cellToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.lookup("set")),
-    option_(cellActionNames_.lookup("option", dict))
-{}
+    topoSetPointSource(mesh),
+    names_(),
+    option_(cellActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::cellToPoint::cellToPoint
@@ -114,15 +128,9 @@ Foam::cellToPoint::cellToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    setName_(checkIs(is)),
+    topoSetPointSource(mesh),
+    names_(one(), word(checkIs(is))),
     option_(cellActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellToPoint::~cellToPoint()
 {}
 
 
@@ -134,17 +142,31 @@ void Foam::cellToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding from " << setName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points in cellSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing from " << setName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points in cellSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

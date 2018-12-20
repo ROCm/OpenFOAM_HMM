@@ -1,4 +1,4 @@
-#/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -33,7 +33,7 @@ Foam::autoPtr<Foam::windowModel> Foam::windowModel::New
     const label nSamples
 )
 {
-    const word modelType(dict.lookup("windowModel"));
+    const word modelType(dict.get<word>("windowModel"));
 
     Info<< "Selecting windowModel " << modelType << endl;
 
@@ -53,7 +53,6 @@ Foam::autoPtr<Foam::windowModel> Foam::windowModel::New
     (
         cstrIter()(dict.subDict(modelType + "Coeffs"), nSamples)
     );
-
 }
 
 

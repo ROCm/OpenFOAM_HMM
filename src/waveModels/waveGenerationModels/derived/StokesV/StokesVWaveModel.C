@@ -846,12 +846,6 @@ Foam::waveModels::StokesV::StokesV
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModels::StokesV::~StokesV()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModels::StokesV::readDict(const dictionary& overrideDict)

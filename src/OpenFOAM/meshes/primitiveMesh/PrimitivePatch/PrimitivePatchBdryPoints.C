@@ -46,10 +46,9 @@ calcBdryPoints() const
 
     if (boundaryPointsPtr_)
     {
-        // it is considered an error to attempt to recalculate
-        // if already allocated
+        // Error to recalculate if already allocated
         FatalErrorInFunction
-            << "edge types already calculated"
+            << "boundaryPoints already calculated"
             << abort(FatalError);
     }
 
@@ -65,8 +64,7 @@ calcBdryPoints() const
         bp.insert(curEdge.end());
     }
 
-    boundaryPointsPtr_ = new labelList(bp.toc());
-    sort(*boundaryPointsPtr_);
+    boundaryPointsPtr_ = new labelList(bp.sortedToc());
 
     if (debug)
     {

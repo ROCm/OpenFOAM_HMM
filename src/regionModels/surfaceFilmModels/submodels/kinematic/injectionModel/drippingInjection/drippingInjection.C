@@ -55,8 +55,8 @@ drippingInjection::drippingInjection
 )
 :
     injectionModel(type(), film, dict),
-    deltaStable_(readScalar(coeffDict_.lookup("deltaStable"))),
-    particlesPerParcel_(readScalar(coeffDict_.lookup("particlesPerParcel"))),
+    deltaStable_(coeffDict_.get<scalar>("deltaStable")),
+    particlesPerParcel_(coeffDict_.get<scalar>("particlesPerParcel")),
     rndGen_(),
     parcelDistribution_
     (

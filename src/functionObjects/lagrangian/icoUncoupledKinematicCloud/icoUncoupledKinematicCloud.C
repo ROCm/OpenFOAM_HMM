@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,7 @@ License
 
 #include "icoUncoupledKinematicCloud.H"
 #include "singlePhaseTransportModel.H"
+#include "gravityMeshObject.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -54,18 +55,7 @@ Foam::functionObjects::icoUncoupledKinematicCloud::icoUncoupledKinematicCloud
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    g_
-    (
-        IOobject
-        (
-            "g",
-            time_.constant(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE
-        ),
-        dimensionedVector("g", dimAcceleration, Zero) // Needs name
-    ),
+    g_(meshObjects::gravity::New(time_)),
     laminarTransport_
     (
         mesh_.lookupObject<singlePhaseTransportModel>("transportProperties")

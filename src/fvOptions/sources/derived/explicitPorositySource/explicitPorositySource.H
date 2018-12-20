@@ -44,14 +44,9 @@ Usage
 
             coordinateSystem
             {
-                type    cartesian;
                 origin  (0 0 0);
-                coordinateRotation
-                {
-                    type    axesRotation;
-                    e1  (0.70710678 0.70710678 0);
-                    e2  (0 0 1);
-                }
+                e1      (0.70710678 0.70710678 0);
+                e2      (0 0 1);
             }
         }
     }
@@ -89,7 +84,6 @@ class explicitPorositySource
 :
     public cellSetOption
 {
-
 protected:
 
     // Protected data
@@ -128,48 +122,45 @@ public:
 
 
     //- Destructor
-    virtual ~explicitPorositySource()
-    {}
+    virtual ~explicitPorositySource() = default;
 
 
     // Member Functions
 
+        //- Access to the porosityModel
         const porosityModel& model() const
         {
-            return porosityPtr_();
+            return *porosityPtr_;
         }
 
-        // Add explicit and implicit contributions
 
-            //- Add implicit contribution to momentum equation
-            virtual void addSup
-            (
-                fvMatrix<vector>& eqn,
-                const label fieldi
-            );
+        //- Add implicit contribution to momentum equation
+        virtual void addSup
+        (
+            fvMatrix<vector>& eqn,
+            const label fieldi
+        );
 
-            //- Add implicit contribution to compressible momentum equation
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<vector>& eqn,
-                const label fieldi
-            );
+        //- Add implicit contribution to compressible momentum equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<vector>& eqn,
+            const label fieldi
+        );
 
-            //- Add implicit contribution to phase momentum equation
-            virtual void addSup
-            (
-                const volScalarField& alpha,
-                const volScalarField& rho,
-                fvMatrix<vector>& eqn,
-                const label fieldi
-            );
+        //- Add implicit contribution to phase momentum equation
+        virtual void addSup
+        (
+            const volScalarField& alpha,
+            const volScalarField& rho,
+            fvMatrix<vector>& eqn,
+            const label fieldi
+        );
 
 
-        // IO
-
-            //- Read dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 

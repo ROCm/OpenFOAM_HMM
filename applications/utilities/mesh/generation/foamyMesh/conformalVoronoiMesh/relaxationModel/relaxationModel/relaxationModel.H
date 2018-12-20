@@ -66,9 +66,8 @@ protected:
         //- Method coeffs dictionary
         dictionary coeffDict_;
 
-private:
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         relaxationModel(const relaxationModel&) = delete;
@@ -120,7 +119,7 @@ public:
 
 
     //- Destructor
-    virtual ~relaxationModel();
+    virtual ~relaxationModel() = default;
 
 
     // Member Functions

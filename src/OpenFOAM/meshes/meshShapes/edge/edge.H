@@ -95,7 +95,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Return first vertex label
         using labelPair::first;
@@ -124,7 +124,7 @@ public:
         inline edge reverseEdge() const;
 
 
-     // Queries
+    // Queries
 
         //- Return the smallest point label used by the edge
         //  No special handling of negative point labels.
@@ -133,6 +133,9 @@ public:
         //- Return the largest point label used by the edge
         //  No special handling of negative point labels.
         inline label maxVertex() const;
+
+        //- Return true if the vertices are unique and non-negative.
+        inline bool valid() const;
 
         //- Return true if point label is found in edge.
         //  Always false for a negative label.
@@ -146,24 +149,24 @@ public:
         //  Negative point labels never connect.
         inline bool connects(const edge& other) const;
 
-        //- Return vertex common with otherEdge or -1 on failure
+        //- Return vertex common with other edge or -1 on failure
         //  Negative point labels are never considered common between edges.
         inline label commonVertex(const edge& other) const;
 
-        //- Given one vertex index, return the other one.
+        //- Given the point label for one vertex, return the other one.
         //  No special treatment for negative point labels.
-        inline label otherVertex(const label index) const;
+        inline label otherVertex(const label pointLabel) const;
 
 
-     // Editing
+    // Editing
 
         //- 'Collapse' edge by marking duplicate point labels as '-1',
-        //  the lower vertex is retained.
+        //- the lower vertex is retained.
         //  Return the effective size after collapsing.
         inline label collapse();
 
 
-     // Hash-like functions
+    // Hash-like functions
 
         //- Return the number of unique, valid (non -1) point labels.
         //  Similar to a HashTable::size().
@@ -260,10 +263,43 @@ public:
         //  - -1: identical values, but in different order
         static inline int compare(const edge& a, const edge& b);
 
+
+    // Hashing
+
+        //- The (commutative) hash-value for edge
+        inline unsigned hashval(unsigned seed=0) const
+        {
+            if (first() < second())
+            {
+                seed = Foam::Hash<label>()(first(), seed);
+                seed = Foam::Hash<label>()(second(), seed);
+            }
+            else
+            {
+                seed = Foam::Hash<label>()(second(), seed);
+                seed = Foam::Hash<label>()(first(), seed);
+            }
+            return seed;
+        }
+
+        //- Hashing function class for edge (commutative)
+        //  Also useful for inheritance in sub-classes
+        template<class HashT=Foam::Hash<label>>
+        struct Hash
+        {
+            inline unsigned operator()(const edge& obj, unsigned seed=0) const
+            {
+                return obj.hashval(seed);
+            }
+        };
 };
 
 
-// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+// Edges are a pair of labels - thus contiguous
+template<> inline bool contiguous<edge>()  {return true;}
+
 
 //- Return reverse of an edge
 inline edge reverse(const edge& e)
@@ -272,46 +308,24 @@ inline edge reverse(const edge& e)
 }
 
 
+//- Hash specialization for edge, using a commutative (incremental) hash.
+template<>
+struct Hash<edge>
+{
+    inline unsigned operator()(const edge& e, unsigned seed=0) const
+    {
+        return e.hashval(seed);
+    }
+};
+
+
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
+
 //- Compare edges for equal content, ignoring orientation
 inline bool operator==(const edge& a, const edge& b);
 
 //- Compare edges for non-equal content, ignoring orientation
 inline bool operator!=(const edge& a, const edge& b);
-
-
-//- Hash specialization for hashing edges as a commutative hash value.
-//  Hash incrementally.
-template<>
-inline unsigned Hash<edge>::operator()(const edge& e, unsigned seed) const
-{
-    unsigned val = seed;
-
-    if (e.first() < e.second())
-    {
-        val = Hash<label>()(e.first(), val);
-        val = Hash<label>()(e.second(), val);
-    }
-    else
-    {
-        val = Hash<label>()(e.second(), val);
-        val = Hash<label>()(e.first(), val);
-    }
-
-    return val;
-}
-
-
-//- Hash specialization for hashing edges as a commutative hash value.
-//  Hash incrementally.
-template<>
-inline unsigned Hash<edge>::operator()(const edge& e) const
-{
-    return Hash<edge>()(e, 0);
-}
-
-// Edges are a pair of labels - thus contiguous
-template<>
-inline bool contiguous<edge>()  {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

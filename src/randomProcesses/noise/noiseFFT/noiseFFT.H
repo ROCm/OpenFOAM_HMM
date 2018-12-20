@@ -109,7 +109,7 @@ public:
     //- Construct from pressure field
     noiseFFT(const scalar deltaT, const label windowSize = -1);
 
-    //- Destructor
+    //- Destructor. Cleanup/destroy plan
     ~noiseFFT();
 
 

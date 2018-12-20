@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,13 @@ Description
     Read/write VTK legacy format (ASCII) for surfaces.
 
     The output is never sorted by zone.
+
+    \heading Output Options
+    \table
+        Property    | Description                       | Required | Default
+        format      | ascii or binary format            | no | ascii
+        precision   | Write precision in ascii          | no | same as IOstream
+    \endtable
 
 SourceFiles
     VTKsurfaceFormat.C
@@ -69,13 +76,6 @@ class VTKsurfaceFormat
         );
 
 
-        //- No copy construct
-        VTKsurfaceFormat(const VTKsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const VTKsurfaceFormat<Face>&) = delete;
-
-
 public:
 
     // Constructors
@@ -112,7 +112,7 @@ public:
         //- Read from file
         virtual bool read(const fileName& filename);
 
-        //- Write object file
+        //- Write meshed surface to file
         virtual void write
         (
             const fileName& name,

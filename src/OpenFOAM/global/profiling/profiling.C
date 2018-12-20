@@ -384,7 +384,7 @@ bool Foam::profiling::writeData(Ostream& os) const
         os.endBlock();
     }
 
-    return os;
+    return os.good();
 }
 
 

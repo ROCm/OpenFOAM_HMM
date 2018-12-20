@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,21 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
+#include "Enum.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::Enum
+<
+    Foam::externalCoupledTemperatureMixedFvPatchScalarField::
+    outputTemperatureType
+>
+Foam::externalCoupledTemperatureMixedFvPatchScalarField::outputTemperatureNames
+({
+    { outputTemperatureType::FLUID, "fluid" },
+    { outputTemperatureType::WALL, "wall" },
+});
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -36,7 +51,14 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeHeader
     Ostream& os
 ) const
 {
-    os  << "# Values: magSf T qDot htc" << endl;
+    if (outputTemperature_ == outputTemperatureType::FLUID)
+    {
+        os  << "# Values: area Tfluid qDot htc" << endl;
+    }
+    else
+    {
+        os  << "# Values: area Twall qDot htc" << endl;
+    }
 }
 
 
@@ -49,7 +71,8 @@ externalCoupledTemperatureMixedFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    externalCoupledMixedFvPatchField<scalar>(p, iF)
+    externalCoupledMixedFvPatchField<scalar>(p, iF),
+    outputTemperature_(outputTemperatureType::WALL)
 {}
 
 
@@ -62,7 +85,8 @@ externalCoupledTemperatureMixedFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    externalCoupledMixedFvPatchField<scalar>(ptf, p, iF, mapper)
+    externalCoupledMixedFvPatchField<scalar>(ptf, p, iF, mapper),
+    outputTemperature_(ptf.outputTemperature_)
 {}
 
 
@@ -75,8 +99,23 @@ externalCoupledTemperatureMixedFvPatchScalarField
 )
 :
     //externalCoupledMixedFvPatchField<scalar>(p, iF, dict)
-    externalCoupledMixedFvPatchField<scalar>(p, iF)
+    externalCoupledMixedFvPatchField<scalar>(p, iF),
+    outputTemperature_(outputTemperatureType::WALL)
 {
+    if (dict.found("outputTemperature"))
+    {
+        outputTemperature_ =
+            outputTemperatureNames.get("outputTemperature", dict);
+    }
+    else
+    {
+        WarningInFunction
+            << "outputTemperature not specified "
+            << flatOutput(outputTemperatureNames) << nl
+            << "using 'wall' as compatibility default" << nl
+            << endl;
+    }
+
     if (dict.found("refValue"))
     {
         // Initialise same way as mixed
@@ -116,7 +155,8 @@ externalCoupledTemperatureMixedFvPatchScalarField
     const externalCoupledTemperatureMixedFvPatchScalarField& ecmpf
 )
 :
-    externalCoupledMixedFvPatchField<scalar>(ecmpf)
+    externalCoupledMixedFvPatchField<scalar>(ecmpf),
+    outputTemperature_(ecmpf.outputTemperature_)
 {}
 
 
@@ -127,14 +167,8 @@ externalCoupledTemperatureMixedFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    externalCoupledMixedFvPatchField<scalar>(ecmpf, iF)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::externalCoupledTemperatureMixedFvPatchScalarField::
-~externalCoupledTemperatureMixedFvPatchScalarField()
+    externalCoupledMixedFvPatchField<scalar>(ecmpf, iF),
+    outputTemperature_(ecmpf.outputTemperature_)
 {}
 
 
@@ -148,7 +182,7 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
     const label patchi = patch().index();
 
     // Heat flux [W/m2]
-    scalarField qDot(this->patch().size(), 0.0);
+    scalarField qDot(this->patch().size(), Zero);
 
     typedef compressible::turbulenceModel cmpTurbModelType;
 
@@ -189,10 +223,11 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
             << "thermo model to be available" << exit(FatalError);
     }
 
-    // Patch temperature [K]
+
+    // Patch (wall) temperature [K]
     const scalarField& Tp(*this);
 
-    // Near wall cell temperature [K]
+    // Near wall cell (fluid) temperature [K]
     const scalarField Tc(patchInternalField());
 
     // Heat transfer coefficient [W/m2/K]
@@ -200,13 +235,19 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
 
     const Field<scalar>& magSf(this->patch().magSf());
 
+    const UList<scalar>& Tout =
+    (
+        outputTemperature_ == outputTemperatureType::FLUID
+      ? Tc
+      : Tp
+    );
+
     forAll(patch(), facei)
     {
         os  << magSf[facei] << token::SPACE
-            << Tp[facei] << token::SPACE
+            << Tout[facei] << token::SPACE
             << qDot[facei] << token::SPACE
-            << htc[facei] << token::SPACE
-            << nl;
+            << htc[facei] << nl;
     }
 }
 
@@ -232,6 +273,20 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::readData
             >> this->refGrad()[facei]
             >> this->valueFraction()[facei];
     }
+}
+
+
+void Foam::externalCoupledTemperatureMixedFvPatchScalarField::write
+(
+    Ostream& os
+) const
+{
+    externalCoupledMixedFvPatchField::write(os);
+    os.writeEntry
+    (
+        "outputTemperature",
+        outputTemperatureNames[outputTemperature_]
+    );
 }
 
 

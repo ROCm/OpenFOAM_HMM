@@ -35,7 +35,7 @@ Foam::SurfaceReactionModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("surfaceReactionModel"));
+    const word modelType(dict.get<word>("surfaceReactionModel"));
 
     Info<< "Selecting surface reaction model " << modelType << endl;
 

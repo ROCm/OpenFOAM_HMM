@@ -40,11 +40,11 @@ const Foam::Enum
     Foam::directions::directionType
 >
 Foam::directions::directionTypeNames_
-{
+({
     { directionType::TAN1, "tan1" },
     { directionType::TAN2, "tan2" },
     { directionType::NORMAL, "normal" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -276,7 +276,7 @@ Foam::directions::directions
     List<vectorField>(wordList(dict.lookup("directions")).size())
 {
     const wordList wantedDirs(dict.lookup("directions"));
-    const word coordSystem(dict.lookup("coordinateSystem"));
+    const word coordSystem(dict.get<word>("coordinateSystem"));
 
     bool wantNormal = false;
     bool wantTan1 = false;
@@ -315,8 +315,7 @@ Foam::directions::directions
         vector tan2(globalDict.lookup("tan2"));
         check2D(correct2DPtr, tan2);
 
-        vector normal = tan1 ^ tan2;
-        normal /= mag(normal);
+        const vector normal = normalised(tan1 ^ tan2);
 
         Info<< "Global Coordinate system:" << endl
             << "     normal : " << normal << endl
@@ -341,7 +340,7 @@ Foam::directions::directions
     {
         const dictionary& patchDict = dict.subDict("patchLocalCoeffs");
 
-        const word patchName(patchDict.lookup("patch"));
+        const word patchName(patchDict.get<word>("patch"));
 
         const label patchi = mesh.boundaryMesh().findPatchID(patchName);
 

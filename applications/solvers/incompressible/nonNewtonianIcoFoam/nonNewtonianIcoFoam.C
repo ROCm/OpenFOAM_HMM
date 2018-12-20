@@ -40,10 +40,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for incompressible laminar flow"
+        " of non-Newtonian fluids."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMeshNoClear.H"
     #include "createControl.H"

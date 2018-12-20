@@ -377,7 +377,7 @@ bool Foam::polyMeshTetDecomposition::checkFaceTets
     const vectorField& fc = mesh.faceCentres();
 
     // Calculate coupled cell centre
-    pointField neiCc(mesh.nFaces() - mesh.nInternalFaces());
+    pointField neiCc(mesh.nBoundaryFaces());
 
     for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); ++facei)
     {

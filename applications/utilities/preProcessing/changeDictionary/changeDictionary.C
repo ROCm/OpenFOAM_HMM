@@ -97,10 +97,15 @@ HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
 {
     HashTable<wordList> groupToPatch;
 
-    forAllConstIter(dictionary, boundaryDict, iter)
+    for (const entry& dEntry : boundaryDict)
     {
-        const word& patchName = iter().keyword();
-        const dictionary& patchDict = iter().dict();
+        if (!dEntry.isDict())
+        {
+            continue;
+        }
+
+        const word& patchName = dEntry.keyword();
+        const dictionary& patchDict = dEntry.dict();
 
         wordList groups;
         if (patchDict.readIfPresent("inGroups", groups))
@@ -235,18 +240,17 @@ bool merge
     // Save current (non-wildcard) keys before adding items.
     wordHashSet thisKeysSet;
     {
-        List<keyType> keys = thisDict.keys(false);
-        forAll(keys, i)
+        for (const word& k : thisDict.keys(false))
         {
-            thisKeysSet.insert(keys[i]);
+            thisKeysSet.insert(k);
         }
     }
 
     // Pass 1. All literal matches
 
-    forAllConstIter(IDLList<entry>, mergeDict, mergeIter)
+    for (const entry& mergeEntry : mergeDict)
     {
-        const keyType& key = mergeIter().keyword();
+        const keyType& key = mergeEntry.keyword();
 
         if (key[0] == '~')
         {
@@ -261,26 +265,21 @@ bool merge
         }
         else if (literalRE || !(key.isPattern() || shortcuts.found(key)))
         {
-            entry* entryPtr = thisDict.lookupEntryPtr
-            (
-                key,
-                false,              // recursive
-                false               // patternMatch
-            );
+            entry* eptr = thisDict.findEntry(key, keyType::LITERAL);
 
-            if (entryPtr)
+            if (eptr)
             {
                 // Mark thisDict entry as having been match for wildcard
                 // handling later on.
-                thisKeysSet.erase(entryPtr->keyword());
+                thisKeysSet.erase(eptr->keyword());
 
                 if
                 (
                     addEntry
                     (
                         thisDict,
-                       *entryPtr,
-                        mergeIter(),
+                       *eptr,
+                        mergeEntry,
                         literalRE,
                         shortcuts
                     )
@@ -293,8 +292,8 @@ bool merge
             {
                 if (addNonExisting)
                 {
-                    // not found - just add
-                    thisDict.add(mergeIter().clone(thisDict).ptr());
+                    // Not found - just add
+                    thisDict.add(mergeEntry.clone(thisDict).ptr());
                     changed = true;
                 }
                 else
@@ -310,14 +309,14 @@ bool merge
 
     // Pass 2. Wildcard or shortcut matches (if any) on any non-match keys.
 
-    if (!literalRE && thisKeysSet.size() > 0)
+    if (!literalRE && thisKeysSet.size())
     {
         // Pick up remaining dictionary entries
         wordList thisKeys(thisKeysSet.toc());
 
-        forAllConstIter(IDLList<entry>, mergeDict, mergeIter)
+        for (const entry& mergeEntry : mergeDict)
         {
-            const keyType& key = mergeIter().keyword();
+            const keyType& key = mergeEntry.keyword();
 
             if (key[0] == '~')
             {
@@ -336,10 +335,10 @@ bool merge
                 );
 
                 // Remove all matches
-                forAll(matches, i)
+                for (const label matchi : matches)
                 {
-                    const word& thisKey = thisKeys[matches[i]];
-                    thisKeysSet.erase(thisKey);
+                    const word& k = thisKeys[matchi];
+                    thisKeysSet.erase(k);
                 }
                 changed = true;
             }
@@ -358,22 +357,19 @@ bool merge
                 );
 
                 // Add all matches
-                forAll(matches, i)
+                for (const label matchi : matches)
                 {
-                    const word& thisKey = thisKeys[matches[i]];
+                    const word& k = thisKeys[matchi];
 
-                    entry& thisEntry = const_cast<entry&>
-                    (
-                        thisDict.lookupEntry(thisKey, false, false)
-                    );
+                    entry* eptr = thisDict.findEntry(k, keyType::LITERAL);
 
                     if
                     (
                         addEntry
                         (
                             thisDict,
-                            thisEntry,
-                            mergeIter(),
+                           *eptr,
+                            mergeEntry,
                             literalRE,
                             HashTable<wordList>(0)    // no shortcuts
                                                       // at deeper levels
@@ -394,18 +390,25 @@ bool merge
 
 int main(int argc, char *argv[])
 {
-    #include "addDictOption.H"
+    argList::addNote
+    (
+        "Utility to change dictionary entries"
+        " (such as the patch type for fields and polyMesh/boundary files)."
+    );
+
+    argList::addOption("dict", "file", "Use alternative changeDictionaryDict");
+
     argList::addOption
     (
         "subDict",
         "name",
-        "specify the subDict name of the replacements dictionary"
+        "Specify the subDict name of the replacements dictionary"
     );
     argList::addOption
     (
         "instance",
         "name",
-        "override instance setting (default is the time name)"
+        "Override instance setting (default is the time name)"
     );
 
     // Add explicit time option
@@ -414,17 +417,17 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "literalRE",
-        "treat regular expressions literally (i.e., as a keyword)"
+        "Treat regular expressions literally (i.e., as a keyword)"
     );
     argList::addBoolOption
     (
         "enableFunctionEntries",
-        "enable expansion of dictionary directives - #include, #codeStream etc"
+        "Enable expansion of dictionary directives - #include, #codeStream etc"
     );
     argList::addBoolOption
     (
         "disablePatchGroups",
-        "disable matching keys to patch groups"
+        "Disable matching keys to patch groups"
     );
 
     #include "addRegionOption.H"
@@ -471,7 +474,7 @@ int main(int argc, char *argv[])
         const bool enableEntries = args.found("enableFunctionEntries");
         if (enableEntries)
         {
-            Info<< "Allowing dictionary preprocessing ('#include', '#codeStream')."
+            Info<< "Allowing dictionary preprocessing (#include, #codeStream)."
                 << endl;
         }
 
@@ -559,9 +562,12 @@ int main(int argc, char *argv[])
 
         // Temporary convert to dictionary
         dictionary fieldDict;
-        forAll(dictList, i)
+        for (const entry& e : dictList)
         {
-            fieldDict.add(dictList[i].keyword(), dictList[i].dict());
+            if (e.isDict())
+            {
+                fieldDict.add(e.keyword(), e.dict());
+            }
         }
 
         if (dictList.size())
@@ -591,9 +597,17 @@ int main(int argc, char *argv[])
 
         // Every replacement is a dictionary name and a keyword in this
 
-        forAllConstIter(dictionary, replaceDicts, fieldIter)
+        for (const entry& replaceEntry : replaceDicts)
         {
-            const word& fieldName = fieldIter().keyword();
+            if (!replaceEntry.isDict())
+            {
+                // Could also warn
+                continue;
+            }
+
+            const word& fieldName = replaceEntry.keyword();
+            const dictionary& replaceDict = replaceEntry.dict();
+
             Info<< "Replacing entries in dictionary " << fieldName << endl;
 
             // Handle 'boundary' specially:
@@ -604,11 +618,8 @@ int main(int argc, char *argv[])
                 Info<< "Special handling of " << fieldName
                     << " as polyMesh/boundary file." << endl;
 
-                // Get the replacement dictionary for the field
-                const dictionary& replaceDict = fieldIter().dict();
-                Info<< "Merging entries from " << replaceDict.toc() << endl;
-
                 // Merge the replacements in. Do not add non-existing entries.
+                Info<< "Merging entries from " << replaceDict.toc() << endl;
                 merge(false, fieldDict, replaceDict, literalRE, patchGroups);
 
                 Info<< "fieldDict:" << fieldDict << endl;
@@ -627,8 +638,7 @@ int main(int argc, char *argv[])
                         fieldDict.lookupEntry
                         (
                             doneKeys[i],
-                            false,
-                            true
+                            keyType::REGEX
                         ).clone()
                     );
                     fieldDict.remove(doneKeys[i]);
@@ -637,9 +647,9 @@ int main(int argc, char *argv[])
                 // Add remaining entries
                 label sz = dictList.size();
                 dictList.setSize(nEntries);
-                forAllConstIter(dictionary, fieldDict, iter)
+                for (const entry& e : fieldDict)
                 {
-                    dictList.set(sz++, iter().clone());
+                    dictList.set(sz++, e.clone());
                 }
 
                 Info<< "Writing modified " << fieldName << endl;
@@ -682,11 +692,8 @@ int main(int argc, char *argv[])
                     Info<< "Loaded dictionary " << fieldName
                         << " with entries " << fieldDict.toc() << endl;
 
-                    // Get the replacement dictionary for the field
-                    const dictionary& replaceDict = fieldIter().dict();
-                    Info<< "Merging entries from " << replaceDict.toc() << endl;
-
                     // Merge the replacements in (allow adding)
+                    Info<< "Merging entries from " << replaceDict.toc() << endl;
                     merge(true, fieldDict, replaceDict, literalRE, patchGroups);
 
                     Info<< "Writing modified fieldDict " << fieldName << endl;

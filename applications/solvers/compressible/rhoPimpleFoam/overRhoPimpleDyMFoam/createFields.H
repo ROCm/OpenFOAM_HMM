@@ -1,10 +1,10 @@
 Info<< "Reading thermophysical properties\n" << endl;
 
-autoPtr<psiThermo> pThermo
+autoPtr<fluidThermo> pThermo
 (
-    psiThermo::New(mesh)
+    fluidThermo::New(mesh)
 );
-psiThermo& thermo = pThermo();
+fluidThermo& thermo = pThermo();
 thermo.validate(args.executable(), "h", "e");
 
 volScalarField& p = thermo.p();
@@ -39,6 +39,8 @@ volVectorField U
 
 #include "compressibleCreatePhi.H"
 
+pressureControl pressureControl(p, rho, pimple.dict(), false);
+
 dimensionedScalar rhoMax
 (
     dimensionedScalar::lookupOrDefault
@@ -63,42 +65,25 @@ dimensionedScalar rhoMin
 
 mesh.setFluxRequired(p.name());
 
-Info<< "Creating field dpdt\n" << endl;
-volScalarField dpdt
-(
-    IOobject
-    (
-        "dpdt",
-        runTime.timeName(),
-        mesh
-    ),
-    mesh,
-    dimensionedScalar(p.dimensions()/dimTime, Zero)
-);
+#include "createDpdt.H"
 
-Info<< "Creating field kinetic energy K\n" << endl;
-volScalarField K("K", 0.5*magSqr(U));
-
+#include "createK.H"
 
 //- Overset specific
 
 // Add solver-specific interpolations
 {
-    dictionary oversetDict;
-    oversetDict.add("U", true);
-    oversetDict.add("p", true);
-    oversetDict.add("HbyA", true);
-    oversetDict.add("grad(p)", true);
+    wordHashSet& nonInt =
+        const_cast<wordHashSet&>(Stencil::New(mesh).nonInterpolatedFields());
 
-    const_cast<dictionary&>
-    (
-        mesh.schemesDict()
-    ).add
-    (
-        "oversetInterpolationRequired",
-        oversetDict,
-        true
-    );
+    nonInt.insert("HbyA");
+    nonInt.insert("grad(p)");
+    nonInt.insert("surfaceIntegrate(phi)");
+    nonInt.insert("surfaceIntegrate(phiHbyA)");
+    nonInt.insert("cellMask");
+    nonInt.insert("cellDisplacement");
+    nonInt.insert("interpolatedCells");
+    nonInt.insert("cellInterpolationWeight");
 }
 
 // Mask field for zeroing out contributions on hole cells

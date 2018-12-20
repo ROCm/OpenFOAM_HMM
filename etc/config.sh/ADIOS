@@ -37,7 +37,7 @@ export ADIOS_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
-if [ "$FOAM_VERBOSE" -a "$PS1" ]
+if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
 then
     echo "Using adios ($adios_version)  ->  $ADIOS_ARCH_PATH" 1>&2
 fi
@@ -49,7 +49,7 @@ then
     # outside of ThirdParty and should be added to the path.
 
     ending="${ADIOS_ARCH_PATH##*-}"
-    if [ "$ending" != none -a "$ending" != system ]
+    if [ "$ending" != none ] && [ "$ending" != system ]
     then
         # PATH was already cleaned by etc/bashrc caller
         _foamAddPath $ADIOS_ARCH_PATH/bin

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,34 @@ Class
 
 Description
     A surfaceWriter for OpenFOAM surfaces
+
+    \heading Output file locations
+
+    The \c rootdir normally corresponds to something like
+    \c postProcessing/\<name\>
+
+    \subheading Geometry
+    \verbatim
+    rootdir
+    `-- timeName
+        `-- surfaceName
+            |-- "points"
+            |-- "faceCentres"
+            `-- "faces"
+    \endverbatim
+
+    \subheading Fields
+    \verbatim
+    rootdir
+    `-- timeName
+        `-- surfaceName
+            |-- scalarField
+            |   |-- field
+            |   `-- field
+            |-- vectorField
+                |-- field
+                `-- field
+    \endverbatim
 
 SourceFiles
     foamSurfaceWriter.C
@@ -56,13 +84,13 @@ class foamSurfaceWriter
         template<class Type>
         fileName writeTemplate
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const word& fieldName,
-            const Field<Type>& values,
-            const bool isNodeValues,
-            const bool verbose
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<Type>& values,      //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const;
 
 
@@ -94,76 +122,76 @@ public:
         //- Write single surface geometry to file.
         virtual fileName write
         (
-            const fileName& outputDir,
-            const fileName& surfaceName,
-            const meshedSurf& surf,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
 
         //- Write scalarField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<scalar>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<scalar>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write vectorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<vector>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<vector>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write sphericalTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<sphericalTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<sphericalTensor>& values, //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write symmTensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<symmTensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<symmTensor>& values,//!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 
         //- Write tensorField for a single surface to file.
-        //  One value per face or vertex (isNodeValues = true)
+        //  One value per face or vertex.
         virtual fileName write
         (
-            const fileName& outputDir,      // <case>/surface/TIME
-            const fileName& surfaceName,    // name of surface
-            const meshedSurf& surf,
-            const word& fieldName,          // name of field
-            const Field<tensor>& values,
-            const bool isNodeValues,
-            const bool verbose = false
+            const fileName& outputDir,      //!< output-dir
+            const fileName& surfaceName,    //!< Name of surface
+            const meshedSurf& surf,         //!< Surface geometry
+            const word& fieldName,          //!< Name of field
+            const Field<tensor>& values,    //!< Field values to write
+            const bool isNodeValues = false,//!< Values are per-vertex
+            const bool verbose = false      //!< Additional verbosity
         ) const; // override
 };
 
@@ -171,12 +199,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "foamSurfaceWriterTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

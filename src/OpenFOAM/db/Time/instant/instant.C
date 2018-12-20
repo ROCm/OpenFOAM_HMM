@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,8 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "instantList.H"
+#include "instant.H"
 #include "Time.H"
+#include <cstdlib>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -33,81 +34,22 @@ const char* const Foam::instant::typeName = "instant";
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::instant::instant()
-{}
-
-
-Foam::instant::instant(const scalar val, const word& tname)
+Foam::instant::instant(scalar timeValue)
 :
-    value_(val),
-    name_(tname)
+    Instant<word>(timeValue, Time::timeName(timeValue))
 {}
 
 
-Foam::instant::instant(const scalar val)
+Foam::instant::instant(const word& timeName)
 :
-    value_(val),
-    name_(Time::timeName(val))
+    Instant<word>(std::atof(timeName.c_str()), timeName)
 {}
 
 
-Foam::instant::instant(const word& tname)
+Foam::instant::instant(word&& timeName)
 :
-    value_(atof(tname.c_str())),
-    name_(tname)
+    Instant<word>(std::atof(timeName.c_str()), std::move(timeName))
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::instant::equal(const scalar val) const
-{
-    return ((value_ > val - SMALL) && (value_ < val + SMALL));
-}
-
-
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
-
-bool Foam::operator==(const instant& a, const instant& b)
-{
-    return a.equal(b.value());
-}
-
-
-bool Foam::operator!=(const instant& a, const instant& b)
-{
-    return !a.equal(b.value());
-}
-
-
-bool Foam::operator<(const instant& a, const instant& b)
-{
-    return a.value() < b.value();
-}
-
-
-bool Foam::operator>(const instant& a, const instant& b)
-{
-    return a.value() > b.value();
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, instant& inst)
-{
-    is >> inst.value_ >> inst.name_;
-
-    return is;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const instant& inst)
-{
-   os << inst.value() << tab << inst.name();
-
-   return os;
-}
 
 
 // ************************************************************************* //

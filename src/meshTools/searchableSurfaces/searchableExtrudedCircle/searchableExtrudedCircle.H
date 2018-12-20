@@ -25,7 +25,18 @@ Class
     Foam::searchableExtrudedCircle
 
 Description
-    Searching on edgemesh with constant radius
+    Searching on edgeMesh with constant radius
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | extrudedCircle / searchableExtrudedCircle | selector |
+        file        | The name of the edge mesh         | yes   |
+        radius      | Search radius around the edges    | yes   |
+    \endtable
+
+Note
+    The edge mesh file is to be located in the constant/geometry directory.
 
 SourceFiles
     searchableExtrudedCircle.C
@@ -43,10 +54,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class edgeMesh;
 class treeDataEdge;
-template <class Type> class indexedOctree;
+template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
                   Class searchableExtrudedCircle Declaration
@@ -102,6 +113,7 @@ public:
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
         //- Whether supports volume type below
@@ -206,8 +218,8 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for point.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
                 const pointField&,

@@ -118,8 +118,7 @@ void Foam::edgeIntersections::intersectEdges
         const point& pStart = points1[meshPoints[e.start()]];
         const point& pEnd = points1[meshPoints[e.end()]];
 
-        const vector eVec(pEnd - pStart);
-        const vector n(eVec/(mag(eVec) + VSMALL));
+        const vector n = normalised(pEnd - pStart);
 
         // Start tracking somewhat before pStart and up to somewhat after p1.
         // Note that tolerances here are smaller than those used to classify
@@ -252,8 +251,7 @@ bool Foam::edgeIntersections::inlinePerturb
             label v0 = surf1.meshPoints()[e[0]];
             label v1 = surf1.meshPoints()[e[1]];
 
-            vector eVec(points1[v1] - points1[v0]);
-            vector n = eVec/mag(eVec);
+            const vector n = normalised(points1[v1] - points1[v0]);
 
             if (perturbStart)
             {
@@ -326,9 +324,7 @@ bool Foam::edgeIntersections::rotatePerturb
             n /= magN;
 
             rndVec -= n*(n & rndVec);
-
-            // Normalize
-            rndVec /= mag(rndVec) + VSMALL;
+            rndVec.normalise();
 
             // Scale to be moved by tolerance.
             rndVec *= 0.01*magN;

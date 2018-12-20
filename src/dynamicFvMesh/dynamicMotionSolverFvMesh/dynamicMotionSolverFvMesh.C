@@ -92,10 +92,11 @@ bool Foam::dynamicMotionSolverFvMesh::update()
 {
     fvMesh::movePoints(motionPtr_->newPoints());
 
-    if (foundObject<volVectorField>("U"))
+    volVectorField* Uptr = getObjectPtr<volVectorField>("U");
+
+    if (Uptr)
     {
-        volVectorField& U = lookupObjectRef<volVectorField>("U");
-        U.correctBoundaryConditions();
+        Uptr->correctBoundaryConditions();
     }
 
     return true;

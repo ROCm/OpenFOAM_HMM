@@ -139,6 +139,12 @@ class logPolynomialTransport
 
     // Private Member Functions
 
+        //- Coeffs name. Eg, "muLogCoeffs<10>"
+        inline static word coeffsName(const char* name)
+        {
+            return word(name + ("LogCoeffs<" + std::to_string(PolySize) + '>'));
+        }
+
         //- Construct from components
         inline logPolynomialTransport
         (

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,13 +24,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "labelRange.H"
+#include "List.H"
 #include "token.H"
+#include <numeric>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-int labelRange::debug(debug::debugSwitch("labelRange", 0));
+    int labelRange::debug(debug::debugSwitch("labelRange", 0));
 }
 
 const Foam::labelRange Foam::labelRange::null;
@@ -48,6 +50,20 @@ Foam::labelRange::labelRange(Istream& is)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::List<Foam::label> Foam::labelRange::labels() const
+{
+    if (size_ <= 0)
+    {
+        return List<label>();
+    }
+
+    List<label> result(size_);
+    std::iota(result.begin(), result.end(), start_);
+
+    return result;
+}
+
 
 void Foam::labelRange::adjust() noexcept
 {

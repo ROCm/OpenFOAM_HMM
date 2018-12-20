@@ -27,7 +27,6 @@ License
 #define pointPatchFields_H
 
 #include "pointPatchField.H"
-#include "fieldTypes.H"
 #include "pointPatchFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

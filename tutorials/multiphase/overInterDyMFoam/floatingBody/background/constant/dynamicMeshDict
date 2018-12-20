@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,10 +17,6 @@ FoamFile
 motionSolverLibs    ("libsixDoFRigidBodyMotion.so");
 
 dynamicFvMesh       dynamicOversetFvMesh;
-
-dynamicOversetFvMeshCoeffs
-{
-}
 
 solver          sixDoFRigidBodyMotion;
 
@@ -65,6 +61,7 @@ sixDoFRigidBodyMotionCoeffs
 
     report          on;
     accelerationRelaxation 0.6;
+    accelerationDamping    0.9;
 
     solver
     {

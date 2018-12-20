@@ -89,13 +89,14 @@ deleteControlDictPtr deleteControlDictPtr_;
 } // End namespace debug
 } // End namespace Foam
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::dictionary& Foam::debug::controlDict()
 {
     if (!controlDictPtr_)
     {
-        string controlDictString(getEnv("FOAM_CONTROLDICT"));
+        string controlDictString(Foam::getEnv("FOAM_CONTROLDICT"));
         if (!controlDictString.empty())
         {
             // Read from environment
@@ -135,12 +136,9 @@ Foam::dictionary& Foam::debug::switchSet
 {
     if (!subDictPtr)
     {
-        entry* ePtr = controlDict().lookupEntryPtr
-        (
-            subDictName, false, false
-        );
+        entry* eptr = controlDict().findEntry(subDictName, keyType::LITERAL);
 
-        if (!ePtr || !ePtr->isDict())
+        if (!eptr || !eptr->isDict())
         {
             cerr<< "debug::switchSet(const char*, dictionary*&):\n"
                 << "    Cannot find " <<  subDictName << " in dictionary "
@@ -150,7 +148,7 @@ Foam::dictionary& Foam::debug::switchSet
             ::exit(1);
         }
 
-        subDictPtr = &ePtr->dict();
+        subDictPtr = &(eptr->dict());
     }
 
     return *subDictPtr;
@@ -179,7 +177,7 @@ int Foam::debug::debugSwitch(const char* name, const int defaultValue)
 {
     return debugSwitches().lookupOrAddDefault
     (
-        name, defaultValue, false, false
+        name, defaultValue, keyType::LITERAL
     );
 }
 
@@ -188,7 +186,7 @@ int Foam::debug::infoSwitch(const char* name, const int defaultValue)
 {
     return infoSwitches().lookupOrAddDefault
     (
-        name, defaultValue, false, false
+        name, defaultValue, keyType::LITERAL
     );
 }
 
@@ -197,7 +195,7 @@ int Foam::debug::optimisationSwitch(const char* name, const int defaultValue)
 {
     return optimisationSwitches().lookupOrAddDefault
     (
-        name, defaultValue, false, false
+        name, defaultValue, keyType::LITERAL
     );
 }
 
@@ -210,7 +208,7 @@ float Foam::debug::floatOptimisationSwitch
 {
     return optimisationSwitches().lookupOrAddDefault
     (
-        name, defaultValue, false, false
+        name, defaultValue, keyType::LITERAL
     );
 }
 
@@ -412,17 +410,17 @@ void listSwitches
 
         wordHashSet controlDictDebug
         (
-            controlDict.subDict("DebugSwitches").sortedToc()
+            controlDict.subDict("DebugSwitches").toc()
         );
 
         wordHashSet controlDictInfo
         (
-            controlDict.subDict("InfoSwitches").sortedToc()
+            controlDict.subDict("InfoSwitches").toc()
         );
 
         wordHashSet controlDictOpt
         (
-            controlDict.subDict("OptimisationSwitches").sortedToc()
+            controlDict.subDict("OptimisationSwitches").toc()
         );
 
 

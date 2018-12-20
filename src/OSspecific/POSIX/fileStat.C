@@ -43,14 +43,14 @@ Foam::fileStat::fileStat()
 
 Foam::fileStat::fileStat
 (
-    const fileName& fName,
+    const char* fName,
     const bool followLink,
     const unsigned int maxTime
 )
 :
     isValid_(false)
 {
-    if (fName.empty())
+    if (!fName || !fName[0])
     {
         return;
     }
@@ -64,17 +64,28 @@ Foam::fileStat::fileStat
     {
         if (followLink)
         {
-            locIsValid = (::stat(fName.c_str(), &status_) == 0);
+            locIsValid = (::stat(fName, &status_) == 0);
         }
         else
         {
-            locIsValid = (::lstat(fName.c_str(), &status_) == 0);
+            locIsValid = (::lstat(fName, &status_) == 0);
         }
     }
 
     // Copy into (non-volatile, possible register based) member var
     isValid_ = locIsValid;
 }
+
+
+Foam::fileStat::fileStat
+(
+    const fileName& fName,
+    const bool followLink,
+    const unsigned int maxTime
+)
+:
+    fileStat(fName.c_str(), followLink, maxTime)
+{}
 
 
 Foam::fileStat::fileStat(Istream& is)

@@ -109,8 +109,8 @@ Foam::processorPolyPatch::processorPolyPatch
 )
 :
     coupledPolyPatch(name, dict, index, bm, patchType),
-    myProcNo_(readLabel(dict.lookup("myProcNo"))),
-    neighbProcNo_(readLabel(dict.lookup("neighbProcNo"))),
+    myProcNo_(dict.get<label>("myProcNo")),
+    neighbProcNo_(dict.get<label>("neighbProcNo")),
     neighbFaceCentres_(),
     neighbFaceAreas_(),
     neighbFaceCellCentres_()
@@ -197,6 +197,16 @@ void Foam::processorPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
     if (Pstream::parRun())
     {
+        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        {
+            FatalErrorInFunction
+                << "On patch " << name()
+                << " trying to access out of range neighbour processor "
+                << neighbProcNo() << ". This can happen if" << nl
+                << "    trying to run on an incorrect number of processors"
+                << exit(FatalError);
+        }
+
         UOPstream toNeighbProc(neighbProcNo(), pBufs);
 
         toNeighbProc
@@ -350,6 +360,16 @@ void Foam::processorPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 
     if (Pstream::parRun())
     {
+        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        {
+            FatalErrorInFunction
+                << "On patch " << name()
+                << " trying to access out of range neighbour processor "
+                << neighbProcNo() << ". This can happen if" << nl
+                << "    trying to run on an incorrect number of processors"
+                << exit(FatalError);
+        }
+
         // Express all points as patch face and index in face.
         labelList pointFace(nPoints());
         labelList pointIndex(nPoints());

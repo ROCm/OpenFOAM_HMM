@@ -480,6 +480,17 @@ Foam::mapDistribute::mapDistribute
 }
 
 
+Foam::mapDistribute::mapDistribute
+(
+    labelListList&& subMap,
+    const bool subHasFlip,
+    const bool constructHasFlip
+)
+:
+    mapDistributeBase(std::move(subMap), subHasFlip, constructHasFlip)
+{}
+
+
 Foam::mapDistribute::mapDistribute(Istream& is)
 {
     is  >> *this;

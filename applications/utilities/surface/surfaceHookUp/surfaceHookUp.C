@@ -127,8 +127,7 @@ void greenRefine
 //{
 //    const edge& e = surf.edges()[edgeIndex];
 
-//    vector eVec = e.vec(surf.localPoints());
-//    eVec /= mag(eVec) + SMALL;
+//    const vector eVec = e.unitVec(surf.localPoints());
 
 //    const labelList& pEdges = surf.pointEdges()[pointIndex];
 //
@@ -136,8 +135,7 @@ void greenRefine
 //    {
 //        const edge& nearE = surf.edges()[pEdges[eI]];
 
-//        vector nearEVec = nearE.vec(surf.localPoints());
-//        nearEVec /= mag(nearEVec) + SMALL;
+//        const vector nearEVec = nearE.unitVec(surf.localPoints());
 
 //        const scalar dot = eVec & nearEVec;
 //        const scalar minCos = degToRad(angle);
@@ -271,13 +269,12 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "hook surfaces to other surfaces by moving and retriangulating their"
-        "boundary edges to match other surface boundary edges"
+        "Hook surfaces to other surfaces by moving and retriangulating their"
+        " boundary edges to match other surface boundary edges"
     );
     argList::noParallel();
-    argList::addArgument("hookTolerance");
-
-    #include "addDictOption.H"
+    argList::addArgument("hookTolerance", "The point merge tolerance");
+    argList::addOption("dict", "file", "Use alternative surfaceHookUpDict");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -289,7 +286,7 @@ int main(int argc, char *argv[])
 
     const IOdictionary dict(dictIO);
 
-    const scalar dist(args.read<scalar>(1));
+    const scalar dist(args.get<scalar>(1));
     const scalar matchTolerance(max(1e-6*dist, SMALL));
     const label maxIters = 100;
 

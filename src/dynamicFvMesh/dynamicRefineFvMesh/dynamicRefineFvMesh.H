@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,8 @@ Description
 
     Determines which cells to refine/unrefine and does all in update().
 
-
+    \verbatim
+    {
         // How often to refine
         refineInterval  1;
         // Field to be refinement on
@@ -56,8 +57,11 @@ Description
             (rho*phi none)   //none)
             (ghf none)  //NaN)   //none)
         );
+
         // Write the refinement level as a volScalarField
         dumpLevel       true;
+    }
+    \endverbatim
 
 
 SourceFiles
@@ -90,23 +94,20 @@ protected:
         //- Mesh cutting engine
         hexRef8 meshCutter_;
 
-        //- Dump cellLevel for post-processing
-        bool dumpLevel_;
-
         //- Fluxes to map
         HashTable<word> correctFluxes_;
-
-        //- Number of refinement/unrefinement steps done so far.
-        label nRefinementIterations_;
 
         //- Protected cells (usually since not hexes)
         bitSet protectedCell_;
 
+        //- Number of refinement/unrefinement steps done so far.
+        label nRefinementIterations_;
+
+        //- Dump cellLevel for post-processing
+        bool dumpLevel_;
+
 
     // Protected Member Functions
-
-        //- Count set/unset elements in packedlist.
-        static label count(const bitSet&, const unsigned int);
 
         //- Calculate cells that cannot be refined since would trigger
         //  refinement of protectedCell_ (since 2:1 refinement cascade)
@@ -117,10 +118,10 @@ protected:
 
 
         //- Refine cells. Update mesh and fields.
-        autoPtr<mapPolyMesh> refine(const labelList&);
+        virtual autoPtr<mapPolyMesh> refine(const labelList&);
 
         //- Unrefine cells. Gets passed in centre points of cells to combine.
-        autoPtr<mapPolyMesh> unrefine(const labelList&);
+        virtual autoPtr<mapPolyMesh> unrefine(const labelList&);
 
 
         // Selection of cells to un/refine
@@ -179,11 +180,33 @@ protected:
             void extendMarkedCells(bitSet& markedCell) const;
 
             //- Check all cells have 8 anchor points
-            void checkEightAnchorPoints
+            void checkEightAnchorPoints(bitSet& protectedCell) const;
+
+            //- Map single non-flux surface<Type>Field
+            //  for new internal faces (e.g. AMR refine). This currently
+            //  interpolates values from surrounding faces (faces on
+            //  neighbouring cells) that do have a value.
+            template <class T>
+            void mapNewInternalFaces
             (
-                bitSet& protectedCell,
-                label& nProtected
-            ) const;
+                const labelList& faceMap,
+                GeometricField<T, fvsPatchField, surfaceMesh>&
+            );
+
+            //- Correct surface fields for new faces
+            template <class T>
+            void mapNewInternalFaces(const labelList& faceMap);
+
+            //- Correct surface fields for new faces. Converts any oriented
+            //  fields into non-oriented (i.e. phi -> Uf) before mapping
+            template <class T>
+            void mapNewInternalFaces
+            (
+                const surfaceVectorField& Sf,
+                const surfaceScalarField& magSf,
+                const labelList& faceMap
+            );
+
 
 private:
 
@@ -206,7 +229,7 @@ public:
 
 
     //- Destructor
-    virtual ~dynamicRefineFvMesh();
+    virtual ~dynamicRefineFvMesh() = default;
 
 
     // Member Functions
@@ -232,6 +255,9 @@ public:
         //- Update the mesh for both mesh motion and topology change
         virtual bool update();
 
+        //- Map all fields in time using given map.
+        virtual void mapFields(const mapPolyMesh& mpm);
+
 
     // Writing
 
@@ -243,13 +269,17 @@ public:
             IOstream::compressionType cmp,
             const bool valid
         ) const;
-
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "dynamicRefineFvMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

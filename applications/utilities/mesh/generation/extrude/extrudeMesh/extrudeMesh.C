@@ -261,6 +261,11 @@ void changeFrontBackPatches
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Extrude mesh from existing patch."
+    );
+
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTimeExtruded.H"
@@ -300,11 +305,7 @@ int main(int argc, char *argv[])
     const bool flipNormals(dict.get<bool>("flipNormals"));
 
     // What to extrude
-    const ExtrudeMode mode = ExtrudeModeNames.lookup
-    (
-        "constructFrom",
-        dict
-    );
+    const ExtrudeMode mode = ExtrudeModeNames.get("constructFrom", dict);
 
     // Any merging of small edges
     const scalar mergeTol(dict.lookupOrDefault<scalar>("mergeTol", 1e-4));
@@ -358,11 +359,10 @@ int main(int argc, char *argv[])
         if (Pstream::parRun())
         {
             sourceCaseDir =
-                sourceCaseDir
-               /"processor" + Foam::name(Pstream::myProcNo());
+                sourceCaseDir/("processor" + Foam::name(Pstream::myProcNo()));
         }
         wordList sourcePatches;
-        dict.lookup("sourcePatches") >> sourcePatches;
+        dict.readEntry("sourcePatches", sourcePatches);
 
         if (sourcePatches.size() == 1)
         {
@@ -581,7 +581,7 @@ int main(int argc, char *argv[])
         labelList exposedPatchID;
         if (mode == PATCH)
         {
-            dict.lookup("exposedPatchName") >> backPatchName;
+            dict.readEntry("exposedPatchName", backPatchName);
             exposedPatchID.setSize
             (
                 extrudePatch.size(),

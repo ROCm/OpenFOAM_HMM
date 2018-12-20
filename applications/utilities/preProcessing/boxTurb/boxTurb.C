@@ -28,8 +28,8 @@ Group
     grpPreProcessingUtilities
 
 Description
-    Makes a box of turbulence which conforms to a given energy
-    spectrum and is divergence free.
+    Create a box of divergence-free turbulence conforming to a given
+    energy spectrum.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,6 +45,12 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Create a box of divergence-free turbulence conforming to a given"
+        " energy spectrum"
+    );
+
     argList::noParallel();
     #include "setRootCase.H"
 

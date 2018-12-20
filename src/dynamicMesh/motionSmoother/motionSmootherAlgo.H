@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,6 @@ class motionSmootherAlgo
         //  zero displacement.
         class maxMagEqOp
         {
-
         public:
 
             void operator()(vector& x, const vector& y) const
@@ -209,9 +208,6 @@ class motionSmootherAlgo
         static void checkFld(const pointScalarField&);
 
         //- Get points used by given faces
-        labelHashSet getPoints(const labelUList& faceLabels) const;
-
-        //- Get points used by given faces
         labelHashSet getPoints(const labelHashSet& faceLabels) const;
 
         //- Calculate per-edge weight
@@ -271,9 +267,6 @@ class motionSmootherAlgo
             const scalar scale,
             pointScalarField&
         ) const;
-
-        //- Helper function. Is point internal?
-        bool isInternalPoint(const label pointi) const;
 
         //- Given a set of faces that cause smoothing and a number of
         //  iterations determine the maximum set of points who are affected

@@ -139,10 +139,8 @@ bool Foam::fv::tabulatedHeatTransfer::read(const dictionary& dict)
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

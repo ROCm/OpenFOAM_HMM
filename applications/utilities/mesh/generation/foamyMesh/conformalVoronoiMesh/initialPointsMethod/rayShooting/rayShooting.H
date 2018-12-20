@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,6 @@ class rayShooting
 :
     public initialPointsMethod
 {
-
 private:
 
     // Private data
@@ -91,8 +90,7 @@ public:
 
 
     //- Destructor
-    virtual ~rayShooting()
-    {}
+    virtual ~rayShooting() = default;
 
 
     // Member Functions

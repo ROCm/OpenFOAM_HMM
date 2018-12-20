@@ -75,10 +75,8 @@ flowRateInletVelocityFvPatchVectorField
     }
     else
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Please supply either 'volumetricFlowRate' or"
+        FatalIOErrorInFunction(dict)
+            << "Please supply either 'volumetricFlowRate' or"
             << " 'massFlowRate' and 'rho'" << exit(FatalIOError);
     }
 
@@ -169,7 +167,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateValues
         Up -= nUp*n;
 
         // Remove any reverse flow
-        nUp = min(nUp, scalar(0.0));
+        nUp = min(nUp, scalar(0));
 
         const scalar flowRate = flowRate_->value(t);
         const scalar estimatedFlowRate = -gSum(rho*(this->patch().magSf()*nUp));

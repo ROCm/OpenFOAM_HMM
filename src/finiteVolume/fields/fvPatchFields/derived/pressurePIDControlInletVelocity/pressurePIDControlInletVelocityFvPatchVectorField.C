@@ -37,27 +37,19 @@ License
 const Foam::surfaceScalarField&
 Foam::pressurePIDControlInletVelocityFvPatchVectorField::facePressure() const
 {
-    const volScalarField& p(db().lookupObject<volScalarField>(pName_));
-
     const word pfName(pName_ + "f");
 
-    if (!db().foundObject<surfaceScalarField>(pfName))
-    {
-        surfaceScalarField* pfPtr
-        (
-            new surfaceScalarField(pfName, linearInterpolate(p))
-        );
+    const volScalarField& p = db().lookupObject<volScalarField>(pName_);
 
+    surfaceScalarField* pfPtr = db().getObjectPtr<surfaceScalarField>(pfName);
+
+    if (!pfPtr)
+    {
+        pfPtr = new surfaceScalarField(pfName, linearInterpolate(p));
         pfPtr->store();
     }
 
-    surfaceScalarField& pf
-    (
-        const_cast<surfaceScalarField&>
-        (
-            db().lookupObject<surfaceScalarField>(pfName)
-        )
-    );
+    surfaceScalarField& pf = *pfPtr;
 
     if (!pf.upToDate(p))
     {
@@ -139,14 +131,14 @@ pressurePIDControlInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(p, iF, dict),
     upstreamName_(dict.lookup("upstream")),
     downstreamName_(dict.lookup("downstream")),
-    deltaP_(readScalar(dict.lookup("deltaP"))),
+    deltaP_(dict.get<scalar>("deltaP")),
     shapeFactor_(dict.lookupOrDefault<scalar>("shapeFactor", 0)),
     pName_(dict.lookupOrDefault<word>("p", "p")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "none")),
-    P_(readScalar(dict.lookup("P"))),
-    I_(readScalar(dict.lookup("I"))),
-    D_(readScalar(dict.lookup("D"))),
+    P_(dict.get<scalar>("P")),
+    I_(dict.get<scalar>("I")),
+    D_(dict.get<scalar>("D")),
     Q_(- gSum(*this & patch().Sf())),
     error_(dict.lookupOrDefault<scalar>("error", 0)),
     errorIntegral_(dict.lookupOrDefault<scalar>("errorIntegral", 0)),

@@ -44,7 +44,7 @@ faFieldDecomposer::patchFieldDecomposer::patchFieldDecomposer
     sizeBeforeMapping_(sizeBeforeMapping),
     directAddressing_(addressingSlice)
 {
-    forAll (directAddressing_, i)
+    forAll(directAddressing_, i)
     {
         // Subtract one to align addressing.
         // directAddressing_[i] -= addressingOffset + 1;
@@ -69,7 +69,7 @@ processorAreaPatchFieldDecomposer
     const labelList& own = mesh.edgeOwner();
     const labelList& neighb = mesh.edgeNeighbour();
 
-    forAll (addressing_, i)
+    forAll(addressing_, i)
     {
         // Subtract one to align addressing.
         label ai = addressingSlice[i];
@@ -119,7 +119,7 @@ processorEdgePatchFieldDecomposer
     addressing_(addressingSlice.size()),
     weights_(addressingSlice.size())
 {
-    forAll (addressing_, i)
+    forAll(addressing_, i)
     {
         addressing_[i].setSize(1);
         weights_[i].setSize(1);
@@ -160,7 +160,7 @@ faFieldDecomposer::faFieldDecomposer
         static_cast<processorEdgePatchFieldDecomposer*>(NULL)
     )
 {
-    forAll (boundaryAddressing_, patchi)
+    forAll(boundaryAddressing_, patchi)
     {
         if (boundaryAddressing_[patchi] >= 0)
         {
@@ -205,7 +205,7 @@ faFieldDecomposer::faFieldDecomposer
 
 faFieldDecomposer::~faFieldDecomposer()
 {
-    forAll (patchFieldDecomposerPtrs_, patchi)
+    forAll(patchFieldDecomposerPtrs_, patchi)
     {
         if (patchFieldDecomposerPtrs_[patchi])
         {
@@ -213,7 +213,7 @@ faFieldDecomposer::~faFieldDecomposer()
         }
     }
 
-    forAll (processorAreaPatchFieldDecomposerPtrs_, patchi)
+    forAll(processorAreaPatchFieldDecomposerPtrs_, patchi)
     {
         if (processorAreaPatchFieldDecomposerPtrs_[patchi])
         {
@@ -221,7 +221,7 @@ faFieldDecomposer::~faFieldDecomposer()
         }
     }
 
-    forAll (processorEdgePatchFieldDecomposerPtrs_, patchi)
+    forAll(processorEdgePatchFieldDecomposerPtrs_, patchi)
     {
         if (processorEdgePatchFieldDecomposerPtrs_[patchi])
         {

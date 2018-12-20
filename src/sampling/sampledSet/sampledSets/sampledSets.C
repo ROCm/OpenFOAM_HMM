@@ -69,10 +69,11 @@ void Foam::sampledSets::combineSampledSets
 
     forAll(sampledSets, setI)
     {
+        labelList segments;
         masterSampledSets.set
         (
             setI,
-            sampledSets[setI].gather(indexSets[setI])
+            sampledSets[setI].gather(indexSets[setI], segments)
         );
     }
 }
@@ -96,16 +97,10 @@ Foam::sampledSets::sampledSets
     interpolationScheme_(word::null),
     writeFormat_(word::null)
 {
-    const fileName relPath(functionObject::outputPrefix/name);
-
-    if (Pstream::parRun())
-    {
-        outputPath_ = mesh_.time().path()/".."/relPath;
-    }
-    else
-    {
-        outputPath_ = mesh_.time().path()/relPath;
-    }
+    outputPath_ =
+    (
+        mesh_.time().globalPath()/functionObject::outputPrefix/name
+    );
 
     if (mesh_.name() != fvMesh::defaultRegion)
     {
@@ -135,16 +130,10 @@ Foam::sampledSets::sampledSets
     interpolationScheme_(word::null),
     writeFormat_(word::null)
 {
-    const fileName relPath(functionObject::outputPrefix/name);
-
-    if (Pstream::parRun())
-    {
-        outputPath_ = mesh_.time().path()/".."/relPath;
-    }
-    else
-    {
-        outputPath_ = mesh_.time().path()/relPath;
-    }
+    outputPath_ =
+    (
+        mesh_.time().globalPath()/functionObject::outputPrefix/name
+    );
 
     if (mesh_.name() != fvMesh::defaultRegion)
     {
@@ -224,14 +213,13 @@ bool Foam::sampledSets::read(const dictionary& dict)
 {
     dict_ = dict;
 
-    bool setsFound = dict_.found("sets");
-    if (setsFound)
+    if (dict_.found("sets"))
     {
-        dict_.lookup("fields") >> fieldSelection_;
+        dict_.readEntry("fields", fieldSelection_);
         clearFieldGroups();
 
-        dict.lookup("interpolationScheme") >> interpolationScheme_;
-        dict.lookup("setFormat") >> writeFormat_;
+        dict.readEntry("interpolationScheme", interpolationScheme_);
+        dict.readEntry("setFormat", writeFormat_);
 
         PtrList<sampledSet> newList
         (
@@ -270,8 +258,7 @@ bool Foam::sampledSets::read(const dictionary& dict)
 
 void Foam::sampledSets::correct()
 {
-    bool setsFound = dict_.found("sets");
-    if (setsFound)
+    if (dict_.found("sets"))
     {
         searchEngine_.correct();
 

@@ -28,8 +28,8 @@ Group
     grpSurfaceUtilities
 
 Description
-    Add two surfaces. Does geometric merge on points. Does not check for
-    overlapping/intersecting triangles.
+    Add two surfaces. Does geometric merge on points.
+    Does not check for overlapping/intersecting triangles.
 
     Keeps patches separate by renumbering.
 
@@ -51,30 +51,31 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "add two surfaces via a geometric merge on points."
+        "Add two surfaces via a geometric merge on points."
+        " Does not check for overlapping/intersecting triangles."
     );
 
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("surfaceFile");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("surface1", "The input surface file 1");
+    argList::addArgument("surface2", "The input surface file 2");
+    argList::addArgument("output", "The output surface file");
 
     argList::addOption
     (
         "points",
         "file",
-        "provide additional points"
+        "Provide additional points"
     );
     argList::addBoolOption
     (
         "mergeRegions",
-        "combine regions from both surfaces"
+        "Combine regions from both surfaces"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor on input surfaces"
+        "Geometry scaling factor on input surfaces"
     );
 
     argList args(argc, argv);
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
     const bool addPoint     = args.found("points");
     const bool mergeRegions = args.found("mergeRegions");
 
-    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.opt<scalar>("scale", -1);
 
     if (addPoint)
     {

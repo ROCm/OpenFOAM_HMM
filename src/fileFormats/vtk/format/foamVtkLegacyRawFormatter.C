@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "foamVtkLegacyRawFormatter.H"
 #include "foamVtkOutputOptions.H"
 #include "endian.H"
+#include <limits>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -58,12 +59,6 @@ Foam::vtk::legacyRawFormatter::legacyRawFormatter
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::legacyRawFormatter::~legacyRawFormatter()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 const Foam::vtk::outputOptions&
@@ -85,11 +80,10 @@ const char* Foam::vtk::legacyRawFormatter::encoding() const
 }
 
 
-void Foam::vtk::legacyRawFormatter::writeSize
-(
-    const uint64_t ignored
-)
-{/*nop*/}
+bool Foam::vtk::legacyRawFormatter::writeSize(const uint64_t)
+{
+    return false;
+}
 
 
 void Foam::vtk::legacyRawFormatter::write
@@ -104,10 +98,7 @@ void Foam::vtk::legacyRawFormatter::write
 }
 
 
-void Foam::vtk::legacyRawFormatter::write
-(
-    const label val
-)
+void Foam::vtk::legacyRawFormatter::write(const label val)
 {
     // std::cerr<<"label is:" << sizeof(val) << '\n';
 
@@ -127,10 +118,7 @@ void Foam::vtk::legacyRawFormatter::write
 }
 
 
-void Foam::vtk::legacyRawFormatter::write
-(
-    const float val
-)
+void Foam::vtk::legacyRawFormatter::write(const float val)
 {
     // std::cerr<<"float is:" << sizeof(val) << '\n';
 
@@ -148,15 +136,25 @@ void Foam::vtk::legacyRawFormatter::write
 }
 
 
-void Foam::vtk::legacyRawFormatter::write
-(
-    const double val
-)
+void Foam::vtk::legacyRawFormatter::write(const double val)
 {
     // Legacy cannot support Float64 anyhow.
     // std::cerr<<"write double as float:" << val << '\n';
-    float copy(val);
-    write(copy);
+
+    // Limit range of double to float conversion
+    if (val >= std::numeric_limits<float>::max())
+    {
+        write(std::numeric_limits<float>::max());
+    }
+    else if (val <= std::numeric_limits<float>::lowest())
+    {
+        write(std::numeric_limits<float>::lowest());
+    }
+    else
+    {
+        float copy(val);
+        write(copy);
+    }
 }
 
 

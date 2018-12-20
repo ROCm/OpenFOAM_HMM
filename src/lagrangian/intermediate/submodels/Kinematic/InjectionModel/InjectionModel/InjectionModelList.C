@@ -43,37 +43,40 @@ Foam::InjectionModelList<CloudType>::InjectionModelList
 :
     PtrList<InjectionModel<CloudType>>()
 {
-    wordList modelNames(dict.toc());
-
     Info<< "Constructing particle injection models" << endl;
 
-    if (modelNames.size() > 0)
+    label count = dict.size();
+    if (count)
     {
-        this->setSize(modelNames.size());
-
-        label i = 0;
-        forAllConstIter(IDLList<entry>, dict, iter)
-        {
-            const word& model = iter().keyword();
-            Info<< "Creating injector: " << model << endl;
-            const dictionary& props = iter().dict();
-
-            this->set
-            (
-                i++,
-                InjectionModel<CloudType>::New
-                (
-                    props,
-                    model,
-                    props.lookup("type"),
-                    owner
-                )
-            );
-        }
+        this->resize(count);
     }
-    else
+
+    count = 0;
+    for (const entry& dEntry : dict)
     {
-        this->setSize(1);
+        const word& model = dEntry.keyword();
+        const dictionary& props = dEntry.dict();
+
+        Info<< "Creating injector: " << model << endl;
+
+        this->set
+        (
+            count,
+            InjectionModel<CloudType>::New
+            (
+                props,
+                model,
+                props.get<word>("type"),
+                owner
+            )
+        );
+
+        ++count;
+    }
+
+    if (!count)
+    {
+        this->resize(1);
 
         this->set
         (

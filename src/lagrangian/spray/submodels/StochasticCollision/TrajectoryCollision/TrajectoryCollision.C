@@ -139,8 +139,8 @@ Foam::TrajectoryCollision<CloudType>::TrajectoryCollision
 )
 :
     ORourkeCollision<CloudType>(dict, owner, typeName),
-    cSpace_(readScalar(this->coeffDict().lookup("cSpace"))),
-    cTime_(readScalar(this->coeffDict().lookup("cTime")))
+    cSpace_(this->coeffDict().getScalar("cSpace")),
+    cTime_(this->coeffDict().getScalar("cTime"))
 {}
 
 

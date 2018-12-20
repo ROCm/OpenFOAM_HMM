@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -238,9 +238,11 @@ void Foam::cyclicACMIPolyPatch::initGeometry(PstreamBuffers& pBufs)
         Pout<< "cyclicACMIPolyPatch::initGeometry : " << name() << endl;
     }
 
+    // Note: calculates transformation and triggers face centre calculation
     cyclicAMIPolyPatch::initGeometry(pBufs);
 
-    // Initialise the AMI
+    // Initialise the AMI early to make sure we adapt the face areas before the
+    // cell centre calculation gets triggered.
     resetAMI();
 }
 
@@ -265,9 +267,11 @@ void Foam::cyclicACMIPolyPatch::initMovePoints
     {
         Pout<< "cyclicACMIPolyPatch::initMovePoints : " << name() << endl;
     }
+
+    // Note: calculates transformation and triggers face centre calculation
     cyclicAMIPolyPatch::initMovePoints(pBufs, p);
 
-    // Initialise the AMI
+    // Initialise the AMI early. See initGeometry.
     resetAMI();
 }
 
@@ -375,10 +379,8 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
 
     if (nonOverlapPatchName_ == name)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Non-overlapping patch name " << nonOverlapPatchName_
+        FatalIOErrorInFunction(dict)
+            << "Non-overlapping patch name " << nonOverlapPatchName_
             << " cannot be the same as this patch " << name
             << exit(FatalIOError);
     }
@@ -539,30 +541,6 @@ Foam::label Foam::cyclicACMIPolyPatch::nonOverlapPatchID() const
     }
 
     return nonOverlapPatchID_;
-}
-
-
-void Foam::cyclicACMIPolyPatch::calcGeometry
-(
-    const primitivePatch& referPatch,
-    const pointField& thisCtrs,
-    const vectorField& thisAreas,
-    const pointField& thisCc,
-    const pointField& nbrCtrs,
-    const vectorField& nbrAreas,
-    const pointField& nbrCc
-)
-{
-    cyclicAMIPolyPatch::calcGeometry
-    (
-        referPatch,
-        thisCtrs,
-        thisAreas,
-        thisCc,
-        nbrCtrs,
-        nbrAreas,
-        nbrCc
-    );
 }
 
 

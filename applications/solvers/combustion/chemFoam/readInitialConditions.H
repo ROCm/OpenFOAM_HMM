@@ -1,13 +1,13 @@
-    word constProp(initialConditions.lookup("constantProperty"));
-    if ((constProp != "pressure") && (constProp != "volume"))
+    word constProp(initialConditions.get<word>("constantProperty"));
+    if (constProp != "pressure" && constProp != "volume")
     {
         FatalError << "in initialConditions, unknown constantProperty type "
             << constProp << nl << " Valid types are: pressure volume."
             << abort(FatalError);
     }
 
-    word fractionBasis(initialConditions.lookup("fractionBasis"));
-    if ((fractionBasis != "mass") && (fractionBasis != "mole"))
+    word fractionBasis(initialConditions.get<word>("fractionBasis"));
+    if (fractionBasis != "mass" && fractionBasis != "mole")
     {
         FatalError << "in initialConditions, unknown fractionBasis type " << nl
             << "Valid types are: mass or mole."
@@ -40,7 +40,7 @@
             const word& name = Y[i].name();
             if (fractions.found(name))
             {
-                X0[i] = readScalar(fractions.lookup(name));
+                X0[i] = fractions.get<scalar>(name);
             }
         }
 
@@ -64,7 +64,7 @@
             const word& name = Y[i].name();
             if (fractions.found(name))
             {
-                Y0[i] = readScalar(fractions.lookup(name));
+                Y0[i] = fractions.get<scalar>(name);
             }
         }
 

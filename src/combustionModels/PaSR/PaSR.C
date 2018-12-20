@@ -37,7 +37,7 @@ Foam::combustionModels::PaSR<ReactionThermo>::PaSR
 )
 :
     laminar<ReactionThermo>(modelType, thermo, turb, combustionProperties),
-    Cmix_(readScalar(this->coeffs().lookup("Cmix"))),
+    Cmix_(this->coeffs().getScalar("Cmix")),
     kappa_
     (
         IOobject
@@ -128,7 +128,7 @@ bool Foam::combustionModels::PaSR<ReactionThermo>::read()
 {
     if (laminar<ReactionThermo>::read())
     {
-        this->coeffs().lookup("Cmix") >> Cmix_;
+        this->coeffs().readEntry("Cmix", Cmix_);
         return true;
     }
     else

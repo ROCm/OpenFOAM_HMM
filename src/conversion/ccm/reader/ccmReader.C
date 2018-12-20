@@ -402,7 +402,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
             )
             {
                 // Fallback
-                str = word(dict["BoundaryType"]) + "_" + ::Foam::name(Id);
+                str = dict.get<word>("BoundaryType") + "_" + ::Foam::name(Id);
             }
 
             if (!str.empty())

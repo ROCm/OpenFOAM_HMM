@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     label nReps = 10000;
 
-    const point sample = args.read<point>(1);
+    const point sample = args.get<point>(1);
 
     const polyMesh::cellDecomposition decompMode = polyMesh::CELL_TETS;
 

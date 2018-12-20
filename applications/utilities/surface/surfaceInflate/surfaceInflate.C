@@ -89,11 +89,8 @@ tmp<vectorField> calcVertexNormals(const triSurface& surf)
 {
     // Weighted average of normals of faces attached to the vertex
     // Weight = fA / (mag(e0)^2 * mag(e1)^2);
-    tmp<vectorField> tpointNormals
-    (
-        new pointField(surf.nPoints(), Zero)
-    );
-    vectorField& pointNormals = tpointNormals.ref();
+    auto tpointNormals = tmp<vectorField>::New(surf.nPoints(), Zero);
+    auto& pointNormals = tpointNormals.ref();
 
     const pointField& points = surf.points();
     const labelListList& pointFaces = surf.pointFaces();
@@ -108,20 +105,20 @@ tmp<vectorField> calcVertexNormals(const triSurface& surf)
             const label faceI = pFaces[fI];
             const triFace& f = surf[faceI];
 
-            vector fN = f.normal(points);
+            vector areaNorm = f.areaNormal(points);
 
             scalar weight = calcVertexNormalWeight
             (
                 f,
                 meshPoints[pI],
-                fN,
+                areaNorm,
                 points
             );
 
-            pointNormals[pI] += weight*fN;
+            pointNormals[pI] += weight * areaNorm;
         }
 
-        pointNormals[pI] /= mag(pointNormals[pI]) + VSMALL;
+        pointNormals[pI].normalise();
     }
 
     return tpointNormals;
@@ -168,9 +165,9 @@ tmp<vectorField> calcPointNormals
 
                 // Get average edge normal
                 vector n = Zero;
-                forAll(eFaces, i)
+                for (const label facei : eFaces)
                 {
-                    n += s.faceNormals()[eFaces[i]];
+                    n += s.faceNormals()[facei];
                 }
                 n /= eFaces.size();
 
@@ -192,7 +189,7 @@ tmp<vectorField> calcPointNormals
         {
             if (nNormals[pointI] > 0)
             {
-                pointNormals[pointI] /= mag(pointNormals[pointI]);
+                pointNormals[pointI].normalise();
             }
         }
     }
@@ -566,55 +563,55 @@ void lloydsSmoothing
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("Inflates surface according to point normals.");
+    argList::addNote
+    (
+        "Inflates surface according to point normals."
+    );
 
     argList::noParallel();
     argList::addNote
     (
-        "Creates inflated version of surface using point normals."
-        " Takes surface, distance to inflate and additional safety factor"
+        "Creates inflated version of surface using point normals. "
+        "Takes surface, distance to inflate and additional safety factor"
     );
     argList::addBoolOption
     (
         "checkSelfIntersection",
-        "also check for self-intersection"
+        "Also check for self-intersection"
     );
     argList::addOption
     (
         "nSmooth",
         "integer",
-        "number of smoothing iterations (default 20)"
+        "Number of smoothing iterations (default 20)"
     );
     argList::addOption
     (
         "featureAngle",
         "scalar",
-        "feature angle"
+        "Feature angle"
     );
     argList::addBoolOption
     (
         "debug",
-        "switch on additional debug information"
+        "Switch on additional debug information"
     );
 
-    argList::addArgument("inputFile");
-    argList::addArgument("distance");
-    argList::addArgument("safety factor [1..]");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("distance", "The inflate distance");
+    argList::addArgument("factor", "The extend safety factor [1,10]");
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
     const word inputName(args[1]);
-    const scalar distance(args.read<scalar>(2));
-    const scalar extendFactor(args.read<scalar>(3));
+    const scalar distance(args.get<scalar>(2));
+    const scalar extendFactor(args.get<scalar>(3));
     const bool checkSelfIntersect = args.found("checkSelfIntersection");
-    const label nSmooth = args.lookupOrDefault("nSmooth", 10);
-    const scalar featureAngle = args.lookupOrDefault<scalar>
-    (
-        "featureAngle",
-        180
-    );
+    const label nSmooth = args.opt<label>("nSmooth", 10);
+    const scalar featureAngle = args.opt<scalar>("featureAngle", 180);
     const bool debug = args.found("debug");
 
 

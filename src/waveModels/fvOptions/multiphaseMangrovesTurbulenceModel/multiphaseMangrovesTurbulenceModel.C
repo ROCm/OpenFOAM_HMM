@@ -55,7 +55,7 @@ Foam::fv::multiphaseMangrovesTurbulenceModel::kCoeff
     const volVectorField& U
 ) const
 {
-    tmp<volScalarField> tkCoeff = tmp<volScalarField>::New
+    auto tkCoeff = tmp<volScalarField>::New
     (
         IOobject
         (
@@ -66,7 +66,7 @@ Foam::fv::multiphaseMangrovesTurbulenceModel::kCoeff
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 
     volScalarField& kCoeff = tkCoeff.ref();
@@ -101,7 +101,7 @@ Foam::fv::multiphaseMangrovesTurbulenceModel::epsilonCoeff
     const volVectorField& U
 ) const
 {
-    tmp<volScalarField> tepsilonCoeff = tmp<volScalarField>::New
+    auto tepsilonCoeff = tmp<volScalarField>::New
     (
         IOobject
         (
@@ -112,7 +112,7 @@ Foam::fv::multiphaseMangrovesTurbulenceModel::epsilonCoeff
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("0", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 
     volScalarField& epsilonCoeff = tepsilonCoeff.ref();
@@ -177,16 +177,16 @@ void Foam::fv::multiphaseMangrovesTurbulenceModel::addSup
 
     if (eqn.psi().name() == epsilonName_)
     {
-	    fvMatrix<scalar> epsilonEqn
-	    (
+        fvMatrix<scalar> epsilonEqn
+        (
           - fvm::Sp(epsilonCoeff(U), eqn.psi())
         );
         eqn += epsilonEqn;
     }
     else if (eqn.psi().name() == kName_)
     {
-	    fvMatrix<scalar> kEqn
-	    (
+        fvMatrix<scalar> kEqn
+        (
           - fvm::Sp(kCoeff(U), eqn.psi())
         );
         eqn += kEqn;
@@ -205,19 +205,19 @@ void Foam::fv::multiphaseMangrovesTurbulenceModel::addSup
 
     if (eqn.psi().name() == epsilonName_)
     {
-	    fvMatrix<scalar> epsilonEqn
-	    (
+        fvMatrix<scalar> epsilonEqn
+        (
           - fvm::Sp(rho*epsilonCoeff(U), eqn.psi())
         );
         eqn += epsilonEqn;
     }
     else if (eqn.psi().name() == kName_)
     {
-	    fvMatrix<scalar> kEqn
-	    (
+        fvMatrix<scalar> kEqn
+        (
           - fvm::Sp(rho*kCoeff(U), eqn.psi())
         );
-	    eqn += kEqn;
+        eqn += kEqn;
     }
 }
 
@@ -226,20 +226,19 @@ bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
 {
     if (option::read(dict))
     {
-        if (coeffs_.found("epsilonNames"))
+        if (!coeffs_.readIfPresent("epsilonNames", fieldNames_))
         {
-            coeffs_.lookup("epsilonNames") >> fieldNames_;
-        }
-        else if (coeffs_.found("epsilon"))
-        {
-            word UName(coeffs_.lookup("epsilon"));
-            fieldNames_ = wordList(1, UName);
-        }
-        else
-        {
-	        fieldNames_.setSize(2);
-	        fieldNames_[0] = "epsilon";
-    	    fieldNames_[1] = "k";
+            if (coeffs_.found("epsilon"))
+            {
+                fieldNames_.resize(1);
+                coeffs_.readEntry("epsilon", fieldNames_.first());
+            }
+            else
+            {
+                fieldNames_.resize(2);
+                fieldNames_[0] = "epsilon";
+                fieldNames_[1] = "k";
+            }
         }
 
         applied_.setSize(fieldNames_.size(), false);
@@ -259,8 +258,9 @@ bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
             const word& regionName = regionNames[i];
             const dictionary& modelDict = regionsDict.subDict(regionName);
 
-            const word& zoneName = modelDict.lookup("cellZone");
-            zoneIDs_[i] = mesh_.cellZones().findIndices(zoneName);
+            const word zoneName(modelDict.get<word>("cellZone"));
+
+            zoneIDs_[i] = mesh_.cellZones().indices(zoneName);
             if (zoneIDs_[i].empty())
             {
                 FatalErrorInFunction
@@ -269,19 +269,17 @@ bool Foam::fv::multiphaseMangrovesTurbulenceModel::read(const dictionary& dict)
                     << exit(FatalError);
             }
 
-            modelDict.lookup("a") >> aZone_[i];
-            modelDict.lookup("N") >> NZone_[i];
-            modelDict.lookup("Ckp") >> CkpZone_[i];
-            modelDict.lookup("Cep") >> CepZone_[i];
-            modelDict.lookup("Cd") >> CdZone_[i];
+            modelDict.readEntry("a", aZone_[i]);
+            modelDict.readEntry("N", NZone_[i]);
+            modelDict.readEntry("Ckp", CkpZone_[i]);
+            modelDict.readEntry("Cep", CepZone_[i]);
+            modelDict.readEntry("Cd", CdZone_[i]);
         }
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

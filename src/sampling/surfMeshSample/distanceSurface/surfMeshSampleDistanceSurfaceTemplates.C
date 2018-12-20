@@ -53,7 +53,7 @@ bool Foam::surfMeshSampleDistanceSurface::sampleType
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    const auto* volFldPtr = mesh().lookupObjectPtr<VolFieldType>(fieldName);
+    const auto* volFldPtr = mesh().findObject<VolFieldType>(fieldName);
 
     if (!volFldPtr)
     {

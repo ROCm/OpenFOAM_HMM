@@ -54,7 +54,7 @@ Foam::messageStream::messageStream
 
 Foam::messageStream::messageStream(const dictionary& dict)
 :
-    title_(dict.lookup("title")),
+    title_(dict.get<string>("title")),
     severity_(FATAL),
     maxErrors_(0),
     errorCount_(0)

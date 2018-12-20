@@ -328,6 +328,17 @@ int main(int argc, char *argv[])
             <<"addresses:" << nl;
         printAddr(Info, list1);
         printAddr(Info, list1a);
+        Info<<"values:" << nl;
+        print(Info, list1a);
+
+        // This should not cause problems (ie, no deletion)
+        {
+            auto* ptr = &(list1a.first());
+            list1a.set(0, ptr);
+            Info<<"values:" << nl;
+            print(Info, list1a);
+        }
+
 
         PtrList<Scalar> list1b(list1a, true);
 

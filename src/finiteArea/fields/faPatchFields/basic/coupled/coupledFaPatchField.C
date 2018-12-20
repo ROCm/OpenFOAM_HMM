@@ -76,7 +76,7 @@ Foam::coupledFaPatchField<Type>::coupledFaPatchField
     const dictionary& dict
 )
 :
-    lduInterfaceField(refCast<const lduInterface>(p)),
+    lduInterfaceField(refCast<const lduInterface>(p, dict)),
     faPatchField<Type>(p, iF, dict)
 {}
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,19 +26,18 @@ License
 #include "pointFile.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(pointFile, 0);
+    addToRunTimeSelectionTable(initialPointsMethod, pointFile, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(pointFile, 0);
-addToRunTimeSelectionTable(initialPointsMethod, pointFile, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pointFile::pointFile
+Foam::pointFile::pointFile
 (
     const dictionary& initialPointsDict,
     const Time& runTime,
@@ -58,12 +57,12 @@ pointFile::pointFile
         cellShapeControls,
         decomposition
     ),
-    pointFileName_(detailsDict().lookup("pointFile")),
-    insideOutsideCheck_(detailsDict().lookup("insideOutsideCheck")),
-    randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
+    pointFileName_(detailsDict().get<fileName>("pointFile")),
+    insideOutsideCheck_(detailsDict().get<Switch>("insideOutsideCheck")),
+    randomiseInitialGrid_(detailsDict().get<Switch>("randomiseInitialGrid")),
     randomPerturbationCoeff_
     (
-        readScalar(detailsDict().lookup("randomPerturbationCoeff"))
+        detailsDict().get<scalar>("randomPerturbationCoeff")
     )
 {
     Info<< "    Inside/Outside check is " << insideOutsideCheck_.c_str()
@@ -73,7 +72,7 @@ pointFile::pointFile
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-List<Vb::Point> pointFile::initialPoints() const
+Foam::List<Vb::Point> Foam::pointFile::initialPoints() const
 {
     pointField points;
     {
@@ -231,9 +230,5 @@ List<Vb::Point> pointFile::initialPoints() const
     return initialPoints;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

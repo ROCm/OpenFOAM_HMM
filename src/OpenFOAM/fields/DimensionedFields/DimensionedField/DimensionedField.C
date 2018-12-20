@@ -28,12 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// check mesh for two fields
+// Check mesh for two fields
 #define checkField(df1, df2, op)                                    \
 if (&(df1).mesh() != &(df2).mesh())                                 \
 {                                                                   \
@@ -69,7 +64,7 @@ void Foam::DimensionedField<Type, GeoMesh>::checkFieldSize() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const Mesh& mesh,
@@ -88,7 +83,26 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensionSet& dims,
+    Field<Type>&& field
+)
+:
+    regIOobject(io),
+    Field<Type>(std::move(field)),
+    mesh_(mesh),
+    dimensions_(dims)
+{
+    //Info<<"Move construct dimensioned for " << io.name() << nl;
+    checkFieldSize();
+}
+
+
+template<class Type, class GeoMesh>
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const Mesh& mesh,
@@ -101,12 +115,33 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     mesh_(mesh),
     dimensions_(dims)
 {
+    //Info<<"Move construct dimensioned for " << io.name() << nl;
     checkFieldSize();
 }
 
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensionSet& dims,
+    const tmp<Field<Type>>& tfield
+)
+:
+    regIOobject(io),
+    Field<Type>(tfield.constCast(), tfield.movable()),
+    mesh_(mesh),
+    dimensions_(dims),
+    oriented_()
+{
+    tfield.clear();
+    checkFieldSize();
+}
+
+
+template<class Type, class GeoMesh>
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const Mesh& mesh,
@@ -128,7 +163,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const Mesh& mesh,
@@ -150,7 +185,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const DimensionedField<Type, GeoMesh>& df
 )
@@ -164,7 +199,17 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    DimensionedField<Type, GeoMesh>&& df
+)
+:
+    DimensionedField<Type, GeoMesh>(df, true)
+{}
+
+
+template<class Type, class GeoMesh>
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     DimensionedField<Type, GeoMesh>& df,
     bool reuse
@@ -178,32 +223,14 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 {}
 
 
-template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
-(
-    DimensionedField<Type, GeoMesh>&& df
-)
-:
-    regIOobject(df, true),
-    Field<Type>(std::move(df)),
-    mesh_(df.mesh_),
-    dimensions_(df.dimensions_),
-    oriented_(df.oriented_)
-{}
-
-
 #ifndef NoConstructFromTmp
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const tmp<DimensionedField<Type, GeoMesh>>& tdf
 )
 :
-    regIOobject(tdf.constCast(), tdf.movable()),
-    Field<Type>(tdf.constCast(), tdf.movable()),
-    mesh_(tdf().mesh_),
-    dimensions_(tdf().dimensions_),
-    oriented_(tdf().oriented_)
+    DimensionedField<Type, GeoMesh>(tdf.constCast(), tdf.movable())
 {
     tdf.clear();
 }
@@ -211,7 +238,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const DimensionedField<Type, GeoMesh>& df
@@ -226,7 +253,18 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    DimensionedField<Type, GeoMesh>&& df
+)
+:
+    DimensionedField<Type, GeoMesh>(io, df, true)
+{}
+
+
+template<class Type, class GeoMesh>
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     DimensionedField<Type, GeoMesh>& df,
@@ -241,8 +279,23 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 {}
 
 
+#ifndef NoConstructFromTmp
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const tmp<DimensionedField<Type, GeoMesh>>& tdf
+)
+:
+    DimensionedField<Type, GeoMesh>(io, tdf.constCast(), tdf.movable())
+{
+    tdf.clear();
+}
+#endif
+
+
+template<class Type, class GeoMesh>
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const word& newName,
     const DimensionedField<Type, GeoMesh>& df
@@ -257,7 +310,18 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 
 
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const word& newName,
+    DimensionedField<Type, GeoMesh>&& df
+)
+:
+    DimensionedField<Type, GeoMesh>(newName, df, true)
+{}
+
+
+template<class Type, class GeoMesh>
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const word& newName,
     DimensionedField<Type, GeoMesh>& df,
@@ -272,34 +336,15 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 {}
 
 
-template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
-(
-    const word& newName,
-    DimensionedField<Type, GeoMesh>&& df
-)
-:
-    regIOobject(newName, df, true),
-    Field<Type>(std::move(df)),
-    mesh_(df.mesh_),
-    dimensions_(df.dimensions_),
-    oriented_(df.oriented_)
-{}
-
-
 #ifndef NoConstructFromTmp
 template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const word& newName,
     const tmp<DimensionedField<Type, GeoMesh>>& tdf
 )
 :
-    regIOobject(newName, tdf(), true),
-    Field<Type>(tdf.constCast(), tdf.movable()),
-    mesh_(tdf().mesh_),
-    dimensions_(tdf().dimensions_),
-    oriented_(tdf().oriented_)
+    DimensionedField<Type, GeoMesh>(newName, tdf.constCast(), tdf.movable())
 {
     tdf.clear();
 }
@@ -307,63 +352,54 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<Type, GeoMesh>>
-DimensionedField<Type, GeoMesh>::clone() const
+Foam::tmp<Foam::DimensionedField<Type, GeoMesh>>
+Foam::DimensionedField<Type, GeoMesh>::clone() const
 {
-    return tmp<DimensionedField<Type, GeoMesh>>
-    (
-        new DimensionedField<Type, GeoMesh>(*this)
-    );
+    return tmp<DimensionedField<Type, GeoMesh>>::New(*this);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::~DimensionedField()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
-tmp
+Foam::tmp
 <
-    DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+    Foam::DimensionedField
+    <
+        typename Foam::DimensionedField<Type, GeoMesh>::cmptType, GeoMesh
+    >
 >
-DimensionedField<Type, GeoMesh>::component
+Foam::DimensionedField<Type, GeoMesh>::component
 (
     const direction d
 ) const
 {
-    tmp<DimensionedField<cmptType, GeoMesh>> result
+    auto tresult = tmp<DimensionedField<cmptType, GeoMesh>>::New
     (
-        new DimensionedField<cmptType, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                name() + ".component(" + ::Foam::name(d) + ')',
-                instance(),
-                db()
-            ),
-            mesh_,
-            dimensions_
-        )
+            name() + ".component(" + ::Foam::name(d) + ')',
+            instance(),
+            db()
+        ),
+        mesh_,
+        dimensions_
     );
 
-    Foam::component(result(), *this, d);
+    Foam::component(tresult.ref(), *this, d);
 
-    return result;
+    return tresult;
 }
 
 
 template<class Type, class GeoMesh>
-void DimensionedField<Type, GeoMesh>::replace
+void Foam::DimensionedField<Type, GeoMesh>::replace
 (
     const direction d,
     const DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>& df
+    <
+        typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh
+    >& df
 )
 {
     Field<Type>::replace(d, df);
@@ -371,13 +407,15 @@ void DimensionedField<Type, GeoMesh>::replace
 
 
 template<class Type, class GeoMesh>
-void DimensionedField<Type, GeoMesh>::replace
+void Foam::DimensionedField<Type, GeoMesh>::replace
 (
     const direction d,
     const tmp
     <
         DimensionedField
-            <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+        <
+            typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh
+        >
     >& tdf
 )
 {
@@ -387,78 +425,72 @@ void DimensionedField<Type, GeoMesh>::replace
 
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<Type, GeoMesh>>
-DimensionedField<Type, GeoMesh>::T() const
+Foam::tmp<Foam::DimensionedField<Type, GeoMesh>>
+Foam::DimensionedField<Type, GeoMesh>::T() const
 {
-    tmp<DimensionedField<Type, GeoMesh>> result
+    auto tresult = tmp<DimensionedField<Type, GeoMesh>>::New
     (
-        new DimensionedField<Type, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                name() + ".T()",
-                instance(),
-                db()
-            ),
-            mesh_,
-            dimensions_
-        )
+            name() + ".T()",
+            instance(),
+            db()
+        ),
+        mesh_,
+        dimensions_
     );
 
-    Foam::T(result(), *this);
+    Foam::T(tresult(), *this);
 
-    return result;
+    return tresult;
 }
 
 
 template<class Type, class GeoMesh>
-dimensioned<Type> DimensionedField<Type, GeoMesh>::average() const
+Foam::dimensioned<Type> Foam::DimensionedField<Type, GeoMesh>::average() const
 {
-    dimensioned<Type> Average
-    (
-        this->name() + ".average()",
-        this->dimensions(),
-        gAverage(field())
-    );
-
-    return Average;
+    return
+        dimensioned<Type>
+        (
+            this->name() + ".average()",
+            this->dimensions(),
+            gAverage(field())
+        );
 }
 
 
 template<class Type, class GeoMesh>
-dimensioned<Type> DimensionedField<Type, GeoMesh>::weightedAverage
+Foam::dimensioned<Type> Foam::DimensionedField<Type, GeoMesh>::weightedAverage
 (
     const DimensionedField<scalar, GeoMesh>& weightField
 ) const
 {
     return
-    (
         dimensioned<Type>
         (
             this->name() + ".weightedAverage(weights)",
             this->dimensions(),
             gSum(weightField*field())/gSum(weightField)
-        )
-    );
+        );
 }
 
 
 template<class Type, class GeoMesh>
-dimensioned<Type> DimensionedField<Type, GeoMesh>::weightedAverage
+Foam::dimensioned<Type> Foam::DimensionedField<Type, GeoMesh>::weightedAverage
 (
     const tmp<DimensionedField<scalar, GeoMesh>>& tweightField
 ) const
 {
-    dimensioned<Type> wa = weightedAverage(tweightField());
+    dimensioned<Type> result = weightedAverage(tweightField());
     tweightField.clear();
-    return wa;
+    return result;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
-void DimensionedField<Type, GeoMesh>::operator=
+void Foam::DimensionedField<Type, GeoMesh>::operator=
 (
     const DimensionedField<Type, GeoMesh>& df
 )
@@ -480,7 +512,7 @@ void DimensionedField<Type, GeoMesh>::operator=
 
 
 template<class Type, class GeoMesh>
-void DimensionedField<Type, GeoMesh>::operator=
+void Foam::DimensionedField<Type, GeoMesh>::operator=
 (
     const tmp<DimensionedField<Type, GeoMesh>>& tdf
 )
@@ -505,7 +537,7 @@ void DimensionedField<Type, GeoMesh>::operator=
 
 
 template<class Type, class GeoMesh>
-void DimensionedField<Type, GeoMesh>::operator=
+void Foam::DimensionedField<Type, GeoMesh>::operator=
 (
     const dimensioned<Type>& dt
 )
@@ -518,7 +550,7 @@ void DimensionedField<Type, GeoMesh>::operator=
 #define COMPUTED_ASSIGNMENT(TYPE, op)                                          \
                                                                                \
 template<class Type, class GeoMesh>                                            \
-void DimensionedField<Type, GeoMesh>::operator op                              \
+void Foam::DimensionedField<Type, GeoMesh>::operator op                        \
 (                                                                              \
     const DimensionedField<TYPE, GeoMesh>& df                                  \
 )                                                                              \
@@ -531,7 +563,7 @@ void DimensionedField<Type, GeoMesh>::operator op                              \
 }                                                                              \
                                                                                \
 template<class Type, class GeoMesh>                                            \
-void DimensionedField<Type, GeoMesh>::operator op                              \
+void Foam::DimensionedField<Type, GeoMesh>::operator op                        \
 (                                                                              \
     const tmp<DimensionedField<TYPE, GeoMesh>>& tdf                            \
 )                                                                              \
@@ -541,7 +573,7 @@ void DimensionedField<Type, GeoMesh>::operator op                              \
 }                                                                              \
                                                                                \
 template<class Type, class GeoMesh>                                            \
-void DimensionedField<Type, GeoMesh>::operator op                              \
+void Foam::DimensionedField<Type, GeoMesh>::operator op                        \
 (                                                                              \
     const dimensioned<TYPE>& dt                                                \
 )                                                                              \
@@ -557,14 +589,9 @@ COMPUTED_ASSIGNMENT(scalar, /=)
 
 #undef COMPUTED_ASSIGNMENT
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #undef checkField
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

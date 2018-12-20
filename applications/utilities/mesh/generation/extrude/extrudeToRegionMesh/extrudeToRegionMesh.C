@@ -492,15 +492,8 @@ labelListList globalEdgeFaces
 
     forAll(edgeFaces, edgeI)
     {
-        const labelList& eFaces = edgeFaces[edgeI];
-
         // Store pp face and processor as unique tag.
-        labelList& globalEFaces = globalEdgeFaces[edgeI];
-        globalEFaces.setSize(eFaces.size());
-        forAll(eFaces, i)
-        {
-            globalEFaces[i] = globalFaces.toGlobal(eFaces[i]);
-        }
+        globalEdgeFaces[edgeI] = globalFaces.toGlobal(edgeFaces[edgeI]);
     }
 
     // Synchronise across coupled edges.
@@ -1469,11 +1462,19 @@ void extrudeGeometricProperties
 
 int main(int argc, char *argv[])
 {
-    argList::addNote("Create region mesh by extruding a faceZone or faceSet");
+    argList::addNote
+    (
+        "Create region mesh by extruding a faceZone or faceSet"
+    );
 
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
-    #include "addDictOption.H"
+
+    argList::addOption
+    (
+        "dict", "file", "Use alternative extrudeToRegionMeshDict"
+    );
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
@@ -1505,7 +1506,7 @@ int main(int argc, char *argv[])
     autoPtr<extrudeModel> model(extrudeModel::New(dict));
 
     // Region
-    const word shellRegionName(dict.lookup("region"));
+    const word shellRegionName(dict.get<word>("region"));
 
     // Faces to extrude - either faceZones or faceSets (boundary faces only)
     wordList zoneNames;
@@ -1514,7 +1515,7 @@ int main(int argc, char *argv[])
     const bool hasZones = dict.found("faceZones");
     if (hasZones)
     {
-        dict.lookup("faceZones") >> zoneNames;
+        dict.readEntry("faceZones", zoneNames);
         dict.readIfPresent("faceZonesShadow", zoneShadowNames);
 
         // Check
@@ -1528,13 +1529,13 @@ int main(int argc, char *argv[])
     }
     else
     {
-        dict.lookup("faceSets") >> zoneNames;
+        dict.readEntry("faceSets", zoneNames);
         dict.readIfPresent("faceSetsShadow", zoneShadowNames);
     }
 
 
     mappedPatchBase::sampleMode sampleMode =
-        mappedPatchBase::sampleModeNames_[dict.lookup("sampleMode")];
+        mappedPatchBase::sampleModeNames_.get("sampleMode", dict);
 
     const bool oneD(dict.get<bool>("oneD"));
     bool oneDNonManifoldEdges(false);
@@ -1542,7 +1543,7 @@ int main(int argc, char *argv[])
     if (oneD)
     {
         oneDNonManifoldEdges = dict.lookupOrDefault("nonManifold", false);
-        dict.lookup("oneDPolyPatchType") >> oneDPatchType;
+        oneDPatchType = dict.get<word>("oneDPolyPatchType");
     }
 
     const bool adaptMesh(dict.get<bool>("adaptMesh"));
@@ -1647,7 +1648,7 @@ int main(int argc, char *argv[])
     word meshInstance;
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
         meshInstance = runTime.timeName();
     }
     else

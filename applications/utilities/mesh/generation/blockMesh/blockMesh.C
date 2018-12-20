@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,16 +41,22 @@ Usage
 
     Options:
       - \par -blockTopology
-        Write the topology as a set of edges in OBJ format.
+        Write the topology as a set of edges in OBJ format and exit.
 
       - \par -region \<name\>
-        Specify an alternative mesh region.
+        Specify alternative mesh region.
 
       - \par -dict \<filename\>
-        Specify alternative dictionary for the block mesh description.
+        Alternative dictionary for the block mesh description.
 
       - \par -sets
         Write cellZones as cellSets too (for processing purposes)
+
+      - \par -noClean
+        Do not remove any existing polyMesh/ directory or files
+
+      - \par -time
+        Write resulting mesh to a time directory (instead of constant)
 
 \*---------------------------------------------------------------------------*/
 
@@ -78,114 +84,165 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Block mesh generator.\n"
+        "  The ordering of vertex and face labels within a block as shown "
+        "below.\n"
+        "  For the local vertex numbering in the sequence 0 to 7:\n"
+        "    Faces 0, 1 (x-direction) are left, right.\n"
+        "    Faces 2, 3 (y-direction) are front, back.\n"
+        "    Faces 4, 5 (z-direction) are bottom, top.\n"
+        "\n"
+        "                        7 ---- 6\n"
+        "                 f5     |\\     |\\     f3\n"
+        "                 |      | 4 ---- 5     \\\n"
+        "                 |      3 |--- 2 |      \\\n"
+        "                 |       \\|     \\|      f2\n"
+        "                 f4       0 ---- 1\n"
+        "    Y  Z\n"
+        "     \\ |                f0 ------ f1\n"
+        "      \\|\n"
+        "       O--- X\n"
+    );
+
     argList::noParallel();
     argList::addBoolOption
     (
         "blockTopology",
-        "write block edges and centres as .obj files"
+        "Write block edges and centres as obj files and exit"
     );
     argList::addBoolOption
     (
         "noClean",
-        "keep the existing files in the polyMesh"
+        "Do not remove any existing polyMesh/ directory or files"
     );
     argList::addOption
     (
         "dict",
         "file",
-        "specify alternative dictionary for the blockMesh description"
+        "Alternative dictionary for the blockMesh description"
     );
     argList::addBoolOption
     (
         "sets",
-        "write cellZones as cellSets too (for processing purposes)"
+        "Write cellZones as cellSets too (for processing purposes)"
     );
-    argList::addNote
+    argList::addOption
     (
-        "Block description\n"
-        "\n"
-        "  For a given block, the correspondence between the ordering of\n"
-        "  vertex labels and face labels is shown below.\n"
-        "  For vertex numbering in the sequence 0 to 7 (block, centre):\n"
-        "    faces 0 (f0) and 1 are left and right, respectively;\n"
-        "    faces 2 and 3 are front and back; \n"
-        "    and faces 4 and 5 are bottom and top::\n"
-        "\n"
-        "                 7 ---- 6\n"
-        "            f5   |\\     |\\   f3\n"
-        "            |    | 4 ---- 5   \\\n"
-        "            |    3 |--- 2 |    \\\n"
-        "            |     \\|     \\|    f2\n"
-        "            f4     0 ---- 1\n"
-        "\n"
-        "       Z         f0 ----- f1\n"
-        "       |  Y\n"
-        "       | /\n"
-        "       O --- X\n"
+        "time",
+        "time",
+        "specify a time to write mesh to"
     );
 
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const word dictName("blockMeshDict");
-
-    word regionName;
+    word regionName = polyMesh::defaultRegion;
     word regionPath;
 
     // Check if the region is specified otherwise mesh the default region
-    if (args.readIfPresent("region", regionName, polyMesh::defaultRegion))
+    if (args.readIfPresent("region", regionName))
     {
         Info<< nl << "Generating mesh for region " << regionName << endl;
         regionPath = regionName;
     }
 
-    // Search for the appropriate blockMesh dictionary....
 
-    fileName dictPath;
+    // Instance for resulting mesh
+    bool useTime = false;
+    word meshInstance(runTime.constant());
 
-    // Check if the dictionary is specified on the command-line
-    if (args.readIfPresent("dict", dictPath))
-    {
-        if (isDir(dictPath))
-        {
-            dictPath = dictPath / dictName;
-        }
-    }
-    // Check if dictionary is present in the constant directory
-    else if
+    if
     (
-        exists
-        (
-            runTime.path()/runTime.constant()
-           /regionPath/polyMesh::meshSubDir/dictName
-        )
+        args.readIfPresent("time", meshInstance)
+     && runTime.constant() != meshInstance
     )
     {
-        dictPath =
-            runTime.constant()
-           /regionPath/polyMesh::meshSubDir/dictName;
+        // Verify that the value is actually good
+        scalar timeValue;
 
-        // Warn that constant/polyMesh/blockMesh was selected instead of
-        // system/blockMesh
-        WarningIn(args[0])
-            << "Using the old blockMeshDict location: "
-            << dictPath << nl
-            << "    instead of the default location:  "
-            << runTime.system()/regionPath/dictName << nl
-            << endl;
+        useTime = readScalar(meshInstance, timeValue);
+        if (!useTime)
+        {
+            FatalErrorInFunction
+                << "Bad input value: " << meshInstance
+                << "Should be a scalar or 'constant'"
+                << nl << endl
+                << exit(FatalError);
+        }
     }
-    // Otherwise assume the dictionary is present in the system directory
-    else
+
+
+    // Locate appropriate blockMeshDict
+    #include "findBlockMeshDict.H"
+
+    blockMesh blocks(meshDict, regionName);
+
+    if (!blocks.valid())
     {
-        dictPath = runTime.system()/regionPath/dictName;
+        // Could/should be Fatal?
+
+        WarningIn(args.executable())
+            << "Did not generate any blocks. Stopping." << nl << endl;
+
+        return 1;
+    }
+
+
+    if (args.found("blockTopology"))
+    {
+        Info<< nl;
+
+        // Write mesh as edges.
+        {
+            OFstream os(runTime.path()/"blockTopology.obj");
+
+            Info<< "Writing block structure as obj format: "
+                << os.name().name() << endl;
+
+            blocks.writeTopology(os);
+        }
+
+        // Write centres of blocks
+        {
+            OFstream os(runTime.path()/"blockCentres.obj");
+
+            Info<< "Writing block centres as obj format: "
+                << os.name().name() << endl;
+
+            const polyMesh& topo = blocks.topology();
+
+            for (const point& cc :  topo.cellCentres())
+            {
+                os << "v " << cc.x() << ' ' << cc.y() << ' ' << cc.z() << nl;
+            }
+        }
+
+        Info<< "\nEnd\n" << endl;
+
+        return 0;
+    }
+
+
+
+    // Instance for resulting mesh
+    if (useTime)
+    {
+        Info<< "Writing polyMesh to " << meshInstance << nl << endl;
+
+        // Make sure that the time is seen to be the current time. This
+        // is the logic inside regIOobject which resets the instance to the
+        // current time before writing
+        runTime.setTime(instant(meshInstance), 0);
     }
 
     if (!args.found("noClean"))
     {
         fileName polyMeshPath
         (
-            runTime.path()/runTime.constant()/regionPath/polyMesh::meshSubDir
+            runTime.path()/meshInstance/regionPath/polyMesh::meshSubDir
         );
 
         if (exists(polyMeshPath))
@@ -205,81 +262,18 @@ int main(int argc, char *argv[])
         }
     }
 
-    IOobject meshDictIO
-    (
-        dictPath,
-        runTime,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE,
-        false
-    );
-
-    if (!meshDictIO.typeHeaderOk<IOdictionary>(true))
-    {
-        FatalErrorInFunction
-            << meshDictIO.objectPath()
-            << nl
-            << exit(FatalError);
-    }
-
-    Info<< "Creating block mesh from\n    "
-        << meshDictIO.objectPath() << endl;
-
-    IOdictionary meshDict(meshDictIO);
-    blockMesh blocks(meshDict, regionName);
-
-    if (args.found("blockTopology"))
-    {
-        // Write mesh as edges.
-        {
-            fileName objMeshFile("blockTopology.obj");
-
-            OFstream str(runTime.path()/objMeshFile);
-
-            Info<< nl << "Dumping block structure as Lightwave obj format"
-                << " to " << objMeshFile << endl;
-
-            blocks.writeTopology(str);
-        }
-
-        // Write centres of blocks
-        {
-            fileName objCcFile("blockCentres.obj");
-
-            OFstream str(runTime.path()/objCcFile);
-
-            Info<< nl << "Dumping block centres as Lightwave obj format"
-                << " to " << objCcFile << endl;
-
-            const polyMesh& topo = blocks.topology();
-
-            const pointField& cellCentres = topo.cellCentres();
-
-            forAll(cellCentres, celli)
-            {
-                //point cc = b.blockShape().centre(b.points());
-                const point& cc = cellCentres[celli];
-
-                str << "v " << cc.x() << ' ' << cc.y() << ' ' << cc.z() << nl;
-            }
-        }
-
-        Info<< nl << "end" << endl;
-
-        return 0;
-    }
-
 
     Info<< nl << "Creating polyMesh from blockMesh" << endl;
 
     word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
+
     polyMesh mesh
     (
         IOobject
         (
             regionName,
-            runTime.constant(),
+            meshInstance,
             runTime
         ),
         pointField(blocks.points()),  // Copy, could we re-use space?
@@ -291,106 +285,21 @@ int main(int argc, char *argv[])
         defaultFacesType
     );
 
-    // Read in a list of dictionaries for the merge patch pairs
-    if (meshDict.found("mergePatchPairs"))
-    {
-        List<Pair<word>> mergePatchPairs
-        (
-            meshDict.lookup("mergePatchPairs")
-        );
 
-        #include "mergePatchPairs.H"
-    }
-    else
-    {
-        Info<< nl << "There are no merge patch pairs edges" << endl;
-    }
+    // Handle merging of patch pairs. Dictionary entry "mergePatchPairs"
+    #include "mergePatchPairs.H"
 
-
-    // Set any cellZones (note: cell labelling unaffected by above
-    // mergePatchPairs)
-
-    const label nZones = blocks.numZonedBlocks();
-    if (nZones > 0)
-    {
-        Info<< nl << "Adding cell zones" << endl;
-
-        // Map from zoneName to cellZone index
-        HashTable<label> zoneMap(nZones);
-
-        // Cells per zone.
-        List<DynamicList<label>> zoneCells(nZones);
-
-        // Running cell counter
-        label celli = 0;
-
-        // Largest zone so far
-        label freeZoneI = 0;
-
-        forAll(blocks, blockI)
-        {
-            const block& b = blocks[blockI];
-            const List<FixedList<label, 8>> blockCells = b.cells();
-            const word& zoneName = b.zoneName();
-
-            if (zoneName.size())
-            {
-                HashTable<label>::const_iterator iter = zoneMap.find(zoneName);
-
-                label zoneI;
-
-                if (iter == zoneMap.end())
-                {
-                    zoneI = freeZoneI++;
-
-                    Info<< "    " << zoneI << '\t' << zoneName << endl;
-
-                    zoneMap.insert(zoneName, zoneI);
-                }
-                else
-                {
-                    zoneI = iter();
-                }
-
-                forAll(blockCells, i)
-                {
-                    zoneCells[zoneI].append(celli++);
-                }
-            }
-            else
-            {
-                celli += b.cells().size();
-            }
-        }
-
-        List<cellZone*> cz(zoneMap.size());
-        forAllConstIter(HashTable<label>, zoneMap, iter)
-        {
-            label zoneI = iter();
-
-            cz[zoneI] = new cellZone
-            (
-                iter.key(),
-                zoneCells[zoneI].shrink(),
-                zoneI,
-                mesh.cellZones()
-            );
-        }
-
-        mesh.pointZones().setSize(0);
-        mesh.faceZones().setSize(0);
-        mesh.cellZones().setSize(0);
-        mesh.addZones(List<pointZone*>(0), List<faceZone*>(0), cz);
-    }
+    // Set any cellZones
+    #include "addCellZones.H"
 
 
     // Detect any cyclic patches and force re-ordering of the faces
     {
         const polyPatchList& patches = mesh.boundaryMesh();
         bool hasCyclic = false;
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            if (isA<cyclicPolyPatch>(patches[patchi]))
+            if (isA<cyclicPolyPatch>(pp))
             {
                 hasCyclic = true;
                 break;
@@ -414,6 +323,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Writing polyMesh with "
         << mesh.cellZones().size() << " cellZones";
+
     if (args.found("sets") && !mesh.cellZones().empty())
     {
         Info<< " (written as cellSets too)";
@@ -430,9 +340,8 @@ int main(int argc, char *argv[])
 
     if (args.found("sets"))
     {
-        forAll(mesh.cellZones(), zonei)
+        for (const cellZone& cz : mesh.cellZones())
         {
-            const cellZone& cz = mesh.cellZones()[zonei];
             cellSet(mesh, cz.name(), cz).write();
         }
     }
@@ -454,11 +363,9 @@ int main(int argc, char *argv[])
             << "Patches" << nl
             << "----------------" << nl;
 
-        forAll(patches, patchi)
+        for (const polyPatch& p : patches)
         {
-            const polyPatch& p = patches[patchi];
-
-            Info<< "  " << "patch " << patchi
+            Info<< "  " << "patch " << p.index()
                 << " (start: " << p.start()
                 << " size: " << p.size()
                 << ") name: " << p.name()

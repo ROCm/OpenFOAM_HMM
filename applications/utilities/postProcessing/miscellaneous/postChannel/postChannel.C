@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Post-processes data from channel flow calculations.
+    Post-process data from channel flow calculations.
 
     For each time: calculate: txx, txy,tyy, txy,
     eps, prod, vorticity, enstrophy and helicity. Assuming that the mesh
@@ -48,6 +48,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Post-process data from channel flow calculations"
+    );
+
     argList::noParallel();
     timeSelector::addOptions();
 

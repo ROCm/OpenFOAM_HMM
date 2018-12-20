@@ -41,16 +41,14 @@ Foam::autoPtr<Foam::polyMeshModifier> Foam::polyMeshModifier::New
         InfoInFunction << "Constructing polyMeshModifier" << endl;
     }
 
-    const word modifierType(dict.lookup("type"));
+    const word modifierType(dict.get<word>("type"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modifierType);
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown polyMeshModifier type "
+        FatalIOErrorInFunction(dict)
+            << "Unknown polyMeshModifier type "
             << modifierType << nl << nl
             << "Valid polyMeshModifier types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()

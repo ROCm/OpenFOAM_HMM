@@ -26,33 +26,39 @@ License
 #include "scalarRanges.H"
 #include "stringOps.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::scalarRanges::scalarRanges(const std::string& str)
-:
-    List<scalarRange>()
+Foam::scalarRanges Foam::scalarRanges::parse
+(
+    const std::string& str,
+    bool verbose
+)
 {
     const SubStrings<std::string> items = stringOps::splitAny(str, " ,;");
 
-    setSize(items.size());
+    scalarRanges ranges(items.size());
 
-    label nItems = 0;
+    label n = 0;
 
     for (const auto& item : items)
     {
         const std::string s = item.str();
 
-        if (scalarRange::parse(s, operator[](nItems)))
+        scalarRange& range = ranges[n];
+
+        if (scalarRange::parse(s, range))
         {
-            ++nItems;
+            ++n;
         }
-        else
+        else if (verbose)
         {
             Info<< "Bad scalar-range while parsing: " << s << endl;
         }
     }
 
-    setSize(nItems);
+    ranges.resize(n);
+
+    return ranges;
 }
 
 

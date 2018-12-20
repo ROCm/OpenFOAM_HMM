@@ -106,7 +106,7 @@ void Foam::meshRefinement::testSyncBoundaryFaceList
     const UList<T>& syncedFaceData
 ) const
 {
-    label nBFaces = mesh_.nFaces() - mesh_.nInternalFaces();
+    const label nBFaces = mesh_.nBoundaryFaces();
 
     if (faceData.size() != nBFaces || syncedFaceData.size() != nBFaces)
     {

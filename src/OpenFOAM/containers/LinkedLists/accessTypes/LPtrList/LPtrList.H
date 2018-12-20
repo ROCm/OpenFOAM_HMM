@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,14 +51,14 @@ template<class LListBase, class T>
 Istream& operator>>
 (
     Istream& is,
-    LPtrList<LListBase, T>& lst
+    LPtrList<LListBase, T>& list
 );
 
 template<class LListBase, class T>
 Ostream& operator<<
 (
     Ostream& os,
-    const LPtrList<LListBase, T>& lst
+    const LPtrList<LListBase, T>& list
 );
 
 
@@ -77,7 +77,7 @@ private:
 
         //- Read from Istream using given Istream constructor class
         template<class INew>
-        void read(Istream& is, const INew& inew);
+        void readIstream(Istream& is, const INew& inew);
 
 
 public:
@@ -419,13 +419,13 @@ public:
         friend Istream& operator>> <LListBase, T>
         (
             Istream& is,
-            LPtrList<LListBase, T>& lst
+            LPtrList<LListBase, T>& list
         );
 
         friend Ostream& operator<< <LListBase, T>
         (
             Ostream& os,
-            const LPtrList<LListBase, T>& lst
+            const LPtrList<LListBase, T>& list
         );
 };
 

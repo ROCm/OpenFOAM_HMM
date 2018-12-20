@@ -85,20 +85,14 @@ displacementComponentLaplacianFvMotionSolver
     frozenPointsZone_
     (
         coeffDict().found("frozenPointsZone")
-      ? fvMesh_.pointZones().findZoneID(coeffDict().lookup("frozenPointsZone"))
+      ? fvMesh_.pointZones().findZoneID
+        (
+            coeffDict().get<word>("frozenPointsZone")
+        )
       : -1
     )
 {
-    Switch applyPointLocation
-    (
-        coeffDict().lookupOrDefault
-        (
-            "applyPointLocation",
-            true
-        )
-    );
-
-    if (applyPointLocation)
+    if (coeffDict().lookupOrDefault("applyPointLocation", true))
     {
         pointLocation_.reset
         (

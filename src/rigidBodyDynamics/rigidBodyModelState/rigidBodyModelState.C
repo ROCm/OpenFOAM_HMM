@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,21 @@ Foam::RBD::rigidBodyModelState::rigidBodyModelState
     qDdot_(dict.lookupOrDefault("qDdot", scalarField(model.nDoF(), Zero))),
     t_(dict.lookupOrDefault<scalar>("t", -1)),
     deltaT_(dict.lookupOrDefault<scalar>("deltaT", 0))
-{}
+{
+    if
+    (
+        q_.size() != model.nDoF()
+     || qDot_.size() != model.nDoF()
+     || qDdot_.size() != model.nDoF()
+    )
+    {
+        FatalErrorInFunction << "State parameters 'q', 'qDot', 'qDdot'"
+            << " do not have the same size as the number of DoF "
+            << model.nDoF()
+            << ". Is your \"rigidBodyMotionState\" state file consistent?"
+            << exit(FatalError);
+    }
+}
 
 
 // ************************************************************************* //

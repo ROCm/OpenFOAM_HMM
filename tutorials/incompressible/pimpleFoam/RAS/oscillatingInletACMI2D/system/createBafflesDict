@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -23,7 +23,7 @@ internalFacesOnly false;
 // Baffles to create.
 baffles
 {
-    // NOTE: cyclicAMI patches MUST BE defined PRIOR to their associted
+    // NOTE: cyclicAMI patches MUST BE defined PRIOR to their associated
     //       blockage patches
 
     ACMI1

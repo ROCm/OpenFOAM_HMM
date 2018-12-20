@@ -38,12 +38,9 @@ ReactingMultiphaseLookupTableInjection
 :
     InjectionModel<CloudType>(dict, owner, modelName, typeName),
     inputFileName_(this->coeffDict().lookup("inputFile")),
-    duration_(readScalar(this->coeffDict().lookup("duration"))),
-    parcelsPerSecond_
-    (
-        readScalar(this->coeffDict().lookup("parcelsPerSecond"))
-    ),
-    randomise_(readBool(this->coeffDict().lookup("randomise"))),
+    duration_(this->coeffDict().getScalar("duration")),
+    parcelsPerSecond_(this->coeffDict().getScalar("parcelsPerSecond")),
+    randomise_(this->coeffDict().getBool("randomise")),
     injectors_
     (
         IOobject

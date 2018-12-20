@@ -27,7 +27,7 @@ Application
     makeFaMesh
 
 Description
-    Check a Finite Area mesh
+    Check a finiteArea mesh
 
 Author
     Zeljko Tukovic, FAMENA
@@ -46,6 +46,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Check a finiteArea mesh"
+    );
+
     #include "addRegionOption.H"
 
     #include "setRootCase.H"

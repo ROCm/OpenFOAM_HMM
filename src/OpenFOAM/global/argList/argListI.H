@@ -25,7 +25,6 @@ License
 
 #include "argList.H"
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
@@ -34,8 +33,8 @@ inline void Foam::argList::readList(ITstream& is, List<T>& list)
     if (is.size() == 1)
     {
         // Single token - treat like List with one entry
-        list.setSize(1);
-        is >> list[0];
+        list.resize(1);
+        is >> list.first();
     }
     else
     {
@@ -52,15 +51,15 @@ inline const Foam::word& Foam::argList::executable() const
 }
 
 
-inline const Foam::fileName& Foam::argList::rootPath() const
+inline const Foam::string& Foam::argList::commandLine() const
 {
-    return rootPath_;
+    return commandLine_;
 }
 
 
-inline bool Foam::argList::distributed() const
+inline const Foam::fileName& Foam::argList::rootPath() const
 {
-    return distributed_;
+    return rootPath_;
 }
 
 
@@ -76,15 +75,37 @@ inline const Foam::fileName& Foam::argList::globalCaseName() const
 }
 
 
-inline const Foam::ParRunControl& Foam::argList::parRunControl() const
-{
-    return parRunControl_;
-}
-
-
 inline Foam::fileName Foam::argList::path() const
 {
     return rootPath()/caseName();
+}
+
+
+inline Foam::fileName Foam::argList::globalPath() const
+{
+    return rootPath()/globalCaseName();
+}
+
+
+inline Foam::fileName Foam::argList::relativePath
+(
+    const fileName& input,
+    const bool caseTag
+) const
+{
+    return input.relative(globalPath(), caseTag);
+}
+
+
+inline bool Foam::argList::distributed() const
+{
+    return parRunControl_.distributed();
+}
+
+
+inline const Foam::ParRunControl& Foam::argList::parRunControl() const
+{
+    return parRunControl_;
 }
 
 
@@ -134,22 +155,22 @@ inline Foam::ITstream Foam::argList::lookup(const word& optName) const
 
 namespace Foam
 {
-    template<> inline int32_t argList::read<int32_t>(const label index) const
+    template<> inline int32_t argList::get<int32_t>(const label index) const
     {
         return Foam::readInt32(args_[index]);
     }
 
-    template<> inline int64_t argList::read<int64_t>(const label index) const
+    template<> inline int64_t argList::get<int64_t>(const label index) const
     {
         return Foam::readInt64(args_[index]);
     }
 
-    template<> inline float argList::read<float>(const label index) const
+    template<> inline float argList::get<float>(const label index) const
     {
         return Foam::readFloat(args_[index]);
     }
 
-    template<> inline double argList::read<double>(const label index) const
+    template<> inline double argList::get<double>(const label index) const
     {
         return Foam::readDouble(args_[index]);
     }
@@ -177,19 +198,19 @@ namespace Foam
 
 
     template<>
-    inline string argList::read<Foam::string>(const label index) const
+    inline string argList::get<Foam::string>(const label index) const
     {
         return args_[index];
     }
 
     template<>
-    inline word argList::read<Foam::word>(const label index) const
+    inline word argList::get<Foam::word>(const label index) const
     {
         return args_[index];
     }
 
     template<>
-    inline fileName argList::read<Foam::fileName>(const label index) const
+    inline fileName argList::get<Foam::fileName>(const label index) const
     {
         return args_[index];
     }
@@ -212,21 +233,21 @@ namespace Foam
     {
         return options_[optName];
     }
-
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline T Foam::argList::read(const label index) const
+inline T Foam::argList::get(const label index) const
 {
     ITstream is(Foam::name(index), args_[index]);
 
     T val;
     is >> val;
 
-    // Could also check is.nRemainingTokens() to detect trailing rubbish
+    checkITstream(is, index);
+
     return val;
 }
 
@@ -239,8 +260,21 @@ inline T Foam::argList::opt(const word& optName) const
     T val;
     is >> val;
 
-    // Could also check is.nRemainingTokens() to detect trailing rubbish
+    checkITstream(is, optName);
+
     return val;
+}
+
+
+template<class T>
+inline T Foam::argList::opt(const word& optName, const T& deflt) const
+{
+    if (found(optName))
+    {
+        return opt<T>(optName);
+    }
+
+    return deflt;
 }
 
 
@@ -296,24 +330,36 @@ inline T Foam::argList::lookupOrDefault
 
 
 template<class T>
-inline Foam::List<T> Foam::argList::readList(const label index) const
+inline Foam::List<T> Foam::argList::getList(const label index) const
 {
     ITstream is(Foam::name(index), args_[index]);
 
     List<T> list;
     readList(is, list);
 
+    checkITstream(is, index);
+
     return list;
 }
 
 
 template<class T>
-inline Foam::List<T> Foam::argList::readList(const word& optName) const
+inline Foam::List<T> Foam::argList::getList
+(
+    const word& optName,
+    bool mandatory
+) const
 {
-    ITstream is(optName, options_[optName]);
-
     List<T> list;
-    readList(is, list);
+
+    if (mandatory || found(optName))
+    {
+        ITstream is(optName, options_[optName]);
+
+        readList(is, list);
+
+        checkITstream(is, optName);
+    }
 
     return list;
 }
@@ -329,7 +375,10 @@ inline bool Foam::argList::readListIfPresent
     if (found(optName))
     {
         ITstream is(optName, options_[optName]);
+
         readList(is, list);
+
+        checkITstream(is, optName);
 
         return true;
     }
@@ -349,74 +398,6 @@ inline const Foam::string& Foam::argList::operator[](const label index) const
 inline const Foam::string& Foam::argList::operator[](const word& optName) const
 {
     return options_[optName];
-}
-
-
-// * * * * * * * * * * * * * * * Compatibility * * * * * * * * * * * * * * * //
-
-
-template<class T>
-inline T Foam::argList::argRead(const label index) const
-{
-    return this->read<T>(index);
-}
-
-
-inline bool Foam::argList::optionFound(const word& optName) const
-{
-    return found(optName);
-}
-
-
-inline Foam::ITstream Foam::argList::optionLookup(const word& optName) const
-{
-    return lookup(optName);
-}
-
-
-template<class T>
-inline T Foam::argList::optionRead(const word& optName) const
-{
-    return opt<T>(optName);
-}
-
-
-template<class T>
-inline bool
-Foam::argList::optionReadIfPresent(const word& optName, T& val) const
-{
-    return readIfPresent<T>(optName, val);
-}
-
-
-template<class T>
-inline bool Foam::argList::optionReadIfPresent
-(
-    const word& optName,
-    T& val,
-    const T& deflt
-) const
-{
-    return readIfPresent<T>(optName, val, deflt);
-}
-
-
-template<class T>
-inline T Foam::argList::optionLookupOrDefault
-(
-    const word& optName,
-    const T& deflt
-) const
-{
-    return lookupOrDefault<T>(optName, deflt);
-}
-
-
-template<class T>
-inline Foam::List<T>
-Foam::argList::optionReadList(const word& optName) const
-{
-    return this->readList<T>(optName);
 }
 
 

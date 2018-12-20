@@ -110,9 +110,9 @@ Foam::layerParameters::layerParameters
     minThickness_
     (
         boundaryMesh.size(),
-        readScalar(dict.lookup("minThickness"))
+        dict.get<scalar>("minThickness")
     ),
-    featureAngle_(readScalar(dict.lookup("featureAngle"))),
+    featureAngle_(dict.get<scalar>("featureAngle")),
     mergePatchFacesAngle_
     (
         dict.lookupOrDefault<scalar>
@@ -125,16 +125,16 @@ Foam::layerParameters::layerParameters
     (
         dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
     ),
-    nGrow_(readLabel(dict.lookup("nGrow"))),
+    nGrow_(dict.get<label>("nGrow")),
     maxFaceThicknessRatio_
     (
-        readScalar(dict.lookup("maxFaceThicknessRatio"))
+        dict.get<scalar>("maxFaceThicknessRatio")
     ),
     nBufferCellsNoExtrude_
     (
-        readLabel(dict.lookup("nBufferCellsNoExtrude"))
+        dict.get<label>("nBufferCellsNoExtrude")
     ),
-    nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
+    nLayerIter_(dict.get<label>("nLayerIter")),
     nRelaxedIter_(labelMax),
     additionalReporting_(dict.lookupOrDefault("additionalReporting", false)),
     meshShrinker_
@@ -156,7 +156,7 @@ Foam::layerParameters::layerParameters
         firstLayerThickness_ = scalarField
         (
             boundaryMesh.size(),
-            readScalar(dict.lookup("firstLayerThickness"))
+            dict.get<scalar>("firstLayerThickness")
         );
         nSpec++;
     }
@@ -166,7 +166,7 @@ Foam::layerParameters::layerParameters
         finalLayerThickness_ = scalarField
         (
             boundaryMesh.size(),
-            readScalar(dict.lookup("finalLayerThickness"))
+            dict.get<scalar>("finalLayerThickness")
         );
         nSpec++;
     }
@@ -176,7 +176,7 @@ Foam::layerParameters::layerParameters
         thickness_ = scalarField
         (
             boundaryMesh.size(),
-            readScalar(dict.lookup("thickness"))
+            dict.get<scalar>("thickness")
         );
         nSpec++;
     }
@@ -186,7 +186,7 @@ Foam::layerParameters::layerParameters
         expansionRatio_ = scalarField
         (
             boundaryMesh.size(),
-            readScalar(dict.lookup("expansionRatio"))
+            dict.get<scalar>("expansionRatio")
         );
         nSpec++;
     }
@@ -226,10 +226,8 @@ Foam::layerParameters::layerParameters
 
     if (layerSpec_ == ILLEGAL || nSpec != 2)
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Over- or underspecified layer thickness."
+        FatalIOErrorInFunction(dict)
+            << "Over- or underspecified layer thickness."
             << " Please specify" << nl
             << "    first layer thickness ('firstLayerThickness')"
             << " and overall thickness ('thickness') or" << nl
@@ -250,7 +248,7 @@ Foam::layerParameters::layerParameters
     if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
     {
         FatalIOErrorInFunction(dict)
-            << "Layer iterations should be >= 0." << endl
+            << "Layer iterations should be >= 0." << nl
             << "nLayerIter:" << nLayerIter_
             << " nRelaxedIter:" << nRelaxedIter_
             << exit(FatalIOError);
@@ -259,11 +257,13 @@ Foam::layerParameters::layerParameters
 
     const dictionary& layersDict = dict.subDict("layers");
 
-    forAllConstIter(dictionary, layersDict, iter)
+    for (const entry& dEntry : layersDict)
     {
-        if (iter().isDict())
+        if (dEntry.isDict())
         {
-            const keyType& key = iter().keyword();
+            const keyType& key = dEntry.keyword();
+            const dictionary& layerDict = dEntry.dict();
+
             const labelHashSet patchIDs
             (
                 boundaryMesh.patchSet(List<wordRe>(1, wordRe(key)))
@@ -278,12 +278,10 @@ Foam::layerParameters::layerParameters
             }
             else
             {
-                const dictionary& layerDict = iter().dict();
-
                 for (const label patchi : patchIDs)
                 {
                     numLayers_[patchi] =
-                        readLabel(layerDict.lookup("nSurfaceLayers"));
+                        layerDict.get<label>("nSurfaceLayers");
 
                     switch (layerSpec_)
                     {
@@ -353,10 +351,8 @@ Foam::layerParameters::layerParameters
                         break;
 
                         default:
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "problem." << exit(FatalIOError);
+                            FatalIOErrorInFunction(dict)
+                                << "problem." << exit(FatalIOError);
                         break;
                     }
 

@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "zeroGradient.H"
-
+#include "stringListOps.H"
 #include "volFields.H"
 #include "dictionary.H"
 #include "wordRes.H"
@@ -112,7 +112,7 @@ bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    dict.lookup("fields") >> selectFields_;
+    dict.readEntry("fields", selectFields_);
     selectFields_.uniq();
 
     Info<< type() << " fields: " << selectFields_ << nl;
@@ -133,9 +133,9 @@ bool Foam::functionObjects::zeroGradient::execute()
     // Check exact matches first
     for (const wordRe& select : selectFields_)
     {
-        if (!select.isPattern())
+        if (select.isLiteral())
         {
-            const word& fieldName = static_cast<const word&>(select);
+            const word& fieldName = select;
 
             if (!candidates.erase(fieldName))
             {
@@ -176,16 +176,15 @@ bool Foam::functionObjects::zeroGradient::write()
     }
 
     // Consistent output order
-    const wordList outputList = results_.sortedToc();
-    for (const word& fieldName : outputList)
+    for (const word& fieldName : results_.sortedToc())
     {
-        if (foundObject<regIOobject>(fieldName))
-        {
-            const regIOobject& io = lookupObject<regIOobject>(fieldName);
+        const regIOobject* ioptr = findObject<regIOobject>(fieldName);
 
+        if (ioptr)
+        {
             Log << "    " << fieldName << endl;
 
-            io.write();
+            ioptr->write();
         }
     }
 

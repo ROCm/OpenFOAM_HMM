@@ -1,0 +1,90 @@
+#-----------------------------------------------------------------------------
+project(runTimePostProcessing)
+
+include(${VTK_USE_FILE})
+
+if(VTK_LIBRARIES)
+    message("Found VTK LIBRARIES: " ${VTK_USE_FILE})
+endif()
+
+if(${VTK_VERSION} VERSION_GREATER "6")
+    message("VTK version: " ${VTK_VERSION})
+else()
+    message(FATAL_ERROR " VTK version is too old - requires VTK6 or newer")
+endif()
+
+include_directories(
+    ${LIB_SRC}/OpenFOAM/include
+    ${LIB_SRC}/OpenFOAM/lnInclude
+    ${LIB_SRC}/OSspecific/${WM_OSTYPE}/lnInclude
+    ${LIB_SRC}/finiteVolume/lnInclude
+    ${LIB_SRC}/surfMesh/lnInclude
+    ${LIB_SRC}/conversion/lnInclude
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+link_directories(
+    $ENV{FOAM_LIBBIN}
+)
+
+set(CMAKE_BUILD_TYPE Release)
+
+# Build intermediate (library) directly into the OpenFOAM libdir
+# - implies CMAKE_INSTALL_PREFIX is ignored and there is no 'install' phase
+set(LIBRARY_OUTPUT_PATH $ENV{FOAM_LIBBIN}
+    CACHE INTERNAL
+    ""
+)
+
+## Record VTK version for general bookkeeping
+# file(WRITE
+#     ${CMAKE_BINARY_DIR}/version
+#     "VTK_VERSION=${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}\n"
+# )
+
+file(GLOB SOURCE_FILES
+    fieldVisualisationBase.C
+    functionObjectBase.C
+    functionObjectCloud.C
+    functionObjectLine.C
+    functionObjectSurface.C
+    geometryBase.C
+    geometryPatches.C
+    geometrySurface.C
+    pathline.C
+    pointData.C
+    runTimePostProcessing.C
+    runTimePostProcessingFunctionObject.C
+    scene.C
+    surface.C
+    text.C
+)
+
+set(OPENFOAM_LIBRARIES
+    OpenFOAM
+    finiteVolume
+    surfMesh
+    conversion
+)
+
+add_library(
+    runTimePostProcessing
+    SHARED
+    ${SOURCE_FILES}
+)
+
+set_target_properties(
+    runTimePostProcessing
+    PROPERTIES
+    VERSION ${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION}.${VTK_BUILD_VERSION}
+    SOVERSION ${VTK_MAJOR_VERSION}
+)
+
+target_link_libraries(
+    runTimePostProcessing
+    ${VTK_LIBRARIES}
+    ${OPENFOAM_LIBRARIES}
+)
+
+#-----------------------------------------------------------------------------

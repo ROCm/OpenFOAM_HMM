@@ -70,7 +70,7 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
     const word& lookupName
 )
 {
-    const word deltaType(dict.lookup(lookupName));
+    const word deltaType(dict.get<word>(lookupName));
 
     Info<< "Selecting LES " << lookupName << " type " << deltaType << endl;
 
@@ -99,7 +99,7 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
     const word& lookupName
 )
 {
-    const word deltaType(dict.lookup(lookupName));
+    const word deltaType(dict.get<word>(lookupName));
 
     Info<< "Selecting LES " << lookupName << " type " << deltaType << endl;
 

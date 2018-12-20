@@ -32,10 +32,13 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableSurfaceWithGaps, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableSurfaceWithGaps, dict);
-
+    defineTypeNameAndDebug(searchableSurfaceWithGaps, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableSurfaceWithGaps,
+        dict
+    );
 }
 
 
@@ -178,24 +181,19 @@ Foam::searchableSurfaceWithGaps::searchableSurfaceWithGaps
 )
 :
     searchableSurface(io),
-    gap_(readScalar(dict.lookup("gap"))),
+    gap_(dict.get<scalar>("gap")),
     subGeom_(1)
 {
-    const word subGeomName(dict.lookup("surface"));
+    const word subGeomName(dict.get<word>("surface"));
 
-    const searchableSurface& s =
-        io.db().lookupObject<searchableSurface>(subGeomName);
-
-    subGeom_.set(0, &const_cast<searchableSurface&>(s));
+    subGeom_.set
+    (
+        0,
+        io.db().getObjectPtr<searchableSurface>(subGeomName)
+    );
 
     bounds() = subGeom_[0].bounds();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableSurfaceWithGaps::~searchableSurfaceWithGaps()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

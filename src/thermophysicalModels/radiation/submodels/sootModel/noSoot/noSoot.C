@@ -55,18 +55,17 @@ Foam::radiation::noSoot::noSoot
     sootModel(dict, mesh, modelType)
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-Foam::radiation::noSoot::~noSoot()
-{}
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::radiation::noSoot::correct()
 {}
 
+
 const Foam::volScalarField& Foam::radiation::noSoot::soot() const
 {
     NotImplemented;
-    return tmp<volScalarField>();
+    return tmp<volScalarField>();   // Placeholder
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

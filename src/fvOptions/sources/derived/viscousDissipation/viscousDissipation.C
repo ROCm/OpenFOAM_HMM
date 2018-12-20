@@ -51,21 +51,18 @@ namespace fv
 
 Foam::tmp<Foam::volScalarField> Foam::fv::viscousDissipation::rho() const
 {
-    tmp<volScalarField> trho
+    auto trho = tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "trho",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "trho",
+            mesh_.time().timeName(),
             mesh_,
-            rho_
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        rho_
     );
 
     if (rho_.value() > 0)
@@ -109,7 +106,7 @@ Foam::fv::viscousDissipation::viscousDissipation
     )
 {
     const basicThermo* thermoPtr =
-        mesh_.lookupObjectPtr<basicThermo>(basicThermo::dictName);
+        mesh_.findObject<basicThermo>(basicThermo::dictName);
 
     if (thermoPtr)
     {
@@ -118,7 +115,7 @@ Foam::fv::viscousDissipation::viscousDissipation
 
     if (fieldNames_.empty())
     {
-        coeffs_.lookup("fields") >> fieldNames_;
+        coeffs_.readEntry("fields", fieldNames_);
     }
 
     if (fieldNames_.size() != 1)
@@ -138,10 +135,11 @@ Foam::fv::viscousDissipation::devRhoReff() const
 {
     // Incompressible
     {
-        typedef incompressible::turbulenceModel turbType;
-
-        const turbType* turbPtr =
-            mesh_.lookupObjectPtr<turbType>(turbulenceModel::propertiesName);
+        const auto* turbPtr =
+            mesh_.findObject<incompressible::turbulenceModel>
+            (
+                turbulenceModel::propertiesName
+            );
 
         if (turbPtr)
         {
@@ -151,10 +149,11 @@ Foam::fv::viscousDissipation::devRhoReff() const
 
     // Compressible
     {
-        typedef compressible::turbulenceModel turbType;
-
-        const turbType* turbPtr =
-            mesh_.lookupObjectPtr<turbType>(turbulenceModel::propertiesName);
+        const auto* turbPtr =
+            mesh_.findObject<compressible::turbulenceModel>
+            (
+                turbulenceModel::propertiesName
+            );
 
         if (turbPtr)
         {
@@ -180,28 +179,24 @@ void Foam::fv::viscousDissipation::addSup
     typedef typename outerProduct<vector, vector>::type GradType;
     typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
-    word gradUName("grad(" + UName_ + ')');
+    const word gradUName("grad(" + UName_ + ')');
 
-    tmp<GradFieldType> tgradU
+    auto tgradU = tmp<GradFieldType>::New
     (
-        new GradFieldType
+        IOobject
         (
-            IOobject
-            (
-                "gradU",
-                mesh_.time().timeName(),
-                mesh_.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedTensor(inv(dimTime), Zero)
-        )
+            "gradU",
+            mesh_.time().timeName(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedTensor(inv(dimTime), Zero)
     );
 
     // Cached?
-    const GradFieldType* gradUPtr =
-        mesh_.lookupObjectPtr<GradFieldType>(gradUName);
+    const GradFieldType* gradUPtr = mesh_.findObject<GradFieldType>(gradUName);
 
     if (gradUPtr)
     {

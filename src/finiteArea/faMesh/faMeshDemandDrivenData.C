@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           |
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -34,7 +34,7 @@ License
 #include "processorFaPatch.H"
 #include "wedgeFaPatch.H"
 #include "PstreamCombineReduceOps.H"
-#include "coordinateSystem.H"
+#include "cartesianCS.H"
 #include "scalarMatrices.H"
 #include "processorFaPatchFields.H"
 #include "emptyFaPatchFields.H"
@@ -425,9 +425,7 @@ void Foam::faMesh::calcFaceAreaNormals() const
     vectorField& nInternal = faceAreaNormals.ref();
     forAll(localFaces, faceI)
     {
-        nInternal[faceI] =
-            localFaces[faceI].normal(localPoints)/
-            localFaces[faceI].mag(localPoints);
+        nInternal[faceI] = localFaces[faceI].unitNormal(localPoints);
     }
 
     forAll(boundary(), patchI)
@@ -529,8 +527,7 @@ void Foam::faMesh::calcEdgeAreaNormals() const
 
     forAll(edgeAreaNormals.internalField(), edgeI)
     {
-        vector e = edges()[edgeI].vec(points());
-        e /= mag(e);
+        const vector e = edges()[edgeI].unitVec(points());
 
 //         scalar wStart =
 //             1.0 - sqr(mag(e^pointNormals[edges()[edgeI].end()]));
@@ -580,8 +577,7 @@ void Foam::faMesh::calcEdgeAreaNormals() const
                 pointNormals[patchEdges[edgeI].start()]
               + pointNormals[patchEdges[edgeI].end()];
 
-            vector e = patchEdges[edgeI].vec(points());
-            e /= mag(e);
+            const vector e = patchEdges[edgeI].unitVec(points());
 
             edgeAreaNormals.boundaryFieldRef()[patchI][edgeI] -=
                 e*(e&edgeAreaNormals.boundaryField()[patchI][edgeI]);
@@ -1069,7 +1065,7 @@ void Foam::faMesh::calcPointAreaNormals() const
     // Processor patch points correction
     for (const faPatch& fap : boundary())
     {
-        if (isA<processorFaPatch>(fap))
+        if (Pstream::parRun() && isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
                 refCast<const processorFaPatch>(fap);
@@ -1275,7 +1271,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
             curPoints = pointSet.toc();
         }
 
-        vectorField allPoints(curPoints.size());
+        pointField allPoints(curPoints.size());
         scalarField W(curPoints.size(), 1.0);
         for (label i=0; i<curPoints.size(); ++i)
         {
@@ -1284,16 +1280,16 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
         }
 
         // Transform points
-        const vector& origin = points[curPoint];
-        vector axis(result[curPoint]/mag(result[curPoint]));
-        vector dir(allPoints[0] - points[curPoint]);
-        dir -= axis*(axis&dir);
-        dir /= mag(dir);
-        coordinateSystem cs("cs", origin, axis, dir);
+        coordSystem::cartesian cs
+        (
+            points[curPoint],   // origin
+            result[curPoint],   // axis [e3] (normalized by constructor)
+            allPoints[0] - points[curPoint] // direction [e1]
+        );
 
-        forAll(allPoints, pI)
+        for (point& p : allPoints)
         {
-            allPoints[pI] = cs.localPosition(allPoints[pI]);
+            p = cs.localPosition(p);
         }
 
         scalarRectangularMatrix M
@@ -1351,7 +1347,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
     {
         const faPatch& fap = boundary()[patchI];
 
-        if (isA<processorFaPatch>(fap))
+        if (Pstream::parRun() && isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
                 refCast<const processorFaPatch>(boundary()[patchI]);
@@ -1419,7 +1415,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
     for (const faPatch& fap : boundary())
     {
-        if (isA<processorFaPatch>(fap))
+        if (Pstream::parRun() && isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
                 refCast<const processorFaPatch>(fap);
@@ -1567,10 +1563,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 // Transform points
                 const vector& origin = points[curPoint];
-                vector axis(result[curPoint]/mag(result[curPoint]));
+                const vector axis = normalised(result[curPoint]);
                 vector dir(allPoints[0] - points[curPoint]);
                 dir -= axis*(axis&dir);
-                dir /= mag(dir);
+                dir.normalise();
+
                 const coordinateSystem cs("cs", origin, axis, dir);
 
                 scalarField W(allPoints.size(), 1.0);
@@ -1738,10 +1735,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 // Transform points
                 const vector& origin = points[curPoint];
-                vector axis(result[curPoint]/mag(result[curPoint]));
+                const vector axis = normalised(result[curPoint]);
                 vector dir(allPoints[0] - points[curPoint]);
                 dir -= axis*(axis&dir);
-                dir /= mag(dir);
+                dir.normalise();
+
                 coordinateSystem cs("cs", origin, axis, dir);
 
                 scalarField W(allPoints.size(), 1.0);

@@ -29,6 +29,34 @@ Description
     The cuttingPlane algorithm 'cuts' the mesh.
     The plane is triangulated by default.
 
+    Example of function object partial specification:
+    \verbatim
+    surfaces
+    (
+        surface1
+        {
+            type        plane;
+            planeType   pointAndNormal;
+            pointAndNormalDict
+            {
+                ...
+            }
+        }
+    );
+    \endverbatim
+
+    Where the sub-entries comprise:
+    \table
+        Property | Description                             | Required | Default
+        type     | plane                                   | yes      |
+        planeType | plane description (pointAndNormal etc) | yes      |
+        triangulate | triangulate faces                    | no       | true
+        bounds   | limit with bounding box                 | no       |
+        zone     | limit to cell zone (name or regex)      | no       |
+        zones    | limit to cell zones (names, regexs)     | no       |
+        coordinateSystem | define plane within given coordinate system | no |
+    \endtable
+
 Note
     Does not actually cut until update() called.
 
@@ -63,13 +91,13 @@ class surfMeshSamplePlane
 
     // Private data
 
-        //- If restricted to zones, name of this zone or a regular expression
-        const keyType zoneKey_;
+        //- The zone or zones in which cutting is to occur
+        wordRes zoneNames_;
 
-        //- Optional bounding box to trim triangles against
+        //- Optional bounding box to trim against
         const boundBox bounds_;
 
-        //- Triangulated faces or keep faces as is
+        //- Triangulate faces or not
         const bool triangulate_;
 
         //- Track if the surface needs an update
@@ -77,6 +105,13 @@ class surfMeshSamplePlane
 
 
     // Private Member Functions
+
+        //- Define cell selection from zones and bounding box.
+        //  Optionally check and warn if the plane does not intersect
+        //  with the bounds of the mesh (or submesh) or if the bounding box
+        //  does not overlap with the mesh (or submesh)
+        bitSet cellSelection(const bool warn=false) const;
+
 
         //- Sample field on surface
         template<class Type>
@@ -109,7 +144,7 @@ public:
             const word& name,
             const polyMesh& mesh,
             const plane& planeDesc,
-            const keyType& zoneKey = word::null,
+            const wordRes& zones = wordRes(),
             const bool triangulate = true
         );
 

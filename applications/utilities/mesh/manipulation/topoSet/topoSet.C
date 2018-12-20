@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,8 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Operates on cellSets/faceSets/pointSets through a dictionary.
+    Operates on cellSets/faceSets/pointSets through a dictionary,
+    normally system/topoSetDict
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +44,6 @@ Description
 #include "faceZoneSet.H"
 #include "pointZoneSet.H"
 #include "IOdictionary.H"
-#include "collatedFileOperation.H"
 
 using namespace Foam;
 
@@ -87,7 +87,11 @@ void removeZone
         // Remove last element
         zones.setSize(zones.size()-1);
         zones.clearAddressing();
-        zones.write();
+        if (!zones.write())
+        {
+            WarningInFunction << "Failed writing zone " << setName << endl;
+        }
+        fileHandler().flush();
     }
 }
 
@@ -196,18 +200,21 @@ polyMesh::readUpdateState meshReadUpdate(polyMesh& mesh)
 
 int main(int argc, char *argv[])
 {
-    // Specific to topoSet/setSet: quite often we want to block upon writing
-    // a set so we can immediately re-read it. So avoid use of threading
-    // for set writing.
-    fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
+    argList::addNote
+    (
+        "Operates on cellSets/faceSets/pointSets through a dictionary,"
+        " normally system/topoSetDict"
+    );
 
-    timeSelector::addOptions(true, false);
-    #include "addDictOption.H"
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
+
+    argList::addOption("dict", "file", "Use alternative topoSetDict");
+
     #include "addRegionOption.H"
     argList::addBoolOption
     (
         "noSync",
-        "do not synchronise selection across coupled patches"
+        "Do not synchronise selection across coupled patches"
     );
 
     #include "setRootCase.H"
@@ -222,7 +229,7 @@ int main(int argc, char *argv[])
     const word dictName("topoSetDict");
     #include "setSystemMeshDictionaryIO.H"
 
-    Info<< "Reading " << dictName << "\n" << endl;
+    Info<< "Reading " << dictName << nl << endl;
 
     IOdictionary topoSetDict(dictIO);
 
@@ -238,29 +245,23 @@ int main(int argc, char *argv[])
         meshReadUpdate(mesh);
 
         // Execute all actions
-        forAll(actions, i)
+        for (const dictionary& dict : actions)
         {
-            const dictionary& dict = actions[i];
+            const word setName(dict.get<word>("name"));
+            const word setType(dict.get<word>("type"));
 
-            const word setName(dict.lookup("name"));
-            const word actionName(dict.lookup("action"));
-            const word setType(dict.lookup("type"));
-
-
-            topoSetSource::setAction action = topoSetSource::toAction
-            (
-                actionName
-            );
+            const topoSetSource::setAction action =
+                topoSetSource::actionNames.get("action", dict);
 
             autoPtr<topoSet> currentSet;
             if
             (
-                (action == topoSetSource::NEW)
-             || (action == topoSetSource::CLEAR)
+                action == topoSetSource::NEW
+             || action == topoSetSource::CLEAR
             )
             {
-                currentSet = topoSet::New(setType, mesh, setName, 10000);
-                Info<< "Created " << currentSet().type() << " "
+                currentSet = topoSet::New(setType, mesh, setName, 16384);
+                Info<< "Created " << currentSet().type() << ' '
                     << setName << endl;
             }
             else if (action == topoSetSource::REMOVE)
@@ -276,47 +277,54 @@ int main(int argc, char *argv[])
                     setName,
                     IOobject::MUST_READ
                 );
-                Info<< "Read set " << currentSet().type() << " "
+                Info<< "Read set " << currentSet().type() << ' '
                     << setName << " with size "
                     << returnReduce(currentSet().size(), sumOp<label>())
                     << endl;
             }
 
 
-
-            // Handle special actions (clear, invert) locally, rest through
-            // sources.
+            // Handle special actions (clear, invert) locally,
+            // the other actions through sources.
             switch (action)
             {
                 case topoSetSource::NEW:
                 case topoSetSource::ADD:
-                case topoSetSource::DELETE:
+                case topoSetSource::SUBTRACT:
                 {
-                    Info<< "    Applying source " << word(dict.lookup("source"))
-                        << endl;
+                    const word sourceType(dict.get<word>("source"));
+
+                    Info<< "    Applying source " << sourceType << endl;
                     autoPtr<topoSetSource> source = topoSetSource::New
                     (
-                        dict.lookup("source"),
+                        sourceType,
                         mesh,
-                        dict.subDict("sourceInfo")
+                        dict.optionalSubDict("sourceInfo")
                     );
 
                     source().applyToSet(action, currentSet());
                     // Synchronize for coupled patches.
                     if (!noSync) currentSet().sync(mesh);
-                    currentSet().write();
+                    if (!currentSet().write())
+                    {
+                        WarningInFunction
+                            << "Failed writing set "
+                            << currentSet().objectPath() << endl;
+                    }
+                    fileHandler().flush();
                 }
                 break;
 
                 case topoSetSource::SUBSET:
                 {
-                    Info<< "    Applying source " << word(dict.lookup("source"))
-                        << endl;
+                    const word sourceType(dict.get<word>("source"));
+
+                    Info<< "    Applying source " << sourceType << endl;
                     autoPtr<topoSetSource> source = topoSetSource::New
                     (
-                        dict.lookup("source"),
+                        sourceType,
                         mesh,
-                        dict.subDict("sourceInfo")
+                        dict.optionalSubDict("sourceInfo")
                     );
 
                     // Backup current set.
@@ -338,27 +346,44 @@ int main(int argc, char *argv[])
                     currentSet().subset(oldSet());
                     // Synchronize for coupled patches.
                     if (!noSync) currentSet().sync(mesh);
-                    currentSet().write();
+                    if (!currentSet().write())
+                    {
+                        WarningInFunction
+                            << "Failed writing set "
+                            << currentSet().objectPath() << endl;
+                    }
+                    fileHandler().flush();
                 }
                 break;
 
                 case topoSetSource::CLEAR:
                     Info<< "    Clearing " << currentSet().type() << endl;
                     currentSet().clear();
-                    currentSet().write();
+                    if (!currentSet().write())
+                    {
+                        WarningInFunction
+                            << "Failed writing set "
+                            << currentSet().objectPath() << endl;
+                    }
+                    fileHandler().flush();
                 break;
 
                 case topoSetSource::INVERT:
                     Info<< "    Inverting " << currentSet().type() << endl;
                     currentSet().invert(currentSet().maxSize(mesh));
-                    currentSet().write();
+                    if (!currentSet().write())
+                    {
+                        WarningInFunction
+                            << "Failed writing set "
+                            << currentSet().objectPath() << endl;
+                    }
+                    fileHandler().flush();
                 break;
 
                 case topoSetSource::REMOVE:
                     Info<< "    Removing set" << endl;
                     removeSet(mesh, setType, setName);
                 break;
-
 
                 default:
                     WarningInFunction
@@ -368,16 +393,16 @@ int main(int argc, char *argv[])
 
             if (currentSet.valid())
             {
-                Info<< "    " << currentSet().type() << " "
-                    << currentSet().name()
-                    << " now size "
+                Info<< "    "
+                    << currentSet().type() << ' '
+                    << currentSet().name() << " now size "
                     << returnReduce(currentSet().size(), sumOp<label>())
                     << endl;
             }
         }
     }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

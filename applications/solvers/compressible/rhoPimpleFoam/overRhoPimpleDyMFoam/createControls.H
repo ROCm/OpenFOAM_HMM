@@ -1,11 +1,4 @@
-#include "createTimeControls.H"
-
-bool correctPhi
+bool ddtCorr
 (
-    pimple.dict().lookupOrDefault("correctPhi", true)
-);
-
-bool checkMeshCourantNo
-(
-    pimple.dict().lookupOrDefault("checkMeshCourantNo", false)
+    pimple.dict().lookupOrDefault("ddtCorr", true)
 );

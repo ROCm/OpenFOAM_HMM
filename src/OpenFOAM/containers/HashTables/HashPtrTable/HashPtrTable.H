@@ -69,11 +69,11 @@ class HashPtrTable
 {
     // Private Member Functions
 
-        //- Read from Istream using given Istream constructor class
+        //- Read from Istream using Istream constructor class
         template<class INew>
-        void read(Istream& is, const INew& inew);
+        void readIstream(Istream& is, const INew& inew);
 
-        //- Read from dictionary using given dictionary constructor class
+        //- Read from dictionary using Istream constructor class
         template<class INew>
         void read(const dictionary& dict, const INew& inew);
 
@@ -123,17 +123,28 @@ public:
 
     // Edit
 
-        //- Remove and return the pointer specified by given iterator.
+        //- Remove entry specified by given iterator.
         //  Includes a safeguard against the end-iterator.
+        //
+        //  \return entry as an encapsulated pointer.
         autoPtr<T> remove(iterator& iter);
 
-        //- Erase an entry specified by given iterator and delete the
+        //- Remove entry specified by given key.
+        //
+        //  \return entry as an encapsulated pointer.
+        autoPtr<T> remove(const Key& key);
+
+        //- Erase entry specified by given iterator and delete the
         //- allocated pointer.
         //  Includes a safeguard against the end-iterator.
+        //
+        //  \return True if item was removed
         bool erase(iterator& iter);
 
-        //- Erase an entry specified by the given key and delete the
+        //- Erase entry specified by given key and delete the
         //- allocated pointer.
+        //
+        //  \return True if item was removed
         bool erase(const Key& key);
 
         //- Clear all entries from table and delete any allocated pointers
@@ -169,19 +180,20 @@ public:
 
     // Housekeeping
 
-        //- No insert() with raw pointers (potential memory leaks)
-        //  Use insert() with autoPtr or set()
+        //- No insert() with raw pointers (potential memory leaks).
+        //- Use insert() with autoPtr or set()
         inline bool insert(const Key&, T*) = delete;
 
         //- Insert a new entry, not overwriting existing entries.
-        //  \return True if the entry inserted, which means that it did
-        //  not previously exist in the table.
+        //
+        //  \return True if the entry inserted (not previously in table)
         inline bool insert(const Key& key, autoPtr<T>& aptr);
 
         //- Insert a new entry, not overwriting existing entries.
+        //
+        //  \return True if the entry inserted (not previously in table)
         inline bool insert(const Key& key, autoPtr<T>&& aptr);
 
-        //- Use set(), not insert() to avoid potential memory leaks
         //- Assign a new entry, overwriting existing entries.
         inline bool set(const Key& key, T* ptr);
 

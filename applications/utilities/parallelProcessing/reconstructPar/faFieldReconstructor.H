@@ -158,7 +158,7 @@ public:
 
         //- Reconstruct area field
         template<class Type>
-        tmp<GeometricField<Type, faPatchField, areaMesh> >
+        tmp<GeometricField<Type, faPatchField, areaMesh>>
         reconstructFaAreaField
         (
             const IOobject& fieldIoObject
@@ -166,7 +166,7 @@ public:
 
         //- Reconstruct edge field
         template<class Type>
-        tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        tmp<GeometricField<Type, faePatchField, edgeMesh>>
         reconstructFaEdgeField
         (
             const IOobject& fieldIoObject

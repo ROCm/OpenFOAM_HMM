@@ -32,7 +32,7 @@ bool Foam::fv::VoFSolidificationMeltingSource::read(const dictionary& dict)
     if (cellSetOption::read(dict))
     {
         alphaSolidT_ = Function1<scalar>::New("alphaSolidT", coeffs_);
-        coeffs_.lookup("L") >> L_;
+        coeffs_.readEntry("L", L_);
         coeffs_.readIfPresent("relax", relax_);
         coeffs_.readIfPresent("Cu", Cu_);
         coeffs_.readIfPresent("q", q_);

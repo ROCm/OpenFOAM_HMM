@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,14 +47,12 @@ bool Foam::setRefCell
         {
             if (Pstream::master())
             {
-                refCelli = readLabel(dict.lookup(refCellName));
+                dict.readEntry(refCellName, refCelli);
 
                 if (refCelli < 0 || refCelli >= field.mesh().nCells())
                 {
-                    FatalIOErrorInFunction
-                    (
-                        dict
-                    )   << "Illegal master cellID " << refCelli
+                    FatalIOErrorInFunction(dict)
+                        << "Illegal master cellID " << refCelli
                         << ". Should be 0.." << field.mesh().nCells()
                         << exit(FatalIOError);
                 }
@@ -66,7 +64,7 @@ bool Foam::setRefCell
         }
         else if (dict.found(refPointName))
         {
-            point refPointi(dict.lookup(refPointName));
+            point refPointi(dict.get<point>(refPointName));
 
             // Try fast approximate search avoiding octree construction
             refCelli = field.mesh().findCell(refPointi, polyMesh::FACE_PLANES);
@@ -86,10 +84,8 @@ bool Foam::setRefCell
 
             if (sumHasRef != 1)
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Unable to set reference cell for field " << field.name()
+                FatalIOErrorInFunction(dict)
+                    << "Unable to set reference cell for field " << field.name()
                     << nl << "    Reference point " << refPointName
                     << " " << refPointi
                     << " found on " << sumHasRef << " domains (should be one)"
@@ -98,23 +94,23 @@ bool Foam::setRefCell
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                dict
-            )   << "Unable to set reference cell for field " << field.name()
+            FatalIOErrorInFunction(dict)
+                << "Unable to set reference cell for field " << field.name()
                 << nl
                 << "    Please supply either " << refCellName
                 << " or " << refPointName << nl << exit(FatalIOError);
         }
 
-        refValue = readScalar(dict.lookup(refValueName));
+        dict.readEntry(refValueName, refValue);
 
         return true;
     }
     else
     {
-        return false;
+        refCelli = -1;
     }
+
+    return false;
 }
 
 
@@ -143,25 +139,14 @@ Foam::scalar Foam::getRefCellValue
         FatalErrorInFunction
             << "Illegal reference cellID " << refCelli
             << ". Mesh has " << field.mesh().nCells() << ". cells."
-            << exit(FatalIOError);
+            << exit(FatalError);
     }
-
-    // Catch duplicates
-    label hasRef =
-        (refCelli >= 0 && refCelli < field.mesh().nCells() ? 1 : 0);
-
-    if (1 != returnReduce<label>(hasRef, sumOp<label>()))
-    {
-        FatalErrorInFunction
-            << "Invalid reference cellID " << refCelli
-            << ". Mesh has " << field.mesh().nCells() << ". cells."
-            << exit(FatalIOError);
-    }
-    scalar refCellValue = (hasRef ? field[refCelli] : 0.0);
-    #else
-    scalar refCellValue = (refCelli >= 0 ? field[refCelli] : 0.0);
     #endif
+    scalar refCellValue = (refCelli >= 0 ? field[refCelli] : 0.0);
 
+    // Currently distributing the value to all processors. This is generally
+    // not needed since only the processor holding the reference cell needs
+    // it. Tdb.
     return returnReduce(refCellValue, sumOp<scalar>());
 }
 

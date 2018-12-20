@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,20 @@ Class
     Foam::boxToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside box(es).
+    A topoSetCellSource to select cells based on cell centres inside box(es).
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        boxes       | Multiple bounding boxes               | partly   |
+        box         | A single bounding box                 | partly   |
+        min         | Minimum point for a single box        | partly   |
+        max         | Maximum point for a single box        | partly   |
+    \endtable
+
+Note
+    Must specify "boxes", "box" or a "min/max" pair
+    (compatibility with searchable box) - highest to lowest precedence.
 
 SourceFiles
     boxToCell.C
@@ -35,7 +48,7 @@ SourceFiles
 #ifndef boxToCell_H
 #define boxToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,14 +62,14 @@ namespace Foam
 
 class boxToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
     // Private data
 
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Bounding box.
+        //- Bounding boxes
         treeBoundBoxList bbs_;
 
 
@@ -72,43 +85,29 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        boxToCell
-        (
-            const polyMesh& mesh,
-            const treeBoundBoxList& bbs
-        );
+        //- Construct from components, copying bounding boxes
+        boxToCell(const polyMesh& mesh, const treeBoundBoxList& bbs);
+
+        //- Construct from components, moving bounding boxes
+        boxToCell(const polyMesh& mesh, treeBoundBoxList&& bbs);
 
         //- Construct from dictionary
-        boxToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        boxToCell(const polyMesh& mesh, const dictionary& dict);
 
-        //- Construct from Istream
-        boxToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        //- Construct from stream - a single box.
+        boxToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~boxToCell();
+    virtual ~boxToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 };
 

@@ -79,7 +79,7 @@ public:
         }
 
 
-   // Member functions
+   // Member Functions
 
         bool writeData(Ostream&) const
         {

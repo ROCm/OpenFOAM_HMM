@@ -26,7 +26,7 @@ License
 #include "lumpedPointState.H"
 #include "OFstream.H"
 #include "axesRotation.H"
-
+#include "coordinateSystem.H"
 #include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -62,27 +62,28 @@ void Foam::lumpedPointState::writeVTP
     );
 
     format().xmlHeader()
-        .beginVTKFile(vtk::fileTag::POLY_DATA, "0.1");
+        .beginVTKFile<vtk::fileTag::POLY_DATA>();
 
     //
     // The 'spine' of lumped mass points
     //
     {
         format()
-            .openTag(vtk::fileTag::PIECE)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, points_.size())
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_VERTS,  points_.size())
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_LINES,  1)
-            .closeTag();
+            .tag
+            (
+                vtk::fileTag::PIECE,
+                vtk::fileAttr::NUMBER_OF_POINTS, points_.size(),
+                vtk::fileAttr::NUMBER_OF_VERTS,  points_.size(),
+                vtk::fileAttr::NUMBER_OF_LINES,  1
+            );
 
         // 'points'
         {
-            const uint64_t payLoad = (points_.size()*3* sizeof(float));
+            const uint64_t payLoad = vtk::sizeofData<float, 3>(points_.size());
 
             format()
                 .tag(vtk::fileTag::POINTS)
-                .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
-                .closeTag();
+                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
 
             format().writeSize(payLoad);
             vtk::writeList(format(), points_);
@@ -100,12 +101,11 @@ void Foam::lumpedPointState::writeVTP
         // 'connectivity'
         //
         {
-            const uint64_t payLoad = (points_.size()*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(points_.size());
 
-            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad);
+
             forAll(points_, i)
             {
                 format().write(i);
@@ -120,12 +120,11 @@ void Foam::lumpedPointState::writeVTP
         // = linear mapping onto points (with 1 offset)
         //
         {
-            const uint64_t payLoad = (points_.size()*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(points_.size());
 
-            format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
+
             forAll(points_, i)
             {
                 format().write(i+1);
@@ -146,12 +145,11 @@ void Foam::lumpedPointState::writeVTP
         // 'connectivity'
         //
         {
-            const uint64_t payLoad = (points_.size()*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(points_.size());
 
-            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad);
+
             forAll(points_, i)
             {
                 format().write(i);
@@ -166,12 +164,11 @@ void Foam::lumpedPointState::writeVTP
         // = single line
         //
         {
-            const uint64_t payLoad = (1*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(1);
 
-            format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
+
             format().write(points_.size());
             format().flush();
 
@@ -179,18 +176,21 @@ void Foam::lumpedPointState::writeVTP
         }
 
         format().endTag(vtk::fileTag::LINES);
-        format().endTag(vtk::fileTag::PIECE);
+        format().endPiece();
     }
 
     // Standard corners in local axis
-    const axesRotation cornerTransform(axis);
-
     FixedList<point, 4> corners;
-    forAll(standardCorners, corni)
-    {
-        corners[corni] = cornerTransform.transform(standardCorners[corni]);
-    }
 
+    {
+        coordinateRotations::axes orient(axis);
+        coordinateSystem cornerTransform(orient);
+
+        forAll(standardCorners, corni)
+        {
+            corners[corni] = cornerTransform.transform(standardCorners[corni]);
+        }
+    }
 
     //
     // Planes to visualize location/rotation
@@ -200,19 +200,20 @@ void Foam::lumpedPointState::writeVTP
         const label nPolys  = points_.size();
 
         format()
-            .openTag(vtk::fileTag::PIECE)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POINTS, nPoints)
-            .xmlAttr(vtk::fileAttr::NUMBER_OF_POLYS,  nPolys)
-            .closeTag();
+            .tag
+            (
+                vtk::fileTag::PIECE,
+                vtk::fileAttr::NUMBER_OF_POINTS, nPoints,
+                vtk::fileAttr::NUMBER_OF_POLYS,  nPolys
+            );
 
         // 'points'
         {
-            const uint64_t payLoad = (nPoints*3*sizeof(float));
+            const uint64_t payLoad = vtk::sizeofData<float, 3>(nPoints);
 
             format()
                 .tag(vtk::fileTag::POINTS)
-                .openDataArray<float, 3>(vtk::dataArrayAttr::POINTS)
-                .closeTag();
+                .beginDataArray<float, 3>(vtk::dataArrayAttr::POINTS);
 
             format().writeSize(payLoad);
 
@@ -250,12 +251,11 @@ void Foam::lumpedPointState::writeVTP
         // 'connectivity' - 4 points (ie, quad)
         //
         {
-            const uint64_t payLoad = (4*nPolys*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(4*nPolys);
 
-            format().openDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad);
+
             for (label i=0; i < 4*nPolys; ++i)
             {
                 format().write(i);
@@ -270,12 +270,11 @@ void Foam::lumpedPointState::writeVTP
         // = single quad
         //
         {
-            const uint64_t payLoad = (nPolys*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(nPolys);
 
-            format().openDataArray<label>(vtk::dataArrayAttr::OFFSETS)
-                .closeTag();
-
+            format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
+
             for (label i=0; i < nPolys; ++i)
             {
                 const label off = 4 * (i+1);
@@ -289,16 +288,15 @@ void Foam::lumpedPointState::writeVTP
         format().endTag(vtk::fileTag::POLYS);
 
 #if 0
-        format().tag(vtk::fileTag::CELL_DATA);
+        format().beginCellData();
 
         // zone Id
         {
-            const uint64_t payLoad = (points_.size()*sizeof(label));
+            const uint64_t payLoad = vtk::sizeofData<label>(nPolys);
 
-            format().openDataArray<label>("zoneId")
-                .closeTag();
-
+            format().beginDataArray<label>("zoneId");
             format().writeSize(payLoad);
+
             for (label i=0; i < nPolys; ++i)
             {
                 format().write(i);
@@ -308,18 +306,18 @@ void Foam::lumpedPointState::writeVTP
             format().endDataArray();
         }
 
-        format().endTag(vtk::fileTag::CELL_DATA);
+        format().endCellData();
 #endif
 
-        format().endTag(vtk::fileTag::PIECE);
+        format().endPiece();
     }
 
     // Finally
     // could add a 'ghost' level above to visualize extrapolated values
     // draw as two triangles to distingush from real levels ...
 
-    format().endTag(vtk::fileTag::POLY_DATA);
-    format().endVTKFile();
+    format().endTag(vtk::fileTag::POLY_DATA)
+        .endVTKFile();
 }
 
 

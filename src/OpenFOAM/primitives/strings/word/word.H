@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 class word;
 Istream& operator>>(Istream& is, word& w);
 Ostream& operator<<(Ostream& os, const word& w);
@@ -82,39 +82,34 @@ public:
     // Constructors
 
         //- Construct null
-        inline word();
+        word() = default;
 
         //- Copy construct
-        inline word(const word& w);
-
-        //- Construct as copy of character array
-        inline word(const char* s, const bool doStripInvalid=true);
-
-        //- Construct as copy with a maximum number of characters
-        inline word
-        (
-            const char* s,
-            const size_type len,
-            const bool doStripInvalid
-        );
-
-        //- Construct as copy of Foam::string
-        inline word(const string& s, const bool doStripInvalid=true);
-
-        //- Construct as copy of std::string
-        inline word(const std::string& s, const bool doStripInvalid=true);
+        word(const word&) = default;
 
         //- Move construct
-        inline word(word&& w);
+        word(word&& w) = default;
+
+        //- Copy construct from Foam::string
+        inline word(const string& s, bool doStrip=true);
 
         //- Move construct from Foam::string
-        inline word(string&& s, const bool doStripInvalid=true);
+        inline word(string&& s, bool doStrip=true);
+
+        //- Copy construct from std::string
+        inline word(const std::string& s, bool doStrip=true);
 
         //- Move construct from std::string
-        inline word(std::string&& s, const bool doStripInvalid=true);
+        inline word(std::string&& s, bool doStrip=true);
+
+        //- Copy from character array
+        inline word(const char* s, bool doStrip=true);
+
+        //- Copy from buffer for a maximum number of characters
+        inline word(const char* s, size_type len, bool doStrip);
 
         //- Construct from Istream
-        word(Istream& is);
+        explicit word(Istream& is);
 
 
     // Member Functions
@@ -190,25 +185,25 @@ public:
     // Assignment
 
         //- Copy assignment, no character validation required
-        inline void operator=(const word& w);
+        word& operator=(const word&) = default;
+
+        //- Move assignment, no character validation required
+        word& operator=(word&& w) = default;
 
         //- Copy assignment from Foam::string, stripping invalid characters
-        inline void operator=(const string& s);
-
-        //- Copy assignment from std::string, stripping invalid characters
-        inline void operator=(const std::string& s);
-
-        //- Copy, stripping invalid characters
-        inline void operator=(const char* s);
-
-        //- Move assignment
-        inline void operator=(word&& w);
+        inline word& operator=(const string& s);
 
         //- Move assignment from Foam::string, stripping invalid characters
-        inline void operator=(string&& s);
+        inline word& operator=(string&& s);
+
+        //- Copy assignment from std::string, stripping invalid characters
+        inline word& operator=(const std::string& s);
 
         //- Move assignment from std::string, stripping invalid characters
-        inline void operator=(std::string&& s);
+        inline word& operator=(std::string&& s);
+
+        //- Copy, stripping invalid characters
+        inline word& operator=(const char* s);
 
 
     // IOstream operators
@@ -218,11 +213,35 @@ public:
 };
 
 
-// Global Operators
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 //- Join words as camelCase, capitalizing the first letter of b.
 //  No effect if either argument is empty.
 word operator&(const word& a, const word& b);
+
+
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+//- Extract name (as a word) from an object, typically using its name() method.
+template<class T>
+struct nameOp
+{
+    inline word operator()(const T& obj) const
+    {
+        return obj.name();
+    }
+};
+
+
+//- Extract type (as a word) from an object, typically using its type() method.
+template<class T>
+struct typeOp
+{
+    inline word operator()(const T& obj) const
+    {
+        return obj.type();
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

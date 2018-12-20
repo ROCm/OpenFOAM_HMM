@@ -25,9 +25,9 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::dictionary& Foam::solutionControl::dict() const
+inline const Foam::dictionary Foam::solutionControl::dict() const
 {
-    return mesh_.solutionDict().subDict(algorithmName_);
+    return mesh_.solutionDict().subOrEmptyDict(algorithmName_);
 }
 
 

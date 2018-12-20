@@ -37,7 +37,7 @@ Foam::autoPtr<Foam::viscosityModel> Foam::viscosityModel::New
     const surfaceScalarField& phi
 )
 {
-    const word modelType(viscosityProperties.lookup("transportModel"));
+    const word modelType(viscosityProperties.get<word>("transportModel"));
 
     Info<< "Selecting incompressible transport model " << modelType << endl;
 

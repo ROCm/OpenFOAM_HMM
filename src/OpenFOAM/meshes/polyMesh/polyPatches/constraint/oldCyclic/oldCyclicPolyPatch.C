@@ -92,9 +92,9 @@ Foam::label Foam::oldCyclicPolyPatch::findMaxArea
 
     forAll(faces, facei)
     {
-        scalar areaSqr = magSqr(faces[facei].normal(points));
+        scalar areaSqr = magSqr(faces[facei].areaNormal(points));
 
-        if (areaSqr > maxAreaSqr)
+        if (maxAreaSqr < areaSqr)
         {
             maxAreaSqr = areaSqr;
             maxI = facei;
@@ -308,10 +308,17 @@ void Foam::oldCyclicPolyPatch::getCentresAndAnchors
             label face0 = getConsistentRotationFace(half0Ctrs);
             label face1 = getConsistentRotationFace(half1Ctrs);
 
-            vector n0 = ((half0Ctrs[face0] - rotationCentre_) ^ rotationAxis_);
-            vector n1 = ((half1Ctrs[face1] - rotationCentre_) ^ -rotationAxis_);
-            n0 /= mag(n0) + VSMALL;
-            n1 /= mag(n1) + VSMALL;
+            const vector n0 =
+                normalised
+                (
+                    (half0Ctrs[face0] - rotationCentre_) ^ rotationAxis_
+                );
+
+            const vector n1 =
+                normalised
+                (
+                    (half1Ctrs[face1] - rotationCentre_) ^ -rotationAxis_
+                );
 
             if (debug)
             {
@@ -359,12 +366,10 @@ void Foam::oldCyclicPolyPatch::getCentresAndAnchors
             // Determine the face with max area on both halves. These
             // two faces are used to determine the transformation tensors
             label max0I = findMaxArea(pp.points(), half0Faces);
-            vector n0 = half0Faces[max0I].normal(pp.points());
-            n0 /= mag(n0) + VSMALL;
+            const vector n0 = half0Faces[max0I].unitNormal(pp.points());
 
             label max1I = findMaxArea(pp.points(), half1Faces);
-            vector n1 = half1Faces[max1I].normal(pp.points());
-            n1 /= mag(n1) + VSMALL;
+            const vector n1 = half1Faces[max1I].unitNormal(pp.points());
 
             if (mag(n0 & n1) < 1-matchTolerance())
             {
@@ -594,10 +599,8 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
 {
     if (dict.found("neighbourPatch"))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Found \"neighbourPatch\" entry when reading cyclic patch "
+        FatalIOErrorInFunction(dict)
+            << "Found \"neighbourPatch\" entry when reading cyclic patch "
             << name << endl
             << "Is this mesh already with split cyclics?" << endl
             << "If so run a newer version that supports it"
@@ -611,13 +614,13 @@ Foam::oldCyclicPolyPatch::oldCyclicPolyPatch
     {
         case ROTATIONAL:
         {
-            dict.lookup("rotationAxis") >> rotationAxis_;
-            dict.lookup("rotationCentre") >> rotationCentre_;
+            dict.readEntry("rotationAxis", rotationAxis_);
+            dict.readEntry("rotationCentre", rotationCentre_);
             break;
         }
         case TRANSLATIONAL:
         {
-            dict.lookup("separationVector") >> separationVector_;
+            dict.readEntry("separationVector", separationVector_);
             break;
         }
         default:

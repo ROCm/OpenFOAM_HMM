@@ -367,8 +367,7 @@ Foam::fileOperations::masterUncollatedFileOperation::localObjectPath
             // Uncollated type, e.g. processor1
             const word procName
             (
-                "processor"
-               +Foam::name(Pstream::myProcNo(Pstream::worldComm))
+                "processor" + Foam::name(Pstream::myProcNo(Pstream::worldComm))
             );
             return
                 processorsPath
@@ -751,7 +750,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
 Foam::fileOperations::masterUncollatedFileOperation::
 masterUncollatedFileOperation
 (
-    const bool verbose
+    bool verbose
 )
 :
     fileOperation
@@ -764,9 +763,12 @@ masterUncollatedFileOperation
     ),
     myComm_(comm_)
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
-        Info<< "I/O    : " << typeName
+        Info
+            << "I/O    : " << typeName
             << " (maxMasterFileBufferSize " << maxMasterFileBufferSize << ')'
             << endl;
     }
@@ -801,15 +803,18 @@ Foam::fileOperations::masterUncollatedFileOperation::
 masterUncollatedFileOperation
 (
     const label comm,
-    const bool verbose
+    bool verbose
 )
 :
     fileOperation(comm),
     myComm_(-1)
 {
+    verbose = (verbose && Foam::infoDetailLevel > 0);
+
     if (verbose)
     {
-        Info<< "I/O    : " << typeName
+        Info
+            << "I/O    : " << typeName
             << " (maxMasterFileBufferSize " << maxMasterFileBufferSize << ')'
             << endl;
     }
@@ -2552,6 +2557,13 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
             valid
         )
     );
+}
+
+
+void Foam::fileOperations::masterUncollatedFileOperation::flush() const
+{
+    fileOperation::flush();
+    times_.clear();
 }
 
 

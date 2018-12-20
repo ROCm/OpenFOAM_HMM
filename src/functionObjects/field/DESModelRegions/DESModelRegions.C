@@ -75,26 +75,21 @@ Foam::functionObjects::DESModelRegions::DESModelRegions
 {
     read(dict);
 
-    tmp<volScalarField> tDESModelRegions
+    auto tmodelRegions = tmp<volScalarField>::New
     (
+        IOobject
         (
-            new volScalarField
-            (
-                IOobject
-                (
-                    resultName_,
-                    time_.timeName(),
-                    mesh_,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh_,
-                dimensionedScalar(dimless, Zero)
-            )
-        )
+            resultName_,
+            time_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(dimless, Zero)
     );
 
-    store(resultName_, tDESModelRegions);
+    store(resultName_, tmodelRegions);
 
     writeFileHeader(file());
 }
@@ -124,10 +119,7 @@ bool Foam::functionObjects::DESModelRegions::execute()
     Log << type() << " " << name() <<  " execute:" << nl;
 
     volScalarField& DESModelRegions =
-        const_cast<volScalarField&>
-        (
-            lookupObject<volScalarField>(resultName_)
-        );
+        lookupObjectRef<volScalarField>(resultName_);
 
 
     if (foundObject<DESModelBase>(turbulenceModel::propertiesName))

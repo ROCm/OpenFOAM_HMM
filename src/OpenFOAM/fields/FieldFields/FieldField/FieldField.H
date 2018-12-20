@@ -25,7 +25,7 @@ Class
     Foam::FieldField
 
 Description
-    Generic field type.
+    A field of fields is a PtrList of fields with reference counting.
 
 SourceFiles
     FieldField.C
@@ -91,29 +91,33 @@ public:
 
         //- Construct given size
         //  Used for temporary fields which are initialised after construction
-        explicit FieldField(const label);
+        explicit FieldField(const label size);
 
-        //- Construct using the Field sizes from the given FieldField
-        //  and the given Field type.
-        //  Used for temporary fields which are initialised after construction
-        FieldField(const word&, const FieldField<Field, Type>&);
+        //- Clone construct with new type
+        FieldField(const word& type, const FieldField<Field, Type>& ff);
 
-        //- Construct as copy
-        FieldField(const FieldField<Field, Type>&);
+        //- Copy construct, cloning each element
+        FieldField(const FieldField<Field, Type>& ff);
+
+        //- Move construct
+        FieldField(FieldField<Field, Type>&& ff);
 
         //- Construct as copy or re-use as specified.
-        FieldField(FieldField<Field, Type>&, bool reuse);
+        FieldField(FieldField<Field, Type>& ff, bool reuse);
 
-        //- Construct as copy of a PtrList<Field, Type>
-        FieldField(const PtrList<Field<Type>>&);
+        //- Copy construct from PtrList
+        FieldField(const PtrList<Field<Type>>& list);
 
-        //- Construct as copy of tmp<FieldField>
+        //- Move construct from PtrList
+        FieldField(PtrList<Field<Type>>&& list);
+
+        //- Move/copy construct from tmp<FieldField>
         #ifndef NoConstructFromTmp
-        FieldField(const tmp<FieldField<Field, Type>>&);
+        FieldField(const tmp<FieldField<Field, Type>>& tf);
         #endif
 
         //- Construct from Istream
-        FieldField(Istream&);
+        FieldField(Istream& is);
 
         //- Clone
         tmp<FieldField<Field, Type>> clone() const;
@@ -147,8 +151,16 @@ public:
 
     // Member operators
 
+        //- Copy assignment
         void operator=(const FieldField<Field, Type>&);
+
+        //- Move assignment
+        void operator=(FieldField<Field, Type>&&);
+
+        //- Move or clone assignment
         void operator=(const tmp<FieldField<Field, Type>>&);
+
+        //- Assign uniform value
         void operator=(const Type&);
 
         void operator+=(const FieldField<Field, Type>&);

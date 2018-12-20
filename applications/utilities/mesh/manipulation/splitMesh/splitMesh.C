@@ -113,17 +113,24 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Splits mesh by making internal faces external at defined faceSet"
+    );
+
     argList::noParallel();
+    argList::noFunctionObjects();  // Never use function objects
+
     #include "addOverwriteOption.H"
 
-    argList::addArgument("faceSet");
-    argList::addArgument("masterPatch");
-    argList::addArgument("slavePatch");
+    argList::addArgument("faceSet", "The faces used for splitting");
+    argList::addArgument("master", "The master patch name");
+    argList::addArgument("slave", "The slave patch name");
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createPolyMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     const word setName = args[1];
@@ -267,7 +274,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTime++;
+        ++runTime;
     }
 
     splitter.attach();

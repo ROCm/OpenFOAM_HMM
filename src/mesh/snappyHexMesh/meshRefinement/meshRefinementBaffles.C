@@ -1649,7 +1649,7 @@ void Foam::meshRefinement::findCellZoneInsideWalk
         (
             mesh_,
             cellRegion,
-            mergeDistance_*vector(1,1,1),
+            mergeDistance_ * vector::one,
             insidePoint
         );
 
@@ -1916,7 +1916,7 @@ void Foam::meshRefinement::findCellZoneTopo
         (
             mesh_,
             cellRegion,
-            mergeDistance_*vector(1,1,1),
+            mergeDistance_ * vector::one,
             keepPoint
         );
 
@@ -2034,11 +2034,19 @@ void Foam::meshRefinement::findCellZoneTopo
 
     if (debug)
     {
+        Pout<< "meshRefinement::findCellZoneTopo :"
+            << " nRegions:" << regionToCellZone.size()
+            << " of which visited (-1 = background, >= 0 : cellZone) :"
+            << endl;
+
         forAll(regionToCellZone, regionI)
         {
-            Pout<< "Region " << regionI
-                << " becomes cellZone:" << regionToCellZone[regionI]
-                << endl;
+            if (regionToCellZone[regionI] != -2)
+            {
+                Pout<< "Region " << regionI
+                    << " becomes cellZone:" << regionToCellZone[regionI]
+                    << endl;
+            }
         }
     }
 
@@ -2405,8 +2413,8 @@ void Foam::meshRefinement::zonify
     const PtrList<surfaceZonesInfo>& surfZones = surfaces_.surfZones();
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
 
@@ -2800,7 +2808,7 @@ void Foam::meshRefinement::handleSnapProblems
 
     if (debug)
     {
-        runTime++;
+        ++runTime;
     }
 
     // Create baffles with same owner and neighbour for now.
@@ -3260,7 +3268,7 @@ void Foam::meshRefinement::consistentOrientation
     {
         labelList neiStatus
         (
-            mesh_.nFaces()-mesh_.nInternalFaces(),
+            mesh_.nBoundaryFaces(),
             orientedSurface::UNVISITED
         );
 
@@ -3553,7 +3561,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
-    const pointField& locationsOutsideMesh
+    const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter
 )
 {
     // Introduce baffles
@@ -3567,8 +3576,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
         << " faces that are intersected by the surface." << nl << endl;
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     labelList ownPatch, neiPatch;
@@ -3638,8 +3647,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
         // so re-do the surface intersections
         {
             // Swap neighbouring cell centres and cell level
-            neiLevel.setSize(mesh_.nFaces()-mesh_.nInternalFaces());
-            neiCc.setSize(mesh_.nFaces()-mesh_.nInternalFaces());
+            neiLevel.setSize(mesh_.nBoundaryFaces());
+            neiCc.setSize(mesh_.nBoundaryFaces());
             calcNeighbourData(neiLevel, neiCc);
 
             labelList ownPatch, neiPatch;
@@ -3679,7 +3688,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug)
     {
-        runTime++;
+        ++runTime;
     }
 
     splitMeshRegions
@@ -3687,7 +3696,8 @@ void Foam::meshRefinement::baffleAndSplitMesh
         globalToMasterPatch,
         globalToSlavePatch,
         locationsInMesh,
-        locationsOutsideMesh
+        locationsOutsideMesh,
+        leakPathFormatter
     );
 
     if (debug)
@@ -3702,7 +3712,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug&MESH)
     {
-        runTime++;
+        ++runTime;
         Pout<< "Writing subsetted mesh to time " << timeName()
             << endl;
         write
@@ -3729,7 +3739,8 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
     const labelList& globalToMasterPatch,
     const labelList& globalToSlavePatch,
     const pointField& locationsInMesh,
-    const pointField& locationsOutsideMesh
+    const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter
 )
 {
     // Merge baffles
@@ -3787,7 +3798,7 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
 
         if (debug)
         {
-            runTime++;
+            ++runTime;
         }
 
         splitMeshRegions
@@ -3795,7 +3806,8 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
             globalToMasterPatch,
             globalToSlavePatch,
             locationsInMesh,
-            locationsOutsideMesh
+            locationsOutsideMesh,
+            leakPathFormatter
         );
 
 
@@ -3819,15 +3831,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
-    const pointField& locationsOutsideMesh
+    const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter
 )
 {
     // Determine patches to put intersections into
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     // Find intersections with all unnamed(!) surfaces
@@ -3861,17 +3874,18 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 
 
     regionSplit cellRegion(mesh_, blockedFace);
-    blockedFace.clear();
 
     // Set unreachable cells to -1
     findRegions
     (
         mesh_,
-        mergeDistance_*vector(1,1,1),   // perturbVec
+        mergeDistance_ * vector::one,   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
+        leakPathFormatter,
         cellRegion.nRegions(),
-        cellRegion
+        cellRegion,
+        blockedFace
     );
 
     return splitMesh
@@ -4125,8 +4139,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::removeLimitShells
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     // Find intersections with all unnamed(!) surfaces
@@ -4451,8 +4465,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
 
     // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
 

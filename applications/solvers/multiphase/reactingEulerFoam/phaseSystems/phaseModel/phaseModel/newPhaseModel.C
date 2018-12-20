@@ -35,7 +35,7 @@ Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::New
     const label index
 )
 {
-    const word modelType(fluid.subDict(phaseName).lookup("type"));
+    const word modelType(fluid.subDict(phaseName).get<word>("type"));
 
     Info<< "Selecting phaseModel for "
         << phaseName << ": " << modelType << endl;

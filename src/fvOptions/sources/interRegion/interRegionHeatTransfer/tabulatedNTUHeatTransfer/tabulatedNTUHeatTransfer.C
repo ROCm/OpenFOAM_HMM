@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,10 +48,10 @@ const Foam::Enum
     Foam::fv::tabulatedNTUHeatTransfer::geometryModeType
 >
 Foam::fv::tabulatedNTUHeatTransfer::geometryModelNames_
-{
+({
     { geometryModeType::gmCalculated, "calculated" },
     { geometryModeType::gmUser, "user" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -89,10 +89,10 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
 {
     if (Ain_ < 0)
     {
-        geometryMode_ = geometryModelNames_.lookup("geometryMode", coeffs_);
+        geometryMode_ = geometryModelNames_.get("geometryMode", coeffs_);
 
-        Info<< "Region " << mesh_.name() << " " << type() << " " << name_ << " "
-            << geometryModelNames_[geometryMode_] << " geometry:" << nl;
+        Info<< "Region " << mesh_.name() << " " << type() << " " << name_
+            << " " << geometryModelNames_[geometryMode_] << " geometry:" << nl;
 
         switch (geometryMode_)
         {
@@ -101,8 +101,8 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
                 const fvMesh& nbrMesh =
                     mesh_.time().lookupObject<fvMesh>(nbrRegionName());
 
-                word inletPatchName(coeffs_.lookup("inletPatch"));
-                word inletPatchNbrName(coeffs_.lookup("inletPatchNbr"));
+                word inletPatchName(coeffs_.get<word>("inletPatch"));
+                word inletPatchNbrName(coeffs_.get<word>("inletPatchNbr"));
 
                 Info<< "    Inlet patch           : " << inletPatchName << nl
                     << "    Inlet patch neighbour : " << inletPatchNbrName
@@ -112,9 +112,9 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
                 label patchINbr =
                     nbrMesh.boundary().findPatchID(inletPatchNbrName);
 
-                scalar alpha(readScalar(coeffs_.lookup("inletBlockageRatio")));
+                scalar alpha(coeffs_.get<scalar>("inletBlockageRatio"));
 
-                if ((alpha < 0) || (alpha > 1))
+                if (alpha < 0 || alpha > 1)
                 {
                     FatalErrorInFunction
                         << "Inlet patch blockage ratio must be between 0 and 1"
@@ -122,12 +122,9 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
                         << abort(FatalError);
                 }
 
-                scalar alphaNbr
-                (
-                    readScalar(coeffs_.lookup("inletBlockageRatioNbr"))
-                );
+                scalar alphaNbr(coeffs_.get<scalar>("inletBlockageRatioNbr"));
 
-                if ((alphaNbr < 0) || (alphaNbr > 1))
+                if (alphaNbr < 0 || alphaNbr > 1)
                 {
                     FatalErrorInFunction
                         << "Inlet patch neighbour blockage ratio must be "
@@ -147,9 +144,9 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
                     (scalar(1) - alphaNbr)
                    *gSum(nbrMesh.magSf().boundaryField()[patchINbr]);
 
-                scalar beta(readScalar(coeffs_.lookup("coreBlockageRatio")));
+                scalar beta(coeffs_.get<scalar>("coreBlockageRatio"));
 
-                if ((beta < 0) || (beta > 1))
+                if (beta < 0 || beta > 1)
                 {
                     FatalErrorInFunction
                         << "Core volume blockage ratio must be between 0 and 1"
@@ -165,8 +162,8 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
             }
             case gmUser:
             {
-                coeffs_.lookup("Ain") >> Ain_;
-                coeffs_.lookup("AinNbr") >> AinNbr_;
+                coeffs_.readEntry("Ain", Ain_);
+                coeffs_.readEntry("AinNbr", AinNbr_);
 
                 if (!coeffs_.readIfPresent("Vcore", Vcore_))
                 {
@@ -281,10 +278,8 @@ bool Foam::fv::tabulatedNTUHeatTransfer::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

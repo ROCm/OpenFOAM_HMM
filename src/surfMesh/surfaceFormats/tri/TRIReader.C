@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,25 +30,6 @@ License
 #include "StringStream.H"
 #include "mergePoints.H"
 #include "Map.H"
-
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-static Foam::string getLineNoComment
-(
-    Foam::ISstream& is,
-    const char comment='#'
-)
-{
-    Foam::string line;
-    do
-    {
-        is.getLine(line);
-    }
-    while ((line.empty() || line[0] == comment) && is.good());
-
-    return line;
-}
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -80,7 +61,7 @@ bool Foam::fileFormats::TRIReader::readFile(const fileName& filename)
 
     while (is.good())
     {
-        string line = getLineNoComment(is);
+        string line = this->getLineNoComment(is);
 
         if (line.empty())
         {

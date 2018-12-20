@@ -105,7 +105,11 @@ public:
             const labelListList& globalCellCells,
             const pointField& cc,
             const scalarField& cWeights
-        ) const;
+        ) const
+        {
+            NotImplemented;
+            return labelList();
+        }
 };
 
 

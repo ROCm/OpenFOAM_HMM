@@ -104,7 +104,7 @@ Foam::perfectInterface::perfectInterface
     const polyTopoChanger& mme
 )
 :
-    polyMeshModifier(name, index, mme, readBool(dict.lookup("active"))),
+    polyMeshModifier(name, index, mme, dict.get<bool>("active")),
     faceZoneID_
     (
         dict.lookup("faceZoneName"),

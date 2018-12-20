@@ -170,7 +170,7 @@ Foam::CellZoneInjection<CloudType>::CellZoneInjection
 :
     InjectionModel<CloudType>(dict, owner, modelName, typeName),
     cellZoneName_(this->coeffDict().lookup("cellZone")),
-    numberDensity_(readScalar(this->coeffDict().lookup("numberDensity"))),
+    numberDensity_(this->coeffDict().getScalar("numberDensity")),
     positions_(),
     injectorCells_(),
     injectorTetFaces_(),

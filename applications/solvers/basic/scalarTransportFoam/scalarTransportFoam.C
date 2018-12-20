@@ -61,8 +61,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Passive scalar transport equation solver."
+    );
+
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "volFields.H"
 #include "cellCellStencil.H"
+#include "cellCellStencilObject.H"
 #include "dynamicOversetFvMesh.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -112,20 +113,27 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
                     << fldName << endl;
             }
         }
-        else if
-        (
-           !fvSchemes.found("oversetInterpolation")
-        || !fvSchemes.found("oversetInterpolationRequired")
-        )
+        else if (!fvSchemes.found("oversetInterpolation"))
         {
             IOWarningInFunction(fvSchemes)
-                << "Missing required dictionary entries"
-                << " 'oversetInterpolation' and 'oversetInterpolationRequired'"
+                << "Missing required dictionary entry"
+                << " 'oversetInterpolation'"
                 << ". Skipping overset interpolation for field "
                 << fldName << endl;
         }
-        else
+        else if (fvSchemes.found("oversetInterpolationRequired"))
         {
+            // Backwards compatibility mode: only interpolate what is
+            // explicitly mentioned
+
+            if (fvSchemes.found("oversetInterpolationSuppressed"))
+            {
+                FatalIOErrorInFunction(fvSchemes)
+                    << "Cannot have both dictionary entry"
+                    << " 'oversetInterpolationSuppresed' and "
+                    << " 'oversetInterpolationRequired' for field "
+                    << fldName << exit(FatalIOError);
+            }
             const dictionary& intDict = fvSchemes.subDict
             (
                 "oversetInterpolationRequired"
@@ -154,6 +162,49 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
             {
                 Info<< "Skipping overset interpolation for field "
                     << fldName << endl;
+            }
+        }
+        else
+        {
+            const dictionary* dictPtr
+            (
+                fvSchemes.subDictPtr("oversetInterpolationSuppressed")
+            );
+
+            const wordHashSet& suppress =
+                Stencil::New(mesh).nonInterpolatedFields();
+
+            bool skipInterpolate = suppress.found(fldName);
+
+            if (dictPtr)
+            {
+                skipInterpolate =
+                    skipInterpolate
+                 || dictPtr->found(fldName);
+            }
+
+            if (skipInterpolate)
+            {
+                if (debug)
+                {
+                    Info<< "Skipping suppressed overset interpolation"
+                        << " for field " << fldName << endl;
+                }
+            }
+            else
+            {
+                if (debug)
+                {
+                    Info<< "Interpolating non-suppressed field " << fldName
+                        << endl;
+                }
+                mesh.interpolate
+                (
+                    const_cast<Field<Type>&>
+                    (
+                        this->primitiveField()
+                    )
+                );
             }
         }
     }

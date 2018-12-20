@@ -150,10 +150,8 @@ Foam::CV2D::CV2D
     ),
     z_
     (
-        Foam::point
-        (
-            cvMeshDict.subDict("surfaceConformation").lookup("locationInMesh")
-        ).z()
+        cvMeshDict.subDict("surfaceConformation")
+       .get<Foam::point>("locationInMesh").z()
     ),
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0),
@@ -187,10 +185,8 @@ void Foam::CV2D::insertPoints
     label nVert = startOfInternalPoints_;
 
     // Add the points and index them
-    forAll(points, i)
+    for (const point2D& p : points)
     {
-        const point2D& p = points[i];
-
         if (qSurf_.wellInside(toPoint3D(p), nearness))
         {
             insert(toPoint(p))->index() = nVert++;
@@ -562,7 +558,7 @@ void Foam::CV2D::newPoints()
 
                     alignmentDirs[aA] = a + sign(dotProduct)*b;
 
-                    alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                    alignmentDirs[aA].normalise();
                 }
             }
         }
@@ -849,7 +845,7 @@ void Foam::CV2D::newPoints()
             cd0 = vector2D(cd0.x() + cd0.y(), cd0.y() - cd0.x());
 
             // Normalise the primary coordinate direction
-            cd0 /= mag(cd0);
+            cd0.normalise();
 
             // Calculate the orthogonal coordinate direction
             vector2D cd1(-cd0.y(), cd0.x());

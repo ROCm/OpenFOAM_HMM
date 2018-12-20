@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,19 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(searchableCone, 0);
-    addToRunTimeSelectionTable(searchableSurface, searchableCone, dict);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableCone,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableCone,
+        dict,
+        cone
+    );
 }
 
 
@@ -39,9 +51,7 @@ namespace Foam
 
 Foam::tmp<Foam::pointField> Foam::searchableCone::coordinates() const
 {
-    tmp<pointField> tCtrs(new pointField(1, 0.5*(point1_ + point2_)));
-
-    return tCtrs;
+    return tmp<pointField>::New(1, 0.5*(point1_ + point2_));
 }
 
 
@@ -71,13 +81,13 @@ void Foam::searchableCone::boundingSpheres
 
 Foam::tmp<Foam::pointField> Foam::searchableCone::points() const
 {
-    tmp<pointField> tPts(new pointField(2));
-    pointField& pts = tPts.ref();
+    auto tpts = tmp<pointField>::New(2);
+    auto& pts = tpts.ref();
 
     pts[0] = point1_;
     pts[1] = point2_;
 
-    return tPts;
+    return tpts;
 }
 
 
@@ -92,20 +102,13 @@ void Foam::searchableCone::findNearestAndNormal
     vector v(sample - point1_);
 
     // Decompose sample-point1 into normal and parallel component
-    scalar parallel = (v & unitDir_);
+    const scalar parallel = (v & unitDir_);
 
     // Remove the parallel component and normalise
     v -= parallel*unitDir_;
 
-    scalar magV = mag(v);
-    if (magV < ROOTVSMALL)
-    {
-       v = Zero;
-    }
-    else
-    {
-       v /= magV;
-    }
+    const scalar magV = mag(v);
+    v.normalise();
 
     // Nearest and normal on disk at point1
     point disk1Point(point1_ + min(max(magV, innerRadius1_), radius1_)*v);
@@ -133,31 +136,30 @@ void Foam::searchableCone::findNearestAndNormal
         p1 /= mag(p1);
 
         // Find vector along the two end of cone
-        vector b(projPt2 - projPt1);
-        scalar magS = mag(b);
-        b /= magS;
+        const vector b = normalised(projPt2 - projPt1);
 
         // Find the vector along sample pt and pt at one end of cone
-        vector a(sample - projPt1);
+        vector a = (sample - projPt1);
 
         if (mag(a) <= ROOTVSMALL)
         {
             // Exception: sample on disk1. Redo with projPt2.
-            vector a(sample - projPt2);
+            a = (sample - projPt2);
+
             // Find normal unitvector
-            nearCone = (a & b)*b+projPt2;
+            nearCone = (a & b)*b + projPt2;
+
             vector b1 = (p1 & b)*b;
-            normalCone = p1 - b1;
-            normalCone /= mag(normalCone);
+            normalCone = normalised(p1 - b1);
         }
         else
         {
-            // Find neartest point on cone surface
-            nearCone = (a & b)*b+projPt1;
+            // Find nearest point on cone surface
+            nearCone = (a & b)*b + projPt1;
+
             // Find projection along surface of cone
             vector b1 = (p1 & b)*b;
-            normalCone = p1 - b1;
-            normalCone /= mag(normalCone);
+            normalCone = normalised(p1 - b1);
         }
 
         if (innerRadius1_ > 0 || innerRadius2_ > 0)
@@ -166,13 +168,10 @@ void Foam::searchableCone::findNearestAndNormal
             point iCprojPt1 = point1_+ innerRadius1_*v;
             point iCprojPt2 = point2_+ innerRadius2_*v;
 
-            vector iCp1 = (iCprojPt1 - point1_);
-            iCp1 /= mag(iCp1);
+            const vector iCp1 = normalised(iCprojPt1 - point1_);
 
             // Find vector along the two end of cone
-            vector iCb(iCprojPt2 - iCprojPt1);
-            magS = mag(iCb);
-            iCb /= magS;
+            const vector iCb = normalised(iCprojPt2 - iCprojPt1);
 
 
             // Find the vector along sample pt and pt at one end of conde
@@ -180,22 +179,22 @@ void Foam::searchableCone::findNearestAndNormal
 
             if (mag(iCa) <= ROOTVSMALL)
             {
-                vector iCa(sample - iCprojPt2);
+                iCa = (sample - iCprojPt2);
 
                 // Find normal unitvector
                 iCnearCone = (iCa & iCb)*iCb+iCprojPt2;
+
                 vector b1 = (iCp1 & iCb)*iCb;
-                iCnormalCone = iCp1 - b1;
-                iCnormalCone /= mag(iCnormalCone);
+                iCnormalCone = normalised(iCp1 - b1);
             }
             else
             {
                 // Find nearest point on cone surface
                 iCnearCone = (iCa & iCb)*iCb+iCprojPt1;
+
                 // Find projection along surface of cone
                 vector b1 = (iCp1 & iCb)*iCb;
-                iCnormalCone = iCp1 - b1;
-                iCnormalCone /= mag(iCnormalCone);
+                iCnormalCone = normalised(iCp1 - b1);
             }
         }
     }
@@ -224,8 +223,9 @@ void Foam::searchableCone::findNearestAndNormal
             scalar para = (v1 & unitDir_);
             // Remove the parallel component and normalise
             v1 -= para*unitDir_;
-            scalar magV1 = mag(v1);
+            const scalar magV1 = mag(v1);
             v1 = v1/magV1;
+
             if (para < 0.0 && magV1 >= radius1_)
             {
                 // Near point 1. Set point to intersection of disk and cone.
@@ -271,7 +271,8 @@ void Foam::searchableCone::findNearestAndNormal
             scalar para = (v1 & unitDir_);
             // Remove the parallel component and normalise
             v1 -= para*unitDir_;
-            scalar magV1 = mag(v1);
+
+            const scalar magV1 = mag(v1);
             v1 = v1/magV1;
 
             if (para < 0.0 && magV1 >= innerRadius1_)
@@ -338,8 +339,8 @@ void Foam::searchableCone::findLineAll
     vector point1End(end-cone.point1_);
 
     // Quick rejection of complete vector outside endcaps
-    scalar s1 = point1Start&(cone.unitDir_);
-    scalar s2 = point1End&(cone.unitDir_);
+    scalar s1 = point1Start & (cone.unitDir_);
+    scalar s2 = point1End & (cone.unitDir_);
 
     if ((s1 < 0.0 && s2 < 0.0) || (s1 > cone.magDir_ && s2 > cone.magDir_))
     {
@@ -372,7 +373,7 @@ void Foam::searchableCone::findLineAll
 
     {
         // Find dot product: mag(s)>VSMALL suggest that it is greater
-        scalar s = (V&unitDir_);
+        scalar s = (V & unitDir_);
         if (mag(s) > VSMALL)
         {
             tPoint1 = -s1/s;
@@ -461,8 +462,7 @@ void Foam::searchableCone::findLineAll
     else
     {
         vector va = cone.unitDir_;
-        vector v1(end-start);
-        v1 = v1/mag(v1);
+        vector v1 = normalised(end-start);
         scalar p  = (va&v1);
         vector a1 = (v1-p*va);
 
@@ -735,23 +735,17 @@ Foam::searchableCone::searchableCone
 )
 :
     searchableSurface(io),
-    point1_(dict.lookup("point1")),
-    radius1_(readScalar(dict.lookup("radius1"))),
-    innerRadius1_(dict.lookupOrDefault("innerRadius1", 0.0)),
-    point2_(dict.lookup("point2")),
-    radius2_(readScalar(dict.lookup("radius2"))),
-    innerRadius2_(dict.lookupOrDefault("innerRadius2", 0.0)),
+    point1_(dict.get<point>("point1")),
+    radius1_(dict.get<scalar>("radius1")),
+    innerRadius1_(dict.lookupOrDefault<scalar>("innerRadius1", 0)),
+    point2_(dict.get<point>("point2")),
+    radius2_(dict.get<scalar>("radius2")),
+    innerRadius2_(dict.lookupOrDefault<scalar>("innerRadius2", 0)),
     magDir_(mag(point2_-point1_)),
     unitDir_((point2_-point1_)/magDir_)
 {
     bounds() = calcBounds();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableCone::~searchableCone()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -775,6 +769,7 @@ void Foam::searchableCone::findNearest
 ) const
 {
     info.setSize(samples.size());
+
     forAll(samples, i)
     {
         vector normal;
@@ -1071,48 +1066,36 @@ void Foam::searchableCone::getVolumeType
 ) const
 {
     volType.setSize(points.size());
-    volType = volumeType::INSIDE;
 
-    forAll(points, pointI)
+    forAll(points, pointi)
     {
-        const point& pt = points[pointI];
+        const point& pt = points[pointi];
+
+        volType[pointi] = volumeType::OUTSIDE;
 
         vector v(pt - point1_);
 
         // Decompose sample-point1 into normal and parallel component
-        scalar parallel = v & unitDir_;
-        scalar comp = parallel;
-        scalar compInner = parallel;
+        const scalar parallel = (v & unitDir_);
 
-
-        scalar radius_sec = radius1_+comp*(radius2_-radius1_)/magDir_;
-
-        scalar radius_sec_inner =
-            innerRadius1_
-           +compInner*(innerRadius2_-innerRadius1_)/magDir_;
-
-        if (parallel < 0)
+        // Quick rejection. Left of point1 endcap, or right of point2 endcap
+        if (parallel < 0 || parallel > magDir_)
         {
-            // Left of point1 endcap
-            volType[pointI] = volumeType::OUTSIDE;
+            continue;
         }
-        else if (parallel > magDir_)
+
+        const scalar radius_sec =
+            radius1_ + parallel * (radius2_-radius1_)/magDir_;
+
+        const scalar radius_sec_inner =
+            innerRadius1_ + parallel * (innerRadius2_-innerRadius1_)/magDir_;
+
+        // Remove the parallel component
+        v -= parallel*unitDir_;
+
+        if (mag(v) >= radius_sec_inner && mag(v) <= radius_sec)
         {
-            // Right of point2 endcap
-            volType[pointI] = volumeType::OUTSIDE;
-        }
-        else
-        {
-            // Remove the parallel component
-            v -= parallel*unitDir_;
-            if (mag(v) >= radius_sec_inner && mag(v) <= radius_sec)
-            {
-                volType[pointI] = volumeType::INSIDE;
-            }
-            else
-            {
-                volType[pointI] = volumeType::OUTSIDE;
-            }
+            volType[pointi] = volumeType::INSIDE;
         }
     }
 }

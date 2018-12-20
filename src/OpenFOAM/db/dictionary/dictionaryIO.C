@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,31 +33,26 @@ Foam::dictionary::dictionary
 (
     const fileName& name,
     const dictionary& parentDict,
-    Istream& is
+    Istream& is,
+    bool keepHeader
 )
 :
-    dictionaryName(parentDict.name() + '.' + name),
+    name_(parentDict.name() + '.' + name),
     parent_(parentDict)
 {
-    read(is);
+    read(is, keepHeader);
 }
 
 
 Foam::dictionary::dictionary(Istream& is)
 :
-    dictionaryName(is.name()),
-    parent_(dictionary::null)
-{
-    // Reset input mode as this is a "top-level" dictionary
-    entry::resetInputMode();
-
-    read(is);
-}
+    dictionary(is, false)
+{}
 
 
 Foam::dictionary::dictionary(Istream& is, bool keepHeader)
 :
-    dictionaryName(is.name()),
+    name_(is.name()),
     parent_(dictionary::null)
 {
     // Reset input mode as this is a "top-level" dictionary
@@ -94,19 +89,33 @@ bool Foam::dictionary::read(Istream& is, bool keepHeader)
     if (!is.good())
     {
         FatalIOErrorInFunction(is)
-            << "Istream not OK for reading dictionary "
+            << "Istream not OK for reading dictionary " << name()
             << exit(FatalIOError);
 
         return false;
     }
 
+    // The expected end character
+    int endChar = token::END_BLOCK;
     token currToken(is);
-    if (currToken != token::BEGIN_BLOCK)
+
+    if (currToken == token::END_BLOCK)
+    {
+        FatalIOErrorInFunction(is)
+            << "Dictionary input cannot start with '}'" << nl
+            << exit(FatalIOError);
+    }
+    else if (currToken != token::BEGIN_BLOCK)
     {
         is.putBack(currToken);
+        endChar = 0;
     }
 
-    while (!is.eof() && entry::New(*this, is))
+    while
+    (
+        !is.eof()
+     && entry::New(*this, is, entry::inputMode::GLOBAL, endChar)
+    )
     {}
 
     if (!keepHeader)
@@ -160,10 +169,8 @@ void Foam::dictionary::writeEntry(const keyType& kw, Ostream& os) const
 
 void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
 {
-    forAllConstIter(parent_type, *this, iter)
+    for (const entry& e : *this)
     {
-        const entry& e = *iter;
-
         // Write entry
         os  << e;
 
@@ -178,7 +185,7 @@ void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
         if (!os.good())
         {
             WarningInFunction
-                << "Can't write entry " << iter().keyword()
+                << "Cannot write entry " << e.keyword()
                 << " for dictionary " << name()
                 << endl;
         }

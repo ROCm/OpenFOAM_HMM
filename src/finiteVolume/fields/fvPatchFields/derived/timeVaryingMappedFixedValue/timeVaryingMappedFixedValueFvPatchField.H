@@ -47,13 +47,13 @@ Description
 
 Usage
     \table
-        Property     | Description                | Required    | Default value
-        setAverage   | Switch to activate setting of average value | no | false
-        perturb      | Perturb points for regular geometries    | no | 1e-5
-        points       | Name of points file        | no          | points
+        Property     | Description                      | Required | Default
+        setAverage   | Use average value                | no    | false
+        perturb      | Perturb points for regular geometries | no | 1e-5
+        points       | Name of points file              | no    | points
         fieldTable   | Alternative field name to sample | no | this field name
-        mapMethod    | Type of mapping            | no | planarInterpolation
-        offset       | Offset to mapped values    | no | Zero
+        mapMethod    | Type of mapping              | no | planarInterpolation
+        offset       | Offset to mapped values      | no | Zero
     \endtable
 
     \verbatim
@@ -76,10 +76,7 @@ SourceFiles
 #define timeVaryingMappedFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "FixedList.H"
-#include "instantList.H"
-#include "pointToPointPlanarInterpolation.H"
-#include "Function1.H"
+#include "MappedFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,47 +94,7 @@ class timeVaryingMappedFixedValueFvPatchField
 {
     // Private data
 
-        //- Name of the field data table, defaults to the name of the field
-        word fieldTableName_;
-
-        //- If true adjust the mapped field to maintain average value
-        Switch setAverage_;
-
-        //- Fraction of perturbation (fraction of bounding box) to add
-        scalar perturb_;
-
-        //- Name of points file; default = "points"
-        word pointsName_;
-
-        //- Interpolation scheme to use
-        word mapMethod_;
-
-        //- 2D interpolation (for 'planarInterpolation' mapMethod)
-        autoPtr<pointToPointPlanarInterpolation> mapperPtr_;
-
-        //- List of boundaryData time directories
-        instantList sampleTimes_;
-
-        //- Current starting index in sampleTimes
-        label startSampleTime_;
-
-        //- Interpolated values from startSampleTime
-        Field<Type> startSampledValues_;
-
-        //- If setAverage: starting average value
-        Type startAverage_;
-
-        //- Current end index in sampleTimes
-        label endSampleTime_;
-
-        //- Interpolated values from endSampleTime
-        Field<Type> endSampledValues_;
-
-        //- If setAverage: end average value
-        Type endAverage_;
-
-        //- Time varying offset values to interpolated data
-        autoPtr<Function1<Type>> offset_;
+        autoPtr<PatchFunction1Types::MappedFile<Type>> uniformValue_;
 
 
 public:
@@ -210,15 +167,6 @@ public:
 
     // Member functions
 
-        // Access
-
-            //- Return startSampledValues
-            const Field<Type> startSampledValues()
-            {
-                 return startSampledValues_;
-            }
-
-
         // Mapping functions
 
             //- Map (and resize as needed) from self given a mapping object
@@ -233,12 +181,6 @@ public:
                 const fvPatchField<Type>&,
                 const labelList&
             );
-
-
-        // Utility functions
-
-            //- Find boundary data inbetween current time and interpolate
-            void checkTable();
 
 
         // Evaluation functions

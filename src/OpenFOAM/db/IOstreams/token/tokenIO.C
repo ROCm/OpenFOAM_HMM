@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,10 @@ static OS& printTokenInfo(OS& os, const token& tok)
     {
         case token::tokenType::UNDEFINED:
             os  << "undefined token";
+        break;
+
+        case token::tokenType::BOOL:
+            os  << "bool '" << (tok.boolToken() ? "true" : "false") << '\'';
         break;
 
         case token::tokenType::FLAG:
@@ -121,6 +125,7 @@ Foam::word Foam::token::name() const
     switch (type_)
     {
         case token::tokenType::UNDEFINED: return "undefined";
+        case token::tokenType::BOOL: return "bool";
         case token::tokenType::FLAG: return "flag";
         case token::tokenType::PUNCTUATION: return "punctuation";
         case token::tokenType::LABEL: return "label";
@@ -158,6 +163,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
             os << "UNDEFINED";
             WarningInFunction
                 << "Undefined token" << endl;
+        break;
+
+        case token::tokenType::BOOL:
+            os << tok.data_.labelVal;
         break;
 
         case token::tokenType::FLAG:
@@ -207,8 +216,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
         default:
             os << "UNKNOWN";
             SeriousErrorInFunction
-                << "Unknown token"
-                << endl;
+                << "Unknown token" << endl;
     }
 
     os.check(FUNCTION_NAME);

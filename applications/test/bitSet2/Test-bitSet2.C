@@ -38,8 +38,11 @@ Description
 #include "bitSet.H"
 #include "FlatOutput.H"
 
-using namespace Foam;
+// #define TEST_SFINAE
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+using namespace Foam;
 
 inline Ostream& extent(const bitSet& bitset)
 {
@@ -99,7 +102,8 @@ inline Ostream& report
 
 inline Ostream& report(const UList<bool>& bools)
 {
-    return info(bools);
+    info(bools);
+    return Info;
 }
 
 
@@ -166,6 +170,70 @@ int main(int argc, char *argv[])
     }
     Info<< "\nalternating bit pattern\n";
     compare(list1, "..........1..1..1..1..1..1..1..1");
+
+    // As boolList
+    {
+        boolList bools = list1.values();
+
+        Info<<"===============" << nl;
+        Info<<"bools: " << flatOutput(bools) << nl;
+
+        for (int i : { -10, 0, 8, 15, 32})
+        {
+            Info<< i << " is " << (bools.test(i) ? "set" : "unset")
+                << " = " << bools.get(i) << nl;
+        }
+
+        Info<<"bools: " << flatOutput(bools) << nl;
+
+        for (int i : { -10, 5, 24})
+        {
+            Info<< "set(" << i << ") = "
+                << (bools.set(i) ? "true" : "false")
+                << nl;
+        }
+        Info<<"bools: " << flatOutput(bools) << nl;
+
+        for (int i : { -10, 12, 32, 150})
+        {
+            Info<< "unset(" << i << ") = "
+                << (bools.unset(i) ? "true" : "false")
+                << nl;
+        }
+
+        Info<<"bools: " << flatOutput(bools) << nl;
+
+        #if 0
+        boolList bools2(6, false);
+        Info<<"other bools: " << flatOutput(bools2) << nl;
+
+        bools2.set(4);
+        Info<<"other bools: " << flatOutput(bools2) << nl;
+
+        bools2.clear();
+        bools2.set(3);
+        bools2.resize(8);
+        Info<<"other bools: " << flatOutput(bools2) << nl;
+        #endif
+        Info<<"===============" << nl;
+    }
+
+    #ifdef TEST_SFINAE
+    {
+        labelList labels = list1.toc();
+        if (labels.test(0))
+        {
+            Info<<"no" << endl;
+        }
+
+        List<double*> ptrs(10, nullptr);
+        if (ptrs.get(0))
+        {
+            Info<<"no" << endl;
+        }
+    }
+    #endif
+
 
     list1.unset(labelRange(13, 20));  // In range
 

@@ -338,10 +338,17 @@ void Foam::sampledSets::sampleAndWrite(fieldGroup<Type>& fields)
             Pstream::scatter(sampleFile);
             if (sampleFile.size())
             {
+                // Case-local file name with "<case>" to make relocatable
+
                 forAll(masterFields, fieldi)
                 {
                     dictionary propsDict;
-                    propsDict.add("file", sampleFile);
+                    propsDict.add
+                    (
+                        "file",
+                        time_.relativePath(sampleFile, true)
+                    );
+
                     const word& fieldName = masterFields[fieldi].name();
                     setProperty(fieldName, propsDict);
                 }

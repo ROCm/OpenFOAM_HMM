@@ -35,7 +35,7 @@ Foam::regionModels::regionModelFunctionObject::New
     const word& modelName
 )
 {
-    const word modelType = dict.subDict(modelName).lookup("type");
+    const word modelType(dict.subDict(modelName).get<word>("type"));
 
     Info<< "        " << modelType << endl;
 

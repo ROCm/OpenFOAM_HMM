@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,10 +30,20 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableDisk, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableDisk, dict);
-
+    defineTypeNameAndDebug(searchableDisk, 0);
+    addToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableDisk,
+        dict
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        searchableSurface,
+        searchableDisk,
+        dict,
+        disk
+    );
 }
 
 
@@ -47,26 +57,21 @@ Foam::pointIndexHit Foam::searchableDisk::findNearest
 {
     pointIndexHit info(false, sample, -1);
 
-    vector v(sample - origin_);
+    vector v(sample - origin());
 
     // Decompose sample-origin into normal and parallel component
-    scalar parallel = (v & normal_);
+    const scalar parallel = (v & normal());
 
     // Remove the parallel component and normalise
-    v -= parallel*normal_;
-    scalar magV = mag(v);
+    v -= parallel * normal();
 
-    if (magV < ROOTVSMALL)
-    {
-        v = Zero;
-    }
-    else
-    {
-        v /= magV;
-    }
+    const scalar magV = mag(v);
+
+    v.normalise();
+
 
     // Clip to radius.
-    info.setPoint(origin_ + min(magV, radius_)*v);
+    info.setPoint(origin() + min(magV, radius_)*v);
 
     if (magSqr(sample - info.rawPoint()) < nearestDistSqr)
     {
@@ -87,31 +92,26 @@ void Foam::searchableDisk::findLine
 {
     info = pointIndexHit(false, Zero, -1);
 
-    vector v(start - origin_);
+    vector v(start - origin());
 
     // Decompose sample-origin into normal and parallel component
-    scalar parallel = (v & normal_);
+    const scalar parallel = (v & normal());
 
-    if (sign(parallel) == sign((end - origin_) & normal_))
+    if (Foam::sign(parallel) == Foam::sign(plane::signedDistance(end)))
     {
         return;
     }
 
     // Remove the parallel component and normalise
-    v -= parallel*normal_;
-    scalar magV = mag(v);
+    v -= parallel * normal();
 
-    if (magV < ROOTVSMALL)
-    {
-        v = Zero;
-    }
-    else
-    {
-        v /= magV;
-    }
+    const scalar magV = mag(v);
+
+    v.normalise();
+
 
     // Set (hit or miss) to intersection of ray and plane of disk
-    info.setPoint(origin_ + magV*v);
+    info.setPoint(origin() + magV*v);
 
     if (magV <= radius_)
     {
@@ -126,30 +126,29 @@ void Foam::searchableDisk::findLine
 Foam::searchableDisk::searchableDisk
 (
     const IOobject& io,
-    const point& origin,
-    const point& normal,
+    const point& originPoint,
+    const vector& normalVector,
     const scalar radius
 )
 :
     searchableSurface(io),
-    origin_(origin),
-    normal_(normal/mag(normal)),
+    plane(originPoint, normalVector),
     radius_(radius)
 {
     // Rough approximation of bounding box
-    //vector span(radius_, radius_, radius_);
+    // vector span(radius_, radius_, radius_);
 
     // See searchableCylinder
     vector span
     (
-        sqrt(sqr(normal_.y()) + sqr(normal_.z())),
-        sqrt(sqr(normal_.x()) + sqr(normal_.z())),
-        sqrt(sqr(normal_.x()) + sqr(normal_.y()))
+        sqrt(sqr(normal().y()) + sqr(normal().z())),
+        sqrt(sqr(normal().x()) + sqr(normal().z())),
+        sqrt(sqr(normal().x()) + sqr(normal().y()))
     );
     span *= radius_;
 
-    bounds().min() = origin_ - span;
-    bounds().max() = origin_ + span;
+    bounds().min() = origin() - span;
+    bounds().max() = origin() + span;
 }
 
 
@@ -159,33 +158,13 @@ Foam::searchableDisk::searchableDisk
     const dictionary& dict
 )
 :
-    searchableSurface(io),
-    origin_(dict.lookup("origin")),
-    normal_(dict.lookup("normal")),
-    radius_(readScalar(dict.lookup("radius")))
-{
-    normal_ /= mag(normal_);
-
-    // Rough approximation of bounding box
-    //vector span(radius_, radius_, radius_);
-
-    // See searchableCylinder
-    vector span
+    searchableDisk
     (
-        sqrt(sqr(normal_.y()) + sqr(normal_.z())),
-        sqrt(sqr(normal_.x()) + sqr(normal_.z())),
-        sqrt(sqr(normal_.x()) + sqr(normal_.y()))
-    );
-    span *= radius_;
-
-    bounds().min() = origin_ - span;
-    bounds().max() = origin_ + span;
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableDisk::~searchableDisk()
+        io,
+        dict.get<point>("origin"),
+        dict.get<vector>("normal"),
+        dict.get<scalar>("radius")
+    )
 {}
 
 
@@ -209,7 +188,7 @@ void Foam::searchableDisk::boundingSpheres
 ) const
 {
     centres.setSize(1);
-    centres[0] = origin_;
+    centres[0] = origin();
 
     radiusSqr.setSize(1);
     radiusSqr[0] = sqr(radius_);
@@ -295,7 +274,7 @@ void Foam::searchableDisk::getRegion
     labelList& region
 ) const
 {
-    region.setSize(info.size());
+    region.resize(info.size());
     region = 0;
 }
 
@@ -303,11 +282,11 @@ void Foam::searchableDisk::getRegion
 void Foam::searchableDisk::getNormal
 (
     const List<pointIndexHit>& info,
-    vectorField& normal
+    vectorField& normals
 ) const
 {
-    normal.setSize(info.size());
-    normal = normal_;
+    normals.resize(info.size());
+    normals = normal();
 }
 
 

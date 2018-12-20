@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,8 @@ License
 // OpenFOAM includes
 #include "geometrySurface.H"
 #include "stringOps.H"
-#include "triSurface.H"
+#include "foamVtkTools.H"
+#include "MeshedSurfaces.H"
 #include "runTimePostProcessing.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -42,7 +43,12 @@ License
 #include "vtkProperty.h"
 #include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
-#include "vtkTriangle.h"
+
+// VTK Readers
+#include "vtkOBJReader.h"
+#include "vtkSTLReader.h"
+#include "vtkPolyDataReader.h"
+#include "vtkXMLPolyDataReader.h"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -57,6 +63,78 @@ namespace runTimePostPro
 }
 }
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+
+static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
+{
+    // Not extremely elegant...
+    vtkSmartPointer<vtkPolyData> dataset;
+
+    if (fName.ext() == "vtk")
+    {
+        auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
+
+        reader->SetFileName(fName.c_str());
+        reader->Update();
+        dataset = reader->GetOutput();
+
+        return dataset;
+    }
+
+    if (fName.ext() == "vtp")
+    {
+        auto reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
+
+        reader->SetFileName(fName.c_str());
+        reader->Update();
+        dataset = reader->GetOutput();
+
+        return dataset;
+    }
+
+    if (fName.ext() == "obj")
+    {
+        auto reader = vtkSmartPointer<vtkOBJReader>::New();
+
+        reader->SetFileName(fName.c_str());
+        reader->Update();
+        dataset = reader->GetOutput();
+
+        return dataset;
+    }
+
+    if (fName.ext() == "stl" || fName.ext() == "stlb")
+    {
+        auto reader = vtkSmartPointer<vtkSTLReader>::New();
+
+        reader->SetFileName(fName.c_str());
+        reader->Update();
+        dataset = reader->GetOutput();
+
+        return dataset;
+    }
+
+
+    // Fallback to using OpenFOAM to read the surface and convert afterwards
+    Foam::meshedSurface surf(fName);
+
+    dataset = Foam::vtk::Tools::Patch::mesh(surf);
+
+    dataset->GetCellData()->SetNormals
+    (
+        Foam::vtk::Tools::Patch::faceNormals(surf)
+    );
+
+    return dataset;
+}
+
+} // End anonymous namespace
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -74,53 +152,22 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
             << " object" << exit(FatalError);
     }
 
-    triSurface surf(fName);
+    auto surf = getPolyDataFile(fName);
 
-    const Field<point>& surfPoints = surf.points();
-    const Field<vector>& surfFaceNormals = surf.faceNormals();
-
-    auto points = vtkSmartPointer<vtkPoints>::New();
-    auto triangles = vtkSmartPointer<vtkCellArray>::New();
-    auto faceNormals = vtkSmartPointer<vtkDoubleArray>::New();
-
-    faceNormals->SetNumberOfComponents(3);
-
-    forAll(surfPoints, i)
+    if (!surf || surf->GetNumberOfPoints() == 0)
     {
-        const point& pt = surfPoints[i];
-        points->InsertNextPoint(pt.x(), pt.y(), pt.z());
+        FatalErrorInFunction
+            << "Could not read "<< fName << nl
+            << exit(FatalError);
     }
-
-    forAll(surf, i)
-    {
-        const Foam::face& f = surf[i];
-
-        auto triangle = vtkSmartPointer<vtkTriangle>::New();
-        triangle->GetPointIds()->SetId(0, f[0]);
-        triangle->GetPointIds()->SetId(1, f[1]);
-        triangle->GetPointIds()->SetId(2, f[2]);
-        triangles->InsertNextCell(triangle);
-
-        double n[3];
-        n[0] = surfFaceNormals[i].x();
-        n[1] = surfFaceNormals[i].y();
-        n[2] = surfFaceNormals[i].z();
-
-        faceNormals->InsertNextTuple(n);
-    }
-
-    surf.clearOut();
-
-    auto polyData = vtkSmartPointer<vtkPolyData>::New();
-    polyData->SetPoints(points);
-    polyData->SetPolys(triangles);
-    polyData->GetCellData()->SetNormals(faceNormals);
 
     auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper->ScalarVisibilityOff();
-    mapper->SetInputData(polyData);
 
-    addFeatureEdges(renderer, polyData);
+    mapper->ScalarVisibilityOff();
+
+    mapper->SetInputData(surf);
+
+    addFeatureEdges(renderer, surf);
 
     surfaceActor_->SetMapper(mapper);
 
@@ -136,30 +183,26 @@ Foam::functionObjects::runTimePostPro::geometrySurface::geometrySurface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     surface(parent, dict, colours),
-    fileNames_(dict.lookup("files"))
-{}
+    fileNames_()
+{
+    dict.readEntry("files", fileNames_);
+}
 
 
 Foam::functionObjects::runTimePostPro::geometrySurface::geometrySurface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>>& colours,
     const List<fileName>& fileNames
 )
 :
     surface(parent, dict, colours),
     fileNames_(fileNames)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimePostPro::geometrySurface::~geometrySurface()
 {}
 
 
@@ -176,10 +219,10 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
         return;
     }
 
-    forAll(fileNames_, i)
+    for (fileName f : fileNames_)  // Use a copy
     {
-        fileName fName = fileNames_[i].expand();
-        addGeometryToScene(position, renderer, fName);
+        f.expand();
+        addGeometryToScene(position, renderer, f);
     }
 }
 
@@ -208,8 +251,8 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::updateActors
 
 bool Foam::functionObjects::runTimePostPro::geometrySurface::clear()
 {
-    // Note: not removing geometry files
-    // - these are usually static files that are used e.g. for meshing
+    // Note: do not remove geometry files
+    // - often static files used for other purposes as well (eg meshing)
 
     return true;
 }

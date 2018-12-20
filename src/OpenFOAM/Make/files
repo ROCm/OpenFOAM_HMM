@@ -2,12 +2,14 @@ global/global.Cver
 /* global/constants/constants.C in global.Cver */
 /* global/constants/dimensionedConstants.C in global.Cver */
 global/argList/argList.C
+global/argList/argListHelp.C
 global/clock/clock.C
 global/profiling/profiling.C
 global/profiling/profilingInformation.C
 global/profiling/profilingSysInfo.C
 global/profiling/profilingTrigger.C
 global/etcFiles/etcFiles.C
+global/version/foamVersion.C
 
 fileOps = global/fileOperations
 $(fileOps)/fileOperation/fileOperation.C
@@ -68,6 +70,10 @@ primitives/Tensor/lists/symmTensorList.C
 primitives/Tensor/lists/tensorList.C
 
 primitives/Vector/complexVector/complexVector.C
+#if !defined(WM_DP)
+primitives/Vector/doubleVector/doubleVector.C
+primitives/Tensor/doubleTensor/doubleTensor.C
+#endif
 #if !defined(WM_SP)
 primitives/Vector/floatVector/floatVector.C
 primitives/Tensor/floatTensor/floatTensor.C
@@ -123,6 +129,8 @@ $(strings)/parsing/parsing.C
 ops = primitives/ops
 $(ops)/flipOp.C
 
+primitives/predicates/scalar/scalarPredicates.C
+
 primitives/hashes/Hasher/Hasher.C
 
 sha1 = primitives/hashes/SHA1
@@ -151,6 +159,7 @@ primitives/Barycentric2D/barycentric2D/barycentric2D.C
 
 containers/Bits/bitSet/bitSet.C
 containers/Bits/bitSet/bitSetIO.C
+containers/Bits/BitOps/BitOps.C
 containers/Bits/PackedList/PackedListCore.C
 containers/HashTables/HashOps/HashOps.C
 containers/HashTables/HashTable/HashTableCore.C
@@ -286,7 +295,6 @@ $(Time)/TimePaths.C
 $(Time)/TimeState.C
 $(Time)/Time.C
 $(Time)/TimeIO.C
-$(Time)/findTimes.C
 $(Time)/subCycleTime.C
 $(Time)/subLoopTime.C
 $(Time)/timeSelector.C
@@ -658,6 +666,7 @@ $(Fields)/triadField/triadField.C
 $(Fields)/triadField/triadIOField.C
 $(Fields)/complexFields/complexFields.C
 $(Fields)/transformField/transformField.C
+$(Fields)/fieldTypes.C
 
 
 pointPatchFields = fields/pointPatchFields
@@ -689,8 +698,6 @@ $(derivedPointPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedV
 $(derivedPointPatchFields)/codedFixedValue/codedFixedValuePointPatchFields.C
 
 fields/GeometricFields/pointFields/pointFields.C
-
-fields/ReadFields/ReadFields.C
 
 meshes/bandCompression/bandCompression.C
 meshes/preservePatchTypes/preservePatchTypes.C

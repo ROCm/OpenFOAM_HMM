@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,8 @@ namespace Foam
     defineTypeNameAndDebug(cellToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, cellToCell, word);
     addToRunTimeSelectionTable(topoSetSource, cellToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, cellToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, cellToCell, istream);
 }
 
 
@@ -54,8 +56,8 @@ Foam::cellToCell::cellToCell
     const word& setName
 )
 :
-    topoSetSource(mesh),
-    setName_(setName)
+    topoSetCellSource(mesh),
+    names_(one(), setName)
 {}
 
 
@@ -65,9 +67,16 @@ Foam::cellToCell::cellToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.lookup("set"))
-{}
+    topoSetCellSource(mesh),
+    names_()
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::cellToCell::cellToCell
@@ -76,14 +85,8 @@ Foam::cellToCell::cellToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    setName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellToCell::~cellToCell()
+    topoSetCellSource(mesh),
+    names_(one(), word(checkIs(is)))
 {}
 
 
@@ -95,25 +98,35 @@ void Foam::cellToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::ADD) || (action == topoSetSource::NEW))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all elements of cellSet " << setName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all elements of cellSet "
+                << flatOutput(names_) << nl;
+        }
 
-        // Load the set
-        cellSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            cellSet loadedSet(mesh_, setName);
 
-        set.addSet(loadedSet);
+            set.addSet(loadedSet);
+        }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all elements of cellSet " << setName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all elements of cellSet "
+                << flatOutput(names_) << nl;
+        }
 
-        // Load the set
-        cellSet loadedSet(mesh_, setName_);
+        for (const word& setName : names_)
+        {
+            cellSet loadedSet(mesh_, setName);
 
-        set.deleteSet(loadedSet);
+            set.subtractSet(loadedSet);
+        }
     }
 }
 

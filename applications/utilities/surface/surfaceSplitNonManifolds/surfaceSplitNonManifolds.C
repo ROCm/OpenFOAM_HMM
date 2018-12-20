@@ -82,8 +82,7 @@ void dumpPoints(const triSurface& surf, const labelList& borderPoint)
 {
     fileName fName("borderPoints.obj");
 
-    Info<< "Dumping borderPoints as Lightwave .obj file to " << fName
-        << "\nThis can be visualized with e.g. javaview (www.javaview.de)\n\n";
+    Info<< "Dumping borderPoints as obj file: " << fName << endl;
 
     OFstream os(fName);
 
@@ -103,8 +102,7 @@ void dumpEdges(const triSurface& surf, const boolList& borderEdge)
 {
     fileName fName("borderEdges.obj");
 
-    Info<< "Dumping borderEdges as Lightwave .obj file to " << fName
-        << "\nThis can be visualized with e.g. javaview (www.javaview.de)\n\n";
+    Info<< "Dumping borderEdges as obj file: " << fName << endl;
 
     OFstream os(fName);
 
@@ -129,7 +127,7 @@ void dumpFaces
     const Map<label>& connectedFaces
 )
 {
-    Info<< "Dumping connectedFaces as .obj file to " << fName << nl;
+    Info<< "Dumping connectedFaces as obj file: " << fName << endl;
 
     OFstream os(fName);
 
@@ -567,16 +565,24 @@ void calcPointVecs
             if (face0I != -1)
             {
                 label v0 = triSurfaceTools::oppositeVertex(surf, face0I, edgeI);
-                vector e0 = (points[v0] - points[e.start()]) ^ eVec;
-                e0 /= mag(e0);
+                const vector e0 =
+                    normalised
+                    (
+                        (points[v0] - points[e.start()]) ^ eVec
+                    );
+
                 midVec = e0;
             }
 
             if (face1I != -1)
             {
                 label v1 = triSurfaceTools::oppositeVertex(surf, face1I, edgeI);
-                vector e1 = (points[e.start()] - points[v1]) ^ eVec;
-                e1 /= mag(e1);
+                const vector e1 =
+                    normalised
+                    (
+                        (points[e.start()] - points[v1]) ^ eVec
+                    );
+
                 midVec += e1;
             }
 
@@ -672,15 +678,15 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "split multiply connected surface edges by duplicating points"
+        "Split multiply connected surface edges by duplicating points"
     );
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("output", "The output surface file");
     argList::addBoolOption
     (
         "debug",
-        "add debugging output"
+        "Add debugging output"
     );
 
     argList args(argc, argv);
@@ -897,8 +903,7 @@ int main(int argc, char *argv[])
             {
                 scalar minLen = minEdgeLen(surf, pointi);
 
-                vector n = borderPointVec[pointi];
-                n /= mag(n);
+                const vector n = normalised(borderPointVec[pointi]);
 
                 newPoints[newPointi] = newPoints[pointi] + 0.1 * minLen * n;
             }

@@ -37,13 +37,7 @@ template<class Specie, int PolySize>
 icoPolynomial<Specie, PolySize>::icoPolynomial(const dictionary& dict)
 :
     Specie(dict),
-    rhoCoeffs_
-(
-    dict.subDict("equationOfState").lookup
-    (
-        "rhoCoeffs<" + Foam::name(PolySize) + '>'
-    )
-)
+    rhoCoeffs_(dict.subDict("equationOfState").lookup(coeffsName("rho")))
 {}
 
 
@@ -54,14 +48,12 @@ void icoPolynomial<Specie, PolySize>::write(Ostream& os) const
 {
     Specie::write(os);
 
-    dictionary dict("equationOfState");
-    dict.add
-    (
-        word("rhoCoeffs<" + Foam::name(PolySize) + '>'),
-        rhoCoeffs_
-    );
-
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("equationOfState");
+        os.writeEntry(coeffsName("rho"), rhoCoeffs_);
+        os.endBlock();
+    }
 }
 
 

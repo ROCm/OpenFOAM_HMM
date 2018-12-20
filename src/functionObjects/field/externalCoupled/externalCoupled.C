@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "externalCoupled.H"
+#include "stringListOps.H"
 #include "addToRunTimeSelectionTable.H"
 #include "OSspecific.H"
 #include "Fstream.H"
@@ -415,7 +416,7 @@ void Foam::functionObjects::externalCoupled::initCoupling()
         UPtrList<const fvMesh> meshes(regionNames.size());
         forAll(regionNames, regi)
         {
-            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
+            meshes.set(regi, time_.findObject<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];
@@ -575,17 +576,17 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     wordList allRegionNames(time_.lookupClass<fvMesh>().sortedToc());
 
     const dictionary& allRegionsDict = dict.subDict("regions");
-    forAllConstIters(allRegionsDict, iter)
+    for (const entry& dEntry : allRegionsDict)
     {
-        if (!iter().isDict())
+        if (!dEntry.isDict())
         {
             FatalIOErrorInFunction(allRegionsDict)
                 << "Regions must be specified in dictionary format"
                 << exit(FatalIOError);
         }
 
-        const wordRe regionGroupName(iter().keyword());
-        const dictionary& regionDict = iter().dict();
+        const wordRe regionGroupName(dEntry.keyword());
+        const dictionary& regionDict = dEntry.dict();
 
         labelList regionIDs = findStrings(regionGroupName, allRegionNames);
 
@@ -594,20 +595,21 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
         regionGroupNames_.append(compositeName(regionNames));
         regionGroupRegions_.append(regionNames);
 
-        forAllConstIters(regionDict, regionIter)
+        for (const entry& dEntry : regionDict)
         {
-            if (!regionIter().isDict())
+            if (!dEntry.isDict())
             {
                 FatalIOErrorInFunction(regionDict)
                     << "Regions must be specified in dictionary format"
                     << exit(FatalIOError);
             }
-            const wordRe groupName(regionIter().keyword());
-            const dictionary& groupDict = regionIter().dict();
+
+            const wordRe groupName(dEntry.keyword());
+            const dictionary& groupDict = dEntry.dict();
 
             const label nGroups = groupNames_.size();
-            const wordList readFields(groupDict.lookup("readFields"));
-            const wordList writeFields(groupDict.lookup("writeFields"));
+            const wordList readFields(groupDict.get<wordList>("readFields"));
+            const wordList writeFields(groupDict.get<wordList>("writeFields"));
 
             auto fnd = regionToGroups_.find(regionGroupNames_.last());
             if (fnd.found())
@@ -619,7 +621,7 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
                 regionToGroups_.insert
                 (
                     regionGroupNames_.last(),
-                    labelList{nGroups}
+                    labelList(one(), nGroups)
                 );
             }
             groupNames_.append(groupName);
@@ -692,7 +694,7 @@ void Foam::functionObjects::externalCoupled::readDataMaster()
         UPtrList<const fvMesh> meshes(regionNames.size());
         forAll(regionNames, regi)
         {
-            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
+            meshes.set(regi, time_.findObject<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];
@@ -736,7 +738,7 @@ void Foam::functionObjects::externalCoupled::writeDataMaster() const
         UPtrList<const fvMesh> meshes(regionNames.size());
         forAll(regionNames, regi)
         {
-            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
+            meshes.set(regi, time_.findObject<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];

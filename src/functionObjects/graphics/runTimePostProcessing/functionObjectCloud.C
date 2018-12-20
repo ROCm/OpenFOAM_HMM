@@ -35,9 +35,11 @@ License
 #include "vtkSmartPointer.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
-#include "vtkXMLPolyDataReader.h"
-#include "vtkPolyDataReader.h"
 #include "vtkProperty.h"
+
+// VTK Readers
+#include "vtkPolyDataReader.h"
+#include "vtkXMLPolyDataReader.h"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -60,14 +62,14 @@ Foam::functionObjects::runTimePostPro::functionObjectCloud::functionObjectCloud
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     pointData(parent, dict, colours),
     functionObjectBase(parent, dict, colours),
-    cloudName_(dict.lookup("cloud")),
+    cloudName_(dict.get<word>("cloud")),
     inputFileName_(),
-    colourFieldName_(dict.lookup("colourField")),
+    colourFieldName_(dict.get<word>("colourField")),
     actor_()
 {
     actor_ = vtkSmartPointer<vtkActor>::New();
@@ -95,41 +97,13 @@ addGeometryToScene
         return;
     }
 
-    inputFileName_.clear();
+    // The vtkCloud stores 'file' via the stateFunctionObject
+    // (lookup by cloudName).
+    // It only generates VTP format, which means there is a single file
+    // containing all fields.
 
-    // The CloudToVTK functionObject from
-    //
-    //   lagrangian/intermediate/submodels/CloudFunctionObjects/
-    //
-    // stores file state on cloud OutputProperties itself,
-    //
-    // whereas the vtkCloud functionObject treats it like other
-    // output and stores via the stateFunctionObject.
-    // Since it uses VTP format, there is only a single file with all fields
-    // - lookup by cloudName.
+    inputFileName_ = getFileName("file", cloudName_);
 
-    const dictionary& cloudDict =
-        geometryBase::parent_.mesh().lookupObject<IOdictionary>
-        (
-            cloudName_ + "OutputProperties"
-        );
-
-    if (cloudDict.found("cloudFunctionObject"))
-    {
-        const dictionary& foDict = cloudDict.subDict("cloudFunctionObject");
-        if (foDict.found(functionObjectName_))
-        {
-            foDict.subDict(functionObjectName_)
-                .readIfPresent("file", inputFileName_);
-        }
-    }
-    else
-    {
-        inputFileName_ = getFileName("file", cloudName_);
-    }
-
-
-    inputFileName_.expand();
     if (inputFileName_.empty())
     {
         WarningInFunction
@@ -139,6 +113,7 @@ addGeometryToScene
             << endl;
         return;
     }
+
 
     vtkSmartPointer<vtkPolyData> dataset;
 
@@ -150,19 +125,21 @@ addGeometryToScene
 
         dataset = reader->GetOutput();
     }
-    else if (inputFileName_.hasExt("vtk"))
-    {
-        auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
-        reader->SetFileName(inputFileName_.c_str());
-        reader->Update();
-
-        dataset = reader->GetOutput();
-    }
     else
     {
-        // Invalid name - ignore
+        // Invalid name - ignore.
+        // Don't support VTK legacy format at all - it is too wasteful
+        // and cumbersome.
+
+        WarningInFunction
+            << "Could not read "<< inputFileName_ << nl
+            << "Only VTK (.vtp) files are supported"
+            << ". Cloud will not be processed"
+            << endl;
+
         inputFileName_.clear();
     }
+
 
     if (dataset)
     {

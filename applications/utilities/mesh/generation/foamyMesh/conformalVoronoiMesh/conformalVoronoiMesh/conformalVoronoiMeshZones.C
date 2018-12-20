@@ -39,7 +39,7 @@ void Foam::conformalVoronoiMesh::calcNeighbourCellCentres
     pointField& neiCc
 ) const
 {
-    label nBoundaryFaces = mesh.nFaces() - mesh.nInternalFaces();
+    const label nBoundaryFaces = mesh.nBoundaryFaces();
 
     if (neiCc.size() != nBoundaryFaces)
     {
@@ -319,7 +319,7 @@ void Foam::conformalVoronoiMesh::calcFaceZones
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeighbour = mesh.faceNeighbour();
 
-    labelList neiFaceOwner(mesh.nFaces() - mesh.nInternalFaces(), label(-1));
+    labelList neiFaceOwner(mesh.nBoundaryFaces(), label(-1));
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -421,7 +421,7 @@ void Foam::conformalVoronoiMesh::calcFaceZones
         )
     );
 
-    pointField neiCc(mesh.nFaces() - mesh.nInternalFaces());
+    pointField neiCc(mesh.nBoundaryFaces());
     calcNeighbourCellCentres
     (
         mesh,
@@ -481,10 +481,9 @@ void Foam::conformalVoronoiMesh::calcFaceZones
                     norm
                 );
 
-                vector fN = faces[facei].normal(mesh.points());
-                fN /= mag(fN) + SMALL;
+                const vector areaNorm = faces[facei].areaNormal(mesh.points());
 
-                if ((norm[0] & fN) < 0)
+                if ((norm[0] & areaNorm) < 0)
                 {
                     flipMap[facei] = true;
                 }
@@ -499,7 +498,7 @@ void Foam::conformalVoronoiMesh::calcFaceZones
     }
 
 
-//    labelList neiCellSurface(mesh.nFaces()-mesh.nInternalFaces());
+//    labelList neiCellSurface(mesh.nBoundaryFaces());
 //
 //    forAll(patches, patchi)
 //    {

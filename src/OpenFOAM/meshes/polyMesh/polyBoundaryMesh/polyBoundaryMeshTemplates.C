@@ -28,13 +28,13 @@ License
 template<class Type>
 Foam::labelHashSet Foam::polyBoundaryMesh::findPatchIDs() const
 {
-    const polyBoundaryMesh& bm = *this;
+    const polyBoundaryMesh& patches = *this;
 
-    labelHashSet patchIDs(bm.size());
+    labelHashSet patchIDs(patches.size());
 
-    forAll(bm, patchi)
+    forAll(patches, patchi)
     {
-        if (isA<Type>(bm[patchi]))
+        if (isA<Type>(patches[patchi]))
         {
             patchIDs.insert(patchi);
         }

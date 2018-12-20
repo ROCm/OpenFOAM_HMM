@@ -162,10 +162,10 @@ void uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
     vector gravity = Zero;
 
-    if (db().foundObject<uniformDimensionedVectorField>("g"))
+    if (db().time().foundObject<uniformDimensionedVectorField>("g"))
     {
         uniformDimensionedVectorField g =
-        db().lookupObject<uniformDimensionedVectorField>("g");
+            db().time().lookupObject<uniformDimensionedVectorField>("g");
 
         gravity = g.value();
     }

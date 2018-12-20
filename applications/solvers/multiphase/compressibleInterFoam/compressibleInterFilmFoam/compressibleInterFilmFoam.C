@@ -25,7 +25,7 @@ Application
     compressibleInterFoam
 
 Description
-    Solver for 2 compressible, non-isothermal immiscible fluids using a VOF
+    Solver for two compressible, non-isothermal immiscible fluids using a VOF
     (volume of fluid) phase-fraction based interface capturing approach.
 
     The momentum and other fluid properties are of the "mixture" and a single
@@ -53,10 +53,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for two compressible, non-isothermal immiscible fluids"
+        " using VOF phase-fraction based interface capturing."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
@@ -97,7 +103,7 @@ int main(int argc, char *argv[])
             #include "setDeltaT.H"
         }
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

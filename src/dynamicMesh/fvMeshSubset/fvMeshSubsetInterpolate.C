@@ -33,19 +33,18 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>> fvMeshSubset::interpolate
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>
+>
+Foam::fvMeshSubset::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const fvMesh& sMesh,
-    const labelList& patchMap,
-    const labelList& cellMap,
-    const labelList& faceMap
+    const labelUList& patchMap,
+    const labelUList& cellMap,
+    const labelUList& faceMap
 )
 {
     // 1. Create the complete field with dummy patch fields
@@ -83,41 +82,39 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> fvMeshSubset::interpolate
         }
     }
 
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tresF
+    auto tresult = tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                "subset"+vf.name(),
-                sMesh.time().timeName(),
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "subset"+vf.name(),
+            sMesh.time().timeName(),
             sMesh,
-            vf.dimensions(),
-            Field<Type>(vf.primitiveField(), cellMap),
-            patchFields
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sMesh,
+        vf.dimensions(),
+        Field<Type>(vf.primitiveField(), cellMap),
+        patchFields
     );
-    GeometricField<Type, fvPatchField, volMesh>& resF = tresF.ref();
-    resF.oriented() = vf.oriented();
+    auto& result = tresult.ref();
+    result.oriented() = vf.oriented();
 
 
     // 2. Change the fvPatchFields to the correct type using a mapper
     //  constructor (with reference to the now correct internal field)
 
-    typename GeometricField<Type, fvPatchField, volMesh>::
-        Boundary& bf = resF.boundaryFieldRef();
+    auto& bf = result.boundaryFieldRef();
 
     forAll(bf, patchi)
     {
-        if (patchMap[patchi] != -1)
+        const label basePatchId = patchMap[patchi];
+
+        if (basePatchId != -1)
         {
             // Construct addressing
             const fvPatch& subPatch = sMesh.boundary()[patchi];
-            const fvPatch& basePatch = vf.mesh().boundary()[patchMap[patchi]];
+            const fvPatch& basePatch = vf.mesh().boundary()[basePatchId];
             const label baseStart = basePatch.start();
             const label baseSize = basePatch.size();
 
@@ -125,7 +122,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> fvMeshSubset::interpolate
 
             forAll(directAddressing, i)
             {
-                label baseFacei = faceMap[subPatch.start()+i];
+                const label baseFacei = faceMap[subPatch.start()+i];
 
                 if (baseFacei >= baseStart && baseFacei < baseStart+baseSize)
                 {
@@ -144,21 +141,25 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> fvMeshSubset::interpolate
                 patchi,
                 fvPatchField<Type>::New
                 (
-                    vf.boundaryField()[patchMap[patchi]],
+                    vf.boundaryField()[basePatchId],
                     subPatch,
-                    resF(),
+                    result(),
                     directFvPatchFieldMapper(directAddressing)
                 )
             );
         }
     }
 
-    return tresF;
+    return tresult;
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, fvPatchField, volMesh>> fvMeshSubset::interpolate
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>
+>
+Foam::fvMeshSubset::interpolate
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
@@ -175,13 +176,17 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> fvMeshSubset::interpolate
 
 
 template<class Type>
-tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>
+>
+Foam::fvMeshSubset::interpolate
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& vf,
     const fvMesh& sMesh,
-    const labelList& patchMap,
-    const labelList& cellMap,
-    const labelList& faceMap
+    const labelUList& patchMap,
+    const labelUList& cellMap,
+    const labelUList& faceMap
 )
 {
     // 1. Create the complete field with dummy patch fields
@@ -220,41 +225,33 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
     }
 
     // Create the complete field from the pieces
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tresF
+    auto tresult = tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>::New
     (
-        new GeometricField<Type, fvsPatchField, surfaceMesh>
+        IOobject
         (
-            IOobject
-            (
-                "subset"+vf.name(),
-                sMesh.time().timeName(),
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "subset"+vf.name(),
+            sMesh.time().timeName(),
             sMesh,
-            vf.dimensions(),
-            Field<Type>
-            (
-                vf.primitiveField(),
-                SubList<label>
-                (
-                    faceMap,
-                    sMesh.nInternalFaces()
-                )
-            ),
-            patchFields
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sMesh,
+        vf.dimensions(),
+        Field<Type>
+        (
+            vf.primitiveField(),
+            SubList<label>(faceMap, sMesh.nInternalFaces())
+        ),
+        patchFields
     );
-    GeometricField<Type, fvsPatchField, surfaceMesh>& resF = tresF.ref();
-    resF.oriented() = vf.oriented();
+    auto& result = tresult.ref();
+    result.oriented() = vf.oriented();
 
 
     // 2. Change the fvsPatchFields to the correct type using a mapper
     //  constructor (with reference to the now correct internal field)
 
-    typename GeometricField<Type, fvsPatchField, surfaceMesh>::
-        Boundary& bf = resF.boundaryFieldRef();
+    auto& bf = result.boundaryFieldRef();
 
     forAll(bf, patchi)
     {
@@ -292,7 +289,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
                 (
                     vf.boundaryField()[patchMap[patchi]],
                     subPatch,
-                    resF(),
+                    result(),
                     directFvPatchFieldMapper(directAddressing)
                 )
             );
@@ -336,12 +333,16 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
         }
     }
 
-    return tresF;
+    return tresult;
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>
+>
+Foam::fvMeshSubset::interpolate
 (
     const GeometricField<Type, fvsPatchField, surfaceMesh>& sf
 ) const
@@ -358,13 +359,16 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
 
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh>>
-fvMeshSubset::interpolate
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>
+>
+Foam::fvMeshSubset::interpolate
 (
     const GeometricField<Type, pointPatchField, pointMesh>& vf,
     const pointMesh& sMesh,
-    const labelList& patchMap,
-    const labelList& pointMap
+    const labelUList& patchMap,
+    const labelUList& pointMap
 )
 {
     // 1. Create the complete field with dummy patch fields
@@ -403,33 +407,29 @@ fvMeshSubset::interpolate
     }
 
     // Create the complete field from the pieces
-    tmp<GeometricField<Type, pointPatchField, pointMesh>> tresF
+    auto tresult = tmp<GeometricField<Type, pointPatchField, pointMesh>>::New
     (
-        new GeometricField<Type, pointPatchField, pointMesh>
+        IOobject
         (
-            IOobject
-            (
-                "subset"+vf.name(),
-                sMesh.time().timeName(),
-                sMesh.thisDb(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            sMesh,
-            vf.dimensions(),
-            Field<Type>(vf.primitiveField(), pointMap),
-            patchFields
-        )
+            "subset"+vf.name(),
+            sMesh.time().timeName(),
+            sMesh.thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sMesh,
+        vf.dimensions(),
+        Field<Type>(vf.primitiveField(), pointMap),
+        patchFields
     );
-    GeometricField<Type, pointPatchField, pointMesh>& resF = tresF.ref();
-    resF.oriented() = vf.oriented();
+    auto& result = tresult.ref();
+    result.oriented() = vf.oriented();
 
 
     // 2. Change the pointPatchFields to the correct type using a mapper
     //  constructor (with reference to the now correct internal field)
 
-    typename GeometricField<Type, pointPatchField, pointMesh>::
-        Boundary& bf = resF.boundaryFieldRef();
+    auto& bf = result.boundaryFieldRef();
 
     forAll(bf, patchi)
     {
@@ -478,19 +478,23 @@ fvMeshSubset::interpolate
                 (
                     vf.boundaryField()[patchMap[patchi]],
                     subPatch,
-                    resF(),
+                    result(),
                     directPointPatchFieldMapper(directAddressing)
                 )
             );
         }
     }
 
-    return tresF;
+    return tresult;
 }
 
 
 template<class Type>
-tmp<GeometricField<Type, pointPatchField, pointMesh>> fvMeshSubset::interpolate
+Foam::tmp
+<
+    Foam::GeometricField<Type, Foam::pointPatchField, Foam::pointMesh>
+>
+Foam::fvMeshSubset::interpolate
 (
     const GeometricField<Type, pointPatchField, pointMesh>& sf
 ) const
@@ -506,40 +510,43 @@ tmp<GeometricField<Type, pointPatchField, pointMesh>> fvMeshSubset::interpolate
 
 
 template<class Type>
-tmp<DimensionedField<Type, volMesh>> fvMeshSubset::interpolate
+Foam::tmp
+<
+    Foam::DimensionedField<Type, Foam::volMesh>
+>
+Foam::fvMeshSubset::interpolate
 (
     const DimensionedField<Type, volMesh>& df,
     const fvMesh& sMesh,
-    const labelList& cellMap
+    const labelUList& cellMap
 )
 {
-    // Create the complete field from the pieces
-    tmp<DimensionedField<Type, volMesh>> tresF
+    auto tresult = tmp<DimensionedField<Type, volMesh>>::New
     (
-        new DimensionedField<Type, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                "subset"+df.name(),
-                sMesh.time().timeName(),
-                sMesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "subset"+df.name(),
+            sMesh.time().timeName(),
             sMesh,
-            df.dimensions(),
-            Field<Type>(df, cellMap)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        sMesh,
+        df.dimensions(),
+        Field<Type>(df, cellMap)
     );
+    tresult.ref().oriented() = df.oriented();
 
-    tresF.ref().oriented() = df.oriented();
-
-    return tresF;
+    return tresult;
 }
 
 
 template<class Type>
-tmp<DimensionedField<Type, volMesh>> fvMeshSubset::interpolate
+Foam::tmp
+<
+    Foam::DimensionedField<Type, Foam::volMesh>
+>
+Foam::fvMeshSubset::interpolate
 (
     const DimensionedField<Type, volMesh>& df
 ) const
@@ -547,9 +554,5 @@ tmp<DimensionedField<Type, volMesh>> fvMeshSubset::interpolate
     return interpolate(df, subMesh(), cellMap());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

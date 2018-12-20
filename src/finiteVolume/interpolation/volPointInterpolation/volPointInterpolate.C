@@ -231,7 +231,7 @@ Foam::tmp<Foam::Field<Type>> Foam::volPointInterpolation::flatBoundaryField
 
     tmp<Field<Type>> tboundaryVals
     (
-        new Field<Type>(mesh.nFaces()-mesh.nInternalFaces())
+        new Field<Type>(mesh.nBoundaryFaces())
     );
     Field<Type>& boundaryVals = tboundaryVals.ref();
 
@@ -372,20 +372,17 @@ Foam::volPointInterpolation::interpolate
     const pointMesh& pm = pointMesh::New(vf.mesh());
 
     // Construct tmp<pointField>
-    tmp<GeometricField<Type, pointPatchField, pointMesh>> tpf
+    auto tpf = tmp<GeometricField<Type, pointPatchField, pointMesh>>::New
     (
-        new GeometricField<Type, pointPatchField, pointMesh>
+        IOobject
         (
-            IOobject
-            (
-                "volPointInterpolate(" + vf.name() + ')',
-                vf.instance(),
-                pm.thisDb()
-            ),
-            pm,
-            vf.dimensions(),
-            patchFieldTypes
-        )
+            "volPointInterpolate(" + vf.name() + ')',
+            vf.instance(),
+            pm.thisDb()
+        ),
+        pm,
+        vf.dimensions(),
+        patchFieldTypes
     );
 
     interpolateInternalField(vf, tpf.ref());
@@ -427,73 +424,60 @@ Foam::volPointInterpolation::interpolate
     const pointMesh& pm = pointMesh::New(vf.mesh());
     const objectRegistry& db = pm.thisDb();
 
+    PointFieldType* pfPtr =
+        db.objectRegistry::template getObjectPtr<PointFieldType>(name);
+
     if (!cache || vf.mesh().changing())
     {
         // Delete any old occurrences to avoid double registration
-        if (db.objectRegistry::template foundObject<PointFieldType>(name))
+        if (pfPtr && pfPtr->ownedByRegistry())
         {
-            PointFieldType& pf = const_cast<PointFieldType&>
-            (
-                db.objectRegistry::template lookupObject<PointFieldType>(name)
-            );
-
-            if (pf.ownedByRegistry())
-            {
-                solution::cachePrintMessage("Deleting", name, vf);
-                pf.release();
-                delete &pf;
-            }
+            solution::cachePrintMessage("Deleting", name, vf);
+            pfPtr->release();
+            delete pfPtr;
         }
 
-
-        tmp<GeometricField<Type, pointPatchField, pointMesh>> tpf
+        auto tpf = tmp<GeometricField<Type, pointPatchField, pointMesh>>::New
         (
-            new GeometricField<Type, pointPatchField, pointMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    vf.instance(),
-                    pm.thisDb()
-                ),
-                pm,
-                vf.dimensions()
-            )
+                name,
+                vf.instance(),
+                pm.thisDb()
+            ),
+            pm,
+            vf.dimensions()
         );
 
         interpolate(vf, tpf.ref());
 
         return tpf;
     }
+
+
+    if (!pfPtr)
+    {
+        solution::cachePrintMessage("Calculating and caching", name, vf);
+
+        pfPtr = interpolate(vf, name, false).ptr();
+        regIOobject::store(pfPtr);
+    }
     else
     {
-        if (!db.objectRegistry::template foundObject<PointFieldType>(name))
+        PointFieldType& pf = *pfPtr;
+
+        if (pf.upToDate(vf))    //TBD: , vf.mesh().points()))
         {
-            solution::cachePrintMessage("Calculating and caching", name, vf);
-            tmp<PointFieldType> tpf = interpolate(vf, name, false);
-            PointFieldType* pfPtr = tpf.ptr();
-            regIOobject::store(pfPtr);
-            return *pfPtr;
+            solution::cachePrintMessage("Reusing", name, vf);
         }
         else
         {
-            PointFieldType& pf = const_cast<PointFieldType&>
-            (
-                db.objectRegistry::template lookupObject<PointFieldType>(name)
-            );
-
-            if (pf.upToDate(vf))    //TBD: , vf.mesh().points()))
-            {
-                solution::cachePrintMessage("Reusing", name, vf);
-            }
-            else
-            {
-                solution::cachePrintMessage("Updating", name, vf);
-                interpolate(vf, pf);
-            }
-            return pf;
+            solution::cachePrintMessage("Updating", name, vf);
+            interpolate(vf, pf);
         }
     }
+
+    return *pfPtr;
 }
 
 
@@ -537,74 +521,61 @@ Foam::volPointInterpolation::interpolate
     const pointMesh& pm = pointMesh::New(vf.mesh());
     const objectRegistry& db = pm.thisDb();
 
+
+    PointFieldType* pfPtr =
+        db.objectRegistry::template getObjectPtr<PointFieldType>(name);
+
     if (!cache || vf.mesh().changing())
     {
         // Delete any old occurrences to avoid double registration
-        if (db.objectRegistry::template foundObject<PointFieldType>(name))
+        if (pfPtr && pfPtr->ownedByRegistry())
         {
-            PointFieldType& pf = const_cast<PointFieldType&>
-            (
-                db.objectRegistry::template lookupObject<PointFieldType>(name)
-            );
-
-            if (pf.ownedByRegistry())
-            {
-                solution::cachePrintMessage("Deleting", name, vf);
-                pf.release();
-                delete &pf;
-            }
+            solution::cachePrintMessage("Deleting", name, vf);
+            pfPtr->release();
+            delete pfPtr;
         }
 
-
-        tmp<DimensionedField<Type, pointMesh>> tpf
+        auto tpf = tmp<DimensionedField<Type, pointMesh>>::New
         (
-            new DimensionedField<Type, pointMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    vf.instance(),
-                    pm.thisDb()
-                ),
-                pm,
-                vf.dimensions()
-            )
+                name,
+                vf.instance(),
+                pm.thisDb()
+            ),
+            pm,
+            vf.dimensions()
         );
 
         interpolateDimensionedInternalField(vf, tpf.ref());
 
         return tpf;
     }
+
+
+    if (!pfPtr)
+    {
+        solution::cachePrintMessage("Calculating and caching", name, vf);
+        pfPtr = interpolate(vf, name, false).ptr();
+
+        regIOobject::store(pfPtr);
+    }
     else
     {
-        if (!db.objectRegistry::template foundObject<PointFieldType>(name))
+        PointFieldType& pf = *pfPtr;
+
+        if (pf.upToDate(vf))    //TBD: , vf.mesh().points()))
         {
-            solution::cachePrintMessage("Calculating and caching", name, vf);
-            tmp<PointFieldType> tpf = interpolate(vf, name, false);
-            PointFieldType* pfPtr = tpf.ptr();
-            regIOobject::store(pfPtr);
-            return *pfPtr;
+            solution::cachePrintMessage("Reusing", name, vf);
         }
         else
         {
-            PointFieldType& pf = const_cast<PointFieldType&>
-            (
-                db.objectRegistry::template lookupObject<PointFieldType>(name)
-            );
-
-            if (pf.upToDate(vf))    //TBD: , vf.mesh().points()))
-            {
-                solution::cachePrintMessage("Reusing", name, vf);
-            }
-            else
-            {
-                solution::cachePrintMessage("Updating", name, vf);
-                interpolateDimensionedInternalField(vf, pf);
-            }
-
-            return pf;
+            solution::cachePrintMessage("Updating", name, vf);
+            interpolateDimensionedInternalField(vf, pf);
         }
     }
+
+    return *pfPtr;
 }
 
 

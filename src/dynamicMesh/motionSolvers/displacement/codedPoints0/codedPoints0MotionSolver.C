@@ -120,15 +120,7 @@ Foam::codedPoints0MotionSolver::codedPoints0MotionSolver
     motionSolver(mesh, dict, typeName),
     codedBase()
 {
-    // Backward compatibility
-    if (dict.found("redirectType"))
-    {
-        dict.lookup("redirectType") >> name_;
-    }
-    else
-    {
-        dict.lookup("name") >> name_;
-    }
+    dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
     updateLibrary(name_);
     redirectMotionSolver();

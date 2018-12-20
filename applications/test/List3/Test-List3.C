@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
         Info<< nl << "Specify an option! " << nl << endl;
     }
 
-    if (args.optionFound("labelListList"))
+    if (args.found("labelListList"))
     {
         for (label argi=1; argi < args.size(); ++argi)
         {

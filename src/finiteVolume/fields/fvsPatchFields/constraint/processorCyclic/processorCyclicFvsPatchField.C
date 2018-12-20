@@ -61,14 +61,12 @@ Foam::processorCyclicFvsPatchField<Type>::processorCyclicFvsPatchField
 )
 :
     coupledFvsPatchField<Type>(p, iF, dict),
-    procPatch_(refCast<const processorCyclicFvPatch>(p))
+    procPatch_(refCast<const processorCyclicFvPatch>(p, dict))
 {
     if (!isType<processorCyclicFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not processor type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not processor type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

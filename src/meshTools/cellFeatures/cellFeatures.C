@@ -124,14 +124,10 @@ bool Foam::cellFeatures::isCellFeatureEdge
 
     // Check the angle between them by comparing the face normals.
 
-    vector n0 = mesh_.faceAreas()[face0];
-    n0 /= mag(n0);
-
-    vector n1 = mesh_.faceAreas()[face1];
-    n1 /= mag(n1);
+    const vector n0 = normalised(mesh_.faceAreas()[face0]);
+    const vector n1 = normalised(mesh_.faceAreas()[face1]);
 
     scalar cosAngle = n0 & n1;
-
 
     const edge& e = mesh_.edges()[edgeI];
 
@@ -167,10 +163,8 @@ bool Foam::cellFeatures::isCellFeatureEdge
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -429,13 +423,11 @@ bool Foam::cellFeatures::isFeaturePoint(const label edge0, const label edge1)
 
     const edge& e0 = mesh_.edges()[edge0];
 
-    vector e0Vec = e0.vec(mesh_.points());
-    e0Vec /= mag(e0Vec);
+    const vector e0Vec = e0.unitVec(mesh_.points());
 
     const edge& e1 = mesh_.edges()[edge1];
 
-    vector e1Vec = e1.vec(mesh_.points());
-    e1Vec /= mag(e1Vec);
+    const vector e1Vec = e1.unitVec(mesh_.points());
 
     scalar cosAngle;
 

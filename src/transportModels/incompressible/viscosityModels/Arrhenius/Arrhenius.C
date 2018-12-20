@@ -60,12 +60,11 @@ Foam::viscosityModels::Arrhenius<ViscousModel>::Arrhenius
     fieldName_(ArrheniusCoeffs_.lookupOrDefault<word>("field","T")),
     mesh_(U.mesh())
 {
-    const volScalarField* fieldPtr =
-        mesh_.lookupObjectPtr<volScalarField>(fieldName_);
+    const auto* fldPtr = mesh_.findObject<volScalarField>(fieldName_);
 
-    if (fieldPtr)
+    if (fldPtr)
     {
-        this->nu_ *= calcNu(*fieldPtr);
+        this->nu_ *= calcNu(*fldPtr);
     }
 }
 
@@ -83,8 +82,8 @@ bool Foam::viscosityModels::Arrhenius<ViscousModel>::read
     ArrheniusCoeffs_ =
         viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    ArrheniusCoeffs_.lookup("alpha") >> alpha_;
-    ArrheniusCoeffs_.lookup("Talpha") >> Talpha_;
+    ArrheniusCoeffs_.readEntry("alpha", alpha_);
+    ArrheniusCoeffs_.readEntry("Talpha", Talpha_);
 
     return true;
 }

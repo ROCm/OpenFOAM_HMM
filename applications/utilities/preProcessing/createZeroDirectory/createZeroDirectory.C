@@ -208,11 +208,17 @@ void createFieldFiles
 // Main program:
 int main(int argc, char *argv[])
 {
-    Foam::argList::addOption
+    argList::addNote
+    (
+        "Create a 0/ directory with fields appropriate for the chosen"
+        " solver and turbulence model."
+    );
+
+    argList::addOption
     (
         "templateDir",
-        "file",
-        "read case set-up templates from specified location"
+        "dir",
+        "Read case set-up templates from specified location"
     );
 
     #include "setRootCase.H"
@@ -232,24 +238,34 @@ int main(int argc, char *argv[])
         )
     );
 
+    // Template directory: default is from PROJECT/etc directory
+    //
+    // Can use
+    // - foamEtcDir("caseDicts/createZeroDirectory", 0007);
+    // - expand "<etc:o>/caseDicts/createZeroDirectory"
+    // - expand "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectory"
+    //
+    // Use "${WM_PROJECT_DIR}/" version for nicer error message
+
     fileName baseDir
     (
-        "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectoryTemplates"
+        args.opt<fileName>
+        (
+            "templateDir",
+            "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectoryTemplates"
+        )
     );
-    if (args.found("templateDir"))
-    {
-        baseDir = args["templateDir"];
-    }
 
     baseDir.expand();
     baseDir.toAbsolute();
 
-    if (!isDir(baseDir))
+    if (!Foam::isDir(baseDir))
     {
         FatalErrorInFunction
-            << "templateDir " << baseDir
-            << " should point to the folder containing the "
-            << "case set-up templates" << exit(FatalError);
+            << "templateDir " << baseDir << nl
+            << "Does not point to a folder containing case set-up templates"
+            << nl
+            << exit(FatalError);
     }
 
     // Keep variable substitutions - delay until after creation of controlDict
@@ -257,7 +273,7 @@ int main(int argc, char *argv[])
     entry::disableFunctionEntries = 1;
 
     // Read the solver
-    const word& solverName = controlDict.lookup("application");
+    const word solverName(controlDict.get<word>("application"));
 
     // Generate solver template
     const solverTemplate solver(baseDir, runTime, solverName);

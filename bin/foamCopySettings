@@ -33,8 +33,8 @@
 #     - requires rsync
 #
 # Note
-#     The foamCopySettings.rc (found with the ~OpenFOAM expansion) can be used
-#     to add any custom rsync options.
+#     The foamCopySettings.rc (found via foamEtcFile) can be used to add any
+#     custom rsync options.
 #------------------------------------------------------------------------------
 Script=${0##*/}
 
@@ -51,8 +51,8 @@ Usage: $Script srcDir dstDir
     - requires rsync
 
 Note
-    The $Script.rc (found via the ~OpenFOAM expansion - see foamEtcFile)
-    can be used to add any custom rsync options.
+    The $Script.rc (found via foamEtcFile) can be used to add any
+    custom rsync options.
 
 USAGE
     exit 1

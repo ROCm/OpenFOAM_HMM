@@ -1,0 +1,104 @@
+#!/bin/sh
+# Note: CFL3D data available from:
+# https://turbmodels.larc.nasa.gov/bump_sa.html
+cd ${0%/*} || exit 1    # run from this directory
+
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+#set -x
+
+plotTau() {
+    graphNameTau="hill2D_tau.png"
+    echo "Creating wallshear stress graph to $graphNameTau"
+    gnuplot<<PLT_TAU
+    set terminal pngcairo font "helvetica,20" size 1000, 1000
+    set xrange [0:1.5]
+    set yrange [0:0.008]
+    set grid
+    set key bottom right
+    set xlabel "x"
+    set ylabel "c_f"
+    set output "$graphNameTau"
+
+    Uref = 69.44
+
+    set lmargin 10
+    set rmargin 1.5
+    set bmargin 3.2
+
+#    plot \
+#       "profiles.dat" u 1:(sqrt(\$2*\$2+\$3*\$3+\$4*\$4)/(0.5*Uref*Uref)) \
+#       t "simpleFoam" w l lw 2 lc rgb "black", \
+#       "cf_bump_cfl3d_sa.dat" every 10 u 1:2 \
+#       t "CFL3D" w p ps 3 pt 6 lw 2 lc rgb "red"
+
+    plot \
+        "profiles.dat" u 1:(sqrt(\$2*\$2+\$3*\$3+\$4*\$4)/(0.5*Uref*Uref)) \
+        t "simpleFoam" w l lw 2 lc rgb "black"
+PLT_TAU
+}
+
+plotCp() {
+    graphNameCp="hill2D_cp.png"
+    echo "Creating pressure coefficient graph to $graphNameCp"
+    gnuplot<<PLT_CP
+    set terminal pngcairo font "helvetica,20" size 1000, 1000
+    set xrange [0:1.5]
+    set yrange [0.4:-0.8]
+    set grid
+    set key bottom right
+    set xlabel "x"
+    set ylabel "c_p"
+    set output "$graphNameCp"
+
+    Uref = 69.44
+
+    set lmargin 10
+    set rmargin 1.5
+    set bmargin 3.2
+
+#    plot \
+#        "profiles.dat" u 1:5 \
+#        t "simpleFoam" w l lw 2 lc rgb "black", \
+#        "cp_bump_cfl3d_sa.dat" every 10 u 1:2 \  
+#        t "CFL3D" w p ps 3 pt 6 lw 2 lc rgb "red"
+
+    plot \
+        "profiles.dat" u 1:5 \
+        t "simpleFoam" w l lw 2 lc rgb "black"
+PLT_CP
+}
+
+
+if notTest $@
+then
+    # Create validation plots
+
+    # Test if gnuplot exists on the system
+    command -v gnuplot >/dev/null 2>&1 || {
+        echo "gnuplot not found - skipping graph creation" 1>&2
+        exit 1
+    }
+
+    # Test if awk exists on the system
+    command -v awk >/dev/null 2>&1 || {
+        echo "awk not found - skipping graph creation" 1>&2
+        exit 1
+    }
+
+    timeDir=$(foamListTimes -latestTime)
+
+    echo "# ccx tau_xx tau_yy tau_zz cp" > profiles.dat
+    foamDictionary -entry boundaryField.bump.value -value $timeDir/Cx | \
+        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > Cx.$$
+    foamDictionary -entry boundaryField.bump.value -value $timeDir/wallShearStress | \
+        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > tau.$$
+    foamDictionary -entry boundaryField.bump.value -value $timeDir/Cp | \
+        sed -n '/(/,/)/p' | sed -e 's/[()]//g;/^\s*$/d' > cp.$$
+    paste -d ' ' Cx.$$ tau.$$ cp.$$ >> profiles.dat
+
+    plotTau
+    plotCp
+
+    \rm -f Cx.$$ tau.$$ cp.$$ profiles.dat
+fi

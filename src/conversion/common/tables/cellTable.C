@@ -238,16 +238,19 @@ Foam::Map<Foam::word> Foam::cellTable::selectType(const word& matl) const
 
     forAllConstIter(Map<dictionary>, *this, iter)
     {
+        const label index = iter.key();
+        const dictionary& dict = iter.object();
+
         if
         (
             matl
-         == iter().lookupOrDefault<word>("MaterialType", defaultMaterial_)
+         == dict.lookupOrDefault<word>("MaterialType", defaultMaterial_)
         )
         {
             lookup.insert
             (
-                iter.key(),
-                iter().lookupOrDefault<word>
+                index,
+                dict.lookupOrDefault<word>
                 (
                     "Label",
                     "cellTable_" + Foam::name(iter.key())

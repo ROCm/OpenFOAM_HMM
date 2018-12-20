@@ -92,10 +92,8 @@ void Foam::refinementFeatures::read
 
             if (fName.empty())
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Could not open " << featObj.objectPath()
+                FatalIOErrorInFunction(dict)
+                    << "Could not open " << featObj.objectPath()
                     << exit(FatalIOError);
             }
 
@@ -186,13 +184,13 @@ void Foam::refinementFeatures::read
 
         if (dict.found("levels"))
         {
-            List<Tuple2<scalar, label>> distLevels(dict["levels"]);
+            List<Tuple2<scalar, label>> distLevels(dict.lookup("levels"));
 
             if (dict.size() < 1)
             {
                 FatalErrorInFunction
                     << " : levels should be at least size 1" << endl
-                    << "levels : "  << dict["levels"]
+                    << "levels : "  << dict.lookup("levels")
                     << exit(FatalError);
             }
 
@@ -203,6 +201,14 @@ void Foam::refinementFeatures::read
             {
                 distances_[featI][j] = distLevels[j].first();
                 levels_[featI][j] = distLevels[j].second();
+
+                if (levels_[featI][j] < 0)
+                {
+                    FatalErrorInFunction
+                        << "Feature " << featFileName
+                        << " has illegal refinement level " << levels_[featI][j]
+                        << exit(FatalError);
+                }
 
                 // Check in incremental order
                 if (j > 0)
@@ -227,8 +233,8 @@ void Foam::refinementFeatures::read
         else
         {
             // Look up 'level' for single level
-            levels_[featI] = labelList(1, readLabel(dict.lookup("level")));
-            distances_[featI] = scalarField(1, 0.0);
+            levels_[featI] = labelList(1, dict.get<label>("level"));
+            distances_[featI] = scalarField(1, Zero);
         }
 
         Info<< "Refinement level according to distance to "
@@ -575,8 +581,8 @@ void Foam::refinementFeatures::findNearestEdge
 
                     const treeDataEdge& td = tree.shapes();
                     const edge& e = td.edges()[nearInfo[sampleI].index()];
-                    nearNormal[sampleI] =  e.vec(td.points());
-                    nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
+
+                    nearNormal[sampleI] = e.unitVec(td.points());
                 }
             }
         }
@@ -638,8 +644,8 @@ void Foam::refinementFeatures::findNearestRegionEdge
                 );
 
                 const edge& e = td.edges()[nearInfo[sampleI].index()];
-                nearNormal[sampleI] =  e.vec(td.points());
-                nearNormal[sampleI] /= mag(nearNormal[sampleI])+VSMALL;
+
+                nearNormal[sampleI] = e.unitVec(td.points());
             }
         }
     }

@@ -157,17 +157,18 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
 
     vector origin(this->coeffDict().lookup("origin"));
 
-    this->coeffDict().lookup("radius") >> radius_;
-    nSector_ = readLabel(this->coeffDict().lookup("nSector"));
+    this->coeffDict().readEntry("radius", radius_);
+    this->coeffDict().readEntry("nSector", nSector_);
 
     label nS = nSector_;
 
     vector refDir;
     if (nSector_ > 1)
     {
-        refDir = this->coeffDict().lookup("refDir");
+        this->coeffDict().readEntry("refDir", refDir);
+
         refDir -= normal_[0]*(normal_[0] & refDir);
-        refDir /= mag(refDir);
+        refDir.normalise();
     }
     else
     {
@@ -207,7 +208,7 @@ void Foam::ParticleCollector<CloudType>::initConcentricCircles()
     faces_.setSize(nFace);
     area_.setSize(nFace);
 
-    coordSys_ = cylindricalCS("coordSys", origin, normal_[0], refDir, false);
+    coordSys_ = coordSystem::cylindrical(origin, normal_[0], refDir);
 
     List<label> ptIDs(identity(nPointPerRadius));
 
@@ -315,13 +316,14 @@ void Foam::ParticleCollector<CloudType>::collectParcelPolygon
         // the face's decomposed triangles does not work due to ambiguity along
         // the diagonals.
         const face& f = faces_[facei];
-        const vector n = f.normal(points_);
+        const vector areaNorm = f.areaNormal(points_);
         bool inside = true;
-        for (label i = 0; i < f.size(); ++ i)
+        for (label i = 0; i < f.size(); ++i)
         {
             const label j = f.fcIndex(i);
             const triPointRef t(pIntersect, points_[f[i]], points_[f[j]]);
-            if ((n & t.normal()) < 0)
+
+            if ((areaNorm & t.areaNormal()) < 0)
             {
                 inside = false;
                 break;
@@ -355,7 +357,7 @@ void Foam::ParticleCollector<CloudType>::collectParcelConcentricCircles
         return;
     }
 
-    // Intersection point in cylindrical co-ordinate system
+    // Intersection point in cylindrical coordinate system
     const point pCyl = coordSys_.localPosition(p1 + (d1/(d1 - d2))*(p2 - p1));
 
     scalar r = pCyl[0];
@@ -538,11 +540,11 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     faceTris_(),
     nSector_(0),
     radius_(),
-    coordSys_(false),
+    coordSys_(),
     normal_(),
     negateParcelsOppositeNormal_
     (
-        readBool(this->coeffDict().lookup("negateParcelsOppositeNormal"))
+        this->coeffDict().getBool("negateParcelsOppositeNormal")
     ),
     surfaceFormat_(this->coeffDict().lookup("surfaceFormat")),
     resetOnWrite_(this->coeffDict().lookup("resetOnWrite")),
@@ -580,8 +582,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
         forAll(polygons, polyI)
         {
             polygons[polyI] = polygonAndNormal[polyI].first();
-            normal_[polyI] = polygonAndNormal[polyI].second();
-            normal_[polyI] /= mag(normal_[polyI]) + ROOTVSMALL;
+            normal_[polyI] = normalised(polygonAndNormal[polyI].second());
         }
 
         initPolygons(polygons);
@@ -625,6 +626,7 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     nSector_(pc.nSector_),
     radius_(pc.radius_),
     coordSys_(pc.coordSys_),
+    area_(pc.area_),
     normal_(pc.normal_),
     negateParcelsOppositeNormal_(pc.negateParcelsOppositeNormal_),
     surfaceFormat_(pc.surfaceFormat_),

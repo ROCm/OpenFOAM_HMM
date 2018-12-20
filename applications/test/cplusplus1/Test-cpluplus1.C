@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
+#include "macros.H"
 #include "IOstreams.H"
 #include "UList.H"
 #include "HashSet.H"
@@ -37,13 +38,8 @@ Description
 
 using namespace Foam;
 
-// Macros to stringify macro contents.
-#define STRINGIFY(content)      #content
-#define STRING_QUOTE(input)     STRINGIFY(input)
-
 #define PRINT_TYPEID(arg)       \
     Info<< typeid(arg).name() << " <= typeid of " << STRING_QUOTE(arg) << nl
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

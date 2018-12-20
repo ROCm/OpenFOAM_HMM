@@ -49,7 +49,7 @@ Foam::label Foam::meshRefinement::mergePatchFaces
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
     // Pick up all candidate cells on boundary
-    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelHashSet boundaryCells(mesh_.nBoundaryFaces());
 
     for (const label patchi : patchIDs)
     {
@@ -254,16 +254,14 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
     combineFaces faceCombiner(mesh_, true);
 
     // Pick up all candidate cells on boundary
-    labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelHashSet boundaryCells(mesh_.nBoundaryFaces());
 
     {
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-        forAll(patchIDs, i)
+        for (const label patchi : patchIDs)
         {
-            label patchI = patchIDs[i];
-
-            const polyPatch& patch = patches[patchI];
+            const polyPatch& patch = patches[patchi];
 
             if (!patch.coupled())
             {
@@ -410,12 +408,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             // Check mesh for errors
             // ~~~~~~~~~~~~~~~~~~~~~
 
-            faceSet errorFaces
-            (
-                mesh_,
-                "errorFaces",
-                mesh_.nFaces()-mesh_.nInternalFaces()
-            );
+            faceSet errorFaces(mesh_, "errorFaces", mesh_.nBoundaryFaces());
             bool hasErrors = motionSmoother::checkMesh
             (
                 false,  // report
@@ -899,12 +892,7 @@ Foam::label Foam::meshRefinement::mergeEdgesUndo
             // Check mesh for errors
             // ~~~~~~~~~~~~~~~~~~~~~
 
-            faceSet errorFaces
-            (
-                mesh_,
-                "errorFaces",
-                mesh_.nFaces()-mesh_.nInternalFaces()
-            );
+            faceSet errorFaces(mesh_, "errorFaces", mesh_.nBoundaryFaces());
             bool hasErrors = motionSmoother::checkMesh
             (
                 false,  // report

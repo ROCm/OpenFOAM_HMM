@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,22 @@ namespace Foam
     defineTypeNameAndDebug(nearestToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, nearestToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, nearestToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, nearestToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, nearestToPoint, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        nearestToPoint,
+        word,
+        nearest
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        nearestToPoint,
+        istream,
+        nearest
+    );
 }
 
 
@@ -88,11 +104,11 @@ void Foam::nearestToPoint::combine(topoSet& set, const bool add) const
     Pstream::listCombineGather(nearest, mappedPatchBase::nearestEqOp());
     Pstream::listCombineScatter(nearest);
 
-    forAll(nearest, pointi)
+    for (const auto& near : nearest)
     {
-        if (nearest[pointi].second().second() == Pstream::myProcNo())
+        if (near.second().second() == Pstream::myProcNo())
         {
-            addOrDelete(set, nearest[pointi].first().index(), add);
+            addOrDelete(set, near.first().index(), add);
         }
     }
 }
@@ -106,8 +122,19 @@ Foam::nearestToPoint::nearestToPoint
     const pointField& points
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     points_(points)
+{}
+
+
+Foam::nearestToPoint::nearestToPoint
+(
+    const polyMesh& mesh,
+    pointField&& points
+)
+:
+    topoSetPointSource(mesh),
+    points_(std::move(points))
 {}
 
 
@@ -117,8 +144,7 @@ Foam::nearestToPoint::nearestToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    points_(dict.lookup("points"))
+    nearestToPoint(mesh, dict.get<pointField>("points"))
 {}
 
 
@@ -128,14 +154,8 @@ Foam::nearestToPoint::nearestToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     points_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::nearestToPoint::~nearestToPoint()
 {}
 
 
@@ -147,15 +167,21 @@ void Foam::nearestToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points nearest to " << points_ << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points nearest to " << points_ << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points nearest to " << points_ << endl;
+        }
 
         combine(set, false);
     }

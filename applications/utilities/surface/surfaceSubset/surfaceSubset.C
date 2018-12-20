@@ -28,8 +28,8 @@ Group
     grpSurfaceUtilities
 
 Description
-    A surface analysis tool which sub-sets the triSurface
-    to choose only a part of interest. Based on subsetMesh.
+    A surface analysis tool that subsets the triSurface to choose a
+    region of interest. Based on subsetMesh.
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,10 +51,16 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "A surface analysis tool that subsets the triSurface to choose a"
+        " region of interest."
+    );
+
     argList::noParallel();
-    argList::addArgument("surfaceSubsetDict");
-    argList::addArgument("surfaceFile");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("dict", "The surfaceSubsetDict");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("output", "The output surface file");
     argList args(argc, argv);
 
     Info<< "Reading dictionary " << args[1] << " ..." << endl;
@@ -226,7 +232,7 @@ int main(int argc, char *argv[])
     {
         const dictionary& surfDict = meshSubsetDict.subDict("surface");
 
-        fileName surfName(surfDict.lookup("name"));
+        const fileName surfName(surfDict.get<fileName>("name"));
 
         const bool outside(surfDict.get<bool>("outside"));
 
@@ -282,8 +288,8 @@ int main(int argc, char *argv[])
         const dictionary& planeDict = meshSubsetDict.subDict("plane");
 
         const plane pl(planeDict);
-        const scalar distance(readScalar(planeDict.lookup("distance")));
-        const scalar cosAngle(readScalar(planeDict.lookup("cosAngle")));
+        const scalar distance(planeDict.get<scalar>("distance"));
+        const scalar cosAngle(planeDict.get<scalar>("cosAngle"));
 
         // Select all triangles that are close to the plane and
         // whose normal aligns with the plane as well.

@@ -21,23 +21,8 @@
 
         if (io.typeHeaderOk<IOdictionary>(true))
         {
-            IOdictionary timeObject
-            (
-                IOobject
-                (
-                    "time",
-                    runTime.timeName(),
-                    "uniform",
-                    runTime,
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE,
-                    false
-                )
-            );
-
-            label index;
-            timeObject.lookup("index") >> index;
-            timeName = Foam::name(index);
+            const label timeIndex = IOdictionary(io).get<label>("index");
+            timeName = Foam::name(timeIndex);
         }
         else
         {

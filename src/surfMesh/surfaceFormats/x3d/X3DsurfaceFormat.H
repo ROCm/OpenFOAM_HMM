@@ -57,14 +57,6 @@ class X3DsurfaceFormat
     public MeshedSurface<Face>,
     public X3DsurfaceFormatCore
 {
-    // Private Member Functions
-
-        //- No copy construct
-        X3DsurfaceFormat(const X3DsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const X3DsurfaceFormat<Face>&) = delete;
-
 public:
 
     // Constructors
@@ -90,7 +82,7 @@ public:
 
     // Member Functions
 
-        //- Write object
+        //- Write surface mesh to file
         virtual void write
         (
             const fileName& name,
@@ -99,7 +91,6 @@ public:
         {
             write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
-
 };
 
 

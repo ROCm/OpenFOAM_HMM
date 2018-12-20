@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(nbrToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, nbrToCell, word);
     addToRunTimeSelectionTable(topoSetSource, nbrToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, nbrToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, nbrToCell, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        nbrToCell,
+        word,
+        nbr
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetCellSource,
+        nbrToCell,
+        istream,
+        nbr
+    );
 }
 
 
@@ -52,19 +68,17 @@ void Foam::nbrToCell::combine(topoSet& set, const bool add) const
     const cellList& cells = mesh().cells();
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    boolList isCoupled(mesh_.nFaces()-mesh_.nInternalFaces(), false);
+    boolList isCoupled(mesh_.nBoundaryFaces(), false);
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled())
         {
             label facei = pp.start();
             forAll(pp, i)
             {
                 isCoupled[facei-mesh_.nInternalFaces()] = true;
-                facei++;
+                ++facei;
             }
         }
     }
@@ -75,17 +89,15 @@ void Foam::nbrToCell::combine(topoSet& set, const bool add) const
 
         label nNbrCells = 0;
 
-        forAll(cFaces, i)
+        for (const label facei : cFaces)
         {
-            label facei = cFaces[i];
-
             if (mesh_.isInternalFace(facei))
             {
-                nNbrCells++;
+                ++nNbrCells;
             }
             else if (isCoupled[facei-mesh_.nInternalFaces()])
             {
-                nNbrCells++;
+                ++nNbrCells;
             }
         }
 
@@ -105,7 +117,7 @@ Foam::nbrToCell::nbrToCell
     const label minNbrs
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     minNbrs_(minNbrs)
 {}
 
@@ -116,8 +128,7 @@ Foam::nbrToCell::nbrToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    minNbrs_(readLabel(dict.lookup("neighbours")))
+    nbrToCell(mesh, dict.get<label>("neighbours"))
 {}
 
 
@@ -127,14 +138,8 @@ Foam::nbrToCell::nbrToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetCellSource(mesh),
     minNbrs_(readLabel(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::nbrToCell::~nbrToCell()
 {}
 
 
@@ -146,17 +151,23 @@ void Foam::nbrToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding cells with only " << minNbrs_ << " or less"
-                " neighbouring cells" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding cells with only " << minNbrs_
+                << " or fewer neighbouring cells" << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing cells with only " << minNbrs_ << " or less"
-                " neighbouring cells" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing cells with only " << minNbrs_
+                << " or fewer neighbouring cells" << " ..." << endl;
+        }
 
         combine(set, false);
     }

@@ -132,21 +132,27 @@ inline Foam::edge Foam::face::faceEdge(const label n) const
 }
 
 
-inline bool Foam::face::found(const label globalIndex) const
+inline bool Foam::face::found(const label pointLabel) const
 {
-    return which(globalIndex) != -1;
+    return labelList::found(pointLabel);
+}
+
+
+inline Foam::label Foam::face::which(const label pointLabel) const
+{
+    return labelList::find(pointLabel);
 }
 
 
 inline Foam::label Foam::face::nextLabel(const label i) const
 {
-    return this->fcValue(i);
+    return labelList::fcValue(i);
 }
 
 
 inline Foam::label Foam::face::prevLabel(const label i) const
 {
-    return this->rcValue(i);
+    return labelList::rcValue(i);
 }
 
 

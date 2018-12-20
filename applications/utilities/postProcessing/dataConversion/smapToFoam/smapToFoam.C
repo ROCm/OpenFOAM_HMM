@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Translates a STAR-CD SMAP data file into OpenFOAM field format.
+    Translate a STARCD SMAP data file into OpenFOAM field format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +39,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Translate a STARCD SMAP data file into OpenFOAM field format"
+    );
+
     argList::noParallel();
     argList::addArgument("SMAP fileName");
 
@@ -122,46 +127,29 @@ int main(int argc, char *argv[])
         {
             if (nameMap.found(starFieldNames[i]))
             {
+                IOobject io
+                (
+                    nameMap.get<word>(starFieldNames[i]),
+                    runTime.timeName(),
+                    mesh,
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                );
+
                 if (starFieldNames[i] == "SU")
                 {
-                    vFields[i] =
-                    new volVectorField
-                    (
-                        IOobject
-                        (
-                            nameMap.lookup(starFieldNames[i]),
-                            runTime.timeName(),
-                            mesh,
-                            IOobject::MUST_READ,
-                            IOobject::AUTO_WRITE
-                        ),
-                        mesh
-                    );
-
+                    vFields[i] = new volVectorField(io, mesh);
                     i += 3;
                 }
                 else
                 {
-                    sFields[i] =
-                    new volScalarField
-                    (
-                        IOobject
-                        (
-                            nameMap.lookup(starFieldNames[i]),
-                            runTime.timeName(),
-                            mesh,
-                            IOobject::MUST_READ,
-                            IOobject::AUTO_WRITE
-                        ),
-                        mesh
-                    );
-
-                    i++;
+                    sFields[i] = new volScalarField(io, mesh);
+                    ++i;
                 }
             }
             else
             {
-                i++;
+                ++i;
             }
         }
 

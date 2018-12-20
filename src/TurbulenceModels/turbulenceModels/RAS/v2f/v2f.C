@@ -341,7 +341,7 @@ void v2f<BasicTurbulenceModel>::correct()
     const volScalarField Ceps1
     (
         "Ceps1",
-        1.4*(1.0 + 0.05*min(sqrt(k_/v2_), scalar(100.0)))
+        1.4*(1.0 + 0.05*min(sqrt(k_/v2_), scalar(100)))
     );
 
     // Update epsilon (and possibly G) at the wall

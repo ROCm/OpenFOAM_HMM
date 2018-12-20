@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,8 +78,8 @@ Usage
 
     Where:
     Valid options for the \c geometryMode entry include:
-    - auto          : determine rototor co-ord system from cells
-    - specified     : specified co-ord system
+    - auto          : determine rotor coordinate system from cells
+    - specified     : specified coordinate system
 
     Valid options for the \c inletFlowType entry include:
     - fixed         : specified velocity
@@ -102,7 +102,6 @@ SourceFiles
 
 #include "cellSetOption.H"
 #include "cylindricalCS.H"
-#include "cylindrical.H"
 #include "Enum.H"
 #include "bladeModel.H"
 #include "profileModelList.H"
@@ -113,7 +112,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class trimModel;
 
 namespace fv
@@ -184,23 +183,20 @@ protected:
         flapData flap_;
 
         //- Cell centre positions in local rotor frame
-        //  (Cylindrical r, theta, z)
+        //  (Cylindrical r-theta-z)
         List<point> x_;
 
         //- Rotation tensor for flap angle
-        List<tensor> R_;
-
-        //- Inverse rotation tensor for flap angle
-        List<tensor> invR_;
+        List<tensor> Rcone_;
 
         //- Area [m2]
         List<scalar> area_;
 
-        //- Rotor local cylindrical co-ordinate system (r, theta, z)
-        cylindricalCS coordSys_;
+        //- Rotor local cylindrical coordinate system (r-theta-z)
+        coordSystem::cylindrical coordSys_;
 
-         //- Rotor transformation co-ordinate system
-        autoPtr<cylindrical> cylindrical_;
+        //- Cached rotation tensors for cylindrical coordinates
+        autoPtr<tensorField> Rcyl_;
 
         //- Maximum radius
         scalar rMax_;
@@ -223,7 +219,7 @@ protected:
         //- Set the face areas per cell, and optionally correct the rotor axis
         void setFaceArea(vector& axis, const bool correct);
 
-        //- Create the co-ordinate system
+        //- Create the coordinate system
         void createCoordinateSystem();
 
         //- Construct geometry
@@ -249,7 +245,6 @@ public:
 
 
     // Constructors
-
 
         //- Construct from components
         rotorDiskSource
@@ -277,11 +272,11 @@ public:
             inline scalar omega() const;
 
             //- Return the cell centre positions in local rotor frame
-            // (Cylindrical r, theta, z)
+            //  (Cylindrical r-theta-z)
             inline const List<point>& x() const;
 
-            //- Return the rotor co-ordinate system (r, theta, z)
-            inline const cylindricalCS& coordSys() const;
+            //- Return the rotor coordinate system (r-theta-z)
+            inline const coordSystem::cylindrical& coordSys() const;
 
 
         // Evaluation

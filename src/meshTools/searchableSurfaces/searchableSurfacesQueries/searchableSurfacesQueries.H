@@ -42,7 +42,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class plane;
 class pointConstraint;
 
@@ -171,7 +171,7 @@ public:
             static boundBox bounds
             (
                 const PtrList<searchableSurface>& allSurfaces,
-                const labelList& surfacesToTest
+                const labelUList& surfacesToTest
             );
 };
 

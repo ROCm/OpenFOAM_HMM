@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,10 +55,10 @@ const Foam::Enum
     Foam::functionObjects::runTimePostPro::pointData::representationType
 >
 Foam::functionObjects::runTimePostPro::pointData::representationTypeNames
-{
+({
     { representationType::rtSphere, "sphere" },
     { representationType::rtVector, "vector" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -93,20 +93,20 @@ Foam::functionObjects::runTimePostPro::pointData::pointData
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.lookup("representation", dict)
+        representationTypeNames.get("representation", dict)
     ),
-    maxGlyphLength_(readScalar(dict.lookup("maxGlyphLength"))),
+    maxGlyphLength_(dict.get<scalar>("maxGlyphLength")),
     pointColour_(nullptr)
 {
     if (dict.found("pointColour"))
     {
-        pointColour_.reset(Function1<vector>::New("pointColour", dict).ptr());
+        pointColour_.reset(Function1<vector>::New("pointColour", dict));
     }
     else
     {
@@ -135,7 +135,7 @@ Foam::functionObjects::runTimePostPro::pointData::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>>& colours,
     const word& pointDataType
 )
 {

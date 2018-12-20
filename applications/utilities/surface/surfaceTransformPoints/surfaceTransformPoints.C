@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
         "Note: roll=rotate about x, pitch=rotate about y, yaw=rotate about z"
     );
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("output", "The output surface file");
     argList::addOption
     (
         "translate",
@@ -175,8 +175,8 @@ int main(int argc, char *argv[])
         (
             args.lookup("rotate")()
         );
-        n1n2[0] /= mag(n1n2[0]);
-        n1n2[1] /= mag(n1n2[1]);
+        n1n2[0].normalise();
+        n1n2[1].normalise();
 
         const tensor rotT = rotationTensor(n1n2[0], n1n2[1]);
 
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
     List<scalar> scaling;
     if (args.readListIfPresent("scale", scaling))
     {
-        // readList handles single or multiple values
+        // readListIfPresent handles single or multiple values
 
         if (scaling.size() == 1)
         {

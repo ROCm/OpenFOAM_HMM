@@ -35,10 +35,10 @@ const Foam::Enum
     Foam::fanPressureFvPatchScalarField::fanFlowDirection
 >
 Foam::fanPressureFvPatchScalarField::fanFlowDirectionNames_
-{
+({
     { fanFlowDirection::ffdIn, "in" },
     { fanFlowDirection::ffdOut, "out" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -84,15 +84,15 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 :
     totalPressureFvPatchScalarField(p, iF, dict),
     fanCurve_(dict),
-    direction_(fanFlowDirectionNames_.lookup("direction", dict)),
+    direction_(fanFlowDirectionNames_.get("direction", dict)),
     nonDimensional_(dict.lookupOrDefault<Switch>("nonDimensional", false)),
     rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
     dm_(dict.lookupOrDefault<scalar>("dm", 0.0))
 {
     if (nonDimensional_)
     {
-        dict.lookup("rpm") >> rpm_;
-        dict.lookup("dm") >> dm_;
+        dict.readEntry("rpm", rpm_);
+        dict.readEntry("dm", dm_);
     }
 }
 

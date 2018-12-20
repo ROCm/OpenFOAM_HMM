@@ -45,9 +45,9 @@ inline Foam::solidArrheniusReactionRate::solidArrheniusReactionRate
     const dictionary& dict
 )
 :
-    A_(readScalar(dict.lookup("A"))),
-    Ta_(readScalar(dict.lookup("Ta"))),
-    Tcrit_(readScalar(dict.lookup("Tcrit")))
+    A_(dict.get<scalar>("A")),
+    Ta_(dict.get<scalar>("Ta")),
+    Tcrit_(dict.get<scalar>("Tcrit"))
 {}
 
 

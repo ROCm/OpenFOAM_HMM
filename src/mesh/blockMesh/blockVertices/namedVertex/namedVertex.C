@@ -53,10 +53,10 @@ Foam::blockVertices::namedVertex::namedVertex
 {
     dictionary& d = const_cast<dictionary&>(dict);
 
-    dictionary* varDictPtr = d.subDictPtr("namedVertices");
+    dictionary* varDictPtr = d.findDict("namedVertices");
     if (varDictPtr)
     {
-        const_cast<dictionary&>(*varDictPtr).add(name_, index);
+        varDictPtr->add(name_, index);
     }
     else
     {

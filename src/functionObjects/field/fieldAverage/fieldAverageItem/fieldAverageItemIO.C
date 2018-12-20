@@ -62,19 +62,19 @@ Foam::Istream& Foam::functionObjects::operator>>
 {
     is.check(FUNCTION_NAME);
 
-    const dictionaryEntry entry(dictionary::null, is);
+    const dictionaryEntry dictEntry(dictionary::null, is);
+    const dictionary& dict = dictEntry.dict();
 
     faItem.active_ = false;
-    faItem.fieldName_ = entry.keyword();
-    faItem.mean_ = readBool(entry.lookup("mean"));
-    faItem.prime2Mean_ = readBool(entry.lookup("prime2Mean"));
-    faItem.base_ = faItem.baseTypeNames_.lookup("base", entry);
-    faItem.window_ = entry.lookupOrDefault<scalar>("window", -1.0);
+    faItem.fieldName_ = dictEntry.keyword();
+    faItem.mean_ = dict.get<bool>("mean");
+    faItem.prime2Mean_ = dict.get<bool>("prime2Mean");
+    faItem.base_ = faItem.baseTypeNames_.get("base", dict);
+    faItem.window_ = dict.lookupOrDefault<scalar>("window", -1.0);
 
     if (faItem.window_ > 0)
     {
-        faItem.windowType_ =
-            faItem.windowTypeNames_.lookup("windowType", entry);
+        faItem.windowType_ = faItem.windowTypeNames_.get("windowType", dict);
 
         if (faItem.windowType_ != fieldAverageItem::windowType::NONE)
         {
@@ -84,17 +84,17 @@ Foam::Istream& Foam::functionObjects::operator>>
              && label(faItem.window_) < 1
             )
             {
-                FatalIOErrorInFunction(entry)
+                FatalIOErrorInFunction(dictEntry)
                     << "Window must be 1 or more for base type "
                     << faItem.baseTypeNames_[fieldAverageItem::baseType::ITER]
                     << exit(FatalIOError);
             }
 
-            faItem.windowName_ = entry.lookupOrDefault<word>("windowName", "");
+            faItem.windowName_ = dict.lookupOrDefault<word>("windowName", "");
 
             if (faItem.windowType_ == fieldAverageItem::windowType::EXACT)
             {
-                faItem.allowRestart_ = readBool(entry.lookup("allowRestart"));
+                faItem.allowRestart_ = dict.get<bool>("allowRestart");
 
                 if (!faItem.allowRestart_)
                 {

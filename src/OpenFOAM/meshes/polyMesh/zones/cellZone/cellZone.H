@@ -50,10 +50,8 @@ namespace Foam
 {
 
 // Forward declarations
-
 class cellZone;
 Ostream& operator<<(Ostream& os, const cellZone& zn);
-
 
 /*---------------------------------------------------------------------------*\
                            Class cellZone Declaration
@@ -63,13 +61,6 @@ class cellZone
 :
     public zone
 {
-
-    // Private Member Functions
-
-        //- No copy construct
-        cellZone(const cellZone&) = delete;
-
-
 protected:
 
     // Protected data
@@ -78,9 +69,15 @@ protected:
         const cellZoneMesh& zoneMesh_;
 
 
+    // Protected Member Functions
+
+        //- No copy construct
+        cellZone(const cellZone&) = delete;
+
+
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- The name associated with the zone-labels dictionary entry
         static const char * const labelsName;

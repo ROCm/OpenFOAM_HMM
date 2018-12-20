@@ -90,8 +90,7 @@ public:
 
 
     //- Destructor
-    virtual ~inhomogeneousMixture()
-    {}
+    virtual ~inhomogeneousMixture() = default;
 
 
     // Member functions

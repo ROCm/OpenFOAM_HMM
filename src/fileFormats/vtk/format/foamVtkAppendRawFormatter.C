@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "foamVtkAppendRawFormatter.H"
 #include "foamVtkOutputOptions.H"
+#include <limits>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -51,13 +52,8 @@ void Foam::vtk::appendRawFormatter::write
 
 Foam::vtk::appendRawFormatter::appendRawFormatter(std::ostream& os)
 :
-    formatter(os)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::appendRawFormatter::~appendRawFormatter()
+    formatter(os),
+    offset_(0)
 {}
 
 
@@ -82,9 +78,22 @@ const char* Foam::vtk::appendRawFormatter::encoding() const
 }
 
 
-void Foam::vtk::appendRawFormatter::writeSize(const uint64_t nBytes)
+uint64_t Foam::vtk::appendRawFormatter::offset(const uint64_t numbytes)
 {
-    write(reinterpret_cast<const char*>(&nBytes), sizeof(uint64_t));
+    uint64_t prev = offset_;
+
+    if (formatter::npos != numbytes)
+    {
+        offset_ += this->encodedLength(sizeof(uint64_t) + numbytes);
+    }
+    return prev;
+}
+
+
+bool Foam::vtk::appendRawFormatter::writeSize(const uint64_t numbytes)
+{
+    write(reinterpret_cast<const char*>(&numbytes), sizeof(uint64_t));
+    return true;
 }
 
 
@@ -111,8 +120,21 @@ void Foam::vtk::appendRawFormatter::write(const float val)
 void Foam::vtk::appendRawFormatter::write(const double val)
 {
     // std::cerr<<"double as float=" << val << '\n';
-    float copy(val);
-    write(copy);
+
+    // Limit range of double to float conversion
+    if (val >= std::numeric_limits<float>::max())
+    {
+        write(std::numeric_limits<float>::max());
+    }
+    else if (val <= std::numeric_limits<float>::lowest())
+    {
+        write(std::numeric_limits<float>::lowest());
+    }
+    else
+    {
+        float copy(val);
+        write(copy);
+    }
 }
 
 

@@ -113,8 +113,7 @@ void Foam::functionObjects::residuals::writeField(const word& fieldName) const
 {
     const word residualName("initialResidual:" + fieldName);
 
-    const IOField<scalar>* residualPtr =
-        mesh_.lookupObjectPtr<IOField<scalar>>(residualName);
+    const auto* residualPtr = mesh_.findObject<IOField<scalar>>(residualName);
 
     if (residualPtr)
     {
@@ -130,7 +129,7 @@ void Foam::functionObjects::residuals::writeField(const word& fieldName) const
                 false
             ),
             mesh_,
-            dimensionedScalar("0", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchField<scalar>::typeName
         );
 

@@ -28,7 +28,7 @@ Group
     grpMeshManipulationUtilities
 
 Description
-    Read obj line (not surface!) file and convert into vtk.
+    Read obj line (not surface) file and convert into legacy VTK file.
 
 \*---------------------------------------------------------------------------*/
 
@@ -110,9 +110,14 @@ labelList parseVertices(const string& line)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Read obj line (not surface) file and convert into legacy VTK file"
+    );
+
     argList::noParallel();
-    argList::addArgument("OBJ file");
-    argList::addArgument("output VTK file");
+    argList::addArgument("obj-file", "The input obj line file");
+    argList::addArgument("vtk-file", "The output vtk file");
     argList args(argc, argv);
 
     const fileName objName = args[1];

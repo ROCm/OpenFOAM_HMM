@@ -179,27 +179,19 @@ bool Foam::fv::acousticDampingSource::read(const dictionary& dict)
 {
     if (cellSetOption::read(dict))
     {
-        if (coeffs_.found("UNames"))
+        if (!coeffs_.readIfPresent("UNames", fieldNames_))
         {
-            coeffs_.lookup("UNames") >> fieldNames_;
-        }
-        else if (coeffs_.found("UName"))
-        {
-            word UName(coeffs_.lookup("UName"));
-            fieldNames_ = wordList(1, UName);
-        }
-        else
-        {
-            fieldNames_ = wordList(1, "U");
+            fieldNames_.resize(1);
+            fieldNames_.first() = coeffs_.lookupOrDefault<word>("U", "U");
         }
 
         applied_.setSize(fieldNames_.size(), false);
 
-        coeffs_.lookup("frequency") >> frequency_.value();
-        coeffs_.lookup("URef") >> URefName_;
-        coeffs_.lookup("centre") >> x0_;
-        coeffs_.lookup("radius1") >> r1_;
-        coeffs_.lookup("radius2") >> r2_;
+        coeffs_.readEntry("frequency", frequency_.value());
+        coeffs_.readEntry("URef", URefName_);
+        coeffs_.readCompat<vector>("origin", {{"centre", -1806}}, x0_);
+        coeffs_.readEntry("radius1", r1_);
+        coeffs_.readEntry("radius2", r2_);
 
         if (coeffs_.readIfPresent("w", w_))
         {
@@ -210,10 +202,8 @@ bool Foam::fv::acousticDampingSource::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

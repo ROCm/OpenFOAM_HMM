@@ -72,7 +72,7 @@ void Foam::setUpdater::updateSets(const mapPolyMesh& morphMap) const
 
     IOobjectList fileSets(Objects.lookupClass(Type::typeName));
 
-    forAllConstIter(IOobjectList, fileSets, iter)
+    forAllConstIters(fileSets, iter)
     {
         if (!memSets.found(iter.key()))
         {

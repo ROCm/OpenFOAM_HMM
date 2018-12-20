@@ -117,8 +117,8 @@ extrudePatchMesh::extrudePatchMesh
 
     forAll(dicts, patchi)
     {
-        dicts[patchi].lookup("name") >> patchNames[patchi];
-        dicts[patchi].lookup("type") >> patchTypes[patchi];
+        dicts[patchi].readEntry("name", patchNames[patchi]);
+        dicts[patchi].readEntry("type", patchTypes[patchi]);
     }
 
     forAll(regionPatches, patchi)
@@ -145,7 +145,7 @@ void extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
 {
     if (this->boundaryMesh().size() == 0)
     {
-        bool columnCells = readBool(dict_.lookup("columnCells"));
+        const bool columnCells = dict_.get<bool>("columnCells");
 
         bitSet nonManifoldEdge(extrudedPatch_.nEdges());
         for (label edgeI = 0; edgeI < extrudedPatch_.nInternalEdges(); edgeI++)
@@ -273,8 +273,8 @@ void extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
 
         forAll(dicts, patchi)
         {
-            dicts[patchi].lookup("name") >> patchNames[patchi];
-            dicts[patchi].lookup("type") >> patchTypes[patchi];
+            dicts[patchi].readEntry("name", patchNames[patchi]);
+            dicts[patchi].readEntry("type", patchTypes[patchi]);
         }
 
         forAll(regionPatches, patchi)

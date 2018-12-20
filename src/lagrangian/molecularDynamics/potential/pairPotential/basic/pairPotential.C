@@ -61,10 +61,10 @@ Foam::pairPotential::pairPotential
 :
     name_(name),
     pairPotentialProperties_(pairPotentialProperties),
-    rCut_(readScalar(pairPotentialProperties_.lookup("rCut"))),
+    rCut_(pairPotentialProperties_.get<scalar>("rCut")),
     rCutSqr_(rCut_*rCut_),
-    rMin_(readScalar(pairPotentialProperties_.lookup("rMin"))),
-    dr_(readScalar(pairPotentialProperties_.lookup("dr"))),
+    rMin_(pairPotentialProperties_.get<scalar>("rMin")),
+    dr_(pairPotentialProperties_.get<scalar>("dr")),
     forceLookup_(0),
     energyLookup_(0),
     esfPtr_(nullptr),

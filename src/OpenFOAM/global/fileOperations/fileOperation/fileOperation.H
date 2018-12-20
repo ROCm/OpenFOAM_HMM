@@ -186,7 +186,7 @@ public:
             fileOperation,
             word,
             (
-                const bool verbose
+                bool verbose
             ),
             (verbose)
         );
@@ -198,7 +198,7 @@ public:
         static autoPtr<fileOperation> New
         (
             const word& handlerType,
-            const bool verbose
+            bool verbose = false
         );
 
 
@@ -514,6 +514,9 @@ public:
             virtual void setTime(const Time&) const
             {}
 
+            //- Forcibly wait until all output done. Flush any cached data
+            virtual void flush() const;
+
             //- Generate path (like io.path) from root+casename with any
             //  'processorXXX' replaced by procDir (usually 'processsors')
             fileName processorsCasePath
@@ -563,7 +566,7 @@ public:
 const fileOperation& fileHandler();
 
 //- Reset file handler
-void fileHandler(autoPtr<fileOperation>&);
+void fileHandler(autoPtr<fileOperation>& newHandler);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

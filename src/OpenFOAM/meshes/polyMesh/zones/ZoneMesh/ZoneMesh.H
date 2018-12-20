@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,14 +47,13 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<class ZoneType, class MeshType> class ZoneMesh;
 
 template<class ZoneType, class MeshType>
 Ostream& operator<<(Ostream& os, const ZoneMesh<ZoneType, MeshType>& zones);
+
 
 /*---------------------------------------------------------------------------*\
                            Class ZoneMesh Declaration
@@ -90,6 +89,22 @@ class ZoneMesh
             const PtrList<ZoneType>& list,
             const UnaryMatchPredicate& matcher,
             const bool doSort
+        );
+
+        //- Templated implementation for indices()
+        template<class UnaryMatchPredicate>
+        static labelList indicesImpl
+        (
+            const PtrList<ZoneType>& list,
+            const UnaryMatchPredicate& matcher
+        );
+
+        //- Templated implementation for findIndex()
+        template<class UnaryMatchPredicate>
+        static label findIndexImpl
+        (
+            const PtrList<ZoneType>& list,
+            const UnaryMatchPredicate& matcher
         );
 
 
@@ -158,33 +173,65 @@ public:
         //- A list of the zone names
         wordList names() const;
 
-        //- A list of the zone names satisfying the input matcher
+        //- A list of zone names satisfying the input matcher
         wordList names(const wordRe& matcher) const;
 
-        //- A list of the zone names satisfying the input matchers
+        //- A list of zone names satisfying the input matchers
         wordList names(const wordRes& matcher) const;
 
         //- Sorted list of the zone names
         wordList sortedNames() const;
 
-        //- Sorted list of the zone names satisfying the input matcher
+        //- Sorted list of zone names satisfying the input matcher
         wordList sortedNames(const wordRe& matcher) const;
 
-        //- Sorted list of the zone names satisfying the input matchers
+        //- Sorted list of zone names satisfying the input matchers
         wordList sortedNames(const wordRes& matcher) const;
 
 
         //- Return zone indices for all matches
-        labelList findIndices(const keyType& key) const;
+        labelList indices(const keyType& key) const;
+
+        //- Return zone indices for all matches
+        labelList indices(const wordRes& matcher) const;
+
 
         //- Return zone index for the first match, return -1 if not found
         label findIndex(const keyType& key) const;
 
+        //- Return zone index for the first match, return -1 if not found
+        label findIndex(const wordRes& matcher) const;
+
+
         //- Find zone index given a name, return -1 if not found
         label findZoneID(const word& zoneName) const;
 
-        //- Mark items (cells, faces, points) that match the zone specification
-        bitSet findMatching(const keyType& key) const;
+
+        //- Return all elements (cells, faces, points) contained in the
+        //- listed zones.
+        //  The bitSet is empty (zero-size) if there are no elements matched
+        //  anywhere.
+        bitSet selection(const labelUList& zoneIds) const;
+
+        //- Return all elements (cells, faces, points) that match the zone
+        //- specification as a bitSet.
+        //  The bitSet is empty (zero-size) if there are no elements matched
+        //  anywhere.
+        bitSet selection(const keyType& key) const;
+
+        //- Return all elements (cells, faces, points) that match the zone
+        //- specification as a bitSet.
+        //  The bitSet is empty (zero-size) if there are no elements matched
+        //  anywhere.
+        bitSet selection(const wordRes& matcher) const;
+
+
+        //- Lookup zone by name and return const pointer, nullptr on error.
+        const ZoneType* zonePtr(const word& zoneName) const;
+
+        //- Lookup zone by name and return pointer, nullptr on error.
+        ZoneType* zonePtr(const word& zoneName);
+
 
         //- Clear addressing
         void clearAddressing();
@@ -204,6 +251,7 @@ public:
 
         //- writeData member function required by regIOobject
         bool writeData(Ostream& os) const;
+
 
     // Member Operators
 
@@ -245,6 +293,15 @@ public:
             Ostream& os,
             const ZoneMesh<ZoneType, MeshType>& zones
         );
+
+
+    // Housekeeping
+
+        //- Identical to the indices() method (AUG-2018)
+        labelList findIndices(const keyType& key) const
+        {
+            return indices(key);
+        }
 };
 
 

@@ -59,10 +59,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 {
     if (!dict.found("value"))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "\n    Cannot find 'value' entry"
+        FatalIOErrorInFunction(dict)
+            << "\n    Cannot find 'value' entry"
             << " on patch " << this->patch().name()
             << " of field " << this->internalField().name()
             << " in file " << this->internalField().objectPath()
@@ -75,17 +73,19 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
             << exit(FatalIOError);
     }
 
-    forAllConstIter(dictionary, dict_, iter)
+    for (const entry& dEntry : dict_)
     {
-        if (iter().keyword() != "type" && iter().keyword() != "value")
+        const keyType& key = dEntry.keyword();
+
+        if (key != "type" && key != "value")
         {
             if
             (
-                iter().isStream()
-             && iter().stream().size()
+                dEntry.isStream()
+             && dEntry.stream().size()
             )
             {
-                ITstream& is = iter().stream();
+                ITstream& is = dEntry.stream();
 
                 // Read first token
                 token firstToken(is);
@@ -108,23 +108,21 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                         {
                             scalarFields_.insert
                             (
-                                iter().keyword(),
+                                dEntry.keyword(),
                                 autoPtr<scalarField>::New()
                             );
                         }
                         else
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    token following 'nonuniform' "
-                                  "is not a compound"
+                            FatalIOErrorInFunction(dict)
+                                << "\n    token following 'nonuniform' "
+                                   "is not a compound"
                                 << "\n    on patch " << this->patch().name()
                                 << " of field "
                                 << this->internalField().name()
                                 << " in file "
                                 << this->internalField().objectPath()
-                            << exit(FatalIOError);
+                                << exit(FatalIOError);
                         }
                     }
                     else if
@@ -145,10 +143,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << iter().keyword()
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -160,7 +156,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                                 << exit(FatalIOError);
                         }
 
-                        scalarFields_.insert(iter().keyword(), fPtr);
+                        scalarFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -180,10 +176,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << iter().keyword()
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -195,7 +189,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                                 << exit(FatalIOError);
                         }
 
-                        vectorFields_.insert(iter().keyword(), fPtr);
+                        vectorFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -218,10 +212,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << iter().keyword()
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -233,7 +225,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                                 << exit(FatalIOError);
                         }
 
-                        sphericalTensorFields_.insert(iter().keyword(), fPtr);
+                        sphericalTensorFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -256,10 +248,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << iter().keyword()
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -271,7 +261,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                                 << exit(FatalIOError);
                         }
 
-                        symmTensorFields_.insert(iter().keyword(), fPtr);
+                        symmTensorFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -291,10 +281,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                         if (fPtr->size() != this->size())
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    size of field " << iter().keyword()
+                            FatalIOErrorInFunction(dict)
+                                << "\n    size of field " << key
                                 << " (" << fPtr->size() << ')'
                                 << " is not the same size as the patch ("
                                 << this->size() << ')'
@@ -306,14 +294,12 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                                 << exit(FatalIOError);
                         }
 
-                        tensorFields_.insert(iter().keyword(), fPtr);
+                        tensorFields_.insert(key, fPtr);
                     }
                     else
                     {
-                        FatalIOErrorInFunction
-                        (
-                            dict
-                        )   << "\n    compound " << fieldToken.compoundToken()
+                        FatalIOErrorInFunction(dict)
+                            << "\n    compound " << fieldToken.compoundToken()
                             << " not supported"
                             << "\n    on patch " << this->patch().name()
                             << " of field "
@@ -335,7 +321,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                     {
                         scalarFields_.insert
                         (
-                            iter().keyword(),
+                            key,
                             autoPtr<scalarField>::New
                             (
                                 this->size(),
@@ -356,7 +342,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                             vectorFields_.insert
                             (
-                                iter().keyword(),
+                                key,
                                 autoPtr<vectorField>::New
                                 (
                                     this->size(),
@@ -370,7 +356,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                             sphericalTensorFields_.insert
                             (
-                                iter().keyword(),
+                                key,
                                 autoPtr<sphericalTensorField>::New
                                 (
                                     this->size(),
@@ -384,7 +370,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                             symmTensorFields_.insert
                             (
-                                iter().keyword(),
+                                key,
                                 autoPtr<symmTensorField>::New
                                 (
                                     this->size(),
@@ -403,7 +389,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
 
                             tensorFields_.insert
                             (
-                                iter().keyword(),
+                                key,
                                 autoPtr<tensorField>::New
                                 (
                                     this->size(),
@@ -413,10 +399,8 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                         }
                         else
                         {
-                            FatalIOErrorInFunction
-                            (
-                                dict
-                            )   << "\n    unrecognised native type " << l
+                            FatalIOErrorInFunction(dict)
+                                << "\n    unrecognised native type " << l
                                 << "\n    on patch " << this->patch().name()
                                 << " of field "
                                 << this->internalField().name()
@@ -797,47 +781,49 @@ void Foam::genericFvPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", actualTypeName_);
 
-    forAllConstIter(dictionary, dict_, iter)
+    for (const entry& dEntry : dict_)
     {
-        if (iter().keyword() != "type" && iter().keyword() != "value")
+        const keyType& key = dEntry.keyword();
+
+        if (key != "type" && key != "value")
         {
             if
             (
-                iter().isStream()
-             && iter().stream().size()
-             && iter().stream()[0].isWord()
-             && iter().stream()[0].wordToken() == "nonuniform"
+                dEntry.isStream()
+             && dEntry.stream().size()
+             && dEntry.stream()[0].isWord()
+             && dEntry.stream()[0].wordToken() == "nonuniform"
             )
             {
-                if (scalarFields_.found(iter().keyword()))
+                if (scalarFields_.found(key))
                 {
-                    scalarFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    scalarFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
-                else if (vectorFields_.found(iter().keyword()))
+                else if (vectorFields_.found(key))
                 {
-                    vectorFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    vectorFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
-                else if (sphericalTensorFields_.found(iter().keyword()))
+                else if (sphericalTensorFields_.found(key))
                 {
-                    sphericalTensorFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    sphericalTensorFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
-                else if (symmTensorFields_.found(iter().keyword()))
+                else if (symmTensorFields_.found(key))
                 {
-                    symmTensorFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    symmTensorFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
-                else if (tensorFields_.found(iter().keyword()))
+                else if (tensorFields_.found(key))
                 {
-                    tensorFields_.find(iter().keyword())()
-                        ->writeEntry(iter().keyword(), os);
+                    tensorFields_.find(key)()
+                        ->writeEntry(key, os);
                 }
             }
             else
             {
-               iter().write(os);
+                dEntry.write(os);
             }
         }
     }

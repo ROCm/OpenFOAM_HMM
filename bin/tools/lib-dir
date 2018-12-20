@@ -31,16 +31,18 @@ printHelp() {
 Usage: ${0##*/} [OPTION] DIR [LIBEXT]
 
 options:
-   -sh               Emit POSIX shell syntax (default)
-   -csh              Emit C-shell shell syntax
-   -make             Emit content for a makefile
-   -help             Print the usage
+  -sh               Emit POSIX shell syntax (default)
+  -csh              Emit C-shell shell syntax
+  -sh-verbose       As per -sh,  with additional verbosity
+  -csh-verbose      As per -csh, with additional verbosity
+  -make             Emit content for a makefile
+  -help             Print the usage
 
 Resolves for the existence of DIR/lib64 and DIR/lib, or uses the fallback
 LIBEXT if these failed. A DIR ending in "-none" or "-system" is skipped.
 
-With -sh             LD_LIBRARY_PATH=dir/lib:$LD_LIBRARY_PATH
-With -csh            setenv LD_LIBRARY_PATH dir/lib:$LD_LIBRARY_PATH
+With -sh             LD_LIBRARY_PATH=dir/lib:\$LD_LIBRARY_PATH
+With -csh            setenv LD_LIBRARY_PATH dir/lib:\$LD_LIBRARY_PATH
 With -make           -Ldir/lib
 
 Exit status is zero (success) or non-zero (failure)
@@ -65,6 +67,7 @@ die()
 #------------------------------------------------------------------------------
 
 optSyntax=sh
+unset verboseOutput
 
 # Parse options
 while [ "$#" -gt 0 ]
@@ -75,6 +78,11 @@ do
         ;;
     -csh | -sh | -make)
         optSyntax="${1#-}"
+        unset verboseOutput
+        ;;
+    -csh-verbose | -sh-verbose)
+        optSyntax="${1#-}"
+        verboseOutput="source "         # Report: "export/setenv ..."
         ;;
     --)
         shift
@@ -148,15 +156,31 @@ then
         ;;
     csh-Darwin*)
         echo "setenv DYLD_LIBRARY_PATH $resolved:$DYLD_LIBRARY_PATH"
+        if [ -n "$verboseOutput" ]
+        then
+            echo "setenv DYLD_LIBRARY_PATH $resolved:$DYLD_LIBRARY_PATH" 1>&2
+        fi
         ;;
     csh*)
         echo "setenv LD_LIBRARY_PATH $resolved:$LD_LIBRARY_PATH"
+        if [ -n "$verboseOutput" ]
+        then
+            echo "setenv LD_LIBRARY_PATH $resolved:$LD_LIBRARY_PATH" 1>&2
+        fi
         ;;
     sh-Darwin*)
         echo "DYLD_LIBRARY_PATH=$resolved:$DYLD_LIBRARY_PATH"
+        if [ -n "$verboseOutput" ]
+        then
+            echo "DYLD_LIBRARY_PATH=$resolved:$DYLD_LIBRARY_PATH" 1>&2
+        fi
         ;;
     *)
         echo "LD_LIBRARY_PATH=$resolved:$LD_LIBRARY_PATH"
+        if [ -n "$verboseOutput" ]
+        then
+            echo "LD_LIBRARY_PATH=$resolved:$LD_LIBRARY_PATH" 1>&2
+        fi
         ;;
     esac
     exit 0      # Good

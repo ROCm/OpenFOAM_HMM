@@ -28,7 +28,7 @@ License
 #include "ListOps.H"
 #include "unitConversion.H"
 #include "SortableList.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "primitiveMeshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -1586,7 +1586,7 @@ bool Foam::primitiveMesh::checkFaceFaces
     label nBaffleFaces = 0;
     label nErrorDuplicate = 0;
     label nErrorOrder = 0;
-    Map<label> nCommonPoints(100);
+    Map<label> nCommonPoints(128);
 
     for (label facei = 0; facei < nFaces(); facei++)
     {

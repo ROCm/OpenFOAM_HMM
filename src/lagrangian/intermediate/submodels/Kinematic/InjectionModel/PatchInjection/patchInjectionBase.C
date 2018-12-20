@@ -75,12 +75,6 @@ Foam::patchInjectionBase::patchInjectionBase(const patchInjectionBase& pib)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::patchInjectionBase::~patchInjectionBase()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::patchInjectionBase::updateMesh(const polyMesh& mesh)

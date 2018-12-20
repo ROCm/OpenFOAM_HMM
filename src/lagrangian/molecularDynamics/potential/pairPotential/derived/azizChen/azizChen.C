@@ -55,15 +55,15 @@ azizChen::azizChen
 :
     pairPotential(name, azizChen),
     azizChenCoeffs_(azizChen.subDict(typeName + "Coeffs")),
-    epsilon_(readScalar(azizChenCoeffs_.lookup("epsilon"))),
-    rm_(readScalar(azizChenCoeffs_.lookup("rm"))),
-    A_(readScalar(azizChenCoeffs_.lookup("A"))),
-    alpha_(readScalar(azizChenCoeffs_.lookup("alpha"))),
-    C6_(readScalar(azizChenCoeffs_.lookup("C6"))),
-    C8_(readScalar(azizChenCoeffs_.lookup("C8"))),
-    C10_(readScalar(azizChenCoeffs_.lookup("C10"))),
-    D_(readScalar(azizChenCoeffs_.lookup("D"))),
-    gamma_(readScalar(azizChenCoeffs_.lookup("gamma")))
+    epsilon_(azizChenCoeffs_.get<scalar>("epsilon")),
+    rm_(azizChenCoeffs_.get<scalar>("rm")),
+    A_(azizChenCoeffs_.get<scalar>("A")),
+    alpha_(azizChenCoeffs_.get<scalar>("alpha")),
+    C6_(azizChenCoeffs_.get<scalar>("C6")),
+    C8_(azizChenCoeffs_.get<scalar>("C8")),
+    C10_(azizChenCoeffs_.get<scalar>("C10")),
+    D_(azizChenCoeffs_.get<scalar>("D")),
+    gamma_(azizChenCoeffs_.get<scalar>("gamma"))
 {
     setLookupTables();
 }
@@ -102,15 +102,15 @@ bool azizChen::read(const dictionary& azizChen)
 
     azizChenCoeffs_ = azizChen.subDict(typeName + "Coeffs");
 
-    azizChenCoeffs_.lookup("epsilon") >> epsilon_;
-    azizChenCoeffs_.lookup("rm") >> rm_;
-    azizChenCoeffs_.lookup("A") >> A_;
-    azizChenCoeffs_.lookup("alpha") >> alpha_;
-    azizChenCoeffs_.lookup("C6") >> C6_;
-    azizChenCoeffs_.lookup("C8") >> C8_;
-    azizChenCoeffs_.lookup("C10") >> C10_;
-    azizChenCoeffs_.lookup("D") >> D_;
-    azizChenCoeffs_.lookup("gamma") >> gamma_;
+    azizChenCoeffs_.readEntry("epsilon", epsilon_);
+    azizChenCoeffs_.readEntry("rm", rm_);
+    azizChenCoeffs_.readEntry("A", A_);
+    azizChenCoeffs_.readEntry("alpha", alpha_);
+    azizChenCoeffs_.readEntry("C6", C6_);
+    azizChenCoeffs_.readEntry("C8", C8_);
+    azizChenCoeffs_.readEntry("C10", C10_);
+    azizChenCoeffs_.readEntry("D", D_);
+    azizChenCoeffs_.readEntry("gamma", gamma_);
 
     return true;
 }

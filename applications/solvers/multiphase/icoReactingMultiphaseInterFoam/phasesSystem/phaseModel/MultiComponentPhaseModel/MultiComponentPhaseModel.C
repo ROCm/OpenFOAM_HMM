@@ -72,7 +72,7 @@ MultiComponentPhaseModel
 
     species_ = thermoPtr_->composition().species();
 
-    inertIndex_ = species_[thermoPtr_().lookup("inertSpecie")];
+    inertIndex_ = species_[thermoPtr_->getWord("inertSpecie")];
 
     X_.setSize(thermoPtr_->composition().species().size());
 
@@ -103,7 +103,6 @@ MultiComponentPhaseModel
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 template<class BasePhaseModel, class phaseThermo>
 void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>
@@ -191,7 +190,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     const dictionary& MULEScontrols = mesh.solverDict(alpha1.name());
 
-    scalar cAlpha(readScalar(MULEScontrols.lookup("cYi")));
+    scalar cAlpha(MULEScontrols.get<scalar>("cYi"));
 
     PtrList<surfaceScalarField> phiYiCorrs(species_.size());
     const surfaceScalarField& phi = this->fluid().phi();
@@ -202,7 +201,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     surfaceScalarField phir(0.0*phi);
 
-    forAllConstIter(phaseSystem::phaseModelTable,this->fluid().phases(),iter2)
+    forAllConstIters(this->fluid().phases(),iter2)
     {
         const volScalarField& alpha2 = iter2();
         if (&alpha2 == &alpha1)
@@ -251,10 +250,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
             surfaceScalarField& phiYiCorr = phiYiCorrs[i];
 
-            forAllConstIter
-            (
-                phaseSystem::phaseModelTable, this->fluid().phases(), iter2
-            )
+            forAllConstIters(this->fluid().phases(), iter2)
             {
                 //const volScalarField& alpha2 = iter2()().oldTime();
                 const volScalarField& alpha2 = iter2();

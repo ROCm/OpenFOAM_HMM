@@ -42,12 +42,12 @@ const Foam::Enum
     Foam::fv::cellSetOption::selectionModeType
 >
 Foam::fv::cellSetOption::selectionModeTypeNames_
-{
+({
     { selectionModeType::smPoints, "points" },
     { selectionModeType::smCellSet, "cellSet" },
     { selectionModeType::smCellZone, "cellZone" },
     { selectionModeType::smAll, "all" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -58,17 +58,17 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
     {
         case smPoints:
         {
-            dict.lookup("points") >> points_;
+            dict.readEntry("points", points_);
             break;
         }
         case smCellSet:
         {
-            dict.lookup("cellSet") >> cellSetName_;
+            dict.readEntry("cellSet", cellSetName_);
             break;
         }
         case smCellZone:
         {
-            dict.lookup("cellZone") >> cellSetName_;
+            dict.readEntry("cellZone", cellSetName_);
             break;
         }
         case smAll:
@@ -90,16 +90,17 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
 
 void Foam::fv::cellSetOption::setVol()
 {
-    scalar VOld = V_;
-
     // Set volume information
-    V_ = 0.0;
-    forAll(cells_, i)
-    {
-        V_ += mesh_.V()[cells_[i]];
-    }
-    reduce(V_, sumOp<scalar>());
 
+    scalar sumVol = 0.0;
+    for (const label celli : cells_)
+    {
+        sumVol += mesh_.V()[celli];
+    }
+    reduce(sumVol, sumOp<scalar>());
+
+    const scalar VOld = V_;
+    V_ = sumVol;
 
     // Convert both volumes to representation using current writeprecision
     word VOldName(Time::timeName(VOld, IOstream::defaultPrecision()));
@@ -142,8 +143,7 @@ void Foam::fv::cellSetOption::setCellSet()
 
             }
 
-            cells_ = selectedCells.toc();
-
+            cells_ = selectedCells.sortedToc();
             break;
         }
         case smCellSet:
@@ -151,9 +151,7 @@ void Foam::fv::cellSetOption::setCellSet()
             Info<< indent
                 << "- selecting cells using cellSet " << cellSetName_ << endl;
 
-            cellSet selectedCells(mesh_, cellSetName_);
-            cells_ = selectedCells.toc();
-
+            cells_ = cellSet(mesh_, cellSetName_).sortedToc();
             break;
         }
         case smCellZone:
@@ -169,15 +167,15 @@ void Foam::fv::cellSetOption::setCellSet()
                     << "Valid cellZones are " << mesh_.cellZones().names()
                     << exit(FatalError);
             }
-            cells_ = mesh_.cellZones()[zoneID];
 
+            cells_ = mesh_.cellZones()[zoneID];
             break;
         }
         case smAll:
         {
             Info<< indent << "- selecting all cells" << endl;
-            cells_ = identity(mesh_.nCells());
 
+            cells_ = identity(mesh_.nCells());
             break;
         }
         default:
@@ -206,10 +204,7 @@ Foam::fv::cellSetOption::cellSetOption
     option(name, modelType, dict, mesh),
     timeStart_(-1.0),
     duration_(0.0),
-    selectionMode_
-    (
-        selectionModeTypeNames_.lookup("selectionMode", coeffs_)
-    ),
+    selectionMode_(selectionModeTypeNames_.get("selectionMode", coeffs_)),
     cellSetName_("none"),
     V_(0.0)
 {
@@ -220,12 +215,6 @@ Foam::fv::cellSetOption::cellSetOption
     setVol();
     Info<< decrIndent;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::cellSetOption::~cellSetOption()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -255,10 +244,22 @@ bool Foam::fv::cellSetOption::isActive()
 
         return true;
     }
-    else
+
+    return false;
+}
+
+
+bool Foam::fv::cellSetOption::read(const dictionary& dict)
+{
+    if (option::read(dict))
     {
-        return false;
+        if (coeffs_.readIfPresent("timeStart", timeStart_))
+        {
+            coeffs_.readEntry("duration", duration_);
+        }
     }
+
+    return true;
 }
 
 

@@ -58,9 +58,9 @@ pitchForkRing::pitchForkRing
     (
         tetherPotentialProperties.subDict(typeName + "Coeffs")
     ),
-    mu_(readScalar(pitchForkRingCoeffs_.lookup("mu"))),
-    alpha_(readScalar(pitchForkRingCoeffs_.lookup("alpha"))),
-    rOrbit_(readScalar(pitchForkRingCoeffs_.lookup("rOrbit")))
+    mu_(pitchForkRingCoeffs_.get<scalar>("mu")),
+    alpha_(pitchForkRingCoeffs_.get<scalar>("alpha")),
+    rOrbit_(pitchForkRingCoeffs_.get<scalar>("rOrbit"))
 {}
 
 
@@ -101,9 +101,9 @@ bool pitchForkRing::read(const dictionary& tetherPotentialProperties)
     pitchForkRingCoeffs_ =
         tetherPotentialProperties.subDict(typeName + "Coeffs");
 
-    pitchForkRingCoeffs_.lookup("mu") >> mu_;
-    pitchForkRingCoeffs_.lookup("alpha") >> alpha_;
-    pitchForkRingCoeffs_.lookup("rOrbit") >> rOrbit_;
+    pitchForkRingCoeffs_.readEntry("mu", mu_);
+    pitchForkRingCoeffs_.readEntry("alpha", alpha_);
+    pitchForkRingCoeffs_.readEntry("rOrbit", rOrbit_);
 
     return true;
 }

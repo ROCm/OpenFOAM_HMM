@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,18 +27,27 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::globalIndex::globalIndex
+Foam::globalIndex::globalIndex(Istream& is)
+{
+    is >> offsets_;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::globalIndex::reset
 (
     const label localSize,
     const int tag,
     const label comm,
     const bool parallel
 )
-:
-    offsets_(Pstream::nProcs(comm)+1)
 {
-    labelList localSizes(Pstream::nProcs(comm), 0);
+    offsets_.resize(Pstream::nProcs(comm)+1);
+
+    labelList localSizes(Pstream::nProcs(comm), Zero);
     localSizes[Pstream::myProcNo(comm)] = localSize;
+
     if (parallel)
     {
         Pstream::gatherList(localSizes, tag, comm);
@@ -47,9 +56,9 @@ Foam::globalIndex::globalIndex
 
     label offset = 0;
     offsets_[0] = 0;
-    for (label proci = 0; proci < Pstream::nProcs(comm); proci++)
+    for (label proci = 0; proci < Pstream::nProcs(comm); ++proci)
     {
-        label oldOffset = offset;
+        const label oldOffset = offset;
         offset += localSizes[proci];
 
         if (offset < oldOffset)
@@ -65,20 +74,21 @@ Foam::globalIndex::globalIndex
 }
 
 
-Foam::globalIndex::globalIndex(const label localSize)
-:
-    offsets_(Pstream::nProcs()+1)
+void Foam::globalIndex::reset(const label localSize)
 {
-    labelList localSizes(Pstream::nProcs(), 0);
+    offsets_.resize(Pstream::nProcs()+1);
+
+    labelList localSizes(Pstream::nProcs(), Zero);
     localSizes[Pstream::myProcNo()] = localSize;
+
     Pstream::gatherList(localSizes, Pstream::msgType());
     Pstream::scatterList(localSizes, Pstream::msgType());
 
     label offset = 0;
     offsets_[0] = 0;
-    for (label proci = 0; proci < Pstream::nProcs(); proci++)
+    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
     {
-        label oldOffset = offset;
+        const label oldOffset = offset;
         offset += localSizes[proci];
 
         if (offset < oldOffset)
@@ -91,12 +101,6 @@ Foam::globalIndex::globalIndex(const label localSize)
         }
         offsets_[proci+1] = offset;
     }
-}
-
-
-Foam::globalIndex::globalIndex(Istream& is)
-{
-    is >> offsets_;
 }
 
 

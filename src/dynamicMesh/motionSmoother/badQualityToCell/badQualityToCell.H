@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ SourceFiles
 #ifndef badQualityToCell_H
 #define badQualityToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +49,7 @@ namespace Foam
 
 class badQualityToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -74,35 +74,22 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        badQualityToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        badQualityToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        badQualityToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        badQualityToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~badQualityToCell();
+    virtual ~badQualityToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

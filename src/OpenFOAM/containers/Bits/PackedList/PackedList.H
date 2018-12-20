@@ -104,6 +104,8 @@ namespace Foam
 
 // Forward declarations
 template<unsigned Width> class PackedList;
+class labelRange;
+
 class Istream;
 class Ostream;
 
@@ -239,10 +241,19 @@ public:
         inline PackedList(Istream& is);
 
         //- Copy construct
-        inline PackedList(const PackedList<Width>& rhs);
+        inline PackedList(const PackedList<Width>& list);
 
         //- Move construct
-        inline PackedList(PackedList<Width>&& rhs);
+        inline PackedList(PackedList<Width>&& list);
+
+        //- Copy construct a subset
+        PackedList(const PackedList<Width>& list, const labelUList& addr);
+
+        //- Copy construct a subset
+        PackedList(const PackedList<Width>& list, const labelUIndList& addr);
+
+        //- Copy construct a subset range
+        PackedList(const PackedList<Width>& list, const labelRange& range);
 
         //- Construct from a list of values
         inline explicit PackedList(const labelUList& values);
@@ -293,6 +304,22 @@ public:
 
         //- Return the values as a list of labels
         labelList values() const;
+
+        //- Return the values as a list of integral type.
+        //  The default integral type is unsigned int.
+        template<class IntType = unsigned int>
+        List<IntType> unpack() const;
+
+        //- Return the range of values as a list of integral type.
+        //  The default integral type is unsigned int.
+        template<class IntType = unsigned int>
+        List<IntType> unpack(const labelRange& range) const;
+
+        //- Extract the values for the specified locations as
+        //- a list of integral type.
+        //  The default integral type is unsigned int.
+        template<class IntType = unsigned int>
+        List<IntType> unpack(const labelUList& locations) const;
 
 
     // Edit

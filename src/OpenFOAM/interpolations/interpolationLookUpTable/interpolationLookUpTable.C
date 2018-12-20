@@ -158,19 +158,19 @@ void Foam::interpolationLookUpTable<Type>::dimensionTable()
 
     forAll(entries_,i)
     {
-        dim_[i] = readLabel(entries_[i].lookup("N"));
-        max_[i] = readScalar(entries_[i].lookup("max"));
-        min_[i] = readScalar(entries_[i].lookup("min"));
+        dim_[i] = entries_[i].template get<label>("N");
+        max_[i] = entries_[i].template get<scalar>("max");
+        min_[i] = entries_[i].template get<scalar>("min");
         delta_[i] = (max_[i] - min_[i])/dim_[i];
         tableDim *= dim_[i] + 1;
-        fieldIndices_.insert(entries_[i].lookup("name"), index);
+        fieldIndices_.insert(entries_[i].template get<word>("name"), index);
         entryIndices_[i] = index;
         index++;
     }
 
     forAll(output_,i)
     {
-        fieldIndices_.insert(output_[i].lookup("name"), index);
+        fieldIndices_.insert(output_[i].template get<word>("name"), index);
         outputIndices_[i] = index;
         index++;
     }
@@ -207,9 +207,9 @@ void Foam::interpolationLookUpTable<Type>::readTable
         )
     );
 
-    control.lookup("fields") >> entries_;
-    control.lookup("output") >> output_;
-    control.lookup("values") >> *this;
+    control.readEntry("fields", entries_);
+    control.readEntry("output", output_);
+    control.readEntry("values", *this);
 
     dimensionTable();
 
@@ -284,7 +284,7 @@ Foam::interpolationLookUpTable<Type>::interpolationLookUpTable
 )
 :
     List<scalarField>(),
-    fileName_(fileName(dict.lookup("file")).expand()),
+    fileName_(dict.template get<fileName>("file").expand()),
     dim_(0),
     min_(0.0),
     delta_(0.0),

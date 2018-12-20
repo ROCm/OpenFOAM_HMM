@@ -233,12 +233,10 @@ baffleThickness() const
     {
         if (thickness_.size() != patch().size())
         {
-            FatalIOErrorInFunction
-            (
-                solidDict_
-            )<< " Field thickness has not been specified "
-            << " for patch " << this->patch().name()
-            << exit(FatalIOError);
+            FatalIOErrorInFunction(solidDict_)
+                << "Field thickness has not been specified"
+                   " for patch " << this->patch().name()
+                << exit(FatalIOError);
         }
 
         return thickness_;

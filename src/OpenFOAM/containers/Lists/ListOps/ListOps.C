@@ -26,7 +26,7 @@ License
 #include "ListOps.H"
 #include <numeric>
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Data Members * * * * * * * * * * * * * //
 
 const Foam::labelList Foam::emptyLabelList;
 
@@ -82,7 +82,7 @@ Foam::labelListList Foam::invertOneToMany
 
     labelListList inverse(len);
 
-    for (label i=0; i<len; ++i)
+    for (label i=0; i < len; ++i)
     {
         inverse[i].resize(sizes[i]);
         sizes[i] = 0; // reset size counter

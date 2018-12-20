@@ -45,7 +45,7 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
                 IOobject::NO_WRITE,
                 false
             )
-        ).lookup("type")
+        ).get<word>("type")
     );
 
     Info<< "Selecting multiphaseSystem " << multiphaseSystemType << endl;

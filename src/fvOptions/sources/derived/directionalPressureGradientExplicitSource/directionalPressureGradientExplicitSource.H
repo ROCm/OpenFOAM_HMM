@@ -84,13 +84,11 @@ SourceFiles
 #ifndef directionalPressureGradientExplicitSource_H
 #define directionalPressureGradientExplicitSource_H
 
-#include "cellSetOption.H"
 #include "autoPtr.H"
-#include "topoSetSource.H"
-#include "cellSet.H"
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvOption.H"
+#include "cellSetOption.H"
 #include "interpolationTable.H"
 
 
@@ -167,7 +165,7 @@ private:
         //- Id for the face zone
         label zoneID_;
 
-         //- Local list of face IDs
+        //- Local list of face IDs
         labelList faceId_;
 
         //- Local list of patch ID per face
@@ -255,7 +253,7 @@ public:
         // I-O
 
             //- Write the source properties
-            virtual void writeData(Ostream&) const;
+            virtual void writeData(Ostream& os) const;
 
             //- Read source dictionary
             virtual bool read(const dictionary& dict);

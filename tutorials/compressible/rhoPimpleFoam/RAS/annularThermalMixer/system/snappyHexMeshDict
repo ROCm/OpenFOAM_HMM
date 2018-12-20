@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -73,7 +73,7 @@ geometry
         type        triSurfaceMesh;
         name        walls;
     }
-};
+}
 
 castellatedMeshControls
 {
@@ -240,7 +240,7 @@ addLayersControls
     nSmoothThickness 10;
     maxFaceThicknessRatio 0.5;
     maxThicknessToMedialRatio 0.3;
-    minMedianAxisAngle 90;
+    minMedialAxisAngle 90;
     nBufferCellsNoExtrude 0;
     nLayerIter 50;
 }

@@ -32,14 +32,14 @@ const Foam::Enum
     Foam::indexedCellEnum::cellTypes
 >
 Foam::indexedCellEnum::cellTypesNames_
-{
+({
     { cellTypes::ctUnassigned, "Unassigned" },
     { cellTypes::ctFar, "Far" },
     { cellTypes::ctInternal, "Internal" },
     { cellTypes::ctSurface, "Surface" },
     { cellTypes::ctFeatureEdge, "FeatureEdge" },
     { cellTypes::ctFeaturePoint,"FeaturePoint" },
-};
+});
 
 
 // ************************************************************************* //

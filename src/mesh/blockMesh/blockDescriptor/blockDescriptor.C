@@ -59,7 +59,8 @@ void Foam::blockDescriptor::check(const Istream& is)
     forAll(faces, i)
     {
         point faceCentre(faces[i].centre(vertices_));
-        vector faceNormal(faces[i].normal(vertices_));
+        vector faceNormal(faces[i].areaNormal(vertices_));
+
         if (mag(faceNormal) > SMALL)
         {
             if (((faceCentre - blockCentre) & faceNormal) > 0)
@@ -216,10 +217,8 @@ Foam::blockDescriptor::blockDescriptor
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "incorrect token while reading n, expected '(', found "
+            FatalIOErrorInFunction(is)
+                << "incorrect token while reading n, expected '(', found "
                 << t.info()
                 << exit(FatalIOError);
         }
@@ -368,7 +367,7 @@ void Foam::blockDescriptor::write
     const dictionary& d
 )
 {
-    const dictionary* varDictPtr = d.subDictPtr("namedBlocks");
+    const dictionary* varDictPtr = d.findDict("namedBlocks");
     if (varDictPtr)
     {
         blockMeshTools::write(os, val, *varDictPtr);

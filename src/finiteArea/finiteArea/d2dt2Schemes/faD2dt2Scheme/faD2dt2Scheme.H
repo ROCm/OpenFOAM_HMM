@@ -122,7 +122,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new d2dt2Scheme created on freestore
-        static tmp<faD2dt2Scheme<Type> > New
+        static tmp<faD2dt2Scheme<Type>> New
         (
             const faMesh& mesh,
             Istream& schemeData
@@ -141,40 +141,40 @@ public:
             return mesh_;
         }
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facD2dt2
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facD2dt2
         (
             const dimensioned<Type>
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facD2dt2
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facD2dt2
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facD2dt2
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facD2dt2
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facD2dt2
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facD2dt2
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<faMatrix<Type> > famD2dt2
+        virtual tmp<faMatrix<Type>> famD2dt2
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<faMatrix<Type> > famD2dt2
+        virtual tmp<faMatrix<Type>> famD2dt2
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<faMatrix<Type> > famD2dt2
+        virtual tmp<faMatrix<Type>> famD2dt2
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -194,17 +194,17 @@ public:
 
 // Add the patch constructor functions to the hash tables
 
-#define makeFaD2dt2TypeScheme(SS, Type)                                         \
-                                                                                \
-    defineNamedTemplateTypeNameAndDebug(Foam::fa::SS<Foam::Type>, 0);           \
-                                                                                \
-    namespace Foam                                                              \
-    {                                                                           \
-        namespace fa                                                            \
-        {                                                                       \
-            faD2dt2Scheme<Type>::addIstreamConstructorToTable<SS<Type> >        \
-                add##SS##Type##IstreamConstructorToTable_;                      \
-        }                                                                       \
+#define makeFaD2dt2TypeScheme(SS, Type)                                        \
+                                                                               \
+    defineNamedTemplateTypeNameAndDebug(Foam::fa::SS<Foam::Type>, 0);          \
+                                                                               \
+    namespace Foam                                                             \
+    {                                                                          \
+        namespace fa                                                           \
+        {                                                                      \
+            faD2dt2Scheme<Type>::addIstreamConstructorToTable<SS<Type>>        \
+                add##SS##Type##IstreamConstructorToTable_;                     \
+        }                                                                      \
     }
 
 

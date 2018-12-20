@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,11 +27,20 @@ Class
 Description
     IOoject and searching on triSurface
 
-    Note: when constructing from dictionary has optional parameters:
+    Note: when constructing from dictionary has the following parameters:
         - scale     : scaling factor.
         - tolerance : relative tolerance for doing intersections
                       (see triangle::intersection)
         - minQuality: discard triangles with low quality when getting normal
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        type        | triSurfaceMesh                    | selector |
+        file        | File name to locate the surface   | no    |
+        scale       | Scaling factor                    | no    | 0
+        minQuality  | Quality criterion                 | no    | -1
+    \endtable
 
 SourceFiles
     triSurfaceMesh.C
@@ -48,7 +57,7 @@ SourceFiles
 #include "treeDataTriSurface.H"
 #include "treeDataPrimitivePatch.H"
 #include "treeDataEdge.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "triSurface.H"
 #include "triSurfaceRegionSearch.H"
 
@@ -183,6 +192,7 @@ public:
     //- Destructor
     virtual ~triSurfaceMesh();
 
+
         //- Clear storage
         void clearOut();
 
@@ -198,9 +208,10 @@ public:
 
         // searchableSurface implementation
 
+            //- Names of regions
             virtual const wordList& regions() const;
 
-            //- Whether supports volume type below. I.e. whether is closed.
+            //- Whether supports volume type (below) - i.e. whether is closed.
             virtual bool hasVolumeType() const;
 
             //- Range of local indices that can be returned.
@@ -278,12 +289,12 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for point.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
+                const pointField& points,
+                List<volumeType>& volType
             ) const;
 
 

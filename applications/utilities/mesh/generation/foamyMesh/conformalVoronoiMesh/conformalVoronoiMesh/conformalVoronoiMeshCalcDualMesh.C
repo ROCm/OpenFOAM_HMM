@@ -751,12 +751,12 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
 
     forAll(patches, p)
     {
-        label totalPatchSize = readLabel(patchDicts[p].lookup("nFaces"));
+        label totalPatchSize = patchDicts[p].get<label>("nFaces");
 
         if
         (
             patchDicts.set(p)
-         && word(patchDicts[p].lookup("type")) == processorPolyPatch::typeName
+         && patchDicts[p].get<word>("type") == processorPolyPatch::typeName
         )
         {
             // Do not create empty processor patches
@@ -837,7 +837,7 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
         = dict.subDict("meshQualityControls");
 
     const scalar maxNonOrtho =
-        readScalar(meshQualityDict.lookup("maxNonOrtho", true));
+        meshQualityDict.get<scalar>("maxNonOrtho", keyType::REGEX_RECURSIVE);
 
     label nWrongFaces = 0;
 
@@ -1710,18 +1710,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
     const label nPatches = patchNames.size();
 
-    labelList procNeighbours(nPatches, label(-1));
+    labelList procNeighbours(nPatches);
     forAll(procNeighbours, patchi)
     {
-        if (patchDicts[patchi].found("neighbProcNo"))
-        {
-            procNeighbours[patchi] =
-            (
-                patchDicts[patchi].found("neighbProcNo")
-              ? readLabel(patchDicts[patchi].lookup("neighbProcNo"))
-              : -1
-            );
-        }
+        procNeighbours[patchi] =
+            patchDicts[patchi].lookupOrDefault<label>("neighbProcNo", -1);
     }
 
     List<DynamicList<face>> patchFaces(nPatches, DynamicList<face>(0));
@@ -1839,11 +1832,11 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                         }
 
                         vector correctNormal = calcSharedPatchNormal(vc1, vc2);
-                        correctNormal /= mag(correctNormal);
+                        correctNormal.normalise();
 
                         Info<< "    cN " << correctNormal << endl;
 
-                        vector fN = f.normal(pts);
+                        vector fN = f.areaNormal(pts);
 
                         if (mag(fN) < SMALL)
                         {
@@ -1851,7 +1844,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
                             continue;
                         }
 
-                        fN /= mag(fN);
+                        fN.normalise();
                         Info<< "    fN " << fN << endl;
 
                         if ((fN & correctNormal) > 0)
@@ -2343,11 +2336,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
             if (patchFaces[nbI].size() > 0)
             {
                 const label neighbour =
-                (
-                    patchDicts[nbI].found("neighbProcNo")
-                  ? readLabel(patchDicts[nbI].lookup("neighbProcNo"))
-                  : -1
-                );
+                    patchDicts[nbI].lookupOrDefault<label>("neighbProcNo", -1);
 
                 faceList procPatchFaces = patchFaces[nbI];
 

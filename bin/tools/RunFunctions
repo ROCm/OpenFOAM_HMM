@@ -53,6 +53,76 @@ notTest()
 
 
 #
+# Check if '$1' corresponds to an OpenFOAM value for 'true' (see Switch.H)
+# - does not handle integers very much, although Switch does
+#
+# Handles -dict as first argument to relay the balance to foamDictionary
+# Eg,
+#     isTrue -dict controls -entry coupling
+# ->
+#     value=$(foamDictionary controls -entry coupling -value)
+#     if value ...
+#
+isTrue()
+{
+    local value="$1"
+
+    if [ "$value" = "-dict" ]
+    then
+        shift
+        value="$(foamDictionary -value $@ 2>/dev/null)" || return 2
+    fi
+
+    case "$value" in
+        (t | y | true | yes | on)  return 0 ;;
+        (f | n | false | no | off) return 1 ;;
+    esac
+    return 2
+}
+
+
+#
+# Extract 'nFaces' for given patchName from constant/polyMesh/boundary
+# or constant/{region}/polyMesh/boundary
+#
+# On failure:
+#    return '1'
+#    exit status 1
+#
+getNumberOfPatchFaces()
+{
+    local patch="${1:-}"
+    local file="${2:-}"
+
+    file="constant/$file${file:+/}polyMesh/boundary"
+
+    [ -n "$patch" ] || {
+        echo "No patch name given" 1>&2
+        return 1
+    }
+
+    [ -f "$file" ] || {
+        echo "No such file: $file" 1>&2
+        return 2
+    }
+
+    local nFaces
+    nFaces=$(sed -ne \
+        '/^ *'"$patch"' *$/,/}/{s/^ *nFaces  *\([0-9][0-9]*\) *;.*$/\1/p}' \
+        "$file")
+
+    if [ -n "nFaces" ]
+    then
+        echo "$nFaces"
+    else
+        echo "No patch entry found for '$patch' in $file" 1>&2
+        echo 0      # Report as 0
+        return 2
+    fi
+}
+
+
+#
 # Extract 'numberOfSubdomains' from system/decomposeParDict
 # (or alternative location).
 #

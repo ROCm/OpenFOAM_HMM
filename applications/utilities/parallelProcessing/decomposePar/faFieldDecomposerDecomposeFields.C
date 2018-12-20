@@ -37,7 +37,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 faFieldDecomposer::decomposeField
 (
     const GeometricField<Type, faPatchField, areaMesh>& field
@@ -47,9 +47,9 @@ faFieldDecomposer::decomposeField
     Field<Type> internalField(field.internalField(), faceAddressing_);
 
     // Create and map the patch field values
-    PtrList<faPatchField<Type> > patchFields(boundaryAddressing_.size());
+    PtrList<faPatchField<Type>> patchFields(boundaryAddressing_.size());
 
-    forAll (boundaryAddressing_, patchi)
+    forAll(boundaryAddressing_, patchi)
     {
         if (boundaryAddressing_[patchi] >= 0)
         {
@@ -85,7 +85,7 @@ faFieldDecomposer::decomposeField
     }
 
     // Create the field for the processor
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -107,7 +107,7 @@ faFieldDecomposer::decomposeField
 
 
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 faFieldDecomposer::decomposeField
 (
     const GeometricField<Type, faePatchField, edgeMesh>& field
@@ -121,7 +121,7 @@ faFieldDecomposer::decomposeField
             procMesh_.nInternalEdges()
         )
     );
-    forAll (mapAddr, i)
+    forAll(mapAddr, i)
     {
         mapAddr[i] -= 1;
     }
@@ -140,27 +140,27 @@ faFieldDecomposer::decomposeField
     // (i.e. using slices)
     Field<Type> allEdgeField(field.mesh().nEdges());
 
-    forAll (field.internalField(), i)
+    forAll(field.internalField(), i)
     {
         allEdgeField[i] = field.internalField()[i];
     }
 
-    forAll (field.boundaryField(), patchi)
+    forAll(field.boundaryField(), patchi)
     {
         const Field<Type> & p = field.boundaryField()[patchi];
 
         const label patchStart = field.mesh().boundary()[patchi].start();
 
-        forAll (p, i)
+        forAll(p, i)
         {
             allEdgeField[patchStart + i] = p[i];
         }
     }
 
     // Create and map the patch field values
-    PtrList<faePatchField<Type> > patchFields(boundaryAddressing_.size());
+    PtrList<faePatchField<Type>> patchFields(boundaryAddressing_.size());
 
-    forAll (boundaryAddressing_, patchi)
+    forAll(boundaryAddressing_, patchi)
     {
         if (boundaryAddressing_[patchi] >= 0)
         {
@@ -196,7 +196,7 @@ faFieldDecomposer::decomposeField
     }
 
     // Create the field for the processor
-    return tmp<GeometricField<Type, faePatchField, edgeMesh> >
+    return tmp<GeometricField<Type, faePatchField, edgeMesh>>
     (
         new GeometricField<Type, faePatchField, edgeMesh>
         (
@@ -223,7 +223,7 @@ void faFieldDecomposer::decomposeFields
     const PtrList<GeoField>& fields
 ) const
 {
-    forAll (fields, fieldI)
+    forAll(fields, fieldI)
     {
         decomposeField(fields[fieldI])().write();
     }

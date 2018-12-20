@@ -33,10 +33,10 @@ template<class Type>
 Foam::csvTableReader<Type>::csvTableReader(const dictionary& dict)
 :
     tableReader<Type>(dict),
-    headerLine_(readBool(dict.lookup("hasHeaderLine"))),
-    timeColumn_(readLabel(dict.lookup("timeColumn"))),
+    headerLine_(dict.get<bool>("hasHeaderLine")),
+    timeColumn_(dict.get<label>("timeColumn")),
     componentColumns_(dict.lookup("valueColumns")),
-    separator_(dict.lookupOrDefault<string>("separator", string(","))[0])
+    separator_(dict.lookupOrDefault<string>("separator", ",")[0])
 {
     if (componentColumns_.size() != pTraits<Type>::nComponents)
     {

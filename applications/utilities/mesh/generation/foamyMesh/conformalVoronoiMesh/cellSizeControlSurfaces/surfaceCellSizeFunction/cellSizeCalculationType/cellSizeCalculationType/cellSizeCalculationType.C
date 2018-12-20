@@ -62,7 +62,7 @@ Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
 {
     const word calculationType
     (
-        cellSizeCalculationTypeDict.lookup("cellSizeCalculationType")
+        cellSizeCalculationTypeDict.get<word>("cellSizeCalculationType")
     );
 
     Info<< indent << "Selecting cellSizeCalculationType "
@@ -85,12 +85,6 @@ Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
         cstrIter()(cellSizeCalculationTypeDict, surface, defaultCellSize)
     );
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellSizeCalculationType::~cellSizeCalculationType()
-{}
 
 
 // ************************************************************************* //

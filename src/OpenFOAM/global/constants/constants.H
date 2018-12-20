@@ -25,7 +25,7 @@ Namespace
     Foam::constant
 
 Description
-    Collection of constants
+    Different types of constants
 
 \*---------------------------------------------------------------------------*/
 
@@ -34,10 +34,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Mathematical constants
 #include "mathematicalConstants.H"
-
-// Fundamental constants
 #include "fundamentalConstants.H"
 
 // Derived constants

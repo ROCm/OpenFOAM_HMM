@@ -64,14 +64,14 @@ public:
         PtrListDictionary(const label size);
 
         //- Copy construct
-        PtrListDictionary(const PtrListDictionary&);
+        PtrListDictionary(const PtrListDictionary& dict);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        PtrListDictionary(Istream&, const INew&);
+        PtrListDictionary(Istream& is, const INew& inew);
 
         //- Construct from Istream
-        PtrListDictionary(Istream&);
+        PtrListDictionary(Istream& is);
 
 
     // Member functions

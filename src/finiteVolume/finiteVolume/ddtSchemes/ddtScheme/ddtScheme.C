@@ -56,10 +56,8 @@ tmp<ddtScheme<Type>> ddtScheme<Type>::New
 
     if (schemeData.eof())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Ddt scheme not specified" << endl << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Ddt scheme not specified" << endl << endl
             << "Valid ddt schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -71,10 +69,8 @@ tmp<ddtScheme<Type>> ddtScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction
-        (
-            schemeData
-        )   << "Unknown ddt scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown ddt scheme "
             << schemeName << nl << nl
             << "Valid ddt schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()

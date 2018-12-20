@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,12 +55,7 @@ typedef MeshObject
 
 class cellCellStencilObject
 :
-    public MeshObject
-    <
-        fvMesh,
-        MoveableMeshObject,
-        cellCellStencilObject
-    >,
+    public Stencil,
     public cellCellStencil
 {
     // Private data
@@ -75,7 +70,11 @@ public:
     // Constructors
 
         //- Construct with mesh
-        explicit cellCellStencilObject(const fvMesh& mesh)
+        explicit cellCellStencilObject
+        (
+            const fvMesh& mesh,
+            const bool update = true
+        )
         :
             MeshObject
             <
@@ -92,7 +91,8 @@ public:
                     mesh.schemesDict().subDict
                     (
                         "oversetInterpolation"
-                    )
+                    ),
+                    update
                 )
             )
         {}
@@ -164,6 +164,13 @@ public:
         ) const
         {
             stencilPtr_().stencilWeights(sample, donorCcs, weights);
+        }
+
+        //- Return the names of any (stencil or mesh specific) fields that
+        //  should not be interpolated
+        virtual const wordHashSet& nonInterpolatedFields() const
+        {
+            return stencilPtr_().nonInterpolatedFields();
         }
 };
 

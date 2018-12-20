@@ -24,12 +24,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "edgeMesh.H"
+#include "bitSet.H"
+#include "edgeHashes.H"
 #include "mergePoints.H"
+#include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
-#include "ListOps.H"
-#include "edgeHashes.H"
-#include "bitSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

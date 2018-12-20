@@ -209,15 +209,14 @@ public:
         {}
 
 
-    // Member functions
+    // Housekeeping
 
-        //- Clear the SHA1 calculation
-        //  \deprecated use reset instead (deprecated Jul 2017)
+        //- Deprecated(2017-07) clear the SHA1 calculation
+        //  \deprecated(2017-07) - use reset() method
         void rewind()
         {
             sha1().clear();
         }
-
 };
 
 

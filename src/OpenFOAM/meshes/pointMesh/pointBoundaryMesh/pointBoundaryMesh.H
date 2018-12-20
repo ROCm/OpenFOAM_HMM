@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class pointMesh;
 class polyBoundaryMesh;
 
@@ -62,7 +62,7 @@ class pointBoundaryMesh
 
     // Private Member Functions
 
-        //- Calculate the geometry for the patches (transformation tensors etc.)
+        //- Calculate geometry for the patches (transformation tensors etc.)
         void calcGeometry();
 
         //- No copy construct
@@ -88,7 +88,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the mesh reference
         const pointMesh& mesh() const
@@ -96,17 +96,27 @@ public:
             return mesh_;
         }
 
+        //- Find patch indices given a name
+        labelList indices(const keyType& key, const bool useGroups) const;
+
         //- Find patch index given a name
         label findPatchID(const word& patchName) const;
-
-        //- Find patch indices given a name
-        labelList findIndices(const keyType&, const bool useGroups) const;
 
         //- Correct polyBoundaryMesh after moving points
         void movePoints(const pointField&);
 
         //- Correct polyBoundaryMesh after topology update
         void updateMesh();
+
+
+    // Housekeeping
+
+        //- Identical to the indices() method (AUG-2018)
+        labelList findIndices(const keyType& key, const bool useGroups) const
+        {
+            return indices(key, useGroups);
+        }
+
 };
 
 

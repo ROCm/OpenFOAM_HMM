@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class sensibleInternalEnergy Declaration
+                   Class sensibleInternalEnergy Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Thermo>
@@ -51,11 +51,9 @@ class sensibleInternalEnergy
 
 public:
 
-    // Constructors
-
-        //- Construct
-        sensibleInternalEnergy()
-        {}
+    //- Constructor
+    sensibleInternalEnergy()
+    {}
 
 
     // Member Functions
@@ -65,6 +63,7 @@ public:
         {
             return "sensibleInternalEnergy";
         }
+
 
         // Fundamental properties
 
@@ -81,10 +80,17 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar cv = thermo.Cv(p, T);
+                return cv;
+                #else
                 return thermo.Cv(p, T);
+                #endif
             }
 
-            //- Cp/Cv []
+            //- Ratio of specific heats Cp/Cv []
             scalar CpByCpv
             (
                 const Thermo& thermo,
@@ -92,7 +98,14 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar gamma = thermo.gamma(p, T);
+                return gamma;
+                #else
                 return thermo.gamma(p, T);
+                #endif
             }
 
             //- Sensible internal energy [J/kg]
@@ -103,11 +116,18 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar es = thermo.Es(p, T);
+                return es;
+                #else
                 return thermo.Es(p, T);
+                #endif
             }
 
-            //- Temperature from sensible internal energy
-            //  given an initial temperature T0
+            //- Temperature from sensible internal energy given an initial
+            //- temperature T0 [K]
             scalar THE
             (
                 const Thermo& thermo,
@@ -116,7 +136,14 @@ public:
                 const scalar T0
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar tes = thermo.TEs(e, p, T0);
+                return tes;
+                #else
                 return thermo.TEs(e, p, T0);
+                #endif
             }
 };
 

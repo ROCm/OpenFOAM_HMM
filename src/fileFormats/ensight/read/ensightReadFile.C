@@ -37,12 +37,6 @@ Foam::ensightReadFile::ensightReadFile
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightReadFile::~ensightReadFile()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::ensightReadFile::read

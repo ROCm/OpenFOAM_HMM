@@ -1,0 +1,3 @@
+Test-vtmWriter.C
+
+EXE = $(FOAM_APPBIN)/Test-vtmWriter

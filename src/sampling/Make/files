@@ -19,10 +19,17 @@ sampledSet/uniform/uniformSet.C
 sampledSet/array/arraySet.C
 sampledSet/shortestPath/shortestPathSet.C
 
-surface/cuttingPlane/cuttingPlane.C
+surface/cutting/cuttingPlane.C
+surface/cutting/cuttingPlaneCuts.C
+surface/cutting/cuttingPlaneSelection.C
+surface/cutting/cuttingSurface.C
+surface/cutting/cuttingSurfaceCuts.C
+surface/cutting/cuttingSurfaceBase.C
+surface/cutting/cuttingSurfaceBaseSelection.C
 surface/distanceSurface/distanceSurface.C
 surface/isoSurface/isoSurface.C
 surface/isoSurface/isoSurfaceCell.C
+surface/isoSurface/isoSurfaceTopo.C
 surface/thresholdCellFaces/thresholdCellFaces.C
 surface/triSurfaceMesh/discreteSurface.C
 
@@ -32,13 +39,16 @@ surfMeshSample/distanceSurface/surfMeshSampleDistanceSurface.C
 surfMeshSample/plane/surfMeshSamplePlane.C
 surfMeshSample/triSurfaceMesh/surfMeshSampleDiscrete.C
 
+sampledSurface/sampledNone/sampledNone.C
 sampledSurface/sampledPatch/sampledPatch.C
 sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
 sampledSurface/sampledPlane/sampledPlane.C
 sampledSurface/isoSurface/sampledIsoSurface.C
 sampledSurface/isoSurface/sampledIsoSurfaceCell.C
+sampledSurface/isoSurface/sampledIsoSurfaceTopo.C
 sampledSurface/distanceSurface/sampledDistanceSurface.C
 sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
+sampledSurface/sampledCuttingSurface/sampledCuttingSurface.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfaces/sampledSurfacesGrouping.C

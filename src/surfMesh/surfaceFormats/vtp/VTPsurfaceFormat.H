@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,16 @@ Class
 
 Description
     Write surfaces in VTP (xml) format.
+    The default format is INLINE_BASE64
 
     The output is never sorted by zone.
+
+    \heading Output Options
+    \table
+        Property    | Description                       | Required | Default
+        format      | ascii or binary format            | no  | binary
+        precision   | Write precision in ascii          | no | same as IOstream
+    \endtable
 
 SourceFiles
     VTPsurfaceFormat.C
@@ -69,13 +77,6 @@ class VTPsurfaceFormat
         );
 
 
-        //- No copy construct
-        VTPsurfaceFormat(const VTPsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const VTPsurfaceFormat<Face>&) = delete;
-
-
 public:
 
     // Constructors
@@ -109,7 +110,7 @@ public:
 
     // Member Functions
 
-        //- Write object file
+        //- Write meshed surface to a file
         virtual void write
         (
             const fileName& name,

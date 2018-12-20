@@ -72,10 +72,7 @@ dimensionedScalar rhocValue
 (
     IOobject::groupName("rho", continuousPhaseName),
     dimDensity,
-    continuousPhaseTransport.lookup
-    (
-        IOobject::groupName("rho", continuousPhaseName)
-    )
+    continuousPhaseTransport
 );
 
 volScalarField rhoc
@@ -122,8 +119,10 @@ volScalarField alphac
     dimensionedScalar(dimless, Zero)
 );
 
-word kinematicCloudName("kinematicCloud");
-args.readIfPresent("cloud", kinematicCloudName);
+const word kinematicCloudName
+(
+    args.opt<word>("cloud", "kinematicCloud")
+);
 
 Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;
 basicKinematicTypeCloud kinematicCloud
@@ -139,10 +138,9 @@ basicKinematicTypeCloud kinematicCloud
 scalar alphacMin
 (
     1.0
-  - readScalar
-    (
+  - (
         kinematicCloud.particleProperties().subDict("constantProperties")
-       .lookup("alphaMax")
+       .get<scalar>("alphaMax")
     )
 );
 

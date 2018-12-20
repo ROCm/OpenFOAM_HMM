@@ -95,14 +95,6 @@ externalCoupledMixedFvPatchField
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::externalCoupledMixedFvPatchField<Type>::
-~externalCoupledMixedFvPatchField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

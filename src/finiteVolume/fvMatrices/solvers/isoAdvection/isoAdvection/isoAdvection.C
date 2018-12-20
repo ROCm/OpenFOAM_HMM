@@ -92,7 +92,7 @@ Foam::isoAdvection::isoAdvection
     isoCutFace_(mesh_, ap_),
     cellIsBounded_(mesh_.nCells(), false),
     checkBounding_(mesh_.nCells(), false),
-    bsFaces_(label(0.2*(mesh_.nFaces() - mesh_.nInternalFaces()))),
+    bsFaces_(label(0.2*mesh_.nBoundaryFaces())),
     bsx0_(bsFaces_.size()),
     bsn0_(bsFaces_.size()),
     bsUn0_(bsFaces_.size()),
@@ -184,7 +184,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
     }
 
     // Storage for isoFace points. Only used if writeIsoFacesToFile_
-    DynamicList<List<point> > isoFacePts;
+    DynamicList<List<point>> isoFacePts;
 
     // Loop through all cells
     forAll(alpha1In_, celli)
@@ -897,7 +897,7 @@ void Foam::isoAdvection::applyBruteForceBounding()
 
     if (dict_.lookupOrDefault("clip", true))
     {
-        alpha1_ = min(scalar(1.0), max(scalar(0.0), alpha1_));
+        alpha1_ = min(scalar(1), max(scalar(0), alpha1_));
         alpha1Changed = true;
     }
 
@@ -968,15 +968,11 @@ void Foam::isoAdvection::writeIsoFaces
     if (!writeIsoFacesToFile_ || !mesh_.time().writeTime()) return;
 
     // Writing isofaces to obj file for inspection, e.g. in paraview
-    const fileName dirName
+    const fileName outputFile
     (
-        Pstream::parRun() ?
-            mesh_.time().path()/".."/"isoFaces"
-          : mesh_.time().path()/"isoFaces"
-    );
-    const word fName
-    (
-        word::printf("isoFaces_%012d", mesh_.time().timeIndex())
+        mesh_.time().globalPath()
+      / "isoFaces"
+      / word::printf("isoFaces_%012d.obj", mesh_.time().timeIndex())
     );
 
     if (Pstream::parRun())
@@ -988,8 +984,8 @@ void Foam::isoAdvection::writeIsoFaces
 
         if (Pstream::master())
         {
-            mkDir(dirName);
-            OBJstream os(dirName/fName + ".obj");
+            mkDir(outputFile.path());
+            OBJstream os(outputFile);
             Info<< nl << "isoAdvection: writing iso faces to file: "
                 << os.name() << nl << endl;
 
@@ -1015,8 +1011,8 @@ void Foam::isoAdvection::writeIsoFaces
     }
     else
     {
-        mkDir(dirName);
-        OBJstream os(dirName/fName + ".obj");
+        mkDir(outputFile.path());
+        OBJstream os(outputFile);
         Info<< nl << "isoAdvection: writing iso faces to file: "
             << os.name() << nl << endl;
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -79,7 +79,7 @@ baffles
     {
         //- Select faces and orientation through a searchableSurface
         type        searchableSurface;
-        surface     searchablePlate;
+        surface     plate;
         origin      (0.099 -0.006 0.004);
         span        (0 0.012 0.012);
 

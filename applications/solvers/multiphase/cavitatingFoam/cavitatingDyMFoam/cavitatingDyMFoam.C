@@ -28,8 +28,8 @@ Group
     grpMultiphaseSolvers grpMovingMeshSolvers
 
 Description
-    Transient cavitation code based on the homogeneous equilibrium model
-    from which the compressibility of the liquid/vapour "mixture" is obtained,
+    Transient cavitation solver based on the homogeneous equilibrium model
+    from which the compressibility of the liquid/vapour 'mixture' is obtained,
     with optional mesh motion and mesh topology changes.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
@@ -48,9 +48,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient cavitation solver based on the homogeneous equilibrium"
+        " model from which the compressibility of the liquid/vapour 'mixture'"
+        " is obtained.\n"
+        "With optional mesh motion and mesh topology changes."
+    );
+
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "createControls.H"
@@ -74,7 +82,7 @@ int main(int argc, char *argv[])
             #include "CourantNo.H"
             #include "setDeltaT.H"
 
-            runTime++;
+            ++runTime;
 
             Info<< "Time = " << runTime.timeName() << nl << endl;
 

@@ -85,7 +85,7 @@ bool Foam::UniformDimensionedField<Type>::readData(Istream& is)
     dictionary dict(is);
     scalar multiplier;
     this->dimensions().read(dict.lookup("dimensions"), multiplier);
-    dict.lookup("value") >> this->value();
+    dict.readEntry("value", this->value());
     this->value() *= multiplier;
 
     return is.good();

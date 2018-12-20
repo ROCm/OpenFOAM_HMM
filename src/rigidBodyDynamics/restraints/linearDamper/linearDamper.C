@@ -96,7 +96,7 @@ bool Foam::RBD::restraints::linearDamper::read
 {
     restraint::read(dict);
 
-    coeffs_.lookup("coeff") >> coeff_;
+    coeffs_.readEntry("coeff", coeff_);
 
     return true;
 }

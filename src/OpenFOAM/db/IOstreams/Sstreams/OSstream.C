@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -288,6 +288,18 @@ std::ios_base::fmtflags Foam::OSstream::flags(const ios_base::fmtflags f)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+char Foam::OSstream::fill() const
+{
+    return os_.fill();
+}
+
+
+char Foam::OSstream::fill(const char fillch)
+{
+    return os_.fill(fillch);
+}
+
 
 int Foam::OSstream::width() const
 {

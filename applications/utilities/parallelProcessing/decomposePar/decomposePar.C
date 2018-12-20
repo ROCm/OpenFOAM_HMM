@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,9 +35,12 @@ Usage
     \b decomposePar [OPTION]
 
     Options:
+      - \par -dry-run
+        Test without actually decomposing
+
       - \par -cellDist
         Write the cell distribution as a labelList, for use with 'manual'
-        decomposition method or as a volScalarField for post-processing.
+        decomposition method and as a volScalarField for visualization.
 
       - \par -region \<regionName\>
         Decompose named region. Does not check for existence of processor*.
@@ -83,6 +86,7 @@ Usage
 #include "fvCFD.H"
 #include "IOobjectList.H"
 #include "domainDecomposition.H"
+#include "domainDecompositionDryRun.H"
 #include "labelIOField.H"
 #include "labelFieldIOField.H"
 #include "scalarIOField.H"
@@ -104,7 +108,6 @@ Usage
 #include "pointFieldDecomposer.H"
 #include "lagrangianFieldDecomposer.H"
 #include "decompositionModel.H"
-#include "collatedFileOperation.H"
 
 #include "faCFD.H"
 #include "emptyFaPatch.H"
@@ -222,7 +225,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "decompose a mesh and fields of a case for parallel execution"
+        "Decompose a mesh and fields of a case for parallel execution"
     );
 
     argList::noParallel();
@@ -230,63 +233,78 @@ int main(int argc, char *argv[])
     (
         "decomposeParDict",
         "file",
-        "read decomposePar dictionary from specified location"
+        "Use specified file for decomposePar dictionary"
     );
     #include "addRegionOption.H"
     argList::addBoolOption
     (
         "allRegions",
-        "operate on all regions in regionProperties"
+        "Operate on all regions in regionProperties"
+    );
+    argList::addBoolOption
+    (
+        "dry-run",
+        "Test without writing the decomposition. "
+        "Changes -cellDist to only write volScalarField."
+    );
+    argList::addBoolOption
+    (
+        "verbose",
+        "Additional verbosity"
     );
     argList::addBoolOption
     (
         "cellDist",
-        "write cell distribution as a labelList - for use with 'manual' "
-        "decomposition method or as a volScalarField for post-processing."
+        "Write cell distribution as a labelList - for use with 'manual' "
+        "decomposition method and as a volScalarField for visualization."
     );
     argList::addBoolOption
     (
         "copyZero",
-        "Copy \a 0 directory to processor* rather than decompose the fields"
+        "Copy 0/ directory to processor*/ rather than decompose the fields"
     );
     argList::addBoolOption
     (
         "copyUniform",
-        "copy any uniform/ directories too"
+        "Copy any uniform/ directories too"
     );
     argList::addBoolOption
     (
         "fields",
-        "use existing geometry decomposition and convert fields only"
+        "Use existing geometry decomposition and convert fields only"
     );
     argList::addBoolOption
     (
         "noSets",
-        "skip decomposing cellSets, faceSets, pointSets"
+        "Skip decomposing cellSets, faceSets, pointSets"
     );
     argList::addBoolOption
     (
         "force",
-        "remove existing processor*/ subdirs before decomposing the geometry"
+        "Remove existing processor*/ subdirs before decomposing the geometry"
     );
     argList::addBoolOption
     (
         "ifRequired",
-        "only decompose geometry if the number of domains has changed"
+        "Only decompose geometry if the number of domains has changed"
     );
 
-    // Include explicit constant options, have zero from time range
-    timeSelector::addOptions(true, false);
+    // Allow explicit -constant, have zero from time range
+    timeSelector::addOptions(true, false);  // constant(true), zero(false)
 
     #include "setRootCase.H"
 
+    const bool dryrun           = args.found("dry-run");
     const bool optRegion        = args.found("region");
     const bool allRegions       = args.found("allRegions");
     const bool writeCellDist    = args.found("cellDist");
+    const bool verbose          = args.found("verbose");
+
+    // Most of these are ignored for dry-run (not triggered anywhere)
     const bool copyZero         = args.found("copyZero");
     const bool copyUniform      = args.found("copyUniform");
     const bool decomposeSets    = !args.found("noSets");
-    const bool ifRequiredDecomposition = args.found("ifRequired");
+    const bool decomposeIfRequired = args.found("ifRequired");
 
     bool decomposeFieldsOnly = args.found("fields");
     bool forceOverwrite      = args.found("force");
@@ -294,39 +312,66 @@ int main(int argc, char *argv[])
 
     // Set time from database
     #include "createTime.H"
-    // Allow override of time
-    instantList times = timeSelector::selectIfPresent(runTime, args);
 
-
-    // Allow override of decomposeParDict location
-    fileName decompDictFile;
-    args.readIfPresent("decomposeParDict", decompDictFile);
-
-    wordList regionNames;
-    if (allRegions)
+    // Allow override of time (unless dry-run)
+    instantList times;
+    if (dryrun)
     {
-        Info<< "Decomposing all regions in regionProperties" << nl << endl;
-        regionProperties rp(runTime);
-
-        wordHashSet names;
-        forAllConstIters(rp, iter)
-        {
-            names.insert(iter.object());
-        }
-
-        regionNames = names.sortedToc();
+        Info<< "\ndry-run: ignoring -copy*, -fields, -force, time selection"
+            << nl;
     }
     else
     {
-        regionNames = {fvMesh::defaultRegion};
-        args.readIfPresent("region", regionNames[0]);
+        times = timeSelector::selectIfPresent(runTime, args);
+    }
+
+
+    // Allow override of decomposeParDict location
+    const fileName decompDictFile = args.opt<fileName>("decomposeParDict", "");
+
+    // Get all region names
+    wordList regionNames;
+    if (allRegions)
+    {
+        regionNames = regionProperties(runTime).names();
+
+        Info<< "Decomposing all regions in regionProperties" << nl
+            << "    " << flatOutput(regionNames) << nl << endl;
+    }
+    else
+    {
+        regionNames.resize(1);
+        regionNames.first() = args.opt<word>("region", fvMesh::defaultRegion);
     }
 
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
         const word& regionDir =
-            regionName == fvMesh::defaultRegion ? word::null : regionName;
+            (regionName == fvMesh::defaultRegion ? word::null : regionName);
+
+        if (dryrun)
+        {
+            Info<< "dry-run: decomposing mesh " << regionName << nl << nl
+                << "Create mesh..." << flush;
+
+            domainDecompositionDryRun decompTest
+            (
+                IOobject
+                (
+                    regionName,
+                    runTime.timeName(),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                decompDictFile
+            );
+
+            decompTest.execute(writeCellDist, verbose);
+            continue;
+        }
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
 
@@ -339,13 +384,13 @@ int main(int argc, char *argv[])
         (
             IOdictionary
             (
-                decompositionModel::selectIO
+                IOobject::selectIO
                 (
                     IOobject
                     (
-                        "decomposeParDict",
+                        decompositionModel::canonicalName,
                         runTime.time().system(),
-                        regionDir,          // use region if non-standard
+                        regionDir,  // region (if non-default)
                         runTime,
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
@@ -377,9 +422,9 @@ int main(int argc, char *argv[])
         {
             bool procDirsProblem = true;
 
-            if (ifRequiredDecomposition && nProcs == nDomains)
+            if (decomposeIfRequired && nProcs == nDomains)
             {
-                // we can reuse the decomposition
+                // We can reuse the decomposition
                 decomposeFieldsOnly = true;
                 procDirsProblem = false;
                 forceOverwrite = false;
@@ -470,12 +515,6 @@ int main(int argc, char *argv[])
         // Decompose the mesh
         if (!decomposeFieldsOnly)
         {
-            // Disable buffering when writing mesh since we need to read
-            // it later on when decomposing the fields
-            float bufSz =
-                fileOperations::collatedFileOperation::maxThreadFileBufferSize;
-            fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
-
             mesh.decomposeMesh();
 
             mesh.writeDecomposition(decomposeSets);
@@ -484,28 +523,7 @@ int main(int argc, char *argv[])
             {
                 const labelList& procIds = mesh.cellToProc();
 
-                // Write the decomposition as labelList for use with 'manual'
-                // decomposition method.
-                labelIOList cellDecomposition
-                (
-                    IOobject
-                    (
-                        "cellDecomposition",
-                        mesh.facesInstance(),
-                        mesh,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE,
-                        false
-                    ),
-                    procIds
-                );
-                cellDecomposition.write();
-
-                Info<< nl << "Wrote decomposition to "
-                    << cellDecomposition.objectPath()
-                    << " for use in manual decomposition." << endl;
-
-                // Write as volScalarField for postprocessing.
+                // Write decomposition as volScalarField for visualization
                 volScalarField cellDist
                 (
                     IOobject
@@ -530,12 +548,32 @@ int main(int argc, char *argv[])
                 cellDist.write();
 
                 Info<< nl << "Wrote decomposition as volScalarField to "
-                    << cellDist.name() << " for use in postprocessing."
+                    << cellDist.name() << " for visualization."
                     << endl;
+
+                // Write decomposition as labelList for use with 'manual'
+                // decomposition method.
+                labelIOList cellDecomposition
+                (
+                    IOobject
+                    (
+                        "cellDecomposition",
+                        mesh.facesInstance(),
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    ),
+                    procIds
+                );
+                cellDecomposition.write();
+
+                Info<< nl << "Wrote decomposition to "
+                    << cellDecomposition.objectPath()
+                    << " for use in manual decomposition." << endl;
             }
 
-            fileOperations::collatedFileOperation::maxThreadFileBufferSize =
-                bufSz;
+            fileHandler().flush();
         }
 
 
@@ -549,7 +587,7 @@ int main(int argc, char *argv[])
                 (
                     Time::controlDictName,
                     args.rootPath(),
-                    args.caseName()/fileName(word("processor") + name(proci))
+                    args.caseName()/("processor" + Foam::name(proci))
                 );
                 processorDb.setTime(runTime);
 
@@ -754,7 +792,7 @@ int main(int argc, char *argv[])
 
                 for (const fileName& cloudDir : cloudDirs)
                 {
-                    IOobjectList sprayObjs
+                    IOobjectList cloudObjects
                     (
                         mesh,
                         runTime.timeName(),
@@ -764,12 +802,12 @@ int main(int argc, char *argv[])
                         false
                     );
 
-                    // Note: looking up "positions" for backwards compatibility
-                    IOobject* positionsPtr =
-                        sprayObjs.lookup(word("positions"));
-                    IOobject* coordsPtr = sprayObjs.lookup(word("coordinates"));
-
-                    if (positionsPtr || coordsPtr)
+                    // Note: look up "positions" for backwards compatibility
+                    if
+                    (
+                        cloudObjects.found("coordinates")
+                     || cloudObjects.found("positions")
+                    )
                     {
                         // Read lagrangian particles
                         // ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -976,7 +1014,7 @@ int main(int argc, char *argv[])
                                 Time::controlDictName,
                                 args.rootPath(),
                                 args.caseName()
-                               /fileName(word("processor") + name(proci))
+                              / ("processor" + Foam::name(proci))
                             )
                         );
                     }
@@ -1334,8 +1372,8 @@ int main(int argc, char *argv[])
                         (
                             Time::controlDictName,
                             args.rootPath(),
-                            args.caseName()/
-                            fileName(word("processor") + name(procI))
+                            args.caseName()
+                          / ("processor" + Foam::name(procI))
                         );
 
                         processorDb.setTime(runTime);
@@ -1433,8 +1471,14 @@ int main(int argc, char *argv[])
 
                             fieldDecomposer.decomposeFields(areaScalarFields);
                             fieldDecomposer.decomposeFields(areaVectorFields);
-                            fieldDecomposer.decomposeFields(areaSphericalTensorFields);
-                            fieldDecomposer.decomposeFields(areaSymmTensorFields);
+                            fieldDecomposer.decomposeFields
+                            (
+                                areaSphericalTensorFields
+                            );
+                            fieldDecomposer.decomposeFields
+                            (
+                                areaSymmTensorFields
+                            );
                             fieldDecomposer.decomposeFields(areaTensorFields);
 
                             fieldDecomposer.decomposeFields(edgeScalarFields);

@@ -33,7 +33,7 @@ Foam::kineticTheoryModels::frictionalStressModel::New
     const dictionary& dict
 )
 {
-    const word modelType(dict.lookup("frictionalStressModel"));
+    const word modelType(dict.get<word>("frictionalStressModel"));
 
     Info<< "Selecting frictionalStressModel " << modelType << endl;
 

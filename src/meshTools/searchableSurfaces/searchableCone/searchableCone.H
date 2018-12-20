@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +27,16 @@ Class
 Description
     Searching on (optionally hollow) cone.
 
-    \heading Function object usage
+    \heading Dictionary parameters
     \table
-        Property     | Description             | Required    | Default value
-        point1       | coordinate of endpoint  | yes         |
-        radius1      | radius at point1        | yes         | yes
-        innerRadius1 | inner radius at point1  | no          |
-        point2       | coordinate of endpoint  | yes         |
-        radius2      | radius at point2        | yes         | yes
-        innerRadius2 | inner radius at point2  | no          |
+        Property    | Description                       | Required | Default
+        type        | code / searchableCone             | selector |
+        point1      | coordinate of endpoint            | yes   |
+        radius1     | radius at point1                  | yes   |
+        innerRadius1| inner radius at point1            | no    | 0
+        point2      | coordinate of endpoint            | yes   |
+        radius2     | radius at point2                  | yes   |
+        innerRadius2| inner radius at point2            | no    | 0
     \endtable
 
 Note
@@ -145,22 +146,22 @@ class searchableCone
 public:
 
     //- Runtime type information
-   TypeName("searchableCone");
+    TypeName("searchableCone");
 
 
     // Constructors
 
         //- Construct from components
-       searchableCone
-       (
-           const IOobject& io,
-           const point& point1,
-           const scalar radius1,
-           const scalar innerRadius1,
-           const point& point2,
-           const scalar radius2,
-           const scalar innerRadius2
-       );
+        searchableCone
+        (
+            const IOobject& io,
+            const point& point1,
+            const scalar radius1,
+            const scalar innerRadius1,
+            const point& point2,
+            const scalar radius2,
+            const scalar innerRadius2
+        );
 
         //- Construct from dictionary (used by searchableSurface)
         searchableCone
@@ -171,15 +172,15 @@ public:
 
 
     //- Destructor
-
-        virtual ~searchableCone();
+    virtual ~searchableCone() = default;
 
 
     // Member Functions
 
+        //- Names of regions
         virtual const wordList& regions() const;
 
-        //- Whether supports volume type below
+        //- Whether supports volume type (below)
         virtual bool hasVolumeType() const
         {
             return true;
@@ -262,12 +263,12 @@ public:
                 vectorField& normal
             ) const;
 
-            //- Determine type (inside/outside/mixed) for point. unknown if
-            //  cannot be determined (e.g. non-manifold surface)
+            //- Determine type (inside/outside/mixed) for point.
+            //  Unknown if cannot be determined (e.g. non-manifold surface)
             virtual void getVolumeType
             (
-                const pointField&,
-                List<volumeType>&
+                const pointField& points,
+                List<volumeType>& volType
             ) const;
 
 

@@ -49,14 +49,7 @@ Foam::profileModel::profileModel(const dictionary& dict, const word& name)
 :
     dict_(dict),
     name_(name),
-    fName_(fileName::null)
-{
-    dict.readIfPresent("file", fName_);
-}
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::profileModel::~profileModel()
+    fName_(dict.lookupOrDefault<fileName>("file", fileName::null))
 {}
 
 
@@ -75,7 +68,7 @@ Foam::autoPtr<Foam::profileModel> Foam::profileModel::New
 {
     const word& modelName = dict.dictName();
 
-    const word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "    - creating " << modelType << " profile " << modelName << endl;
 

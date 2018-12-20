@@ -27,7 +27,6 @@ License
 #include "universalConstants.H"
 #include "electromagneticConstants.H"
 #include "atomicConstants.H"
-
 #include "dimensionedConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

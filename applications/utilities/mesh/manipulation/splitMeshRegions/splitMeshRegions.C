@@ -34,7 +34,7 @@ Description
     cell-face-cell walking without crossing
     - boundary faces
     - additional faces from faceset (-blockedFaces faceSet).
-    - any face inbetween differing cellZones (-cellZones)
+    - any face between differing cellZones (-cellZones)
 
     Output is:
     - volScalarField with regions as different scalars (-detectOnly)
@@ -97,7 +97,7 @@ Description
 #include "cellSet.H"
 #include "polyTopoChange.H"
 #include "removeCells.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "syncTools.H"
 #include "ReadFields.H"
 #include "mappedWallPolyPatch.H"
@@ -353,7 +353,7 @@ void getInterfaceSizes
     // ~~~~~~~~~~~~~~
 
     // Neighbour cellRegion.
-    labelList coupledRegion(mesh.nFaces()-mesh.nInternalFaces());
+    labelList coupledRegion(mesh.nBoundaryFaces());
 
     forAll(coupledRegion, i)
     {
@@ -641,7 +641,7 @@ autoPtr<mapPolyMesh> createRegionMesh
 
 
     // Neighbour cellRegion.
-    labelList coupledRegion(mesh.nFaces()-mesh.nInternalFaces());
+    labelList coupledRegion(mesh.nBoundaryFaces());
 
     forAll(coupledRegion, i)
     {
@@ -1232,7 +1232,7 @@ void getZoneID
     }
 
     // Neighbour zoneID.
-    neiZoneID.setSize(mesh.nFaces()-mesh.nInternalFaces());
+    neiZoneID.setSize(mesh.nBoundaryFaces());
 
     forAll(neiZoneID, i)
     {
@@ -1263,7 +1263,7 @@ void matchRegions
 
     // Get current per cell zoneID
     labelList zoneID(mesh.nCells(), -1);
-    labelList neiZoneID(mesh.nFaces()-mesh.nInternalFaces());
+    labelList neiZoneID(mesh.nBoundaryFaces());
     getZoneID(mesh, cellZones, zoneID, neiZoneID);
 
     // Sizes per cellzone
@@ -1417,73 +1417,75 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "splits mesh into multiple regions (detected by walking across faces)"
+        "Split mesh into multiple regions (detected by walking across faces)"
     );
     #include "addRegionOption.H"
     #include "addOverwriteOption.H"
     argList::addBoolOption
     (
         "cellZones",
-        "additionally split cellZones off into separate regions"
+        "Additionally split cellZones off into separate regions"
     );
     argList::addBoolOption
     (
         "cellZonesOnly",
-        "use cellZones only to split mesh into regions; do not use walking"
+        "Use cellZones only to split mesh into regions; do not use walking"
     );
     argList::addOption
     (
         "cellZonesFileOnly",
         "file",
-        "like -cellZonesOnly, but use specified file"
+        "Like -cellZonesOnly, but use specified file"
     );
     argList::addOption
     (
         "blockedFaces",
         "faceSet",
-        "specify additional region boundaries that walking does not cross"
+        "Specify additional region boundaries that walking does not cross"
     );
     argList::addBoolOption
     (
         "makeCellZones",
-        "place cells into cellZones instead of splitting mesh"
+        "Place cells into cellZones instead of splitting mesh"
     );
     argList::addBoolOption
     (
         "largestOnly",
-        "only write largest region"
+        "Only write largest region"
     );
     argList::addOption
     (
         "insidePoint",
         "point",
-        "only write region containing point"
+        "Only write region containing point"
     );
     argList::addBoolOption
     (
         "detectOnly",
-        "do not write mesh"
+        "Do not write mesh"
     );
     argList::addBoolOption
     (
         "sloppyCellZones",
-        "try to match heuristically regions to existing cell zones"
+        "Try to match heuristically regions to existing cell zones"
     );
     argList::addBoolOption
     (
         "useFaceZones",
-        "use faceZones to patch inter-region faces instead of single patch"
+        "Use faceZones to patch inter-region faces instead of single patch"
     );
     argList::addBoolOption
     (
         "prefixRegion",
-        "prefix region name to all patches, not just coupling patches"
+        "Prefix region name to all patches, not just coupling patches"
     );
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
     #include "createNamedMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;
@@ -1550,7 +1552,7 @@ int main(int argc, char *argv[])
     // Existing zoneID
     labelList zoneID(mesh.nCells(), -1);
     // Neighbour zoneID.
-    labelList neiZoneID(mesh.nFaces()-mesh.nInternalFaces());
+    labelList neiZoneID(mesh.nBoundaryFaces());
     getZoneID(mesh, cellZones, zoneID, neiZoneID);
 
 
@@ -1620,7 +1622,7 @@ int main(int argc, char *argv[])
         );
 
         labelList newZoneID(mesh.nCells(), -1);
-        labelList newNeiZoneID(mesh.nFaces()-mesh.nInternalFaces());
+        labelList newNeiZoneID(mesh.nBoundaryFaces());
         getZoneID(mesh, newCellZones, newZoneID, newNeiZoneID);
 
         label unzonedCelli = newZoneID.find(-1);
@@ -1944,7 +1946,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
             mesh.setInstance(runTime.timeName());
         }
         else
@@ -1992,7 +1994,7 @@ int main(int argc, char *argv[])
 
         if (!overwrite)
         {
-            runTime++;
+            ++runTime;
         }
 
 

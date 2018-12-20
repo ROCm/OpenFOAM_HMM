@@ -261,6 +261,13 @@ inline const T& Foam::autoPtr<T>::operator()() const
 
 
 template<class T>
+inline Foam::autoPtr<T>::operator bool() const noexcept
+{
+    return ptr_;
+}
+
+
+template<class T>
 inline void Foam::autoPtr<T>::operator=(autoPtr<T>&& ap) noexcept
 {
     if (this != &ap)

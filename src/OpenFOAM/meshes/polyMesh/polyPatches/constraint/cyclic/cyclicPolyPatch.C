@@ -30,7 +30,7 @@ License
 #include "demandDrivenData.H"
 #include "OFstream.H"
 #include "matchPoints.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "Time.H"
 #include "transformField.H"
 #include "SubField.H"
@@ -60,9 +60,9 @@ Foam::label Foam::cyclicPolyPatch::findMaxArea
 
     forAll(faces, facei)
     {
-        scalar areaSqr = magSqr(faces[facei].normal(points));
+        scalar areaSqr = magSqr(faces[facei].areaNormal(points));
 
-        if (areaSqr > maxAreaSqr)
+        if (maxAreaSqr < areaSqr)
         {
             maxAreaSqr = areaSqr;
             maxI = facei;
@@ -81,7 +81,7 @@ void Foam::cyclicPolyPatch::calcTransforms()
         vectorField half0Areas(half0.size());
         forAll(half0, facei)
         {
-            half0Areas[facei] = half0[facei].normal(half0.points());
+            half0Areas[facei] = half0[facei].areaNormal(half0.points());
         }
 
         // Half1
@@ -89,7 +89,7 @@ void Foam::cyclicPolyPatch::calcTransforms()
         vectorField half1Areas(half1.size());
         forAll(half1, facei)
         {
-            half1Areas[facei] = half1[facei].normal(half1.points());
+            half1Areas[facei] = half1[facei].areaNormal(half1.points());
         }
 
         calcTransforms
@@ -260,19 +260,17 @@ void Foam::cyclicPolyPatch::calcTransforms
             // use calculated normals.
             vector n0 = findFaceMaxRadius(half0Ctrs);
             vector n1 = -findFaceMaxRadius(half1Ctrs);
-            n0 /= mag(n0) + VSMALL;
-            n1 /= mag(n1) + VSMALL;
+            n0.normalise();
+            n1.normalise();
 
             if (debug)
             {
-                scalar theta = radToDeg(acos(n0 & n1));
-
                 Pout<< "cyclicPolyPatch::calcTransforms :"
                     << " patch:" << name()
                     << " Specified rotation :"
                     << " n0:" << n0 << " n1:" << n1
-                    << " swept angle: " << theta << " [deg]"
-                    << endl;
+                    << " swept angle: " << radToDeg(acos(n0 & n1))
+                    << " [deg]" << endl;
             }
 
             // Extended tensor from two local coordinate systems calculated
@@ -420,18 +418,17 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
             {
                 vector n0 = findFaceMaxRadius(half0Ctrs);
                 vector n1 = -findFaceMaxRadius(half1Ctrs);
-                n0 /= mag(n0) + VSMALL;
-                n1 /= mag(n1) + VSMALL;
+                n0.normalise();
+                n1.normalise();
 
                 if (debug)
                 {
-                    scalar theta = radToDeg(acos(n0 & n1));
-
                     Pout<< "cyclicPolyPatch::getCentresAndAnchors :"
                         << " patch:" << name()
                         << " Specified rotation :"
                         << " n0:" << n0 << " n1:" << n1
-                        << " swept angle: " << theta << " [deg]"
+                        << " swept angle: "
+                        << radToDeg(acos(n0 & n1)) << " [deg]"
                         << endl;
                 }
 
@@ -499,12 +496,10 @@ void Foam::cyclicPolyPatch::getCentresAndAnchors
                 // Determine the face with max area on both halves. These
                 // two faces are used to determine the transformation tensors
                 label max0I = findMaxArea(pp0.points(), pp0);
-                vector n0 = pp0[max0I].normal(pp0.points());
-                n0 /= mag(n0) + VSMALL;
+                const vector n0 = pp0[max0I].unitNormal(pp0.points());
 
                 label max1I = findMaxArea(pp1.points(), pp1);
-                vector n1 = pp1[max1I].normal(pp1.points());
-                n1 /= mag(n1) + VSMALL;
+                const vector n1 = pp1[max1I].unitNormal(pp1.points());
 
                 if (mag(n0 & n1) < 1-matchTolerance())
                 {
@@ -665,10 +660,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 {
     if (neighbPatchName_ == word::null && !coupleGroup_.valid())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "No \"neighbourPatch\" provided." << endl
+        FatalIOErrorInFunction(dict)
+            << "No \"neighbourPatch\" provided." << endl
             << "Is your mesh uptodate with split cyclics?" << endl
             << "Run foamUpgradeCyclics to convert mesh and fields"
             << " to split cyclics." << exit(FatalIOError);
@@ -686,8 +679,8 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     {
         case ROTATIONAL:
         {
-            dict.lookup("rotationAxis") >> rotationAxis_;
-            dict.lookup("rotationCentre") >> rotationCentre_;
+            dict.readEntry("rotationAxis", rotationAxis_);
+            dict.readEntry("rotationCentre", rotationCentre_);
 
             scalar magRot = mag(rotationAxis_);
             if (magRot < SMALL)
@@ -703,7 +696,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
         }
         case TRANSLATIONAL:
         {
-            dict.lookup("separationVector") >> separationVector_;
+            dict.readEntry("separationVector", separationVector_);
             break;
         }
         default:

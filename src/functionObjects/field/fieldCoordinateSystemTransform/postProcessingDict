@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -41,12 +41,8 @@ functions
         coordinateSystem
         {
             origin  (0 0 0);
-            coordinateRotation
-            {
-                type    axesRotation;
-                e1      (1  0.15  0);
-                e3      (0  0    -1);
-            }
+            e1      (1 0.15 0);
+            e3      (0 0 -1);
         }
     }
 }

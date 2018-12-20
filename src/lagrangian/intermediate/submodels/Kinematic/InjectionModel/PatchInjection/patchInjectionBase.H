@@ -51,7 +51,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward class declarations
+// Forward declarations
 class polyMesh;
 class fvMesh;
 class Random;
@@ -106,7 +106,7 @@ public:
 
 
     //- Destructor
-    virtual ~patchInjectionBase();
+    virtual ~patchInjectionBase() = default;
 
 
     // Member Functions

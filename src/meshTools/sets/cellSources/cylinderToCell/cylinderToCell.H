@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,16 @@ Class
     Foam::cylinderToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside a cylinder.
+    A topoSetCellSource to select cells with their centres inside a cylinder.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required | Default
+        p1          | Coordinate of endpoint            | yes   |
+        p2          | Coordinate of endpoint            | yes   |
+        radius      | Cylinder (outer) radius           | yes   |
+        innerRadius | Cylinder inner radius             | no    | 0
+    \endtable
 
 SourceFiles
     cylinderToCell.C
@@ -35,7 +44,7 @@ SourceFiles
 #ifndef cylinderToCell_H
 #define cylinderToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +57,7 @@ namespace Foam
 
 class cylinderToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -57,13 +66,16 @@ class cylinderToCell
         static addToUsageTable usage_;
 
         //- First point on cylinder axis
-        vector p1_;
+        point point1_;
 
         //- Second point on cylinder axis
-        vector p2_;
+        point point2_;
 
-        //- Radius
+        //- Outer radius
         scalar radius_;
+
+        //- Inner radius
+        scalar innerRadius_;
 
 
     // Private Member Functions
@@ -83,41 +95,29 @@ public:
         cylinderToCell
         (
             const polyMesh& mesh,
-            const vector& p1,
-            const vector& p2,
-            const scalar radius
+            const point& point1,
+            const point& point2,
+            const scalar radius,
+            const scalar innerRadius = 0
         );
 
         //- Construct from dictionary
-        cylinderToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        cylinderToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        cylinderToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        cylinderToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~cylinderToCell();
+    virtual ~cylinderToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

@@ -96,10 +96,8 @@ timeVaryingMappedFixedValuePointPatchField
      && mapMethod_ != "nearest"
     )
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "mapMethod should be one of 'planarInterpolation'"
+        FatalIOErrorInFunction(dict)
+            << "mapMethod should be one of 'planarInterpolation'"
             << ", 'nearest'" << exit(FatalIOError);
     }
 

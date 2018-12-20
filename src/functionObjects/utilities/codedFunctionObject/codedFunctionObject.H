@@ -134,8 +134,6 @@ protected:
         virtual const dictionary& codeDict() const;
 
 
-private:
-
         //- No copy construct
         codedFunctionObject(const codedFunctionObject&) = delete;
 

@@ -218,22 +218,22 @@ void Foam::dimensionSet::tokeniser::putBack(const token& t)
 
 void Foam::dimensionSet::round(const scalar tol)
 {
-    for (int i=0; i < dimensionSet::nDimensions; ++i)
+    scalar integralPart;
+    for (scalar& val : exponents_)
     {
-        scalar integralPart;
-        scalar fractionalPart = std::modf(exponents_[i], &integralPart);
+        const scalar fractionalPart = std::modf(val, &integralPart);
 
         if (mag(fractionalPart-1.0) <= tol)
         {
-            exponents_[i] = 1.0+integralPart;
+            val = 1.0+integralPart;
         }
         else if (mag(fractionalPart+1.0) <= tol)
         {
-            exponents_[i] = -1.0+integralPart;
+            val = -1.0+integralPart;
         }
         else if (mag(fractionalPart) <= tol)
         {
-            exponents_[i] = integralPart;
+            val = integralPart;
         }
     }
 }
@@ -294,10 +294,8 @@ Foam::dimensionedScalar Foam::dimensionSet::parse
                 token t = tis.nextToken();
                 if (!t.isPunctuation()  || t.pToken() !=  token::END_LIST)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        tis.stream()
-                    )   << "Illegal token " << t << exit(FatalIOError);
+                    FatalIOErrorInFunction(tis.stream())
+                        << "Illegal token " << t << exit(FatalIOError);
                 }
 
                 ds.dimensions() *= sub.dimensions();
@@ -363,18 +361,14 @@ Foam::dimensionedScalar Foam::dimensionSet::parse
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    tis.stream()
-                )   << "Illegal token " << nextToken << exit(FatalIOError);
+                FatalIOErrorInFunction(tis.stream())
+                    << "Illegal token " << nextToken << exit(FatalIOError);
             }
         }
         else
         {
-            FatalIOErrorInFunction
-            (
-                tis.stream()
-            )   << "Illegal token " << nextToken << exit(FatalIOError);
+            FatalIOErrorInFunction(tis.stream())
+                << "Illegal token " << nextToken << exit(FatalIOError);
         }
 
 
@@ -415,10 +409,8 @@ Foam::Istream& Foam::dimensionSet::read
 
     if (startToken != token::BEGIN_SQR)
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "expected a " << token::BEGIN_SQR << " in dimensionSet"
+        FatalIOErrorInFunction(is)
+            << "Expected a " << token::BEGIN_SQR << " in dimensionSet"
             << endl << "in stream " << is.info()
             << exit(FatalIOError);
     }
@@ -435,10 +427,7 @@ Foam::Istream& Foam::dimensionSet::read
         dimensionedScalar ds(parse(0, tis, readSet));
 
         multiplier = ds.value();
-        for (int i=0; i < dimensionSet::nDimensions; ++i)
-        {
-            exponents_[i] = ds.dimensions()[i];
-        }
+        exponents_ = ds.dimensions().values();
     }
     else
     {
@@ -471,10 +460,8 @@ Foam::Istream& Foam::dimensionSet::read
         // Check end of dimensionSet
         if (nextToken != token::END_SQR)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "expected a " << token::END_SQR << " in dimensionSet "
+            FatalIOErrorInFunction(is)
+                << "Expected a " << token::END_SQR << " in dimensionSet "
                 << endl << "in stream " << is.info()
                 << exit(FatalIOError);
         }
@@ -509,10 +496,8 @@ Foam::Istream& Foam::dimensionSet::read
 
     if (startToken != token::BEGIN_SQR)
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "expected a " << token::BEGIN_SQR << " in dimensionSet"
+        FatalIOErrorInFunction(is)
+            << "Expected a " << token::BEGIN_SQR << " in dimensionSet"
             << endl << "in stream " << is.info()
             << exit(FatalIOError);
     }
@@ -536,17 +521,17 @@ Foam::Istream& Foam::dimensionSet::read
             // Parse unit
             dimensionSet symbolSet(dimless);
 
-            size_t index = symbolPow.find('^');
-            if (index != string::npos)
+            const auto index = symbolPow.find('^');
+            if (index != std::string::npos)
             {
                 const word symbol = symbolPow.substr(0, index);
-                const word exp = symbolPow.substr(index+1);
-                scalar exponent = readScalar(exp);
+                const scalar exponent = readScalar(symbolPow.substr(index+1));
 
                 dimensionedScalar s;
-                s.read(readSet[symbol], readSet);
+                s.read(readSet.lookup(symbol), readSet);
 
                 symbolSet.reset(pow(s.dimensions(), exponent));
+
                 // Round to nearest integer if close to it
                 symbolSet.round(10*smallExponent);
                 multiplier *= Foam::pow(s.value(), exponent);
@@ -554,7 +539,7 @@ Foam::Istream& Foam::dimensionSet::read
             else
             {
                 dimensionedScalar s;
-                s.read(readSet[symbolPow], readSet);
+                s.read(readSet.lookup(symbolPow), readSet);
 
                 symbolSet.reset(s.dimensions());
                 multiplier *= s.value();
@@ -609,11 +594,9 @@ Foam::Istream& Foam::dimensionSet::read
         // Check end of dimensionSet
         if (nextToken != token::END_SQR)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "expected a " << token::END_SQR << " in dimensionSet "
-                << endl << "in stream " << is.info()
+            FatalIOErrorInFunction(is)
+                << "Expected a " << token::END_SQR << " in dimensionSet " << nl
+                << "in stream " << is.info() << endl
                 << exit(FatalIOError);
         }
     }
@@ -707,12 +690,12 @@ Foam::Ostream& Foam::dimensionSet::write
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, dimensionSet& dset)
+Foam::Istream& Foam::operator>>(Istream& is, dimensionSet& ds)
 {
-    scalar multiplier;
-    dset.read(is, multiplier);
+    scalar mult(1.0);
+    ds.read(is, mult);
 
-    if (mag(multiplier-1.0) > dimensionSet::smallExponent)
+    if (mag(mult-1.0) > dimensionSet::smallExponent)
     {
         FatalIOErrorInFunction(is)
             << "Cannot use scaled units in dimensionSet"
@@ -724,10 +707,10 @@ Foam::Istream& Foam::operator>>(Istream& is, dimensionSet& dset)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const dimensionSet& dset)
+Foam::Ostream& Foam::operator<<(Ostream& os, const dimensionSet& ds)
 {
-    scalar multiplier;
-    dset.write(os, multiplier);
+    scalar mult(1.0);
+    ds.write(os, mult);
 
     os.check(FUNCTION_NAME);
     return os;

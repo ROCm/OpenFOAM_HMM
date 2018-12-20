@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class legacyAsciiFormatter Declaration
+                  Class vtk::legacyAsciiFormatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class legacyAsciiFormatter
@@ -80,7 +80,7 @@ public:
 
 
     //- Destructor
-    virtual ~legacyAsciiFormatter();
+    virtual ~legacyAsciiFormatter() = default;
 
 
     // Member Functions
@@ -94,6 +94,17 @@ public:
         //- Name for the XML append encoding (unused).
         //  Currently identical to name(), but do not rely on this.
         virtual const char* encoding() const;
+
+
+    // Disable some XML-only methods
+
+        inline virtual formatter& endTag(vtk::fileTag) { return *this; }
+        inline virtual formatter& endDataArray() { return *this; }
+        inline virtual formatter& endFieldData() { return *this; }
+        inline virtual formatter& endCellData() { return *this; }
+        inline virtual formatter& endPointData() { return *this; }
+        inline virtual formatter& endPiece() { return *this; }
+        inline virtual formatter& endVTKFile() { return *this; }
 
 };
 

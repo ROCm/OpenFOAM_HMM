@@ -103,8 +103,11 @@ int main(int argc, char *argv[])
     ldl[1].reserve(5);        // should not decrease allocated size
     ldl[1](3) = 2;            // allocates space and sets value
 
-    // this works without a segfault, but doesn't change the list size
+    #ifndef FULLDEBUG
+    // Accessing an out-of-bounds address, but writing into allocated  memory.
+    // No segfault, doesn't change the list size. Nonetheless not a good idea.
     ldl[0][4] = 4;
+    #endif
 
     ldl[1] = 3;
 

@@ -80,13 +80,13 @@ class faMeshDecomposition
         labelListList procFaceLabels_;
 
         //-
-        List<Map<label> > procMeshEdgesMap_;
+        List<Map<label>> procMeshEdgesMap_;
 
         //- Number of internal edges for each processor mesh
         labelList procNInternalEdges_;
 
         //- Edge labels for patches of processor meshes
-        List<List<List<label> > > procPatchEdgeLabels_;
+        List<List<List<label>>> procPatchEdgeLabels_;
 
         //- Labels of points for each processor
         labelListList procPatchPointAddressing_;
@@ -135,8 +135,10 @@ public:
 
     // Constructors
 
-        //- Construct from fvMesh (for mesh and optional non-standard
-        //- decomposeParDict location)
+        //- Construct from components.
+        //  \param mesh the fvMesh
+        //  \param decompDictFile optional non-standard location for the
+        //      decomposeParDict file
         faMeshDecomposition
         (
             const fvMesh& mesh,

@@ -689,12 +689,7 @@ void Foam::globalMeshData::calcGlobalPointEdges
     forAll(pointEdges, pointi)
     {
         const labelList& pEdges = pointEdges[pointi];
-        labelList& globalPEdges = globalPointEdges[pointi];
-        globalPEdges.setSize(pEdges.size());
-        forAll(pEdges, i)
-        {
-            globalPEdges[i] = globalEdgeNumbers.toGlobal(pEdges[i]);
-        }
+        globalPointEdges[pointi] = globalEdgeNumbers.toGlobal(pEdges);
 
         labelPairList& globalPPoints = globalPointPoints[pointi];
         globalPPoints.setSize(pEdges.size());
@@ -1325,7 +1320,7 @@ void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
     // Global indices for boundary faces
     globalBoundaryFaceNumberingPtr_.reset
     (
-        new globalIndex(mesh_.nFaces()-mesh_.nInternalFaces())
+        new globalIndex(mesh_.nBoundaryFaces())
     );
     globalIndex& globalIndices = globalBoundaryFaceNumberingPtr_();
 

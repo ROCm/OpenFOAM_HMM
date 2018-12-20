@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,9 @@ Class
     Foam::mergedSurf
 
 Description
-    Simple class to manage surface merging information
+    Simple class to manage surface merging information.
+
+    Merging is done with PatchTools::gatherAndMerge()
 
 SourceFiles
     mergedSurf.C
@@ -55,20 +57,43 @@ class mergedSurf
     labelList  zones_;
     labelList  pointsMap_;
 
-    //- No copy construct
-    mergedSurf(const mergedSurf&) = delete;
-
-    // Assignment is needed for lists
 
 public:
 
     // Constructors
 
         //- Construct null
-        mergedSurf();
+        mergedSurf() = default;
 
-        //- Construct and merge meshed surfaces immediately (in parallel only).
-        mergedSurf(const meshedSurf&, const scalar mergeDim);
+        //- Copy construct null
+        mergedSurf(const mergedSurf&) = default;
+
+        //- Move construct
+        mergedSurf(mergedSurf&&) = default;
+
+        //- Construct and merge.
+        mergedSurf
+        (
+            const meshedSurf& unmergedSurface,
+            const scalar mergeDim
+        );
+
+        //- Construct and merge.
+        mergedSurf
+        (
+            const pointField& unmergedPoints,
+            const faceList& unmergedFaces,
+            const scalar mergeDim
+        );
+
+        //- Construct and merge
+        mergedSurf
+        (
+            const pointField& unmergedPoints,
+            const faceList& unmergedFaces,
+            const labelList& originalIds,
+            const scalar mergeDim
+        );
 
 
     //- Destructor
@@ -117,7 +142,37 @@ public:
         void clear();
 
         //- Merge meshed surfaces (in parallel only).
-        bool merge(const meshedSurf&, const scalar mergeDim);
+        bool merge
+        (
+            const meshedSurf& unmergedSurface,
+            const scalar mergeDim
+        );
+
+        //- Merge meshed surfaces (in parallel only).
+        bool merge
+        (
+            const pointField& unmergedPoints,
+            const faceList& unmergedFaces,
+            const scalar mergeDim
+        );
+
+        //- Merge meshed surfaces (in parallel only).
+        bool merge
+        (
+            const pointField& unmergedPoints,
+            const faceList& unmergedFaces,
+            const labelList& originalIds,
+            const scalar mergeDim
+        );
+
+
+    // Member Operators
+
+        //- Copy assignment
+        mergedSurf& operator=(const mergedSurf&) = default;
+
+        //- Move assignment
+        mergedSurf& operator=(mergedSurf&&) = default;
 
 };
 

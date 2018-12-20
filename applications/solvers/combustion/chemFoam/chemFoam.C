@@ -32,7 +32,6 @@ Description
     provide comparison against other chemistry solvers, that uses a single cell
     mesh, and fields created from the initial conditions.
 
-
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
@@ -49,13 +48,19 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for chemistry problems, designed for use on single cell cases"
+        " to provide comparison against other chemistry solvers"
+    );
+
     argList::noParallel();
 
     #define CREATE_MESH createSingleCellMesh.H
     #define NO_CONTROL
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createSingleCellMesh.H"
     #include "createFields.H"
@@ -73,7 +78,7 @@ int main(int argc, char *argv[])
 
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         #include "solveChemistry.H"

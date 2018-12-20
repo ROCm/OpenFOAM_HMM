@@ -33,7 +33,7 @@ const Foam::Enum
     Foam::timeControl::timeControls
 >
 Foam::timeControl::timeControlNames_
-{
+({
     { timeControl::ocTimeStep, "timeStep" },
     { timeControl::ocWriteTime, "writeTime" },
     { timeControl::ocOutputTime, "outputTime" },
@@ -43,7 +43,7 @@ Foam::timeControl::timeControlNames_
     { timeControl::ocCpuTime, "cpuTime" },
     { timeControl::ocOnEnd, "onEnd" },
     { timeControl::ocNone, "none" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -110,14 +110,8 @@ void Foam::timeControl::read(const dictionary& dict)
         intervalName = "outputInterval";
     }
 
-    if (dict.found(controlName))
-    {
-        timeControl_ = timeControlNames_.lookup(controlName, dict);
-    }
-    else
-    {
-        timeControl_ = ocTimeStep;
-    }
+    timeControl_ =
+        timeControlNames_.lookupOrDefault(controlName, dict, ocTimeStep);
 
     switch (timeControl_)
     {
@@ -139,7 +133,7 @@ void Foam::timeControl::read(const dictionary& dict)
         case ocCpuTime:
         case ocAdjustableRunTime:
         {
-            const scalar userTime = readScalar(dict.lookup(intervalName));
+            const scalar userTime = dict.get<scalar>(intervalName);
             interval_ = time_.userTimeToTime(userTime);
             break;
         }

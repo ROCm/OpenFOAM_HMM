@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,20 @@ Class
     Foam::boxToPoint
 
 Description
-    A topoSetSource to select points based on whether they are inside box.
+    A topoSetPointSource to select points based on whether they are inside box.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        boxes       | Multiple bounding boxes               | partly   |
+        box         | A single bounding box                 | partly   |
+        min         | Minimum point for a single box        | partly   |
+        max         | Maximum point for a single box        | partly   |
+    \endtable
+
+Note
+    Must specify "boxes", "box" or a "min/max" pair
+    (compatibility with searchable box) - highest to lowest precedence.
 
 SourceFiles
     boxToPoint.C
@@ -35,7 +48,7 @@ SourceFiles
 #ifndef boxToPoint_H
 #define boxToPoint_H
 
-#include "topoSetSource.H"
+#include "topoSetPointSource.H"
 #include "treeBoundBoxList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +62,7 @@ namespace Foam
 
 class boxToPoint
 :
-    public topoSetSource
+    public topoSetPointSource
 {
 
     // Private data
@@ -57,7 +70,7 @@ class boxToPoint
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Bounding box.
+        //- Bounding boxes
         treeBoundBoxList bbs_;
 
 
@@ -73,43 +86,29 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        boxToPoint
-        (
-            const polyMesh& mesh,
-            const treeBoundBoxList& bb
-        );
+        //- Construct from components, copying bounding boxes
+        boxToPoint(const polyMesh& mesh, const treeBoundBoxList& bbs);
+
+        //- Construct from components, moving bounding boxes
+        boxToPoint(const polyMesh& mesh, treeBoundBoxList&& bbs);
 
         //- Construct from dictionary
-        boxToPoint
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        boxToPoint(const polyMesh& mesh, const dictionary& dict);
 
-        //- Construct from Istream
-        boxToPoint
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        //- Construct from stream - a single box.
+        boxToPoint(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~boxToPoint();
+    virtual ~boxToPoint() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return POINTSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

@@ -78,7 +78,7 @@ Foam::FreeStream<CloudType>::FreeStream
         particleFluxAccumulators_[p] = List<Field<scalar>>
         (
             molecules.size(),
-            Field<scalar>(patch.size(), 0.0)
+            Field<scalar>(patch.size(), Zero)
         );
     }
 
@@ -88,10 +88,7 @@ Foam::FreeStream<CloudType>::FreeStream
 
     forAll(molecules, i)
     {
-        numberDensities_[i] = readScalar
-        (
-            numberDensitiesDict.lookup(molecules[i])
-        );
+        numberDensities_[i] = numberDensitiesDict.get<scalar>(molecules[i]);
 
         moleculeTypeIds_[i] = cloud.typeIdList().find(molecules[i]);
 
@@ -265,18 +262,15 @@ void Foam::FreeStream<CloudType>::inflow()
 
             // Normal unit vector *negative* so normal is pointing into the
             // domain
-            vector n = patch.faceAreas()[pFI];
-            n /= -mag(n);
+            const vector n = -normalised(patch.faceAreas()[pFI]);
 
             // Wall tangential unit vector. Use the direction between the
             // face centre and the first vertex in the list
-            vector t1 = fC - (mesh.points()[f[0]]);
-            t1 /= mag(t1);
+            const vector t1 = normalised(fC - (mesh.points()[f[0]]));
 
             // Other tangential unit vector.  Rescaling in case face is not
             // flat and n and t1 aren't perfectly orthogonal
-            vector t2 = n^t1;
-            t2 /= mag(t2);
+            const vector t2 = normalised(n ^ t1);
 
             scalar faceTemperature = boundaryT[patchi][pFI];
 

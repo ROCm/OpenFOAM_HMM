@@ -30,6 +30,12 @@ Description
     The population count uses the Hamming weight
     (http://en.wikipedia.org/wiki/Hamming_weight).
 
+Namespace
+    Foam::BitSetOps
+
+Description
+    Factory and other methods for bitSet.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef BitOps_H
@@ -37,6 +43,7 @@ Description
 
 #include "label.H"
 #include "UList.H"
+#include "HashSet.H"
 #include "Ostream.H"
 #include <algorithm>
 #include <limits>
@@ -46,6 +53,9 @@ Description
 
 namespace Foam
 {
+
+// Forward declarations
+class bitSet;
 
 /*---------------------------------------------------------------------------*\
                          Namespace BitOps Declaration
@@ -202,11 +212,77 @@ struct bitInfo
     operator UIntType& () { return value; }
 };
 
-
 } // End namespace BitOps
 
 
+/*---------------------------------------------------------------------------*\
+                        Namespace BitSetOps Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace BitSetOps
+{
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Create a bitSet with length n with the specifed \a on locations.
+//  The resulting bitSet is guaranteed to have exactly the specified length,
+//  any values or positions larger than n-1 are silently ignored.
+//
+//  \param n the size of the output bitSet
+//  \param locations the list of positions corresponding to an \a on bit.
+//  \param on the value for on. Set as false to invert the logic.
+//
+//  \return a bitset
+bitSet create
+(
+    const label n,
+    const labelHashSet& locations,
+    const bool on = true
+);
+
+
+//- Create a bitSet with length n with the specifed \a on locations.
+//  The resulting bitSet is guaranteed to have exactly the specified length,
+//  any values or positions larger than n-1 are silently ignored.
+//
+//  \param n the size of the output bitSet
+//  \param locations the list of positions corresponding to an \a on bit.
+//  \param on the value for on. Set as false to invert the logic.
+//
+//  \return a bitset
+bitSet create
+(
+    const label n,
+    const labelUList& locations,
+    const bool on = true
+);
+
+
+//- Create a bitSet with length n with the specifed \a on locations
+//- when the list values are equal to the select value.
+//
+//  The resulting bitSet is guaranteed to have exactly the specified length,
+//  any values or positions larger than n-1 are silently ignored.
+//
+//  \param n the size of the output bitSet
+//  \param select the value to select as 'on'
+//  \param values the values to scan for 'select'
+//  \param on the value for on. Set as false to invert the logic.
+//
+//  \return a bitset
+bitSet create
+(
+    const label n,
+    const label select,
+    const labelUList& values,
+    const bool on = true
+);
+
+} // End namespace BitSetOps
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 //- Print 0/1 bits of an (unsigned) integral type via an adapter
 template<class UIntType>

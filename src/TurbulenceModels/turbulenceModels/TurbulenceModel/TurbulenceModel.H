@@ -75,9 +75,7 @@ protected:
         const transportModel& transport_;
 
 
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         TurbulenceModel(const TurbulenceModel&) = delete;
@@ -139,8 +137,7 @@ public:
 
 
     //- Destructor
-    virtual ~TurbulenceModel()
-    {}
+    virtual ~TurbulenceModel() = default;
 
 
     // Member Functions

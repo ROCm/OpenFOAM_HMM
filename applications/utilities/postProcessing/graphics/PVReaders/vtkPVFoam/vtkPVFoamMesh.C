@@ -172,7 +172,7 @@ void Foam::vtkPVFoam::convertMeshPatches()
             {
                 // Point movement on single patch is OK
 
-                const labelList& patchIds = vtpData.additionalIds();
+                const labelUList& patchIds = vtpData.additionalIds();
                 if (patchIds.size() == 1)
                 {
                     vtkgeom = vtpData.getCopy();
@@ -423,8 +423,7 @@ void Foam::vtkPVFoam::convertMeshCellZones()
 
         if (!vtkgeom)
         {
-            fvMeshSubset subsetter(mesh);
-            subsetter.setLargeCellSubset(zMesh[zoneId]);
+            fvMeshSubset subsetter(mesh, zMesh[zoneId]);
 
             vtkgeom = vtuData.subset(subsetter, this->decomposePoly_);
         }
@@ -490,8 +489,7 @@ void Foam::vtkPVFoam::convertMeshCellSets()
 
         if (!vtkgeom)
         {
-            fvMeshSubset subsetter(mesh);
-            subsetter.setLargeCellSubset(cellSet(mesh, partName));
+            fvMeshSubset subsetter(mesh, cellSet(mesh, partName));
 
             vtkgeom = vtuData.subset(subsetter, this->decomposePoly_);
         }

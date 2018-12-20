@@ -25,7 +25,6 @@ License
 
 #include "fileOperationInitialise.H"
 #include "addToRunTimeSelectionTable.H"
-#include "OSspecific.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -62,10 +61,9 @@ Foam::fileOperations::fileOperationInitialise::New
         InfoInFunction << "Constructing fileOperationInitialise" << endl;
     }
 
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(type);
+    auto cstrIter = wordConstructorTablePtr_->cfind(type);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown fileOperationInitialise type "
@@ -77,12 +75,6 @@ Foam::fileOperations::fileOperationInitialise::New
 
     return autoPtr<fileOperationInitialise>(cstrIter()(argc, argv));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileOperations::fileOperationInitialise::~fileOperationInitialise()
-{}
 
 
 // ************************************************************************* //

@@ -39,7 +39,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// template specialisation for pTraits<Scalar>
+// Template specialisation for pTraits<Scalar>
 template<>
 class pTraits<Scalar>
 {
@@ -105,9 +105,21 @@ public:
 
 // * * * * * * * * * * * * * * * IO/Conversion * * * * * * * * * * * * * * * //
 
-//- Return a word representation of a Scalar.
+//- A word representation of a floating-point value.
 //  Uses stringstream instead of std::to_string for more consistent formatting.
 word name(const Scalar val);
+
+
+//- A word representation of a floating-point value.
+template<>
+struct nameOp<Scalar>
+{
+    inline word operator()(const Scalar val) const
+    {
+        return Foam::name(val);
+    }
+};
+
 
 //- Parse entire buffer as a float/double, skipping leading/trailing whitespace.
 //  \return Parsed value or FatalIOError on any problem
@@ -378,17 +390,85 @@ inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
 
 
 //- Stabilisation around zero for division
-inline Scalar stabilise(const Scalar s, const Scalar small)
+inline Scalar stabilise(const Scalar s, const Scalar tol)
 {
     if (s >= 0)
     {
-        return s + small;
+        return s + tol;
     }
     else
     {
-        return s - small;
+        return s - tol;
     }
 }
+
+
+// Specializations
+
+// Default definition in ops.H
+template<class T> struct compareOp;
+
+//- Compare scalar values
+template<>
+struct compareOp<Scalar>
+{
+    const Scalar tolerance;
+
+    //- Construct with specified tolerance (non-negative value)
+    compareOp(Scalar tol = ScalarVSMALL)
+    :
+        tolerance(tol)
+    {}
+
+    Scalar operator()(const Scalar& a, const Scalar& b) const
+    {
+        return (mag(a - b) <= tolerance) ? 0 : (a - b);
+    }
+};
+
+
+// Default definition in ops.H
+template<class T> struct equalOp;
+
+//- Compare scalar values for equality
+template<>
+struct equalOp<Scalar>
+{
+    const Scalar tolerance;
+
+    //- Construct with specified tolerance (non-negative value)
+    equalOp(Scalar tol = ScalarVSMALL)
+    :
+        tolerance(tol)
+    {}
+
+    bool operator()(const Scalar& a, const Scalar& b) const
+    {
+        return Foam::mag(a - b) <= tolerance;
+    }
+};
+
+
+// Default definition in ops.H
+template<class T> struct notEqualOp;
+
+//- Compare scalar values for inequality
+template<>
+struct notEqualOp<Scalar>
+{
+    const Scalar tolerance;
+
+    //- Construct with specified tolerance (non-negative value)
+    notEqualOp(Scalar tol = ScalarVSMALL)
+    :
+        tolerance(tol)
+    {}
+
+    bool operator()(const Scalar& a, const Scalar& b) const
+    {
+        return Foam::mag(a - b) > tolerance;
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

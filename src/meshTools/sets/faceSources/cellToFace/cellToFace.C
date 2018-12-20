@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,8 @@ namespace Foam
     defineTypeNameAndDebug(cellToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, cellToFace, word);
     addToRunTimeSelectionTable(topoSetSource, cellToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, cellToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, cellToFace, istream);
 }
 
 
@@ -53,36 +55,41 @@ const Foam::Enum
     Foam::cellToFace::cellAction
 >
 Foam::cellToFace::cellActionNames_
-{
+({
     { cellAction::ALL, "all" },
     { cellAction::BOTH, "both" },
-};
+});
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::cellToFace::combine(topoSet& set, const bool add) const
+void Foam::cellToFace::combine
+(
+    topoSet& set,
+    const bool add,
+    const word& setName
+) const
 {
     // Load the set
-    if (!exists(mesh_.time().path()/topoSet::localPath(mesh_, setName_)))
+    if (!exists(mesh_.time().path()/topoSet::localPath(mesh_, setName)))
     {
         SeriousError<< "Cannot load set "
-            << setName_ << endl;
+            << setName << endl;
     }
 
-    cellSet loadedSet(mesh_, setName_);
+    cellSet loadedSet(mesh_, setName);
+    const labelHashSet& cellLabels = loadedSet;
 
     if (option_ == ALL)
     {
         // Add all faces from cell
-        forAllConstIter(cellSet, loadedSet, iter)
+        for (const label celli : cellLabels)
         {
-            const label celli = iter.key();
             const labelList& cFaces = mesh_.cells()[celli];
 
-            forAll(cFaces, cFacei)
+            for (const label facei : cFaces)
             {
-                addOrDelete(set, cFaces[cFacei], add);
+                addOrDelete(set, facei, add);
             }
         }
     }
@@ -97,9 +104,9 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
 
 
         // Check all internal faces
-        for (label facei = 0; facei < nInt; facei++)
+        for (label facei = 0; facei < nInt; ++facei)
         {
-            if (loadedSet.found(own[facei]) && loadedSet.found(nei[facei]))
+            if (cellLabels.found(own[facei]) && cellLabels.found(nei[facei]))
             {
                 addOrDelete(set, facei, add);
             }
@@ -109,17 +116,15 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
         // Get coupled cell status
         boolList neiInSet(mesh_.nFaces()-nInt, false);
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            const polyPatch& pp = patches[patchi];
-
             if (pp.coupled())
             {
                 label facei = pp.start();
                 forAll(pp, i)
                 {
-                    neiInSet[facei-nInt] = loadedSet.found(own[facei]);
-                    facei++;
+                    neiInSet[facei-nInt] = cellLabels.found(own[facei]);
+                    ++facei;
                 }
             }
         }
@@ -127,20 +132,18 @@ void Foam::cellToFace::combine(topoSet& set, const bool add) const
 
 
         // Check all boundary faces
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            const polyPatch& pp = patches[patchi];
-
             if (pp.coupled())
             {
                 label facei = pp.start();
                 forAll(pp, i)
                 {
-                    if (loadedSet.found(own[facei]) && neiInSet[facei-nInt])
+                    if (cellLabels.found(own[facei]) && neiInSet[facei-nInt])
                     {
                         addOrDelete(set, facei, add);
                     }
-                    facei++;
+                    ++facei;
                 }
             }
         }
@@ -157,8 +160,8 @@ Foam::cellToFace::cellToFace
     const cellAction option
 )
 :
-    topoSetSource(mesh),
-    setName_(setName),
+    topoSetFaceSource(mesh),
+    names_(one(), setName),
     option_(option)
 {}
 
@@ -169,10 +172,17 @@ Foam::cellToFace::cellToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    setName_(dict.lookup("set")),
-    option_(cellActionNames_.lookup("option", dict))
-{}
+    topoSetFaceSource(mesh),
+    names_(),
+    option_(cellActionNames_.get("option", dict))
+{
+    // Look for 'sets' or 'set'
+    if (!dict.readIfPresent("sets", names_))
+    {
+        names_.resize(1);
+        dict.readEntry("set", names_.first());
+    }
+}
 
 
 Foam::cellToFace::cellToFace
@@ -181,15 +191,9 @@ Foam::cellToFace::cellToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    setName_(checkIs(is)),
+    topoSetFaceSource(mesh),
+    names_(one(), word(checkIs(is))),
     option_(cellActionNames_.read(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellToFace::~cellToFace()
 {}
 
 
@@ -201,19 +205,31 @@ void Foam::cellToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces according to cellSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces according to cellSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, true);
+        for (const word& setName : names_)
+        {
+            combine(set, true, setName);
+        }
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces according to cellSet " << setName_
-            << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces according to cellSet "
+                << flatOutput(names_) << nl;
+        }
 
-        combine(set, false);
+        for (const word& setName : names_)
+        {
+            combine(set, false, setName);
+        }
     }
 }
 

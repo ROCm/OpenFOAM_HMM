@@ -25,7 +25,6 @@ License
 
 #include "foamVtkOutput.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::vtk::outputOptions::outputOptions()
@@ -56,10 +55,20 @@ Foam::vtk::outputOptions::newFormatter(std::ostream& os) const
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-inline Foam::vtk::formatType
-Foam::vtk::outputOptions::fmt() const
+inline Foam::vtk::formatType Foam::vtk::outputOptions::fmt() const
 {
     return fmtType_;
+}
+
+
+inline Foam::word Foam::vtk::outputOptions::ext(vtk::fileTag contentType) const
+{
+    return
+    (
+        legacy()
+      ? vtk::legacy::fileExtension
+      : vtk::fileExtension[contentType]
+    );
 }
 
 

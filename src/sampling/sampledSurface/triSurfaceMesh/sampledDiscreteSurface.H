@@ -180,14 +180,14 @@ public:
         }
 
         //- If element ids/order of the original surface are kept
-        bool keepIds() const
+        virtual bool hasFaceIds() const
         {
-            return MeshStorage::keepIds();
+            return MeshStorage::hasFaceIds();
         }
 
         //- List of element ids/order of the original surface,
         //  when keepIds is active.
-        const labelList& originalIds() const
+        virtual const labelList& originalIds() const
         {
             return MeshStorage::originalIds();
         }

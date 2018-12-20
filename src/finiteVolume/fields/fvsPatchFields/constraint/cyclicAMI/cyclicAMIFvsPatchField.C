@@ -72,14 +72,12 @@ Foam::cyclicAMIFvsPatchField<Type>::cyclicAMIFvsPatchField
 )
 :
     coupledFvsPatchField<Type>(p, iF, dict),
-    cyclicAMIPatch_(refCast<const cyclicAMIFvPatch>(p))
+    cyclicAMIPatch_(refCast<const cyclicAMIFvPatch>(p, dict))
 {
     if (!isA<cyclicAMIFvPatch>(p))
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "patch " << this->patch().index() << " not cyclicAMI type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not cyclicAMI type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }

@@ -46,13 +46,13 @@ const Foam::Enum
     Foam::functionObjects::fieldValues::fieldValueDelta::operationType
 >
 Foam::functionObjects::fieldValues::fieldValueDelta::operationTypeNames_
-{
+({
     { operationType::opAdd, "add" },
     { operationType::opSubtract, "subtract" },
     { operationType::opMin, "min" },
     { operationType::opMax, "max" },
     { operationType::opAverage, "average" },
-};
+});
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
@@ -146,7 +146,7 @@ bool Foam::functionObjects::fieldValues::fieldValueDelta::read
         ).ptr()
     );
 
-    operation_ = operationTypeNames_.lookup("operation", dict);
+    operation_ = operationTypeNames_.get("operation", dict);
 
     return true;
 }

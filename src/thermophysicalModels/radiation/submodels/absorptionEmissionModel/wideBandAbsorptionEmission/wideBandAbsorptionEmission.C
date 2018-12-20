@@ -65,36 +65,35 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
 {
     label nBand = 0;
     const dictionary& functionDicts = dict.optionalSubDict(typeName +"Coeffs");
-    forAllConstIter(dictionary, functionDicts, iter)
+    for (const entry& dEntry : functionDicts)
     {
-        // safety:
-        if (!iter().isDict())
+        if (!dEntry.isDict())  // safety
         {
             continue;
         }
 
-        const dictionary& dict = iter().dict();
-        dict.lookup("bandLimits") >> iBands_[nBand];
-        dict.lookup("EhrrCoeff") >> iEhrrCoeffs_[nBand];
+        const dictionary& dict = dEntry.dict();
+
+        dict.readEntry("bandLimits", iBands_[nBand]);
+        dict.readEntry("EhrrCoeff", iEhrrCoeffs_[nBand]);
         totalWaveLength_ += iBands_[nBand][1] - iBands_[nBand][0];
 
         label nSpec = 0;
+
         const dictionary& specDicts = dict.subDict("species");
-        forAllConstIter(dictionary, specDicts, iter)
+        for (const entry& dEntry : specDicts)
         {
-            const word& key = iter().keyword();
+            const word& key = dEntry.keyword();
+
             if (nBand == 0)
             {
                 speciesNames_.insert(key, nSpec);
             }
-            else
+            else if (!speciesNames_.found(key))
             {
-                if (!speciesNames_.found(key))
-                {
-                    FatalErrorInFunction
-                        << "specie: " << key << " is not in all the bands"
-                        << nl << exit(FatalError);
-                }
+                FatalErrorInFunction
+                    << "specie: " << key << " is not in all the bands"
+                    << nl << exit(FatalError);
             }
             coeffs_[nBand][nSpec].initialise(specDicts.subDict(key));
             nSpec++;
@@ -103,28 +102,28 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
     }
     nBands_ = nBand;
 
-    if (coeffsDict_.found("lookUpTableFileName"))
+    if
+    (
+        coeffsDict_.found("lookUpTableFileName")
+     && "none" != coeffsDict_.get<word>("lookUpTableFileName")
+    )
     {
-        const word name = coeffsDict_.lookup("lookUpTableFileName");
-        if (name != "none")
-        {
-            lookUpTablePtr_.set
+        lookUpTablePtr_.set
+        (
+            new interpolationLookUpTable<scalar>
             (
-                new interpolationLookUpTable<scalar>
-                (
-                    fileName(coeffsDict_.lookup("lookUpTableFileName")),
-                    mesh.time().constant(),
-                    mesh
-                )
-            );
+                coeffsDict_.get<fileName>("lookUpTableFileName"),
+                mesh.time().constant(),
+                mesh
+            )
+        );
 
-            if (!mesh.foundObject<volScalarField>("ft"))
-            {
-                FatalErrorInFunction
-                    << "specie ft is not present to use with "
-                    << "lookUpTableFileName " << nl
-                    << exit(FatalError);
-            }
+        if (!mesh.foundObject<volScalarField>("ft"))
+        {
+            FatalErrorInFunction
+                << "specie ft is not present to use with "
+                << "lookUpTableFileName " << nl
+                << exit(FatalError);
         }
     }
 
@@ -132,48 +131,53 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
     // look-up table and save the corresponding indices of the look-up table
 
     label j = 0;
-    forAllConstIter(HashTable<label>, speciesNames_, iter)
+    forAllConstIters(speciesNames_, iter)
     {
+        const word& specieName = iter.key();
+        const label index = iter.object();
+
+        volScalarField* fldPtr = mesh.getObjectPtr<volScalarField>(specieName);
+
         if (!lookUpTablePtr_.empty())
         {
-            if (lookUpTablePtr_().found(iter.key()))
+            if (lookUpTablePtr_().found(specieName))
             {
-                const label index =
-                    lookUpTablePtr_().findFieldIndex(iter.key());
+                const label fieldIndex =
+                    lookUpTablePtr_().findFieldIndex(specieName);
 
-                Info<< "specie: " << iter.key() << " found on look-up table "
-                    << " with index: " << index << endl;
+                Info<< "specie: " << specieName << " found on look-up table "
+                    << " with index: " << fieldIndex << endl;
 
-                specieIndex_[iter()] = index;
+                specieIndex_[index] = fieldIndex;
             }
-            else if (mesh.foundObject<volScalarField>(iter.key()))
+            else if (fldPtr)
             {
-                Yj_.set(j, &mesh.lookupObjectRef<volScalarField>(iter.key()));
-                specieIndex_[iter()] = 0;
+                Yj_.set(j, fldPtr);
+                specieIndex_[index] = 0;
                 j++;
-                Info<< "specie: " << iter.key() << " is being solved" << endl;
+                Info<< "specie: " << specieName << " is being solved" << endl;
             }
             else
             {
                 FatalErrorInFunction
-                    << "specie: " << iter.key()
+                    << "specie: " << specieName
                     << " is neither in look-up table: "
                     << lookUpTablePtr_().tableName()
                     << " nor is being solved" << nl
                     << exit(FatalError);
             }
         }
-        else if (mesh.foundObject<volScalarField>(iter.key()))
+        else if (fldPtr)
         {
-            Yj_.set(j, &mesh.lookupObjectRef<volScalarField>(iter.key()));
-            specieIndex_[iter()] = 0;
+            Yj_.set(j, fldPtr);
+            specieIndex_[index] = 0;
             j++;
         }
         else
         {
             FatalErrorInFunction
-                << " there is no lookup table and the specie" << nl
-                << iter.key() << nl
+                << "There is no lookup table and the specie" << nl
+                << specieName << nl
                 << " is not found " << nl
                 << exit(FatalError);
 
@@ -220,7 +224,7 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandi) const
 
     forAll(a, celli)
     {
-        forAllConstIter(HashTable<label>, speciesNames_, iter)
+        forAllConstIters(speciesNames_, iter)
         {
             const label n = iter();
             scalar Xipi = 0;
@@ -300,10 +304,11 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandi) const
         )
     );
 
-    if (mesh().foundObject<volScalarField>("Qdot"))
+    const volScalarField* QdotPtr = mesh().findObject<volScalarField>("Qdot");
+
+    if (QdotPtr)
     {
-        const volScalarField& Qdot =
-            mesh().lookupObject<volScalarField>("Qdot");
+        const volScalarField& Qdot = *QdotPtr;
 
         if (Qdot.dimensions() == dimEnergy/dimTime)
         {

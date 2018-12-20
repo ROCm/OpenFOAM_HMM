@@ -74,9 +74,9 @@ outletMappedUniformInletHeatAdditionFvPatchField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    outletPatchName_(dict.lookup("outletPatch")),
+    outletPatchName_(dict.get<word>("outletPatch")),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
-    Q_(readScalar(dict.lookup("Q"))),
+    Q_(dict.get<scalar>("Q")),
     TMin_(dict.lookupOrDefault<scalar>("TMin", 0)),
     TMax_(dict.lookupOrDefault<scalar>("TMax", 5000))
 {}

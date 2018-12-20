@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,15 +21,13 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    Foam::Pstream
+InNamespace
+    Foam
 
 Description
-    Combination-Reduction operation for a parallel run.
-
-    The information from all nodes is collected on the master node,
-    combined using the given combination function and the result is
-    broadcast to all nodes
+    Various function objects for unary and binary operations.
+    Can be used for parallel combine-reduce operations or other places
+    requiring a function object.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,29 +41,30 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Assignment operation taking two parameters, returning void.
+// Alters the value of the first parameter.
+//     Eg, plusEqOp for (x += y)
+
 #define EqOp(opName, op)                                                       \
                                                                                \
-template<class T1, class T2>                                                   \
-class opName##Op2                                                              \
-{                                                                              \
-public:                                                                        \
-                                                                               \
-    void operator()(T1& x, const T2& y) const                                  \
+    template<class T1, class T2>                                               \
+    struct opName##Op2                                                         \
     {                                                                          \
-        op;                                                                    \
-    }                                                                          \
-};                                                                             \
+        void operator()(T1& x, const T2& y) const                              \
+        {                                                                      \
+            op;                                                                \
+        }                                                                      \
+    };                                                                         \
                                                                                \
-template<class T>                                                              \
-class opName##Op                                                               \
-{                                                                              \
-public:                                                                        \
-                                                                               \
-    void operator()(T& x, const T& y) const                                    \
+    template<class T>                                                          \
+    struct opName##Op                                                          \
     {                                                                          \
-        op;                                                                    \
-    }                                                                          \
-};
+        void operator()(T& x, const T& y) const                                \
+        {                                                                      \
+            op;                                                                \
+        }                                                                      \
+    };
+
 
 EqOp(eq, x = y)
 EqOp(plusEq, x += y)
@@ -77,10 +76,10 @@ EqOp(eqMag, x = mag(y))
 EqOp(plusEqMagSqr, x += magSqr(y))
 EqOp(maxEq, x = max(x, y))
 EqOp(minEq, x = min(x, y))
-EqOp(minMagSqrEq, x = (magSqr(x)<=magSqr(y) ? x : y))
-EqOp(maxMagSqrEq, x = (magSqr(x)>=magSqr(y) ? x : y))
+EqOp(minMagSqrEq, x = (magSqr(x) <= magSqr(y) ? x : y))
+EqOp(maxMagSqrEq, x = (magSqr(x) >= magSqr(y) ? x : y))
 EqOp(andEq, x = (x && y))
-EqOp(orEq, x  = (x || y))
+EqOp(orEq,  x = (x || y))
 
 EqOp(eqMinus, x = -y)
 
@@ -91,19 +90,22 @@ EqOp(nopEq, (void)x)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Warning about unused result
 #if __GNUC__
 #define WARNRETURN __attribute__((warn_unused_result))
 #else
 #define WARNRETURN
 #endif
 
+// Operation taking two parameters, returning the first type.
+// Neither parameter is altered.
+//     Eg, plusOp for (x + y)
+
 #define Op(opName, op)                                                         \
                                                                                \
     template<class T, class T1, class T2>                                      \
-    class opName##Op3                                                          \
+    struct opName##Op3                                                         \
     {                                                                          \
-    public:                                                                    \
-                                                                               \
         T operator()(const T1& x, const T2& y) const WARNRETURN                \
         {                                                                      \
             return op;                                                         \
@@ -111,10 +113,8 @@ EqOp(nopEq, (void)x)
     };                                                                         \
                                                                                \
     template<class T1, class T2>                                               \
-    class opName##Op2                                                          \
+    struct opName##Op2                                                         \
     {                                                                          \
-    public:                                                                    \
-                                                                               \
         T1 operator()(const T1& x, const T2& y) const WARNRETURN               \
         {                                                                      \
             return op;                                                         \
@@ -122,10 +122,8 @@ EqOp(nopEq, (void)x)
     };                                                                         \
                                                                                \
     template<class T>                                                          \
-    class opName##Op                                                           \
+    struct opName##Op                                                          \
     {                                                                          \
-    public:                                                                    \
-                                                                               \
         T operator()(const T& x, const T& y) const WARNRETURN                  \
         {                                                                      \
             return op;                                                         \
@@ -133,30 +131,55 @@ EqOp(nopEq, (void)x)
     };
 
 
-#define weightedOp(opName, op)                                                 \
+// Operations taking two parameters (unaltered), returning bool
+
+#define BoolOp(opName, op)                                                     \
                                                                                \
-    template<class Type, class CombineOp>                                      \
+    template<class T1, class T2>                                               \
+    struct opName##Op2                                                         \
+    {                                                                          \
+        bool operator()(const T1& x, const T2& y) const WARNRETURN             \
+        {                                                                      \
+            return op;                                                         \
+        }                                                                      \
+    };                                                                         \
+                                                                               \
+    template<class T>                                                          \
+    struct opName##Op                                                          \
+    {                                                                          \
+        bool operator()(const T& x, const T& y) const WARNRETURN               \
+        {                                                                      \
+            return op;                                                         \
+        }                                                                      \
+    };
+
+
+// Weighting operations
+
+#define WeightedOp(opName, op)                                                 \
+                                                                               \
+    template<class T, class CombineOp>                                         \
     class opName##WeightedOp                                                   \
     {                                                                          \
         const CombineOp& cop_;                                                 \
                                                                                \
-        public:                                                                \
+    public:                                                                    \
                                                                                \
-            opName##WeightedOp(const CombineOp& cop)                           \
-            :                                                                  \
-                cop_(cop)                                                      \
-            {}                                                                 \
+        opName##WeightedOp(const CombineOp& cop)                               \
+        :                                                                      \
+            cop_(cop)                                                          \
+        {}                                                                     \
                                                                                \
-            void operator()                                                    \
-            (                                                                  \
-                Type& x,                                                       \
-                const label index,                                             \
-                const Type& y,                                                 \
-                const scalar weight                                            \
-            ) const                                                            \
-            {                                                                  \
-                cop_(x, op);                                                   \
-            }                                                                  \
+        void operator()                                                        \
+        (                                                                      \
+            T& x,                                                              \
+            const label index,                                                 \
+            const T& y,                                                        \
+            const scalar weight                                                \
+        ) const                                                                \
+        {                                                                      \
+            cop_(x, op);                                                       \
+        }                                                                      \
     };                                                                         \
 
 
@@ -175,18 +198,67 @@ Op(min, min(x, y))
 Op(minMagSqr, (magSqr(x)<=magSqr(y) ? x : y))
 Op(maxMagSqr, (magSqr(x)>=magSqr(y) ? x : y))
 Op(minMod, minMod(x, y))
-Op(and, x && y)
-Op(or, x || y)
-Op(eqEq, x == y)
-Op(less, x < y)
-Op(lessEq, x <= y)
-Op(greater, x > y)
-Op(greaterEq, x >= y)
 
-weightedOp(multiply, (weight*y))
+BoolOp(and, x && y)
+BoolOp(or, x || y)
+BoolOp(equal, x == y)
+BoolOp(notEqual, x != y)
+BoolOp(less, x < y)
+BoolOp(lessEq, x <= y)
+BoolOp(greater, x > y)
+BoolOp(greaterEq, x >= y)
+
+WeightedOp(multiply, (weight*y))
 
 #undef Op
-#undef weightedOp
+#undef BoolOp
+#undef WeightedOp
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Three-way comparison operation of two parameters,
+//  similar to the \c <=> operator in C++20.
+//
+//  \return a negative value for less, a positive value for greater,
+//      and zero for equal value.
+template<class T>
+struct compareOp
+{
+    int operator()(const T& a, const T& b) const WARNRETURN
+    {
+        return (a < b) ? -1 : (b < a) ? 1 : 0;
+    }
+};
+
+
+//- General get operation to extract the 'name' from an object as a word.
+//  The default implementation uses the 'name()' method commonly used within
+//  OpenFOAM.
+template<class T>
+struct getNameOp
+{
+    word operator()(const T& x) const WARNRETURN
+    {
+        return x.name();
+    }
+};
+
+
+//- General get operation to extract the 'type' from an object as a word.
+//  The default implementation uses the 'type()' method commonly used within
+//  OpenFOAM.
+template<class T>
+struct getTypeOp
+{
+    word operator()(const T& x) const WARNRETURN
+    {
+        return x.type();
+    }
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #undef WARNRETURN
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

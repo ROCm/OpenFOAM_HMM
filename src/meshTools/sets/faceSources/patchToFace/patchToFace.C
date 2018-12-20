@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(patchToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, patchToFace, word);
     addToRunTimeSelectionTable(topoSetSource, patchToFace, istream);
+    addToRunTimeSelectionTable(topoSetFaceSource, patchToFace, word);
+    addToRunTimeSelectionTable(topoSetFaceSource, patchToFace, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        patchToFace,
+        word,
+        patch
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        patchToFace,
+        istream,
+        patch
+    );
 }
 
 
@@ -51,7 +67,7 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
 {
     labelHashSet patchIDs = mesh_.boundaryMesh().patchSet
     (
-        List<wordRe>(1, patchName_),
+        selectedPatches_,
         true,           // warn if not found
         true            // use patch groups if available
     );
@@ -60,14 +76,17 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
     {
         const polyPatch& pp = mesh_.boundaryMesh()[patchi];
 
-        Info<< "    Found matching patch " << pp.name()
-            << " with " << pp.size() << " faces." << endl;
+        if (verbose_)
+        {
+            Info<< "    Found matching patch " << pp.name()
+                << " with " << pp.size() << " faces." << endl;
+        }
 
         for
         (
             label facei = pp.start();
             facei < pp.start() + pp.size();
-            facei++
+            ++facei
         )
         {
             addOrDelete(set, facei, add);
@@ -77,8 +96,10 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
     if (patchIDs.empty())
     {
         WarningInFunction
-            << "Cannot find any patch named " << patchName_ << endl
-            << "Valid names are " << mesh_.boundaryMesh().names() << endl;
+            << "Cannot find any patches matching "
+            << flatOutput(selectedPatches_) << nl
+            << "Valid names are " << flatOutput(mesh_.boundaryMesh().names())
+            << endl;
     }
 }
 
@@ -88,11 +109,11 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
 Foam::patchToFace::patchToFace
 (
     const polyMesh& mesh,
-    const word& patchName
+    const wordRe& patchName
 )
 :
-    topoSetSource(mesh),
-    patchName_(patchName)
+    topoSetFaceSource(mesh),
+    selectedPatches_(one(), patchName)
 {}
 
 
@@ -102,9 +123,17 @@ Foam::patchToFace::patchToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    patchName_(dict.lookup("name"))
-{}
+    topoSetFaceSource(mesh),
+    selectedPatches_()
+{
+    // Look for 'patches' and 'patch', but accept 'name' as well
+    if (!dict.readIfPresent("patches", selectedPatches_))
+    {
+        selectedPatches_.resize(1);
+        selectedPatches_.first() =
+            dict.getCompat<wordRe>("patch", {{"name", 1806}});
+    }
+}
 
 
 Foam::patchToFace::patchToFace
@@ -113,14 +142,8 @@ Foam::patchToFace::patchToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    patchName_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::patchToFace::~patchToFace()
+    topoSetFaceSource(mesh),
+    selectedPatches_(one(), wordRe(checkIs(is)))
 {}
 
 
@@ -132,16 +155,23 @@ void Foam::patchToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all faces of patch " << patchName_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all faces of patches "
+                << flatOutput(selectedPatches_) << " ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all faces of patch " << patchName_ << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all faces of patches "
+                << flatOutput(selectedPatches_) << " ..." << endl;
+        }
 
         combine(set, false);
     }

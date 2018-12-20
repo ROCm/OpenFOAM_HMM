@@ -30,7 +30,7 @@ Group
 Description
     Transient solver for the passive transport of a particle cloud.
 
-    Uses a pre- calculated velocity field to evolve the cloud.
+    Uses a pre-calculated velocity field to evolve the cloud.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,6 +43,11 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transient solver for the passive transport of a particle cloud.\n"
+        "Uses a pre-calculated velocity field to evolve the cloud."
+    );
     argList::addOption
     (
         "cloud",
@@ -54,7 +59,7 @@ int main(int argc, char *argv[])
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"

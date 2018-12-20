@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,30 +89,30 @@ void Foam::parLagrangianRedistributor::findClouds
     for (const fileName& localCloudName : localCloudDirs)
     {
         // Do local scan for valid cloud objects
-        IOobjectList sprayObjs
+        IOobjectList localObjs
         (
             mesh,
             mesh.time().timeName(),
             cloud::prefix/localCloudName
         );
 
-        if (sprayObjs.found("coordinates") || sprayObjs.found("positions"))
+        bool isCloud = false;
+        if (localObjs.erase("coordinates"))
+        {
+            isCloud = true;
+        }
+        if (localObjs.erase("positions"))
+        {
+            isCloud = true;
+        }
+
+        if (isCloud)
         {
             // Has coordinates/positions - so must be a valid cloud
 
-            const label cloudI = cloudNames.find(localCloudName);
+            const label cloudi = cloudNames.find(localCloudName);
 
-            objectNames[cloudI].setSize(sprayObjs.size());
-            label objectI = 0;
-            forAllConstIters(sprayObjs, iter)
-            {
-                const word& name = iter.key();
-                if (name != "coordinates" && name != "positions")
-                {
-                    objectNames[cloudI][objectI++] = name;
-                }
-            }
-            objectNames[cloudI].setSize(objectI);
+            objectNames[cloudi] = localObjs.sortedNames();
         }
     }
 

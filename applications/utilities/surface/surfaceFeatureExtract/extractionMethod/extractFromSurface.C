@@ -55,7 +55,7 @@ Foam::surfaceFeaturesExtraction::extractFromSurface::extractFromSurface
     const dictionary& coeffDict =
         dict.optionalSubDict("extractFromSurfaceCoeffs");
 
-    coeffDict.lookup("includedAngle") >> includedAngle_;
+    coeffDict.readEntry("includedAngle", includedAngle_);
     coeffDict.readIfPresent("geometricTestOnly", geometricTestOnly_);
 }
 

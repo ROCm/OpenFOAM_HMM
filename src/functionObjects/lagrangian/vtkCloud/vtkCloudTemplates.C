@@ -35,10 +35,23 @@ Foam::wordList Foam::functionObjects::vtkCloud::writeFields
     const label nTotParcels
 ) const
 {
-    const int nCmpt(pTraits<Type>::nComponents);
+    const direction nCmpt(pTraits<Type>::nComponents);
 
-    const bool useIntField =
-        std::is_integral<typename pTraits<Type>::cmptType>();
+    static_assert
+    (
+        (
+            std::is_same<typename pTraits<Type>::cmptType,label>::value
+         || std::is_floating_point<typename pTraits<Type>::cmptType>::value
+        ),
+        "Label and Floating-point vector space only"
+    );
+
+    const bool isLabel =
+        std::is_same<typename pTraits<Type>::cmptType,label>::value;
+
+    // Other integral types (eg, bool etc) would need cast/convert to label.
+    // Similarly for labelVector etc.
+
 
     // Fields are not always on all processors (eg, multi-component parcels).
     // Thus need to resolve names between all processors.
@@ -47,104 +60,49 @@ Foam::wordList Foam::functionObjects::vtkCloud::writeFields
     Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
     Pstream::combineScatter(fieldNames);
 
-    // Sort to get identical order of fields on all processors
+    // Consistent order on all processors
     Foam::sort(fieldNames);
 
     for (const word& fieldName : fieldNames)
     {
-        const auto* fldPtr = obrTmp.lookupObjectPtr<IOField<Type>>(fieldName);
+        const List<Type>* fldPtr = obrTmp.findObject<IOField<Type>>(fieldName);
+        const List<Type>& values = (fldPtr ? *fldPtr : List<Type>());
 
         if (Pstream::master())
         {
-            if (useIntField)
+            if (isLabel)
             {
-                const uint64_t payLoad(nTotParcels * nCmpt * sizeof(label));
+                const uint64_t payLoad =
+                    vtk::sizeofData<label, nCmpt>(nTotParcels);
 
-                format().openDataArray<label, nCmpt>(fieldName)
-                    .closeTag();
-
+                format().beginDataArray<label, nCmpt>(fieldName);
                 format().writeSize(payLoad);
-
-                if (fldPtr)
-                {
-                    // Data on master
-                    const auto& fld = *fldPtr;
-
-                    // Ensure consistent output width
-                    for (const Type& val : fld)
-                    {
-                        for (int cmpt=0; cmpt < nCmpt; ++cmpt)
-                        {
-                            format().write(label(component(val, cmpt)));
-                        }
-                    }
-                }
-
-                // Slaves - recv
-                for (int slave=1; slave<Pstream::nProcs(); ++slave)
-                {
-                    IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                    Field<Type> recv(fromSlave);
-
-                    for (const Type& val : recv)
-                    {
-                        for (int cmpt=0; cmpt < nCmpt; ++cmpt)
-                        {
-                            format().write(label(component(val, cmpt)));
-                        }
-                    }
-                }
             }
             else
             {
-                const uint64_t payLoad(nTotParcels * nCmpt * sizeof(float));
+                const uint64_t payLoad =
+                    vtk::sizeofData<float, nCmpt>(nTotParcels);
 
-                format().openDataArray<float, nCmpt>(fieldName)
-                    .closeTag();
-
+                format().beginDataArray<float, nCmpt>(fieldName);
                 format().writeSize(payLoad);
-
-                if (fldPtr)
-                {
-                    // Data on master
-                    vtk::writeList(format(), *fldPtr);
-                }
-
-                // Slaves - recv
-                for (int slave=1; slave<Pstream::nProcs(); ++slave)
-                {
-                    IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                    Field<Type> recv(fromSlave);
-
-                    vtk::writeList(format(), recv);
-                }
             }
+        }
 
-            format().flush();
-
-            format()
-                .endDataArray();
+        if (applyFilter_)
+        {
+            vtk::writeListParallel(format.ref(), values, parcelAddr_);
         }
         else
         {
-            // Slaves - send
+            vtk::writeListParallel(format.ref(), values);
+        }
 
-            OPstream toMaster
-            (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo()
-            );
+        if (Pstream::master())
+        {
+            // Non-legacy
+            format().flush();
 
-            if (fldPtr)
-            {
-                toMaster
-                    << *fldPtr;
-            }
-            else
-            {
-                toMaster
-                    << Field<Type>();
-            }
+            format().endDataArray();
         }
     }
 

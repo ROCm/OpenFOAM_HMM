@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::geometrySurface
+    Foam::functionObjects::runTimePostPro::geometrySurface
 
 Description
     Visualisation of surface geometry data
@@ -39,6 +39,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Forward declarations
 class vtkPolyData;
 
 namespace Foam
@@ -56,17 +57,6 @@ class geometrySurface
 :
     public surface
 {
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        geometrySurface(const geometrySurface&) = delete;
-
-        //- No copy assignment
-        void operator=(const geometrySurface&) = delete;
-
-
 protected:
 
     // Protected data
@@ -85,6 +75,12 @@ protected:
             const fileName& fName
         ) const;
 
+        //- No copy construct
+        geometrySurface(const geometrySurface&) = delete;
+
+        //- No copy assignment
+        void operator=(const geometrySurface&) = delete;
+
 
 public:
 
@@ -99,7 +95,7 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours
+            const HashPtrTable<Function1<vector>>& colours
         );
 
         //- Construct from components
@@ -107,18 +103,18 @@ public:
         (
             const runTimePostProcessing& parent,
             const dictionary& dict,
-            const HashPtrTable<Function1<vector>, word>& colours,
+            const HashPtrTable<Function1<vector>>& colours,
             const List<fileName>& fileNames
         );
 
 
     //- Destructor
-    virtual ~geometrySurface();
+    virtual ~geometrySurface() = default;
 
 
     // Member Functions
 
-        //- Add surface(s) to scene
+        //- Add geometry surface(s) to scene
         virtual void addGeometryToScene
         (
             const scalar position,

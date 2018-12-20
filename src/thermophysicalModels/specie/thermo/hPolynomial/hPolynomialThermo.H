@@ -148,6 +148,12 @@ class hPolynomialThermo
 
     // Private Member Functions
 
+        //- Coeffs name. Eg, "CpCoeffs<10>"
+        inline static word coeffsName(const char* name)
+        {
+            return word(name + ("Coeffs<" + std::to_string(PolySize) + '>'));
+        }
+
         //- Construct from components
         inline hPolynomialThermo
         (

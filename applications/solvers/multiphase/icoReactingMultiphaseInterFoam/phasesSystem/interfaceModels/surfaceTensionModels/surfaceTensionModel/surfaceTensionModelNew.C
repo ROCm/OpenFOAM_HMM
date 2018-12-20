@@ -34,12 +34,12 @@ Foam::autoPtr<Foam::surfaceTensionModel> Foam::surfaceTensionModel::New
     const phasePair& pair
 )
 {
-    word modelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting surfaceTensionModel for "
         << pair << ": " << modelType << endl;
 
-   const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+    const auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {

@@ -50,12 +50,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class Istream;
 class Ostream;
 class triPoints;
 class plane;
-
-// Forward declaration of friend functions and operators
 
 template<class Point, class PointRef> class triangle;
 
@@ -158,7 +158,7 @@ private:
         template<class AboveOp, class BelowOp>
         inline static void triSliceWithPlane
         (
-            const plane& pl,
+            const plane& pln,
             const triPoints& tri,
             AboveOp& aboveOp,
             BelowOp& belowOp
@@ -212,8 +212,8 @@ public:
             //- Return unit normal
             inline vector unitNormal() const;
 
-            //- Legacy name for areaNormal.
-            //  \deprecated Deprecated for new use (JUN-2018)
+            //- Legacy name for areaNormal().
+            //  \deprecated(2018-06) Deprecated for new use
             inline vector normal() const
             {
                 return areaNormal();
@@ -323,11 +323,19 @@ public:
                 pointHit& edgePoint
             ) const;
 
+            //- The sign for which side of the face plane the point is on.
+            //  Uses the supplied tolerance for rounding around zero.
+            //  \return
+            //  -  0: on plane
+            //  - +1: front-side
+            //  - -1: back-side
+            inline int sign(const point& p, const scalar tol = SMALL) const;
+
             //- Decompose triangle into triangles above and below plane
             template<class AboveOp, class BelowOp>
             inline void sliceWithPlane
             (
-                const plane& pl,
+                const plane& pln,
                 AboveOp& aboveOp,
                 BelowOp& belowOp
             ) const;

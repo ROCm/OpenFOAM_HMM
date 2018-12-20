@@ -48,9 +48,9 @@ const Foam::Enum
     Foam::tabulatedWallFunctions::general::interpolationType
 >
 Foam::tabulatedWallFunctions::general::interpolationTypeNames_
-{
+({
     { interpolationType::itLinear, "linear" },
-};
+});
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -132,7 +132,7 @@ Foam::tabulatedWallFunctions::general::general
 )
 :
     tabulatedWallFunction(dict, mesh, typeName),
-    interpType_(interpolationTypeNames_.lookup("interpType", coeffDict_)),
+    interpType_(interpolationTypeNames_.get("interpType", coeffDict_)),
     yPlus_(),
     uPlus_(),
     log10YPlus_(coeffDict_.lookup("log10YPlus")),

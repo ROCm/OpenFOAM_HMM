@@ -159,8 +159,10 @@ public:
 
     // Constructors
 
-        //- Construct from IOobjects (for mesh and optional non-standard
-        //- decomposeParDict location)
+        //- Construct from components.
+        //  \param io the IOobject for mesh
+        //  \param decompDictFile optional non-standard location for the
+        //      decomposeParDict file
         domainDecomposition
         (
             const IOobject& io,
@@ -186,7 +188,7 @@ public:
             return distributed_;
         }
 
-        //- Decompose mesh.
+        //- Decompose mesh
         void decomposeMesh();
 
         //- Write decomposition

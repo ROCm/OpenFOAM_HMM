@@ -25,6 +25,9 @@
 #     For USERMPI, the user is responsible for supplying an appropriate
 #     wmake/rules/General/mplibUSERMPI file and managing all settings
 #
+#     For INTELMPI, note that the (I_MPI_CC, I_MPI_CCX) environment variables
+#     define the underlying compiler to be used
+#
 #------------------------------------------------------------------------------
 unsetenv MPI_ARCH_PATH MPI_HOME
 setenv FOAM_MPI dummy  # Fallback value

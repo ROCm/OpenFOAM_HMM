@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class polyBoundaryMesh;
 class polyPatch;
 class PstreamBuffers;
@@ -303,6 +300,10 @@ public:
 
 
     // Member Functions
+
+        //- The offset where this patch starts in the boundary face list
+        //  The value is the same as  patch.start() - mesh.nInternalFaces()
+        label offset() const;
 
         //- Return start label of this patch in the polyMesh face list
         label start() const

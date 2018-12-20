@@ -56,13 +56,13 @@ const Foam::Enum
     Foam::functionObjects::runTimePostPro::surface::representationType
 >
 Foam::functionObjects::runTimePostPro::surface::representationTypeNames
-{
+({
     { representationType::rtNone, "none" },
     { representationType::rtWireframe, "wireframe" },
     { representationType::rtSurface, "surface" },
     { representationType::rtSurfaceWithEdges, "surfaceWithEdges" },
     { representationType::rtGlyph, "glyph" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -83,7 +83,7 @@ void Foam::functionObjects::runTimePostPro::surface::setRepresentation
         }
         case rtWireframe:
         {
-            // note: colour is set using general SetColour, not setEdgeColor
+            // note: colour is set using general SetColor, not SetEdgeColor
             actor->GetProperty()->SetRepresentationToWireframe();
             break;
         }
@@ -143,13 +143,13 @@ Foam::functionObjects::runTimePostPro::surface::surface
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.lookup("representation", dict)
+        representationTypeNames.get("representation", dict)
     ),
     featureEdges_(false),
     surfaceColour_(nullptr),
@@ -163,10 +163,7 @@ Foam::functionObjects::runTimePostPro::surface::surface
 
     if (dict.found("surfaceColour"))
     {
-        surfaceColour_.reset
-        (
-            Function1<vector>::New("surfaceColour", dict).ptr()
-        );
+        surfaceColour_.reset(Function1<vector>::New("surfaceColour", dict));
     }
     else
     {
@@ -175,7 +172,7 @@ Foam::functionObjects::runTimePostPro::surface::surface
 
     if (dict.found("edgeColour"))
     {
-        edgeColour_.reset(Function1<vector>::New("edgeColour", dict).ptr());
+        edgeColour_.reset(Function1<vector>::New("edgeColour", dict));
     }
     else
     {
@@ -184,11 +181,11 @@ Foam::functionObjects::runTimePostPro::surface::surface
 
     if (representation_ == rtGlyph)
     {
-        dict.lookup("maxGlyphLength") >> maxGlyphLength_;
+        dict.readEntry("maxGlyphLength", maxGlyphLength_);
     }
     else
     {
-        dict.lookup("featureEdges") >> featureEdges_;
+        dict.readEntry("featureEdges", featureEdges_);
     }
 }
 
@@ -200,7 +197,7 @@ Foam::functionObjects::runTimePostPro::surface::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>>& colours,
     const word& surfaceType
 )
 {

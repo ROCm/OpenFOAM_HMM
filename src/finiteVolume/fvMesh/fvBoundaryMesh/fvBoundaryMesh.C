@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,7 @@ Foam::fvBoundaryMesh::fvBoundaryMesh
     const fvMesh& m
 )
 :
-    fvPatchList(0),
+    fvPatchList(),
     mesh_(m)
 {}
 
@@ -70,6 +70,16 @@ Foam::fvBoundaryMesh::fvBoundaryMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::labelList Foam::fvBoundaryMesh::indices
+(
+    const keyType& key,
+    const bool useGroups
+) const
+{
+    return mesh().boundaryMesh().indices(key, useGroups);
+}
+
+
 Foam::label Foam::fvBoundaryMesh::findPatchID(const word& patchName) const
 {
     const fvPatchList& patches = *this;
@@ -87,26 +97,18 @@ Foam::label Foam::fvBoundaryMesh::findPatchID(const word& patchName) const
 }
 
 
-Foam::labelList Foam::fvBoundaryMesh::findIndices
-(
-    const keyType& key,
-    const bool usePatchGroups
-) const
-{
-    return mesh().boundaryMesh().findIndices(key, usePatchGroups);
-}
-
-
 void Foam::fvBoundaryMesh::movePoints()
 {
-    forAll(*this, patchi)
+    fvPatchList& patches = *this;
+
+    for (fvPatch& p : patches)
     {
-        operator[](patchi).initMovePoints();
+        p.initMovePoints();
     }
 
-    forAll(*this, patchi)
+    for (fvPatch& p : patches)
     {
-        operator[](patchi).movePoints();
+        p.movePoints();
     }
 }
 

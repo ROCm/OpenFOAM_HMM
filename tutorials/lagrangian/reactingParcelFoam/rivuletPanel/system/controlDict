@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -51,5 +51,18 @@ maxCo           0.3;
 
 maxDeltaT       1e-03;
 
+functions
+{
+    fieldExtents
+    {
+        type            fieldExtents;
+        libs            ("libfieldFunctionObjects.so");
+        region          wallFilmRegion;
+        threshold       0.5;
+        fields          (alpha);
+        internalField   yes;
+        patches         ();
+    }
+}
 
 // ************************************************************************* //

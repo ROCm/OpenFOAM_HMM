@@ -28,8 +28,8 @@ Group
     grpMeshGenerationUtilities
 
 Description
-    Takes 2D mesh (all faces 2 points only, no front and back faces) and
-    creates a 3D mesh by extruding with specified thickness.
+    Create a 3D mesh by extruding a 2D mesh with specified thickness.
+    For the 2D mesh, all faces are 2 points only, no front and back faces.
 
 Note
     Not sure about the walking of the faces to create the front and back faces.
@@ -110,9 +110,16 @@ static const Enum<ExtrudeMode> ExtrudeModeNames
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Create a 3D mesh from a 2D mesh by extruding with specified thickness"
+    );
+
     argList::addArgument("surfaceFormat");
 
     #include "addOverwriteOption.H"
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
 
@@ -125,6 +132,7 @@ int main(int argc, char *argv[])
         args.caseName()
     );
 
+    // For safety
     runTimeExtruded.functionObjects().off();
 
     const ExtrudeMode surfaceFormat = ExtrudeModeNames[args[1]];
@@ -301,7 +309,7 @@ int main(int argc, char *argv[])
 
     if (!overwrite)
     {
-        runTimeExtruded++;
+        ++runTimeExtruded;
     }
     else
     {

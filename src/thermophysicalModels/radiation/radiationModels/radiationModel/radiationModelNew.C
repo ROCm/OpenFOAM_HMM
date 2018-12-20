@@ -47,7 +47,7 @@ Foam::radiation::radiationModel::New
     word modelType("none");
     if (radIO.typeHeaderOk<IOdictionary>(true))
     {
-        IOdictionary(radIO).lookup("radiationModel") >> modelType;
+        IOdictionary(radIO).readEntry("radiationModel", modelType);
     }
     else
     {
@@ -80,7 +80,7 @@ Foam::radiation::radiationModel::New
     const volScalarField& T
 )
 {
-    const word modelType(dict.lookup("radiationModel"));
+    const word modelType(dict.get<word>("radiationModel"));
 
     Info<< "Selecting radiationModel " << modelType << endl;
 

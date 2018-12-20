@@ -54,7 +54,7 @@ Foam::autoPtr<Foam::faceAreaWeightModel> Foam::faceAreaWeightModel::New
     const dictionary& relaxationDict
 )
 {
-    const word modelType(relaxationDict.lookup("faceAreaWeightModel"));
+    const word modelType(relaxationDict.get<word>("faceAreaWeightModel"));
 
     Info<< nl << "Selecting faceAreaWeightModel " << modelType << endl;
 
@@ -72,12 +72,6 @@ Foam::autoPtr<Foam::faceAreaWeightModel> Foam::faceAreaWeightModel::New
 
     return autoPtr<faceAreaWeightModel>(cstrIter()(relaxationDict));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceAreaWeightModel::~faceAreaWeightModel()
-{}
 
 
 // ************************************************************************* //

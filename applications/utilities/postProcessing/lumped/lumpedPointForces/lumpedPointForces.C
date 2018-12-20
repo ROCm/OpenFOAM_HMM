@@ -81,14 +81,14 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Extract force/moment information from existing calculations based "
-        "on the lumpedPoints pressure zones."
+        "Extract force/moment information from existing calculations based"
+        " on the lumpedPoints pressure zones."
     );
 
     argList::addBoolOption
     (
         "vtk",
-        "create visualization files of the forces"
+        "Create visualization files of the forces"
     );
 
     timeSelector::addOptions(true, false);
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
 
         // Pressure field
         autoPtr<volScalarField> pField
-            = loadField<volScalarField>(mesh, objects.lookup("p"));
+            = loadField<volScalarField>(mesh, objects.findObject("p"));
 
         // The forces per zone
         if (movement().forcesAndMoments(mesh, forces, moments))

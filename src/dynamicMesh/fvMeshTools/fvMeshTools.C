@@ -568,7 +568,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
             forAll(patchEntries, patchI)
             {
                 const entry& e = patchEntries[patchI];
-                const word type(e.dict().lookup("type"));
+                const word type(e.dict().get<word>("type"));
 
                 if
                 (

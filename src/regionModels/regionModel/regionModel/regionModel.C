@@ -149,9 +149,9 @@ bool Foam::regionModels::regionModel::read()
     {
         if (active_)
         {
-            if (const dictionary* dictPtr = subDictPtr(modelName_ + "Coeffs"))
+            if (const dictionary* dictptr = findDict(modelName_ + "Coeffs"))
             {
-                coeffs_ <<= *dictPtr;
+                coeffs_ <<= *dictptr;
             }
 
             infoOutput_.readIfPresent("infoOutput", *this);
@@ -159,10 +159,8 @@ bool Foam::regionModels::regionModel::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -170,18 +168,16 @@ bool Foam::regionModels::regionModel::read(const dictionary& dict)
 {
     if (active_)
     {
-        if (const dictionary* dictPtr = dict.subDictPtr(modelName_ + "Coeffs"))
+        if (const dictionary* dictptr = dict.findDict(modelName_ + "Coeffs"))
         {
-            coeffs_ <<= *dictPtr;
+            coeffs_ <<= *dictptr;
         }
 
         infoOutput_.readIfPresent("infoOutput", dict);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -79,10 +79,15 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Steady-state solver for incompressible, turbulent flow"
+    );
+
     #define CREATE_MESH createUpdatedDynamicFvMesh.H
     #include "postProcess.H"
 
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createUpdatedDynamicFvMesh.H"
     #include "createControl.H"

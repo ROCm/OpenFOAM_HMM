@@ -246,6 +246,16 @@ public:
             const int tag = Pstream::msgType()
         );
 
+        //- Construct from my elements to send. Assumes layout is my elements
+        //  first followed by elements from all other processors in consecutive
+        //  order
+        explicit mapDistributeBase
+        (
+            labelListList&& subMap,
+            const bool subHasFlip = false,
+            const bool constructHasFlip = false
+        );
+
         //- Construct from Istream
         mapDistributeBase(Istream& is);
 

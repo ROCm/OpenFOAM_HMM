@@ -28,7 +28,7 @@ Group
     grpMeshAdvancedUtilities
 
 Description
-    Utility to refine cells near to a surface.
+    Refine cells near to a surface.
 
 \*---------------------------------------------------------------------------*/
 
@@ -623,6 +623,10 @@ void classifyCells
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Refine cells near to a surface"
+    );
     argList::noParallel();
 
     #include "setRootCase.H"
@@ -677,22 +681,22 @@ int main(int argc, char *argv[])
         )
     );
 
-    fileName surfName(refineDict.lookup("surface"));
+    fileName surfName(refineDict.get<fileName>("surface"));
     surfName.expand();
-    label nCutLayers(readLabel(refineDict.lookup("nCutLayers")));
-    label cellLimit(readLabel(refineDict.lookup("cellLimit")));
-    bool selectCut(readBool(refineDict.lookup("selectCut")));
-    bool selectInside(readBool(refineDict.lookup("selectInside")));
-    bool selectOutside(readBool(refineDict.lookup("selectOutside")));
-    bool selectHanging(readBool(refineDict.lookup("selectHanging")));
+    const label nCutLayers(refineDict.get<label>("nCutLayers"));
+    const label cellLimit(refineDict.get<label>("cellLimit"));
+    const bool selectCut(refineDict.get<bool>("selectCut"));
+    const bool selectInside(refineDict.get<bool>("selectInside"));
+    const bool selectOutside(refineDict.get<bool>("selectOutside"));
+    const bool selectHanging(refineDict.get<bool>("selectHanging"));
 
-    scalar minEdgeLen(readScalar(refineDict.lookup("minEdgeLen")));
-    scalar maxEdgeLen(readScalar(refineDict.lookup("maxEdgeLen")));
-    scalar curvature(readScalar(refineDict.lookup("curvature")));
-    scalar curvDist(readScalar(refineDict.lookup("curvatureDistance")));
+    const scalar minEdgeLen(refineDict.get<scalar>("minEdgeLen"));
+    const scalar maxEdgeLen(refineDict.get<scalar>("maxEdgeLen"));
+    const scalar curvature(refineDict.get<scalar>("curvature"));
+    const scalar curvDist(refineDict.get<scalar>("curvatureDistance"));
     pointField outsidePts(refineDict.lookup("outsidePoints"));
-    label refinementLimit(readLabel(refineDict.lookup("splitLevel")));
-    bool writeMesh(readBool(refineDict.lookup("writeMesh")));
+    const label refinementLimit(refineDict.get<label>("splitLevel"));
+    const bool writeMesh(refineDict.get<bool>("writeMesh"));
 
     Info<< "Cells to be used for meshing (0=false, 1=true):" << nl
         << "    cells cut by surface            : " << selectCut << nl

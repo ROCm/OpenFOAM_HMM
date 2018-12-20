@@ -57,12 +57,8 @@ bool Foam::functionObjects::enstrophy::calc()
             0.5*magSqr(fvc::curl(lookupObject<volVectorField>(fieldName_)))
         );
     }
-    else
-    {
-        return false;
-    }
 
-    return true;
+    return false;
 }
 
 

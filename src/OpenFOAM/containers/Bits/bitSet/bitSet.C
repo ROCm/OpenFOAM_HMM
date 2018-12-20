@@ -293,6 +293,47 @@ Foam::bitSet::bitSet(Istream& is)
 }
 
 
+Foam::bitSet::bitSet(const bitSet& bitset, const labelUList& addr)
+:
+    bitSet(addr.size())
+{
+    const label len = addr.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        set(i, bitset.get(addr[i]));
+    }
+}
+
+
+Foam::bitSet::bitSet(const bitSet& bitset, const labelUIndList& addr)
+:
+    bitSet(addr.size())
+{
+    const label len = addr.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        set(i, bitset.get(addr[i]));
+    }
+}
+
+
+Foam::bitSet::bitSet(const bitSet& bitset, const labelRange& range)
+:
+    bitSet(range.size())
+{
+    label pos = range.start();
+    const label len = range.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        set(i, bitset.get(pos));
+        ++pos;
+    }
+}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::bitSet::assign(const UList<bool>& bools)

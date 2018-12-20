@@ -176,9 +176,13 @@ Foam::labelList Foam::processorCyclicPolyPatch::patchIDs
     const polyBoundaryMesh& bm
 )
 {
-    return bm.findIndices
+    return bm.indices
     (
-        string("procBoundary.*to.*through" + cyclicPolyPatchName)
+        keyType
+        (
+            "procBoundary.*to.*through" + cyclicPolyPatchName,
+            true  // isPattern
+        )
     );
 }
 
@@ -196,11 +200,11 @@ int Foam::processorCyclicPolyPatch::tag() const
 
         if (owner())
         {
-            tag_ = Hash<word>()(cycPatch.name()) % 32768u;
+            tag_ = string::hash()(cycPatch.name()) % 32768u;
         }
         else
         {
-            tag_ = Hash<word>()(cycPatch.neighbPatch().name()) % 32768u;
+            tag_ = string::hash()(cycPatch.neighbPatch().name()) % 32768u;
         }
 
         if (tag_ == Pstream::msgType() || tag_ == -1)

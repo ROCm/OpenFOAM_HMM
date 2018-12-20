@@ -53,14 +53,15 @@ int main(int argc, char *argv[])
     (
         "Re-sample surfaces used in foamyHexMesh operation"
     );
-    argList::addArgument("(nx ny nz)");
-    argList::addArgument("outputName");
+    argList::addArgument("(nx ny nz)", "The resampling interval");
+    argList::addArgument("output", "The output triSurface/ file");
+
+    argList::noFunctionObjects();  // Never use function objects
 
     #include "setRootCase.H"
     #include "createTime.H"
-    runTime.functionObjects().off();
 
-    const labelVector n(args.read<labelVector>(1));
+    const labelVector n(args.get<labelVector>(1));
     const fileName exportName = args[2];
 
     Info<< "Reading surfaces as specified in the foamyHexMeshDict and"

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,18 +32,12 @@ Foam::TimeState::TimeState()
 :
     dimensionedScalar(Time::timeName(0), dimTime, 0),
     timeIndex_(0),
-    deltaT_(0),
-    deltaTSave_(0),
-    deltaT0_(0),
-    deltaTchanged_(false),
     writeTimeIndex_(0),
+    deltaT_(0),
+    deltaT0_(0),
+    deltaTSave_(0),
+    deltaTchanged_(false),
     writeTime_(false)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * //
-
-Foam::TimeState::~TimeState()
 {}
 
 

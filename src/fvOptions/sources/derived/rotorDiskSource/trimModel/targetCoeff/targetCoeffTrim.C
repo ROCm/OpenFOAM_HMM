@@ -57,9 +57,9 @@ Foam::vector Foam::targetCoeffTrim::calcCoeffs
     const List<point>& x = rotor_.x();
 
     const vector& origin = rotor_.coordSys().origin();
-    const vector& rollAxis = rotor_.coordSys().R().e1();
-    const vector& pitchAxis = rotor_.coordSys().R().e2();
-    const vector& yawAxis = rotor_.coordSys().R().e3();
+    const vector& rollAxis = rotor_.coordSys().e1();
+    const vector& pitchAxis = rotor_.coordSys().e2();
+    const vector& yawAxis = rotor_.coordSys().e3();
 
     scalar coeff1 = alpha_*sqr(rotor_.omega())*mathematical::pi;
 
@@ -211,12 +211,6 @@ Foam::targetCoeffTrim::targetCoeffTrim
 }
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::targetCoeffTrim::~targetCoeffTrim()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::targetCoeffTrim::read(const dictionary& dict)
@@ -231,16 +225,16 @@ void Foam::targetCoeffTrim::read(const dictionary& dict)
         ext = "Coeff";
     }
 
-    target_[0] = readScalar(targetDict.lookup("thrust" + ext));
-    target_[1] = readScalar(targetDict.lookup("pitch" + ext));
-    target_[2] = readScalar(targetDict.lookup("roll" + ext));
+    targetDict.readEntry("thrust" + ext, target_[0]);
+    targetDict.readEntry("pitch" + ext, target_[1]);
+    targetDict.readEntry("roll" + ext, target_[2]);
 
     const dictionary& pitchAngleDict(coeffs_.subDict("pitchAngles"));
-    theta_[0] = degToRad(readScalar(pitchAngleDict.lookup("theta0Ini")));
-    theta_[1] = degToRad(readScalar(pitchAngleDict.lookup("theta1cIni")));
-    theta_[2] = degToRad(readScalar(pitchAngleDict.lookup("theta1sIni")));
+    theta_[0] = degToRad(pitchAngleDict.get<scalar>("theta0Ini"));
+    theta_[1] = degToRad(pitchAngleDict.get<scalar>("theta1cIni"));
+    theta_[2] = degToRad(pitchAngleDict.get<scalar>("theta1sIni"));
 
-    coeffs_.lookup("calcFrequency") >> calcFrequency_;
+    coeffs_.readEntry("calcFrequency", calcFrequency_);
 
     coeffs_.readIfPresent("nIter", nIter_);
     coeffs_.readIfPresent("tol", tol_);
@@ -251,7 +245,7 @@ void Foam::targetCoeffTrim::read(const dictionary& dict)
         dTheta_ = degToRad(dTheta_);
     }
 
-    alpha_ = readScalar(coeffs_.lookup("alpha"));
+    coeffs_.readEntry("alpha", alpha_);
 }
 
 
@@ -259,8 +253,8 @@ Foam::tmp<Foam::scalarField> Foam::targetCoeffTrim::thetag() const
 {
     const List<vector>& x = rotor_.x();
 
-    tmp<scalarField> ttheta(new scalarField(x.size()));
-    scalarField& t = ttheta.ref();
+    auto ttheta = tmp<scalarField>::New(x.size());
+    auto& t = ttheta.ref();
 
     forAll(t, i)
     {

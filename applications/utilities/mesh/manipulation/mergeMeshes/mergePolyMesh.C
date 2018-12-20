@@ -55,7 +55,7 @@ Foam::label Foam::mergePolyMesh::patchIndex(const polyPatch& p)
     {
         if (patchNames_[patchi] == pName)
         {
-            if (word(patchDicts_[patchi]["type"]) == pType)
+            if (patchDicts_[patchi].get<word>("type") == pType)
             {
                 // Found name and types match
                 return patchi;

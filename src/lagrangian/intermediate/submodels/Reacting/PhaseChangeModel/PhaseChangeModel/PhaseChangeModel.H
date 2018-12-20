@@ -60,7 +60,7 @@ class PhaseChangeModel
 {
 public:
 
-    // Public enumerations
+    // Public Enumerations
 
         //- Enthalpy transfer type
         enum enthalpyTransferType
@@ -70,7 +70,7 @@ public:
         };
 
         //- Name representations of enthalpy transfer types
-        static const Foam::wordList enthalpyTransferTypeNames;
+        static const wordList enthalpyTransferTypeNames;
 
 
 protected:
@@ -136,7 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~PhaseChangeModel();
+    virtual ~PhaseChangeModel() = default;
 
 
     //- Selector

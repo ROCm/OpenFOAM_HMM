@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,16 @@ Class
     Foam::sphereToCell
 
 Description
-    A topoSetSource to select cells based on cell centres inside sphere.
+    A topoSetCellSource to select cells based on cell centres inside sphere.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        origin      | The origin (centre) of the sphere     | yes   |
+        radius      | The (outer) radius of sphere          | yes   |
+        innerRadius | The inner radius of sphere            | no    | 0
+        centre      | Alternative for 'origin'              | no    |
+    \endtable
 
 SourceFiles
     sphereToCell.C
@@ -35,7 +44,7 @@ SourceFiles
 #ifndef sphereToCell_H
 #define sphereToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +57,7 @@ namespace Foam
 
 class sphereToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -56,11 +65,14 @@ class sphereToCell
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Centre
-        vector centre_;
+        //- Centre point of the sphere
+        point origin_;
 
-        //- Radius
+        //- The outer radius of the sphere
         scalar radius_;
+
+        //- The inner radius of the sphere
+        scalar innerRadius_;
 
 
     // Private Member Functions
@@ -80,40 +92,28 @@ public:
         sphereToCell
         (
             const polyMesh& mesh,
-            const vector& centre,
-            const scalar radius
+            const point& origin,
+            const scalar radius,
+            const scalar innerRadius = 0
         );
 
         //- Construct from dictionary
-        sphereToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        sphereToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        sphereToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        sphereToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~sphereToCell();
+    virtual ~sphereToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

@@ -35,6 +35,14 @@ namespace Foam
     addToRunTimeSelectionTable(surfaceWriter, ensightSurfaceWriter, wordDict);
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Field writing implementation
+#include "ensightSurfaceWriterImpl.C"
+
+// Field writing methods
+defineSurfaceWriterWriteFields(Foam::ensightSurfaceWriter);
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -106,11 +114,12 @@ Foam::ensightSurfaceWriter::ensightSurfaceWriter(const dictionary& options)
     surfaceWriter(),
     writeFormat_
     (
-        IOstreamOption::formatNames.lookupOrFailsafe
+        IOstreamOption::formatNames.lookupOrDefault
         (
             "format",
             options,
-            IOstreamOption::ASCII
+            IOstreamOption::ASCII,
+            true  // Failsafe behaviour
         )
     ),
     collateTimes_(options.lookupOrDefault("collateTimes", true))
@@ -142,7 +151,10 @@ void Foam::ensightSurfaceWriter::updateMesh
 
         const fileName baseDir = outputDir.path()/surfName;
         const fileName timeDir = outputDir.name();
-        const scalar timeValue = readScalar(timeDir);
+
+        // Convert timeDir to a value (if possible - use 0.0 otherwise)
+        scalar timeValue = 0.0;
+        readScalar(timeDir, timeValue);
 
         if (!isDir(baseDir))
         {
@@ -179,9 +191,12 @@ Foam::fileName Foam::ensightSurfaceWriter::write
     const bool verbose
 ) const
 {
-    const pointField& points = surf.points();
-    const faceList&   faces  = surf.faces();
     const ensight::FileName surfName(surfaceName);
+
+    // Uncollated
+    // ==========
+    // geometry:  rootdir/time/surfaceName.case
+    // geometry:  rootdir/time/surfaceName.00000000.mesh
 
     if (!isDir(outputDir))
     {
@@ -201,6 +216,9 @@ Foam::fileName Foam::ensightSurfaceWriter::write
         Info<< "Writing case file to " << osCase.name() << endl;
     }
 
+    const pointField& points = surf.points();
+    const faceList&   faces  = surf.faces();
+
     osCase
         << "FORMAT" << nl
         << "type: ensight gold" << nl
@@ -216,11 +234,13 @@ Foam::fileName Foam::ensightSurfaceWriter::write
     osGeom << ensPart;
 
     return osCase.name();
+
+
+    // Collated?
+    // ========
+    // geometry:  rootdir/surfaceName/surfaceName.case
+    // geometry:  rootdir/surfaceName/surfaceName.mesh
 }
-
-
-// Create all write methods
-defineSurfaceWriterWriteFields(Foam::ensightSurfaceWriter);
 
 
 // ************************************************************************* //

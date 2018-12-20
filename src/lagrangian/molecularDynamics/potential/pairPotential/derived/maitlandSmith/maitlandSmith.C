@@ -55,10 +55,10 @@ maitlandSmith::maitlandSmith
 :
     pairPotential(name, maitlandSmith),
     maitlandSmithCoeffs_(maitlandSmith.subDict(typeName + "Coeffs")),
-    m_(readScalar(maitlandSmithCoeffs_.lookup("m"))),
-    gamma_(readScalar(maitlandSmithCoeffs_.lookup("gamma"))),
-    rm_(readScalar(maitlandSmithCoeffs_.lookup("rm"))),
-    epsilon_(readScalar(maitlandSmithCoeffs_.lookup("epsilon")))
+    m_(maitlandSmithCoeffs_.get<scalar>("m")),
+    gamma_(maitlandSmithCoeffs_.get<scalar>("gamma")),
+    rm_(maitlandSmithCoeffs_.get<scalar>("rm")),
+    epsilon_(maitlandSmithCoeffs_.get<scalar>("epsilon"))
 {
     setLookupTables();
 }
@@ -84,10 +84,10 @@ bool maitlandSmith::read(const dictionary& maitlandSmith)
 
     maitlandSmithCoeffs_ = maitlandSmith.subDict(typeName + "Coeffs");
 
-    maitlandSmithCoeffs_.lookup("m") >> m_;
-    maitlandSmithCoeffs_.lookup("gamma") >> gamma_;
-    maitlandSmithCoeffs_.lookup("rm") >> rm_;
-    maitlandSmithCoeffs_.lookup("epsilon") >> epsilon_;
+    maitlandSmithCoeffs_.readEntry("m", m_);
+    maitlandSmithCoeffs_.readEntry("gamma", gamma_);
+    maitlandSmithCoeffs_.readEntry("rm", rm_);
+    maitlandSmithCoeffs_.readEntry("epsilon", epsilon_);
 
     return true;
 }

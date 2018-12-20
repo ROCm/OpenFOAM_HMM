@@ -31,10 +31,37 @@ const Foam::Enum
 <
     Foam::vtk::fileTag
 >
-Foam::vtk::fileTagNames
+Foam::vtk::fileExtension
 {
+    { fileTag::POLY_DATA, "vtp" },
+    { fileTag::UNSTRUCTURED_GRID, "vtu" },
+    { fileTag::MULTI_BLOCK, "vtm" },
+    // { fileTag::COLLECTION, "pvd" },
+};
+
+
+const Foam::Enum
+<
+    Foam::vtk::fileTag
+>
+Foam::vtk::fileContentVersions
+{
+    { fileTag::POLY_DATA, "0.1" },
+    { fileTag::UNSTRUCTURED_GRID, "0.1" },
+    { fileTag::MULTI_BLOCK, "1.0" },
+    // { fileTag::COLLECTION, "0.1" },
+};
+
+
+const Foam::Enum
+<
+    Foam::vtk::fileTag
+>
+Foam::vtk::fileTagNames
+({
     { fileTag::VTK_FILE, "VTKFile" },
     { fileTag::DATA_ARRAY, "DataArray" },
+    { fileTag::BLOCK, "Block" },
     { fileTag::PIECE, "Piece" },
     { fileTag::DATA_SET, "DataSet" },
     { fileTag::POINTS, "Points" },
@@ -44,10 +71,12 @@ Foam::vtk::fileTagNames
     { fileTag::LINES, "Lines" },
     { fileTag::CELL_DATA, "CellData" },
     { fileTag::POINT_DATA, "PointData" },
+    { fileTag::FIELD_DATA, "FieldData" },
     { fileTag::POLY_DATA, "PolyData" },
     { fileTag::UNSTRUCTURED_GRID, "UnstructuredGrid" },
     { fileTag::MULTI_BLOCK, "vtkMultiBlockDataSet" },
-};
+    // { fileTag::COLLECTION, "Collection" },
+});
 
 
 const Foam::Enum
@@ -55,15 +84,16 @@ const Foam::Enum
     Foam::vtk::fileAttr
 >
 Foam::vtk::fileAttrNames
-{
+({
     { fileAttr::OFFSET, "offset" },
     { fileAttr::NUMBER_OF_COMPONENTS, "NumberOfComponents" },
+    { fileAttr::NUMBER_OF_TUPLES, "NumberOfTuples" },
     { fileAttr::NUMBER_OF_POINTS, "NumberOfPoints" },
     { fileAttr::NUMBER_OF_CELLS, "NumberOfCells" },
     { fileAttr::NUMBER_OF_POLYS, "NumberOfPolys" },
     { fileAttr::NUMBER_OF_VERTS, "NumberOfVerts" },
     { fileAttr::NUMBER_OF_LINES, "NumberOfLines" },
-};
+});
 
 
 const Foam::Enum
@@ -71,14 +101,40 @@ const Foam::Enum
     Foam::vtk::dataArrayAttr
 >
 Foam::vtk::dataArrayAttrNames
-{
+({
     { dataArrayAttr::POINTS, "Points" },
     { dataArrayAttr::OFFSETS, "offsets" },
     { dataArrayAttr::CONNECTIVITY, "connectivity" },
     { dataArrayAttr::TYPES, "types" },
     { dataArrayAttr::FACES, "faces" },
     { dataArrayAttr::FACEOFFSETS, "faceoffsets" },
-};
+});
+
+
+// Legacy
+
+const Foam::word Foam::vtk::legacy::fileExtension("vtk");
+
+const Foam::Enum
+<
+    Foam::vtk::fileTag
+>
+Foam::vtk::legacy::contentNames
+({
+    { vtk::fileTag::POLY_DATA, "POLYDATA" },
+    { vtk::fileTag::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
+});
+
+
+const Foam::Enum
+<
+    Foam::vtk::fileTag
+>
+Foam::vtk::legacy::dataTypeNames
+({
+    { vtk::fileTag::CELL_DATA,  "CELL_DATA" },
+    { vtk::fileTag::POINT_DATA, "POINT_DATA" },
+});
 
 
 // ************************************************************************* //

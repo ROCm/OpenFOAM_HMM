@@ -46,9 +46,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-class IFstream;
+// Forward declarations
+class ISstream;
 class Time;
 
 namespace fileFormats

@@ -25,7 +25,7 @@ Namespace
     stdFoam
 
 Description
-    Some global templates and macros used by OpenFOAM and some standard
+    Global templates and macros used by OpenFOAM and some standard
     C++ headers.
 
     Some of the templates defined here correspond to useful
@@ -60,6 +60,17 @@ SeeAlso
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Namespace for OpenFOAM
+namespace Foam
+{
+    //- Implementation details for various OpenFOAM classes
+    namespace Detail {}
+
+    //- Additional OpenFOAM modules
+    namespace Module {}
+}
+
 
 namespace stdFoam
 {
@@ -224,7 +235,7 @@ constexpr inline const T& max(const T& a, const T& b)
     )
 
 
-//- Rverse iterate across elements in the \a container object of type
+//- Reverse iterate across elements in the \a container object of type
 //  \a Container.
 //  \par Usage
 //  \code

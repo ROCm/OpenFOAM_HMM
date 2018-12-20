@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,32 @@ namespace Foam
     defineTypeNameAndDebug(cylinderAnnulusToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, cylinderAnnulusToFace, word);
     addToRunTimeSelectionTable(topoSetSource, cylinderAnnulusToFace, istream);
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderAnnulusToFace,
+        word
+    );
+    addToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderAnnulusToFace,
+        istream
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderAnnulusToFace,
+        word,
+        cylinderAnnulus
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetFaceSource,
+        cylinderAnnulusToFace,
+        istream,
+        cylinderAnnulus
+    );
 }
 
 
@@ -50,24 +76,26 @@ Foam::topoSetSource::addToUsageTable Foam::cylinderAnnulusToFace::usage_
 
 void Foam::cylinderAnnulusToFace::combine(topoSet& set, const bool add) const
 {
-    const vector axis = p2_ - p1_;
-    const scalar orad2 = sqr(outerRadius_);
-    const scalar irad2 = sqr(innerRadius_);
-    const scalar magAxis2 = magSqr(axis);
-
     const pointField& ctrs = mesh_.faceCentres();
 
-    forAll(ctrs, facei)
+    const vector axis = (point2_ - point1_);
+    const scalar magAxis2 = magSqr(axis);
+    const scalar orad2 = sqr(radius_);
+    const scalar irad2 = innerRadius_ > 0 ? sqr(innerRadius_) : -1;
+
+    // Treat innerRadius == 0 like unspecified innerRadius (always accept)
+
+    forAll(ctrs, elemi)
     {
-        vector d = ctrs[facei] - p1_;
-        scalar magD = d & axis;
+        const vector d = ctrs[elemi] - point1_;
+        const scalar magD = d & axis;
 
         if ((magD > 0) && (magD < magAxis2))
         {
-            scalar d2 = (d & d) - sqr(magD)/magAxis2;
+            const scalar d2 = (d & d) - sqr(magD)/magAxis2;
             if ((d2 < orad2) && (d2 > irad2))
             {
-                addOrDelete(set, facei, add);
+                addOrDelete(set, elemi, add);
             }
         }
     }
@@ -79,16 +107,16 @@ void Foam::cylinderAnnulusToFace::combine(topoSet& set, const bool add) const
 Foam::cylinderAnnulusToFace::cylinderAnnulusToFace
 (
     const polyMesh& mesh,
-    const vector& p1,
-    const vector& p2,
-    const scalar outerRadius,
+    const point& point1,
+    const point& point2,
+    const scalar radius,
     const scalar innerRadius
 )
 :
-    topoSetSource(mesh),
-    p1_(p1),
-    p2_(p2),
-    outerRadius_(outerRadius),
+    topoSetFaceSource(mesh),
+    point1_(point1),
+    point2_(point2),
+    radius_(radius),
     innerRadius_(innerRadius)
 {}
 
@@ -99,11 +127,14 @@ Foam::cylinderAnnulusToFace::cylinderAnnulusToFace
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    p1_(dict.lookup("p1")),
-    p2_(dict.lookup("p2")),
-    outerRadius_(readScalar(dict.lookup("outerRadius"))),
-    innerRadius_(readScalar(dict.lookup("innerRadius")))
+    cylinderAnnulusToFace
+    (
+        mesh,
+        dict.get<point>("p1"),
+        dict.get<point>("p2"),
+        dict.get<scalar>("outerRadius"),
+        dict.get<scalar>("innerRadius")
+    )
 {}
 
 
@@ -113,17 +144,11 @@ Foam::cylinderAnnulusToFace::cylinderAnnulusToFace
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    p1_(checkIs(is)),
-    p2_(checkIs(is)),
-    outerRadius_(readScalar(checkIs(is))),
+    topoSetFaceSource(mesh),
+    point1_(checkIs(is)),
+    point2_(checkIs(is)),
+    radius_(readScalar(checkIs(is))),
     innerRadius_(readScalar(checkIs(is)))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cylinderAnnulusToFace::~cylinderAnnulusToFace()
 {}
 
 
@@ -135,22 +160,29 @@ void Foam::cylinderAnnulusToFace::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding faces with centre within cylinder annulus,"
-            << " with p1 = "
-            << p1_ << ", p2 = " << p2_ << " and outer radius = " << outerRadius_
-        << " and inner radius = " << innerRadius_
-        << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding faces with centre within cylinder annulus,"
+                << " with p1 = " << point1_ << ", p2 = " << point2_
+                << ", radius = " << radius_
+                << ", inner radius = " << innerRadius_
+                << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing faces with centre within cylinder, with p1 = "
-            << p1_ << ", p2 = " << p2_ << " and outer radius = " << outerRadius_
-        << " and inner radius " << innerRadius_
-        << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing faces with centre within cylinder annulus,"
+                << " with p1 = " << point1_ << ", p2 = " << point2_
+                << ", radius = " << radius_
+                << ", inner radius = " << innerRadius_
+                << endl;
+        }
 
         combine(set, false);
     }

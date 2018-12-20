@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,24 +29,42 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::mergedSurf::mergedSurf()
-:
-    points_(),
-    faces_(),
-    zones_(),
-    pointsMap_()
-{}
-
-
 Foam::mergedSurf::mergedSurf
 (
-    const meshedSurf& surf,
+    const meshedSurf& unmergedSurface,
     const scalar mergeDim
 )
 :
     mergedSurf()
 {
-    merge(surf, mergeDim);
+    merge(unmergedSurface, mergeDim);
+}
+
+
+Foam::mergedSurf::mergedSurf
+(
+    const pointField& unmergedPoints,
+    const faceList& unmergedFaces,
+    const scalar mergeDim
+)
+:
+    mergedSurf()
+{
+    merge(unmergedPoints, unmergedFaces, mergeDim);
+}
+
+
+Foam::mergedSurf::mergedSurf
+(
+    const pointField& unmergedPoints,
+    const faceList& unmergedFaces,
+    const labelList& originalIds,
+    const scalar mergeDim
+)
+:
+    mergedSurf()
+{
+    merge(unmergedPoints, unmergedFaces, originalIds, mergeDim);
 }
 
 
@@ -69,15 +87,43 @@ void Foam::mergedSurf::clear()
 
 bool Foam::mergedSurf::merge
 (
-    const meshedSurf& surf,
+    const meshedSurf& unmergedSurface,
     const scalar mergeDim
 )
 {
-    // needed for extra safety?
-    // clear();
+    return
+        merge
+        (
+            unmergedSurface.points(),
+            unmergedSurface.faces(),
+            unmergedSurface.zoneIds(),
+            mergeDim
+        );
+}
 
+
+bool Foam::mergedSurf::merge
+(
+    const pointField& unmergedPoints,
+    const faceList& unmergedFaces,
+    const scalar mergeDim
+)
+{
+    return merge(unmergedPoints, unmergedFaces, labelList(), mergeDim);
+}
+
+
+bool Foam::mergedSurf::merge
+(
+    const pointField& unmergedPoints,
+    const faceList& unmergedFaces,
+    const labelList& originalIds,
+    const scalar mergeDim
+)
+{
     if (!use())
     {
+        clear();   // Extra safety?
         return false;
     }
 
@@ -86,8 +132,8 @@ bool Foam::mergedSurf::merge
         mergeDim,
         primitivePatch
         (
-            SubList<face>(surf.faces(), surf.faces().size()),
-            surf.points()
+            SubList<face>(unmergedFaces, unmergedFaces.size()),
+            unmergedPoints
         ),
         points_,
         faces_,
@@ -96,7 +142,7 @@ bool Foam::mergedSurf::merge
 
     // Now handle zone/region information
     List<labelList> allZones(Pstream::nProcs());
-    allZones[Pstream::myProcNo()] = surf.zoneIds();
+    allZones[Pstream::myProcNo()] = originalIds;
     Pstream::gatherList(allZones);
 
     if (Pstream::master())

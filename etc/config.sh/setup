@@ -1,0 +1,173 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.sh/setup
+#     - sourced by OpenFOAM-*/etc/bashrc
+#
+# Description
+#     Finalize setup of OpenFOAM environment for POSIX shell.
+#
+# Environment
+#     FOAM_VERBOSE (set/unset)
+#         - add extra verbosity when sourcing files
+#     FOAM_CONFIG_NOUSER (set/unset)
+#         - suppress use of user/group configuration files
+#
+#------------------------------------------------------------------------------
+
+# [WM_PROJECT_API] - The API level for the project
+export WM_PROJECT_API="$($WM_PROJECT_DIR/bin/foamEtcFile -show-api)"
+
+# The installation parent directory
+prefixDir="${WM_PROJECT_DIR%/*}"
+
+# Load shell functions
+unset WM_SHELL_FUNCTIONS
+. "$WM_PROJECT_DIR/etc/config.sh/functions"
+
+
+# [WM_THIRD_PARTY_DIR] - Location of third-party software components
+# \- This may be installed in a directory parallel to the OpenFOAM project
+#    directory, with the same version name or using the API value.
+#    It may also not be required at all, in which case a dummy "ThirdParty"
+#    directory inside of the OpenFOAM project directory.
+#
+# Note: only accept if the directory exists and contains either
+#   a "Allwmake" file (source) or a "platforms" directory (runtime-only)
+
+export WM_THIRD_PARTY_DIR
+unset foundDir
+
+_foamEcho "Locating ThirdParty directory"
+
+for WM_THIRD_PARTY_DIR in \
+    "$WM_PROJECT_DIR/ThirdParty" \
+    "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
+    "$prefixDir/ThirdParty-v$WM_PROJECT_API" \
+    "$prefixDir/ThirdParty-$WM_PROJECT_API" \
+    "$prefixDir/ThirdParty-common" \
+    ;
+do
+    _foamEcho "... $WM_THIRD_PARTY_DIR"
+    if [ -d "$WM_THIRD_PARTY_DIR" ]
+    then
+        if [ -f "$WM_THIRD_PARTY_DIR/Allwmake" ] || \
+           [ -d "$WM_THIRD_PARTY_DIR/platforms" ]
+        then
+            foundDir=true
+            break
+        fi
+    fi
+done
+
+if [ -n "$foundDir" ]
+then
+    _foamEcho "Using $WM_THIRD_PARTY_DIR"
+else
+    # Dummy fallback value
+    WM_THIRD_PARTY_DIR="$WM_PROJECT_DIR/ThirdParty"
+    _foamEcho "Dummy $WM_THIRD_PARTY_DIR"
+fi
+# Done with ThirdParty discovery
+
+
+# Overrides via <prefs.sh>
+# 1. other (system) values
+_foamEtc -mode=o prefs.sh
+
+# 2. user or group values (unless disabled)
+[ -z "$FOAM_CONFIG_NOUSER" ] && _foamEtc -mode=ug prefs.sh
+
+
+# Capture and evaluate any command-line parameters
+# These can be used to set/unset values, specify additional files etc.
+FOAM_SETTINGS="$@"
+
+# Evaluate the command-line parameters, which were saved as FOAM_SETTINGS.
+# These can be used to set/unset values, specify additional files etc.
+if [ -z "$FOAM_SETTINGS" ]
+then
+    unset FOAM_SETTINGS
+else
+    export FOAM_SETTINGS
+    _foamEval "$@"
+fi
+
+
+# Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export PATH MANPATH LD_LIBRARY_PATH
+_foamClean PATH "$foamOldDirs"
+_foamClean MANPATH "$foamOldDirs"
+_foamClean LD_LIBRARY_PATH "$foamOldDirs"
+
+# Setup for OpenFOAM compilation etc
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_foamEtc -config  settings
+
+# Setup for third-party packages
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_foamEtc -config  mpi
+_foamEtc -config  paraview -- "$@"  # Pass through for evaluation
+_foamEtc -config  vtk
+_foamEtc -config  ensight
+_foamEtc -config  gperftools
+## _foamEtc -config  ADIOS
+## _foamEtc -config  ADIOS2
+_foamEtc -config  CGAL
+_foamEtc -config  scotch
+_foamEtc -config  FFTW
+
+if [ -d "$WM_PROJECT_DIR/doc/man1" ]
+then
+    _foamAddMan "$WM_PROJECT_DIR/doc"
+fi
+
+# Interactive shell
+if /usr/bin/tty -s 2>/dev/null
+then
+    _foamEtc -config  aliases
+    [ "${BASH_VERSINFO:-0}" -ge 4 ] && _foamEtc -config  bash_completion
+fi
+
+
+# Clean environment paths again. Only remove duplicates
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+export PATH MANPATH LD_LIBRARY_PATH
+
+_foamClean PATH
+_foamClean MANPATH
+_foamClean LD_LIBRARY_PATH
+
+# Add trailing ':' for system manpages
+if [ -n "$MANPATH" ]
+then
+    MANPATH="${MANPATH}:"
+fi
+
+if [ -n "$LD_PRELOAD" ]
+then
+    export LD_PRELOAD
+    _foamClean LD_PRELOAD
+fi
+
+
+# Cleanup temporary information
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Unload shell functions
+. "$WM_PROJECT_DIR/etc/config.sh/functions"
+
+# Variables (done as the last statement for a clean exit code)
+unset cleaned foamOldDirs foundDir prefixDir
+
+#------------------------------------------------------------------------------

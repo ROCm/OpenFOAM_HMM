@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ddt2.H"
-
+#include "stringListOps.H"
 #include "volFields.H"
 #include "dictionary.H"
 #include "wordRes.H"
@@ -134,7 +134,7 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
         return false;
     }
 
-    dict.lookup("fields") >> selectFields_;
+    dict.readEntry("fields", selectFields_);
     selectFields_.uniq();
 
     Info<< type() << " fields: " << selectFields_ << nl;
@@ -174,9 +174,9 @@ bool Foam::functionObjects::ddt2::execute()
     // Check exact matches first
     for (const wordRe& select : selectFields_)
     {
-        if (!select.isPattern())
+        if (select.isLiteral())
         {
-            const word& fieldName = static_cast<const word&>(select);
+            const word& fieldName = select;
 
             if (!candidates.erase(fieldName))
             {

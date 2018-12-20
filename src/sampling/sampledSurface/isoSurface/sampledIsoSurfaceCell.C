@@ -64,7 +64,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
 
     // Use field from database, or try to read it in
 
-    const auto* cellFldPtr = fvm.lookupObjectPtr<volScalarField>(isoField_);
+    const auto* cellFldPtr = fvm.findObject<volScalarField>(isoField_);
 
     if (debug)
     {
@@ -196,12 +196,11 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
 :
     sampledSurface(name, mesh, dict),
     MeshStorage(),
-    isoField_(dict.lookup("isoField")),
-    isoVal_(readScalar(dict.lookup("isoValue"))),
+    isoField_(dict.get<word>("isoField")),
+    isoVal_(dict.get<scalar>("isoValue")),
     bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", true)),
-    zoneKey_(keyType::null),
     prevTimeIndex_(-1),
     meshCells_()
 {}

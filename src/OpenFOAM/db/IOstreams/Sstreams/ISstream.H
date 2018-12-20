@@ -134,7 +134,7 @@ public:
             inline int peek();
 
             //- Raw, low-level getline into a string function.
-            inline ISstream& getLine(string& str);
+            inline ISstream& getLine(std::string& str);
 
             //- Raw, low-level putback character function.
             inline ISstream& putback(const char c);

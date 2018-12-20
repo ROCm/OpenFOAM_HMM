@@ -47,7 +47,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     const dictionary& solverControls
 )
 {
-    const word name(solverControls.lookup("solver"));
+    const word name(solverControls.get<word>("solver"));
 
     if (matrix.diagonal())
     {

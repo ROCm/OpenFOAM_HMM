@@ -12,25 +12,13 @@ areaScalarField Cs
     aMesh
 );
 
-dimensioned<scalar> Cs0
-(
-    "Cs0",
-    dimensionSet(1, -2, 0, 0, 0, 0, 0),
-    1.0
-);
+dimensionedScalar Cs0("Cs0", dimMass/dimArea, 1.0);
 
 const areaVectorField& R = aMesh.areaCentres();
 
 Cs = Cs0*(1.0 + R.component(vector::X)/mag(R));
 
-
-dimensioned<scalar> Ds
-(
-    "Ds",
-    dimensionSet(0, 2, -1, 0, 0, 0, 0),
-    1.0
-);
-
+dimensionedScalar Ds("Ds", dimViscosity, 1.0);
 
 areaVectorField Us
 (
@@ -48,7 +36,7 @@ areaVectorField Us
 
 dimensioned<scalar> Uinf("Uinf", dimVelocity, 1.0);
 
-forAll (Us, faceI)
+forAll(Us, faceI)
 {
     Us[faceI].x() =
         Uinf.value()*(0.25*(3.0 + sqr(R[faceI].x()/mag(R[faceI]))) - 1.0);

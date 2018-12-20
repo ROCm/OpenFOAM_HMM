@@ -93,8 +93,6 @@ class motionSmoother
     public motionSmootherAlgo
 
 {
-    // Private class
-
 public:
 
     ClassName("motionSmoother");
@@ -105,10 +103,10 @@ public:
         //  Reads displacement field (only boundary conditions used)
         motionSmoother
         (
-            polyMesh&,
-            pointMesh&,
-            indirectPrimitivePatch& pp,         // 'outside' points
-            const labelList& adaptPatchIDs,     // patches forming 'outside'
+            polyMesh& mesh,
+            pointMesh& pMesh,
+            indirectPrimitivePatch& pp,         //!< 'outside' points
+            const labelList& adaptPatchIDs,     //!< patches forming 'outside'
             const dictionary& paramDict
         );
 
@@ -116,13 +114,12 @@ public:
         //  displacementfield (only boundary conditions used)
         motionSmoother
         (
-            polyMesh&,
-            indirectPrimitivePatch& pp,         // 'outside' points
-            const labelList& adaptPatchIDs,     // patches forming 'outside'
-            const pointVectorField&,
+            polyMesh& mesh,
+            indirectPrimitivePatch& pp,         //!< 'outside' points
+            const labelList& adaptPatchIDs,     //!< patches forming 'outside'
+            const pointVectorField& displacement,
             const dictionary& paramDict
         );
-
 };
 
 

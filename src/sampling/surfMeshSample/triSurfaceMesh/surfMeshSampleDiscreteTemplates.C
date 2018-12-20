@@ -60,7 +60,7 @@ bool Foam::surfMeshSampleDiscrete::sampleType
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
     const auto* volFldPtr =
-        SurfaceSource::mesh().lookupObjectPtr<VolFieldType>(fieldName);
+        SurfaceSource::mesh().findObject<VolFieldType>(fieldName);
 
     if (!volFldPtr)
     {

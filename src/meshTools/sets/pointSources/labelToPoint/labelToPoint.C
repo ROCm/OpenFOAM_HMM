@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,22 @@ namespace Foam
     defineTypeNameAndDebug(labelToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, labelToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, labelToPoint, istream);
+    addToRunTimeSelectionTable(topoSetPointSource, labelToPoint, word);
+    addToRunTimeSelectionTable(topoSetPointSource, labelToPoint, istream);
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        labelToPoint,
+        word,
+        label
+    );
+    addNamedToRunTimeSelectionTable
+    (
+        topoSetPointSource,
+        labelToPoint,
+        istream,
+        label
+    );
 }
 
 
@@ -45,17 +61,6 @@ Foam::topoSetSource::addToUsageTable Foam::labelToPoint::usage_
 );
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::labelToPoint::combine(topoSet& set, const bool add) const
-{
-    forAll(labels_, labelI)
-    {
-        addOrDelete(set, labels_[labelI], add);
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::labelToPoint::labelToPoint
@@ -64,8 +69,19 @@ Foam::labelToPoint::labelToPoint
     const labelList& labels
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     labels_(labels)
+{}
+
+
+Foam::labelToPoint::labelToPoint
+(
+    const polyMesh& mesh,
+    labelList&& labels
+)
+:
+    topoSetPointSource(mesh),
+    labels_(std::move(labels))
 {}
 
 
@@ -75,8 +91,7 @@ Foam::labelToPoint::labelToPoint
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    labels_(dict.lookup("value"))
+    labelToPoint(mesh, dict.get<labelList>("value"))
 {}
 
 
@@ -86,15 +101,11 @@ Foam::labelToPoint::labelToPoint
     Istream& is
 )
 :
-    topoSetSource(mesh),
+    topoSetPointSource(mesh),
     labels_(checkIs(is))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::labelToPoint::~labelToPoint()
-{}
+{
+    check(labels_, mesh.nPoints());
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -105,18 +116,25 @@ void Foam::labelToPoint::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding points mentioned in dictionary" << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding points mentioned in dictionary"
+                << " ..." << endl;
+        }
 
-        combine(set, true);
+        addOrDelete(set, labels_, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing points mentioned in dictionary" << " ..."
-            << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing points mentioned in dictionary"
+                << " ..." << endl;
+        }
 
-        combine(set, false);
+        addOrDelete(set, labels_, false);
     }
 }
 

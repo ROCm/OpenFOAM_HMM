@@ -30,7 +30,7 @@ Group
     grpFiniteAreaSolvers
 
 Description
-    Passive scalar transport equation solver.
+    Passive scalar transport finiteArea equation solver.
 
     \heading Solver details
     The equation is given by:
@@ -65,7 +65,12 @@ Author
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
+    argList::addNote
+    (
+        "Passive scalar transport finiteArea equation solver."
+    );
+
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFaMesh.H"

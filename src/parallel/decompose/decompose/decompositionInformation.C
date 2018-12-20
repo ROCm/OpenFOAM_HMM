@@ -164,6 +164,9 @@ void Foam::decompositionInformation::printSummary(Ostream& os) const
 
 void Foam::decompositionInformation::printDetails(Ostream& os) const
 {
+    os  << "Decomposition details with (proc faces) "
+        "for each processor connection"<< nl << nl;
+
     forAll(distrib_, ownProc)
     {
         const labelList& subdist = distrib_[ownProc];

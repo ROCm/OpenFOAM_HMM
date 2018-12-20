@@ -82,7 +82,7 @@ Foam::PackingModel<CloudType>::New
     CloudType& owner
 )
 {
-    word modelType(dict.lookup(typeName));
+    const word modelType(dict.get<word>(typeName));
 
     Info<< "Selecting packing model " << modelType << endl;
 

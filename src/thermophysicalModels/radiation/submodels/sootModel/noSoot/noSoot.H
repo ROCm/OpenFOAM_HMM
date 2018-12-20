@@ -38,7 +38,6 @@ SourceFiles
 #ifndef noSoot_H
 #define noSoot_H
 
-
 #include "sootModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,7 +48,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class noSoot Declaration
+                           Class noSoot Declaration
 \*---------------------------------------------------------------------------*/
 class noSoot
 :
@@ -65,24 +64,25 @@ public:
     // Constructors
 
         //- Construct from components
-        noSoot(const dictionary& dict, const fvMesh& mesh, const word&);
+        noSoot
+        (
+            const dictionary& dict,
+            const fvMesh& mesh,
+            const word& modelType
+        );
 
 
     //- Destructor
-    virtual ~noSoot();
+    virtual ~noSoot() = default;
 
 
     // Member Functions
 
-        // Edit
+        //- Main update/correction routine
+        void correct();
 
-            //- Main update/correction routine
-            void correct();
-
-        // Access
-
-            //- Return Ysoot
-            const volScalarField& soot() const;
+        //- Return Ysoot. Not implemented.
+        const volScalarField& soot() const;
 
 };
 

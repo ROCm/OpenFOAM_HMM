@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,7 +66,6 @@ Description
         writeOctaves | Write octaves data            | no        | yes
     \endtable
 
-
 SourceFiles
     noiseModel.C
 
@@ -92,18 +91,6 @@ namespace Foam
 
 class noiseModel
 {
-
-private:
-
-    // Private Member Functions
-
-        //- No copy construct
-        noiseModel(const noiseModel&) = delete;
-
-        //- No copy assignment
-        void operator=(const noiseModel&) = delete;
-
-
 protected:
 
     // Protected Data
@@ -196,6 +183,13 @@ protected:
         fileName baseFileDir(const label dataseti) const;
 
 
+        //- No copy construct
+        noiseModel(const noiseModel&) = delete;
+
+        //- No copy assignment
+        void operator=(const noiseModel&) = delete;
+
+
 public:
 
     //- Runtime type information
@@ -220,7 +214,7 @@ public:
     noiseModel(const dictionary& dict, const bool readFields = true);
 
     //- Destructor
-    virtual ~noiseModel();
+    virtual ~noiseModel() = default;
 
 
     // Public Member Functions

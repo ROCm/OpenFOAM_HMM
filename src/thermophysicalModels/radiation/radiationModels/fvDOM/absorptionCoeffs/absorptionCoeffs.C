@@ -67,12 +67,12 @@ Foam::radiation::absorptionCoeffs::coeffs
 
 void Foam::radiation::absorptionCoeffs::initialise(const dictionary& dict)
 {
-    dict.lookup("Tcommon") >> Tcommon_;
-    dict.lookup("Tlow") >> Tlow_;
-    dict.lookup("Thigh") >> Thigh_;
-    dict.lookup("invTemp") >> invTemp_;
-    dict.lookup("loTcoeffs") >> lowACoeffs_;
-    dict.lookup("hiTcoeffs") >> highACoeffs_;
+    dict.readEntry("Tcommon", Tcommon_);
+    dict.readEntry("Tlow", Tlow_);
+    dict.readEntry("Thigh", Thigh_);
+    dict.readEntry("invTemp", invTemp_);
+    dict.readEntry("loTcoeffs", lowACoeffs_);
+    dict.readEntry("hiTcoeffs", highACoeffs_);
 }
 
 

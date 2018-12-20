@@ -37,13 +37,13 @@ void Foam::vtkUnstructuredReader::readBlock
 (
     Istream& inFile,
     const label n,
-    List<T>& lst
+    List<T>& list
 ) const
 {
-    lst.setSize(n);
-    forAll(lst, i)
+    list.setSize(n);
+    for (T& val : list)
     {
-        inFile >> lst[i];
+        inFile >> val;
     }
 }
 
@@ -59,13 +59,14 @@ void Foam::vtkUnstructuredReader::printFieldStats
     if (fieldNames.size())
     {
         Info<< "Read " << fieldNames.size() << " " << Type::typeName
-            << " fields:" << endl;
-        Info<< "Size\tName" << nl
+            << " fields:" << nl
+            << "Size\tName" << nl
             << "----\t----" << endl;
-        forAll(fieldNames, i)
+
+        for (const word& fieldName : fieldNames)
         {
-            Info<< obj.lookupObject<Type>(fieldNames[i]).size()
-                << "\t" << fieldNames[i]
+            Info<< obj.lookupObject<Type>(fieldName).size()
+                << "\t" << fieldName
                 << endl;
         }
         Info<< endl;

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -30,10 +30,10 @@ geometry
 {
     cylinder
     {
-        type      searchableCylinder;
-        point1    (0 0 -1);
-        point2    (0 0  1);
-        radius    $radius;
+        type    cylinder;
+        point1  (0 0 -1);
+        point2  (0 0  1);
+        radius  $radius;
     }
 }
 

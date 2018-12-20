@@ -186,10 +186,7 @@ void Foam::radiation::fvDOM::initialise()
 
     Info<< endl;
 
-    if (this->found("useSolarLoad"))
-    {
-        this->lookup("useSolarLoad") >> useSolarLoad_;
-    }
+    this->readIfPresent("useSolarLoad", useSolarLoad_);
 
     if (useSolarLoad_)
     {
@@ -282,8 +279,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
         mesh_,
         dimensionedScalar(dimless/dimLength, Zero)
     ),
-    nTheta_(readLabel(coeffs_.lookup("nTheta"))),
-    nPhi_(readLabel(coeffs_.lookup("nPhi"))),
+    nTheta_(coeffs_.get<label>("nTheta")),
+    nPhi_(coeffs_.get<label>("nPhi")),
     nRay_(0),
     nLambda_(absorptionEmission_->nBands()),
     aLambda_(nLambda_),
@@ -378,8 +375,8 @@ Foam::radiation::fvDOM::fvDOM
         mesh_,
         dimensionedScalar(dimless/dimLength, Zero)
     ),
-    nTheta_(readLabel(coeffs_.lookup("nTheta"))),
-    nPhi_(readLabel(coeffs_.lookup("nPhi"))),
+    nTheta_(coeffs_.get<label>("nTheta")),
+    nPhi_(coeffs_.get<label>("nPhi")),
     nRay_(0),
     nLambda_(absorptionEmission_->nBands()),
     aLambda_(nLambda_),
@@ -532,7 +529,7 @@ Foam::radiation::fvDOM::Ru() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimensionSet(1, -1, -3, 0, 0), 0)
+            dimensionedScalar(dimensionSet(1, -1, -3, 0, 0), Zero)
         )
     );
 

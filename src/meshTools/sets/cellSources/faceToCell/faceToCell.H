@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,18 @@ Class
     Foam::faceToCell
 
 Description
-    A topoSetSource to select cells based on usage in faces.
+    A topoSetCellSource to select cells based on usage in a face set.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                           | Required | Default
+        sets        | The faceSet names to use              | possibly |
+        set         | The faceSet name to use               | possibly |
+        option      | Selection type (all/any/owner/neighbour)  | yes   |
+    \endtable
+
+Note
+    Must specify "sets" or "set" (highest to lowest precedence).
 
 SourceFiles
     faceToCell.C
@@ -35,7 +46,7 @@ SourceFiles
 #ifndef faceToCell_H
 #define faceToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,16 +60,16 @@ namespace Foam
 
 class faceToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 public:
         //- Enumeration defining the valid options
         enum faceAction
         {
-            NEIGHBOUR,
-            OWNER,
             ANY,
-            ALL
+            ALL,
+            OWNER,
+            NEIGHBOUR
         };
 
 private:
@@ -69,8 +80,8 @@ private:
         //- Add usage string
         static addToUsageTable usage_;
 
-        //- Name of set to use
-        word setName_;
+        //- Names of sets to use
+        wordList names_;
 
         //- Option
         faceAction option_;
@@ -79,7 +90,7 @@ private:
     // Private Member Functions
 
         //- Depending on face to cell option add to or delete from cellSet.
-        void combine(topoSet& set, const bool add) const;
+        void combine(topoSet& set, const bool add, const word& setName) const;
 
 
 public:
@@ -99,35 +110,22 @@ public:
         );
 
         //- Construct from dictionary
-        faceToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        faceToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        faceToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        faceToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~faceToCell();
+    virtual ~faceToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

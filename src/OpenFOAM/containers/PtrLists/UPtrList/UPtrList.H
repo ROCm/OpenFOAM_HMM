@@ -32,7 +32,7 @@ Description
 Note
     The class definition is such that it contains a list of pointers, but
     itself does not inherit from a list of pointers since this would
-    wreak havoc later inheritance resolution.
+    wreak havoc later with inheritance resolution.
 
 See Also
     Foam::PtrList
@@ -182,7 +182,7 @@ public:
 
         //- Set element to specified pointer and return the old list element,
         //- which can be a nullptr.
-        //  No checks on new element
+        //  No-op if the new pointer value is identical to the current content.
         inline T* set(const label i, T* ptr);
 
         //- Reorder elements. Reordering must be unique (ie, shuffle).
@@ -225,6 +225,11 @@ public:
 
             //- Construct for a given entry
             inline iterator(T** ptr);
+
+            // Member functions
+
+            //- Return pointer, can be nullptr.
+            inline pointer get() const;
 
             // Member operators
 
@@ -279,6 +284,11 @@ public:
 
             //- Copy construct from non-const iterator
             inline const_iterator(const iterator& iter);
+
+            // Member functions
+
+            //- Return pointer, can be nullptr.
+            inline pointer get() const;
 
             // Member operators
 

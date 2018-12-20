@@ -212,7 +212,7 @@ bool Foam::RASModels::kineticTheoryModel::read()
         >::read()
     )
     {
-        coeffDict().lookup("equilibrium") >> equilibrium_;
+        coeffDict().readEntry("equilibrium", equilibrium_);
         e_.readIfPresent(coeffDict());
         alphaMax_.readIfPresent(coeffDict());
         alphaMinFriction_.readIfPresent(coeffDict());

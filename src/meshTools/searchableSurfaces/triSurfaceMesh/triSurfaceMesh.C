@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 #include "triSurfaceMesh.H"
 #include "Random.H"
 #include "addToRunTimeSelectionTable.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "triSurfaceFields.H"
 #include "Time.H"
 #include "PatchTools.H"
@@ -37,8 +37,10 @@ namespace Foam
 {
     defineTypeNameAndDebug(triSurfaceMesh, 0);
     addToRunTimeSelectionTable(searchableSurface, triSurfaceMesh, dict);
-    word triSurfaceMesh::meshSubDir = "triSurface";
 }
+
+Foam::word Foam::triSurfaceMesh::meshSubDir = "triSurface";
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -98,14 +100,17 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
 )
 {
     fileName fName;
-    if (dict.readIfPresent("file", fName, false, false))
+    if (dict.readIfPresent("file", fName, keyType::LITERAL))
     {
+        const fileName rawFName(fName);
+
         fName = relativeFilePath(io, fName, isGlobal);
 
         if (!exists(fName))
         {
             FatalErrorInFunction
-                << "Cannot find triSurfaceMesh at " << fName
+                << "Cannot find triSurfaceMesh " << rawFName
+                << " starting from " << io.objectPath()
                 << exit(FatalError);
         }
     }
@@ -136,19 +141,13 @@ bool Foam::triSurfaceMesh::addFaceToEdge
     EdgeMap<label>& facesPerEdge
 )
 {
-    EdgeMap<label>::iterator eFnd = facesPerEdge.find(e);
-    if (eFnd != facesPerEdge.end())
+    label& count = facesPerEdge(e, 0);  // lookup or new entry
+    if (count == 2)
     {
-        if (eFnd() == 2)
-        {
-            return false;
-        }
-        eFnd()++;
+        return false;
     }
-    else
-    {
-        facesPerEdge.insert(e, 1);
-    }
+
+    ++count;
     return true;
 }
 
@@ -166,16 +165,16 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
     // Every edge should be used by two faces exactly.
     // To prevent doing work twice per edge only look at edges to higher
     // point
-    EdgeMap<label> facesPerEdge(100);
+    EdgeMap<label> facesPerEdge(128);
     forAll(pointFaces, pointi)
     {
         const labelList& pFaces = pointFaces[pointi];
 
         facesPerEdge.clear();
-        forAll(pFaces, i)
+        for (const label facei : pFaces)
         {
-            const triSurface::FaceType& f = triSurface::operator[](pFaces[i]);
-            label fp = f.find(pointi);
+            const triSurface::FaceType& f = triSurface::operator[](facei);
+            const label fp = f.find(pointi);
 
             // Something weird: if I expand the code of addFaceToEdge in both
             // below instances it gives a segmentation violation on some
@@ -183,7 +182,7 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
 
 
             // Forward edge
-            label nextPointi = f[f.fcIndex(fp)];
+            const label nextPointi = f[f.fcIndex(fp)];
 
             if (nextPointi > pointi)
             {
@@ -198,8 +197,9 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
                     return false;
                 }
             }
+
             // Reverse edge
-            label prevPointi = f[f.rcIndex(fp)];
+            const label prevPointi = f[f.rcIndex(fp)];
 
             if (prevPointi > pointi)
             {
@@ -217,9 +217,9 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
         }
 
         // Check for any edges used only once.
-        forAllConstIter(EdgeMap<label>, facesPerEdge, iter)
+        forAllConstIters(facesPerEdge, iter)
         {
-            if (iter() != 2)
+            if (iter.object() != 2)
             {
                 return false;
             }
@@ -321,7 +321,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Reading from supplied file name instead of objectPath/filePath
-    if (dict.readIfPresent("file", fName_, false, false))
+    if (dict.readIfPresent("file", fName_, keyType::LITERAL))
     {
         fName_ = relativeFilePath
         (
@@ -421,7 +421,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Reading from supplied file name instead of objectPath/filePath
-    if (dict.readIfPresent("file", fName_, false, false))
+    if (dict.readIfPresent("file", fName_, keyType::LITERAL))
     {
         fName_ = relativeFilePath
         (
@@ -477,17 +477,17 @@ void Foam::triSurfaceMesh::clearOut()
 
 Foam::tmp<Foam::pointField> Foam::triSurfaceMesh::coordinates() const
 {
-    tmp<pointField> tPts(new pointField(8));
-    pointField& pt = tPts.ref();
+    auto tpts = tmp<pointField>::New(8);
+    auto& pts = tpts.ref();
 
     // Use copy to calculate face centres so they don't get stored
-    pt = PrimitivePatch<triSurface::FaceType, SubList, const pointField&>
+    pts = PrimitivePatch<triSurface::FaceType, SubList, const pointField&>
     (
         SubList<triSurface::FaceType>(*this, triSurface::size()),
         triSurface::points()
     ).faceCentres();
 
-    return tPts;
+    return tpts;
 }
 
 
@@ -507,9 +507,9 @@ void Foam::triSurfaceMesh::boundingSpheres
     {
         const labelledTri& f = triSurface::operator[](facei);
         const point& fc = centres[facei];
-        forAll(f, fp)
+        for (const label pointi : f)
         {
-            const point& pt = pts[f[fp]];
+            const point& pt = pts[pointi];
             radiusSqr[facei] = max(radiusSqr[facei], Foam::magSqr(fc-pt));
         }
     }
@@ -543,7 +543,7 @@ void Foam::triSurfaceMesh::movePoints(const pointField& newPoints)
     searchableSurface::instance() = objectRegistry::time().timeName();
     objectRegistry::instance() = searchableSurface::instance();
 
-    label event = getEvent();
+    const label event = getEvent();
     searchableSurface::eventNo() = event;
     objectRegistry::eventNo() = searchableSurface::eventNo();
 
@@ -623,9 +623,9 @@ const Foam::wordList& Foam::triSurfaceMesh::regions() const
     if (regions_.empty())
     {
         regions_.setSize(patches().size());
-        forAll(regions_, regionI)
+        forAll(regions_, regioni)
         {
-            regions_[regionI] = patches()[regionI].name();
+            regions_[regioni] = patches()[regioni].name();
         }
     }
     return regions_;
@@ -755,8 +755,8 @@ void Foam::triSurfaceMesh::getNormal
         {
             if (info[i].hit())
             {
-                label facei = info[i].index();
-                normal[i] = s[facei].normal(pts);
+                const label facei = info[i].index();
+                normal[i] = s[facei].unitNormal(pts);
 
                 scalar qual = s[facei].tri(pts).quality();
 
@@ -765,19 +765,16 @@ void Foam::triSurfaceMesh::getNormal
                     // Search neighbouring triangles
                     const labelList& fFaces = faceFaces[facei];
 
-                    forAll(fFaces, j)
+                    for (const label nbri : fFaces)
                     {
-                        label nbrI = fFaces[j];
-                        scalar nbrQual = s[nbrI].tri(pts).quality();
+                        scalar nbrQual = s[nbri].tri(pts).quality();
                         if (nbrQual > qual)
                         {
                             qual = nbrQual;
-                            normal[i] = s[nbrI].normal(pts);
+                            normal[i] = s[nbri].unitNormal(pts);
                         }
                     }
                 }
-
-                normal[i] /= mag(normal[i]) + VSMALL;
             }
             else
             {
@@ -792,13 +789,10 @@ void Foam::triSurfaceMesh::getNormal
         {
             if (info[i].hit())
             {
-                label facei = info[i].index();
-                // Cached:
-                //normal[i] = faceNormals()[facei];
+                const label facei = info[i].index();
 
                 // Uncached
-                normal[i] = s[facei].normal(pts);
-                normal[i] /= mag(normal[i]) + VSMALL;
+                normal[i] = s[facei].unitNormal(pts);
             }
             else
             {
@@ -812,40 +806,32 @@ void Foam::triSurfaceMesh::getNormal
 
 void Foam::triSurfaceMesh::setField(const labelList& values)
 {
-    if (foundObject<triSurfaceLabelField>("values"))
+    auto* fldPtr = getObjectPtr<triSurfaceLabelField>("values");
+
+    if (fldPtr)
     {
-        triSurfaceLabelField& fld = const_cast<triSurfaceLabelField&>
-        (
-            lookupObject<triSurfaceLabelField>
-            (
-                "values"
-            )
-        );
-        fld.field() = values;
+        (*fldPtr).field() = values;
     }
     else
     {
-        autoPtr<triSurfaceLabelField> fldPtr
+        fldPtr = new triSurfaceLabelField
         (
-            new triSurfaceLabelField
+            IOobject
             (
-                IOobject
-                (
-                    "values",
-                    objectRegistry::time().timeName(),  // instance
-                    meshSubDir,                         // local
-                    *this,
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
+                "values",
+                objectRegistry::time().timeName(),  // instance
+                meshSubDir,                         // local
                 *this,
-                dimless,
-                labelField(values)
-            )
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            *this,
+            dimless,
+            labelField(values)
         );
 
         // Store field on triMesh
-        fldPtr.ptr()->store();
+        fldPtr->store();
     }
 }
 
@@ -856,14 +842,13 @@ void Foam::triSurfaceMesh::getField
     labelList& values
 ) const
 {
-    if (foundObject<triSurfaceLabelField>("values"))
-    {
-        values.setSize(info.size());
+    const auto* fldPtr = getObjectPtr<triSurfaceLabelField>("values");
 
-        const triSurfaceLabelField& fld = lookupObject<triSurfaceLabelField>
-        (
-            "values"
-        );
+    if (fldPtr)
+    {
+        const auto& fld = *fldPtr;
+
+        values.setSize(info.size());
 
         forAll(info, i)
         {
@@ -882,36 +867,33 @@ void Foam::triSurfaceMesh::getVolumeType
     List<volumeType>& volType
 ) const
 {
-    volType.setSize(points.size());
-
-    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    const scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
     indexedOctree<treeDataTriSurface>::perturbTol() = tolerance();
+
+    volType.setSize(points.size());
 
     forAll(points, pointi)
     {
         const point& pt = points[pointi];
 
-        if (!tree().bb().contains(pt))
+        if (tree().bb().contains(pt))
         {
-            if (hasVolumeType())
+            // Use cached volume type per each tree node
+            volType[pointi] = tree().getVolumeType(pt);
+        }
+        else if (hasVolumeType())
+        {
+            // Precalculate and cache value for this outside point
+            if (outsideVolType_ == volumeType::UNKNOWN)
             {
-                // Precalculate and cache value for this outside point
-                if (outsideVolType_ == volumeType::UNKNOWN)
-                {
-                    outsideVolType_ = tree().shapes().getVolumeType(tree(), pt);
-                }
-                volType[pointi] = outsideVolType_;
+                outsideVolType_ = tree().shapes().getVolumeType(tree(), pt);
             }
-            else
-            {
-                // Have to calculate directly as outside the octree
-                volType[pointi] = tree().shapes().getVolumeType(tree(), pt);
-            }
+            volType[pointi] = outsideVolType_;
         }
         else
         {
-            // - use cached volume type per each tree node
-            volType[pointi] = tree().getVolumeType(pt);
+            // Have to calculate directly as outside the octree
+            volType[pointi] = tree().shapes().getVolumeType(tree(), pt);
         }
     }
 

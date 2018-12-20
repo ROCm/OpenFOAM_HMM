@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,7 +122,7 @@ public:
     ~UOPstream();
 
 
-    // Member functions
+    // Member Functions
 
         // Inquiry
 
@@ -133,7 +133,7 @@ public:
             }
 
 
-        // Write functions
+        // Write Functions
 
             //- Write given buffer to given processor
             static bool write
@@ -223,13 +223,27 @@ public:
             virtual void endl()
             {}
 
+            //- Get the current padding character
+            //  \return previous padding character
+            virtual char fill() const
+            {
+                return 0;
+            }
+
+            //- Set padding character for formatted field up to field width
+            virtual char fill(const char)
+            {
+                return 0;
+            }
+
             //- Get width of output field
             virtual int width() const
             {
                 return 0;
             }
 
-            //- Set width of output field (and return old width)
+            //- Set width of output field
+            //  \return previous width
             virtual int width(const int)
             {
                  return 0;
@@ -241,7 +255,8 @@ public:
                  return 0;
             }
 
-            //- Set precision of output field (and return old precision)
+            //- Set precision of output field
+            //  \return old precision
             virtual int precision(const int)
             {
                  return 0;

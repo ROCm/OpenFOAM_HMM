@@ -33,6 +33,7 @@ Description
 #include "nil.H"
 #include "IOstreams.H"
 #include "PstreamBuffers.H"
+#include "argList.H"
 #include "Time.H"
 
 namespace Foam
@@ -62,6 +63,13 @@ int main(int argc, char *argv[])
     {
         nil x;
         cout<<"nil:" << sizeof(x) << nl;
+    }
+    {
+        argList x(argc, argv);
+        cout<<"argList:" << sizeof(x) << nl;
+
+        TimePaths y(x);
+        cout<<"TimePaths:" << sizeof(y) << nl;
     }
     {
         zero x;

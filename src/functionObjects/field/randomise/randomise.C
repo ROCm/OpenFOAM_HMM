@@ -81,7 +81,7 @@ bool Foam::functionObjects::randomise::read(const dictionary& dict)
 {
     fieldExpression::read(dict);
 
-    dict.lookup("magPerturbation") >> magPerturbation_;
+    dict.readEntry("magPerturbation", magPerturbation_);
 
     return true;
 }

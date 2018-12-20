@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,7 +146,7 @@ bool Foam::RBD::restraints::linearAxialAngularSpring::read
 
     refQ_ = coeffs_.lookupOrDefault<tensor>("referenceOrientation", I);
 
-    if (mag(mag(refQ_) - sqrt(3.0)) > 1e-9)
+    if (mag(mag(refQ_) - sqrt(3.0)) > ROOTSMALL)
     {
         FatalErrorInFunction
             << "referenceOrientation " << refQ_ << " is not a rotation tensor. "
@@ -170,8 +170,8 @@ bool Foam::RBD::restraints::linearAxialAngularSpring::read
             << abort(FatalError);
     }
 
-    coeffs_.lookup("stiffness") >> stiffness_;
-    coeffs_.lookup("damping") >> damping_;
+    coeffs_.readEntry("stiffness", stiffness_);
+    coeffs_.readEntry("damping", damping_);
 
     return true;
 }

@@ -70,10 +70,7 @@ public:
     // Constructors
 
         //- Construct from a SubField
-        inline SubDimensionedField
-        (
-            const SubField<Type>& slist
-        );
+        inline SubDimensionedField(const SubField<Type>& sfield);
 
         //- Construct from a UList and size
         inline SubDimensionedField
@@ -89,6 +86,24 @@ public:
             const label subSize,
             const label startIndex
         );
+
+        //- Construct from UList and a (start,size) range.
+        //  The range is subsetted with the list size itself to ensure that the
+        //  result always addresses a valid section of the list.
+        inline SubDimensionedField
+        (
+            const UList<Type>& list,
+            const labelRange& range
+        );
+
+        //- Construct from UList and a (start,size) range, but bypassing
+        //- run-time range checking.
+        inline SubDimensionedField
+        (
+            const labelRange& range,
+            const UList<Type>& list
+        );
+
 
         //- Construct as copy
         inline SubDimensionedField

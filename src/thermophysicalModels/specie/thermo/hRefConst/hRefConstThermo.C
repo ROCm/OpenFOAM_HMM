@@ -32,10 +32,10 @@ template<class EquationOfState>
 Foam::hRefConstThermo<EquationOfState>::hRefConstThermo(const dictionary& dict)
 :
     EquationOfState(dict),
-    Cp_(readScalar(dict.subDict("thermodynamics").lookup("Cp"))),
-    Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf"))),
-    Tref_(readScalar(dict.subDict("thermodynamics").lookup("Tref"))),
-    Href_(readScalar(dict.subDict("thermodynamics").lookup("Href")))
+    Cp_(dict.subDict("thermodynamics").get<scalar>("Cp")),
+    Hf_(dict.subDict("thermodynamics").get<scalar>("Hf")),
+    Tref_(dict.subDict("thermodynamics").get<scalar>("Tref")),
+    Href_(dict.subDict("thermodynamics").get<scalar>("Href"))
 {}
 
 
@@ -46,12 +46,15 @@ void Foam::hRefConstThermo<EquationOfState>::write(Ostream& os) const
 {
     EquationOfState::write(os);
 
-    dictionary dict("thermodynamics");
-    dict.add("Cp", Cp_);
-    dict.add("Hf", Hf_);
-    dict.add("Tref", Tref_);
-    dict.add("Href", Href_);
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("thermodynamics");
+        os.writeEntry("Cp", Cp_);
+        os.writeEntry("Hf", Hf_);
+        os.writeEntry("Tref", Tref_);
+        os.writeEntry("Href", Href_);
+        os.endBlock();
+    }
 }
 
 

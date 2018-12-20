@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -31,16 +31,16 @@ geometry
 {
     windTurbine1
     {
-        type searchableBox;
-        min (581845 4785805 1061);
-        max (581855 4785815 1071);
+        type box;
+        min  (581845 4785805 1061);
+        max  (581855 4785815 1071);
     }
 
     windTurbine2
     {
-        type searchableBox;
-        min (581740 4785658 1065);
-        max (581771 4785671 1079);
+        type box;
+        min  (581740 4785658 1065);
+        max  (581771 4785671 1079);
     }
 
     terrain.stl
@@ -48,8 +48,7 @@ geometry
         type triSurfaceMesh;
         name terrain;
     }
-};
-
+}
 
 
 // Settings for the castellatedMesh generation.
@@ -290,7 +289,7 @@ addLayersControls
 
     // Angle used to pick up medial axis points
     // Note: changed(corrected) w.r.t 16x! 90 degrees corresponds to 130 in 16x.
-    minMedianAxisAngle 90;
+    minMedialAxisAngle 90;
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;

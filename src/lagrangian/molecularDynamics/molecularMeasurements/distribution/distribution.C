@@ -247,22 +247,14 @@ void Foam::distribution::add(const label valueToAdd)
 
 void Foam::distribution::insertMissingKeys()
 {
-    iterator iter(this->begin());
+    List<label> keys = sortedToc();
 
-    List<label> keys = toc();
-
-    sort(keys);
-
-    if (keys.size())
+    if (keys.size() > 2)
     {
-        for (label k = keys[0]; k < keys.last(); k++)
+        for (label k = keys[1]; k < keys.last(); k++)
         {
-            iter = find(k);
-
-            if (iter == this->end())
-            {
-                this->insert(k,0);
-            }
+            // Insert 0, if the entry does not already exist
+            this->insert(k,0);
         }
     }
 }
@@ -274,10 +266,7 @@ Foam::List<Foam::Pair<Foam::scalar>> Foam::distribution::normalised()
 
     insertMissingKeys();
 
-    List<label> keys = toc();
-
-    sort(keys);
-
+    List<label> keys = sortedToc();
     List<Pair<scalar>> normDist(size());
 
     forAll(keys,k)
@@ -420,10 +409,7 @@ Foam::List<Foam::Pair<Foam::scalar>> Foam::distribution::raw()
 {
     insertMissingKeys();
 
-    List<label> keys = toc();
-
-    sort(keys);
-
+    List<label> keys = sortedToc();
     List<Pair<scalar>> rawDist(size());
 
     forAll(keys,k)

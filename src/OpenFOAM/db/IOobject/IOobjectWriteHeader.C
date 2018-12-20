@@ -21,10 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Writes the header description of the File to the stream
-    associated with the File.
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"
@@ -52,13 +48,15 @@ Foam::Ostream& Foam::IOobject::writeBanner(Ostream& os, bool noHint)
     if (!*paddedVersion)
     {
         // Populate: like strncpy but without trailing '\0'
-        const char *p = Foam::FOAMversion;
 
-        memset(paddedVersion, ' ', 38);
-        for (int i = 0; *p && i < 38; ++i)
+        std::size_t len = foamVersion::version.length();
+        if (len > 38)
         {
-            paddedVersion[i] = *p++;
+            len = 38;
         }
+
+        std::memset(paddedVersion, ' ', 38);
+        std::memcpy(paddedVersion, foamVersion::version.c_str(), len);
         paddedVersion[38] = '\0';
     }
 
@@ -134,7 +132,7 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 
     if (os.format() == IOstream::BINARY)
     {
-        os  << "    arch        " << Foam::FOAMbuildArch << ";\n";
+        os  << "    arch        " << foamVersion::buildArch << ";\n";
     }
 
     if (!note().empty())

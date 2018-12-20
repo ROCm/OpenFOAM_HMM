@@ -35,6 +35,8 @@ Description
         GRID          28        10.20269-.030265-2.358-8
     \endverbatim
 
+    The Nastran writer uses FREE format only.
+
 SourceFiles
     NASsurfaceFormat.C
 
@@ -76,12 +78,6 @@ class NASsurfaceFormat
             label elementId
         );
 
-        //- No copy construct
-        NASsurfaceFormat(const NASsurfaceFormat<Face>&) = delete;
-
-        //- No copy assignment
-        void operator=(const NASsurfaceFormat<Face>&) = delete;
-
 
 public:
 
@@ -108,10 +104,10 @@ public:
 
     // Member Functions
 
-        //- Read from a file
+        //- Read from file
         virtual bool read(const fileName& filename);
 
-        //- Write object file
+        //- Write surface mesh to file
         virtual void write
         (
             const fileName& name,

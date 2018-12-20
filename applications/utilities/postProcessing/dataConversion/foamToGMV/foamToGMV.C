@@ -28,7 +28,7 @@ Group
     grpPostProcessingUtilities
 
 Description
-    Translates foam output to GMV readable files.
+    Translate OpenFOAM output to GMV readable files.
 
     A free post-processor with available binaries from
     http://www-xdiv.lanl.gov/XCM/gmv/
@@ -45,23 +45,24 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 int main(int argc, char *argv[])
 {
-    const label nTypes = 4;
-    const word fieldTypes[] =
-    {
+    argList::addNote
+    (
+        "Translate OpenFOAM output to GMV readable files"
+    );
+
+    const wordList fieldTypes
+    ({
         "volScalarField",
         "volVectorField",
         "surfaceScalarField",
         cloud::prefix
-    };
+    });
 
     #include "setRootCase.H"
-
     #include "createTime.H"
     #include "createNamedMesh.H"
-
     #include "readConversionProperties.H"
 
     // get the available time-steps

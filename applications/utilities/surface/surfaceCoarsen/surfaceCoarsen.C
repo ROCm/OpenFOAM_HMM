@@ -71,21 +71,26 @@ int mapVertex(::List<int>& collapse_map, int a, int mx)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Surface coarsening using 'bunnylod'"
+    );
+
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("reductionFactor");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("factor", "The reduction factor [0,1)");
+    argList::addArgument("output", "The output surface file");
     argList::addOption
     (
         "scale",
         "factor",
-        "input geometry scaling factor"
+        "Input geometry scaling factor"
     );
 
     argList args(argc, argv);
 
     const fileName inFileName = args[1];
-    const scalar reduction = args.read<scalar>(2);
+    const scalar reduction = args.get<scalar>(2);
     const fileName outFileName = args[3];
 
     if (reduction <= 0 || reduction > 1)
@@ -97,7 +102,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.opt<scalar>("scale", -1);
 
     Info<< "Input surface   :" << inFileName << nl
         << "Scaling factor  :" << scaleFactor << nl

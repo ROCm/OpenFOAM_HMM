@@ -48,7 +48,7 @@ tmp<volScalarField> LaunderSharmaKE<BasicTurbulenceModel>::f2() const
 {
     return
         scalar(1)
-      - 0.3*exp(-min(sqr(sqr(k_)/(this->nu()*epsilon_)), scalar(50.0)));
+      - 0.3*exp(-min(sqr(sqr(k_)/(this->nu()*epsilon_)), scalar(50)));
 }
 
 

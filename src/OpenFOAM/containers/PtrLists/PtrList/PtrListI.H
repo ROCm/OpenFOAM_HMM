@@ -31,7 +31,7 @@ License
 template<class T>
 inline void Foam::PtrList<T>::free()
 {
-    (this->ptrs_).free();
+    (this->ptrs_).free(); // free old pointers
 }
 
 
@@ -82,7 +82,7 @@ inline Foam::PtrList<T>::PtrList
 template<class T>
 inline void Foam::PtrList<T>::clear()
 {
-    (this->ptrs_).free();
+    (this->ptrs_).free(); // free old pointers
     UPtrList<T>::clear();
 }
 
@@ -160,7 +160,7 @@ inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, const tmp<T>& tptr)
 template<class T>
 inline void Foam::PtrList<T>::transfer(PtrList<T>& list)
 {
-    this->free(); // free old pointers
+    (this->ptrs_).free(); // free old pointers
     UPtrList<T>::transfer(list);
 }
 

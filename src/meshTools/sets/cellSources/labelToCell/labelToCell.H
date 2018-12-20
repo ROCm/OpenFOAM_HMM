@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,13 @@ Class
     Foam::labelToCell
 
 Description
-    A topoSetSource to select cells based on explicitly given labels.
+    A topoSetCellSource to select cells based on explicitly given labels.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        value       | The cell labels                   | yes   |
+    \endtable
 
 SourceFiles
     labelToCell.C
@@ -35,7 +41,7 @@ SourceFiles
 #ifndef labelToCell_H
 #define labelToCell_H
 
-#include "topoSetSource.H"
+#include "topoSetCellSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +54,7 @@ namespace Foam
 
 class labelToCell
 :
-    public topoSetSource
+    public topoSetCellSource
 {
 
     // Private data
@@ -60,11 +66,6 @@ class labelToCell
         labelList labels_;
 
 
-    // Private Member Functions
-
-        void combine(topoSet& set, const bool add) const;
-
-
 public:
 
     //- Runtime type information
@@ -72,43 +73,29 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        labelToCell
-        (
-            const polyMesh& mesh,
-            const labelList& labels
-        );
+        //- Construct from components, copying labels
+        labelToCell(const polyMesh& mesh, const labelList& labels);
+
+        //- Construct from components, moving labels
+        labelToCell(const polyMesh& mesh, labelList&& labels);
 
         //- Construct from dictionary
-        labelToCell
-        (
-            const polyMesh& mesh,
-            const dictionary& dict
-        );
+        labelToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        labelToCell
-        (
-            const polyMesh& mesh,
-            Istream&
-        );
+        labelToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~labelToCell();
+    virtual ~labelToCell() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return CELLSETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

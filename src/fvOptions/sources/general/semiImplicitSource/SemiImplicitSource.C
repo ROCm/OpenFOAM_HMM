@@ -83,17 +83,19 @@ Foam::word Foam::fv::SemiImplicitSource<Type>::volumeModeTypeToWord
 template<class Type>
 void Foam::fv::SemiImplicitSource<Type>::setFieldData(const dictionary& dict)
 {
-    fieldNames_.setSize(dict.toc().size());
-    injectionRate_.setSize(fieldNames_.size());
+    label count = dict.size();
 
-    applied_.setSize(fieldNames_.size(), false);
+    fieldNames_.resize(count);
+    injectionRate_.resize(count);
+    applied_.resize(count, false);
 
-    label i = 0;
-    forAllConstIter(dictionary, dict, iter)
+    count = 0;
+    for (const entry& dEntry : dict)
     {
-        fieldNames_[i] = iter().keyword();
-        dict.lookup(iter().keyword()) >> injectionRate_[i];
-        i++;
+        fieldNames_[count] = dEntry.keyword();
+        dEntry.readEntry(injectionRate_[count]);
+
+        ++count;
     }
 
     // Set volume normalisation
@@ -194,6 +196,22 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
     }
 
     return this->addSup(eqn, fieldi);
+}
+
+
+
+template<class Type>
+bool Foam::fv::SemiImplicitSource<Type>::read(const dictionary& dict)
+{
+    if (cellSetOption::read(dict))
+    {
+        volumeMode_ = wordToVolumeModeType(coeffs_.get<word>("volumeMode"));
+        setFieldData(coeffs_.subDict("injectionRateSuSp"));
+
+        return true;
+    }
+
+    return false;
 }
 
 

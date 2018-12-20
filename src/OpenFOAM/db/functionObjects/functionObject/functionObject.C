@@ -40,6 +40,7 @@ bool Foam::functionObject::postProcess(false);
 
 Foam::word Foam::functionObject::outputPrefix("postProcessing");
 
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::word Foam::functionObject::scopedName(const word& name) const
@@ -66,31 +67,35 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
     const dictionary& dict
 )
 {
-    const word functionType(dict.lookup("type"));
+    const word functionType(dict.get<word>("type"));
 
-    if (debug)
+    DebugInfo
+        << "Selecting function " << functionType << endl;
+
+
+    // Load any additional libraries
     {
-        Info<< "Selecting function " << functionType << endl;
+        const auto finder =
+            dict.csearchCompat("libs", {{"functionObjectLibs", 1612}});
+
+        if (finder.found())
+        {
+            const_cast<Time&>(runTime).libs().open
+            (
+                dict,
+                finder.ref().keyword(),
+                dictionaryConstructorTablePtr_
+            );
+        }
     }
 
-    if (dict.found("functionObjectLibs"))
-    {
-        const_cast<Time&>(runTime).libs().open
-        (
-            dict,
-            "functionObjectLibs",
-            dictionaryConstructorTablePtr_
-        );
-    }
-    else
-    {
-        const_cast<Time&>(runTime).libs().open
-        (
-            dict,
-            "libs",
-            dictionaryConstructorTablePtr_
-        );
-    }
+    // This is the simplified version without compatibility messages
+    // const_cast<Time&>(runTime).libs().open
+    // (
+    //     dict,
+    //     "libs",
+    //     dictionaryConstructorTablePtr_
+    // );
 
     if (!dictionaryConstructorTablePtr_)
     {
@@ -117,12 +122,6 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObject::~functionObject()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::word& Foam::functionObject::name() const
@@ -135,7 +134,7 @@ bool Foam::functionObject::read(const dictionary& dict)
 {
     if (!postProcess)
     {
-        log = dict.lookupOrDefault<Switch>("log", true);
+        log = dict.lookupOrDefault("log", true);
     }
 
     return true;
@@ -172,6 +171,50 @@ void Foam::functionObject::updateMesh(const mapPolyMesh&)
 
 void Foam::functionObject::movePoints(const polyMesh&)
 {}
+
+
+// * * * * * * * * * * * * unavailableFunctionObject * * * * * * * * * * * * //
+
+Foam::functionObject::unavailableFunctionObject::unavailableFunctionObject
+(
+    const word& name
+)
+:
+    functionObject(name)
+{}
+
+
+void Foam::functionObject::unavailableFunctionObject::carp
+(
+    std::string message
+) const
+{
+    FatalError
+        << "####" << nl
+        << "    " << type() << " not available" << nl
+        << "####" << nl;
+
+    if (message.size())
+    {
+        FatalError
+            << message.c_str() << nl;
+    }
+
+    FatalError
+        << exit(FatalError);
+}
+
+
+bool Foam::functionObject::unavailableFunctionObject::execute()
+{
+    return true;
+}
+
+
+bool Foam::functionObject::unavailableFunctionObject::write()
+{
+    return true;
+}
 
 
 // ************************************************************************* //

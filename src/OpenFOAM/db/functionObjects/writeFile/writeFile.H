@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,13 @@ protected:
         //- Flag to identify whether the header has been written
         bool writtenHeader_;
 
+        //- Flag to use the specified user time, e.g. CA deg instead
+        //- of seconds.  Default = true
+        bool useUserTime_;
+
+        //- Start time value
+        scalar startTime_;
+
 
     // Protected Member Functions
 
@@ -94,8 +101,18 @@ protected:
         //- Return the base directory for the current time value
         fileName baseTimeDir() const;
 
+        //- Return an autoPtr to a new file for a given time
+        virtual autoPtr<OFstream> createFile
+        (
+            const word& name,
+            const scalar time
+        ) const;
+
         //- Return an autoPtr to a new file
-        virtual autoPtr<OFstream> createFile(const word& name) const;
+        virtual autoPtr<OFstream> createFile
+        (
+            const word& name
+        ) const;
 
         //- Reset internal file pointer to new file with new name
         virtual void resetFile(const word& name);
@@ -142,7 +159,7 @@ public:
 
 
     //- Destructor
-    virtual ~writeFile();
+    virtual ~writeFile() = default;
 
 
     // Member Functions

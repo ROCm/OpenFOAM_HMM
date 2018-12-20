@@ -40,11 +40,11 @@ InClass
 #include "areaFaMesh.H"
 #include "areaFields.H"
 
-// vtk includes
-#include "vtkFloatArray.h"
-#include "vtkCellData.h"
-#include "vtkPointData.h"
-#include "vtkSmartPointer.h"
+// VTK includes
+#include <vtkFloatArray.h>
+#include <vtkCellData.h>
+#include <vtkPointData.h>
+#include <vtkSmartPointer.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //
@@ -68,10 +68,8 @@ void Foam::vtkPVFoam::convertVolField
     autoPtr<GeometricField<Type, pointPatchField, pointMesh>> ptfPtr;
     if (interpField)
     {
-        if (debug)
-        {
-            Info<< "convertVolField interpolating:" << fld.name() << nl;
-        }
+        DebugInfo
+            << "convertVolField interpolating:" << fld.name() << nl;
 
         ptfPtr.reset
         (
@@ -102,7 +100,7 @@ void Foam::vtkPVFoam::convertVolField
         foamVtpData& vtpData = iter.object();
         auto dataset = vtpData.dataset;
 
-        const labelList& patchIds = vtpData.additionalIds();
+        const labelUList& patchIds = vtpData.additionalIds();
 
         if (patchIds.empty())
         {
@@ -291,13 +289,13 @@ void Foam::vtkPVFoam::convertVolFields
             catch (Foam::IOerror& ioErr)
             {
                 ioErr.write(Warning, false);
-                Info << nl << endl;
+                Info<< nl << endl;
             }
             catch (Foam::error& err)
             {
                 // Bit of trickery to get the original message
                 err.write(Warning, false);
-                Info << nl << endl;
+                Info<< nl << endl;
             }
 
             // Restore previous exception throwing state
@@ -373,13 +371,13 @@ void Foam::vtkPVFoam::convertDimFields
         catch (Foam::IOerror& ioErr)
         {
             ioErr.write(Warning, false);
-            Info << nl << endl;
+            Info<< nl << endl;
         }
         catch (Foam::error& err)
         {
             // Bit of trickery to get the original message
             err.write(Warning, false);
-            Info << nl << endl;
+            Info<< nl << endl;
         }
 
         // Restore previous exception throwing state
@@ -501,13 +499,13 @@ void Foam::vtkPVFoam::convertAreaFields
             catch (Foam::IOerror& ioErr)
             {
                 ioErr.write(Warning, false);
-                Info << nl << endl;
+                Info<< nl << endl;
             }
             catch (Foam::error& err)
             {
                 // Bit of trickery to get the original message
                 err.write(Warning, false);
-                Info << nl << endl;
+                Info<< nl << endl;
             }
 
             // Restore previous exception throwing state
@@ -545,10 +543,8 @@ void Foam::vtkPVFoam::convertPointFields
             continue;
         }
 
-        if (debug)
-        {
-            Info<< "convertPointFields : " << fieldName << nl;
-        }
+        DebugInfo
+            << "convertPointFields : " << fieldName << nl;
 
         // Throw FatalError, FatalIOError as exceptions
         const bool throwingError = FatalError.throwExceptions();
@@ -581,7 +577,7 @@ void Foam::vtkPVFoam::convertPointFields
                 foamVtpData& vtpData = iter.object();
                 auto dataset = vtpData.dataset;
 
-                const labelList& patchIds = vtpData.additionalIds();
+                const labelUList& patchIds = vtpData.additionalIds();
                 if (patchIds.size() != 1)
                 {
                     continue;
@@ -645,13 +641,13 @@ void Foam::vtkPVFoam::convertPointFields
         catch (Foam::IOerror& ioErr)
         {
             ioErr.write(Warning, false);
-            Info << nl << endl;
+            Info<< nl << endl;
         }
         catch (Foam::error& err)
         {
             // Bit of trickery to get the original message
             err.write(Warning, false);
-            Info << nl << endl;
+            Info<< nl << endl;
         }
 
         // Restore previous exception throwing state
@@ -706,7 +702,6 @@ vtkSmartPointer<vtkFloatArray> Foam::vtkPVFoam::convertPointField
     const foamVtuData& vtuData
 )
 {
-    const int nComp(pTraits<Type>::nComponents);
     const labelUList& addPointCellLabels = vtuData.additionalIds();
     const labelUList& pointMap = vtuData.pointMap();
 
@@ -714,7 +709,7 @@ vtkSmartPointer<vtkFloatArray> Foam::vtkPVFoam::convertPointField
     const label nPoints = (pointMap.size() ? pointMap.size() : pfld.size());
 
     auto data = vtkSmartPointer<vtkFloatArray>::New();
-    data->SetNumberOfComponents(nComp);
+    data->SetNumberOfComponents(static_cast<int>(pTraits<Type>::nComponents));
     data->SetNumberOfTuples(nPoints + addPointCellLabels.size());
 
     // Note: using the name of the original volField
@@ -729,75 +724,54 @@ vtkSmartPointer<vtkFloatArray> Foam::vtkPVFoam::convertPointField
         data->SetName(pfld.name().c_str());
     }
 
-    if (debug)
-    {
-        Info<< "convert Point field: "
-            << pfld.name()
-            << " size="  << (nPoints + addPointCellLabels.size())
-            << " (" << nPoints << " + " << addPointCellLabels.size()
-            << ") nComp=" << nComp << nl;
-    }
+    DebugInfo
+        << "Convert point field: " << pfld.name()
+        << " size="  << (nPoints + addPointCellLabels.size())
+        << " (" << nPoints << " + " << addPointCellLabels.size()
+        << ") nComp=" << static_cast<int>(pTraits<Type>::nComponents) << nl;
 
-    float vec[nComp];
 
-    label pointi = 0;
+    float scratch[pTraits<Type>::nComponents];
+
+    vtkIdType pointi = 0;
     if (pointMap.size())
     {
-        forAll(pointMap, i)
+        for (const label meshPointi : pointMap)
         {
-            const Type& t = pfld[pointMap[i]];
-            for (direction d=0; d<nComp; ++d)
-            {
-                vec[d] = component(t, d);
-            }
-            remapTuple<Type>(vec);
-
-            data->SetTuple(pointi++, vec);
+            vtk::Tools::foamToVtkTuple(scratch, pfld[meshPointi]);
+            data->SetTuple(pointi++, scratch);
         }
     }
     else
     {
-        forAll(pfld, i)
+        for (const Type& val : pfld)
         {
-            const Type& t = pfld[i];
-            for (direction d=0; d<nComp; ++d)
-            {
-                vec[d] = component(t, d);
-            }
-            remapTuple<Type>(vec);
-
-            data->SetTuple(pointi++, vec);
+            vtk::Tools::foamToVtkTuple(scratch, val);
+            data->SetTuple(pointi++, scratch);
         }
     }
 
     // Continue with additional points
+    // - correspond to cell centres
 
     if (notNull(vfld))
     {
-        forAll(addPointCellLabels, apI)
+        for (const label meshCelli : addPointCellLabels)
         {
-            const Type& t = vfld[addPointCellLabels[apI]];
-            for (direction d=0; d<nComp; ++d)
-            {
-                vec[d] = component(t, d);
-            }
-            remapTuple<Type>(vec);
-
-            data->SetTuple(pointi++, vec);
+            vtk::Tools::foamToVtkTuple(scratch, vfld[meshCelli]);
+            data->SetTuple(pointi++, scratch);
         }
     }
     else
     {
-        forAll(addPointCellLabels, apI)
+        for (const label meshCelli : addPointCellLabels)
         {
-            Type t = interpolatePointToCell(pfld, addPointCellLabels[apI]);
-            for (direction d=0; d<nComp; ++d)
-            {
-                vec[d] = component(t, d);
-            }
-            remapTuple<Type>(vec);
-
-            data->SetTuple(pointi++, vec);
+            vtk::Tools::foamToVtkTuple
+            (
+                scratch,
+                interpolatePointToCell(pfld, meshCelli)
+            );
+            data->SetTuple(pointi++, scratch);
         }
     }
 
@@ -846,13 +820,13 @@ void Foam::vtkPVFoam::convertLagrangianFields
             catch (Foam::IOerror& ioErr)
             {
                 ioErr.write(Warning, false);
-                Info << nl << endl;
+                Info<< nl << endl;
             }
             catch (Foam::error& err)
             {
                 // Bit of trickery to get the original message
                 err.write(Warning, false);
-                Info << nl << endl;
+                Info<< nl << endl;
             }
 
             // Restore previous exception throwing state
@@ -876,53 +850,44 @@ Foam::vtkPVFoam::convertFaceFieldToVTK
     const labelUList& faceLabels
 ) const
 {
-    if (debug)
-    {
-        Info<< "convert face field: "
-            << fld.name()
-            << " size="  << faceLabels.size()
-            << " nComp=" << int(pTraits<Type>::nComponents) << nl;
-    }
+    DebugInfo
+        << "Convert face field: " << fld.name()
+        << " size=" << faceLabels.size()
+        << " nComp=" << static_cast<int>(pTraits<Type>::nComponents) << nl;
 
     const fvMesh& mesh = fld.mesh();
 
-    const int nComp(pTraits<Type>::nComponents);
     const label nInternalFaces = mesh.nInternalFaces();
-    const labelList& faceOwner = mesh.faceOwner();
-    const labelList& faceNeigh = mesh.faceNeighbour();
+    const labelUList& faceOwner = mesh.faceOwner();
+    const labelUList& faceNeigh = mesh.faceNeighbour();
 
     auto data = vtkSmartPointer<vtkFloatArray>::New();
     data->SetName(fld.name().c_str());
-    data->SetNumberOfComponents(nComp);
+    data->SetNumberOfComponents(static_cast<int>(pTraits<Type>::nComponents));
     data->SetNumberOfTuples(faceLabels.size());
-
-    float scratch[nComp];
 
     // Interior faces: average owner/neighbour
     // Boundary faces: the owner value
-    forAll(faceLabels, idx)
-    {
-        const label faceNo = faceLabels[idx];
-        if (faceNo < nInternalFaces)
-        {
-            Type t = 0.5*(fld[faceOwner[faceNo]] + fld[faceNeigh[faceNo]]);
 
-            for (direction d=0; d<nComp; ++d)
-            {
-                scratch[d] = component(t, d);
-            }
+    float scratch[pTraits<Type>::nComponents];
+
+    vtkIdType faceId = 0;
+    for (const label meshFacei : faceLabels)
+    {
+        if (meshFacei < nInternalFaces)
+        {
+            Type val =
+                0.5*(fld[faceOwner[meshFacei]] + fld[faceNeigh[meshFacei]]);
+
+            vtk::Tools::foamToVtkTuple(scratch, val);
         }
         else
         {
-            const Type& t = fld[faceOwner[faceNo]];
-            for (direction d=0; d<nComp; ++d)
-            {
-                scratch[d] = component(t, d);
-            }
+            const Type& val = fld[faceOwner[meshFacei]];
+            vtk::Tools::foamToVtkTuple(scratch, val);
         }
-        remapTuple<Type>(scratch);
 
-        data->SetTuple(idx, scratch);
+        data->SetTuple(faceId++, scratch);
     }
 
     return data;
@@ -937,35 +902,26 @@ Foam::vtkPVFoam::convertVolFieldToVTK
     const foamVtuData& vtuData
 ) const
 {
-    const int nComp(pTraits<Type>::nComponents);
     const labelUList& cellMap = vtuData.cellMap();
 
     auto data = vtkSmartPointer<vtkFloatArray>::New();
     data->SetName(fld.name().c_str());
-    data->SetNumberOfComponents(nComp);
+    data->SetNumberOfComponents(static_cast<int>(pTraits<Type>::nComponents));
     data->SetNumberOfTuples(cellMap.size());
 
-    if (debug)
-    {
-        Info<< "convert volField: "
-            << fld.name()
-            << " size=" << cellMap.size()
-            << " (" << fld.size() << " + "
-            << (cellMap.size() - fld.size())
-            << ") nComp=" << nComp << nl;
-    }
+    DebugInfo
+        << "Convert volField: " << fld.name() << " size="
+        << cellMap.size() << " (field "
+        << fld.size() << ") nComp="
+        << static_cast<int>(pTraits<Type>::nComponents) << nl;
 
-    float scratch[nComp];
-    forAll(cellMap, idx)
-    {
-        const Type& t = fld[cellMap[idx]];
-        for (direction d=0; d<nComp; ++d)
-        {
-            scratch[d] = component(t, d);
-        }
-        remapTuple<Type>(scratch);
+    float scratch[pTraits<Type>::nComponents];
 
-        data->SetTuple(idx, scratch);
+    vtkIdType celli = 0;
+    for (const label meshCelli : cellMap)
+    {
+        vtk::Tools::foamToVtkTuple(scratch, fld[meshCelli]);
+        data->SetTuple(celli++, scratch);
     }
 
     return data;

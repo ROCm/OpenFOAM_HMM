@@ -37,7 +37,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
     const dictionary& solverDict
 )
 {
-    const word solverName = solverDict.lookup("solver");
+    const word solverName(solverDict.get<word>("solver"));
 
     if (matrix.diagonal())
     {

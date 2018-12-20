@@ -28,7 +28,7 @@ License
 #include "vectorList.H"
 #include "addToRunTimeSelectionTable.H"
 #include "boundaryRadiationProperties.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "cyclicAMIPolyPatch.H"
 #include "mappedPatchBase.H"
 #include "wallPolyPatch.H"
@@ -294,23 +294,23 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
 
 void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
 {
-    if (coeffs.found("gridUp"))
+    if (coeffs.readIfPresent("gridUp", verticalDir_))
     {
-         coeffs.lookup("gridUp") >> verticalDir_;
-         verticalDir_ /= mag(verticalDir_);
+         verticalDir_.normalise();
     }
-    else if (mesh_.foundObject<uniformDimensionedVectorField>("g"))
+    else
     {
         const uniformDimensionedVectorField& g =
-            mesh_.lookupObject<uniformDimensionedVectorField>("g");
+            meshObjects::gravity::New(mesh_.time());
         verticalDir_ = (-g/mag(g)).value();
     }
 
-    includePatches_ = mesh_.boundaryMesh().findIndices(viewFactorWalls);
+    includePatches_ = mesh_.boundaryMesh().indices(viewFactorWalls);
 
-    coeffs.lookup("useVFbeamToDiffuse") >> useVFbeamToDiffuse_;
+    coeffs.readEntry("useVFbeamToDiffuse", useVFbeamToDiffuse_);
 
-    coeffs.lookup("spectralDistribution") >> spectralDistribution_;
+    coeffs.readEntry("spectralDistribution", spectralDistribution_);
+
     spectralDistribution_ =
         spectralDistribution_/sum(spectralDistribution_);
 
@@ -968,7 +968,7 @@ void Foam::radiation::solarLoad::calculate()
 
     if (debug)
     {
-        if (mesh_.time().outputTime())
+        if (mesh_.time().writeTime())
         {
             Ru_.write();
         }

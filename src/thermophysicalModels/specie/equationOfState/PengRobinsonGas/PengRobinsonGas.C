@@ -35,11 +35,11 @@ Foam::PengRobinsonGas<Specie>::PengRobinsonGas
 )
 :
     Specie(dict),
-    Tc_(readScalar(dict.subDict("equationOfState").lookup("Tc"))),
-    Vc_(readScalar(dict.subDict("equationOfState").lookup("Vc"))),
+    Tc_(dict.subDict("equationOfState").get<scalar>("Tc")),
+    Vc_(dict.subDict("equationOfState").get<scalar>("Vc")),
     Zc_(1.0),
-    Pc_(readScalar(dict.subDict("equationOfState").lookup("Pc"))),
-    omega_(readScalar(dict.subDict("equationOfState").lookup("omega")))
+    Pc_(dict.subDict("equationOfState").get<scalar>("Pc")),
+    omega_(dict.subDict("equationOfState").get<scalar>("omega"))
 {
     Zc_ = Pc_*Vc_/(RR*Tc_);
 }

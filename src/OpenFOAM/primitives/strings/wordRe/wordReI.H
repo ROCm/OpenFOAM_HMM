@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,13 @@ inline Foam::wordRe::wordRe(const wordRe& str)
         compile();
     }
 }
+
+
+inline Foam::wordRe::wordRe(wordRe&& str)
+:
+    word(std::move(static_cast<word&>(str))),
+    re_(std::move(str.re_))
+{}
 
 
 inline Foam::wordRe::wordRe(const keyType& str)
@@ -148,14 +155,13 @@ inline Foam::wordRe::wordRe(const word& str, const compOption opt)
 }
 
 
-inline Foam::wordRe::wordRe(wordRe&& str)
-:
-    word(std::move(static_cast<word&>(str))),
-    re_(std::move(str.re_))
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool Foam::wordRe::isLiteral() const
+{
+    return !re_.exists();
+}
+
 
 inline bool Foam::wordRe::isPattern() const
 {
@@ -200,9 +206,9 @@ inline bool Foam::wordRe::compile() const
 }
 
 
-inline void Foam::wordRe::uncompile(const bool doStripInvalid) const
+inline void Foam::wordRe::uncompile(bool doStrip) const
 {
-    if (re_.clear() && doStripInvalid)
+    if (re_.clear() && doStrip)
     {
         // Skip stripping unless debug is active to avoid costly operations
         if (word::debug)

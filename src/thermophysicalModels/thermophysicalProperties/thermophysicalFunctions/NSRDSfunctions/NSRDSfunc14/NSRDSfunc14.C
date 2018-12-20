@@ -60,11 +60,11 @@ Foam::NSRDSfunc14::NSRDSfunc14
 
 Foam::NSRDSfunc14::NSRDSfunc14(const dictionary& dict)
 :
-    Tc_(readScalar(dict.lookup("Tc"))),
-    a_(readScalar(dict.lookup("a"))),
-    b_(readScalar(dict.lookup("b"))),
-    c_(readScalar(dict.lookup("c"))),
-    d_(readScalar(dict.lookup("d")))
+    Tc_(dict.get<scalar>("Tc")),
+    a_(dict.get<scalar>("a")),
+    b_(dict.get<scalar>("b")),
+    c_(dict.get<scalar>("c")),
+    d_(dict.get<scalar>("d"))
 {}
 
 

@@ -86,10 +86,16 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for compressible premixed/partially-premixed combustion with"
+        " turbulence modelling."
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
@@ -115,7 +121,7 @@ int main(int argc, char *argv[])
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
         Info<< "\n\nTime = " << runTime.timeName() << endl;
 
         #include "rhoEqn.H"

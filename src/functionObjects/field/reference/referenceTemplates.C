@@ -30,7 +30,7 @@ bool Foam::functionObjects::reference::calcType()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    const VolFieldType* vfPtr = lookupObjectPtr<VolFieldType>(fieldName_);
+    const VolFieldType* vfPtr = findObject<VolFieldType>(fieldName_);
 
     if (vfPtr)
     {

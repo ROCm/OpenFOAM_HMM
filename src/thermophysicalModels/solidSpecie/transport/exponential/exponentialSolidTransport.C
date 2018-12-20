@@ -35,15 +35,10 @@ Foam::exponentialSolidTransport<Thermo>::exponentialSolidTransport
 )
 :
     Thermo(dict),
-    kappa0_(0.0),
-    n0_(0.0),
-    Tref_(0.0)
-{
-    const dictionary& subDict = dict.subDict("transport");
-    kappa0_ = readScalar(subDict.lookup("kappa0"));
-    n0_ = readScalar(subDict.lookup("n0"));
-    Tref_ = readScalar(subDict.lookup("Tref"));
-}
+    kappa0_(dict.subDict("transport").get<scalar>("kappa0")),
+    n0_(dict.subDict("transport").get<scalar>("n0")),
+    Tref_(dict.subDict("transport").get<scalar>("Tref"))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -56,11 +51,14 @@ void Foam::exponentialSolidTransport<Thermo>::exponentialSolidTransport::write
 {
     Thermo::write(os);
 
-    dictionary dict("transport");
-    dict.add("kappa0", kappa0_);
-    dict.add("n0", n0_);
-    dict.add("Tref", Tref_);
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("transport");
+        os.writeEntry("kappa0", kappa0_);
+        os.writeEntry("n0", n0_);
+        os.writeEntry("Tref", Tref_);
+        os.endBlock();
+    }
 }
 
 

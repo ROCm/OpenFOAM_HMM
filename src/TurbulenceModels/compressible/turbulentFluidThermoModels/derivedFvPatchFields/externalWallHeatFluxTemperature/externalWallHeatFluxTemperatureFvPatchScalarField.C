@@ -38,11 +38,11 @@ const Foam::Enum
     Foam::externalWallHeatFluxTemperatureFvPatchScalarField::operationMode
 >
 Foam::externalWallHeatFluxTemperatureFvPatchScalarField::operationModeNames
-{
+({
     { operationMode::fixedPower, "power" },
     { operationMode::fixedHeatFlux, "flux" },
     { operationMode::fixedHeatTransferCoeff, "coefficient" },
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -84,7 +84,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    mode_(operationModeNames.lookup("mode", dict)),
+    mode_(operationModeNames.get("mode", dict)),
     Q_(0),
     q_(),
     h_(),
@@ -100,7 +100,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
     {
         case fixedPower:
         {
-            dict.lookup("Q") >> Q_;
+            dict.readEntry("Q", Q_);
 
             break;
         }
@@ -115,10 +115,9 @@ externalWallHeatFluxTemperatureFvPatchScalarField
             h_ = scalarField("h", dict, p.size());
             Ta_ = Function1<scalar>::New("Ta", dict);
 
-            if (dict.found("thicknessLayers"))
+            if (dict.readIfPresent("thicknessLayers", thicknessLayers_))
             {
-                dict.lookup("thicknessLayers") >> thicknessLayers_;
-                dict.lookup("kappaLayers") >> kappaLayers_;
+                dict.readEntry("kappaLayers", kappaLayers_);
 
                 if (thicknessLayers_.size() != kappaLayers_.size())
                 {

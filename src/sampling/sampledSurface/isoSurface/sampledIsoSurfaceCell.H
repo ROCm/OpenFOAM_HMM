@@ -56,6 +56,9 @@ Usage
         bounds   | limit with bounding box                 | no       |
     \endtable
 
+Note
+    Does not currently support cell zones.
+
 SourceFiles
     sampledIsoSurfaceCell.C
 
@@ -101,9 +104,6 @@ class sampledIsoSurfaceCell
 
         //- Whether to recalculate cell values as average of point values
         const bool average_;
-
-        //- If restricted to zones, name of this zone or a regular expression
-        keyType zoneKey_;
 
 
     // Recreated for every isoSurface

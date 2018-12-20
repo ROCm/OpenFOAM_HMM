@@ -35,7 +35,7 @@ Foam::SurfaceFilmModel<CloudType>::New
     CloudType& owner
 )
 {
-    const word modelType(dict.lookup("surfaceFilmModel"));
+    const word modelType(dict.get<word>("surfaceFilmModel"));
 
     Info<< "Selecting surface film model " << modelType << endl;
 

@@ -42,7 +42,7 @@ Foam::profileModelList::profileModelList
 
         Info<< "    Constructing blade profiles:" << endl;
 
-        if (modelNames.size() > 0)
+        if (modelNames.size())
         {
             this->setSize(modelNames.size());
 
@@ -63,12 +63,6 @@ Foam::profileModelList::profileModelList
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::profileModelList::~profileModelList()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

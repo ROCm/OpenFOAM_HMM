@@ -42,10 +42,10 @@ const Foam::Enum
     Foam::IOstreamOption::streamFormat
 >
 Foam::IOstreamOption::formatNames
-{
+({
     { streamFormat::ASCII, "ascii" },
-    { streamFormat::BINARY, "binary" }
-};
+    { streamFormat::BINARY, "binary" },
+});
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //

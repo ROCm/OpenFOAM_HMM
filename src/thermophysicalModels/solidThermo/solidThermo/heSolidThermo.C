@@ -161,8 +161,8 @@ heSolidThermo
     heThermo<BasicSolidThermo, MixtureType>(mesh, phaseName)
 {
     calculate();
-    this->mu_ == dimensionedScalar("zero", this->mu_.dimensions(), 0.0);
-    this->psi_ == dimensionedScalar("zero", this->psi_.dimensions(), 0.0);
+    this->mu_ == dimensionedScalar(this->mu_.dimensions(), Zero);
+    this->psi_ == dimensionedScalar(this->psi_.dimensions(), Zero);
 }
 
 
@@ -178,8 +178,8 @@ heSolidThermo
     heThermo<BasicSolidThermo, MixtureType>(mesh, dict, phaseName)
 {
     calculate();
-    this->mu_ == dimensionedScalar("zero", this->mu_.dimensions(), 0.0);
-    this->psi_ == dimensionedScalar("zero", this->psi_.dimensions(), 0.0);
+    this->mu_ == dimensionedScalar(this->mu_.dimensions(), Zero);
+    this->psi_ == dimensionedScalar(this->psi_.dimensions(), Zero);
 }
 
 
@@ -198,8 +198,8 @@ heSolidThermo
 
     // TBD. initialise psi, mu (at heThermo level) since these do not
     // get initialised. Move to heThermo constructor?
-    this->mu_ == dimensionedScalar("zero", this->mu_.dimensions(), 0.0);
-    this->psi_ == dimensionedScalar("zero", this->psi_.dimensions(), 0.0);
+    this->mu_ == dimensionedScalar(this->mu_.dimensions(), Zero);
+    this->psi_ == dimensionedScalar(this->psi_.dimensions(), Zero);
 }
 
 

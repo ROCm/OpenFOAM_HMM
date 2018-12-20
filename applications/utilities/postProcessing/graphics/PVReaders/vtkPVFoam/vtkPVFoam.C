@@ -194,7 +194,8 @@ int Foam::vtkPVFoam::setTime(const std::vector<double>& requestTimes)
 
     Time& runTime = dbPtr_();
 
-    // Get times list
+    // Get times list. Flush first to force refresh.
+    fileHandler().flush();
     instantList Times = runTime.times();
 
     int nearestIndex = timeIndex_;
@@ -300,11 +301,6 @@ Foam::vtkPVFoam::vtkPVFoam
     }
 
     fileName FileName(vtkFileName);
-
-    // Make sure not to use the threaded version - it does not like
-    // being loaded as a shared library - static cleanup order is problematic.
-    // For now just disable the threaded writer.
-    fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
 
     // avoid argList and get rootPath/caseName directly from the file
     fileName fullCasePath(FileName.path());
@@ -729,6 +725,8 @@ std::vector<double> Foam::vtkPVFoam::findTimes(const bool skipZero) const
     if (dbPtr_.valid())
     {
         const Time& runTime = dbPtr_();
+        // Get times list. Flush first to force refresh.
+        fileHandler().flush();
         instantList timeLst = runTime.times();
 
         // find the first time for which this mesh appears to exist

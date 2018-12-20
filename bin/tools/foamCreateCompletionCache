@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -27,11 +27,12 @@ usage() {
 
 Usage: ${0##*/} [OPTION] [appName .. [appNameN]]
 options:
-  -d dir | -dir dir   Directory to process
-  -u | -user          Add \$FOAM_USER_APPBIN to the search directories
-  -no-header          Suppress header generation
-  -o FILE             Write to alternative output
-  -h | -help          Print the usage
+  -dir DIR          Directory to process
+  -user             Add \$FOAM_USER_APPBIN to the search directories
+  -no-header        Suppress header generation
+  -output FILE, -o FILE
+                    Write to alternative output
+  -h | -help        Print the usage
 
 Create cache of bash completion values for OpenFOAM applications.
 The cached values are typically used by the tcsh completion wrapper.
@@ -68,13 +69,13 @@ do
     -h | -help*)
         usage
         ;;
-    -d | -dir)
+    -dir)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         searchDirs="$2"
         [ -d "$searchDirs" ] || die "directory not found '$searchDirs'"
         shift
         ;;
-    -u | -user)
+    -user)
         searchDirs="$searchDirs $FOAM_USER_APPBIN"
         ;;
     -no-head*)
@@ -116,7 +117,8 @@ echo 1>&2
 # Header not disabled
 [ "$optHeader" = true ] && cat << HEADER
 #----------------------------------*-sh-*--------------------------------------
-# Cached options for bash completion of OpenFOAM applications.
+# Cached options for bash completion of OpenFOAM applications,
+# primarily for use with the tcsh completion mechanism.
 # These are the values expected by the '_of_complete_' function
 #
 # Recreate with "${0##*/}"
@@ -132,14 +134,38 @@ HEADER
 
 #-------------------------------------------------------------------------------
 
-# Scans the output of the application -help to detect options with/without
+# Scans the output of the application -help-full to detect options with/without
 # arguments.  Dispatch via _of_complete_
 #
+# Extract all options of the format
+#   -opt1         descrip
+#   -opt2 <arg>   descrip
+#   -help-full
+#
+# Ignores
+#   -help-man     Internal option
+#   -hostRoots    Advanced distributed run option
+#   -roots        Advanced distributed run option
+#
+# Begin parsing after first appearance of "^[Oo]ptions:"
+# Terminate parsing on first appearance of "-help-full"
+# - options with '=' (eg, -mode=ugo) are not handled very well at all.
+# - alternatives (eg, -a, -all) are not handled nicely either,
+#   for these treat ',' like a space to catch the worst of them.
 extractOptions()
 {
     local appName="$1"
     local helpText=$($appName -help-full 2>/dev/null | \
-        sed -n -e 's/,/ /g' -e 's/=.*$/=/' -e '/^  *-/p')
+        sed -ne '1,/^[Oo]ptions:/d' \
+            -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d; /^-help-man/d;' \
+            -e '/^-hostRoots /d; /^-roots /d;' \
+            -e 'y/,/ /; s/=.*$/=/;' \
+            -e '/^-[^ ]* </{ s/^\(-[^ ]* <\).*$/\1/; p; d }' \
+            -e 's/^\(-[^ ]*\).*$/\1/; p; /^-help-full/q;' \
+            )
+
+    # After this bit of sed, we have "-opt1" or "-opt2 <"
+    # for entries without or with arguments.
 
     [ -n "$helpText" ] || {
         echo "Error calling $appName" 1>&2
@@ -147,10 +173,11 @@ extractOptions()
     }
 
     # Array of options with args
-    local argOpts=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$helpText"))
+    local argOpts=($(awk '/</ {print $1}' <<< "$helpText"))
 
-    # Array of options without args
-    local boolOpts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$helpText"))
+    # Array of options without args, but skip the following:
+    #     -help-compat -help-full etc
+    local boolOpts=($(awk '!/</ && !/help-/ {print $1}' <<< "$helpText"))
 
     appName="${appName##*/}"
     echo "$appName" 1>&2

@@ -38,7 +38,7 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     mesh_(cloud.mesh()),
     interactionType_
     (
-        this->wordToInteractionType(this->coeffDict().lookup("type"))
+        this->wordToInteractionType(this->coeffDict().getWord("type"))
     ),
     e_(0.0),
     mu_(0.0),
@@ -55,7 +55,7 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     {
         case PatchInteractionModel<CloudType>::itOther:
         {
-            const word interactionTypeName(this->coeffDict().lookup("type"));
+            const word interactionTypeName(this->coeffDict().getWord("type"));
 
             FatalErrorInFunction
                 << "Unknown interaction result type "

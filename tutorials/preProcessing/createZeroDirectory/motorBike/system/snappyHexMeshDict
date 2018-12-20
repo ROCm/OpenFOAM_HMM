@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -36,12 +36,11 @@ geometry
 
     refinementBox
     {
-        type searchableBox;
-        min (-1.0 -0.7 0.0);
-        max ( 8.0  0.7 2.5);
+        type box;
+        min  (-1.0 -0.7 0.0);
+        max  ( 8.0  0.7 2.5);
     }
-};
-
+}
 
 
 // Settings for the castellatedMesh generation.
@@ -277,7 +276,7 @@ addLayersControls
     // Angle used to pick up medial axis points
     // Note: changed(corrected) w.r.t 1.7.x! 90 degrees corresponds to 130
     // in 1.7.x.
-    minMedianAxisAngle 90;
+    minMedialAxisAngle 90;
 
 
     // Create buffer region for new layer terminations

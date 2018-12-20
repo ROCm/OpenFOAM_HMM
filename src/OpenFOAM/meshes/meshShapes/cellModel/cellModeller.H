@@ -30,15 +30,15 @@ namespace Foam
 namespace cellModeller
 {
 
-    //- Equivalent to cellModel::ptr static method.
-    //  \deprecated use cellModel::ptr instead (NOV-2017)
+    //- Deprecated(2017-11) equivalent to cellModel::ptr static method.
+    //  \deprecated(2017-11) use cellModel::ptr instead
     inline const cellModel* lookup(const word& modelName)
     {
         return cellModel::ptr(modelName);
     }
 
-    //- Equivalent to cellModel::ptr static method.
-    //  \deprecated use cellModel::ptr instead (NOV-2017)
+    //- Deprecated(2017-11) equivalent to cellModel::ptr static method.
+    //  \deprecated(2017-11) use cellModel::ptr instead
     inline const cellModel* lookup(const label modelIndex)
     {
         return cellModel::ptr(modelIndex);

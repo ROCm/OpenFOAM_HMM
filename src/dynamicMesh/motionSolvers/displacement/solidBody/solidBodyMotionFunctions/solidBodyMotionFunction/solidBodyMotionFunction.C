@@ -46,7 +46,7 @@ Foam::solidBodyMotionFunction::solidBodyMotionFunction
     (
         SBMFCoeffs.optionalSubDict
         (
-            word(SBMFCoeffs.lookup("solidBodyMotionFunction")) + "Coeffs"
+            SBMFCoeffs.get<word>("solidBodyMotionFunction") + "Coeffs"
         )
     ),
     time_(runTime)

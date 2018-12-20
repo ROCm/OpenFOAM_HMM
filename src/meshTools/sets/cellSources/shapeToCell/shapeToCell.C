@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,8 @@ namespace Foam
     defineTypeNameAndDebug(shapeToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, shapeToCell, word);
     addToRunTimeSelectionTable(topoSetSource, shapeToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, shapeToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, shapeToCell, istream);
 }
 
 
@@ -57,9 +59,9 @@ Foam::scalar Foam::shapeToCell::featureCos = Foam::cos(degToRad(10.0));
 
 void Foam::shapeToCell::combine(topoSet& set, const bool add) const
 {
-    if (type_ == "splitHex")
+    if (shape_ == "splitHex")
     {
-        for (label celli = 0; celli < mesh_.nCells(); celli++)
+        for (label celli = 0; celli < mesh_.nCells(); ++celli)
         {
             cellFeatures superCell(mesh_, featureCos, celli);
 
@@ -71,7 +73,7 @@ void Foam::shapeToCell::combine(topoSet& set, const bool add) const
     }
     else
     {
-        const cellModel& wantedModel = cellModel::ref(type_);
+        const cellModel& wantedModel = cellModel::ref(shape_);
 
         const cellShapeList& cellShapes = mesh_.cellShapes();
 
@@ -91,16 +93,16 @@ void Foam::shapeToCell::combine(topoSet& set, const bool add) const
 Foam::shapeToCell::shapeToCell
 (
     const polyMesh& mesh,
-    const word& type
+    const word& shapeName
 )
 :
-    topoSetSource(mesh),
-    type_(type)
+    topoSetCellSource(mesh),
+    shape_(shapeName)
 {
-    if (!cellModel::ptr(type_) && type_ != "splitHex")
+    if (!cellModel::ptr(shape_) && shape_ != "splitHex")
     {
         FatalErrorInFunction
-            << "Illegal cell type " << type_ << exit(FatalError);
+            << "Illegal cell shape " << shape_ << exit(FatalError);
     }
 }
 
@@ -111,15 +113,8 @@ Foam::shapeToCell::shapeToCell
     const dictionary& dict
 )
 :
-    topoSetSource(mesh),
-    type_(dict.lookup("type"))
-{
-    if (!cellModel::ptr(type_) && type_ != "splitHex")
-    {
-        FatalErrorInFunction
-            << "Illegal cell type " << type_ << exit(FatalError);
-    }
-}
+    shapeToCell(mesh, dict.getCompat<word>("shape", {{"type", 1806}}))
+{}
 
 
 Foam::shapeToCell::shapeToCell
@@ -128,21 +123,15 @@ Foam::shapeToCell::shapeToCell
     Istream& is
 )
 :
-    topoSetSource(mesh),
-    type_(checkIs(is))
+    topoSetCellSource(mesh),
+    shape_(checkIs(is))
 {
-    if (!cellModel::ptr(type_) && type_ != "splitHex")
+    if (!cellModel::ptr(shape_) && shape_ != "splitHex")
     {
         FatalErrorInFunction
-            << "Illegal cell type " << type_ << exit(FatalError);
+            << "Illegal cell shape " << shape_ << exit(FatalError);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::shapeToCell::~shapeToCell()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -153,15 +142,21 @@ void Foam::shapeToCell::applyToSet
     topoSet& set
 ) const
 {
-    if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+    if (action == topoSetSource::ADD || action == topoSetSource::NEW)
     {
-        Info<< "    Adding all cells of type " << type_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Adding all " << shape_ << " cells ..." << endl;
+        }
 
         combine(set, true);
     }
-    else if (action == topoSetSource::DELETE)
+    else if (action == topoSetSource::SUBTRACT)
     {
-        Info<< "    Removing all cells of type " << type_ << " ..." << endl;
+        if (verbose_)
+        {
+            Info<< "    Removing all " << shape_ << " cells ..." << endl;
+        }
 
         combine(set, false);
     }

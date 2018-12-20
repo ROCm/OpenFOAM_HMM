@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,8 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "IOstreams.H"
+#include "FlatOutput.H"
 #include "objectRegistry.H"
-#include "hashedWordList.H"
 
 using namespace Foam;
 
@@ -43,22 +43,6 @@ using namespace Foam;
 
 // file variable, needed for switching the default in lookupObject etc.
 bool recursive = false;
-
-
-template<class Type>
-Foam::Ostream& printList(Foam::Ostream& os, const UList<Type>& list)
-{
-    // list with out any linebreaks
-    os  << '(';
-    forAll(list, i)
-    {
-        if (i) os << ' ';
-        os  << list[i];
-    }
-    os  << ')';
-
-    return os;
-}
 
 
 void printRegistry
@@ -76,8 +60,8 @@ void printRegistry
     Foam::label indent
 )
 {
-    wordList names = obr.sortedNames();
-    hashedWordList regs = obr.sortedNames<objectRegistry>();
+    wordList names(obr.sortedNames());
+    wordList regs(obr.sortedNames<objectRegistry>());
 
     std::string prefix;
     for (label i=indent; i; --i)
@@ -88,23 +72,13 @@ void printRegistry
     os  << '#' << prefix.c_str() << obr.name()
         << " parent:" << obr.parent().name() << nl;
 
-    // all names
-    {
-        os  << ' ' << prefix.c_str() << "objects: ";
-        printList(os, names) << nl;
-    }
+    os  << ' ' << prefix.c_str() << "objects: " << flatOutput(names) << nl;
+    os  << ' ' << prefix.c_str() << "registries: " << flatOutput(regs) << nl;
 
-    // sub-registry names
-    {
-        os  << ' ' << prefix.c_str() << "registries: ";
-        printList(os, regs) << nl;
-    }
 
     // Print, but skip expansion of sub-registries for now
-    forAll(names, i)
+    for (const word& name : names)
     {
-        const word& name = names[i];
-
         os  << (regs.found(name) ? '-' : ' ')
             << prefix.c_str() << name << " => " << obr[name]->type() << nl;
     }
@@ -115,9 +89,8 @@ void printRegistry
     os  << '\n';
 
     // Now descend into the sub-registries
-    forAll(regs, i)
+    for (const word& name : regs)
     {
-        const word& name = regs[i];
         const objectRegistry& next = obr.lookupObject<objectRegistry>
         (
             name,
@@ -240,8 +213,8 @@ int main(int argc, char *argv[])
         );
     }
 
-    Info<< "after adding some entries, top-level now contains: ";
-    printList(Info, db.names()) << endl;
+    Info<< "after adding some entries, top-level now contains: "
+        << flatOutput(db.names()) << endl;
 
     Info<<"## Now attempt to add a few more entries ##" << nl;
 

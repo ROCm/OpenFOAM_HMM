@@ -75,8 +75,7 @@ public:
             phasePairTable;
 
 
-        typedef
-            HashTable<autoPtr<phaseModel>, word, word::hash> phaseModelTable;
+        typedef HashTable<autoPtr<phaseModel>> phaseModelTable;
 
 
 protected:
@@ -261,13 +260,7 @@ public:
         virtual volScalarField& he()
         {
             NotImplemented;
-            return
-            (
-                const_cast<volScalarField&>
-                (
-                    volScalarField::null()
-                )
-            );
+            return const_cast<volScalarField&>(volScalarField::null());
         }
 
         //- Return access to the inernal energy field [J/Kg]
@@ -275,10 +268,7 @@ public:
         virtual const volScalarField& he() const
         {
            NotImplemented;
-           return
-           (
-                volScalarField::null()
-           );
+           return volScalarField::null();
         }
 
         //- Enthalpy/Internal energy

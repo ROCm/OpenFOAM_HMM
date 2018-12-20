@@ -250,14 +250,11 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
 
             vector pointNormal(Zero);
 
-            forAll(pFaces, i)
+            for (const label facei : pFaces)
             {
-                if (isTreeFace_.test(pFaces[i]))
+                if (isTreeFace_.test(facei))
                 {
-                    vector n = mesh_.faceAreas()[pFaces[i]];
-                    n /= mag(n) + VSMALL;
-
-                    pointNormal += n;
+                    pointNormal += normalised(mesh_.faceAreas()[facei]);
                 }
             }
 
@@ -319,14 +316,11 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
 
             vector edgeNormal(Zero);
 
-            forAll(eFaces, i)
+            for (const label facei : eFaces)
             {
-                if (isTreeFace_.test(eFaces[i]))
+                if (isTreeFace_.test(facei))
                 {
-                    vector n = mesh_.faceAreas()[eFaces[i]];
-                    n /= mag(n) + VSMALL;
-
-                    edgeNormal += n;
+                    edgeNormal += normalised(mesh_.faceAreas()[facei]);
                 }
             }
 
@@ -369,11 +363,8 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
             vector ePrev = points[f[f.rcIndex(fp)]] - fc;
             vector eNext = points[f[f.fcIndex(fp)]] - fc;
 
-            vector nLeft = ePrev ^ e;
-            nLeft /= mag(nLeft) + VSMALL;
-
-            vector nRight = e ^ eNext;
-            nRight /= mag(nRight) + VSMALL;
+            vector nLeft = normalised(ePrev ^ e);
+            vector nRight = normalised(e ^ eNext);
 
             if (debug & 2)
             {

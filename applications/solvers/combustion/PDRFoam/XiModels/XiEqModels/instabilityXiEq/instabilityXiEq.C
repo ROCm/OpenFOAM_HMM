@@ -49,7 +49,7 @@ Foam::XiEqModels::instability::instability
 )
 :
     XiEqModel(XiEqProperties, thermo, turbulence, Su),
-    XiEqIn(readScalar(XiEqModelCoeffs_.lookup("XiEqIn"))),
+    XiEqIn(XiEqModelCoeffs_.get<scalar>("XiEqIn")),
     XiEqModel_(XiEqModel::New(XiEqModelCoeffs_, thermo, turbulence, Su))
 {}
 
@@ -73,7 +73,7 @@ bool Foam::XiEqModels::instability::read(const dictionary& XiEqProperties)
 {
     XiEqModel::read(XiEqProperties);
 
-    XiEqModelCoeffs_.lookup("XiEqIn") >> XiEqIn;
+    XiEqModelCoeffs_.readEntry("XiEqIn", XiEqIn);
 
     return XiEqModel_->read(XiEqModelCoeffs_);
 }

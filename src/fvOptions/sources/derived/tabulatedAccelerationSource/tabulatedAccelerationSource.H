@@ -69,7 +69,6 @@ class tabulatedAccelerationSource
 :
     public option
 {
-
 protected:
 
     // Protected data
@@ -126,8 +125,7 @@ public:
 
 
     //- Destructor
-    virtual ~tabulatedAccelerationSource()
-    {}
+    virtual ~tabulatedAccelerationSource() = default;
 
 
     // Member Functions

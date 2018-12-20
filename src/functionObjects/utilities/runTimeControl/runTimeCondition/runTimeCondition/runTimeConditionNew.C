@@ -36,7 +36,7 @@ Foam::functionObjects::runTimeControls::runTimeCondition::New
     stateFunctionObject& state
 )
 {
-    const word conditionType(dict.lookup("type"));
+    const word conditionType(dict.get<word>("type"));
 
     Info<< "Selecting runTimeCondition " << conditionType << endl;
 
@@ -52,7 +52,8 @@ Foam::functionObjects::runTimeControls::runTimeCondition::New
             << exit(FatalError);
     }
 
-    return autoPtr<runTimeCondition>
+    return
+        autoPtr<runTimeCondition>
         (
             cstrIter()(conditionName, obr, dict, state)
         );

@@ -64,9 +64,8 @@ protected:
         //- Method coeffs dictionary
         dictionary coeffDict_;
 
-private:
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         faceAreaWeightModel(const faceAreaWeightModel&) = delete;
@@ -115,7 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~faceAreaWeightModel();
+    virtual ~faceAreaWeightModel() = default;
 
 
     // Member Functions

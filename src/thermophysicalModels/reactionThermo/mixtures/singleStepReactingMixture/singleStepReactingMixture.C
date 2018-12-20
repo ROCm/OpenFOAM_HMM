@@ -51,7 +51,7 @@ void Foam::singleStepReactingMixture<ThermoType>::calculateqFuel()
         specieProd_[speciei] = -1;
     }
 
-    Info << "Fuel heat of combustion :" << qFuel_.value() << endl;
+    Info<< "Fuel heat of combustion :" << qFuel_.value() << endl;
 }
 
 
@@ -73,9 +73,9 @@ void Foam::singleStepReactingMixture<ThermoType>::massAndAirStoichRatios()
       * mag(specieStoichCoeffs_[O2Index]))
       / (Wu*mag(specieStoichCoeffs_[fuelIndex_]));
 
-    Info << "stoichiometric air-fuel ratio :" << stoicRatio_.value() << endl;
+    Info<< "stoichiometric air-fuel ratio :" << stoicRatio_.value() << endl;
 
-    Info << "stoichiometric oxygen-fuel ratio :" << s_.value() << endl;
+    Info<< "stoichiometric oxygen-fuel ratio :" << s_.value() << endl;
 }
 
 
@@ -108,7 +108,7 @@ void Foam::singleStepReactingMixture<ThermoType>::calculateMaxProducts()
         Yprod0_[speciei] =  this->speciesData()[speciei].W()/Wm*Xi[i];
     }
 
-    Info << "Maximum products mass concentrations:" << nl;
+    Info<< "Maximum products mass concentrations:" << nl;
     forAll(Yprod0_, i)
     {
         if (Yprod0_[i] > 0)
@@ -144,11 +144,11 @@ void Foam::singleStepReactingMixture<ThermoType>::fresCorrect()
         const label speciei = reaction.lhs()[i].index;
         if (speciei == fuelIndex_)
         {
-            fres_[speciei] =  max(YFuel - YO2/s_, scalar(0.0));
+            fres_[speciei] =  max(YFuel - YO2/s_, scalar(0));
         }
         else if (speciei == O2Index)
         {
-            fres_[speciei] =  max(YO2 - YFuel*s_, scalar(0.0));
+            fres_[speciei] =  max(YO2 - YFuel*s_, scalar(0));
         }
     }
 
@@ -202,8 +202,8 @@ Foam::singleStepReactingMixture<ThermoType>::singleStepReactingMixture
     specieStoichCoeffs_(this->species_.size(), Zero),
     Yprod0_(this->species_.size(), Zero),
     fres_(Yprod0_.size()),
-    inertIndex_(this->species()[thermoDict.lookup("inertSpecie")]),
-    fuelIndex_(this->species()[thermoDict.lookup("fuel")]),
+    inertIndex_(this->species()[thermoDict.get<word>("inertSpecie")]),
+    fuelIndex_(this->species()[thermoDict.get<word>("fuel")]),
     specieProd_(Yprod0_.size(), 1)
 {
     if (this->size() == 1)

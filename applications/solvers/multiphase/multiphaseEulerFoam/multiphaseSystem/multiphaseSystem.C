@@ -844,7 +844,7 @@ void Foam::multiphaseSystem::solve()
     const Time& runTime = mesh_.time();
 
     const dictionary& alphaControls = mesh_.solverDict("alpha");
-    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
+    label nAlphaSubCycles(alphaControls.get<label>("nAlphaSubCycles"));
 
     if (nAlphaSubCycles > 1)
     {
@@ -944,16 +944,14 @@ bool Foam::multiphaseSystem::read()
             readOK &= iter().read(phaseData[phasei++].dict());
         }
 
-        lookup("sigmas") >> sigmas_;
-        lookup("interfaceCompression") >> cAlphas_;
-        lookup("virtualMass") >> Cvms_;
+        readEntry("sigmas", sigmas_);
+        readEntry("interfaceCompression", cAlphas_);
+        readEntry("virtualMass", Cvms_);
 
         return readOK;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

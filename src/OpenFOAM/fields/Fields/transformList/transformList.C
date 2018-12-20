@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,14 +34,14 @@ Foam::List<T> Foam::transform
     const UList<T>& field
 )
 {
-    List<T> newField(field.size());
+    List<T> result(field.size());
 
     forAll(field, i)
     {
-        newField[i] = transform(rotTensor, field[i]);
+        result[i] = transform(rotTensor, field[i]);
     }
 
-    return newField;
+    return result;
 }
 
 
@@ -60,10 +60,7 @@ void Foam::transformList(const tensorField& rotTensor, UList<T>& field)
 {
     if (rotTensor.size() == 1)
     {
-        forAll(field, i)
-        {
-            field[i] = transform(rotTensor[0], field[i]);
-        }
+        transformList(rotTensor[0], field);
     }
     else if (rotTensor.size() == field.size())
     {
@@ -85,9 +82,10 @@ void Foam::transformList(const tensorField& rotTensor, UList<T>& field)
 template<class T>
 void Foam::transformList(const tensor& rotTensor, Map<T>& field)
 {
-    forAllIter(typename Map<T>, field, iter)
+    forAllIters(field, iter)
     {
-        iter() = transform(rotTensor[0], iter());
+        T& value = iter.object();
+        value = transform(rotTensor, value);
     }
 }
 
@@ -97,10 +95,7 @@ void Foam::transformList(const tensorField& rotTensor, Map<T>& field)
 {
     if (rotTensor.size() == 1)
     {
-        forAllIter(typename Map<T>, field, iter)
-        {
-            iter() = transform(rotTensor[0], iter());
-        }
+        transformList(rotTensor[0], field);
     }
     else
     {
@@ -115,9 +110,10 @@ void Foam::transformList(const tensorField& rotTensor, Map<T>& field)
 template<class T>
 void Foam::transformList(const tensor& rotTensor, EdgeMap<T>& field)
 {
-    forAllIter(typename EdgeMap<T>, field, iter)
+    forAllIters(field, iter)
     {
-        iter() = transform(rotTensor[0], iter());
+        T& value = iter.object();
+        value = transform(rotTensor, value);
     }
 }
 
@@ -127,10 +123,7 @@ void Foam::transformList(const tensorField& rotTensor, EdgeMap<T>& field)
 {
     if (rotTensor.size() == 1)
     {
-        forAllIter(typename EdgeMap<T>, field, iter)
-        {
-            iter() = transform(rotTensor[0], iter());
-        }
+        transformList(rotTensor[0], field);
     }
     else
     {

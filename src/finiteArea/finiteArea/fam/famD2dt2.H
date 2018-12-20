@@ -53,20 +53,20 @@ namespace Foam
 namespace fam
 {
     template<class Type>
-    tmp<faMatrix<Type> > d2dt2
+    tmp<faMatrix<Type>> d2dt2
     (
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > d2dt2
+    tmp<faMatrix<Type>> d2dt2
     (
         const dimensionedScalar&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > d2dt2
+    tmp<faMatrix<Type>> d2dt2
     (
         const areaScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&

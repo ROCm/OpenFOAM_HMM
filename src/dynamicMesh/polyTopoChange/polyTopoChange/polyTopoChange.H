@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class face;
 class primitiveMesh;
 class polyMesh;
@@ -239,9 +239,6 @@ class polyTopoChange
             const labelUList& oldToNew,
             labelList& elems
         );
-
-        //- Get all set elements as a labelHashSet
-        static labelHashSet getSetIndices(const bitSet& lst);
 
         //- Count number of added and removed quantities from maps.
         static void countMap

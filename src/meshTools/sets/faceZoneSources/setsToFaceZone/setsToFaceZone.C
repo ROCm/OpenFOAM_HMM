@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 #include "polyMesh.H"
 #include "faceZoneSet.H"
 #include "cellSet.H"
-
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -56,7 +55,7 @@ Foam::setsToFaceZone::setsToFaceZone
     const polyMesh& mesh,
     const word& faceSetName,
     const word& cellSetName,
-    const Switch& flip
+    const bool flip
 )
 :
     topoSetSource(mesh),
@@ -73,8 +72,8 @@ Foam::setsToFaceZone::setsToFaceZone
 )
 :
     topoSetSource(mesh),
-    faceSetName_(dict.lookup("faceSet")),
-    cellSetName_(dict.lookup("cellSet")),
+    faceSetName_(dict.get<word>("faceSet")),
+    cellSetName_(dict.get<word>("cellSet")),
     flip_(dict.lookupOrDefault("flip", false))
 {}
 
@@ -89,12 +88,6 @@ Foam::setsToFaceZone::setsToFaceZone
     faceSetName_(checkIs(is)),
     cellSetName_(checkIs(is)),
     flip_(false)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::setsToFaceZone::~setsToFaceZone()
 {}
 
 
@@ -113,31 +106,34 @@ void Foam::setsToFaceZone::applyToSet
     }
     else
     {
-        faceZoneSet& fzSet = refCast<faceZoneSet>(set);
+        faceZoneSet& zoneSet = refCast<faceZoneSet>(set);
 
-        if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
+        if (action == topoSetSource::ADD || action == topoSetSource::NEW)
         {
-            Info<< "    Adding all faces from faceSet " << faceSetName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Adding all faces from faceSet " << faceSetName_
+                    << " ..." << endl;
+            }
 
             // Load the sets
             faceSet fSet(mesh_, faceSetName_);
             cellSet cSet(mesh_, cellSetName_);
 
             // Start off from copy
-            DynamicList<label> newAddressing(fzSet.addressing());
-            DynamicList<bool> newFlipMap(fzSet.flipMap());
+            DynamicList<label> newAddressing(zoneSet.addressing());
+            DynamicList<bool> newFlipMap(zoneSet.flipMap());
 
             forAllConstIter(faceSet, fSet, iter)
             {
                 label facei = iter.key();
 
-                if (!fzSet.found(facei))
+                if (!zoneSet.found(facei))
                 {
                     bool flipFace = false;
 
-                    label own = mesh_.faceOwner()[facei];
-                    bool ownFound = cSet.found(own);
+                    const label own = mesh_.faceOwner()[facei];
+                    const bool ownFound = cSet.found(own);
 
                     if (mesh_.isInternalFace(facei))
                     {
@@ -183,33 +179,36 @@ void Foam::setsToFaceZone::applyToSet
                 }
             }
 
-            fzSet.addressing().transfer(newAddressing);
-            fzSet.flipMap().transfer(newFlipMap);
-            fzSet.updateSet();
+            zoneSet.addressing().transfer(newAddressing);
+            zoneSet.flipMap().transfer(newFlipMap);
+            zoneSet.updateSet();
         }
-        else if (action == topoSetSource::DELETE)
+        else if (action == topoSetSource::SUBTRACT)
         {
-            Info<< "    Removing all faces from faceSet " << faceSetName_
-                << " ..." << endl;
+            if (verbose_)
+            {
+                Info<< "    Removing all faces from faceSet " << faceSetName_
+                    << " ..." << endl;
+            }
 
             // Load the set
             faceZoneSet loadedSet(mesh_, faceSetName_);
 
             // Start off empty
-            DynamicList<label> newAddressing(fzSet.addressing().size());
-            DynamicList<bool> newFlipMap(fzSet.flipMap().size());
+            DynamicList<label> newAddressing(zoneSet.addressing().size());
+            DynamicList<bool> newFlipMap(zoneSet.flipMap().size());
 
-            forAll(fzSet.addressing(), i)
+            forAll(zoneSet.addressing(), i)
             {
-                if (!loadedSet.found(fzSet.addressing()[i]))
+                if (!loadedSet.found(zoneSet.addressing()[i]))
                 {
-                    newAddressing.append(fzSet.addressing()[i]);
-                    newFlipMap.append(fzSet.flipMap()[i]);
+                    newAddressing.append(zoneSet.addressing()[i]);
+                    newFlipMap.append(zoneSet.flipMap()[i]);
                 }
             }
-            fzSet.addressing().transfer(newAddressing);
-            fzSet.flipMap().transfer(newFlipMap);
-            fzSet.updateSet();
+            zoneSet.addressing().transfer(newAddressing);
+            zoneSet.flipMap().transfer(newFlipMap);
+            zoneSet.updateSet();
         }
     }
 }

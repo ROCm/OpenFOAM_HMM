@@ -46,7 +46,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     inflationSetName_(this->coeffDict().lookup("inflationCellSet")),
     generationCells_(),
     inflationCells_(),
-    duration_(readScalar(this->coeffDict().lookup("duration"))),
+    duration_(this->coeffDict().getScalar("duration")),
     flowRateProfile_
     (
         TimeFunction1<scalar>
@@ -83,7 +83,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
 
     if (selfSeed_)
     {
-        dSeed_ = readScalar(this->coeffDict().lookup("dSeed"));
+        this->coeffDict().readEntry("dSeed", dSeed_);
     }
 
     cellSet generationCells(this->owner().mesh(), generationSetName_);

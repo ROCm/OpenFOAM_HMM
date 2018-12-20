@@ -49,7 +49,6 @@ License
 #include "globalIndex.H"
 #include "meshTools.H"
 #include "OFstream.H"
-#include "geomDecomp.H"
 #include "Random.H"
 #include "searchableSurfaces.H"
 #include "treeBoundBox.H"
@@ -57,6 +56,10 @@ License
 #include "fvMeshTools.H"
 #include "motionSmoother.H"
 #include "faceSet.H"
+
+// Leak path
+#include "shortestPathSet.H"
+#include "meshSearch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -71,23 +74,23 @@ const Foam::Enum
     Foam::meshRefinement::debugType
 >
 Foam::meshRefinement::debugTypeNames
-{
+({
     { debugType::MESH, "mesh" },
     { debugType::OBJINTERSECTIONS, "intersections" },
     { debugType::FEATURESEEDS, "featureSeeds" },
     { debugType::ATTRACTION, "attraction" },
     { debugType::LAYERINFO, "layerInfo" },
-};
+});
 
 
-const Foam::Enum
-<
-    Foam::meshRefinement::outputType
->
-Foam::meshRefinement::outputTypeNames
-{
-    { outputType::OUTPUTLAYERINFO, "layerInfo" }
-};
+//const Foam::Enum
+//<
+//    Foam::meshRefinement::outputType
+//>
+//Foam::meshRefinement::outputTypeNames
+//({
+//    { outputType::OUTPUTLAYERINFO, "layerInfo" }
+//});
 
 
 const Foam::Enum
@@ -95,18 +98,18 @@ const Foam::Enum
     Foam::meshRefinement::writeType
 >
 Foam::meshRefinement::writeTypeNames
-{
+({
     { writeType::WRITEMESH, "mesh" },
     { writeType::NOWRITEREFINEMENT, "noRefinement" },
     { writeType::WRITELEVELS, "scalarLevels" },
     { writeType::WRITELAYERSETS, "layerSets" },
     { writeType::WRITELAYERFIELDS, "layerFields" },
-};
+});
 
 
 Foam::meshRefinement::writeType Foam::meshRefinement::writeLevel_;
 
-Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel_;
+//Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel_;
 
 // Inside/outside test for polyMesh:.findCell()
 //   2.4.x : default = polyMesh::FACE_DIAG_TRIS
@@ -130,7 +133,7 @@ void Foam::meshRefinement::calcNeighbourData
     const labelList& cellLevel = meshCutter_.cellLevel();
     const pointField& cellCentres = mesh_.cellCentres();
 
-    label nBoundaryFaces = mesh_.nFaces() - mesh_.nInternalFaces();
+    const label nBoundaryFaces = mesh_.nBoundaryFaces();
 
     if (neiLevel.size() != nBoundaryFaces || neiCc.size() != nBoundaryFaces)
     {
@@ -172,8 +175,7 @@ void Foam::meshRefinement::calcNeighbourData
             forAll(faceCells, i)
             {
                 // Extrapolate the face centre.
-                vector fn = faceAreas[i];
-                fn /= mag(fn)+VSMALL;
+                const vector fn = normalised(faceAreas[i]);
 
                 label own = faceCells[i];
                 label ownLevel = cellLevel[own];
@@ -270,14 +272,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
 
     {
-        label nMasterFaces = 0;
-        forAll(isMasterFace, facei)
-        {
-            if (isMasterFace.test(facei))
-            {
-                ++nMasterFaces;
-            }
-        }
+        label nMasterFaces = isMasterFace.count();
         reduce(nMasterFaces, sumOp<label>());
 
         label nChangedFaces = 0;
@@ -298,8 +293,8 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
 
 
     // Get boundary face centre and level. Coupled aware.
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    labelList neiLevel(mesh_.nBoundaryFaces());
+    pointField neiCc(mesh_.nBoundaryFaces());
     calcNeighbourData(neiLevel, neiCc);
 
     // Collect segments we want to test for
@@ -459,7 +454,7 @@ void Foam::meshRefinement::checkData()
     meshCutter_.checkRefinementLevels(1, labelList(0));
 
 
-    label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+    const label nBnd = mesh_.nBoundaryFaces();
 
     Pout<< "meshRefinement::checkData() : Checking synchronization."
         << endl;
@@ -598,7 +593,7 @@ void Foam::meshRefinement::checkData()
         labelList::subList boundarySurface
         (
             surfaceIndex_,
-            mesh_.nFaces()-mesh_.nInternalFaces(),
+            mesh_.nBoundaryFaces(),
             mesh_.nInternalFaces()
         );
 
@@ -629,11 +624,7 @@ void Foam::meshRefinement::checkData()
         localPointRegion::findDuplicateFaces
         (
             mesh_,
-            identity
-            (
-                mesh_.nFaces() - mesh_.nInternalFaces(),
-                mesh_.nInternalFaces()
-            )
+            identity(mesh_.nBoundaryFaces(), mesh_.nInternalFaces())
         )
     );
 
@@ -999,12 +990,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         // Check mesh for errors
         // ~~~~~~~~~~~~~~~~~~~~~
 
-        faceSet errorFaces
-        (
-            mesh_,
-            "errorFaces",
-            mesh_.nFaces()-mesh_.nInternalFaces()
-        );
+        faceSet errorFaces(mesh_, "errorFaces", mesh_.nBoundaryFaces());
         bool hasErrors = motionSmoother::checkMesh
         (
             false,  // report
@@ -1406,7 +1392,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
             if (keepBaffles)
             {
-                label nBnd = mesh_.nFaces()-mesh_.nInternalFaces();
+                const label nBnd = mesh_.nBoundaryFaces();
 
                 labelList coupledFace(mesh_.nFaces(), -1);
                 {
@@ -1753,7 +1739,7 @@ void Foam::meshRefinement::checkCoupledFaceZones(const polyMesh& mesh)
 
     // Check that coupled faces are present on both sides.
 
-    labelList faceToZone(mesh.nFaces()-mesh.nInternalFaces(), -1);
+    labelList faceToZone(mesh.nBoundaryFaces(), -1);
 
     forAll(fZones, zonei)
     {
@@ -2238,8 +2224,10 @@ Foam::label Foam::meshRefinement::findRegions
     const vector& perturbVec,
     const pointField& locationsInMesh,
     const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter,
     const label nRegions,
-    labelList& cellRegion
+    labelList& cellRegion,
+    const boolList& blockedFace
 )
 {
     bitSet insideCell(mesh.nCells());
@@ -2291,11 +2279,169 @@ Foam::label Foam::meshRefinement::findRegions
             label index = insideRegions.find(regioni);
             if (index != -1)
             {
+                const polyBoundaryMesh& pbm = mesh.boundaryMesh();
+
+                fileName outputDir;
+                if (Pstream::master())
+                {
+                    outputDir =
+                        mesh.time().globalPath()
+                      / functionObject::outputPrefix
+                      / mesh.pointsInstance();
+                    outputDir.clean();
+                    mkDir(outputDir);
+                }
+
+
+                // Write the leak path
+
+                meshSearch searchEngine(mesh);
+                shortestPathSet leakPath
+                (
+                    "leakPath",
+                    mesh,
+                    searchEngine,
+                    coordSet::coordFormatNames[coordSet::coordFormat::DISTANCE],
+                    false,  //true,
+                    50,     // tbd. Number of iterations
+                    pbm.groupPatchIDs()["wall"],
+                    locationsInMesh,
+                    locationsOutsideMesh,
+                    blockedFace
+                );
+
+                // Split leak path according to segment. Note: segment index
+                // is global (= index in locationsInsideMesh)
+                List<pointList> segmentPoints;
+                List<scalarList> segmentDist;
+                {
+                    label nSegments = 0;
+                    if (leakPath.segments().size())
+                    {
+                        nSegments = max(leakPath.segments())+1;
+                    }
+                    reduce(nSegments, maxOp<label>());
+
+                    labelList nElemsPerSegment(nSegments, 0);
+                    for (label segmenti : leakPath.segments())
+                    {
+                        nElemsPerSegment[segmenti]++;
+                    }
+                    segmentPoints.setSize(nElemsPerSegment.size());
+                    segmentDist.setSize(nElemsPerSegment.size());
+                    forAll(nElemsPerSegment, i)
+                    {
+                        segmentPoints[i].setSize(nElemsPerSegment[i]);
+                        segmentDist[i].setSize(nElemsPerSegment[i]);
+                    }
+                    nElemsPerSegment = 0;
+
+                    forAll(leakPath, elemi)
+                    {
+                        label segmenti = leakPath.segments()[elemi];
+                        pointList& points = segmentPoints[segmenti];
+                        scalarList& dist = segmentDist[segmenti];
+                        label& n = nElemsPerSegment[segmenti];
+
+                        points[n] = leakPath[elemi];
+                        dist[n] = leakPath.curveDist()[elemi];
+                        n++;
+                    }
+                }
+
+                PtrList<coordSet> allLeakPaths(segmentPoints.size());
+                forAll(allLeakPaths, segmenti)
+                {
+                    // Collect data from all processors
+                    List<pointList> gatheredPts(Pstream::nProcs());
+                    gatheredPts[Pstream::myProcNo()] =
+                        std::move(segmentPoints[segmenti]);
+                    Pstream::gatherList(gatheredPts);
+
+                    List<scalarList> gatheredDist(Pstream::nProcs());
+                    gatheredDist[Pstream::myProcNo()] =
+                        std::move(segmentDist[segmenti]);
+                    Pstream::gatherList(gatheredDist);
+
+                    // Combine processor lists into one big list.
+                    pointList allPts
+                    (
+                        ListListOps::combine<pointList>
+                        (
+                            gatheredPts, accessOp<pointList>()
+                        )
+                    );
+                    scalarList allDist
+                    (
+                        ListListOps::combine<scalarList>
+                        (
+                            gatheredDist, accessOp<scalarList>()
+                        )
+                    );
+
+                    // Sort according to curveDist
+                    labelList indexSet;
+                    Foam::sortedOrder(allDist, indexSet);
+
+                    allLeakPaths.set
+                    (
+                        segmenti,
+                        new coordSet
+                        (
+                            leakPath.name(),
+                            leakPath.axis(),
+                            pointList(allPts, indexSet),
+                            //scalarList(allDist, indexSet)
+                            scalarList(allPts.size(), scalar(segmenti))
+                        )
+                    );
+                }
+
+                fileName fName;
+                if (Pstream::master())
+                {
+                    List<List<scalarField>> allLeakData(1);
+                    List<scalarField>& varData = allLeakData[0];
+                    varData.setSize(allLeakPaths.size());
+                    forAll(allLeakPaths, segmenti)
+                    {
+                        varData[segmenti] = allLeakPaths[segmenti].curveDist();
+                    }
+
+                    const wordList valueSetNames(1, "leakPath");
+
+                    fName =
+                        outputDir
+                       /leakPathFormatter.getFileName
+                        (
+                            allLeakPaths[0],
+                            valueSetNames
+                        );
+
+                    // Note scope to force writing to finish before
+                    // FatalError exit
+                    OFstream ofs(fName);
+                    if (ofs.opened())
+                    {
+                        leakPathFormatter.write
+                        (
+                            true,               // write tracks
+                            allLeakPaths,
+                            valueSetNames,
+                            allLeakData,
+                            ofs
+                        );
+                    }
+                }
+
+                Pstream::scatter(fName);
+
                 FatalErrorInFunction
                     << "Location in mesh " << locationsInMesh[index]
                     << " is inside same mesh region " << regioni
-                    << " as location outside mesh "
-                    << locationsOutsideMesh[i]
+                    << " as one of the locations outside mesh "
+                    << locationsOutsideMesh
+                    << nl << "    Dumped leak path to " << fName
                     << exit(FatalError);
             }
         }
@@ -2327,7 +2473,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     const labelList& globalToMasterPatch,
     const labelList& globalToSlavePatch,
     const pointField& locationsInMesh,
-    const pointField& locationsOutsideMesh
+    const pointField& locationsOutsideMesh,
+    const writer<scalar>& leakPathFormatter
 )
 {
     // Force calculation of face decomposition (used in findCell)
@@ -2344,11 +2491,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
     label nRemove = findRegions
     (
         mesh_,
-        mergeDistance_*vector(1,1,1),   // perturbVec
+        mergeDistance_ * vector::one,   // perturbVec
         locationsInMesh,
         locationsOutsideMesh,
+        leakPathFormatter,
         cellRegion.nRegions(),
-        cellRegion
+        cellRegion,
+        blockedFace
     );
 
     // Subset
@@ -2669,11 +2818,10 @@ Foam::bitSet Foam::meshRefinement::getMasterPoints
 {
     const globalIndex globalPoints(meshPoints.size());
 
-    labelList myPoints(meshPoints.size());
-    forAll(meshPoints, pointi)
-    {
-        myPoints[pointi] = globalPoints.toGlobal(pointi);
-    }
+    labelList myPoints
+    (
+        identity(globalPoints.localSize(), globalPoints.localStart())
+    );
 
     syncTools::syncPointList
     (
@@ -2706,11 +2854,10 @@ Foam::bitSet Foam::meshRefinement::getMasterEdges
 {
     const globalIndex globalEdges(meshEdges.size());
 
-    labelList myEdges(meshEdges.size());
-    forAll(meshEdges, edgei)
-    {
-        myEdges[edgei] = globalEdges.toGlobal(edgei);
-    }
+    labelList myEdges
+    (
+        identity(globalEdges.localSize(), globalEdges.localStart())
+    );
 
     syncTools::syncEdgeList
     (
@@ -2751,24 +2898,10 @@ const
 
     {
         bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
-        label nMasterFaces = 0;
-        forAll(isMasterFace, i)
-        {
-            if (isMasterFace.test(i))
-            {
-                ++nMasterFaces;
-            }
-        }
+        label nMasterFaces = isMasterFace.count();
 
         bitSet isMeshMasterPoint(syncTools::getMasterPoints(mesh_));
-        label nMasterPoints = 0;
-        forAll(isMeshMasterPoint, i)
-        {
-            if (isMeshMasterPoint.test(i))
-            {
-                ++nMasterPoints;
-            }
-        }
+        label nMasterPoints = isMeshMasterPoint.count();
 
         Info<< msg.c_str()
             << " : cells:" << pData.nTotalCells()
@@ -2892,8 +3025,8 @@ void Foam::meshRefinement::dumpIntersections(const fileName& prefix) const
         // ~~~~~~~~~~~~~~~~~~~~~~
 
         // Get boundary face centre and level. Coupled aware.
-        labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-        pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+        labelList neiLevel(mesh_.nBoundaryFaces());
+        pointField neiCc(mesh_.nBoundaryFaces());
         calcNeighbourData(neiLevel, neiCc);
 
         labelList intersectionFaces(intersectedFaces());
@@ -3012,16 +3145,16 @@ void Foam::meshRefinement::writeLevel(const writeType flags)
 }
 
 
-Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel()
-{
-    return outputLevel_;
-}
-
-
-void Foam::meshRefinement::outputLevel(const outputType flags)
-{
-    outputLevel_ = flags;
-}
+//Foam::meshRefinement::outputType Foam::meshRefinement::outputLevel()
+//{
+//    return outputLevel_;
+//}
+//
+//
+//void Foam::meshRefinement::outputLevel(const outputType flags)
+//{
+//    outputLevel_ = flags;
+//}
 
 
 // ************************************************************************* //

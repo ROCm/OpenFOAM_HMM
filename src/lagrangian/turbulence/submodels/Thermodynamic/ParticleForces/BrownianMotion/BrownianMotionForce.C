@@ -64,11 +64,11 @@ Foam::BrownianMotionForce<CloudType>::kModel() const
             this->owner().U().group()
         );
 
-    if (obr.foundObject<turbulenceModel>(turbName))
+    const turbulenceModel* turb = obr.findObject<turbulenceModel>(turbName);
+
+    if (turb)
     {
-        const turbulenceModel& model =
-            obr.lookupObject<turbulenceModel>(turbName);
-        return model.k();
+        return turb->k();
     }
 
     FatalErrorInFunction
@@ -92,8 +92,8 @@ Foam::BrownianMotionForce<CloudType>::BrownianMotionForce
 :
     ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     rndGen_(owner.rndGen()),
-    lambda_(readScalar(this->coeffs().lookup("lambda"))),
-    turbulence_(readBool(this->coeffs().lookup("turbulence"))),
+    lambda_(this->coeffs().getScalar("lambda")),
+    turbulence_(this->coeffs().getBool("turbulence")),
     kPtr_(nullptr),
     ownK_(false)
 {}

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,17 +55,19 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
     }
 
 
-    // the region name is already in the mesh db
-    IOobjectList sprayObjs
+    // The region name is already in the mesh db
+    IOobjectList cloudObjects
     (
         mesh,
         mesh.time().timeName(),
         cloud::prefix/cloudName
     );
 
-    IOobject* positionsPtr = sprayObjs.lookup(word("positions"));
-    IOobject* coordinatesPtr = sprayObjs.lookup(word("coordinates"));
-    if (positionsPtr || coordinatesPtr)
+    if
+    (
+        cloudObjects.found("positions")
+     || cloudObjects.found("coordinates")
+    )
     {
         Cloud<passiveParticle> parcels(mesh, cloudName, false);
 

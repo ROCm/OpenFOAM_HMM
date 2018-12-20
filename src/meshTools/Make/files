@@ -56,18 +56,23 @@ cellDist/wallPoint/wallPoint.C
 
 cellFeatures/cellFeatures.C
 
-csys = coordinateSystems
+csys = coordinate/systems
 $(csys)/coordinateSystem.C
 $(csys)/coordinateSystemNew.C
+$(csys)/coordinateSystemTransform.C
 $(csys)/coordinateSystems.C
-$(csys)/cylindricalCS.C
 $(csys)/cartesianCS.C
-$(csys)/coordinateRotation/axesRotation.C
-$(csys)/coordinateRotation/coordinateRotation.C
-$(csys)/coordinateRotation/coordinateRotationNew.C
-$(csys)/coordinateRotation/EulerCoordinateRotation.C
-$(csys)/coordinateRotation/STARCDCoordinateRotation.C
-$(csys)/coordinateRotation/cylindrical.C
+$(csys)/cylindricalCS.C
+$(csys)/indirectCS.C
+
+crot = coordinate/rotation
+$(crot)/axesRotation.C
+$(crot)/axisAngleRotation.C
+$(crot)/coordinateRotation.C
+$(crot)/cylindricalRotation.C
+$(crot)/identityRotation.C
+$(crot)/EulerCoordinateRotation.C
+$(crot)/STARCDCoordinateRotation.C
 
 polyMeshZipUpCells/polyMeshZipUpCells.C
 primitiveMeshGeometry/primitiveMeshGeometry.C
@@ -129,59 +134,76 @@ searchableSurfaces/subTriSurfaceMesh/subTriSurfaceMesh.C
 searchableSurfaces/triSurfaceMesh/triSurfaceMesh.C
 
 topoSets = sets/topoSets
+$(topoSets)/cellBitSet.C
 $(topoSets)/cellSet.C
-$(topoSets)/topoSet.C
-$(topoSets)/faceSet.C
-$(topoSets)/pointSet.C
 $(topoSets)/cellZoneSet.C
+$(topoSets)/faceBitSet.C
+$(topoSets)/faceBoolSet.C
+$(topoSets)/faceSet.C
 $(topoSets)/faceZoneSet.C
+$(topoSets)/pointBitSet.C
+$(topoSets)/pointSet.C
 $(topoSets)/pointZoneSet.C
+$(topoSets)/topoBoolSet.C
+$(topoSets)/topoBitSet.C
+$(topoSets)/topoSet.C
 
 sets/topoSetSource/topoSetSource.C
 
-cellSources =  sets/cellSources
-$(cellSources)/faceToCell/faceToCell.C
-$(cellSources)/fieldToCell/fieldToCell.C
-$(cellSources)/pointToCell/pointToCell.C
-$(cellSources)/shapeToCell/shapeToCell.C
+cellSources = sets/cellSources
+$(cellSources)/topoSetCellSource/topoSetCellSource.C
+$(cellSources)/boundaryToCell/boundaryToCell.C
 $(cellSources)/boxToCell/boxToCell.C
+$(cellSources)/cellToCell/cellToCell.C
+$(cellSources)/cylinderAnnulusToCell/cylinderAnnulusToCell.C
+$(cellSources)/cylinderToCell/cylinderToCell.C
+$(cellSources)/faceToCell/faceToCell.C
+$(cellSources)/faceZoneToCell/faceZoneToCell.C
+$(cellSources)/fieldToCell/fieldToCell.C
+$(cellSources)/labelToCell/labelToCell.C
+$(cellSources)/nbrToCell/nbrToCell.C
+$(cellSources)/nearestToCell/nearestToCell.C
+$(cellSources)/patchToCell/patchToCell.C
+$(cellSources)/pointToCell/pointToCell.C
 $(cellSources)/regionToCell/regionToCell.C
 $(cellSources)/rotatedBoxToCell/rotatedBoxToCell.C
-$(cellSources)/labelToCell/labelToCell.C
-$(cellSources)/surfaceToCell/surfaceToCell.C
-$(cellSources)/cellToCell/cellToCell.C
-$(cellSources)/nearestToCell/nearestToCell.C
-$(cellSources)/nbrToCell/nbrToCell.C
-$(cellSources)/zoneToCell/zoneToCell.C
+$(cellSources)/shapeToCell/shapeToCell.C
+$(cellSources)/searchableSurfaceToCell/searchableSurfaceToCell.C
 $(cellSources)/sphereToCell/sphereToCell.C
-$(cellSources)/cylinderToCell/cylinderToCell.C
-$(cellSources)/faceZoneToCell/faceZoneToCell.C
-$(cellSources)/cylinderAnnulusToCell/cylinderAnnulusToCell.C
+$(cellSources)/surfaceToCell/surfaceToCell.C
 $(cellSources)/targetVolumeToCell/targetVolumeToCell.C
+$(cellSources)/zoneToCell/zoneToCell.C
 
 faceSources = sets/faceSources
+$(faceSources)/topoSetFaceSource/topoSetFaceSource.C
+$(faceSources)/boundaryToFace/boundaryToFace.C
+$(faceSources)/boxToFace/boxToFace.C
+$(faceSources)/cellToFace/cellToFace.C
+$(faceSources)/cylinderAnnulusToFace/cylinderAnnulusToFace.C
+$(faceSources)/cylinderToFace/cylinderToFace.C
 $(faceSources)/faceToFace/faceToFace.C
 $(faceSources)/labelToFace/labelToFace.C
-$(faceSources)/cellToFace/cellToFace.C
 $(faceSources)/normalToFace/normalToFace.C
-$(faceSources)/pointToFace/pointToFace.C
 $(faceSources)/patchToFace/patchToFace.C
-$(faceSources)/boundaryToFace/boundaryToFace.C
-$(faceSources)/zoneToFace/zoneToFace.C
-$(faceSources)/boxToFace/boxToFace.C
+$(faceSources)/pointToFace/pointToFace.C
 $(faceSources)/regionToFace/regionToFace.C
-$(faceSources)/cylinderToFace/cylinderToFace.C
-$(faceSources)/cylinderAnnulusToFace/cylinderAnnulusToFace.C
+$(faceSources)/searchableSurfaceToFace/searchableSurfaceToFace.C
+$(faceSources)/sphereToFace/sphereToFace.C
+$(faceSources)/zoneToFace/zoneToFace.C
 
 pointSources = sets/pointSources
-$(pointSources)/labelToPoint/labelToPoint.C
-$(pointSources)/pointToPoint/pointToPoint.C
-$(pointSources)/cellToPoint/cellToPoint.C
-$(pointSources)/faceToPoint/faceToPoint.C
+$(pointSources)/topoSetPointSource/topoSetPointSource.C
 $(pointSources)/boxToPoint/boxToPoint.C
+$(pointSources)/cellToPoint/cellToPoint.C
+$(pointSources)/cylinderToPoint/cylinderToPoint.C
+$(pointSources)/faceToPoint/faceToPoint.C
+$(pointSources)/labelToPoint/labelToPoint.C
+$(pointSources)/nearestToPoint/nearestToPoint.C
+$(pointSources)/pointToPoint/pointToPoint.C
+$(pointSources)/searchableSurfaceToPoint/searchableSurfaceToPoint.C
+$(pointSources)/sphereToPoint/sphereToPoint.C
 $(pointSources)/surfaceToPoint/surfaceToPoint.C
 $(pointSources)/zoneToPoint/zoneToPoint.C
-$(pointSources)/nearestToPoint/nearestToPoint.C
 
 faceZoneSources = sets/faceZoneSources
 $(faceZoneSources)/faceZoneToFaceZone/faceZoneToFaceZone.C
@@ -270,10 +292,16 @@ mappedPatches/mappedPolyPatch/mappedVariableThicknessWallPolyPatch.C
 mappedPatches/mappedPointPatch/mappedPointPatch.C
 mappedPatches/mappedPointPatch/mappedWallPointPatch.C
 
+PatchFunction1/makePatchFunction1s.C
+PatchFunction1/coordinateLabelScaling.C
+
 meshStructure/meshStructure.C
 meshStructure/topoDistanceData.C
 meshStructure/pointTopoDistanceData.C
 
+output/foamVtkIndPatchWriter.C
+output/foamVtkSurfaceWriter.C
+output/foamVtkWriteTopoSet.C
 output/foamVtkWriteFaceSet.C
 output/foamVtkWritePointSet.C
 output/foamVtkWriteCellSetFaces.C

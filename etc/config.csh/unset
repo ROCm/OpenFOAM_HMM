@@ -43,6 +43,7 @@ unsetenv WM_ARCH_OPTION
 unsetenv WM_CC
 unsetenv WM_CFLAGS
 unsetenv WM_COMPILER
+unsetenv WM_COMPILER_ARCH
 unsetenv WM_COMPILER_TYPE
 unsetenv WM_COMPILER_LIB_ARCH
 unsetenv WM_COMPILE_OPTION
@@ -59,6 +60,7 @@ unsetenv WM_OPTIONS
 unsetenv WM_OSTYPE
 unsetenv WM_PRECISION_OPTION
 unsetenv WM_PROJECT
+unsetenv WM_PROJECT_API
 unsetenv WM_PROJECT_DIR
 unsetenv WM_PROJECT_INST_DIR
 unsetenv WM_PROJECT_SITE

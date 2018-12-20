@@ -193,7 +193,7 @@ Note
 #include "meshTools.H"
 #include "OBJstream.H"
 #include "triSurfaceMesh.H"
-#include "vtkSurfaceWriter.H"
+#include "foamVtkSurfaceWriter.H"
 #include "unitConversion.H"
 #include "plane.H"
 #include "point.H"
@@ -207,16 +207,18 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Extract and write surface features to file"
+        "Extract and write surface feature lines to file.\n"
+        "Feature line extraction only valid on closed manifold surfaces."
     );
+
     argList::noParallel();
-    argList::noFunctionObjects();
+    argList::noFunctionObjects();  // Never use function objects
 
     argList::addOption
     (
         "dict",
         "file",
-        "read surfaceFeatureExtractDict from specified location"
+        "Read surfaceFeatureExtractDict from specified location"
     );
 
     #include "setRootCase.H"
@@ -239,14 +241,15 @@ int main(int argc, char *argv[])
     // Where to write VTK output files
     const fileName vtkOutputDir = runTime.constantPath()/"triSurface";
 
-    forAllConstIters(dict, iter)
+    for (const entry& dEntry : dict)
     {
-        if (!iter().isDict() || iter().keyword().isPattern())
+        if (!dEntry.isDict() || dEntry.keyword().isPattern())  // safety
         {
             continue;
         }
 
-        const dictionary& surfaceDict = iter().dict();
+        const word& dictName = dEntry.keyword();
+        const dictionary& surfaceDict = dEntry.dict();
 
         if (!surfaceDict.found("extractionMethod"))
         {
@@ -255,7 +258,6 @@ int main(int argc, char *argv[])
         }
 
         // The output name based in dictionary name (without extensions)
-        const word& dictName = iter().keyword();
         const word outputName = dictName.lessExt();
 
         autoPtr<surfaceFeaturesExtraction::method> extractor =
@@ -292,7 +294,7 @@ int main(int argc, char *argv[])
         // message.
         if (surfaceDict.found("surfaces") || !dictName.hasExt())
         {
-            loader.select(wordReList(surfaceDict.lookup("surfaces")));
+            loader.select(surfaceDict.get<wordRes>("surfaces"));
         }
         else
         {
@@ -493,7 +495,7 @@ int main(int argc, char *argv[])
 
                 Info<< "Only include feature edges that intersect the plane"
                     << " with normal " << cutPlane.normal()
-                    << " and base point " << cutPlane.refPoint() << endl;
+                    << " and origin " << cutPlane.origin() << endl;
 
                 features().subsetPlane(edgeStat, cutPlane);
             }
@@ -508,7 +510,7 @@ int main(int argc, char *argv[])
         boolList surfBaffleRegions(surf.patches().size(), false);
         if (surfaceDict.found("baffles"))
         {
-            wordReList baffleSelect(surfaceDict.lookup("baffles"));
+            wordRes baffleSelect(surfaceDict.get<wordRes>("baffles"));
 
             wordList patchNames(surf.patches().size());
             forAll(surf.patches(), patchi)
@@ -516,7 +518,8 @@ int main(int argc, char *argv[])
                 patchNames[patchi] = surf.patches()[patchi].name();
             }
 
-            labelList indices = findStrings(baffleSelect, patchNames);
+            labelList indices(baffleSelect.matching(patchNames));
+
             for (const label patchId : indices)
             {
                 surfBaffleRegions[patchId] = true;
@@ -549,7 +552,11 @@ int main(int argc, char *argv[])
 
         if (surfaceDict.isDict("addFeatures"))
         {
-            const word addFeName = surfaceDict.subDict("addFeatures")["name"];
+            const word addFeName
+            (
+                surfaceDict.subDict("addFeatures").get<word>("name")
+            );
+
             Info<< "Adding (without merging) features from " << addFeName
                 << nl << endl;
 
@@ -649,8 +656,54 @@ int main(int argc, char *argv[])
             bfeMesh.regIOobject::write();
         }
 
+
+        // Output information
+
+        const bool optCloseness =
+            surfaceDict.lookupOrDefault("closeness", false);
+
+        const bool optProximity =
+            surfaceDict.lookupOrDefault("featureProximity", false);
+
+        const bool optCurvature =
+            surfaceDict.lookupOrDefault("curvature", false);
+
+
+        // For VTK legacy format, we would need an a priori count of
+        // CellData and PointData fields.
+        // For convenience, we therefore only use the XML formats
+
+        autoPtr<vtk::surfaceWriter> vtkWriter;
+
+        if (optCloseness || optProximity || optCurvature)
+        {
+            if (writeVTK)
+            {
+                vtkWriter.reset
+                (
+                    new vtk::surfaceWriter
+                    (
+                        surf.points(),
+                        faces,
+                        (vtkOutputDir / outputName),
+                        false  // serial only
+                    )
+                );
+
+                vtkWriter->writeGeometry();
+
+                Info<< "Writing VTK to "
+                    << runTime.relativePath(vtkWriter->output()) << nl;
+            }
+        }
+        else
+        {
+            continue;  // Nothing to output
+        }
+
+
         // Option: "closeness"
-        if (surfaceDict.lookupOrDefault("closeness", false))
+        if (optCloseness)
         {
             Pair<tmp<scalarField>> tcloseness =
                 triSurfaceTools::writeCloseness
@@ -662,73 +715,20 @@ int main(int argc, char *argv[])
                     10   // externalAngleTolerance
                 );
 
-            if (writeVTK)
+            if (vtkWriter.valid())
             {
-                vtkSurfaceWriter().write
-                (
-                    vtkOutputDir,
-                    outputName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        faces
-                    ),
-                    "internalCloseness",                // fieldName
-                    tcloseness[0](),
-                    false,                              // isNodeValues
-                    true                                // verbose
-                );
-
-                vtkSurfaceWriter().write
-                (
-                    vtkOutputDir,
-                    outputName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        faces
-                    ),
-                    "externalCloseness",                // fieldName
-                    tcloseness[1](),
-                    false,                              // isNodeValues
-                    true                                // verbose
-                );
-            }
-        }
-
-        // Option: "curvature"
-        if (surfaceDict.lookupOrDefault("curvature", false))
-        {
-            tmp<scalarField> tcurvatureField =
-                triSurfaceTools::writeCurvature
-                (
-                    runTime,
-                    outputName,
-                    surf
-                );
-
-            if (writeVTK)
-            {
-                vtkSurfaceWriter().write
-                (
-                    vtkOutputDir,
-                    outputName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        faces
-                    ),
-                    "curvature",                        // fieldName
-                    tcurvatureField(),
-                    true,                               // isNodeValues
-                    true                                // verbose
-                );
+                vtkWriter->beginCellData();
+                vtkWriter->write("internalCloseness", tcloseness[0]());
+                vtkWriter->write("externalCloseness", tcloseness[1]());
             }
         }
 
         // Option: "featureProximity"
-        if (surfaceDict.lookupOrDefault("featureProximity", false))
+        if (optCloseness)
         {
+            const scalar maxProximity =
+                surfaceDict.lookupOrDefault<scalar>("maxFeatureProximity", 1);
+
             tmp<scalarField> tproximity =
                 edgeMeshTools::writeFeatureProximity
                 (
@@ -736,25 +736,31 @@ int main(int argc, char *argv[])
                     outputName,
                     feMesh,
                     surf,
-                    readScalar(surfaceDict.lookup("maxFeatureProximity"))
+                    maxProximity
                 );
 
-            if (writeVTK)
+            if (vtkWriter.valid())
             {
-                vtkSurfaceWriter().write
+                vtkWriter->beginCellData();
+                vtkWriter->write("featureProximity", tproximity());
+            }
+        }
+
+        // Option: "curvature"
+        if (optCurvature)
+        {
+            tmp<scalarField> tcurvature =
+                triSurfaceTools::writeCurvature
                 (
-                    vtkOutputDir,
+                    runTime,
                     outputName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        faces
-                    ),
-                    "featureProximity",                 // fieldName
-                    tproximity(),
-                    false,                              // isNodeValues
-                    true                                // verbose
+                    surf
                 );
+
+            if (vtkWriter.valid())
+            {
+                vtkWriter->beginPointData();
+                vtkWriter->write("curvature", tcurvature());
             }
         }
 

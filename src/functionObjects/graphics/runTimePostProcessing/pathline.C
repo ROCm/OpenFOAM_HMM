@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,12 +55,12 @@ const Foam::Enum
     Foam::functionObjects::runTimePostPro::pathline::representationType
 >
 Foam::functionObjects::runTimePostPro::pathline::representationTypeNames
-{
+({
     { representationType::rtNone, "none" },
     { representationType::rtLine, "line" },
     { representationType::rtTube, "tube" },
     { representationType::rtVector, "vector" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -78,7 +78,7 @@ void Foam::functionObjects::runTimePostPro::pathline::addLines
     actor->GetProperty()->SetColor(colour[0], colour[1], colour[2]);
 
     vtkPolyDataMapper* mapper =
-            vtkPolyDataMapper::SafeDownCast(actor->GetMapper());
+        vtkPolyDataMapper::SafeDownCast(actor->GetMapper());
 
     switch (representation_)
     {
@@ -123,20 +123,20 @@ Foam::functionObjects::runTimePostPro::pathline::pathline
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours
+    const HashPtrTable<Function1<vector>>& colours
 )
 :
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.lookup("representation", dict)
+        representationTypeNames.get("representation", dict)
     ),
     tubeRadius_(0.0),
     lineColour_(nullptr)
 {
     if (dict.found("lineColour"))
     {
-        lineColour_.reset(Function1<vector>::New("lineColour", dict).ptr());
+        lineColour_.reset(Function1<vector>::New("lineColour", dict));
     }
     else
     {
@@ -155,7 +155,7 @@ Foam::functionObjects::runTimePostPro::pathline::pathline
         }
         case rtTube:
         {
-            dict.lookup("tubeRadius") >> tubeRadius_;
+            dict.readEntry("tubeRadius", tubeRadius_);
             break;
         }
         case rtVector:
@@ -174,7 +174,7 @@ Foam::functionObjects::runTimePostPro::pathline::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,
-    const HashPtrTable<Function1<vector>, word>& colours,
+    const HashPtrTable<Function1<vector>>& colours,
     const word& pathlineType
 )
 {

@@ -26,19 +26,18 @@ License
 #include "bodyCentredCubic.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(bodyCentredCubic, 0);
 addToRunTimeSelectionTable(initialPointsMethod, bodyCentredCubic, dictionary);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-bodyCentredCubic::bodyCentredCubic
+Foam::bodyCentredCubic::bodyCentredCubic
 (
     const dictionary& initialPointsDict,
     const Time& runTime,
@@ -58,18 +57,18 @@ bodyCentredCubic::bodyCentredCubic
         cellShapeControls,
         decomposition
     ),
-    initialCellSize_(readScalar(detailsDict().lookup("initialCellSize"))),
-    randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
+    initialCellSize_(detailsDict().get<scalar>("initialCellSize")),
+    randomiseInitialGrid_(detailsDict().get<Switch>("randomiseInitialGrid")),
     randomPerturbationCoeff_
     (
-        readScalar(detailsDict().lookup("randomPerturbationCoeff"))
+        detailsDict().get<scalar>("randomPerturbationCoeff")
     )
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-List<Vb::Point> bodyCentredCubic::initialPoints() const
+Foam::List<Vb::Point> Foam::bodyCentredCubic::initialPoints() const
 {
     boundBox bb;
 
@@ -195,9 +194,5 @@ List<Vb::Point> bodyCentredCubic::initialPoints() const
     return initialPoints.shrink();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

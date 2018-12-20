@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
         }
 
         {
-            label start = args.read<label>(argI);
-            label size  = args.read<label>(argI+1);
+            label start = args.get<label>(argI);
+            label size  = args.get<label>(argI+1);
             ++argI;
 
             range.reset(start, size);

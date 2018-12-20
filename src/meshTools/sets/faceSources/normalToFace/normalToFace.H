@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,14 @@ Class
     Foam::normalToFace
 
 Description
-    A topoSetSource to select faces based on normal.
+    A topoSetFaceSource to select faces based on normal.
+
+    \heading Dictionary parameters
+    \table
+        Property    | Description                       | Required  | Default
+        normal      | The normal for selecting faces    | yes   |
+        cos         | Tolerance angle (range -1, +1)    | yes   |
+    \endtable
 
 SourceFiles
     normalToFace.C
@@ -35,7 +42,7 @@ SourceFiles
 #ifndef normalToFace_H
 #define normalToFace_H
 
-#include "topoSetSource.H"
+#include "topoSetFaceSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,7 +55,7 @@ namespace Foam
 
 class normalToFace
 :
-    public topoSetSource
+    public topoSetFaceSource
 {
 
 private:
@@ -92,20 +99,15 @@ public:
 
 
     //- Destructor
-    virtual ~normalToFace();
+    virtual ~normalToFace() = default;
 
 
     // Member Functions
 
-        virtual sourceType setType() const
-        {
-            return FACESETSOURCE;
-        }
-
         virtual void applyToSet
         (
             const topoSetSource::setAction action,
-            topoSet&
+            topoSet& set
         ) const;
 
 };

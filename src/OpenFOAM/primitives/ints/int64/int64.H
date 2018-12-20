@@ -55,12 +55,22 @@ class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Return a word representation of an int64
+//- A word representation of int64 value
 inline word name(const int64_t val)
 {
-    // No stripping required
-    return word(std::to_string(val), false);
+    return word(std::to_string(val), false); // Needs no stripping
 }
+
+
+//- A word representation of int64 value
+template<>
+struct nameOp<int64_t>
+{
+    inline word operator()(const int64_t val) const
+    {
+        return word(std::to_string(val), false); // Needs no stripping
+    }
+};
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //

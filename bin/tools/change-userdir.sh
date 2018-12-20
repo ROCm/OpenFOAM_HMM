@@ -69,8 +69,8 @@ then
         -plat*) suffix="platforms/$WM_OPTIONS" ;;
     esac
     case "$prefix" in
-        -home) prefix="$HOME/OpenFOAM/$USER-${WM_PROJECT_VERSION:-unknown}" ;;
-        -none) unset prefix ;;
+        -home)  prefix="$HOME/OpenFOAM/$USER-${WM_PROJECT_VERSION:-unknown}" ;;
+        -none)  unset prefix ;;
     esac
 
     if [ -n "$prefix" ]

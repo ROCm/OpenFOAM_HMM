@@ -251,7 +251,7 @@ void Foam::localPointRegion::calcPointRegions
     boolList& candidatePoint
 )
 {
-    label nBnd = mesh.nFaces()-mesh.nInternalFaces();
+    const label nBnd = mesh.nBoundaryFaces();
     const labelList& faceOwner = mesh.faceOwner();
     const labelList& faceNeighbour = mesh.faceNeighbour();
 
@@ -346,7 +346,7 @@ void Foam::localPointRegion::calcPointRegions
         // Transport minimum from face across cell
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        Map<label> minPointValue(100);
+        Map<label> minPointValue(128);
         label nChanged = 0;
         forAllConstIter(Map<label>, candidateCell, iter)
         {
@@ -419,7 +419,7 @@ void Foam::localPointRegion::calcPointRegions
         SubList<face> l
         (
             minRegion,
-            mesh.nFaces()-mesh.nInternalFaces(),
+            mesh.nBoundaryFaces(),
             mesh.nInternalFaces()
         );
         syncTools::syncBoundaryFaceList
@@ -574,7 +574,8 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
                 {
                     FatalErrorInFunction
                         << "Face:" << bFacei + mesh.nInternalFaces()
-                        << " has local points:" << f
+                        << " has local points:" << f << " at:"
+                        << UIndirectList<point>(allPatch.localPoints(), f)
                         << " which are in same order as face:"
                         << otherFacei + mesh.nInternalFaces()
                         << " with local points:" << otherF
@@ -597,7 +598,8 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
                             << "This means that three or more faces share"
                             << " the same points and this is illegal." << nl
                             << "Face:" << meshFace0
-                            << " with local points:" << f
+                            << " with local points:" << f << " at:"
+                            << UIndirectList<point>(allPatch.localPoints(), f)
                             << " which are in same order as face:"
                             << meshFace1
                             << " with local points:" << otherF
@@ -626,7 +628,7 @@ Foam::List<Foam::labelPair> Foam::localPointRegion::findDuplicateFacePairs
     // Faces to test: all boundary faces
     labelList testFaces
     (
-        identity(mesh.nFaces()-mesh.nInternalFaces(), mesh.nInternalFaces())
+        identity(mesh.nBoundaryFaces(), mesh.nInternalFaces())
     );
 
     // Find corresponding baffle face (or -1)

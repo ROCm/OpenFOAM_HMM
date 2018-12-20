@@ -26,7 +26,7 @@ License
 #include "waveModel.H"
 #include "fvMesh.H"
 #include "polyPatch.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 #include "volFields.H"
 #include "fvPatchFields.H"
 
@@ -53,12 +53,11 @@ Foam::word Foam::waveModel::modelName(const word& patchName)
 
 void Foam::waveModel::initialiseGeometry()
 {
-    // Determine local patch co-ordinate system given by:
+    // Determine local patch coordinate system given by:
     // - X: streamwise: patch normal
     // - Y: spanwise: Z^X
     // - Z: up: (negative) gravity direction
-    vector x(-gAverage(patch_.faceAreas()));
-    x /= mag(x) + ROOTVSMALL;
+    vector x = normalised(-gAverage(patch_.faceAreas()));
     vector z = -g_/mag(g_);
     vector y = z^x;
 
@@ -126,8 +125,8 @@ void Foam::waveModel::initialiseGeometry()
 Foam::tmp<Foam::scalarField> Foam::waveModel::waterLevel() const
 {
     // Note: initialising as initial depth
-    tmp<scalarField> tlevel(new scalarField(nPaddle_, initialDepth_));
-    scalarField& level = tlevel.ref();
+    auto tlevel = tmp<scalarField>::New(nPaddle_, initialDepth_);
+    auto& level = tlevel.ref();
 
     const volScalarField& alpha =
         mesh_.lookupObject<volScalarField>(alphaName_);
@@ -262,7 +261,7 @@ Foam::waveModel::waveModel
     ),
     mesh_(mesh),
     patch_(patch),
-    g_(mesh.lookupObject<uniformDimensionedVectorField>("g").value()),
+    g_(meshObjects::gravity::New(mesh.time()).value()),
     UName_("U"),
     alphaName_("alpha"),
     Rgl_(tensor::I),
@@ -288,12 +287,6 @@ Foam::waveModel::waveModel
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::waveModel::~waveModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::waveModel::readDict(const dictionary& overrideDict)
@@ -309,7 +302,7 @@ bool Foam::waveModel::readDict(const dictionary& overrideDict)
     readIfPresent("U", UName_);
     readIfPresent("alpha", alphaName_);
 
-    lookup("nPaddle") >> nPaddle_;
+    readEntry("nPaddle", nPaddle_);
     if (nPaddle_ < 1)
     {
         FatalIOErrorInFunction(*this)
@@ -403,7 +396,7 @@ void Foam::waveModel::correct(const scalar t)
             }
         }
 
-        // Transform velocity into global co-ordinate system
+        // Transform velocity into global coordinate system
         U_ = Rlg_ & U_;
 
         currTimeIndex_ = mesh_.time().timeIndex();

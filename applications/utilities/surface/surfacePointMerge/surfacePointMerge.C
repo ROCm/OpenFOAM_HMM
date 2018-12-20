@@ -51,24 +51,24 @@ int main(int argc, char *argv[])
         "Merge points on surface if they are within absolute distance [m]."
     );
     argList::noParallel();
-    argList::addArgument("surfaceFile");
-    argList::addArgument("merge distance");
-    argList::addArgument("output surfaceFile");
+    argList::addArgument("input", "The input surface file");
+    argList::addArgument("distance", "The merge distance");
+    argList::addArgument("output", "The output surface file");
 
     argList::addOption
     (
         "scale",
         "factor",
-        "input geometry scaling factor"
+        "Input geometry scaling factor"
     );
 
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const scalar   mergeTol = args.read<scalar>(2);
+    const scalar   mergeTol = args.get<scalar>(2);
     const fileName outFileName = args[3];
 
-    const scalar scaling = args.lookupOrDefault<scalar>("scale", -1);
+    const scalar scaling = args.opt<scalar>("scale", -1);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl
         << "Merging points within " << mergeTol << " metre." << nl;

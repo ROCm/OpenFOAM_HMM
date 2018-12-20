@@ -31,19 +31,81 @@ Description
 
 #include "argList.H"
 #include "labelledTri.H"
+#include "pointList.H"
+#include "ListOps.H"
 
 using namespace Foam;
+
+
+template<class Face>
+void faceInfo(const Face& f, const UList<point>& points)
+{
+    Info<< f
+        << " points:" << f.points(points)
+        << " normal:" << f.unitNormal(points);
+}
+
+
+template<class Face>
+void testSign
+(
+    const Face& f,
+    const UList<point>& points,
+    const UList<point>& testPoints
+)
+{
+    for (const point& p : testPoints)
+    {
+        Info<< "  point:" << p << " sign=" << f.sign(p, points) << nl;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
 {
+    pointList points1
+    ({
+        { 0, 0, 0},
+        { -1, -1, 1},
+        { 1, -1, -1},
+        { 1, 1, -1},
+        { -1, 1, 1}
+    });
+
+    pointList points2 = ListOps::create<point>
+    (
+        points1,
+        [](const point& p){ return point(p.x(), p.y(), -p.z()); }
+    );
+
+    pointList testPoints
+    ({
+        { -2, -2, -2},
+        { -2, -2, 2},
+        { 0, 0, 0},
+        { 2, 2, -2},
+        { 2, 2, 2}
+    });
+
     face f1{ 1, 2, 3, 4 };
-    Info<< "face:" << f1 << nl;
+    Info<< "face:"; faceInfo(f1, points1); Info << nl;
+    testSign(f1, points1, testPoints);
+
+    Info<< "face:"; faceInfo(f1, points2); Info << nl;
+    testSign(f1, points2, testPoints);
+    Info<< nl;
 
     triFace t1{ 1, 2, 3 };
-    Info<< "triFace:" << t1 << nl;
+    Info<< "triFace:"; faceInfo(t1, points1); Info << nl;
+    testSign(t1, points1, testPoints);
+
+    Info<< "triFace:"; faceInfo(t1, points2); Info << nl;
+    testSign(t1, points2, testPoints);
+    Info<< nl;
+
 
     f1 = t1;
     Info<< "face:" << f1 << nl;

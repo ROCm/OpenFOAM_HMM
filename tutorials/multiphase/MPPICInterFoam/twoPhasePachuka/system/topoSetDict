@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,10 +22,7 @@ actions
         type    faceSet;
         action  new;
         source  boxToFace;
-        sourceInfo
-        {
-            box (-0.01 -0.01 -0.03)(0.01 0.01 0.001);
-        }
+        box     (-0.01 -0.01 -0.03)(0.01 0.01 0.001);
     }
 
     {
@@ -33,10 +30,7 @@ actions
         type    faceZoneSet;
         action  new;
         source  setToFaceZone;
-        sourceInfo
-        {
-            faceSet    inlet;
-        }
+        faceSet inlet;
     }
 );
 

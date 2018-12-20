@@ -33,6 +33,9 @@ Description
 #include "STLReader.H"
 #include "OSspecific.H"
 
+// Ragel switch/case logic may have several implicit fallthroughs
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+
 // https://en.wikipedia.org/wiki/STL_%28file_format%29#ASCII_STL
 //
 // Format

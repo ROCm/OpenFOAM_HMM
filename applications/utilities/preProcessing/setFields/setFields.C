@@ -28,7 +28,7 @@ Group
     grpPreProcessingUtilities
 
 Description
-    Set values on a selected set of cells/patchfaces through a dictionary.
+    Set values on a selected set of cells/patch-faces via a dictionary.
 
 \*---------------------------------------------------------------------------*/
 
@@ -157,6 +157,12 @@ public:
             selectedCells_(selectedCells)
         {}
 
+        iNew(const fvMesh& mesh, labelList&& selectedCells)
+        :
+            mesh_(mesh),
+            selectedCells_(std::move(selectedCells))
+        {}
+
         autoPtr<setCellField> operator()(Istream& fieldValues) const
         {
             word fieldType(fieldValues);
@@ -239,7 +245,7 @@ bool setFaceFieldType
         const Type& value = pTraits<Type>(fieldValueStream);
 
         // Create flat list of selected faces and their value.
-        Field<Type> allBoundaryValues(mesh.nFaces()-mesh.nInternalFaces());
+        Field<Type> allBoundaryValues(mesh.nBoundaryFaces());
         forAll(field.boundaryField(), patchi)
         {
             SubField<Type>
@@ -348,6 +354,12 @@ public:
             selectedFaces_(selectedFaces)
         {}
 
+        iNew(const fvMesh& mesh, labelList&& selectedFaces)
+        :
+            mesh_(mesh),
+            selectedFaces_(std::move(selectedFaces))
+        {}
+
         autoPtr<setFaceField> operator()(Istream& fieldValues) const
         {
             word fieldType(fieldValues);
@@ -384,7 +396,13 @@ public:
 
 int main(int argc, char *argv[])
 {
-    #include "addDictOption.H"
+    argList::addNote
+    (
+        "Set values on a selected set of cells/patch-faces via a dictionary"
+    );
+
+    argList::addOption("dict", "file", "Use alternative setFieldsDict");
+
     #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTime.H"
@@ -438,7 +456,7 @@ int main(int argc, char *argv[])
             PtrList<setCellField> fieldValues
             (
                 region.dict().lookup("fieldValues"),
-                setCellField::iNew(mesh, selectedCellSet.toc())
+                setCellField::iNew(mesh, selectedCellSet.sortedToc())
             );
         }
         else if (source().setType() == topoSetSource::FACESETSOURCE)
@@ -447,7 +465,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 "faceSet",
-                (mesh.nFaces()-mesh.nInternalFaces())/10+1
+                mesh.nBoundaryFaces()/10+1
             );
 
             source->applyToSet
@@ -459,7 +477,7 @@ int main(int argc, char *argv[])
             PtrList<setFaceField> fieldValues
             (
                 region.dict().lookup("fieldValues"),
-                setFaceField::iNew(mesh, selectedFaceSet.toc())
+                setFaceField::iNew(mesh, selectedFaceSet.sortedToc())
             );
         }
     }

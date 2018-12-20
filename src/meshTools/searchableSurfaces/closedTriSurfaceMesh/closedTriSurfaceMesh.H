@@ -52,7 +52,8 @@ class closedTriSurfaceMesh
 :
     public triSurfaceMesh
 {
-private:
+
+    // Private Member Functions
 
         //- No copy construct
         closedTriSurfaceMesh(const closedTriSurfaceMesh&) = delete;
@@ -76,7 +77,7 @@ public:
         closedTriSurfaceMesh(const IOobject& io);
 
         //- Construct from IO and dictionary (used by searchableSurface).
-        //  Dictionary may contain a 'scale' entry (eg, 0.001: mm -> m)
+        //  Dictionary may contain a 'scale' entry (eg, 0.001: mm to m)
         closedTriSurfaceMesh
         (
             const IOobject& io,
@@ -84,9 +85,9 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~closedTriSurfaceMesh() = default;
 
-        virtual ~closedTriSurfaceMesh();
 
     // Member Functions
 

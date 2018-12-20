@@ -61,7 +61,7 @@ bool Foam::sampledThresholdCellFaces::updateGeometry() const
 
     // Use volField from database, or try to read it in
 
-    const auto* cellFldPtr = fvm.lookupObjectPtr<volScalarField>(fieldName_);
+    const auto* cellFldPtr = fvm.findObject<volScalarField>(fieldName_);
 
     if (debug)
     {
@@ -147,13 +147,12 @@ Foam::sampledThresholdCellFaces::sampledThresholdCellFaces
 )
 :
     sampledSurface(name, mesh, dict),
-    fieldName_(dict.lookup("field")),
+    fieldName_(dict.get<word>("field")),
     lowerThreshold_(dict.lookupOrDefault<scalar>("lowerLimit", -VGREAT)),
     upperThreshold_(dict.lookupOrDefault<scalar>("upperLimit", VGREAT)),
-    zoneKey_(keyType::null),
     triangulate_(dict.lookupOrDefault("triangulate", false)),
     prevTimeIndex_(-1),
-    meshCells_(0)
+    meshCells_()
 {
     if (!dict.found("lowerLimit") && !dict.found("upperLimit"))
     {

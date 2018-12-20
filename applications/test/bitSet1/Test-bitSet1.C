@@ -25,7 +25,7 @@ Application
     Test-bitSet1
 
 Description
-    Test bitSet functionality
+    Basic bitSet characteristics
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,8 +64,6 @@ inline Ostream& report
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Main program:
-
 int main(int argc, char *argv[])
 {
     bitSet set1(100);
@@ -74,6 +72,23 @@ int main(int argc, char *argv[])
 
     bitSet set2(100, { -1, 10, 25, 45});
     Info<<"bitSet(label, labels): "; report(set2, true);
+
+    bitSet set2b(set2, labelRange(15, 30));
+    Info<<"bitSet slice(15,30) :"; report(set2b, true);
+
+    {
+        FixedList<label, 4> locs({ -1, 3, 4, 12});
+
+        bitSet set3a(20, locs);
+        Info<<"bitSet(FixedList<label>): "; report(set3a, true);
+
+        bitSet set3b(locs);
+        Info<<"bitSet(FixedList<label>): "; report(set3b, true);
+
+        set3b.unset(FixedList<label, 3>({ 1, 2, 3}));
+
+        Info<<"bitSet unset(FixedList<label>): "; report(set3b, true);
+    }
 
     Info<< "End\n" << endl;
 

@@ -16,31 +16,28 @@
 # Description
 #     Locate user/group/other file as per '#includeEtc'.
 #
-#     The -mode option can be used to allow chaining from personal settings
-#     to site-wide settings.
-#
-#     For example, within the user ~/.OpenFOAM/<VER>/config.sh/compiler:
-#     \code
-#        eval $(foamEtcFile -sh -mode=go config.sh/compiler)
-#     \endcode
-#
-#     The -mode option is similarly used within etc/{bashrc,cshrc} to ensure
+#     The -mode option is used within etc/{bashrc,cshrc} to ensure
 #     that system prefs are respected:
 #     \code
 #        eval $(foamEtcFile -sh -mode=o  prefs.sh)
 #        eval $(foamEtcFile -sh -mode=ug prefs.sh)
 #     \endcode
 #
+#     The -mode option can also be used when chaining settings.
+#     For example, in the user ~/.OpenFOAM/config.sh/compiler
+#     \code
+#        eval $(foamEtcFile -sh -mode=go config.sh/compiler)
+#     \endcode
+#
 # Environment
-#     - WM_PROJECT:         (unset defaults to OpenFOAM)
-#     - WM_PROJECT_SITE:    (unset defaults to PREFIX/site)
-#     - WM_PROJECT_VERSION: (unset defaults to detect from path)
+#     - WM_PROJECT_SITE         (unset defaults to PROJECT/site)
 #
 # Note
-#     This script must exist in one of these locations:
-#     - $WM_PROJECT_INST_DIR/OpenFOAM-<VERSION>/bin
-#     - $WM_PROJECT_INST_DIR/openfoam-<VERSION>/bin
-#     - $WM_PROJECT_INST_DIR/openfoam<VERSION>/bin  (debian version)
+#     This script must exist in the project 'bin' directory
+#
+#     The '-show-api' and '-show-patch' options implement partial logic
+#     from wmake/wmakeBuildInfo.
+#     Make sure that any changes there are also reflected here.
 #
 #-------------------------------------------------------------------------------
 printHelp() {
@@ -54,8 +51,6 @@ options:
   -list (-l)        List directories or files to be checked
   -list-test        List (existing) directories or files to be checked
   -mode=MODE        Any combination of u(user), g(group), o(other)
-  -prefix=DIR       Specify an alternative installation prefix
-  -version=VER      Specify alternative OpenFOAM version (eg, 3.0, 1612, ...)
   -csh              Produce 'source FILE' output for a csh eval
   -sh               Produce '. FILE' output for a sh eval
   -csh-verbose      As per -csh, with additional verbosity
@@ -63,6 +58,9 @@ options:
   -config           Add config directory prefix for shell type:
                         with -csh* for a config.csh/ prefix
                         with -sh*  for a config.sh/ prefix
+  -show-api         Print api value from wmake/rules, or meta-info and exit
+  -show-patch       Print patch value from meta-info and exit
+  -with-api=NUM     Specify alternative api value to search with
   -quiet (-q)       Suppress all normal output
   -silent (-s)      Suppress stderr, except -csh-verbose, -sh-verbose output
   -help             Print the usage
@@ -72,8 +70,8 @@ Locate user/group/other file as per '#includeEtc'
 Do not group single character options.
 Equivalent options:
   |  -mode=MODE     |  -mode MODE     | -m MODE
-  |  -prefix=DIR    |  -prefix DIR    | -p DIR
-  |  -version=VER   |  -version VER   | -v VER
+  |  -prefix=DIR    |  -prefix DIR    | -p DIR   [obsolete 1812]
+  |  -version=VER   |  -version VER   | -v VER   [obsolete 1812]
 
 Exit status
     0  when the file is found. Print resolved path to stdout.
@@ -100,93 +98,71 @@ die()
 }
 
 #-------------------------------------------------------------------------------
-binDir="${0%/*}"                # The bin dir
-projectDir="${binDir%/bin}"     # The project dir
-prefixDir="${projectDir%/*}"    # The prefix dir (same as $WM_PROJECT_INST_DIR)
+binDir="${0%/*}"                                    # The bin dir
+projectDir="$(\cd $(dirname $binDir) && \pwd -L)"   # Project dir
 
-# Could not resolve projectDir, prefixDir? (eg, called as ./bin/foamEtcFile)
-if [ "$prefixDir" = "$projectDir" ]
-then
-    binDir="$(cd $binDir && pwd -L)"
-    projectDir="${binDir%/bin}"
-    prefixDir="${projectDir%/*}"
-fi
-projectDirName="${projectDir##*/}"      # The project directory name
-
-projectVersion="$WM_PROJECT_VERSION"    # Empty? - will be treated later
-userDir="$HOME/.OpenFOAM"               # Hard-coded as per foamVersion.H
+userDir="$HOME/.OpenFOAM"                           # As per foamVersion.H
+groupDir="${WM_PROJECT_SITE:-$projectDir/site}"     # As per foamVersion.H
 
 #-------------------------------------------------------------------------------
 
-# Guess project version or simply get the stem part of the projectDirName.
-# Handle standard and debian naming conventions.
+# The API locations. See wmake/wmakeBuildInfo
+rulesFile="$projectDir/wmake/rules/General/general"
+metaInfoDir="$projectDir/META-INFO"
+
+# Get api from rules/General/general
 #
-# - projectVersion: update unless already set
+# Failure modes:
+# - No api information (can't find file etc).
+#   -> Fatal for building, but could be OK for a stripped down version
 #
-# Helper variables:
-# - dirBase (for reassembling name) == projectDirName without the version
-# - versionNum (debian packaging)
-unset dirBase versionNum
-guessVersion()
+# Fallback. Get from api-info
+#
+getApi()
 {
-    local version
+    local value
 
-    case "$projectDirName" in
-    (OpenFOAM-* | openfoam-*)
-        # Standard naming: OpenFOAM-<VERSION> or openfoam-<VERSION>
-        dirBase="${projectDirName%%-*}-"
-        version="${projectDirName#*-}"
-        version="${version%%*-}" # Extra safety, eg openfoam-version-packager
-        ;;
-
-    (openfoam[0-9]*)
-        # Debian naming: openfoam<VERSION>
-        dirBase="openfoam"
-        version="${projectDirName#openfoam}"
-        versionNum="$version"
-
-        # Convert digits version number to decimal delineated
-        case "${#versionNum}" in (2|3|4)
-            version=$(echo "$versionNum" | sed -e 's@\([0-9]\)@\1.@g')
-            version="${version%.}"
-            ;;
-        esac
-
-        # Ignore special treatment if no decimals were inserted.
-        [ "${#version}" -gt "${#versionNum}" ] || unset versionNum
-        ;;
-
-    (*)
-        die "unknown/unsupported naming convention for '$projectDirName'"
-        ;;
-    esac
-
-    # Set projectVersion if required
-    : ${projectVersion:=$version}
-}
-
-
-# Set projectVersion and update versionNum, projectDirName accordingly
-setVersion()
-{
-    projectVersion="$1"
-
-    # Need dirBase when reassembling projectDirName
-    [ -n "$dirBase" ] || guessVersion
-
-    # Debian: update x.y.z -> xyz version
-    if [ -n "$versionNum" ]
+    value="$(sed -ne '/^ *#/!{ /WM_VERSION.*OPENFOAM=/{ s@^.*OPENFOAM= *\([0-9][0-9]*\).*@\1@p; q }}' $rulesFile 2>/dev/null)"
+    if [ -z "$value" ] && [ -f "$metaInfoDir/api-info" ]
     then
-        versionNum=$(echo "$projectVersion" | sed -e 's@\.@@g')
+        # Fallback. Get from api-info
+        value="$(sed -ne 's@^ *api *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/api-info 2>/dev/null)"
     fi
 
-    projectDirName="$dirBase${versionNum:-$projectVersion}"
+    if [ -n "$value" ]
+    then
+        echo "$value"
+    else
+        return 1
+    fi
 }
 
 
+# Get patch from meta-info / api-info
+#
+# Failure modes:
+# - No patch information (can't find file etc).
+#
+getPatchLevel()
+{
+    local value
+
+    # Fallback. Get from api-info
+    value="$(sed -ne 's@^ *patch *= *\([0-9][0-9]*\).*@\1@p' $metaInfoDir/api-info 2>/dev/null)"
+
+    if [ -n "$value" ]
+    then
+        echo "$value"
+    else
+        return 1
+    fi
+}
+
+
+#-------------------------------------------------------------------------------
 optMode=ugo         # Default mode is always 'ugo'
 unset shellOutput verboseOutput
-unset optAll optConfig optList optVersion
+unset optAll optConfig optList projectApi
 
 # Parse options
 while [ "$#" -gt 0 ]
@@ -194,6 +170,19 @@ do
     case "$1" in
     -h | -help*)
         printHelp
+        ;;
+    -show-api)
+        # Show API and exit
+        getApi
+        exit $?
+        ;;
+    -show-patch)
+        # Show patch level and exit
+        getPatchLevel
+        exit $?
+        ;;
+    -with-api=*)
+        projectApi="${1#*=}"
         ;;
     -a | -all)
         optAll=true
@@ -216,32 +205,20 @@ do
     -config)
         optConfig=true
         ;;
-    -mode=[ugo]*)
+    -mode=[ugoa]*)
         optMode="${1#*=}"
-        ;;
-    -prefix=/*)
-        prefixDir="${1#*=}"
-        prefixDir="${prefixDir%/}"
-        ;;
-    -version=*)
-        optVersion="${1#*=}"
         ;;
     -m | -mode)
         optMode="$2"
         shift
         # Sanity check. Handles missing argument too.
         case "$optMode" in
-        ([ugo]*)
+        ([ugoa]*)
             ;;
         (*)
             die "invalid mode '$optMode'"
             ;;
         esac
-        ;;
-    -p | -prefix)
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        prefixDir="${2%/}"
-        shift
         ;;
     -q | -quiet)
         optQuiet=true
@@ -249,11 +226,17 @@ do
     -s | -silent)
         optSilent=true
         ;;
-    -v | -version)
+
+    -prefix=* | -version=*)
+        echo "ignored defunct option '${1%%=*}'" 1>&2
+        ;;
+    -p | -prefix | -v | -version)
+        # Ignored, but still need to check/discard its argument
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        optVersion="$2"
+        echo "ignored defunct option '$1'" 1>&2
         shift
         ;;
+
     --)
         shift
         break
@@ -269,6 +252,10 @@ do
 done
 
 #-------------------------------------------------------------------------------
+
+# Establish the API value
+[ -n "$projectApi" ] || projectApi=$(getApi)
+
 
 # Split arguments into filename (for searching) and trailing bits for shell eval
 # Silently remove leading ~OpenFOAM/ (as per Foam::findEtcFile)
@@ -294,42 +281,26 @@ then
 fi
 
 
-# Get version information
-if [ -n "$optVersion" ]
-then
-    setVersion $optVersion
-elif [ -z "$projectVersion" ]
-then
-    guessVersion
-fi
-
-# Updates:
-# - projectDir  for changes via -prefix or -version
-# - groupDir    for changes via -prefix
-projectDir="$prefixDir/$projectDirName"
-groupDir="${WM_PROJECT_SITE:-$prefixDir/site}"
-
-
 # Debugging:
 # echo "Installed locations:" 1>&2
-# for i in projectDir prefixDir projectDirName projectVersion
+# for i in projectDir
 # do
 #     eval echo "$i=\$$i" 1>&2
 # done
 
 # Define the various places to be searched:
 unset dirList
-case "$optMode" in (*u*) # (U)ser
-    dirList="$dirList $userDir/$projectVersion $userDir"
+case "$optMode" in (*[au]*) # (A)ll or (U)ser
+    dirList="$dirList $userDir/$projectApi $userDir"
     ;;
 esac
 
-case "$optMode" in (*g*) # (G)roup == site
-    dirList="$dirList $groupDir/$projectVersion $groupDir"
+case "$optMode" in (*[ag]*) # (A)ll or (G)roup == site
+    dirList="$dirList $groupDir/$projectApi/etc $groupDir/etc"
     ;;
 esac
 
-case "$optMode" in (*o*) # (O)ther == shipped
+case "$optMode" in (*[ao]*) # (A)ll or (O)ther == shipped
     dirList="$dirList $projectDir/etc"
     ;;
 esac

@@ -31,7 +31,7 @@ Group
     grpMultiphaseSolvers
 
 Description
-    Solver derived from interFoam for 2 incompressible, isothermal immiscible
+    Solver derived from interFoam for two incompressible, isothermal immiscible
     fluids using the isoAdvector phase-fraction based interface capturing
     approach, with optional mesh motion and mesh topology changes including
     adaptive re-meshing.
@@ -66,10 +66,19 @@ Description
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Solver for two incompressible, isothermal immiscible fluids"
+        " using isoAdvector phase-fraction based interface capturing.\n"
+        "With optional mesh motion and mesh topology changes including"
+        " adaptive re-meshing.\n"
+        "The solver is derived from interFoam"
+    );
+
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCase.H"
+    #include "setRootCaseLists.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
@@ -93,7 +102,7 @@ int main(int argc, char *argv[])
         #include "alphaCourantNo.H"
         #include "setDeltaT.H"
 
-        runTime++;
+        ++runTime;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 

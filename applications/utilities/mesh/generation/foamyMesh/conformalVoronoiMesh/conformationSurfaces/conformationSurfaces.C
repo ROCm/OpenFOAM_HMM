@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(conformationSurfaces, 0);
+    defineTypeNameAndDebug(conformationSurfaces, 0);
 }
 
 
@@ -71,8 +71,7 @@ void Foam::conformationSurfaces::hasBoundedVolume
 
             referenceVolumeTypes[s] = vTypes[0];
 
-            Info<< "    is "
-                << volumeType::names[referenceVolumeTypes[s]]
+            Info<< "    is " << referenceVolumeTypes[s].str()
                 << " surface " << surface.name()
                 << endl;
         }
@@ -90,11 +89,9 @@ void Foam::conformationSurfaces::hasBoundedVolume
             Info<< "        Index = " << surfaces_[s] << endl;
             Info<< "        Offset = " << regionOffset_[s] << endl;
 
-            forAll(triSurf, sI)
+            for (const labelledTri& f : triSurf)
             {
-                const label patchID =
-                    triSurf[sI].region()
-                  + regionOffset_[s];
+                const label patchID = f.region() + regionOffset_[s];
 
                 // Don't include baffle surfaces in the calculation
                 if
@@ -103,15 +100,15 @@ void Foam::conformationSurfaces::hasBoundedVolume
                  != extendedFeatureEdgeMesh::BOTH
                 )
                 {
-                    sum += triSurf[sI].normal(surfPts);
+                    sum += f.areaNormal(surfPts);
                 }
                 else
                 {
-                    nBaffles++;
+                    ++nBaffles;
                 }
             }
             Info<< "        has " << nBaffles << " baffles out of "
-                << triSurf.size() << " triangles" << endl;
+                << triSurf.size() << " triangles" << nl;
 
             totalTriangles += triSurf.size();
         }
@@ -134,12 +131,15 @@ void Foam::conformationSurfaces::readFeatures
     label& featureIndex
 )
 {
-    word featureMethod =
+    const word featureMethod =
         featureDict.lookupOrDefault<word>("featureMethod", "none");
 
     if (featureMethod == "extendedFeatureEdgeMesh")
     {
-        fileName feMeshName(featureDict.lookup("extendedFeatureEdgeMesh"));
+        fileName feMeshName
+        (
+            featureDict.get<fileName>("extendedFeatureEdgeMesh")
+        );
 
         Info<< "    features: " << feMeshName << endl;
 
@@ -214,12 +214,15 @@ void Foam::conformationSurfaces::readFeatures
     label& featureIndex
 )
 {
-    word featureMethod =
+    const word featureMethod =
         featureDict.lookupOrDefault<word>("featureMethod", "none");
 
     if (featureMethod == "extendedFeatureEdgeMesh")
     {
-        fileName feMeshName(featureDict.lookup("extendedFeatureEdgeMesh"));
+        fileName feMeshName
+        (
+            featureDict.get<fileName>("extendedFeatureEdgeMesh")
+        );
 
         Info<< "    features: " << feMeshName << ", id: " << featureIndex
             << endl;
@@ -272,7 +275,7 @@ Foam::conformationSurfaces::conformationSurfaces
     rndGen_(rndGen),
     allGeometry_(allGeometry),
     features_(),
-    locationInMesh_(surfaceConformationDict.lookup("locationInMesh")),
+    locationInMesh_(surfaceConformationDict.get<point>("locationInMesh")),
     surfaces_(),
     allGeometryToSurfaces_(),
     normalVolumeTypes_(),
@@ -299,13 +302,11 @@ Foam::conformationSurfaces::conformationSurfaces
 
     // Count number of surfaces.
     label surfI = 0;
-    forAll(allGeometry.names(), geomI)
+    for (const word& geomName : allGeometry_.names())
     {
-        const word& geomName = allGeometry_.names()[geomI];
-
         if (surfacesDict.found(geomName))
         {
-            surfI++;
+            ++surfI;
         }
     }
 
@@ -338,7 +339,7 @@ Foam::conformationSurfaces::conformationSurfaces
     {
         const word& geomName = allGeometry_.names()[geomI];
 
-        const entry* ePtr = surfacesDict.lookupEntryPtr(geomName, false, true);
+        const entry* ePtr = surfacesDict.findEntry(geomName, keyType::REGEX);
 
         if (ePtr)
         {
@@ -464,10 +465,8 @@ Foam::conformationSurfaces::conformationSurfaces
 
     if (unmatchedKeys.size() > 0)
     {
-        IOWarningInFunction
-        (
-            surfacesDict
-        )   << "Not all entries in conformationSurfaces dictionary were used."
+        IOWarningInFunction(surfacesDict)
+            << "Not all entries in conformationSurfaces dictionary were used."
             << " The following entries were not used : "
             << unmatchedKeys.sortedToc()
             << endl;
@@ -534,16 +533,12 @@ Foam::conformationSurfaces::conformationSurfaces
         Info<< nl << "Reading additionalFeatures" << endl;
     }
 
-    forAllConstIter(dictionary, additionalFeaturesDict, iter)
+    for (const entry& dEntry : additionalFeaturesDict)
     {
-        word featureName = iter().keyword();
+        const word& featureName = dEntry.keyword();
+        const dictionary& featureSubDict = dEntry.dict();
 
-        Info<< nl << "    " << iter().keyword() << endl;
-
-        const dictionary& featureSubDict
-        (
-            additionalFeaturesDict.subDict(featureName)
-        );
+        Info<< nl << "    " << featureName << endl;
 
         readFeatures(featureSubDict, featureName, featureI);
     }
@@ -595,12 +590,6 @@ Foam::conformationSurfaces::conformationSurfaces
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::conformationSurfaces::~conformationSurfaces()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -743,8 +732,11 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInOutSide
 
                 surface.findNearest(sample, nearestDistSqr, info);
 
-                vector hitDir = info[0].rawPoint() - samplePts[i];
-                hitDir /= mag(hitDir) + SMALL;
+                const vector hitDir =
+                    normalised
+                    (
+                        info[0].rawPoint() - samplePts[i]
+                    );
 
                 pointIndexHit surfHit;
                 label hitSurface;

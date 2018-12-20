@@ -23,8 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // Constants supplied in the main controlDict
 #include "fundamentalConstants.C"
 

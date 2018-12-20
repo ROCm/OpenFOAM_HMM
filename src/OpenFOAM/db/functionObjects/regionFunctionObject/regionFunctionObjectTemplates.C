@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,47 @@ bool Foam::functionObjects::regionFunctionObject::foundObject
 
 
 template<class ObjectType>
+const ObjectType* Foam::functionObjects::regionFunctionObject::cfindObject
+(
+    const word& fieldName
+) const
+{
+    return obr().cfindObject<ObjectType>(fieldName);
+}
+
+
+template<class ObjectType>
+const ObjectType* Foam::functionObjects::regionFunctionObject::findObject
+(
+    const word& fieldName
+) const
+{
+    return obr().findObject<ObjectType>(fieldName);
+}
+
+
+template<class ObjectType>
+ObjectType* Foam::functionObjects::regionFunctionObject::findObject
+(
+    const word& fieldName
+)
+{
+    // Need getObjectPtr to bypass const access on the objectRegistry
+    return obr().getObjectPtr<ObjectType>(fieldName);
+}
+
+
+template<class ObjectType>
+ObjectType* Foam::functionObjects::regionFunctionObject::getObjectPtr
+(
+    const word& fieldName
+) const
+{
+    return obr().getObjectPtr<ObjectType>(fieldName);
+}
+
+
+template<class ObjectType>
 const ObjectType& Foam::functionObjects::regionFunctionObject::lookupObject
 (
     const word& fieldName
@@ -55,26 +96,6 @@ ObjectType& Foam::functionObjects::regionFunctionObject::lookupObjectRef
 ) const
 {
     return obr().lookupObjectRef<ObjectType>(fieldName);
-}
-
-
-template<class ObjectType>
-const ObjectType* Foam::functionObjects::regionFunctionObject::lookupObjectPtr
-(
-    const word& fieldName
-) const
-{
-    return obr().lookupObjectPtr<ObjectType>(fieldName);
-}
-
-
-template<class ObjectType>
-ObjectType* Foam::functionObjects::regionFunctionObject::lookupObjectRefPtr
-(
-    const word& fieldName
-) const
-{
-    return obr().lookupObjectRefPtr<ObjectType>(fieldName);
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +50,6 @@ class pointSet
 :
     public topoSet
 {
-
-
 public:
 
     //- Runtime type information
@@ -72,7 +70,7 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct from additional size of labelHashSet
+        //- Construct empty with initial size for labelHashSet
         pointSet
         (
             const polyMesh& mesh,
@@ -90,27 +88,36 @@ public:
             writeOption w=NO_WRITE
         );
 
-        //- Construct from additional labelHashSet
+        //- Construct (no-read) with copy of labelHashSet
         pointSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelHashSet& set,
+            const labelHashSet& labels,
             writeOption w=NO_WRITE
         );
 
-        //- Construct from additional list of labels for the labelHashSet
+        //- Construct (no-read) with moving labelHashSet
         pointSet
         (
             const polyMesh& mesh,
             const word& name,
-            const labelUList& set,
+            labelHashSet&& labels,
+            writeOption w=NO_WRITE
+        );
+
+        //- Construct (no-read) with copy of labels
+        pointSet
+        (
+            const polyMesh& mesh,
+            const word& name,
+            const labelUList& labels,
             writeOption w=NO_WRITE
         );
 
 
     //- Destructor
-    virtual ~pointSet();
+    virtual ~pointSet() = default;
 
 
     // Member functions
@@ -123,9 +130,6 @@ public:
 
         //- Update any stored data for new labels
         virtual void updateMesh(const mapPolyMesh& morphMap);
-
-        //- Update any stored data for new labels
-        //virtual void updateMesh(const polyTopoChange& meshMod);
 
         //- Update any stored data for mesh redistribution.
         virtual void distribute(const mapDistributePolyMesh&);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,6 +101,14 @@ protected:
         //  boundary condition handling
         template<class GeoField>
         void interpolate(GeoField& psi) const;
+
+        //- Helper: strip off trailing _0
+        static word baseName(const word& name);
+
+        //- Explicit interpolation of all registered fields. Excludes
+        //  selected fields (and their old-time fields)
+        template<class GeoField>
+        void interpolate(const wordHashSet& suppressed);
 
         //- Freeze values at holes
         template<class Type>
@@ -298,6 +306,9 @@ public:
 
         //- Update the mesh for both mesh motion and topology change
         virtual bool update();
+
+        //- Update fields when mesh is updated
+        virtual bool interpolateFields();
 
         //- Write using given format, version and compression
         virtual bool writeObject

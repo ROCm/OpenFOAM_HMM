@@ -283,7 +283,7 @@ public:
 
         //- Decompose area field
         template<class Type>
-        tmp<GeometricField<Type, faPatchField, areaMesh> >
+        tmp<GeometricField<Type, faPatchField, areaMesh>>
         decomposeField
         (
             const GeometricField<Type, faPatchField, areaMesh>& field
@@ -291,7 +291,7 @@ public:
 
         //- Decompose surface field
         template<class Type>
-        tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        tmp<GeometricField<Type, faePatchField, edgeMesh>>
         decomposeField
         (
             const GeometricField<Type, faePatchField, edgeMesh>& field

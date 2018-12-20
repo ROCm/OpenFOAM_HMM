@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,60 +26,147 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class GeoField>
-Foam::label
-Foam::functionObjects::vtkWrite::countFields() const
+Foam::label Foam::functionObjects::vtkWrite::writeVolFields
+(
+    autoPtr<vtk::internalWriter>& internalWriter,
+    UPtrList<vtk::patchWriter>& patchWriters,
+    const fvMeshSubset& proxy,
+    const wordHashSet& acceptField
+) const
 {
-    return obr_.names<GeoField>(selectFields_).size();
+    const fvMesh& baseMesh = proxy.baseMesh();
+
+    label count = 0;
+
+    for (const word& fieldName : baseMesh.sortedNames<GeoField>(acceptField))
+    {
+        bool ok = false;
+        const auto* fieldptr = baseMesh.findObject<GeoField>(fieldName);
+
+        if (!fieldptr)
+        {
+            continue;
+        }
+
+        auto tfield = fvMeshSubsetProxy::interpolate(proxy, *fieldptr);
+        const auto& field = tfield();
+
+        // Internal
+        if (internalWriter.valid())
+        {
+            ok = true;
+            internalWriter->write(field);
+        }
+
+        // Boundary
+        label writeri = 0;
+        for (vtk::patchWriter& writer : patchWriters)
+        {
+            ok = true;
+            writer.write(field);
+            ++writeri;
+        }
+
+        if (ok)
+        {
+            ++count;
+
+            if (verbose_)
+            {
+                if (count == 1)
+                {
+                    Log << "    " << GeoField::typeName << '(';
+                }
+                else
+                {
+                    Log << ' ';
+                }
+                Log << fieldName;
+            }
+        }
+    }
+
+    if (verbose_ && count)
+    {
+        Log << ')' << endl;
+    }
+
+    return count;
 }
 
 
 template<class GeoField>
-Foam::label
-Foam::functionObjects::vtkWrite::writeFields
+Foam::label Foam::functionObjects::vtkWrite::writeVolFields
 (
-    vtk::internalWriter& writer,
-    bool verbose
+    autoPtr<vtk::internalWriter>& internalWriter,
+    const autoPtr<volPointInterpolation>& pInterp,
+    UPtrList<vtk::patchWriter>& patchWriters,
+    const UPtrList<PrimitivePatchInterpolation<primitivePatch>>& patchInterps,
+    const fvMeshSubset& proxy,
+    const wordHashSet& acceptField
 ) const
 {
-    const wordList names = obr_.sortedNames<GeoField>(selectFields_);
+    const fvMesh& baseMesh = proxy.baseMesh();
 
-    if (verbose && names.size())
+    label count = 0;
+
+    for (const word& fieldName : baseMesh.sortedNames<GeoField>(acceptField))
     {
-        Info<< "    " << GeoField::typeName
-            << " " << flatOutput(names) << endl;
+        bool ok = false;
+        const auto* fieldptr = baseMesh.findObject<GeoField>(fieldName);
+
+        if (!fieldptr)
+        {
+            continue;
+        }
+
+        auto tfield = fvMeshSubsetProxy::interpolate(proxy, *fieldptr);
+        const auto& field = tfield();
+
+        // Internal
+        if (internalWriter.valid() && pInterp.valid())
+        {
+            ok = true;
+            internalWriter->write(field, *pInterp);
+        }
+
+        // Boundary
+        label writeri = 0;
+        for (vtk::patchWriter& writer : patchWriters)
+        {
+            if (writeri < patchInterps.size() && patchInterps.set(writeri))
+            {
+                ok = true;
+                writer.write(field, patchInterps[writeri]);
+            }
+            ++writeri;
+        }
+
+        if (ok)
+        {
+            ++count;
+
+            if (verbose_)
+            {
+                if (count == 1)
+                {
+                    Log << "    " << GeoField::typeName << "->point(";
+                }
+                else
+                {
+                    Log << ' ';
+                }
+                Log << fieldName;
+            }
+        }
     }
 
-    for (const word& fieldName : names)
+    if (verbose_ && count)
     {
-        writer.write(obr_.lookupObject<GeoField>(fieldName));
+        Log << ')' << endl;
     }
 
-    return names.size();
-}
-
-
-template<class GeoField>
-Foam::label
-Foam::functionObjects::vtkWrite::writeFields
-(
-    vtk::surfaceMeshWriter& writer,
-    bool verbose
-) const
-{
-    const wordList names = obr_.sortedNames<GeoField>(selectFields_);
-
-    if (verbose && names.size())
-    {
-        Info<< "    " << GeoField::typeName
-            << " " << flatOutput(names) << endl;
-    }
-
-    for (const word& fieldName : names)
-    {
-        writer.write(obr_.lookupObject<GeoField>(fieldName));
-    }
-
-    return names.size();
+    return count;
 }
 
 

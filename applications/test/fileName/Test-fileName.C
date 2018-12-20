@@ -47,6 +47,38 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+unsigned testClean(std::initializer_list<Pair<std::string>> tests)
+{
+    unsigned nFail = 0;
+
+    for (const Pair<std::string>& test : tests)
+    {
+        const std::string& input = test.first();
+        const std::string& expected = test.second();
+
+        fileName cleaned(test.first());
+        cleaned.clean();
+
+        if (cleaned == expected)
+        {
+            Info<< "(pass)"
+                << "  clean " << input << " -> " << cleaned << nl;
+        }
+        else
+        {
+            Info<< "(fail)"
+                << "  clean " << input << " -> " << cleaned
+                << "  expected=" << expected
+                << nl;
+
+            ++nFail;
+        }
+    }
+
+    return nFail;
+}
+
+
 unsigned testStrip
 (
     const bool doClean,
@@ -172,15 +204,24 @@ unsigned testRelative(std::initializer_list<Pair<std::string>> tests)
         const std::string& dir    = test.first();
         const std::string& parent = test.second();
 
-        fileName relative = fileName(dir).relative(parent);
-
         Info<< "directory: " << dir << nl
             << "parent   : " << parent << nl
-            << "relative = " << relative << nl
+            << "relative = " << fileName(dir).relative(parent) << nl
+            << "case-rel = " << fileName(dir).relative(parent, true) << nl
             << endl;
     }
 
     return nFail;
+}
+
+
+void testDirname(const fileName& input)
+{
+    Info<< "input:" << input
+        << "   path:" << input.path()
+        << "   name:\"" << input.name() << '"'
+        << "   ext:\"" << input.ext()  << '"'
+        << "   components: " << flatOutput(input.components()) << nl;
 }
 
 
@@ -196,6 +237,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption("relative", "test relative operations");
     argList::addBoolOption("system", "test filesystem operations");
     argList::addBoolOption("default", "reinstate default tests");
+    argList::addBoolOption("clean", "clean()");
+    argList::addBoolOption("dirname", "basename/dirname tables");
     argList::addNote("runs default tests or specified ones only");
 
     #include "setRootCase.H"
@@ -252,6 +295,20 @@ int main(int argc, char *argv[])
             file1
         };
         Info<< "All ==> " << file4 << nl;
+    }
+
+    if (args.found("dirname"))
+    {
+        testDirname("");
+        testDirname(".");
+        testDirname("abc");
+        testDirname("/");
+        testDirname("/abc");
+        testDirname("abc/def");
+        testDirname("/abc/def");
+        testDirname("/abc/def/");
+        testDirname("/abc///def///");
+        testDirname("/abc/../def");
     }
 
 
@@ -381,6 +438,35 @@ int main(int argc, char *argv[])
     }
 
 
+    if (args.found("clean"))
+    {
+        Info<< nl << "Test fileName::clean()" << nl << nl;
+
+        unsigned nFail = testClean
+        ({
+            { "/", "/" },
+            { "/abc/", "/abc" },
+            { "/abc////def", "/abc/def" },
+            { "/abc/def/./ghi/.", "/abc/def/ghi" },
+            { "abc/def/./",   "abc/def" },
+            { "./abc/", "./abc" },
+            { "/abc/def/../ghi/jkl/nmo/..", "/abc/ghi/jkl" },
+            { "abc/../def/ghi/../jkl", "abc/../def/jkl" },
+        });
+
+        Info<< nl;
+        if (nFail)
+        {
+            Info<< "failed " << nFail;
+        }
+        else
+        {
+            Info<< "passed all";
+        }
+        Info<< " fileName::clean tests" << nl;
+    }
+
+
     if (args.found("validate"))
     {
         unsigned nFail = 0;
@@ -450,12 +536,17 @@ int main(int argc, char *argv[])
         nFail += testRelative
         (
             {
+                { "",  "" },
+                { "",  "/" },
+                { "",  "/some" },
+
                 { "/some/dir/subdir/name",  "" },
                 { "/some/dir/subdir/name",  "/" },
                 { "/some/dir/subdir/name",  "/some" },
                 { "/some/dir/subdir/name",  "/some/" },
                 { "/some/dir/subdir/name",  "/some/dir" },
                 { "/some/dir/subdir/name",  "/some/dir/" },
+                { "/some/dir/subdir/name",  "/some/dir/subdir" },
                 { "/some/dir/subdir/name",  "/some/dir/subdir/name" },
                 { "/some/dir/subdir/name",  "/some/dir/subdir/name/" },
                 { "/some/dir/subdir/name",  "/some/other" },
@@ -467,6 +558,7 @@ int main(int argc, char *argv[])
                 { "/some/dir/subdir/a",  "/some/" },
                 { "/some/dir/subdir/a",  "/some/dir" },
                 { "/some/dir/subdir/a",  "/some/dir/" },
+                { "/some/dir/subdir/a",  "/some/dir/subdir" },
                 { "/some/dir/subdir/a",  "/some/dir/subdir/a" },
                 { "/some/dir/subdir/a",  "/some/dir/subdir/a/" },
                 { "/some/dir/subdir/a",  "/some/other" },
@@ -478,6 +570,7 @@ int main(int argc, char *argv[])
                 { "/some/dir/subdir/a/",  "/some/" },
                 { "/some/dir/subdir/a/",  "/some/dir" },
                 { "/some/dir/subdir/a/",  "/some/dir/" },
+                { "/some/dir/subdir/a/",  "/some/dir/subdir/" },
                 { "/some/dir/subdir/a/",  "/some/dir/subdir/a" },
                 { "/some/dir/subdir/a/",  "/some/dir/subdir/a/" },
                 { "/some/dir/subdir/a/",  "/some/other" },
@@ -617,14 +710,21 @@ int main(int argc, char *argv[])
     fileName pathName(wrdList);
 
     Info<< "pathName = " << pathName << nl
+        << "nameOp   = " << nameOp<fileName>()(pathName) << nl
         << "pathName.name()     = >" << pathName.name() << "<\n"
         << "pathName.path()     = "  << pathName.path() << nl
         << "pathName.ext()      = >" << pathName.ext() << "<\n"
-        << "pathName.name(true) = >" << pathName.name(true) << "<\n";
+        << "pathName.nameLessExt= >" << pathName.nameLessExt() << "<\n";
 
     Info<< "pathName.components() = " << pathName.components() << nl
         << "pathName.component(2) = " << pathName.component(2) << nl
         << endl;
+
+    Info<< "hasPath = " << Switch(pathName.hasPath()) << nl;
+    pathName.removePath();
+    Info<< "removed path = " << pathName << nl;
+
+    Info<< nl << nl;
 
     // try with different combination
     // The final one should emit warnings
@@ -670,9 +770,27 @@ int main(int argc, char *argv[])
         << " controlDict => " << findEtcFile("controlDict") << nl
         << " badName => " << findEtcFile("badName") << endl;
 
-    Info<< "This should emit a fatal error:" << endl;
-    Info<< " badName(die) => " << findEtcFile("badName", true) << nl
-        << endl;
+    {
+
+        Info<< nl << "Expect a FatalError for findEtcFile() with a bad name:"
+            << nl;
+
+        const bool throwingError = FatalError.throwExceptions();
+
+        try
+        {
+            Info<< " badName(die) => " << flush
+                << findEtcFile("<very-badName>", true) << nl
+                << endl;
+        }
+        catch (Foam::error& err)
+        {
+            Info<< nl << "findEtcFile() Caught FatalError "
+                << err << nl << endl;
+        }
+        FatalError.throwExceptions(throwingError);
+    }
+
 
     Info<< "\nEnd\n" << endl;
     return 0;

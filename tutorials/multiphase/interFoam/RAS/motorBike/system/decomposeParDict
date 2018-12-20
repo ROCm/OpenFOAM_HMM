@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,6 +20,12 @@ numberOfSubdomains 5;
 method          hierarchical;
 // method          ptscotch;
 
+coeffs
+{
+    n           (5 1 1);
+}
+
+
 // Optional decomposition constraints
 constraints
 {
@@ -29,15 +35,6 @@ constraints
         //  end up on same processor
         type    refinementHistory;
     }
-}
-
-
-coeffs
-{
-    n           (5 1 1);
-    //delta       0.001; // default=0.001
-    //order       xyz;   // default=xzy
-    dataFile    "cellDecomposition";
 }
 
 

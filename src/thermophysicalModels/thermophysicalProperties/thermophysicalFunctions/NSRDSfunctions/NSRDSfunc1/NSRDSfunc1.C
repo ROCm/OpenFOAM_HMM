@@ -55,11 +55,11 @@ Foam::NSRDSfunc1::NSRDSfunc1
 
 Foam::NSRDSfunc1::NSRDSfunc1(const dictionary& dict)
 :
-    a_(readScalar(dict.lookup("a"))),
-    b_(readScalar(dict.lookup("b"))),
-    c_(readScalar(dict.lookup("c"))),
-    d_(readScalar(dict.lookup("d"))),
-    e_(readScalar(dict.lookup("e")))
+    a_(dict.get<scalar>("a")),
+    b_(dict.get<scalar>("b")),
+    c_(dict.get<scalar>("c")),
+    d_(dict.get<scalar>("d")),
+    e_(dict.get<scalar>("e"))
 {}
 
 

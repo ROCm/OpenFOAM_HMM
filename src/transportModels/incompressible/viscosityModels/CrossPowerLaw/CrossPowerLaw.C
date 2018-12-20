@@ -100,10 +100,10 @@ bool Foam::viscosityModels::CrossPowerLaw::read
     CrossPowerLawCoeffs_ =
         viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    CrossPowerLawCoeffs_.lookup("nu0") >> nu0_;
-    CrossPowerLawCoeffs_.lookup("nuInf") >> nuInf_;
-    CrossPowerLawCoeffs_.lookup("m") >> m_;
-    CrossPowerLawCoeffs_.lookup("n") >> n_;
+    CrossPowerLawCoeffs_.readEntry("nu0", nu0_);
+    CrossPowerLawCoeffs_.readEntry("nuInf", nuInf_);
+    CrossPowerLawCoeffs_.readEntry("m", m_);
+    CrossPowerLawCoeffs_.readEntry("n", n_);
 
     return true;
 }

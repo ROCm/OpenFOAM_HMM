@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 template<class T> class List;
 
 /*---------------------------------------------------------------------------*\
@@ -84,34 +85,48 @@ public:
         //- Construct initialized to zero
         inline Vector(const Foam::zero);
 
-        //- Construct given VectorSpace of the same rank
+        //- Copy construct from VectorSpace of the same rank
         template<class Cmpt2>
-        inline Vector(const VectorSpace<Vector<Cmpt2>, Cmpt2, 3>&);
+        inline Vector(const VectorSpace<Vector<Cmpt2>, Cmpt2, 3>& vs);
 
-        //- Construct given three components
+        //- Construct from three components
         inline Vector(const Cmpt& vx, const Cmpt& vy, const Cmpt& vz);
 
         //- Construct from Istream
-        inline Vector(Istream&);
+        inline Vector(Istream& is);
 
 
     // Member Functions
 
-        // Access
+        //- Access to the vector x component
+        inline const Cmpt& x() const;
 
-            inline const Cmpt& x() const;
-            inline const Cmpt& y() const;
-            inline const Cmpt& z() const;
+        //- Access to the vector y component
+        inline const Cmpt& y() const;
 
-            inline Cmpt& x();
-            inline Cmpt& y();
-            inline Cmpt& z();
+        //- Access to the vector z component
+        inline const Cmpt& z() const;
+
+        //- Access to the vector x component
+        inline Cmpt& x();
+
+        //- Access to the vector y component
+        inline Cmpt& y();
+
+        //- Access to the vector z component
+        inline Cmpt& z();
+
+
+        //- Normalise the vector by its magnitude
+        inline Vector<Cmpt>& normalise();
+
 
         //- Return *this (used for point which is a typedef to Vector<scalar>.
         inline const Vector<Cmpt>& centre
         (
             const Foam::List<Vector<Cmpt>>&
         ) const;
+
 };
 
 

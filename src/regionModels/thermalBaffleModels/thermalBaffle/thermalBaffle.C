@@ -52,14 +52,14 @@ addToRunTimeSelectionTable(thermalBaffleModel, thermalBaffle, dictionary);
 
 bool thermalBaffle::read()
 {
-    this->solution().lookup("nNonOrthCorr") >> nNonOrthCorr_;
+    this->solution().readEntry("nNonOrthCorr", nNonOrthCorr_);
     return regionModel1D::read();
 }
 
 
 bool thermalBaffle::read(const dictionary& dict)
 {
-    this->solution().lookup("nNonOrthCorr") >> nNonOrthCorr_;
+    this->solution().readEntry("nNonOrthCorr", nNonOrthCorr_);
     return regionModel1D::read(dict);
 }
 
@@ -164,7 +164,7 @@ thermalBaffle::thermalBaffle
 )
 :
     thermalBaffleModel(modelType, mesh, dict),
-    nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
+    nNonOrthCorr_(solution().get<label>("nNonOrthCorr")),
     thermo_(solidThermo::New(regionMesh(), dict)),
     h_(thermo_->he()),
     qs_
@@ -214,7 +214,7 @@ thermalBaffle::thermalBaffle
 )
 :
     thermalBaffleModel(modelType, mesh),
-    nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
+    nNonOrthCorr_(solution().get<label>("nNonOrthCorr")),
     thermo_(solidThermo::New(regionMesh())),
     h_(thermo_->he()),
     qs_

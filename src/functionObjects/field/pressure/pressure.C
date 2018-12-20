@@ -70,22 +70,19 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
 {
     if (p.dimensions() == dimPressure)
     {
-        return tmp<volScalarField>
+        return tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    "rhoScale",
-                    p.mesh().time().timeName(),
-                    p.mesh(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                p,
-                fvPatchField<scalar>::calculatedType()
-            )
+                "rhoScale",
+                p.mesh().time().timeName(),
+                p.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            p,
+            fvPatchField<scalar>::calculatedType()
         );
     }
     else
@@ -115,10 +112,8 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
     {
         return lookupObject<volScalarField>(rhoName_)*tsf;
     }
-    else
-    {
-        return dimensionedScalar("rhoInf", dimDensity, rhoInf_)*tsf;
-    }
+
+    return dimensionedScalar("rhoInf", dimDensity, rhoInf_)*tsf;
 }
 
 
@@ -192,28 +187,23 @@ bool Foam::functionObjects::pressure::calc()
     {
         const volScalarField& p = lookupObject<volScalarField>(fieldName_);
 
-        tmp<volScalarField> tp
+        auto tp = tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    resultName_,
-                    p.mesh().time().timeName(),
-                    p.mesh(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                coeff(pRef(pDyn(p, rhoScale(p))))
-            )
+                resultName_,
+                p.mesh().time().timeName(),
+                p.mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            coeff(pRef(pDyn(p, rhoScale(p))))
         );
 
         return store(resultName_, tp);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -238,13 +228,6 @@ Foam::functionObjects::pressure::pressure
     rhoInfInitialised_(false)
 {
     read(dict);
-
-    dimensionSet pDims(dimPressure);
-
-    if (calcCoeff_)
-    {
-        pDims /= dimPressure;
-    }
 }
 
 
@@ -265,22 +248,22 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
 
     if (rhoName_ == "rhoInf")
     {
-        dict.lookup("rhoInf") >> rhoInf_;
+        dict.readEntry("rhoInf", rhoInf_);
         rhoInfInitialised_ = true;
     }
 
-    dict.lookup("calcTotal") >> calcTotal_;
+    dict.readEntry("calcTotal", calcTotal_);
     if (calcTotal_)
     {
         pRef_ = dict.lookupOrDefault<scalar>("pRef", 0.0);
     }
 
-    dict.lookup("calcCoeff") >> calcCoeff_;
+    dict.readEntry("calcCoeff", calcCoeff_);
     if (calcCoeff_)
     {
-        dict.lookup("pInf") >> pInf_;
-        dict.lookup("UInf") >> UInf_;
-        dict.lookup("rhoInf") >> rhoInf_;
+        dict.readEntry("pInf", pInf_);
+        dict.readEntry("UInf", UInf_);
+        dict.readEntry("rhoInf", rhoInf_);
 
         scalar zeroCheck = 0.5*rhoInf_*magSqr(UInf_) + pInf_;
 

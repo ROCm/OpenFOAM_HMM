@@ -55,9 +55,9 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
     scalarList(species.size()),
     species_(species)
 {
-    if (dict.found("coeffs"))
+    List<Tuple2<word, scalar>> coeffs;
+    if (dict.readIfPresent("coeffs", coeffs))
     {
-        List<Tuple2<word, scalar>> coeffs(dict.lookup("coeffs"));
         if (coeffs.size() != species_.size())
         {
             FatalErrorInFunction
@@ -73,7 +73,7 @@ inline Foam::thirdBodyEfficiencies::thirdBodyEfficiencies
     }
     else
     {
-        scalar defaultEff = readScalar(dict.lookup("defaultEfficiency"));
+        const scalar defaultEff = dict.get<scalar>("defaultEfficiency");
         scalarList::operator=(defaultEff);
     }
 }

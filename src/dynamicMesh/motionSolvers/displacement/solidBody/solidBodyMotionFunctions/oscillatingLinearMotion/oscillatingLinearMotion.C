@@ -89,8 +89,8 @@ bool Foam::solidBodyMotionFunctions::oscillatingLinearMotion::read
 {
     solidBodyMotionFunction::read(SBMFCoeffs);
 
-    SBMFCoeffs_.lookup("amplitude") >> amplitude_;
-    SBMFCoeffs_.lookup("omega") >> omega_;
+    SBMFCoeffs_.readEntry("amplitude", amplitude_);
+    SBMFCoeffs_.readEntry("omega", omega_);
 
     return true;
 }

@@ -30,7 +30,7 @@ Description
     The wrapped object of type \<T\> must implement a transfer() method and
     an operator=() copy method.
 
-\deprecated This class is an artifact from pre-C++11 code (MAR-2018).
+\deprecated(2018-03) This class is an artifact from pre-C++11 code.
 
 Note
     This class is an artifact from pre-C++11 code, where it was used

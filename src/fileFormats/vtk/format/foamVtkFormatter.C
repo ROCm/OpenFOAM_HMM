@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,13 +24,46 @@ License
 
 #include "foamVtkFormatter.H"
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-Foam::vtk::formatter::~formatter()
-{}
+bool Foam::vtk::formatter::canWriteAttr(const word& k) const
+{
+    if (!inTag_)
+    {
+        WarningInFunction
+            << "xml attribute '" << k << "' but not inside a tag!" << endl;
+    }
+
+    return inTag_;
+}
+
+
+bool Foam::vtk::formatter::canWriteToplevel(const char* what) const
+{
+    if (inTag_)
+    {
+        WarningInFunction
+            << "Cannot add " << what << " inside a tag!"
+            << endl;
+    }
+
+    return !inTag_;
+}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::vtk::formatter::quoting(const quoteChar quote)
+{
+    quote_ = quote;
+}
+
+
+uint64_t Foam::vtk::formatter::offset(const uint64_t)
+{
+    return formatter::npos;
+}
+
 
 std::size_t Foam::vtk::formatter::encodedLength(std::size_t n) const
 {
@@ -38,113 +71,75 @@ std::size_t Foam::vtk::formatter::encodedLength(std::size_t n) const
 }
 
 
-void Foam::vtk::formatter::indent()
-{
-    label n = xmlTags_.size() * 2;
-    while (n--)
-    {
-        os_ << ' ';
-    }
-}
-
-
-Foam::vtk::formatter&
-Foam::vtk::formatter::xmlHeader()
+bool Foam::vtk::formatter::openTagImpl(const word& tagName)
 {
     if (inTag_)
     {
         WarningInFunction
-            << "xml header, but already within a tag!"
+            << "open xml tag '" << tagName << "', but already within a tag!"
             << endl;
+
+        return false;
     }
 
-    os_ << "<?xml version='1.0'?>" << nl;
-
-    return *this;
-}
-
-
-Foam::vtk::formatter&
-Foam::vtk::formatter::xmlComment(const std::string& comment)
-{
-    if (inTag_)
-    {
-        WarningInFunction
-            << "adding xml comment inside a tag??"
-            << endl;
-    }
-
-    indent();
-    os_ << "<!-- " << comment << " -->" << nl;
-
-    return *this;
-}
-
-
-Foam::vtk::formatter&
-Foam::vtk::formatter::openTag(const word& tagName)
-{
-    if (inTag_)
-    {
-        WarningInFunction
-            << "open XML tag '" << tagName
-            << "', but already within a tag!"
-            << endl;
-    }
-
+    // Emit, before changing the stack or the state.
     indent();
     os_ << '<' << tagName;
 
-    xmlTags_.push(tagName);
+    // Add to the stack and change the state.
+    xmlTags_.append(tagName);
     inTag_ = true;
 
-    return *this;
+    return true;
 }
 
 
-Foam::vtk::formatter&
-Foam::vtk::formatter::closeTag(const bool isEmpty)
+Foam::vtk::formatter& Foam::vtk::formatter::closeTag(const bool isEmpty)
 {
     if (!inTag_)
     {
         WarningInFunction
-            << "close XML tag, but not within a tag!"
+            << "attempt to close xml tag, but not within a tag!"
             << endl;
     }
-
-    if (isEmpty)
+    else
     {
-        // eg, <tag ... />
-        xmlTags_.pop();
-        os_ << " /";
-    }
-    os_ << '>' << nl;
+        // Change the state
+        inTag_ = false;
 
-    inTag_ = false;
+        if (isEmpty)
+        {
+            // Eg, <tag ... />
+            xmlTags_.remove();
+            os_ << " /";
+        }
+        os_ << '>' << nl;
+    }
 
     return *this;
 }
 
 
-Foam::vtk::formatter&
-Foam::vtk::formatter::endTag(const word& tagName)
+Foam::vtk::formatter& Foam::vtk::formatter::endTag(const word& tagName)
 {
-    const word curr = xmlTags_.pop();
+    const word curr(xmlTags_.remove());
     indent();
 
     if (inTag_)
     {
         WarningInFunction
-            << "adding XML endTag '" << curr
+            << "adding xml endTag '" << curr
             << "' but already in another tag!"
             << endl;
+
+        // Also suppress further output, or not?
     }
 
-    // verify expected end tag
+    // Verify expected end tag
     if (!tagName.empty() && tagName != curr)
     {
         WarningInFunction
-            << "expecting to end xml-tag '" << tagName
+            << "expecting to end xml tag '" << tagName
             << "' but found '" << curr << "' instead"
             << endl;
     }
@@ -157,8 +152,7 @@ Foam::vtk::formatter::endTag(const word& tagName)
 }
 
 
-Foam::vtk::formatter&
-Foam::vtk::formatter::beginVTKFile
+Foam::vtk::formatter& Foam::vtk::formatter::beginVTKFile
 (
     const word& contentType,
     const word& contentVersion,
@@ -182,15 +176,7 @@ Foam::vtk::formatter::beginVTKFile
 }
 
 
-Foam::vtk::formatter&
-Foam::vtk::formatter::endVTKFile()
-{
-    return endTag(vtk::fileTag::VTK_FILE);
-}
-
-
-Foam::vtk::formatter&
-Foam::vtk::formatter::beginAppendedData()
+Foam::vtk::formatter& Foam::vtk::formatter::beginAppendedData()
 {
     openTag("AppendedData");
     xmlAttr("encoding", encoding());
@@ -201,31 +187,124 @@ Foam::vtk::formatter::beginAppendedData()
 }
 
 
-Foam::vtk::formatter&
-Foam::vtk::formatter::endAppendedData()
+Foam::vtk::formatter& Foam::vtk::formatter::endAppendedData()
 {
-    flush();     // flush any pending encoded content
-    os_ << nl;   // ensure clear separation from content.
+    flush();     // Flush any pending encoded content
+    os_ << nl;   // Ensure clear separation from content
     return endTag("AppendedData");
 }
 
 
-Foam::vtk::formatter&
-Foam::vtk::formatter::xmlAttr
+Foam::vtk::formatter& Foam::vtk::formatter::beginBlock
 (
-    const word& k,
-    const std::string& v,
-    const char quote
+    label index,
+    std::string name
 )
 {
-    if (!inTag_)
+    openTag(vtk::fileTag::BLOCK);
+    if (index >= 0)
     {
-        WarningInFunction
-            << "xml attribute '" << k << "' but not within a tag!"
-            << endl;
+        xmlAttr("index", index);
     }
+    if (name.size())
+    {
+        xmlAttr("name", name);
+    }
+    closeTag();
 
-    os_ << ' ' << k << '=' << quote << v.c_str() << quote;
+    return *this;
+}
+
+
+Foam::vtk::formatter& Foam::vtk::formatter::beginPiece
+(
+    label index,
+    std::string name
+)
+{
+    openTag(vtk::fileTag::PIECE);
+    if (index >= 0)
+    {
+        xmlAttr("index", index);
+    }
+    if (name.size())
+    {
+        xmlAttr("name", name);
+    }
+    closeTag();
+
+    return *this;
+}
+
+
+Foam::vtk::formatter& Foam::vtk::formatter::DataSet
+(
+    label index,
+    std::string file,
+    bool autoName
+)
+{
+    openTag(vtk::fileTag::DATA_SET);
+
+    if (index >= 0)
+    {
+        xmlAttr("index", index);
+    }
+    if (file.size())
+    {
+        if (autoName)
+        {
+            xmlAttr("name", fileName::nameLessExt(file));
+        }
+        xmlAttr("file", file);
+    }
+    closeTag(true);  // Empty tag. ie, <DataSet ... />
+
+    return *this;
+}
+
+
+Foam::vtk::formatter& Foam::vtk::formatter::DataSet
+(
+    label index,
+    std::string file,
+    std::string name
+)
+{
+    openTag(vtk::fileTag::DATA_SET);
+
+    if (index >= 0)
+    {
+        xmlAttr("index", index);
+    }
+    if (name.size())
+    {
+        xmlAttr("name", name);
+    }
+    if (file.size())
+    {
+        xmlAttr("file", file);
+    }
+    closeTag(true);  // Empty tag. ie, <DataSet ... />
+
+    return *this;
+}
+
+
+Foam::vtk::formatter& Foam::vtk::formatter::writeTimeValue(scalar timeValue)
+{
+    // Emit "TimeValue" as FieldData
+    // NumberOfTuples="1" (required!)
+
+    uint64_t payLoad = vtk::sizeofData<float>(1);
+
+    beginDataArray<float,1,1>("TimeValue");
+    writeSize(payLoad);
+
+    write(timeValue);
+    flush();
+
+    endDataArray();
 
     return *this;
 }

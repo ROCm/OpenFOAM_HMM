@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 #include "IATEsource.H"
 #include "fvMatrix.H"
 #include "phaseCompressibleTurbulenceModel.H"
-#include "uniformDimensionedFields.H"
+#include "gravityMeshObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -54,12 +54,12 @@ Foam::diameterModels::IATEsource::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
+        FatalIOErrorInFunction(dict)
             << "Unknown IATE source type "
             << type << nl << nl
-            << "Valid IATE source types :" << endl
+            << "Valid IATE source types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     return autoPtr<IATEsource>(cstrIter()(iate, dict));
@@ -71,7 +71,7 @@ Foam::diameterModels::IATEsource::New
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::Ur() const
 {
     const uniformDimensionedVectorField& g =
-        phase().db().lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(phase().db().time());
 
     return
         sqrt(2.0)
@@ -84,15 +84,18 @@ Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::Ur() const
        *pow(max(1 - phase(), scalar(0)), 1.75);
 }
 
+
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::Ut() const
 {
     return sqrt(2*otherPhase().turbulence().k());
 }
 
+
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::Re() const
 {
     return max(Ur()*phase().d()/otherPhase().nu(), scalar(1.0e-3));
 }
+
 
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::CD() const
 {
@@ -111,10 +114,11 @@ Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::CD() const
         );
 }
 
+
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::Mo() const
 {
     const uniformDimensionedVectorField& g =
-        phase().db().lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(phase().db().time());
 
     return
         mag(g)*pow4(otherPhase().nu())*sqr(otherPhase().rho())
@@ -122,16 +126,18 @@ Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::Mo() const
        /pow3(fluid().sigma());
 }
 
+
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::Eo() const
 {
     const uniformDimensionedVectorField& g =
-        phase().db().lookupObject<uniformDimensionedVectorField>("g");
+        meshObjects::gravity::New(phase().db().time());
 
     return
         mag(g)*sqr(phase().d())
        *(otherPhase().rho() - phase().rho())
        /fluid().sigma();
 }
+
 
 Foam::tmp<Foam::volScalarField> Foam::diameterModels::IATEsource::We() const
 {

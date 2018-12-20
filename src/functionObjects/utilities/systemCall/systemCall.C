@@ -26,6 +26,7 @@ License
 #include "systemCall.H"
 #include "Time.H"
 #include "dynamicCode.H"
+#include "foamVersion.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -113,23 +114,31 @@ bool Foam::functionObjects::systemCall::read(const dictionary& dict)
     if (executeCalls_.empty() && endCalls_.empty() && writeCalls_.empty())
     {
         WarningInFunction
-            << "no executeCalls, endCalls or writeCalls defined."
+            << "No executeCalls, endCalls or writeCalls defined."
             << endl;
+    }
+    else if (isAdministrator())
+    {
+        FatalErrorInFunction
+            << "System calls should not be executed by someone"
+            << " with administrator rights for security reasons." << nl
+            << nl << endl
+            << exit(FatalError);
     }
     else if (!dynamicCode::allowSystemOperations)
     {
         FatalErrorInFunction
-            << "Executing user-supplied system calls may not be enabled by "
-            << "default due to potential " << nl
-            << "security issues.  If you trust the case you can enable this "
-            << "facility by " << nl
-            << "adding to the InfoSwitches setting in the system controlDict:"
+            << "Executing user-supplied system calls may have been disabled"
+            << " by default" << nl
+            << "for security reasons." << nl
+            << "If you trust the code, you may enable this by adding"
             << nl << nl
             << "    allowSystemOperations 1" << nl << nl
-            << "The system controlDict is either" << nl << nl
-            << "    ~/.OpenFOAM/$WM_PROJECT_VERSION/controlDict" << nl << nl
-            << "or" << nl << nl
-            << "    $WM_PROJECT_DIR/etc/controlDict" << nl << nl
+            << "to the InfoSwitches setting in the system controlDict." << nl
+            << "The system controlDict is any of" << nl << nl
+            << "    ~/.OpenFOAM/" << foamVersion::api << "/controlDict" << nl
+            << "    ~/.OpenFOAM/controlDict" << nl
+            << "    $WM_PROJECT_DIR/etc/controlDict" << nl << endl
             << exit(FatalError);
     }
 

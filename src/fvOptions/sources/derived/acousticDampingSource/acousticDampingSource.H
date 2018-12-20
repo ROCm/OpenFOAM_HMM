@@ -36,6 +36,14 @@ Description
     \verbatim
     acousticDampingSourceCoeffs
     {
+        timeStart        0.004;
+        duration         1000.0;
+        selectionMode    all;
+        origin           (-1.25 0 0);
+        radius1          1.2;
+        radius2          1.65;
+        frequency        3000;
+        URef             UMean;
     }
     \endverbatim
 
@@ -132,43 +140,38 @@ public:
 
 
     //- Destructor
-    virtual ~acousticDampingSource()
-    {}
+    virtual ~acousticDampingSource() = default;
 
 
     // Member Functions
 
-        // Add explicit and implicit contributions
+        //- Add implicit contribution to momentum equation
+        virtual void addSup
+        (
+            fvMatrix<vector>& eqn,
+            const label fieldI
+        );
 
-            //- Add implicit contribution to momentum equation
-            virtual void addSup
-            (
-                fvMatrix<vector>& eqn,
-                const label fieldI
-            );
+        //- Add implicit contribution to compressible momentum equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<vector>& eqn,
+            const label fieldI
+        );
 
-            //- Add implicit contribution to compressible momentum equation
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<vector>& eqn,
-                const label fieldI
-            );
-
-            //- Add implicit contribution to phase momentum equation
-            virtual void addSup
-            (
-                const volScalarField& alpha,
-                const volScalarField& rho,
-                fvMatrix<vector>& eqn,
-                const label fieldI
-            );
+        //- Add implicit contribution to phase momentum equation
+        virtual void addSup
+        (
+            const volScalarField& alpha,
+            const volScalarField& rho,
+            fvMatrix<vector>& eqn,
+            const label fieldI
+        );
 
 
-        // IO
-
-            //- Read dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 

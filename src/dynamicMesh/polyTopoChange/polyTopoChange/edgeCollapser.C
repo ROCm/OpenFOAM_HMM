@@ -410,13 +410,9 @@ void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
 
     if (detJ < 1e-5)
     {
-        collapseAxis = f.edges()[f.longestEdge(pts)].vec(pts);
-
         // It is possible that all the points of a face are the same
-        if (magSqr(collapseAxis) > VSMALL)
-        {
-            collapseAxis /= mag(collapseAxis);
-        }
+
+        collapseAxis = f.edges()[f.longestEdge(pts)].unitVec(pts);
 
         // Empirical correlation for high aspect ratio faces
 
@@ -433,9 +429,7 @@ void Foam::edgeCollapser::faceCollapseAxisAndAspectRatio
             // Cannot necessarily determine linearly independent
             // eigenvectors, or any at all, use longest edge direction.
 
-            collapseAxis = f.edges()[f.longestEdge(pts)].vec(pts);
-
-            collapseAxis /= mag(collapseAxis);
+            collapseAxis = f.edges()[f.longestEdge(pts)].unitVec(pts);
 
             aspectRatio = 1.0;
         }
@@ -468,7 +462,7 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
     const labelList& cellOwner = mesh_.faceOwner();
     const labelList& cellNeighbour = mesh_.faceNeighbour();
 
-    const label nBoundaryFaces = mesh_.nFaces() - mesh_.nInternalFaces();
+    const label nBoundaryFaces = mesh_.nBoundaryFaces();
 
     // Calculate face size from cell volumes for internal faces
     for (label intFacei = 0; intFacei < mesh_.nInternalFaces(); ++intFacei)

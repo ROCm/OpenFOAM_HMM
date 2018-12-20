@@ -128,8 +128,7 @@ public:
 
 
     //- Destructor
-    virtual ~solidProperties()
-    {}
+    virtual ~solidProperties() = default;
 
 
     // Member Functions
@@ -157,7 +156,7 @@ public:
 
     // I-O
 
-        //- Read and set the properties present it the given dictionary
+        //- Read and set the properties if present in the given dictionary
         void readIfPresent(const dictionary& dict);
 
         //- Write the solidProperties properties

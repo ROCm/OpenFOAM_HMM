@@ -169,7 +169,7 @@ void Foam::radiation::MarshakRadiationFvPatchScalarField::updateCoeffs()
 
     const scalarField& emissivity = temissivity();
 
-    const scalarField Ep(emissivity/(2.0*(scalar(2.0) - emissivity)));
+    const scalarField Ep(emissivity/(2.0*(scalar(2) - emissivity)));
 
     // Set value fraction
     valueFraction() = 1.0/(1.0 + gamma*patch().deltaCoeffs()/Ep);

@@ -1,0 +1,172 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     foamCreateManpage
+#
+# Description
+#     Query OpenFOAM applications with -help-man to generate manpage content.
+#
+#------------------------------------------------------------------------------
+defaultOutputDir="$WM_PROJECT_DIR/doc/man1"
+
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+Usage: ${0##*/} [OPTION] [appName .. [appNameN]]
+options:
+  -dir dir          Directory to process
+  -gzip             Compressed output
+  -o DIR            Write to alternative output directory
+  -version VER      Specify an alternative version
+  -h | -help        Print the usage
+
+Query OpenFOAM applications with -help-man for their manpage content
+and redirect to corresponding directory location.
+Default input:  \$FOAM_APPBIN only.
+Default output: $defaultOutputDir
+
+Uses the search directory if applications are specified.
+
+Copyright (C) 2018 OpenCFD Ltd.
+USAGE
+    exit 1
+}
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+#-------------------------------------------------------------------------------
+searchDirs="$FOAM_APPBIN"
+unset gzipFilter sedFilter outputDir
+
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help*)
+        usage
+        ;;
+    -d | -dir)
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        searchDirs="$2"
+        [ -d "$searchDirs" ] || die "directory not found '$searchDirs'"
+        shift
+        ;;
+    -gz | -gzip)
+        gzipFilter="gzip"
+        ;;
+    -v | -version)
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        version="$2"
+        sedFilter='s/OpenFOAM-[^\"]*/OpenFOAM-'"$version/"
+        shift
+        ;;
+    -o | -output)
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        outputDir="$2"
+        shift
+        ;;
+    -*)
+        die "unknown option: '$1'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+    shift
+done
+
+: ${outputDir:=$defaultOutputDir}
+
+# Verify that output is writeable
+if [ -e "$outputDir" ]
+then
+    [ -d "$outputDir" ] && [ -w "$outputDir" ] || \
+        die "Cannot write to $outputDir" "Not a directory, or no permission?"
+else
+    mkdir -p "$outputDir" || \
+        die "Cannot create directory: $outputDir"
+fi
+
+#-------------------------------------------------------------------------------
+
+# Pass through content, filter for version and/or gzip
+#
+
+tmpFile="$outputDir/${0##*/}"
+trap "rm -fv $tmpFile >/dev/null; exit 0" EXIT TERM INT
+
+process()
+{
+    local appName="$1"
+    local outFile="$outputDir/${appName##*/}.1"
+
+    rm -f "$outFile"*;
+
+    "$appName" -help-man 2>/dev/null >| $tmpFile;
+
+    if grep -F -q "SYNOPSIS" "$tmpFile" 2>/dev/null
+    then
+        cat "$tmpFile" | \
+            sed -e "${sedFilter}" | "${gzipFilter:-cat}" \
+            >| "$outFile${gzipFilter:+.gz}"
+
+        echo "$outFile${gzipFilter:+.gz}" 1>&2
+    else
+        echo "Problem with $appName" 1>&2
+    fi
+}
+
+#------------------------------------------------------------------------------
+
+# Default to standard search directories
+[ "$#" -gt 0 ] || set -- ${searchDirs}
+
+echo "Generating manpages from OpenFOAM applications" 1>&2
+echo 1>&2
+
+for item
+do
+    if [ -d "$item" ]
+    then
+        # Process directory for applications - sort with ignore-case
+        echo "[directory] $item" 1>&2
+        choices="$(find $item -maxdepth 1 -executable -type f | sort -f 2>/dev/null)"
+        for appName in $choices
+        do
+            process $appName
+        done
+    elif command -v "$item" > /dev/null 2>&1
+    then
+        process $item
+    else
+        echo "No such file or directory: $item" 1>&2
+    fi
+done
+
+echo 1>&2
+echo "Done" 1>&2
+
+
+# -----------------------------------------------------------------------------

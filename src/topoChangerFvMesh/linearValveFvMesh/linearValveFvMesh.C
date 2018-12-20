@@ -76,7 +76,10 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
     List<faceZone*> fz(3);
 
     // Inner slider
-    const word innerSliderName(motionDict_.subDict("slider").lookup("inside"));
+    const word innerSliderName
+    (
+        motionDict_.subDict("slider").get<word>("inside")
+    );
     const polyPatch& innerSlider = boundaryMesh()[innerSliderName];
 
     fz[0] = new faceZone
@@ -89,7 +92,10 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
     );
 
     // Outer slider
-    const word outerSliderName(motionDict_.subDict("slider").lookup("outside"));
+    const word outerSliderName
+    (
+        motionDict_.subDict("slider").get<word>("outside")
+    );
     const polyPatch& outerSlider = boundaryMesh()[outerSliderName];
 
     fz[1] = new faceZone

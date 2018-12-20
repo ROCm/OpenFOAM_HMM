@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1812                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,44 +17,32 @@ FoamFile
 actions
 (
     {
-      name    bgr0;       // all around bgr
-      type    cellSet;
-      action  new;
-      source  zoneToCell;
-      sourceInfo
-      {
-          name    background;
-      }
+        name    bgr0;       // all around bgr
+        type    cellSet;
+        action  new;
+        source  zoneToCell;
+        zone    background;
     }
     {
         name    hullBox0;       // all around hull
         type    cellSet;
         action  new;
         source  zoneToCell;
-        sourceInfo
-        {
-            name    hullBox;
-        }
+        zone    hullBox;
     }
     {
         name    propeller0;       // all around propeller
         type    cellSet;
         action  new;
         source  zoneToCell;
-        sourceInfo
-        {
-            name    propeller;
-        }
+        zone    propeller;
     }
     {
         name    rudder0;       // all around rudder
         type    cellSet;
         action  new;
         source  zoneToCell;
-        sourceInfo
-        {
-            name    rudder;
-        }
+        zone    rudder;
     }
 
     {
@@ -62,10 +50,7 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set rudder0;
-        }
+        set     rudder0;
     }
 
 
@@ -74,13 +59,10 @@ actions
         type    cellSet;
         action  subset;
         source  boxToCell;
-        sourceInfo
-        {
-            boxes
-            (
-            (-0.10 -0.0749 -0.00499)(-0.050 0.0749 0.00499) //rudder
-            );
-        }
+        boxes
+        (
+            (-0.09 -0.12 -0.00499)(-0.059 -0.03 0.00499) //rudder
+        );
     }
 
     {
@@ -93,40 +75,28 @@ actions
         type    cellSet;
         action  new;
         source  cellToCell;
-        sourceInfo
-        {
-            set box;
-        }
+        set     box;
     }
     {
         name    keepBox;   //all cells
         type    cellSet;
         action  add;
         source  cellToCell;
-        sourceInfo
-        {
-            set propeller0;
-        }
+        set     propeller0;
     }
     {
         name    keepBox;   //all cells
         type    cellSet;
         action  add;
         source  cellToCell;
-        sourceInfo
-        {
-            set hullBox0;
-        }
+        set     hullBox0;
     }
     {
         name    keepBox;   //all cells
         type    cellSet;
         action  add;
         source  cellToCell;
-        sourceInfo
-        {
-            set bgr0;
-        }
+        set     bgr0;
     }
 );
 

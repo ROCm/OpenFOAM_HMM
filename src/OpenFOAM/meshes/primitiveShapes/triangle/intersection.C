@@ -34,10 +34,10 @@ const Foam::Enum
     Foam::intersection::direction
 >
 Foam::intersection::directionNames_
-{
+({
     { intersection::direction::VECTOR, "vector" },
     { intersection::direction::CONTACT_SPHERE, "contactSphere" },
-};
+});
 
 
 const Foam::Enum
@@ -45,11 +45,11 @@ const Foam::Enum
     Foam::intersection::algorithm
 >
 Foam::intersection::algorithmNames_
-{
+({
     { intersection::algorithm::FULL_RAY, "fullRay" },
     { intersection::algorithm::HALF_RAY, "halfRay" },
     { intersection::algorithm::VISIBLE, "visible" },
-};
+});
 
 
 // ************************************************************************* //

@@ -23,7 +23,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-    
+
 \*---------------------------------------------------------------------------*/
 
 #include "EulerFaD2dt2Scheme.H"
@@ -60,7 +60,7 @@ template<class Type>
 tmp<GeometricField<Type, faPatchField, areaMesh>>
 EulerFaD2dt2Scheme<Type>::facD2dt2
 (
-    const dimensioned<Type> dt 
+    const dimensioned<Type> dt
 )
 {
 
@@ -89,7 +89,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
         scalarField SS0 = mesh().S() + mesh().S0();
         scalarField S0S00 = mesh().S0() + mesh().S00();
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > tdt2dt2
+        tmp<GeometricField<Type, faPatchField, areaMesh>> tdt2dt2
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -113,7 +113,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -165,7 +165,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
         scalarField SS0 = mesh().S() + mesh().S0();
         scalarField S0S00 = mesh().S0() + mesh().S00();
 
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -192,7 +192,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -234,7 +234,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
 
     scalar coefft   = (deltaT + deltaT0)/(2*deltaT);
     scalar coefft00 = (deltaT + deltaT0)/(2*deltaT0);
-    scalar coefft0  = coefft + coefft00;  
+    scalar coefft0  = coefft + coefft00;
 
     if (mesh().moving())
     {
@@ -248,7 +248,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
             (mesh().S0() + mesh().S00())
            *rho.value();
 
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -277,12 +277,12 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
     else
     {
 
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
                 d2dt2IOobject,
-                rDeltaT2 * rho.value() * 
+                rDeltaT2 * rho.value() *
                 (
                     coefft*vf
                   - coefft0*vf.oldTime()
@@ -340,7 +340,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
             )
         );
 
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -362,7 +362,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
                     coefft
                    *(rho.boundaryField() + rho.oldTime().boundaryField())
                    *vf.boundaryField()
-                        
+
                   - (
                         coefft
                        *(
@@ -392,7 +392,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
         areaScalarField rhoRho0(rho + rho.oldTime());
         areaScalarField rho0Rho00(rho.oldTime() + rho.oldTime().oldTime());
 
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -416,7 +416,7 @@ EulerFaD2dt2Scheme<Type>::famD2dt2
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -428,7 +428,7 @@ EulerFaD2dt2Scheme<Type>::famD2dt2
     faMatrix<Type>& fam = tfam.ref();
 
     scalar deltaT = deltaT_();
-    scalar deltaT0 = deltaT0_(); 
+    scalar deltaT0 = deltaT0_();
 
     scalar coefft = (deltaT + deltaT0)/(2*deltaT);
     scalar coefft00 = (deltaT + deltaT0)/(2*deltaT0);
@@ -469,14 +469,14 @@ EulerFaD2dt2Scheme<Type>::famD2dt2
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 EulerFaD2dt2Scheme<Type>::famD2dt2
 (
     const dimensionedScalar& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -489,7 +489,7 @@ EulerFaD2dt2Scheme<Type>::famD2dt2
     faMatrix<Type>& fam = tfam.ref();
 
     scalar deltaT = deltaT_();
-    scalar deltaT0 = deltaT0_(); 
+    scalar deltaT0 = deltaT0_();
 
     scalar coefft = (deltaT + deltaT0)/(2*deltaT);
     scalar coefft00 = (deltaT + deltaT0)/(2*deltaT0);
@@ -537,7 +537,7 @@ EulerFaD2dt2Scheme<Type>::famD2dt2
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (

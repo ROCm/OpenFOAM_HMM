@@ -316,8 +316,7 @@ Foam::scalar Foam::wallBoundedParticle::trackFaceTri
 
         // Outwards pointing normal
         vector edgeNormal = (pt1 - pt0)^n;
-
-        edgeNormal /= mag(edgeNormal) + VSMALL;
+        edgeNormal.normalise();
 
         // Determine whether position and end point on either side of edge.
         scalar sEnd = (endPosition - pt0)&edgeNormal;

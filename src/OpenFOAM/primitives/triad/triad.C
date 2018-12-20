@@ -95,14 +95,6 @@ Foam::triad::triad(const quaternion& q)
 }
 
 
-Foam::triad::triad(const tensor& t)
-{
-    x() = t.x();
-    y() = t.y();
-    z() = t.z();
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::triad::orthogonalize()
@@ -376,16 +368,6 @@ Foam::triad::operator Foam::quaternion() const
     R.zz() = z().z();
 
     return quaternion(R);
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::triad::operator=(const tensor& t)
-{
-    x() = t.x();
-    y() = t.y();
-    z() = t.z();
 }
 
 

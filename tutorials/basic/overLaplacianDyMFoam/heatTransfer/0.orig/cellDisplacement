@@ -1,0 +1,59 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1812                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    location    "0.1";
+    object      cellDisplacement;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 0 0 0 0 0];
+
+
+internalField   uniform (0 0 0);
+
+boundaryField
+{
+    free
+    {
+        patchType       overset;
+        type            cellMotion;
+        value           uniform (0 0 0);
+    }
+
+    walls
+    {
+        type            cellMotion;
+        value           uniform (0 0 0);
+    }
+    hole
+    {
+        type            cellMotion;
+        value           uniform (0 0 0);
+    }
+    frontAndBack
+    {
+        type            empty;
+    }
+    left1
+    {
+        type            cellMotion;
+        value           uniform (0 0 0);
+    }
+    right1
+    {
+        type            cellMotion;
+        value           uniform (0 0 0);
+    }
+}
+
+
+// ************************************************************************* //

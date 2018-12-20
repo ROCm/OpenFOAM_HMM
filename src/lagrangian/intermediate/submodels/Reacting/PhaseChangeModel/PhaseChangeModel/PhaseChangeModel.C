@@ -95,16 +95,9 @@ Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
     CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     enthalpyTransfer_
     (
-        wordToEnthalpyTransfer(this->coeffDict().lookup("enthalpyTransfer"))
+        wordToEnthalpyTransfer(this->coeffDict().getWord("enthalpyTransfer"))
     ),
     dMass_(0.0)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PhaseChangeModel<CloudType>::~PhaseChangeModel()
 {}
 
 

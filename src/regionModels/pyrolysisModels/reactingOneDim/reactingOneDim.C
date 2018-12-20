@@ -52,11 +52,11 @@ addToRunTimeSelectionTable(pyrolysisModel, reactingOneDim, dictionary);
 void reactingOneDim::readReactingOneDimControls()
 {
     const dictionary& solution = this->solution().subDict("SIMPLE");
-    solution.lookup("nNonOrthCorr") >> nNonOrthCorr_;
-    time().controlDict().lookup("maxDi") >> maxDiff_;
-    coeffs().lookup("minimumDelta") >> minimumDelta_;
+    solution.readEntry("nNonOrthCorr", nNonOrthCorr_);
+    time().controlDict().readEntry("maxDi", maxDiff_);
+    coeffs().readEntry("minimumDelta", minimumDelta_);
     gasHSource_ = coeffs().lookupOrDefault("gasHSource", false);
-    coeffs().lookup("qrHSource") >> qrHSource_;
+    coeffs().readEntry("qrHSource", qrHSource_);
     useChemistrySolvers_ =
         coeffs().lookupOrDefault("useChemistrySolvers", true);
 }
@@ -106,7 +106,7 @@ void reactingOneDim::updateqr()
 
         // qr is positive going in the solid
         // If the surface is emitting the radiative flux is set to zero
-        qrBf[patchi] = max(qrBf[patchi], scalar(0.0));
+        qrBf[patchi] = max(qrBf[patchi], scalar(0));
     }
 
     const vectorField& cellC = regionMesh().cellCentres();
