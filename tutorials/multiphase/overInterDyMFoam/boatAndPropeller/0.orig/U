@@ -45,6 +45,7 @@ boundaryField
     "overset.*"
     {
         type            overset;
+	patchType	overset;
         value           uniform (0 0 0);
     }
 }

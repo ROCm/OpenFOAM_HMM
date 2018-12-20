@@ -83,7 +83,7 @@ solvers
 
 PIMPLE
 {
-    momentumPredictor   yes;
+    momentumPredictor   no;
     nOuterCorrectors    2;
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
@@ -93,7 +93,7 @@ PIMPLE
     massFluxInterpolation   no;
 
     moveMeshOuterCorrectors no;
-    turbOnFinalIterOnly no;
+    turbOnFinalIterOnly yes;
 
     oversetAdjustPhi    no;
 

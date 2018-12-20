@@ -39,7 +39,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear uncorrected;
+    default         Gauss linear uncorrected;//uncorrected;
 }
 
 interpolationSchemes
@@ -49,12 +49,12 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         uncorrected;
+    default         uncorrected;//uncorrected;
 }
 
 oversetInterpolation
 {
-    method          inverseDistance;//cellVolumeWeight;
+    method          inverseDistance;
 }
 
 oversetInterpolationSuppressed
