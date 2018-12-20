@@ -167,7 +167,7 @@ inline To& refCast(From& r, const dictionary& d)
 
 //- Check if dynamic_cast to TargetType is possible
 template<class TargetType, class Type>
-inline bool isA(const Type& t)
+inline const TargetType* isA(const Type& t)
 {
     const Type* p = &t;
     return dynamic_cast<const TargetType*>(p);
