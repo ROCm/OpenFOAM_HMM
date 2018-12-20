@@ -187,6 +187,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 :
     fixedJumpFvPatchField<vector>(ptf),
     phiName_(ptf.phiName_),
+    pName_(ptf.pName_),
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     rpm_(ptf.rpm_),
@@ -205,6 +206,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
 :
     fixedJumpFvPatchField<vector>(ptf, iF),
     phiName_(ptf.phiName_),
+    pName_(ptf.pName_),
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     rpm_(ptf.rpm_),
