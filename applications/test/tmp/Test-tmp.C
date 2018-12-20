@@ -56,16 +56,18 @@ int main()
     }
 
     {
-        tmp<scalarField> tfld1 = tmp<scalarField>::New(20, Zero);
+        auto tfld1 = tmp<scalarField>::New(20, Zero);
 
         Info<< "tmp refCount = " << tfld1->count() << nl;
         if (tfld1.valid())
         {
             Info<<"tmp: " << tfld1() << nl;
         }
-    }
 
-    {
+        Info<<"tmp addr: " << long(tfld1.get()) << nl;
+
+        // Hold on to the old content for a bit
+
         tmp<scalarField> tfld2 =
             tmp<scalarField>::NewFrom<myScalarField>(20, Zero);
 
@@ -74,6 +76,12 @@ int main()
         {
             Info<<"tmp: " << tfld2() << nl;
         }
+
+        Info<<"tmp addr: " << long(tfld2.get()) << nl;
+
+        tfld2.clear();
+
+        Info<<"after clear: " << long(tfld2.get()) << nl;
     }
 
     Info<< "\nEnd" << endl;

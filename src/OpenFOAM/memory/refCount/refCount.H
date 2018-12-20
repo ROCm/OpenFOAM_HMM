@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,25 +84,25 @@ public:
     // Member Operators
 
         //- Increment the reference count
-        void operator++()
+        void operator++() noexcept
         {
             ++count_;
         }
 
         //- Increment the reference count
-        void operator++(int)
+        void operator++(int) noexcept
         {
             ++count_;
         }
 
         //- Decrement the reference count
-        void operator--()
+        void operator--() noexcept
         {
             --count_;
         }
 
         //- Decrement the reference count
-        void operator--(int)
+        void operator--(int) noexcept
         {
             --count_;
         }

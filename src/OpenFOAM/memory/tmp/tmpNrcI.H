@@ -150,28 +150,28 @@ inline Foam::tmpNrc<T>::~tmpNrc()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline bool Foam::tmpNrc<T>::isTmp() const
+inline bool Foam::tmpNrc<T>::isTmp() const noexcept
 {
     return type_ == PTR;
 }
 
 
 template<class T>
-inline bool Foam::tmpNrc<T>::empty() const
+inline bool Foam::tmpNrc<T>::empty() const noexcept
 {
     return (!ptr_ && isTmp());
 }
 
 
 template<class T>
-inline bool Foam::tmpNrc<T>::valid() const
+inline bool Foam::tmpNrc<T>::valid() const noexcept
 {
     return (ptr_ || type_ == CREF);
 }
 
 
 template<class T>
-inline bool Foam::tmpNrc<T>::movable() const
+inline bool Foam::tmpNrc<T>::movable() const noexcept
 {
     return (type_ == PTR && ptr_);
 }
@@ -181,6 +181,20 @@ template<class T>
 inline Foam::word Foam::tmpNrc<T>::typeName() const
 {
     return "tmpNrc<" + word(typeid(T).name()) + '>';
+}
+
+
+template<class T>
+inline T* Foam::tmpNrc<T>::get() noexcept
+{
+    return ptr_; // non-const pointer
+}
+
+
+template<class T>
+inline const T* Foam::tmpNrc<T>::get() const noexcept
+{
+    return ptr_; // const pointer
 }
 
 
@@ -262,7 +276,7 @@ inline T* Foam::tmpNrc<T>::ptr() const
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::clear() const
+inline void Foam::tmpNrc<T>::clear() const noexcept
 {
     if (isTmp() && ptr_)
     {
@@ -273,7 +287,7 @@ inline void Foam::tmpNrc<T>::clear() const
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::reset()
+inline void Foam::tmpNrc<T>::reset() noexcept
 {
     clear();
     ptr_ = nullptr;
@@ -282,7 +296,7 @@ inline void Foam::tmpNrc<T>::reset()
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::reset(T* p)
+inline void Foam::tmpNrc<T>::reset(T* p) noexcept
 {
     clear();
     ptr_ = p;
