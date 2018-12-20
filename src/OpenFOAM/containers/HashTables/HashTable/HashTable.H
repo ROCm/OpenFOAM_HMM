@@ -685,7 +685,12 @@ protected:
             //- The key associated with the iterator
             inline const Key& key() const;
 
+
         // Member Operators
+
+            //- True if iterator points to an entry
+            //  This can be used directly instead of comparing to end()
+            explicit inline operator bool() const noexcept;
 
             //- Compare hash-entry element pointers.
             //  Independent of const/non-const access

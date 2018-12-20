@@ -126,6 +126,15 @@ inline const Key& Foam::HashTable<T, Key, Hash>::Iterator<Const>::key() const
 
 template<class T, class Key, class Hash>
 template<bool Const>
+inline Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator
+bool() const noexcept
+{
+    return entry_;
+}
+
+
+template<class T, class Key, class Hash>
+template<bool Const>
 inline bool Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator==
 (
     const Iterator<true>& iter

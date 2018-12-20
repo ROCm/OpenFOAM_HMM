@@ -40,7 +40,7 @@ using namespace Foam;
 template<class Iter>
 void printIf(const Iter& iter)
 {
-    if (iter.found())
+    if (iter)
     {
         Info<< *iter;
     }
