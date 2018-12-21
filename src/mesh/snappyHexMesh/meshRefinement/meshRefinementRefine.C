@@ -1561,20 +1561,10 @@ bool Foam::meshRefinement::isGap
             {
                 return true;
             }
-            else
-            {
-                return  false;
-            }
-        }
-        else
-        {
-            return false;
         }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1619,20 +1609,10 @@ bool Foam::meshRefinement::isNormalGap
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
         }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
