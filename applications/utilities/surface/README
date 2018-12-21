@@ -17,11 +17,12 @@ surfaceCoarsen
 surfaceConvert
 - Converts surfaces to/from various formats
 
+surfaceMeshExtract
+- Extracts mesh patches (or faceSets) and writes as a single surface.
+- foamToSurface duplicates this
+
 surfaceFind
 - Finds nearest vertex and face to given point.
-
-surfaceMeshTriangulate
-- Triangulate external faces of mesh and write as surface.
 
 surfacePointMerge
 - Explicit point merge of surface.

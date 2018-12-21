@@ -16,7 +16,7 @@ constant/triSurface/boundaryAndFaceZones.stl
             faceSet porosityFaces subset cellToFace porosity all
             faceZoneSet porosityFaces new setToFaceZone porosityFaces
 
-        surfaceMeshTriangulate -faceZones '(porosityFaces)' boundaryAndFaceZones.stl
+        surfaceMeshExtract -faceZones '(porosityFaces)' boundaryAndFaceZones.obj
     )
 
 surfaceFeatureExtract

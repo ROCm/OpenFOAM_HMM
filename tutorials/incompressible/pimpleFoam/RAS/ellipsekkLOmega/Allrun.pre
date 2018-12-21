@@ -14,7 +14,7 @@ runApplication topoSet
 
 runApplication createPatch -overwrite
 
-runApplication surfaceMeshTriangulate \
+runApplication surfaceMeshExtract \
     -patches hole ppGeometry.vtp -constant -time none
 
 echo "End"
