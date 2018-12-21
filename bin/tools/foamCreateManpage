@@ -27,8 +27,9 @@ usage() {
 Usage: ${0##*/} [OPTION] [appName .. [appNameN]]
 options:
   -dir dir          Directory to process
-  -gzip             Compressed output
-  -o DIR            Write to alternative output directory
+  -gzip             Compressed manpage output
+  -pdf              Process as manpage and pass to ps2pdf
+  -output DIR       Write to alternative output directory
   -version VER      Specify an alternative version
   -h | -help        Print the usage
 
@@ -59,7 +60,7 @@ die()
 
 #-------------------------------------------------------------------------------
 searchDirs="$FOAM_APPBIN"
-unset gzipFilter sedFilter outputDir
+unset sedFilter outputDir outputType
 
 while [ "$#" -gt 0 ]
 do
@@ -67,14 +68,17 @@ do
     -h | -help*)
         usage
         ;;
-    -d | -dir)
+    -dir)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         searchDirs="$2"
         [ -d "$searchDirs" ] || die "directory not found '$searchDirs'"
         shift
         ;;
     -gz | -gzip)
-        gzipFilter="gzip"
+        outputType="gz"
+        ;;
+    -pdf)
+        outputType="pdf"
         ;;
     -v | -version)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
@@ -100,51 +104,83 @@ done
 : ${outputDir:=$defaultOutputDir}
 
 # Verify that output is writeable
-if [ -e "$outputDir" ]
+if [ -e x"$outputDir" ]
 then
     [ -d "$outputDir" ] && [ -w "$outputDir" ] || \
         die "Cannot write to $outputDir" "Not a directory, or no permission?"
 else
-    mkdir -p "$outputDir" || \
+    mkdir -p "$outputDir" 2> /dev/null || \
         die "Cannot create directory: $outputDir"
 fi
 
-#-------------------------------------------------------------------------------
+echo "Generating manpages from OpenFOAM applications" 1>&2
+echo 1>&2
 
-# Pass through content, filter for version and/or gzip
-#
-
-tmpFile="$outputDir/${0##*/}"
+# Use a tmp file so that we confirm that the content was
+# generated and looks somewhat like a manpage (has a SYNOPSIS)
+tmpFile="$outputDir/${0##*/}-tmp$$"
 trap "rm -fv $tmpFile >/dev/null; exit 0" EXIT TERM INT
 
+
+# Any special filter requirements?
+# Default extension is "1" for manpage
+outputExt="1"
+
+case "$outputType" in
+    pdf)
+        outputExt="pdf"
+        command -v groff  > /dev/null || die "Missing program: groff"
+        command -v ps2pdf > /dev/null || die "Missing program: ps2pdf"
+        ;;
+    gz)
+        outputExt="1.gz"
+        command -v gzip   > /dev/null || die "Missing program: gzip"
+    ;;
+esac
+
+
+#-------------------------------------------------------------------------------
+
+# Get nroff man content from application, store in tmp file for checking
+# and output / filter
+# 1 = application
 process()
 {
     local appName="$1"
-    local outFile="$outputDir/${appName##*/}.1"
+    local outFile="$outputDir/${appName##*/}"
 
     rm -f "$outFile"*;
 
-    "$appName" -help-man 2>/dev/null >| $tmpFile;
+    "$appName" -help-man | sed -e "${sedFilter}" 2>/dev/null >| "$tmpFile"
 
+    # Check that it looks ok
     if grep -F -q "SYNOPSIS" "$tmpFile" 2>/dev/null
     then
-        cat "$tmpFile" | \
-            sed -e "${sedFilter}" | "${gzipFilter:-cat}" \
-            >| "$outFile${gzipFilter:+.gz}"
+        case "$outputType" in
+        pdf)
+            groff -man "$tmpFile" | ps2pdf - "$outFile.$outputExt"
+            ;;
 
-        echo "$outFile${gzipFilter:+.gz}" 1>&2
+        gz)
+            gzip -c "$tmpFile" >| "$outFile.$outputExt"
+            ;;
+
+        *)
+            \cp -f "$tmpFile" "$outFile.$outputExt"
+            ;;
+        esac
+
+        echo "$outFile.$outputExt" 1>&2
     else
-        echo "Problem with $appName" 1>&2
+        echo "Problem with ${appName##*/}" 1>&2
     fi
 }
+
 
 #------------------------------------------------------------------------------
 
 # Default to standard search directories
 [ "$#" -gt 0 ] || set -- ${searchDirs}
-
-echo "Generating manpages from OpenFOAM applications" 1>&2
-echo 1>&2
 
 for item
 do
