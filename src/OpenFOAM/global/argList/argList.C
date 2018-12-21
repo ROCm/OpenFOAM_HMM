@@ -98,9 +98,9 @@ Foam::argList::initValidTables::initValidTables()
     argList::addOption
     (
         "hostRoots",
-        "(((host1 dir1) .. (hostN dirN))",
-        "slave root directories (per host) for distributed running. "
-        "The host specification can use a regex.",
+        "((host1 dir1) .. (hostN dirN))",
+        "Per-host slave root directories for distributed running."
+        " The host specification can be a regex.",
         true  // advanced option
     );
     validParOptions.set

@@ -83,7 +83,7 @@ void Foam::waveModel::initialiseGeometry()
     for (label paddlei = 0; paddlei < nPaddle_; ++paddlei)
     {
         xPaddle_[paddlei] = xMid;
-        yPaddle_[paddlei] = paddlei*paddleDy + yMin + 0.5*paddleDy;;
+        yPaddle_[paddlei] = paddlei*paddleDy + yMin + 0.5*paddleDy;
     }
 
     // Local face centres

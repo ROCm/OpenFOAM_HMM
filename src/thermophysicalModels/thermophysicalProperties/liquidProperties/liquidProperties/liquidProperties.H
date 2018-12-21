@@ -291,7 +291,7 @@ public:
         inline void readIfPresent(Liquid& l, const dictionary& dict);
 
         //- Write the function coefficients
-        virtual void writeData(Ostream& os) const = 0;;
+        virtual void writeData(Ostream& os) const = 0;
 
         //- Write the data for each of the property functions
         template<class Liquid>
