@@ -2095,6 +2095,11 @@ void Foam::snappySnapDriver::smoothDisplacement
     motionSmoother& meshMover
 ) const
 {
+    if (dryRun_)
+    {
+        return;
+    }
+
     const fvMesh& mesh = meshRefiner_.mesh();
     const indirectPrimitivePatch& pp = meshMover.patch();
 

@@ -77,10 +77,13 @@ void Foam::refinementFeatures::read
                 fName
             );
 
-            Info<< "Read extendedFeatureEdgeMesh " << extFeatObj.name()
-                << nl << incrIndent;
-            eMeshPtr().writeStats(Info);
-            Info<< decrIndent << endl;
+            if (!dryRun_)
+            {
+                Info<< "Read extendedFeatureEdgeMesh " << extFeatObj.name()
+                    << nl << incrIndent;
+                eMeshPtr().writeStats(Info);
+                Info<< decrIndent << endl;
+            }
 
             set(featI, new extendedFeatureEdgeMesh(extFeatObj, eMeshPtr()));
         }
@@ -108,16 +111,17 @@ void Foam::refinementFeatures::read
                     << exit(FatalIOError);
             }
 
-
             // Read as edgeMesh
             autoPtr<edgeMesh> eMeshPtr = edgeMesh::New(fName);
             const edgeMesh& eMesh = eMeshPtr();
 
-            Info<< "Read edgeMesh " << featObj.name() << nl
-                << incrIndent;
-            eMesh.writeStats(Info);
-            Info<< decrIndent << endl;
-
+            if (!dryRun_)
+            {
+                Info<< "Read edgeMesh " << featObj.name() << nl
+                    << incrIndent;
+                eMesh.writeStats(Info);
+                Info<< decrIndent << endl;
+            }
 
             // Analyse for feature points. These are all classified as mixed
             // points for lack of anything better
@@ -260,14 +264,17 @@ void Foam::refinementFeatures::read
             distances_[featI] = scalarField(1, Zero);
         }
 
-        Info<< "Refinement level according to distance to "
-            << featFileName << " (" << eMesh.points().size() << " points, "
-            << eMesh.edges().size() << " edges)." << endl;
-        forAll(levels_[featI], j)
+        if (!dryRun_)
         {
-            Info<< "    level " << levels_[featI][j]
-                << " for all cells within " << distances_[featI][j]
-                << " metre." << endl;
+            Info<< "Refinement level according to distance to "
+                << featFileName << " (" << eMesh.points().size() << " points, "
+                << eMesh.edges().size() << " edges)." << endl;
+            forAll(levels_[featI], j)
+            {
+                Info<< "    level " << levels_[featI][j]
+                    << " for all cells within " << distances_[featI][j]
+                    << " metre." << endl;
+            }
         }
     }
 }

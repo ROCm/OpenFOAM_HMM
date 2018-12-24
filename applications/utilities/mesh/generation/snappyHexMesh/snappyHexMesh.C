@@ -1362,13 +1362,16 @@ int main(int argc, char *argv[])
         globalToMasterPatch.setSize(surfaces.nRegions(), -1);
         globalToSlavePatch.setSize(surfaces.nRegions(), -1);
 
-        Info<< setf(ios_base::left)
-            << setw(6) << "Patch"
-            << setw(20) << "Type"
-            << setw(30) << "Region" << nl
-            << setw(6) << "-----"
-            << setw(20) << "----"
-            << setw(30) << "------" << endl;
+        if (!dryRun)
+        {
+            Info<< setf(ios_base::left)
+                << setw(6) << "Patch"
+                << setw(20) << "Type"
+                << setw(30) << "Region" << nl
+                << setw(6) << "-----"
+                << setw(20) << "----"
+                << setw(30) << "------" << endl;
+        }
 
         const labelList& surfaceGeometry = surfaces.surfaces();
         const PtrList<dictionary>& surfacePatchInfo = surfaces.patchInfo();
@@ -1380,7 +1383,10 @@ int main(int argc, char *argv[])
 
             const wordList& regNames = allGeometry.regionNames()[geomi];
 
-            Info<< surfaces.names()[surfi] << ':' << nl << nl;
+            if (!dryRun)
+            {
+                Info<< surfaces.names()[surfi] << ':' << nl << nl;
+            }
 
             const word& fzName = surfaces.surfZones()[surfi].faceZoneName();
 
@@ -1413,10 +1419,13 @@ int main(int argc, char *argv[])
                         );
                     }
 
-                    Info<< setf(ios_base::left)
-                        << setw(6) << patchi
-                        << setw(20) << pbm[patchi].type()
-                        << setw(30) << regNames[i] << nl;
+                    if (!dryRun)
+                    {
+                        Info<< setf(ios_base::left)
+                            << setw(6) << patchi
+                            << setw(20) << pbm[patchi].type()
+                            << setw(30) << regNames[i] << nl;
+                    }
 
                     globalToMasterPatch[globalRegioni] = patchi;
                     globalToSlavePatch[globalRegioni] = patchi;
@@ -1453,10 +1462,13 @@ int main(int argc, char *argv[])
                             );
                         }
 
-                        Info<< setf(ios_base::left)
-                            << setw(6) << patchi
-                            << setw(20) << pbm[patchi].type()
-                            << setw(30) << regNames[i] << nl;
+                        if (!dryRun)
+                        {
+                            Info<< setf(ios_base::left)
+                                << setw(6) << patchi
+                                << setw(20) << pbm[patchi].type()
+                                << setw(30) << regNames[i] << nl;
+                        }
 
                         globalToMasterPatch[globalRegioni] = patchi;
                     }
@@ -1485,10 +1497,13 @@ int main(int argc, char *argv[])
                             );
                         }
 
-                        Info<< setf(ios_base::left)
-                            << setw(6) << patchi
-                            << setw(20) << pbm[patchi].type()
-                            << setw(30) << slaveName << nl;
+                        if (!dryRun)
+                        {
+                            Info<< setf(ios_base::left)
+                                << setw(6) << patchi
+                                << setw(20) << pbm[patchi].type()
+                                << setw(30) << slaveName << nl;
+                        }
 
                         globalToSlavePatch[globalRegioni] = patchi;
                     }
@@ -1510,7 +1525,10 @@ int main(int argc, char *argv[])
                 }
             }
 
-            Info<< nl;
+            if (!dryRun)
+            {
+                Info<< nl;
+            }
         }
         Info<< "Added patches in = "
             << mesh.time().cpuTimeIncrement() << " s" << nl << endl;

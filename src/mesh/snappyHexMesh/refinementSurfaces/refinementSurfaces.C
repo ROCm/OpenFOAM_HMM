@@ -703,10 +703,14 @@ void Foam::refinementSurfaces::setMinLevelFields(const shellSurfaces& shells)
                     }
                 }
 
-                Info<< "For geometry " << geom.name()
-                    << " detected " << returnReduce(nUncached, sumOp<label>())
-                    << " uncached triangles out of " << geom.globalSize()
-                    << endl;
+                if (!dryRun_)
+                {
+                    Info<< "For geometry " << geom.name()
+                        << " detected "
+                        << returnReduce(nUncached, sumOp<label>())
+                        << " uncached triangles out of " << geom.globalSize()
+                        << endl;
+                }
             }
 
 

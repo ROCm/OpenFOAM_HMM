@@ -285,10 +285,13 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
         }
         reduce(nChangedFaces, sumOp<label>());
 
-        Info<< "Edge intersection testing:" << nl
-            << "    Number of edges             : " << nMasterFaces << nl
-            << "    Number of edges to retest   : " << nChangedFaces
-            << endl;
+        if (!dryRun_)
+        {
+            Info<< "Edge intersection testing:" << nl
+                << "    Number of edges             : " << nMasterFaces << nl
+                << "    Number of edges to retest   : " << nChangedFaces
+                << endl;
+        }
     }
 
 
@@ -342,7 +345,11 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     label nHits = countHits();
     label nTotHits = returnReduce(nHits, sumOp<label>());
 
-    Info<< "    Number of intersected edges : " << nTotHits << endl;
+
+    if (!dryRun_)
+    {
+        Info<< "    Number of intersected edges : " << nTotHits << endl;
+    }
 
     // Set files to same time as mesh
     setInstance(mesh_.facesInstance());
