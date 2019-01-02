@@ -26,6 +26,16 @@ License
 #include "reactingMixture.H"
 #include "fvMesh.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class ThermoType>
+Foam::autoPtr<Foam::chemistryReader<ThermoType>>&
+Foam::reactingMixture<ThermoType>::reader()
+{
+    return static_cast<autoPtr<chemistryReader<ThermoType>>&>(*this);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ThermoType>
@@ -45,20 +55,21 @@ Foam::reactingMixture<ThermoType>::reactingMixture
     (
         thermoDict,
         *this,
-        autoPtr<chemistryReader<ThermoType>>::operator()().speciesThermo(),
+        this->reader()->speciesThermo(),
         mesh,
         phaseName
     ),
     PtrList<Reaction<ThermoType>>
     (
-        autoPtr<chemistryReader<ThermoType>>::operator()().reactions()
+        this->reader()->reactions()
     ),
     speciesComposition_
     (
-        autoPtr<chemistryReader<ThermoType>>::operator()().specieComposition()
+        this->reader()->specieComposition()
     )
 {
-    autoPtr<chemistryReader<ThermoType>>::clear();
+    // Done with reader
+    reader().clear();
 }
 
 

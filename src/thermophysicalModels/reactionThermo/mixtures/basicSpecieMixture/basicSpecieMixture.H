@@ -69,16 +69,15 @@ public:
         //- Construct from dictionary, species names, mesh and phase name
         basicSpecieMixture
         (
-            const dictionary&,
+            const dictionary& thermoDict,
             const wordList& specieNames,
-            const fvMesh&,
-            const word&
+            const fvMesh& mesh,
+            const word& phaseName
         );
 
 
     //- Destructor
-    virtual ~basicSpecieMixture()
-    {}
+    virtual ~basicSpecieMixture() = default;
 
 
     // Member functions

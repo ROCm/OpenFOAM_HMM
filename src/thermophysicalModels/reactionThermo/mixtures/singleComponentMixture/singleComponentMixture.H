@@ -66,11 +66,16 @@ public:
     // Constructors
 
         //- Construct from dictionary, mesh and phase name
-        singleComponentMixture(const dictionary&, const fvMesh&, const word&);
+        singleComponentMixture
+        (
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
 
 
     //- Destructor
-    virtual ~singleComponentMixture();
+    virtual ~singleComponentMixture() = default;
 
 
     // Member Functions

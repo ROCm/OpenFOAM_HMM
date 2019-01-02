@@ -40,13 +40,6 @@ Foam::singleComponentMixture<ThermoType>::singleComponentMixture
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class ThermoType>
-Foam::singleComponentMixture<ThermoType>::~singleComponentMixture()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class ThermoType>

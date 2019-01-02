@@ -76,8 +76,8 @@ class egrMixture
         //- Residual gases
         volScalarField& egr_;
 
-        //- Construct as copy (not implemented)
-        egrMixture(const egrMixture<ThermoType>&);
+        //- No copy construct
+        egrMixture(const egrMixture<ThermoType>&) = delete;
 
 
 public:
@@ -89,7 +89,12 @@ public:
     // Constructors
 
         //- Construct from dictionary, mesh and phaseName
-        egrMixture(const dictionary&, const fvMesh&, const word&);
+        egrMixture
+        (
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
 
 
     //- Destructor

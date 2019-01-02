@@ -126,8 +126,7 @@ public:
 
 
     //- Destructor
-    virtual ~foamChemistryReader()
-    {}
+    virtual ~foamChemistryReader() = default;
 
 
     // Member functions

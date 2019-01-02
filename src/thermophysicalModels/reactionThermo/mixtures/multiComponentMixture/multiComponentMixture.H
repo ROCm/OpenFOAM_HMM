@@ -96,17 +96,21 @@ public:
             const dictionary&,
             const wordList& specieNames,
             const HashPtrTable<ThermoType>& thermoData,
-            const fvMesh&,
-            const word&
+            const fvMesh& mesh,
+            const word& phaseName
         );
 
         //- Construct from dictionary, mesh and phase name
-        multiComponentMixture(const dictionary&, const fvMesh&, const word&);
+        multiComponentMixture
+        (
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
 
 
     //- Destructor
-    virtual ~multiComponentMixture()
-    {}
+    virtual ~multiComponentMixture() = default;
 
 
     // Member functions

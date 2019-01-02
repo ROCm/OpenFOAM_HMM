@@ -35,12 +35,11 @@ Foam::chemistryReader<ThermoType>::New
     speciesTable& species
 )
 {
-    // Let the chemistry reader type default to CHEMKIN
-    // for backward compatibility
-    word readerName("chemkinReader");
-
-    // otherwise use the specified reader
-    thermoDict.readIfPresent("chemistryReader", readerName);
+    // Use specified reader or default to CHEMKIN for backward compatibility
+    const word readerName
+    (
+        thermoDict.lookupOrDefault<word>("chemistryReader", "chemkinReader")
+    );
 
     Info<< "Selecting chemistryReader " << readerName << endl;
 

@@ -73,8 +73,11 @@ class inhomogeneousMixture
         //- Regress variable
         volScalarField& b_;
 
-        //- Construct as copy (not implemented)
-        inhomogeneousMixture(const inhomogeneousMixture<ThermoType>&);
+        //- No copy construct
+        inhomogeneousMixture
+        (
+            const inhomogeneousMixture<ThermoType>&
+        ) = delete;
 
 
 public:
@@ -86,7 +89,12 @@ public:
     // Constructors
 
         //- Construct from dictionary, mesh and phase name
-        inhomogeneousMixture(const dictionary&, const fvMesh&, const word&);
+        inhomogeneousMixture
+        (
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
 
 
     //- Destructor

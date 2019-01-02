@@ -32,7 +32,7 @@ template<class ThermoType>
 void Foam::singleStepReactingMixture<ThermoType>::calculateqFuel()
 {
     const Reaction<ThermoType>& reaction = this->operator[](0);
-    const  scalar Wu = this->speciesData()[fuelIndex_].W();
+    const scalar Wu = this->speciesData()[fuelIndex_].W();
 
     forAll(reaction.lhs(), i)
     {
@@ -134,7 +134,7 @@ void Foam::singleStepReactingMixture<ThermoType>::fresCorrect()
 {
     const Reaction<ThermoType>& reaction = this->operator[](0);
 
-    label O2Index = this->species()["O2"];
+    const label O2Index = this->species()["O2"];
     const volScalarField& YFuel = this->Y()[fuelIndex_];
     const volScalarField& YO2 = this->Y()[O2Index];
 
@@ -236,8 +236,6 @@ Foam::singleStepReactingMixture<ThermoType>::singleStepReactingMixture
         massAndAirStoichRatios();
 
         calculateMaxProducts();
-
-        autoPtr<chemistryReader<ThermoType>>::clear();
     }
     else
     {

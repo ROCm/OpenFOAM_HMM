@@ -90,16 +90,15 @@ public:
         //- Construct from dictionary, species names, mesh and phase name
         basicMultiComponentMixture
         (
-            const dictionary&,
+            const dictionary& thermoDict,
             const wordList& specieNames,
-            const fvMesh&,
-            const word&
+            const fvMesh& mesh,
+            const word& phaseName
         );
 
 
     //- Destructor
-    virtual ~basicMultiComponentMixture()
-    {}
+    virtual ~basicMultiComponentMixture() = default;
 
 
     // Member functions

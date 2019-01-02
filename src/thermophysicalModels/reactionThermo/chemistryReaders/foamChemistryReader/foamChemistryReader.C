@@ -36,7 +36,7 @@ Foam::speciesTable& Foam::foamChemistryReader<ThermoType>::setSpecies
     speciesTable& species
 )
 {
-    wordList s(dict.lookup("species"));
+    wordList s(dict.get<wordList>("species"));
     species.transfer(s);
     return species;
 }
@@ -51,23 +51,23 @@ void Foam::foamChemistryReader<ThermoType>::readSpeciesComposition()
         return;
     }
 
-    wordList e(chemDict_.lookup("elements"));
+    wordList e(chemDict_.get<wordList>("elements"));
     label currentElementIndex(0);
 
     DynamicList<word> elementNames_;
     HashTable<label> elementIndices_;
 
-    forAll(e, ei)
+    for (const word& elemName : e)
     {
-        if (!elementIndices_.found(e[ei]))
+        if (!elementIndices_.found(elemName))
         {
-            elementIndices_.insert(e[ei], currentElementIndex++);
-            elementNames_.append(e[ei]);
+            elementIndices_.insert(elemName, currentElementIndex++);
+            elementNames_.append(elemName);
         }
         else
         {
             IOWarningInFunction(chemDict_)
-                << "element " << e[ei] << " already in table." << endl;
+                << "element " << elemName << " already in table." << endl;
         }
     }
 

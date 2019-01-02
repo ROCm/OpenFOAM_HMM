@@ -69,16 +69,15 @@ public:
         //- Construct from dictionary, specie names, mesh and phase name
         basicCombustionMixture
         (
-            const dictionary&,
+            const dictionary& thermoDict,
             const wordList& specieNames,
-            const fvMesh&,
-            const word&
+            const fvMesh& mesh,
+            const word& phaseName
         );
 
 
     //- Destructor
-    virtual ~basicCombustionMixture()
-    {}
+    virtual ~basicCombustionMixture() = default;
 
 
     // Member functions
