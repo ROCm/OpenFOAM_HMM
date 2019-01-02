@@ -76,8 +76,7 @@ Foam::labelList Foam::manualRenumber::renumber
         )
     );
 
-    // check if the final renumbering is OK
-
+    // Check if the final renumbering is OK
     if (newToOld.size() != points.size())
     {
         FatalErrorInFunction
@@ -94,7 +93,7 @@ Foam::labelList Foam::manualRenumber::renumber
     labelList oldToNew(points.size(), -1);
     forAll(newToOld, i)
     {
-        label origCelli = newToOld[i];
+        const label origCelli = newToOld[i];
 
         if (origCelli < 0 || origCelli >= points.size())
         {
@@ -122,7 +121,7 @@ Foam::labelList Foam::manualRenumber::renumber
         }
     }
 
-    return newToOld;
+    return std::move(newToOld);
 }
 
 

@@ -988,7 +988,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findOffsetPatchFaces
         offsetBoundaryCells.write();
     }
 
-    return offsetBoundaryCells;
+    return std::move(offsetBoundaryCells);
 }
 
 

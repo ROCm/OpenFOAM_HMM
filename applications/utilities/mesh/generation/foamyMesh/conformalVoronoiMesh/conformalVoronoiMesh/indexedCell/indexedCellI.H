@@ -363,7 +363,7 @@ CGAL::indexedCell<Gt, Cb>::globallyOrderedCellVertices
         tVGI[i] = vertexMap[i];
     }
 
-    return tVGI;
+    return std::move(tVGI);
 }
 
 

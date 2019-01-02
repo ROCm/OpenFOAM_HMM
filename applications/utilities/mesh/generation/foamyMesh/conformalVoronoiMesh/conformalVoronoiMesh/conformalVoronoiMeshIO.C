@@ -1355,11 +1355,10 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findRemainingProtrusionSet
         protrudingCells.insert(pCells);
     }
 
-    label protrudingCellsSize = protrudingCells.size();
+    const label protrudingCellsSize =
+        returnReduce(protrudingCells.size(), sumOp<label>());
 
-    reduce(protrudingCellsSize, sumOp<label>());
-
-    if (foamyHexMeshControls().objOutput() && protrudingCellsSize > 0)
+    if (foamyHexMeshControls().objOutput() && protrudingCellsSize)
     {
         Info<< nl << "Found " << protrudingCellsSize
             << " cells protruding from the surface, writing cellSet "
@@ -1369,7 +1368,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findRemainingProtrusionSet
         protrudingCells.write();
     }
 
-    return protrudingCells;
+    return std::move(protrudingCells);
 }
 
 
