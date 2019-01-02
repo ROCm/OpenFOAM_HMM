@@ -114,7 +114,7 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
     maxNut_
     (
         "maxNut",
-        dimensionSet(0,2,-1,0,0),
+        dimViscosity,
         coeffDict_.lookupOrDefault<scalar>("maxNut",1000)
     ),
 
@@ -142,7 +142,7 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
             IOobject::NO_WRITE
         ),
         U.mesh(),
-        dimensionedScalar(dimensionSet(0, 2, -1, 0, 0), Zero)
+        dimensionedScalar(dimViscosity, Zero)
     ),
 
     gs0_
@@ -156,7 +156,7 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
             IOobject::NO_WRITE
         ),
         U.mesh(),
-        dimensionedScalar(dimensionSet(0, 0, 0, 0, 0), Zero)
+        dimensionedScalar(dimless, Zero)
     ),
 
     kappa_
@@ -184,7 +184,7 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
             IOobject::AUTO_WRITE
         ),
         U.mesh(),
-        dimensionedScalar(dimensionSet(0, 2, -1, 0, 0), Zero)
+        dimensionedScalar(dimViscosity, Zero)
     )
 {
     if (type == typeName)

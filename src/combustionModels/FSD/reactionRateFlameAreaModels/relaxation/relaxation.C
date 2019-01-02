@@ -113,8 +113,6 @@ void Foam::reactionRateFlameAreaModels::relaxation::correct
 
     const volScalarField omegaInf(correlation_.omega0Sigma(sigmaTotal));
 
-    dimensionedScalar sigma0("sigma0", sigma.dimensions(), Zero);
-
     const volScalarField tau(C_*mag(sigmaTotal));
 
     volScalarField Rc
@@ -157,10 +155,8 @@ bool  Foam::reactionRateFlameAreaModels::relaxation::read
         );
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 // ************************************************************************* //

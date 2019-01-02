@@ -71,9 +71,8 @@
 
         const surfaceVectorField& Sf = mesh.Sf();
 
-        forAll(faces, i)
+        for (const label facei : faces)
         {
-            label facei = faces[i];
             murf[facei] = muri;
             Mrf[facei] = Mri*(orientationi & Sf[facei]);
         }

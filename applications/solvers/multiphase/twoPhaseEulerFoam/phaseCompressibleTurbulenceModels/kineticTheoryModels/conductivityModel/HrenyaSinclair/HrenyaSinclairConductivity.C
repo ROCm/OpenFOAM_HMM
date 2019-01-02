@@ -57,7 +57,7 @@ Foam::kineticTheoryModels::conductivityModels::HrenyaSinclair::HrenyaSinclair
 :
     conductivityModel(dict),
     coeffDict_(dict.optionalSubDict(typeName + "Coeffs")),
-    L_("L", dimensionSet(0, 1, 0, 0, 0), coeffDict_)
+    L_("L", dimLength, coeffDict_)
 {}
 
 

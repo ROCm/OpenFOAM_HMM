@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,17 @@ License
 #include <limits>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dimensionSet::dimensionSet(const dictionary& dict, const word& entryName)
+{
+    const entry& e = dict.lookupEntry(entryName, keyType::REGEX);
+    ITstream& is = e.stream();
+
+    is >> *this;
+
+    e.checkITstream(is);
+}
+
 
 Foam::dimensionSet::dimensionSet(Istream& is)
 {
@@ -57,7 +68,7 @@ void Foam::dimensionSet::tokeniser::push(const token& t)
     }
     else
     {
-        size_++;
+        ++size_;
     }
 }
 
@@ -620,7 +631,7 @@ Foam::Ostream& Foam::dimensionSet::write
     if (writeUnits.valid() && os.format() == IOstream::ASCII)
     {
         scalarField exponents(dimensionSet::nDimensions);
-        for (int d=0; d<dimensionSet::nDimensions; d++)
+        for (int d=0; d<dimensionSet::nDimensions; ++d)
         {
             exponents[d] = exponents_[d];
         }

@@ -68,14 +68,14 @@ public:
     typedef FixedList<scalar,7> list_type;
 
 
-    // Member constants
+    // Member Constants
 
         enum
         {
             nDimensions = 7     //!< 7 base dimensions
         };
 
-        //- Define an enumeration for the names of the dimension exponents
+        //- Enumeration for the dimension exponents
         enum dimensionType
         {
             MASS,               //!< kilogram   kg
@@ -189,8 +189,11 @@ public:
         //- Construct from exponents for all seven dimensions
         dimensionSet(const FixedList<scalar,7>& dimensions);
 
-        //- Copy constructor
+        //- Copy construct
         dimensionSet(const dimensionSet& ds);
+
+        //- Construct from dictionary entry - usually "dimensions".
+        dimensionSet(const dictionary& dict, const word& entryName);
 
         //- Construct and return a clone
         autoPtr<dimensionSet> clone() const

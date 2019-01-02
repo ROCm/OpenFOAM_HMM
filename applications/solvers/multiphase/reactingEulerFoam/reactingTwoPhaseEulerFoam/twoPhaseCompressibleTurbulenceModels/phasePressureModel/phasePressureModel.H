@@ -132,7 +132,7 @@ public:
 
 
     //- Destructor
-    virtual ~phasePressureModel();
+    virtual ~phasePressureModel() = default;
 
 
     // Member Functions

@@ -221,7 +221,7 @@ void Foam::solverTemplate::setRegionProperties
         fieldDimensions_[regionI].set
         (
             i,
-            new dimensionSet(dict.lookup("dimensions"))
+            new dimensionSet(dict, "dimensions")
         );
     }
 }
