@@ -107,7 +107,7 @@ Foam::Istream& Foam::operator>>(Istream& is, uint32_t& val)
 
 uint32_t Foam::readUint32(Istream& is)
 {
-    uint32_t val;
+    uint32_t val(0);
     is >> val;
 
     return val;

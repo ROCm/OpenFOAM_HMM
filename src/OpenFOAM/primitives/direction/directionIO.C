@@ -30,7 +30,7 @@ License
 
 Foam::direction Foam::readDirection(Istream& is)
 {
-    direction val;
+    direction val(0);
     is >> val;
 
     return val;

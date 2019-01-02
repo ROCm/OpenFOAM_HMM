@@ -107,7 +107,7 @@ Foam::Istream& Foam::operator>>(Istream& is, uint64_t& val)
 
 uint64_t Foam::readUint64(Istream& is)
 {
-    uint64_t val;
+    uint64_t val(0);
     is >> val;
 
     return val;

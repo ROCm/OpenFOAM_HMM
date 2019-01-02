@@ -128,8 +128,7 @@ Foam::label Foam::isoCutFace::calcSubFace
     //  +1: face is fully above the isosurface
     label faceStatus;
 
-    label pl1 = pLabels[0];
-    scalar f1 = f[pl1];
+    scalar f1 = f[pLabels[0]];
 
     // If vertex values are very close to isoValue lift them slightly to avoid
     // dealing with the many special cases of a face being touched either at a
@@ -186,7 +185,6 @@ Foam::label Foam::isoCutFace::calcSubFace
                 }
             }
         }
-        pl1 = pl2;
         f1 = f2;
     }
 

@@ -76,7 +76,7 @@ Foam::label Foam::blockMeshTools::read
     const dictionary& dict
 )
 {
-    label val;
+    label val(0);
     read(is, val, dict);
     return val;
 }

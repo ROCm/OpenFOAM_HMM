@@ -998,7 +998,7 @@ bool Foam::processorPolyPatch::order
                 // aspect ratios) we will probably also have problems with
                 // reliable normals calculation
                 labelList faceMap2(faceMap.size(), -1);
-                matchedAll = matchPoints
+                matchPoints
                 (
                     facePointAverages,
                     masterFacePointAverages,
@@ -1007,21 +1007,18 @@ bool Foam::processorPolyPatch::order
                     faceMap2
                 );
 
-                forAll(faceMap, oldFacei)
-                {
-                    if (faceMap[oldFacei] == -1)
-                    {
-                        faceMap[oldFacei] = faceMap2[oldFacei];
-                    }
-                }
-
                 matchedAll = true;
 
                 forAll(faceMap, oldFacei)
                 {
                     if (faceMap[oldFacei] == -1)
                     {
-                        matchedAll = false;
+                        faceMap[oldFacei] = faceMap2[oldFacei];
+
+                        if (faceMap[oldFacei] == -1)
+                        {
+                            matchedAll = false;
+                        }
                     }
                 }
             }

@@ -2572,7 +2572,7 @@ Foam::label Foam::fileOperations::masterUncollatedFileOperation::addWatch
     const fileName& fName
 ) const
 {
-    label watchFd;
+    label watchFd = -1;
     if (Pstream::master())      // comm_))
     {
         watchFd = monitor().addWatch(fName);
@@ -2587,7 +2587,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::removeWatch
     const label watchIndex
 ) const
 {
-    bool ok;
+    bool ok = false;
     if (Pstream::master())  // comm_))
     {
         ok = monitor().removeWatch(watchIndex);

@@ -193,7 +193,7 @@ void Foam::vtk::surfaceWriter::writePolysLegacy(const label pointOffset)
                     ++iter;
                 }
             }
-            off += points_.size();
+            // off += points_.size();
         }
     }
 
@@ -259,7 +259,7 @@ void Foam::vtk::surfaceWriter::writePolys(const label pointOffset)
                         ++iter;
                     }
                 }
-                off += points_.size();
+                // off += points_.size();
             }
         }
 

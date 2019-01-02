@@ -2050,7 +2050,6 @@ void Foam::snappySnapDriver::avoidDiagonalAttraction
                         scalar distSqr = magSqr(mid-pt);
                         if (distSqr < minDistSqr)
                         {
-                            distSqr = minDistSqr;
                             minFp = fp;
                         }
                     }

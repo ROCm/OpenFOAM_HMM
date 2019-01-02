@@ -30,7 +30,7 @@ License
 
 unsigned int Foam::readUint(Istream& is)
 {
-    unsigned int val;
+    unsigned int val(0);
     is >> val;
 
     return val;

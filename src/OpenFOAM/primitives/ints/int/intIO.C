@@ -76,7 +76,7 @@ bool Foam::readInt(const char* buf, int& val)
 
 int Foam::readInt(Istream& is)
 {
-    int val;
+    int val(0);
     is >> val;
 
     return val;
