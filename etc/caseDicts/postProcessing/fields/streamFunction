@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 Description
-    Writes the steam-function pointScalarField calculated from the specified
+    Writes the stream-function pointScalarField calculated from the specified
     flux surfaceScalarField.
 
 \*---------------------------------------------------------------------------*/

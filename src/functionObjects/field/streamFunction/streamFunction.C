@@ -58,7 +58,7 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
 ) const
 {
     Log << "    functionObjects::" << type() << " " << name()
-        << " calculating steam-function" << endl;
+        << " calculating stream-function" << endl;
 
     Vector<label> slabNormal((Vector<label>::one - mesh_.geometricD())/2);
     const direction slabDir
