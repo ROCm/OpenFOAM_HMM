@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Namespace
     stdFoam
 
 Description
-    Global templates and macros used by OpenFOAM and some standard
+    Global macros and templates used by OpenFOAM and some standard
     C++ headers.
 
     Some of the templates defined here correspond to useful
@@ -47,6 +47,8 @@ SeeAlso
 #include <initializer_list>
 #include <utility>
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 // Mirror OPENFOAM define in other variants
 #ifdef OPENFOAM
 // Code base from www.openfoam.com
@@ -57,6 +59,22 @@ SeeAlso
 # ifndef OPENFOAM_PLUS
 #  define OPENFOAM_PLUS OPENFOAM
 # endif
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Compile-time warning for use of deprecated methods (compiler-dependent).
+// Use within the class declaration.
+
+#if defined(__cplusplus) && (__cplusplus >= 201402L)
+# define FOAM_DEPRECATED(since) [[deprecated("Since " #since)]]
+# define FOAM_DEPRECATED_FOR(since, replacement) [[deprecated("Since " #since "; use " #replacement)]]
+#elif defined(__GNUC__)
+# define FOAM_DEPRECATED(since) __attribute__((__deprecated__("Since " #since)))
+# define FOAM_DEPRECATED_FOR(since, replacement) __attribute__((__deprecated__("Since " #since "; use " #replacement)))
+#else
+# define FOAM_DEPRECATED(since)
+# define FOAM_DEPRECATED_FOR(since, replacement)
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

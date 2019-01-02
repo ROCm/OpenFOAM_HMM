@@ -129,6 +129,8 @@ namespace Foam
 #define FOAMbuild       foamVersion::build.c_str()
 #define FOAMbuildArch   foamVersion::buildArch
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #endif
 
 // ************************************************************************* //
