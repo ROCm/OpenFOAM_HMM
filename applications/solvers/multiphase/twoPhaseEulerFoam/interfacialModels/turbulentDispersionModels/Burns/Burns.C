@@ -61,11 +61,8 @@ Foam::turbulentDispersionModels::Burns::Burns
     (
         "residualAlpha",
         dimless,
-        dict.lookupOrDefault<scalar>
-        (
-            "residualAlpha",
-            pair_.dispersed().residualAlpha().value()
-        )
+        pair_.dispersed().residualAlpha().value(),
+        dict
     )
 {}
 

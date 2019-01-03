@@ -56,25 +56,25 @@ Foam::compressibilityModels::Wallis::Wallis
     (
         "psiv",
         dimCompressibility,
-        compressibilityProperties_.lookup("psiv")
+        compressibilityProperties_
     ),
     psil_
     (
         "psil",
         dimCompressibility,
-        compressibilityProperties_.lookup("psil")
+        compressibilityProperties_
     ),
     rhovSat_
     (
         "rhovSat",
         dimDensity,
-        compressibilityProperties_.lookup("rhovSat")
+        compressibilityProperties_
     ),
     rholSat_
     (
         "rholSat",
         dimDensity,
-        compressibilityProperties_.lookup("rholSat")
+        compressibilityProperties_
     )
 {
     correct();

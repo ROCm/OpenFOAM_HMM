@@ -63,12 +63,7 @@ Foam::blendingMethods::linear::linear
         maxFullyDispersedAlpha_.insert
         (
             *iter,
-            dimensionedScalar
-            (
-                nameFull,
-                dimless,
-                dict.lookup(nameFull)
-            )
+            dimensionedScalar(nameFull, dimless, dict)
         );
 
         const word namePart
@@ -79,12 +74,7 @@ Foam::blendingMethods::linear::linear
         maxPartlyDispersedAlpha_.insert
         (
             *iter,
-            dimensionedScalar
-            (
-                namePart,
-                dimless,
-                dict.lookup(namePart)
-            )
+            dimensionedScalar(namePart, dimless, dict)
         );
 
         if

@@ -57,7 +57,7 @@ Foam::phaseModel::phaseModel
     nu_
     (
         "nu",
-        dimensionSet(0, 2, -1, 0, 0),
+        dimViscosity,
         phaseDict_
     ),
     kappa_
@@ -69,7 +69,7 @@ Foam::phaseModel::phaseModel
     Cp_
     (
         "Cp",
-        dimensionSet(0, 2, -2, -1, 0),
+        dimSpecificHeatCapacity,
         phaseDict_
     ),
     rho_

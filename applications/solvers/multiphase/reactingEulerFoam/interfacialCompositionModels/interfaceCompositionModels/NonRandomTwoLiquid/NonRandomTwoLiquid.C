@@ -58,8 +58,10 @@ NonRandomTwoLiquid
         pair.phase1().mesh(),
         dimensionedScalar("one", dimless, 1)
     ),
-    beta12_("", dimless/dimTemperature, 0),
-    beta21_("", dimless/dimTemperature, 0)
+    alpha12_("alpha12", dimless, Zero),
+    alpha21_("alpha21", dimless, Zero),
+    beta12_("beta12", dimless/dimTemperature, Zero),
+    beta21_("beta21", dimless/dimTemperature, Zero)
 {
     if (this->speciesNames_.size() != 2)
     {
@@ -74,31 +76,10 @@ NonRandomTwoLiquid
     species1Index_ = this->thermo_.composition().species()[species1Name_];
     species2Index_ = this->thermo_.composition().species()[species2Name_];
 
-    alpha12_ = dimensionedScalar
-    (
-        "alpha12",
-        dimless,
-        dict.subDict(species1Name_).lookup("alpha")
-    );
-    alpha21_ = dimensionedScalar
-    (
-        "alpha21",
-        dimless,
-        dict.subDict(species2Name_).lookup("alpha")
-    );
-
-    beta12_ = dimensionedScalar
-    (
-        "beta12",
-        dimless/dimTemperature,
-        dict.subDict(species1Name_).lookup("beta")
-    );
-    beta21_ = dimensionedScalar
-    (
-        "beta21",
-        dimless/dimTemperature,
-        dict.subDict(species2Name_).lookup("beta")
-    );
+    alpha12_.read("alpha", dict.subDict(species1Name_));
+    alpha21_.read("alpha", dict.subDict(species2Name_));
+    beta12_.read("beta", dict.subDict(species1Name_));
+    beta21_.read("beta", dict.subDict(species2Name_));
 
     saturationModel12_.reset
     (

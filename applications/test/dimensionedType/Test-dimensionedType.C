@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
         dict.add("test1", scalar(10));
         dict.add("test2a", scalar(21));
         dict.add("test5", dimensionedScalar("", 50));
+        dict.add("carp1", dimensionedScalar("test1", 11));
         // This will fail to tokenize:
         // dict.add("test5", dimensionedScalar(50));
     }
@@ -125,6 +126,36 @@ int main(int argc, char *argv[])
 
     Info<< "test5 : "
         << dimensionedScalar::lookupOrAddToDict("test5", dict, -50) << nl;
+
+    // Deprecated
+    Info<< "Deprecated constructors" << nl;
+    Info<< "carp : "
+        << dimensionedScalar(dict.lookup("carp1")) << nl;
+
+    Info<< "carp : "
+        << dimensionedScalar("other", dict.lookup("test5")) << nl;
+
+    Info<< "carp : "
+        << dimensionedScalar("carp", dimless, dict.lookup("carp1")) << nl;
+
+    Info<< "alt : "
+        << dimensionedScalar("myName", dimless, dict, "carp1") << nl;
+
+    Info<< "alt : "
+        << dimensionedScalar("myName", dimless, dict, "test5") << nl;
+
+    {
+        dimensionedScalar scalar1("myName", dimless, Zero);
+
+        scalar1.read("test5", dict);
+        Info<< "read in : " << scalar1 << nl;
+
+        scalar1.readIfPresent("test4", dict);
+        Info<< "read in : " << scalar1 << nl;
+
+        scalar1.readIfPresent("test5", dict);
+        Info<< "read in : " << scalar1 << nl;
+    }
 
     Info<< nl << "Dictionary is now: " << dict << nl;
 

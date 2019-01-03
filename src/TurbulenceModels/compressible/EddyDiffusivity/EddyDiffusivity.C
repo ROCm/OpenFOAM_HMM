@@ -31,13 +31,7 @@ template<class BasicTurbulenceModel>
 void Foam::EddyDiffusivity<BasicTurbulenceModel>::correctNut()
 {
     // Read Prt if provided
-    Prt_ = dimensioned<scalar>::lookupOrDefault
-    (
-        "Prt",
-        this->coeffDict(),
-        1.0
-    );
-
+    Prt_ = dimensionedScalar("Prt", dimless, 1.0, this->coeffDict());
     alphat_ = this->rho_*this->nut()/Prt_;
     alphat_.correctBoundaryConditions();
 }

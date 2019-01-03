@@ -180,7 +180,6 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
         "Pr",
         dimless,
         thermophysicalProperties.subDict("mixture").subDict("transport")
-        .lookup("Pr")
     );
 
     Field<scalar> C2

@@ -66,9 +66,9 @@ Foam::phaseModel::phaseModel
     (
         "residualAlpha",
         dimless,
-        fluid.subDict(phaseName).lookup("residualAlpha")
+        fluid.subDict(phaseName)
     ),
-    alphaMax_(fluid.subDict(phaseName).lookupOrDefault("alphaMax", 1.0))
+    alphaMax_(fluid.subDict(phaseName).lookupOrDefault<scalar>("alphaMax", 1))
 {
     diameterModel_ = diameterModel::New(fluid.subDict(phaseName), *this);
 }

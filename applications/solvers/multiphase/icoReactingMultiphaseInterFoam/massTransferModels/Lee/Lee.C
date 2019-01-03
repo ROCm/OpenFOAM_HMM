@@ -37,9 +37,9 @@ Foam::meltingEvaporationModels::Lee<Thermo, OtherThermo>::Lee
 )
 :
     InterfaceCompositionModel<Thermo, OtherThermo>(dict, pair),
-    C_("C", inv(dimTime), dict.lookup("C")),
-    Tactivate_("Tactivate", dimTemperature, dict.lookup("Tactivate")),
-    alphaMin_(dict.lookupOrDefault<scalar>("alphaMin", 0.0))
+    C_("C", inv(dimTime), dict),
+    Tactivate_("Tactivate", dimTemperature, dict),
+    alphaMin_(dict.lookupOrDefault<scalar>("alphaMin", 0))
 {}
 
 

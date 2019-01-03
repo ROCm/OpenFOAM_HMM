@@ -385,12 +385,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::forces::mu() const
         const dictionary& transportProperties =
              lookupObject<dictionary>("transportProperties");
 
-        dimensionedScalar nu
-        (
-            "nu",
-            dimViscosity,
-            transportProperties.lookup("nu")
-        );
+        dimensionedScalar nu("nu", dimViscosity, transportProperties);
 
         return rho()*nu;
     }

@@ -68,7 +68,7 @@ class phaseModel
         //- Index of phase
         label index_;
 
-        //- Return the residual phase-fraction for given phase
+        //- The residual phase-fraction for given phase
         //  Used to stabilize the phase momentum as the phase-fraction -> 0
         dimensionedScalar residualAlpha_;
 

@@ -98,25 +98,9 @@ Foam::RASModels::kineticTheoryModel::kineticTheoryModel
     equilibrium_(coeffDict_.lookup("equilibrium")),
     e_("e", dimless, coeffDict_),
     alphaMax_("alphaMax", dimless, coeffDict_),
-    alphaMinFriction_
-    (
-        "alphaMinFriction",
-        dimless,
-        coeffDict_
-    ),
-    residualAlpha_
-    (
-        "residualAlpha",
-        dimless,
-        coeffDict_
-    ),
-
-    maxNut_
-    (
-        "maxNut",
-        dimViscosity,
-        coeffDict_.lookupOrDefault<scalar>("maxNut",1000)
-    ),
+    alphaMinFriction_("alphaMinFriction", dimless, coeffDict_),
+    residualAlpha_("residualAlpha", dimless, coeffDict_),
+    maxNut_("maxNut", dimViscosity, 1000, coeffDict_),
 
     Theta_
     (

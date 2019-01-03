@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,10 +52,7 @@ class dictionary;
 template<class Type> class dimensioned;
 
 template<class Type>
-Istream& operator>>(Istream&, dimensioned<Type>&);
-
-template<class Type>
-Ostream& operator<<(Ostream&, const dimensioned<Type>&);
+Istream& operator>>(Istream& is, dimensioned<Type>& dt);
 
 
 /*---------------------------------------------------------------------------*\
@@ -65,9 +62,9 @@ Ostream& operator<<(Ostream&, const dimensioned<Type>&);
 template<class Type>
 class dimensioned
 {
-    // Private data
+    // Private Data
 
-        //- Variable name
+        //- The variable name
         word name_;
 
         //- The dimension set
@@ -77,9 +74,9 @@ class dimensioned
         Type value_;
 
 
-    // Private member functions
+    // Private Member Functions
 
-        //- Constructor helper.
+        //- Read helper.
         //  Requires a value, optional preceded with name and/or dimensions.
         //  \verbatim
         //  [name] [dims] value
@@ -88,8 +85,28 @@ class dimensioned
         //  If dimensions are present, they are read.
         //  With checkDims = true, the dimensions read are verified
         //  against the current (expected) dimensions.
-        void initialize(Istream& is, bool checkDims);
+        void initialize(Istream& is, const bool checkDims);
 
+        //- Find entry and assign to dimensioned Type
+        //- FatalIOError if it is found and the number of tokens is incorrect,
+        //- or it is mandatory and not found.
+        //
+        //  Requires a value, optional preceded with name and/or dimensions.
+        //  \verbatim
+        //  [name] [dims] value
+        //  \endverbatim
+        //  If the name is present, it is used to rename.
+        //  If dimensions are present, they are read.
+        //  With checkDims = true, the dimensions read are verified
+        //  against the current (expected) dimensions.
+        bool readEntry
+        (
+            const word& key,
+            const dictionary& dict,
+            const bool mandatory = true, //!< entry is mandatory
+            const bool checkDims = true, //!< verify dimensions read
+            enum keyType::option matchOpt = keyType::REGEX
+        );
 
 public:
 
@@ -99,7 +116,7 @@ public:
 
     // Constructors
 
-        //- Construct null: a dimensionless Zero, named "0"
+        //- A dimensionless Zero, named "0"
         dimensioned();
 
         //- A dimensioned Zero, named "0"
@@ -119,7 +136,7 @@ public:
         //- Copy construct dimensioned Type with a new name
         dimensioned(const word& name, const dimensioned<Type>& dt);
 
-        //- Construct from components: name, dimensionSet and a value.
+        //- Construct from components (name, dimensions, value).
         dimensioned
         (
             const word& name,
@@ -145,19 +162,48 @@ public:
         //  \endverbatim
         //  If the optional name is found, it is used for renaming.
         //  If the optional dimensions are present, they are read and
-        //  normally verified against the expected dimensions.
+        //  verified against the expected dimensions.
+        dimensioned
+        (
+            const word& name,
+            const dimensionSet& dims,
+            const dictionary& dict
+        );
+
+        //- Construct from dictionary lookup with a given name and dimensions.
+        //  The dictionary entry may contain optional name and dimensions.
+        //  \verbatim
+        //  [name] [dims] value
+        //  \endverbatim
+        //  If the optional name is found, it is used for renaming.
+        //  If the optional dimensions are present, they are read and
+        //  verified against the expected dimensions.
         dimensioned
         (
             const word& name,
             const dimensionSet& dims,
             const dictionary& dict,
-            const bool checkDims = true //!< verify dimensions read
+            const word& entryName      //!< dictionary lookup name
+        );
+
+        //- Construct from components (name, dimensions, value) with
+        //- optional dictionary override.
+        //  The dictionary entry may contain optional name and dimensions.
+        //  \verbatim
+        //  [name] [dims] value
+        //  \endverbatim
+        dimensioned
+        (
+            const word& name,
+            const dimensionSet& dims,
+            const Type& val,
+            const dictionary& dict
         );
 
 
-    // Static member functions
+    // Static Member Functions
 
-        //- Construct from dictionary, with default dimensions and value.
+        //- Construct dimensioned from dictionary, with default value.
         //- FatalIOError if there are excess tokens.
         static dimensioned<Type> lookupOrDefault
         (
@@ -167,7 +213,7 @@ public:
             const Type& defaultValue = Type(Zero)
         );
 
-        //- Construct from dictionary, dimensionless and with a value.
+        //- Construct dimensionless from dictionary, with default value.
         //  FatalIOError if it is found and there are excess tokens.
         static dimensioned<Type> lookupOrDefault
         (
@@ -176,7 +222,7 @@ public:
             const Type& defaultValue = Type(Zero)
         );
 
-        //- Construct from dictionary, with default value.
+        //- Construct dimensioned from dictionary, with default value.
         //  If the value is not found, it is added into the dictionary.
         //  FatalIOError if it is found and there are excess tokens.
         static dimensioned<Type> lookupOrAddToDict
@@ -187,7 +233,7 @@ public:
             const Type& defaultValue = Type(Zero)
         );
 
-        //- Construct from dictionary, dimensionless with default value.
+        //- Construct dimensionless from dictionary, with default value.
         //  If the value is not found, it is added into the dictionary.
         //  FatalIOError if it is found and there are excess tokens.
         static dimensioned<Type> lookupOrAddToDict
@@ -227,24 +273,35 @@ public:
         //- Return transpose.
         dimensioned<Type> T() const;
 
-        //- Update the value of dimensioned\<Type\>
-        void read(const dictionary& dict);
+        //- Update the value of dimensioned\<Type\>,
+        //- lookup in dictionary with the name().
+        bool read(const dictionary& dict);
 
-        //- Update the value of dimensioned\<Type\> if found in the dictionary.
+        //- Update the value of dimensioned\<Type\> if found in the dictionary,
+        //- lookup in dictionary with the name().
         bool readIfPresent(const dictionary& dict);
+
+        //- Update the value of dimensioned\<Type\>,
+        //- using an alternative entry name
+        bool read(const word& entryName, const dictionary& dict);
+
+        //- Update the value of dimensioned\<Type\> if found in the dictionary,
+        //- using an alternative entry name
+        bool readIfPresent(const word& entryName, const dictionary& dict);
 
 
     // IO
 
-        //- Read name, dimensions, value from stream,
-        //- using units from system table
-        Istream& read(Istream& is);
+        //- Read (name, dimensions, value) from stream,
+        //- using units from system table.
+        //  Optionally skip reading the name
+        Istream& read(Istream& is, const bool readName = true);
 
-        //- Read name, dimensions, value from stream,
+        //- Read (name, dimensions, value) from stream,
         //- using units from dictionary
         Istream& read(Istream& is, const dictionary& readSet);
 
-        //- Read name, dimensions, value from stream,
+        //- Read (name, dimensions, value) from stream,
         //- using units from table
         Istream& read(Istream& is, const HashTable<dimensionedScalar>& readSet);
 
@@ -265,21 +322,15 @@ public:
         void operator/=(const scalar s);
 
 
-    // IOstream operators
+    // IOstream Operators
 
         //- Read from stream. The name and dimensions are optional.
-        //  If the optional dimensions are present, they are used
-        //  used without further verification.
+        //  If the optional dimensions are present,
+        //  they are used without further verification.
         friend Istream& operator>> <Type>
         (
             Istream& is,
             dimensioned<Type>& dt
-        );
-
-        friend Ostream& operator<< <Type>
-        (
-            Ostream& os,
-            const dimensioned<Type>& dt
         );
 
 
@@ -287,31 +338,35 @@ public:
 
         //- Deprecated(2018-11) Construct from Istream
         //- (expects name, dimensions, value)
-        //  \deprecated(2018-11) - should generally use one of the construct
-        //      from dictionary constructors instead. They provide additional
-        //      checks on the input stream.
-        explicit dimensioned(Istream& is);
+        //  \deprecated(2018-11) - should generally use construct from
+        //      dictionary instead (additional checks on the input stream).
+        explicit dimensioned(Istream& is)
+        FOAM_DEPRECATED(2018-11);
 
         //- Deprecated(2018-11) Construct from Istream with given name
         //- (expects dimensions, value)
-        //  \deprecated(2018-11) - should generally use one of the construct
-        //      from dictionary constructors instead. They provide additional
-        //      checks on the input stream.
-        dimensioned(const word& name, Istream& is);
+        //  \deprecated(2018-11) - should generally use construct from
+        //      dictionary instead (additional checks on the input stream).
+        dimensioned(const word& name, Istream& is)
+        FOAM_DEPRECATED(2018-11);
 
         //- Deprecated(2018-11) Construct from Istream with given name
         //- and expected dimensions.
         //  Expects value, but supports optional name and dimensions.
         //  If the optional dimensions are present, they are read and
         //  verified against the expected dimensions.
-        //  \deprecated(2018-11) - should generally use one of the construct
-        //      from dictionary constructors instead. They provide additional
-        //      checks on the input stream.
-        dimensioned(const word& name, const dimensionSet& dims, Istream& is);
+        //  \deprecated(2018-11) - should generally use construct from
+        //      dictionary instead (additional checks on the input stream).
+        dimensioned(const word& name, const dimensionSet& dims, Istream& is)
+        FOAM_DEPRECATED(2018-11);
 };
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+//- Output operator
+template<class Type>
+Ostream& operator<<(Ostream& os, const dimensioned<Type>& dt);
 
 template<class Type, direction r>
 dimensioned<typename powProduct<Type, r>::type>

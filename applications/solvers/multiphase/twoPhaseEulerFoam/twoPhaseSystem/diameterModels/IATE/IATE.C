@@ -78,12 +78,7 @@ Foam::diameterModels::IATE::IATE
     ),
     dMax_("dMax", dimLength, diameterProperties_),
     dMin_("dMin", dimLength, diameterProperties_),
-    residualAlpha_
-    (
-        "residualAlpha",
-        dimless,
-        diameterProperties_
-    ),
+    residualAlpha_("residualAlpha", dimless, diameterProperties_),
     d_
     (
         IOobject

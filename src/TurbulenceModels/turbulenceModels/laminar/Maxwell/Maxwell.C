@@ -61,25 +61,9 @@ Maxwell<BasicTurbulenceModel>::Maxwell
         propertiesName
     ),
 
-    nuM_
-    (
-        dimensioned<scalar>
-        (
-            "nuM",
-            dimViscosity,
-            this->coeffDict_.lookup("nuM")
-        )
-    ),
+    nuM_("nuM", dimViscosity, this->coeffDict_),
 
-    lambda_
-    (
-        dimensioned<scalar>
-        (
-            "lambda",
-            dimTime,
-            this->coeffDict_.lookup("lambda")
-        )
-    ),
+    lambda_("lambda", dimTime, this->coeffDict_),
 
     sigma_
     (

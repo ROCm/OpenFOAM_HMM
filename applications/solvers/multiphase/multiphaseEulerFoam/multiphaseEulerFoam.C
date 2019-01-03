@@ -77,7 +77,8 @@ int main(int argc, char *argv[])
     (
         "maxSlamVelocity",
         dimVelocity,
-        fluid.lookupOrDefault<scalar>("maxSlamVelocity", GREAT)
+        GREAT,
+        fluid
     );
 
     turbulence->validate();

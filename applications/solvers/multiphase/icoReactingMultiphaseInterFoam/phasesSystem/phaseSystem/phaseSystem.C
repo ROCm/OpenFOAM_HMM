@@ -237,7 +237,7 @@ Foam::phaseSystem::phaseSystem
     totalPhasePairs_(),
     Prt_
     (
-        dimensioned<scalar>::lookupOrAddToDict
+        dimensionedScalar::lookupOrAddToDict
         (
             "Prt", *this, 1.0
         )

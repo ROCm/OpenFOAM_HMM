@@ -56,13 +56,13 @@ Foam::compressibilityModels::linear::linear
     (
         "psiv",
         dimCompressibility,
-        compressibilityProperties_.lookup("psiv")
+        compressibilityProperties_
     ),
     psil_
     (
         "psil",
         dimCompressibility,
-        compressibilityProperties_.lookup("psil")
+        compressibilityProperties_
     )
 {
     correct();

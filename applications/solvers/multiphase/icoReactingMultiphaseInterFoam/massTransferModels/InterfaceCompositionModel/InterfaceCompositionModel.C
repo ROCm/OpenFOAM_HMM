@@ -204,7 +204,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::InterfaceCompositionModel
             )
         )
     ),
-    Le_("Le", dimless, dict.lookupOrDefault<scalar>("Le", 1.0))
+    Le_("Le", dimless, 1.0, dict)
 {}
 
 

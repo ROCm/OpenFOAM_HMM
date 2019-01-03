@@ -76,12 +76,7 @@ JohnsonJacksonParticleSlipFvPatchVectorField
 )
 :
     partialSlipFvPatchVectorField(p, iF),
-    specularityCoefficient_
-    (
-        "specularityCoefficient",
-        dimless,
-        dict.lookup("specularityCoefficient")
-    )
+    specularityCoefficient_("specularityCoefficient", dimless, dict)
 {
     if
     (
@@ -219,7 +214,6 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::updateCoeffs()
         )
        .subDict("RAS")
        .subDict("kineticTheoryCoeffs")
-       .lookup("alphaMax")
     );
 
     // calculate the slip value fraction

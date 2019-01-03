@@ -84,7 +84,7 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
     const surfaceScalarField& phi
 )
 :
-    basicThermo(U.mesh(),  word::null),
+    basicThermo(U.mesh(), word::null),
     thermoIncompressibleTwoPhaseMixture(U, phi),
 
     e_
@@ -105,12 +105,7 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
         )
     ),
 
-    TSat_
-    (
-        "TSat",
-        dimTemperature,
-        basicThermo::lookup("TSat")
-    ),
+    TSat_("TSat", dimTemperature, static_cast<const basicThermo&>(*this)),
 
     pDivU_(basicThermo::lookupOrDefault<Switch>("pDivU", true))
 

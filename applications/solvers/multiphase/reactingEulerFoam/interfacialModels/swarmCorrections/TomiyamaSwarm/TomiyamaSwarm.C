@@ -57,11 +57,8 @@ Foam::swarmCorrections::TomiyamaSwarm::TomiyamaSwarm
     (
         "residualAlpha",
         dimless,
-        dict.lookupOrDefault<scalar>
-        (
-            "residualAlpha",
-            pair_.dispersed().residualAlpha().value()
-        )
+        pair_.dispersed().residualAlpha().value(),
+        dict
     ),
     l_("l", dimless, dict)
 {}

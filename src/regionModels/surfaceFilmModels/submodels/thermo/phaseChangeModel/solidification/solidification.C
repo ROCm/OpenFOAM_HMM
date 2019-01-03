@@ -63,13 +63,10 @@ solidification::solidification
     ),
     maxSolidificationRate_
     (
-        dimensioned<scalar>::lookupOrDefault
-        (
-            "maxSolidificationRate",
-            coeffDict_,
-            dimless/dimTime,
-            GREAT
-        )
+        "maxSolidificationRate",
+        dimless/dimTime,
+        GREAT,
+        coeffDict_
     ),
     mass_
     (

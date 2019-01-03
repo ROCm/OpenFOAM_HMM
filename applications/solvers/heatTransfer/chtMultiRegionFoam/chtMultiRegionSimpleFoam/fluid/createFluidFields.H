@@ -199,31 +199,13 @@ forAll(fluidRegions, i)
     rhoMax.set
     (
         i,
-        new dimensionedScalar
-        (
-            dimensionedScalar::lookupOrDefault
-            (
-                "rhoMax",
-                simpleDict,
-                dimDensity,
-                GREAT
-            )
-        )
+        new dimensionedScalar("rhoMax", dimDensity, GREAT, simpleDict)
     );
 
     rhoMin.set
     (
         i,
-        new dimensionedScalar
-        (
-            dimensionedScalar::lookupOrDefault
-            (
-                "rhoMin",
-                simpleDict,
-                dimDensity,
-                0
-            )
-        )
+        new dimensionedScalar("rhoMin", dimDensity, Zero, simpleDict)
     );
 
     Info<< "    Adding MRF\n" << endl;

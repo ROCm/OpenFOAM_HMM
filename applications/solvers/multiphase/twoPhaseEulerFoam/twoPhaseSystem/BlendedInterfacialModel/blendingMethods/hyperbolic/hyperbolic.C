@@ -52,12 +52,7 @@ Foam::blendingMethods::hyperbolic::hyperbolic
 )
 :
     blendingMethod(dict),
-    transitionAlphaScale_
-    (
-        "transitionAlphaScale",
-        dimless,
-        dict.lookup("transitionAlphaScale")
-    )
+    transitionAlphaScale_("transitionAlphaScale", dimless, dict)
 {
     forAllConstIter(wordList, phaseNames, iter)
     {
@@ -66,12 +61,7 @@ Foam::blendingMethods::hyperbolic::hyperbolic
         maxDispersedAlpha_.insert
         (
             *iter,
-            dimensionedScalar
-            (
-                name,
-                dimless,
-                dict.lookup(name)
-            )
+            dimensionedScalar(name, dimless, dict)
         );
     }
 }

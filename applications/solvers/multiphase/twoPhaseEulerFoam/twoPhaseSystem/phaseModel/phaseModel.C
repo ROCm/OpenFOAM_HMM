@@ -70,9 +70,9 @@ Foam::phaseModel::phaseModel
     (
         "residualAlpha",
         dimless,
-        fluid.subDict(phaseName).lookup("residualAlpha")
+        fluid.subDict(phaseName)
     ),
-    alphaMax_(phaseDict_.lookupOrDefault("alphaMax", 1.0)),
+    alphaMax_(phaseDict_.lookupOrDefault<scalar>("alphaMax", 1)),
     thermo_(rhoThermo::New(fluid.mesh(), name_)),
     U_
     (
