@@ -293,7 +293,7 @@ void Foam::ensightPartCells::writeSummary(Ostream& os) const
     os.writeEntry("name",   name());
     os.writeEntry("size",   size());
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 
@@ -322,7 +322,7 @@ void Foam::ensightPartCells::dumpInfo(Ostream& os) const
         os << ')' << endEntry;
     }
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 

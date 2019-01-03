@@ -284,7 +284,7 @@ void Foam::Function1Types::CSV<Type>::writeData(Ostream& os) const
     os.writeEntry("mergeSeparators", mergeSeparators_);
     os.writeEntry("file", fName_);
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 

@@ -86,7 +86,7 @@ void Foam::Function1Types::Sine<Type>::writeData(Ostream& os) const
     scale_->writeData(os);
     level_->writeData(os);
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 

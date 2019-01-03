@@ -169,7 +169,7 @@ Foam::Ostream& Foam::functionObjects::operator<<
         os.writeEntry("allowRestart", faItem.allowRestart_);
     }
 
-    os.endBlock() << flush;
+    os.endBlock();
 
     os.check(FUNCTION_NAME);
 

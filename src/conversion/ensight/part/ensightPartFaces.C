@@ -257,7 +257,7 @@ void Foam::ensightPartFaces::writeSummary(Ostream& os) const
     os.writeEntry("start",  start_);
     os.writeEntry("size",   size());
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 
@@ -287,7 +287,7 @@ void Foam::ensightPartFaces::dumpInfo(Ostream& os) const
         os << ')' << endEntry;
     }
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 

@@ -438,7 +438,7 @@ void Foam::plane::writeDict(Ostream& os) const
     os.writeEntry("point",  origin_);
     os.writeEntry("normal", normal_);
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 

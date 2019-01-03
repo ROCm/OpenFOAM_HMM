@@ -530,7 +530,7 @@ writeEntry(const word& keyword, Ostream& os) const
 {
     os.beginBlock(keyword);
     this->writeEntries(os);
-    os.endBlock() << flush;
+    os.endBlock();
 
     os.check(FUNCTION_NAME);
 }

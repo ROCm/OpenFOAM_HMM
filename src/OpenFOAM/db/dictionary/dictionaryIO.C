@@ -163,7 +163,7 @@ void Foam::dictionary::writeEntry(const keyType& kw, Ostream& os) const
 {
     os.beginBlock(kw);
     writeEntries(os);
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 
@@ -205,7 +205,7 @@ void Foam::dictionary::write(Ostream& os, const bool subDict) const
 
     if (subDict)
     {
-        os.endBlock() << flush;
+        os.endBlock();
     }
 }
 

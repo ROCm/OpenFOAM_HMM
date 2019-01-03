@@ -89,7 +89,7 @@ void Foam::Function1Types::Square<Type>::writeData(Ostream& os) const
     scale_->writeData(os);
     level_->writeData(os);
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 

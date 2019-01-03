@@ -87,7 +87,7 @@ void Foam::Function1Types::TableFile<Type>::writeData(Ostream& os) const
 
     os.writeEntry("file", fName_);
 
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 
