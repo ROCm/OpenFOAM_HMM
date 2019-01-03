@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,16 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    Tuple2Test
+    Test-Tuple2
 
 Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "Pair.H"
 #include "Tuple2.H"
 #include "label.H"
 #include "scalar.H"
 #include "List.H"
+#include "ListOps.H"
 #include "ops.H"
 #include <functional>
 
@@ -75,7 +77,7 @@ int main()
     indexedScalar t2(1, 3.2);
 
     Info<< "tuple: "
-        << t2 << " "
+        << t2 << " => "
         << t2.first() << " " << t2.second() << nl;
 
     // As list. Generated so that we have duplicate indices
@@ -110,7 +112,28 @@ int main()
     Info<< "special sorted tuples - sort on value, reverse on index:"
         << nl << list1 << nl;
 
-    Info<< "End\n" << endl;
+
+    Info<< nl << nl << "Pairs" << nl;
+
+    typedef Pair<label> indexedLabel;
+
+    indexedLabel pr(1, 3);
+
+    Info<< "pair: "
+        << pr << " => "
+        << pr.first() << " " << pr.second() << nl;
+
+    List<indexedLabel> list2 = ListOps::create<indexedLabel>
+    (
+        list1,
+        [](const indexedScalar& t2) {
+            return indexedLabel(t2.first(), t2.second());
+        }
+    );
+
+    Info<< "Unsorted pairs:" << nl << list2 << nl;
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }
