@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,7 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "dictionary.H"
 #include "dimensionedTensor.H"
+
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -99,6 +101,32 @@ int main(int argc, char *argv[])
     Pout<< "zero scalar (time): " << dimensionedScalar(dimTime) << endl;
     Pout<< "zero vector: " << dimensionedVector(dimLength) << endl;
     Pout<< "zero tensor: " << dimensionedTensor(dimLength) << endl;
+
+
+    dictionary dict;
+    {
+        dict.add("test1", scalar(10));
+        dict.add("test2a", scalar(21));
+        dict.add("test5", dimensionedScalar("", 50));
+        // This will fail to tokenize:
+        // dict.add("test5", dimensionedScalar(50));
+    }
+
+    Info<< nl << "Get from dictionary: " << dict << nl;
+
+    Info<< "test1 : " << dimensionedScalar("test1", dict) << nl;
+    Info<< "test2 : " << dimensionedScalar("test2", dimless, 20, dict) << nl;
+    Info<< "test2a : " << dimensionedScalar("test2a", dimless, 20, dict) << nl;
+    Info<< "test3 : "
+        << dimensionedScalar::lookupOrDefault("test3", dict, 30) << nl;
+
+    Info<< "test4 : "
+        << dimensionedScalar::lookupOrAddToDict("test4", dict, 40) << nl;
+
+    Info<< "test5 : "
+        << dimensionedScalar::lookupOrAddToDict("test5", dict, -50) << nl;
+
+    Info<< nl << "Dictionary is now: " << dict << nl;
 
     Info<< "End\n" << endl;
 

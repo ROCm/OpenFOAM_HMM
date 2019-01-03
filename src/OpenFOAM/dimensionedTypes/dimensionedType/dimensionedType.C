@@ -244,8 +244,12 @@ Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrAddToDict
     const Type& defaultValue
 )
 {
-    Type value = dict.lookupOrAddDefault<Type>(name, defaultValue);
-    return dimensioned<Type>(name, dims, value);
+    if (!dict.found(name))
+    {
+        (void) dict.add(name, defaultValue);
+    }
+
+    return dimensioned<Type>(name, dims, dict);
 }
 
 
