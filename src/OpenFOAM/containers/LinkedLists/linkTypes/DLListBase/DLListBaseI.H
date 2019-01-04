@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -245,7 +245,7 @@ Foam::DLListBase::iterator::get_node() const
 }
 
 
-inline bool Foam::DLListBase::iterator::found() const
+inline bool Foam::DLListBase::iterator::good() const
 {
     return (node_ != nullptr);
 }
@@ -351,7 +351,7 @@ Foam::DLListBase::const_iterator::get_node() const
 }
 
 
-inline bool Foam::DLListBase::const_iterator::found() const
+inline bool Foam::DLListBase::const_iterator::good() const
 {
     return (node_ != nullptr);
 }

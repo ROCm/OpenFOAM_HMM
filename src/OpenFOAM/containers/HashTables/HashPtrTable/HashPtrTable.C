@@ -75,7 +75,7 @@ Foam::HashPtrTable<T, Key, Hash>::~HashPtrTable()
 template<class T, class Key, class Hash>
 Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 {
-    if (iter.found())
+    if (iter.good())
     {
         autoPtr<T> aptr(iter.object());
         this->parent_type::erase(iter);
@@ -97,7 +97,7 @@ Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::remove(const Key& key)
 template<class T, class Key, class Hash>
 bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 {
-    if (iter.found())
+    if (iter.good())
     {
         T* ptr = iter.object();
 

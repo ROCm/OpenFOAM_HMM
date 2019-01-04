@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,6 +104,15 @@ Foam::HashTable<T, Key, Hash>::Iterator<Const>::increment()
         entry_ = nullptr;
         index_ = 0;
     }
+}
+
+
+template<class T, class Key, class Hash>
+template<bool Const>
+inline bool
+Foam::HashTable<T, Key, Hash>::Iterator<Const>::good() const
+{
+    return entry_;
 }
 
 

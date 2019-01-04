@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ SourceFiles
 
 #include "label.H"
 #include "uLabel.H"
-#include <utility>
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -237,7 +237,15 @@ public:
             inline link* get_node() const;
 
             //- Pointing at a valid storage node
-            inline bool found() const;
+            inline bool good() const;
+
+            //- Deprecated(2019-01) Pointing at a valid storage node
+            //  \deprecated(2019-01) - use good() method
+            inline bool found() const
+            FOAM_DEPRECATED_FOR(2019-01, "good() method")
+            {
+                return this->good();
+            }
 
             //- Move backward through list
             inline void prev();
@@ -283,7 +291,15 @@ public:
             inline const link* get_node() const;
 
             //- Pointing at a valid storage node
-            inline bool found() const;
+            inline bool good() const;
+
+            //- Deprecated(2019-01) Pointing at a valid storage node
+            //  \deprecated(2019-01) - use good() method
+            inline bool found() const
+            FOAM_DEPRECATED_FOR(2019-01, "good() method")
+            {
+                return this->good();
+            }
 
             //- Move backward through list
             inline void prev();

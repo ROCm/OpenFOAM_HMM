@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,6 +191,12 @@ public:
                 eptr_(nullptr)
             {}
 
+
+            //- True if entry was found
+            inline bool good() const
+            {
+                return eptr_;
+            }
 
             //- True if entry was found
             inline bool found() const
