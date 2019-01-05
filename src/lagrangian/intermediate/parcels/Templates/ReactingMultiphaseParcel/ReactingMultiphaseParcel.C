@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -311,6 +311,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         td,
         dt,
         d0,
+        Res,
+        mus/rhos,
         T0,
         mass0,
         canCombust_,
@@ -607,6 +609,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
     trackingData& td,
     const scalar dt,
     const scalar d,
+    const scalar Re,
+    const scalar nu,
     const scalar T,
     const scalar mass,
     const label canCombust,
@@ -644,6 +648,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
     const scalar hReaction = cloud.surfaceReaction().calculate
     (
         dt,
+        Re,
+        nu,
         this->cell(),
         d,
         T,

@@ -757,23 +757,29 @@ void Foam::KinematicCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
 template<class CloudType>
 void Foam::KinematicCloud<CloudType>::info()
 {
-    vector linearMomentum = linearMomentumOfSystem();
-    reduce(linearMomentum, sumOp<vector>());
+    const vector linearMomentum =
+        returnReduce(linearMomentumOfSystem(), sumOp<vector>());
 
-    scalar linearKineticEnergy = linearKineticEnergyOfSystem();
-    reduce(linearKineticEnergy, sumOp<scalar>());
+    const scalar linearKineticEnergy =
+        returnReduce(linearKineticEnergyOfSystem(), sumOp<scalar>());
+
+    const label nTotParcel = returnReduce(this->size(), sumOp<label>());
+
+    const scalar particlePerParcel =
+    (
+        nTotParcel
+      ? (returnReduce(totalParticlePerParcel(), sumOp<scalar>()) / nTotParcel)
+      : 0
+    );
 
     Info<< "Cloud: " << this->name() << nl
-        << "    Current number of parcels       = "
-        << returnReduce(this->size(), sumOp<label>()) << nl
+        << "    Current number of parcels       = " << nTotParcel << nl
         << "    Current mass in system          = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl
-        << "    Linear momentum                 = "
-        << linearMomentum << nl
-        << "   |Linear momentum|                = "
-        << mag(linearMomentum) << nl
-        << "    Linear kinetic energy           = "
-        << linearKineticEnergy << nl;
+        << "    Linear momentum                 = " << linearMomentum << nl
+        << "   |Linear momentum|                = " << mag(linearMomentum) << nl
+        << "    Linear kinetic energy           = " << linearKineticEnergy << nl
+        << "    Average particle per parcel     = " << particlePerParcel << nl;
 
     injectors_.info(Info);
     this->surfaceFilm().info(Info);

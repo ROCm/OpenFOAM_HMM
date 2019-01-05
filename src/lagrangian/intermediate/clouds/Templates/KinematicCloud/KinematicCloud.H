@@ -502,6 +502,9 @@ public:
             //- Total linear momentum of the system
             inline vector linearMomentumOfSystem() const;
 
+            //- Average particle per parcel
+            inline scalar totalParticlePerParcel() const;
+
             //- Total linear kinetic energy in the system
             inline scalar linearKineticEnergyOfSystem() const;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -36,6 +36,7 @@ namespace Foam
     defineRunTimeSelectionTable(solidProperties, dictionary);
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::solidProperties::solidProperties
@@ -44,14 +45,16 @@ Foam::solidProperties::solidProperties
     scalar Cp,
     scalar kappa,
     scalar Hf,
-    scalar emissivity
+    scalar emissivity,
+    scalar W
 )
 :
     rho_(rho),
     Cp_(Cp),
     kappa_(kappa),
     Hf_(Hf),
-    emissivity_(emissivity)
+    emissivity_(emissivity),
+    W_(W)
 {}
 
 
@@ -61,7 +64,8 @@ Foam::solidProperties::solidProperties(const dictionary& dict)
     Cp_(dict.get<scalar>("Cp")),
     kappa_(dict.getCompat<scalar>("kappa", {{"K", 1612}})),
     Hf_(dict.get<scalar>("Hf")),
-    emissivity_(dict.get<scalar>("emissivity"))
+    emissivity_(dict.get<scalar>("emissivity")),
+    W_(dict.get<scalar>("W"))
 {}
 
 
@@ -74,6 +78,7 @@ void Foam::solidProperties::readIfPresent(const dictionary& dict)
     dict.readIfPresentCompat("kappa", {{"K", 1612}}, kappa_);
     dict.readIfPresent("Hf_", Hf_);
     dict.readIfPresent("emissivity", emissivity_);
+    dict.readIfPresent("W", W_);
 }
 
 
@@ -83,7 +88,8 @@ void Foam::solidProperties::writeData(Ostream& os) const
         << Cp_ << token::SPACE
         << kappa_ << token::SPACE
         << Hf_ << token::SPACE
-        << emissivity_;
+        << emissivity_ << token::SPACE
+        << W_;
 }
 
 
