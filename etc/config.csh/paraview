@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -29,7 +29,7 @@
 #         ParaView_DIR
 #         PV_PLUGIN_PATH
 #     The OpenFOAM plugin must be the first in PV_PLUGIN_PATH and have
-#     paraview-major.minor version encoded in its name.
+#     paraview-major.minor encoded in its name.
 #
 #     For central installations not located under ThirdParty, the environment
 #     values must be set manually. For example,
@@ -66,16 +66,10 @@ set archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER"
 eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-env=PATH "$ParaView_DIR $archDir/ParaView- $archDir/qt- $archDir/cmake-"`
 eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-env=LD_LIBRARY_PATH "$ParaView_DIR $archDir/ParaView- $archDir/qt-"`
 
-# ThirdParty cmake
-set cmake="$archDir/$cmake_version"
-if ( -r "$cmake/bin/cmake" ) then
-    # _foamAddPath not available when foamPV alias is used
-    setenv PATH "$cmake/bin:${PATH}"
-endif
-
-# Evaluate command-line parameters for ParaView
+# Evaluate command-line parameters for ParaView and cmake
 while ( $#argv > 0 )
     switch ($argv[1])
+    case cmake*=*:
     case ParaView*=*:
         # name=value  -> set name=value
         eval "set $argv[1]"
@@ -83,6 +77,13 @@ while ( $#argv > 0 )
     endsw
     shift
 end
+
+# ThirdParty cmake
+set cmake="$archDir/$cmake_version"
+if ( -r "$cmake/bin/cmake" ) then
+    # _foamAddPath not available when foamPV alias is used
+    setenv PATH "$cmake/bin:${PATH}"
+endif
 
 if ($?ParaView_VERSION) then
 switch ("$ParaView_VERSION")

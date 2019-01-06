@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -300,8 +300,14 @@ case INTELMPI:
         echo "    Currently using '$MPI_ARCH_PATH'"
     endif
 
-    _foamAddPath    $MPI_ARCH_PATH/bin64
-    _foamAddLib     $MPI_ARCH_PATH/lib64
+    # Newer versions (5.0.3 or earlier?) with intel64/bin ...
+    if ( -d "$MPI_ARCH_PATH/intel64/bin" ) then
+        _foamAddPath    "$MPI_ARCH_PATH/intel64/bin"
+        _foamAddLib     "$MPI_ARCH_PATH/intel64/lib"
+    else
+        _foamAddPath    "$MPI_ARCH_PATH/bin64"
+        _foamAddLib     "$MPI_ARCH_PATH/lib64"
+    endif
     breaksw
 endsw
 
