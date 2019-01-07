@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -69,18 +69,18 @@ void Foam::edgeVertex::updateLabels
     // Iterate over map to see if anything changed
     bool changed = false;
 
-    forAllConstIter(Map<label>, cellPairs, iter)
+    forAllConstIters(cellPairs, iter)
     {
         label newMaster = map[iter.key()];
 
         label newSlave = -1;
 
-        if (iter() != -1)
+        if (iter.val() != -1)
         {
-            newSlave = map[iter()];
+            newSlave = map[iter.val()];
         }
 
-        if ((newMaster != iter.key()) || (newSlave != iter()))
+        if ((newMaster != iter.key()) || (newSlave != iter.val()))
         {
             changed = true;
 
@@ -93,15 +93,15 @@ void Foam::edgeVertex::updateLabels
     {
         Map<label> newCellPairs(2*cellPairs.size());
 
-        forAllConstIter(Map<label>, cellPairs, iter)
+        forAllConstIters(cellPairs, iter)
         {
             label newMaster = map[iter.key()];
 
             label newSlave = -1;
 
-            if (iter() != -1)
+            if (iter.val() != -1)
             {
-                newSlave = map[iter()];
+                newSlave = map[iter.val()];
             }
 
             if (newMaster == -1)

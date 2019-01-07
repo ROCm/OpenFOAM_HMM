@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -221,10 +221,9 @@ void Foam::layerAdditionRemoval::removeCellLayer
 
         forAll(newFace, pointi)
         {
-            Map<label>::iterator rpmIter =
-                removedPointMap.find(newFace[pointi]);
+            const auto rpmIter = removedPointMap.cfind(newFace[pointi]);
 
-            if (rpmIter != removedPointMap.end())
+            if (rpmIter.found())
             {
                 // Point mapped. Replace it
                 newFace[pointi] = rpmIter();

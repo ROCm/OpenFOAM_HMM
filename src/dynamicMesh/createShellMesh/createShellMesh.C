@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -398,9 +398,9 @@ void Foam::createShellMesh::calcPointRegions
         {
             label globalRegionI = pointGlobalRegions[facei][fp];
 
-            Map<label>::iterator fnd = globalToLocalRegion.find(globalRegionI);
+            const auto fnd = globalToLocalRegion.cfind(globalRegionI);
 
-            if (fnd != globalToLocalRegion.end())
+            if (fnd.found())
             {
                 // Already encountered this global region. Assign same local one
                 pRegions[fp] = fnd();

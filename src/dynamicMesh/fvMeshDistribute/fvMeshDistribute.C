@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -713,20 +713,17 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         label globali = pointToGlobalMaster[pointi];
         if (globali != -1)
         {
-            Map<label>::const_iterator iter = globalMasterToLocalMaster.find
-            (
-                globali
-            );
+            const auto iter = globalMasterToLocalMaster.cfind(globali);
 
-            if (iter == globalMasterToLocalMaster.end())
+            if (iter.found())
+            {
+                pointToMaster.insert(pointi, *iter);
+            }
+            else
             {
                 // Found first point. Designate as master
                 globalMasterToLocalMaster.insert(globali, pointi);
                 pointToMaster.insert(pointi, pointi);
-            }
-            else
-            {
-                pointToMaster.insert(pointi, iter());
             }
         }
     }
@@ -1097,11 +1094,11 @@ void Foam::fvMeshDistribute::findCouples
         {
             labelPair myData(sourceFace[bFacei], sourceProc[bFacei]);
 
-            labelPairLookup::const_iterator iter = map.find(myData);
+            const auto iter = map.cfind(myData);
 
-            if (iter != map.end())
+            if (iter.found())
             {
-                label nbrBFacei = iter();
+                label nbrBFacei = *iter;
 
                 masterCoupledFaces[coupledI] = mesh.nInternalFaces() + bFacei;
                 slaveCoupledFaces[coupledI] =

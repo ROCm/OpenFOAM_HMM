@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -196,10 +196,9 @@ void Foam::attachDetach::attachInterface
 
         forAll(newFace, pointi)
         {
-            Map<label>::const_iterator rpmIter =
-                removedPointMap.find(newFace[pointi]);
+            const auto rpmIter = removedPointMap.cfind(newFace[pointi]);
 
-            if (rpmIter != removedPointMap.end())
+            if (rpmIter.found())
             {
                 // Point mapped. Replace it
                 newFace[pointi] = rpmIter();
@@ -225,7 +224,7 @@ void Foam::attachDetach::attachInterface
         }
 
 
-        label patchID = mesh.boundaryMesh().whichPatch(curFaceID);
+        const label patchID = mesh.boundaryMesh().whichPatch(curFaceID);
         label neiCell;
         if (patchID == -1)
         {

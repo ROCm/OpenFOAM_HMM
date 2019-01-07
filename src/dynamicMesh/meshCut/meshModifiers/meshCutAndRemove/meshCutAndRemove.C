@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -706,9 +706,9 @@ void Foam::meshCutAndRemove::setRefinement
         // Check
         const Map<edge>& faceSplitCut = cuts.faceSplitCut();
 
-        forAllConstIter(Map<edge>, faceSplitCut, iter)
+        forAllConstIters(faceSplitCut, iter)
         {
-            const edge& fCut = iter();
+            const edge& fCut = iter.val();
 
             forAll(fCut, i)
             {
@@ -854,16 +854,16 @@ void Foam::meshCutAndRemove::setRefinement
 
     const Map<edge>& faceSplitCuts = cuts.faceSplitCut();
 
-    forAllConstIter(Map<edge>, faceSplitCuts, iter)
+    forAllConstIters(faceSplitCuts, iter)
     {
-        label facei = iter.key();
+        const label facei = iter.key();
+
+        const edge& splitEdge = iter.val();
 
         // Renumber face to include split edges.
         face newFace(addEdgeCutsToFace(facei));
 
         // Edge splitting the face. Convert edge to new vertex numbering.
-        const edge& splitEdge = iter();
-
         label cut0 = splitEdge[0];
 
         label v0;
@@ -1272,14 +1272,13 @@ void Foam::meshCutAndRemove::updateMesh(const mapPolyMesh& map)
     {
         Map<label> newAddedFaces(addedFaces_.size());
 
-        forAllConstIter(Map<label>, addedFaces_, iter)
+        forAllConstIters(addedFaces_, iter)
         {
-            label celli = iter.key();
-            label newCelli = map.reverseCellMap()[celli];
+            const label celli = iter.key();
+            const label addedFacei = iter.val();
 
-            label addedFacei = iter();
-
-            label newAddedFacei = map.reverseFaceMap()[addedFacei];
+            const label newCelli = map.reverseCellMap()[celli];
+            const label newAddedFacei = map.reverseFaceMap()[addedFacei];
 
             if ((newCelli >= 0) && (newAddedFacei >= 0))
             {
@@ -1311,15 +1310,13 @@ void Foam::meshCutAndRemove::updateMesh(const mapPolyMesh& map)
             const edge& e = iter.key();
             const label addedPointi = iter.val();
 
-            label newStart = map.reversePointMap()[e.start()];
-
-            label newEnd = map.reversePointMap()[e.end()];
-
-            label newAddedPointi = map.reversePointMap()[addedPointi];
+            const label newStart = map.reversePointMap()[e.start()];
+            const label newEnd = map.reversePointMap()[e.end()];
+            const label newAddedPointi = map.reversePointMap()[addedPointi];
 
             if ((newStart >= 0) && (newEnd >= 0) && (newAddedPointi >= 0))
             {
-                edge newE = edge(newStart, newEnd);
+                edge newE(newStart, newEnd);
 
                 if
                 (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -40,7 +40,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(undoableMeshCutter, 0);
+    defineTypeNameAndDebug(undoableMeshCutter, 0);
 }
 
 
@@ -70,9 +70,9 @@ void Foam::undoableMeshCutter::printCellRefTree
 // For debugging
 void Foam::undoableMeshCutter::printRefTree(Ostream& os) const
 {
-    forAllConstIter(Map<splitCell*>, liveSplitCells_, iter)
+    forAllConstIters(liveSplitCells_, iter)
     {
-        const splitCell* splitPtr = iter();
+        const splitCell* splitPtr = iter.val();
 
         // Walk to top (master path only)
         while (splitPtr->parent())
@@ -111,9 +111,9 @@ void Foam::undoableMeshCutter::updateLabels
 
     bool changed = false;
 
-    forAllConstIter(Map<splitCell*>, liveSplitCells, iter)
+    forAllConstIters(liveSplitCells, iter)
     {
-        const splitCell* splitPtr = iter();
+        const splitCell* splitPtr = iter.val();
 
         if (!splitPtr)
         {
@@ -141,13 +141,13 @@ void Foam::undoableMeshCutter::updateLabels
         // since new labels (= keys in Map) might clash with existing ones.
         Map<splitCell*> newLiveSplitCells(2*liveSplitCells.size());
 
-        forAllIter(Map<splitCell*>, liveSplitCells, iter)
+        forAllIters(liveSplitCells, iter)
         {
-            splitCell* splitPtr = iter();
+            splitCell* splitPtr = iter.val();
 
-            label celli = splitPtr->cellLabel();
+            const label celli = splitPtr->cellLabel();
 
-            label newCelli = map[celli];
+            const label newCelli = map[celli];
 
             if (debug && (celli != newCelli))
             {
@@ -197,9 +197,9 @@ Foam::undoableMeshCutter::~undoableMeshCutter()
 {
     // Clean split cell tree.
 
-    forAllIter(Map<splitCell*>, liveSplitCells_, iter)
+    forAllIters(liveSplitCells_, iter)
     {
-        splitCell* splitPtr = iter();
+        splitCell* splitPtr = iter.val();
 
         while (splitPtr)
         {
@@ -247,10 +247,9 @@ void Foam::undoableMeshCutter::setRefinement
             // Newly created split cell. (celli ->  celli + addedCelli)
 
             // Check if celli already part of split.
-            Map<splitCell*>::iterator findCell =
-                liveSplitCells_.find(celli);
+            auto findCell = liveSplitCells_.find(celli);
 
-            if (findCell == liveSplitCells_.end())
+            if (!findCell.found())
             {
                 // Celli not yet split. It cannot be unlive split cell
                 // since that would be illegal to split in the first
@@ -350,9 +349,9 @@ Foam::labelList Foam::undoableMeshCutter::getSplitFaces() const
 
     DynamicList<label> liveSplitFaces(liveSplitCells_.size());
 
-    forAllConstIter(Map<splitCell*>, liveSplitCells_, iter)
+    forAllConstIters(liveSplitCells_, iter)
     {
-        const splitCell* splitPtr = iter();
+        const splitCell* splitPtr = iter.val();
 
         if (!splitPtr->parent())
         {
@@ -411,9 +410,9 @@ Foam::Map<Foam::label> Foam::undoableMeshCutter::getAddedCells() const
 
     Map<label> addedCells(liveSplitCells_.size());
 
-    forAllConstIter(Map<splitCell*>, liveSplitCells_, iter)
+    forAllConstIters(liveSplitCells_, iter)
     {
-        const splitCell* splitPtr = iter();
+        const splitCell* splitPtr = iter.val();
 
         if (!splitPtr->parent())
         {
@@ -497,29 +496,18 @@ Foam::labelList Foam::undoableMeshCutter::removeSplitFaces
         }
 
         label own = mesh().faceOwner()[facei];
-
         label nbr = mesh().faceNeighbour()[facei];
 
-        Map<splitCell*>::iterator ownFind = liveSplitCells_.find(own);
+        auto ownFind = liveSplitCells_.find(own);
+        auto nbrFind = liveSplitCells_.find(nbr);
 
-        Map<splitCell*>::iterator nbrFind = liveSplitCells_.find(nbr);
-
-        if
-        (
-            (ownFind == liveSplitCells_.end())
-         || (nbrFind == liveSplitCells_.end())
-        )
-        {
-            // Can happen because of removeFaces adding extra faces to
-            // original splitFaces
-        }
-        else
+        if (ownFind.found() && nbrFind.found())
         {
             // Face is original splitFace.
 
-            splitCell* ownPtr = ownFind();
+            splitCell* ownPtr = ownFind.val();
 
-            splitCell* nbrPtr = nbrFind();
+            splitCell* nbrPtr = nbrFind.val();
 
             splitCell* parentPtr = ownPtr->parent();
 
@@ -586,7 +574,6 @@ Foam::labelList Foam::undoableMeshCutter::removeSplitFaces
             delete ownPtr;
             delete nbrPtr;
 
-            //
             // Update parent:
             //   - has parent itself: is part of split cell. Update cellLabel
             //     with merged cell one.

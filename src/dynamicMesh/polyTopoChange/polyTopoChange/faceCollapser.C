@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -34,7 +34,6 @@ License
 #include "SortableList.H"
 #include "meshTools.H"
 #include "OFstream.H"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -464,12 +463,13 @@ void Foam::faceCollapser::setRefinement
         }
     }
 
-    forAllConstIter(Map<labelList>, splitEdges, iter)
+    forAllConstIters(splitEdges, iter)
     {
         Pout<< "Split edge:" << iter.key()
             << " verts:" << mesh_.edges()[iter.key()]
             << " in:" << nl;
-        const labelList& edgePoints = iter();
+
+        const labelList& edgePoints = iter.val();
 
         forAll(edgePoints, i)
         {

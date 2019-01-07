@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -43,15 +43,13 @@ void Foam::setUpdater::updateSets(const mapPolyMesh& morphMap) const
     HashTable<const Type*> memSets =
         morphMap.mesh().objectRegistry::lookupClass<Type>();
 
-    forAllIter(typename HashTable<const Type*>, memSets, iter)
+    forAllIters(memSets, iter)
     {
         Type& set = const_cast<Type&>(*iter());
 
-        if (debug)
-        {
-            Pout<< "Set:" << set.name() << " size:" << set.size()
-                << " updated in memory" << endl;
-        }
+        DebugPout
+            << "Set:" << set.name() << " size:" << set.size()
+            << " updated in memory" << endl;
 
         set.updateMesh(morphMap);
 
@@ -65,14 +63,14 @@ void Foam::setUpdater::updateSets(const mapPolyMesh& morphMap) const
     //
 
     // Get last valid mesh (discard points-only change)
-    IOobjectList Objects
+    IOobjectList objs
     (
         morphMap.mesh().time(),
         morphMap.mesh().facesInstance(),
         "polyMesh/sets"
     );
 
-    IOobjectList fileSets(Objects.lookupClass(Type::typeName));
+    IOobjectList fileSets(objs.lookupClass<Type>());
 
     forAllConstIters(fileSets, iter)
     {
@@ -93,11 +91,9 @@ void Foam::setUpdater::updateSets(const mapPolyMesh& morphMap) const
         }
         else
         {
-            if (debug)
-            {
-                Pout<< "Set:" << iter.key() << " already updated from memory"
-                    << endl;
-            }
+            DebugPout
+                << "Set:" << iter.key() << " already updated from memory"
+                << endl;
         }
     }
 }

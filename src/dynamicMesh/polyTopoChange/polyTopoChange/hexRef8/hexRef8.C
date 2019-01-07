@@ -55,9 +55,8 @@ namespace Foam
 
     //- Reduction class. If x and y are not equal assign value.
     template<label value>
-    class ifEqEqOp
+    struct ifEqEqOp
     {
-        public:
         void operator()(label& x, const label y) const
         {
             x = (x == y) ? x : value;
@@ -970,15 +969,15 @@ Foam::label Foam::hexRef8::storeMidPointInfo
     bool changed = false;
     bool haveTwoAnchors = false;
 
-    Map<edge>::iterator edgeMidFnd = midPointToAnchors.find(edgeMidPointi);
+    auto edgeMidFnd = midPointToAnchors.find(edgeMidPointi);
 
-    if (edgeMidFnd == midPointToAnchors.end())
+    if (!edgeMidFnd.found())
     {
         midPointToAnchors.insert(edgeMidPointi, edge(anchorPointi, -1));
     }
     else
     {
-        edge& e = edgeMidFnd();
+        edge& e = edgeMidFnd.val();
 
         if (anchorPointi != e[0])
         {
@@ -997,15 +996,15 @@ Foam::label Foam::hexRef8::storeMidPointInfo
 
     bool haveTwoFaceMids = false;
 
-    Map<edge>::iterator faceMidFnd = midPointToFaceMids.find(edgeMidPointi);
+    auto faceMidFnd = midPointToFaceMids.find(edgeMidPointi);
 
-    if (faceMidFnd == midPointToFaceMids.end())
+    if (!faceMidFnd.found())
     {
         midPointToFaceMids.insert(edgeMidPointi, edge(faceMidPointi, -1));
     }
     else
     {
-        edge& e = faceMidFnd();
+        edge& e = faceMidFnd.val();
 
         if (faceMidPointi != e[0])
         {
@@ -1844,11 +1843,11 @@ bool Foam::hexRef8::matchHexShape
                     label pointi = f[fp];
                     if (pointLevel_[pointi] == cellLevel+1)
                     {
-                        Map<labelList>::iterator iter =
-                            pointFaces.find(pointi);
-                        if (iter != pointFaces.end())
+                        auto iter = pointFaces.find(pointi);
+
+                        if (iter.found())
                         {
-                            labelList& pFaces = iter();
+                            labelList& pFaces = iter.val();
                             if (!pFaces.found(facei))
                             {
                                 pFaces.append(facei);
@@ -1868,9 +1867,9 @@ bool Foam::hexRef8::matchHexShape
         }
 
         // 2. Check if we've collected any midPoints.
-        forAllConstIter(Map<labelList>, pointFaces, iter)
+        forAllConstIters(pointFaces, iter)
         {
-            const labelList& pFaces = iter();
+            const labelList& pFaces = iter.val();
 
             if (pFaces.size() == 4)
             {
@@ -2651,10 +2650,10 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
         seedFaces.setCapacity(changedFacesInfo.size());
         seedFacesInfo.setCapacity(changedFacesInfo.size());
 
-        forAllConstIter(Map<refinementData>, changedFacesInfo, iter)
+        forAllConstIters(changedFacesInfo, iter)
         {
             seedFaces.append(iter.key());
-            seedFacesInfo.append(iter());
+            seedFacesInfo.append(iter.val());
         }
     }
 
@@ -4313,14 +4312,14 @@ void Foam::hexRef8::updateMesh
 
         // See if any cells to restore. This will be for some new cells
         // the corresponding old cell.
-        forAllConstIter(Map<label>, cellsToRestore, iter)
+        forAllConstIters(cellsToRestore, iter)
         {
-            label newCelli = iter.key();
-            label storedCelli = iter();
+            const label newCelli = iter.key();
+            const label storedCelli = iter.val();
 
-            Map<label>::iterator fnd = savedCellLevel_.find(storedCelli);
+            const auto fnd = savedCellLevel_.cfind(storedCelli);
 
-            if (fnd == savedCellLevel_.end())
+            if (!fnd.found())
             {
                 FatalErrorInFunction
                     << "Problem : trying to restore old value for new cell "
@@ -4328,7 +4327,7 @@ void Foam::hexRef8::updateMesh
                     << " in map of stored values " << savedCellLevel_
                     << abort(FatalError);
             }
-            cellLevel_[newCelli] = fnd();
+            cellLevel_[newCelli] = fnd.val();
         }
 
         //if (cellLevel_.found(-1))
@@ -4363,7 +4362,7 @@ void Foam::hexRef8::updateMesh
 
             forAll(pointMap, newPointi)
             {
-                label oldPointi = pointMap[newPointi];
+                const label oldPointi = pointMap[newPointi];
 
                 if (oldPointi == -1)
                 {
@@ -4386,14 +4385,14 @@ void Foam::hexRef8::updateMesh
 
         // See if any points to restore. This will be for some new points
         // the corresponding old point (the one from the call to storeData)
-        forAllConstIter(Map<label>, pointsToRestore, iter)
+        forAllConstIters(pointsToRestore, iter)
         {
-            label newPointi = iter.key();
-            label storedPointi = iter();
+            const label newPointi = iter.key();
+            const label storedPointi = iter.val();
 
-            Map<label>::iterator fnd = savedPointLevel_.find(storedPointi);
+            auto fnd = savedPointLevel_.find(storedPointi);
 
-            if (fnd == savedPointLevel_.end())
+            if (!fnd.found())
             {
                 FatalErrorInFunction
                     << "Problem : trying to restore old value for new point "
@@ -4402,7 +4401,7 @@ void Foam::hexRef8::updateMesh
                     << " in map of stored values " << savedPointLevel_
                     << abort(FatalError);
             }
-            pointLevel_[newPointi] = fnd();
+            pointLevel_[newPointi] = fnd.val();
         }
 
         //if (pointLevel_.found(-1))

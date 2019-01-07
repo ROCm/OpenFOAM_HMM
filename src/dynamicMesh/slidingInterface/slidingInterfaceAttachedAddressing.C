@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -380,23 +380,18 @@ void Foam::slidingInterface::renumberAttachedAddressing
     Map<label>* newRpmPtr = new Map<label>(rpm.size());
     Map<label>& newRpm = *newRpmPtr;
 
-    const labelList rpmToc = rpm.toc();
-
     // Get reference to point renumbering
     const labelList& reversePointMap = m.reversePointMap();
 
-    label key, value;
-
-    forAll(rpmToc, rpmTocI)
+    forAllConstIters(rpm, iter)
     {
-        key = reversePointMap[rpmToc[rpmTocI]];
-
-        value = reversePointMap[rpm.find(rpmToc[rpmTocI])()];
+        const label key = reversePointMap[iter.key()];
+        const label val = reversePointMap[iter.val()];
 
         if (debug)
         {
             // Check if all the mapped cells are live
-            if (key < 0 || value < 0)
+            if (key < 0 || val < 0)
             {
                 FatalErrorInFunction
                     << "Error in retired point numbering for object "
@@ -406,7 +401,7 @@ void Foam::slidingInterface::renumberAttachedAddressing
             }
         }
 
-        newRpm.insert(key, value);
+        newRpm.insert(key, val);
     }
 
     // Renumber the cut point edge pair map. Need to take a copy!
@@ -415,13 +410,11 @@ void Foam::slidingInterface::renumberAttachedAddressing
     Map<Pair<edge>>* newCpepmPtr = new Map<Pair<edge>>(cpepm.size());
     Map<Pair<edge>>& newCpepm = *newCpepmPtr;
 
-    const labelList cpepmToc = cpepm.toc();
-
-    forAll(cpepmToc, cpepmTocI)
+    forAllConstIters(cpepm, iter)
     {
-        key = reversePointMap[cpepmToc[cpepmTocI]];
+        const label key = reversePointMap[iter.key()];
 
-        const Pair<edge>& oldPe = cpepm.find(cpepmToc[cpepmTocI])();
+        const Pair<edge>& oldPe = iter.val();
 
         // Re-do the edges in global addressing
         const label ms = reversePointMap[oldPe.first().start()];

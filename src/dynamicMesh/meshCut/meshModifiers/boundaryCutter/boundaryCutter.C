@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -40,7 +40,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(boundaryCutter, 0);
+    defineTypeNameAndDebug(boundaryCutter, 0);
 }
 
 
@@ -99,9 +99,9 @@ Foam::face Foam::boundaryCutter::addEdgeCutsToFace
 
         label edgeI = meshTools::findEdge(edges, fEdges, f[fp], v1);
 
-        Map<labelList>::const_iterator fnd = edgeToAddedPoints.find(edgeI);
+        const auto fnd = edgeToAddedPoints.cfind(edgeI);
 
-        if (fnd != edgeToAddedPoints.end())
+        if (fnd.found())
         {
             // edge has been cut. Introduce new vertices. Check order.
             const labelList& addedPoints = fnd();
@@ -228,9 +228,9 @@ bool Foam::boundaryCutter::splitFace
 
         label edgeI = meshTools::findEdge(edges, fEdges, f[fp], nextV);
 
-        Map<labelList>::const_iterator fnd = edgeToAddedPoints.find(edgeI);
+        const auto fnd = edgeToAddedPoints.cfind(edgeI);
 
-        if (fnd != edgeToAddedPoints.end())
+        if (fnd.found())
         {
             nSplitEdges++;
             nTotalSplits += fnd().size();
@@ -422,14 +422,14 @@ void Foam::boundaryCutter::setRefinement
     // Note: could just as well be handled outside of setRefinement.
     //
 
-    forAllConstIter(Map<point>, pointToPos, iter)
+    forAllConstIters(pointToPos, iter)
     {
         meshMod.setAction
         (
             polyModifyPoint
             (
                 iter.key(), // point
-                iter(),     // position
+                iter.val(), // position
                 false,      // no zone
                 -1,         // zone for point
                 true        // supports a cell
@@ -445,14 +445,14 @@ void Foam::boundaryCutter::setRefinement
     // Map from edge label to sorted list of points
     Map<labelList> edgeToAddedPoints(edgeToCuts.size());
 
-    forAllConstIter(Map<List<point>>, edgeToCuts, iter)
+    forAllConstIters(edgeToCuts, iter)
     {
-        label edgeI = iter.key();
+        const label edgeI = iter.key();
+        const List<point>& cuts = iter.val();
 
         const edge& e = mesh_.edges()[edgeI];
 
         // Sorted (from start to end) list of cuts on edge
-        const List<point>& cuts = iter();
 
         forAll(cuts, cutI)
         {
@@ -471,9 +471,9 @@ void Foam::boundaryCutter::setRefinement
                     )
                 );
 
-            Map<labelList>::iterator fnd = edgeToAddedPoints.find(edgeI);
+            auto fnd = edgeToAddedPoints.find(edgeI);
 
-            if (fnd != edgeToAddedPoints.end())
+            if (fnd.found())
             {
                 labelList& addedPoints = fnd();
 
@@ -499,9 +499,9 @@ void Foam::boundaryCutter::setRefinement
     // Introduce feature points.
     //
 
-    forAllConstIter(Map<point>, faceToFeaturePoint, iter)
+    forAllConstIters(faceToFeaturePoint, iter)
     {
-        label facei = iter.key();
+        const label facei = iter.key();
 
         const face& f = mesh_.faces()[facei];
 
@@ -527,18 +527,19 @@ void Foam::boundaryCutter::setRefinement
             (
                 polyAddPoint
                 (
-                    iter(), // point
+                    iter.val(), // point
                     f[0],   // master point
                     -1,     // zone for point
                     true    // supports a cell
                 )
             );
+
         faceAddedPoint_.insert(facei, addedPointi);
 
         if (debug)
         {
             Pout<< "Added point " << addedPointi << " for feature point "
-                << iter() << " on face " << facei << " with centre "
+                << iter.val() << " on face " << facei << " with centre "
                 << mesh_.faceCentres()[facei] << endl;
         }
     }
@@ -555,14 +556,13 @@ void Foam::boundaryCutter::setRefinement
 
 
     // Triangulate faces containing feature points
-    forAllConstIter(Map<label>, faceAddedPoint_, iter)
+    forAllConstIters(faceAddedPoint_, iter)
     {
-        label facei = iter.key();
+        const label facei = iter.key();
+        const label addedPointi = iter.val();
 
         // Get face with new points on cut edges.
         face newFace(addEdgeCutsToFace(facei, edgeToAddedPoints));
-
-        label addedPointi = iter();
 
         // Information about old face
         label patchID, zoneID, zoneFlip;
@@ -628,9 +628,9 @@ void Foam::boundaryCutter::setRefinement
 
 
     // Diagonally split faces
-    forAllConstIter(Map<labelPair>, faceToSplit, iter)
+    forAllConstIters(faceToSplit, iter)
     {
-        label facei = iter.key();
+        const label facei = iter.key();
 
         const face& f = mesh_.faces()[facei];
 
@@ -654,7 +654,7 @@ void Foam::boundaryCutter::setRefinement
         label masterPoint = mesh_.faces()[facei][0];
 
         // Split face from one side of diagonal to other.
-        const labelPair& diag = iter();
+        const labelPair& diag = iter.val();
 
         label fp0 = newFace.find(f[diag[0]]);
         label fp1 = newFace.find(f[diag[1]]);
@@ -743,9 +743,9 @@ void Foam::boundaryCutter::setRefinement
 
     // Split external faces without feature point but using cut edges.
     // Does right handed walk but not really.
-    forAllConstIter(Map<labelList>, edgeToAddedPoints, iter)
+    forAllConstIters(edgeToAddedPoints, iter)
     {
-        label edgeI = iter.key();
+        const label edgeI = iter.key();
 
         const labelList& eFaces = mesh_.edgeFaces()[edgeI];
 
@@ -769,9 +769,9 @@ void Foam::boundaryCutter::setRefinement
     // Add cut edges (but don't split) any other faces using any cut edge.
     // These can be external faces where splitFace hasn't cut them or
     // internal faces.
-    forAllConstIter(Map<labelList>, edgeToAddedPoints, iter)
+    forAllConstIters(edgeToAddedPoints, iter)
     {
-        label edgeI = iter.key();
+        const label edgeI = iter.key();
 
         const labelList& eFaces = mesh_.edgeFaces()[edgeI];
 
@@ -784,7 +784,7 @@ void Foam::boundaryCutter::setRefinement
                 // Renumber face to include split edges.
                 face newFace(addEdgeCutsToFace(facei, edgeToAddedPoints));
 
-                label own = mesh_.faceOwner()[facei];
+                const label own = mesh_.faceOwner()[facei];
 
                 label nei = -1;
 
@@ -821,9 +821,9 @@ void Foam::boundaryCutter::setRefinement
     // to point labels
     edgeAddedPoints_.resize(edgeToCuts.size());
 
-    forAllConstIter(Map<labelList>, edgeToAddedPoints, iter)
+    forAllConstIters(edgeToAddedPoints, iter)
     {
-        edgeAddedPoints_.insert(mesh_.edges()[iter.key()], iter());
+        edgeAddedPoints_.insert(mesh_.edges()[iter.key()], iter.val());
     }
 }
 
@@ -840,15 +840,13 @@ void Foam::boundaryCutter::updateMesh(const mapPolyMesh& morphMap)
         // Create copy since we're deleting entries.
         Map<label> newAddedPoints(faceAddedPoint_.size());
 
-        forAllConstIter(Map<label>, faceAddedPoint_, iter)
+        forAllConstIters(faceAddedPoint_, iter)
         {
-            label oldFacei = iter.key();
+            const label oldFacei = iter.key();
+            const label oldPointi = iter.val();
 
-            label newFacei = morphMap.reverseFaceMap()[oldFacei];
-
-            label oldPointi = iter();
-
-            label newPointi = morphMap.reversePointMap()[oldPointi];
+            const label newFacei = morphMap.reverseFaceMap()[oldFacei];
+            const label newPointi = morphMap.reversePointMap()[oldPointi];
 
             if (newFacei >= 0 && newPointi >= 0)
             {

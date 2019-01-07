@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -49,8 +49,6 @@ void Foam::enrichedPatch::calcPointPoints() const
 
     const faceList& lf = localFaces();
 
-    bool found = false;
-
     for (const face& curFace : lf)
     {
         forAll(curFace, pointi)
@@ -60,36 +58,15 @@ void Foam::enrichedPatch::calcPointPoints() const
             // Do next label
             const label next = curFace.nextLabel(pointi);
 
-            found = false;
-
-            forAll(curPp, i)
-            {
-                if (curPp[i] == next)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
+            if (!curPp.found(next))
             {
                 curPp.append(next);
             }
 
             // Do previous label
             const label prev = curFace.prevLabel(pointi);
-            found = false;
 
-            forAll(curPp, i)
-            {
-                if (curPp[i] == prev)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
+            if (!curPp.found(prev))
             {
                 curPp.append(prev);
             }
