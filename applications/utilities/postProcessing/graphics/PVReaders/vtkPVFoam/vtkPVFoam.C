@@ -30,6 +30,7 @@ License
 #include "areaFaMesh.H"
 #include "faMesh.H"
 #include "fvMesh.H"
+#include "foamVersion.H"
 #include "Time.H"
 #include "patchZones.H"
 #include "IOobjectList.H"
@@ -313,6 +314,9 @@ Foam::vtkPVFoam::vtkPVFoam
     {
         fullCasePath = cwd();
     }
+
+    // OPENFOAM API
+    setEnv("FOAM_API", std::to_string(foamVersion::api), true);
 
     // The name of the executable, unless already present in the environment
     setEnv("FOAM_EXECUTABLE", "paraview", false);

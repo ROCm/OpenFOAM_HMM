@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 // OpenFOAM includes
 #include "blockMesh.H"
 #include "blockMeshTools.H"
+#include "foamVersion.H"
 #include "Time.H"
 #include "patchZones.H"
 #include "StringStream.H"
@@ -205,6 +206,9 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
     {
         fullCasePath = cwd();
     }
+
+    // OPENFOAM API
+    setEnv("FOAM_API", std::to_string(foamVersion::api), true);
 
     // The name of the executable, unless already present in the environment
     setEnv("FOAM_EXECUTABLE", "paraview", false);

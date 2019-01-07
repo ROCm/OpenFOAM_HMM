@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -73,6 +73,7 @@ unsetenv WM_THIRD_PARTY_DIR
 #------------------------------------------------------------------------------
 # Unset FOAM_* environment variables
 
+unsetenv FOAM_API
 unsetenv FOAM_APPBIN
 unsetenv FOAM_APP
 unsetenv FOAM_CODE_TEMPLATES
