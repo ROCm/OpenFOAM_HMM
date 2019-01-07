@@ -35,7 +35,7 @@ inline bool Foam::basicMultiComponentMixture::contains
     const word& specieName
 ) const
 {
-    return species_.contains(specieName);
+    return species_.found(specieName);
 }
 
 

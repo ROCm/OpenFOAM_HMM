@@ -63,17 +63,9 @@ const Foam::hashedWordList& Foam::interfaceCompositionModel::species() const
 }
 
 
-bool Foam::interfaceCompositionModel::transports
-(
-    word& speciesName
-) const
+bool Foam::interfaceCompositionModel::transports(word& speciesName) const
 {
-    if (this->speciesNames_.contains(speciesName))
-    {
-        return true;
-    }
-
-    return false;
+    return this->speciesNames_.found(speciesName);
 }
 
 
