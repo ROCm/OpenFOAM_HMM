@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -346,7 +346,9 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                 (
                     this->polyMesh::name(), // region of undecomposed mesh
                     facesInstance(),
-                    processorDb
+                    processorDb,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
                 ),
                 std::move(facesInstancePoints),
                 std::move(procFaces),
@@ -361,7 +363,9 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                 (
                     this->polyMesh::name(), // region of undecomposed mesh
                     facesInstance(),
-                    processorDb
+                    processorDb,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
                 ),
                 std::move(procPoints),
                 std::move(procFaces),
