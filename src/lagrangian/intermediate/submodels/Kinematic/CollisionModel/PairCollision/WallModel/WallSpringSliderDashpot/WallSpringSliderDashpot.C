@@ -41,10 +41,8 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
     rhoMax = -VGREAT;
     UMagMax = -VGREAT;
 
-    forAllConstIter(typename CloudType, this->owner(), iter)
+    for (const typename CloudType::parcelType& p : this->owner())
     {
-        const typename CloudType::parcelType& p = iter();
-
         // Finding minimum diameter to avoid excessive arithmetic
 
         scalar dEff = p.d();

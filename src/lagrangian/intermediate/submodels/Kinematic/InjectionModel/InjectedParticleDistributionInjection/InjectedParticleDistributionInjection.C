@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,9 +45,8 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::initialise()
 
     // Flatten all data
     label particlei = 0;
-    forAllConstIter(injectedParticleCloud, ipCloud, iter)
+    for (const injectedParticle& p : ipCloud)
     {
-        const injectedParticle& p = iter();
         tag[particlei] = p.tag();
         position[particlei] = p.position();
         U[particlei] = p.U();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -41,10 +41,8 @@ void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
     rhoMax = -VGREAT;
     UMagMax = -VGREAT;
 
-    forAllConstIter(typename CloudType, this->owner(), iter)
+    for (const typename CloudType::parcelType& p : this->owner())
     {
-        const typename CloudType::parcelType& p = iter();
-
         // Finding minimum diameter to avoid excessive arithmetic
 
         scalar dEff = p.d();
@@ -123,13 +121,6 @@ Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
 
     cohesion_ = (mag(cohesionEnergyDensity_) > VSMALL);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PairSpringSliderDashpot<CloudType>::~PairSpringSliderDashpot()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

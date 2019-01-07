@@ -41,10 +41,8 @@ void Foam::WallLocalSpringSliderDashpot<CloudType>::findMinMaxProperties
     rhoMax = -VGREAT;
     UMagMax = -VGREAT;
 
-    forAllConstIter(typename CloudType, this->owner(), iter)
+    for (const typename CloudType::parcelType& p : this->owner())
     {
-        const typename CloudType::parcelType& p = iter();
-
         // Finding minimum diameter to avoid excessive arithmetic
 
         scalar dEff = p.d();
@@ -213,11 +211,11 @@ Foam::WallLocalSpringSliderDashpot<CloudType>::WallLocalSpringSliderDashpot
 
     DynamicList<label> wallPatchIndices;
 
-    forAll(bMesh, patchi)
+    for (const polyPatch& pp : bMesh)
     {
-        if (isA<wallPolyPatch>(bMesh[patchi]))
+        if (isA<wallPolyPatch>(pp))
         {
-            wallPatchIndices.append(bMesh[patchi].index());
+            wallPatchIndices.append(pp.index());
         }
     }
 
@@ -269,13 +267,6 @@ Foam::WallLocalSpringSliderDashpot<CloudType>::WallLocalSpringSliderDashpot
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::WallLocalSpringSliderDashpot<CloudType>::~WallLocalSpringSliderDashpot()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

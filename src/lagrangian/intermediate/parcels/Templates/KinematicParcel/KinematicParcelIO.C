@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -176,10 +176,8 @@ void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
 
     label i = 0;
 
-    forAllIter(typename CloudType, c, iter)
+    for (KinematicParcel<ParcelType>& p : c)
     {
-        KinematicParcel<ParcelType>& p = iter();
-
         p.active_ = active[i];
         p.typeId_ = typeId[i];
         p.nParticle_ = nParticle[i];
@@ -191,7 +189,7 @@ void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
 
-        i++;
+        ++i;
     }
 }
 
@@ -221,10 +219,8 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
 
     label i = 0;
 
-    forAllConstIter(typename CloudType, c, iter)
+    for (const KinematicParcel<ParcelType>& p : c)
     {
-        const KinematicParcel<ParcelType>& p = iter();
-
         active[i] = p.active();
         typeId[i] = p.typeId();
         nParticle[i] = p.nParticle();
@@ -236,7 +232,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
 
-        i++;
+        ++i;
     }
 
     const bool valid = np > 0;
@@ -282,10 +278,8 @@ void Foam::KinematicParcel<ParcelType>::writeObjects
 
     label i = 0;
 
-    forAllConstIter(typename CloudType, c, iter)
+    for (const KinematicParcel<ParcelType>& p : c)
     {
-        const KinematicParcel<ParcelType>& p = iter();
-
         active[i] = p.active();
         typeId[i] = p.typeId();
         nParticle[i] = p.nParticle();
@@ -297,7 +291,7 @@ void Foam::KinematicParcel<ParcelType>::writeObjects
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
 
-        i++;
+        ++i;
     }
 }
 

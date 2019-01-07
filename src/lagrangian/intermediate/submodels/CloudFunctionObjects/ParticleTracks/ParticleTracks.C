@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -46,10 +46,7 @@ void Foam::ParticleTracks<CloudType>::write()
     }
     else
     {
-        if (debug)
-        {
-            InfoInFunction << "cloupPtr invalid" << endl;
-        }
+        DebugInFunction << "invalid cloud pointer" << endl;
     }
 }
 
@@ -125,23 +122,12 @@ void Foam::ParticleTracks<CloudType>::postFace(const parcelType& p, bool&)
              << "Cloud storage not allocated" << abort(FatalError);
         }
 
-        labelPairLookup::iterator iter =
-            faceHitCounter_.find(labelPair(p.origProc(), p.origId()));
+        const label count =
+            ++(faceHitCounter_(labelPair(p.origProc(), p.origId()), 0));
 
-        label localI = -1;
-        if (iter != faceHitCounter_.end())
-        {
-            iter()++;
-            localI = iter();
-        }
-        else
-        {
-            localI = 1;
-            faceHitCounter_.insert(labelPair(p.origProc(), p.origId()), localI);
-        }
+        const label nSamples = floor(count/trackInterval_);
 
-        label nSamples = floor(localI/trackInterval_);
-        if ((localI % trackInterval_ == 0) && (nSamples < maxSamples_))
+        if ((count % trackInterval_) == 0 && nSamples < maxSamples_)
         {
             cloudPtr_->append
             (

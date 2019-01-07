@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,16 +46,14 @@ void Foam::InjectedParticleInjection<CloudType>::initialise()
 
     label particlei = 0;
 
-    forAllConstIter(injectedParticleCloud, cloud, iter)
+    for (const injectedParticle& p : cloud)
     {
-        const injectedParticle& p = iter();
-
         time[particlei] = p.soi();
         position[particlei] = p.position() + positionOffset_;
         diameter[particlei] = p.d();
         U[particlei] = p.U();
 
-        particlei++;
+        ++particlei;
     }
 
     // Combine all proc data
@@ -218,13 +216,6 @@ Foam::InjectedParticleInjection<CloudType>::InjectedParticleInjection
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::InjectedParticleInjection<CloudType>::~InjectedParticleInjection()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -289,7 +280,7 @@ Foam::label Foam::InjectedParticleInjection<CloudType>::parcelsToInject
     {
         if ((time_[particlei] >= time0) && (time_[particlei] < time1))
         {
-            nParticles++;
+            ++nParticles;
         }
     }
 

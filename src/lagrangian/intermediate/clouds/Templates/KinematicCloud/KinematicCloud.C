@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -155,14 +155,14 @@ void Foam::KinematicCloud<CloudType>::buildCellOccupancy()
 
     List<DynamicList<parcelType*>>& cellOccupancy = cellOccupancyPtr_();
 
-    forAll(cellOccupancy, cO)
+    for (auto& list : cellOccupancy)
     {
-        cellOccupancy[cO].clear();
+        list.clear();
     }
 
-    forAllIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (parcelType& p : *this)
     {
-        cellOccupancy[iter().cell()].append(&iter());
+        cellOccupancy[p.cell()].append(&p);
     }
 }
 

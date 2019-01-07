@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -109,10 +109,11 @@ void Foam::ReactingParcel<ParcelType>::readFields
     c.checkFieldIOobject(c, mass0);
 
     label i = 0;
-    forAllIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
+    for (ReactingParcel<ParcelType>& p : c)
     {
-        ReactingParcel<ParcelType>& p = iter();
-        p.mass0_ = mass0[i++];
+        p.mass0_ = mass0[i];
+
+        ++i;
     }
 
     // Get names and sizes for each Y...
@@ -126,9 +127,8 @@ void Foam::ReactingParcel<ParcelType>::readFields
 
 
     // Set storage for each Y... for each parcel
-    forAllIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
+    for (ReactingParcel<ParcelType>& p : c)
     {
-        ReactingParcel<ParcelType>& p = iter();
         p.Y_.setSize(nPhases, 0.0);
     }
 
@@ -146,10 +146,11 @@ void Foam::ReactingParcel<ParcelType>::readFields
         );
 
         label i = 0;
-        forAllIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
+        for (ReactingParcel<ParcelType>& p : c)
         {
-            ReactingParcel<ParcelType>& p = iter();
-            p.Y_[j] = Y[i++];
+            p.Y_[j] = Y[i];
+
+            ++i;
         }
     }
 }
@@ -179,10 +180,11 @@ void Foam::ReactingParcel<ParcelType>::writeFields
         IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::NO_READ), np);
 
         label i = 0;
-        forAllConstIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
+        for (const ReactingParcel<ParcelType>& p : c)
         {
-            const ReactingParcel<ParcelType>& p = iter();
             mass0[i++] = p.mass0_;
+
+            ++i;
         }
         mass0.write(np > 0);
 
@@ -205,16 +207,13 @@ void Foam::ReactingParcel<ParcelType>::writeFields
                 ),
                 np
             );
+
             label i = 0;
-            forAllConstIter
-            (
-                typename Cloud<ReactingParcel<ParcelType>>,
-                c,
-                iter
-            )
+            for (const ReactingParcel<ParcelType>& p : c)
             {
-                const ReactingParcel<ParcelType>& p = iter();
-                Y[i++] = p.Y()[j];
+                Y[i] = p.Y()[j];
+
+                ++i;
             }
 
             Y.write(np > 0);
@@ -253,10 +252,11 @@ void Foam::ReactingParcel<ParcelType>::writeObjects
         IOField<scalar>& mass0(cloud::createIOField<scalar>("mass0", np, obr));
 
         label i = 0;
-        forAllConstIter(typename Cloud<ReactingParcel<ParcelType>>, c, iter)
+        for (const ReactingParcel<ParcelType>& p : c)
         {
-            const ReactingParcel<ParcelType>& p = iter();
-            mass0[i++] = p.mass0_;
+            mass0[i] = p.mass0_;
+
+            ++i;
         }
 
         // Write the composition fractions
@@ -276,15 +276,11 @@ void Foam::ReactingParcel<ParcelType>::writeObjects
             );
 
             label i = 0;
-            forAllConstIter
-            (
-                typename Cloud<ReactingParcel<ParcelType>>,
-                c,
-                iter
-            )
+            for (const ReactingParcel<ParcelType>& p : c)
             {
-                const ReactingParcel<ParcelType>& p = iter();
-                Y[i++] = p.Y()[j];
+                Y[i] = p.Y()[j];
+
+                ++i;
             }
         }
     }

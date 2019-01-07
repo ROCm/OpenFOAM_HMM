@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -45,10 +45,8 @@ template<class CloudType>
 void Foam::PairCollision<CloudType>::preInteraction()
 {
     // Set accumulated quantities to zero
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (typename CloudType::parcelType& p : this->owner())
     {
-        typename CloudType::parcelType& p = iter();
-
         p.f() = Zero;
 
         p.torque() = Zero;
@@ -145,11 +143,10 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
 
         // Loop over all referred parcels in the referred cell
 
-        forAllIter
+        for
         (
-            typename IDLList<typename CloudType::parcelType>,
-            refCellRefParticles,
-            referredParcel
+            typename CloudType::parcelType& referredParcel
+          : refCellRefParticles
         )
         {
             // Loop over all real cells in that the referred cell is
@@ -165,7 +162,7 @@ void Foam::PairCollision<CloudType>::realReferredInteraction()
                     evaluatePair
                     (
                         *realCellParcels[realParcelI],
-                        referredParcel()
+                        referredParcel
                     );
                 }
             }
@@ -481,10 +478,8 @@ void Foam::PairCollision<CloudType>::postInteraction()
 {
     // Delete any collision records where no collision occurred this step
 
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (typename CloudType::parcelType& p : this->owner())
     {
-        typename CloudType::parcelType& p = iter();
-
         p.collisionRecords().update();
     }
 }
