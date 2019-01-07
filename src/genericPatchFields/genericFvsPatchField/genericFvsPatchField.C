@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2011,2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -227,7 +225,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
                                 << exit(FatalIOError);
                         }
 
-                        sphericalTensorFields_.insert(key, fPtr);
+                        sphTensorFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -356,7 +354,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
                         {
                             sphericalTensor vs(l[0]);
 
-                            sphericalTensorFields_.insert
+                            sphTensorFields_.insert
                             (
                                 key,
                                 autoPtr<sphericalTensorField>::New
@@ -462,11 +460,11 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
     forAllConstIter
     (
         HashPtrTable<sphericalTensorField>,
-        ptf.sphericalTensorFields_,
+        ptf.sphTensorFields_,
         iter
     )
     {
-        sphericalTensorFields_.insert
+        sphTensorFields_.insert
         (
             iter.key(),
             autoPtr<sphericalTensorField>::New(*iter(), mapper)
@@ -514,7 +512,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
     dict_(ptf.dict_),
     scalarFields_(ptf.scalarFields_),
     vectorFields_(ptf.vectorFields_),
-    sphericalTensorFields_(ptf.sphericalTensorFields_),
+    sphTensorFields_(ptf.sphTensorFields_),
     symmTensorFields_(ptf.symmTensorFields_),
     tensorFields_(ptf.tensorFields_)
 {}
@@ -532,7 +530,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
     dict_(ptf.dict_),
     scalarFields_(ptf.scalarFields_),
     vectorFields_(ptf.vectorFields_),
-    sphericalTensorFields_(ptf.sphericalTensorFields_),
+    sphTensorFields_(ptf.sphTensorFields_),
     symmTensorFields_(ptf.symmTensorFields_),
     tensorFields_(ptf.tensorFields_)
 {}
@@ -548,52 +546,27 @@ void Foam::genericFvsPatchField<Type>::autoMap
 {
     calculatedFvsPatchField<Type>::autoMap(m);
 
-    forAllIter
-    (
-        HashPtrTable<scalarField>,
-        scalarFields_,
-        iter
-    )
+    forAllIters(scalarFields_, iter)
     {
         iter()->autoMap(m);
     }
 
-    forAllIter
-    (
-        HashPtrTable<vectorField>,
-        vectorFields_,
-        iter
-    )
+    forAllIters(vectorFields_, iter)
     {
         iter()->autoMap(m);
     }
 
-    forAllIter
-    (
-        HashPtrTable<sphericalTensorField>,
-        sphericalTensorFields_,
-        iter
-    )
+    forAllIters(sphTensorFields_, iter)
     {
         iter()->autoMap(m);
     }
 
-    forAllIter
-    (
-        HashPtrTable<symmTensorField>,
-        symmTensorFields_,
-        iter
-    )
+    forAllIters(symmTensorFields_, iter)
     {
         iter()->autoMap(m);
     }
 
-    forAllIter
-    (
-        HashPtrTable<tensorField>,
-        tensorFields_,
-        iter
-    )
+    forAllIters(tensorFields_, iter)
     {
         iter()->autoMap(m);
     }
@@ -612,83 +585,53 @@ void Foam::genericFvsPatchField<Type>::rmap
     const genericFvsPatchField<Type>& dptf =
         refCast<const genericFvsPatchField<Type>>(ptf);
 
-    forAllIter
-    (
-        HashPtrTable<scalarField>,
-        scalarFields_,
-        iter
-    )
+    forAllIters(scalarFields_, iter)
     {
-        HashPtrTable<scalarField>::const_iterator dptfIter =
-            dptf.scalarFields_.find(iter.key());
+        const auto iter2 = dptf.scalarFields_.cfind(iter.key());
 
-        if (dptfIter != dptf.scalarFields_.end())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 
-    forAllIter
-    (
-        HashPtrTable<vectorField>,
-        vectorFields_,
-        iter
-    )
+    forAllIters(vectorFields_, iter)
     {
-        HashPtrTable<vectorField>::const_iterator dptfIter =
-            dptf.vectorFields_.find(iter.key());
+        const auto iter2 = dptf.vectorFields_.find(iter.key());
 
-        if (dptfIter != dptf.vectorFields_.end())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 
-    forAllIter
-    (
-        HashPtrTable<sphericalTensorField>,
-        sphericalTensorFields_,
-        iter
-    )
+    forAllIters(sphTensorFields_, iter)
     {
-        HashPtrTable<sphericalTensorField>::const_iterator dptfIter =
-            dptf.sphericalTensorFields_.find(iter.key());
+        const auto iter2 = dptf.sphTensorFields_.find(iter.key());
 
-        if (dptfIter != dptf.sphericalTensorFields_.end())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 
-    forAllIter
-    (
-        HashPtrTable<symmTensorField>,
-        symmTensorFields_,
-        iter
-    )
+    forAllIters(symmTensorFields_, iter)
     {
-        HashPtrTable<symmTensorField>::const_iterator dptfIter =
-            dptf.symmTensorFields_.find(iter.key());
+        const auto iter2 = dptf.symmTensorFields_.find(iter.key());
 
-        if (dptfIter != dptf.symmTensorFields_.end())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 
-    forAllIter
-    (
-        HashPtrTable<tensorField>,
-        tensorFields_,
-        iter
-    )
+    forAllIters(tensorFields_, iter)
     {
-        HashPtrTable<tensorField>::const_iterator dptfIter =
-            dptf.tensorFields_.find(iter.key());
+        const auto iter2 = dptf.tensorFields_.find(iter.key());
 
-        if (dptfIter != dptf.tensorFields_.end())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 }
@@ -807,9 +750,9 @@ void Foam::genericFvsPatchField<Type>::write(Ostream& os) const
                     vectorFields_.find(key)()
                         ->writeEntry(key, os);
                 }
-                else if (sphericalTensorFields_.found(key))
+                else if (sphTensorFields_.found(key))
                 {
-                    sphericalTensorFields_.find(key)()
+                    sphTensorFields_.find(key)()
                         ->writeEntry(key, os);
                 }
                 else if (symmTensorFields_.found(key))

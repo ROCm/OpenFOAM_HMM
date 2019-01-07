@@ -207,7 +207,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
                                 << exit(FatalIOError);
                         }
 
-                        sphericalTensorFields_.insert(key, fPtr);
+                        sphTensorFields_.insert(key, fPtr);
                     }
                     else if
                     (
@@ -328,9 +328,9 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
         );
     }
 
-    forAllConstIters(ptf.sphericalTensorFields_, iter)
+    forAllConstIters(ptf.sphTensorFields_, iter)
     {
-        sphericalTensorFields_.insert
+        sphTensorFields_.insert
         (
             iter.key(),
             autoPtr<sphericalTensorField>::New(*iter(), mapper)
@@ -369,7 +369,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
     dict_(ptf.dict_),
     scalarFields_(ptf.scalarFields_),
     vectorFields_(ptf.vectorFields_),
-    sphericalTensorFields_(ptf.sphericalTensorFields_),
+    sphTensorFields_(ptf.sphTensorFields_),
     symmTensorFields_(ptf.symmTensorFields_),
     tensorFields_(ptf.tensorFields_)
 {}
@@ -393,7 +393,7 @@ void Foam::genericPointPatchField<Type>::autoMap
         iter()->autoMap(m);
     }
 
-    forAllIters(sphericalTensorFields_, iter)
+    forAllIters(sphTensorFields_, iter)
     {
         iter()->autoMap(m);
     }
@@ -422,56 +422,51 @@ void Foam::genericPointPatchField<Type>::rmap
 
     forAllIters(scalarFields_, iter)
     {
-        HashPtrTable<scalarField>::const_iterator dptfIter =
-            dptf.scalarFields_.find(iter.key());
+        const auto iter2 = dptf.scalarFields_.cfind(iter.key());
 
-        if (dptfIter.found())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 
     forAllIters(vectorFields_, iter)
     {
-        HashPtrTable<vectorField>::const_iterator dptfIter =
-            dptf.vectorFields_.find(iter.key());
+        const auto iter2 = dptf.vectorFields_.cfind(iter.key());
 
-        if (dptfIter.found())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 
-    forAllIters(sphericalTensorFields_, iter)
+    forAllIters(sphTensorFields_, iter)
     {
-        HashPtrTable<sphericalTensorField>::const_iterator dptfIter =
-            dptf.sphericalTensorFields_.find(iter.key());
+        const auto iter2 = dptf.sphTensorFields_.find(iter.key());
 
-        if (dptfIter.found())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 
     forAllIters(symmTensorFields_, iter)
     {
-        HashPtrTable<symmTensorField>::const_iterator dptfIter =
-            dptf.symmTensorFields_.find(iter.key());
+        const auto iter2 = dptf.symmTensorFields_.find(iter.key());
 
-        if (dptfIter.found())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 
     forAllIters(tensorFields_, iter)
     {
-        HashPtrTable<tensorField>::const_iterator dptfIter =
-            dptf.tensorFields_.find(iter.key());
+        const auto iter2 = dptf.tensorFields_.find(iter.key());
 
-        if (dptfIter != tensorFields_.end())
+        if (iter2.found())
         {
-            iter()->rmap(*dptfIter(), addr);
+            iter()->rmap(*iter2(), addr);
         }
     }
 }
@@ -511,9 +506,9 @@ void Foam::genericPointPatchField<Type>::write(Ostream& os) const
                 {
                     vectorFields_.find(key)()->writeEntry(key, os);
                 }
-                else if (sphericalTensorFields_.found(key))
+                else if (sphTensorFields_.found(key))
                 {
-                    sphericalTensorFields_.find(key)()->writeEntry(key, os);
+                    sphTensorFields_.find(key)()->writeEntry(key, os);
                 }
                 else if (symmTensorFields_.found(key))
                 {
