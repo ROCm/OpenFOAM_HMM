@@ -314,18 +314,7 @@ void Foam::snappyLayerDriver::countCommonPoints
             if (facei < nbFacei)
             {
                 // Only check once for each combination of two faces.
-
-                Map<label>::iterator fnd = nCommonPoints.find(nbFacei);
-
-                if (fnd == nCommonPoints.end())
-                {
-                    // First common vertex found.
-                    nCommonPoints.insert(nbFacei, 1);
-                }
-                else
-                {
-                    fnd()++;
-                }
+                ++(nCommonPoints(nbFacei, 0));
             }
         }
     }
@@ -437,10 +426,10 @@ void Foam::snappyLayerDriver::checkCommonOrder
     List<extrudeMode>& extrudeStatus
 ) const
 {
-    forAllConstIter(Map<label>, nCommonPoints, iter)
+    forAllConstIters(nCommonPoints, iter)
     {
-        label nbFacei = iter.key();
-        label nCommon = iter();
+        const label nbFacei = iter.key();
+        const label nCommon = iter.val();
 
         const face& curFace = pp[facei];
         const face& nbFace = pp[nbFacei];
@@ -1415,10 +1404,10 @@ void Foam::snappyLayerDriver::determineSidePatches
         forAll(edgePatchID, i)
         {
             label patchi = edgePatchID[i];
-            Map<label>::const_iterator fnd = wantedToAddedPatch.find(patchi);
-            if (fnd != wantedToAddedPatch.end())
+            const auto fnd = wantedToAddedPatch.cfind(patchi);
+            if (fnd.found())
             {
-                edgePatchID[i] = fnd();
+                edgePatchID[i] = fnd.val();
             }
         }
 
@@ -2098,10 +2087,8 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
 
     const Map<label>& meshPointMap = pp.meshPointMap();
 
-    forAllConstIter(faceSet, illegalPatchFaces, iter)
+    for (const label facei : illegalPatchFaces)
     {
-        label facei = iter.key();
-
         if (mesh.isInternalFace(facei))
         {
             FatalErrorInFunction
@@ -2115,9 +2102,10 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
 
         forAll(f, fp)
         {
-            if (meshPointMap.found(f[fp]))
+            const auto fnd = meshPointMap.cfind(f[fp]);
+            if (fnd.found())
             {
-                label patchPointi = meshPointMap[f[fp]];
+                const label patchPointi = fnd.val();
 
                 if (extrudeStatus[patchPointi] != NOEXTRUDE)
                 {
@@ -2820,8 +2808,8 @@ Foam::List<Foam::labelPair> Foam::snappyLayerDriver::getBafflesOnAddedMesh
     {
         label oldFacei = newToOldFaces[facei];
 
-        Map<label>::const_iterator faceFnd = baffleSet.find(oldFacei);
-        if (faceFnd != baffleSet.end())
+        const auto faceFnd = baffleSet.find(oldFacei);
+        if (faceFnd.found())
         {
             label bafflei = faceFnd();
             labelPair& p = newBaffles[bafflei];

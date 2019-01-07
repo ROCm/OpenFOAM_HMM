@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -1300,18 +1300,18 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
         }
 
 
-        forAllConstIter(faceSet, wrongFaces, iter)
+        for (const label facei : wrongFaces)
         {
-            label patchi = mesh_.boundaryMesh().whichPatch(iter.key());
+            const label patchi = mesh_.boundaryMesh().whichPatch(facei);
 
             if (patchi == -1 || mesh_.boundaryMesh()[patchi].coupled())
             {
-                facePatch[iter.key()] = nearestAdaptPatch[iter.key()];
+                facePatch[facei] = nearestAdaptPatch[facei];
                 nBaffleFaces++;
 
-                //Pout<< "    " << iter.key()
+                //Pout<< "    " << facei
                 //    //<< " on patch " << mesh_.boundaryMesh()[patchi].name()
-                //    << " is destined for patch " << facePatch[iter.key()]
+                //    << " is destined for patch " << facePatch[facei]
                 //    << endl;
             }
         }

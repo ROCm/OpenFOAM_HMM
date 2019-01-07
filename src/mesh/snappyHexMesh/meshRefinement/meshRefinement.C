@@ -913,13 +913,12 @@ Foam::label Foam::meshRefinement::splitFacesUndo
             forAll(map.faceMap(), facei)
             {
                 label oldFacei = map.faceMap()[facei];
-                Map<label>::iterator oldFaceFnd = splitFaceToIndex.find
-                (
-                    oldFacei
-                );
-                if (oldFaceFnd != splitFaceToIndex.end())
+
+                const auto oldFaceFnd = splitFaceToIndex.cfind(oldFacei);
+
+                if (oldFaceFnd.found())
                 {
-                    labelPair& twoFaces = facePairs[oldFaceFnd()];
+                    labelPair& twoFaces = facePairs[oldFaceFnd.val()];
                     if (twoFaces[0] == -1)
                     {
                         twoFaces[0] = facei;

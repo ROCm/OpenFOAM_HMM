@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2014 OpenFOAM Foundation
@@ -1235,10 +1235,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
             }
         }
 
-        forAllConstIter(Map<label>, faceToPatch, iter)
+        forAllConstIters(faceToPatch, iter)
         {
-            label faceI = iter.key();
-            label patchI = iter();
+            const label faceI = iter.key();
+            const label patchI = iter.val();
 
             if (!mesh_.isInternalFace(faceI))
             {

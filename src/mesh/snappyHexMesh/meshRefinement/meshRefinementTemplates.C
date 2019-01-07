@@ -209,11 +209,10 @@ void Foam::meshRefinement::addPatchFields
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    forAllIter(typename HashTable<GeoField*>, flds, iter)
+    forAllIters(flds, iter)
     {
         GeoField& fld = *iter();
-        typename GeoField::Boundary& fldBf =
-            fld.boundaryFieldRef();
+        auto& fldBf = fld.boundaryFieldRef();
 
         label sz = fldBf.size();
         fldBf.setSize(sz+1);
@@ -243,7 +242,7 @@ void Foam::meshRefinement::reorderPatchFields
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    forAllIter(typename HashTable<GeoField*>, flds, iter)
+    forAllIters(flds, iter)
     {
         iter()->boundaryFieldRef().reorder(oldToNew);
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -225,10 +225,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
     // Unmark any point on the boundary. If we're doing zero iterations of
     // face-cell wave we might have coupled points not being unmarked.
-    forAll(pp.meshPoints(), pointi)
-    {
-        isMovingPoint.unset(pp.meshPoints()[pointi]);
-    }
+    isMovingPoint.unset(pp.meshPoints());
 
     // Make sure that points that are coupled to meshPoints but not on a patch
     // are unmarked as well
@@ -962,12 +959,11 @@ Foam::labelList Foam::snappySnapDriver::getZoneSurfacePoints
         {
             label meshPointi = f[fp];
 
-            Map<label>::const_iterator iter =
-                pp.meshPointMap().find(meshPointi);
+            const auto iter = pp.meshPointMap().cfind(meshPointi);
 
-            if (iter != pp.meshPointMap().end())
+            if (iter.found())
             {
-                label pointi = iter();
+                const label pointi = iter.val();
                 pointOnZone[pointi] = true;
             }
         }

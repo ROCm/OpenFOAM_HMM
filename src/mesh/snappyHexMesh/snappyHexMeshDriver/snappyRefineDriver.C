@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -1113,9 +1113,8 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
 
                 // Pass2: check for oppositeness
 
-                //forAllConstIter(cellSet, transitionCells, iter)
+                //for (const label celli : transitionCells)
                 //{
-                //    const label celli : iter.key();
                 //    const cell& cFaces = cells[celli];
                 //    const point& cc = cellCentres[celli];
                 //    const scalar rCVol = pow(cellVolumes[celli], -5.0/3.0);
@@ -1226,9 +1225,8 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
 
                 const scalar oppositeCos = Foam::cos(degToRad(135.0));
 
-                forAllConstIter(cellSet, transitionCells, iter)
+                for (const label celli : transitionCells)
                 {
-                    label celli = iter.key();
                     const cell& cFaces = cells[celli];
                     label cLevel = cutter.cellLevel()[celli];
 

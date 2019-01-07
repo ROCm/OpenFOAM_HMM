@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -504,12 +504,10 @@ void Foam::meshRefinement::markFeatureCellLevel
         Pout<< "Constructing cloud for cell marking" << endl;
     }
 
-    forAllIter(Cloud<trackedParticle>, startPointCloud, iter)
+    for (const trackedParticle& startTp : startPointCloud)
     {
-        const trackedParticle& startTp = iter();
-
-        label featI = startTp.i();
-        label pointI = startTp.j();
+        const label featI = startTp.i();
+        const label pointI = startTp.j();
 
         const edgeMesh& featureMesh = features_[featI];
         const labelList& pEdges = featureMesh.pointEdges()[pointI];
@@ -562,12 +560,10 @@ void Foam::meshRefinement::markFeatureCellLevel
         cloud.move(cloud, td, maxTrackLen);
 
         // Make particle follow edge.
-        forAllIter(Cloud<trackedParticle>, cloud, iter)
+        for (trackedParticle& tp : cloud)
         {
-            trackedParticle& tp = iter();
-
-            label featI = tp.i();
-            label pointI = tp.j();
+            const label featI = tp.i();
+            const label pointI = tp.j();
 
             const edgeMesh& featureMesh = features_[featI];
             const labelList& pEdges = featureMesh.pointEdges()[pointI];

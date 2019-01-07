@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -461,11 +461,11 @@ Foam::refinementSurfaces::refinementSurfaces
         }
 
         // Overwrite with region specific information
-        forAllConstIter(Map<label>, regionMinLevel[surfI], iter)
+        forAllConstIters(regionMinLevel[surfI], iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
 
-            minLevel_[globalRegionI] = iter();
+            minLevel_[globalRegionI] = iter.val();
             maxLevel_[globalRegionI] = regionMaxLevel[surfI][iter.key()];
             gapLevel_[globalRegionI] =
                 maxLevel_[globalRegionI]
@@ -475,7 +475,7 @@ Foam::refinementSurfaces::refinementSurfaces
             extendedGapMode_[globalRegionI] =
                 regionGapMode[surfI][iter.key()];
         }
-        forAllConstIter(Map<scalar>, regionAngle[surfI], iter)
+        forAllConstIters(regionAngle[surfI], iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
 
@@ -483,11 +483,12 @@ Foam::refinementSurfaces::refinementSurfaces
         }
 
         const Map<autoPtr<dictionary>>& localInfo = regionPatchInfo[surfI];
-        forAllConstIter(Map<autoPtr<dictionary>>, localInfo, iter)
+        forAllConstIters(localInfo, iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
+            const dictionary& dict = *(iter.val());
 
-            patchInfo_.set(globalRegionI, iter()().clone());
+            patchInfo_.set(globalRegionI, dict.clone());
         }
     }
 }
