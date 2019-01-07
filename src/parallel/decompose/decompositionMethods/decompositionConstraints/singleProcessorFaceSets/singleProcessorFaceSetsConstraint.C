@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2016 OpenFOAM Foundation
@@ -159,9 +159,9 @@ void Foam::decompositionConstraints::singleProcessorFaceSets::add
 
         // Check that it does not overlap with existing specifiedProcessorFaces
         labelList nMatch(specifiedProcessorFaces.size(), Zero);
-        forAllConstIter(faceSet, fz, iter)
+        for (const label facei : fz)
         {
-            label seti = faceToSet[iter.key()];
+            const label seti = faceToSet[facei];
             if (seti != -1)
             {
                 ++nMatch[seti];
@@ -190,7 +190,6 @@ void Foam::decompositionConstraints::singleProcessorFaceSets::add
         }
 
         reduce(store, andOp<bool>());
-
 
         if (store)
         {
