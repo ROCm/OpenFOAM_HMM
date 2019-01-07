@@ -429,12 +429,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
     actualTypeName_(ptf.actualTypeName_),
     dict_(ptf.dict_)
 {
-    forAllConstIter
-    (
-        HashPtrTable<scalarField>,
-        ptf.scalarFields_,
-        iter
-    )
+    forAllConstIters(ptf.scalarFields_, iter)
     {
         scalarFields_.insert
         (
@@ -443,12 +438,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
         );
     }
 
-    forAllConstIter
-    (
-        HashPtrTable<vectorField>,
-        ptf.vectorFields_,
-        iter
-    )
+    forAllConstIters(ptf.vectorFields_, iter)
     {
         vectorFields_.insert
         (
@@ -457,12 +447,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
         );
     }
 
-    forAllConstIter
-    (
-        HashPtrTable<sphericalTensorField>,
-        ptf.sphTensorFields_,
-        iter
-    )
+    forAllConstIters(ptf.sphTensorFields_, iter)
     {
         sphTensorFields_.insert
         (
@@ -471,12 +456,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
         );
     }
 
-    forAllConstIter
-    (
-        HashPtrTable<symmTensorField>,
-        ptf.symmTensorFields_,
-        iter
-    )
+    forAllConstIters(ptf.symmTensorFields_, iter)
     {
         symmTensorFields_.insert
         (
@@ -485,12 +465,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
         );
     }
 
-    forAllConstIter
-    (
-        HashPtrTable<tensorField>,
-        ptf.tensorFields_,
-        iter
-    )
+    forAllConstIters(ptf.tensorFields_, iter)
     {
         tensorFields_.insert
         (
