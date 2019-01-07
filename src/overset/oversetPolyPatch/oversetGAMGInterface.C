@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,17 +81,17 @@ Foam::oversetGAMGInterface::oversetGAMGInterface
         label coarseCelli = localRestrictAddressing[ffi];
 
         // Do we have coarse face for it?
-        Map<label>::iterator iter = cellToCoarseFace.find(coarseCelli);
-        if (iter == cellToCoarseFace.end())
+        const auto iter = cellToCoarseFace.cfind(coarseCelli);
+        if (iter.found())
         {
-            label coarseFacei = dynFaceCells.size();
-            cellToCoarseFace.insert(coarseCelli, coarseFacei);
-            dynFaceCells.append(coarseCelli);
-            dynFaceRestrictAddressing.append(coarseFacei);
+            dynFaceRestrictAddressing.append(iter.val());
         }
         else
         {
-            dynFaceRestrictAddressing.append(iter());
+            const label coarseFacei = dynFaceCells.size();
+            cellToCoarseFace.insert(coarseCelli, coarseFacei);
+            dynFaceCells.append(coarseCelli);
+            dynFaceRestrictAddressing.append(coarseFacei);
         }
     }
 

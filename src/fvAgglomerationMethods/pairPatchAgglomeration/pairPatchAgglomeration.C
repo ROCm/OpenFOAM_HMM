@@ -129,7 +129,7 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
     edgeHashSet fineFeaturedFaces(coarsePatch.nEdges()/10);
 
     // Map fine faces with featured edge into coarse faces
-    forAllConstIter(EdgeMap<scalar>, facePairWeight_, iter)
+    forAllConstIters(facePairWeight_, iter)
     {
         if (iter() == -1.0)
         {

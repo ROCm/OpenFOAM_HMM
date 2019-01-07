@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -62,15 +62,14 @@ Foam::multivariateScheme<Type, Scheme>::multivariateScheme
         dimless
     )
 {
-    typename multivariateSurfaceInterpolationScheme<Type>::
-        fieldTable::const_iterator iter = this->fields().begin();
+    auto iter = this->fields().cbegin();
 
     surfaceScalarField limiter
     (
         Scheme(mesh, faceFlux_, *this).limiter(*iter())
     );
 
-    for (++iter; iter != this->fields().end(); ++iter)
+    for (++iter; iter.good(); ++iter)
     {
         limiter = min
         (

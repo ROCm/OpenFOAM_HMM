@@ -104,18 +104,12 @@ void Foam::singleCellFvMesh::agglomerateMesh
                     label myZone = agglom[patchi][i];
                     label nbrZone = nbrAgglom[bFacei];
 
-                    Map<label>::const_iterator iter = localToNbr.find(myZone);
+                    const auto iter = localToNbr.cfind(myZone);
 
-                    if (iter == localToNbr.end())
-                    {
-                        // First occurrence of this zone. Store correspondence
-                        // to remote zone number.
-                        localToNbr.insert(myZone, nbrZone);
-                    }
-                    else
+                    if (iter.found())
                     {
                         // Check that zone numbers are still the same.
-                        if (iter() != nbrZone)
+                        if (iter.val() != nbrZone)
                         {
                             FatalErrorInFunction
                                 << "agglomeration is not synchronised across"
@@ -125,6 +119,12 @@ void Foam::singleCellFvMesh::agglomerateMesh
                                 << ". Remote agglomeration " << nbrZone
                                 << exit(FatalError);
                         }
+                    }
+                    else
+                    {
+                        // First occurrence of this zone. Store correspondence
+                        // to remote zone number.
+                        localToNbr.insert(myZone, nbrZone);
                     }
                 }
             }

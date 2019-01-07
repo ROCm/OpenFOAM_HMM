@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -43,7 +43,7 @@ filmModel() const
     HashTable<const filmModelType*> models
         = db().time().lookupClass<filmModelType>();
 
-    forAllConstIter(HashTable<const filmModelType*>, models, iter)
+    forAllConstIters(models, iter)
     {
         if (iter()->regionMesh().name() == filmRegionName_)
         {
@@ -52,7 +52,7 @@ filmModel() const
     }
 
     DynamicList<word> modelNames;
-    forAllConstIter(HashTable<const filmModelType*>, models, iter)
+    forAllConstIters(models, iter)
     {
         modelNames.append(iter()->regionMesh().name());
     }
@@ -74,7 +74,7 @@ pyrModel() const
     HashTable<const pyrolysisModelType*> models =
         db().time().lookupClass<pyrolysisModelType>();
 
-    forAllConstIter(HashTable<const pyrolysisModelType*>, models, iter)
+    forAllConstIters(models, iter)
     {
         if (iter()->regionMesh().name() == pyrolysisRegionName_)
         {
@@ -83,7 +83,7 @@ pyrModel() const
     }
 
     DynamicList<word> modelNames;
-    forAllConstIter(HashTable<const pyrolysisModelType*>, models, iter)
+    forAllConstIters(models, iter)
     {
         modelNames.append(iter()->regionMesh().name());
     }
