@@ -96,12 +96,12 @@ void Foam::PrintTable<KeyType, DataType>::print
 
                 Map<DataType>& key = combinedTable[iter.key()];
 
-                key.insert(proci, iter.object());
+                key.insert(proci, iter.val());
 
                 forAllConstIters(key, dataIter)
                 {
                     std::ostringstream buf;
-                    buf << dataIter.object();
+                    buf << dataIter.val();
 
                     largestDataLength = max
                     (

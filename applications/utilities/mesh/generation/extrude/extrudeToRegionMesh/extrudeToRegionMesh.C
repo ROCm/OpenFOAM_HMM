@@ -1796,9 +1796,8 @@ int main(int argc, char *argv[])
         forAll(zones, i)
         {
             const faceSet& fz = zones[i];
-            forAllConstIter(faceSet, fz, iter)
+            for (const label facei : fz)
             {
-                label facei = iter.key();
                 if (mesh.isInternalFace(facei))
                 {
                     FatalIOErrorInFunction(dict)
@@ -1834,9 +1833,9 @@ int main(int argc, char *argv[])
             }
 
             label nShadowFaces = 0;
-            forAll(shadowZones, i)
+            for (const faceSet& fz : shadowZones)
             {
-                nShadowFaces += shadowZones[i].size();
+                nShadowFaces += fz.size();
             }
 
             if (nExtrudeFaces != nShadowFaces)
@@ -1856,9 +1855,8 @@ int main(int argc, char *argv[])
             forAll(shadowZones, i)
             {
                 const faceSet& fz = shadowZones[i];
-                forAllConstIter(faceSet, fz, iter)
+                for (const label facei : fz)
                 {
-                    label facei = iter.key();
                     if (mesh.isInternalFace(facei))
                     {
                         FatalIOErrorInFunction(dict)
@@ -1883,7 +1881,6 @@ int main(int argc, char *argv[])
 
     // Check zone either all internal or all external faces
     checkZoneInside(mesh, zoneNames, zoneID, extrudeMeshFaces, isInternal);
-
 
 
     const pointField& extrudePoints = extrudePatch.localPoints();

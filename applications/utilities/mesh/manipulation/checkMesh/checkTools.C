@@ -307,9 +307,9 @@ void Foam::mergeAndWrite
 
     // Determine faces on outside of cellSet
     bitSet isInSet(mesh.nCells());
-    forAllConstIter(cellSet, set, iter)
+    for (const label celli : set)
     {
-        isInSet.set(iter.key());
+        isInSet.set(celli);
     }
 
 

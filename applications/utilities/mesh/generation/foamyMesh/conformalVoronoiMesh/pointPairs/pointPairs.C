@@ -117,10 +117,8 @@ inline bool Foam::pointPairs<Triangulation>::addPointPair
     const DynamicList<labelPair>& slaves
 )
 {
-    forAll(slaves, sI)
+    for (const labelPair& slave : slaves)
     {
-        const labelPair& slave = slaves[sI];
-
         addPointPair(master, slave);
     }
 
@@ -190,10 +188,9 @@ void Foam::pointPairs<Triangulation>::reIndex(const Map<label>& oldToNewIndices)
 
         if (start.second() == Pstream::myProcNo())
         {
-            Map<label>::const_iterator iter2 =
-                oldToNewIndices.find(start.first());
+            const auto iter2 = oldToNewIndices.cfind(start.first());
 
-            if (iter2 != oldToNewIndices.end())
+            if (iter2.found())
             {
                 if (iter2() != -1)
                 {
@@ -208,10 +205,9 @@ void Foam::pointPairs<Triangulation>::reIndex(const Map<label>& oldToNewIndices)
 
         if (end.second() == Pstream::myProcNo())
         {
-            Map<label>::const_iterator iter2 =
-                oldToNewIndices.find(end.first());
+            const auto iter2 = oldToNewIndices.cfind(end.first());
 
-            if (iter2 != oldToNewIndices.end())
+            if (iter2.found())
             {
                 if (iter2() != -1)
                 {

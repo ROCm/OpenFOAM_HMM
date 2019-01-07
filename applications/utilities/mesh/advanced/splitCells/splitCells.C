@@ -222,10 +222,8 @@ bool splitHex
 
     const cell& cFaces = mesh.cells()[celli];
 
-    forAll(cFaces, i)
+    for (const label facei : cFaces)
     {
-        label facei = cFaces[i];
-
         const face& f = faces[facei];
 
         label fp0 = f.find(e[0]);
@@ -399,15 +397,12 @@ void collectCuts
     boolList edgeIsCut(mesh.nEdges(), false);
     scalarField edgeWeight(mesh.nEdges(), -GREAT);
 
-    forAllConstIter(cellSet, cellsToCut, iter)
+    for (const label celli : cellsToCut)
     {
-        const label celli = iter.key();
         const labelList& cEdges = cellEdges[celli];
 
-        forAll(cEdges, i)
+        for (const label edgeI : cEdges)
         {
-            label edgeI = cEdges[i];
-
             label f0, f1;
             meshTools::getEdgeFaces(mesh, celli, edgeI, f0, f1);
 

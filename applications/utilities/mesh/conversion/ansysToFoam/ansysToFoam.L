@@ -197,7 +197,7 @@ elementType           ^{space}"TYPE"{cspace}
 
             forAll(slPatchCells, i)
             {
-                if (!slPatchCells(i))
+                if (!slPatchCells.set(i))
                 {
                     slPatchCells.set(i, new SLList<label>);
                 }
@@ -210,7 +210,7 @@ elementType           ^{space}"TYPE"{cspace}
 
             forAll(slPatchCells, i)
             {
-                if (!slPatchCellFaces(i))
+                if (!slPatchCellFaces.set(i))
                 {
                     slPatchCellFaces.set(i, new SLList<label>);
                 }
@@ -344,19 +344,19 @@ int main(int argc, char *argv[])
     pointField points(slPoints.size());
 
     label i = 0;
-    forAllConstIter(SLList<point>, slPoints, pointIter)
+    for (const point& pt : slPoints)
     {
         // Scale points for the given scale factor
-        points[i++] = scaleFactor * pointIter();
+        points[i++] = scaleFactor * pt;
     }
 
 
     labelList pointMap(maxNodei+1);
 
     i = 0;
-    forAllConstIter(SLList<label>, slPointMap, pointMapIter)
+    for (const label pointi : slPointMap)
     {
-        pointMap[pointMapIter()] = i++;
+        pointMap[pointi] = i++;
     }
 
     Info<< "Creating cells" << endl;
@@ -364,9 +364,9 @@ int main(int argc, char *argv[])
     labelList cellMap(maxCelli+1);
 
     i = 0;
-    forAllConstIter(SLList<label>, slCellMap, cellMapIter)
+    for (const label celli : slCellMap)
     {
-        cellMap[cellMapIter()] = i++;
+        cellMap[celli] = i++;
     }
 
 
@@ -383,66 +383,66 @@ int main(int argc, char *argv[])
     cellShapeList cellShapes(slCellLabels.size());
     label nCells = 0;
 
-    forAllConstIter(SLPtrList<labelList>, slCellLabels, cellIter)
+    for (const labelList& labels : slCellLabels)
     {
         if      // Tetrahedron
         (
-            cellIter()[2] == cellIter()[3]
-         && cellIter()[4] == cellIter()[5]
-         && cellIter()[5] == cellIter()[6]
-         && cellIter()[6] == cellIter()[7]
+            labels[2] == labels[3]
+         && labels[4] == labels[5]
+         && labels[5] == labels[6]
+         && labels[6] == labels[7]
         )
         {
-            labelsTet[0] = pointMap[cellIter()[0] ];
-            labelsTet[1] = pointMap[cellIter()[1] ];
-            labelsTet[2] = pointMap[cellIter()[2] ];
-            labelsTet[3] = pointMap[cellIter()[4] ];
+            labelsTet[0] = pointMap[labels[0]];
+            labelsTet[1] = pointMap[labels[1]];
+            labelsTet[2] = pointMap[labels[2]];
+            labelsTet[3] = pointMap[labels[4]];
 
             cellShapes[nCells++] = cellShape(tet, labelsTet);
         }
 
         else if // Square-based pyramid
         (
-            cellIter()[4] == cellIter()[5]
-         && cellIter()[5] == cellIter()[6]
-         && cellIter()[6] == cellIter()[7]
+            labels[4] == labels[5]
+         && labels[5] == labels[6]
+         && labels[6] == labels[7]
         )
         {
-            labelsPyramid[0] = pointMap[cellIter()[0] ];
-            labelsPyramid[1] = pointMap[cellIter()[1] ];
-            labelsPyramid[2] = pointMap[cellIter()[2] ];
-            labelsPyramid[3] = pointMap[cellIter()[3] ];
-            labelsPyramid[4] = pointMap[cellIter()[4] ];
+            labelsPyramid[0] = pointMap[labels[0]];
+            labelsPyramid[1] = pointMap[labels[1]];
+            labelsPyramid[2] = pointMap[labels[2]];
+            labelsPyramid[3] = pointMap[labels[3]];
+            labelsPyramid[4] = pointMap[labels[4]];
 
             cellShapes[nCells++] = cellShape(pyr, labelsPyramid);
         }
 
         else if // Triangular prism
         (
-            cellIter()[2] == cellIter()[3]
-         && cellIter()[6] == cellIter()[7]
+            labels[2] == labels[3]
+         && labels[6] == labels[7]
         )
         {
-            labelsPrism[0] = pointMap[cellIter()[0] ];
-            labelsPrism[1] = pointMap[cellIter()[1] ];
-            labelsPrism[2] = pointMap[cellIter()[2] ];
-            labelsPrism[3] = pointMap[cellIter()[4] ];
-            labelsPrism[4] = pointMap[cellIter()[5] ];
-            labelsPrism[5] = pointMap[cellIter()[6] ];
+            labelsPrism[0] = pointMap[labels[0]];
+            labelsPrism[1] = pointMap[labels[1]];
+            labelsPrism[2] = pointMap[labels[2]];
+            labelsPrism[3] = pointMap[labels[4]];
+            labelsPrism[4] = pointMap[labels[5]];
+            labelsPrism[5] = pointMap[labels[6]];
 
             cellShapes[nCells++] = cellShape(prism, labelsPrism);
         }
 
         else // Hex
         {
-            labelsHex[0] = pointMap[cellIter()[0] ];
-            labelsHex[1] = pointMap[cellIter()[1] ];
-            labelsHex[2] = pointMap[cellIter()[2] ];
-            labelsHex[3] = pointMap[cellIter()[3] ];
-            labelsHex[4] = pointMap[cellIter()[4] ];
-            labelsHex[5] = pointMap[cellIter()[5] ];
-            labelsHex[6] = pointMap[cellIter()[6] ];
-            labelsHex[7] = pointMap[cellIter()[7] ];
+            labelsHex[0] = pointMap[labels[0]];
+            labelsHex[1] = pointMap[labels[1]];
+            labelsHex[2] = pointMap[labels[2]];
+            labelsHex[3] = pointMap[labels[3]];
+            labelsHex[4] = pointMap[labels[4]];
+            labelsHex[5] = pointMap[labels[5]];
+            labelsHex[6] = pointMap[labels[6]];
+            labelsHex[7] = pointMap[labels[7]];
 
             cellShapes[nCells++] = cellShape(hex, labelsHex);
         }
@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
 
     // Warning: tet face order has changed between version 1.9.6 and 2.0
     //
-    label faceIndex[7][6] =
+    const label faceIndex[7][6] =
     {
         {-1, -1, -1, -1, -1, -1}, // 0
         {-1, -1, -1, -1, -1, -1}, // 1
@@ -494,14 +494,13 @@ int main(int argc, char *argv[])
     {
         SLList<face> patchFaces;
 
-        SLList<label>::iterator cellIter(slPatchCells[patchi].begin());
-        SLList<label>::iterator faceIter(slPatchCellFaces[patchi].begin());
+        auto cellIter = slPatchCells[patchi].cbegin();
+        auto faceIter = slPatchCellFaces[patchi].cbegin();
 
         for
         (
             ;
-            cellIter != slPatchCells[patchi].end()
-         && faceIter != slPatchCellFaces[patchi].end();
+            cellIter.good() && faceIter.good();
             ++cellIter, ++faceIter
         )
         {
@@ -519,7 +518,7 @@ int main(int argc, char *argv[])
         }
 
         boundary[patchi] = patchFaces;
-        patchNames[patchi] = word("patch") + name(patchi + 1);
+        patchNames[patchi] = "patch" + Foam::name(patchi + 1);
     }
 
 
@@ -660,20 +659,20 @@ int main(int argc, char *argv[])
         // CellZones
         labelList types = cellTypes.sortedToc();
 
-        forAll(types, j)
+        forAll(types, typei)
         {
-            label cellType = types[j];
+            const label cellType = types[typei];
 
             // Pick up cells in zone
             DynamicList<label> addr;
 
-            SLList<label>::iterator cellMapIter = slCellMap.begin();
-            SLList<label>::iterator typeIter = slCellType.begin();
+            auto cellMapIter = slCellMap.cbegin();
+            auto typeIter = slCellType.cbegin();
 
             for
             (
                 ;
-                typeIter != slCellType.end();
+                typeIter.good();
                 ++typeIter, ++cellMapIter
             )
             {
@@ -692,7 +691,7 @@ int main(int argc, char *argv[])
                 (
                     cellTypes[cellType],
                     addr,
-                    j,
+                    typei,
                     pShapeMesh.cellZones()
                 )
             );
@@ -709,7 +708,7 @@ int main(int argc, char *argv[])
     pShapeMesh.removeFiles();
     pShapeMesh.write();
 
-    Info<< nl << "end" << endl;
+    Info<< nl << "End" << endl;
     return 0;
 }
 

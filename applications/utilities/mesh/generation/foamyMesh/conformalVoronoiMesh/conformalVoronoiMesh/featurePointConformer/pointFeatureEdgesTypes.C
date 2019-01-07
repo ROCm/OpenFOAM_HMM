@@ -78,7 +78,7 @@ Foam::Ostream& Foam::operator<<
         os  << "    "
             << extendedFeatureEdgeMesh::edgeStatusNames_[iter.key()]
             << " = "
-            << iter.object()
+            << iter.val()
             << endl;
     }
 

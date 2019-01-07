@@ -1057,9 +1057,9 @@ int main(int argc, char *argv[])
 
         uniquify(name, patchNames);
 
-        HashTable<word>::const_iterator iter = fluentToFoamType.find(type);
+        const auto iter = fluentToFoamType.cfind(type);
 
-        if (iter != fluentToFoamType.end())
+        if (iter.found())
         {
             // See if we have a periodic and can derive the other side.
             word neighbPatchName;

@@ -109,7 +109,7 @@ public:
 
 
     //- Destructor
-    ~cellSplitter();
+    ~cellSplitter() = default;
 
 
     // Member Functions

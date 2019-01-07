@@ -201,18 +201,10 @@ int main(int argc, char *argv[])
             forAll(surface1.patches(), i)
             {
                 const word& name = surface1.patches()[i].name();
-                auto iter = nameToPatch.find(name);
 
-                label combinedi;
-                if (iter.found())
-                {
-                    combinedi = iter.object();
-                }
-                else
-                {
-                    combinedi = nameToPatch.size();
-                    nameToPatch.insert(name, combinedi);
-                }
+                // Lookup or insert
+                const label combinedi = nameToPatch(name, nameToPatch.size());
+
                 patch1Map[i] = combinedi;
             }
 
@@ -221,18 +213,10 @@ int main(int argc, char *argv[])
             forAll(surface2.patches(), i)
             {
                 const word& name = surface2.patches()[i].name();
-                auto iter = nameToPatch.find(name);
 
-                label combinedi;
-                if (iter.found())
-                {
-                    combinedi = iter.object();
-                }
-                else
-                {
-                    combinedi = nameToPatch.size();
-                    nameToPatch.insert(name, combinedi);
-                }
+                // Lookup or insert
+                const label combinedi = nameToPatch(name, nameToPatch.size());
+
                 patch2Map[i] = combinedi;
             }
 

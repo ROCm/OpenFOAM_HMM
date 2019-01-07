@@ -255,12 +255,12 @@ void Foam::vtkPVFoam::convertLagrangianFields()
         const word cloudName = getFoamName(longName);
 
         auto iter = cachedVtp_.find(longName);
-        if (!iter.found() || !iter.object().dataset)
+        if (!iter.found() || !iter.val().dataset)
         {
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
-        auto dataset = iter.object().dataset;
+        auto dataset = iter.val().dataset;
 
         // Get the Lagrangian fields for this time and this cloud
         // but only keep selected fields

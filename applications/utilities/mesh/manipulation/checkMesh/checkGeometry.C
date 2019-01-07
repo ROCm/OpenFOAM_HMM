@@ -241,7 +241,7 @@ bool Foam::checkWedges
         if (setPtr)
         {
             setPtr->resize(2*nEdgesInError);
-            forAllConstIter(EdgeMap<label>, edgesInError, iter)
+            forAllConstIters(edgesInError, iter)
             {
                 if (iter() >= 0)
                 {

@@ -57,7 +57,7 @@ int main()
 
     graph("r", "x", "r", x, r).write("r", "xmgr");
 
-    Info<< "end" << endl;
+    Info<< "End" << endl;
 
     return 0;
 }

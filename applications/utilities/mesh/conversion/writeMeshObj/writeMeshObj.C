@@ -119,32 +119,32 @@ void writePoints
 
             label v0;
 
-            Map<label>::iterator e0Fnd = pointToObj.find(e[0]);
+            const auto e0Fnd = pointToObj.cfind(e[0]);
 
-            if (e0Fnd == pointToObj.end())
+            if (e0Fnd.found())
             {
-                meshTools::writeOBJ(str, mesh.points()[e[0]]);
-                v0 = vertI++;
-                pointToObj.insert(e[0], v0);
+                v0 = *e0Fnd;
             }
             else
             {
-                v0 = e0Fnd();
+                v0 = vertI++;
+                meshTools::writeOBJ(str, mesh.points()[e[0]]);
+                pointToObj.insert(e[0], v0);
             }
 
             label v1;
 
-            Map<label>::iterator e1Fnd = pointToObj.find(e[1]);
+            const auto e1Fnd = pointToObj.cfind(e[1]);
 
-            if (e1Fnd == pointToObj.end())
+            if (e1Fnd.found())
             {
-                meshTools::writeOBJ(str, mesh.points()[e[1]]);
-                v1 = vertI++;
-                pointToObj.insert(e[1], v1);
+                v1 = *e1Fnd;
             }
             else
             {
-                v1 = e1Fnd();
+                v1 = vertI++;
+                meshTools::writeOBJ(str, mesh.points()[e[1]]);
+                pointToObj.insert(e[1], v1);
             }
 
 

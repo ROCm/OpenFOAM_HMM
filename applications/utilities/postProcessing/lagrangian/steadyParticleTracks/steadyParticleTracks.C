@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
             particles.setSize(ppc.size());
 
             label i = 0;
-            forAllIter(passiveParticleCloud, ppc, iter)
+            forAllIters(ppc, iter)
             {
                 particles.set(i++, ppc.remove(&iter()));
             }
@@ -178,18 +178,19 @@ int main(int argc, char *argv[])
                 const label origProc = particles[i].origProc();
                 const label origId = particles[i].origId();
 
-                labelPairLookup::const_iterator iter =
-                    trackTable.find(labelPair(origProc, origId));
+                const labelPair key(origProc, origId);
 
-                if (iter == trackTable.end())
+                const auto iter = trackTable.cfind(key);
+
+                if (iter.found())
                 {
-                    particleToTrack[i] = nTracks;
-                    trackTable.insert(labelPair(origProc, origId), nTracks);
-                    nTracks++;
+                    particleToTrack[i] = *iter;
                 }
                 else
                 {
-                    particleToTrack[i] = iter();
+                    particleToTrack[i] = nTracks;
+                    trackTable.insert(key, nTracks);
+                    ++nTracks;
                 }
             }
         }
@@ -205,10 +206,9 @@ int main(int argc, char *argv[])
 
             // Determine length of each track
             labelList trackLengths(nTracks, Zero);
-            forAll(particleToTrack, i)
+            for (const label tracki : particleToTrack)
             {
-                const label trackI = particleToTrack[i];
-                trackLengths[trackI]++;
+                ++trackLengths[tracki];
             }
 
             // Particle "age" property used to sort the tracks

@@ -154,7 +154,7 @@ void Foam::patchToPoly2DMesh::addPatchFacesToFaces()
 
     forAll(patchNames_, patchi)
     {
-        forAllConstIter(EdgeMap<label>, mapEdgesRegion_, eIter)
+        forAllConstIters(mapEdgesRegion_, eIter)
         {
             if (eIter() == patchi)
             {

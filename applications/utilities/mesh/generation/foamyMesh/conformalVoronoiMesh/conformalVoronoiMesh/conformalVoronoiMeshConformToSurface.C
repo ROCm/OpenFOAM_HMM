@@ -2278,11 +2278,11 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
         Vb& v = surfaceConformationVertices_[vI];
         label& vIndex = v.index();
 
-        Map<label>::const_iterator iter = oldToNewIndices.find(vIndex);
+        const auto iter = oldToNewIndices.cfind(vIndex);
 
-        if (iter != oldToNewIndices.end())
+        if (iter.found())
         {
-            const label newIndex = iter();
+            const label newIndex = *iter;
 
             if (newIndex != -1)
             {

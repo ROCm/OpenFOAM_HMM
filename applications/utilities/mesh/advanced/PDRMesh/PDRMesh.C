@@ -711,18 +711,18 @@ int main(int argc, char *argv[])
             setsAndPatches[setI][1]
         );
 
-        forAllConstIter(faceSet, fSet, iter)
+        for (const label facei : fSet)
         {
-            if (wantedPatch[iter.key()] != -1)
+            if (wantedPatch[facei] != -1)
             {
                 FatalErrorInFunction
-                    << "Face " << iter.key()
+                    << "Face " << facei
                     << " is in faceSet " << setsAndPatches[setI][0]
                     << " destined for patch " << setsAndPatches[setI][1]
-                    << " but also in patch " << wantedPatch[iter.key()]
+                    << " but also in patch " << wantedPatch[facei]
                     << exit(FatalError);
             }
-            wantedPatch[iter.key()] = patchi;
+            wantedPatch[facei] = patchi;
         }
     }
 
@@ -749,20 +749,21 @@ int main(int argc, char *argv[])
         faceSet fSet(mesh, coupledAndPatches[setI][0]);
         label patchi = findPatch(patches, coupledAndPatches[setI][1]);
 
-        forAllConstIter(faceSet, fSet, iter)
+        for (const label facei : fSet)
         {
-            if (coupledWantedPatch[iter.key()] != -1)
+            if (coupledWantedPatch[facei] != -1)
             {
                 FatalErrorInFunction
-                    << "Face " << iter.key()
+                    << "Face " << facei
                     << " is in faceSet " << coupledAndPatches[setI][0]
                     << " destined for patch " << coupledAndPatches[setI][1]
-                    << " but also in patch " << coupledWantedPatch[iter.key()]
+                    << " but also in patch " << coupledWantedPatch[facei]
                     << exit(FatalError);
             }
-                coupledWantedPatch[iter.key()] = patchi;
-                cyclicWantedPatch_half0[iter.key()] = cyclicId;
-                cyclicWantedPatch_half1[iter.key()] = cyclicSlaveId;
+
+            coupledWantedPatch[facei] = patchi;
+            cyclicWantedPatch_half0[facei] = cyclicId;
+            cyclicWantedPatch_half1[facei] = cyclicSlaveId;
         }
     }
 

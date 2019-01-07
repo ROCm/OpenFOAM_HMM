@@ -131,7 +131,7 @@ void dumpFaces
 
     OFstream os(fName);
 
-    forAllConstIter(Map<label>, connectedFaces, iter)
+    forAllConstIters(connectedFaces, iter)
     {
         point ctr = surf.localFaces()[iter.key()].centre(surf.localPoints());
 
@@ -461,7 +461,7 @@ label sharedFace
     label startIndex = f.find(e.start());
 
     // points in face in same order as edge
-    bool edgeOrder = (f[f.fcIndex(startIndex)] == e.end());
+    const bool edgeOrder = (f[f.fcIndex(startIndex)] == e.end());
 
     // Get faces using edge in sorted order. (sorted such that walking
     // around them in anti-clockwise order corresponds to edge vector
@@ -469,7 +469,7 @@ label sharedFace
     const labelList& eFaces = surf.sortedEdgeFaces()[sharedEdgeI];
 
     // Get position of face in sorted edge faces
-    label faceIndex = eFaces.find(firstFacei);
+    const label faceIndex = eFaces.find(firstFacei);
 
     if (edgeOrder)
     {
@@ -500,9 +500,9 @@ void calcPointVecs
 
     boolList edgeDone(surf.nEdges(), false);
 
-    forAllConstIter(Map<label>, faceToEdge, iter)
+    forAllConstIters(faceToEdge, iter)
     {
-        const label edgeI = iter();
+        const label edgeI = iter.val();
 
         if (!edgeDone[edgeI])
         {
@@ -611,7 +611,7 @@ void renumberFaces
     List<triSurface::FaceType>& newTris
 )
 {
-    forAllConstIter(Map<label>, faceToEdge, iter)
+    forAllConstIters(faceToEdge, iter)
     {
         const label facei = iter.key();
         const triSurface::FaceType& f = surf.localFaces()[facei];

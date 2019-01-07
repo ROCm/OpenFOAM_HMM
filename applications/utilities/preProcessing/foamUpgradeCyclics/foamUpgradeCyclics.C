@@ -301,7 +301,7 @@ void rewriteField
     forAllConstIters(thisNames, iter)
     {
         const word& patchName = iter.key();
-        const word& newName = iter.object();
+        const word& newName = iter.val();
 
         Info<< "Looking for entry for patch " << patchName << endl;
 

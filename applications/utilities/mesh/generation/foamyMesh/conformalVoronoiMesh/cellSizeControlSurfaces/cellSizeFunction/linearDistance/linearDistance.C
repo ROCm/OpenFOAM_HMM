@@ -212,10 +212,8 @@ bool Foam::linearDistance::setCellSize(const pointField& pts)
 {
 //    labelHashSet surfaceAlreadyHit(surfaceCellSize_.size());
 
-//    forAll(pts, ptI)
+//    for (const Foam::point& pt : pts)
 //    {
-//        const Foam::point& pt = pts[ptI];
-
 //        List<pointIndexHit> hits;
 
 //        surface_.findNearest

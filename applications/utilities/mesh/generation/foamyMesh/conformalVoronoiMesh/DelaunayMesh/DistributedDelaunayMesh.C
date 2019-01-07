@@ -409,18 +409,15 @@ void Foam::DistributedDelaunayMesh<Triangulation>::markVerticesToRefer
              continue;
         }
 
-        Map<labelList>::const_iterator iter =
-            circumsphereOverlaps.find(cit->cellIndex());
+        const auto iter = circumsphereOverlaps.cfind(cit->cellIndex());
 
         // Pre-tested circumsphere potential influence
-        if (iter != circumsphereOverlaps.cend())
+        if (iter.found())
         {
             const labelList& citOverlaps = iter();
 
-            forAll(citOverlaps, cOI)
+            for (const label proci : citOverlaps)
             {
-                label proci = citOverlaps[cOI];
-
                 for (int i = 0; i < 4; i++)
                 {
                     Vertex_handle v = cit->vertex(i);
@@ -1023,15 +1020,6 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
 
     return uninserted;
 }
-
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

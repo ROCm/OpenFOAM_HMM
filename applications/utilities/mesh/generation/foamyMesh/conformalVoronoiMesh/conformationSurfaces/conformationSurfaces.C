@@ -509,7 +509,7 @@ Foam::conformationSurfaces::conformationSurfaces
             }
         }
 
-        forAllConstIter(Map<sideVolumeType>, regionVolumeTypes[surfI], iter)
+        forAllConstIters(regionVolumeTypes[surfI], iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
 
@@ -518,7 +518,7 @@ Foam::conformationSurfaces::conformationSurfaces
         }
 
         const Map<autoPtr<dictionary>>& localInfo = regionPatchInfo[surfI];
-        forAllConstIter(Map<autoPtr<dictionary>>, localInfo, iter)
+        forAllConstIters(localInfo, iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
 

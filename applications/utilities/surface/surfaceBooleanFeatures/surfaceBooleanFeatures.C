@@ -1257,7 +1257,7 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     forAllConstIters(inter.facePairToEdgeId(), iter)
     {
         const labelPair& facePair = iter.key();
-        const label cutEdgeI = iter.object();
+        const label cutEdgeI = iter.val();
 
         const edge& fE = inter.cutEdges()[cutEdgeI];
 

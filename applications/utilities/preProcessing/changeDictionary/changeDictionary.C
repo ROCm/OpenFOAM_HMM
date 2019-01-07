@@ -107,23 +107,23 @@ HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
         const word& patchName = dEntry.keyword();
         const dictionary& patchDict = dEntry.dict();
 
-        wordList groups;
-        if (patchDict.readIfPresent("inGroups", groups))
+        wordList groupNames;
+        patchDict.readIfPresent("inGroups", groupNames);
+
+        for (const word& groupName : groupNames)
         {
-            forAll(groups, i)
+            auto groupIter = groupToPatch.find(groupName);
+            if (groupIter.found())
             {
-                auto fndGroup = groupToPatch.find(groups[i]);
-                if (!fndGroup.found())
-                {
-                    groupToPatch.insert(groups[i], wordList(1, patchName));
-                }
-                else
-                {
-                    fndGroup().append(patchName);
-                }
+                (*groupIter).append(patchName);
+            }
+            else
+            {
+                groupToPatch.insert(groupName, wordList(one(), patchName));
             }
         }
     }
+
     return groupToPatch;
 }
 

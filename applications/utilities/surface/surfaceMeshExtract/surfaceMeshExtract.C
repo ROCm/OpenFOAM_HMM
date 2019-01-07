@@ -273,12 +273,12 @@ int main(int argc, char *argv[])
                 label patchi = bMesh.findPatchID(iter.key());
                 if (patchi != -1)
                 {
-                    patchToCompactZone[patchi] = iter();
+                    patchToCompactZone[patchi] = iter.val();
                 }
                 else
                 {
                     label zoneI = fzm.findZoneID(iter.key());
-                    faceZoneToCompactZone[zoneI] = iter();
+                    faceZoneToCompactZone[zoneI] = iter.val();
                 }
             }
 
@@ -382,11 +382,11 @@ int main(int argc, char *argv[])
 
             // Zones
             surfZoneIdentifierList surfZones(compactZoneID.size());
-            forAllConstIter(HashTable<label>, compactZoneID, iter)
+            forAllConstIters(compactZoneID, iter)
             {
-                surfZones[iter()] = surfZoneIdentifier(iter.key(), iter());
-                Info<< "surfZone " << iter()
-                    <<  " : "      << surfZones[iter()].name()
+                surfZones[*iter] = surfZoneIdentifier(iter.key(), *iter);
+                Info<< "surfZone " << *iter
+                    <<  " : "      << surfZones[*iter].name()
                     << endl;
             }
 

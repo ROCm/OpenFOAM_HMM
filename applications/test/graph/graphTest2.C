@@ -57,7 +57,7 @@ int main()
         "xmgr"
     );
 
-    Info<< "end" << endl;
+    Info<< "End" << endl;
 }
 
 

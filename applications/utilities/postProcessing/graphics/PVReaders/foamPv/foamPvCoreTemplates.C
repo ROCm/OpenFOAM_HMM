@@ -118,7 +118,7 @@ Foam::label Foam::foamPvCore::addToSelection
 
     if (iter.found())
     {
-        return addToArray(select, prefix, iter.object().sortedToc());
+        return addToArray(select, prefix, iter.val().sortedToc());
     }
 
     return 0;
@@ -137,7 +137,7 @@ Foam::label Foam::foamPvCore::addToSelection
 
     if (iter.found())
     {
-        return addToArray(select, iter.object().sortedToc(), suffix);
+        return addToArray(select, iter.val().sortedToc(), suffix);
     }
 
     return 0;

@@ -59,11 +59,11 @@ int main(int argc, char *argv[])
         Pout<< "Adding a particle." << endl;
         particles.addParticle(new passiveParticle(mesh, Zero, -1));
 
-        forAllConstIter(passiveParticleCloud, particles, iter)
+        for (const passiveParticle& p : particles)
         {
-            Pout<< "    " << iter().position() << " cell:" << iter().cell()
-                << " origProc:" << iter().origProc()
-                << " origId:" << iter().origId()
+            Pout<< "    " << p.position() << " cell:" << p.cell()
+                << " origProc:" << p.origProc()
+                << " origId:" << p.origId()
                 << endl;
         }
 
@@ -80,11 +80,11 @@ int main(int argc, char *argv[])
         passiveParticleCloud particles(mesh, cloudName);
         Pout<< "Reread particles:" << particles.size() << endl;
 
-        forAllConstIter(passiveParticleCloud, particles, iter)
+        for (const passiveParticle& p : particles)
         {
-            Pout<< "    " << iter().position() << " cell:" << iter().cell()
-                << " origProc:" << iter().origProc()
-                << " origId:" << iter().origId()
+            Pout<< "    " << p.position() << " cell:" << p.cell()
+                << " origProc:" << p.origProc()
+                << " origId:" << p.origId()
                 << endl;
         }
     }

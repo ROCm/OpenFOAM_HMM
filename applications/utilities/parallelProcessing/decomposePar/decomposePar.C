@@ -842,16 +842,11 @@ int main(int argc, char *argv[])
 
                         label i = 0;
 
-                        forAllIter
-                        (
-                            Cloud<indexedParticle>,
-                            lagrangianPositions[cloudI],
-                            iter
-                        )
+                        for (indexedParticle& p : lagrangianPositions[cloudI])
                         {
-                            iter().index() = i++;
+                            p.index() = i++;
 
-                            label celli = iter().cell();
+                            label celli = p.cell();
 
                             // Check
                             if (celli < 0 || celli >= mesh.nCells())
@@ -859,14 +854,14 @@ int main(int argc, char *argv[])
                                 FatalErrorInFunction
                                     << "Illegal cell number " << celli
                                     << " for particle with index "
-                                    << iter().index()
+                                    << p.index()
                                     << " at position "
-                                    << iter().position() << nl
+                                    << p.position() << nl
                                     << "Cell number should be between 0 and "
                                     << mesh.nCells()-1 << nl
                                     << "On this mesh the particle should"
                                     << " be in cell "
-                                    << mesh.findCell(iter().position())
+                                    << mesh.findCell(p.position())
                                     << exit(FatalError);
                             }
 
@@ -876,7 +871,7 @@ int main(int argc, char *argv[])
                                     new SLList<indexedParticle*>();
                             }
 
-                            cellParticles[cloudI][celli]->append(&iter());
+                            cellParticles[cloudI][celli]->append(&p);
                         }
 
                         // Read fields

@@ -284,7 +284,7 @@ Foam::label Foam::parLagrangianRedistributor::redistributeStoredFields
     label nFields = 0;
     forAllIters(fields, iter)
     {
-        Container& field = *(iter.object());
+        Container& field = *(iter.val());
 
         if (!nFields++)
         {

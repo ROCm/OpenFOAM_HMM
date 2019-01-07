@@ -213,18 +213,16 @@ int main(int argc, char *argv[])
         // Get the four (outwards pointing) faces of the cell
         faceList tris(cll.faces());
 
-        forAll(tris, i)
+        for (const face& f : tris)
         {
-            const face& f = tris[i];
-
             // Is there any boundary face with same vertices?
             // (uses commutative hash)
             auto iter = vertsToBoundary.find(triFace(f[0], f[1], f[2]));
 
             if (iter.found())
             {
-                label facei = iter.object();
                 const triFace& tri = iter.key();
+                const label facei = iter.val();
 
                 // Determine orientation of tri v.s. cell centre.
                 point cc(cll.centre(points));

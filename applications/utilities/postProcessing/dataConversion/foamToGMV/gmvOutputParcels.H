@@ -1,48 +1,48 @@
 gmvFile << "tracers " << particles.size() << nl;
-forAllConstIter(discretePhase, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().position().x() << " ";
+    gmvFile << p.position().x() << " ";
 }
 gmvFile << nl;
 
-forAllConstIter(discretePhase, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().position().y() << " ";
+    gmvFile << p.position().y() << " ";
 }
 gmvFile << nl;
 
-forAllConstIter(discretePhase, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().position().z() << " ";
+    gmvFile << p.position().z() << " ";
 }
 gmvFile << nl;
 
 gmvFile << "U" << nl;
-forAllConstIter(discretePhase, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().velocity().x() << " ";
+    gmvFile << p.velocity().x() << " ";
 }
 gmvFile << nl;
 
 gmvFile << "V" << nl;
-forAllConstIter(discretePhase, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().velocity().y() << " ";
+    gmvFile << p.velocity().y() << " ";
 }
 gmvFile << nl;
 
 gmvFile << "W" << nl;
-forAllConstIter(discretePhase, particles, iter)
+for (const passiveParticle& p : particles)
 {
 {
-    gmvFile << iter().velocity().z() << " ";
+    gmvFile << p.velocity().z() << " ";
 }
 gmvFile << nl;
 
 gmvFile << "Diam" << nl;
-forAllConstIter(discretePhase, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().d() << " ";
+    gmvFile << p.d() << " ";
 }
 
 gmvFile << "endtrace"<< nl;

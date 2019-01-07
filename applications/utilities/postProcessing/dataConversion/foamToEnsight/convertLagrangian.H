@@ -74,7 +74,7 @@ if (doLagrangian)
         forAllConstIters(theseCloudFields, fieldIter)
         {
             const word& fieldName = fieldIter.key();
-            const word& fieldType = fieldIter.object();
+            const word& fieldType = fieldIter.val();
 
             IOobject fieldObject
             (

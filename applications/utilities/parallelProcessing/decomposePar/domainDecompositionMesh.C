@@ -55,16 +55,16 @@ void Foam::domainDecomposition::addInterProcFace
     List<DynamicList<DynamicList<label>>>& interPatchFaces
 ) const
 {
-    Map<label>::iterator patchiter = nbrToInterPatch[ownerProc].find(nbrProc);
-
     // Introduce turning index only for internal faces (are duplicated).
-    label ownerIndex = facei+1;
-    label nbrIndex = -(facei+1);
+    const label ownerIndex = facei+1;
+    const label nbrIndex = -(facei+1);
 
-    if (patchiter != nbrToInterPatch[ownerProc].end())
+    const auto patchiter = nbrToInterPatch[ownerProc].cfind(nbrProc);
+
+    if (patchiter.found())
     {
         // Existing interproc patch. Add to both sides.
-        label toNbrProcPatchi = patchiter();
+        const label toNbrProcPatchi = *patchiter;
         interPatchFaces[ownerProc][toNbrProcPatchi].append(ownerIndex);
 
         if (isInternalFace(facei))
@@ -76,8 +76,9 @@ void Foam::domainDecomposition::addInterProcFace
     else
     {
         // Create new interproc patches.
-        label toNbrProcPatchi = nbrToInterPatch[ownerProc].size();
+        const label toNbrProcPatchi = nbrToInterPatch[ownerProc].size();
         nbrToInterPatch[ownerProc].insert(nbrProc, toNbrProcPatchi);
+
         DynamicList<label> oneFace;
         oneFace.append(ownerIndex);
         interPatchFaces[ownerProc].append(oneFace);

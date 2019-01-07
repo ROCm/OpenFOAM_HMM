@@ -91,13 +91,13 @@ void Foam::vtkPVFoam::convertVolField
         const auto& longName = selectedPartIds_[partId];
 
         auto iter = cachedVtp_.find(longName);
-        if (!iter.found() || !iter.object().dataset)
+        if (!iter.found() || !iter.val().dataset)
         {
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
 
-        foamVtpData& vtpData = iter.object();
+        foamVtpData& vtpData = iter.val();
         auto dataset = vtpData.dataset;
 
         const labelUList& patchIds = vtpData.additionalIds();
@@ -195,13 +195,13 @@ void Foam::vtkPVFoam::convertVolField
         const word zoneName = getFoamName(longName);
 
         auto iter = cachedVtp_.find(longName);
-        if (!iter.found() || !iter.object().dataset)
+        if (!iter.found() || !iter.val().dataset)
         {
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
 
-        foamVtpData& vtpData = iter.object();
+        foamVtpData& vtpData = iter.val();
         auto dataset = vtpData.dataset;
 
         const faceZoneMesh& zMesh = mesh.faceZones();
@@ -236,12 +236,12 @@ void Foam::vtkPVFoam::convertVolField
         const word selectName = getFoamName(longName);
 
         auto iter = cachedVtp_.find(longName);
-        if (!iter.found() || !iter.object().dataset)
+        if (!iter.found() || !iter.val().dataset)
         {
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
-        foamVtpData& vtpData = iter.object();
+        foamVtpData& vtpData = iter.val();
         auto dataset = vtpData.dataset;
 
         vtkSmartPointer<vtkFloatArray> cdata = convertFaceFieldToVTK
@@ -270,7 +270,7 @@ void Foam::vtkPVFoam::convertVolFields
     forAllConstIters(objects, iter)
     {
         // Restrict to GeometricField<Type, ...>
-        const auto& ioobj = *(iter.object());
+        const auto& ioobj = *(iter.val());
 
         if (ioobj.headerClassName() == FieldType::typeName)
         {
@@ -320,7 +320,7 @@ void Foam::vtkPVFoam::convertDimFields
     forAllConstIters(objects, iter)
     {
         // Restrict to DimensionedField<Type, ...>
-        const auto& ioobj = *(iter.object());
+        const auto& ioobj = *(iter.val());
 
         if (ioobj.headerClassName() != FieldType::typeName)
         {
@@ -404,13 +404,13 @@ void Foam::vtkPVFoam::convertVolFieldBlock
         const auto& longName = selectedPartIds_[partId];
 
         auto iter = cachedVtu_.find(longName);
-        if (!iter.found() || !iter.object().dataset)
+        if (!iter.found() || !iter.val().dataset)
         {
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
 
-        foamVtuData& vtuData = iter.object();
+        foamVtuData& vtuData = iter.val();
         auto dataset = vtuData.dataset;
 
         vtkSmartPointer<vtkFloatArray> cdata = convertVolFieldToVTK
@@ -459,7 +459,7 @@ void Foam::vtkPVFoam::convertAreaFields
     forAllConstIters(objects, iter)
     {
         // Restrict to GeometricField<Type, ...>
-        const auto& ioobj = *(iter.object());
+        const auto& ioobj = *(iter.val());
 
         if (ioobj.headerClassName() == FieldType::typeName)
         {
@@ -478,14 +478,14 @@ void Foam::vtkPVFoam::convertAreaFields
                     const auto& longName = selectedPartIds_[partId];
 
                     auto iter = cachedVtp_.find(longName);
-                    if (!iter.found() || !iter.object().dataset)
+                    if (!iter.found() || !iter.val().dataset)
                     {
                         // Should not happen, but for safety require a vtk
                         // geometry
                         continue;
                     }
 
-                    foamVtpData& vtpData = iter.object();
+                    foamVtpData& vtpData = iter.val();
                     auto dataset = vtpData.dataset;
 
                     vtkSmartPointer<vtkFloatArray> cdata = convertFieldToVTK
@@ -535,7 +535,7 @@ void Foam::vtkPVFoam::convertPointFields
     forAllConstIters(objects, iter)
     {
         // Restrict to this GeometricField<Type, ...>
-        const auto& ioobj = *(iter.object());
+        const auto& ioobj = *(iter.val());
 
         const word& fieldName = ioobj.name();
         if (ioobj.headerClassName() != FieldType::typeName)
@@ -568,13 +568,13 @@ void Foam::vtkPVFoam::convertPointFields
                 const auto& longName = selectedPartIds_[partId];
 
                 auto iter = cachedVtp_.find(longName);
-                if (!iter.found() || !iter.object().dataset)
+                if (!iter.found() || !iter.val().dataset)
                 {
                     // Should not happen, but for safety require a vtk geometry
                     continue;
                 }
 
-                foamVtpData& vtpData = iter.object();
+                foamVtpData& vtpData = iter.val();
                 auto dataset = vtpData.dataset;
 
                 const labelUList& patchIds = vtpData.additionalIds();
@@ -605,13 +605,13 @@ void Foam::vtkPVFoam::convertPointFields
                 const word zoneName = getFoamName(longName);
 
                 auto iter = cachedVtp_.find(longName);
-                if (!iter.found() || !iter.object().dataset)
+                if (!iter.found() || !iter.val().dataset)
                 {
                     // Should not happen, but for safety require a vtk geometry
                     continue;
                 }
 
-                foamVtpData& vtpData = iter.object();
+                foamVtpData& vtpData = iter.val();
                 auto dataset = vtpData.dataset;
 
                 const label zoneId = mesh.faceZones().findZoneID(zoneName);
@@ -673,13 +673,13 @@ void Foam::vtkPVFoam::convertPointFieldBlock
         const auto& longName = selectedPartIds_[partId];
 
         auto iter = cachedVtu_.find(longName);
-        if (!iter.found() || !iter.object().dataset)
+        if (!iter.found() || !iter.val().dataset)
         {
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
 
-        foamVtuData& vtuData = iter.object();
+        foamVtuData& vtuData = iter.val();
         auto dataset = vtuData.dataset;
 
         vtkSmartPointer<vtkFloatArray> pdata = convertPointField
@@ -794,7 +794,7 @@ void Foam::vtkPVFoam::convertLagrangianFields
     forAllConstIters(objects, iter)
     {
         // Restrict to IOField<Type>
-        const auto& ioobj = *(iter.object());
+        const auto& ioobj = *(iter.val());
 
         if (ioobj.headerClassName() == IOField<Type>::typeName)
         {

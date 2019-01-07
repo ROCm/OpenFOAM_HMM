@@ -54,7 +54,7 @@ int main()
     a = h + i + j;
     Info<< a << endl;
 
-    Info<< "end" << endl;
+    Info<< "End" << endl;
 
     return 0;
 }

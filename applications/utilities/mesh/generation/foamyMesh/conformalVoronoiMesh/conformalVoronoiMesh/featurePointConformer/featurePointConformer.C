@@ -618,12 +618,11 @@ void Foam::featurePointConformer::reIndexPointPairs
     {
         const label currentIndex = featurePointVertices_[vI].index();
 
-        Map<label>::const_iterator newIndexIter =
-            oldToNewIndices.find(currentIndex);
+        const auto newIndexIter = oldToNewIndices.cfind(currentIndex);
 
-        if (newIndexIter != oldToNewIndices.end())
+        if (newIndexIter.found())
         {
-            featurePointVertices_[vI].index() = newIndexIter();
+            featurePointVertices_[vI].index() = *newIndexIter;
         }
     }
 

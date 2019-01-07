@@ -65,7 +65,7 @@ int main()
     );
     phi.write("phi", "xmgr");
 
-    Info<< "end" << endl;
+    Info<< "End" << endl;
 }
 
 

@@ -276,7 +276,7 @@ void Foam::vtkPVFoam::updateInfoPatches
         forAllConstIters(groups, iter)
         {
             const auto& groupName = iter.key();
-            const auto& patchIDs  = iter.object();
+            const auto& patchIDs  = iter.val();
 
             label nFaces = 0;
             for (auto patchId : patchIDs)
@@ -392,7 +392,7 @@ void Foam::vtkPVFoam::updateInfoPatches
             forAllConstIters(groups, iter)
             {
                 const auto& groupName = iter.key();
-                const auto& patchIDs  = iter.object();
+                const auto& patchIDs  = iter.val();
 
                 const string dpyName = "group/" + groupName;
                 displayNames.append(dpyName);
@@ -715,7 +715,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
 
             forAllConstIters(localFields, iter)
             {
-                fields(iter.key()) |= iter.object();
+                fields(iter.key()) |= iter.val();
             }
         }
     }

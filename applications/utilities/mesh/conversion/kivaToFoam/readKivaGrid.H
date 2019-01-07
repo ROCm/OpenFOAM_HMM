@@ -327,10 +327,8 @@ if
 {
     scalar minz = GREAT;
 
-    forAllConstIter(SLList<face>, pFaces[CYLINDERHEAD][0], iter)
+    for (const face& pf : pFaces[CYLINDERHEAD][0])
     {
-        const face& pf = iter();
-
         forAll(pf, pfi)
         {
             minz = min(minz, points[pf[pfi]].z());
@@ -341,10 +339,8 @@ if
 
     SLList<face> newLinerFaces;
 
-    forAllConstIter(SLList<face>, pFaces[LINER][0], iter)
+    for (const face& pf : pFaces[LINER][0])
     {
-        const face& pf = iter();
-
         scalar minfz = GREAT;
         forAll(pf, pfi)
         {
@@ -370,10 +366,8 @@ if
 
     SLList<face> newCylinderHeadFaces;
 
-    forAllConstIter(SLList<face>, pFaces[CYLINDERHEAD][0], iter)
+    for (const face& pf : pFaces[CYLINDERHEAD][0])
     {
-        const face& pf = iter();
-
         scalar minfz = GREAT;
         forAll(pf, pfi)
         {
@@ -421,12 +415,13 @@ if (pFaces[WEDGE].size() && pFaces[WEDGE][0].size())
 
         const scalar tanTheta = Foam::tan(degToRad(2.5));
 
-        SLList<face>::iterator iterf = pFaces[WEDGE][0].begin();
-        SLList<face>::iterator iterb = pFaces[WEDGE][1].begin();
+        auto iterf = pFaces[WEDGE][0].begin();
+        auto iterb = pFaces[WEDGE][1].begin();
+
         for
         (
             ;
-            iterf != pFaces[WEDGE][0].end() && iterb != pFaces[WEDGE][1].end();
+            iterf.good() && iterb.good();
             ++iterf, ++iterb
         )
         {
@@ -441,9 +436,9 @@ if (pFaces[WEDGE].size() && pFaces[WEDGE][0].size())
     {
         pFaces[CYCLIC].setSize(1);
         pFaces[CYCLIC][0] = pFaces[WEDGE][0];
-        forAllIter(SLList<face>, pFaces[WEDGE][1], iterb)
+        for (const face& pf : pFaces[WEDGE][1])
         {
-            pFaces[CYCLIC][0].append(iterb());
+            pFaces[CYCLIC][0].append(pf);
         }
 
         pFaces[WEDGE].clear();

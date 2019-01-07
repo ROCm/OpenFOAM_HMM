@@ -219,26 +219,26 @@ void storeCellInZone
     List<DynamicList<label>>& zoneCells
 )
 {
-    Map<label>::const_iterator zoneFnd = physToZone.find(regPhys);
+    const auto zoneFnd = physToZone.cfind(regPhys);
 
-    if (zoneFnd == physToZone.end())
-    {
-        // New region. Allocate zone for it.
-        label zoneI = zoneCells.size();
-        zoneCells.setSize(zoneI+1);
-        zoneToPhys.setSize(zoneI+1);
-
-        Info<< "Mapping region " << regPhys << " to Foam cellZone "
-            << zoneI << endl;
-        physToZone.insert(regPhys, zoneI);
-
-        zoneToPhys[zoneI] = regPhys;
-        zoneCells[zoneI].append(celli);
-    }
-    else
+    if (zoneFnd.found())
     {
         // Existing zone for region
         zoneCells[zoneFnd()].append(celli);
+    }
+    else
+    {
+        // New region. Allocate zone for it.
+        const label zonei = zoneCells.size();
+        zoneCells.setSize(zonei+1);
+        zoneToPhys.setSize(zonei+1);
+
+        Info<< "Mapping region " << regPhys << " to Foam cellZone "
+            << zonei << endl;
+        physToZone.insert(regPhys, zonei);
+
+        zoneToPhys[zonei] = regPhys;
+        zoneCells[zonei].append(celli);
     }
 }
 
@@ -516,10 +516,15 @@ void readCells
 
             renumber(mshToFoam, triPoints);
 
-            Map<label>::iterator regFnd = physToPatch.find(regPhys);
+            const auto regFnd = physToPatch.cfind(regPhys);
 
             label patchi = -1;
-            if (regFnd == physToPatch.end())
+            if (regFnd.found())
+            {
+                // Existing patch for region
+                patchi = regFnd();
+            }
+            else
             {
                 // New region. Allocate patch for it.
                 patchi = patchFaces.size();
@@ -531,11 +536,6 @@ void readCells
                     << patchi << endl;
                 physToPatch.insert(regPhys, patchi);
                 patchToPhys[patchi] = regPhys;
-            }
-            else
-            {
-                // Existing patch for region
-                patchi = regFnd();
             }
 
             // Add triangle to correct patchFaces.
@@ -549,10 +549,15 @@ void readCells
 
             renumber(mshToFoam, quadPoints);
 
-            Map<label>::iterator regFnd = physToPatch.find(regPhys);
+            const auto regFnd = physToPatch.cfind(regPhys);
 
             label patchi = -1;
-            if (regFnd == physToPatch.end())
+            if (regFnd.found())
+            {
+                // Existing patch for region
+                patchi = regFnd();
+            }
+            else
             {
                 // New region. Allocate patch for it.
                 patchi = patchFaces.size();
@@ -564,11 +569,6 @@ void readCells
                     << patchi << endl;
                 physToPatch.insert(regPhys, patchi);
                 patchToPhys[patchi] = regPhys;
-            }
-            else
-            {
-                // Existing patch for region
-                patchi = regFnd();
             }
 
             // Add quad to correct patchFaces.
@@ -748,15 +748,15 @@ void readCells
     Info<< "CellZones:" << nl
         << "Zone\tSize" << endl;
 
-    forAll(zoneCells, zoneI)
+    forAll(zoneCells, zonei)
     {
-        zoneCells[zoneI].shrink();
+        zoneCells[zonei].shrink();
 
-        const labelList& zCells = zoneCells[zoneI];
+        const labelList& zCells = zoneCells[zonei];
 
         if (zCells.size())
         {
-            Info<< "    " << zoneI << '\t' << zCells.size() << endl;
+            Info<< "    " << zonei << '\t' << zCells.size() << endl;
         }
     }
     Info<< endl;
@@ -870,11 +870,11 @@ int main(int argc, char *argv[])
 
     label nValidCellZones = 0;
 
-    forAll(zoneCells, zoneI)
+    forAll(zoneCells, zonei)
     {
-        if (zoneCells[zoneI].size())
+        if (zoneCells[zonei].size())
         {
-            nValidCellZones++;
+            ++nValidCellZones;
         }
     }
 
@@ -895,18 +895,13 @@ int main(int argc, char *argv[])
 
     forAll(boundaryPatchNames, patchi)
     {
-        label physReg = patchToPhys[patchi];
+        boundaryPatchNames[patchi] =
+            physicalNames.lookup
+            (
+                patchToPhys[patchi],
+                "patch" + Foam::name(patchi) // default name
+            );
 
-        Map<word>::const_iterator iter = physicalNames.find(physReg);
-
-        if (iter != physicalNames.end())
-        {
-            boundaryPatchNames[patchi] = iter();
-        }
-        else
-        {
-            boundaryPatchNames[patchi] = word("patch") + name(patchi);
-        }
         Info<< "Patch " << patchi << " gets name "
             << boundaryPatchNames[patchi] << endl;
     }
@@ -1001,17 +996,17 @@ int main(int argc, char *argv[])
     Info<< "FaceZones:" << nl
         << "Zone\tSize" << endl;
 
-    forAll(zoneFaces, zoneI)
+    forAll(zoneFaces, zonei)
     {
-        zoneFaces[zoneI].shrink();
+        zoneFaces[zonei].shrink();
 
-        const labelList& zFaces = zoneFaces[zoneI];
+        const labelList& zFaces = zoneFaces[zonei];
 
         if (zFaces.size())
         {
-            nValidFaceZones++;
+            ++nValidFaceZones;
 
-            Info<< "    " << zoneI << '\t' << zFaces.size() << endl;
+            Info<< "    " << zonei << '\t' << zFaces.size() << endl;
         }
     }
     Info<< endl;
@@ -1036,31 +1031,30 @@ int main(int argc, char *argv[])
 
         nValidCellZones = 0;
 
-        forAll(zoneCells, zoneI)
+        forAll(zoneCells, zonei)
         {
-            if (zoneCells[zoneI].size())
+            if (zoneCells[zonei].size())
             {
-                label physReg = zoneToPhys[zoneI];
+                const word zoneName
+                (
+                    physicalNames.lookup
+                    (
+                        zoneToPhys[zonei],
+                        "cellZone_" + Foam::name(zonei)  // default name
+                    )
+                );
 
-                Map<word>::const_iterator iter = physicalNames.find(physReg);
-
-                word zoneName = "cellZone_" + name(zoneI);
-                if (iter != physicalNames.end())
-                {
-                    zoneName = iter();
-                }
-
-                Info<< "Writing zone " << zoneI << " to cellZone "
+                Info<< "Writing zone " << zonei << " to cellZone "
                     << zoneName << " and cellSet"
                     << endl;
 
-                cellSet cset(mesh, zoneName, zoneCells[zoneI]);
+                cellSet cset(mesh, zoneName, zoneCells[zonei]);
                 cset.write();
 
                 cz[nValidCellZones] = new cellZone
                 (
                     zoneName,
-                    zoneCells[zoneI],
+                    zoneCells[zonei],
                     nValidCellZones,
                     mesh.cellZones()
                 );
@@ -1075,31 +1069,30 @@ int main(int argc, char *argv[])
 
         nValidFaceZones = 0;
 
-        forAll(zoneFaces, zoneI)
+        forAll(zoneFaces, zonei)
         {
-            if (zoneFaces[zoneI].size())
+            if (zoneFaces[zonei].size())
             {
-                label physReg = patchToPhys[zoneI];
+                const word zoneName
+                (
+                    physicalNames.lookup
+                    (
+                        patchToPhys[zonei],
+                        "faceZone_" + Foam::name(zonei)  // default name
+                    )
+                );
 
-                Map<word>::const_iterator iter = physicalNames.find(physReg);
-
-                word zoneName = "faceZone_" + name(zoneI);
-                if (iter != physicalNames.end())
-                {
-                    zoneName = iter();
-                }
-
-                Info<< "Writing zone " << zoneI << " to faceZone "
+                Info<< "Writing zone " << zonei << " to faceZone "
                     << zoneName << " and faceSet"
                     << endl;
 
-                faceSet fset(mesh, zoneName, zoneFaces[zoneI]);
+                faceSet fset(mesh, zoneName, zoneFaces[zonei]);
                 fset.write();
 
                 fz[nValidFaceZones] = new faceZone
                 (
                     zoneName,
-                    zoneFaces[zoneI],
+                    zoneFaces[zonei],
                     true, // all are flipped
                     nValidFaceZones,
                     mesh.faceZones()

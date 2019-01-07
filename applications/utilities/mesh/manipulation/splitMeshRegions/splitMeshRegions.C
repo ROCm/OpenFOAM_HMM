@@ -157,9 +157,9 @@ void subsetVolFields
     (
         mesh.objectRegistry::lookupClass<GeoField>()
     );
-    forAllConstIter(typename HashTable<const GeoField*>, fields, iter)
+    forAllConstIters(fields, iter)
     {
-        const GeoField& fld = *iter();
+        const GeoField& fld = *iter.val();
 
         Info<< "Mapping field " << fld.name() << endl;
 
@@ -211,9 +211,9 @@ void subsetSurfaceFields
     (
         mesh.objectRegistry::lookupClass<GeoField>()
     );
-    forAllConstIter(typename HashTable<const GeoField*>, fields, iter)
+    forAllConstIters(fields, iter)
     {
-        const GeoField& fld = *iter();
+        const GeoField& fld = *iter.val();
 
         Info<< "Mapping field " << fld.name() << endl;
 
@@ -278,19 +278,16 @@ void addToInterface
         max(ownRegion, neiRegion)
     );
 
-    EdgeMap<Map<label>>::iterator iter = regionsToSize.find
-    (
-        interface
-    );
+    auto iter = regionsToSize.find(interface);
 
-    if (iter != regionsToSize.end())
+    if (iter.found())
     {
         // Check if zone present
-        Map<label>::iterator zoneFnd = iter().find(zoneID);
-        if (zoneFnd != iter().end())
+        auto zoneIter = iter().find(zoneID);
+        if (zoneIter.found())
         {
             // Found zone. Increment count.
-            zoneFnd()++;
+            ++(*zoneIter);
         }
         else
         {
@@ -398,29 +395,26 @@ void getInterfaceSizes
 
                 EdgeMap<Map<label>> slaveSizes(fromSlave);
 
-                forAllConstIter(EdgeMap<Map<label>>, slaveSizes, slaveIter)
+                forAllConstIters(slaveSizes, slaveIter)
                 {
-                    EdgeMap<Map<label>>::iterator masterIter =
-                        regionsToSize.find(slaveIter.key());
+                    const Map<label>& slaveInfo = *slaveIter;
 
-                    if (masterIter != regionsToSize.end())
+                    auto masterIter = regionsToSize.find(slaveIter.key());
+
+                    if (masterIter.found())
                     {
                         // Same inter-region
-                        const Map<label>& slaveInfo = slaveIter();
-                        Map<label>& masterInfo = masterIter();
+                        Map<label>& masterInfo = *masterIter;
 
-                        forAllConstIter(Map<label>, slaveInfo, iter)
+                        forAllConstIters(slaveInfo, iter)
                         {
-                            label zoneID = iter.key();
-                            label slaveSize = iter();
+                            const label zoneID = iter.key();
+                            const label slaveSize = iter.val();
 
-                            Map<label>::iterator zoneFnd = masterInfo.find
-                            (
-                                zoneID
-                            );
-                            if (zoneFnd != masterInfo.end())
+                            auto zoneIter = masterInfo.find(zoneID);
+                            if (zoneIter.found())
                             {
-                                zoneFnd() += slaveSize;
+                                *zoneIter += slaveSize;
                             }
                             else
                             {
@@ -430,7 +424,7 @@ void getInterfaceSizes
                     }
                     else
                     {
-                        regionsToSize.insert(slaveIter.key(), slaveIter());
+                        regionsToSize.insert(slaveIter.key(), slaveInfo);
                     }
                 }
             }
@@ -458,9 +452,9 @@ void getInterfaceSizes
     // Now we have the global sizes of all inter-regions.
     // Invert this on master and distribute.
     label nInterfaces = 0;
-    forAllConstIter(EdgeMap<Map<label>>, regionsToSize, iter)
+    forAllConstIters(regionsToSize, iter)
     {
-        const Map<label>& info = iter();
+        const Map<label>& info = iter.val();
         nInterfaces += info.size();
     }
 
@@ -470,14 +464,15 @@ void getInterfaceSizes
     EdgeMap<Map<label>> regionsToInterface(nInterfaces);
 
     nInterfaces = 0;
-    forAllConstIter(EdgeMap<Map<label>>, regionsToSize, iter)
+    forAllConstIters(regionsToSize, iter)
     {
         const edge& e = iter.key();
+        const Map<label>& info = iter.val();
+
         const word& name0 = regionNames[e[0]];
         const word& name1 = regionNames[e[1]];
 
-        const Map<label>& info = iter();
-        forAllConstIter(Map<label>, info, infoIter)
+        forAllConstIters(info, infoIter)
         {
             interfaces[nInterfaces] = iter.key();
             label zoneID = infoIter.key();
@@ -1666,9 +1661,9 @@ int main(int argc, char *argv[])
 
             blockedFace.setSize(mesh.nFaces(), false);
 
-            forAllConstIter(faceSet, blockedFaceSet, iter)
+            for (const label facei : blockedFaceSet)
             {
-                blockedFace[iter.key()] = true;
+                blockedFace[facei] = true;
             }
         }
 

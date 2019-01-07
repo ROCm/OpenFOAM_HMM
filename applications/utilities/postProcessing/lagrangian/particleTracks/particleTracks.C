@@ -85,10 +85,10 @@ int main(int argc, char *argv[])
         Info<< "    Read " << returnReduce(myCloud.size(), sumOp<label>())
             << " particles" << endl;
 
-        forAllConstIter(passiveParticleCloud, myCloud, iter)
+        for (const passiveParticle& p : myCloud)
         {
-            label origId = iter().origId();
-            label origProc = iter().origProc();
+            const label origId = p.origId();
+            const label origProc = p.origProc();
 
             if (origProc >= maxIds.size())
             {
@@ -157,16 +157,16 @@ int main(int argc, char *argv[])
             myCloud.size(),
             point::zero
         );
-        allOrigIds[Pstream::myProcNo()].setSize(myCloud.size(), 0);
-        allOrigProcs[Pstream::myProcNo()].setSize(myCloud.size(), 0);
+        allOrigIds[Pstream::myProcNo()].setSize(myCloud.size(), Zero);
+        allOrigProcs[Pstream::myProcNo()].setSize(myCloud.size(), Zero);
 
         label i = 0;
-        forAllConstIter(passiveParticleCloud, myCloud, iter)
+        for (const passiveParticle& p : myCloud)
         {
-            allPositions[Pstream::myProcNo()][i] = iter().position();
-            allOrigIds[Pstream::myProcNo()][i] = iter().origId();
-            allOrigProcs[Pstream::myProcNo()][i] = iter().origProc();
-            i++;
+            allPositions[Pstream::myProcNo()][i] = p.position();
+            allOrigIds[Pstream::myProcNo()][i] = p.origId();
+            allOrigProcs[Pstream::myProcNo()][i] = p.origProc();
+            ++i;
         }
 
         // Collect the track data on the master processor

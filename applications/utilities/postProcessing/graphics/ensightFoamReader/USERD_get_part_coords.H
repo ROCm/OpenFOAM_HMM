@@ -42,12 +42,12 @@ int USERD_get_part_coords
     {
         label indx = 1;
 
-        forAllConstIter(Cloud<passiveParticle>, *sprayPtr, iter)
+        forAllConstIters(*sprayPtr, iter)
         {
             coord_array[0][indx] = float(iter().position().x());
             coord_array[1][indx] = float(iter().position().y());
             coord_array[2][indx] = float(iter().position().z());
-            indx++;
+            ++indx;
         }
 
     }

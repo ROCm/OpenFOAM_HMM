@@ -144,9 +144,9 @@ bool Foam::vtkPVFoam::addOutputBlock
         const word shortName = getFoamName(longName);
 
         auto iter = cache.find(longName);
-        if (iter.found() && iter.object().dataset)
+        if (iter.found() && iter.val().dataset)
         {
-            auto dataset = iter.object().dataset;
+            auto dataset = iter.val().dataset;
 
             if (singleDataset)
             {
@@ -540,13 +540,13 @@ void Foam::vtkPVFoam::Update
             // Eliminate cached values that would be unreliable
             forAllIters(cachedVtp_, iter)
             {
-                iter.object().clearGeom();
-                iter.object().clear();
+                iter.val().clearGeom();
+                iter.val().clear();
             }
             forAllIters(cachedVtu_, iter)
             {
-                iter.object().clearGeom();
-                iter.object().clear();
+                iter.val().clearGeom();
+                iter.val().clear();
             }
         }
         else if (oldDecomp != decomposePoly_)
@@ -554,8 +554,8 @@ void Foam::vtkPVFoam::Update
             // poly-decompose changed - dispose of cached values
             forAllIters(cachedVtu_, iter)
             {
-                iter.object().clearGeom();
-                iter.object().clear();
+                iter.val().clearGeom();
+                iter.val().clear();
             }
         }
     }

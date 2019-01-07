@@ -72,7 +72,7 @@ public:
 
     void testCallbackFunction() const
     {
-        forAllConstIter(callbackRegistry, *this, iter)
+        forAllConstIters(*this, iter)
         {
             iter().testCallbackFunction();
         }

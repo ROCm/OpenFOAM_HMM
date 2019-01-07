@@ -80,9 +80,9 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
         vtkpoints->SetNumberOfPoints(parcels.size());
 
         vtkIdType particleId = 0;
-        forAllConstIters(parcels, iter)
+        for (const passiveParticle& p : parcels)
         {
-            vtkpoints->SetPoint(particleId, iter().position().v_);
+            vtkpoints->SetPoint(particleId, p.position().v_);
             ++particleId;
         }
 

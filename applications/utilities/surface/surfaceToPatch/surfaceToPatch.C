@@ -284,10 +284,8 @@ int main(int argc, char *argv[])
         faceSet faceLabels(mesh, setName);
         Info<< "Read " << faceLabels.size() << " faces to repatch ..." << endl;
 
-        forAllConstIter(faceSet, faceLabels, iter)
+        for (const label facei : faceLabels)
         {
-            label facei = iter.key();
-
             if (repatchFace(mesh, bMesh, nearest, patchMap, facei, meshMod))
             {
                 nChanged++;
@@ -298,11 +296,11 @@ int main(int argc, char *argv[])
     {
         forAll(nearest, bFacei)
         {
-            label facei = mesh.nInternalFaces() + bFacei;
+            const label facei = mesh.nInternalFaces() + bFacei;
 
             if (repatchFace(mesh, bMesh, nearest, patchMap, facei, meshMod))
             {
-                nChanged++;
+                ++nChanged;
             }
         }
     }

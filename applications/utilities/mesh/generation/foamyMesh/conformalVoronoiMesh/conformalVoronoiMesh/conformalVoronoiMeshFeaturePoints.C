@@ -411,7 +411,7 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
     );
 
 
-    forAllConstIter(Map<Foam::point>, masterPoints, iter)
+    forAllConstIters(masterPoints, iter)
     {
         const Foam::point& pt = masterPoints[iter.key()];
         const vertexType ptType = masterPointsTypes[iter.key()];

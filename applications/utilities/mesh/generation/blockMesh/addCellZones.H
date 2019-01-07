@@ -68,7 +68,7 @@
         forAllConstIters(zoneMap, iter)
         {
             const word& zoneName = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             cz[zonei] = new cellZone
             (

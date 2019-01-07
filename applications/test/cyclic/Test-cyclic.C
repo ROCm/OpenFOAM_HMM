@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
     Info<< fvc::div(U);
 
-    Info<< "end" << endl;
+    Info<< "End" << endl;
 }
 
 

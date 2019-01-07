@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
         Info<< "Tad = " << Tad << nl << endl;
     }
 
-    Info<< nl << "end" << endl;
+    Info<< nl << "End" << endl;
 
     return 0;
 }

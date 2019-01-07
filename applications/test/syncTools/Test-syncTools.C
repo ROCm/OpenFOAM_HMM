@@ -261,10 +261,10 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         }
 
         // 2. Does sparseData contain more?
-        forAllConstIter(Map<point>, sparseData, iter)
+        forAllConstIters(sparseData, iter)
         {
-            const point& sparsePt = iter();
-            label meshPointi = iter.key();
+            const label meshPointi = iter.key();
+            const point& sparsePt = iter.val();
             const point& fullPt = fullData[meshPointi];
 
             if (fullPt != sparsePt)
@@ -350,9 +350,9 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const edge& e = mesh.edges()[meshEdgeI];
 
-            EdgeMap<point>::const_iterator iter = sparseData.find(e);
+            const auto iter = sparseData.cfind(e);
 
-            if (iter != sparseData.end())
+            if (iter.found())
             {
                 const point& sparsePt = iter();
                 const point& fullPt = fullData[meshEdgeI];

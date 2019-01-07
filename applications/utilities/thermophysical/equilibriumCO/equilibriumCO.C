@@ -126,9 +126,9 @@ int main(int argc, char *argv[])
     );
 
 
-    forAllConstIter(SLPtrList<thermo>, EQreactions, iter)
+    for (const thermo& react : EQreactions)
     {
-        Info<< "Kc(EQreactions) = " << iter().Kc(P, T) << endl;
+        Info<< "Kc(EQreactions) = " << react.Kc(P, T) << endl;
     }
 
     Info<< nl << "End" << nl << endl;

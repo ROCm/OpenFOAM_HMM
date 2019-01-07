@@ -293,7 +293,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
         }
 
         // Overwrite with region specific information
-        forAllConstIter(Map<label>, regionMinLevel[surfi], iter)
+        forAllConstIters(regionMinLevel[surfi], iter)
         {
             label globalRegioni = regionOffset[surfi] + iter.key();
 
@@ -305,7 +305,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
         }
 
         const Map<autoPtr<dictionary>>& localInfo = regionPatchInfo[surfi];
-        forAllConstIter(Map<autoPtr<dictionary>>, localInfo, iter)
+        forAllConstIters(localInfo, iter)
         {
             label globalRegioni = regionOffset[surfi] + iter.key();
             patchInfo.set(globalRegioni, iter()().clone());
@@ -403,7 +403,7 @@ void extractSurface
 
     // Allocate zone/patch for all patches
     HashTable<label> compactZoneID(1024);
-    forAllConstIter(HashTable<label>, patchSize, iter)
+    forAllConstIters(patchSize, iter)
     {
         label sz = compactZoneID.size();
         compactZoneID.insert(iter.key(), sz);
@@ -413,7 +413,7 @@ void extractSurface
 
     // Rework HashTable into labelList just for speed of conversion
     labelList patchToCompactZone(bMesh.size(), -1);
-    forAllConstIter(HashTable<label>, compactZoneID, iter)
+    forAllConstIters(compactZoneID, iter)
     {
         label patchi = bMesh.findPatchID(iter.key());
         if (patchi != -1)
@@ -504,7 +504,7 @@ void extractSurface
 
         // Zones
         surfZoneIdentifierList surfZones(compactZoneID.size());
-        forAllConstIter(HashTable<label>, compactZoneID, iter)
+        forAllConstIters(compactZoneID, iter)
         {
             surfZones[iter()] = surfZoneIdentifier(iter.key(), iter());
             Info<< "surfZone " << iter()  <<  " : " << surfZones[iter()].name()

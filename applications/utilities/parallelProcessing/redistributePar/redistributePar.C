@@ -746,7 +746,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    forAllIter(typename HashTable<GeoField*>, flds, iter)
+    forAllIters(flds, iter)
     {
         GeoField& fld = *iter();
 
@@ -1944,16 +1944,11 @@ void readLagrangian
         );
 
 
-        //forAllConstIter
-        //(
-        //    unmappedPassivePositionParticleCloud,
-        //    clouds[i],
-        //    iter
-        //)
+        //for (passivePositionParticle& p : clouds[i]))
         //{
-        //    Pout<< "Particle position:" << iter().position()
-        //        << " cell:" << iter().cell()
-        //        << " with cc:" << mesh.cellCentres()[iter().cell()]
+        //    Pout<< "Particle position:" << p.position()
+        //        << " cell:" << p.cell()
+        //        << " with cc:" << mesh.cellCentres()[p.cell()]
         //        << endl;
         //}
 
