@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,14 @@ Foam::setToFaceZone::setToFaceZone
 :
     topoSetSource(mesh),
     setName_(dict.get<word>("faceSet"))
-{}
+{
+    if (dict.found("cellSet"))
+    {
+        IOWarningInFunction(dict)
+            << "Ignoring entry 'cellSet' - maybe use setsToFaceZone instead ?"
+            << endl;
+    }
+}
 
 
 Foam::setToFaceZone::setToFaceZone

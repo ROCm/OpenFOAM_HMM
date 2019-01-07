@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,6 +166,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         // Create dummy mesh. Only used on procs that don't have mesh.
         IOobject noReadIO(io);
         noReadIO.readOpt() = IOobject::NO_READ;
+        noReadIO.writeOpt() = IOobject::AUTO_WRITE;
         fvMesh dummyMesh(noReadIO, Zero, false);
 
         // Add patches
