@@ -50,8 +50,7 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
 
     Info<< "Selecting chemistry type " << chemistryTypeDict << endl;
 
-    const int nCmpt = 13;
-    const char* cmptNames[nCmpt] =
+    std::initializer_list<const char*> cmptNames
     {
         "chemistrySolver",
         "chemistryThermo",
@@ -136,10 +135,14 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
             validChemistryTypeNames.size() + 1
         );
 
+        const int nCmpt = cmptNames.size();
         validChemistryTypeNameCmpts[0].setSize(nCmpt);
-        forAll(validChemistryTypeNameCmpts[0], j)
+
+        label j = 0;
+        for (const char* cmptName : cmptNames)
         {
-            validChemistryTypeNameCmpts[0][j] = cmptNames[j];
+            validChemistryTypeNameCmpts[0][j] = cmptName;
+            ++j;
         }
 
         // Split the thermo package names into their constituent parts

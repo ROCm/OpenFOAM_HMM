@@ -28,7 +28,7 @@ Group
     grpReactionThermophysicalMixtures
 
 Description
-    Foam::inhomogeneousMixture
+    The inhomogeneous mixture contains species ("ft", "b").
 
 SourceFiles
     inhomogeneousMixture.C
@@ -54,10 +54,7 @@ class inhomogeneousMixture
 :
     public basicCombustionMixture
 {
-    // Private data
-
-        static const int nSpecies_ = 2;
-        static const char* specieNames_[2];
+    // Private Data
 
         dimensionedScalar stoicRatio_;
 
@@ -182,7 +179,7 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
     #include "inhomogeneousMixture.C"

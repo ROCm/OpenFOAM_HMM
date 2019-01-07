@@ -28,7 +28,7 @@ Group
     grpReactionThermophysicalMixtures
 
 Description
-    Foam::veryInhomogeneousMixture
+    The very inhomogeneous mixture contains species ("ft", "fu", "b").
 
 SourceFiles
     veryInhomogeneousMixture.C
@@ -54,10 +54,7 @@ class veryInhomogeneousMixture
 :
     public basicCombustionMixture
 {
-    // Private data
-
-        static const int nSpecies_ = 3;
-        static const char* specieNames_[3];
+    // Private Data
 
         dimensionedScalar stoicRatio_;
 
@@ -183,7 +180,7 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
     #include "veryInhomogeneousMixture.C"

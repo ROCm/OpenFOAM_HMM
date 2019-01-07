@@ -178,8 +178,7 @@ public:
         (
             const dictionary& thermoTypeDict,
             Table* tablePtr,
-            const int nCmpt,
-            const char* cmptNames[],
+            std::initializer_list<const char*> cmptNames,
             const word& thermoTypeName
         );
 

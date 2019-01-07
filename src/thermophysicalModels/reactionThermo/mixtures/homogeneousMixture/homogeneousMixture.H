@@ -28,7 +28,7 @@ Group
     grpReactionThermophysicalMixtures
 
 Description
-    Foam::homogeneousMixture
+    The homogeneous mixture contains species ("b").
 
 SourceFiles
     homogeneousMixture.C
@@ -54,10 +54,7 @@ class homogeneousMixture
 :
     public basicCombustionMixture
 {
-    // Private data
-
-        static const int nSpecies_ = 1;
-        static const char* specieNames_[1];
+    // Private Data
 
         ThermoType reactants_;
         ThermoType products_;
@@ -148,7 +145,7 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
     #include "homogeneousMixture.C"

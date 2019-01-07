@@ -28,7 +28,7 @@ Group
     grpReactionThermophysicalMixtures
 
 Description
-    Foam::egrMixture
+    The egr mixture contains species ("ft", "b", "egr").
 
 SourceFiles
     egrMixture.C
@@ -54,10 +54,7 @@ class egrMixture
 :
     public basicCombustionMixture
 {
-    // Private data
-
-        static const int nSpecies_ = 3;
-        static const char* specieNames_[3];
+    // Private Data
 
         dimensionedScalar stoicRatio_;
 
@@ -190,7 +187,7 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
     #include "egrMixture.C"

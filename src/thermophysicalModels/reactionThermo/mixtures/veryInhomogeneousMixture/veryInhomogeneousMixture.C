@@ -26,17 +26,6 @@ License
 #include "veryInhomogeneousMixture.H"
 #include "fvMesh.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class ThermoType>
-const char* Foam::veryInhomogeneousMixture<ThermoType>::specieNames_[3] =
-{
-    "ft",
-    "fu",
-    "b"
-};
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ThermoType>
@@ -50,7 +39,7 @@ Foam::veryInhomogeneousMixture<ThermoType>::veryInhomogeneousMixture
     basicCombustionMixture
     (
         thermoDict,
-        speciesTable(nSpecies_, specieNames_),
+        speciesTable({"ft", "fu", "b"}),
         mesh,
         phaseName
     ),

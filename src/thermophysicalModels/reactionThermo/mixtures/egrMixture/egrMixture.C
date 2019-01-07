@@ -26,12 +26,6 @@ License
 #include "egrMixture.H"
 #include "fvMesh.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class ThermoType>
-const char* Foam::egrMixture<ThermoType>::specieNames_[3] = {"ft", "b", "egr"};
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ThermoType>
@@ -45,7 +39,7 @@ Foam::egrMixture<ThermoType>::egrMixture
     basicCombustionMixture
     (
         thermoDict,
-        speciesTable(nSpecies_, specieNames_),
+        speciesTable({"ft", "b", "egr"}),
         mesh,
         phaseName
     ),
