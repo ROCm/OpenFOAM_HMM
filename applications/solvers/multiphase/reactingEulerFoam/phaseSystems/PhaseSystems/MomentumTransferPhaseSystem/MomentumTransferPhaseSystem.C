@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2016 OpenFOAM Foundation
@@ -181,7 +181,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::Kd
         const phaseModel* phase1 = &pair.phase1();
         const phaseModel* phase2 = &pair.phase2();
 
-        forAllConstIter(phasePair, pair, iter)
+        forAllConstIters(pair, iter)
         {
             if (phase1 == &phase)
             {
@@ -403,7 +403,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::momentumTransfer() const
         const phaseModel* phase = &pair.phase1();
         const phaseModel* otherPhase = &pair.phase2();
 
-        forAllConstIter(phasePair, pair, iter)
+        forAllConstIters(pair, iter)
         {
             const volVectorField& U = phase->U();
 
@@ -429,7 +429,7 @@ Foam::MomentumTransferPhaseSystem<BasePhaseSystem>::momentumTransfer() const
         const phaseModel* phase = &pair.phase1();
         const phaseModel* otherPhase = &pair.phase2();
 
-        forAllConstIter(phasePair, pair, iter)
+        forAllConstIters(pair, iter)
         {
             const volVectorField& U = phase->U();
             const surfaceScalarField& phi = phase->phi();

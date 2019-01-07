@@ -226,7 +226,7 @@ while (pimple.correct())
             const phaseModel* phase1 = &pair.phase1();
             const phaseModel* phase2 = &pair.phase2();
 
-            forAllConstIter(phasePair, pair, iter)
+            forAllConstIters(pair, iter)
             {
                 if (phase1 == &phase)
                 {

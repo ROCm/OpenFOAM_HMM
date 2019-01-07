@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2015 OpenFOAM Foundation
@@ -179,7 +179,7 @@ void Foam::pointPairs<Triangulation>::reIndex(const Map<label>& oldToNewIndices)
 {
     pointPairs<Triangulation> newTable(triangulation_);
 
-    forAllConstIter(pointPairs, *this, iter)
+    forAllConstIters(*this, iter)
     {
         labelPairPair e = iter.key();
 

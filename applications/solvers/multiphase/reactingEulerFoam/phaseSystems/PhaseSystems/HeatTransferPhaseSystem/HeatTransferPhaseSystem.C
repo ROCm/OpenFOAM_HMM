@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2016 OpenFOAM Foundation
@@ -131,7 +131,7 @@ Foam::HeatTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
         const phaseModel* phase = &pair.phase1();
         const phaseModel* otherPhase = &pair.phase2();
 
-        forAllConstIter(phasePair, pair, iter)
+        forAllConstIters(pair, iter)
         {
             const volScalarField& he(phase->thermo().he());
             volScalarField Cpv(phase->thermo().Cpv());
