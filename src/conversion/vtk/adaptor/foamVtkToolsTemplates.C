@@ -224,7 +224,15 @@ Foam::vtk::Tools::zeroField
     data->SetNumberOfComponents(static_cast<int>(pTraits<Type>::nComponents));
     data->SetNumberOfTuples(size);
 
+    // Fill() was not available before VTK-8
+    #if (VTK_MAJOR_VERSION < 8)
+    for (int i = 0; i < data->GetNumberOfComponents(); ++i)
+    {
+        data->FillComponent(i, 0);
+    }
+    #else
     data->Fill(0);
+    #endif
 
     return data;
 }

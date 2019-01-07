@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 #------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -26,7 +26,7 @@
 #     wmakeBuildInfo
 #
 # Description
-#     Print the version used when building the project
+#     Print the api/version and other build information for the project.
 #
 # Environment
 #     - WM_PROJECT_DIR
@@ -51,7 +51,7 @@ usage() {
 Usage: ${0##*/} [OPTION]
        ${0##*/} [-update] -filter FILE
 options:
-  -check        Compare make and meta information (exit 0 for no changes)
+  -cmp, -check  Compare make and meta information (exit 0 for no changes)
   -diff         Display differences between make and meta information
                 (exit code 0 for no changes)
   -dry-run      In combination with -update
@@ -96,7 +96,7 @@ do
     -h | -help*)
         usage
         ;;
-    -check)
+    -cmp | -check)
         optCheck=true
         ;;
     -diff)
@@ -156,12 +156,11 @@ fi
 
 #------------------------------------------------------------------------------
 
-# Variables
-declare -A makeInfo
-declare -A metaInfo
+# Variables - for portability, avoiding bash associative arrays
+unset make_info meta_info
 
-#
-# Populate makeInfo array
+
+# Populate make_* variables
 #
 #  - api    : from rules/General/general
 #  - patch  : cached value from previous make
@@ -177,10 +176,9 @@ declare -A metaInfo
 #
 # - Working on detached head.
 #   -> branch has value "HEAD" instead of something more readable.
-#
 getMakeInfo()
 {
-    if [ "${#makeInfo[*]}" -eq 4 ]
+    if [ -n "$make_info" ]
     then
         ##echo "use cached value for make info" 1>&2
         return 0
@@ -188,7 +186,7 @@ getMakeInfo()
     ##echo "get make info" 1>&2
 
     local api patch build branch
-    makeInfo=()
+    unset make_api make_patch make_branch make_build
 
     # (api) from WM_DIR/rules/General/general
     # - extract WM_VERSION = OPENFOAM=<digits>
@@ -211,15 +209,15 @@ getMakeInfo()
         branch="$(git --git-dir=$WM_PROJECT_DIR/.git rev-parse --abbrev-ref HEAD 2>/dev/null)"
     fi
 
-    makeInfo[api]="$api"
-    makeInfo[patch]="${patch:-0}"  # default is 0
-    makeInfo[branch]="$branch"
-    makeInfo[build]="$build"
+    make_api="$api"
+    make_patch="${patch:-0}"  # Default is 0 (unpatched)
+    make_branch="$branch"
+    make_build="$build"
+    make_info=true
 }
 
 
-#
-# Populate metaInfo array
+# Populate meta_* variables
 #
 #  - api    : from META-INFO/api-info
 #  - patch  : from META-INFO/api-info
@@ -229,10 +227,9 @@ getMakeInfo()
 # Failure modes:
 # - Directory, file or entry not found.
 #   -> corresponding entries are empty strings
-#
 getMetaInfo()
 {
-    if [ "${#metaInfo[*]}" -eq 4 ]
+    if [ -n "$meta_info" ]
     then
         ##echo "use cached value for meta info" 1>&2
         return 0
@@ -240,7 +237,7 @@ getMetaInfo()
     ##echo "get meta info" 1>&2
 
     local api patch build branch
-    metaInfo=()
+    unset meta_api meta_patch meta_branch meta_build
 
     if [ -d "$metaInfoDir" ]
     then
@@ -253,14 +250,14 @@ getMetaInfo()
         build="$(sed -ne 's@^build *= *\([^ ]*\).*@\1@p' $metaInfoDir/build-info 2>/dev/null)"
     fi
 
-    metaInfo[api]="$api"
-    metaInfo[patch]="${patch:-0}"  # default is 0
-    metaInfo[branch]="$branch"
-    metaInfo[build]="$build"
+    meta_api="$api"
+    meta_patch="${patch:-0}"  # Default is 0 (unpatched)
+    meta_branch="$branch"
+    meta_build="$build"
+    meta_info=true
 }
 
 
-#
 # Get api from rules/General/general
 #
 # Failure modes:
@@ -268,18 +265,17 @@ getMetaInfo()
 #   -> Fatal for building, but could be OK for a stripped down version
 #
 # Fallback. Get from api-info
-#
 getApi()
 {
     getMakeInfo
 
     # Local copy
-    local api="${makeInfo[api]}"
+    local api="${make_api}"
 
     if [ -z "$api" ]
     then
         getMetaInfo
-        api="${metaInfo[api]}"
+        api="${meta_api}"
     fi
 
     if [ -n "$api" ]
@@ -295,53 +291,69 @@ getApi()
 #
 # Failure modes:
 # - No patch information (can't find file etc).
-#
 getPatchLevel()
 {
     getMetaInfo
 
     # Local copy
-    local value="${metaInfo[patch]}"
+    local patch="${meta_patch}"
 
-    if [ -n "$value" ]
+    if [ -n "$patch" ]
     then
-        echo "$value"
+        echo "$patch"
     else
         return 1
     fi
 }
 
 
+#
 # Report make info
+#
 reportMakeInfo()
 {
     getMakeInfo
     getMetaInfo
 
-    local patch="${metaInfo[patch]}" # <- From meta-info only
-    makeInfo[patch]="${patch:=0}"    # Extra safety
-
     echo "make"
-    for key in api patch branch build
-    do
-        echo "    $key = ${makeInfo[$key]}"
-    done
+    echo "    api = ${make_api}"
+    echo "    patch = ${meta_patch:-0}"  # <- From meta-info only
+    echo "    branch = ${make_branch}"
+    echo "    build = ${make_build}"
 }
 
 
+#
 # Report meta info
+#
 reportMetaInfo()
 {
     getMetaInfo
 
-    local patch="${metaInfo[patch]}" # <- From meta-info only
-    metaInfo[patch]="${patch:=0}"    # Extra safety
-
     echo "meta"
-    for key in api patch branch build
-    do
-        echo "    $key = ${metaInfo[$key]}"
-    done
+    echo "    api = ${meta_api}"
+    echo "    patch = ${meta_patch:-0}"  # <- From meta-info only
+    echo "    branch = ${meta_branch}"
+    echo "    build = ${meta_build}"
+}
+
+
+# Report diff between make and meta info (single key).
+# Set diff_header prior to the first call.
+# $1 == key
+# $2 == make value
+# $3 == meta value
+unset diff_header
+_reportDiff()
+{
+    if [ -n "$diff_header" ]
+    then
+        echo "$diff_header"
+        unset diff_header
+    fi
+    echo "$1:"
+    echo "    make $2"
+    echo "    meta $3"
 }
 
 
@@ -350,50 +362,68 @@ reportMetaInfo()
 # $1 == verbose, print as diff. Silent otherwise
 checkDiff()
 {
-    local verbose="$1"
-    local key diff
+    local diff verbose
+
+    if [ "$1" = "verbose" ]
+    then
+        diff_header="Differences"
+        verbose=true
+    fi
 
     getMakeInfo
     getMetaInfo
 
-    for key in api patch branch build
-    do
-        if [ "${makeInfo[$key]}" != "${metaInfo[$key]}" ]
-        then
-            case "$key" in
-            (branch | build)
-                # Only trigger when make info (branch, build) are non-empty
-                if [ -n "${makeInfo[$key]}" ]
-                then
-                    diff="$diff $key"
-                fi
-
-                ;;
-            (*)
-                diff="$diff $key"
-                ;;
-            esac
-        fi
-    done
-
-    if [ "$verbose" = verbose ] && [ -n "$diff" ]
+    # api
+    if [ "${make_api}" != "${meta_api}" ]
     then
-        echo "Differences"
-        for key in $diff
-        do
-            echo "$key:"
-            echo "     make ${makeInfo[$key]}"
-            echo "     meta ${metaInfo[$key]}"
-        done
+        diff=true
+
+        if [ -n "$verbose" ]
+        then
+            _reportDiff "api" "${make_api}" "${meta_api}"
+        fi
+    fi
+
+    # patch
+    if [ "${make_patch}" != "${meta_patch}" ]
+    then
+        diff=true
+
+        if [ -n "$verbose" ]
+        then
+            _reportDiff "patch" "${make_patch}" "${meta_patch}"
+        fi
+    fi
+
+    # branch - only test when make info is non-empty
+    if [ -n "${make_branch}" ] && [ "${make_branch}" != "${meta_branch}" ]
+    then
+        diff=true
+
+        if [ -n "$verbose" ]
+        then
+            _reportDiff "branch" "${make_branch}" "${meta_branch}"
+        fi
+    fi
+
+    # build - only test when make info is non-empty
+    if [ -n "${make_build}" ] && [ "${make_build}" != "${meta_build}" ]
+    then
+        diff=true
+
+        if [ -n "$verbose" ]
+        then
+            _reportDiff "build" "${make_build}" "${meta_build}"
+        fi
     fi
 
     # No diffs, but never permit entirely empty values for build.
-    test -z "$diff" || test -z "${makeInfo[build]}${metaInfo[build]}"
+    test -z "$diff" || test -z "${make_build}${meta_build}"
 }
 
 
 #
-# Update metaInfo (on disk) based on the makeInfo
+# Update meta info (on disk) based on the make info
 #
 performUpdate()
 {
@@ -401,16 +431,16 @@ performUpdate()
     getMetaInfo
 
     # Local copies of the make info
-    local api="${makeInfo[api]}"
-    local branch="${makeInfo[branch]}"
-    local build="${makeInfo[build]}"
-    local patch="${makeInfo[patch]}"
+    local api="${make_api}"
+    local branch="${make_branch}"
+    local build="${make_build}"
+    local patch="${make_patch}"
 
     # If any of the make-info are empty (bad),
     # use the meta-info to avoid spurious changes
-    [ -n "$api" ] || api="${metaInfo[api]}"
-    [ -n "$branch" ] || branch="${metaInfo[branch]}"
-    [ -n "$build" ] || build="${metaInfo[build]}"
+    [ -n "$api" ] || api="${meta_api}"
+    [ -n "$branch" ] || branch="${meta_branch}"
+    [ -n "$build" ] || build="${meta_build}"
 
     # Fallback to WM_PROJECT_VERSION alone
     [ -n "$build" ] || build="${WM_PROJECT_VERSION:-unknown}"
@@ -419,12 +449,11 @@ performUpdate()
 
     # build-info
     outputFile="$metaInfoDir/build-info"
-    if [ "$branch" != "${metaInfo[branch]}" ] || \
-       [ "$build" != "${metaInfo[build]}" ] || \
-       [ "$patch" != "${metaInfo[patch]}" ]
+    if [ "$branch" != "${meta_branch}" ] || \
+       [ "$build" != "${meta_build}" ] || \
+       [ "$patch" != "${meta_patch}" ]
     then
-        patch="${metaInfo[patch]}"      # <- From meta-info only
-        : "${patch:=0}"                 # Extra safety
+        patch="${meta_patch:-0}"        # <- From meta-info only
 
         if [ -n "$optDryRun" ]
         then
@@ -441,10 +470,9 @@ performUpdate()
 
     # api-info
     outputFile="$metaInfoDir/api-info"
-    if [ "$api" != "${metaInfo[api]}" ]
+    if [ "$api" != "${meta_api}" ]
     then
-        patch="${metaInfo[patch]}"      # <- From meta-info only
-        : "${patch:=0}"                 # Extra safety
+        patch="${meta_patch:-0}"        # <- From meta-info only
 
         if [ -n "$optDryRun" ]
         then
@@ -461,8 +489,7 @@ performUpdate()
 
 
 #
-# Update metaInfo (on disk) based on the makeInfo
-# This is the
+# Update meta info (on disk) based on the make info
 #
 performFiltering()
 {
@@ -477,11 +504,10 @@ performFiltering()
     getMetaInfo
 
     # Local copies of the make info
-    local api="${makeInfo[api]}"
-    local branch="${makeInfo[branch]}"
-    local build="${makeInfo[build]}"
-    local patch="${metaInfo[patch]}"   # <- From meta-info only
-    : "${patch:=0}"                    # Extra safety
+    local api="${make_api}"
+    local branch="${make_branch}"
+    local build="${make_build}"
+    local patch="${meta_patch:-0}"  # <- From meta-info only
 
 
     # If any of the make-info are empty (bad),
@@ -492,19 +518,20 @@ performFiltering()
 
     if [ -z "$api" ]
     then
-        api="${metaInfo[api]}"
+        api="${meta_api}"
         api="${api:-0}"  # integer value
     fi
 
     # branch/build could be missing for non-git
     if [ -z "$branch" ]
     then
-        branch="${metaInfo[branch]}"
+        branch="${meta_branch}"
         branch="${branch:-unknown}"
     fi
+
     if [ -z "$build" ]
     then
-        build="${metaInfo[build]}"
+        build="${meta_build}"
         # Fallback to WM_PROJECT_VERSION
         build="${build:-${WM_PROJECT_VERSION:-unknown}}"
     fi
@@ -523,7 +550,7 @@ performFiltering()
 
 #------------------------------------------------------------------------------
 
-# Dispatching
+# Dispatch
 
 if [ -n "$optCheck" ]
 then
