@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -671,6 +671,9 @@ void Foam::argList::setCasePaths()
     rootPath_   = caseDir.path();
     globalCase_ = caseDir.name();
     case_       = globalCase_;  // The (processor) local case name
+
+    // OPENFOAM API
+    setEnv("FOAM_API", std::to_string(foamVersion::api), true);
 
     // Global case (directory) and case-name as environment variables
     setEnv("FOAM_CASE", caseDir, true);

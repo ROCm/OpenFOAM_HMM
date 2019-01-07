@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,8 @@ Description
     may be present for some solvers or utilities.
 
     Environment variables set by argList or by Time:
+      - \par FOAM_API
+        The value of foamVersion::api
       - \par FOAM_CASE
         The path of the global case.
         It is the same for serial and parallel jobs.
