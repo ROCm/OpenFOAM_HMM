@@ -638,10 +638,9 @@ void Foam::meshToMesh::distributeAndMergeCells
                 key[1] = max(proci, nbrProci[i]);
                 key[2] = localFacei[i];
 
-                procCoupleInfo::const_iterator fnd =
-                    procFaceToGlobalCell.find(key);
+                const auto fnd = procFaceToGlobalCell.cfind(key);
 
-                if (fnd == procFaceToGlobalCell.end())
+                if (!fnd.found())
                 {
                     procFaceToGlobalCell.insert(key, -1);
                 }
@@ -754,9 +753,9 @@ void Foam::meshToMesh::distributeAndMergeCells
                 key[1] = max(proci, nbrProci[i]);
                 key[2] = localFacei[i];
 
-                procCoupleInfo::iterator fnd = procFaceToGlobalCell.find(key);
+                auto fnd = procFaceToGlobalCell.find(key);
 
-                if (fnd != procFaceToGlobalCell.end())
+                if (fnd.found())
                 {
                     label tgtFacei = fnd();
                     if (tgtFacei == -1)
