@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -320,10 +320,8 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
     // Determine the index of all of the wall faces on this processor
     DynamicList<label> localWallFaces;
 
-    forAll(mesh_.boundaryMesh(), patchi)
+    for (const polyPatch& patch : mesh_.boundaryMesh())
     {
-        const polyPatch& patch = mesh_.boundaryMesh()[patchi];
-
         if (isA<wallPolyPatch>(patch))
         {
             const scalarField areaFraction(patch.areaFraction());
@@ -607,11 +605,9 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
         // Reserve space to avoid multiple resizing
         DynamicList<label> cellDIL(interactingElems.size());
 
-        forAll(interactingElems, i)
+        for (const label elemi : interactingElems)
         {
-            label elemI = interactingElems[i];
-
-            label c = allCellsTree.shapes().cellLabels()[elemI];
+            const label c = allCellsTree.shapes().cellLabels()[elemi];
 
             // Here, a more detailed geometric test could be applied,
             // i.e. a more accurate bounding volume like a OBB or
@@ -634,9 +630,9 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         forAll(interactingElems, i)
         {
-            label elemI = interactingElems[i];
+            const label elemi = interactingElems[i];
 
-            label f = wallFacesTree.shapes().faceLabels()[elemI];
+            const label f = wallFacesTree.shapes().faceLabels()[elemi];
 
             dwfil_[celli][i] = f;
         }
@@ -849,10 +845,8 @@ void Foam::InteractionLists<ParticleType>::buildMap
     // 1. Count
     labelList nSend(Pstream::nProcs(), Zero);
 
-    forAll(toProc, i)
+    for (const label proci : toProc)
     {
-        label proci = toProc[i];
-
         nSend[proci]++;
     }
 
@@ -896,7 +890,7 @@ void Foam::InteractionLists<ParticleType>::buildMap
     {
         if (proci != Pstream::myProcNo())
         {
-            label nRecv = recvSizes[proci];
+            const label nRecv = recvSizes[proci];
 
             constructMap[proci].setSize(nRecv);
 
@@ -991,11 +985,11 @@ void Foam::InteractionLists<ParticleType>::fillReferredParticleCloud()
             const IDLList<ParticleType>& refCell =
                 referredParticles_[refCelli];
 
-            forAllConstIter(typename IDLList<ParticleType>, refCell, iter)
+            for (const ParticleType& p : refCell)
             {
                 cloud_.addParticle
                 (
-                    static_cast<ParticleType*>(iter().clone().ptr())
+                    static_cast<ParticleType*>(p.clone().ptr())
                 );
             }
         }
@@ -1238,9 +1232,9 @@ void Foam::InteractionLists<ParticleType>::receiveReferredData
     forAll(referredParticles_, refCelli)
     {
         IDLList<ParticleType>& refCell = referredParticles_[refCelli];
-        forAllIter(typename IDLList<ParticleType>, refCell, iter)
+        for (ParticleType& p : refCell)
         {
-            iter().correctAfterInteractionListReferral(ril_[refCelli][0]);
+            p.correctAfterInteractionListReferral(ril_[refCelli][0]);
         }
     }
 

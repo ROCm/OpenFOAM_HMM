@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -200,9 +200,8 @@ void Foam::SprayParcel<ParcelType>::readFields
     c.checkFieldIOobject(c, user);
 
     label i = 0;
-    forAllIter(typename Cloud<SprayParcel<ParcelType>>, c, iter)
+    for (SprayParcel<ParcelType>& p : c)
     {
-        SprayParcel<ParcelType>& p = iter();
         p.d0_ = d0[i];
         p.position0_ = position0[i];
         p.sigma_ = sigma[i];
@@ -216,7 +215,7 @@ void Foam::SprayParcel<ParcelType>::readFields
         p.injector_ = injector[i];
         p.tMom_ = tMom[i];
         p.user_ = user[i];
-        i++;
+        ++i;
     }
 }
 
@@ -268,9 +267,8 @@ void Foam::SprayParcel<ParcelType>::writeFields
     IOField<scalar> user(c.fieldIOobject("user", IOobject::NO_READ), np);
 
     label i = 0;
-    forAllConstIter(typename Cloud<SprayParcel<ParcelType>>, c, iter)
+    for (const SprayParcel<ParcelType>& p : c)
     {
-        const SprayParcel<ParcelType>& p = iter();
         d0[i] = p.d0_;
         position0[i] = p.position0_;
         sigma[i] = p.sigma_;
@@ -284,7 +282,7 @@ void Foam::SprayParcel<ParcelType>::writeFields
         injector[i] = p.injector_;
         tMom[i] = p.tMom_;
         user[i] = p.user_;
-        i++;
+        ++i;
     }
 
     const bool valid = np > 0;
@@ -354,9 +352,8 @@ void Foam::SprayParcel<ParcelType>::writeObjects
     IOField<scalar>& user(cloud::createIOField<scalar>("user", np, obr));
 
     label i = 0;
-    forAllConstIter(typename Cloud<SprayParcel<ParcelType>>, c, iter)
+    for (const SprayParcel<ParcelType>& p : c)
     {
-        const SprayParcel<ParcelType>& p = iter();
         d0[i] = p.d0_;
         position0[i] = p.position0_;
         sigma[i] = p.sigma_;
@@ -370,7 +367,7 @@ void Foam::SprayParcel<ParcelType>::writeObjects
         injector[i] = p.injector_;
         tMom[i] = p.tMom_;
         user[i] = p.user_;
-        i++;
+        ++i;
     }
 }
 

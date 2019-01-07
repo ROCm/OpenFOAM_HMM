@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -110,9 +110,8 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
 
     label i = 0;
     scalar mSum = 0.0;
-    forAllConstIter(typename SprayCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
         scalar m = p.nParticle()*p.mass();
         scalar d = mag(p.position() - p.position0());
         mSum += m;
@@ -120,7 +119,7 @@ inline Foam::scalar Foam::SprayCloud<CloudType>::penetration
         mass[i] = m;
         dist[i] = d;
 
-        i++;
+        ++i;
     }
 
     // calculate total mass across all processors
