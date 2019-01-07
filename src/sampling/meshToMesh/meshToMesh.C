@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -478,7 +478,8 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
                 "newTgt." + Foam::name(Pstream::myProcNo()),
                 tgtRegion_.time().timeName(),
                 tgtRegion_.time(),
-                IOobject::NO_READ
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
             ),
             std::move(newTgtPoints),
             std::move(newTgtFaces),

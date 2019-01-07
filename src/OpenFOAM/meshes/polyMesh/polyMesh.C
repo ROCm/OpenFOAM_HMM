@@ -374,7 +374,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             io.writeOpt()
         ),
         std::move(points)
@@ -387,7 +387,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             io.writeOpt()
         ),
         std::move(faces)
@@ -400,7 +400,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             io.writeOpt()
         ),
         std::move(owner)
@@ -413,7 +413,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             io.writeOpt()
         ),
         std::move(neighbour)
@@ -427,7 +427,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             io.writeOpt()
         ),
         *this,
@@ -447,7 +447,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
@@ -461,7 +461,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,
@@ -475,7 +475,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
+            io.readOpt(),
             IOobject::NO_WRITE
         ),
         *this,

@@ -3311,6 +3311,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
     IOobject noReadIO(io);
     noReadIO.readOpt() = IOobject::NO_READ;
+    noReadIO.readOpt() = IOobject::AUTO_WRITE;
     newMeshPtr.reset
     (
         new fvMesh

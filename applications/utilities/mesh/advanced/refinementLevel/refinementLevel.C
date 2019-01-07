@@ -213,7 +213,9 @@ int main(int argc, char *argv[])
         (
             fvMesh::defaultRegion,
             runTime.timeName(),
-            runTime
+            runTime,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         pointField(mesh.points()),  // Could we safely re-use the data?
         faceList(mesh.faces()),

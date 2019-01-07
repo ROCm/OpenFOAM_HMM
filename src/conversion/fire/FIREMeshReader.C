@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -431,7 +431,9 @@ Foam::autoPtr<Foam::polyMesh> Foam::fileFormats::FIREMeshReader::mesh
         (
             polyMesh::defaultRegion,
             "constant",
-            registry
+            registry,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         std::move(points_),
         std::move(meshFaces_),
