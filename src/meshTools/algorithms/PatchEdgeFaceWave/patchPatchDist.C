@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -45,12 +45,6 @@ Foam::patchPatchDist::patchPatchDist
 {
     patchPatchDist::correct();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::patchPatchDist::~patchPatchDist()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -120,8 +114,8 @@ void Foam::patchPatchDist::correct()
     {
         const edge& e = patch_.edges()[edgeI];
         const edge meshE = edge(mp[e[0]], mp[e[1]]);
-        EdgeMap<label>::const_iterator edgeFnd = nbrEdges.find(meshE);
-        if (edgeFnd != nbrEdges.end())
+
+        if (nbrEdges.found(meshE))
         {
             initialEdges.append(edgeI);
             initialEdgesInfo.append

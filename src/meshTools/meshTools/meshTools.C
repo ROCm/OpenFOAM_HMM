@@ -276,10 +276,8 @@ void Foam::meshTools::writeOBJ
 {
     writeOBJ(os, bb.points());
 
-    forAll(treeBoundBox::edges, edgei)
+    for (const edge& e : treeBoundBox::edges)
     {
-        const edge& e = treeBoundBox::edges[edgei];
-
         os << "l " << (e[0] + 1) <<  ' ' << (e[1] + 1) << nl;
     }
 }
@@ -296,10 +294,9 @@ void Foam::meshTools::writeOBJ
 {
     labelHashSet usedFaces(4*cellLabels.size());
 
-    forAll(cellLabels, i)
+    for (const label celli : cellLabels)
     {
-        const cell& cFaces = cells[cellLabels[i]];
-        usedFaces.insert(cFaces);
+        usedFaces.insert(cells[celli]);
     }
 
     writeOBJ(os, faces, points, usedFaces.toc());

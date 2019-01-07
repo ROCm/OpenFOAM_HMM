@@ -136,10 +136,8 @@ void Foam::setsToFaceZone::applyToSet
             DynamicList<label> newAddressing(zoneSet.addressing());
             DynamicList<bool> newFlipMap(zoneSet.flipMap());
 
-            forAllConstIter(faceSet, fSet, iter)
+            for (const label facei : fSet)
             {
-                label facei = iter.key();
-
                 if (!zoneSet.found(facei))
                 {
                     bool flipFace = false;

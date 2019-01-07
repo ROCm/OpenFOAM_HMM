@@ -144,7 +144,7 @@ namespace Foam
     //            );
     //
     //        // Add the UniformValueField under the Function1 name
-    //        forAllConstIter(typename F1Type, F1Table, iter)
+    //        forAllConstIters(F1Table, iter)
     //        {
     //            //bool ok =
     //            PF1Table.insert(iter.key(), cstrIter());

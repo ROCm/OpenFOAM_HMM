@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -36,7 +36,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(meshStructure, 0);
+    defineTypeNameAndDebug(meshStructure, 0);
 }
 
 
@@ -327,7 +327,7 @@ void Foam::meshStructure::correct
                         label pointi = f[fp];
                         label nextPointi = f.nextLabel(fp);
 
-                        EdgeMap<label>::const_iterator fnd = pointsToEdge.find
+                        const auto fnd = pointsToEdge.cfind
                         (
                             edge
                             (
@@ -335,9 +335,10 @@ void Foam::meshStructure::correct
                                 pointData[nextPointi].data()
                             )
                         );
-                        if (fnd != pointsToEdge.end())
+
+                        if (fnd.found())
                         {
-                            faceToPatchEdgeAddressing_[facei] = fnd();
+                            faceToPatchEdgeAddressing_[facei] = fnd.val();
                             faceToPatchFaceAddressing_[facei] = 0;
                             label own = mesh.faceOwner()[facei];
                             faceLayer_[facei] = cellData[own].distance();

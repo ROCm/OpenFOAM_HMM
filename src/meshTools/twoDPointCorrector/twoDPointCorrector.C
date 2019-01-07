@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -59,14 +59,13 @@ void Foam::twoDPointCorrector::calcAddressing() const
     // Try and find a wedge patch
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    forAll(patches, patchi)
+    for (const polyPatch& p : patches)
     {
-        if (isA<wedgePolyPatch>(patches[patchi]))
+        if (isA<wedgePolyPatch>(p))
         {
             isWedge_ = true;
 
-            const wedgePolyPatch& wp =
-                refCast<const wedgePolyPatch>(patches[patchi]);
+            const wedgePolyPatch& wp = refCast<const wedgePolyPatch>(p);
 
             pn = wp.centreNormal();
 
@@ -75,7 +74,7 @@ void Foam::twoDPointCorrector::calcAddressing() const
 
             if (polyMesh::debug)
             {
-                Pout<< "Found normal from wedge patch " << patchi;
+                Pout<< "Found normal from wedge patch " << p.index() << nl;
             }
 
             break;
@@ -85,15 +84,15 @@ void Foam::twoDPointCorrector::calcAddressing() const
     // Try to find an empty patch with faces
     if (!isWedge_)
     {
-        forAll(patches, patchi)
+        for (const polyPatch& p : patches)
         {
-            if (isA<emptyPolyPatch>(patches[patchi]) && patches[patchi].size())
+            if (isA<emptyPolyPatch>(p) && p.size())
             {
-                pn = patches[patchi].faceAreas()[0];
+                pn = p.faceAreas()[0];
 
                 if (polyMesh::debug)
                 {
-                    Pout<< "Found normal from empty patch " << patchi;
+                    Pout<< "Found normal from empty patch " << p.index() << nl;
                 }
 
                 break;
@@ -115,7 +114,7 @@ void Foam::twoDPointCorrector::calcAddressing() const
 
     if (polyMesh::debug)
     {
-        Pout<< " twoDPointCorrector normal: " << pn << endl;
+        Pout<< " twoDPointCorrector normal: " << pn << nl;
     }
 
     // Select edges to be included in check.
@@ -132,7 +131,7 @@ void Foam::twoDPointCorrector::calcAddressing() const
     {
         const edge& e = meshEdges[edgeI];
 
-        vector edgeVector = e.vec(meshPoints)/(e.mag(meshPoints) + VSMALL);
+        vector edgeVector = e.unitVec(meshPoints);
 
         if (mag(edgeVector & pn) > edgeOrthogonalityTol)
         {
@@ -235,15 +234,13 @@ Foam::direction Foam::twoDPointCorrector::normalDir() const
     {
         return vector::Z;
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Plane normal not aligned with the coordinate system" << nl
-            << "    pn = " << pn
-            << abort(FatalError);
 
-        return vector::Z;
-    }
+    FatalErrorInFunction
+        << "Plane normal not aligned with the coordinate system" << nl
+        << "    pn = " << pn
+        << abort(FatalError);
+
+    return vector::Z;
 }
 
 
@@ -284,11 +281,11 @@ void Foam::twoDPointCorrector::correctPoints(pointField& p) const
     const labelList& neIndices = normalEdgeIndices();
     const vector& pn = planeNormal();
 
-    forAll(neIndices, edgeI)
+    for (const label edgei : neIndices)
     {
-        point& pStart = p[meshEdges[neIndices[edgeI]].start()];
+        point& pStart = p[meshEdges[edgei].start()];
 
-        point& pEnd = p[meshEdges[neIndices[edgeI]].end()];
+        point& pEnd = p[meshEdges[edgei].end()];
 
         // calculate average point position
         point A = 0.5*(pStart + pEnd);
@@ -328,9 +325,9 @@ void Foam::twoDPointCorrector::correctDisplacement
     const labelList& neIndices = normalEdgeIndices();
     const vector& pn = planeNormal();
 
-    forAll(neIndices, edgeI)
+    for (const label edgei : neIndices)
     {
-        const edge& e = meshEdges[neIndices[edgeI]];
+        const edge& e = meshEdges[edgei];
 
         label startPointi = e.start();
         point pStart = p[startPointi] + disp[startPointi];

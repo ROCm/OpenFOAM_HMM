@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -355,9 +355,9 @@ void Foam::regionToCell::combine(topoSet& set, const bool add) const
         cellSet subSet(mesh_, setName_);
 
         selectedCell = false;
-        forAllConstIter(cellSet, subSet, iter)
+        for (const label celli : subSet)
         {
-            selectedCell[iter.key()] = true;
+            selectedCell[celli] = true;
         }
     }
 
