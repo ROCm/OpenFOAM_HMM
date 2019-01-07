@@ -52,7 +52,7 @@ void Foam::meshReader::addFaceZones(polyMesh& mesh) const
     }
 
     nZone = 0;
-    forAllConstIter(HashTable<labelList>, monitoringSets_, iter)
+    forAllConstIters(monitoringSets_, iter)
     {
         Info<< "faceZone " << nZone
             << " (size: " << iter().size() << ") name: "

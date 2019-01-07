@@ -140,7 +140,7 @@ namespace Foam
 
         forAll(valueSetNames, i)
         {
-            if (i > 0)
+            if (i)
             {
                 writeSeparator(os);
             }
@@ -166,7 +166,7 @@ void Foam::csvSetWriter<Type>::writeHeader
     {
         for (label j=0; j<Type::nComponents; j++)
         {
-            if (i>0 || j>0)
+            if (i || j)
             {
                 writeSeparator(os);
             }
@@ -189,12 +189,7 @@ void Foam::csvSetWriter<Type>::writeCoordHeader
 
     if (points.hasVectorAxis())
     {
-        for
-        (
-            word::const_iterator iter = axisName.begin();
-            iter != axisName.end();
-            ++iter
-        )
+        for (auto iter = axisName.cbegin(); iter != axisName.cend(); ++iter)
         {
             os << *iter;
             writeSeparator(os);

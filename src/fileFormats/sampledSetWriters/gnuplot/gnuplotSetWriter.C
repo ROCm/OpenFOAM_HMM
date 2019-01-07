@@ -85,7 +85,7 @@ void Foam::gnuplotSetWriter<Type>::write
 
     forAll(valueSets, i)
     {
-        if (i != 0)
+        if (i)
         {
             os << ',';
         }
