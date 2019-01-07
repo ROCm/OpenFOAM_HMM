@@ -134,12 +134,6 @@ greyMeanSolidAbsorptionEmission
     }
 }
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::greyMeanSolidAbsorptionEmission::
-~greyMeanSolidAbsorptionEmission()
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -167,7 +161,7 @@ calc(const label propertyId) const
 
     scalarField& a = ta.ref().primitiveFieldRef();
 
-    forAllConstIter(HashTable<label>, speciesNames_, iter)
+    forAllConstIters(speciesNames_, iter)
     {
         if (mixture_.contains(iter.key()))
         {
