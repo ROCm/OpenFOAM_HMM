@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -379,6 +379,10 @@ void Foam::singleCellFvMesh::agglomerateMesh
             );
         }
     }
+
+    // Make sure we don't start dumping mesh every timestep (since
+    // resetPrimitives sets AUTO_WRITE)
+    setInstance(time().constant(), IOobject::NO_WRITE);
 }
 
 

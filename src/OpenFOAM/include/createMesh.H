@@ -16,6 +16,7 @@ if (args.found("dry-run") || args.found("dry-run-write"))
     if (args.found("dry-run-write"))
     {
         // Using saWriteNow triggers function objects execute(), write()
+        meshPtr->setInstance(runTime.constant());
         runTime.stopAt(Foam::Time::saWriteNow);
     }
     else

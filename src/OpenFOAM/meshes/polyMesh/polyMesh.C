@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -374,8 +374,8 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
-            IOobject::AUTO_WRITE
+            IOobject::NO_READ,
+            io.writeOpt()
         ),
         std::move(points)
     ),
@@ -387,8 +387,8 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
-            IOobject::AUTO_WRITE
+            IOobject::NO_READ,
+            io.writeOpt()
         ),
         std::move(faces)
     ),
@@ -400,8 +400,8 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
-            IOobject::AUTO_WRITE
+            IOobject::NO_READ,
+            io.writeOpt()
         ),
         std::move(owner)
     ),
@@ -413,8 +413,8 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
-            IOobject::AUTO_WRITE
+            IOobject::NO_READ,
+            io.writeOpt()
         ),
         std::move(neighbour)
     ),
@@ -427,8 +427,8 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
-            IOobject::AUTO_WRITE
+            IOobject::NO_READ,
+            io.writeOpt()
         ),
         *this,
         polyPatchList()
@@ -447,7 +447,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         *this,
@@ -461,7 +461,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         *this,
@@ -475,7 +475,7 @@ Foam::polyMesh::polyMesh
             instance(),
             meshSubDir,
             *this,
-            io.readOpt(),
+            IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         *this,
@@ -526,7 +526,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         std::move(points)
     ),
@@ -539,7 +539,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         std::move(faces)
     ),
@@ -552,7 +552,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         0
     ),
@@ -565,7 +565,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         0
     ),
@@ -579,7 +579,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         *this,
         0

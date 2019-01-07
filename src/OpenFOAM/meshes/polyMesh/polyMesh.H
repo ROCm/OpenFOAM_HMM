@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -399,7 +399,11 @@ public:
             const fileName& facesInstance() const;
 
             //- Set the instance for mesh files
-            void setInstance(const fileName&);
+            void setInstance
+            (
+                const fileName& instance,
+                const IOobject::writeOption wOpt = IOobject::AUTO_WRITE
+            );
 
 
         // Access
