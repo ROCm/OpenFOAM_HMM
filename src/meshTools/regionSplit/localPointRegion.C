@@ -447,11 +447,11 @@ void Foam::localPointRegion::calcPointRegions
 
 
     //// Print points with multiple regions. These points need to be duplicated.
-    //forAllConstIter(Map<label>, meshPointMap_, iter)
+    //forAllConstIters(meshPointMap_, iter)
     //{
     //    Pout<< "point:" << iter.key()
     //        << " coord:" << mesh.points()[iter.key()]
-    //        << " regions:" << pointRegions_[iter()] << endl;
+    //        << " regions:" << pointRegions_[iter.val()] << endl;
     //}
 }
 
@@ -685,13 +685,13 @@ void Foam::localPointRegion::updateMesh(const mapPolyMesh& map)
     {
         Map<label> newMap(meshFaceMap_.size());
 
-        forAllConstIter(Map<label>, meshFaceMap_, iter)
+        forAllConstIters(meshFaceMap_, iter)
         {
-            label newFacei = map.reverseFaceMap()[iter.key()];
+            const label newFacei = map.reverseFaceMap()[iter.key()];
 
             if (newFacei >= 0)
             {
-                newMap.insert(newFacei, iter());
+                newMap.insert(newFacei, iter.val());
             }
         }
         meshFaceMap_.transfer(newMap);
@@ -699,13 +699,13 @@ void Foam::localPointRegion::updateMesh(const mapPolyMesh& map)
     {
         Map<label> newMap(meshPointMap_.size());
 
-        forAllConstIter(Map<label>, meshPointMap_, iter)
+        forAllConstIters(meshPointMap_, iter)
         {
-            label newPointi = map.reversePointMap()[iter.key()];
+            const label newPointi = map.reversePointMap()[iter.key()];
 
             if (newPointi >= 0)
             {
-                newMap.insert(newPointi, iter());
+                newMap.insert(newPointi, iter.val());
             }
         }
 
