@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -121,10 +121,8 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
             windowValues.push(currentValue);
 
             // Calculate the window average
-            typename FIFOStack<scalar>::const_iterator timeIter =
-                windowTimes.begin();
-            typename FIFOStack<Type>::const_iterator valueIter =
-                windowValues.begin();
+            auto timeIter = windowTimes.cbegin();
+            auto valueIter = windowValues.cbegin();
 
             meanValue = pTraits<Type>::zero;
             Type valueOld(pTraits<Type>::zero);
@@ -132,7 +130,7 @@ void Foam::functionObjects::runTimeControls::averageCondition::calc
             for
             (
                 label i = 0;
-                timeIter != windowTimes.end();
+                timeIter.good();
                 ++i, ++timeIter, ++valueIter
             )
             {

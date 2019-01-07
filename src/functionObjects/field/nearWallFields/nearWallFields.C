@@ -160,9 +160,8 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
         );
         InfoInFunction << "Dumping tracks to " << str.name() << endl;
 
-        forAllConstIter(Cloud<findCellParticle>, cloud, iter)
+        for (const findCellParticle& tp : cloud)
         {
-            const findCellParticle& tp = iter();
             str.write(linePointRef(tp.position(), tp.end()));
         }
     }
@@ -186,9 +185,8 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
     {
         start.setSize(nPatchFaces);
         nPatchFaces = 0;
-        forAllConstIter(Cloud<findCellParticle>, cloud, iter)
+        for (const findCellParticle& tp : cloud)
         {
-            const findCellParticle& tp = iter();
             start[nPatchFaces++] = tp.position();
         }
     }

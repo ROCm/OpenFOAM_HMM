@@ -240,7 +240,7 @@ void Foam::functionObjects::forces::initialiseBins()
 
             const scalarField dd(mesh_.C() & binDir_);
 
-            forAllConstIter(HashTable<const porosityModel*>, models, iter)
+            forAllConstIters(models, iter)
             {
                 const porosityModel& pm = *iter();
                 const labelList& cellZoneIDs = pm.cellZoneIDs();

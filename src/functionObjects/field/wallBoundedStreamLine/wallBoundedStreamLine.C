@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -305,16 +305,8 @@ bool Foam::functionObjects::wallBoundedStreamLine::read(const dictionary& dict)
                     forAll(f, fp)
                     {
                         const edge e(f[fp], f.nextLabel(fp));
-                        EdgeMap<label>::iterator eFnd = numFacesPerEdge.find(e);
 
-                        if (eFnd != numFacesPerEdge.end())
-                        {
-                            eFnd()++;
-                        }
-                        else
-                        {
-                            numFacesPerEdge.insert(e, 1);
-                        }
+                        ++(numFacesPerEdge(e, 0));
                     }
                 }
 
