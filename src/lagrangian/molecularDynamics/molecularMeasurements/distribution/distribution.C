@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -87,9 +87,9 @@ Foam::label Foam::distribution::totalEntries() const
 {
     label sumOfEntries = 0;
 
-    forAllConstIter(Map<label>, *this, iter)
+    forAllConstIters(*this, iter)
     {
-        sumOfEntries += iter();
+        sumOfEntries += iter.val();
 
         if (sumOfEntries < 0)
         {
@@ -115,9 +115,9 @@ Foam::scalar Foam::distribution::approxTotalEntries() const
 {
     scalar sumOfEntries = 0;
 
-    forAllConstIter(Map<label>, *this, iter)
+    forAllConstIters(*this, iter)
     {
-        sumOfEntries += scalar(iter());
+        sumOfEntries += scalar(iter.val());
     }
 
     return sumOfEntries;

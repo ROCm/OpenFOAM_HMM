@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -50,7 +50,7 @@ void Foam::DSMCCloud<ParcelType>::buildConstProps()
 
     forAll(typeIdList_, i)
     {
-        const word& id(typeIdList_[i]);
+        const word& id = typeIdList_[i];
 
         Info<< "    " << id << endl;
 
@@ -64,14 +64,14 @@ void Foam::DSMCCloud<ParcelType>::buildConstProps()
 template<class ParcelType>
 void Foam::DSMCCloud<ParcelType>::buildCellOccupancy()
 {
-    forAll(cellOccupancy_, cO)
+    for (auto& list : cellOccupancy_)
     {
-        cellOccupancy_[cO].clear();
+        list.clear();
     }
 
-    forAllIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (ParcelType& p : *this)
     {
-        cellOccupancy_[iter().cell()].append(&iter());
+        cellOccupancy_[p.cell()].append(&p);
     }
 }
 
@@ -400,9 +400,8 @@ void Foam::DSMCCloud<ParcelType>::calculateFields()
     scalarField& iDof = iDof_.primitiveFieldRef();
     vectorField& momentum = momentum_.primitiveFieldRef();
 
-    forAllConstIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (const ParcelType& p : *this)
     {
-        const ParcelType& p = iter();
         const label celli = p.cell();
 
         rhoN[celli]++;
@@ -692,7 +691,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
     const fvMesh& mesh,
     const IOdictionary& dsmcInitialiseDict
 )
-    :
+:
     Cloud<ParcelType>(mesh, cloudName, false),
     DSMCBaseCloud(),
     cloudName_(cloudName),
@@ -1038,13 +1037,11 @@ void Foam::DSMCCloud<ParcelType>::dumpParticlePositions() const
       + this->db().time().timeName() + ".obj"
     );
 
-    forAllConstIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (const ParcelType& p : *this)
     {
-        const ParcelType& p = iter();
-
         pObj<< "v " << p.position().x()
-            << " "  << p.position().y()
-            << " "  << p.position().z()
+            << ' '  << p.position().y()
+            << ' '  << p.position().z()
             << nl;
     }
 

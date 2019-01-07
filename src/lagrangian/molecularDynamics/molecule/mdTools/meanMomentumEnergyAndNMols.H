@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -56,15 +56,15 @@ label singleStepNMols = molecules.size();
 label singleStepDOFs = 0;
 
 {
-    forAllConstIter(IDLList<molecule>, molecules, mol)
+    for (const molecule& mol : molecules)
     {
-        const label molId = mol().id();
+        const label molId = mol.id();
 
         scalar molMass(molecules.constProps(molId).mass());
 
         singleStepTotalMass += molMass;
 
-        //singleStepCentreOfMass += mol().position()*molMass;
+        //singleStepCentreOfMass += mol.position()*molMass;
     }
 
     // if (singleStepNMols)
@@ -72,9 +72,9 @@ label singleStepDOFs = 0;
     //     singleStepCentreOfMass /= singleStepTotalMass;
     // }
 
-    forAllConstIter(IDLList<molecule>, molecules, mol)
+    for (const molecule& mol : molecules)
     {
-        const label molId = mol().id();
+        const label molId = mol.id();
 
         const molecule::constantProperties cP(molecules.constProps(molId));
 
@@ -82,16 +82,16 @@ label singleStepDOFs = 0;
 
         const diagTensor& molMoI(cP.momentOfInertia());
 
-        const vector& molV(mol().v());
+        const vector& molV(mol.v());
 
-        const vector molOmega(inv(molMoI) & mol().pi());
+        const vector molOmega(inv(molMoI) & mol.pi());
 
-        vector molPiGlobal = mol().Q() & mol().pi();
+        vector molPiGlobal = mol.Q() & mol.pi();
 
         singleStepTotalLinearMomentum += molV * molMass;
 
         singleStepTotalAngularMomentum += molPiGlobal;
-        //+((mol().position() - singleStepCentreOfMass) ^ (molV * molMass));
+        //+((mol.position() - singleStepCentreOfMass) ^ (molV * molMass));
 
         if (mag(molV) > singleStepMaxVelocityMag)
         {
@@ -102,9 +102,9 @@ label singleStepDOFs = 0;
 
         singleStepTotalAngularKE += 0.5*(molOmega & molMoI & molOmega);
 
-        singleStepTotalPE += mol().potentialEnergy();
+        singleStepTotalPE += mol.potentialEnergy();
 
-        singleStepTotalrDotf += tr(mol().rf());
+        singleStepTotalrDotf += tr(mol.rf());
 
         singleStepDOFs += cP.degreesOfFreedom();
     }
