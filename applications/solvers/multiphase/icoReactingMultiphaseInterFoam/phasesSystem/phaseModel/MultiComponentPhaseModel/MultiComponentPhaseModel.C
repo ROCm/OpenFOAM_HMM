@@ -63,7 +63,7 @@ MultiComponentPhaseModel
         ).ptr()
     );
 
-    if (thermoPtr_->composition().species().size() == 0)
+    if (thermoPtr_->composition().species().empty())
     {
         FatalErrorInFunction
             << " The selected thermo is pure. Use a multicomponent thermo."

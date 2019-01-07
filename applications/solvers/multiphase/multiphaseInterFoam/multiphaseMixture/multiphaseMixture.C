@@ -42,9 +42,9 @@ void Foam::multiphaseMixture::calcAlphas()
     scalar level = 0.0;
     alphas_ == 0.0;
 
-    forAllIter(PtrDictionary<phase>, phases_, iter)
+    for (const phase& ph : phases_)
     {
-        alphas_ += level*iter();
+        alphas_ += level * ph;
         level += 1.0;
     }
 }
@@ -135,12 +135,12 @@ Foam::multiphaseMixture::multiphaseMixture
 Foam::tmp<Foam::volScalarField>
 Foam::multiphaseMixture::rho() const
 {
-    PtrDictionary<phase>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<volScalarField> trho = iter()*iter().rho();
     volScalarField& rho = trho.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         rho += iter()*iter().rho();
     }
@@ -152,12 +152,12 @@ Foam::multiphaseMixture::rho() const
 Foam::tmp<Foam::scalarField>
 Foam::multiphaseMixture::rho(const label patchi) const
 {
-    PtrDictionary<phase>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<scalarField> trho = iter().boundaryField()[patchi]*iter().rho().value();
     scalarField& rho = trho.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         rho += iter().boundaryField()[patchi]*iter().rho().value();
     }
@@ -169,12 +169,12 @@ Foam::multiphaseMixture::rho(const label patchi) const
 Foam::tmp<Foam::volScalarField>
 Foam::multiphaseMixture::mu() const
 {
-    PtrDictionary<phase>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<volScalarField> tmu = iter()*iter().rho()*iter().nu();
     volScalarField& mu = tmu.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         mu += iter()*iter().rho()*iter().nu();
     }
@@ -186,20 +186,25 @@ Foam::multiphaseMixture::mu() const
 Foam::tmp<Foam::scalarField>
 Foam::multiphaseMixture::mu(const label patchi) const
 {
-    PtrDictionary<phase>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<scalarField> tmu =
+    (
         iter().boundaryField()[patchi]
        *iter().rho().value()
-       *iter().nu(patchi);
+       *iter().nu(patchi)
+    );
+
     scalarField& mu = tmu.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         mu +=
+        (
             iter().boundaryField()[patchi]
            *iter().rho().value()
-           *iter().nu(patchi);
+           *iter().nu(patchi)
+        );
     }
 
     return tmu;
@@ -209,13 +214,13 @@ Foam::multiphaseMixture::mu(const label patchi) const
 Foam::tmp<Foam::surfaceScalarField>
 Foam::multiphaseMixture::muf() const
 {
-    PtrDictionary<phase>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<surfaceScalarField> tmuf =
         fvc::interpolate(iter())*iter().rho()*fvc::interpolate(iter().nu());
     surfaceScalarField& muf = tmuf.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         muf +=
             fvc::interpolate(iter())*iter().rho()*fvc::interpolate(iter().nu());
@@ -267,21 +272,19 @@ Foam::multiphaseMixture::surfaceTensionForce() const
     surfaceScalarField& stf = tstf.ref();
     stf.setOriented();
 
-    forAllConstIter(PtrDictionary<phase>, phases_, iter1)
+    forAllConstIters(phases_, iter1)
     {
         const phase& alpha1 = iter1();
 
-        PtrDictionary<phase>::const_iterator iter2 = iter1;
-        ++iter2;
+        auto iter2 = iter1;
 
-        for (; iter2 != phases_.end(); ++iter2)
+        for (++iter2; iter2 != phases_.cend(); ++iter2)
         {
             const phase& alpha2 = iter2();
 
-            sigmaTable::const_iterator sigma =
-                sigmas_.find(interfacePair(alpha1, alpha2));
+            auto sigma = sigmas_.cfind(interfacePair(alpha1, alpha2));
 
-            if (sigma == sigmas_.end())
+            if (!sigma.found())
             {
                 FatalErrorInFunction
                     << "Cannot find interface " << interfacePair(alpha1, alpha2)
@@ -289,7 +292,7 @@ Foam::multiphaseMixture::surfaceTensionForce() const
                     << exit(FatalError);
             }
 
-            stf += dimensionedScalar("sigma", dimSigma_, sigma())
+            stf += dimensionedScalar("sigma", dimSigma_, *sigma)
                *fvc::interpolate(K(alpha1, alpha2))*
                 (
                     fvc::interpolate(alpha2)*fvc::snGrad(alpha1)
@@ -354,9 +357,9 @@ void Foam::multiphaseMixture::solve()
 
 void Foam::multiphaseMixture::correct()
 {
-    forAllIter(PtrDictionary<phase>, phases_, iter)
+    for (phase& ph : phases_)
     {
-        iter().correct();
+        ph.correct();
     }
 }
 
@@ -431,11 +434,10 @@ void Foam::multiphaseMixture::correctContactAngle
                /mesh_.magSf().boundaryField()[patchi]
             );
 
-            alphaContactAngleFvPatchScalarField::thetaPropsTable::
-                const_iterator tp =
-                acap.thetaProps().find(interfacePair(alpha1, alpha2));
+            const auto tp =
+                acap.thetaProps().cfind(interfacePair(alpha1, alpha2));
 
-            if (tp == acap.thetaProps().end())
+            if (!tp.found())
             {
                 FatalErrorInFunction
                     << "Cannot find interface " << interfacePair(alpha1, alpha2)
@@ -444,12 +446,12 @@ void Foam::multiphaseMixture::correctContactAngle
                     << exit(FatalError);
             }
 
-            bool matched = (tp.key().first() == alpha1.name());
+            const bool matched = (tp.key().first() == alpha1.name());
 
             const scalar theta0 = degToRad(tp().theta0(matched));
             scalarField theta(boundary[patchi].size(), theta0);
 
-            scalar uTheta = tp().uTheta();
+            const scalar uTheta = tp().uTheta();
 
             // Calculate the dynamic contact angle if required
             if (uTheta > SMALL)
@@ -541,10 +543,9 @@ Foam::multiphaseMixture::nearInterface() const
         )
     );
 
-    forAllConstIter(PtrDictionary<phase>, phases_, iter)
+    for (const phase& ph : phases_)
     {
-        tnearInt.ref() =
-            max(tnearInt(), pos0(iter() - 0.01)*pos0(0.99 - iter()));
+        tnearInt.ref() = max(tnearInt(), pos0(ph - 0.01)*pos0(0.99 - ph));
     }
 
     return tnearInt;
@@ -556,11 +557,11 @@ void Foam::multiphaseMixture::solveAlphas
     const scalar cAlpha
 )
 {
-    static label nSolves=-1;
-    nSolves++;
+    static label nSolves(-1);
+    ++nSolves;
 
-    word alphaScheme("div(phi,alpha)");
-    word alpharScheme("div(phirb,alpha)");
+    const word alphaScheme("div(phi,alpha)");
+    const word alpharScheme("div(phirb,alpha)");
 
     surfaceScalarField phic(mag(phi_/mesh_.magSf()));
     phic = min(cAlpha*phic, max(phic));
@@ -568,10 +569,8 @@ void Foam::multiphaseMixture::solveAlphas
     PtrList<surfaceScalarField> alphaPhiCorrs(phases_.size());
     int phasei = 0;
 
-    forAllIter(PtrDictionary<phase>, phases_, iter)
+    for (phase& alpha : phases_)
     {
-        phase& alpha = iter();
-
         alphaPhiCorrs.set
         (
             phasei,
@@ -589,10 +588,8 @@ void Foam::multiphaseMixture::solveAlphas
 
         surfaceScalarField& alphaPhiCorr = alphaPhiCorrs[phasei];
 
-        forAllIter(PtrDictionary<phase>, phases_, iter2)
+        for (phase& alpha2 : phases_)
         {
-            phase& alpha2 = iter2();
-
             if (&alpha2 == &alpha) continue;
 
             surfaceScalarField phir(phic*nHatf(alpha, alpha2));
@@ -619,12 +616,12 @@ void Foam::multiphaseMixture::solveAlphas
             true
         );
 
-        phasei++;
+        ++phasei;
     }
 
     MULES::limitSum(alphaPhiCorrs);
 
-    rhoPhi_ = dimensionedScalar(dimensionSet(1, 0, -1, 0, 0), Zero);
+    rhoPhi_ = dimensionedScalar(dimMass/dimTime, Zero);
 
     volScalarField sumAlpha
     (
@@ -640,10 +637,8 @@ void Foam::multiphaseMixture::solveAlphas
 
     phasei = 0;
 
-    forAllIter(PtrDictionary<phase>, phases_, iter)
+    for (phase& alpha : phases_)
     {
-        phase& alpha = iter();
-
         surfaceScalarField& alphaPhi = alphaPhiCorrs[phasei];
         alphaPhi += upwind<scalar>(mesh_, phi_).flux(alpha);
 
@@ -666,7 +661,7 @@ void Foam::multiphaseMixture::solveAlphas
 
         sumAlpha += alpha;
 
-        phasei++;
+        ++phasei;
     }
 
     Info<< "Phase-sum volume fraction, min, max = "
@@ -677,9 +672,8 @@ void Foam::multiphaseMixture::solveAlphas
 
     // Correct the sum of the phase-fractions to avoid 'drift'
     volScalarField sumCorr(1.0 - sumAlpha);
-    forAllIter(PtrDictionary<phase>, phases_, iter)
+    for (phase& alpha : phases_)
     {
-        phase& alpha = iter();
         alpha += alpha*sumCorr;
     }
 
@@ -696,9 +690,9 @@ bool Foam::multiphaseMixture::read()
         PtrList<entry> phaseData(lookup("phases"));
         label phasei = 0;
 
-        forAllIter(PtrDictionary<phase>, phases_, iter)
+        for (phase& ph : phases_)
         {
-            readOK &= iter().read(phaseData[phasei++].dict());
+            readOK &= ph.read(phaseData[phasei++].dict());
         }
 
         readEntry("sigmas", sigmas_);

@@ -39,7 +39,7 @@ void Foam::phaseSystem::createSubModels
     >& models
 )
 {
-    forAllConstIter(dictTable, modelDicts, iter)
+    forAllConstIters(modelDicts, iter)
     {
         const phasePairKey& key = iter.key();
 
@@ -104,7 +104,7 @@ void Foam::phaseSystem::generatePairsAndSubModels
 
     autoPtr<modelType> noModel;
 
-    forAllConstIter(typename modelTypeTable, tempModels, iter)
+    forAllConstIters(tempModels, iter)
     {
         if (!iter().valid())
         {
@@ -167,18 +167,18 @@ void Foam::phaseSystem::generatePairsAndSubModels
         HashTable<autoPtr<modelType>, phasePairKey, phasePairKey::hash>
         modelTypeTable;
 
-    forAll(phaseModels_, phasei)
+    for (const phaseModel& phase : phaseModels_)
     {
         modelTypeTable tempModels;
         generatePairsAndSubModels
         (
-            IOobject::groupName(modelName, phaseModels_[phasei].name()),
+            IOobject::groupName(modelName, phase.name()),
             tempModels
         );
 
-        forAllConstIter(typename modelTypeTable, tempModels, tempModelIter)
+        forAllConstIters(tempModels, tempModelIter)
         {
-            const phasePairKey key(tempModelIter.key());
+            const phasePairKey& key = tempModelIter.key();
 
             if (!models.found(key))
             {
@@ -191,7 +191,7 @@ void Foam::phaseSystem::generatePairsAndSubModels
 
             models[tempModelIter.key()].insert
             (
-                phaseModels_[phasei].name(),
+                phase.name(),
                 *tempModelIter
             );
         }

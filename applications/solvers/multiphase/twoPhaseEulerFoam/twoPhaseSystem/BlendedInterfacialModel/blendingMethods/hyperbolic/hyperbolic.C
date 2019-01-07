@@ -54,23 +54,20 @@ Foam::blendingMethods::hyperbolic::hyperbolic
     blendingMethod(dict),
     transitionAlphaScale_("transitionAlphaScale", dimless, dict)
 {
-    forAllConstIter(wordList, phaseNames, iter)
+    for (const word& phaseName : phaseNames)
     {
-        const word name(IOobject::groupName("maxDispersedAlpha", *iter));
-
         maxDispersedAlpha_.insert
         (
-            *iter,
-            dimensionedScalar(name, dimless, dict)
+            phaseName,
+            dimensionedScalar
+            (
+                IOobject::groupName("maxDispersedAlpha", phaseName),
+                dimless,
+                dict
+            )
         );
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::blendingMethods::hyperbolic::~hyperbolic()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

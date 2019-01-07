@@ -59,7 +59,7 @@ class InterfaceCompositionModel
 {
 protected:
 
-    // Private data
+    // Protected Data
 
         //- Thermo
         const Thermo& thermo_;
@@ -71,7 +71,7 @@ protected:
         const dimensionedScalar Le_;
 
 
-    // Private member functions
+    // Protected Member Functions
 
         //- Get a reference to the local thermo for a pure mixture
         template<class ThermoType>
@@ -105,7 +105,7 @@ public:
 
 
     //- Destructor
-    ~InterfaceCompositionModel();
+    ~InterfaceCompositionModel() = default;
 
 
     // Member Functions

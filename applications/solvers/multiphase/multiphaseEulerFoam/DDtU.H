@@ -1,7 +1,5 @@
-forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+for (phaseModel& phase : fluid.phases())
 {
-    phaseModel& phase = iter();
-
     phase.DDtU() =
         fvc::ddt(phase.U())
       + fvc::div(phase.phi(), phase.U())

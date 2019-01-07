@@ -77,7 +77,7 @@ public:
 
 
     //- Destructor
-    ~linear();
+    ~linear() = default;
 
 
     // Member Functions

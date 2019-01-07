@@ -93,14 +93,6 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::InterfaceCompositionModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Thermo, class OtherThermo>
-Foam::InterfaceCompositionModel<Thermo, OtherThermo>::
-~InterfaceCompositionModel()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class Thermo, class OtherThermo>
@@ -153,7 +145,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::D
         )
     );
 
-    volScalarField& D(tmpD.ref());
+    volScalarField& D = tmpD.ref();
 
     forAll(p, celli)
     {
@@ -207,7 +199,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::L
         )
     );
 
-    volScalarField& L(tmpL.ref());
+    volScalarField& L = tmpL.ref();
 
     forAll(p, celli)
     {
@@ -229,18 +221,18 @@ void Foam::InterfaceCompositionModel<Thermo, OtherThermo>::addMDotL
     volScalarField& mDotLPrime
 ) const
 {
-    forAllConstIter(hashedWordList, this->speciesNames_, iter)
+    for (const word& speciesName : this->speciesNames_)
     {
         volScalarField rhoKDL
         (
             thermo_.rhoThermo::rho()
            *K
-           *D(*iter)
-           *L(*iter, Tf)
+           *D(speciesName)
+           *L(speciesName, Tf)
         );
 
-        mDotL += rhoKDL*dY(*iter, Tf);
-        mDotLPrime += rhoKDL*YfPrime(*iter, Tf);
+        mDotL += rhoKDL*dY(speciesName, Tf);
+        mDotLPrime += rhoKDL*YfPrime(speciesName, Tf);
     }
 }
 

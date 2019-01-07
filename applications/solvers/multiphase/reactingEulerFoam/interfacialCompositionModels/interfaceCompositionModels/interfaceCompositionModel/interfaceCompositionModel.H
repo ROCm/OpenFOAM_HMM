@@ -99,7 +99,7 @@ public:
 
 
     //- Destructor
-    virtual ~interfaceCompositionModel();
+    virtual ~interfaceCompositionModel() = default;
 
 
     // Selectors
@@ -120,7 +120,7 @@ public:
         const hashedWordList& species() const;
 
         //- Returns whether the species is transported by the model and
-        //  provides the name of the diffused species
+        //- provides the name of the diffused species
         bool transports
         (
             word& speciesName

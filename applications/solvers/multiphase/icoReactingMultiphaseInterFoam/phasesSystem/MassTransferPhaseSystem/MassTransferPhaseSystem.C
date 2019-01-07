@@ -44,7 +44,7 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::MassTransferPhaseSystem
 {
     this->generatePairsAndSubModels("massTransferModel", massTransferModels_);
 
-    forAllConstIter(massTransferModelTable, massTransferModels_, iterModel)
+    forAllConstIters(massTransferModels_, iterModel)
     {
         if (!dmdt_.found(iterModel()->pair()))
         {
@@ -184,22 +184,17 @@ Foam::MassTransferPhaseSystem<BasePhaseSystem>::heatTransfer
 
     fvScalarMatrix& eqn = tEqnPtr.ref();
 
-    forAllIter(phaseSystem::phaseModelTable,  this->phaseModels_, iteri)
+    forAllConstIters(this->phaseModels_, iteri)
     {
-        phaseModel& phasei = iteri()();
+        const phaseModel& phasei = iteri()();
 
-        phaseSystem::phaseModelTable::iterator iterk = iteri;
-        iterk++;
-        for
-        (
-            ;
-            iterk != this->phaseModels_.end();
-            ++iterk
-        )
+        auto iterk = iteri;
+
+        for (++iterk; iterk != this->phaseModels_.end(); ++iterk)
         {
             if (iteri()().name() != iterk()().name())
             {
-                phaseModel& phasek = iterk()();
+                const phaseModel& phasek = iterk()();
 
                 // Phase i to phase k
                 const phasePairKey keyik(phasei.name(), phasek.name(), true);
@@ -290,7 +285,7 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::massSpeciesTransfer
 )
 {
     // Fill the volumetric mass transfer for species
-    forAllIter(massTransferModelTable, massTransferModels_, iter)
+    forAllConstIters(massTransferModels_, iter)
     {
         if (iter()->transferSpecie() == speciesName)
         {

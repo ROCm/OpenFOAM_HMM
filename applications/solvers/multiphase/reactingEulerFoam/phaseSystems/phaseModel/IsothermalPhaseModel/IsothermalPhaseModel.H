@@ -66,7 +66,7 @@ public:
 
 
     //- Destructor
-    virtual ~IsothermalPhaseModel();
+    virtual ~IsothermalPhaseModel() = default;
 
 
     // Member Functions

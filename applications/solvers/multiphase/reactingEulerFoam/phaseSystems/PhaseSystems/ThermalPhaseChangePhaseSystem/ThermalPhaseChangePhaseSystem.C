@@ -211,7 +211,7 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::massTransfer() const
         const phaseModel& phase = pair.phase1();
         const phaseModel& otherPhase = pair.phase2();
 
-        const word name
+        const word thisName
         (
             IOobject::groupName(volatile_, phase.name())
         );
@@ -225,7 +225,7 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::massTransfer() const
         const volScalarField dmdt12(posPart(dmdt));
         const volScalarField dmdt21(negPart(dmdt));
 
-        *eqns[name] += fvm::Sp(dmdt21, eqns[name]->psi()) - dmdt21;
+        *eqns[thisName] += fvm::Sp(dmdt21, eqns[thisName]->psi()) - dmdt21;
         *eqns[otherName] += dmdt12 - fvm::Sp(dmdt12, eqns[otherName]->psi());
     }
 
@@ -485,16 +485,10 @@ bool Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::read()
 {
     if (BasePhaseSystem::read())
     {
-        bool readOK = true;
-
-        // Models ...
-
-        return readOK;
+        return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

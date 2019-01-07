@@ -57,13 +57,6 @@ Foam::interfaceCompositionModels::Henry<Thermo, OtherThermo>::Henry
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Thermo, class OtherThermo>
-Foam::interfaceCompositionModels::Henry<Thermo, OtherThermo>::~Henry()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class Thermo, class OtherThermo>
@@ -74,9 +67,9 @@ void Foam::interfaceCompositionModels::Henry<Thermo, OtherThermo>::update
 {
     YSolvent_ = scalar(1);
 
-    forAllConstIter(hashedWordList, this->speciesNames_, iter)
+    for (const word& speciesName : this->speciesNames_)
     {
-        YSolvent_ -= Yf(*iter, Tf);
+        YSolvent_ -= Yf(speciesName, Tf);
     }
 }
 

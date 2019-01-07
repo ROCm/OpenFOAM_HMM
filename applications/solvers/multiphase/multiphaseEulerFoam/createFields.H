@@ -42,9 +42,8 @@ surfaceScalarField phi
 
 multiphaseSystem fluid(U, phi);
 
-forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+for (const phaseModel& phase : fluid.phases())
 {
-    phaseModel& phase = iter();
     const volScalarField& alpha = phase;
 
     U += alpha*phase.U();

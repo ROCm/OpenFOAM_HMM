@@ -39,7 +39,7 @@
             ).ptr()
         );
 
-        phasei++;
+        ++phasei;
     }
 
     // Cache p_rgh prior to solve for density update
@@ -73,7 +73,7 @@
                 p_rghEqnComp.ref() += hmm;
             }
 
-            phasei++;
+            ++phasei;
         }
 
         solve
@@ -86,18 +86,13 @@
         if (pimple.finalNonOrthogonalIter())
         {
             phasei = 0;
-            forAllIter
-            (
-                PtrDictionary<phaseModel>,
-                mixture.phases(),
-                phase
-            )
+            for (phaseModel& phase : mixture.phases())
             {
-                phase().dgdt() =
-                    pos0(phase())
-                  *(p_rghEqnComps[phasei] & p_rgh)/phase().thermo().rho();
+                phase.dgdt() =
+                    pos0(phase)
+                  *(p_rghEqnComps[phasei] & p_rgh)/phase.thermo().rho();
 
-                phasei++;
+                ++phasei;
             }
 
             phi = phiHbyA + p_rghEqnIncomp.flux();

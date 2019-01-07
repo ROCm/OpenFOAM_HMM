@@ -54,23 +54,20 @@ Foam::blendingMethods::hyperbolic::hyperbolic
     blendingMethod(dict),
     transitionAlphaScale_("transitionAlphaScale", dimless, dict)
 {
-    forAllConstIter(wordList, phaseNames, iter)
+    for (const word& phaseName : phaseNames)
     {
-        const word name(IOobject::groupName("minContinuousAlpha", *iter));
-
         minContinuousAlpha_.insert
         (
-            *iter,
-            dimensionedScalar(name, dimless, dict)
+            phaseName,
+            dimensionedScalar
+            (
+                IOobject::groupName("minContinuousAlpha", phaseName),
+                dimless,
+                dict
+            )
         );
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::blendingMethods::hyperbolic::~hyperbolic()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

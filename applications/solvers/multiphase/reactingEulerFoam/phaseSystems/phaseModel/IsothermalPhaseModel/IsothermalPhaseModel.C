@@ -40,13 +40,6 @@ Foam::IsothermalPhaseModel<BasePhaseModel>::IsothermalPhaseModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class BasePhaseModel>
-Foam::IsothermalPhaseModel<BasePhaseModel>::~IsothermalPhaseModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class BasePhaseModel>

@@ -97,17 +97,13 @@ massTransfer() const
     }
 
     // Sum up the contribution from each interface composition model
-    forAllConstIters
-    (
-        interfaceCompositionModels_,
-        interfaceCompositionModelIter
-    )
+    forAllConstIters(interfaceCompositionModels_, modelIter)
     {
         const phasePair& pair =
-            *(this->phasePairs_[interfaceCompositionModelIter.key()]);
+            *(this->phasePairs_[modelIter.key()]);
 
         const interfaceCompositionModel& compositionModel =
-            *(interfaceCompositionModelIter.object());
+            *(modelIter.object());
 
         const phaseModel& phase = pair.phase1();
         const phaseModel& otherPhase = pair.phase2();
@@ -288,16 +284,10 @@ bool Foam::InterfaceCompositionPhaseChangePhaseSystem<BasePhaseSystem>::read()
 {
     if (BasePhaseSystem::read())
     {
-        bool readOK = true;
-
-        // Models ...
-
-        return readOK;
+        return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

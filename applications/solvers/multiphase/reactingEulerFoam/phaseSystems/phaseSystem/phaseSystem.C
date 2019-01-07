@@ -55,7 +55,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::phaseSystem::calcPhi
         )
     );
 
-    for (label phasei=1; phasei<phaseModels.size(); phasei++)
+    for (label phasei=1; phasei<phaseModels.size(); ++phasei)
     {
         tmpPhi.ref() +=
             fvc::interpolate(phaseModels[phasei])*phaseModels[phasei].phi();
@@ -70,7 +70,7 @@ void Foam::phaseSystem::generatePairs
     const dictTable& modelDicts
 )
 {
-    forAllConstIter(dictTable, modelDicts, iter)
+    forAllConstIters(modelDicts, iter)
     {
         const phasePairKey& key = iter.key();
 
@@ -188,14 +188,16 @@ Foam::phaseSystem::~phaseSystem()
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::rho() const
 {
+    auto phasei = phaseModels_.cbegin();
+
     tmp<volScalarField> tmpRho
     (
-        phaseModels_[0]*phaseModels_[0].rho()
+        phasei() * phasei().rho()
     );
 
-    for (label phasei=1; phasei<phaseModels_.size(); phasei++)
+    for (++phasei; phasei != phaseModels_.cend(); ++phasei)
     {
-        tmpRho.ref() += phaseModels_[phasei]*phaseModels_[phasei].rho();
+        tmpRho.ref() += phasei() * phasei().rho();
     }
 
     return tmpRho;
@@ -204,14 +206,16 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::rho() const
 
 Foam::tmp<Foam::volVectorField> Foam::phaseSystem::U() const
 {
+    auto phasei = phaseModels_.cbegin();
+
     tmp<volVectorField> tmpU
     (
-        phaseModels_[0]*phaseModels_[0].U()
+        phasei() * phasei().U()
     );
 
-    for (label phasei=1; phasei<phaseModels_.size(); phasei++)
+    for (++phasei; phasei != phaseModels_.cend(); ++phasei)
     {
-        tmpU.ref() += phaseModels_[phasei]*phaseModels_[phasei].U();
+        tmpU.ref() += phasei() * phasei().U();
     }
 
     return tmpU;
@@ -274,9 +278,9 @@ void Foam::phaseSystem::solve()
 
 void Foam::phaseSystem::correct()
 {
-    forAll(phaseModels_, phasei)
+    for (phaseModel& phase : phaseModels_)
     {
-        phaseModels_[phasei].correct();
+        phase.correct();
     }
 }
 
@@ -285,44 +289,44 @@ void Foam::phaseSystem::correctKinematics()
 {
     bool updateDpdt = false;
 
-    forAll(phaseModels_, phasei)
+    for (phaseModel& phase : phaseModels_)
     {
-        phaseModels_[phasei].correctKinematics();
+        phase.correctKinematics();
 
-        updateDpdt = updateDpdt || phaseModels_[phasei].thermo().dpdt();
+        updateDpdt = updateDpdt || phase.thermo().dpdt();
     }
 
     // Update the pressure time-derivative if required
     if (updateDpdt)
     {
-        dpdt_ = fvc::ddt(phaseModels_.begin()().thermo().p());
+        dpdt_ = fvc::ddt(phaseModels_.cbegin()().thermo().p());
     }
 }
 
 
 void Foam::phaseSystem::correctThermo()
 {
-    forAll(phaseModels_, phasei)
+    for (phaseModel& phase : phaseModels_)
     {
-        phaseModels_[phasei].correctThermo();
+        phase.correctThermo();
     }
 }
 
 
 void Foam::phaseSystem::correctTurbulence()
 {
-    forAll(phaseModels_, phasei)
+    for (phaseModel& phase : phaseModels_)
     {
-        phaseModels_[phasei].correctTurbulence();
+        phase.correctTurbulence();
     }
 }
 
 
 void Foam::phaseSystem::correctEnergyTransport()
 {
-    forAll(phaseModels_, phasei)
+    for (phaseModel& phase : phaseModels_)
     {
-        phaseModels_[phasei].correctEnergyTransport();
+        phase.correctEnergyTransport();
     }
 }
 
@@ -333,19 +337,17 @@ bool Foam::phaseSystem::read()
     {
         bool readOK = true;
 
-        forAll(phaseModels_, phasei)
+        for (phaseModel& phase : phaseModels_)
         {
-            readOK &= phaseModels_[phasei].read();
+            readOK &= phase.read();
         }
 
         // models ...
 
         return readOK;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -94,7 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~twoPhaseMixtureEThermo();
+    virtual ~twoPhaseMixtureEThermo() = default;
 
 
     // Member Functions
@@ -162,14 +162,14 @@ public:
         //- i.e. rho != f(p)
         bool incompressible() const
         {
-            return (true);
+            return true;
         }
 
         //- Return true if the equation of state is isochoric
         //- i.e. rho = const
         bool isochoric() const
         {
-            return (false);
+            return false;
         }
 
         //- Return rho of the mixture

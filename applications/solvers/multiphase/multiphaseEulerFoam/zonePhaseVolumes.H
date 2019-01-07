@@ -5,14 +5,12 @@
     {
         const labelList& cellLabels = mesh.cellZones()[czi];
 
-        forAllConstIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+        for (const volScalarField& alpha : fluid.phases())
         {
-            const volScalarField& alpha = iter();
             scalar phaseVolume = 0;
 
-            forAll(cellLabels, cli)
+            for (const label celli : cellLabels)
             {
-                label celli = cellLabels[cli];
                 phaseVolume += alpha[celli]*V[celli];
             }
 

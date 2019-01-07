@@ -115,12 +115,6 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-Foam::twoPhaseMixtureEThermo::~twoPhaseMixtureEThermo()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::twoPhaseMixtureEThermo::correct()
@@ -182,7 +176,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::he
 
     forAll(T, i)
     {
-        label celli = cells[i];
+        const label celli = cells[i];
         he[i] =
             (
                 (T[i] - TSat_.value())

@@ -85,7 +85,7 @@ public:
 
 
     //- Destructor
-    virtual ~Henry();
+    virtual ~Henry() = default;
 
 
     // Member Functions

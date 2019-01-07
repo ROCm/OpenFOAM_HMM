@@ -229,12 +229,8 @@ bool Foam::phaseModel::read(const dictionary& phaseDict)
 
         return true;
     }
-    // else
-    // {
-    //     return false;
-    // }
 
-    return true;
+    // return false;
 }
 
 

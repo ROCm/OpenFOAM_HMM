@@ -58,29 +58,22 @@ Foam::interfaceCompositionModels::Raoult<Thermo, OtherThermo>::Raoult
         dimensionedScalar(dimless/dimTemperature, Zero)
     )
 {
-    forAllConstIter(hashedWordList, this->speciesNames_, iter)
+    for (const word& speciesName : this->speciesNames_)
     {
         speciesModels_.insert
         (
-            *iter,
+            speciesName,
             autoPtr<interfaceCompositionModel>
             (
                 interfaceCompositionModel::New
                 (
-                    dict.subDict(*iter),
+                    dict.subDict(speciesName),
                     pair
                 )
             )
         );
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Thermo, class OtherThermo>
-Foam::interfaceCompositionModels::Raoult<Thermo, OtherThermo>::~Raoult()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -93,12 +86,7 @@ void Foam::interfaceCompositionModels::Raoult<Thermo, OtherThermo>::update
 {
     YNonVapour_ = scalar(1);
 
-    forAllIter
-    (
-        HashTable<autoPtr<interfaceCompositionModel>>,
-        speciesModels_,
-        iter
-    )
+    forAllIters(speciesModels_, iter)
     {
         iter()->update(Tf);
 

@@ -140,11 +140,11 @@ public:
     // Constructors
 
         //- Construct from fvMesh
-        multiphaseSystem(const fvMesh&);
+        multiphaseSystem(const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~multiphaseSystem();
+    virtual ~multiphaseSystem() = default;
 
 
     // Selectors

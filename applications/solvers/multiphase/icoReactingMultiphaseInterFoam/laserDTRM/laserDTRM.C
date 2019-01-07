@@ -133,7 +133,7 @@ void Foam::radiation::laserDTRM::initialiseReflection()
     {
         dictTable modelDicts(lookup("reflectionModel"));
 
-        forAllConstIter(dictTable, modelDicts, iter)
+        forAllConstIters(modelDicts, iter)
         {
             const phasePairKey& key = iter.key();
 
@@ -142,7 +142,7 @@ void Foam::radiation::laserDTRM::initialiseReflection()
                 key,
                 reflectionModel::New
                 (
-                    *iter,
+                    iter.object(),
                     mesh_
                 )
             );
@@ -612,20 +612,23 @@ void Foam::radiation::laserDTRM::calculate()
         reflectionUPtr.resize(reflections_.size());
 
         label reflectionModelId(0);
-        forAllIter(reflectionModelTable, reflections_, iter1)
+        forAllIters(reflections_, iter1)
         {
             reflectionModel& model = iter1()();
 
             reflectionUPtr.set(reflectionModelId, &model);
 
-            const word alpha1Name = "alpha." + iter1.key().first();
-            const word alpha2Name = "alpha." + iter1.key().second();
-
             const volScalarField& alphaFrom =
-                mesh_.lookupObject<volScalarField>(alpha1Name);
+                mesh_.lookupObject<volScalarField>
+                (
+                    IOobject::groupName("alpha", iter1.key().first())
+                );
 
             const volScalarField& alphaTo =
-                mesh_.lookupObject<volScalarField>(alpha2Name);
+                mesh_.lookupObject<volScalarField>
+                (
+                    IOobject::groupName("alpha", iter1.key().second())
+                );
 
             const volVectorField nHatPhase(nHatfv(alphaFrom, alphaTo));
 
@@ -700,9 +703,8 @@ void Foam::radiation::laserDTRM::calculate()
         DynamicList<point>  positionsMyProc;
         DynamicList<point>  p0MyProc;
 
-        forAllIter(Cloud<DTRMParticle>, DTRMCloud_, iter)
+        for (const DTRMParticle& p : DTRMCloud_)
         {
-            DTRMParticle& p = iter();
             positionsMyProc.append(p.position());
             p0MyProc.append(p.p0());
         }

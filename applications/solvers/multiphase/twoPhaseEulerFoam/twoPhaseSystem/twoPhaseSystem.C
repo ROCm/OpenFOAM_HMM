@@ -561,10 +561,8 @@ bool Foam::twoPhaseSystem::read()
 
         return readOK;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

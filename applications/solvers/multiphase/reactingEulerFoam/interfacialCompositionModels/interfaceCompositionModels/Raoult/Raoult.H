@@ -86,7 +86,7 @@ public:
 
 
     //- Destructor
-    virtual ~Raoult();
+    virtual ~Raoult() = default;
 
 
     // Member Functions

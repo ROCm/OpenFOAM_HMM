@@ -49,12 +49,6 @@ Foam::interfaceCompositionModel::interfaceCompositionModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::interfaceCompositionModel::~interfaceCompositionModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::hashedWordList& Foam::interfaceCompositionModel::species() const

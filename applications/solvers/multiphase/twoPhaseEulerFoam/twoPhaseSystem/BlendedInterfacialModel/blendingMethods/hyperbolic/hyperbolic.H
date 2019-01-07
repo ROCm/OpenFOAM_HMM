@@ -77,7 +77,7 @@ public:
 
 
     //- Destructor
-    ~hyperbolic();
+    ~hyperbolic() = default;
 
 
     // Member Functions

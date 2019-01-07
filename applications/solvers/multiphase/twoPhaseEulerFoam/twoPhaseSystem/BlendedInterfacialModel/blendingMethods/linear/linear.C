@@ -53,50 +53,44 @@ Foam::blendingMethods::linear::linear
 :
     blendingMethod(dict)
 {
-    forAllConstIter(wordList, phaseNames, iter)
+    for (const word& phaseName : phaseNames)
     {
-        const word nameFull
-        (
-            IOobject::groupName("maxFullyDispersedAlpha", *iter)
-        );
-
         maxFullyDispersedAlpha_.insert
         (
-            *iter,
-            dimensionedScalar(nameFull, dimless, dict)
-        );
-
-        const word namePart
-        (
-            IOobject::groupName("maxPartlyDispersedAlpha", *iter)
+            phaseName,
+            dimensionedScalar
+            (
+                IOobject::groupName("maxFullyDispersedAlpha", phaseName),
+                dimless,
+                dict
+            )
         );
 
         maxPartlyDispersedAlpha_.insert
         (
-            *iter,
-            dimensionedScalar(namePart, dimless, dict)
+            phaseName,
+            dimensionedScalar
+            (
+                IOobject::groupName("maxPartlyDispersedAlpha", phaseName),
+                dimless,
+                dict
+            )
         );
 
         if
         (
-            maxFullyDispersedAlpha_[*iter]
-          > maxPartlyDispersedAlpha_[*iter]
+            maxFullyDispersedAlpha_[phaseName]
+          > maxPartlyDispersedAlpha_[phaseName]
         )
         {
             FatalErrorInFunction
                 << "The supplied fully dispersed volume fraction for "
-                << *iter
+                << phaseName
                 << " is greater than the partly dispersed value."
                 << endl << exit(FatalError);
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::blendingMethods::linear::~linear()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

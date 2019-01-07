@@ -3,14 +3,13 @@
 PtrList<fvVectorMatrix> UEqns(fluid.phases().size());
 autoPtr<multiphaseSystem::dragCoeffFields> dragCoeffs(fluid.dragCoeffs());
 
-int phasei = 0;
-forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+label phasei = 0;
+for (phaseModel& phase : fluid.phases())
 {
-    phaseModel& phase = iter();
     const volScalarField& alpha = phase;
     volVectorField& U = phase.U();
 
-    volScalarField nuEff(turbulence->nut() + iter().nu());
+    volScalarField nuEff(turbulence->nut() + phase.nu());
 
     UEqns.set
     (
@@ -58,5 +57,5 @@ forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
     );
     //UEqns[phasei].relax();
 
-    phasei++;
+    ++phasei;
 }

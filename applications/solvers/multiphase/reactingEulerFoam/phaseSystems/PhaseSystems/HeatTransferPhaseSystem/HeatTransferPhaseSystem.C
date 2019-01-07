@@ -164,16 +164,10 @@ bool Foam::HeatTransferPhaseSystem<BasePhaseSystem>::read()
 {
     if (BasePhaseSystem::read())
     {
-        bool readOK = true;
-
-        // Models ...
-
-        return readOK;
+        return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

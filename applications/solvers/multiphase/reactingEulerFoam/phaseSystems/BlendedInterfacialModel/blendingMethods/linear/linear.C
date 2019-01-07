@@ -53,50 +53,44 @@ Foam::blendingMethods::linear::linear
 :
     blendingMethod(dict)
 {
-    forAllConstIter(wordList, phaseNames, iter)
+    for (const word& phaseName : phaseNames)
     {
-        const word nameFull
-        (
-            IOobject::groupName("minFullyContinuousAlpha", *iter)
-        );
-
         minFullyContinuousAlpha_.insert
         (
-            *iter,
-            dimensionedScalar(nameFull, dimless, dict)
-        );
-
-        const word namePart
-        (
-            IOobject::groupName("minPartlyContinuousAlpha", *iter)
+            phaseName,
+            dimensionedScalar
+            (
+                IOobject::groupName("minFullyContinuousAlpha", phaseName),
+                dimless,
+                dict
+            )
         );
 
         minPartlyContinuousAlpha_.insert
         (
-            *iter,
-            dimensionedScalar(namePart, dimless, dict)
+            phaseName,
+            dimensionedScalar
+            (
+                IOobject::groupName("minPartlyContinuousAlpha", phaseName),
+                dimless,
+                dict
+            )
         );
 
         if
         (
-            minFullyContinuousAlpha_[*iter]
-          < minPartlyContinuousAlpha_[*iter]
+            minFullyContinuousAlpha_[phaseName]
+          < minPartlyContinuousAlpha_[phaseName]
         )
         {
             FatalErrorInFunction
                 << "The supplied fully continuous volume fraction for "
-                << *iter
+                << phaseName
                 << " is less than the partly continuous value."
                 << endl << exit(FatalError);
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::blendingMethods::linear::~linear()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
