@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017-2018 OpenFOAM Foundation
@@ -254,14 +254,9 @@ Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
 
         // Check for approximately same time. E.g. if time = 1e-2 and
         // directory is 0.01 (due to different time formats)
-        HashPtrTable<instantList>::const_iterator pathFnd
-        (
-            times_.find
-            (
-                io.time().path()
-            )
-        );
-        if (search && (pathFnd != times_.end()))
+        const auto pathFnd = times_.cfind(io.time().path());
+
+        if (search && pathFnd.found())
         {
             newInstancePath = findInstancePath
             (
@@ -2307,8 +2302,8 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
     const word& constantName
 ) const
 {
-    HashPtrTable<instantList>::const_iterator iter = times_.find(directory);
-    if (iter != times_.end())
+    const auto iter = times_.cfind(directory);
+    if (iter.found())
     {
         if (debug)
         {
@@ -2358,8 +2353,8 @@ void Foam::fileOperations::masterUncollatedFileOperation::setTime
         return;
     }
 
-    HashPtrTable<instantList>::const_iterator iter = times_.find(tm.path());
-    if (iter != times_.end())
+    const auto iter = times_.cfind(tm.path());
+    if (iter.found())
     {
         instantList& times = *iter();
 

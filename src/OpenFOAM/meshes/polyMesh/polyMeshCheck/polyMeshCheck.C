@@ -382,7 +382,7 @@ bool Foam::polyMesh::checkEdgeAlignment
         if (setPtr)
         {
             setPtr->resize(2*edgesInError.size());
-            forAllConstIter(EdgeMap<label>, edgesInError, iter)
+            forAllConstIters(edgesInError, iter)
             {
                 setPtr->insert(iter.key()[0]);
                 setPtr->insert(iter.key()[1]);

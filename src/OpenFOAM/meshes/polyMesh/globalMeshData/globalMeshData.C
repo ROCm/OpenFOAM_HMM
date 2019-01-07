@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -89,10 +89,8 @@ void Foam::globalMeshData::initProcAddr()
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
         // Send indices of my processor patches to my neighbours
-        forAll(processorPatches_, i)
+        for (const label patchi : processorPatches_)
         {
-            label patchi = processorPatches_[i];
-
             UOPstream toNeighbour
             (
                 refCast<const processorPolyPatch>
@@ -107,10 +105,8 @@ void Foam::globalMeshData::initProcAddr()
 
         pBufs.finishedSends();
 
-        forAll(processorPatches_, i)
+        for (const label patchi : processorPatches_)
         {
-            label patchi = processorPatches_[i];
-
             UIPstream fromNeighbour
             (
                 refCast<const processorPolyPatch>
@@ -254,13 +250,22 @@ void Foam::globalMeshData::countSharedEdges
 )
 {
     // Count occurrences of procSharedEdges in global shared edges table.
-    forAllConstIter(EdgeMap<labelList>, procSharedEdges, iter)
+    forAllConstIters(procSharedEdges, iter)
     {
         const edge& e = iter.key();
 
-        EdgeMap<label>::iterator globalFnd = globalShared.find(e);
+        auto globalFnd = globalShared.find(e);
 
-        if (globalFnd == globalShared.end())
+        if (globalFnd.found())
+        {
+            if (globalFnd() == -1)
+            {
+                // Second time occurence of this edge.
+                // Assign proper edge label.
+                globalFnd() = sharedEdgeI++;
+            }
+        }
+        else
         {
             // First time occurrence of this edge. Check how many we are adding.
             if (iter().size() == 1)
@@ -273,15 +278,6 @@ void Foam::globalMeshData::countSharedEdges
                 // Edge used more than once (even by local shared edges alone)
                 // so allocate proper shared edge label.
                 globalShared.insert(e, sharedEdgeI++);
-            }
-        }
-        else
-        {
-            if (globalFnd() == -1)
-            {
-                // Second time occurence of this edge. Assign proper
-                // edge label.
-                globalFnd() = sharedEdgeI++;
             }
         }
     }
@@ -329,13 +325,13 @@ void Foam::globalMeshData::calcSharedEdges() const
     {
         const edge& e = edges[edgeI];
 
-        Map<label>::const_iterator e0Fnd = meshToShared.find(e[0]);
+        const auto e0Fnd = meshToShared.cfind(e[0]);
 
-        if (e0Fnd != meshToShared.end())
+        if (e0Fnd.found())
         {
-            Map<label>::const_iterator e1Fnd = meshToShared.find(e[1]);
+            const auto e1Fnd = meshToShared.cfind(e[1]);
 
-            if (e1Fnd != meshToShared.end())
+            if (e1Fnd.found())
             {
                 // Found edge which uses shared points. Probably shared.
 
@@ -347,10 +343,9 @@ void Foam::globalMeshData::calcSharedEdges() const
                     sharedPtAddr[e1Fnd()]
                 );
 
-                EdgeMap<labelList>::iterator iter =
-                    localShared.find(sharedEdge);
+                auto iter = localShared.find(sharedEdge);
 
-                if (iter == localShared.end())
+                if (!iter.found())
                 {
                     // First occurrence of this point combination. Store.
                     localShared.insert(sharedEdge, labelList(1, edgeI));
@@ -360,7 +355,7 @@ void Foam::globalMeshData::calcSharedEdges() const
                     // Add this edge to list of edge labels.
                     labelList& edgeLabels = iter();
 
-                    label sz = edgeLabels.size();
+                    const label sz = edgeLabels.size();
                     edgeLabels.setSize(sz+1);
                     edgeLabels[sz] = edgeI;
                 }
@@ -425,7 +420,7 @@ void Foam::globalMeshData::calcSharedEdges() const
 
             globalShared.clear();
 
-            forAllConstIter(EdgeMap<label>, oldSharedEdges, iter)
+            forAllConstIters(oldSharedEdges, iter)
             {
                 if (iter() != -1)
                 {
@@ -487,22 +482,22 @@ void Foam::globalMeshData::calcSharedEdges() const
     DynamicList<label> dynSharedEdgeLabels(globalShared.size());
     DynamicList<label> dynSharedEdgeAddr(globalShared.size());
 
-    forAllConstIter(EdgeMap<labelList>, localShared, iter)
+    forAllConstIters(localShared, iter)
     {
         const edge& e = iter.key();
 
-        EdgeMap<label>::const_iterator edgeFnd = globalShared.find(e);
+        const auto edgeFnd = globalShared.cfind(e);
 
-        if (edgeFnd != globalShared.end())
+        if (edgeFnd.found())
         {
             // My local edge is indeed a shared one. Go through all local edge
             // labels with this point combination.
             const labelList& edgeLabels = iter();
 
-            forAll(edgeLabels, i)
+            for (const label edgei : edgeLabels)
             {
                 // Store label of local mesh edge
-                dynSharedEdgeLabels.append(edgeLabels[i]);
+                dynSharedEdgeLabels.append(edgei);
 
                 // Store label of shared edge
                 dynSharedEdgeAddr.append(edgeFnd());
@@ -1238,25 +1233,18 @@ void Foam::globalMeshData::calcPointBoundaryFaces
 
     labelList nPointFaces(coupledPatch().nPoints(), Zero);
 
-    forAll(bMesh, patchi)
+    for (const polyPatch& pp : bMesh)
     {
-        const polyPatch& pp = bMesh[patchi];
-
         if (!pp.coupled())
         {
-            forAll(pp, i)
+            for (const face& f : pp)
             {
-                const face& f = pp[i];
-
                 forAll(f, fp)
                 {
-                    Map<label>::const_iterator iter = meshPointMap.find
-                    (
-                        f[fp]
-                    );
-                    if (iter != meshPointMap.end())
+                    const auto iter = meshPointMap.cfind(f[fp]);
+                    if (iter.found())
                     {
-                        nPointFaces[iter()]++;
+                        nPointFaces[iter.val()]++;
                     }
                 }
             }
@@ -1287,11 +1275,9 @@ void Foam::globalMeshData::calcPointBoundaryFaces
                 const face& f = pp[i];
                 forAll(f, fp)
                 {
-                    Map<label>::const_iterator iter = meshPointMap.find
-                    (
-                        f[fp]
-                    );
-                    if (iter != meshPointMap.end())
+                    const auto iter = meshPointMap.cfind(f[fp]);
+
+                    if (iter.found())
                     {
                         label bFacei =
                              pp.start() + i - mesh_.nInternalFaces();
@@ -1525,10 +1511,10 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
 
         forAll(pCells, i)
         {
-            label celli = pCells[i];
-            Map<label>::iterator fnd = meshCellMap.find(celli);
+            const label celli = pCells[i];
+            const auto fnd = meshCellMap.cfind(celli);
 
-            if (fnd != meshCellMap.end())
+            if (fnd.found())
             {
                 bCells[i] = fnd();
             }
@@ -2568,9 +2554,9 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     {
         label meshPointi = meshPoints[patchPointi];
 
-        Map<label>::const_iterator iter = cpp.meshPointMap().find(meshPointi);
+        const auto iter = cpp.meshPointMap().cfind(meshPointi);
 
-        if (iter != cpp.meshPointMap().end())
+        if (iter.found())
         {
             patchToCoupled[patchPointi] = iter();
             coupledToGlobalPatch[iter()] = globalPPoints.toGlobal(patchPointi);

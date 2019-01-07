@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -50,7 +50,7 @@ void Foam::xmgrGraph::write(const graph& g, Ostream& os) const
 
     label fieldi = 0;
 
-    forAllConstIter(graph, g, iter)
+    forAllConstIters(g, iter)
     {
         os  << "@s" << fieldi << " legend "
             << iter()->name() << nl

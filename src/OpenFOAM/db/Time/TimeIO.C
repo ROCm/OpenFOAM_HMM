@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -290,7 +290,7 @@ void Foam::Time::readDict()
 
         IStringStream dummyIs("");
 
-        forAllConstIter(simpleObjectRegistry, objs, iter)
+        forAllConstIters(objs, iter)
         {
             const List<simpleRegIOobject*>& objects = *iter;
 

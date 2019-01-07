@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -51,7 +51,7 @@ inline void mapClouds(const objectRegistry& db, const mapPolyMesh& mapper)
 {
     HashTable<const cloud*> clouds(db.lookupClass<cloud>());
 
-    forAllIter(HashTable<const cloud*>, clouds, iter)
+    forAllIters(clouds, iter)
     {
         cloud& c = const_cast<cloud&>(*iter());
 

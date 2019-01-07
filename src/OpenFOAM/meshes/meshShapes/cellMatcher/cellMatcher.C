@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -55,16 +55,14 @@ Foam::cellMatcher::cellMatcher
     cellModelName_(cellModelName),
     cellModelPtr_(nullptr)
 {
-    forAll(localFaces_, facei)
+    for (face& f : localFaces_)
     {
-        face& f = localFaces_[facei];
-
         f.setSize(maxVertPerFace);
     }
 
-    forAll(pointFaceIndex_, verti)
+    for (labelList& faceIndices : pointFaceIndex_)
     {
-        pointFaceIndex_[verti].setSize(facePerCell);
+        faceIndices.setSize(facePerCell);
     }
 }
 
@@ -94,10 +92,15 @@ Foam::label Foam::cellMatcher::calcLocalFaces
 
         forAll(f, localVertI)
         {
-            label vertI = f[localVertI];
+            const label vertI = f[localVertI];
 
-            Map<label>::iterator iter = localPoint_.find(vertI);
-            if (iter == localPoint_.end())
+            const auto iter = localPoint_.cfind(vertI);
+            if (iter.found())
+            {
+                // Reuse local vertex number.
+                localFace[localVertI] = iter.val();
+            }
+            else
             {
                 // Not found. Assign local vertex number.
 
@@ -111,11 +114,6 @@ Foam::label Foam::cellMatcher::calcLocalFaces
                 localPoint_.insert(vertI, newVertI);
                 newVertI++;
             }
-            else
-            {
-                // Reuse local vertex number.
-                localFace[localVertI] = *iter;
-            }
         }
 
         // Create face from localvertex labels
@@ -123,10 +121,9 @@ Foam::label Foam::cellMatcher::calcLocalFaces
     }
 
     // Create local to global vertex mapping
-    forAllConstIter(Map<label>, localPoint_, iter)
+    forAllConstIters(localPoint_, iter)
     {
-        const label fp = iter();
-        pointMap_[fp] = iter.key();
+        pointMap_[iter.val()] = iter.key();
     }
 
     ////debug
@@ -188,10 +185,8 @@ void Foam::cellMatcher::calcEdgeAddressing(const label numVert)
 void Foam::cellMatcher::calcPointFaceIndex()
 {
     // Fill pointFaceIndex_ with -1
-    forAll(pointFaceIndex_, i)
+    for (labelList& faceIndices : pointFaceIndex_)
     {
-        labelList& faceIndices = pointFaceIndex_[i];
-
         faceIndices = -1;
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -48,9 +48,8 @@ Foam::label Foam::globalPoints::countPatchPoints
 {
     label nTotPoints = 0;
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
         if (pp.coupled())
         {
             nTotPoints += pp.nPoints();
@@ -279,11 +278,11 @@ bool Foam::globalPoints::mergeInfo
     label infoChanged = false;
 
     // Get the index into the procPoints list.
-    Map<label>::iterator iter = meshToProcPoint_.find(localPointi);
+    const auto iter = meshToProcPoint_.cfind(localPointi);
 
-    if (iter != meshToProcPoint_.end())
+    if (iter.found())
     {
-        if (mergeInfo(nbrInfo, localPointi, procPoints_[iter()]))
+        if (mergeInfo(nbrInfo, localPointi, procPoints_[iter.val()]))
         {
             infoChanged = true;
         }
@@ -328,11 +327,11 @@ bool Foam::globalPoints::storeInitialInfo
     label infoChanged = false;
 
     // Get the index into the procPoints list.
-    Map<label>::iterator iter = meshToProcPoint_.find(localPointi);
+    const auto iter = meshToProcPoint_.find(localPointi);
 
-    if (iter != meshToProcPoint_.end())
+    if (iter.found())
     {
-        if (mergeInfo(nbrInfo, localPointi, procPoints_[iter()]))
+        if (mergeInfo(nbrInfo, localPointi, procPoints_[iter.val()]))
         {
             infoChanged = true;
         }
@@ -681,10 +680,9 @@ void Foam::globalPoints::receivePatchPoints
 
 
                     // Do we have information on pointA?
-                    Map<label>::iterator procPointA =
-                        meshToProcPoint_.find(localA);
+                    const auto procPointA = meshToProcPoint_.cfind(localA);
 
-                    if (procPointA != meshToProcPoint_.end())
+                    if (procPointA.found())
                     {
                         const labelPairList infoA = addSendTransform
                         (
@@ -699,10 +697,9 @@ void Foam::globalPoints::receivePatchPoints
                     }
 
                     // Same for info on pointB
-                    Map<label>::iterator procPointB =
-                        meshToProcPoint_.find(localB);
+                    const auto procPointB = meshToProcPoint_.cfind(localB);
 
-                    if (procPointB != meshToProcPoint_.end())
+                    if (procPointB.found())
                     {
                         const labelPairList infoB = addSendTransform
                         (
@@ -968,11 +965,11 @@ void Foam::globalPoints::calculateSharedPoints
 
 
     //Pout<< "**ALL** connected points:" << endl;
-    //forAllConstIter(Map<label>, meshToProcPoint_, iter)
+    //forAllConstIters(meshToProcPoint_, iter)
     //{
     //    label localI = iter.key();
-    //    const labelPairList& pointInfo = procPoints_[iter()];
-    //    Pout<< "pointi:" << localI << " index:" << iter()
+    //    const labelPairList& pointInfo = procPoints_[iter.val()];
+    //    Pout<< "pointi:" << localI << " index:" << iter.val()
     //        << " coord:"
     //        << mesh_.points()[localToMeshPoint(patchToMeshPoint, localI)]
     //        << endl;
@@ -992,9 +989,9 @@ void Foam::globalPoints::calculateSharedPoints
     // the master the first element on all processors.
     // Note: why not sort in decreasing order? Give more work to higher
     //       processors.
-    forAllConstIter(Map<label>, meshToProcPoint_, iter)
+    forAllConstIters(meshToProcPoint_, iter)
     {
-        labelPairList& pointInfo = procPoints_[iter()];
+        labelPairList& pointInfo = procPoints_[iter.val()];
         sort(pointInfo, globalIndexAndTransform::less(globalTransforms_));
     }
 
@@ -1005,9 +1002,10 @@ void Foam::globalPoints::calculateSharedPoints
 
     pointPoints_.setSize(globalIndices_.localSize());
     List<labelPairList> transformedPoints(globalIndices_.localSize());
-    forAllConstIter(Map<label>, meshToProcPoint_, iter)
+
+    forAllConstIters(meshToProcPoint_, iter)
     {
-        const labelPairList& pointInfo = procPoints_[iter()];
+        const labelPairList& pointInfo = procPoints_[iter.val()];
 
         if (pointInfo.size() >= 2)
         {

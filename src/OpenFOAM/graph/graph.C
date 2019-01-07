@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -197,7 +197,7 @@ void Foam::graph::setXRange(const scalar x0, const scalar x1)
     scalarField xNew(SubField<scalar>(x_, nX, i0));
     x_.transfer(xNew);
 
-    forAllIter(HashPtrTable<curve>, *this, iter)
+    forAllIters(*this, iter)
     {
         curve* c = iter();
         scalarField cNew(SubField<scalar>(*c, nX, i0));
@@ -254,7 +254,7 @@ void Foam::graph::writeTable(Ostream& os) const
     {
         os  << setw(10) << x_[xi];
 
-        forAllConstIter(graph, *this, iter)
+        forAllConstIters(*this, iter)
         {
             os  << token::SPACE << setw(10) << (*iter())[xi];
         }

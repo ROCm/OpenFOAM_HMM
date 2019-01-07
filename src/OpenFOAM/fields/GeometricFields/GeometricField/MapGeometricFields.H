@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -87,7 +87,7 @@ void MapGeometricFields
     // old-time-level field is mapped before the field itself, sizes
     // will not match.
 
-    forAllConstIter(typename HashTable<const FieldType*>, fields, fieldIter)
+    forAllConstIters(fields, fieldIter)
     {
         FieldType& field = const_cast<FieldType&>(*fieldIter());
 
@@ -99,7 +99,7 @@ void MapGeometricFields
         }
     }
 
-    forAllConstIter(typename HashTable<const FieldType*>, fields, fieldIter)
+    forAllConstIters(fields, fieldIter)
     {
         FieldType& field = const_cast<FieldType&>(*fieldIter());
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -1094,10 +1094,8 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
         // Build map from points on *this (A) to points on neighbourpatch (B)
         Map<label> aToB(2*pointCouples.size());
 
-        forAll(pointCouples, i)
+        for (const edge& e : pointCouples)
         {
-            const edge& e = pointCouples[i];
-
             aToB.insert(e[0], e[1]);
         }
 
@@ -1108,18 +1106,16 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
         {
             const labelList& fEdges = faceEdges()[patchFacei];
 
-            forAll(fEdges, i)
+            for (const label edgeI : fEdges)
             {
-                label edgeI = fEdges[i];
-
                 const edge& e = edges()[edgeI];
 
                 // Convert edge end points to corresponding points on B side.
-                Map<label>::const_iterator fnd0 = aToB.find(e[0]);
-                if (fnd0 != aToB.end())
+                const auto fnd0 = aToB.cfind(e[0]);
+                if (fnd0.found())
                 {
-                    Map<label>::const_iterator fnd1 = aToB.find(e[1]);
-                    if (fnd1 != aToB.end())
+                    const auto fnd1 = aToB.cfind(e[1]);
+                    if (fnd1.found())
                     {
                         edgeMap.insert(edge(fnd0(), fnd1()), edgeI);
                     }
@@ -1134,7 +1130,6 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
         const labelList& mp = meshPoints();
 
 
-
         coupledEdgesPtr_ = new edgeList(edgeMap.size());
         edgeList& coupledEdges = *coupledEdgesPtr_;
         label coupleI = 0;
@@ -1143,18 +1138,16 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
         {
             const labelList& fEdges = neighbPatch.faceEdges()[patchFacei];
 
-            forAll(fEdges, i)
+            for (const label edgeI : fEdges)
             {
-                label edgeI = fEdges[i];
-
                 const edge& e = neighbPatch.edges()[edgeI];
 
                 // Look up A edge from HashTable.
-                EdgeMap<label>::iterator iter = edgeMap.find(e);
+                auto iter = edgeMap.find(e);
 
-                if (iter != edgeMap.end())
+                if (iter.found())
                 {
-                    label edgeA = iter();
+                    const label edgeA = iter.val();
                     const edge& eA = edges()[edgeA];
 
                     // Store correspondence. Filter out edges on wedge axis.
@@ -1202,10 +1195,8 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
             Pout<< "Writing file " << str.name() << " with centres of "
                 << "coupled edges" << endl;
 
-            forAll(coupledEdges, i)
+            for (const edge& e : coupledEdges)
             {
-                const edge& e = coupledEdges[i];
-
                 const point& a = edges()[e[0]].centre(localPoints());
                 const point& b = neighbPatch.edges()[e[1]].centre
                 (

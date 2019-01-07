@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -104,7 +104,7 @@ Foam::procFacesGAMGProcAgglomeration::singleCellMesh
             // Add all the higher processors
             nbrs.clear();
             weights.clear();
-            forAllConstIter(Map<label>, neighbours, iter)
+            forAllConstIters(neighbours, iter)
             {
                 if (iter.key() > proci)
                 {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017-2018 OpenFOAM Foundation
@@ -261,7 +261,7 @@ void Foam::OFstreamCollator::waitForBufferSpace(const off_t wantedSize) const
 
         {
             std::lock_guard<std::mutex> guard(mutex_);
-            forAllConstIter(FIFOStack<writeData*>, objects_, iter)
+            forAllConstIters(objects_, iter)
             {
                 totalSize += iter()->size();
             }

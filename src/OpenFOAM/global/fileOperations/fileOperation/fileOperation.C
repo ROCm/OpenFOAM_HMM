@@ -258,12 +258,11 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
     {
         const fileName procPath(path/pDir);
 
-        HashTable<dirIndexList>::const_iterator iter =
-            procsDirs_.find(procPath);
+        const auto iter = procsDirs_.cfind(procPath);
 
-        if (iter != procsDirs_.end())
+        if (iter.found())
         {
-            return iter();
+            return iter.val();
         }
 
         // Read all directories to see any beginning with processor

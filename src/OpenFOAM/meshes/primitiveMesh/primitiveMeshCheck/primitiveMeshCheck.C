@@ -811,7 +811,7 @@ bool Foam::primitiveMesh::checkFaceFlatness
     }
 
 
-    if (nWarped> 0)
+    if (nWarped > 0)
     {
         if (debug || report)
         {
@@ -1352,7 +1352,7 @@ bool Foam::primitiveMesh::checkDuplicateFaces
 {
     bool error = false;
 
-    forAllConstIter(Map<label>, nCommonPoints, iter)
+    forAllConstIters(nCommonPoints, iter)
     {
         label nbFacei = iter.key();
         label nCommon = iter();
@@ -1392,7 +1392,7 @@ bool Foam::primitiveMesh::checkCommonOrder
 {
     bool error = false;
 
-    forAllConstIter(Map<label>, nCommonPoints, iter)
+    forAllConstIters(nCommonPoints, iter)
     {
         label nbFacei = iter.key();
         label nCommon = iter();
@@ -1583,18 +1583,7 @@ bool Foam::primitiveMesh::checkFaceFaces
                 if (facei < nbFacei)
                 {
                     // Only check once for each combination of two faces.
-
-                    Map<label>::iterator fnd = nCommonPoints.find(nbFacei);
-
-                    if (fnd == nCommonPoints.end())
-                    {
-                        // First common vertex found.
-                        nCommonPoints.insert(nbFacei, 1);
-                    }
-                    else
-                    {
-                        fnd()++;
-                    }
+                    ++(nCommonPoints(nbFacei, 0));
                 }
             }
         }
