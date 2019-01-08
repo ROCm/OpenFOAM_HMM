@@ -46,11 +46,6 @@ inline int Foam::Pair<T>::compare(const Pair<T>& a, const Pair<T>& b)
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::Pair<T>::Pair()
-{}
-
-
-template<class T>
 inline Foam::Pair<T>::Pair(const T& f, const T& s)
 {
     first()  = f;

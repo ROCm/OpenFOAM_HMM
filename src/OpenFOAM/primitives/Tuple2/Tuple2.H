@@ -57,7 +57,7 @@ inline Ostream& operator<<(Ostream& os, const Tuple2<Type1, Type2>& t2);
 
 
 /*---------------------------------------------------------------------------*\
-                           class Tuple2 Declaration
+                           Class Tuple2 Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type1, class Type2>
@@ -81,9 +81,8 @@ public:
 
     // Constructors
 
-        //- Null constructor for lists and hashes
-        inline Tuple2()
-        {}
+        //- Construct null
+        inline Tuple2() = default;
 
         //- Construct from components
         inline Tuple2(const Type1& f, const Type2& s)

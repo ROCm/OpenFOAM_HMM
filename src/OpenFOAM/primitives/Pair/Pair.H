@@ -61,8 +61,8 @@ public:
 
     // Constructors
 
-        //- Null constructor
-        inline Pair();
+        //- Construct null
+        Pair() = default;
 
         //- Construct from components
         inline Pair(const T& f, const T& s);
