@@ -99,7 +99,7 @@ namespace Foam
 
 template<class T> class List;
 template<class T> class UList;
-template<class T, unsigned Size> class FixedList;
+template<class T, unsigned N> class FixedList;
 template<class T, class Key, class Hash> class HashTable;
 
 template<class T, class Key, class Hash>
@@ -406,8 +406,8 @@ public:
 
         //- Remove table entries given by the listed keys
         //  \return The number of items removed
-        template<unsigned Size>
-        inline label erase(const FixedList<Key, Size>& keys);
+        template<unsigned N>
+        inline label erase(const FixedList<Key, N>& keys);
 
         //- Remove table entries given by the listed keys
         //  \return The number of items removed

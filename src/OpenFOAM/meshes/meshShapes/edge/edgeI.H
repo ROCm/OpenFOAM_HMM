@@ -275,11 +275,11 @@ inline bool Foam::edge::insert(const label index)
 }
 
 
-template<class InputIter>
+template<class InputIterator>
 inline Foam::label Foam::edge::insert
 (
-    InputIter begIter,
-    InputIter endIter
+    InputIterator begIter,
+    InputIterator endIter
 )
 {
     // Available slots.
@@ -305,8 +305,8 @@ inline Foam::label Foam::edge::insert(std::initializer_list<label> list)
 }
 
 
-template<unsigned Size>
-inline Foam::label Foam::edge::insert(const FixedList<label, Size>& list)
+template<unsigned N>
+inline Foam::label Foam::edge::insert(const FixedList<label, N>& list)
 {
     return insert(list.begin(), list.end());
 }
@@ -344,11 +344,11 @@ inline Foam::label Foam::edge::erase(const label index)
 }
 
 
-template<class InputIter>
+template<class InputIterator>
 inline Foam::label Foam::edge::erase
 (
-    InputIter begIter,
-    InputIter endIter
+    InputIterator begIter,
+    InputIterator endIter
 )
 {
     // Occupied slots.
@@ -371,8 +371,8 @@ inline Foam::label Foam::edge::erase(std::initializer_list<label> list)
 }
 
 
-template<unsigned Size>
-inline Foam::label Foam::edge::erase(const FixedList<label, Size>& list)
+template<unsigned N>
+inline Foam::label Foam::edge::erase(const FixedList<label, N>& list)
 {
     return erase(list.begin(), list.end());
 }

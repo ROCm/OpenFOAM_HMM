@@ -57,8 +57,8 @@ inline Foam::label Foam::HashSet<Key, Hash>::assignMany
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-template<unsigned Size>
-Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& list)
+template<unsigned N>
+Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, N>& list)
 :
     parent_type(2*list.size())
 {
@@ -154,10 +154,10 @@ inline Foam::label Foam::HashSet<Key, Hash>::insert
 
 
 template<class Key, class Hash>
-template<unsigned Size>
+template<unsigned N>
 inline Foam::label Foam::HashSet<Key, Hash>::insert
 (
-    const FixedList<Key, Size>& list
+    const FixedList<Key, N>& list
 )
 {
     return insert(list.begin(), list.end());
@@ -207,10 +207,10 @@ inline Foam::label Foam::HashSet<Key, Hash>::unset
 
 
 template<class Key, class Hash>
-template<unsigned Size>
+template<unsigned N>
 inline Foam::label Foam::HashSet<Key, Hash>::unset
 (
-    const FixedList<Key, Size>& list
+    const FixedList<Key, N>& list
 )
 {
     return unset(list.begin(), list.end());
@@ -254,8 +254,8 @@ inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
 
 
 template<class Key, class Hash>
-template<unsigned Size>
-void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& rhs)
+template<unsigned N>
+void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, N>& rhs)
 {
     assignMany(rhs.size(), rhs.begin(), rhs.end());
 }

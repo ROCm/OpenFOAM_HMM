@@ -121,8 +121,8 @@ public:
         }
 
         //- Operate on a triangle or tetrahedron
-        template<unsigned Size>
-        result operator()(const FixedList<point, Size>& p) const
+        template<unsigned N>
+        result operator()(const FixedList<point, N>& p) const
         {
             return result();
         }
@@ -309,7 +309,7 @@ public:
                             Class listOp Declaration
 \*---------------------------------------------------------------------------*/
 
-template<unsigned Size>
+template<unsigned N>
 class listOp
 :
     public uniformOp<zero::null>
@@ -321,16 +321,16 @@ public:
         //- Result class
         class result
         :
-            public DynamicList<FixedList<point, Size>>
+            public DynamicList<FixedList<point, N>>
         {
         public:
 
             // Constructors
 
                 //- Construct from a single element
-                result(const FixedList<point, Size>& x)
+                result(const FixedList<point, N>& x)
                 :
-                    DynamicList<FixedList<point, Size>>(1, x)
+                    DynamicList<FixedList<point, N>>(1, x)
                 {}
 
 
@@ -368,7 +368,7 @@ public:
         }
 
         //- Operate on a triangle or tetrahedron
-        result operator()(const FixedList<point, Size>& p) const
+        result operator()(const FixedList<point, N>& p) const
         {
             return result(p);
         }
@@ -420,8 +420,8 @@ public:
         }
 
         //- Operate on a triangle or tetrahedron
-        template<unsigned Size>
-        result operator()(const FixedList<point, Size>& p) const
+        template<unsigned N>
+        result operator()(const FixedList<point, N>& p) const
         {
             this->data().append(p);
             return result();

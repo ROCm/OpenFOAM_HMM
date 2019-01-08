@@ -134,8 +134,8 @@ public:
         {}
 
         //- Construct from FixedList of Key
-        template<unsigned Size>
-        explicit HashSet(const FixedList<Key, Size>& list);
+        template<unsigned N>
+        explicit HashSet(const FixedList<Key, N>& list);
 
         //- Construct from UList of Key
         explicit HashSet(const UList<Key>& list);
@@ -203,8 +203,8 @@ public:
 
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
-        template<unsigned Size>
-        inline label insert(const FixedList<Key, Size>& list);
+        template<unsigned N>
+        inline label insert(const FixedList<Key, N>& list);
 
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
@@ -228,8 +228,8 @@ public:
         }
 
         //- Same as insert (no value to overwrite)
-        template<unsigned Size>
-        inline label set(const FixedList<Key, Size>& list)
+        template<unsigned N>
+        inline label set(const FixedList<Key, N>& list)
         {
             return insert(list);
         }
@@ -265,8 +265,8 @@ public:
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
-        template<unsigned Size>
-        inline label unset(const FixedList<Key, Size>& list);
+        template<unsigned N>
+        inline label unset(const FixedList<Key, N>& list);
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
@@ -338,8 +338,8 @@ public:
         void operator=(const UList<Key>& rhs);
 
         //- Assignment from a FixedList of keys
-        template<unsigned Size>
-        void operator=(const FixedList<Key, Size>& rhs);
+        template<unsigned N>
+        void operator=(const FixedList<Key, N>& rhs);
 
         //- Assignment from an initializer list of keys
         void operator=(std::initializer_list<Key> rhs);

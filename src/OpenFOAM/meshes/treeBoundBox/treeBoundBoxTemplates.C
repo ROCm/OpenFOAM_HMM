@@ -28,11 +28,11 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<unsigned Size>
+template<unsigned N>
 Foam::treeBoundBox::treeBoundBox
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices
+    const FixedList<label, N>& indices
 )
 :
     boundBox(points, indices, false)

@@ -149,17 +149,17 @@ public:
         inline explicit face(const label sz);
 
         //- Copy construct from list of labels
-        inline explicit face(const labelUList& lst);
+        inline explicit face(const labelUList& list);
 
         //- Copy construct from list of labels
-        template<unsigned Size>
-        inline explicit face(const FixedList<label, Size>& lst);
+        template<unsigned N>
+        inline explicit face(const FixedList<label, N>& list);
 
         //- Copy construct from an initializer list of labels
-        inline explicit face(std::initializer_list<label> lst);
+        inline explicit face(std::initializer_list<label> list);
 
         //- Move construct from list of labels
-        inline explicit face(labelList&& lst);
+        inline explicit face(labelList&& list);
 
         //- Copy construct from triFace
         face(const triFace& f);

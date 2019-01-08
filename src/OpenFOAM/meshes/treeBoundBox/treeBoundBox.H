@@ -176,11 +176,11 @@ public:
         //- Construct as subset of points
         //  The indices could be from edge/triFace etc.
         //  Local processor domain only (no reduce as in boundBox)
-        template<unsigned Size>
+        template<unsigned N>
         treeBoundBox
         (
             const UList<point>& points,
-            const FixedList<label, Size>& indices
+            const FixedList<label, N>& indices
         );
 
 

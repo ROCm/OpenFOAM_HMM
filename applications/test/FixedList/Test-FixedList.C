@@ -42,11 +42,11 @@ See also
 
 using namespace Foam;
 
-template<class T, unsigned Size>
-Ostream& printInfo(const FixedList<List<T>, Size>& list)
+template<class T, unsigned N>
+Ostream& printInfo(const FixedList<List<T>, N>& list)
 {
     Info<< list << " addresses:";
-    for (unsigned i = 0; i < Size; ++i)
+    for (unsigned i = 0; i < N; ++i)
     {
         Info<< " " << long(list[i].cdata());
     }
@@ -55,11 +55,11 @@ Ostream& printInfo(const FixedList<List<T>, Size>& list)
 }
 
 
-template<class T, unsigned Size>
+template<class T, unsigned N>
 Ostream& printInfo
 (
-    const FixedList<List<T>, Size>& list1,
-    const FixedList<List<T>, Size>& list2
+    const FixedList<List<T>, N>& list1,
+    const FixedList<List<T>, N>& list2
 )
 {
     Info<< "llist1:"; printInfo(list1);
@@ -139,15 +139,15 @@ int main(int argc, char *argv[])
         FixedList<label, 4> list1{2, 3, 4, 5};
 
         Info<< "list1:" << list1
-            << " hash:" << FixedList<label,4>::Hash<>()(list1) << nl
-            << " hash:" << Hash<FixedList<label,4>>()(list1) << nl;
+            << " hash:" << FixedList<label, 4>::Hash<>()(list1) << nl
+            << " hash:" << Hash<FixedList<label, 4>>()(list1) << nl;
 
         label a[4] = {0, 1, 2, 3};
         FixedList<label, 4> list2(a);
 
         Info<< "list2:" << list2
-            << " hash:" << FixedList<label,4>::Hash<>()(list2) << nl
-            << " hash:" << Hash<FixedList<label,4>>()(list2) << nl;
+            << " hash:" << FixedList<label, 4>::Hash<>()(list2) << nl
+            << " hash:" << Hash<FixedList<label, 4>>()(list2) << nl;
 
 
         // Using FixedList for content too

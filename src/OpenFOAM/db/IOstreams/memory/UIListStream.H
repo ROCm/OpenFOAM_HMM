@@ -225,16 +225,16 @@ public:
 
 
         //- Construct using data area from a FixedList
-        template<unsigned FixedSize>
+        template<unsigned N>
         UIListStream
         (
-            const FixedList<char,FixedSize>& buffer,
+            const FixedList<char, N>& buffer,
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
             const Foam::string& name="input"
         )
         :
-            UIListStream(buffer.cdata(), FixedSize, format, version, name)
+            UIListStream(buffer.cdata(), N, format, version, name)
         {}
 
         //- Construct using data area from a List and number of bytes

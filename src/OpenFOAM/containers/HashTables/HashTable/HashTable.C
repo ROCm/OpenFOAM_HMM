@@ -443,10 +443,10 @@ inline Foam::label Foam::HashTable<T, Key, Hash>::erase
 
 
 template<class T, class Key, class Hash>
-template<unsigned Size>
+template<unsigned N>
 inline Foam::label Foam::HashTable<T, Key, Hash>::erase
 (
-    const FixedList<Key, Size>& keys
+    const FixedList<Key, N>& keys
 )
 {
     return erase(keys.cbegin(), keys.cend());

@@ -114,11 +114,11 @@ public:
         //- Construct bounding box as an indirect subset of the points.
         //  The indices could be from edge/triFace etc.
         //  Does parallel communication (doReduce = true)
-        template<unsigned Size>
+        template<unsigned N>
         boundBox
         (
             const UList<point>& points,
-            const FixedList<label, Size>& indices,
+            const FixedList<label, N>& indices,
             bool doReduce = true
         );
 
@@ -202,16 +202,16 @@ public:
             inline void add(const tmp<pointField>& tpoints);
 
             //- Extend to include the points.
-            template<unsigned Size>
-            void add(const FixedList<point, Size>& points);
+            template<unsigned N>
+            void add(const FixedList<point, N>& points);
 
             //- Extend to include a (subsetted) point field.
             //  The indices could be from edge/triFace etc.
-            template<unsigned Size>
+            template<unsigned N>
             void add
             (
                 const UList<point>& points,
-                const FixedList<label, Size>& indices
+                const FixedList<label, N>& indices
             );
 
             //- Extend to include a (subsetted) point field.
@@ -266,11 +266,11 @@ public:
             bool contains(const UList<point>& points) const;
 
             //- Contains all of the (subsetted) points? (inside or on edge)
-            template<unsigned Size>
+            template<unsigned N>
             bool contains
             (
                 const UList<point>& points,
-                const FixedList<label, Size>& indices
+                const FixedList<label, N>& indices
             ) const;
 
 
@@ -290,11 +290,11 @@ public:
             bool containsAny(const UList<point>& points) const;
 
             //- Contains any of the (subsetted) points? (inside or on edge)
-            template<unsigned Size>
+            template<unsigned N>
             bool containsAny
             (
                 const UList<point>& points,
-                const FixedList<label, Size>& indices
+                const FixedList<label, N>& indices
             ) const;
 
             //- Contains any of the (subsetted) points? (inside or on edge)

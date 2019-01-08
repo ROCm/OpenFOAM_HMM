@@ -58,7 +58,7 @@ class Istream;
 class Ostream;
 
 template<class T> class List;
-template<class T, unsigned Size> class FixedList;
+template<class T, unsigned N> class FixedList;
 template<class T, int SizeMin> class DynamicList;
 
 template<class T> class PtrList;
@@ -160,9 +160,9 @@ public:
         template<class InputIterator>
         List(InputIterator begIter, InputIterator endIter);
 
-        //- Construct as copy of FixedList<T, Size>
-        template<unsigned Size>
-        explicit List(const FixedList<T, Size>& list);
+        //- Construct as copy of FixedList\<T, N\>
+        template<unsigned N>
+        explicit List(const FixedList<T, N>& list);
 
         //- Construct as copy of PtrList<T>
         explicit List(const PtrList<T>& list);

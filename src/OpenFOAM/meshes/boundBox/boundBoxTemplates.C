@@ -28,11 +28,11 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<unsigned Size>
+template<unsigned N>
 Foam::boundBox::boundBox
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices,
+    const FixedList<label, N>& indices,
     bool doReduce
 )
 :
@@ -49,10 +49,10 @@ Foam::boundBox::boundBox
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template<unsigned Size>
+template<unsigned N>
 void Foam::boundBox::add
 (
-    const FixedList<point, Size>& points
+    const FixedList<point, N>& points
 )
 {
     for (const point& p : points)
@@ -62,11 +62,11 @@ void Foam::boundBox::add
 }
 
 
-template<unsigned Size>
+template<unsigned N>
 void Foam::boundBox::add
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices
+    const FixedList<label, N>& indices
 )
 {
     const label len = points.size();
@@ -108,11 +108,11 @@ void Foam::boundBox::add
 }
 
 
-template<unsigned Size>
+template<unsigned N>
 inline bool Foam::boundBox::contains
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices
+    const FixedList<label, N>& indices
 ) const
 {
     const label len = points.size();
@@ -166,11 +166,11 @@ inline bool Foam::boundBox::contains
 }
 
 
-template<unsigned Size>
+template<unsigned N>
 inline bool Foam::boundBox::containsAny
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices
+    const FixedList<label, N>& indices
 ) const
 {
     const label len = points.size();

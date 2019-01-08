@@ -130,10 +130,10 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 
 
 template<class T, int SizeMin>
-template<unsigned FixedSize>
+template<unsigned N>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const FixedList<T, FixedSize>& lst
+    const FixedList<T, N>& lst
 )
 :
     capacity_(0)
@@ -515,11 +515,11 @@ Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
-template<unsigned FixedSize>
+template<unsigned N>
 inline Foam::DynamicList<T, SizeMin>&
 Foam::DynamicList<T, SizeMin>::append
 (
-    const FixedList<T, FixedSize>& lst
+    const FixedList<T, N>& lst
 )
 {
     label idx = List<T>::size();
@@ -770,10 +770,10 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 
 
 template<class T, int SizeMin>
-template<unsigned FixedSize>
+template<unsigned N>
 inline void Foam::DynamicList<T, SizeMin>::operator=
 (
-    const FixedList<T, FixedSize>& lst
+    const FixedList<T, N>& lst
 )
 {
     const label n = lst.size();

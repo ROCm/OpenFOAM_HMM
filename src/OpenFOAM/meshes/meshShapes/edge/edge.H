@@ -185,8 +185,8 @@ public:
         inline bool insert(const label index);
 
         //- Insert values, using begin/end iterators.
-        template<class InputIter>
-        inline label insert(InputIter begIter, InputIter endIter);
+        template<class InputIterator>
+        inline label insert(InputIterator begIter, InputIterator endIter);
 
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
@@ -198,8 +198,8 @@ public:
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
         //  Similar to a HashTable::insert().
-        template<unsigned Size>
-        inline label insert(const FixedList<label, Size>& list);
+        template<unsigned N>
+        inline label insert(const FixedList<label, N>& list);
 
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
@@ -214,8 +214,8 @@ public:
         inline label erase(const label index);
 
         //- Remove values, using begin/end iterators.
-        template<class InputIter>
-        inline label erase(InputIter begIter, InputIter endIter);
+        template<class InputIterator>
+        inline label erase(InputIterator begIter, InputIterator endIter);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
@@ -223,8 +223,8 @@ public:
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        template<unsigned Size>
-        inline label erase(const FixedList<label, Size>& list);
+        template<unsigned N>
+        inline label erase(const FixedList<label, N>& list);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.

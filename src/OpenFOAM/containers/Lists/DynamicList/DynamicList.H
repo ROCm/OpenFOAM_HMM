@@ -138,8 +138,8 @@ public:
         inline explicit DynamicList(const UList<T>& lst);
 
         //- Construct from a FixedList
-        template<unsigned FixedSize>
-        inline DynamicList(const FixedList<T, FixedSize>& lst);
+        template<unsigned N>
+        inline DynamicList(const FixedList<T, N>& lst);
 
         //- Construct given begin/end iterators.
         //  Uses std::distance to determine the size.
@@ -249,9 +249,9 @@ public:
             inline DynamicList<T, SizeMin>& append(const UList<T>& lst);
 
             //- Append a FixedList to the end of this list.
-            template<unsigned FixedSize>
+            template<unsigned N>
             inline DynamicList<T, SizeMin>&
-            append(const FixedList<T, FixedSize>& lst);
+            append(const FixedList<T, N>& lst);
 
             //- Append an initializer list at the end of this list.
             inline DynamicList<T, SizeMin>&
@@ -323,8 +323,8 @@ public:
             inline void operator=(const UList<T>& lst);
 
             //- Assignment to FixedList
-            template<unsigned FixedSize>
-            inline void operator=(const FixedList<T, FixedSize>& lst);
+            template<unsigned N>
+            inline void operator=(const FixedList<T, N>& lst);
 
             //- Assignment to DynamicList
             inline void operator=(const DynamicList<T, SizeMin>& lst);

@@ -57,11 +57,11 @@ void Foam::vtk::writeList
 }
 
 
-template<class Type, unsigned Size>
+template<class Type, unsigned N>
 void Foam::vtk::writeList
 (
     vtk::formatter& fmt,
-    const FixedList<Type, Size>& values
+    const FixedList<Type, N>& values
 )
 {
     for (const Type& val : values)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,8 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T, unsigned Size>
-Foam::label Foam::FixedList<T, Size>::find
+template<class T, unsigned N>
+Foam::label Foam::FixedList<T, N>::find
 (
     const T& val,
     const label start
@@ -39,7 +39,7 @@ Foam::label Foam::FixedList<T, Size>::find
     {
         List_CONST_ACCESS(T, *this, list);
 
-        for (label i = start; i < label(Size); ++i)
+        for (label i = start; i < label(N); ++i)
         {
             if (list[i] == val)
             {
@@ -52,8 +52,8 @@ Foam::label Foam::FixedList<T, Size>::find
 }
 
 
-template<class T, unsigned Size>
-void Foam::FixedList<T, Size>::moveFirst(const label i)
+template<class T, unsigned N>
+void Foam::FixedList<T, N>::moveFirst(const label i)
 {
     checkIndex(i);
 
@@ -64,20 +64,20 @@ void Foam::FixedList<T, Size>::moveFirst(const label i)
 }
 
 
-template<class T, unsigned Size>
-void Foam::FixedList<T, Size>::moveLast(const label i)
+template<class T, unsigned N>
+void Foam::FixedList<T, N>::moveLast(const label i)
 {
     checkIndex(i);
 
-    for (label upper = label(Size - 1); upper > i; --upper)
+    for (label upper = label(N-1); upper > i; --upper)
     {
         Foam::Swap(v_[i], v_[upper]);
     }
 }
 
 
-template<class T, unsigned Size>
-void Foam::FixedList<T, Size>::swapFirst(const label i)
+template<class T, unsigned N>
+void Foam::FixedList<T, N>::swapFirst(const label i)
 {
     checkIndex(i);
 
@@ -88,12 +88,12 @@ void Foam::FixedList<T, Size>::swapFirst(const label i)
 }
 
 
-template<class T, unsigned Size>
-void Foam::FixedList<T, Size>::swapLast(const label i)
+template<class T, unsigned N>
+void Foam::FixedList<T, N>::swapLast(const label i)
 {
     checkIndex(i);
 
-    const label upper = label(Size - 1);
+    const label upper = label(N-1);
 
     if (i < upper)
     {
@@ -104,14 +104,14 @@ void Foam::FixedList<T, Size>::swapLast(const label i)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& list) const
+template<class T, unsigned N>
+bool Foam::FixedList<T, N>::operator==(const FixedList<T, N>& list) const
 {
     List_CONST_ACCESS(T, *this, lhs);
     List_CONST_ACCESS(T, (list), rhs);
 
     // List sizes are identical by definition (template parameter)
-    for (unsigned i = 0; i < Size; ++i)
+    for (unsigned i = 0; i < N; ++i)
     {
         if (!(lhs[i] == rhs[i]))
         {
@@ -124,14 +124,14 @@ bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& list) const
 }
 
 
-template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator<(const FixedList<T, Size>& list) const
+template<class T, unsigned N>
+bool Foam::FixedList<T, N>::operator<(const FixedList<T, N>& list) const
 {
     List_CONST_ACCESS(T, *this, lhs);
     List_CONST_ACCESS(T, (list), rhs);
 
     // List sizes are identical by definition (template parameter)
-    for (unsigned i=0; i<Size; ++i)
+    for (unsigned i=0; i<N; ++i)
     {
         if (lhs[i] < rhs[i])
         {
@@ -148,29 +148,29 @@ bool Foam::FixedList<T, Size>::operator<(const FixedList<T, Size>& list) const
 }
 
 
-template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator!=(const FixedList<T, Size>& list) const
+template<class T, unsigned N>
+bool Foam::FixedList<T, N>::operator!=(const FixedList<T, N>& list) const
 {
     return !operator==(list);
 }
 
 
-template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator>(const FixedList<T, Size>& list) const
+template<class T, unsigned N>
+bool Foam::FixedList<T, N>::operator>(const FixedList<T, N>& list) const
 {
     return list.operator<(*this);
 }
 
 
-template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator<=(const FixedList<T, Size>& list) const
+template<class T, unsigned N>
+bool Foam::FixedList<T, N>::operator<=(const FixedList<T, N>& list) const
 {
     return !list.operator<(*this);
 }
 
 
-template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator>=(const FixedList<T, Size>& list) const
+template<class T, unsigned N>
+bool Foam::FixedList<T, N>::operator>=(const FixedList<T, N>& list) const
 {
     return !operator<(list);
 }

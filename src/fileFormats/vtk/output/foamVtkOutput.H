@@ -120,11 +120,11 @@ namespace vtk
 
     //- Write a list of values.
     //  The output does not include the payload size.
-    template<class Type, unsigned Size>
+    template<class Type, unsigned N>
     void writeList
     (
         vtk::formatter& fmt,
-        const FixedList<Type, Size>& values
+        const FixedList<Type, N>& values
     );
 
 

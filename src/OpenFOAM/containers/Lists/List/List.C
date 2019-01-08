@@ -32,7 +32,6 @@ License
 #include "UIndirectList.H"
 #include "BiIndirectList.H"
 #include "contiguous.H"
-
 #include <utility>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -302,10 +301,10 @@ Foam::List<T>::List(InputIterator begIter, InputIterator endIter)
 
 
 template<class T>
-template<unsigned Size>
-Foam::List<T>::List(const FixedList<T, Size>& list)
+template<unsigned N>
+Foam::List<T>::List(const FixedList<T, N>& list)
 :
-    UList<T>(nullptr, Size)
+    UList<T>(nullptr, label(N))
 {
     doAlloc();
     copyList(list);
