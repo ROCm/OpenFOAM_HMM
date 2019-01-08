@@ -88,9 +88,10 @@ const std::string Foam::foamVersion::version
 #include "new.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Create the nullObject singleton
+// The nullObject singleton and a dummy zero singleton
 
 #include "nullObject.C"
+#include "zero.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global IO streams
