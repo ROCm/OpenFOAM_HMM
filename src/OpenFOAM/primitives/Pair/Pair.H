@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,7 @@ See also
 
 #include "FixedList.H"
 #include "Istream.H"
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,17 +65,26 @@ public:
         //- Construct null
         Pair() = default;
 
-        //- Construct from components
+        //- Copy construct from components
         inline Pair(const T& f, const T& s);
 
-        //- Construct from FixedList
-        inline Pair(const FixedList<T, 2>& lst);
+        //- Move construct from components
+        inline Pair(T&& f, T&& s);
 
-        //- Construct, optionally sorted with first less-than second
+        //- Copy construct from std::pair
+        inline Pair(const std::pair<T,T>& vals);
+
+        //- Move construct from std::pair
+        inline Pair(std::pair<T,T>&& vals);
+
+        //- Copy construct FixedList of two items
+        inline Pair(const FixedList<T, 2>& list);
+
+        //- Copy construct, optionally sorted with first less-than second
         inline Pair(const T& f, const T& s, const bool doSort);
 
-        //- Construct, optionally sorted with first less-than second
-        inline Pair(const FixedList<T, 2>& lst, const bool doSort);
+        //- Copy construct, optionally sorted with first less-than second
+        inline Pair(const FixedList<T, 2>& list, const bool doSort);
 
         //- Construct from Istream
         inline explicit Pair(Istream& is);
@@ -151,6 +161,7 @@ public:
                 return seed;
             }
         };
+
 };
 
 
@@ -206,11 +217,7 @@ bool operator<(const Pair<T>& a, const Pair<T>& b)
     return
     (
         a.first() < b.first()
-     ||
-        (
-            !(b.first() < a.first())
-         && a.second() < b.second()
-        )
+     || (!(b.first() < a.first()) && a.second() < b.second())
     );
 }
 

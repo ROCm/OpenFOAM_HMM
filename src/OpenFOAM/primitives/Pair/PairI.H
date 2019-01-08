@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,9 +54,33 @@ inline Foam::Pair<T>::Pair(const T& f, const T& s)
 
 
 template<class T>
-inline Foam::Pair<T>::Pair(const FixedList<T, 2>& lst)
+inline Foam::Pair<T>::Pair(T&& f, T&& s)
+{
+    first()  = std::move(f);
+    second() = std::move(s);
+}
+
+
+template<class T>
+inline Foam::Pair<T>::Pair(const std::pair<T,T>& vals)
+{
+    first()  = vals.first;
+    second() = vals.second;
+}
+
+
+template<class T>
+inline Foam::Pair<T>::Pair(std::pair<T,T>&& vals)
+{
+    first()  = std::move(vals.first);
+    second() = std::move(vals.second);
+}
+
+
+template<class T>
+inline Foam::Pair<T>::Pair(const FixedList<T, 2>& list)
 :
-    FixedList<T, 2>(lst)
+    FixedList<T, 2>(list)
 {}
 
 
@@ -77,11 +101,10 @@ inline Foam::Pair<T>::Pair(const T& f, const T& s, const bool doSort)
 
 
 template<class T>
-inline Foam::Pair<T>::Pair(const FixedList<T, 2>& lst, const bool doSort)
+inline Foam::Pair<T>::Pair(const FixedList<T, 2>& list, const bool doSort)
 :
-    Pair<T>(lst.first(), lst.last(), doSort)
+    Pair<T>(list.first(), list.last(), doSort)
 {}
-
 
 
 template<class T>
@@ -132,16 +155,16 @@ inline const T& Foam::Pair<T>::other(const T& a) const
 
 
 template<class T>
-inline bool Foam::Pair<T>::sorted() const
+inline void Foam::Pair<T>::flip()
 {
-    return (first() < second());
+    Foam::Swap(first(), second());
 }
 
 
 template<class T>
-inline void Foam::Pair<T>::flip()
+inline bool Foam::Pair<T>::sorted() const
 {
-    Foam::Swap(first(), second());
+    return !(second() < first());
 }
 
 
