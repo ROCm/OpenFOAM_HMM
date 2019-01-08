@@ -29,7 +29,6 @@ License
 #include "token.H"
 #include "contiguous.H"
 
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class T, unsigned Size>
@@ -70,15 +69,14 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
     const FixedList<T, Size>& list = *this;
 
     // Write list contents depending on data format
+
+    // Unlike UList, no compact output form (eg, "2{-1}") since a
+    // FixedList is generally small and we also want the same appearance
+    // for FixedList<T, 2> as Tuple2<T,T>
+
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        if (contiguous<T>() && list.uniform())
-        {
-            // Two or more entries, and all entries have identical values.
-
-            os << Size << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
-        }
-        else if
+        if
         (
             Size <= 1 || !shortListLen
          || (Size <= unsigned(shortListLen) && contiguous<T>())
@@ -145,7 +143,8 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& list)
 
         is.fatalCheck
         (
-            "operator>>(Istream&, FixedList<T, Size>&) : reading first token"
+            "operator>>(Istream&, FixedList<T, Size>&) : "
+            "reading first token"
         );
 
         if (firstToken.isCompound())

@@ -180,7 +180,7 @@ public:
         inline explicit FixedList(const SLList<T>& list);
 
         //- Construct from Istream
-        FixedList(Istream& is);
+        explicit FixedList(Istream& is);
 
         //- Clone
         inline autoPtr<FixedList<T, Size>> clone() const;
