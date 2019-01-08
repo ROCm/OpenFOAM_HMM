@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -151,7 +151,7 @@ List<T> values(const HashTable<T, Key, Hash>& tbl, const bool doSort=false)
 
     forAllConstIters(tbl, iter)
     {
-        output[i] = iter.object();
+        output[i] = iter.val();
         ++i;
     }
 

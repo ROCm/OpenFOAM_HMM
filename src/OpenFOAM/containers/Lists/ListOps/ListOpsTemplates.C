@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -249,7 +249,7 @@ void Foam::inplaceMapKey
             // Could enforce (oldIdx < oldToNew.size())
             // ... or just rely on FULLDEBUG from UList
 
-            output.insert(oldToNew[oldIdx], iter.object());
+            output.insert(oldToNew[oldIdx], iter.val());
         }
     }
 
@@ -268,7 +268,7 @@ Foam::label Foam::inplaceMapValue
 
     for (auto iter = input.begin(); iter != input.end(); ++iter)
     {
-        const label oldIdx = iter.object();
+        const label oldIdx = iter.val();
         if (oldIdx >= 0)
         {
             // Could enforce (oldIdx < oldToNew.size())
@@ -278,7 +278,7 @@ Foam::label Foam::inplaceMapValue
 
             if (oldIdx != newIdx)
             {
-                iter.object() = newIdx;
+                iter.val() = newIdx;
                 ++nChanged;
             }
         }
@@ -304,7 +304,7 @@ Foam::label Foam::inplaceMapValue
 
     for (auto iter = input.begin(); iter != input.end(); ++iter)
     {
-        label& value = iter.object();
+        label& value = iter.val();
 
         auto mapIter = mapper.find(value);
         if (mapIter.found() && value != *mapIter)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
 {
     for (const_iterator iter = ht.cbegin(); iter != ht.cend(); ++iter)
     {
-        insert(iter.key(), iter.object());
+        insert(iter.key(), iter.val());
     }
 }
 
@@ -87,12 +87,12 @@ Foam::HashTable<T, Key, Hash>::HashTable(HashTable<T, Key, Hash>&& rhs)
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable
 (
-    std::initializer_list<std::pair<Key, T>> lst
+    std::initializer_list<std::pair<Key, T>> list
 )
 :
-    HashTable<T, Key, Hash>(2*lst.size())
+    HashTable<T, Key, Hash>(2*list.size())
 {
-    for (const auto& keyval : lst)
+    for (const auto& keyval : list)
     {
         insert(keyval.first, keyval.second);
     }
@@ -172,7 +172,7 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocKeys
         }
     }
 
-    list.setSize(count);
+    list.resize(count);
     Foam::sort(list);
 
     return list;
@@ -192,13 +192,13 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocValues
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        if ((pred(iter.object()) ? !invert : invert))
+        if ((pred(iter.val()) ? !invert : invert))
         {
             list[count++] = iter.key();
         }
     }
 
-    list.setSize(count);
+    list.resize(count);
     Foam::sort(list);
 
     return list;
@@ -218,13 +218,13 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocEntries
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        if ((pred(iter.key(), iter.object()) ? !invert : invert))
+        if ((pred(iter.key(), iter.val()) ? !invert : invert))
         {
             list[count++] = iter.key();
         }
     }
 
-    list.setSize(count);
+    list.resize(count);
     Foam::sort(list);
 
     return list;
@@ -265,7 +265,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::countValues
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        if ((pred(iter.object()) ? !invert : invert))
+        if ((pred(iter.val()) ? !invert : invert))
         {
             ++count;
         }
@@ -287,7 +287,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::countEntries
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        if ((pred(iter.key(), iter.object()) ? !invert : invert))
+        if ((pred(iter.key(), iter.val()) ? !invert : invert))
         {
             ++count;
         }
@@ -334,10 +334,7 @@ bool Foam::HashTable<T, Key, Hash>::setEntry
         if (double(size_)/capacity_ > 0.8 && capacity_ < maxTableSize)
         {
             #ifdef FULLDEBUG
-            if (debug)
-            {
-                InfoInFunction << "Doubling table size\n";
-            }
+            DebugInFunction << "Doubling table size\n";
             #endif
 
             resize(2*capacity_);
@@ -346,6 +343,13 @@ bool Foam::HashTable<T, Key, Hash>::setEntry
     else if (overwrite)
     {
         // Overwrite current entry (Perl convention).
+
+        // Can skip if the value is not stored anyhow (Eg, HashSet)
+        // - this avoids a useless delete/new
+        if (!node_type::stores_value())
+        {
+            return true;
+        }
 
         node_type* ep = curr->next_;  // next in the linked list
 
@@ -370,11 +374,7 @@ bool Foam::HashTable<T, Key, Hash>::setEntry
     {
         // Do not overwrite existing entry (STL 'insert' convention)
         #ifdef FULLDEBUG
-        if (debug)
-        {
-            InfoInFunction
-                << "Cannot insert " << key << " already in hash table\n";
-        }
+        DebugInFunction << "Not inserting " << key << ": already in table\n";
         #endif
         return false;
     }
@@ -553,10 +553,7 @@ void Foam::HashTable<T, Key, Hash>::resize(const label sz)
     if (newCapacity == oldCapacity)
     {
         #ifdef FULLDEBUG
-        if (debug)
-        {
-            InfoInFunction << "New table size == old table size\n";
-        }
+        DebugInFunction << "New table size == old table size\n";
         #endif
 
         return;
@@ -567,8 +564,7 @@ void Foam::HashTable<T, Key, Hash>::resize(const label sz)
         if (size_)
         {
             WarningInFunction
-                << "HashTable contains " << size_ << " cannot resize(0)"
-                << endl;
+                << "HashTable contains " << size_ << " cannot resize(0)" << nl;
         }
         else
         {
@@ -711,7 +707,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::filterValues
         // Matches? either prune (pruning) or keep (!pruning)
         if
         (
-            (pred(iter.object()) ? pruning : !pruning)
+            (pred(iter.val()) ? pruning : !pruning)
          && erase(iter)
         )
         {
@@ -738,7 +734,7 @@ Foam::label Foam::HashTable<T, Key, Hash>::filterEntries
         // Matches? either prune (pruning) or keep (!pruning)
         if
         (
-            (pred(iter.key(), iter.object()) ? pruning : !pruning)
+            (pred(iter.key(), iter.val()) ? pruning : !pruning)
          && erase(iter)
         )
         {
@@ -778,7 +774,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
 
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
-        insert(iter.key(), iter.object());
+        insert(iter.key(), iter.val());
     }
 }
 
@@ -840,7 +836,7 @@ bool Foam::HashTable<T, Key, Hash>::operator==
     {
         const const_iterator other(this->cfind(iter.key()));
 
-        if (!other.found() || other.object() != iter.object())
+        if (!other.found() || other.val() != iter.val())
         {
             return false;
         }
@@ -873,7 +869,7 @@ Foam::HashTable<T, Key, Hash>& Foam::HashTable<T, Key, Hash>::operator+=
         {
             for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
             {
-                insert(iter.key(), iter.object());
+                insert(iter.key(), iter.val());
             }
         }
         else

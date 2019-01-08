@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,7 +153,7 @@ void Foam::HashPtrTable<T, Key, Hash>::write(Ostream& os) const
 {
     for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
     {
-        const T* ptr = iter.object();
+        const T* ptr = iter.val();
         if (ptr)
         {
             ptr->write(os);
@@ -195,45 +195,6 @@ Foam::Istream& Foam::operator>>(Istream& is, HashPtrTable<T, Key, Hash>& tbl)
     tbl.readIstream(is, INew<T>());
 
     return is;
-}
-
-
-template<class T, class Key, class Hash>
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const HashPtrTable<T, Key, Hash>& tbl
-)
-{
-    const label len = tbl.size();
-
-    if (len)
-    {
-        // Size and start list delimiter
-        os << nl << len << nl << token::BEGIN_LIST << nl;
-
-        // Contents
-        for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
-        {
-            const T* ptr = iter.object();
-
-            os << iter.key();
-            if (ptr)
-            {
-                os << token::SPACE << *ptr;
-            }
-            os << nl;
-        }
-        os << token::END_LIST; // End list delimiter
-    }
-    else
-    {
-        // Empty hash table
-        os << len << token::BEGIN_LIST << token::END_LIST;
-    }
-
-    os.check(FUNCTION_NAME);
-    return os;
 }
 
 

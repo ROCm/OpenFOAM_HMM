@@ -54,9 +54,6 @@ template<class T, class Key, class Hash> class HashPtrTable;
 template<class T, class Key, class Hash>
 Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& tbl);
 
-template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& tbl);
-
 
 /*---------------------------------------------------------------------------*\
                         Class HashPtrTable Declaration
@@ -169,12 +166,6 @@ public:
         (
             Istream& is,
             HashPtrTable<T, Key, Hash>& tbl
-        );
-
-        friend Ostream& operator<< <T, Key, Hash>
-        (
-            Ostream& os,
-            const HashPtrTable<T, Key, Hash>& tbl
         );
 
 

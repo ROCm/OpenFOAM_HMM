@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,28 @@ License
 #include "HashTable.H"
 #include "Istream.H"
 #include "Ostream.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+bool Foam::HashTable<T, Key, Hash>::addEntry(Istream& is, const bool overwrite)
+{
+    typename node_type::key_type key;
+    typename node_type::mapped_type val;
+
+    is >> key >> val;
+
+    const bool ok = this->setEntry(key, val, overwrite);
+
+    is.fatalCheck
+    (
+        "HashTable::addEntry(Istream&) : "
+        "reading entry"
+    );
+
+    return ok;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -143,8 +165,6 @@ Foam::Istream& Foam::operator>>
     HashTable<T, Key, Hash>& L
 )
 {
-    is.fatalCheck(FUNCTION_NAME);
-
     // Anull existing table
     L.clear();
 
@@ -176,15 +196,7 @@ Foam::Istream& Foam::operator>>
             {
                 for (label i=0; i<len; ++i)
                 {
-                    Key key;
-                    is >> key;
-                    L.insert(key, pTraits<T>(is));
-
-                    is.fatalCheck
-                    (
-                        "operator>>(Istream&, HashTable&) : "
-                        "reading entry"
-                    );
+                    L.addEntry(is);
                 }
             }
             else
@@ -218,15 +230,7 @@ Foam::Istream& Foam::operator>>
         {
             is.putBack(lastToken);
 
-            Key key;
-            is >> key;
-            L.insert(key, pTraits<T>(is));
-
-            is.fatalCheck
-            (
-                "operator>>(Istream&, HashTable&) : "
-                "reading entry"
-            );
+            L.addEntry(is);
 
             is >> lastToken;
         }
@@ -262,7 +266,7 @@ Foam::Ostream& Foam::operator<<
         // Contents
         for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
         {
-            os << iter.key() << token::SPACE << iter.object() << nl;
+            iter.print(os) << nl;
         }
 
         os << token::END_LIST;    // End list delimiter

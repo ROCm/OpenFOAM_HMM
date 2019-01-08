@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,10 +118,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::insert
 (
     const Key& key,
-    const T& obj
+    const T& val
 )
 {
-    return this->setEntry(key, obj, false);  // No overwrite
+    return this->setEntry(key, val, false);  // No overwrite
 }
 
 
@@ -129,10 +129,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::set
 (
     const Key& key,
-    const T& obj
+    const T& val
 )
 {
-    return this->setEntry(key, obj, true);   // Overwrite
+    return this->setEntry(key, val, true);   // Overwrite
 }
 
 
@@ -144,7 +144,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::lookup
 ) const
 {
     const const_iterator iter(this->cfind(key));
-    return iter.found() ? iter.object() : deflt;
+    return iter.found() ? iter.val() : deflt;
 }
 
 
@@ -163,7 +163,7 @@ inline T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key)
             << exit(FatalError);
     }
 
-    return iter.object();
+    return iter.val();
 }
 
 
@@ -180,7 +180,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key) const
             << exit(FatalError);
     }
 
-    return iter.object();
+    return iter.val();
 }
 
 
@@ -191,11 +191,11 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()(const Key& key)
 
     if (iter.found())
     {
-        return iter.object();
+        return iter.val();
     }
 
     this->insert(key, mapped_type());
-    return find(key).object();
+    return find(key).val();
 }
 
 
@@ -210,11 +210,11 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()
 
     if (iter.found())
     {
-        return iter.object();
+        return iter.val();
     }
 
     this->insert(key, deflt);
-    return find(key).object();
+    return find(key).val();
 }
 
 

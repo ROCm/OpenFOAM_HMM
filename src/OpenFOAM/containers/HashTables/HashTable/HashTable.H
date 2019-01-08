@@ -46,8 +46,7 @@ Description
 Note
     For historical reasons, dereferencing the table iterator
     (eg, \a *iter) returns a reference to the stored object value
-    value rather than the stored key/object value like std::unordered_map
-    does.
+    rather than the stored key/val pair like std::unordered_map does.
 
     The HashTable iterator:
     \code
@@ -55,7 +54,7 @@ Note
         {
             Info<< "val:" << *iter << nl
                 << "key:" << iter.key() << nl;
-                << "val:" << iter.object() << nl;
+                << "val:" << iter.val() << nl;
         }
     \endcode
     whereas for the \c std::unordered_map iterator:
@@ -84,6 +83,7 @@ SourceFiles
 #include "word.H"
 #include "zero.H"
 #include "Hash.H"
+#include "HashTableDetail.H"
 #include "HashTableCore.H"
 
 #include <initializer_list>
@@ -103,7 +103,7 @@ template<class T, unsigned Size> class FixedList;
 template<class T, class Key, class Hash> class HashTable;
 
 template<class T, class Key, class Hash>
-Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& L);
+Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& tbl);
 
 template<class T, class Key, class Hash>
 Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& tbl);
@@ -118,118 +118,14 @@ class HashTable
 :
     public HashTableCore
 {
-    // Private types for table entries
+    // Types
 
-        //- Structure with a (K,V) tuple and a linked-list for collisions
-        //  Could store key/object as std::pair, but no particular advantage
-        //  unless the iterator dereference type changes.
-        struct pair_entry
-        {
-            //- Type of key
-            typedef Key key_type;
-
-            //- Object content type
-            typedef T mapped_type;
-
-            //- The lookup key
-            key_type key_;
-
-            //- The data object
-            mapped_type obj_;
-
-            //- Addressing (next in collision list)
-            pair_entry* next_;
-
-            //- Construct from key, object, next pointer
-            pair_entry(const Key& key, const T& obj, pair_entry* next)
-            :
-                key_(key),
-                obj_(obj),
-                next_(next)
-            {}
-
-            //- The key
-            const key_type& key() const
-            {
-                return key_;
-            }
-
-            //- The mapped object
-            const mapped_type& mapped() const
-            {
-                return obj_;
-            }
-            mapped_type& mapped()
-            {
-                return obj_;
-            }
-
-        private:
-            //- No copy construct
-            pair_entry(const pair_entry&) = delete;
-
-            //- No copy assignment
-            void operator=(const pair_entry&) = delete;
-        };
-
-
-        //- Structure with a single (K) value and a linked-list for collisions
-        struct unary_entry
-        {
-            //- Type of key
-            typedef Key key_type;
-
-            //- Object content type
-            typedef zero::null mapped_type;
-
-            //- Content storage type to the entry
-            typedef key_type value_type;
-
-            //- The lookup key == content
-            key_type key_;
-
-            //- Addressing (next in collision list)
-            unary_entry* next_;
-
-            //- Construct from key, (ununsed) object, next pointer
-            unary_entry(const Key& key, const T&, unary_entry* next)
-            :
-                key_(key),
-                next_(next)
-            {}
-
-            //- The key
-            const key_type& key() const
-            {
-                return key_;
-            }
-
-            //- Dummy mapped object
-            const mapped_type& mapped() const
-            {
-                return zeroNullElement;
-            }
-            mapped_type& mapped()
-            {
-                return zeroNullElement;
-            }
-
-
-        private:
-            //- No copy construct
-            unary_entry(const unary_entry&) = delete;
-
-            //- No copy assignment
-            void operator=(const unary_entry&) = delete;
-        };
-
-
-        //- Hashed node with a linked-list for collisions
+        //- Table entry. A hashed node with a linked-list for collisions
         typedef typename std::conditional
         <
             std::is_same<zero::null, typename std::remove_cv<T>::type>::value,
-            unary_entry,
-            pair_entry
+            Detail::HashTableSingle<T, Key>,
+            Detail::HashTablePair<T, Key>
         >::type node_type;
 
 
@@ -250,6 +146,10 @@ class HashTable
         //- Return the hash index of the Key within the current table size.
         //  No checks for zero-sized tables.
         inline label hashKeyIndex(const Key& key) const;
+
+        //- Read entry (key, val) and assign
+        //  \return True if the new entry was set.
+        bool addEntry(Istream& is, const bool overwrite = false);
 
         //- Assign a new hash-entry to a possibly already existing key.
         //  \return True if the new entry was set.
@@ -335,7 +235,7 @@ public:
         HashTable(this_type&& rhs);
 
         //- Construct from an initializer list
-        HashTable(std::initializer_list<std::pair<Key, T>> lst);
+        HashTable(std::initializer_list<std::pair<Key, T>> list);
 
 
     //- Destructor
@@ -689,6 +589,9 @@ protected:
             //- The key associated with the iterator
             inline const Key& key() const;
 
+            //- Write the (key, val) pair
+            inline Ostream& print(Ostream& os) const;
+
 
         // Member Operators
 
@@ -742,7 +645,13 @@ protected:
             //- Increment to the next position
             inline void increment();
 
-            //- The object associated with the iterator
+            //- The value associated with the iterator
+            inline mapped_type& val() const
+            {
+                return entry_->mapped();
+            }
+
+            //- The object (value) associated with the iterator
             inline mapped_type& object() const
             {
                 return entry_->mapped();
@@ -793,12 +702,15 @@ public:
 
         // Member functions/operators
 
+            //- Non-const access to referenced object (value)
+            using Iterator<false>::val;
+
             //- Non-const access to referenced object
             using Iterator<false>::object;
 
             //- Non-const access to referenced object
-            inline reference operator*() const  { return this->object(); }
-            inline reference operator()() const { return this->object(); }
+            inline reference operator*() const  { return this->val(); }
+            inline reference operator()() const { return this->val(); }
 
             inline iterator& operator++();
             inline iterator operator++(int);
@@ -852,12 +764,15 @@ public:
 
         // Member functions/operators
 
-            //- Const access to referenced object
+            //- Const access to referenced value
+            using Iterator<true>::val;
+
+            //- Const access to referenced object (value)
             using Iterator<true>::object;
 
-            //- Const access to referenced object
-            inline reference operator*() const  { return this->object(); }
-            inline reference operator()() const { return this->object(); }
+            //- Const access to referenced value
+            inline reference operator*() const  { return this->val(); }
+            inline reference operator()() const { return this->val(); }
 
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
@@ -966,7 +881,7 @@ public:
         friend Istream& operator>> <T, Key, Hash>
         (
             Istream& is,
-            HashTable<T, Key, Hash>& L
+            HashTable<T, Key, Hash>& tbl
         );
 
         friend Ostream& operator<< <T, Key, Hash>

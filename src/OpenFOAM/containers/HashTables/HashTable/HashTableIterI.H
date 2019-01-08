@@ -135,6 +135,21 @@ inline const Key& Foam::HashTable<T, Key, Hash>::Iterator<Const>::key() const
 
 template<class T, class Key, class Hash>
 template<bool Const>
+inline Foam::Ostream& Foam::HashTable<T, Key, Hash>::Iterator<Const>::print
+(
+    Ostream& os
+) const
+{
+    if (entry_)
+    {
+        entry_->print(os);
+    }
+    return os;
+}
+
+
+template<class T, class Key, class Hash>
+template<bool Const>
 inline Foam::HashTable<T, Key, Hash>::Iterator<Const>::operator
 bool() const noexcept
 {
