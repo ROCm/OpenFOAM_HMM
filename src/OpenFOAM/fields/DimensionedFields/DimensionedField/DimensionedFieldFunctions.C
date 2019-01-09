@@ -309,7 +309,7 @@ dimensioned<returnType> func                                                   \
     const DimensionedField<Type, GeoMesh>& df                                  \
 )                                                                              \
 {                                                                              \
-    return dimensioned<Type>                                                   \
+    return dimensioned<returnType>                                             \
     (                                                                          \
         #func "(" + df.name() + ')',                                           \
         df.dimensions(),                                                       \
