@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,6 +132,7 @@ public:
         //- Legacy name for areaNormal()
         //  \deprecated(2018-06) Deprecated for new use
         inline vector normal(const UList<point>& points) const
+        FOAM_DEPRECATED_FOR(2018-12, "areaNormal() or unitNormal()")
         {
             return areaNormal(points); // Legacy definition
         }
