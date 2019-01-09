@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -4212,6 +4212,7 @@ void Foam::hexRef8::storeData
     const labelList& cellsToStore
 )
 {
+    savedPointLevel_.clear();
     savedPointLevel_.resize(2*pointsToStore.size());
     forAll(pointsToStore, i)
     {
@@ -4219,6 +4220,7 @@ void Foam::hexRef8::storeData
         savedPointLevel_.insert(pointi, pointLevel_[pointi]);
     }
 
+    savedCellLevel_.clear();
     savedCellLevel_.resize(2*cellsToStore.size());
     forAll(cellsToStore, i)
     {
