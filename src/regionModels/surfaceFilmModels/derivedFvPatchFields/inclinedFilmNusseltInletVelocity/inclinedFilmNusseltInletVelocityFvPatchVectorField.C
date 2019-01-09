@@ -179,7 +179,7 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::updateCoeffs()
 
     const scalarField Re(max(G, scalar(0))/mup);
 
-    operator==(n*pow(gTan*mup/(3*rhop), 1.0/3.0)*pow(Re, 2.0/3.0));
+    operator==(n*cbrt(gTan*mup/(3*rhop))*pow(Re, 2.0/3.0));
 
     fixedValueFvPatchVectorField::updateCoeffs();
 }

@@ -166,7 +166,7 @@ Foam::threePhaseInterfaceProperties::threePhaseInterfaceProperties
     deltaN_
     (
         "deltaN",
-        1e-8/pow(average(mixture.U().mesh().V()), 1.0/3.0)
+        1e-8/cbrt(average(mixture.U().mesh().V()))
     ),
 
     nHatf_

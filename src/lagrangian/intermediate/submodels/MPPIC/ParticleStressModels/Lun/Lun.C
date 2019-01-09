@@ -89,7 +89,7 @@ Foam::ParticleStressModels::Lun::tau
         0.6
       / max
         (
-            1.0 - pow(alpha/alphaPacked_,1.0/3.0),
+            1.0 - cbrt(alpha/alphaPacked_),
             max(eps_*(1.0 - alpha), SMALL)
         )
     );

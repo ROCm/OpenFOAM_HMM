@@ -370,7 +370,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         auto& Co = CoPtr.ref();
 
         Co.primitiveFieldRef() =
-            mesh_.time().deltaT()*mag(*UNamePtr)/pow(mesh_.V(), 1.0/3.0);
+            mesh_.time().deltaT()*mag(*UNamePtr)/cbrt(mesh_.V());
 
         indicator_ =
             max

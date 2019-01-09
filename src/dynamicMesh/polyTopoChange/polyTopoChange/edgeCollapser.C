@@ -470,8 +470,8 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
         const scalar cellOwnerVol = max(0.0, V[cellOwner[intFacei]]);
         const scalar cellNeighbourVol = max(0.0, V[cellNeighbour[intFacei]]);
 
-        scalar targetFaceSizeA = Foam::pow(cellOwnerVol, 1.0/3.0);
-        scalar targetFaceSizeB = Foam::pow(cellNeighbourVol, 1.0/3.0);
+        scalar targetFaceSizeA = Foam::cbrt(cellOwnerVol);
+        scalar targetFaceSizeB = Foam::cbrt(cellNeighbourVol);
 
         targetFaceSizes[intFacei] = 0.5*(targetFaceSizeA + targetFaceSizeB);
     }
@@ -505,7 +505,7 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
                 const label extFacei = patchFacei + patch.start();
                 const scalar cellOwnerVol = max(0.0, V[cellOwner[extFacei]]);
 
-                targetFaceSizes[extFacei] = Foam::pow(cellOwnerVol, 1.0/3.0);
+                targetFaceSizes[extFacei] = Foam::cbrt(cellOwnerVol);
             }
         }
     }
@@ -526,8 +526,8 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
                 const scalar cellOwnerVol = max(0.0, V[cellOwner[localFacei]]);
                 const scalar cellNeighbourVol = neiCellVolumes[bFacei++];
 
-                scalar targetFaceSizeA = Foam::pow(cellOwnerVol, 1.0/3.0);
-                scalar targetFaceSizeB = Foam::pow(cellNeighbourVol, 1.0/3.0);
+                scalar targetFaceSizeA = Foam::cbrt(cellOwnerVol);
+                scalar targetFaceSizeB = Foam::cbrt(cellNeighbourVol);
 
                 targetFaceSizes[localFacei]
                     = 0.5*(targetFaceSizeA + targetFaceSizeB);

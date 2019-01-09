@@ -73,7 +73,7 @@ Foam::tmp<Foam::volScalarField> Foam::diameterModels::isothermal::d() const
         "p"
     );
 
-    return d0_*pow(p0_/p, 1.0/3.0);
+    return d0_*cbrt(p0_/p);
 }
 
 

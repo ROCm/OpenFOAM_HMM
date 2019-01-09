@@ -120,7 +120,7 @@ Foam::multiphaseMixture::multiphaseMixture
     deltaN_
     (
         "deltaN",
-        1e-8/pow(average(mesh_.V()), 1.0/3.0)
+        1e-8/cbrt(average(mesh_.V()))
     )
 {
     rhoPhi_.setOriented();

@@ -44,9 +44,9 @@ forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
                *max
                 (
                     mag(U()) - maxSlamVelocity,
-                    dimensionedScalar("U0", dimVelocity, 0)
+                    dimensionedScalar("U0", dimVelocity, Zero)
                 )
-               /pow(mesh.V(), 1.0/3.0),
+               /cbrt(mesh.V()),
                 U
             )
         )

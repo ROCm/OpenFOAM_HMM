@@ -94,7 +94,7 @@ eddyDissipationDiffusionModel<ReactionThermo, ThermoType>::rtDiff() const
     );
 
     volScalarField& delta = tdelta.ref();
-    delta.ref() = pow(this->mesh().V(), 1.0/3.0);
+    delta.ref() = cbrt(this->mesh().V());
     delta.correctBoundaryConditions();
 
     // NOTE: Assume Prt = 1

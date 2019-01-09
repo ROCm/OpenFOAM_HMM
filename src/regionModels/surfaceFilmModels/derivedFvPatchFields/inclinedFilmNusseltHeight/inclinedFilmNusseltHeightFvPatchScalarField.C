@@ -179,7 +179,7 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
 
     operator==
     (
-        pow(3*sqr(mup/rhop)/(gTan + ROOTVSMALL), 1.0/3.0)*pow(Re, 1.0/3.0)
+        cbrt(3*sqr(mup/rhop)/(gTan + ROOTVSMALL))*cbrt(Re)
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();
