@@ -487,6 +487,8 @@ public:
         //- Return a const-reference to the dimensioned internal field
         //- of a "vol" field.
         //  Useful in the formulation of source-terms for FV equations
+        //
+        //  \note definition in finiteVolume/fields/volFields/volFieldsI.H
         inline const Internal& v() const;
 
         //- Return a reference to the internal field
@@ -579,22 +581,30 @@ public:
 
     // Member function *this operators
 
+        //- Negate the field inplace
         void negate();
 
+        //- Replace specified field component with content from another field
         void replace
         (
-            const direction,
-            const GeometricField<cmptType, PatchField, GeoMesh>&
+            const direction d,
+            const GeometricField<cmptType, PatchField, GeoMesh>& gcf
         );
 
+        //- Replace specified field component with specified value
         void replace
         (
-            const direction,
-            const dimensioned<cmptType>&
+            const direction d,
+            const dimensioned<cmptType>& ds
         );
 
-        void max(const dimensioned<Type>&);
-        void min(const dimensioned<Type>&);
+        //- Use the minimum of the field and specified value
+        //  This sets the \em ceiling on the field values
+        void min(const dimensioned<Type>& dt);
+
+        //- Use the maximum of the field and specified value
+        //  This sets the \em floor on the field values
+        void max(const dimensioned<Type>& dt);
 
         void maxMin
         (
@@ -602,32 +612,8 @@ public:
             const dimensioned<Type>& maxDt
         );
 
-        void max
-        (
-            const GeometricField<Type, PatchField, GeoMesh>&,
-            const dimensioned<Type>&
-        );
 
-        void min
-        (
-            const GeometricField<Type, PatchField, GeoMesh>&,
-            const dimensioned<Type>&
-        );
-
-        void scale
-        (
-            const GeometricField<Type, PatchField, GeoMesh>&,
-            const GeometricField<Type, PatchField, GeoMesh>&
-        );
-
-        void scale
-        (
-            const GeometricField<Type, PatchField, GeoMesh>&,
-            const dimensioned<Type>&
-        );
-
-
-    // Member operators
+    // Member Operators
 
         //- Return a const-reference to the dimensioned internal field
         //  Useful in the formulation of source-terms for FV equations
