@@ -58,6 +58,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//- Compare two values for equality
 template<class T>
 inline bool equal(const T& s1, const T& s2)
 {
@@ -65,24 +66,25 @@ inline bool equal(const T& s1, const T& s2)
 }
 
 
-#define MAXMINPOW(retType, type1, type2)          \
-                                                  \
-MAXMIN(retType, type1, type2)                     \
-                                                  \
-inline double pow(const type1 s, const type2 e)   \
-{                                                 \
-    return ::pow(double(s), double(e));           \
+#define MAXMINPOW(retType, type1, type2)                \
+                                                        \
+MAXMIN(retType, type1, type2)                           \
+                                                        \
+/** \brief Raise base to the power expon */             \
+inline double pow(const type1 base, const type2 expon)  \
+{                                                       \
+    return ::pow(double(base), double(expon));          \
 }
 
 
 MAXMINPOW(double, double, double)
 MAXMINPOW(double, double, float)
 MAXMINPOW(double, float, double)
-MAXMINPOW(float, float, float)
 MAXMINPOW(double, double, int)
 MAXMINPOW(double, int, double)
 MAXMINPOW(double, double, long)
 MAXMINPOW(double, long, double)
+MAXMINPOW(float, float, float)
 MAXMINPOW(float, float, int)
 MAXMINPOW(float, int, float)
 MAXMINPOW(float, float, long)
