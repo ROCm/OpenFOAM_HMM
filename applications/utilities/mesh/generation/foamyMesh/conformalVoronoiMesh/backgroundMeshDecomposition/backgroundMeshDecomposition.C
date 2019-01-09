@@ -177,7 +177,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     {
                         volumeStatus[celli] = volumeType::MIXED;
                     }
-                    else if (geometry.inside(cellBb.midpoint()))
+                    else if (geometry.inside(cellBb.centre()))
                     {
                         volumeStatus[celli] = volumeType::INSIDE;
                     }
@@ -296,7 +296,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     {
                         volumeStatus[celli] = volumeType::MIXED;
                     }
-                    else if (geometry.inside(cellBb.midpoint()))
+                    else if (geometry.inside(cellBb.centre()))
                     {
                         volumeStatus[celli] = volumeType::INSIDE;
                     }
@@ -578,7 +578,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 //                hitInfo[i].hitPoint()
 //            );
 //
-//            // Info<< "cellBb.midpoint() " << cellBb.midpoint() << nl
+//            // Info<< "cellBb.centre() " << cellBb.centre() << nl
 //            //     << samplePoints[i] << nl
 //            //     << hitInfo[i] << nl
 //            //     << "cellBb.span() " << cellBb.span() << nl
@@ -603,10 +603,9 @@ bool Foam::backgroundMeshDecomposition::refineCell
     else if (volType == volumeType::INSIDE)
     {
         // scalar s =
-        //    foamyHexMesh_.cellShapeControl_.cellSize(cellBb.midpoint());
+        //    foamyHexMesh_.cellShapeControl_.cellSize(cellBb.centre());
 
-        // Estimate the number of points in the cell by the size at the cell
-        // midpoint
+        // Estimate number of points in cell by the size at the cell centre
         // weightEstimate = cellBb.volume()/pow3(s);
 
         return false;

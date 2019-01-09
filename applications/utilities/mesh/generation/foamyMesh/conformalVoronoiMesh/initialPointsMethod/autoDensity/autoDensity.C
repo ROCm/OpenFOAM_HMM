@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,7 @@ addToRunTimeSelectionTable
     autoDensity,
     dictionary
 );
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -242,7 +243,7 @@ Foam::label Foam::autoDensity::recurseAndFill
                 }
             }
         }
-        else if (combinedInside(subBB.midpoint()))
+        else if (combinedInside(subBB.centre()))
         {
             if (debug)
             {
@@ -322,14 +323,14 @@ bool Foam::autoDensity::fillBox
         // Check the nearest point on the surface to the box, if it is far
         // enough away, then the surface sampling of the box can be skipped.
         // Checking if the nearest piece of surface is at least 1.5*bb.span away
-        // from the bb.midpoint.
+        // from the bb.centre()
 
         pointIndexHit surfHit;
         label hitSurface;
 
         geometry.findSurfaceNearest
         (
-            bb.midpoint(),
+            bb.centre(),
             2.25*magSqr(span),
             surfHit,
             hitSurface

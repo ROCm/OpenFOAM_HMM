@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::boundBox
 
 Description
-    A bounding box defined in terms of the points at its extremities.
+    A bounding box defined in terms of min/max extrema points.
 
 Note
     When a bounding box is created without any points, it creates an inverted
@@ -133,8 +133,8 @@ public:
             //- Bounding box is inverted, contains no points.
             inline bool empty() const;
 
-            //- Clear bounding box of all points - make it an inverted box
-            inline void clear();
+            //- Bounding box is non-inverted.
+            inline bool valid() const;
 
             //- Minimum describing the bounding box
             inline const point& min() const;
@@ -148,7 +148,10 @@ public:
             //- Maximum describing the bounding box, non-const access
             inline point& max();
 
-            //- The midpoint of the bounding box
+            //- The centre (midpoint) of the bounding box
+            inline point centre() const;
+
+            //- The midpoint (centre) of the bounding box. Identical to centre()
             inline point midpoint() const;
 
             //- The bounding box span (from minimum to maximum)
@@ -188,6 +191,9 @@ public:
 
 
         // Manipulate
+
+            //- Clear bounding box and make it an inverted box
+            inline void clear();
 
             //- Extend to include the second box.
             inline void add(const boundBox& bb);
@@ -230,6 +236,7 @@ public:
 
             //- Parallel reduction of min/max values
             void reduce();
+
 
         // Query
 

@@ -357,7 +357,7 @@ Foam::volumeType Foam::dynamicIndexedOctree<Type>::calcVolumeType
 
             subType = volumeType
             (
-                shapes_.getVolumeType(*this, subBb.midpoint())
+                shapes_.getVolumeType(*this, subBb.centre())
             );
         }
 

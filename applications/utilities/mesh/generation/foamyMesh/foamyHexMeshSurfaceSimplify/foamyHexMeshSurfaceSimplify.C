@@ -199,7 +199,7 @@ public:
 
 
             ////- Surface intersects bb (but not using intersection test)
-            //scalar ccDist = signedDistance(bb.midpoint());
+            //scalar ccDist = signedDistance(bb.centre());
             //scalar ccVal = ccDist - _iso_val;
             //if (mag(ccVal) < SMALL)
             //{

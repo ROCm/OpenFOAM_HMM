@@ -72,14 +72,16 @@ void Foam::boundBox::add
     const label len = points.size();
 
     // Skip if points is empty
-    if (len)
+    if (!len)
     {
-        for (const label pointi : indices)
+        return;
+    }
+
+    for (const label pointi : indices)
+    {
+        if (pointi >= 0 && pointi < len)
         {
-            if (pointi >= 0 && pointi < len)
-            {
-                add(points[pointi]);
-            }
+            add(points[pointi]);
         }
     }
 }
@@ -95,14 +97,16 @@ void Foam::boundBox::add
     const label len = points.size();
 
     // Skip if points is empty
-    if (len)
+    if (!len)
     {
-        for (const label pointi : indices)
+        return;
+    }
+
+    for (const label pointi : indices)
+    {
+        if (pointi >= 0 && pointi < len)
         {
-            if (pointi >= 0 && pointi < len)
-            {
-                add(points[pointi]);
-            }
+            add(points[pointi]);
         }
     }
 }

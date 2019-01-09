@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1460,7 +1460,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
         DynamicList<label> trimTriMap;
         // Trimmed to original point
         labelList trimTriPointMap;
-        if (!bounds_.empty())
+        if (bounds_.valid())
         {
             isoSurface::trimToBox
             (
@@ -1492,7 +1492,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
                 << " merged triangles." << endl;
         }
 
-        if (!bounds_.empty())
+        if (bounds_.valid())
         {
             // Adjust interpolatedPoints_
             inplaceRenumber(triPointMergeMap_, interpolatedPoints_);

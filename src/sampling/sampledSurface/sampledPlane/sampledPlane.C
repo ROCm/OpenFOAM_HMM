@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,7 +147,7 @@ Foam::sampledPlane::sampledPlane
             << " origin:" << origin()
             << " normal:" << normal();
 
-        if (!bounds_.empty())
+        if (bounds_.valid())
         {
             Info<< " bounds:" << bounds_;
         }

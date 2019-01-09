@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1985,7 +1985,7 @@ Foam::triSurface Foam::distributedTriSurfaceMesh::overlappingSurface
     const scalar eps = 1.0e-4;
     forAll(bbs, i)
     {
-        const point mid = bbs[i].midpoint();
+        const point mid = bbs[i].centre();
         const vector halfSpan = (1.0+eps)*(bbs[i].max() - mid);
 
         bbsX[i].min() = mid - halfSpan;

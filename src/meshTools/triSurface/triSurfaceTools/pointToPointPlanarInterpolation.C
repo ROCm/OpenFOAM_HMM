@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -195,7 +195,7 @@ void Foam::pointToPointPlanarInterpolation::calcWeights
         auto& localVertices = tlocalVertices.ref();
 
         const boundBox bb(localVertices, true);
-        const point bbMid(bb.midpoint());
+        const point bbMid(bb.centre());
 
         if (debug)
         {

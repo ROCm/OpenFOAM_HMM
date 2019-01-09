@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ void Foam::cuttingSurfaceBase::checkOverlap
 )
 {
     // User bounding-box does not overlap with (global) mesh!
-    if (!userBounds.empty() && !userBounds.overlaps(meshBounds))
+    if (userBounds.valid() && !userBounds.overlaps(meshBounds))
     {
         WarningInFunction
             << nl << callerName

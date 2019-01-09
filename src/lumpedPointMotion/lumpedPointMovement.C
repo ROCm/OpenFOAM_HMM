@@ -351,7 +351,7 @@ void Foam::lumpedPointMovement::setBoundBox
 
     if (autoCentre_)
     {
-        centre_ = boundBox_.midpoint();
+        centre_ = boundBox_.centre();
         centre_ -= (centre_ & axis_) * axis_;
         if (lumpedPointIOMovement::debug)
         {

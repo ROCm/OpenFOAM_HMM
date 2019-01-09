@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ void Foam::sampledCuttingPlane::checkBoundsIntersection
 ) const
 {
     // Verify specified bounding box
-    if (!bounds_.empty())
+    if (bounds_.valid())
     {
         // Bounding box does not overlap with (global) mesh!
         if (!bounds_.overlaps(meshBb))
@@ -132,7 +132,7 @@ void Foam::sampledCuttingPlane::createGeometry()
 
         // If we will use a fvMeshSubset so can apply bounds as well to make
         // the initial selection smaller.
-        if (!bounds_.empty() && cellsToSelect.any())
+        if (bounds_.valid() && cellsToSelect.any())
         {
             const auto& cellCentres = fvm.C();
 

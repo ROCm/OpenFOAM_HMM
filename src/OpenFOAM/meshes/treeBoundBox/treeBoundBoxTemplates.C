@@ -41,10 +41,7 @@ Foam::treeBoundBox::treeBoundBox
     if (points.empty())
     {
         WarningInFunction
-            << "cannot find bounding box for zero-sized pointField, "
-            << "returning zero" << endl;
-
-        return;
+            << "No bounding box for zero-sized pointField" << nl;
     }
 }
 

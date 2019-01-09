@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 
     pointField newPoints(mesh.points());
 
-    const point half = meshBb.midpoint();
+    const point half = meshBb.centre();
 
     forAll(newPoints, pointi)
     {

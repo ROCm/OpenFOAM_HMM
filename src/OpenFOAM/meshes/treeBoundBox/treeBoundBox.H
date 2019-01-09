@@ -25,7 +25,7 @@ Class
     Foam::treeBoundBox
 
 Description
-    Standard boundBox + extra functionality for use in octree.
+    Standard boundBox with extra functionality for use in octree.
 
     Numbering of corner points is according to octant numbering.
 
@@ -153,7 +153,7 @@ public:
 
     // Constructors
 
-        //- Construct null setting points to zero
+        //- Construct without any points - an inverted bounding box
         inline treeBoundBox();
 
         //- Construct from a boundBox
