@@ -421,8 +421,8 @@ Foam::Istream& Foam::dimensionSet::read
     if (startToken != token::BEGIN_SQR)
     {
         FatalIOErrorInFunction(is)
-            << "Expected a " << token::BEGIN_SQR << " in dimensionSet"
-            << endl << "in stream " << is.info()
+            << "Expected a '" << token::BEGIN_SQR << "' in dimensionSet\n"
+            << "in stream " << is.info() << nl
             << exit(FatalIOError);
     }
 
@@ -444,7 +444,7 @@ Foam::Istream& Foam::dimensionSet::read
     {
         // Read first five dimensions
         exponents_[dimensionSet::MASS] = nextToken.number();
-        for (int d=1; d<dimensionSet::CURRENT; ++d)
+        for (int d=1; d < dimensionSet::CURRENT; ++d)
         {
             is >> exponents_[d];
         }
@@ -472,8 +472,8 @@ Foam::Istream& Foam::dimensionSet::read
         if (nextToken != token::END_SQR)
         {
             FatalIOErrorInFunction(is)
-                << "Expected a " << token::END_SQR << " in dimensionSet "
-                << endl << "in stream " << is.info()
+                << "Expected a '" << token::END_SQR << "' in dimensionSet\n"
+                << "in stream " << is.info() << nl
                 << exit(FatalIOError);
         }
     }
@@ -508,8 +508,8 @@ Foam::Istream& Foam::dimensionSet::read
     if (startToken != token::BEGIN_SQR)
     {
         FatalIOErrorInFunction(is)
-            << "Expected a " << token::BEGIN_SQR << " in dimensionSet"
-            << endl << "in stream " << is.info()
+            << "Expected a '" << token::BEGIN_SQR << "' in dimensionSet\n"
+            << "in stream " << is.info() << nl
             << exit(FatalIOError);
     }
 
@@ -606,8 +606,8 @@ Foam::Istream& Foam::dimensionSet::read
         if (nextToken != token::END_SQR)
         {
             FatalIOErrorInFunction(is)
-                << "Expected a " << token::END_SQR << " in dimensionSet " << nl
-                << "in stream " << is.info() << endl
+                << "Expected a '" << token::END_SQR << "' in dimensionSet\n"
+                << "in stream " << is.info() << nl
                 << exit(FatalIOError);
         }
     }
@@ -631,7 +631,7 @@ Foam::Ostream& Foam::dimensionSet::write
     if (writeUnits.valid() && os.format() == IOstream::ASCII)
     {
         scalarField exponents(dimensionSet::nDimensions);
-        for (int d=0; d<dimensionSet::nDimensions; ++d)
+        for (int d=0; d < dimensionSet::nDimensions; ++d)
         {
             exponents[d] = exponents_[d];
         }
@@ -675,7 +675,7 @@ Foam::Ostream& Foam::dimensionSet::write
     }
     else
     {
-        for (int d=0; d<dimensionSet::nDimensions; ++d)
+        for (int d=0; d < dimensionSet::nDimensions; ++d)
         {
             if (d) os << token::SPACE;
             os << exponents_[d];

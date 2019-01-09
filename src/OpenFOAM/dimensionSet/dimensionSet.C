@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,33 @@ namespace Foam
 }
 
 const Foam::scalar Foam::dimensionSet::smallExponent = SMALL;
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+static inline bool checkDims
+(
+    const char* what,
+    const dimensionSet& a,
+    const dimensionSet& b
+)
+{
+    if (a != b)
+    {
+        FatalErrorInFunction
+            << "Different dimensions for '" << what
+            << "'\n     dimensions : " << a << " != " << b << nl
+            << abort(FatalError);
+        return false;
+    }
+
+    return true;
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -166,12 +193,9 @@ bool Foam::dimensionSet::operator!=(const dimensionSet& ds) const
 
 bool Foam::dimensionSet::operator=(const dimensionSet& ds) const
 {
-    if (dimensionSet::debug && *this != ds)
+    if (dimensionSet::debug)
     {
-        FatalErrorInFunction
-            << "Different dimensions for =" << nl
-            << "     dimensions : " << *this << " = " << ds << endl
-            << abort(FatalError);
+        checkDims("(a = b)", *this, ds);
     }
 
     return true;
@@ -180,12 +204,9 @@ bool Foam::dimensionSet::operator=(const dimensionSet& ds) const
 
 bool Foam::dimensionSet::operator+=(const dimensionSet& ds) const
 {
-    if (dimensionSet::debug && *this != ds)
+    if (dimensionSet::debug)
     {
-        FatalErrorInFunction
-            << "Different dimensions for +=" << nl
-            << "     dimensions : " << *this << " = " << ds << endl
-            << abort(FatalError);
+        checkDims("(a += b)", *this, ds);
     }
 
     return true;
@@ -194,12 +215,9 @@ bool Foam::dimensionSet::operator+=(const dimensionSet& ds) const
 
 bool Foam::dimensionSet::operator-=(const dimensionSet& ds) const
 {
-    if (dimensionSet::debug && *this != ds)
+    if (dimensionSet::debug)
     {
-        FatalErrorInFunction
-            << "Different dimensions for -=" << nl
-            << "     dimensions : " << *this << " = " << ds << endl
-            << abort(FatalError);
+        checkDims("(a -= b)", *this, ds);
     }
 
     return true;
@@ -226,12 +244,9 @@ bool Foam::dimensionSet::operator/=(const dimensionSet& ds)
 
 Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
 {
-    if (dimensionSet::debug && ds1 != ds2)
+    if (dimensionSet::debug)
     {
-        FatalErrorInFunction
-            << "Arguments of min have different dimensions" << nl
-            << "     dimensions : " << ds1 << " and " << ds2 << endl
-            << abort(FatalError);
+        checkDims("min(a, b)", ds1, ds2);
     }
 
     return ds1;
@@ -240,12 +255,20 @@ Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
 
 Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
 {
-    if (dimensionSet::debug && ds1 != ds2)
+    if (dimensionSet::debug)
     {
-        FatalErrorInFunction
-            << "Arguments of max have different dimensions" << nl
-            << "     dimensions : " << ds1 << " and " << ds2 << endl
-            << abort(FatalError);
+        checkDims("max(a, b)", ds1, ds2);
+    }
+
+    return ds1;
+}
+
+
+Foam::dimensionSet Foam::clip(const dimensionSet& ds1, const dimensionSet& ds2)
+{
+    if (dimensionSet::debug)
+    {
+        checkDims("clip(a, b)", ds1, ds2);
     }
 
     return ds1;
@@ -464,12 +487,9 @@ Foam::dimensionSet Foam::trans(const dimensionSet& ds)
 
 Foam::dimensionSet Foam::atan2(const dimensionSet& ds1, const dimensionSet& ds2)
 {
-    if (dimensionSet::debug && ds1 != ds2)
+    if (dimensionSet::debug)
     {
-        FatalErrorInFunction
-            << "Arguments of atan2 have different dimensions" << nl
-            << "     dimensions : " << ds1 << " and " << ds2 << endl
-            << abort(FatalError);
+        checkDims("atan2(a, b)", ds1, ds2);
     }
 
     return dimless;
@@ -508,12 +528,9 @@ Foam::dimensionSet Foam::operator+
     const dimensionSet& ds2
 )
 {
-    if (dimensionSet::debug && ds1 != ds2)
+    if (dimensionSet::debug)
     {
-        FatalErrorInFunction
-            << "LHS and RHS of '+' have different dimensions" << nl
-            << "     dimensions : " << ds1 << " + " << ds2 << endl
-            << abort(FatalError);
+        checkDims("(a + b)", ds1, ds2);
     }
 
     return ds1;
@@ -526,12 +543,9 @@ Foam::dimensionSet Foam::operator-
     const dimensionSet& ds2
 )
 {
-    if (dimensionSet::debug && ds1 != ds2)
+    if (dimensionSet::debug)
     {
-        FatalErrorInFunction
-            << "LHS and RHS of '-' have different dimensions" << nl
-            << "     dimensions : " << ds1 << " - " << ds2 << endl
-            << abort(FatalError);
+        checkDims("(a - b)", ds1, ds2);
     }
 
     return ds1;

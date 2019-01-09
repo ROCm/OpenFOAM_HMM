@@ -47,14 +47,49 @@ inline scalar readNasScalar(const std::string& str)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class TYPE>
+template<class T>
+bool hadParsingError
+(
+    const std::pair<bool, std::string>& input,
+    const std::pair<bool, T>& result,
+    std::string errMsg
+)
+{
+    if (result.first)
+    {
+        if (input.first)
+        {
+            Info<< "(pass) parsed "
+                << input.second << " = " << result.second << nl;
+        }
+        else
+        {
+            Info<< "(fail) unexpected success for " << input.second << nl;
+        }
+    }
+    else
+    {
+        if (input.first)
+        {
+            Info<< "(fail) unexpected";
+        }
+        else
+        {
+            Info<< "(pass) expected";
+        }
+
+        Info<< " failure " << input.second << "  >> " << errMsg.c_str() << nl;
+    }
+
+    return (input.first != result.first);
+}
+
+
+template<class T>
 unsigned testParsing
 (
-    TYPE (*function)(const std::string&),
-    std::initializer_list
-    <
-        Tuple2<bool, std::string>
-    > tests
+    T (*function)(const std::string&),
+    std::initializer_list<std::pair<bool, std::string>> tests
 )
 {
     unsigned nFail = 0;
@@ -63,51 +98,26 @@ unsigned testParsing
     // Expect some failures
     const bool prev = FatalIOError.throwExceptions();
 
-    for (const Tuple2<bool, std::string>& test : tests)
+    for (const std::pair<bool, std::string>& test : tests)
     {
-        const bool expected = test.first();
-        const std::string& str = test.second();
+        std::pair<bool, T> result(false, T());
 
-        bool parsed = true;
-
-        TYPE val;
         try
         {
-            val = function (str);
+            result.second = function (test.second);
+            result.first = true;
         }
         catch (Foam::error& err)
         {
-            parsed = false;
             errMsg = err.message();
         }
 
-        if (parsed)
+        if (test.first != result.first)
         {
-            if (expected)
-            {
-                Info<< "(pass) parsed " << str << " = " << val << nl;
-            }
-            else
-            {
-                ++nFail;
-                Info<< "(fail) unexpected success for " << str << nl;
-            }
+            ++nFail;
         }
-        else
-        {
-            if (expected)
-            {
-                ++nFail;
-                Info<< "(fail) unexpected";
-            }
-            else
-            {
-                Info<< "(pass) expected";
-            }
 
-            Info<< " failure " << str
-                << "  >> " << errMsg.c_str() << nl;
-        }
+        hadParsingError(test, result, errMsg);
     }
 
     FatalIOError.throwExceptions(prev);

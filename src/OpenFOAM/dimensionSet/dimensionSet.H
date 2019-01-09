@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,10 +70,8 @@ public:
 
     // Member Constants
 
-        enum
-        {
-            nDimensions = 7     //!< 7 base dimensions
-        };
+        //- There are 7 base dimensions
+        static constexpr int nDimensions = 7;
 
         //- Enumeration for the dimension exponents
         enum dimensionType
@@ -88,8 +86,9 @@ public:
         };
 
 
-    // Static data members
+    // Static Data Members
 
+        //- Tolerance for 'small' exponents, for near-zero rounding
         static const scalar smallExponent;
 
 
@@ -216,6 +215,7 @@ public:
         //- Return non-const access to the exponents as a list
         FixedList<scalar,7>& values();
 
+        //- Copy assign the exponents from the dimensionSet
         void reset(const dimensionSet& ds);
 
 
@@ -291,6 +291,7 @@ Ostream& operator<<(Ostream& os, const dimensionSet& ds);
 
 dimensionSet min(const dimensionSet& ds1, const dimensionSet& ds2);
 dimensionSet max(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet clip(const dimensionSet& ds1, const dimensionSet& ds2);
 
 dimensionSet cmptMultiply(const dimensionSet& ds1, const dimensionSet& ds2);
 dimensionSet cmptDivide(const dimensionSet& ds1, const dimensionSet& ds2);
