@@ -62,7 +62,7 @@ template<class T, unsigned N>
 Foam::Ostream& Foam::FixedList<T, N>::writeList
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
     const FixedList<T, N>& list = *this;
@@ -77,8 +77,16 @@ Foam::Ostream& Foam::FixedList<T, N>::writeList
     {
         if
         (
-            N <= 1 || !shortListLen
-         || (N <= unsigned(shortListLen) && contiguous<T>())
+            (N <= 1 || !shortLen)
+         ||
+            (
+                (N <= unsigned(shortLen))
+             &&
+                (
+                    Detail::ListPolicy::no_linebreak<T>::value
+                 || contiguous<T>()
+                )
+            )
         )
         {
             // Start delimiter

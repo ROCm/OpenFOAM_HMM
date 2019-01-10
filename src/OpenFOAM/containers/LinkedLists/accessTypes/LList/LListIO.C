@@ -130,15 +130,15 @@ template<class LListBase, class T>
 Foam::Ostream& Foam::LList<LListBase, T>::writeList
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
     const label len = this->size();
 
     if
     (
-        len <= 1 || !shortListLen
-     || (len <= shortListLen)
+        (len <= 1 || !shortLen)
+     || (len <= shortLen)
     )
     {
         // Size and start delimiter
@@ -179,7 +179,7 @@ Foam::Ostream& Foam::LList<LListBase, T>::writeList
 template<class LListBase, class T>
 Foam::Ostream& Foam::operator<<(Ostream& os, const LList<LListBase, T>& lst)
 {
-    return lst.writeList(os, -1);  // always with line breaks
+    return lst.writeList(os, -1);  // Always with line breaks
 }
 
 

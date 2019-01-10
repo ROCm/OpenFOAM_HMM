@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +50,6 @@ namespace Foam
 
 // Forward declarations
 template<class T> class UIndirectList;
-template<class T> Ostream& operator<<(Ostream&, const UIndirectList<T>&);
 
 // Commonly required list types
 typedef UIndirectList<bool> boolUIndList;
@@ -320,21 +319,21 @@ public:
 
     // Writing
 
-        //- Write the list, with line-breaks in ASCII if its length
-        //- exceeds shortListLen.
+        //- Write List, with line-breaks in ASCII when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
-
-
-    // Ostream operator
-
-        //- Write list to Ostream, as per writeList() with shortListLen=10
-        friend Ostream& operator<< <T>
-        (
-            Ostream& os,
-            const UIndirectList<T>& list
-        );
+        Ostream& writeList(Ostream& os, const label shortLen=0) const;
 };
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Write List to Ostream, as per UList::writeList() with default length.
+//  The default short-length is given by Detail::ListPolicy::short_length
+template<class T>
+Ostream& operator<<(Ostream& os, const UIndirectList<T>& list)
+{
+    return list.writeList(os, Detail::ListPolicy::short_length<T>::value);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

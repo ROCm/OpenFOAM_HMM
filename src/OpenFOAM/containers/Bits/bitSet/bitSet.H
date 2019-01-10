@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -541,10 +541,9 @@ public:
 
     // IO
 
-        //- Write the bitSet, with line-breaks in ASCII if the size
-        //- exceeds shortListLen.
+        //- Write bitSet, with line-breaks (ASCII) when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
         //- Write as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
@@ -561,7 +560,7 @@ public:
 
     // Housekeeping
 
-        //- \deprecated(2018-04) compatibility name for PackedBoolList
+        //- Deprecated(2018-04) compatibility name for PackedBoolList
         //  \deprecated(2018-04) - use toc() method
         inline labelList used() const { return toc(); }
 
@@ -570,8 +569,12 @@ public:
 
 // Global Operators
 
-Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
+//- Write bitset to Ostream, as per bitSet::writeList() with default length
+//- of 40 items.
 Ostream& operator<<(Ostream& os, const bitSet& bitset);
+
+//- Output bitset information
+Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
 
 
 //- Bitwise-AND of two bitsets.

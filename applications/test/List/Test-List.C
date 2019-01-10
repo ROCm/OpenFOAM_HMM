@@ -46,6 +46,7 @@ See also
 #include "HashOps.H"
 #include "ListOps.H"
 #include "SubList.H"
+#include "ListPolicy.H"
 
 #include <list>
 #include <numeric>
@@ -64,7 +65,20 @@ public:
     using List<string>::List;
 };
 
+
+
+namespace Detail
+{
+namespace ListPolicy
+{
+
+// Override on a per-type basis
+template<> struct short_length<short> : std::integral_constant<short,20> {};
+
+} // End namespace ListPolicy
+} // End namespace Detail
 } // End namespace Foam
+
 
 
 using namespace Foam;
@@ -89,6 +103,20 @@ void printMyString(const UList<string>& lst)
     MyStrings slist2(lst);
 
     Info<<slist2 << nl;
+}
+
+
+template<class T>
+Ostream& printListOutputType(const char* what)
+{
+    Info<< what
+        << " (contiguous="
+        << contiguous<T>() << " no_linebreak="
+        << Detail::ListPolicy::no_linebreak<T>::value
+        << " short_length="
+        << Detail::ListPolicy::short_length<T>::value << ')';
+
+    return Info;
 }
 
 
@@ -251,11 +279,21 @@ int main(int argc, char *argv[])
 
         Info<<"scalar identity:" << flatOutput(slist) << endl;
 
-        Info<< "labels (contiguous=" << contiguous<label>() << ")" << nl;
+        printListOutputType<label>("labels") << nl;
 
         Info<< "normal: " << longLabelList << nl;
         Info<< "flatOutput: " << flatOutput(longLabelList) << nl;
         // Info<< "flatOutput(14): " << flatOutput(longLabelList, 14) << nl;
+
+        auto shrtList = ListOps::create<short>
+        (
+            longLabelList,
+            [](const label& val){ return val; }
+        );
+
+        printListOutputType<short>("short") << nl;
+        Info<< "normal: " << shrtList << nl;
+
 
         stringList longStringList(12);
         forAll(longStringList, i)
@@ -263,11 +301,32 @@ int main(int argc, char *argv[])
             longStringList[i].resize(3, 'a' + i);
         }
 
-        Info<< "string (contiguous=" << contiguous<string>() << ")" << nl;
+        printListOutputType<string>("string") << nl;
 
         Info<< "normal: " << longStringList << nl;
         Info<< "flatOutput: " << flatOutput(longStringList) << nl;
-        // contiguous longStringList[i].resize(3, 'a' + i);
+
+        auto wList = ListOps::create<word>
+        (
+            longStringList,
+            [](const std::string& val){ return val; }
+        );
+
+        printListOutputType<word>("word") << nl;
+
+        Info<< "normal: " << wList << nl;
+
+        // Shorten
+        longStringList.resize(8);
+        wList.resize(8);
+
+        Info<< "Test shorter lists" << nl;
+
+        printListOutputType<string>("string") << nl;
+        Info<< "normal: " << longStringList << nl;
+
+        printListOutputType<word>("word") << nl;
+        Info<< "normal: " << wList << nl;
     }
 
     // test SubList and labelRange

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,7 @@ SourceFiles
 #include "stdFoam.H"
 #include "Swap.H"
 #include "HashFwd.H"
+#include "ListPolicy.H"
 
 #include <initializer_list>
 #include <iterator>
@@ -66,8 +67,8 @@ class labelRange;
 template<class T> class List;
 template<class T> class SubList;
 template<class T> class UList;
-template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 template<class T> Istream& operator>>(Istream&, UList<T>&);
+template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 
 // Common list types
 typedef UList<char> charUList;
@@ -471,20 +472,12 @@ public:
         //- Write the List as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
 
-        //- Write the List, with line-breaks in ASCII if the list length
-        //- exceeds shortListLen.
+        //- Write List, with line-breaks in ASCII when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
 
-    // IOstream operators
-
-        //- Write List to Ostream, as per writeList() with shortListLen=10
-        friend Ostream& operator<< <T>
-        (
-            Ostream& os,
-            const UList<T>& list
-        );
+    // IOstream Operators
 
         //- Read List contents from Istream.
         //  Requires size to have been set before
@@ -560,6 +553,17 @@ public:
             }
         };
 };
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Write List to Ostream, as per UList::writeList() with default length.
+//  The default short-length is given by Detail::ListPolicy::short_length
+template<class T>
+Ostream& operator<<(Ostream& os, const UList<T>& list)
+{
+    return list.writeList(os, Detail::ListPolicy::short_length<T>::value);
+}
 
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //

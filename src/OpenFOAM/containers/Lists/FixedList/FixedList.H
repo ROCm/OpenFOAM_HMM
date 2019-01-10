@@ -46,6 +46,7 @@ SourceFiles
 #include "Swap.H"
 #include "HashFwd.H"
 #include "SLListFwd.H"
+#include "ListPolicy.H"
 
 #include <initializer_list>
 #include <iterator>
@@ -400,8 +401,7 @@ public:
         //- Write the list as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
 
-        //- Write the list, with line-breaks in ASCII if the length
-        //- exceeds shortLen.
+        //- Write List, with line-breaks in ASCII when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
@@ -480,11 +480,12 @@ struct Hash<FixedList<T, N>>
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-//- Write to Ostream, as per FixedList::writeList() with shortLen=10
+//- Write List to Ostream, as per FixedList::writeList() with default length.
+//  The default short-length is given by Detail::ListPolicy::short_length
 template<class T, unsigned N>
 Ostream& operator<<(Ostream& os, const FixedList<T, N>& list)
 {
-    return list.writeList(os, 10);
+    return list.writeList(os, Detail::ListPolicy::short_length<T>::value);
 }
 
 

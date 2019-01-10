@@ -115,7 +115,7 @@ template<class T, class Key, class Hash>
 Foam::Ostream& Foam::HashTable<T, Key, Hash>::writeKeys
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
     // Similar to UList::writeList version except the following:
@@ -124,7 +124,11 @@ Foam::Ostream& Foam::HashTable<T, Key, Hash>::writeKeys
 
     label i = this->size();
 
-    if (i <= 1 || !shortListLen || (i <= shortListLen))
+    if
+    (
+        (i <= 1 || !shortLen)
+     || (i <= shortLen)
+    )
     {
         // Write size and start delimiter
         os << i << token::BEGIN_LIST;

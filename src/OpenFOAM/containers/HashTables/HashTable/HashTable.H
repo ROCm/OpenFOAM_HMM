@@ -870,10 +870,10 @@ public:
         //- Print information
         Ostream& printInfo(Ostream& os) const;
 
-        //- Write the unordered keys as a list, with line-breaks if list length
-        //- exceeds shortListLen.
+        //- Write unordered keys (list), with line-breaks
+        //- when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeKeys(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeKeys(Ostream& os, const label shortLen=0) const;
 
 
     // IOstream Operator

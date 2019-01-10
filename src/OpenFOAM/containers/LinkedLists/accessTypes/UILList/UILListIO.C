@@ -33,15 +33,15 @@ template<class LListBase, class T>
 Foam::Ostream& Foam::UILList<LListBase, T>::writeList
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
     const label len = this->size();
 
     if
     (
-        len <= 1 || !shortListLen
-     || (len <= shortListLen)
+        (len <= 1 || !shortLen)
+     || (len <= shortLen)
     )
     {
         // Size and start delimiter

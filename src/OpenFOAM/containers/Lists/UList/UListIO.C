@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ template<class T>
 Foam::Ostream& Foam::UList<T>::writeList
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
     const UList<T>& list = *this;
@@ -88,8 +88,16 @@ Foam::Ostream& Foam::UList<T>::writeList
         }
         else if
         (
-            len <= 1 || !shortListLen
-         || (len <= shortListLen && contiguous<T>())
+            (len <= 1 || !shortLen)
+         ||
+            (
+                (len <= shortLen)
+             &&
+                (
+                    Detail::ListPolicy::no_linebreak<T>::value
+                 || contiguous<T>()
+                )
+            )
         )
         {
             // Size and start delimiter
@@ -141,14 +149,7 @@ Foam::Ostream& Foam::UList<T>::writeList
 }
 
 
-// * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
-
-template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const UList<T>& list)
-{
-    return list.writeList(os, 10);
-}
-
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T>
 Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)

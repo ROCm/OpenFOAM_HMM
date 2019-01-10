@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -400,10 +400,9 @@ public:
         //- Clear list and read from stream
         Istream& read(Istream& is);
 
-        //- Write the List, with line-breaks in ASCII if the list length
-        //- exceeds shortListLen.
+        //- Write List, with line-breaks in ASCII when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
         //- Write as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
@@ -492,13 +491,18 @@ public:
             Istream& is,
             PackedList<Width>& list
         );
-
-        friend Ostream& operator<< <Width>
-        (
-            Ostream& os,
-            const PackedList<Width>& list
-        );
 };
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Write List to Ostream, as per UList::writeList() with default length.
+//  The default short-length is given by Detail::ListPolicy::short_length
+template<unsigned Width>
+Ostream& operator<<(Ostream& os, const PackedList<Width>& list)
+{
+    return list.writeList(os, Detail::ListPolicy::short_length<void>::value);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

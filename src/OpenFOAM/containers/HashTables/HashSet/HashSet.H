@@ -290,12 +290,12 @@ public:
 
     // Writing
 
-        //- Write the unordered keys as a list, with line-breaks if list length
-        //- exceeds shortListLen.
+        //- Write unordered keys (list), with line-breaks
+        //- when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const
+        Ostream& writeList(Ostream& os, const label shortLen=0) const
         {
-            return this->writeKeys(os, shortListLen);
+            return this->writeKeys(os, shortLen);
         }
 
 
