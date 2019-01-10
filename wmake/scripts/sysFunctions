@@ -71,16 +71,16 @@ then
     }
 
 
-    # True if '$1' is an empty string or matches "*-none".
+    # True if '$1' is an empty string, "none" or ends in "-none"
     # Eg,
-    #    if isNone "$KAHIP_ARCH_PATH" ...
+    #    if isNone "$BOOST_ARCH_PATH" ...
     isNone()
     {
         test -z "$1" -o "${1##*-}" = none
     }
 
 
-    # True if '$1' matches "*-system"
+    # True if '$1' is "system" or ends in "-system"
     # Eg,
     #    if isSystem "$BOOST_ARCH_PATH"
     isSystem()

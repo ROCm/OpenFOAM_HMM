@@ -180,6 +180,7 @@ have_pvplugin_support()
         return 2
     }
 
+    # OK
     export HAVE_PVPLUGIN_SUPPORT=true
     export FOAM_PV_PLUGIN_LIBBIN="$targetDir"
     export PARAVIEW_API="$pv_api"
