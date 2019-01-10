@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,79 +33,70 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class TypeR>
-tmp<Field<TypeR>> New
-(
-    const tmp<Field<TypeR>>& tf1,
-    const bool initRet = false
-)
-{
-    if (tf1.isTmp())
-    {
-        return tf1;
-    }
-
-    tmp<Field<TypeR>> rtf(new Field<TypeR>(tf1().size()));
-
-    if (initRet)
-    {
-        rtf.ref() = tf1();
-    }
-
-    return rtf;
-}
-
-
 template<class TypeR, class Type1>
-class reuseTmp
+struct reuseTmp
 {
-public:
-
     static tmp<Field<TypeR>> New(const tmp<Field<Type1>>& tf1)
     {
-        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
+        return tmp<Field<TypeR>>::New(tf1().size());
     }
 };
 
 
 template<class TypeR>
-class reuseTmp<TypeR, TypeR>
+struct reuseTmp<TypeR, TypeR>
 {
-public:
-
-    static tmp<Field<TypeR>> New(const tmp<Field<TypeR>>& tf1)
+    static tmp<Field<TypeR>> New
+    (
+        const tmp<Field<TypeR>>& tf1,
+        const bool initCopy = false
+    )
     {
         if (tf1.isTmp())
         {
             return tf1;
         }
 
-        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
+        auto rtf = tmp<Field<TypeR>>::New(tf1().size());
+
+        if (initCopy)
+        {
+            rtf.ref() = tf1();
+        }
+
+        return rtf;
     }
 };
 
 
-template<class TypeR, class Type1, class Type12, class Type2>
-class reuseTmpTmp
+//- This global function forwards to reuseTmp::New
+template<class TypeR> tmp<Field<TypeR>> New
+(
+    const tmp<Field<TypeR>>& tf1,
+    const bool initCopy = false
+)
 {
-public:
+    return reuseTmp<TypeR, TypeR>::New(tf1, initCopy);
+}
 
+
+template<class TypeR, class Type1, class Type12, class Type2>
+struct reuseTmpTmp
+{
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<Type1>>& tf1,
         const tmp<Field<Type2>>& tf2
     )
     {
-        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
+        return tmp<Field<TypeR>>::New(tf1().size());
     }
 };
 
 
 template<class TypeR, class Type1, class Type12>
-class reuseTmpTmp<TypeR, Type1, Type12, TypeR>
+struct reuseTmpTmp<TypeR, Type1, Type12, TypeR>
 {
-public:
-
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<Type1>>& tf1,
@@ -117,16 +108,14 @@ public:
             return tf2;
         }
 
-        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
+        return tmp<Field<TypeR>>::New(tf1().size());
     }
 };
 
 
 template<class TypeR, class Type2>
-class reuseTmpTmp<TypeR, TypeR, TypeR, Type2>
+struct reuseTmpTmp<TypeR, TypeR, TypeR, Type2>
 {
-public:
-
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<TypeR>>& tf1,
@@ -138,16 +127,14 @@ public:
             return tf1;
         }
 
-        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
+        return tmp<Field<TypeR>>::New(tf1().size());
     }
 };
 
 
 template<class TypeR>
-class reuseTmpTmp<TypeR, TypeR, TypeR, TypeR>
+struct reuseTmpTmp<TypeR, TypeR, TypeR, TypeR>
 {
-public:
-
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<TypeR>>& tf1,
@@ -163,7 +150,7 @@ public:
             return tf2;
         }
 
-        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
+        return tmp<Field<TypeR>>::New(tf1().size());
     }
 };
 

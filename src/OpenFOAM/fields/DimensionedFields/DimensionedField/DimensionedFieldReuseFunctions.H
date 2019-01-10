@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,47 +33,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class TypeR, class GeoMesh>
-tmp<DimensionedField<TypeR, GeoMesh>> New
-(
-    const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
-    const word& name,
-    const dimensionSet& dimensions
-)
-{
-    if (tdf1.isTmp())
-    {
-        auto& df1 = tdf1.constCast();
-
-        df1.rename(name);
-        df1.dimensions().reset(dimensions);
-        return tdf1;
-    }
-
-    const auto& df1 = tdf1();
-
-    return tmp<DimensionedField<TypeR, GeoMesh>>
-    (
-        new DimensionedField<TypeR, GeoMesh>
-        (
-            IOobject
-            (
-                name,
-                df1.instance(),
-                df1.db()
-            ),
-            df1.mesh(),
-            dimensions
-        )
-    );
-}
-
-
 template<class TypeR, class Type1, class GeoMesh>
-class reuseTmpDimensionedField
+struct reuseTmpDimensionedField
 {
-public:
-
     static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
         const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,
@@ -83,29 +45,24 @@ public:
     {
         const auto& df1 = tdf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>
+        return tmp<DimensionedField<TypeR, GeoMesh>>::New
         (
-            new DimensionedField<TypeR, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    df1.instance(),
-                    df1.db()
-                ),
-                df1.mesh(),
-                dimensions
-            )
+                name,
+                df1.instance(),
+                df1.db()
+            ),
+            df1.mesh(),
+            dimensions
         );
     }
 };
 
 
 template<class TypeR, class GeoMesh>
-class reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>
+struct reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>
 {
-public:
-
     static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
         const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
@@ -124,29 +81,42 @@ public:
 
         const auto& df1 = tdf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>
+        return tmp<DimensionedField<TypeR, GeoMesh>>::New
         (
-            new DimensionedField<TypeR, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    df1.instance(),
-                    df1.db()
-                ),
-                df1.mesh(),
-                dimensions
-            )
+                name,
+                df1.instance(),
+                df1.db()
+            ),
+            df1.mesh(),
+            dimensions
         );
     }
 };
 
 
-template<class TypeR, class Type1, class Type12, class Type2, class GeoMesh>
-class reuseTmpTmpDimensionedField
+//- Global function forwards to reuseTmpDimensionedField::New
+template<class TypeR, class GeoMesh>
+tmp<DimensionedField<TypeR, GeoMesh>> New
+(
+    const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
+    const word& name,
+    const dimensionSet& dimensions
+)
 {
-public:
+    return reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>::New
+    (
+        tdf1,
+        name,
+        dimensions
+    );
+}
 
+
+template<class TypeR, class Type1, class Type12, class Type2, class GeoMesh>
+struct reuseTmpTmpDimensionedField
+{
     static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
         const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,
@@ -157,29 +127,24 @@ public:
     {
         const auto& df1 = tdf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>
+        return tmp<DimensionedField<TypeR, GeoMesh>>::New
         (
-            new DimensionedField<TypeR, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    df1.instance(),
-                    df1.db()
-                ),
-                df1.mesh(),
-                dimensions
-            )
+                name,
+                df1.instance(),
+                df1.db()
+            ),
+            df1.mesh(),
+            dimensions
         );
     }
 };
 
 
 template<class TypeR, class Type1, class Type12, class GeoMesh>
-class reuseTmpTmpDimensionedField<TypeR, Type1, Type12, TypeR, GeoMesh>
+struct reuseTmpTmpDimensionedField<TypeR, Type1, Type12, TypeR, GeoMesh>
 {
-public:
-
     static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
         const tmp<DimensionedField<Type1, GeoMesh>>& tdf1,
@@ -199,29 +164,24 @@ public:
 
         const auto& df1 = tdf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>
+        return tmp<DimensionedField<TypeR, GeoMesh>>::New
         (
-            new DimensionedField<TypeR, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    df1.instance(),
-                    df1.db()
-                ),
-                df1.mesh(),
-                dimensions
-            )
+                name,
+                df1.instance(),
+                df1.db()
+            ),
+            df1.mesh(),
+            dimensions
         );
     }
 };
 
 
 template<class TypeR, class Type2, class GeoMesh>
-class reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, Type2, GeoMesh>
+struct reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, Type2, GeoMesh>
 {
-public:
-
     static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
         const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
@@ -241,29 +201,24 @@ public:
 
         const auto& df1 = tdf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>
+        return tmp<DimensionedField<TypeR, GeoMesh>>::New
         (
-            new DimensionedField<TypeR, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    df1.instance(),
-                    df1.db()
-                ),
-                df1.mesh(),
-                dimensions
-            )
+                name,
+                df1.instance(),
+                df1.db()
+            ),
+            df1.mesh(),
+            dimensions
         );
     }
 };
 
 
 template<class TypeR, class GeoMesh>
-class reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, TypeR, GeoMesh>
+struct reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, TypeR, GeoMesh>
 {
-public:
-
     static tmp<DimensionedField<TypeR, GeoMesh>> New
     (
         const tmp<DimensionedField<TypeR, GeoMesh>>& tdf1,
@@ -291,19 +246,16 @@ public:
 
         const auto& df1 = tdf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>
+        return tmp<DimensionedField<TypeR, GeoMesh>>::New
         (
-            new DimensionedField<TypeR, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    df1.instance(),
-                    df1.db()
-                ),
-                df1.mesh(),
-                dimensions
-            )
+                name,
+                df1.instance(),
+                df1.db()
+            ),
+            df1.mesh(),
+            dimensions
         );
     }
 };

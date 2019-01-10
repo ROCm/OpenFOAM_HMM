@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//- Test if a tmp GeometricField is reusable, which means that it has been
+//- allocated (not a const-reference).
+//
+//  When GeometricField debug is on, also checks that the patches have
+//  reusable types.
 template
 <
     class Type,
@@ -45,20 +50,17 @@ bool reusable(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
     {
         if (GeometricField<Type, PatchField, GeoMesh>::debug)
         {
-            const auto& gf = tgf();
-            const auto& gbf = gf.boundaryField();
-
-            forAll(gbf, patchi)
+            for (const auto& p : tgf().boundaryField())
             {
                 if
                 (
-                    !polyPatch::constraintType(gbf[patchi].patch().type())
-                 && !isA<typename PatchField<Type>::Calculated>(gbf[patchi])
+                    !polyPatch::constraintType(p.patch().type())
+                 && !isA<typename PatchField<Type>::Calculated>(p)
                 )
                 {
                     WarningInFunction
                         << "Attempt to reuse temporary with non-reusable BC "
-                        << gbf[patchi].type() << endl;
+                        << p.type() << endl;
 
                     return false;
                 }
@@ -72,50 +74,6 @@ bool reusable(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
 }
 
 
-template<class TypeR, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
-(
-    const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
-    const word& name,
-    const dimensionSet& dimensions,
-    const bool initRet = false
-)
-{
-    if (reusable(tgf1))
-    {
-        auto& gf1 = tgf1.constCast();
-
-        gf1.rename(name);
-        gf1.dimensions().reset(dimensions);
-        return tgf1;
-    }
-
-    const auto& gf1 = tgf1();
-
-    tmp<GeometricField<TypeR, PatchField, GeoMesh>> rtgf
-    (
-        new GeometricField<TypeR, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                name,
-                gf1.instance(),
-                gf1.db()
-            ),
-            gf1.mesh(),
-            dimensions
-        )
-    );
-
-    if (initRet)
-    {
-        rtgf.ref() == gf1;
-    }
-
-    return rtgf;
-}
-
-
 template
 <
     class TypeR,
@@ -123,10 +81,8 @@ template
     template<class> class PatchField,
     class GeoMesh
 >
-class reuseTmpGeometricField
+struct reuseTmpGeometricField
 {
-public:
-
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
         const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tgf1,
@@ -136,34 +92,32 @@ public:
     {
         const auto& gf1 = tgf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
-            new GeometricField<TypeR, PatchField, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    gf1.instance(),
-                    gf1.db()
-                ),
-                gf1.mesh(),
-                dimensions
-            )
+                name,
+                gf1.instance(),
+                gf1.db()
+            ),
+            gf1.mesh(),
+            dimensions
         );
     }
 };
 
 
 template<class TypeR, template<class> class PatchField, class GeoMesh>
-class reuseTmpGeometricField<TypeR, TypeR, PatchField, GeoMesh>
+struct reuseTmpGeometricField<TypeR, TypeR, PatchField, GeoMesh>
 {
-public:
-
+    //- Since the input and output types are identical, also allow
+    //- optional copy assignment of the initial content.
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
         const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
         const word& name,
-        const dimensionSet& dimensions
+        const dimensionSet& dimensions,
+        const bool initCopy = false
     )
     {
         if (reusable(tgf1))
@@ -177,22 +131,49 @@ public:
 
         const auto& gf1 = tgf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        auto rtgf = tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
-            new GeometricField<TypeR, PatchField, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    gf1.instance(),
-                    gf1.db()
-                ),
-                gf1.mesh(),
-                dimensions
-            )
+                name,
+                gf1.instance(),
+                gf1.db()
+            ),
+            gf1.mesh(),
+            dimensions
         );
+
+        if (initCopy)
+        {
+            rtgf.ref() == gf1;
+        }
+
+        return rtgf;
     }
 };
+
+
+//- This global function forwards to reuseTmpGeometricField::New
+template<class TypeR, template<class> class PatchField, class GeoMesh>
+tmp
+<
+    GeometricField<TypeR, PatchField, GeoMesh>
+> New
+(
+    const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
+    const word& name,
+    const dimensionSet& dimensions,
+    const bool initCopy = false
+)
+{
+    return reuseTmpGeometricField<TypeR, TypeR, PatchField, GeoMesh>::New
+    (
+        tgf1,
+        name,
+        dimensions,
+        initCopy
+    );
+}
 
 
 template
@@ -204,10 +185,8 @@ template
     template<class> class PatchField,
     class GeoMesh
 >
-class reuseTmpTmpGeometricField
+struct reuseTmpTmpGeometricField
 {
-public:
-
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
         const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tgf1,
@@ -218,19 +197,16 @@ public:
     {
         const auto& gf1 = tgf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
-            new GeometricField<TypeR, PatchField, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    gf1.instance(),
-                    gf1.db()
-                ),
-                gf1.mesh(),
-                dimensions
-            )
+                name,
+                gf1.instance(),
+                gf1.db()
+            ),
+            gf1.mesh(),
+            dimensions
         );
     }
 };
@@ -244,11 +220,11 @@ template
     template<class> class PatchField,
     class GeoMesh
 >
-class reuseTmpTmpGeometricField
-    <TypeR, Type1, Type12, TypeR, PatchField, GeoMesh>
+struct reuseTmpTmpGeometricField
+<
+    TypeR, Type1, Type12, TypeR, PatchField, GeoMesh
+>
 {
-public:
-
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
         const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tgf1,
@@ -268,19 +244,16 @@ public:
 
         const auto& gf1 = tgf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
-            new GeometricField<TypeR, PatchField, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    gf1.instance(),
-                    gf1.db()
-                ),
-                gf1.mesh(),
-                dimensions
-            )
+                name,
+                gf1.instance(),
+                gf1.db()
+            ),
+            gf1.mesh(),
+            dimensions
         );
     }
 };
@@ -293,10 +266,11 @@ template
     template<class> class PatchField,
     class GeoMesh
 >
-class reuseTmpTmpGeometricField<TypeR, TypeR, TypeR, Type2, PatchField, GeoMesh>
+struct reuseTmpTmpGeometricField
+<
+    TypeR, TypeR, TypeR, Type2, PatchField, GeoMesh
+>
 {
-public:
-
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
         const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
@@ -316,29 +290,27 @@ public:
 
         const auto& gf1 = tgf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
-            new GeometricField<TypeR, PatchField, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    gf1.instance(),
-                    gf1.db()
-                ),
-                gf1.mesh(),
-                dimensions
-            )
+                name,
+                gf1.instance(),
+                gf1.db()
+            ),
+            gf1.mesh(),
+            dimensions
         );
     }
 };
 
 
 template<class TypeR, template<class> class PatchField, class GeoMesh>
-class reuseTmpTmpGeometricField<TypeR, TypeR, TypeR, TypeR, PatchField, GeoMesh>
+struct reuseTmpTmpGeometricField
+<
+    TypeR, TypeR, TypeR, TypeR, PatchField, GeoMesh
+>
 {
-public:
-
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
         const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
@@ -366,22 +338,20 @@ public:
 
         const auto& gf1 = tgf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
-            new GeometricField<TypeR, PatchField, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    gf1.instance(),
-                    gf1.db()
-                ),
-                gf1.mesh(),
-                dimensions
-            )
+                name,
+                gf1.instance(),
+                gf1.db()
+            ),
+            gf1.mesh(),
+            dimensions
         );
     }
 };
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
