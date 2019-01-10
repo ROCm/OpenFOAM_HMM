@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedTypes_H
-#define dimensionedTypes_H
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "dimensionedScalar.H"
-#include "dimensionedVector.H"
-#include "dimensionedSphericalTensor.H"
-#include "dimensionedSymmTensor.H"
-#include "dimensionedTensor.H"
 #include "dimensionedMinMax.H"
+#include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-#endif
+
+template<class T>
+Foam::dimensioned<Foam::MinMax<T>> Foam::makeDimensionedMinMax
+(
+    const word& name,
+    const dimensionSet& dims,
+    const MinMax<T>& values,
+    const dictionary& dict,
+    const word& minName,
+    const word& maxName
+)
+{
+    // Normal construction with optional entry
+
+    dimensioned<MinMax<T>> range(name, dims, values, dict);
+
+    // Optional min specification
+    if (!minName.empty())
+    {
+        dimensioned<T> minVal(minName, dims, values.min(), dict);
+        range.dimensions() += minVal.dimensions();
+        range.value().min() = minVal.value();
+    }
+
+    // Optional max specification
+    if (!maxName.empty())
+    {
+        dimensioned<T> maxVal(maxName, dims, values.max(), dict);
+        range.dimensions() += maxVal.dimensions();
+        range.value().max() = maxVal.value();
+    }
+
+    return range;
+}
+
 
 // ************************************************************************* //

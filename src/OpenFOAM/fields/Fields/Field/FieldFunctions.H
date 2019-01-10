@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #define TEMPLATE template<class Type>
 #include "FieldFunctionsM.H"
 #include "UPstream.H"
+#include "MinMax.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -151,8 +152,10 @@ tmp<Field<Type>> cmptMag(const UList<Type>& f);
 template<class Type>
 tmp<Field<Type>> cmptMag(const tmp<Field<Type>>& tf);
 
+
 #define TMP_UNARY_FUNCTION(ReturnType, Func)                                   \
                                                                                \
+/** \brief  Apply the \c Func() function on the tmp field */                   \
 template<class Type>                                                           \
 ReturnType Func(const tmp<Field<Type>>& tf1);
 
@@ -170,6 +173,15 @@ template<class Type>
 Type sum(const UList<Type>& f);
 
 TMP_UNARY_FUNCTION(Type, sum)
+
+
+// From MinMaxOps.H:
+//   - Foam::minMax(const UList<Type>&)
+//   - Foam::minMaxMag(const UList<Type>&)
+
+TMP_UNARY_FUNCTION(MinMax<Type>, minMax)
+TMP_UNARY_FUNCTION(scalarMinMax, minMaxMag)
+
 
 template<class Type>
 Type maxMagSqr(const UList<Type>& f);
@@ -224,6 +236,9 @@ G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
 G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
 
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, minMax)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
+
 #undef G_UNARY_FUNCTION
 
 template<class Type>
@@ -263,6 +278,8 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
 
 
 // * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //

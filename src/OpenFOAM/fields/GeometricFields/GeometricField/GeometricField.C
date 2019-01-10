@@ -991,10 +991,10 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::writeMinMax
     Ostream& os
 ) const
 {
+    MinMax<Type> range = Foam::minMax(*this).value();
+
     os  << "min/max(" << this->name() << ") = "
-        << Foam::min(*this).value() << ", "
-        << Foam::max(*this).value()
-        << endl;
+        << range.min() << ", " << range.max() << endl;
 }
 
 

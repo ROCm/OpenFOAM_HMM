@@ -54,6 +54,13 @@ inline Foam::MinMax<T>::MinMax(const Pair<T>& range)
 
 
 template<class T>
+inline Foam::MinMax<T>::MinMax(const zero)
+:
+    Tuple2<T,T>(pTraits<T>::zero, pTraits<T>::zero)
+{}
+
+
+template<class T>
 inline Foam::MinMax<T>::MinMax(const T& val)
 :
     Tuple2<T,T>(val, val)
@@ -61,11 +68,11 @@ inline Foam::MinMax<T>::MinMax(const T& val)
 
 
 template<class T>
-inline Foam::MinMax<T>::MinMax(const UList<T>& list)
+inline Foam::MinMax<T>::MinMax(const UList<T>& vals)
 :
     MinMax<T>()
 {
-    add(list);
+    add(vals);
 }
 
 
@@ -104,6 +111,13 @@ inline T Foam::MinMax<T>::centre() const
 {
     // Multiply before adding to avoid possible overflow
     return (0.5 * min()) + (0.5 * max());
+}
+
+
+template<class T>
+inline Foam::scalar Foam::MinMax<T>::mag() const
+{
+    return (empty() ? Zero : ::Foam::mag(max() - min()));
 }
 
 
@@ -214,10 +228,7 @@ inline bool Foam::MinMax<T>::inplaceClip(T& val) const
 
 
 template<class T>
-inline Foam::MinMax<T>& Foam::MinMax<T>::add
-(
-    const MinMax& other
-)
+inline Foam::MinMax<T>& Foam::MinMax<T>::add(const MinMax& other)
 {
     min() = Foam::min(min(), other.min());
     max() = Foam::max(max(), other.max());
@@ -286,10 +297,7 @@ inline bool Foam::MinMax<T>::operator()(const T& val) const
 
 
 template<class T>
-inline Foam::MinMax<T>& Foam::MinMax<T>::operator+=
-(
-    const MinMax<T>& b
-)
+inline Foam::MinMax<T>& Foam::MinMax<T>::operator+=(const MinMax<T>& b)
 {
     return add(b);
 }

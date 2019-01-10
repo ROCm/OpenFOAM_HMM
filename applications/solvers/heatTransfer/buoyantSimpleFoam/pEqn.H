@@ -79,6 +79,6 @@
 
     rho = thermo.rho();
     rho.relax();
-    Info<< "rho max/min : " << max(rho).value() << " " << min(rho).value()
+    Info<< "rho min/max : " << min(rho).value() << " " << max(rho).value()
         << endl;
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,6 +119,9 @@ UNARY_REDUCTION_FUNCTION(Type, sum, gSum)
 UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
 
+UNARY_REDUCTION_FUNCTION(MinMax<Type>, minMax, gMinMax)
+UNARY_REDUCTION_FUNCTION(scalarMinMax, minMaxMag, gMinMaxMag)
+
 #undef UNARY_REDUCTION_FUNCTION
 
 
@@ -131,6 +134,8 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
 
 
 // * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //

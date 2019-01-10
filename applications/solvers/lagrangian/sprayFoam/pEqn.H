@@ -97,8 +97,7 @@ rho = thermo.rho();
 rho = max(rho, rhoMin);
 rho = min(rho, rhoMax);
 rho.relax();
-Info<< "rho max/min : " << max(rho).value()
-    << " " << min(rho).value() << endl;
+Info<< "rho min/max : " << min(rho).value() << " " << max(rho).value() << endl;
 
 U = HbyA - rAU*fvc::grad(p);
 U.correctBoundaryConditions();

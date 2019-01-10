@@ -99,7 +99,7 @@ Description
 #include "scalar.H"
 #include "Pair.H"
 #include "Tuple2.H"
-#include "ListListOps.H"
+#include "VectorSpace.H"
 #include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -109,6 +109,7 @@ namespace Foam
 
 // Forward declarations
 template<class T> class MinMax;
+class zero;
 
 // Common min/max types
 typedef MinMax<label> labelMinMax;
@@ -148,11 +149,14 @@ public:
         //- Copy construct from components
         inline MinMax(const Pair<T>& range);
 
+        //- Construct with a single zero value
+        inline explicit MinMax(const zero);
+
         //- Construct with a single initial value
         inline explicit MinMax(const T& val);
 
-        //- Construct from list
-        inline explicit MinMax(const UList<T>& list);
+        //- Construct from list of values
+        inline explicit MinMax(const UList<T>& vals);
 
 
     // Member Functions
@@ -174,6 +178,8 @@ public:
         //- The min/max average value
         inline T centre() const;
 
+        //- The magnitude of the min to max span. Zero if the range is invalid.
+        inline scalar mag() const;
 
         //- Range is empty if it is inverted
         inline bool empty() const;
@@ -259,145 +265,6 @@ word name(const MinMax<T>& range)
 }
 
 
-//- Return the value after clipping by the min/max limiter
-template<class T>
-T clip(const T& val, const MinMax<T>& range)
-{
-    return range.clip(val);
-}
-
-
-
-//- Return the value after clipping by the min/max limiter
-template<class T>
-struct clipOp
-{
-    T operator()(T& val, const MinMax<T>& range) const
-    {
-        return range.clip(val);
-    }
-};
-
-
-//- Clip value and assign inplace
-template<class T>
-struct clipEqOp
-{
-    bool operator()(T& val, const MinMax<T>& range) const
-    {
-        return range.inplaceClip(val);
-    }
-};
-
-
-//- Extract the min/max range from a list of values
-template<class T>
-MinMax<T> minMax(const UList<T>& list)
-{
-    return MinMax<T>(list);
-}
-
-
-//- Extract the min/max magnitudes from a list of values
-template<class T>
-MinMax<scalar> minMaxMag(const UList<T>& list)
-{
-    MinMax<scalar> result;
-    for (const T& val : list)
-    {
-        result += Foam::mag(val);
-    }
-
-    return result;
-}
-
-
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
-
-//- Combine two ranges
-template<class T>
-inline MinMax<T> operator+(const MinMax<T>& x, const MinMax<T>& y)
-{
-    return MinMax<T>(x).add(y);
-}
-
-
-//- Multiply range by scalar factor
-template<class T>
-inline MinMax<T> operator*(const MinMax<T>& x, const scalar& s)
-{
-    return MinMax<T>(x.min()*s, x.max()*s);
-}
-
-
-//- Divide range by scalar factor
-template<class T>
-inline MinMax<T> operator/(const MinMax<T>& x, const scalar& s)
-{
-    return MinMax<T>(x.min()/s, x.max()/s);
-}
-
-
-// Comparison
-
-template<class T, class U>
-inline typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-operator<(const MinMax<T>& range, const U& val)
-{
-    return (range.compare(val) < 0);
-}
-
-template<class T, class U>
-inline typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-operator<=(const MinMax<T>& range, const U& val)
-{
-    return (range.compare(val) <= 0);
-}
-
-template<class T, class U>
-inline typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-operator>(const MinMax<T>& range, const U& val)
-{
-    return (range.compare(val) > 0);
-}
-
-template<class T, class U>
-inline typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-operator>=(const MinMax<T>& range, const U& val)
-{
-    return (range.compare(val) >= 0);
-}
-
-
-template<class T, class U>
-inline typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-operator<(const U& val, const MinMax<T>& range)
-{
-    return (range.compare(val) > 0);
-}
-
-template<class T, class U>
-inline typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-operator<=(const U& val, const MinMax<T>& range)
-{
-    return (range.compare(val) >= 0);
-}
-
-template<class T, class U>
-inline typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-operator>(const U& val, const MinMax<T>& range)
-{
-    return (range.compare(val) < 0);
-}
-
-template<class T, class U>
-inline typename std::enable_if<std::is_convertible<U, T>::value, bool>::type
-operator>=(const U& val, const MinMax<T>& range)
-{
-    return (range.compare(val) <= 0);
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
@@ -409,5 +276,9 @@ operator>=(const U& val, const MinMax<T>& range)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
+
+// Global Functions and Operators
+#include "MinMaxOps.H"
+
 
 // ************************************************************************* //

@@ -121,8 +121,8 @@ int main(int argc, char *argv[])
         }
 
         #include "rhoEqn.H"
-        Info<< "rhoEqn max/min : " << max(rho).value()
-            << " " << min(rho).value() << endl;
+        Info<< "rho min/max : " << min(rho).value() << " " << max(rho).value()
+            << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())

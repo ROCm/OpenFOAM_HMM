@@ -357,6 +357,15 @@ Type sum(const UList<Type>& f)
 
 TMP_UNARY_FUNCTION(Type, sum)
 
+
+// From MinMaxOps.H:
+//   - Foam::minMax(const UList<Type>&)
+//   - Foam::minMaxMag(const UList<Type>&)
+
+TMP_UNARY_FUNCTION(MinMax<Type>, minMax)
+TMP_UNARY_FUNCTION(scalarMinMax, minMaxMag)
+
+
 template<class Type>
 Type maxMagSqr(const UList<Type>& f)
 {
@@ -414,25 +423,21 @@ TMP_UNARY_FUNCTION(Type, minMagSqr)
 template<class Type>
 scalar sumProd(const UList<Type>& f1, const UList<Type>& f2)
 {
+    scalar SumProd = 0;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        scalar SumProd = 0;
         TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, Type, f1, &&, Type, f2)
-        return SumProd;
     }
-    else
-    {
-        return 0;
-    }
+    return SumProd;
 }
 
 
 template<class Type>
 Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
 {
+    Type SumProd = Zero;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        Type SumProd = Zero;
         TFOR_ALL_S_OP_FUNC_F_F
         (
             Type,
@@ -444,28 +449,20 @@ Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
             Type,
             f2
         )
-        return SumProd;
     }
-    else
-    {
-        return Zero;
-    }
+    return SumProd;
 }
 
 
 template<class Type>
 scalar sumSqr(const UList<Type>& f)
 {
+    scalar SumSqr = 0;
     if (f.size())
     {
-        scalar SumSqr = 0;
         TFOR_ALL_S_OP_FUNC_F(scalar, SumSqr, +=, sqr, Type, f)
-        return SumSqr;
     }
-    else
-    {
-        return 0;
-    }
+    return SumSqr;
 }
 
 TMP_UNARY_FUNCTION(scalar, sumSqr)
@@ -473,16 +470,12 @@ TMP_UNARY_FUNCTION(scalar, sumSqr)
 template<class Type>
 scalar sumMag(const UList<Type>& f)
 {
+    scalar SumMag = 0;
     if (f.size())
     {
-        scalar SumMag = 0;
         TFOR_ALL_S_OP_FUNC_F(scalar, SumMag, +=, mag, Type, f)
-        return SumMag;
     }
-    else
-    {
-        return 0;
-    }
+    return SumMag;
 }
 
 TMP_UNARY_FUNCTION(scalar, sumMag)
@@ -491,16 +484,12 @@ TMP_UNARY_FUNCTION(scalar, sumMag)
 template<class Type>
 Type sumCmptMag(const UList<Type>& f)
 {
+    Type SumMag = Zero;
     if (f.size())
     {
-        Type SumMag = Zero;
         TFOR_ALL_S_OP_FUNC_F(scalar, SumMag, +=, cmptMag, Type, f)
-        return SumMag;
     }
-    else
-    {
-        return Zero;
-    }
+    return SumMag;
 }
 
 TMP_UNARY_FUNCTION(Type, sumCmptMag)
@@ -546,7 +535,11 @@ G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
 G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
 
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, minMax)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
+
 #undef G_UNARY_FUNCTION
+
 
 template<class Type>
 scalar gSumProd
@@ -614,6 +607,8 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
 
 
 /* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
