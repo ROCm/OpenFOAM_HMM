@@ -103,9 +103,8 @@ pow
 {
     typedef typename powProduct<Type, r>::type powProductType;
 
-    tmp<GeometricField<powProductType, PatchField, GeoMesh>> tPow
-    (
-        new GeometricField<powProductType, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<powProductType, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -117,12 +116,11 @@ pow
             ),
             gf.mesh(),
             pow(gf.dimensions(), r)
-        )
-    );
+        );
 
-    pow<Type, r, PatchField, GeoMesh>(tPow.ref(), gf);
+    pow<Type, r, PatchField, GeoMesh>(tres.ref(), gf);
 
-    return tPow;
+    return tres;
 }
 
 
@@ -144,9 +142,8 @@ pow
 
     const GeometricField<Type, PatchField, GeoMesh>& gf = tgf();
 
-    tmp<GeometricField<powProductType, PatchField, GeoMesh>> tPow
-    (
-        new GeometricField<powProductType, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<powProductType, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -158,14 +155,12 @@ pow
             ),
             gf.mesh(),
             pow(gf.dimensions(), r)
-        )
-    );
+        );
 
-    pow<Type, r, PatchField, GeoMesh>(tPow.ref(), gf);
+    pow<Type, r, PatchField, GeoMesh>(tres.ref(), gf);
 
     tgf.clear();
-
-    return tPow;
+    return tres;
 }
 
 
@@ -197,9 +192,8 @@ sqr(const GeometricField<Type, PatchField, GeoMesh>& gf)
 {
     typedef typename outerProduct<Type, Type>::type outerProductType;
 
-    tmp<GeometricField<outerProductType, PatchField, GeoMesh>> tSqr
-    (
-        new GeometricField<outerProductType, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<outerProductType, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -211,12 +205,11 @@ sqr(const GeometricField<Type, PatchField, GeoMesh>& gf)
             ),
             gf.mesh(),
             sqr(gf.dimensions())
-        )
-    );
+        );
 
-    sqr(tSqr.ref(), gf);
+    sqr(tres.ref(), gf);
 
-    return tSqr;
+    return tres;
 }
 
 
@@ -236,9 +229,8 @@ sqr(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
 
     const GeometricField<Type, PatchField, GeoMesh>& gf = tgf();
 
-    tmp<GeometricField<outerProductType, PatchField, GeoMesh>> tSqr
-    (
-        new GeometricField<outerProductType, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<outerProductType, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -250,14 +242,13 @@ sqr(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
             ),
             gf.mesh(),
             sqr(gf.dimensions())
-        )
-    );
+        );
 
-    sqr(tSqr.ref(), gf);
+    sqr(tres.ref(), gf);
 
     tgf.clear();
 
-    return tSqr;
+    return tres;
 }
 
 
@@ -280,9 +271,8 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tMagSqr
-    (
-        new GeometricField<scalar, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<scalar, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -294,12 +284,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
             ),
             gf.mesh(),
             sqr(gf.dimensions())
-        )
-    );
+        );
 
-    magSqr(tMagSqr.ref(), gf);
+    magSqr(tres.ref(), gf);
 
-    return tMagSqr;
+    return tres;
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -310,9 +299,8 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
 {
     const GeometricField<Type, PatchField, GeoMesh>& gf = tgf();
 
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tMagSqr
-    (
-        new GeometricField<scalar, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<scalar, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -324,14 +312,13 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
             ),
             gf.mesh(),
             sqr(gf.dimensions())
-        )
-    );
+        );
 
-    magSqr(tMagSqr.ref(), gf);
+    magSqr(tres.ref(), gf);
 
     tgf.clear();
 
-    return tMagSqr;
+    return tres;
 }
 
 
@@ -354,9 +341,8 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tMag
-    (
-        new GeometricField<scalar, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<scalar, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -368,12 +354,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
             ),
             gf.mesh(),
             gf.dimensions()
-        )
-    );
+        );
 
-    mag(tMag.ref(), gf);
+    mag(tres.ref(), gf);
 
-    return tMag;
+    return tres;
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -384,9 +369,8 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
 {
     const GeometricField<Type, PatchField, GeoMesh>& gf = tgf();
 
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tMag
-    (
-        new GeometricField<scalar, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<scalar, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -398,14 +382,13 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
             ),
             gf.mesh(),
             gf.dimensions()
-        )
-    );
+        );
 
-    mag(tMag.ref(), gf);
+    mag(tres.ref(), gf);
 
     tgf.clear();
 
-    return tMag;
+    return tres;
 }
 
 
@@ -441,9 +424,8 @@ cmptAv(const GeometricField<Type, PatchField, GeoMesh>& gf)
     typedef typename GeometricField<Type, PatchField, GeoMesh>::cmptType
         cmptType;
 
-    tmp<GeometricField<cmptType, PatchField, GeoMesh>> CmptAv
-    (
-        new GeometricField<scalar, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<cmptType, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -455,12 +437,11 @@ cmptAv(const GeometricField<Type, PatchField, GeoMesh>& gf)
             ),
             gf.mesh(),
             gf.dimensions()
-        )
-    );
+        );
 
-    cmptAv(CmptAv.ref(), gf);
+    cmptAv(tres.ref(), gf);
 
-    return CmptAv;
+    return tres;
 }
 
 
@@ -481,9 +462,8 @@ cmptAv(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
 
     const GeometricField<Type, PatchField, GeoMesh>& gf = tgf();
 
-    tmp<GeometricField<cmptType, PatchField, GeoMesh>> CmptAv
-    (
-        new GeometricField<scalar, PatchField, GeoMesh>
+    auto tres =
+        tmp<GeometricField<cmptType, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -495,14 +475,13 @@ cmptAv(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
             ),
             gf.mesh(),
             gf.dimensions()
-        )
-    );
+        );
 
-    cmptAv(CmptAv.ref(), gf);
+    cmptAv(tres.ref(), gf);
 
     tgf.clear();
 
-    return CmptAv;
+    return tres;
 }
 
 
@@ -649,9 +628,9 @@ operator op                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    tmp<GeometricField<productType, PatchField, GeoMesh>> tRes                 \
-    (                                                                          \
-        new GeometricField<productType, PatchField, GeoMesh>                   \
+                                                                               \
+    auto tres =                                                                \
+        tmp<GeometricField<productType, PatchField, GeoMesh>>::New             \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -663,13 +642,13 @@ operator op                                                                    \
             ),                                                                 \
             gf1.mesh(),                                                        \
             gf1.dimensions() op gf2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref(), gf1, gf2);                                        \
+    Foam::opFunc(tres.ref(), gf1, gf2);                                        \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template                                                                       \
 <class Type1, class Type2, template<class> class PatchField, class GeoMesh>    \
@@ -687,7 +666,7 @@ operator op                                                                    \
                                                                                \
     const GeometricField<Type2, PatchField, GeoMesh>& gf2 = tgf2();            \
                                                                                \
-    tmp<GeometricField<productType, PatchField, GeoMesh>> tRes =               \
+    auto tres =                                                                \
         reuseTmpGeometricField<productType, Type2, PatchField, GeoMesh>::New   \
         (                                                                      \
             tgf2,                                                              \
@@ -695,11 +674,11 @@ operator op                                                                    \
             gf1.dimensions() op gf2.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref(), gf1, gf2);                                        \
+    Foam::opFunc(tres.ref(), gf1, gf2);                                        \
                                                                                \
     tgf2.clear();                                                              \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -718,7 +697,7 @@ operator op                                                                    \
                                                                                \
     const GeometricField<Type1, PatchField, GeoMesh>& gf1 = tgf1();            \
                                                                                \
-    tmp<GeometricField<productType, PatchField, GeoMesh>> tRes =               \
+    auto tres =                                                                \
         reuseTmpGeometricField<productType, Type1, PatchField, GeoMesh>::New   \
         (                                                                      \
             tgf1,                                                              \
@@ -726,11 +705,11 @@ operator op                                                                    \
             gf1.dimensions() op gf2.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref(), gf1, gf2);                                        \
+    Foam::opFunc(tres.ref(), gf1, gf2);                                        \
                                                                                \
     tgf1.clear();                                                              \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -750,7 +729,7 @@ operator op                                                                    \
     const GeometricField<Type1, PatchField, GeoMesh>& gf1 = tgf1();            \
     const GeometricField<Type2, PatchField, GeoMesh>& gf2 = tgf2();            \
                                                                                \
-    tmp<GeometricField<productType, PatchField, GeoMesh>> tRes =               \
+    auto tres =                                                                \
         reuseTmpTmpGeometricField                                              \
         <productType, Type1, Type1, Type2, PatchField, GeoMesh>::New           \
         (                                                                      \
@@ -760,12 +739,12 @@ operator op                                                                    \
             gf1.dimensions() op gf2.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref(), gf1, gf2);                                        \
+    Foam::opFunc(tres.ref(), gf1, gf2);                                        \
                                                                                \
     tgf1.clear();                                                              \
     tgf2.clear();                                                              \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -794,9 +773,8 @@ operator op                                                                    \
 {                                                                              \
     typedef typename product<Type, Form>::type productType;                    \
                                                                                \
-    tmp<GeometricField<productType, PatchField, GeoMesh>> tRes                 \
-    (                                                                          \
-        new GeometricField<productType, PatchField, GeoMesh>                   \
+    auto tres =                                                                \
+        tmp<GeometricField<productType, PatchField, GeoMesh>>::New             \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -808,12 +786,11 @@ operator op                                                                    \
             ),                                                                 \
             gf1.mesh(),                                                        \
             gf1.dimensions() op dvs.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref(), gf1, dvs);                                        \
+    Foam::opFunc(tres.ref(), gf1, dvs);                                        \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -848,7 +825,7 @@ operator op                                                                    \
                                                                                \
     const GeometricField<Type, PatchField, GeoMesh>& gf1 = tgf1();             \
                                                                                \
-    tmp<GeometricField<productType, PatchField, GeoMesh>> tRes =               \
+    auto tres =                                                                \
         reuseTmpGeometricField<productType, Type, PatchField, GeoMesh>::New    \
         (                                                                      \
             tgf1,                                                              \
@@ -856,11 +833,11 @@ operator op                                                                    \
             gf1.dimensions() op dvs.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref(), gf1, dvs);                                        \
+    Foam::opFunc(tres.ref(), gf1, dvs);                                        \
                                                                                \
     tgf1.clear();                                                              \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -907,9 +884,9 @@ operator op                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Form, Type>::type productType;                    \
-    tmp<GeometricField<productType, PatchField, GeoMesh>> tRes                 \
-    (                                                                          \
-        new GeometricField<productType, PatchField, GeoMesh>                   \
+                                                                               \
+    auto tres =                                                                \
+        tmp<GeometricField<productType, PatchField, GeoMesh>>::New             \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -921,12 +898,11 @@ operator op                                                                    \
             ),                                                                 \
             gf1.mesh(),                                                        \
             dvs.dimensions() op gf1.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref(), dvs, gf1);                                        \
+    Foam::opFunc(tres.ref(), dvs, gf1);                                        \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template                                                                       \
@@ -960,7 +936,7 @@ operator op                                                                    \
                                                                                \
     const GeometricField<Type, PatchField, GeoMesh>& gf1 = tgf1();             \
                                                                                \
-    tmp<GeometricField<productType, PatchField, GeoMesh>> tRes =               \
+    auto tres =                                                                \
         reuseTmpGeometricField<productType, Type, PatchField, GeoMesh>::New    \
         (                                                                      \
             tgf1,                                                              \
@@ -968,11 +944,11 @@ operator op                                                                    \
             dvs.dimensions() op gf1.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref(), dvs, gf1);                                        \
+    Foam::opFunc(tres.ref(), dvs, gf1);                                        \
                                                                                \
     tgf1.clear();                                                              \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template                                                                       \

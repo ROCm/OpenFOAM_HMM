@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1021,25 +1021,22 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
 Foam::GeometricField<Type, PatchField, GeoMesh>::T() const
 {
-    tmp<GeometricField<Type, PatchField, GeoMesh>> result
+    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
     (
-        new GeometricField<Type, PatchField, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                this->name() + ".T()",
-                this->instance(),
-                this->db()
-            ),
-            this->mesh(),
-            this->dimensions()
-        )
+            this->name() + ".T()",
+            this->instance(),
+            this->db()
+        ),
+        this->mesh(),
+        this->dimensions()
     );
 
-    Foam::T(result.ref().primitiveFieldRef(), primitiveField());
-    Foam::T(result.ref().boundaryFieldRef(), boundaryField());
+    Foam::T(tresult.ref().primitiveFieldRef(), primitiveField());
+    Foam::T(tresult.ref().boundaryFieldRef(), boundaryField());
 
-    return result;
+    return tresult;
 }
 
 
@@ -1058,25 +1055,22 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::component
     const direction d
 ) const
 {
-    tmp<GeometricField<cmptType, PatchField, GeoMesh>> Component
+    auto tresult = tmp<GeometricField<cmptType, PatchField, GeoMesh>>::New
     (
-        new GeometricField<cmptType, PatchField, GeoMesh>
+        IOobject
         (
-            IOobject
-            (
-                this->name() + ".component(" + Foam::name(d) + ')',
-                this->instance(),
-                this->db()
-            ),
-            this->mesh(),
-            this->dimensions()
-        )
+            this->name() + ".component(" + Foam::name(d) + ')',
+            this->instance(),
+            this->db()
+        ),
+        this->mesh(),
+        this->dimensions()
     );
 
-    Foam::component(Component.ref().primitiveFieldRef(), primitiveField(), d);
-    Foam::component(Component.ref().boundaryFieldRef(), boundaryField(), d);
+    Foam::component(tresult.ref().primitiveFieldRef(), primitiveField(), d);
+    Foam::component(tresult.ref().boundaryFieldRef(), boundaryField(), d);
 
-    return Component;
+    return tresult;
 }
 
 
