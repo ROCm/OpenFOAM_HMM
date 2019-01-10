@@ -514,7 +514,7 @@ dimensioned<returnType> func                                                   \
     const GeometricField<Type, PatchField, GeoMesh>& gf                        \
 )                                                                              \
 {                                                                              \
-    return dimensioned<Type>                                                   \
+    return dimensioned<returnType>                                             \
     (                                                                          \
         #func "(" + gf.name() + ')',                                           \
         gf.dimensions(),                                                       \
@@ -555,7 +555,7 @@ dimensioned<returnType> func                                                   \
     const GeometricField<Type, PatchField, GeoMesh>& gf                        \
 )                                                                              \
 {                                                                              \
-    return dimensioned<Type>                                                   \
+    return dimensioned<returnType>                                             \
     (                                                                          \
         #func "(" + gf.name() + ')',                                           \
         gf.dimensions(),                                                       \
