@@ -105,17 +105,17 @@ void inv(Field<tensor>& tf, const UList<tensor>& tf1)
 
 tmp<tensorField> inv(const UList<tensor>& tf)
 {
-    tmp<tensorField> result(new tensorField(tf.size()));
-    inv(result.ref(), tf);
-    return result;
+    auto tres = tmp<tensorField>::New(tf.size());
+    inv(tres.ref(), tf);
+    return tres;
 }
 
 tmp<tensorField> inv(const tmp<tensorField>& tf)
 {
-    tmp<tensorField> tRes = New(tf);
-    inv(tRes.ref(), tf());
+    auto tres = New(tf);
+    inv(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 UNARY_FUNCTION(vector, tensor, eigenValues)
@@ -131,10 +131,10 @@ tmp<Field<tensor>> transformFieldMask<tensor>
     const symmTensorField& stf
 )
 {
-    tmp<tensorField> tRes(new tensorField(stf.size()));
-    tensorField& res = tRes.ref();
+    auto tres = tmp<tensorField>::New(stf.size());
+    auto& res = tres.ref();
     TFOR_ALL_F_OP_F(tensor, res, =, symmTensor, stf)
-    return tRes;
+    return tres;
 }
 
 template<>

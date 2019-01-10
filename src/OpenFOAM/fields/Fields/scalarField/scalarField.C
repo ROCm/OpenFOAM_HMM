@@ -73,17 +73,17 @@ void stabilise(scalarField& res, const UList<scalar>& sf, const scalar s)
 
 tmp<scalarField> stabilise(const UList<scalar>& sf, const scalar s)
 {
-    tmp<scalarField> tRes(new scalarField(sf.size()));
-    stabilise(tRes.ref(), sf, s);
-    return tRes;
+    auto tresult = tmp<scalarField>::New(sf.size());
+    stabilise(tresult.ref(), sf, s);
+    return tresult;
 }
 
 tmp<scalarField> stabilise(const tmp<scalarField>& tsf, const scalar s)
 {
-    tmp<scalarField> tRes = New(tsf);
-    stabilise(tRes.ref(), tsf(), s);
+    tmp<scalarField> tresult = New(tsf);
+    stabilise(tresult.ref(), tsf(), s);
     tsf.clear();
-    return tRes;
+    return tresult;
 }
 
 
@@ -92,16 +92,12 @@ tmp<scalarField> stabilise(const tmp<scalarField>& tsf, const scalar s)
 template<>
 scalar sumProd(const UList<scalar>& f1, const UList<scalar>& f2)
 {
+    scalar SumProd = 0.0;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        scalar SumProd = 0.0;
         TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, scalar, f1, *, scalar, f2)
-        return SumProd;
     }
-    else
-    {
-        return 0.0;
-    }
+    return SumProd;
 }
 
 
@@ -174,17 +170,17 @@ void func(scalarField& res, const int n, const UList<scalar>& sf)              \
                                                                                \
 tmp<scalarField> func(const int n, const UList<scalar>& sf)                    \
 {                                                                              \
-    tmp<scalarField> tRes(new scalarField(sf.size()));                         \
-    func(tRes.ref(), n, sf);                                                   \
-    return tRes;                                                               \
+    auto tresult = tmp<scalarField>::New(sf.size());                           \
+    func(tresult.ref(), n, sf);                                                \
+    return tresult;                                                            \
 }                                                                              \
                                                                                \
 tmp<scalarField> func(const int n, const tmp<scalarField>& tsf)                \
 {                                                                              \
-    tmp<scalarField> tRes = New(tsf);                                          \
-    func(tRes.ref(), n, tsf());                                                \
+    tmp<scalarField> tresult = New(tsf);                                       \
+    func(tresult.ref(), n, tsf());                                             \
     tsf.clear();                                                               \
-    return tRes;                                                               \
+    return tresult;                                                            \
 }
 
 BesselFunc(jn)

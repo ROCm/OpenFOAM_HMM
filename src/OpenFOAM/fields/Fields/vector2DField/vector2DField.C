@@ -33,10 +33,12 @@ Foam::tmp<Foam::vector2DField> Foam::zip
     const tmp<scalarField>& y
 )
 {
-    tmp<vector2DField> txy(new vector2DField(x->size()));
-    vector2DField& xy = txy.ref();
+    auto txy = tmp<vector2DField>::New(x->size());
+    auto& xy = txy.ref();
+
     xy.replace(0, x);
     xy.replace(1, y);
+
     return txy;
 }
 

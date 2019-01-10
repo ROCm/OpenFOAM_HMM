@@ -107,17 +107,17 @@ void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
 
 tmp<symmTensorField> inv(const UList<symmTensor>& tf)
 {
-    tmp<symmTensorField> result(new symmTensorField(tf.size()));
-    inv(result.ref(), tf);
-    return result;
+    auto tresult = tmp<symmTensorField>::New(tf.size());
+    inv(tresult.ref(), tf);
+    return tresult;
 }
 
 tmp<symmTensorField> inv(const tmp<symmTensorField>& tf)
 {
-    tmp<symmTensorField> tRes = New(tf);
-    inv(tRes.ref(), tf());
+    tmp<symmTensorField> tresult = New(tf);
+    inv(tresult.ref(), tf());
     tf.clear();
-    return tRes;
+    return tresult;
 }
 
 

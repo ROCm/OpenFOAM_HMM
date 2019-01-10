@@ -34,11 +34,13 @@ Foam::tmp<Foam::vectorField> Foam::zip
     const tmp<scalarField>& z
 )
 {
-    tmp<vectorField> txyz(new vectorField(x->size()));
-    vectorField& xyz = txyz.ref();
+    auto txyz = tmp<vectorField>::New(x->size());
+    auto& xyz = txyz.ref();
+
     xyz.replace(0, x);
     xyz.replace(1, y);
     xyz.replace(2, z);
+
     return txyz;
 }
 
