@@ -322,7 +322,7 @@ public:
         //
         //  \return True if value changed.
         template<class TypeT = T>
-        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline set(const label i, bool val = true)
         {
             if (i < 0)

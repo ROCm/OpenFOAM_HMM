@@ -501,7 +501,7 @@ public:
         //
         //  \return The element value, or false for out-of-range access
         template<class TypeT = T>
-        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline test(const label i) const
         {
             return (i >= 0 && i < size() && v_[i]);
@@ -511,7 +511,7 @@ public:
         //
         //  \return The element value, or false for out-of-range access
         template<class TypeT = T>
-        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline get(const label i) const
         {
             return (i >= 0 && i < size_ && v_[i]);
@@ -521,7 +521,7 @@ public:
         //
         //  \return True if value changed and was not out-of-range
         template<class TypeT = T>
-        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline unset(const label i)
         {
             if (i >= 0 && i < size_ && v_[i])

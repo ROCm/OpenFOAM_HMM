@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,14 +40,11 @@ Foam::wordList Foam::functionObjects::vtkCloud::writeFields
     static_assert
     (
         (
-            std::is_same<typename pTraits<Type>::cmptType,label>::value
+            std::is_same<label, typename pTraits<Type>::cmptType>::value
          || std::is_floating_point<typename pTraits<Type>::cmptType>::value
         ),
         "Label and Floating-point vector space only"
     );
-
-    const bool isLabel =
-        std::is_same<typename pTraits<Type>::cmptType,label>::value;
 
     // Other integral types (eg, bool etc) would need cast/convert to label.
     // Similarly for labelVector etc.
@@ -70,7 +67,7 @@ Foam::wordList Foam::functionObjects::vtkCloud::writeFields
 
         if (Pstream::master())
         {
-            if (isLabel)
+            if (std::is_same<label, typename pTraits<Type>::cmptType>::value)
             {
                 const uint64_t payLoad =
                     vtk::sizeofData<label, nCmpt>(nTotParcels);
