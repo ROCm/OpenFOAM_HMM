@@ -29,7 +29,7 @@
 #     Extract data for each time-step from a log file for graphing.
 #
 # Environment
-#     WM_PROJECT_API
+#     FOAM_API
 #     WM_PROJECT_DIR
 #     WM_PROJECT_SITE
 #
@@ -90,9 +90,9 @@ cat <<HELP
 
     The database ($Script.db) will taken from these locations:
         .
-        $userDir/$WM_PROJECT_API/
+        $userDir/$FOAM_API/
         $userDir/
-        $groupDir/$WM_PROJECT_API/etc/
+        $groupDir/$FOAM_API/etc/
         $groupDir/etc/
         $WM_PROJECT_DIR/etc/
         $toolsDir
