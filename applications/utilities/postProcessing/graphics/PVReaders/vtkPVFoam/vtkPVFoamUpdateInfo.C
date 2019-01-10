@@ -232,7 +232,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
     {
         names.insert
         (
-            readDir
+            fileHandler().readDir
             (
                 dbPtr_->path()/t.name()/lagrangianPrefix,
                 fileName::DIRECTORY
