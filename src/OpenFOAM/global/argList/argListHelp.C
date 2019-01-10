@@ -314,6 +314,7 @@ void Foam::argList::printMan() const
     }
 
     printManOption("help-man", "Display full help (manpage format) and exit");
+    printManOption("help-notes", "Display help notes (description) and exit");
 
     printManCompat();
 
@@ -407,6 +408,7 @@ void Foam::argList::printUsage(bool full) const
     if (full)
     {
         printOption("help-man", "Display full help (manpage format) and exit");
+        printOption("help-notes", "Display help notes (description) and exit");
     }
 
     printOption("help-full", "Display full help and exit");

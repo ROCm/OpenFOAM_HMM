@@ -878,6 +878,12 @@ void Foam::argList::parse
             printUsage(true);
             quickExit = true;
         }
+        else if (options_.found("help-notes"))
+        {
+            printNotes();
+            Info<< nl;
+            quickExit = true;
+        }
         else if (options_.found("help"))
         {
             printUsage(false);
