@@ -196,13 +196,13 @@ sourceFoam=false    # Fallback command
 
 # Same as foamEtcFile -mode=uo bashrc
 #
-# check ~/.$WM_PROJECT/$WM_PROJECT_API/
+# check ~/.$WM_PROJECT/$FOAM_API/
 # check ~/.$WM_PROJECT/
-# check <installedProject>/etc/
-if [ -n "$WM_PROJECT" ]
+# check projectDir/etc/
+if [ -n "$WM_PROJECT_DIR" ]
 then
     for i in \
-        "$HOME/.$WM_PROJECT/$WM_PROJECT_API" \
+        "$HOME/.$WM_PROJECT/$FOAM_API" \
         "$HOME/.$WM_PROJECT" \
         "$WM_PROJECT_DIR/etc" \
         ;

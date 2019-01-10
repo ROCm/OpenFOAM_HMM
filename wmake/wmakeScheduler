@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -44,20 +44,24 @@
 #     Sources the relevant cshrc/bashrc if not set.
 #
 # Environment
+#     - FOAM_API
 #     - WM_PROJECT_DIR
-#     - WM_PROJECT
-#     - WM_PROJECT_API
+#     - WM_PROJECT  (defaults to OpenFOAM)
 #
 #-------------------------------------------------------------------------------
-Script=${0##*/}
+Script="${0##*/}"
 
-# csh sets HOST, bash sets HOSTNAME
-: ${HOST:=$HOSTNAME}
+# Default project
+[ -n "$WM_PROJECT" ] || WM_PROJECT=OpenFOAM
 
 lockDir="$HOME/.$WM_PROJECT/.wmake"
 
+# csh sets HOST, bash sets HOSTNAME
+[ -n "$HOST" ] || HOST="$HOSTNAME"
+
 # Fallback - 1 core on current host
-: ${WM_HOSTS:=$HOST:1}
+[ -n "$WM_HOSTS" ] || WM_HOSTS="${HOST}:1"
+
 
 # Count the total number of slots available and exit
 if [ "$1" = "-count" ]
@@ -90,13 +94,13 @@ esac
 
 # Same as foamEtcFile -mode=uo bashrc
 #
-# Check ~/.$WM_PROJECT/$WM_PROJECT_API/
+# Check ~/.$WM_PROJECT/$FOAM_API/
 # Check ~/.$WM_PROJECT/
 # Check projectDir/etc/
-if [ -n "$WM_PROJECT" ]
+if [ -n "$WM_PROJECT_DIR" ]
 then
     for i in \
-        "$HOME/.$WM_PROJECT/$WM_PROJECT_API" \
+        "$HOME/.$WM_PROJECT/$FOAM_API" \
         "$HOME/.$WM_PROJECT" \
         "$WM_PROJECT_DIR/etc" \
         ;
@@ -114,11 +118,11 @@ fi
 # Use FOAM_SETTINGS to pass command-line settings
 case "$sourceFoam" in
 */bashrc)
-    sourceFoam='[ -n "$WM_PROJECT" ] || '". $sourceFoam $FOAM_SETTINGS"
+    sourceFoam='[ -n "$WM_PROJECT_DIR" ] || '". $sourceFoam $FOAM_SETTINGS"
     ;;
 
 */cshrc)
-    sourceFoam='if ( ! $?WM_PROJECT ) source '"$sourceFoam $FOAM_SETTINGS"
+    sourceFoam='if ( ! $?WM_PROJECT_DIR ) source '"$sourceFoam $FOAM_SETTINGS"
     ;;
 esac
 

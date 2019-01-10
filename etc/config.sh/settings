@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -180,13 +180,13 @@ fi
 export PATH="$WM_PROJECT_DIR/bin:$PATH"
 
 # Prepend site-specific scripts to path - only if they exist
-if [ -d "$siteDir/bin" ]                        # Generic
+if [ -d "$siteDir/bin" ]                # Generic
 then
     _foamAddPath "$siteDir/bin"
 fi
-if [ -d "$siteDir/$WM_PROJECT_API/bin" ]        # API-specific
+if [ -d "$siteDir/$FOAM_API/bin" ]      # API-specific
 then
-    _foamAddPath "$siteDir/$WM_PROJECT_API/bin"
+    _foamAddPath "$siteDir/$FOAM_API/bin"
 fi
 
 # OpenFOAM executables (user, group, standard)

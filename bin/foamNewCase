@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -30,14 +30,14 @@
 #     - requires rsync
 #
 # Environment
-#     WM_PROJECT_API
+#     FOAM_API
 #     WM_PROJECT_DIR
 #     WM_PROJECT_SITE
 #
 #------------------------------------------------------------------------------
 groupDir="${WM_PROJECT_SITE:-${WM_PROJECT_DIR:-<unknown>}/site}"
 userDir="$HOME/.OpenFOAM"
-projectApi="${WM_PROJECT_API:-unknown}"
+projectApi="${FOAM_API:-unknown}"
 
 templateDir="appTemplates"
 
@@ -52,7 +52,7 @@ options:
   -app NAME         specify the application to use
   -case DIR         specify alternative case directory, default is the cwd
   -list             list the applications available
-  -with-api=NUM     specify alternative api to use (default: \$WM_PROJECT_API)
+  -with-api=NUM     specify alternative api to use (default: \$FOAM_API)
   -version VER      [obsolete]
   -help             Print the usage
 

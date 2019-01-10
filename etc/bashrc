@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -22,9 +22,9 @@
 #         -  $WM_PROJECT_DIR/etc/prefs.sh
 #
 #       - User or group values (first file found):
-#         -  ~/.OpenFOAM/$WM_PROJECT_API/prefs.sh
+#         -  ~/.OpenFOAM/$FOAM_API/prefs.sh
 #         -  ~/.OpenFOAM/prefs.sh
-#         -  $WM_PROJECT_SITE/$WM_PROJECT_API/etc/prefs.sh
+#         -  $WM_PROJECT_SITE/$FOAM_API/etc/prefs.sh
 #         -  $WM_PROJECT_SITE/etc/prefs.sh
 #
 # Environment
