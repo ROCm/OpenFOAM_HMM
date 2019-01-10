@@ -36,6 +36,7 @@ License
 #include "SubList.H"
 #include "unthreadedInitialise.H"
 #include "bitSet.H"
+#include "IListStream.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -613,6 +614,13 @@ Foam::fileOperations::masterUncollatedFileOperation::read
         {
             if (procValid[0])
             {
+                if (filePaths[0].empty())
+                {
+                    FatalIOErrorInFunction(filePaths[0])
+                        << "cannot find file " << io.objectPath()
+                        << exit(FatalIOError);
+                }
+
                 DynamicList<label> validProcs(Pstream::nProcs(comm));
                 for
                 (
@@ -705,10 +713,11 @@ Foam::fileOperations::masterUncollatedFileOperation::read
         if (!isPtr.valid())
         {
             UIPstream is(Pstream::masterNo(), pBufs);
-            string buf(recvSizes[Pstream::masterNo()], '\0');
+
+            List<char> buf(recvSizes[Pstream::masterNo()]);
             if (recvSizes[Pstream::masterNo()] > 0)
             {
-                is.read(&buf[0], recvSizes[Pstream::masterNo()]);
+                is.read(buf.begin(), recvSizes[Pstream::masterNo()]);
             }
 
             if (debug)
@@ -719,10 +728,10 @@ Foam::fileOperations::masterUncollatedFileOperation::read
             const fileName& fName = filePaths[Pstream::myProcNo(comm)];
             isPtr.reset
             (
-                new IStringStream
+                new IListStream
                 (
-                    buf,
-                    IOstream::ASCII,
+                    std::move(buf),
+                    IOstream::BINARY,
                     IOstream::currentVersion,
                     fName
                 )
@@ -2503,8 +2512,9 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
             }
 
             UIPstream is(Pstream::masterNo(), pBufs);
-            string buf(recvSizes[Pstream::masterNo()], '\0');
-            is.read(&buf[0], recvSizes[Pstream::masterNo()]);
+
+            List<char> buf(recvSizes[Pstream::masterNo()]);
+            is.read(buf.begin(), buf.size());
 
             if (debug)
             {
@@ -2517,10 +2527,10 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
             //       so it holds a copy of the buffer.
             return autoPtr<ISstream>
             (
-                new IStringStream
+                new IListStream
                 (
-                    buf,
-                    IOstream::ASCII,
+                    std::move(buf),
+                    IOstream::BINARY,
                     IOstream::currentVersion,
                     filePath
                 )
