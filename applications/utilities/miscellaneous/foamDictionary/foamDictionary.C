@@ -129,7 +129,6 @@ Usage
 #include "Fstream.H"
 #include "etcFiles.H"
 #include "includeEntry.H"
-#include "foamVersion.H"
 
 using namespace Foam;
 
@@ -328,9 +327,6 @@ int main(int argc, char *argv[])
     profiling::disable(); // Disable profiling (and its output)
 
     argList args(argc, argv);
-
-    // OPENFOAM API
-    setEnv("FOAM_API", std::to_string(foamVersion::api), true);
 
     const bool listIncludes = args.found("includes");
 
