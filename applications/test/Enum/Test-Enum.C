@@ -82,6 +82,12 @@ const Foam::Enum<int> otherNames2
 
 std::array<const char*, 2> myarray{ "false", "true" };
 
+
+// Verify compile-time warnings
+// #include "NamedEnum.H"
+// const Foam::NamedEnum<testing::option, 2> bad_legacy;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 

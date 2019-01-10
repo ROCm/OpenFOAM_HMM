@@ -99,7 +99,8 @@ public:
     // Constructors
 
         //- Construct from names
-        NamedEnum();
+        NamedEnum()
+        FOAM_DEPRECATED_FOR(2017-05, "Enum instead of using NamedEnum");
 
 
     // Member Functions
