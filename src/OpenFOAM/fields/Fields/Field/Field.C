@@ -560,9 +560,9 @@ Foam::Field<Type>::component
     const direction d
 ) const
 {
-    tmp<Field<cmptType>> Component(new Field<cmptType>(this->size()));
-    ::Foam::component(Component.ref(), *this, d);
-    return Component;
+    auto tres = tmp<Field<cmptType>>::New(this->size());
+    ::Foam::component(tres.ref(), *this, d);
+    return tres;
 }
 
 
@@ -618,9 +618,9 @@ VSForm Foam::Field<Type>::block(const label start) const
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::T() const
 {
-    tmp<Field<Type>> transpose(new Field<Type>(this->size()));
-    ::Foam::T(transpose.ref(), *this);
-    return transpose;
+    auto tres = tmp<Field<cmptType>>::New(this->size());
+    ::Foam::T(tres.ref(), *this);
+    return tres;
 }
 
 
