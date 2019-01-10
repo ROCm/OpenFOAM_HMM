@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,9 +35,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     const DimensionedField<Type1, GeoMesh>& df1                                \
 )                                                                              \
 {                                                                              \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
-        new DimensionedField<ReturnType, GeoMesh>                              \
+    auto tres =                                                                \
+        tmp<DimensionedField<ReturnType, GeoMesh>>::New                        \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -47,15 +46,14 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
             ),                                                                 \
             df1.mesh(),                                                        \
             Dfunc(df1.dimensions())                                            \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), df1.field());                                     \
+    Func(tres.ref().field(), df1.field());                                     \
+    tres.ref().oriented() = Dfunc(df1.oriented());                             \
                                                                                \
-    tRes.ref().oriented() = Dfunc(df1.oriented());                             \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
@@ -65,23 +63,19 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 {                                                                              \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
         (                                                                      \
             tdf1,                                                              \
             #Func "(" + df1.name() + ')',                                      \
             Dfunc(df1.dimensions())                                            \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), df1.field());                                     \
-                                                                               \
-    tRes.ref().oriented() = Dfunc(df1.oriented());                             \
+    Func(tres.ref().field(), df1.field());                                     \
+    tres.ref().oriented() = Dfunc(df1.oriented());                             \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -95,9 +89,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     const DimensionedField<Type1, GeoMesh>& df1                                \
 )                                                                              \
 {                                                                              \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
-        new DimensionedField<ReturnType, GeoMesh>                              \
+    auto tres =                                                                \
+        tmp<DimensionedField<ReturnType, GeoMesh>>::New                        \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -107,15 +100,14 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
             ),                                                                 \
             df1.mesh(),                                                        \
             Dfunc(df1.dimensions())                                            \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), df1.field());                             \
+    Foam::OpFunc(tres.ref().field(), df1.field());                             \
+    tres.ref().oriented() = Dfunc(df1.oriented());                             \
                                                                                \
-    tRes.ref().oriented() = Dfunc(df1.oriented());                             \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -125,23 +117,19 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 {                                                                              \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
         (                                                                      \
             tdf1,                                                              \
             #Op + df1.name(),                                                  \
             Dfunc(df1.dimensions())                                            \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), df1.field());                             \
-                                                                               \
-    tRes.ref().oriented() = Dfunc(df1.oriented());                             \
+    Foam::OpFunc(tres.ref().field(), df1.field());                             \
+    tres.ref().oriented() = Dfunc(df1.oriented());                             \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -156,9 +144,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     const DimensionedField<Type2, GeoMesh>& df2                                \
 )                                                                              \
 {                                                                              \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
-        new DimensionedField<ReturnType, GeoMesh>                              \
+    auto tres =                                                                \
+        tmp<DimensionedField<ReturnType, GeoMesh>>::New                        \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -168,15 +155,14 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
             ),                                                                 \
             df1.mesh(),                                                        \
             Func(df1.dimensions(), df2.dimensions())                           \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), df1.field(), df2.field());                        \
+    Func(tres.ref().field(), df1.field(), df2.field());                        \
+    tres.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
                                                                                \
-    tRes.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
@@ -187,24 +173,21 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 {                                                                              \
     const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type2, GeoMesh>::New              \
         (                                                                      \
             tdf2,                                                              \
             #Func "(" + df1.name() + ',' + df2.name() + ')',                   \
             Func(df1.dimensions(), df2.dimensions())                           \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), df1.field(), df2.field());                        \
-                                                                               \
-    tRes.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
+    Func(tres.ref().field(), df1.field(), df2.field());                        \
+    tres.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
                                                                                \
     tdf2.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
@@ -215,7 +198,7 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 {                                                                              \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
+    tmp<DimensionedField<ReturnType, GeoMesh>> tres                            \
     (                                                                          \
         reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
         (                                                                      \
@@ -225,14 +208,13 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
         )                                                                      \
     );                                                                         \
                                                                                \
-    Func(tRes.ref().field(), df1.field(), df2.field());                        \
-                                                                               \
-    tRes.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
+    Func(tres.ref().field(), df1.field(), df2.field());                        \
+    tres.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
@@ -244,26 +226,22 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
     const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpTmpDimensionedField                                            \
-            <ReturnType, Type1, Type1, Type2, GeoMesh>::New                    \
+        <ReturnType, Type1, Type1, Type2, GeoMesh>::New                        \
         (                                                                      \
             tdf1,                                                              \
             tdf2,                                                              \
             #Func "(" + df1.name() + ',' + df2.name() + ')',                   \
             Func(df1.dimensions(), df2.dimensions())                           \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), df1.field(), df2.field());                        \
-                                                                               \
-    tRes.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
+    Func(tres.ref().field(), df1.field(), df2.field());                        \
+    tres.ref().oriented() = Func(df1.oriented(), df2.oriented());              \
                                                                                \
     tdf1.clear();                                                              \
     tdf2.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -278,9 +256,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     const DimensionedField<Type2, GeoMesh>& df2                                \
 )                                                                              \
 {                                                                              \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
-        new DimensionedField<ReturnType, GeoMesh>                              \
+    auto tres =                                                                \
+        tmp<DimensionedField<ReturnType, GeoMesh>>::New                        \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -290,15 +267,14 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
             ),                                                                 \
             df2.mesh(),                                                        \
             Func(dt1.dimensions(), df2.dimensions())                           \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), dt1.value(), df2.field());                        \
+    Func(tres.ref().field(), dt1.value(), df2.field());                        \
+    tres.ref().oriented() = df2.oriented();                                    \
                                                                                \
-    tRes.ref().oriented() = df2.oriented();                                    \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
@@ -320,24 +296,21 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 {                                                                              \
     const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type2, GeoMesh>::New              \
         (                                                                      \
             tdf2,                                                              \
             #Func "(" + dt1.name() + ',' + df2.name() + ')',                   \
             Func(dt1.dimensions(), df2.dimensions())                           \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), dt1.value(), df2.field());                        \
-                                                                               \
-    tRes.ref().oriented() = df2.oriented();                                    \
+    Func(tres.ref().field(), dt1.value(), df2.field());                        \
+    tres.ref().oriented() = df2.oriented();                                    \
                                                                                \
     tdf2.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
@@ -359,9 +332,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
     const dimensioned<Type2>& dt2                                              \
 )                                                                              \
 {                                                                              \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
-        new DimensionedField<ReturnType, GeoMesh>                              \
+    auto tres =                                                                \
+        tmp<DimensionedField<ReturnType, GeoMesh>>::New                        \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -371,15 +343,14 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
             ),                                                                 \
             df1.mesh(),                                                        \
             Func(df1.dimensions(), dt2.dimensions())                           \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), df1.field(), dt2.value());                        \
+    Func(tres.ref().field(), df1.field(), dt2.value());                        \
+    tres.ref().oriented() = df1.oriented();                                    \
                                                                                \
-    tRes.ref().oriented() = df1.oriented();                                    \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
@@ -401,24 +372,21 @@ tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
 {                                                                              \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
         (                                                                      \
             tdf1,                                                              \
             #Func "(" + df1.name() + ',' + dt2.name() + ')',                   \
             Func(df1.dimensions(), dt2.dimensions())                           \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Func(tRes.ref().field(), df1.field(), dt2.value());                        \
-                                                                               \
-    tRes.ref().oriented() = df1.oriented();                                    \
+    Func(tres.ref().field(), df1.field(), dt2.value());                        \
+    tres.ref().oriented() = df1.oriented();                                    \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> Func                                \
@@ -447,9 +415,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     const DimensionedField<Type2, GeoMesh>& df2                                \
 )                                                                              \
 {                                                                              \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
-        new DimensionedField<ReturnType, GeoMesh>                              \
+    auto tres =                                                                \
+        tmp<DimensionedField<ReturnType, GeoMesh>>::New                        \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -459,15 +426,14 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
             ),                                                                 \
             df1.mesh(),                                                        \
             df1.dimensions() Op df2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), df1.field(), df2.field());                \
+    Foam::OpFunc(tres.ref().field(), df1.field(), df2.field());                \
+    tres.ref().oriented() = df1.oriented() Op df2.oriented();                  \
                                                                                \
-    tRes.ref().oriented() = df1.oriented() Op df2.oriented();                  \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -478,24 +444,21 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 {                                                                              \
     const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type2, GeoMesh>::New              \
         (                                                                      \
             tdf2,                                                              \
             '(' + df1.name() + OpName + df2.name() + ')',                      \
             df1.dimensions() Op df2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), df1.field(), df2.field());                \
-                                                                               \
-    tRes.ref().oriented() = df1.oriented() Op df2.oriented();                  \
+    Foam::OpFunc(tres.ref().field(), df1.field(), df2.field());                \
+    tres.ref().oriented() = df1.oriented() Op df2.oriented();                  \
                                                                                \
     tdf2.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -506,24 +469,21 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 {                                                                              \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
         (                                                                      \
             tdf1,                                                              \
             '(' + df1.name() + OpName + df2.name() + ')',                      \
             df1.dimensions() Op df2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), df1.field(), df2.field());                \
-                                                                               \
-    tRes.ref().oriented() = df1.oriented() Op df2.oriented();                  \
+    Foam::OpFunc(tres.ref().field(), df1.field(), df2.field());                \
+    tres.ref().oriented() = df1.oriented() Op df2.oriented();                  \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -535,26 +495,22 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
     const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpTmpDimensionedField                                            \
-            <ReturnType, Type1, Type1, Type2, GeoMesh>::New                    \
+        <ReturnType, Type1, Type1, Type2, GeoMesh>::New                        \
         (                                                                      \
             tdf1,                                                              \
             tdf2,                                                              \
             '(' + df1.name() + OpName + df2.name() + ')',                      \
             df1.dimensions() Op df2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), df1.field(), df2.field());                \
-                                                                               \
-    tRes.ref().oriented() = df1.oriented() Op df2.oriented();                  \
+    Foam::OpFunc(tres.ref().field(), df1.field(), df2.field());                \
+    tres.ref().oriented() = df1.oriented() Op df2.oriented();                  \
                                                                                \
     tdf1.clear();                                                              \
     tdf2.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -569,9 +525,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     const DimensionedField<Type2, GeoMesh>& df2                                \
 )                                                                              \
 {                                                                              \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
-        new DimensionedField<ReturnType, GeoMesh>                              \
+    auto tres =                                                                \
+        tmp<DimensionedField<ReturnType, GeoMesh>>::New                        \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -581,15 +536,15 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
             ),                                                                 \
             df2.mesh(),                                                        \
             dt1.dimensions() Op df2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    tRes.ref().oriented() = df2.oriented();                                    \
+    tres.ref().oriented() = df2.oriented();                                    \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), dt1.value(), df2.field());                \
+    Foam::OpFunc(tres.ref().field(), dt1.value(), df2.field());                \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -611,24 +566,21 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 {                                                                              \
     const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type2, GeoMesh>::New              \
         (                                                                      \
             tdf2,                                                              \
             '(' + dt1.name() + OpName + df2.name() + ')',                      \
             dt1.dimensions() Op df2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), dt1.value(), tdf2().field());             \
-                                                                               \
-    tRes.ref().oriented() = df2.oriented();                                    \
+    Foam::OpFunc(tres.ref().field(), dt1.value(), tdf2().field());             \
+    tres.ref().oriented() = df2.oriented();                                    \
                                                                                \
     tdf2.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -650,9 +602,8 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
     const dimensioned<Type2>& dt2                                              \
 )                                                                              \
 {                                                                              \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
-        new DimensionedField<ReturnType, GeoMesh>                              \
+    auto tres =                                                                \
+        tmp<DimensionedField<ReturnType, GeoMesh>>::New                        \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -662,15 +613,14 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
             ),                                                                 \
             df1.mesh(),                                                        \
             df1.dimensions() Op dt2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), df1.field(), dt2.value());                \
+    Foam::OpFunc(tres.ref().field(), df1.field(), dt2.value());                \
+    tres.ref().oriented() = df1.oriented();                                    \
                                                                                \
-    tRes.ref().oriented() = df1.oriented();                                    \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
@@ -692,24 +642,21 @@ tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \
 {                                                                              \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
                                                                                \
-    tmp<DimensionedField<ReturnType, GeoMesh>> tRes                            \
-    (                                                                          \
+    auto tres =                                                                \
         reuseTmpDimensionedField<ReturnType, Type1, GeoMesh>::New              \
         (                                                                      \
             tdf1,                                                              \
             '(' + df1.name() + OpName + dt2.name() + ')',                      \
             df1.dimensions() Op dt2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::OpFunc(tRes.ref().field(), tdf1().field(), dt2.value());             \
-                                                                               \
-    tRes.ref().oriented() = df1.oriented();                                    \
+    Foam::OpFunc(tres.ref().field(), tdf1().field(), dt2.value());             \
+    tres.ref().oriented() = df1.oriented();                                    \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 TEMPLATE                                                                       \
 tmp<DimensionedField<ReturnType, GeoMesh>> operator Op                         \

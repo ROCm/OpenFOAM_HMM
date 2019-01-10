@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,9 +45,8 @@ pow
 {
     typedef typename powProduct<Type, r>::type powProductType;
 
-    tmp<DimensionedField<powProductType, GeoMesh>> tPow
-    (
-        new DimensionedField<powProductType, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<powProductType, GeoMesh>>::New
         (
             IOobject
             (
@@ -57,12 +56,11 @@ pow
             ),
             df.mesh(),
             pow(df.dimensions(), r)
-        )
-    );
+        );
 
-    pow<Type, r, GeoMesh>(tPow.ref().field(), df.field());
+    pow<Type, r, GeoMesh>(tres.ref().field(), df.field());
 
-    return tPow;
+    return tres;
 }
 
 
@@ -78,7 +76,7 @@ pow
 
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<powProductType, GeoMesh>> tPow =
+    auto tres =
         reuseTmpDimensionedField<powProductType, Type, GeoMesh>::New
         (
             tdf,
@@ -86,12 +84,12 @@ pow
             pow(df.dimensions(), r)
         );
 
-    pow<Type, r, GeoMesh>(tPow.ref().field(), df.field());
+    pow<Type, r, GeoMesh>(tres.ref().field(), df.field());
 
     tdf.clear();
-
-    return tPow;
+    return tres;
 }
+
 
 template<class Type, class GeoMesh>
 tmp<DimensionedField<typename outerProduct<Type, Type>::type, GeoMesh>>
@@ -99,9 +97,8 @@ sqr(const DimensionedField<Type, GeoMesh>& df)
 {
     typedef typename outerProduct<Type, Type>::type outerProductType;
 
-    tmp<DimensionedField<outerProductType, GeoMesh>> tSqr
-    (
-        new DimensionedField<outerProductType, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<outerProductType, GeoMesh>>::New
         (
             IOobject
             (
@@ -111,12 +108,11 @@ sqr(const DimensionedField<Type, GeoMesh>& df)
             ),
             df.mesh(),
             sqr(df.dimensions())
-        )
-    );
+        );
 
-    sqr(tSqr.ref().field(), df.field());
+    sqr(tres.ref().field(), df.field());
 
-    return tSqr;
+    return tres;
 }
 
 template<class Type, class GeoMesh>
@@ -127,7 +123,7 @@ sqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
 
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<outerProductType, GeoMesh>> tSqr =
+    auto tres =
         reuseTmpDimensionedField<outerProductType, Type, GeoMesh>::New
         (
             tdf,
@@ -135,11 +131,10 @@ sqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
             sqr(df.dimensions())
         );
 
-    sqr(tSqr.ref().field(), df.field());
+    sqr(tres.ref().field(), df.field());
 
     tdf.clear();
-
-    return tSqr;
+    return tres;
 }
 
 
@@ -149,9 +144,8 @@ tmp<DimensionedField<scalar, GeoMesh>> magSqr
     const DimensionedField<Type, GeoMesh>& df
 )
 {
-    tmp<DimensionedField<scalar, GeoMesh>> tMagSqr
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -161,12 +155,11 @@ tmp<DimensionedField<scalar, GeoMesh>> magSqr
             ),
             df.mesh(),
             sqr(df.dimensions())
-        )
-    );
+        );
 
-    magSqr(tMagSqr.ref().field(), df.field());
+    magSqr(tres.ref().field(), df.field());
 
-    return tMagSqr;
+    return tres;
 }
 
 template<class Type, class GeoMesh>
@@ -177,7 +170,7 @@ tmp<DimensionedField<scalar, GeoMesh>> magSqr
 {
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tMagSqr =
+    auto tres =
         reuseTmpDimensionedField<scalar, Type, GeoMesh>::New
         (
             tdf,
@@ -185,11 +178,10 @@ tmp<DimensionedField<scalar, GeoMesh>> magSqr
             sqr(df.dimensions())
         );
 
-    magSqr(tMagSqr.ref().field(), df.field());
+    magSqr(tres.ref().field(), df.field());
 
     tdf.clear();
-
-    return tMagSqr;
+    return tres;
 }
 
 
@@ -199,9 +191,8 @@ tmp<DimensionedField<scalar, GeoMesh>> mag
     const DimensionedField<Type, GeoMesh>& df
 )
 {
-    tmp<DimensionedField<scalar, GeoMesh>> tMag
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -211,12 +202,11 @@ tmp<DimensionedField<scalar, GeoMesh>> mag
             ),
             df.mesh(),
             df.dimensions()
-        )
-    );
+        );
 
-    mag(tMag.ref().field(), df.field());
+    mag(tres.ref().field(), df.field());
 
-    return tMag;
+    return tres;
 }
 
 template<class Type, class GeoMesh>
@@ -227,7 +217,7 @@ tmp<DimensionedField<scalar, GeoMesh>> mag
 {
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tMag =
+    auto tres =
         reuseTmpDimensionedField<scalar, Type, GeoMesh>::New
         (
             tdf,
@@ -235,11 +225,10 @@ tmp<DimensionedField<scalar, GeoMesh>> mag
             df.dimensions()
         );
 
-    mag(tMag.ref().field(), df.field());
+    mag(tres.ref().field(), df.field());
 
     tdf.clear();
-
-    return tMag;
+    return tres;
 }
 
 
@@ -247,15 +236,16 @@ template<class Type, class GeoMesh>
 tmp
 <
     DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+    <
+        typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh
+    >
 >
 cmptAv(const DimensionedField<Type, GeoMesh>& df)
 {
     typedef typename DimensionedField<Type, GeoMesh>::cmptType cmptType;
 
-    tmp<DimensionedField<cmptType, GeoMesh>> CmptAv
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<cmptType, GeoMesh>>::New
         (
             IOobject
             (
@@ -265,28 +255,29 @@ cmptAv(const DimensionedField<Type, GeoMesh>& df)
             ),
             df.mesh(),
             df.dimensions()
-        )
-    );
+        );
 
-    cmptAv(CmptAv.ref().field(), df.field());
+    cmptAv(tres.ref().field(), df.field());
 
-    return CmptAv;
+    return tres;
 }
+
 
 template<class Type, class GeoMesh>
 tmp
 <
     DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+    <
+        typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh
+    >
 >
 cmptAv(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
 {
-    typedef typename DimensionedField<Type, GeoMesh>::cmptType
-        cmptType;
+    typedef typename DimensionedField<Type, GeoMesh>::cmptType cmptType;
 
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
-    tmp<DimensionedField<cmptType, GeoMesh>> CmptAv =
+    auto tres =
         reuseTmpDimensionedField<cmptType, Type, GeoMesh>::New
         (
             tdf,
@@ -294,12 +285,12 @@ cmptAv(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
             df.dimensions()
         );
 
-    cmptAv(CmptAv.ref().field(), df.field());
+    cmptAv(tres.ref().field(), df.field());
 
     tdf.clear();
-
-    return CmptAv;
+    return tres;
 }
+
 
 #define UNARY_REDUCTION_FUNCTION(returnType, func, dfunc)                      \
                                                                                \
@@ -375,9 +366,9 @@ operator op                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    tmp<DimensionedField<productType, GeoMesh>> tRes                           \
-    (                                                                          \
-        new DimensionedField<productType, GeoMesh>                             \
+                                                                               \
+    auto tres =                                                                \
+        tmp<DimensionedField<productType, GeoMesh>>::New                       \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -387,13 +378,13 @@ operator op                                                                    \
             ),                                                                 \
             df1.mesh(),                                                        \
             df1.dimensions() op df2.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref().field(), df1.field(), df2.field());                \
+    Foam::opFunc(tres.ref().field(), df1.field(), df2.field());                \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Type1, class Type2, class GeoMesh>                              \
 tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh>>           \
@@ -407,7 +398,7 @@ operator op                                                                    \
                                                                                \
     const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
                                                                                \
-    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+    auto tres =                                                                \
         reuseTmpDimensionedField<productType, Type2, GeoMesh>::New             \
         (                                                                      \
             tdf2,                                                              \
@@ -415,12 +406,12 @@ operator op                                                                    \
             df1.dimensions() op df2.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref().field(), df1.field(), df2.field());                \
+    Foam::opFunc(tres.ref().field(), df1.field(), df2.field());                \
                                                                                \
     tdf2.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Type1, class Type2, class GeoMesh>                              \
 tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh>>           \
@@ -434,7 +425,7 @@ operator op                                                                    \
                                                                                \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
                                                                                \
-    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+    auto tres =                                                                \
         reuseTmpDimensionedField<productType, Type1, GeoMesh>::New             \
         (                                                                      \
             tdf1,                                                              \
@@ -442,12 +433,12 @@ operator op                                                                    \
             df1.dimensions() op df2.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref().field(), df1.field(), df2.field());                \
+    Foam::opFunc(tres.ref().field(), df1.field(), df2.field());                \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Type1, class Type2, class GeoMesh>                              \
 tmp<DimensionedField<typename product<Type1, Type2>::type, GeoMesh>>           \
@@ -462,7 +453,7 @@ operator op                                                                    \
     const DimensionedField<Type1, GeoMesh>& df1 = tdf1();                      \
     const DimensionedField<Type2, GeoMesh>& df2 = tdf2();                      \
                                                                                \
-    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+    auto tres =                                                                \
         reuseTmpTmpDimensionedField                                            \
         <productType, Type1, Type1, Type2, GeoMesh>::New                       \
         (                                                                      \
@@ -472,13 +463,13 @@ operator op                                                                    \
             df1.dimensions() op df2.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref().field(), df1.field(), df2.field());                \
+    Foam::opFunc(tres.ref().field(), df1.field(), df2.field());                \
                                                                                \
     tdf1.clear();                                                              \
     tdf2.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Form, class Type, class GeoMesh>                                \
 tmp<DimensionedField<typename product<Type, Form>::type, GeoMesh>>             \
@@ -490,9 +481,8 @@ operator op                                                                    \
 {                                                                              \
     typedef typename product<Type, Form>::type productType;                    \
                                                                                \
-    tmp<DimensionedField<productType, GeoMesh>> tRes                           \
-    (                                                                          \
-        new DimensionedField<productType, GeoMesh>                             \
+    auto tres =                                                                \
+        tmp<DimensionedField<productType, GeoMesh>>::New                       \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -502,13 +492,13 @@ operator op                                                                    \
             ),                                                                 \
             df1.mesh(),                                                        \
             df1.dimensions() op dvs.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref().field(), df1.field(), dvs.value());                \
+    Foam::opFunc(tres.ref().field(), df1.field(), dvs.value());                \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Form, class Cmpt, direction nCmpt, class Type, class GeoMesh>   \
 tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
@@ -534,7 +524,7 @@ operator op                                                                    \
                                                                                \
     const DimensionedField<Type, GeoMesh>& df1 = tdf1();                       \
                                                                                \
-    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+    auto tres =                                                                \
         reuseTmpDimensionedField<productType, Type, GeoMesh>::New              \
         (                                                                      \
             tdf1,                                                              \
@@ -542,12 +532,12 @@ operator op                                                                    \
             df1.dimensions() op dvs.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref().field(), df1.field(), dvs.value());                \
+    Foam::opFunc(tres.ref().field(), df1.field(), dvs.value());                \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Form, class Cmpt, direction nCmpt, class Type, class GeoMesh>   \
 tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
@@ -570,9 +560,9 @@ operator op                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Form, Type>::type productType;                    \
-    tmp<DimensionedField<productType, GeoMesh>> tRes                           \
-    (                                                                          \
-        new DimensionedField<productType, GeoMesh>                             \
+                                                                               \
+    auto tres =                                                                \
+        tmp<DimensionedField<productType, GeoMesh>>::New                       \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -582,13 +572,13 @@ operator op                                                                    \
             ),                                                                 \
             df1.mesh(),                                                        \
             dvs.dimensions() op df1.dimensions()                               \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref().field(), dvs.value(), df1.field());                \
+    Foam::opFunc(tres.ref().field(), dvs.value(), df1.field());                \
                                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Form, class Cmpt, direction nCmpt, class Type, class GeoMesh>   \
 tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
@@ -600,6 +590,7 @@ operator op                                                                    \
 {                                                                              \
     return dimensioned<Form>(static_cast<const Form&>(vs)) op df1;             \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Form, class Type, class GeoMesh>                                \
 tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
@@ -613,7 +604,7 @@ operator op                                                                    \
                                                                                \
     const DimensionedField<Type, GeoMesh>& df1 = tdf1();                       \
                                                                                \
-    tmp<DimensionedField<productType, GeoMesh>> tRes =                         \
+    auto tres =                                                                \
         reuseTmpDimensionedField<productType, Type, GeoMesh>::New              \
         (                                                                      \
             tdf1,                                                              \
@@ -621,12 +612,12 @@ operator op                                                                    \
             dvs.dimensions() op df1.dimensions()                               \
         );                                                                     \
                                                                                \
-    Foam::opFunc(tRes.ref().field(), dvs.value(), df1.field());                \
+    Foam::opFunc(tres.ref().field(), dvs.value(), df1.field());                \
                                                                                \
     tdf1.clear();                                                              \
-                                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class Form, class Cmpt, direction nCmpt, class Type, class GeoMesh>   \
 tmp<DimensionedField<typename product<Form, Type>::type, GeoMesh>>             \
@@ -638,6 +629,7 @@ operator op                                                                    \
 {                                                                              \
     return dimensioned<Form>(static_cast<const Form&>(vs)) op tdf1;            \
 }
+
 
 PRODUCT_OPERATOR(typeOfSum, +, add)
 PRODUCT_OPERATOR(typeOfSum, -, subtract)
