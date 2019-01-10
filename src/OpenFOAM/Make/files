@@ -244,6 +244,8 @@ $(functionEntries)/includeEtcEntry/includeEtcEntry.C
 $(functionEntries)/includeFuncEntry/includeFuncEntry.C
 $(functionEntries)/inputMode/inputMode.C
 $(functionEntries)/removeEntry/removeEntry.C
+$(functionEntries)/ifeqEntry/ifeqEntry.C
+$(functionEntries)/ifEntry/ifEntry.C
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/baseIOdictionary.C
