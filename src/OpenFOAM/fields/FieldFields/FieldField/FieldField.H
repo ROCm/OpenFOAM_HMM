@@ -161,7 +161,7 @@ public:
         void operator=(const tmp<FieldField<Field, Type>>&);
 
         //- Assign uniform value
-        void operator=(const Type&);
+        void operator=(const Type& val);
 
         void operator+=(const FieldField<Field, Type>&);
         void operator+=(const tmp<FieldField<Field, Type>>&);

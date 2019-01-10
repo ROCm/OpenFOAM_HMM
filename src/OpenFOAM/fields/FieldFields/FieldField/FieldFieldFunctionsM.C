@@ -49,12 +49,12 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const FieldField<Field, Type>& f                                           \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         FieldField<Field, ReturnType>::NewCalculatedType(f)                    \
     );                                                                         \
-    Func(tRes.ref(), f);                                                       \
-    return tRes;                                                               \
+    Func(tres.ref(), f);                                                       \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -63,10 +63,10 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const tmp<FieldField<Field, Type>>& tf                                     \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes(New(tf));                          \
-    Func(tRes.ref(), tf());                                                    \
+    tmp<FieldField<Field, ReturnType>> tres(New(tf));                          \
+    Func(tres.ref(), tf());                                                    \
     tf.clear();                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -93,12 +93,12 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const FieldField<Field, Type>& f                                           \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         FieldField<Field, Type>::NewCalculatedType(f)                          \
     );                                                                         \
-    OpFunc(tRes.ref(), f);                                                     \
-    return tRes;                                                               \
+    OpFunc(tres.ref(), f);                                                     \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -107,10 +107,10 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const tmp<FieldField<Field, Type>>& tf                                     \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes(New(tf));                          \
-    OpFunc(tRes.ref(), tf());                                                  \
+    tmp<FieldField<Field, ReturnType>> tres(New(tf));                          \
+    OpFunc(tres.ref(), tf());                                                  \
     tf.clear();                                                                \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -139,12 +139,12 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         FieldField<Field, Type1>::NewCalculatedType(f1)                        \
     );                                                                         \
-    Func(tRes.ref(), f1, f2);                                                  \
-    return tRes;                                                               \
+    Func(tres.ref(), f1, f2);                                                  \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -154,13 +154,13 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const tmp<FieldField<Field, Type2>>& tf2                                   \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, ReturnType, Type2>::New(tf2)                 \
     );                                                                         \
-    Func(tRes.ref(), f1, tf2());                                               \
+    Func(tres.ref(), f1, tf2());                                               \
     tf2.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -170,13 +170,13 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, ReturnType, Type1>::New(tf1)                 \
     );                                                                         \
-    Func(tRes.ref(), tf1(), f2);                                               \
+    Func(tres.ref(), tf1(), f2);                                               \
     tf1.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -186,15 +186,15 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const tmp<FieldField<Field, Type2>>& tf2                                   \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpTmpFieldField<Field, ReturnType, Type1, Type1, Type2>::        \
             New(tf1, tf2)                                                      \
     );                                                                         \
-    Func(tRes.ref(), tf1(), tf2());                                            \
+    Func(tres.ref(), tf1(), tf2());                                            \
     tf1.clear();                                                               \
     tf2.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -223,12 +223,12 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         FieldField<Field, Type2>::NewCalculatedType(f2)                        \
     );                                                                         \
-    Func(tRes.ref(), s, f2);                                                   \
-    return tRes;                                                               \
+    Func(tres.ref(), s, f2);                                                   \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -238,13 +238,13 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const tmp<FieldField<Field, Type2>>& tf2                                   \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, ReturnType, Type2>::New(tf2)                 \
     );                                                                         \
-    Func(tRes.ref(), s, tf2());                                                \
+    Func(tres.ref(), s, tf2());                                                \
     tf2.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -271,12 +271,12 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const Type2& s                                                             \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         FieldField<Field, Type1>::NewCalculatedType(f1)                        \
     );                                                                         \
-    Func(tRes.ref(), f1, s);                                                   \
-    return tRes;                                                               \
+    Func(tres.ref(), f1, s);                                                   \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -286,13 +286,13 @@ tmp<FieldField<Field, ReturnType>> Func                                        \
     const Type2& s                                                             \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, ReturnType, Type1>::New(tf1)                 \
     );                                                                         \
-    Func(tRes.ref(), tf1(), s);                                                \
+    Func(tres.ref(), tf1(), s);                                                \
     tf1.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -326,12 +326,12 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         FieldField<Field, ReturnType>::NewCalculatedType(f1)                   \
     );                                                                         \
-    OpFunc(tRes.ref(), f1, f2);                                                \
-    return tRes;                                                               \
+    OpFunc(tres.ref(), f1, f2);                                                \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -341,13 +341,13 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const tmp<FieldField<Field, Type2>>& tf2                                   \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, ReturnType, Type2>::New(tf2)                 \
     );                                                                         \
-    OpFunc(tRes.ref(), f1, tf2());                                             \
+    OpFunc(tres.ref(), f1, tf2());                                             \
     tf2.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -357,13 +357,13 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, ReturnType, Type1>::New(tf1)                 \
     );                                                                         \
-    OpFunc(tRes.ref(), tf1(), f2);                                             \
+    OpFunc(tres.ref(), tf1(), f2);                                             \
     tf1.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -373,15 +373,15 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const tmp<FieldField<Field, Type2>>& tf2                                   \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpTmpFieldField<Field, ReturnType, Type1, Type1, Type2>::        \
             New(tf1, tf2)                                                      \
     );                                                                         \
-    OpFunc(tRes.ref(), tf1(), tf2());                                          \
+    OpFunc(tres.ref(), tf1(), tf2());                                          \
     tf1.clear();                                                               \
     tf2.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -410,12 +410,12 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const FieldField<Field, Type2>& f2                                         \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         FieldField<Field, Type2>::NewCalculatedType(f2)                        \
     );                                                                         \
-    OpFunc(tRes.ref(), s, f2);                                                 \
-    return tRes;                                                               \
+    OpFunc(tres.ref(), s, f2);                                                 \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -425,13 +425,13 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const tmp<FieldField<Field, Type2>>& tf2                                   \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, ReturnType, Type2>::New(tf2)                 \
     );                                                                         \
-    OpFunc(tRes.ref(), s, tf2());                                              \
+    OpFunc(tres.ref(), s, tf2());                                              \
     tf2.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 
@@ -458,12 +458,12 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const Type2& s                                                             \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         FieldField<Field, Type1>::NewCalculatedType(f1)                        \
     );                                                                         \
-    OpFunc(tRes.ref(), f1, s);                                                 \
-    return tRes;                                                               \
+    OpFunc(tres.ref(), f1, s);                                                 \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -473,13 +473,13 @@ tmp<FieldField<Field, ReturnType>> operator Op                                 \
     const Type2& s                                                             \
 )                                                                              \
 {                                                                              \
-    tmp<FieldField<Field, ReturnType>> tRes                                    \
+    tmp<FieldField<Field, ReturnType>> tres                                    \
     (                                                                          \
         reuseTmpFieldField<Field, ReturnType, Type1>::New(tf1)                 \
     );                                                                         \
-    OpFunc(tRes.ref(), tf1(), s);                                              \
+    OpFunc(tres.ref(), tf1(), s);                                              \
     tf1.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 

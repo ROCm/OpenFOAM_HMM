@@ -86,6 +86,7 @@ template<template<class> class Field, class Type>
 tmp<FieldField<Field, typename outerProduct<Type, Type>::type>>
 sqr(const tmp<FieldField<Field, Type>>& tf);
 
+
 template<template<class> class Field, class Type>
 void magSqr(FieldField<Field, scalar>& sf, const FieldField<Field, Type>& f);
 
@@ -94,6 +95,7 @@ tmp<FieldField<Field, scalar>> magSqr(const FieldField<Field, Type>& f);
 
 template<template<class> class Field, class Type>
 tmp<FieldField<Field, scalar>> magSqr(const tmp<FieldField<Field, Type>>& tf);
+
 
 template<template<class> class Field, class Type>
 void mag(FieldField<Field, scalar>& sf, const FieldField<Field, Type>& f);
@@ -190,25 +192,30 @@ tmp<FieldField<Field, Type>> cmptMag
 template<template<class> class Field, class Type>                              \
 returnType func(const tmp<FieldField<Field, Type>>& tf1);
 
+
 template<template<class> class Field, class Type>
 Type max(const FieldField<Field, Type>& f);
 
 TMP_UNARY_FUNCTION(Type, max)
+
 
 template<template<class> class Field, class Type>
 Type min(const FieldField<Field, Type>& f);
 
 TMP_UNARY_FUNCTION(Type, min)
 
+
 template<template<class> class Field, class Type>
 Type sum(const FieldField<Field, Type>& f);
 
 TMP_UNARY_FUNCTION(Type, sum)
 
+
 template<template<class> class Field, class Type>
 scalar sumMag(const FieldField<Field, Type>& f);
 
 TMP_UNARY_FUNCTION(scalar, sumMag)
+
 
 template<template<class> class Field, class Type>
 Type average(const FieldField<Field, Type>& f);
