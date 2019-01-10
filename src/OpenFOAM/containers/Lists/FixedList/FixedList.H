@@ -90,7 +90,7 @@ protected:
     // Protected Member Functions
 
         //- True if there are two or more entries and all entries have
-        //  identical values.
+        //- identical values.
         inline bool uniform() const;
 
         //- Write the FixedList with its compound type
@@ -99,7 +99,7 @@ protected:
 
 public:
 
-    // STL type definitions
+    // STL Type Definitions
 
         //- The value type the FixedList contains
         typedef T value_type;
@@ -197,16 +197,16 @@ public:
         //  This can be used (with caution) when interfacing with C code
         inline T* data();
 
-        //- Return the first element of the list
+        //- The first element of the list, position [0]
         inline T& first();
 
-        //- Return first element of the list
+        //- The first element of the list, position [0]
         inline const T& first() const;
 
-        //- Return the last element of the list
+        //- The last element of the list, position [N-1]
         inline T& last();
 
-        //- Return the last element of the list
+        //- The last element of the list, position [N-1]
         inline const T& last() const;
 
 
@@ -279,7 +279,7 @@ public:
         inline void transfer(FixedList<T, N>& list);
 
 
-    // Member operators
+    // Member Operators
 
         //- Return element of FixedList
         inline T& operator[](const label i);
@@ -357,22 +357,22 @@ public:
         inline const_reverse_iterator rend() const;
 
 
-    // STL member functions
-
-        //- Return the number of elements in the FixedList
-        inline label size() const;
-
-        //- Return size of the largest possible FixedList
-        inline label max_size() const;
+    // STL Member Functions
 
         //- Always false since zero-sized FixedList is compile-time disabled.
-        inline bool empty() const;
+        static constexpr bool empty() noexcept { return !N; }
+
+        //- Return the number of elements in the FixedList
+        static constexpr label size() noexcept { return N; }
+
+        //- The dimensioned size (template parameter N) of the FixedList
+        static constexpr unsigned max_size() noexcept { return N; }
 
         //- Swap lists by swapping the content of the individual list elements
         inline void swap(FixedList<T, N>& list);
 
 
-    // STL member operators
+    // STL Member Operators
 
         //- Equality operation on FixedLists of the same type.
         //  Returns true when the FixedLists are element-wise equal

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,6 +68,36 @@ Ostream& printInfo
 }
 
 
+template<class T, unsigned N>
+void compileInfo()
+{
+    // Info<< typeid(decltype(FixedList<T, N>)).name() << nl;
+
+    // Info<< "  holds: "
+    // << typeid(decltype(FixedList<T, N>::value_type())).name() << nl;
+
+    Info<< "max_size:"
+        << FixedList<T, N>::max_size() << nl;
+}
+
+
+template<class FixedListType>
+typename std::enable_if
+<(FixedListType::max_size() == 2), bool>::type
+is_pair()
+{
+     return true;
+}
+
+
+template<class FixedListType>
+typename std::enable_if<(FixedListType::max_size() != 2), std::string>::type
+is_pair()
+{
+     return "not really at all";
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -85,6 +115,18 @@ int main(int argc, char *argv[])
     const bool defaultTests =
         args.found("default") || args.options().empty();
 
+
+    typedef FixedList<scalar,2> scalar2Type;
+    typedef FixedList<label,3>  label3Type;
+
+    // Compile-time info
+
+    compileInfo<label, 5>();
+
+    Info<< "pair: " << is_pair<scalar2Type>() << nl;
+    Info<< "pair: " << is_pair<label3Type>() << nl;
+
+    Info<< "max_size:" << scalar2Type::max_size() << nl;
 
     if (defaultTests || args.found("iter"))
     {

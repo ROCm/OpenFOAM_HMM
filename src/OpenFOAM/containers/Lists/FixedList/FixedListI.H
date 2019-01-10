@@ -548,27 +548,6 @@ Foam::FixedList<T, N>::crend() const
 }
 
 
-template<class T, unsigned N>
-inline Foam::label Foam::FixedList<T, N>::size() const
-{
-    return N;
-}
-
-
-template<class T, unsigned N>
-inline Foam::label Foam::FixedList<T, N>::max_size() const
-{
-    return N;
-}
-
-
-template<class T, unsigned N>
-inline bool Foam::FixedList<T, N>::empty() const
-{
-    return false;
-}
-
-
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class T, unsigned N>
