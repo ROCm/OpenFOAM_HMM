@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -598,11 +598,23 @@ public:
         //  This sets the \em floor on the field values
         void max(const dimensioned<Type>& dt);
 
+        //- Clip the field to be bounded within the specified range
+        void clip(const dimensioned<MinMax<Type>>& range);
+
+        //- Clip the field to be bounded within the specified range
+        void clip
+        (
+            const dimensioned<Type>& minVal,
+            const dimensioned<Type>& maxVal
+        );
+
+        //- Deprecated(2019-01) identical to clip()
+        //  \deprecated(2019-01) identical to clip()
         void maxMin
         (
-            const dimensioned<Type>& minDt,
-            const dimensioned<Type>& maxDt
-        );
+            const dimensioned<Type>& minVal,
+            const dimensioned<Type>& maxVal
+        ) FOAM_DEPRECATED_FOR(2019-01, "clip() method");
 
 
     // Member Operators
