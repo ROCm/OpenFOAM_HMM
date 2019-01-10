@@ -929,7 +929,7 @@ Foam::phaseSystem::surfaceTensionForce() const
             mesh_
         ),
         mesh_,
-        dimensionedScalar(dimForce, Zero)
+        dimensionedScalar({1, -2, -2, 0, 0, 0}, Zero)
     );
 
     auto& stf = tstf.ref();
