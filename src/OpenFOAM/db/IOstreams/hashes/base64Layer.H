@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    base64Layer
+    Foam::base64Layer
 
 Description
     An output filter layer to write base-64 encoded content.

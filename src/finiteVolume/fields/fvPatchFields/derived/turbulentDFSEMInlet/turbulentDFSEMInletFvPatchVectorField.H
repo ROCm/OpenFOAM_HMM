@@ -45,9 +45,10 @@ Description
     except that no interpolation in time is supported.  These should be
     located in the directory:
 
+    \verbatim
         \$FOAM_CASE/constant/boundaryData/\<patchName\>/points
         \$FOAM_CASE/constant/boundaryData/\<patchName\>/0/\{R|U|L\}
-
+    \endverbatim
 
 Usage
     \table

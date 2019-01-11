@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faMeshDecomposition
+    Foam::faMeshDecomposition
 
 Description
     Automatic faMesh decomposition class

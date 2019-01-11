@@ -21,13 +21,13 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namspace
+Namespace
     Foam::HashSetOps
 
 Description
     Various operations for HashSet.
 
-Namspace
+Namespace
     Foam::HashTableOps
 
 Description

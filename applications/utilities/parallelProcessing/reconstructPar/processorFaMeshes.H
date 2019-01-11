@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    processorFaMeshes
+    Foam::processorFaMeshes
 
 Description
     Container for processor mesh addressing.
@@ -50,7 +50,6 @@ SourceFiles
 
 namespace Foam
 {
-
 
 /*---------------------------------------------------------------------------*\
                      Class processorFaMeshes Declaration
