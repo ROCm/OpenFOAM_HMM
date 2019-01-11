@@ -112,8 +112,7 @@ protected:
         //  Use with care
         inline void size(const label n);
 
-        //- True if there are two or more entries and all entries have
-        //  identical values.
+        //- True if all entries have identical values, and list is non-empty
         inline bool uniform() const;
 
         //- Write the UList with its compound type

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -629,27 +629,12 @@ void Foam::Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 {
     os.writeKeyword(keyword);
 
-    const label len = this->size();
+    // The contents are 'uniform' if the list is non-empty
+    // and all entries have identical values.
 
-    // Can the contents be considered 'uniform' (ie, identical)?
-    bool uniform = (contiguous<Type>() && len);
-    if (uniform)
+    if (contiguous<Type>() && List<Type>::uniform())
     {
-        const Type& val = this->operator[](0);
-
-        for (label i=1; i<len; ++i)
-        {
-            if (val != this->operator[](i))
-            {
-                uniform = false;
-                break;
-            }
-        }
-    }
-
-    if (uniform)
-    {
-        os << "uniform " << this->operator[](0);
+        os << "uniform " << this->first();
     }
     else
     {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,10 +89,16 @@ Foam::PackedList<Width>::PackedList
 template<unsigned Width>
 bool Foam::PackedList<Width>::uniform() const
 {
-    if (size() < 2)
+    // Trivial cases
+    if (empty())
     {
-        return false;   // Trivial case
+        return false;
     }
+    else if (size() == 1)
+    {
+        return true;
+    }
+
 
     // The value of the first element for testing
     const unsigned int val = get(0);
@@ -162,11 +168,13 @@ Foam::PackedList<Width>::unpack() const
         "Width of IntType is too small to hold result"
     );
 
-    if (size() < 2 || uniform())
+    if (empty())
     {
-        const IntType val = (size() ? get(0) : 0);
-
-        return List<IntType>(size(), val);
+        return List<IntType>(0);
+    }
+    else if (uniform())
+    {
+        return List<IntType>(size(), static_cast<IntType>(get(0)));
     }
 
     List<IntType> output(size());

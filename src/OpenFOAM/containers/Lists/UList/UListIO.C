@@ -81,7 +81,7 @@ Foam::Ostream& Foam::UList<T>::writeList
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        if (contiguous<T>() && list.uniform())
+        if (len > 1 && contiguous<T>() && list.uniform())
         {
             // Two or more entries, and all entries have identical values.
             os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
@@ -232,7 +232,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
                 }
                 else
                 {
-                    // uniform content (delimiter == token::BEGIN_BLOCK)
+                    // Uniform content (delimiter == token::BEGIN_BLOCK)
 
                     T element;
                     is >> element;

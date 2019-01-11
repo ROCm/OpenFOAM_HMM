@@ -211,8 +211,7 @@ public:
         //- True if no bits in this bitset are set.
         inline bool none() const;
 
-        //- True if there are two or more entries and all entries have
-        //- identical values.
+        //- True if all entries have identical values, and the set is non-empty
         inline bool uniform() const;
 
         //- Count number of bits set.

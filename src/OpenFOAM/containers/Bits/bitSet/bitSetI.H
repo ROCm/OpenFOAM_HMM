@@ -449,7 +449,7 @@ inline bool Foam::bitSet::none() const
 
 inline bool Foam::bitSet::uniform() const
 {
-    return (size() > 1 && (test(0) ? all() : none()));
+    return (size() == 1 || (size() > 1 && (test(0) ? all() : none())));
 }
 
 

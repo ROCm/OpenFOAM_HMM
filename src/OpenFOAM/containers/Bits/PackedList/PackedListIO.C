@@ -215,9 +215,9 @@ Foam::Ostream& Foam::PackedList<Width>::writeList
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII)
     {
-        if (list.uniform())
+        if (len > 1 && list.uniform())
         {
-            // Two or more entries, and all entries have identical values.
+            // Two or more entries, and all have identical values.
             os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
         }
         else if (!shortLen || len <= shortLen)

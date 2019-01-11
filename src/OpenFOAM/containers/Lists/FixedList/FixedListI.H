@@ -42,22 +42,17 @@ inline const Foam::FixedList<T, N>& Foam::FixedList<T, N>::null()
 template<class T, unsigned N>
 inline bool Foam::FixedList<T, N>::uniform() const
 {
-    if (N > 1)
+    if (empty()) return false;   // <- Compile-time disabled anyhow
+
+    for (unsigned i=1; i<N; ++i)
     {
-        const T& val = first();
-
-        for (unsigned i=1; i<N; ++i)
+        if (v_[0] != v_[i])
         {
-            if (val != (*this)[i])
-            {
-                return false;
-            }
+            return false;
         }
-
-        return true;
     }
 
-    return false;
+    return true;
 }
 
 

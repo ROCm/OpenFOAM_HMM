@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,22 +30,22 @@ inline bool Foam::UIndirectList<T>::uniform() const
 {
     const label len = this->size();
 
-    if (len > 1)
+    if (!len)
     {
-        const T& val = (*this)[0];
-
-        for (label i=1; i<len; ++i)
-        {
-            if (val != (*this)[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return false;
     }
 
-    return false;
+    const T& val = (*this)[0];
+
+    for (label i=1; i<len; ++i)
+    {
+        if (val != (*this)[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 

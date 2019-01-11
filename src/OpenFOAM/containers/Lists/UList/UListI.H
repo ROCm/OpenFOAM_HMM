@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "contiguous.H"
 #include "pTraits.H"
 #include "Swap.H"
 
@@ -35,22 +34,22 @@ inline bool Foam::UList<T>::uniform() const
 {
     const label len = size();
 
-    if (len > 1)
+    if (len == 0)
     {
-        const T& val = first();
-
-        for (label i=1; i<len; ++i)
-        {
-            if (val != (*this)[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return false;
     }
 
-    return false;
+    const T& val = first();
+
+    for (label i=1; i<len; ++i)
+    {
+        if (val != (*this)[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 

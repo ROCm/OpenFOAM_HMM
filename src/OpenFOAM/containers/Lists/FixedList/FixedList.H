@@ -90,8 +90,7 @@ protected:
 
     // Protected Member Functions
 
-        //- True if there are two or more entries and all entries have
-        //- identical values.
+        //- True if all entries have identical values, and list is non-empty
         inline bool uniform() const;
 
         //- Write the FixedList with its compound type

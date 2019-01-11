@@ -281,8 +281,7 @@ public:
         //- The number of elements that can be stored with reallocating
         inline label capacity() const;
 
-        //- True if there are two or more entries and all entries have
-        //- identical values.
+        //- True if all entries have identical values, and list is non-empty
         bool uniform() const;
 
 
