@@ -199,7 +199,7 @@ void Foam::faPatchField<Type>::evaluate(const Pstream::commsTypes)
 template<class Type>
 void Foam::faPatchField<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
 }
 
 

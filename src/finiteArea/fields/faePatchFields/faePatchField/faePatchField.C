@@ -169,7 +169,7 @@ void Foam::faePatchField<Type>::rmap
 template<class Type>
 void Foam::faePatchField<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
 }
 
 

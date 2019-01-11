@@ -467,13 +467,13 @@ void Foam::faPatch::resetEdges(const labelList& newEdges)
 
 void Foam::faPatch::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
+
     patchIdentifier::write(os);
 
     const labelList& edgeLabels = *this;
     edgeLabels.writeEntry("edgeLabels", os);
-    os.writeKeyword("ngbPolyPatchIndex") << ngbPolyPatchIndex_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("ngbPolyPatchIndex", ngbPolyPatchIndex_);
 }
 
 

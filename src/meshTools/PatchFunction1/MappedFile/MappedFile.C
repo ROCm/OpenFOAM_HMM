@@ -602,8 +602,7 @@ void Foam::PatchFunction1Types::MappedFile<Type>::writeData
     // bc)
     if (dictConstructed_)
     {
-        os.writeKeyword(this->name()) << type();
-        os  << token::END_STATEMENT << nl;
+        os.writeEntry(this->name(), type());
 
         os.writeEntryIfDifferent
         (
