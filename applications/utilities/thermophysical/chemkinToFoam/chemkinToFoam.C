@@ -76,14 +76,15 @@ int main(int argc, char *argv[])
 
     chemkinReader cr(species, args[1], args[3], args[2], newFormat);
 
+    {
+        // output: reactions file
+        OFstream reactionsFile(args[4]);
 
-    OFstream reactionsFile(args[4]);
-    reactionsFile
-        << "elements" << cr.elementNames() << token::END_STATEMENT << nl << nl;
-    reactionsFile
-        << "species" << cr.species() << token::END_STATEMENT << nl << nl;
-    cr.reactions().write(reactionsFile);
+        reactionsFile.writeEntry("elements", cr.elementNames()) << nl;
+        reactionsFile.writeEntry("species", cr.species()) << nl;
 
+        cr.reactions().write(reactionsFile);
+    }
 
     // Temporary hack to splice the specie composition data into the thermo file
     // pending complete integration into the thermodynamics structure
@@ -92,23 +93,23 @@ int main(int argc, char *argv[])
     cr.speciesThermo().write(os);
     dictionary thermoDict(IStringStream(os.str())());
 
-    wordList speciesList(thermoDict.toc());
-
     // Add elements
-    forAll(speciesList, si)
+    for (entry& dEntry : thermoDict)
     {
-        dictionary elementsDict("elements");
-        forAll(cr.specieComposition()[speciesList[si]], ei)
+        const word& speciesName = dEntry.keyword();
+        dictionary& speciesDict = dEntry.dict();
+
+        dictionary elemDict("elements");
+
+        for (const specieElement& elem : cr.specieComposition()[speciesName])
         {
-            elementsDict.add
-            (
-                cr.specieComposition()[speciesList[si]][ei].name(),
-                cr.specieComposition()[speciesList[si]][ei].nAtoms()
-            );
+            elemDict.add(elem.name(), elem.nAtoms());
         }
 
-        thermoDict.subDict(speciesList[si]).add("elements", elementsDict);
+        speciesDict.add("elements", elemDict);
     }
+
+    // output: thermo file
 
     thermoDict.write(OFstream(args[5])(), false);
 
