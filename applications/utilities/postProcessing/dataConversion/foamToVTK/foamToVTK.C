@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -331,6 +331,12 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
+        "processor-fields",
+        "Write field values on processor boundaries only",
+        true  // mark as an advanced option
+    );
+    argList::addBoolOption
+    (
         "surfaceFields",
         "Write surfaceScalarFields (eg, phi)",
         true  // mark as an advanced option
@@ -449,6 +455,29 @@ int main(int argc, char *argv[])
     const bool allRegions    = args.found("allRegions");
 
     const vtk::outputOptions writeOpts = getOutputOptions(args);
+
+    bool processorFieldsOnly = false;
+
+    if (args.found("processor-fields"))
+    {
+        if (!Pstream::parRun())
+        {
+            Info<< "Ignoring processor patch writing in serial"
+                << nl << endl;
+        }
+        else if (writeOpts.legacy())
+        {
+            Info<< "Ignoring processor patch writing in legacy format"
+                << nl << endl;
+        }
+        else
+        {
+            processorFieldsOnly = true;
+
+            Info<< "Writing processor patch fields only"
+                << nl << endl;
+        }
+    }
 
     if (nearCellValue)
     {
@@ -739,6 +768,13 @@ int main(int argc, char *argv[])
                     },
                     true // prune
                 );
+            }
+
+            if (processorFieldsOnly)
+            {
+                // Processor-patches only and continue
+                #include "convertProcessorPatches.H"
+                continue;
             }
 
             // Volume, internal, point fields
