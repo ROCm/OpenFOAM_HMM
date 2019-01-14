@@ -665,9 +665,9 @@ void Foam::vtk::internalWriter::writeCellIDs()
 
 bool Foam::vtk::internalWriter::writeProcIDs()
 {
-    if (!Pstream::parRun())
+    if (!parallel_)
     {
-        // Skip serial output (meaningless)
+        // Disabled in serial output (meaningless)
         return false;
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -221,6 +221,14 @@ public:
         //- Write patch ids as CellData.
         //  Must be called within the CELL_DATA state.
         void writePatchIDs();
+
+        //- Write processor ids as CellData. This is no-op in serial.
+        //  Must be called within the CELL_DATA state.
+        bool writeProcIDs();
+
+        //- Write processor neighbour ids as CellData. This is no-op in serial.
+        //  Must be called within the CELL_DATA state.
+        bool writeNeighIDs();
 
 
     // Write

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -660,6 +660,238 @@ void Foam::vtk::patchWriter::writePatchIDs()
         format().flush();
         format().endDataArray();
     }
+}
+
+
+bool Foam::vtk::patchWriter::writeProcIDs()
+{
+    // This is different than for internalWriter.
+    // Here we allow procIDs whenever running in parallel, even if the
+    // output is serial. This allow diagnosis of processor patches.
+
+    if (!Pstream::parRun())
+    {
+        // Skip in non-parallel
+        return false;
+    }
+
+    if (isState(outputState::CELL_DATA))
+    {
+        ++nCellData_;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::CELL_DATA]
+            << ") for patchID field" << nl << endl
+            << exit(FatalError);
+    }
+
+    label nFaces = nLocalFaces_;
+
+    if (parallel_)
+    {
+        reduce(nFaces, sumOp<label>());
+    }
+
+    if (format_)
+    {
+        if (legacy())
+        {
+            legacy::intField<1>(format(), "procID", nFaces);  // 1 component
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<label>(nFaces);
+
+            format().beginDataArray<label>("procID");
+            format().writeSize(payLoad);
+        }
+    }
+
+    bool good = false;
+
+    if (parallel_)
+    {
+        globalIndex procSizes(nLocalFaces_);
+
+        if (Pstream::master())
+        {
+            // Per-processor ids
+            for (label proci=0; proci < Pstream::nProcs(); ++proci)
+            {
+                label len = procSizes.localSize(proci);
+
+                while (len--)
+                {
+                    format().write(proci);
+                }
+            }
+
+            good = true;
+        }
+    }
+    else
+    {
+        const label proci = Pstream::myProcNo();
+
+        label len = nLocalFaces_;
+
+        while (len--)
+        {
+            format().write(proci);
+        }
+
+        good = true;
+    }
+
+
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
+    }
+
+    // MPI barrier
+    return parallel_ ? returnReduce(good, orOp<bool>()) : good;
+}
+
+
+bool Foam::vtk::patchWriter::writeNeighIDs()
+{
+    if (!Pstream::parRun())
+    {
+        // Skip in non-parallel
+        return false;
+    }
+
+    if (isState(outputState::CELL_DATA))
+    {
+        ++nCellData_;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::CELL_DATA]
+            << ") for patchID field" << nl << endl
+            << exit(FatalError);
+    }
+
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    label nFaces = nLocalFaces_;
+
+    if (parallel_)
+    {
+        reduce(nFaces, sumOp<label>());
+    }
+
+    if (format_)
+    {
+        if (legacy())
+        {
+            legacy::intField<1>(format(), "neighID", nFaces);  // 1 component
+        }
+        else
+        {
+            const uint64_t payLoad =
+                vtk::sizeofData<label>(nFaces);
+
+            format().beginDataArray<label>("neighID");
+            format().writeSize(payLoad);
+        }
+    }
+
+    bool good = false;
+
+    if (parallel_ ? Pstream::master() : true)
+    {
+        for (const label patchId : patchIDs_)
+        {
+            label count = patches[patchId].size();
+
+            const auto* pp = isA<processorPolyPatch>(patches[patchId]);
+
+            const label val = (pp ?  pp->neighbProcNo() : -1);
+
+            while (count--)
+            {
+                format().write(val);
+            }
+        }
+
+        good = true;
+    }
+
+    if (parallel_)
+    {
+        if (Pstream::master())
+        {
+            labelList recv;
+
+            // Receive each pair
+            for
+            (
+                int slave=Pstream::firstSlave();
+                slave<=Pstream::lastSlave();
+                ++slave
+            )
+            {
+                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
+
+                fromSlave >> recv;
+
+                for (label i=0; i < recv.size(); ++i)
+                {
+                    label count = recv[i];
+                    ++i;
+                    const label val = recv[i];
+
+                    while (count--)
+                    {
+                        format().write(val);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Send to master
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
+
+            labelList send(2*patchIDs_.size());
+
+            // Encode as [size, id] pairs
+            label i = 0;
+            for (const label patchId : patchIDs_)
+            {
+                const auto* pp = isA<processorPolyPatch>(patches[patchId]);
+
+                send[i] = patches[patchId].size();
+                send[i+1] = (pp ?  pp->neighbProcNo() : -1);
+
+                i += 2;
+            }
+
+            toMaster << send;
+        }
+    }
+
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
+    }
+
+    // MPI barrier
+    return parallel_ ? returnReduce(good, orOp<bool>()) : good;
 }
 
 
