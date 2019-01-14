@@ -93,17 +93,6 @@ SourceFiles
 namespace Foam
 {
 
-//- Dummy access operator for ListListOps::combine()
-template<class T>
-struct accessOp
-{
-    const T& operator()(const T& x) const
-    {
-        return x;
-    }
-};
-
-
 //- Offset operator for ListListOps::combineOffset()
 template<class T>
 struct offsetOp

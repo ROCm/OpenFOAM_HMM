@@ -615,6 +615,31 @@ struct Hash<UList<T>>
 };
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Object access operator or list access operator.
+//- \sa ListListOps::combine()
+template<class T>
+struct accessOp
+{
+    const T& operator()(const T& obj) const
+    {
+        return obj;
+    }
+};
+
+
+//- Test if object is empty, typically using its empty() method.
+template<class T>
+struct emptyOp
+{
+    inline bool operator()(const T& obj) const
+    {
+        return obj.empty();
+    }
+};
+
+
 //- Extract size (as label) from an object, typically using its size() method.
 template<class T>
 struct sizeOp
