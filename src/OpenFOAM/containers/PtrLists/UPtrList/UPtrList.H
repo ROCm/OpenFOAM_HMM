@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,8 +177,9 @@ public:
         //- Transfer contents into this list and annul the argument
         inline void transfer(UPtrList<T>& list);
 
-        //- Return true if element is set (not a nullptr)
-        inline bool set(const label i) const;
+        //- Return const pointer to element (if set) or nullptr.
+        //  The return value can be tested as a bool.
+        inline const T* set(const label i) const;
 
         //- Set element to specified pointer and return the old list element,
         //- which can be a nullptr.

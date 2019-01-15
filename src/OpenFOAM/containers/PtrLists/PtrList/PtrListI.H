@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,35 +123,35 @@ inline void Foam::PtrList<T>::append(const tmp<T>& tptr)
 
 
 template<class T>
-inline bool Foam::PtrList<T>::set(const label i) const
+inline const T* Foam::PtrList<T>::set(const label i) const
 {
     return UPtrList<T>::set(i);
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, T* ptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, T* ptr)
 {
     return autoPtr<T>(UPtrList<T>::set(i, ptr));
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, autoPtr<T>& aptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, autoPtr<T>& aptr)
 {
     return set(i, aptr.release());
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, autoPtr<T>&& aptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, autoPtr<T>&& aptr)
 {
     return set(i, aptr.release());
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, const tmp<T>& tptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, const tmp<T>& tptr)
 {
     return set(i, tptr.ptr());
 }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,9 +170,9 @@ inline void Foam::UPtrList<T>::append(T* ptr)
 
 
 template<class T>
-inline bool Foam::UPtrList<T>::set(const label i) const
+inline const T* Foam::UPtrList<T>::set(const label i) const
 {
-    return ptrs_[i] != nullptr;
+    return ptrs_[i];
 }
 
 
@@ -199,7 +199,7 @@ inline const T& Foam::UPtrList<T>::operator[](const label i) const
     if (!ptr)
     {
         FatalErrorInFunction
-            << "cannot dereference nullptr at index " << i
+            << "Cannot dereference nullptr at index " << i
             << " in range [0," << size() << ")"
             << abort(FatalError);
     }
@@ -216,7 +216,7 @@ inline T& Foam::UPtrList<T>::operator[](const label i)
     if (!ptr)
     {
         FatalErrorInFunction
-            << "cannot dereference nullptr at index " << i
+            << "Cannot dereference nullptr at index " << i
             << " in range [0," << size() << ")"
             << abort(FatalError);
     }

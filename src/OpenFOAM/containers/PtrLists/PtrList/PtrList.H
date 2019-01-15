@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,21 +150,22 @@ public:
         //- Transfer into this list and annul the argument list
         inline void transfer(PtrList<T>& list);
 
-        //- Return true if element is set (ie, not a nullptr)
-        inline bool set(const label i) const;
+        //- Return const pointer to element (if set) or nullptr.
+        //  The return value can be tested as a bool.
+        inline const T* set(const label i) const;
 
         //- Set element to given pointer and return old element (can be null)
         //  No-op if the new pointer value is identical to the current content.
-        inline autoPtr<T> set(label i, T* ptr);
+        inline autoPtr<T> set(const label i, T* ptr);
 
         //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(label i, autoPtr<T>& aptr);
+        inline autoPtr<T> set(const label i, autoPtr<T>& aptr);
 
         //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(label i, autoPtr<T>&& aptr);
+        inline autoPtr<T> set(const label i, autoPtr<T>&& aptr);
 
         //- Set element to given tmp and return old element
-        inline autoPtr<T> set(label i, const tmp<T>& tptr);
+        inline autoPtr<T> set(const label i, const tmp<T>& tptr);
 
 
     // Member Operators
