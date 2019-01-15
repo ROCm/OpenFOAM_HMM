@@ -285,7 +285,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
     }
     else
     {
-        Info<< "    Conditions not met - calculations proceeding" << nl;
+        Info<< "    Conditions not met" << nl;
     }
 
     Info<< endl;
