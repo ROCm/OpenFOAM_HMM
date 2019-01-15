@@ -33,7 +33,7 @@ usage: ${0##*/} [OPTION]
 options:
   -git          Use git to retrieve the tutorials
   -no-git       Do not use git to retrieve the tutorials
-  -no-debug     Do not adjust DebugSwitches (fvSchemes, solution)
+  -debug        Adjust DebugSwitches (fvSchemes, solution)
   -root dir     Specify root directory to run tests from
   -default      Sets up a default scheme on all schemes
   -help         Print the usage
@@ -62,9 +62,9 @@ die()
 #------------------------------------------------------------------------------
 
 ROOT="./"
+adjustDebugSwitches=false
 useDefaultSchemes=false
 useGit=auto
-adjustDebugSwitches=true
 
 # Parse options
 while [ "$#" -gt 0 ]
@@ -84,10 +84,10 @@ do
     -no-git)
         unset useGit
         ;;
-    -no-debug)
-        unset adjustDebugSwitches
+    -debug)
+        adjustDebugSwitches=true
         ;;
-    -d | -default)
+    -default)
         useDefaultSchemes=true
         ;;
     *)
@@ -145,14 +145,17 @@ then
     then
         if [ -e "${ETC_CONTROL_DICT}.orig" ]
         then
-            die "File ${ETC_CONTROL_DICT}.orig already exists" \
-                "Did Alltest fail in some way and then run again?"
-        fi
+            echo "File ${ETC_CONTROL_DICT}.orig already exists" \
+                "Did Alltest fail in some way and then run again?" 2>&1
 
-        grep DebugSwitches "${ETC_CONTROL_DICT}" 1> /dev/null 2>&1 || {
-            echo "No DebugSwitches to adjust in ${ETC_CONTROL_DICT}" 1>&2
+            echo "Not adjusting DebugSwitches ..." 2>&1
             unset ETC_CONTROL_DICT
-        }
+        else
+            grep DebugSwitches "${ETC_CONTROL_DICT}" 1> /dev/null 2>&1 || {
+                echo "No DebugSwitches to adjust in ${ETC_CONTROL_DICT}" 1>&2
+                unset ETC_CONTROL_DICT
+            }
+        fi
     else
         echo "No main (user or project) controlDict to adjust" 1>&2
         unset ETC_CONTROL_DICT
