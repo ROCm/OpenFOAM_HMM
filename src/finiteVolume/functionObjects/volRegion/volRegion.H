@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,6 +80,8 @@ namespace Foam
 
 // Forward declarations
 class fvMesh;
+class polyMesh;
+class mapPolyMesh;
 
 namespace functionObjects
 {
@@ -97,10 +99,17 @@ class volRegion
         //- The cell ids, from cellSet
         labelList cellIds_;
 
-        // Cache integral properties of the region for writeFileHeader
+        //- Cached total number of cells selected
         label nCells_;
 
+        //- Cached total selection volume
         scalar V_;
+
+
+    // Private Member Functions
+
+        //- Update cellIds, nCells, volume
+        void calculateCache();
 
 
 public:
@@ -155,10 +164,7 @@ public:
     virtual ~volRegion() = default;
 
 
-    // Public Member Functions
-
-        //- Read from dictionary
-        bool read(const dictionary& dict);
+    // Member Functions
 
         //- Return the region type
         inline const regionTypes& regionType() const;
@@ -167,10 +173,20 @@ public:
         const labelList& cellIDs() const;
 
         //- Return the number of cells selected in the region
-        label nCells() const;
+        inline label nCells() const;
 
-        //- Return total volume of the region
-        scalar V() const;
+        //- Return total volume of the selected region
+        inline scalar V() const;
+
+
+        //- Read from dictionary
+        virtual bool read(const dictionary& dict);
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh&);
+
+        //- Update for mesh point-motion
+        virtual void movePoints(const polyMesh&);
 };
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,5 +30,18 @@ Foam::functionObjects::volRegion::regionType() const
 {
     return regionType_;
 }
+
+
+inline Foam::label Foam::functionObjects::volRegion::nCells() const
+{
+    return nCells_;
+}
+
+
+inline Foam::scalar Foam::functionObjects::volRegion::V() const
+{
+    return V_;
+}
+
 
 // ************************************************************************* //
