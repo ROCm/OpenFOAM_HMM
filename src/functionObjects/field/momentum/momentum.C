@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -249,8 +249,9 @@ void Foam::functionObjects::momentum::writeFileHeader(Ostream& os)
     {
         writeTabbed(os, "(momentum_r momentum_rtheta momentum_axis)");
     }
-    os  << endl;
 
+    writeTabbed(os, "volume");
+    os  << endl;
 
     writtenHeader_ = true;
 }
@@ -319,7 +320,8 @@ void Foam::functionObjects::momentum::writeValues(Ostream& os)
         {
             os << tab << sumAngularMom_;
         }
-        os << endl;
+
+        os << tab << volRegion::V() << endl;
     }
 
     Log << endl;
@@ -409,9 +411,6 @@ bool Foam::functionObjects::momentum::read(const dictionary& dict)
     pName_ = dict.lookupOrDefault<word>("p", "p");
     rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
     rhoRef_ = dict.lookupOrDefault<scalar>("rhoRef", 1.0);
-
-    rhoRef_ = dict.lookupOrDefault<scalar>("rhoRef", 1.0);
-
     hasCsys_ = dict.lookupOrDefault("cylindrical", false);
 
     if (hasCsys_)
@@ -567,6 +566,18 @@ bool Foam::functionObjects::momentum::write()
     }
 
     return true;
+}
+
+
+void Foam::functionObjects::momentum::updateMesh(const mapPolyMesh& mpm)
+{
+    volRegion::updateMesh(mpm);
+}
+
+
+void Foam::functionObjects::momentum::movePoints(const polyMesh& pm)
+{
+    volRegion::movePoints(pm);
 }
 
 
