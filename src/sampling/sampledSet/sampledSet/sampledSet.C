@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "meshSearch.H"
 #include "writer.H"
 #include "particle.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -427,40 +428,13 @@ Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
     // ordering in indexSet.
     // Note: only master results are valid
 
-    // Collect data from all processors
-    List<List<point>> gatheredPts(Pstream::nProcs());
-    gatheredPts[Pstream::myProcNo()] = *this;
-    Pstream::gatherList(gatheredPts);
+    List<point> allPts;
+    globalIndex::gatherOp(*this, allPts);
 
-    List<labelList> gatheredSegments(Pstream::nProcs());
-    gatheredSegments[Pstream::myProcNo()] = segments();
-    Pstream::gatherList(gatheredSegments);
+    globalIndex::gatherOp(segments(), allSegments);
 
-    List<scalarList> gatheredDist(Pstream::nProcs());
-    gatheredDist[Pstream::myProcNo()] = curveDist();
-    Pstream::gatherList(gatheredDist);
-
-
-    // Combine processor lists into one big list.
-    List<point> allPts
-    (
-        ListListOps::combine<List<point>>
-        (
-            gatheredPts, accessOp<List<point>>()
-        )
-    );
-    allSegments =
-        ListListOps::combine<labelList>
-        (
-            gatheredSegments, accessOp<labelList>()
-        );
-    scalarList allCurveDist
-    (
-        ListListOps::combine<scalarList>
-        (
-            gatheredDist, accessOp<scalarList>()
-        )
-    );
+    scalarList allCurveDist;
+    globalIndex::gatherOp(curveDist(), allCurveDist);
 
 
     if (Pstream::master() && allCurveDist.empty())

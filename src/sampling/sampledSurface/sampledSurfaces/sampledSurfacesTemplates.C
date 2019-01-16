@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 #include "sampledSurfaces.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "ListListOps.H"
+#include "globalIndex.H"
 #include "stringListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -51,29 +51,19 @@ void Foam::sampledSurfaces::writeSurface
 
     if (Pstream::parRun())
     {
-        // Collect values from all processors
-        List<Field<Type>> gatheredValues(Pstream::nProcs());
-        gatheredValues[Pstream::myProcNo()] = values;
-        Pstream::gatherList(gatheredValues);
+        // Gather all values into single field
+        Field<Type> allValues;
+
+        globalIndex::gatherOp(values, allValues);
 
         fileName sampleFile;
         if (Pstream::master())
         {
-            // Combine values into single field
-            Field<Type> allValues
-            (
-                ListListOps::combine<Field<Type>>
-                (
-                    gatheredValues,
-                    accessOp<Field<Type>>()
-                )
-            );
-
             // Renumber (point data) to correspond to merged points
             if (mergedList_[surfi].pointsMap().size() == allValues.size())
             {
                 inplaceReorder(mergedList_[surfi].pointsMap(), allValues);
-                allValues.setSize(mergedList_[surfi].points().size());
+                allValues.resize(mergedList_[surfi].points().size());
             }
 
             // Write to time directory under outputPath_

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ License
 
 #include "mergedSurf.H"
 #include "PatchTools.H"
-#include "ListListOps.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -140,20 +140,10 @@ bool Foam::mergedSurf::merge
         pointsMap_
     );
 
-    // Now handle zone/region information
-    List<labelList> allZones(Pstream::nProcs());
-    allZones[Pstream::myProcNo()] = originalIds;
-    Pstream::gatherList(allZones);
 
-    if (Pstream::master())
-    {
-        zones_ = ListListOps::combine<labelList>
-        (
-            allZones,
-            accessOp<labelList>()
-        );
-    }
-    allZones.clear();
+    // Now handle zone/region information
+
+    globalIndex::gatherOp(originalIds, zones_);
 
     return true;
 }

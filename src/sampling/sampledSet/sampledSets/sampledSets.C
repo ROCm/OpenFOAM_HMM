@@ -27,7 +27,6 @@ License
 #include "dictionary.H"
 #include "Time.H"
 #include "volFields.H"
-#include "ListListOps.H"
 #include "volPointInterpolation.H"
 #include "mapPolyMesh.H"
 #include "addToRunTimeSelectionTable.H"

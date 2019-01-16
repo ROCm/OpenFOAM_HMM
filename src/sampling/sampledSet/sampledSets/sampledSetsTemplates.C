@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 #include "sampledSets.H"
 #include "volFields.H"
-#include "ListListOps.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -182,21 +182,12 @@ void Foam::sampledSets::combineSampledValues
         forAll(indexSets, setI)
         {
             // Collect data from all processors
-            List<Field<T>> gatheredData(Pstream::nProcs());
-            gatheredData[Pstream::myProcNo()] = sampledFields[fieldi][setI];
-            Pstream::gatherList(gatheredData);
+
+            Field<T> allData;
+            globalIndex::gatherOp(sampledFields[fieldi][setI], allData);
 
             if (Pstream::master())
             {
-                Field<T> allData
-                (
-                    ListListOps::combine<Field<T>>
-                    (
-                        gatheredData,
-                        Foam::accessOp<Field<T>>()
-                    )
-                );
-
                 masterValues[setI] = UIndirectList<T>
                 (
                     allData,
