@@ -24,12 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
-#include <numeric>
-
-// * * * * * * * * * * * * * * Global Data Members * * * * * * * * * * * * * //
-
-const Foam::labelList Foam::emptyLabelList;
-
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -47,6 +41,16 @@ Foam::labelList Foam::invert
 
         if (newIdx >= 0)
         {
+            #ifdef FULLDEBUG
+            if (newIdx >= len)
+            {
+                FatalErrorInFunction
+                    << "Inverse location " << newIdx
+                    << " is out of range. List has size " << len
+                    << abort(FatalError);
+            }
+            #endif
+
             if (inverse[newIdx] >= 0)
             {
                 FatalErrorInFunction
@@ -76,7 +80,7 @@ Foam::labelListList Foam::invertOneToMany
     {
         if (newIdx >= 0)
         {
-            sizes[newIdx]++;
+            ++sizes[newIdx];
         }
     }
 
@@ -99,15 +103,6 @@ Foam::labelListList Foam::invertOneToMany
     }
 
     return inverse;
-}
-
-
-Foam::labelList Foam::identity(const label len, label start)
-{
-    labelList map(len);
-    std::iota(map.begin(), map.end(), start);
-
-    return map;
 }
 
 

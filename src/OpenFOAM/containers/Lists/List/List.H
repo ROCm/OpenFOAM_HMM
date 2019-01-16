@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -345,6 +345,11 @@ public:
 
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+//- Create identity map of the given length with (map[i] == i)
+//  Optionally with an alternative start index, so that (map[i] == i+start)
+labelList identity(const label len, label start=0);
+
 
 //- Hashing for List data, which uses Hasher for contiguous data and
 //- element-wise incrementally hashing otherwise.

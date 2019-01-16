@@ -47,6 +47,7 @@ $(ints)/int64/int64IO.C
 $(ints)/int/intIO.C
 $(ints)/label/label.C
 $(ints)/uLabel/uLabel.C
+$(ints)/lists/labelList.C
 $(ints)/lists/labelIOList.C
 $(ints)/lists/labelListIOList.C
 

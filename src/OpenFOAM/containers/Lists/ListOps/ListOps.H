@@ -55,17 +55,6 @@ SourceFiles
 namespace Foam
 {
 
-//- Deprecated(2018-07) reference to zero-sized list.
-//  Compare to List::null() which returns null pointer cast as list reference.
-//
-//  \deprecated(2018-07) This cast is disallowed with many modern compilers
-template<class T>
-static const List<T>& emptyList()
-{
-    return *reinterpret_cast<const List<T>*>(&emptyLabelList);
-}
-
-
 //- Renumber the values (not the indices) of a list.
 //  Negative IntListType elements are left untouched.
 template<class IntListType>
@@ -372,9 +361,6 @@ List<OutputIntListType> invertManyToMany
     return output;
 }
 
-//- Create identity map of the given length with (map[i] == i)
-//  Optionally with an alternative start index, so that (map[i] == i+start)
-labelList identity(const label len, label start=0);
 
 //- Deprecated(2017-10) search for first occurence of the given element.
 //  \return The index found or return -1 if not found.
