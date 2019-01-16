@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,13 +161,11 @@ void Foam::meshRefinement::collectAndPrint
     const UList<T>& data
 )
 {
-    globalIndex globalPoints(points.size());
+    const globalIndex globalPoints(points.size());
 
     pointField allPoints;
     globalPoints.gather
     (
-        Pstream::worldComm,
-        identity(Pstream::nProcs()),
         points,
         allPoints,
         UPstream::msgType(),
@@ -177,8 +175,6 @@ void Foam::meshRefinement::collectAndPrint
     List<T> allData;
     globalPoints.gather
     (
-        Pstream::worldComm,
-        identity(Pstream::nProcs()),
         data,
         allData,
         UPstream::msgType(),

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,19 +78,10 @@ void writeWeights
         mergedFaces,
         mergedPoints
     );
+
     // Collect field
     scalarField mergedWeights;
-    globalFaces().gather
-    (
-        UPstream::worldComm,
-        ListOps::create<label>
-        (
-            UPstream::procID(UPstream::worldComm),
-            labelOp<int>()  // int -> label
-        ),
-        wghtSum,
-        mergedWeights
-    );
+    globalFaces().gather(wghtSum, mergedWeights);
 
     instant inst(runTime.value(), runTime.timeName());
 

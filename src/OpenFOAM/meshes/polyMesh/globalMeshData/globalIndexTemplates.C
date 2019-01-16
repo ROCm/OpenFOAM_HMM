@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ void Foam::globalIndex::gather
          || commsType == Pstream::commsTypes::blocking
         )
         {
-            for (label i = 1; i < procIDs.size(); i++)
+            for (label i = 1; i < procIDs.size(); ++i)
             {
                 SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
@@ -96,7 +96,7 @@ void Foam::globalIndex::gather
             label startOfRequests = Pstream::nRequests();
 
             // Set up reads
-            for (label i = 1; i < procIDs.size(); i++)
+            for (label i = 1; i < procIDs.size(); ++i)
             {
                 SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
@@ -182,6 +182,40 @@ void Foam::globalIndex::gather
 template<class Type>
 void Foam::globalIndex::gather
 (
+    const UList<Type>& fld,
+    List<Type>& allFld,
+    const int tag,
+    const Pstream::commsTypes commsType
+) const
+{
+    gather
+    (
+        UPstream::worldComm,
+        identity(Pstream::nProcs(UPstream::worldComm)),
+        fld,
+        allFld,
+        tag,
+        commsType
+    );
+}
+
+
+template<class Type>
+void Foam::globalIndex::gatherOp
+(
+    const UList<Type>& fld,
+    List<Type>& allFld,
+    const int tag,
+    const Pstream::commsTypes commsType
+)
+{
+    globalIndex(fld.size()).gather(fld, allFld, tag, commsType);
+}
+
+
+template<class Type>
+void Foam::globalIndex::gather
+(
     const labelUList& off,
     const label comm,
     const labelList& procIDs,
@@ -198,6 +232,49 @@ void Foam::globalIndex::gather
     {
         fld.transfer(allFld);
     }
+}
+
+
+template<class Type>
+void Foam::globalIndex::gather
+(
+    List<Type>& fld,
+    const int tag,
+    const Pstream::commsTypes commsType
+) const
+{
+    List<Type> allFld;
+
+    gather
+    (
+        UPstream::worldComm,
+        identity(Pstream::master(UPstream::worldComm)),
+        fld,
+        allFld,
+        tag,
+        commsType
+    );
+
+    if (Pstream::master(UPstream::worldComm))
+    {
+        fld.transfer(allFld);
+    }
+    else
+    {
+        fld.clear();
+    }
+}
+
+
+template<class Type>
+void Foam::globalIndex::gatherOp
+(
+    List<Type>& fld,
+    const int tag,
+    const Pstream::commsTypes commsType
+)
+{
+    globalIndex(fld.size()).gather(fld, tag, commsType);
 }
 
 
@@ -223,7 +300,7 @@ void Foam::globalIndex::scatter
          || commsType == Pstream::commsTypes::blocking
         )
         {
-            for (label i = 1; i < procIDs.size(); i++)
+            for (label i = 1; i < procIDs.size(); ++i)
             {
                 const SubList<Type> procSlot
                 (
@@ -272,7 +349,7 @@ void Foam::globalIndex::scatter
             label startOfRequests = Pstream::nRequests();
 
             // Set up writes
-            for (label i = 1; i < procIDs.size(); i++)
+            for (label i = 1; i < procIDs.size(); ++i)
             {
                 const SubList<Type> procSlot
                 (
@@ -357,6 +434,28 @@ void Foam::globalIndex::scatter
             Pstream::waitRequests(startOfRequests);
         }
     }
+}
+
+
+template<class Type>
+void Foam::globalIndex::scatter
+(
+    const UList<Type>& allFld,
+    UList<Type>& fld,
+    const int tag,
+    const Pstream::commsTypes commsType
+) const
+{
+    scatter
+    (
+        offsets_,
+        UPstream::worldComm,
+        identity(Pstream::nProcs(UPstream::worldComm)),
+        allFld,
+        fld,
+        tag,
+        commsType
+    );
 }
 
 

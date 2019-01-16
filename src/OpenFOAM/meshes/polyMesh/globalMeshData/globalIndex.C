@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,33 +74,25 @@ void Foam::globalIndex::reset
 }
 
 
-void Foam::globalIndex::reset(const label localSize)
+Foam::labelList Foam::globalIndex::sizes() const
 {
-    offsets_.resize(Pstream::nProcs()+1);
+    labelList values;
 
-    labelList localSizes(Pstream::nProcs(), Zero);
-    localSizes[Pstream::myProcNo()] = localSize;
+    const label len = (offsets_.size() - 1);
 
-    Pstream::gatherList(localSizes, Pstream::msgType());
-    Pstream::scatterList(localSizes, Pstream::msgType());
-
-    label offset = 0;
-    offsets_[0] = 0;
-    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+    if (len < 1)
     {
-        const label oldOffset = offset;
-        offset += localSizes[proci];
-
-        if (offset < oldOffset)
-        {
-            FatalErrorInFunction
-                << "Overflow : sum of sizes " << localSizes
-                << " exceeds capability of label (" << labelMax
-                << "). Please recompile with larger datatype for label."
-                << exit(FatalError);
-        }
-        offsets_[proci+1] = offset;
+        return values;
     }
+
+    values.resize(len);
+
+    for (label proci=0; proci < len; ++proci)
+    {
+        values[proci] = offsets_[proci+1] - offsets_[proci];
+    }
+
+    return values;
 }
 
 

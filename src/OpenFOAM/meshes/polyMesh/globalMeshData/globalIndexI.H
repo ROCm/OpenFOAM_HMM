@@ -82,6 +82,18 @@ inline Foam::labelList& Foam::globalIndex::offsets()
 }
 
 
+inline Foam::label Foam::globalIndex::size() const
+{
+    return offsets_.empty() ? 0 : offsets_.last();
+}
+
+
+inline void Foam::globalIndex::reset(const label localSize)
+{
+    reset(localSize, Pstream::msgType(), 0, true);
+}
+
+
 inline Foam::label Foam::globalIndex::offset(const label proci) const
 {
     return offsets_[proci];
@@ -121,12 +133,6 @@ inline Foam::labelRange Foam::globalIndex::range(const label proci) const
 inline Foam::labelRange Foam::globalIndex::range() const
 {
     return range(Pstream::myProcNo());
-}
-
-
-inline Foam::label Foam::globalIndex::size() const
-{
-    return offsets_.last();
 }
 
 

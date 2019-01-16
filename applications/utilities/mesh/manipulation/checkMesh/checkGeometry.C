@@ -1014,12 +1014,6 @@ Foam::label Foam::checkGeometry
                         scalarField mergedWeights;
                         globalFaces().gather
                         (
-                            UPstream::worldComm,
-                            ListOps::create<label>
-                            (
-                                UPstream::procID(UPstream::worldComm),
-                                labelOp<int>()  // int -> label
-                            ),
                             ami.srcWeightsSum(),
                             mergedWeights
                         );
@@ -1048,18 +1042,14 @@ Foam::label Foam::checkGeometry
                         {
                             const cyclicACMIPolyPatch& pp =
                                 refCast<const cyclicACMIPolyPatch>(pbm[patchi]);
+
                             scalarField mergedMask;
                             globalFaces().gather
                             (
-                                UPstream::worldComm,
-                                ListOps::create<label>
-                                (
-                                    UPstream::procID(UPstream::worldComm),
-                                    labelOp<int>()  // int -> label
-                                ),
                                 pp.mask(),
                                 mergedMask
                             );
+
                             if (Pstream::master())
                             {
                                 wr.write
@@ -1108,12 +1098,6 @@ Foam::label Foam::checkGeometry
                         scalarField mergedWeights;
                         globalFaces().gather
                         (
-                            UPstream::worldComm,
-                            ListOps::create<label>
-                            (
-                                UPstream::procID(UPstream::worldComm),
-                                labelOp<int>()  // int -> label
-                            ),
                             ami.tgtWeightsSum(),
                             mergedWeights
                         );
@@ -1145,12 +1129,6 @@ Foam::label Foam::checkGeometry
                             scalarField mergedMask;
                             globalFaces().gather
                             (
-                                UPstream::worldComm,
-                                ListOps::create<label>
-                                (
-                                    UPstream::procID(UPstream::worldComm),
-                                    labelOp<int>()  // int -> label
-                                ),
                                 pp.neighbPatch().mask(),
                                 mergedMask
                             );

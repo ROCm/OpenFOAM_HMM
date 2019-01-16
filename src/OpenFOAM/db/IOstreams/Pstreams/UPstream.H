@@ -58,7 +58,6 @@ namespace Foam
 
 class UPstream
 {
-
 public:
 
     //- Types of communications
@@ -71,6 +70,7 @@ public:
 
     //- Names of the communication types
     static const Enum<commsTypes> commsTypeNames;
+
 
     // Public classes
 
@@ -159,11 +159,8 @@ public:
 
 
         //- combineReduce operator for lists. Used for counting.
-        class listEq
+        struct listEq
         {
-
-        public:
-
             template<class T>
             void operator()(T& x, const T& y) const
             {
@@ -430,7 +427,7 @@ public:
         }
 
         //- Process index of the master
-        static int masterNo()
+        static constexpr int masterNo() noexcept
         {
             return 0;
         }
@@ -459,7 +456,7 @@ public:
         }
 
         //- Process index of first slave
-        static int firstSlave()
+        static constexpr int firstSlave() noexcept
         {
             return 1;
         }
@@ -495,19 +492,19 @@ public:
         }
 
 
-            //- Get the communications type of the stream
-            commsTypes commsType() const
-            {
-                return commsType_;
-            }
+        //- Get the communications type of the stream
+        commsTypes commsType() const
+        {
+            return commsType_;
+        }
 
-            //- Set the communications type of the stream
-            commsTypes commsType(const commsTypes ct)
-            {
-                commsTypes oldCommsType = commsType_;
-                commsType_ = ct;
-                return oldCommsType;
-            }
+        //- Set the communications type of the stream
+        commsTypes commsType(const commsTypes ct)
+        {
+            commsTypes oldCommsType = commsType_;
+            commsType_ = ct;
+            return oldCommsType;
+        }
 
 
         //- Exit program
@@ -575,6 +572,7 @@ Ostream& operator<<(Ostream&, const UPstream::commsStruct&);
 template<>
 UPstream::commsStruct&
 UList<UPstream::commsStruct>::operator[](const label);
+
 template<>
 const UPstream::commsStruct&
 UList<UPstream::commsStruct>::operator[](const label) const;
