@@ -67,14 +67,6 @@ class UIndirectList
         UList<T>& values_;
         const labelUList& addressing_;
 
-protected:
-
-    // Protected Member Functions
-
-        //- True if all entries have identical values, and list is non-empty
-        inline bool uniform() const;
-
-
 public:
 
     // STL type definitions
@@ -122,6 +114,9 @@ public:
 
         //- Return true if the list is empty (ie, size() is zero).
         inline bool empty() const;
+
+        //- True if all entries have identical values, and list is non-empty
+        inline bool uniform() const;
 
         //- Return the first element of the list.
         inline T& first();

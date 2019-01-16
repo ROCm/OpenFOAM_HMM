@@ -112,9 +112,6 @@ protected:
         //  Use with care
         inline void size(const label n);
 
-        //- True if all entries have identical values, and list is non-empty
-        inline bool uniform() const;
-
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
 
@@ -280,19 +277,22 @@ public:
             inline const T& last() const;
 
 
-        // Check
+    // Check
 
-            //- Check start is within valid range [0,size)
-            inline void checkStart(const label start) const;
+        //- Check start is within valid range [0,size)
+        inline void checkStart(const label start) const;
 
-            //- Check size is within valid range [0,size]
-            inline void checkSize(const label size) const;
+        //- Check size is within valid range [0,size]
+        inline void checkSize(const label size) const;
 
-            //- Check index is within valid range [0,size)
-            inline void checkIndex(const label i) const;
+        //- Check index is within valid range [0,size)
+        inline void checkIndex(const label i) const;
+
+        //- True if all entries have identical values, and list is non-empty
+        inline bool uniform() const;
 
 
-      // Search
+    // Search
 
         //- Find index of the first occurrence of the value.
         //  When start is specified, any occurrences before start are ignored.
@@ -313,7 +313,7 @@ public:
         inline bool found(const T& val, const label start=0) const;
 
 
-      // Edit
+    // Edit
 
         //- Move element to the first position.
         void moveFirst(const label i);
@@ -328,7 +328,7 @@ public:
         void swapLast(const label i);
 
 
-      // Copy
+    // Copy
 
         //- Copy the pointer held by the given UList
         inline void shallowCopy(const UList<T>& list);

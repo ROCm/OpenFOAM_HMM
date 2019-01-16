@@ -90,9 +90,6 @@ protected:
 
     // Protected Member Functions
 
-        //- True if all entries have identical values, and list is non-empty
-        inline bool uniform() const;
-
         //- Write the FixedList with its compound type
         void writeEntry(Ostream& os) const;
 
@@ -241,6 +238,9 @@ public:
 
         //- Check index is within valid range [0,N)
         inline void checkIndex(const label i) const;
+
+        //- True if all entries have identical values, and list is non-empty
+        inline bool uniform() const;
 
 
     // Search

@@ -23,32 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class T>
-inline bool Foam::UIndirectList<T>::uniform() const
-{
-    const label len = this->size();
-
-    if (!len)
-    {
-        return false;
-    }
-
-    const T& val = (*this)[0];
-
-    for (label i=1; i<len; ++i)
-    {
-        if (val != (*this)[i])
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -76,6 +50,32 @@ template<class T>
 inline bool Foam::UIndirectList<T>::empty() const
 {
     return addressing_.empty();
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class T>
+inline bool Foam::UIndirectList<T>::uniform() const
+{
+    const label len = this->size();
+
+    if (!len)
+    {
+        return false;
+    }
+
+    const T& val = (*this)[0];
+
+    for (label i=1; i<len; ++i)
+    {
+        if (val != (*this)[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 

@@ -37,25 +37,6 @@ inline const Foam::FixedList<T, N>& Foam::FixedList<T, N>::null()
 }
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class T, unsigned N>
-inline bool Foam::FixedList<T, N>::uniform() const
-{
-    if (empty()) return false;   // <- Compile-time disabled anyhow
-
-    for (unsigned i=1; i<N; ++i)
-    {
-        if (v_[0] != v_[i])
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, unsigned N>
@@ -296,6 +277,23 @@ inline void Foam::FixedList<T, N>::checkIndex(const label i) const
             << "index " << i << " out of range [0," << N << ")"
             << abort(FatalError);
     }
+}
+
+
+template<class T, unsigned N>
+inline bool Foam::FixedList<T, N>::uniform() const
+{
+    if (empty()) return false;   // <- Compile-time disabled anyhow
+
+    for (unsigned i=1; i<N; ++i)
+    {
+        if (v_[0] != v_[i])
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
