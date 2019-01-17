@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,13 @@ Usage
 See also
     Foam::nutWallFunctionFvPatchScalarField
 
+Note
+    Suffers from non-exact restart since correctNut() (called through
+    turbulence->validate) returns a slightly different value every time
+    it is called. This is since the seed for the Newton-Raphson iteration
+    uses the current value of *this (= nut). Can be avoided by seeding the
+    NR with e.g. the laminar viscosity.
+
 SourceFiles
     nutUSpaldingWallFunctionFvPatchScalarField.C
 
@@ -66,6 +73,7 @@ SourceFiles
 #define nutUSpaldingWallFunctionFvPatchScalarField_H
 
 #include "nutWallFunctionFvPatchScalarField.H"
+#include "uint64.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,6 +89,12 @@ class nutUSpaldingWallFunctionFvPatchScalarField
     public nutWallFunctionFvPatchScalarField
 {
 protected:
+
+    // Protected data
+
+        mutable uint64_t invocations_;
+        mutable uint64_t iterations_;
+
 
     // Protected Member Functions
 
@@ -158,6 +172,10 @@ public:
                 new nutUSpaldingWallFunctionFvPatchScalarField(*this, iF)
             );
         }
+
+
+    //- Destructor
+    virtual ~nutUSpaldingWallFunctionFvPatchScalarField();
 
 
     // Member functions

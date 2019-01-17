@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -353,39 +353,42 @@ void SpalartAllmaras<BasicTurbulenceModel>::correct()
         return;
     }
 
-    // Local references
-    const alphaField& alpha = this->alpha_;
-    const rhoField& rho = this->rho_;
-    const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
-    fv::options& fvOptions(fv::options::New(this->mesh_));
+    {
+        // Local references
+        const alphaField& alpha = this->alpha_;
+        const rhoField& rho = this->rho_;
+        const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
+        fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
+        eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
 
-    const volScalarField chi(this->chi());
-    const volScalarField fv1(this->fv1(chi));
+        const volScalarField chi(this->chi());
+        const volScalarField fv1(this->fv1(chi));
 
-    const volScalarField Stilda(this->Stilda(chi, fv1));
+        const volScalarField Stilda(this->Stilda(chi, fv1));
 
-    tmp<fvScalarMatrix> nuTildaEqn
-    (
-        fvm::ddt(alpha, rho, nuTilda_)
-      + fvm::div(alphaRhoPhi, nuTilda_)
-      - fvm::laplacian(alpha*rho*DnuTildaEff(), nuTilda_)
-      - Cb2_/sigmaNut_*alpha*rho*magSqr(fvc::grad(nuTilda_))
-     ==
-        Cb1_*alpha*rho*Stilda*nuTilda_
-      - fvm::Sp(Cw1_*alpha*rho*fw(Stilda)*nuTilda_/sqr(y_), nuTilda_)
-      + fvOptions(alpha, rho, nuTilda_)
-    );
+        tmp<fvScalarMatrix> nuTildaEqn
+        (
+            fvm::ddt(alpha, rho, nuTilda_)
+          + fvm::div(alphaRhoPhi, nuTilda_)
+          - fvm::laplacian(alpha*rho*DnuTildaEff(), nuTilda_)
+          - Cb2_/sigmaNut_*alpha*rho*magSqr(fvc::grad(nuTilda_))
+         ==
+            Cb1_*alpha*rho*Stilda*nuTilda_
+          - fvm::Sp(Cw1_*alpha*rho*fw(Stilda)*nuTilda_/sqr(y_), nuTilda_)
+          + fvOptions(alpha, rho, nuTilda_)
+        );
 
-    nuTildaEqn.ref().relax();
-    fvOptions.constrain(nuTildaEqn.ref());
-    solve(nuTildaEqn);
-    fvOptions.correct(nuTilda_);
-    bound(nuTilda_, dimensionedScalar(nuTilda_.dimensions(), Zero));
-    nuTilda_.correctBoundaryConditions();
+        nuTildaEqn.ref().relax();
+        fvOptions.constrain(nuTildaEqn.ref());
+        solve(nuTildaEqn);
+        fvOptions.correct(nuTilda_);
+        bound(nuTilda_, dimensionedScalar(nuTilda_.dimensions(), Zero));
+        nuTilda_.correctBoundaryConditions();
+    }
 
-    correctNut(fv1);
+    // Update nut with latest available k,epsilon
+    correctNut();
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,11 @@ Usage
 
 See also
     Foam::nutWallFunctionFvPatchScalarField
+
+Note
+    Suffers from non-exact restart since correctNut() (called through
+    turbulence->validate) returns a slightly different value every time
+    it is called. See nutUSpaldingWallFunctionFvPatchScalarField.C
 
 SourceFiles
     nutUWallFunctionFvPatchScalarField.C

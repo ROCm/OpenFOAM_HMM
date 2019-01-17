@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,6 +92,8 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
     forAll(uTau, facei)
     {
         scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
+        // Note: for exact restart seed with laminar viscosity only:
+        //scalar ut = sqrt(nuw[facei]*magGradU[facei]);
 
         if (ut > ROOTVSMALL)
         {
@@ -117,9 +119,19 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
                 err = mag((ut - uTauNew)/ut);
                 ut = uTauNew;
 
+                if (debug)
+                {
+                    iterations_++;
+                }
+
             } while (ut > ROOTVSMALL && err > 0.01 && ++iter < 10);
 
             uTau[facei] = max(0.0, ut);
+
+            if (debug)
+            {
+                invocations_++;
+            }
         }
     }
 
@@ -136,7 +148,9 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF)
+    nutWallFunctionFvPatchScalarField(p, iF),
+    invocations_(0),
+    iterations_(0)
 {}
 
 
@@ -149,7 +163,9 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
+    invocations_(0),
+    iterations_(0)
 {}
 
 
@@ -161,7 +177,9 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF, dict)
+    nutWallFunctionFvPatchScalarField(p, iF, dict),
+    invocations_(0),
+    iterations_(0)
 {}
 
 
@@ -171,7 +189,9 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const nutUSpaldingWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    nutWallFunctionFvPatchScalarField(wfpsf)
+    nutWallFunctionFvPatchScalarField(wfpsf),
+    invocations_(wfpsf.invocations_),
+    iterations_(wfpsf.iterations_)
 {}
 
 
@@ -182,8 +202,27 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(wfpsf, iF)
+    nutWallFunctionFvPatchScalarField(wfpsf, iF),
+    invocations_(0),
+    iterations_(0)
 {}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+nutUSpaldingWallFunctionFvPatchScalarField::
+~nutUSpaldingWallFunctionFvPatchScalarField()
+{
+    if (debug)
+    {
+        Info<< "nutUSpaldingWallFunctionFvPatchScalarField :"
+            << " total invocations:"
+            << returnReduce(invocations_, sumOp<label>())
+            << " total iterations:"
+            << returnReduce(iterations_, sumOp<label>())
+            << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
