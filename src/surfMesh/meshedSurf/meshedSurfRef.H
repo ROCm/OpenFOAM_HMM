@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ Description
 #define meshedSurfRef_H
 
 #include "meshedSurf.H"
+#include <functional>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,18 +48,10 @@ class meshedSurfRef
 :
     public meshedSurf
 {
-    const pointField& points_;
-    const faceList&   faces_;
-    const labelList&  zoneIds_;
+    std::reference_wrapper<const pointField> points_;
+    std::reference_wrapper<const faceList> faces_;
+    std::reference_wrapper<const labelList> zoneIds_;
 
-
-    // Private Member Functions
-
-        //- No copy construct
-        meshedSurfRef(const meshedSurfRef&) = delete;
-
-        //- No copy assignment
-        void operator=(const meshedSurfRef&) = delete;
 
 public:
 
@@ -69,12 +62,12 @@ public:
         (
             const pointField& pts,
             const faceList& faces,
-            const labelList& ids = labelList()
+            const labelList& ids = emptyLabelList
         )
         :
-            points_(pts),
-            faces_(faces),
-            zoneIds_(ids)
+            points_(std::cref<pointField>(pts)),
+            faces_(std::cref<faceList>(faces)),
+            zoneIds_(std::cref<labelList>(ids))
         {}
 
 
@@ -82,24 +75,24 @@ public:
     virtual ~meshedSurfRef() = default;
 
 
-    // Access Member Functions
+    // Member Functions
 
         //- Const access to (global) points used for the surface
         virtual const pointField& points() const
         {
-            return points_;
+            return points_.get();
         }
 
         //- Const access to the surface faces
         virtual const faceList& faces() const
         {
-            return faces_;
+            return faces_.get();
         }
 
         //- Const access to per-face zone/region information
         virtual const labelList& zoneIds() const
         {
-            return zoneIds_;
+            return zoneIds_.get();
         }
 
 };
