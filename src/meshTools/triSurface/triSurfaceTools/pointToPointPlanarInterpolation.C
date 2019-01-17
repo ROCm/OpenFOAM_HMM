@@ -63,7 +63,7 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
     // Find furthest away point
     vector e1;
     label index1 = -1;
-    scalar maxDist = -GREAT;
+    scalar maxDist = ROOTVSMALL;
 
     for (label i = 1; i < points.size(); i++)
     {
@@ -77,11 +77,21 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
             maxDist = magD;
         }
     }
+
+    if (index1 == -1)
+    {
+        FatalErrorInFunction
+            << "Cannot find any point that is different from first point"
+            << p0 << ". Are all your points coincident?"
+            << exit(FatalError);
+    }
+
+
     // Find point that is furthest away from line p0-p1
     const point& p1 = points[index1];
 
     label index2 = -1;
-    maxDist = -GREAT;
+    maxDist = ROOTVSMALL;
     for (label i = 1; i < points.size(); i++)
     {
         if (i != index1)
@@ -101,9 +111,9 @@ Foam::pointToPointPlanarInterpolation::calcCoordinateSystem
     if (index2 == -1)
     {
         FatalErrorInFunction
-            << "Cannot find points that make valid normal." << nl
-            << "Have so far points " << p0 << " and " << p1
-            << "Need at least three points which are not in a line."
+            << "Cannot find points that define a plane with a valid normal."
+            << nl << "Have so far points " << p0 << " and " << p1
+            << ". Are all your points on a single line instead of a plane?"
             << exit(FatalError);
     }
 
