@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,8 @@ namespace Foam
 // Forward declaration of friend functions and operators
 class polyMesh;
 class OBJstream;
+class IOobject;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
                         Class voxelMeshSearch Declaration
@@ -60,7 +62,7 @@ class voxelMeshSearch
         //- Local mesh bounding box
         boundBox localBb_;
 
-        //- Number of points in all directions (for local mesh only)
+        //- Number of voxels in all directions (for local mesh only)
         labelVector nDivs_;
 
         //- Voxel to seed cell
@@ -185,6 +187,10 @@ public:
                 const boundBox&,
                 const labelVector&
             );
+
+            //- Debug: construct fvMesh. Note: writes a dummy mesh to
+            //  io.timeName()! TBD.
+            autoPtr<fvMesh> makeMesh(const IOobject&) const;
 };
 
 

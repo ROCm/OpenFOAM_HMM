@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,11 @@ License
 #include "voxelMeshSearch.H"
 #include "polyMesh.H"
 #include "processorPolyPatch.H"
-
+#include "IOobject.H"
+#include "fvMesh.H"
+#include "block.H"
+#include "emptyPolyPatch.H"
+#include "fvMeshTools.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -340,6 +344,14 @@ bool Foam::voxelMeshSearch::update()
     }
 
 
+    if (debug)
+    {
+        Pout<< "voxelMeshSearch : mesh:" << mesh_.name()
+            << " nDivs:" << nDivs_
+            << " localBb:" << localBb_ << endl;
+    }
+
+
     //// Small optimisation: make sure the cell centre at least always
     //// returns the cell itself
     //const pointField& cellCentres = mesh_.cellCentres();
@@ -426,6 +438,108 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
             return -1;
         }
     }
+}
+
+
+Foam::autoPtr<Foam::fvMesh> Foam::voxelMeshSearch::makeMesh
+(
+    const IOobject& io
+) const
+{
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+
+    cellShapeList cellShapes;
+    faceListList boundary;
+    pointField points;
+    {
+        //Info<< "Creating block" << endl;
+
+        block b
+        (
+            cellShape(hex, identity(8), false),
+            localBb_.points(),
+            blockEdgeList(),
+            blockFaceList(),
+            nDivs_,
+            List<gradingDescriptors>(12)
+        );
+
+        List<FixedList<label, 8>> bCells(b.cells());
+        cellShapes.setSize(bCells.size());
+        forAll(cellShapes, celli)
+        {
+            cellShapes[celli] =
+                cellShape(hex, labelList(bCells[celli]), false);
+        }
+
+        //Info<< "Creating boundary faces" << endl;
+
+        boundary.setSize(b.boundaryPatches().size());
+        forAll(boundary, patchi)
+        {
+            faceList faces(b.boundaryPatches()[patchi].size());
+            forAll(faces, facei)
+            {
+                faces[facei] = face(b.boundaryPatches()[patchi][facei]);
+            }
+            boundary[patchi].transfer(faces);
+        }
+
+        points.transfer(const_cast<pointField&>(b.points()));
+    }
+
+    //Info<< "Creating patch dictionaries" << endl;
+    wordList patchNames(boundary.size());
+    forAll(patchNames, patchi)
+    {
+        patchNames[patchi] = "patch" + Foam::name(patchi);
+    }
+
+    PtrList<dictionary> boundaryDicts(boundary.size());
+    forAll(boundaryDicts, patchi)
+    {
+        boundaryDicts.set(patchi, new dictionary());
+        dictionary& patchDict = boundaryDicts[patchi];
+        patchDict.add("type", emptyPolyPatch::typeName);
+    }
+
+    //Info<< "Creating polyMesh" << endl;
+    IOobject polyIO(io);
+    polyIO.readOpt() = IOobject::NO_READ;
+    polyMesh mesh
+    (
+        //IOobject
+        //(
+        //    polyMesh::defaultRegion,
+        //    runTime.constant(),
+        //    runTime,
+        //    IOobject::NO_READ
+        //),
+        polyIO,
+        std::move(points),
+        cellShapes,
+        boundary,
+        patchNames,
+        boundaryDicts,
+        "defaultFaces",
+        emptyPolyPatch::typeName,
+        false
+    );
+
+    //Info<< "Writing polyMesh" << endl;
+    mesh.write();
+
+    //Info<< "Reading fvMesh" << endl;
+
+    fvMeshTools::createDummyFvMeshFiles
+    (
+        io.db(),
+        io.name()
+    );
+    IOobject fvIO(io);
+    fvIO.readOpt() = IOobject::MUST_READ;
+
+    return autoPtr<fvMesh>::New(fvIO);
 }
 
 

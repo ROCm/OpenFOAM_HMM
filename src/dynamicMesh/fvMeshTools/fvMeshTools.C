@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -664,6 +664,68 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
     }
 
     return meshPtr;
+}
+
+
+void Foam::fvMeshTools::createDummyFvMeshFiles
+(
+    const objectRegistry& mesh,
+    const word& regionName,
+    const bool verbose
+)
+{
+    // Create dummy system/fv*
+    {
+        IOobject io
+        (
+            "fvSchemes",
+            mesh.time().system(),
+            regionName,
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        if (!io.typeHeaderOk<IOdictionary>(false))
+        {
+            if (verbose)
+            {
+                Info<< "Writing dummy " << regionName/io.name() << endl;
+            }
+            dictionary dummyDict;
+            dictionary divDict;
+            dummyDict.add("divSchemes", divDict);
+            dictionary gradDict;
+            dummyDict.add("gradSchemes", gradDict);
+            dictionary laplDict;
+            dummyDict.add("laplacianSchemes", laplDict);
+
+            IOdictionary(io, dummyDict).regIOobject::write();
+        }
+    }
+    {
+        IOobject io
+        (
+            "fvSolution",
+            mesh.time().system(),
+            regionName,
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        if (!io.typeHeaderOk<IOdictionary>(false))
+        {
+            if (verbose)
+            {
+                Info<< "Writing dummy " << regionName/io.name() << endl;
+            }
+            dictionary dummyDict;
+            IOdictionary(io, dummyDict).regIOobject::write();
+        }
+    }
 }
 
 

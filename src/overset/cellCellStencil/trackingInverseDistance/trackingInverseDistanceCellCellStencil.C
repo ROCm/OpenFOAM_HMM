@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -441,55 +441,55 @@ Foam::cellCellStencils::trackingInverseDistance::trackingInverseDistance
     inverseDistance(mesh, dict, false),
     globalCells_(mesh_.nCells())
 {
+    // Initialise donor cell
+    globalDonor_.setSize(mesh_.nCells());
+    globalDonor_ = -1;
+
+    // Initialise mesh partitions
+    const labelIOList& zoneID = this->zoneID();
+    label nZones = gMax(zoneID)+1;
+
+    labelList nCellsPerZone(nZones, Zero);
+    forAll(zoneID, celli)
+    {
+        nCellsPerZone[zoneID[celli]]++;
+    }
+    Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
+    Pstream::listCombineScatter(nCellsPerZone);
+
+    meshParts_.setSize(nZones);
+    forAll(meshParts_, zonei)
+    {
+        meshParts_.set
+        (
+            zonei,
+            new fvMeshSubset(mesh_, zonei, zoneID)
+        );
+
+        // Trigger early evaluation of mesh dimension
+        // (in case there are locally zero cells in mesh)
+        (void)meshParts_[zonei].subMesh().nGeometricD();
+    }
+
+
+    // Print a bit
+    {
+        Info<< typeName << " : detected " << nZones
+            << " mesh regions" << endl;
+        Info<< incrIndent;
+        forAll(nCellsPerZone, zonei)
+        {
+            Info<< indent<< "zone:" << zonei
+                << " nCells:" << nCellsPerZone[zonei]
+                << endl;
+        }
+        Info<< decrIndent;
+    }
+
+
+    // Do geometry update
     if (doUpdate)
     {
-        // Initialise donor cell
-        globalDonor_.setSize(mesh_.nCells());
-        globalDonor_ = -1;
-
-        // Initialise mesh partitions
-        const labelIOList& zoneID = this->zoneID();
-        label nZones = gMax(zoneID)+1;
-
-        labelList nCellsPerZone(nZones, Zero);
-        forAll(zoneID, celli)
-        {
-            nCellsPerZone[zoneID[celli]]++;
-        }
-        Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
-        Pstream::listCombineScatter(nCellsPerZone);
-
-        meshParts_.setSize(nZones);
-        forAll(meshParts_, zonei)
-        {
-            meshParts_.set
-            (
-                zonei,
-                new fvMeshSubset(mesh_, zonei, zoneID)
-            );
-
-            // Trigger early evaluation of mesh dimension
-            // (in case there are locally zero cells in mesh)
-            (void)meshParts_[zonei].subMesh().nGeometricD();
-        }
-
-
-        // Print a bit
-        {
-            Info<< typeName << " : detected " << nZones
-                << " mesh regions" << endl;
-            Info<< incrIndent;
-            forAll(nCellsPerZone, zonei)
-            {
-                Info<< indent<< "zone:" << zonei
-                    << " nCells:" << nCellsPerZone[zonei]
-                    << endl;
-            }
-            Info<< decrIndent;
-        }
-
-
-        // Do geometry update
         update();
     }
 }
@@ -550,11 +550,35 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
             meshSearches.set
             (
                 zonei,
-                new voxelMeshSearch(meshParts_[zonei].subMesh(), true)
+                new voxelMeshSearch
+                (
+                    meshParts_[zonei].subMesh(),
+                    true
+                )
             );
         }
     }
     DebugInfo<< FUNCTION_NAME << " : Constructed cell voxel meshes" << endl;
+
+    PtrList<fvMesh> voxelMeshes;
+    if (debug)
+    {
+        voxelMeshes.setSize(meshSearches.size());
+        forAll(meshSearches, zonei)
+        {
+            IOobject meshIO
+            (
+                word("voxelMesh" + Foam::name(zonei)),
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ
+            );
+
+            Pout<< "Constructing voxel mesh " << meshIO.objectPath() << endl;
+            voxelMeshes.set(zonei, meshSearches[zonei].makeMesh(meshIO));
+        }
+    }
+
 
 
     const boundBox& allBb(mesh_.bounds());
@@ -657,6 +681,24 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     }
     DebugInfo<< FUNCTION_NAME << " : Calculated boundary voxel meshes" << endl;
 
+    if (debug)
+    {
+        forAll(patchParts, zonei)
+        {
+            const labelList voxelTypes(patchParts[zonei].values());
+            const fvMesh& vm = voxelMeshes[zonei];
+            tmp<volScalarField> tfld
+            (
+                createField<label>
+                (
+                    vm,
+                    "patchTypes",
+                    voxelTypes
+                )
+            );
+            tfld().write();
+        }
+    }
 
     // Current best guess for cells
     labelList allCellTypes(mesh_.nCells(), CALCULATED);
@@ -698,7 +740,13 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
                 srci,
                 allCellTypes
             );
+        }
+    }
 
+    for (label srci = 0; srci < meshParts_.size()-1; srci++)
+    {
+        for (label tgti = srci+1; tgti < meshParts_.size(); tgti++)
+        {
             markDonors
             (
                 pBufs,
@@ -727,6 +775,15 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     DebugInfo<< FUNCTION_NAME << " : Determined holes and donor-acceptors"
         << endl;
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes", allCellTypes)
+        );
+        tfld().write();
+    }
+
 
     // Use the patch types and weights to decide what to do
     forAll(allPatchTypes, celli)
@@ -753,14 +810,83 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     }
     DebugInfo<< FUNCTION_NAME << " : Removed bad donors" << endl;
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_patch", allCellTypes)
+        );
+        tfld().write();
+    }
+
+
     // Mark unreachable bits
     findHoles(globalCells_, mesh_, zoneID, allStencil, allCellTypes);
     DebugInfo<< FUNCTION_NAME << " : Flood-filled holes" << endl;
+
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_hole", allCellTypes)
+        );
+        tfld().write();
+    }
 
     // Add buffer interpolation layer(s) around holes
     scalarField allWeight(mesh_.nCells(), Zero);
     walkFront(layerRelax, allStencil, allCellTypes, allWeight);
     DebugInfo<< FUNCTION_NAME << " : Implemented layer relaxation" << endl;
+
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_front", allCellTypes)
+        );
+        tfld().write();
+    }
+
+
+    // Check previous iteration cellTypes_ for any hole->calculated changes
+    {
+        label nCalculated = 0;
+
+        forAll(cellTypes_, celli)
+        {
+            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+            {
+                if (allStencil[celli].size() == 0)
+                {
+                    FatalErrorInFunction
+                    //WarningInFunction
+                        << "Cell:" << celli
+                        << " at:" << mesh_.cellCentres()[celli]
+                        << " zone:" << zoneID[celli]
+                        << " changed from hole to calculated"
+                        << " but there is no donor"
+                        //<< endl;
+                        << exit(FatalError);
+                }
+                else
+                {
+                    Pout<< "cell:" << mesh_.cellCentres()[celli]
+                        << " changed from hole to calculated"
+                        << " using donors:" << allStencil[celli]
+                        << endl;
+                    allCellTypes[celli] = INTERPOLATED;
+                    nCalculated++;
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Detected " << nCalculated << " cells changing from hole"
+                << " to calculated. Changed to interpolated"
+                << endl;
+        }
+    }
 
 
     // Convert cell-cell addressing to stencil in compact notation

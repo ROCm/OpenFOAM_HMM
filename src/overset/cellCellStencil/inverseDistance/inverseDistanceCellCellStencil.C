@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -1998,8 +1998,10 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
     if (debug)
     {
-        tmp<volScalarField> tfld(createField("allCellTypes", allCellTypes));
-        //tfld.ref().correctBoundaryConditions();
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes", allCellTypes)
+        );
         tfld().write();
     }
 
@@ -2041,9 +2043,8 @@ bool Foam::cellCellStencils::inverseDistance::update()
     {
         tmp<volScalarField> tfld
         (
-            createField("allCellTypes_patch", allCellTypes)
+            createField(mesh_, "allCellTypes_patch", allCellTypes)
         );
-        //tfld.ref().correctBoundaryConditions();
         tfld().write();
     }
 
@@ -2054,9 +2055,8 @@ bool Foam::cellCellStencils::inverseDistance::update()
     {
         tmp<volScalarField> tfld
         (
-            createField("allCellTypes_hole", allCellTypes)
+            createField(mesh_, "allCellTypes_hole", allCellTypes)
         );
-        //tfld.ref().correctBoundaryConditions();
         tfld().write();
     }
     if (debug)
@@ -2066,8 +2066,10 @@ bool Foam::cellCellStencils::inverseDistance::update()
         {
             stencilSize[celli] = allStencil[celli].size();
         }
-        tmp<volScalarField> tfld(createField("allStencil_hole", stencilSize));
-        //tfld.ref().correctBoundaryConditions();
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allStencil_hole", stencilSize)
+        );
         tfld().write();
     }
 
@@ -2080,9 +2082,8 @@ bool Foam::cellCellStencils::inverseDistance::update()
     {
         tmp<volScalarField> tfld
         (
-            createField("allCellTypes_front", allCellTypes)
+            createField(mesh_, "allCellTypes_front", allCellTypes)
         );
-        //tfld.ref().correctBoundaryConditions();
         tfld().write();
     }
 
@@ -2227,14 +2228,20 @@ bool Foam::cellCellStencils::inverseDistance::update()
                         << endl;
                 }
             }
-            tmp<volScalarField> tfld(createField("maxMagWeight", maxMagWeight));
+            tmp<volScalarField> tfld
+            (
+                createField(mesh_, "maxMagWeight", maxMagWeight)
+            );
             tfld.ref().correctBoundaryConditions();
             tfld().write();
         }
 
         // Dump cell types
         {
-            tmp<volScalarField> tfld(createField("cellTypes", cellTypes_));
+            tmp<volScalarField> tfld
+            (
+                createField(mesh_, "cellTypes", cellTypes_)
+            );
             tfld.ref().correctBoundaryConditions();
             tfld().write();
         }

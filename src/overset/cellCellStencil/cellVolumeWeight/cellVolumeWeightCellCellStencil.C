@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2014-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,12 +155,12 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
                     {
                         allWeight[own] = fraction;
 
-                        if (debug)
-                        {
-                            Pout<< "    setting cell "
-                                << mesh_.cellCentres()[own]
-                                << " to " << fraction << endl;
-                        }
+                        //if (debug)
+                        //{
+                        //    Pout<< "    setting cell "
+                        //        << mesh_.cellCentres()[own]
+                        //        << " to " << fraction << endl;
+                        //}
                         allCellTypes[own] = INTERPOLATED;
                         newIsFront.set(mesh_.cells()[own]);
                     }
@@ -174,12 +174,12 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
                         {
                             allWeight[nei] = fraction;
 
-                            if (debug)
-                            {
-                                Pout<< "    setting cell "
-                                    << mesh_.cellCentres()[nei]
-                                    << " to " << fraction << endl;
-                            }
+                            //if (debug)
+                            //{
+                            //    Pout<< "    setting cell "
+                            //        << mesh_.cellCentres()[nei]
+                            //        << " to " << fraction << endl;
+                            //}
 
                             allCellTypes[nei] = INTERPOLATED;
                             newIsFront.set(mesh_.cells()[nei]);
@@ -928,6 +928,16 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     }
 
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes", allCellTypes)
+        );
+        tfld().write();
+    }
+
+
     // Use the patch types and weights to decide what to do
     forAll(allPatchTypes, cellI)
     {
@@ -977,15 +987,44 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         }
     }
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_patch", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
+
 
     // Mark unreachable bits
     findHoles(globalCells, mesh_, zoneID, allStencil, allCellTypes);
+
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_hole", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
 
 
     // Add buffer interpolation layer around holes
     scalarField allWeight(mesh_.nCells(), Zero);
     walkFront(layerRelax, allCellTypes, allWeight);
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_front", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
 
     // Check previous iteration cellTypes_ for any hole->calculated changes
     {
@@ -1104,39 +1143,39 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     }
 
 
-//     // Check previous iteration cellTypes_ for any hole->calculated changes
-//     {
-//         label nCalculated = 0;
+//  // Check previous iteration cellTypes_ for any hole->calculated changes
+//  {
+//      label nCalculated = 0;
 //
-//         forAll(cellTypes_, celli)
-//         {
-//             if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
-//             {
-//                 if (allStencil[celli].size() == 0)
-//                 {
-//                     FatalErrorInFunction
-//                         << "Cell:" << celli
-//                         << " at:" << mesh_.cellCentres()[celli]
-//                         << " zone:" << zoneID[celli]
-//                         << " changed from hole to calculated"
-//                         << " but there is no donor"
-//                         << exit(FatalError);
-//                 }
-//                 else
-//                 {
-//                     allCellTypes[celli] = INTERPOLATED;
-//                     nCalculated++;
-//                 }
-//             }
-//         }
+//      forAll(cellTypes_, celli)
+//      {
+//          if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+//          {
+//              if (allStencil[celli].size() == 0)
+//              {
+//                  FatalErrorInFunction
+//                      << "Cell:" << celli
+//                      << " at:" << mesh_.cellCentres()[celli]
+//                      << " zone:" << zoneID[celli]
+//                      << " changed from hole to calculated"
+//                      << " but there is no donor"
+//                      << exit(FatalError);
+//              }
+//              else
+//              {
+//                  allCellTypes[celli] = INTERPOLATED;
+//                  nCalculated++;
+//              }
+//          }
+//      }
 //
-//         if (debug)
-//         {
-//             Pout<< "Detected " << nCalculated << " cells changing from hole"
-//                 << " to calculated. Changed these to interpolated"
-//                 << endl;
-//         }
-//     }
+//      if (debug)
+//      {
+//          Pout<< "Detected " << nCalculated << " cells changing from hole"
+//              << " to calculated. Changed these to interpolated"
+//              << endl;
+//      }
+//  }
 
 
     cellTypes_.transfer(allCellTypes);

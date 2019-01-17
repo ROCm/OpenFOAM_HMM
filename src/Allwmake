@@ -53,7 +53,6 @@ wmake $targetType topoChangerFvMesh
 parallel/Allwmake $targetType $*
 randomProcesses/Allwmake $targetType $*
 
-wmake $targetType overset
 wmake $targetType ODE
 
 transportModels/Allwmake $targetType $*
@@ -67,6 +66,7 @@ wmake $targetType fvOptions
 wmake $targetType fvMotionSolver
 
 mesh/Allwmake $targetType $*
+wmake $targetType overset
 renumber/Allwmake $targetType $*
 fvAgglomerationMethods/Allwmake $targetType $*
 wmake $targetType waveModels

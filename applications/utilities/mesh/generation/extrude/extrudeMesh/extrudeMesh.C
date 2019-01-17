@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,7 @@ Description
 #include "MeshedSurfaces.H"
 #include "globalIndex.H"
 #include "cellSet.H"
+#include "fvMeshTools.H"
 
 #include "extrudedMesh.H"
 #include "extrudeModel.H"
@@ -76,59 +77,6 @@ static const Enum<ExtrudeMode> ExtrudeModeNames
     { ExtrudeMode::PATCH, "patch" },
     { ExtrudeMode::SURFACE, "surface" },
 };
-
-
-void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
-{
-    // Create dummy system/fv*
-    {
-        IOobject io
-        (
-            "fvSchemes",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        Info<< "Testing:" << io.objectPath() << endl;
-
-        if (!io.typeHeaderOk<IOdictionary>(false))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            dictionary divDict;
-            dummyDict.add("divSchemes", divDict);
-            dictionary gradDict;
-            dummyDict.add("gradSchemes", gradDict);
-            dictionary laplDict;
-            dummyDict.add("laplacianSchemes", laplDict);
-
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-    {
-        IOobject io
-        (
-            "fvSolution",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if (!io.typeHeaderOk<IOdictionary>(false))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-}
 
 
 label findPatchID(const polyBoundaryMesh& patches, const word& name)
@@ -738,7 +686,7 @@ int main(int argc, char *argv[])
 
 
         // Create dummy fvSchemes, fvSolution
-        createDummyFvMeshFiles(mesh, regionDir);
+        fvMeshTools::createDummyFvMeshFiles(mesh, regionDir, true);
 
         // Create actual mesh from polyTopoChange container
         autoPtr<mapPolyMesh> map = meshMod().makeMesh

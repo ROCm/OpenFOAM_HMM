@@ -4,6 +4,7 @@
 
 EXE_INC = \
     -I$(LIB_SRC)/fileFormats/lnInclude \
+    -I$(LIB_SRC)/mesh/blockMesh/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
@@ -15,4 +16,5 @@ EXE_INC = \
 LIB_LIBS = \
     -ldynamicFvMesh \
     -lsampling \
+    -lblockMesh \
     -ldecompositionMethods

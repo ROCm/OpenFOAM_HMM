@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -350,59 +350,6 @@ void deleteEmptyPatches(fvMesh& mesh)
     }
 
     fvMeshTools::reorderPatches(mesh, oldToNew, usedI, true);
-}
-
-
-void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
-{
-    // Create dummy system/fv*
-    {
-        IOobject io
-        (
-            "fvSchemes",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        Info<< "Testing:" << io.objectPath() << endl;
-
-        if (!io.typeHeaderOk<IOdictionary>(true))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            dictionary divDict;
-            dummyDict.add("divSchemes", divDict);
-            dictionary gradDict;
-            dummyDict.add("gradSchemes", gradDict);
-            dictionary laplDict;
-            dummyDict.add("laplacianSchemes", laplDict);
-
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-    {
-        IOobject io
-        (
-            "fvSolution",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if (!io.typeHeaderOk<IOdictionary>(true))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
 }
 
 
@@ -1642,7 +1589,7 @@ int main(int argc, char *argv[])
 
 
     // Create dummy fv* files
-    createDummyFvMeshFiles(mesh, shellRegionName);
+    fvMeshTools::createDummyFvMeshFiles(mesh, shellRegionName, true);
 
 
     word meshInstance;
