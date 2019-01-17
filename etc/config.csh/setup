@@ -139,7 +139,6 @@ _foamEtc -config  settings
 _foamEtc -config  mpi
 _foamEtc -config  paraview -- "$FOAM_SETTINGS"  # Pass through for evaluation
 _foamEtc -config  vtk
-_foamEtc -config  ensight
 ## _foamEtc -config  ADIOS
 ## _foamEtc -config  ADIOS2
 _foamEtc -config  CGAL

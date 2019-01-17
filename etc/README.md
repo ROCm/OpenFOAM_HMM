@@ -14,7 +14,6 @@ These source the following files in the `config.sh/` or
 * `aliases` : aliases for interactive shells
 * `unset` : sourced to clear as many OpenFOAM environment settings as possible
 * `mpi` : MPI communications library settings
-* `ensight` : application settings for EnSight
 * `paraview` : application settings for ParaView
 * `scotch` : application settings for compiling against scotch
 * `metis` : application settings for compiling against metis
