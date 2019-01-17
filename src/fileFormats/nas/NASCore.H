@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,6 +68,16 @@ public:
 
         //- Selection names for the NASTRAN file field formats
         static const Enum<fieldFormat> fieldFormatNames;
+
+        //- Output load format
+        enum loadFormat
+        {
+            PLOAD2,
+            PLOAD4
+        };
+
+        //- Selection names for the NASTRAN file field formats
+        static const Enum<loadFormat> loadFormatNames;
 
 
     // Constructors

@@ -89,7 +89,8 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeFaceValue
     Type scaledValue = scale_*value;
 
     // Write keyword
-    writeKeyword(os, loadFormatNames_[format])  << separator_;
+    writeKeyword(os, fileFormats::NASCore::loadFormatNames[format])
+        << separator_;
 
     // Write load set ID
     os.setf(std::ios_base::right);
@@ -107,8 +108,9 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeFaceValue
             else
             {
                 WarningInFunction
-                    << loadFormatNames_[format] << " requires scalar values "
-                    << "and cannot be used for higher rank values"
+                    << fileFormats::NASCore::loadFormatNames[format]
+                    << " requires scalar values"
+                    << " - it cannot be used for higher rank values"
                     << endl;
 
                 writeValue(os, scalar(0)) << separator_;

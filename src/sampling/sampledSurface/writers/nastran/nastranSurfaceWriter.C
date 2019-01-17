@@ -37,17 +37,6 @@ namespace Foam
     addToRunTimeSelectionTable(surfaceWriter, nastranSurfaceWriter, wordDict);
 }
 
-const Foam::Enum
-<
-    Foam::nastranSurfaceWriter::loadFormat
->
-Foam::nastranSurfaceWriter::loadFormatNames_
-({
-    { loadFormat::PLOAD2, "PLOAD2" },
-    { loadFormat::PLOAD4, "PLOAD4" },
-});
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Field writing implementation
@@ -356,7 +345,7 @@ Foam::nastranSurfaceWriter::nastranSurfaceWriter(const dictionary& options)
         fieldMap_.insert
         (
             item.first(),
-            loadFormatNames_[item.second()]
+            fileFormats::NASCore::loadFormatNames[item.second()]
         );
     }
 }

@@ -110,18 +110,12 @@ public:
     using fieldFormat = Foam::fileFormats::NASCore::fieldFormat;
 
     //- Output load format
-    enum loadFormat
-    {
-        PLOAD2,
-        PLOAD4
-    };
+    using loadFormat = Foam::fileFormats::NASCore::loadFormat;
 
 
 private:
 
     // Private data
-
-        static const Enum<loadFormat> loadFormatNames_;
 
         //- Field format (width and separator)
         fieldFormat writeFormat_;
