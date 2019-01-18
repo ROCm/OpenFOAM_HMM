@@ -86,7 +86,7 @@ void Foam::polyTopoChange::renumberKey
 
         if (newKey >= 0)
         {
-            newMap.insert(newKey, iter.object());
+            newMap.insert(newKey, iter.val());
         }
     }
 

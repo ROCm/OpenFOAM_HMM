@@ -358,7 +358,7 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
         labelList indexToInjector(injIdToIndex_.size());
         forAllConstIters(injIdToIndex_, iter)
         {
-            indexToInjector[iter.object()] = iter.key();
+            indexToInjector[iter.val()] = iter.key();
         }
 
         forAll(patchData_, i)

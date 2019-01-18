@@ -386,7 +386,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     forAllConstIters(zoneLookup, iter)
     {
         const label groupId = iter.key();
-        const label zoneId  = iter.object();
+        const label zoneId  = iter.val();
 
         const auto iterName = nameLookup.cfind(groupId);
         if (iterName.found())

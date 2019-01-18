@@ -239,7 +239,7 @@ Foam::Map<Foam::word> Foam::cellTable::selectType(const word& matl) const
     forAllConstIter(Map<dictionary>, *this, iter)
     {
         const label index = iter.key();
-        const dictionary& dict = iter.object();
+        const dictionary& dict = iter.val();
 
         if
         (

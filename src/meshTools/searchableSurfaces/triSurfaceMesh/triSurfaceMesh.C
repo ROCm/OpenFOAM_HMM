@@ -219,7 +219,7 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
         // Check for any edges used only once.
         forAllConstIters(facesPerEdge, iter)
         {
-            if (iter.object() != 2)
+            if (iter.val() != 2)
             {
                 return false;
             }

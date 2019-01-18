@@ -739,7 +739,7 @@ void Foam::globalPoints::remove
     forAllConstIters(oldMeshToProcPoint, iter)
     {
         const label localPointi = iter.key();
-        const labelPairList& pointInfo = oldProcPoints[iter.object()];
+        const labelPairList& pointInfo = oldProcPoints[iter.val()];
 
         if (pointInfo.size() == 2)
         {

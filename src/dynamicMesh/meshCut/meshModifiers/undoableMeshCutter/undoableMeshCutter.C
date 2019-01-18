@@ -237,12 +237,10 @@ void Foam::undoableMeshCutter::setRefinement
     if (undoable_)
     {
         // Use cells cut in this iteration to update splitCell tree.
-        forAllConstIter(Map<label>, addedCells(), iter)
+        forAllConstIters(addedCells(), iter)
         {
-            label celli = iter.key();
-
-            label addedCelli = iter();
-
+            const label celli = iter.key();
+            const label addedCelli = iter.val();
 
             // Newly created split cell. (celli ->  celli + addedCelli)
 

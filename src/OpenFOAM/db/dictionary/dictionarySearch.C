@@ -271,7 +271,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearch
 
     if (iter.found())
     {
-        finder.set(iter.object());
+        finder.set(iter.val());
         return finder;
     }
 
@@ -427,7 +427,7 @@ const Foam::dictionary* Foam::dictionary::cfindScopedDict
 
             if (iter.found())
             {
-                const entry *eptr = iter.object();
+                const entry *eptr = iter.val();
 
                 if (eptr->isDict())
                 {
@@ -534,7 +534,7 @@ Foam::dictionary* Foam::dictionary::makeScopedDict(const fileName& dictPath)
 
             if (iter.found())
             {
-                entry *eptr = iter.object();
+                entry *eptr = iter.val();
 
                 if (eptr->isDict())
                 {

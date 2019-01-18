@@ -652,6 +652,7 @@ protected:
             }
 
             //- The object (value) associated with the iterator
+            //  \deprecated(2019-01) use val() method
             inline mapped_type& object() const
             {
                 return entry_->mapped();

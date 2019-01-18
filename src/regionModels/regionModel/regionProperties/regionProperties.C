@@ -76,7 +76,7 @@ Foam::label Foam::regionProperties::count() const
 
     forAllConstIters(props, iter)
     {
-        n += iter.object().size();
+        n += iter.val().size();
     }
 
     return n;
@@ -114,7 +114,7 @@ Foam::wordList Foam::regionProperties::sortedNames() const
 
     forAllConstIters(props, iter)
     {
-        for (const word& name : iter.object())
+        for (const word& name : iter.val())
         {
             list[n] = name;
             ++n;

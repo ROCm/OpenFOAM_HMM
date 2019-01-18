@@ -82,7 +82,7 @@ massTransfer() const
     // Reset the interfacial mass flow rates
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {
@@ -99,11 +99,9 @@ massTransfer() const
     // Sum up the contribution from each interface composition model
     forAllConstIters(interfaceCompositionModels_, modelIter)
     {
-        const phasePair& pair =
-            *(this->phasePairs_[modelIter.key()]);
+        const phasePair& pair = *(this->phasePairs_[modelIter.key()]);
 
-        const interfaceCompositionModel& compositionModel =
-            *(modelIter.object());
+        const interfaceCompositionModel& compositionModel = *(modelIter.val());
 
         const phaseModel& phase = pair.phase1();
         const phaseModel& otherPhase = pair.phase2();
@@ -185,7 +183,7 @@ correctThermo()
 
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {

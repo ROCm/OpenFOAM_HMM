@@ -77,7 +77,7 @@ Foam::label Foam::sampledSurfaces::classifyFields()
     // Total number selected
     forAllConstIters(available, iter)
     {
-        nFields += iter.object().size();
+        nFields += iter.val().size();
     }
 
     return nFields;

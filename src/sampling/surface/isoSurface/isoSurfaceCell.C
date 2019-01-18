@@ -1185,7 +1185,7 @@ Foam::label Foam::isoSurfaceCell::markDanglingTriangles
         // with only one connected edge (= this edge)
 
         const label edgeI = iter.key();
-        const labelList& otherEdgeFaces = iter.object();
+        const labelList& otherEdgeFaces = iter.val();
 
         // Remove all dangling triangles
         if (danglingTriangle(faceEdges[edgeFace0[edgeI]], edgeFace1))

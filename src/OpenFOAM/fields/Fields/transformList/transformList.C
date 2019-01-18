@@ -84,7 +84,7 @@ void Foam::transformList(const tensor& rotTensor, Map<T>& field)
 {
     forAllIters(field, iter)
     {
-        T& value = iter.object();
+        T& value = iter.val();
         value = transform(rotTensor, value);
     }
 }
@@ -112,7 +112,7 @@ void Foam::transformList(const tensor& rotTensor, EdgeMap<T>& field)
 {
     forAllIters(field, iter)
     {
-        T& value = iter.object();
+        T& value = iter.val();
         value = transform(rotTensor, value);
     }
 }

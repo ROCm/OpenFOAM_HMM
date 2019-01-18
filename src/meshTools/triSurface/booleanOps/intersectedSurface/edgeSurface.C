@@ -247,7 +247,7 @@ Foam::edgeSurface::edgeSurface
         const label facei = iter.key()[isFirstSurface ? 0 : 1];
 
         // Edge label in intersection
-        const label edgeI = iter.object();
+        const label edgeI = iter.val();
 
         // Store on face-edge addressing. (note: offset edge)
         allFaceEdges[facei].append(edgeI + nSurfaceEdges_);

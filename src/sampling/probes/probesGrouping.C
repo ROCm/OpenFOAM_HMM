@@ -62,7 +62,7 @@ Foam::label Foam::probes::classifyFields()
     forAllConstIters(available, iter)
     {
         const word& fieldType = iter.key();
-        const wordList fieldNames = iter.object().sortedToc();
+        const wordList fieldNames = iter.val().sortedToc();
 
         const label count = fieldNames.size(); // pre-filtered, so non-empty
 

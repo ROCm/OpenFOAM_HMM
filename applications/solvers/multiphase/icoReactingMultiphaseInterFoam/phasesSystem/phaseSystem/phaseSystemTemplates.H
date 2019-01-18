@@ -46,7 +46,7 @@ void Foam::phaseSystem::createSubModels
             key,
             modelType::New
             (
-                iter.object(),
+                iter.val(),
                 phasePairs_[key]
             )
         );
@@ -76,7 +76,7 @@ void Foam::phaseSystem::createSubModels
             key,
             modelType::New
             (
-                iter.object(),
+                iter.val(),
                 mesh
             )
         );

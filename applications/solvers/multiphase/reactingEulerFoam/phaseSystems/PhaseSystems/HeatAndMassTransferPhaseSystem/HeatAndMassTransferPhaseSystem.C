@@ -61,7 +61,7 @@ HeatAndMassTransferPhaseSystem
 
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {
@@ -194,7 +194,7 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::dmdt
 
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {
@@ -231,7 +231,7 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::momentumTransfer() const
     // Source term due to mass transfer
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {
@@ -318,7 +318,7 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
     // Source term due to mass transfer
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {

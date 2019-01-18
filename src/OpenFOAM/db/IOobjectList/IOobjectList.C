@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -194,7 +194,7 @@ Foam::label Foam::IOobjectList::append(const IOobjectList& other)
                 InfoInFunction << "Copy append " << iter.key() << nl;
             }
 
-            set(iter.key(), new IOobject(*(iter.object())));
+            set(iter.key(), new IOobject(*(iter.val())));
             ++count;
         }
     }
@@ -253,7 +253,7 @@ const Foam::IOobject* Foam::IOobjectList::cfindObject
             InfoInFunction << "Found " << objName << endl;
         }
 
-        return iter.object();
+        return iter.val();
     }
     else if (IOobject::debug)
     {
@@ -422,9 +422,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const IOobjectList& list)
 {
     os << nl << list.size() << nl << token::BEGIN_LIST << nl;
 
-    forAllConstIters(list, it)
+    forAllConstIters(list, iter)
     {
-        os << it.key() << token::SPACE << it.object()->headerClassName() << nl;
+        os  << iter.key() << token::SPACE
+            << iter.val()->headerClassName() << nl;
     }
 
     os << token::END_LIST;

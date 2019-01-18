@@ -44,7 +44,7 @@ ThermalPhaseChangePhaseSystem
 
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {
@@ -106,7 +106,7 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::heatTransfer() const
     // Accumulate mDotL contributions from boundaries
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {
@@ -201,7 +201,7 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::massTransfer() const
 
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {
@@ -270,7 +270,7 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::iDmdt
 
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {
@@ -305,7 +305,7 @@ void Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctThermo()
 
     forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair = *(phasePairIter.object());
+        const phasePair& pair = *(phasePairIter.val());
 
         if (pair.ordered())
         {

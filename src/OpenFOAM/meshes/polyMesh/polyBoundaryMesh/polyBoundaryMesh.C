@@ -390,7 +390,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
                 else
                 {
                     // Second occurrence. Store.
-                    const labelPair& edgeInfo = fnd.object();
+                    const labelPair& edgeInfo = fnd.val();
 
                     neighbourEdges[patchi][edgei - pp.nInternalEdges()] =
                         edgeInfo;
@@ -704,7 +704,7 @@ Foam::labelList Foam::polyBoundaryMesh::indices
             if (iter.found())
             {
                 // Hash the patch ids for the group
-                labelHashSet groupIndices(iter.object());
+                labelHashSet groupIndices(iter.val());
 
                 groupIndices.erase(patchIndices);  // Skip existing
                 patchIndices.append(groupIndices.sortedToc());

@@ -589,7 +589,7 @@ Foam::dynamicRefineFvMesh::unrefine
             forAllConstIters(faceToSplitPoint, iter)
             {
                 const label oldFacei = iter.key();
-                const label oldPointi = iter.object();
+                const label oldPointi = iter.val();
 
                 if (reversePointMap[oldPointi] < 0)
                 {

@@ -2696,7 +2696,7 @@ void Foam::meshRefinement::updateMesh
 
             if (newFacei >= 0)
             {
-                newFaceToPatch.insert(newFacei, iter.object());
+                newFaceToPatch.insert(newFacei, iter.val());
             }
         }
         faceToCoupledPatch_.transfer(newFaceToPatch);

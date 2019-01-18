@@ -96,7 +96,7 @@ Foam::List<int> Foam::NamedEnum<EnumType, nEnum>::values() const
 
             if (iter.found())
             {
-                lst[count++] = iter.object();
+                lst[count++] = iter.val();
             }
         }
     }
@@ -113,7 +113,7 @@ bool Foam::NamedEnum<EnumType, nEnum>::hasName(const EnumType e) const
 
     forAllConstIters(lookup_, iter)
     {
-        if (iter.object() == enumValue)
+        if (iter.val() == enumValue)
         {
             return true;
         }
@@ -140,7 +140,7 @@ EnumType Foam::NamedEnum<EnumType, nEnum>::lookup
             << exit(FatalIOError);
     }
 
-    return EnumType(iter.object());
+    return EnumType(iter.val());
 }
 
 
@@ -177,7 +177,7 @@ EnumType Foam::NamedEnum<EnumType, nEnum>::read(Istream& is) const
             << exit(FatalIOError);
     }
 
-    return EnumType(iter.object());
+    return EnumType(iter.val());
 }
 
 

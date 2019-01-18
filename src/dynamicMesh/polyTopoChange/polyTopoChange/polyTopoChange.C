@@ -1363,7 +1363,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
         forAllConstIters(faceFromPoint_, iter)
         {
             const label facei = iter.key();
-            const label pointi = iter.object();
+            const label pointi = iter.val();
 
             // Get internal or patch faces using point on old mesh
             const bool internal = (region_[facei] == -1);
@@ -1395,7 +1395,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
         forAllConstIters(faceFromEdge_, iter)
         {
             const label facei = iter.key();
-            const label edgei = iter.object();
+            const label edgei = iter.val();
 
             // Get internal or patch faces using edge on old mesh
             const bool internal = (region_[facei] == -1);
@@ -1445,7 +1445,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
         forAllConstIters(cellFromPoint_, iter)
         {
             const label celli = iter.key();
-            const label pointi = iter.object();
+            const label pointi = iter.val();
 
             cellsFromPoints[nCellsFromPoints++] = objectMap
             (
@@ -1466,7 +1466,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
         forAllConstIters(cellFromEdge_, iter)
         {
             const label celli = iter.key();
-            const label edgei = iter.object();
+            const label edgei = iter.val();
 
             cellsFromEdges[nCellsFromEdges++] = objectMap
             (
@@ -1489,7 +1489,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
         forAllConstIters(cellFromFace_, iter)
         {
             const label celli = iter.key();
-            const label oldFacei = iter.object();
+            const label oldFacei = iter.val();
 
             if (mesh.isInternalFace(oldFacei))
             {
@@ -1548,7 +1548,7 @@ void Foam::polyTopoChange::resetZones
         forAllConstIters(pointZone_, iter)
         {
             const label pointi = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             if (zonei < 0 || zonei >= pointZones.size())
             {
@@ -1572,7 +1572,7 @@ void Foam::polyTopoChange::resetZones
         forAllConstIters(pointZone_, iter)
         {
             const label pointi = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             addressing[zonei][nPoints[zonei]++] = pointi;
         }
@@ -1634,7 +1634,7 @@ void Foam::polyTopoChange::resetZones
         forAllConstIters(faceZone_, iter)
         {
             const label facei = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             if (zonei < 0 || zonei >= faceZones.size())
             {
@@ -1659,7 +1659,7 @@ void Foam::polyTopoChange::resetZones
         forAllConstIters(faceZone_, iter)
         {
             const label facei = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             const label index = nFaces[zonei]++;
 

@@ -485,7 +485,7 @@ Foam::face Foam::meshCutAndRemove::addEdgeCutsToFace(const label facei) const
         if (fnd.found())
         {
             // edge has been cut. Introduce new vertex.
-            newFace[newFp++] = fnd.object();
+            newFace[newFp++] = fnd.val();
         }
     }
 
@@ -546,7 +546,7 @@ Foam::face Foam::meshCutAndRemove::loopToFace
 
                     if (fnd.found())
                     {
-                        newFace[newFacei++] = fnd.object();
+                        newFace[newFacei++] = fnd.val();
                     }
                 }
             }
@@ -1307,7 +1307,7 @@ void Foam::meshCutAndRemove::updateMesh(const mapPolyMesh& map)
         forAllConstIters(addedPoints_, iter)
         {
             const edge& e = iter.key();
-            const label addedPointi = iter.object();
+            const label addedPointi = iter.val();
 
             label newStart = map.reversePointMap()[e.start()];
 

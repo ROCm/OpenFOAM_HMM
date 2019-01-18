@@ -126,7 +126,7 @@ void Foam::pointToFace::combine
         forAllConstIters(numPoints, iter)
         {
             const label facei = iter.key();
-            const label count = iter.object();
+            const label count = iter.val();
 
             if (count == mesh_.faces()[facei].size())
             {

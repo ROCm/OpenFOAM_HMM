@@ -65,7 +65,7 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
     }
 
     // Mesh has patch group
-    const labelList& patchIDs = fnd.object();
+    const labelList& patchIDs = fnd.val();
 
     if (&mesh == &thisPatch.boundaryMesh().mesh())
     {

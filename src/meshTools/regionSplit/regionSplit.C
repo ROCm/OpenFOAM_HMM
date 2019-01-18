@@ -660,7 +660,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
 
         forAllConstIters(localToGlobal, iter)
         {
-            const label regioni = iter.object();
+            const label regioni = iter.val();
 
             if (globalRegions.isLocal(regioni))
             {
@@ -706,7 +706,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::reduceRegions
 
         forAllConstIters(localToGlobal, iter)
         {
-            const label regioni = iter.object();
+            const label regioni = iter.val();
 
             if (globalRegions.isLocal(regioni))
             {

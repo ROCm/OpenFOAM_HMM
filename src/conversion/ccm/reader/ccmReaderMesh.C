@@ -480,7 +480,7 @@ void Foam::ccm::reader::readCells
         auto dictIter = boundaryRegion_.find(info.ccmIndex);
         if (dictIter.found())
         {
-            dictionary& dict = dictIter.object();
+            dictionary& dict = dictIter.val();
 
             const word patchName(dict.get<word>("Label"));
             const word patchType(dict.get<word>("BoundaryType"));
@@ -1263,7 +1263,7 @@ void Foam::ccm::reader::removeUnwanted()
             forAllConstIters(removeMap, iter)
             {
                 Info<< "    zone "
-                    << iter.key() << " : " << iter.object() << nl;
+                    << iter.key() << " : " << iter.val() << nl;
             }
 
             Info<<"retain "<< (nCells_ - nRemove) << " cells in "
@@ -1272,7 +1272,7 @@ void Foam::ccm::reader::removeUnwanted()
             forAllConstIters(keepMap, iter)
             {
                 Info<< "    zone "
-                    << iter.key() << " : " << iter.object() << nl;
+                    << iter.key() << " : " << iter.val() << nl;
             }
         }
     }
@@ -1826,7 +1826,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
 
     forAllConstIters(interfaceDefinitions_, iter)
     {
-        const interfaceEntry& ifentry = iter.object();
+        const interfaceEntry& ifentry = iter.val();
 
         labelPair patchPair
         (
@@ -2366,7 +2366,7 @@ void Foam::ccm::reader::reorderMesh()
 
     forAllIters(monitoringSets_, iter)
     {
-        labelList& lst = iter.object();
+        labelList& lst = iter.val();
         inplaceRenumber(oldToNew, lst);
 
         // disallow monitoring on boundaries

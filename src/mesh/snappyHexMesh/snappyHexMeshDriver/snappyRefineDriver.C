@@ -2609,7 +2609,7 @@ void Foam::snappyRefineDriver::addFaceZones
         forAllConstIters(faceZoneToPatches, iter)
         {
             const word& fzName = iter.key();
-            const Pair<word>& patchNames = iter.object();
+            const Pair<word>& patchNames = iter.val();
 
             // Get any user-defined faceZone data
             surfaceZonesInfo::faceZoneType fzType;

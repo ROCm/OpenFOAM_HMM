@@ -257,7 +257,7 @@ void Foam::cuttingSurfaceBase::walkCellCuts
         // they can also be used to determine the correct face orientation.
 
         const edge refEdge = localFaces.begin().key();
-        label nextFace = localFaces.begin().object()[0];
+        label nextFace = localFaces.begin().val()[0];
 
         DebugInfo
             << "search face " <<  nextFace << " IN " <<  localEdges << endl;
@@ -274,23 +274,23 @@ void Foam::cuttingSurfaceBase::walkCellCuts
             forAllIters(localFaces, iter)
             {
                 DebugInfo
-                    << "lookup " << nextFace << " in " << iter.object() << nl;
+                    << "lookup " << nextFace << " in " << iter.val() << nl;
 
                 // Find local index (0,1) or -1 on failure
-                const label got = iter.object().which(nextFace);
+                const label got = iter.val().which(nextFace);
 
                 if (got != -1)
                 {
                     ok = true;
 
                     // The other face
-                    nextFace = iter.object()[(got?0:1)];
+                    nextFace = iter.val()[(got?0:1)];
 
                     // The edge -> cut point
                     localFaceLoop.append(localEdges[iter.key()]);
 
                     DebugInfo
-                        <<" faces " << iter.object()
+                        <<" faces " << iter.val()
                         << " point " << localFaceLoop.last()
                         << " edge=" << iter.key() << " nextFace=" << nextFace
                         << nl;

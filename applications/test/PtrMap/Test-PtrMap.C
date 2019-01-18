@@ -38,7 +38,7 @@ void printTable(const PtrMap<T>& table)
 
     forAllConstIters(table, iter)
     {
-        const T* ptr = iter.object();
+        const T* ptr = iter.val();
         Info<< iter.key() << " = ";
         if (ptr)
         {

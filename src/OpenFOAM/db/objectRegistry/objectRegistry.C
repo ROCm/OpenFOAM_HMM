@@ -90,9 +90,9 @@ Foam::objectRegistry::~objectRegistry()
 
     for (iterator iter = begin(); iter != end(); ++iter)
     {
-        if (iter.object()->ownedByRegistry())
+        if (iter.val()->ownedByRegistry())
         {
-            myObjects[nObjects++] = iter.object();
+            myObjects[nObjects++] = iter.val();
         }
     }
 

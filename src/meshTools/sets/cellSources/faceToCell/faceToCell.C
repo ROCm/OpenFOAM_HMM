@@ -120,7 +120,7 @@ void Foam::faceToCell::combine
         forAllConstIters(facesPerCell, iter)
         {
             const label celli = iter.key();
-            const label count = iter.object();
+            const label count = iter.val();
 
             if (count == mesh_.cells()[celli].size())
             {

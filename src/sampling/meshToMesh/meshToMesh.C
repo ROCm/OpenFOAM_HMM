@@ -800,7 +800,7 @@ void Foam::meshToMesh::constructFromCuttingPatches
     forAllConstIters(patchMap, iter)
     {
         const word& tgtPatchName = iter.key();
-        const word& srcPatchName = iter.object();
+        const word& srcPatchName = iter.val();
 
         const polyPatch& srcPatch = srcBm[srcPatchName];
 

@@ -142,7 +142,7 @@ void Foam::radiation::laserDTRM::initialiseReflection()
                 key,
                 reflectionModel::New
                 (
-                    iter.object(),
+                    iter.val(),
                     mesh_
                 )
             );

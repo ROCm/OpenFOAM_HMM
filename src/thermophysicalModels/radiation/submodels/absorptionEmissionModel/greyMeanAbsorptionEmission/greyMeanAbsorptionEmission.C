@@ -123,7 +123,7 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
     forAllConstIters(speciesNames_, iter)
     {
         const word& specieName = iter.key();
-        const label index = iter.object();
+        const label index = iter.val();
 
         volScalarField* fldPtr = mesh.getObjectPtr<volScalarField>(specieName);
 

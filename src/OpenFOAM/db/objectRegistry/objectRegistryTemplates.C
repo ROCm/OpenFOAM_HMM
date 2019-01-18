@@ -42,12 +42,12 @@ Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classesImpl
     // Summary (key,val) = (class-name, object-names)
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if (matchName(obj->name()))
         {
             // Create entry (if needed) and insert
-            summary(iter.object()->type()).insert(obj->name());
+            summary(iter.val()->type()).insert(obj->name());
         }
     }
 
@@ -68,7 +68,7 @@ Foam::label Foam::objectRegistry::countImpl
 
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if (matchClass(obj->type()) && matchName(obj->name()))
         {
@@ -92,7 +92,7 @@ Foam::label Foam::objectRegistry::countTypeImpl
 
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if
         (
@@ -123,7 +123,7 @@ Foam::wordList Foam::objectRegistry::namesImpl
     label count=0;
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if (matchClass(obj->type()) && matchName(obj->name()))
         {
@@ -157,7 +157,7 @@ Foam::wordList Foam::objectRegistry::namesTypeImpl
     label count = 0;
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if
         (
@@ -235,7 +235,7 @@ Foam::label Foam::objectRegistry::count
 
     forAllConstIters(*this, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if
         (
@@ -337,7 +337,7 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 
     forAllConstIters(*this, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
         {
@@ -359,7 +359,7 @@ Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
 
     forAllIters(*this, iter)
     {
-        regIOobject* obj = iter.object();
+        regIOobject* obj = iter.val();
 
         if (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
         {

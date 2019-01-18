@@ -112,7 +112,7 @@ int main()
     Info<< "\nerase table2 by iterator" << nl;
     forAllIters(table2, iter)
     {
-        Info<< "erasing " << iter.key() << " => " << iter.object() << " ... ";
+        Info<< "erasing " << iter.key() << " => " << iter.val() << " ... ";
         table2.erase(iter);
         Info<< "erased" << endl;
     }

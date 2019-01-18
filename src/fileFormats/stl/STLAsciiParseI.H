@@ -35,10 +35,10 @@ inline void Foam::Detail::STLAsciiParse::beginSolid(word solidName)
     auto iter = nameLookup_.cfind(solidName);
     if (iter.found())
     {
-        if (groupId_ != iter.object())
+        if (groupId_ != iter.val())
         {
             sorted_ = false;  // Group appeared out of order
-            groupId_ = iter.object();
+            groupId_ = iter.val();
         }
     }
     else

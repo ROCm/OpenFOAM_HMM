@@ -114,10 +114,10 @@ bool Foam::fileFormats::TRIReader::readFile(const fileName& filename)
         const auto iter = lookup.cfind(name);
         if (iter.found())
         {
-            if (zoneI != iter.object())
+            if (zoneI != iter.val())
             {
                 sorted_ = false; // Group appeared out of order
-                zoneI = iter.object();
+                zoneI = iter.val();
             }
         }
         else

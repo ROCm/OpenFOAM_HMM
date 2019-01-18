@@ -39,7 +39,7 @@ void Foam::functionObjects::nearWallFields::createFields
 
     forAllConstIters(flds, iter)
     {
-        const VolFieldType& fld = *(iter.object());
+        const VolFieldType& fld = *(iter.val());
 
         if (fieldMap_.found(fld.name()))
         {

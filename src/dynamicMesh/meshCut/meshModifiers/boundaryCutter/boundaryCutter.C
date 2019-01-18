@@ -42,9 +42,6 @@ defineTypeNameAndDebug(boundaryCutter, 0);
 }
 
 
-// * * * * * * * * * * * * * Private Static Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::boundaryCutter::getFaceInfo
@@ -874,10 +871,10 @@ void Foam::boundaryCutter::updateMesh(const mapPolyMesh& morphMap)
         forAllConstIters(edgeAddedPoints_, iter)
         {
             const edge& e = iter.key();
+            const labelList& addedPoints = iter.val();
 
-            label newStart = morphMap.reversePointMap()[e.start()];
-
-            label newEnd = morphMap.reversePointMap()[e.end()];
+            const label newStart = morphMap.reversePointMap()[e.start()];
+            const label newEnd = morphMap.reversePointMap()[e.end()];
 
             if (newStart >= 0 && newEnd >= 0)
             {
