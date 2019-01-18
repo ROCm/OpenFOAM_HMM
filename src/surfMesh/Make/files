@@ -1,5 +1,5 @@
-surfZone/surfZone/surfZone.C
-surfZone/surfZone/surfZoneIOList.C
+surfZone/surfZone.C
+surfZone/surfZoneIOList.C
 
 MeshedSurfaceAllocator/MeshedSurfaceIOAllocator.C
 
