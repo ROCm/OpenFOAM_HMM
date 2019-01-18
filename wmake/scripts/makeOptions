@@ -40,7 +40,9 @@ fi
 
 [ -d Make ] || mkdir Make
 rm -f Make/options
+
 #------------------------------------------------------------------------------
+
 echo "Creating Make/options"
 
 echo 'EXE_INC = \

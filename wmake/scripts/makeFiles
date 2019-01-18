@@ -31,7 +31,7 @@
 #     Usage : makeFiles
 #
 #------------------------------------------------------------------------------
-dirToString="$WM_DIR/platforms/$WM_ARCH$WM_COMPILER"/dirToString
+dirToString="${WM_DIR:-$WM_PROJECT_DIR/wmake}/platforms/$WM_ARCH$WM_COMPILER/dirToString"
 
 if [ -r Make/files ]
 then
@@ -46,8 +46,10 @@ fi
 
 [ -d Make ] || mkdir Make
 rm -f Make/files
+
 #------------------------------------------------------------------------------
-echo "Creating Make/files"
+
+echo "Creating Make/files ..."
 
 for dir in $(find . -mindepth 1 -type d -print)
 do
@@ -68,7 +70,7 @@ do
 
     if [ -n "$pathName" ]
     then
-        echo '$('$pathName')/'"${file##*/}"
+        echo '$('"$pathName"')/'"${file##*/}"
     else
         echo "${file##*/}"
     fi

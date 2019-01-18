@@ -91,7 +91,7 @@ shift 2
 
 if [ "${printOpt:-false}" = true ]
 then
-    cat $Template$subType$Type
+    cat "$Template$subType$Type"
 else
 
     fileName="$className$Type"
@@ -106,11 +106,11 @@ else
     # process class name
     sed -e "s/CLASSNAME/$className/g" \
         -e "s/YEAR/$(date +%Y)/g" \
-        $Template$subType$Type > $fileName
+        "$Template$subType$Type" > "$fileName"
 
     if [ "$subType" = App -a ! -d Make ]
     then
-        wmakeFilesAndOptions
+        "${WM_DIR:-$WM_PROJECT_DIR/wmake}/wmakeFilesAndOptions"
     fi
 fi
 
