@@ -392,37 +392,6 @@ void checkZoneInside
 }
 
 
-// To combineReduce a labelList. Filters out duplicates.
-class uniqueEqOp
-{
-
-public:
-
-    void operator()(labelList& x, const labelList& y) const
-    {
-        if (x.empty())
-        {
-            if (y.size())
-            {
-                x = y;
-            }
-        }
-        else
-        {
-            forAll(y, yi)
-            {
-                if (!x.found(y[yi]))
-                {
-                    label sz = x.size();
-                    x.setSize(sz+1);
-                    x[sz] = y[yi];
-                }
-            }
-        }
-    }
-};
-
-
 // Calculate global pp faces per pp edge.
 labelListList globalEdgeFaces
 (
@@ -449,7 +418,7 @@ labelListList globalEdgeFaces
         mesh,
         ppMeshEdges,
         globalEdgeFaces,
-        uniqueEqOp(),
+        ListOps::uniqueEqOp<label>(),
         labelList()             // null value
     );
 

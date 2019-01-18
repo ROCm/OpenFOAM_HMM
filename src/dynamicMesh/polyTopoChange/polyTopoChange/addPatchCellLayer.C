@@ -657,7 +657,7 @@ Foam::labelListList Foam::addPatchCellLayer::globalEdgeFaces
     (
         mesh,
         globalEdgeFaces,
-        uniqueEqOp(),
+        ListOps::uniqueEqOp<label>(),
         labelList()             // null value
     );
 
