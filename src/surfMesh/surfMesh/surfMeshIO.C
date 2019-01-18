@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,12 +31,10 @@ License
 void Foam::surfMesh::setInstance
 (
     const fileName& inst,
-    IOobject::writeOption wOpt)
+    IOobject::writeOption wOpt
+)
 {
-    if (debug)
-    {
-        InfoInFunction << "Resetting file instance to " << inst << endl;
-    }
+    DebugInFunction << "Resetting file instance to " << inst << endl;
 
     instance() = inst;
     Allocator::setInstance(inst);
@@ -54,30 +52,23 @@ void Foam::surfMesh::setWriteOption(IOobject::writeOption wOpt)
 
 Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
 {
-    if (debug)
-    {
-        InfoInFunction << "Updating mesh based on saved data." << endl;
-    }
+    DebugInFunction << "Updating mesh based on saved data." << endl;
 
     // Find point and face instances
     fileName pointsInst(time().findInstance(meshDir(), "points"));
     fileName facesInst(time().findInstance(meshDir(), "faces"));
 
-    if (debug)
-    {
-        Info<< "Points instance: old = " << pointsInstance()
-            << " new = " << pointsInst << nl
-            << "Faces instance: old = " << facesInstance()
-            << " new = " << facesInst << endl;
-    }
+    DebugInFunction
+        << "Points instance: old = " << pointsInstance()
+        << " new = " << pointsInst << nl
+        << "Faces instance: old = " << facesInstance()
+        << " new = " << facesInst << endl;
 
     if (facesInst != facesInstance())
     {
         // Topological change
-        if (debug)
-        {
-            Info<< "Topological change" << endl;
-        }
+        DebugInfo
+            << "Topological change" << endl;
 
         clearOut();
 
@@ -167,10 +158,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
     else if (pointsInst != pointsInstance())
     {
         // Points moved
-        if (debug)
-        {
-            Info<< "Point motion" << endl;
-        }
+        DebugInfo << "Point motion" << endl;
 
         clearOut();
         storedIOPoints().instance() = pointsInst;
@@ -193,10 +181,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
     }
     else
     {
-        if (debug)
-        {
-            Info<< "No change" << endl;
-        }
+        DebugInfo << "No change" << endl;
     }
 
     return surfMesh::UNCHANGED;

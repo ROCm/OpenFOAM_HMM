@@ -50,7 +50,7 @@ Foam::surfaceRegistry::surfaceRegistry
     (
         IOobject
         (
-            ( surfName.size() ? surfName : defaultName ),
+            (surfName.size() ? surfName : defaultName),
             obr.time().timeName(),
             prefix,
             obr,

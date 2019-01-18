@@ -56,7 +56,6 @@ Foam::surfMeshSample::getOrCreateSurfMesh() const
             meshedSurface(),    // Create as empty surface
             name()
         );
-        ptr->setWriteOption(IOobject::NO_WRITE);
 
         mesh().objectRegistry::store(ptr);
     }

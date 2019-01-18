@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ License
 
 namespace Foam
 {
-  defineTypeNameAndDebug(surfMesh, 0);
+    defineTypeNameAndDebug(surfMesh, 0);
 }
 
 Foam::word Foam::surfMesh::meshSubDir = "surfMesh";
@@ -56,8 +56,8 @@ Foam::word Foam::surfMesh::meshSubDir = "surfMesh";
 //         zoneName = "zone0";
 //     }
 //
-//     // set single default zone
-//     zones.setSize(1);
+//     // Set single default zone
+//     zones.resize(1);
 //     zones[0] = surfZone
 //     (
 //         zoneName,
@@ -130,7 +130,7 @@ Foam::surfMesh::surfMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         IOobject
         (
@@ -139,7 +139,7 @@ Foam::surfMesh::surfMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         IOobject
         (
@@ -148,21 +148,18 @@ Foam::surfMesh::surfMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         )
     ),
     MeshReference(this->storedIOFaces(), this->storedIOPoints())
 {
-    if (debug)
-    {
-        Info<<"IOobject: " << io.path() << nl
-            <<" name: " << io.name()
-            <<" instance: " << io.instance()
-            <<" local: " << io.local()
-            <<" dbDir: " << io.db().dbDir() << endl;
-        Info<<"creating surfMesh at instance " << instance() << endl;
-        Info<<"timeName: " << instance() << endl;
-    }
+    DebugInfo
+        <<"IOobject: " << io.path() << nl
+        <<"  name: " << io.name()
+        <<"  instance: " << io.instance()
+        <<"  local: " << io.local()
+        <<"  dbDir: " << io.db().dbDir() << nl
+        <<"creating surfMesh at instance " << instance() << endl;
 
     copyContents(surf);
 }
@@ -184,8 +181,8 @@ Foam::surfMesh::surfMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.readOpt(),
+            io.writeOpt()
         ),
         IOobject
         (
@@ -193,8 +190,8 @@ Foam::surfMesh::surfMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.readOpt(),
+            io.writeOpt()
         ),
         IOobject
         (
@@ -202,22 +199,20 @@ Foam::surfMesh::surfMesh
             instance(),
             meshSubDir,
             *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.readOpt(),
+            io.writeOpt()
         )
     ),
     MeshReference(this->storedIOFaces(), this->storedIOPoints())
 {
-    if (debug)
-    {
-        Info<<"IOobject: " << io.path() << nl
-            <<" name: " << io.name()
-            <<" instance: " << io.instance()
-            <<" local: " << io.local()
-            <<" dbDir: " << io.db().dbDir() << endl;
-        Info<<"creating surfMesh at instance " << instance() << endl;
-        Info<<"timeName: " << instance() << endl;
-    }
+    DebugInfo
+        <<"IOobject: " << io.path() << nl
+        <<" name: " << io.name()
+        <<" instance: " << io.instance()
+        <<" local: " << io.local()
+        <<" dbDir: " << io.db().dbDir() << nl
+        <<"creating surfMesh at instance " << instance() << nl
+        <<"timeName: " << instance() << endl;
 
     transfer(surf);
 }
@@ -434,6 +429,7 @@ void Foam::surfMesh::removeFiles(const fileName& instanceDir) const
     rm(meshFilesPath/"faces");
     rm(meshFilesPath/"surfZones");
 }
+
 
 void Foam::surfMesh::removeFiles() const
 {
