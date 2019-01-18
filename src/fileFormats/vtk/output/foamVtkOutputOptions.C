@@ -25,7 +25,6 @@ License
 
 #include "foamVtkOutputOptions.H"
 
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::vtk::outputOptions&

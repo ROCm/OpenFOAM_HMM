@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ Description
 
 SourceFiles
     foamVtkOutputOptions.C
+    foamVtkOutputOptionsI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,7 +52,7 @@ namespace vtk
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class outputOptions Declaration
+                     Class vtk::outputOptions Declaration
 \*---------------------------------------------------------------------------*/
 
 class outputOptions
@@ -79,9 +80,12 @@ public:
         //- Construct null - XML insitu ASCII format with default precision
         inline outputOptions();
 
-        //- Construct with specified format.
-        //  This constructor should remain non-explicit.
+        //- Construct with specified format and default (ASCII) precision
+        //  \note This constructor should remain non-explicit.
         inline outputOptions(enum formatType fmtType);
+
+        //- Construct with specified format and (ASCII) write precision
+        inline outputOptions(enum formatType fmtType, unsigned prec);
 
 
     // Selectors
