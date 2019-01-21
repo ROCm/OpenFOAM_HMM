@@ -40,7 +40,7 @@ no_hypre()
 }
 
 
-# Reset variables
+# Report
 echo_hypre()
 {
     echo "hypre=${HAVE_HYPRE:-false}"

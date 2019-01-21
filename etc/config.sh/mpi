@@ -59,7 +59,7 @@ SYSTEMOPENMPI)
     ;;
 
 OPENMPI)
-    export FOAM_MPI=openmpi-1.10.4
+    export FOAM_MPI=openmpi-1.10.7
     _foamEtc -config  openmpi                   # <- Adjustments (optional)
 
     # Respect MPI_ARCH_PATH if set to a valid directory (ie, from user adjustments)

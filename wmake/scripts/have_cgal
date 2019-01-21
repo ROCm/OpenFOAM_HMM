@@ -40,7 +40,7 @@ no_cgal()
 }
 
 
-# Reset variables
+# Report
 echo_cgal()
 {
     echo "cgal=${HAVE_CGAL:-false}"
