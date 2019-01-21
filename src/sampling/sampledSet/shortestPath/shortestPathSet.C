@@ -218,7 +218,7 @@ void Foam::shortestPathSet::calculateDistance
             scalarField pfld(fld.boundaryField()[patchi].size());
             forAll(pfld, i)
             {
-                pfld[i] = 1.0*allFaceInfo[pp.start()+i].distance();
+                pfld[i] = 1.0*p[i].distance();
             }
             fld.boundaryFieldRef()[patchi] == pfld;
         }
