@@ -33,15 +33,20 @@ template<class Type>
 void Foam::functionObjects::fileFieldSelection::addFromFile
 (
     const IOobjectList& allFileObjects,
-     DynamicList<fieldInfo>& set
+    DynamicList<fieldInfo>& set
 ) const
 {
     for (const fieldInfo& fi : *this)
     {
         const wordList names(allFileObjects.names(Type::typeName, fi.name()));
-        for (const word& name : names)
+        if (names.size())
         {
-            set.append(fieldInfo(wordRe(name)));
+            for (const word& name : names)
+            {
+                set.append(fieldInfo(wordRe(name)));
+            }
+
+            fi.found() = true;
         }
     }
 }

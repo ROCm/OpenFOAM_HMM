@@ -131,8 +131,11 @@ public:
         //- Clear the current selection
         virtual void clearSelection();
 
-        //- Update the selection using current contents of obr_
+        //- Update the selection
         virtual bool updateSelection();
+
+        //- Check that all requested fielda have been found
+        virtual bool checkSelection();
 };
 
 

@@ -28,14 +28,14 @@ Description
     Helper class to manage solver field selections
 
 SourceFiles
-    volFieldSelection.C
+    solverFieldSelection.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef functionObjects_solverFieldSelection_H
 #define functionObjects_solverFieldSelection_H
 
-#include "volFieldSelection.H"
+#include "fieldSelection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +50,7 @@ namespace functionObjects
 
 class solverFieldSelection
 :
-    public volFieldSelection
+    public fieldSelection
 {
 private:
 

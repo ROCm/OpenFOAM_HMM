@@ -70,8 +70,8 @@ operatingModeNames
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::runTimeControls::equationInitialResidualCondition::
-equationInitialResidualCondition
+Foam::functionObjects::runTimeControls::
+equationInitialResidualCondition::equationInitialResidualCondition
 (
     const word& name,
     const objectRegistry& obr,
@@ -130,7 +130,6 @@ equationInitialResidualCondition::apply()
     forAll(selection, fieldi)
     {
         const auto& fieldInfo = selection[fieldi];
-
         const word& fieldName = fieldInfo.name();
 
         if (solverDict.found(fieldName))

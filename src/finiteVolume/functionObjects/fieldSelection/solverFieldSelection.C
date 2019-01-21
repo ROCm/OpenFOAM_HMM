@@ -36,7 +36,7 @@ Foam::functionObjects::solverFieldSelection::solverFieldSelection
     const bool includeComponents
 )
 :
-    volFieldSelection(obr, includeComponents)
+    fieldSelection(obr, includeComponents)
 {
     if (!isA<fvMesh>(obr))
     {
@@ -53,26 +53,36 @@ bool Foam::functionObjects::solverFieldSelection::updateSelection()
 {
     List<fieldInfo> oldSet(std::move(selection_));
 
-    DynamicList<fieldInfo> volFields;
-    addRegisteredGeoFields<fvPatchField, volMesh>(volFields);
-
     DynamicList<fieldInfo> newSelection(oldSet.size());
 
     const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
 
     const dictionary& solverDict = mesh.solverPerformanceDict();
 
-    for (const fieldInfo& fi : volFields)
-    {
-        const wordRe& name = fi.name();
+    const wordList solvedFieldNames(solverDict.sortedToc());
 
-        if (solverDict.found(name))
+    for (const fieldInfo& fi : *this)
+    {
+        for (const word& solvedField : solvedFieldNames)
         {
-            newSelection.append(fi);
+            if (fi.name().match(solvedField))
+            {
+                newSelection.append
+                (
+                    fieldInfo(wordRe(solvedField), fi.component())
+                );
+                fi.found() = true;
+            }
         }
     }
 
     selection_.transfer(newSelection);
+
+    if (!fieldSelection::checkSelection())
+    {
+        WarningInFunction
+            << "Valid solver fields are: " << solvedFieldNames;
+    }
 
     return selection_ != oldSet;
 }

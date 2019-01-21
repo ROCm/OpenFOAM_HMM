@@ -33,8 +33,9 @@ Description
 #ifndef functionObjects_fieldInfo_H
 #define functionObjects_fieldInfo_H
 
-#include "label.H"
 #include "wordRe.H"
+#include "label.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,6 +62,9 @@ class fieldInfo
         //- Field component
         label component_;
 
+        //- Found
+        mutable Switch found_;
+
 
 public:
 
@@ -70,7 +74,8 @@ public:
         fieldInfo()
         :
             name_(word::null),
-            component_(-1)
+            component_(-1),
+            found_(false)
         {}
 
 
@@ -78,14 +83,16 @@ public:
         fieldInfo(const wordRe& name, const label component = -1)
         :
             name_(name),
-            component_(component)
+            component_(component),
+            found_(false)
         {}
 
         //- Construct from stream
         fieldInfo(Istream& is)
         :
             name_(is),
-            component_(readLabel(is))
+            component_(readLabel(is)),
+            found_(false)
         {}
 
 
@@ -105,9 +112,17 @@ public:
             return component_;
         }
 
+        Switch& found() const
+        {
+            return found_;
+        }
+
         friend bool operator==(const fieldInfo& a, const fieldInfo& b)
         {
-            return a.name_ == b.name_ && a.component_ == b.component_;
+            return
+                a.name_ == b.name_
+             && a.component_ == b.component_
+             && a.found_ == b.found_;
         }
 
         friend bool operator!=(const fieldInfo& a, const fieldInfo& b)
@@ -120,12 +135,12 @@ public:
 
         friend Istream& operator>>(Istream& is, fieldInfo& fi)
         {
-            is  >> fi.name_ >> fi.component_;
+            is  >> fi.name_ >> fi.component_ >> fi.found_;
             return is;
         }
         friend Ostream& operator<<(Ostream& os, const fieldInfo& fi)
         {
-            os  << fi.name_ << ' ' << fi.component_;
+            os  << fi.name_ << ' ' << fi.component_ << ' ' << fi.found_;
             return os;
         }
 };

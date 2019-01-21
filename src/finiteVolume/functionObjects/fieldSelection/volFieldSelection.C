@@ -51,6 +51,8 @@ bool Foam::functionObjects::volFieldSelection::updateSelection()
 
     selection_.transfer(newSet);
 
+    (void)fieldSelection::checkSelection();
+
     return selection_ != oldSet;
 }
 

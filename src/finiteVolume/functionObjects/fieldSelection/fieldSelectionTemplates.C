@@ -35,11 +35,15 @@ void Foam::functionObjects::fieldSelection::addRegistered
 {
     for (const fieldInfo& fi : *this)
     {
-        set.insert(obr_.names<Type>(name));
         wordList names(obr_.names<Type>(fi.name()));
-        for (const word& name : names)
+        if (names.size())
         {
-            set.append(fieldInfo(wordRe(name), fi.component()));
+            for (const word& name : names)
+            {
+                set.append(fieldInfo(wordRe(name), fi.component()));
+            }
+
+            fi.found() = true;
         }
     }
 }

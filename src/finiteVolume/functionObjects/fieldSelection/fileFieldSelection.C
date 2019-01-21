@@ -100,6 +100,8 @@ bool Foam::functionObjects::fileFieldSelection::updateSelection()
 
     selection_.transfer(newSelection);
 
+    (void)fieldSelection::checkSelection();
+
     return selection_ != oldSet;
 }
 

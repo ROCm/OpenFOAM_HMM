@@ -84,7 +84,7 @@ bool Foam::functionObjects::fieldSelection::resetFieldFilters
                 FatalErrorInFunction
                     << "Invalid field component specification for "
                     << name << nl
-                    << "Field should be expressed as <field>.component(i)"
+                    << ". Field should be expressed as <field>.component(i)"
                     << exit(FatalError);
             }
 
@@ -151,6 +151,25 @@ void Foam::functionObjects::fieldSelection::clearSelection()
 bool Foam::functionObjects::fieldSelection::updateSelection()
 {
     return false;
+}
+
+
+bool Foam::functionObjects::fieldSelection::checkSelection()
+{
+    bool ok = true;
+    for (const fieldInfo& fi : *this)
+    {
+        if (!fi.found())
+        {
+            WarningInFunction
+                << "Field " << fi.name() << " not found"
+                << endl;
+
+            ok = false;
+        }
+    }
+
+    return ok;
 }
 
 
