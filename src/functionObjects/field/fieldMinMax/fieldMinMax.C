@@ -90,9 +90,8 @@ void Foam::functionObjects::fieldMinMax::writeFileHeader(Ostream& os)
     }
     else
     {
-        forAllConstIters(fieldSet_.selection(), iter)
+        for (const word& fieldName : fieldSet_.selectionNames())
         {
-            const word& fieldName = iter();
             writeTabbed(os, "min(" + fieldName + ')');
             writeTabbed(os, "max(" + fieldName + ')');
         }
@@ -153,7 +152,7 @@ bool Foam::functionObjects::fieldMinMax::write()
     if (!location_) writeTime(file());
     Log << type() << " " << name() <<  " write:" << nl;
 
-    for (const word& fieldName : fieldSet_.selection())
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
         calcMinMaxFields<scalar>(fieldName, mdCmpt);
         calcMinMaxFields<vector>(fieldName, mode_);

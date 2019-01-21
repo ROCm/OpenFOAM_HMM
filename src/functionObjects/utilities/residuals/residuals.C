@@ -64,7 +64,7 @@ void Foam::functionObjects::residuals::writeFileHeader(Ostream& os)
 
     writeCommented(os, "Time");
 
-    for (const word& fieldName : fieldSet_.selection())
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
         writeFileHeader<scalar>(os, fieldName);
         writeFileHeader<vector>(os, fieldName);
@@ -193,7 +193,7 @@ bool Foam::functionObjects::residuals::execute()
 
         if (writeFields_)
         {
-            for (const word& fieldName : fieldSet_.selection())
+            for (const word& fieldName : fieldSet_.selectionNames())
             {
                 initialiseField<scalar>(fieldName);
                 initialiseField<vector>(fieldName);
@@ -214,7 +214,7 @@ bool Foam::functionObjects::residuals::write()
 {
     writeTime(file());
 
-    for (const word& fieldName : fieldSet_.selection())
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
         writeResidual<scalar>(fieldName);
         writeResidual<vector>(fieldName);
