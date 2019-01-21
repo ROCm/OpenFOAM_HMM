@@ -131,8 +131,7 @@ public:
         //  New entries are initialized to nullptr, removed entries are deleted
         void resize(const label newLen);
 
-        //- Adjust size of PtrList.
-        //  New entries are initialized to nullptr, removed entries are deleted
+        //- Same as resize()
         inline void setSize(const label newLen);
 
         //- Append an element to the end of the list

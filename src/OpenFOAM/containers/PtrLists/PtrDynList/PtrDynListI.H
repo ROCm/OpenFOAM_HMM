@@ -243,9 +243,9 @@ inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::remove()
 
 
 template<class T, int SizeMin>
-inline bool Foam::PtrDynList<T, SizeMin>::set(const label i) const
+inline const T* Foam::PtrDynList<T, SizeMin>::set(const label i) const
 {
-    return (i >= 0 && i < PtrList<T>::size()) ? PtrList<T>::set(i) : false;
+    return (i >= 0 && i < PtrList<T>::size()) ? PtrList<T>::set(i) : nullptr;
 }
 
 

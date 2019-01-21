@@ -106,7 +106,7 @@ public:
         //- Alter the addressed list size.
         inline void resize(const label newLen);
 
-        //- Alter the addressed list size.
+        //- Same as resize()
         inline void setSize(const label newLen);
 
         //- Reserve allocation space for at least this size.
@@ -139,8 +139,9 @@ public:
         //- Remove and return the top element
         inline autoPtr<T> remove();
 
-        //- Return true if element is set (ie, not a nullptr)
-        inline bool set(const label i) const;
+        //- Return const pointer to element (if set) or nullptr.
+        //  The return value can be tested as a bool.
+        inline const T* set(const label i) const;
 
         //- Set element to given pointer and return old element (can be null)
         inline autoPtr<T> set(const label i, T* ptr);

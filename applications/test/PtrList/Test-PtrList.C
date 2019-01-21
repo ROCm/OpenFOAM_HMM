@@ -488,6 +488,33 @@ int main(int argc, char *argv[])
 
     report(Info, dynPlanes, true);
 
+    {
+        // No clone for plane - do manual copy
+        PtrList<plane> stdPlanes(dynPlanes.size());
+
+        forAll(dynPlanes, i)
+        {
+            const plane* pln = dynPlanes.set(i);
+            if (pln)
+            {
+                stdPlanes.set(i, new plane(*pln));
+            }
+        }
+
+        report(Info, stdPlanes);
+        printAddr(Info, stdPlanes);
+
+        stdPlanes.resize(stdPlanes.squeezeNull());
+
+        Info<<"After pruning nullptr entries" << endl;
+        printAddr(Info, stdPlanes);
+    }
+
+    dynPlanes.resize(dynPlanes.squeezeNull());
+
+    Info<<"After pruning nullptr entries" << endl;
+    report(Info, dynPlanes, true);
+
     Info<<"free()" << endl;
 
     dynPlanes.free();

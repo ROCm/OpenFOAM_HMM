@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,30 @@ Foam::UPtrList<T>::UPtrList(PtrList<T>& list)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T>
+Foam::label Foam::UPtrList<T>::squeezeNull()
+{
+    const label len = this->size();
+    label newLen = 0;
+
+    for (label i=0; i < len; ++i)
+    {
+        T* ptr = ptrs_[i];
+        if (ptr)
+        {
+            if (i != newLen)
+            {
+                ptrs_[newLen] = ptr;
+                ptrs_[i] = nullptr;
+            }
+            ++newLen;
+        }
+    }
+
+    return newLen;
+}
+
 
 template<class T>
 void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)

@@ -132,7 +132,7 @@ public:
         inline explicit UPtrList(UList<T>& list);
 
 
-    // Member functions
+    // Member Functions
 
     // Access
 
@@ -164,9 +164,12 @@ public:
         //  New entries are initialized to nullptr.
         inline void resize(const label newLen);
 
-        //- Reset size of list.
-        //  New entries are initialized to nullptr.
+        //- Same as resize()
         inline void setSize(const label newLen);
+
+        //- Squeeze out intermediate nullptr entries in the list of pointers
+        //  \return the number of non-null entries
+        label squeezeNull();
 
         //- Append an element to the end of the list
         inline void append(T* ptr);
