@@ -17,6 +17,7 @@ runTimeControl1
     satisfiedAction setTrigger;
     trigger         1;
 }
+
 runTimeControl2
 {
     type            runTimeControl;
@@ -33,3 +34,22 @@ runTimeControl2
     }
     satisfiedAction end;
 }
+
+/*
+    runTimeControl3
+    {
+        type            runTimeControl;
+        libs            ("libutilityFunctionObjects.so");
+        conditions
+        {
+            condition1
+            {
+                type            equationInitialResidual;
+                fields          (U.component(0));
+                value           1e-02;
+                mode            minimum;
+            }
+        }
+        satisfiedAction end;
+    }
+*/
