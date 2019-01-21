@@ -83,78 +83,91 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
     const dictionary& dict
 )
 {
-    fvMeshFunctionObject::read(dict);
-
-    const dictionary& conditionsDict = dict.subDict("conditions");
-    const wordList conditionNames(conditionsDict.toc());
-    conditions_.setSize(conditionNames.size());
-
-    label uniqueGroupi = 0;
-    forAll(conditionNames, conditioni)
+    if (functionObject::postProcess)
     {
-        const word& conditionName = conditionNames[conditioni];
-        const dictionary& dict = conditionsDict.subDict(conditionName);
-
-        conditions_.set
-        (
-            conditioni,
-            runTimeCondition::New(conditionName, obr_, dict, *this)
-        );
-
-        label groupi = conditions_[conditioni].groupID();
-
-        if (groupMap_.insert(groupi, uniqueGroupi))
-        {
-            ++uniqueGroupi;
-        }
-    }
-
-    dict.readIfPresent("nWriteStep", nWriteStep_);
-
-    // Check that some conditions are set
-    if (conditions_.empty())
-    {
-        Info<< type() << " " << name() << " output:" << nl
-            << "    No conditions present" << nl
+        Info<< "Deactivated " << name()
+            << " function object for post-processing"
             << endl;
+
+        return false;
     }
-    else
+
+
+    if (fvMeshFunctionObject::read(dict))
     {
-        // Check that at least one condition is active
-        bool check = false;
-        for (const auto& condition : conditions_)
+        const dictionary& conditionsDict = dict.subDict("conditions");
+        const wordList conditionNames(conditionsDict.toc());
+        conditions_.setSize(conditionNames.size());
+
+        label uniqueGroupi = 0;
+        forAll(conditionNames, conditioni)
         {
-            if (condition.active())
+            const word& conditionName = conditionNames[conditioni];
+            const dictionary& dict = conditionsDict.subDict(conditionName);
+
+            conditions_.set
+            (
+                conditioni,
+                runTimeCondition::New(conditionName, obr_, dict, *this)
+            );
+
+            label groupi = conditions_[conditioni].groupID();
+
+            if (groupMap_.insert(groupi, uniqueGroupi))
             {
-                check = true;
-                break;
+                ++uniqueGroupi;
             }
         }
 
-        if (!check)
+        dict.readIfPresent("nWriteStep", nWriteStep_);
+
+        // Check that some conditions are set
+        if (conditions_.empty())
         {
             Info<< type() << " " << name() << " output:" << nl
-                << "    All conditions are inactive" << nl
+                << "    No conditions present" << nl
                 << endl;
         }
+        else
+        {
+            // Check that at least one condition is active
+            bool check = false;
+            for (const auto& condition : conditions_)
+            {
+                if (condition.active())
+                {
+                    check = true;
+                    break;
+                }
+            }
+
+            if (!check)
+            {
+                Info<< type() << " " << name() << " output:" << nl
+                    << "    All conditions are inactive" << nl
+                    << endl;
+            }
+        }
+
+        // Set the action to perform when all conditions are satisfied
+        // - set to end fro backwards compatibility with v1806
+        satisfiedAction_ =
+            satisfiedActionNames.lookupOrDefault
+            (
+                "satisfiedAction",
+                dict,
+                satisfiedAction::END
+            );
+
+        if (satisfiedAction_ == satisfiedAction::SET_TRIGGER)
+        {
+            triggerIndex_ = readLabel(dict.lookup("trigger"));
+        }
+
+        return true;
     }
 
-    // Set the action to perform when all conditions are satisfied
-    // - set to end fro backwards compatibility with v1806
-    satisfiedAction_ =
-        satisfiedActionNames.lookupOrDefault
-        (
-            "satisfiedAction",
-            dict,
-            satisfiedAction::END
-        );
-
-    if (satisfiedAction_ == satisfiedAction::SET_TRIGGER)
-    {
-        triggerIndex_ = readLabel(dict.lookup("trigger"));
-    }
-
-    return true;
+    return false;
 }
 
 
