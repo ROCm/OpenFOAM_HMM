@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -674,6 +674,71 @@ void Foam::snappyLayerDriver::handleNonManifolds
 
     Info<< "Set displacement to zero for all " << nNonManif
         << " non-manifold points" << endl;
+
+
+
+    // 4. Check for extrusion of baffles i.e. all edges of a face having the
+    //    same two neighbouring faces (one of which is the current face).
+    //    Note: this is detected locally already before - this test is for the
+    //          extremely rare occurence where the baffle faces are on different
+    //          processors.
+    {
+        label nBaffleFaces = 0;
+
+        const labelListList& faceEdges = pp.faceEdges();
+        forAll(pp, facei)
+        {
+            const labelList& fEdges = faceEdges[facei];
+
+            const labelList& globFaces0 = edgeGlobalFaces[fEdges[0]];
+            if (globFaces0.size() == 2)
+            {
+                const edge e0(globFaces0[0], globFaces0[1]);
+                bool isBaffle = true;
+                for (label fp = 1; fp < fEdges.size(); fp++)
+                {
+                    const labelList& globFaces = edgeGlobalFaces[fEdges[fp]];
+                    if
+                    (
+                        (globFaces.size() != 2)
+                     || (edge(globFaces[0], globFaces[1]) != e0)
+                    )
+                    {
+                        isBaffle = false;
+                        break;
+                    }
+                }
+
+                if (isBaffle)
+                {
+                    bool unextrude = unmarkExtrusion
+                    (
+                        pp.localFaces()[facei],
+                        patchDisp,
+                        patchNLayers,
+                        extrudeStatus
+                    );
+                    if (unextrude)
+                    {
+                        //Pout<< "Detected extrusion of baffle face "
+                        //    << pp.faceCentres()[facei]
+                        //    << " since all edges have the same neighbours "
+                        //    << e0 << endl;
+
+                        nBaffleFaces++;
+                    }
+                }
+            }
+        }
+
+        reduce(nBaffleFaces, sumOp<label>());
+
+        if (nBaffleFaces)
+        {
+            Info<< "Set displacement to zero for all points on " << nBaffleFaces
+                << " baffle faces" << endl;
+        }
+    }
 }
 
 
