@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,10 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
 #include "Time.H"
+#include "volFields.H"
+
+#define SetResidual(Type)                                                     \
+    setResidual<Type>(mesh, solverDict, fieldName, component, canSet, residual);
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -76,12 +80,14 @@ equationInitialResidualCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    fieldNames_(dict.get<wordList>("fields")),
+    fieldSelection_(obr, true),
     value_(dict.get<scalar>("value")),
     timeStart_(dict.lookupOrDefault("timeStart", -GREAT)),
     mode_(operatingModeNames.get("mode", dict))
 {
-    if (fieldNames_.size())
+    fieldSelection_.read(dict);
+
+    if (fieldSelection_.size())
     {
         timeStart_ = obr.time().userTimeToTime(timeStart_);
     }
@@ -97,9 +103,11 @@ equationInitialResidualCondition
 
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
-bool Foam::functionObjects::runTimeControls::equationInitialResidualCondition::
-apply()
+bool Foam::functionObjects::runTimeControls::
+equationInitialResidualCondition::apply()
 {
+    fieldSelection_.updateSelection();
+
     bool satisfied = false;
 
     if (!active_)
@@ -116,16 +124,26 @@ apply()
     const fvMesh& mesh = refCast<const fvMesh>(obr_);
     const dictionary& solverDict = mesh.solverPerformanceDict();
 
-    List<scalar> result(fieldNames_.size(), -VGREAT);
+    const auto& selection = fieldSelection_.selection();
+    List<scalar> result(selection.size(), -VGREAT);
 
-    forAll(fieldNames_, fieldi)
+    forAll(selection, fieldi)
     {
-        const word& fieldName = fieldNames_[fieldi];
+        const auto& fieldInfo = selection[fieldi];
+
+        const word& fieldName = fieldInfo.name();
 
         if (solverDict.found(fieldName))
         {
-            const List<solverPerformance> sp(solverDict.lookup(fieldName));
-            const scalar residual = sp.first().initialResidual();
+            label component = fieldInfo.component();
+            scalar residual = VGREAT;
+            bool canSet = true;
+            SetResidual(scalar);
+            SetResidual(vector);
+            SetResidual(symmTensor);
+            SetResidual(sphericalTensor);
+            SetResidual(tensor);
+
             result[fieldi] = residual;
 
             switch (mode_)
@@ -164,7 +182,9 @@ apply()
         {
             WarningInFunction
                 << "Initial residual data not found for field "
-                << fieldNames_[i] << endl;
+                << selection[i].name()
+                << ".  Solver dictionary contains " << solverDict.sortedToc()
+                << endl;
         }
         else
         {
@@ -190,7 +210,7 @@ apply()
         {
             if (result[resulti] > 0)
             {
-                Log << "    field: " << fieldNames_[resulti]
+                Log << "    field: " << selection[resulti].name()
                     << ", residual: " << result[resulti] << nl;
             }
         }
@@ -201,8 +221,8 @@ apply()
 }
 
 
-void Foam::functionObjects::runTimeControls::equationInitialResidualCondition::
-write()
+void Foam::functionObjects::runTimeControls::
+equationInitialResidualCondition::write()
 {
     // do nothing
 }
