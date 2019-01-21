@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -236,6 +236,69 @@ Foam::functionObjects::stateFunctionObject::objectResultEntries
     entries.transfer(result);
 
     return entries;
+}
+
+void Foam::functionObjects::stateFunctionObject::writeResultEntries
+(
+    Ostream& os
+) const
+{
+    writeResultEntries(name(), os);
+}
+
+
+void Foam::functionObjects::stateFunctionObject::writeResultEntries
+(
+    const word& objectName,
+    Ostream& os
+) const
+{
+    const IOdictionary& stateDict = this->stateDict();
+
+    if (stateDict.found(resultsName_))
+    {
+        const dictionary& resultsDict = stateDict.subDict(resultsName_);
+
+        if (resultsDict.found(objectName))
+        {
+            const dictionary& objectDict = resultsDict.subDict(objectName);
+
+            for (const word& dataFormat : objectDict.sortedToc())
+            {
+                os  << "    Type: " << dataFormat << nl;
+
+                const dictionary& resultDict = objectDict.subDict(dataFormat);
+
+                for (const word& result : resultDict.sortedToc())
+                {
+                    os << "        " << result << nl;
+                }
+            }
+        }
+    }
+}
+
+
+void Foam::functionObjects::stateFunctionObject::writeAllResultEntries
+(
+    Ostream& os
+) const
+{
+    const IOdictionary& stateDict = this->stateDict();
+
+    if (stateDict.found(resultsName_))
+    {
+        const dictionary& resultsDict = stateDict.subDict(resultsName_);
+
+        const wordList allObjectNames = resultsDict.sortedToc();
+
+        for (const word& objectName : allObjectNames)
+        {
+            os  << "Object: " << objectName << endl;
+
+            writeResultEntries(objectName, os);
+        }
+    }
 }
 
 
