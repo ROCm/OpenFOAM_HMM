@@ -48,6 +48,9 @@ runTimeModifiable true;
 functions
 {
     #include "forceCoeffs"
+    #include "fieldAverage"
+    #include "runTimeControls"
 }
+
 
 // ************************************************************************* //
