@@ -22,74 +22,80 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::fileFieldSelection
+    Foam::functionObjects::fieldSelection
 
 Description
-    Helper class to manage file-based field selections
+    Helper class to manage field selections
+
+    The class holds a list of field name filters which are then applied to a
+    set of field objects (in derived classes) from which the resulting set is
+    available via the selection() function.  This returns a list of
+    (fieldName, component) objects, e.g. for U.component(0) this is (U, 0).
 
 SourceFiles
     fieldSelection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_fileFieldSelection_H
-#define functionObjects_fileFieldSelection_H
+#ifndef functionObjects_fieldSelection_H
+#define functionObjects_fieldSelection_H
 
-#include "fieldSelection.H"
+#include "fieldInfo.H"
+#include "DynamicList.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class IOobjectList;
+class dictionary;
+class objectRegistry;
 
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class fileFieldSelection Declaration
+                       Class fieldSelection Declaration
 \*---------------------------------------------------------------------------*/
 
-class fileFieldSelection
+class fieldSelection
 :
-    public fieldSelection
+    public List<fieldInfo>
 {
 private:
 
     // Private Member Functions
 
         //- No copy construct
-        fileFieldSelection(const fileFieldSelection&) = delete;
+        fieldSelection(const fieldSelection&) = delete;
 
 
 protected:
 
+    // Protected member data
+
+        //- Reference to the database
+        const objectRegistry& obr_;
+
+        //- Flag to indicate whether components are allowed
+        const bool includeComponents_;
+
+        //- Current field selection
+        List<fieldInfo> selection_;
+
+
     // Protected Member Functions
 
-        //- Add registered GeometricField types to selection
-        template<template<class> class PatchType, class MeshType>
-        void addGeoFieldTypes(DynamicList<fieldInfo>& set) const;
-
-        //- Add registered Internal types to selection
-        void addInternalFieldTypes(DynamicList<fieldInfo>& set) const;
-
-        //- Add registered uniform types to selection
-        void addUniformFieldTypes(DynamicList<fieldInfo>& set) const;
-
-        //- Add objects of a given type
+        //- Add registered objects of a given type
         template<class Type>
-        void addFromFile
-        (
-            const IOobjectList& allFileObjects,
-            DynamicList<fieldInfo>& set
-        ) const;
+        void addRegistered(DynamicList<fieldInfo>& set) const;
 
 
 public:
 
     //- Construct from object registry
-    fileFieldSelection
+    fieldSelection
     (
         const objectRegistry& obr,
         const bool includeComponents = false
@@ -97,13 +103,39 @@ public:
 
 
     //- Destructor
-    virtual ~fileFieldSelection() = default;
+    virtual ~fieldSelection() = default;
 
 
     // Member Functions
 
+        //- Return the cuurent filters
+        inline HashSet<wordRe> filters() const;
+
+        inline const List<fieldInfo>& selection() const;
+
+        //- Return the current field selection
+        inline wordHashSet selectionNames() const;
+
+        //- Reset the field filters to the given field names
+        virtual bool resetFieldFilters(const HashSet<wordRe>& names);
+
+        //- Reset the field filters to the given field name
+        virtual bool resetFieldFilters(const wordRe& name);
+
+        //- Read the fieldSelection data from dictionary
+        virtual bool read(const dictionary& dict);
+
+        //- Return whether the field names contain a pattern
+        virtual bool containsPattern() const;
+
+        //- Clear the current selection
+        virtual void clearSelection();
+
         //- Update the selection
         virtual bool updateSelection();
+
+        //- Check that all requested fielda have been found
+        virtual bool checkSelection();
 };
 
 
@@ -114,8 +146,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "fieldSelectionI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #ifdef NoRepository
-    #include "fileFieldSelectionTemplates.C"
+    #include "fieldSelectionTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,11 @@ Class
 Description
     Helper class to manage field selections
 
+    The class holds a list of field name filters which are then applied to a
+    set of field objects (in derived classes) from which the resulting set is
+    available via the selection() function.  This returns a list of
+    (fieldName, component) objects, e.g. for U.component(0) this is (U, 0).
+
 SourceFiles
     fieldSelection.C
 
@@ -35,8 +40,9 @@ SourceFiles
 #ifndef functionObjects_fieldSelection_H
 #define functionObjects_fieldSelection_H
 
+#include "fieldInfo.H"
+#include "DynamicList.H"
 #include "HashSet.H"
-#include "wordRe.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +61,7 @@ namespace functionObjects
 
 class fieldSelection
 :
-    public HashSet<wordRe>
+    public List<fieldInfo>
 {
 private:
 
@@ -72,35 +78,50 @@ protected:
         //- Reference to the database
         const objectRegistry& obr_;
 
+        //- Flag to indicate whether components are allowed
+        const bool includeComponents_;
+
         //- Current field selection
-        wordHashSet selection_;
+        List<fieldInfo> selection_;
 
 
     // Protected Member Functions
 
         //- Add registered objects of a given type
         template<class Type>
-        void addRegistered(wordHashSet& set) const;
+        void addRegistered(DynamicList<fieldInfo>& set) const;
 
 
 public:
 
     //- Construct from object registry
-    fieldSelection(const objectRegistry& obr);
+    fieldSelection
+    (
+        const objectRegistry& obr,
+        const bool includeComponents = false
+    );
 
 
     //- Destructor
-    virtual ~fieldSelection();
+    virtual ~fieldSelection() = default;
 
 
     // Member Functions
 
-        //- Return the current field selection
-        const wordHashSet& selection() const
-        {
-            return selection_;
-        }
+        //- Return the cuurent filters
+        inline HashSet<wordRe> filters() const;
 
+        inline const List<fieldInfo>& selection() const;
+
+        //- Return the current field selection
+        inline wordHashSet selectionNames() const;
+
+        //- Reset the field filters to the given field names
+        virtual bool resetFieldFilters(const HashSet<wordRe>& names);
+
+        //- Reset the field filters to the given field name
+        virtual bool resetFieldFilters(const wordRe& name);
+ 
         //- Read the fieldSelection data from dictionary
         virtual bool read(const dictionary& dict);
 
@@ -119,6 +140,10 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "fieldSelectionI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

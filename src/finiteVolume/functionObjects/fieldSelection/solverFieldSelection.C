@@ -32,10 +32,11 @@ License
 
 Foam::functionObjects::solverFieldSelection::solverFieldSelection
 (
-    const objectRegistry& obr
+    const objectRegistry& obr,
+    const bool includeComponents
 )
 :
-    volFieldSelection(obr)
+    volFieldSelection(obr, includeComponents)
 {
     if (!isA<fvMesh>(obr))
     {
@@ -46,33 +47,32 @@ Foam::functionObjects::solverFieldSelection::solverFieldSelection
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::solverFieldSelection::~solverFieldSelection()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::solverFieldSelection::updateSelection()
 {
-    wordHashSet oldSet;
-    oldSet.swap(selection_);
+    List<fieldInfo> oldSet(std::move(selection_));
 
-    wordHashSet volFields;
+    DynamicList<fieldInfo> volFields;
     addRegisteredGeoFields<fvPatchField, volMesh>(volFields);
+
+    DynamicList<fieldInfo> newSelection(oldSet.size());
 
     const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
 
-    const Foam::dictionary& solverDict = mesh.solverPerformanceDict();
+    const dictionary& solverDict = mesh.solverPerformanceDict();
 
-    for (const word& fieldName : volFields)
+    for (const fieldInfo& fi : volFields)
     {
-        if (solverDict.found(fieldName))
+        const wordRe& name = fi.name();
+
+        if (solverDict.found(name))
         {
-            selection_.insert(fieldName);
+            newSelection.append(fi);
         }
     }
+
+    selection_.transfer(newSelection);
 
     return selection_ != oldSet;
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2109 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,16 +31,11 @@ License
 
 Foam::functionObjects::volFieldSelection::volFieldSelection
 (
-    const objectRegistry& obr
+    const objectRegistry& obr,
+    const bool includeComponents
 )
 :
-    fieldSelection(obr)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::volFieldSelection::~volFieldSelection()
+    fieldSelection(obr, includeComponents)
 {}
 
 
@@ -48,11 +43,13 @@ Foam::functionObjects::volFieldSelection::~volFieldSelection()
 
 bool Foam::functionObjects::volFieldSelection::updateSelection()
 {
-    wordHashSet oldSet;
+    List<fieldInfo> oldSet(std::move(selection_));
 
-    oldSet.swap(selection_);
+    DynamicList<fieldInfo> newSet(oldSet.size());
 
-    addRegisteredGeoFields<fvPatchField, volMesh>(selection_);
+    addRegisteredGeoFields<fvPatchField, volMesh>(newSet);
+
+    selection_.transfer(newSet);
 
     return selection_ != oldSet;
 }

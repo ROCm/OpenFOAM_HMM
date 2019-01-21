@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,36 +31,108 @@ License
 
 Foam::functionObjects::fieldSelection::fieldSelection
 (
-    const objectRegistry& obr
+    const objectRegistry& obr,
+    const bool includeComponents
 )
 :
-    HashSet<wordRe>(),
+    List<fieldInfo>(),
     obr_(obr),
+    includeComponents_(includeComponents),
     selection_()
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+bool Foam::functionObjects::fieldSelection::resetFieldFilters
+(
+    const HashSet<wordRe>& names
+)
+{
+    static word cmptStr(".component(");
+    static string::size_type len(cmptStr.size());
 
-Foam::functionObjects::fieldSelection::~fieldSelection()
-{}
+    DynamicList<fieldInfo> nameAndComponent(names.size());
+
+    for (const wordRe& name : names)
+    {
+        string::size_type n = name.find(cmptStr);
+        if (n != string::npos)
+        {
+            // Field should be written <field>.component(i)
+
+            if (!includeComponents_)
+            {
+                FatalErrorInFunction
+                    << "Component specification not allowed for " << name
+                    << exit(FatalError);
+            }
+
+            if (name.isPattern())
+            {
+                FatalErrorInFunction
+                    << "Cannot use \".component option\" in combination with "
+                    << "wildcards for " << name
+                    << exit(FatalError);
+            }
+
+            word baseName = name.substr(0, n);
+
+            // Extract the component - number between ()'s
+            string::size_type closei = name.find(')', n);
+
+            if (closei == string::npos)
+            {
+                FatalErrorInFunction
+                    << "Invalid field component specification for "
+                    << name << nl
+                    << "Field should be expressed as <field>.component(i)"
+                    << exit(FatalError);
+            }
+
+            string::size_type cmptWidth = closei - n - len;
+
+            label component
+            (
+                readLabel(IStringStream(name.substr(n+len, cmptWidth))())
+            );
+
+            nameAndComponent.append(fieldInfo(wordRe(baseName), component));
+        }
+        else
+        {
+            nameAndComponent.append(fieldInfo(name));
+        }
+    }
+
+    this->transfer(nameAndComponent);
+
+    return true;
+}
+
+
+bool Foam::functionObjects::fieldSelection::resetFieldFilters
+(
+    const wordRe& name
+)
+{
+    return resetFieldFilters(HashSet<wordRe>({name}));
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::fieldSelection::read(const dictionary& dict)
 {
-    dict.readEntry("fields", *this);
+    HashSet<wordRe> fields(dict.lookup("fields"));
 
-    return true;
+    return resetFieldFilters(fields);
 }
 
 
 bool Foam::functionObjects::fieldSelection::containsPattern() const
 {
-    for (const wordRe& fieldName : *this)
+    for (const fieldInfo& fi : *this)
     {
-        if (fieldName.isPattern())
+        if (fi.name().isPattern())
         {
             return true;
         }

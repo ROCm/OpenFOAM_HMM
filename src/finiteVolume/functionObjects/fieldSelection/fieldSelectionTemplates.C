@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DynamicList.H"
 #include "objectRegistry.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
@@ -31,12 +30,17 @@ License
 template<class Type>
 void Foam::functionObjects::fieldSelection::addRegistered
 (
-    wordHashSet& set
+     DynamicList<fieldInfo>& set
 ) const
 {
-    for (const wordRe& name : *this)
+    for (const fieldInfo& fi : *this)
     {
         set.insert(obr_.names<Type>(name));
+        wordList names(obr_.names<Type>(fi.name()));
+        for (const word& name : names)
+        {
+            set.append(fieldInfo(wordRe(name), fi.component()));
+        }
     }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "volFields.H"
+inline Foam::HashSet<Foam::wordRe>
+Foam::functionObjects::fieldSelection::filters() const
+{
+    HashSet<wordRe> f;
+    for (const auto fieldInfo : *this)
+    {
+        f.insert(fieldInfo.name());
+    }
+
+    return f;
+}
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-template<template<class> class PatchType, class MeshType>
-void Foam::functionObjects::volFieldSelection::addRegisteredGeoFields
-(
-    DynamicList<fieldInfo>& set
-) const
+inline const Foam::List<Foam::functionObjects::fieldInfo>&
+Foam::functionObjects::fieldSelection::selection() const
 {
-    addRegistered<GeometricField<scalar, PatchType, MeshType>>(set);
-    addRegistered<GeometricField<vector, PatchType, MeshType>>(set);
-    addRegistered<GeometricField<sphericalTensor, PatchType, MeshType>>(set);
-    addRegistered<GeometricField<symmTensor, PatchType, MeshType>>(set);
-    addRegistered<GeometricField<tensor, PatchType, MeshType>>(set);
+    return selection_;
+}
+
+
+inline Foam::wordHashSet
+Foam::functionObjects::fieldSelection::selectionNames() const
+{
+    wordHashSet names;
+    for (const fieldInfo& fi : *this)
+    {
+        names.insert(fi.name());
+    }
+
+    return names;
 }
 
 

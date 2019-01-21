@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::functionObjects::volFieldSelection
 
 Description
-    Helper class to manage volume field selections
+    Helper class to manage solver field selections
 
 SourceFiles
     volFieldSelection.C
@@ -63,11 +63,15 @@ private:
 public:
 
     //- Construct from object registry
-    solverFieldSelection(const objectRegistry& obr);
+    solverFieldSelection
+    (
+        const objectRegistry& obr,
+        const bool includeComponents = false
+    );
 
 
     //- Destructor
-    virtual ~solverFieldSelection();
+    virtual ~solverFieldSelection() = default;
 
 
     // Member Functions

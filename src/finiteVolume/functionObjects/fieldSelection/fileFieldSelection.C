@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ License
 
 void Foam::functionObjects::fileFieldSelection::addInternalFieldTypes
 (
-    wordHashSet& set
+    DynamicList<fieldInfo>& set
 ) const
 {
     const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
@@ -52,7 +52,7 @@ void Foam::functionObjects::fileFieldSelection::addInternalFieldTypes
 
 void Foam::functionObjects::fileFieldSelection::addUniformFieldTypes
 (
-    wordHashSet& set
+    DynamicList<fieldInfo>& set
 ) const
 {
     const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
@@ -71,16 +71,11 @@ void Foam::functionObjects::fileFieldSelection::addUniformFieldTypes
 
 Foam::functionObjects::fileFieldSelection::fileFieldSelection
 (
-    const objectRegistry& obr
+    const objectRegistry& obr,
+    const bool includeComponents
 )
 :
-    fieldSelection(obr)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fileFieldSelection::~fileFieldSelection()
+    fieldSelection(obr, includeComponents)
 {}
 
 
@@ -88,19 +83,22 @@ Foam::functionObjects::fileFieldSelection::~fileFieldSelection()
 
 bool Foam::functionObjects::fileFieldSelection::updateSelection()
 {
-    wordHashSet oldSet;
-    oldSet.swap(selection_);
+    List<fieldInfo> oldSet(std::move(selection_));
+
+    DynamicList<fieldInfo> newSelection(oldSet.size());
 
     // Geometric fields
-    addGeoFieldTypes<fvPatchField, volMesh>(selection_);
-    addGeoFieldTypes<fvsPatchField, surfaceMesh>(selection_);
-    addGeoFieldTypes<pointPatchField, pointMesh>(selection_);
+    addGeoFieldTypes<fvPatchField, volMesh>(newSelection);
+    addGeoFieldTypes<fvsPatchField, surfaceMesh>(newSelection);
+    addGeoFieldTypes<pointPatchField, pointMesh>(newSelection);
 
     // Internal fields
-    addInternalFieldTypes(selection_);
+    addInternalFieldTypes(newSelection);
 
     // Uniform fields
-    addUniformFieldTypes(selection_);
+    addUniformFieldTypes(newSelection);
+
+    selection_.transfer(newSelection);
 
     return selection_ != oldSet;
 }

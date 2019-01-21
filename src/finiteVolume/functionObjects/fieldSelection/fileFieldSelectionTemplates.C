@@ -33,12 +33,16 @@ template<class Type>
 void Foam::functionObjects::fileFieldSelection::addFromFile
 (
     const IOobjectList& allFileObjects,
-    wordHashSet& set
+     DynamicList<fieldInfo>& set
 ) const
 {
-    for (const wordRe& fieldName : *this)
+    for (const fieldInfo& fi : *this)
     {
-        set.insert(allFileObjects.names(Type::typeName, fieldName));
+        const wordList names(allFileObjects.names(Type::typeName, fi.name()));
+        for (const word& name : names)
+        {
+            set.append(fieldInfo(wordRe(name)));
+        }
     }
 }
 
@@ -46,7 +50,7 @@ void Foam::functionObjects::fileFieldSelection::addFromFile
 template<template<class> class PatchType, class MeshType>
 void Foam::functionObjects::fileFieldSelection::addGeoFieldTypes
 (
-    wordHashSet& set
+    DynamicList<fieldInfo>& set
 ) const
 {
     const fvMesh& mesh = static_cast<const fvMesh&>(obr_);

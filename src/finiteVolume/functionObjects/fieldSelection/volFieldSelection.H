@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,17 +66,21 @@ protected:
 
         //- Add registered GeometricField types to selection
         template<template<class> class PatchType, class MeshType>
-        void addRegisteredGeoFields(wordHashSet& set) const;
+        void addRegisteredGeoFields(DynamicList<fieldInfo>& set) const;
 
 
 public:
 
     //- Construct from object registry
-    volFieldSelection(const objectRegistry& obr);
+    volFieldSelection
+    (
+        const objectRegistry& obr,
+        const bool includeComponents = false
+    );
 
 
     //- Destructor
-    virtual ~volFieldSelection();
+    virtual ~volFieldSelection() = default;
 
 
     // Member Functions
