@@ -36,7 +36,7 @@ void Foam::surfMesh::removeZones()
     DebugInFunction << "Removing surface zones." << endl;
 
     // Remove the surface zones
-    storedZones().clear();
+    surfZones_.clear();
 
     clearOut();
 }
@@ -54,7 +54,7 @@ void Foam::surfMesh::clearGeom()
 
 void Foam::surfMesh::clearAddressing()
 {
-    DebugInFunction << "clearing topology" << endl;
+    DebugInFunction << "Clearing topology" << endl;
 
     MeshReference::clearPatchMeshAddr();
 }

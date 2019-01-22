@@ -43,6 +43,7 @@ SourceFiles
 #include "MeshedSurfaceIOAllocator.H"
 #include "PrimitivePatch.H"
 #include "SubField.H"
+#include "surfZoneIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +65,7 @@ class surfMesh
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration defining the state of the mesh after a read update.
         //  Used for post-processing applications, where the mesh
@@ -94,6 +95,12 @@ private:
         MeshReference;
 
 
+    // Demand driven private data
+
+        //- The surface zones
+        surfZoneIOList surfZones_;
+
+
     // Private Member Functions
 
         //- No copy construct
@@ -119,10 +126,10 @@ protected:
             return Allocator::storedIOFaces();
         }
 
-        //- Non-const access to the zones
+        //- Non-const access to the surface zones
         surfZoneList& storedZones()
         {
-            return Allocator::storedIOZones();
+            return surfZones_;
         }
 
         //- Update references to storedFaces
@@ -236,9 +243,8 @@ public:
         //- Return surface zones
         virtual const surfZoneList& surfZones() const
         {
-            return Allocator::storedIOZones();
+            return surfZones_;
         }
-
 
         //- Return face area vectors (normals)
         inline const vectorField& Sf() const
@@ -264,7 +270,7 @@ public:
         //- Add surface zones, optionally validating the zone coverage
         void addZones
         (
-            const surfZoneList& srfZones,
+            const surfZoneList& zones,
             bool validate = true
         );
 

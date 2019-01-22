@@ -124,7 +124,7 @@ private:
         surfZoneList zones_;
 
 
-    // Private Member functions
+    // Private Member Functions
 
         //- Read/construct from Istream
         Istream& read(Istream& is);

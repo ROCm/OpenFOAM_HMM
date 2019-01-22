@@ -62,7 +62,7 @@ public:
         (
             const pointField& pts,
             const faceList& faces,
-            const labelList& ids = emptyLabelList
+            const labelList& ids = labelList::null()
         )
         :
             points_(std::cref<pointField>(pts)),
@@ -77,19 +77,19 @@ public:
 
     // Member Functions
 
-        //- Const access to (global) points used for the surface
+        //- The points used for the surface
         virtual const pointField& points() const
         {
             return points_.get();
         }
 
-        //- Const access to the surface faces
+        //- The faces used for the surface
         virtual const faceList& faces() const
         {
             return faces_.get();
         }
 
-        //- Const access to per-face zone/region information
+        //- Per-face zone/region information.
         virtual const labelList& zoneIds() const
         {
             return zoneIds_.get();

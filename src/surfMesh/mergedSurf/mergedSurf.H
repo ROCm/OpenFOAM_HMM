@@ -123,7 +123,7 @@ public:
             return faces_;
         }
 
-        //- Const access to per-face zone/region information
+        //- Per-face zone/region information
         virtual const labelList& zoneIds() const
         {
             return zones_;

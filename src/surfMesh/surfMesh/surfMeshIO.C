@@ -40,6 +40,7 @@ void Foam::surfMesh::setInstance
 
     instance() = inst;
     Allocator::setInstance(inst);
+    surfZones_.instance()  = inst;
 
     setWriteOption(wOpt);
 }
@@ -49,6 +50,7 @@ void Foam::surfMesh::setWriteOption(IOobject::writeOption wOpt)
 {
     writeOpt() = wOpt;
     Allocator::setWriteOption(wOpt);
+    surfZones_.writeOpt()  = wOpt;
 }
 
 
@@ -116,7 +118,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
                 facesInst,
                 meshSubDir,
                 *this,
-                IOobject::MUST_READ,
+                IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
                 false
             )
@@ -125,16 +127,15 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
         // Check that zone types and names are unchanged
         bool zonesChanged = false;
 
-        surfZoneList& zones = this->storedIOZones();
-        if (zones.size() != newZones.size())
+        if (surfZones_.size() != newZones.size())
         {
             zonesChanged = true;
         }
         else
         {
-            forAll(zones, zoneI)
+            forAll(surfZones_, zoneI)
             {
-                if (zones[zoneI].name() != newZones[zoneI].name())
+                if (surfZones_[zoneI].name() != newZones[zoneI].name())
                 {
                     zonesChanged = true;
                     break;
@@ -142,12 +143,12 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             }
         }
 
-        zones.transfer(newZones);
+        surfZones_.transfer(newZones);
 
         if (zonesChanged)
         {
             WarningInFunction
-                << "unexpected consequences.  Proceed with care." << endl;
+                << "Unexpected consequences.  Proceed with care." << endl;
 
             return surfMesh::TOPO_PATCH_CHANGE;
         }
@@ -155,7 +156,6 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
         {
             return surfMesh::TOPO_CHANGE;
         }
-
     }
     else if (pointsInst != pointsInstance())
     {
@@ -198,7 +198,14 @@ bool Foam::surfMesh::writeObject
     const bool valid
 ) const
 {
-    return Allocator::writeObject(fmt, ver, cmp, valid);
+    bool ok = Allocator::writeObject(fmt, ver, cmp, valid);
+
+    if (ok)
+    {
+        surfZones_.writeObject(fmt, ver, cmp, valid);
+    }
+
+    return ok;
 }
 
 
