@@ -16,11 +16,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+radiation       off;
 
-radiationModel  opaqueSolid;
+radiationModel  none;//opaqueSolid;
 
-absorptionEmissionModel multiBandSolidAbsorptionEmission;
+absorptionEmissionModel none;
 
 multiBandSolidAbsorptionEmissionCoeffs
 {

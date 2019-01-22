@@ -52,7 +52,10 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::radiation::solarLoad::updateReflectedRays()
+void Foam::radiation::solarLoad::updateReflectedRays
+(
+    const labelHashSet& includePatches
+)
 {
     if (reflectedFaces_.empty() && !hitFaces_.empty())
     {
@@ -72,11 +75,40 @@ void Foam::radiation::solarLoad::updateReflectedRays()
     reflectedFaces_->correct();
 
     volScalarField::Boundary& qrBf = qr_.boundaryFieldRef();
+    const scalarField& V = mesh_.V();
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    for (label bandI = 0; bandI < nBands_; bandI++)
+    forAll (qrBf, patchID)
     {
-        qrBf += reflectedFaces_->qreflective(bandI).boundaryField();
+        if (includePatches[patchID])
+        {
+            for (label bandI = 0; bandI < nBands_; bandI++)
+            {
+                qrBf[patchID] +=
+                reflectedFaces_->qreflective(bandI).boundaryField()[patchID];
+            }
+        }
+        else
+        {
+            const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
+            const labelList cellIs = patches[patchID].faceCells();
+
+            for (label bandI = 0; bandI < nBands_; bandI++)
+            {
+                forAll (cellIs, i)
+                {
+                    const label cellI = cellIs[i];
+
+                    Ru_[cellI] +=
+                        (reflectedFaces_->qreflective(bandI).
+                            boundaryField()[patchID][i] * sf[i])/V[cellI];
+                }
+            }
+        }
     }
+
+
+
 }
 
 
@@ -863,7 +895,7 @@ void Foam::radiation::solarLoad::calculate()
         // Add specular reflected radiation
         if (useReflectedRays_)
         {
-            updateReflectedRays();
+            updateReflectedRays(includeMappedPatchBasePatches);
         }
 
         firstIter_ = false;

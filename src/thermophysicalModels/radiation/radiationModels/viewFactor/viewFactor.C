@@ -239,7 +239,8 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
             mesh_.polyMesh::instance(),
             mesh_.time(),
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         ),
         mesh_,
         finalAgglom_
@@ -300,7 +301,8 @@ Foam::radiation::viewFactor::viewFactor
             mesh_.polyMesh::instance(),
             mesh_.time(),
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            false
         ),
         mesh_,
         finalAgglom_
@@ -385,15 +387,9 @@ void Foam::radiation::viewFactor::calculate()
         solarLoad_->calculate();
     }
 
-<<<<<<< HEAD
-    scalarField compactCoarseT4(map_->constructSize(), Zero);
-    scalarField compactCoarseE(map_->constructSize(), Zero);
-    scalarField compactCoarseHo(map_->constructSize(), Zero);
-=======
      // Net radiation
     scalarField q(totalNCoarseFaces_, 0.0);
     volScalarField::Boundary& qrBf = qr_.boundaryFieldRef();
->>>>>>> ENH:
 
     globalIndex globalNumbering(nLocalCoarseFaces_);
 
@@ -429,13 +425,7 @@ void Foam::radiation::viewFactor::calculate()
             const tmp<scalarField> teb =
                 boundaryRadiation.emissivity(patchID, bandI);
 
-<<<<<<< HEAD
-        scalarList T4ave(pp.size(), Zero);
-        scalarList Eave(pp.size(), Zero);
-        scalarList Hoiave(pp.size(), Zero);
-=======
             const scalarField& eb = teb();
->>>>>>> ENH:
 
             const tmp<scalarField> tHoi = qrp.qro(bandI);
             const scalarField& Hoi = tHoi();
@@ -492,17 +482,10 @@ void Foam::radiation::viewFactor::calculate()
         SubList<scalar>(compactCoarseHo, nLocalCoarseFaces_) =
             localCoarseHoave;
 
-<<<<<<< HEAD
-    // Create global size vectors
-    scalarField T4(totalNCoarseFaces_, Zero);
-    scalarField E(totalNCoarseFaces_, Zero);
-    scalarField qrExt(totalNCoarseFaces_, Zero);
-=======
         // Distribute data
         map_->distribute(compactCoarseT4);
         map_->distribute(compactCoarseE);
         map_->distribute(compactCoarseHo);
->>>>>>> ENH:
 
         // Distribute local global ID
         labelList compactGlobalIds(map_->constructSize(), Zero);
@@ -519,45 +502,18 @@ void Foam::radiation::viewFactor::calculate()
 
         map_->distribute(compactGlobalIds);
 
-<<<<<<< HEAD
-    // Net radiation
-    scalarField q(totalNCoarseFaces_, Zero);
-=======
         // Create global size vectors
         scalarField T4(totalNCoarseFaces_, 0.0);
         scalarField E(totalNCoarseFaces_, 0.0);
         scalarField qrExt(totalNCoarseFaces_, 0.0);
->>>>>>> ENH:
 
         // Fill lists from compact to global indexes.
         forAll(compactCoarseT4, i)
         {
-<<<<<<< HEAD
-            scalarSquareMatrix C(totalNCoarseFaces_, Zero);
-
-            for (label i=0; i<totalNCoarseFaces_; i++)
-            {
-                for (label j=0; j<totalNCoarseFaces_; j++)
-                {
-                    const scalar invEj = 1.0/E[j];
-                    const scalar sigmaT4 = physicoChemical::sigma.value()*T4[j];
-
-                    if (i==j)
-                    {
-                        C(i, j) = invEj - (invEj - 1.0)*Fmatrix_()(i, j);
-                        q[i] += (Fmatrix_()(i, j) - 1.0)*sigmaT4 - qrExt[j];
-                    }
-                    else
-                    {
-                        C(i, j) = (1.0 - invEj)*Fmatrix_()(i, j);
-                        q[i] += Fmatrix_()(i, j)*sigmaT4;
-                    }
-=======
             T4[compactGlobalIds[i]] = compactCoarseT4[i];
             E[compactGlobalIds[i]] = compactCoarseE[i];
             qrExt[compactGlobalIds[i]] = compactCoarseHo[i];
         }
->>>>>>> ENH:
 
         Pstream::listCombineGather(T4, maxEqOp<scalar>());
         Pstream::listCombineGather(E, maxEqOp<scalar>());

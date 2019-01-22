@@ -51,7 +51,10 @@ Foam::radiation::boundaryRadiationPropertiesPatch::New
     const polyPatch& pp
 )
 {
-    word modelType(dict.lookup("type"));
+    word modelType
+    (
+        dict.lookupCompat("type", {{"mode", 1812}})
+    );
 
     Info<< "Selecting boundary radiation Model: "
         << modelType << endl;

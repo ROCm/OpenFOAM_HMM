@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1806                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -9,30 +9,31 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      radiationProperties;
+    class       volScalarField;
+    location    "0";
+    object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+dimensions      [0 0 0 1 0 0 0];
 
-radiationModel  viewFactor;
+internalField   uniform 300;
 
-viewFactorCoeffs
+boundaryField
 {
-    smoothing true; //Smooth view factor matrix (use when in a close surface
-                    //to force Sum(Fij = 1)
-    constantEmissivity true; //constant emissivity on surfaces.
+    "(solarpanel.*|ref_wall|ZMin)"
+    {
+        type            zeroGradient;
+        value           $internalField;
+    }
+
+    "(YMax|YMin|XMax|XMin|ZMax)"
+    {
+        type            inletOutlet;
+        inletValue      $internalField;
+        value           $internalField;
+    }
 }
 
-// Number of flow iterations per radiation iteration
-solverFreq 3;
-
-absorptionEmissionModel none;
-
-scatterModel    none;
-
-sootModel       none;
 
 // ************************************************************************* //

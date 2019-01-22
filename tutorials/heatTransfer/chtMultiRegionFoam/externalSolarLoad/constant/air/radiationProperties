@@ -17,7 +17,7 @@ FoamFile
 
 radiation       on;
 
-radiationModel  viewFactor;//solarLoad;
+radiationModel  viewFactor;
 
 solarLoadCoeffs
 {

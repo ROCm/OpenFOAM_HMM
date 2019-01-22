@@ -77,6 +77,8 @@ Foam::patchDistMethods::exact::patchSurface() const
 
         Info<< "Triangulating local patch faces" << nl << endl;
 
+        labelList mapTriToGlobal;
+
         patchSurfPtr_.reset
         (
             new distributedTriSurfaceMesh
@@ -93,7 +95,8 @@ Foam::patchDistMethods::exact::patchSurface() const
                 triSurfaceTools::triangulate
                 (
                     pbm,
-                    patchIDs_
+                    patchIDs_,
+                    mapTriToGlobal
                 ),
                 dict
             )

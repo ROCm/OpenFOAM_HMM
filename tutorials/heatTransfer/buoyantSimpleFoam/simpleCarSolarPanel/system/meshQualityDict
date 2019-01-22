@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1806                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -10,29 +10,15 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      radiationProperties;
+    object      meshQualityDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+// Include defaults parameters from master dictionary
+#includeEtc "caseDicts/meshQualityDict"
 
-radiationModel  viewFactor;
+//- minFaceWeight (0 -> 0.5)
+minFaceWeight 0.02;
 
-viewFactorCoeffs
-{
-    smoothing true; //Smooth view factor matrix (use when in a close surface
-                    //to force Sum(Fij = 1)
-    constantEmissivity true; //constant emissivity on surfaces.
-}
-
-// Number of flow iterations per radiation iteration
-solverFreq 3;
-
-absorptionEmissionModel none;
-
-scatterModel    none;
-
-sootModel       none;
 
 // ************************************************************************* //

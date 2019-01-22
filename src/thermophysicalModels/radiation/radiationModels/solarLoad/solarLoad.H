@@ -148,7 +148,7 @@ private:
         void updateDirectHitRadiation(const labelList&, const labelHashSet&);
 
         //- Update reflected heat flux
-        void updateReflectedRays();
+        void updateReflectedRays(const labelHashSet&);
 
         //- Calculate diffusive heat flux
         //void calculateQdiff(const labelHashSet&, const labelHashSet&);

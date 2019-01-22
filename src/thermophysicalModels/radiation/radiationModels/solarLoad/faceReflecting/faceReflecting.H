@@ -92,6 +92,9 @@ class faceReflecting
         //- Face centres from which rays are shot
         autoPtr<pointField> Cfs_;
 
+        //- Face normal from which rays are shot
+        autoPtr<vectorField> Nfs_;
+
         //- Solar calculator
         const solarCalculator& solarCalc_;
 

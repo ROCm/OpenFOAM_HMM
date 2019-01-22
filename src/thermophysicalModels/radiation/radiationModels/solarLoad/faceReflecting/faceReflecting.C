@@ -125,9 +125,11 @@ void Foam::faceReflecting::initialise(const dictionary& coeffs)
     // global face index
     globalIndex globalNumbering(mesh_.nFaces());
 
+
     // Collect faces with t = 0, r = 0 and a > 0 to shoot rays
     // and patches to construct the triSurface
     DynamicList<point> dynCf;
+    DynamicList<vector> dynNf;
     DynamicList<label> dynFacesI;
     forAll(patches, patchI)
     {
@@ -149,17 +151,31 @@ void Foam::faceReflecting::initialise(const dictionary& coeffs)
             const scalarField& r = tr();
             const scalarField& a = ta();
 
+            const vectorField& n = pp.faceNormals();
+
             forAll(pp, faceI)
             {
+                //const vector nf(n[faceI]);
                 // Opaque, non-reflective, absortived faces to shoot
-                if (t[faceI] == 0 && r[faceI] == 0 && a[faceI] > 0)
+                if
+                (
+                    t[faceI] == 0
+                 && r[faceI] == 0
+                 && a[faceI] > 0
+                )
                 {
                     dynFacesI.append(faceI + pp.start());
                     dynCf.append(cf[faceI]);
+                    dynNf.append(n[faceI]);
                 }
 
                 // relfective opaque patches to build reflective surface
-                if (r[faceI] > 0 && t[faceI] == 0)
+                // plus opaque non-reflective
+                if
+                (
+                    (r[faceI] > 0 && t[faceI] == 0) ||
+                    (t[faceI] == 0 && a[faceI] > 0 && r[faceI] == 0)
+                )
                 {
                     includePatches_.insert(patchI);
                 }
@@ -169,6 +185,7 @@ void Foam::faceReflecting::initialise(const dictionary& coeffs)
 
     shootFacesIds_.reset(new labelList(dynFacesI));
     Cfs_.reset(new pointField(dynCf));
+    Nfs_.reset(new vectorField(dynNf));
 
     // * * * * * * * * * * * * * * *
     // Create distributedTriSurfaceMesh
@@ -334,20 +351,25 @@ void Foam::faceReflecting::calculate()
         {
             const point& fc = Cfs_()[i];
 
+            const vector nf = Nfs_()[i];
+
             const label myFaceId = shootFacesIds_()[i];
 
             forAll (refDisDirsIndex, dirIndex)
             {
                 if (refDisDirsIndex[dirIndex] > -1)
                 {
-                    const vector direction = -refDiscAngles_[dirIndex];
+                    if ( (nf & refDiscAngles_[dirIndex]) > 0)
+                    {
+                        const vector direction = -refDiscAngles_[dirIndex];
 
-                    start.append(fc + 0.001*direction);
+                        start.append(fc + 0.001*direction);
 
-                    startIndex.append(myFaceId);
-                    dirStartIndex.append(dirIndex);
+                        startIndex.append(myFaceId);
+                        dirStartIndex.append(dirIndex);
 
-                    end.append(fc + maxBounding*direction);
+                        end.append(fc + maxBounding*direction);
+                    }
                 }
             }
         }
@@ -369,14 +391,6 @@ void Foam::faceReflecting::calculate()
         )
     );
     const mapDistribute& map = mapPtr();
-
-    List<scalarField> r(nBands);
-    labelList refDirIndex(triangleIndex.size());
-
-    for (label bandI = 0; bandI < nBands; bandI++)
-    {
-        r[bandI].setSize(triangleIndex.size());
-    }
 
     PtrList<List<scalarField> > patchr(patches.size());
     PtrList<List<scalarField> > patcha(patches.size());
@@ -418,6 +432,14 @@ void Foam::faceReflecting::calculate()
         }
     }
 
+    List<scalarField> r(nBands);
+     for (label bandI = 0; bandI < nBands; bandI++)
+    {
+        r[bandI].setSize(triangleIndex.size());
+    }
+    labelList refDirIndex(triangleIndex.size());
+    labelList refIndex(triangleIndex.size());
+    // triangleIndex includes hits on non-reflecting and reflecting faces
     forAll(triangleIndex, i)
     {
         label trii = triangleIndex[i];
@@ -430,6 +452,7 @@ void Foam::faceReflecting::calculate()
         if (refFacesDirIndex.found(globalFace))
         {
             refDirIndex[i] = refFacesDirIndex.find(globalFace)();
+            refIndex[i] = globalFace;
         }
         for (label bandI = 0; bandI < nBands; bandI++)
         {
@@ -437,6 +460,7 @@ void Foam::faceReflecting::calculate()
         }
     }
     map.reverseDistribute(hitInfo.size(), refDirIndex);
+    map.reverseDistribute(hitInfo.size(), refIndex);
     for (label bandI = 0; bandI < nBands; bandI++)
     {
         map.reverseDistribute(hitInfo.size(), r[bandI]);
@@ -457,7 +481,11 @@ void Foam::faceReflecting::calculate()
     {
         if (hitInfo[rayI].hit())
         {
-            if (dirStartIndex[rayI]==refDirIndex[rayI])
+            if
+            (
+                dirStartIndex[rayI]==refDirIndex[rayI]
+             && refFacesDirIndex.found(refIndex[rayI])
+            )
             {
                 for (label bandI = 0; bandI < nBands; bandI++)
                 {
@@ -474,9 +502,18 @@ void Foam::faceReflecting::calculate()
 
                     const vectorField& nStart = ppStart.faceNormals();
 
+                    vector rayIn = refDiscAngles_[dirStartIndex[rayI]];
+
+                    rayIn /= mag(rayIn);
+
                     qrefBf[startPatchI][localStartFaceI] +=
-                        (qPrim*r[bandI][rayI]*spectralDistribution_[bandI]*a)
-                        & nStart[localStartFaceI];
+                    (
+                        (
+                            mag(qPrim)*r[bandI][rayI]*spectralDistribution_[bandI]
+                            *a*rayIn
+                        )
+                        & nStart[localStartFaceI]
+                    );
                 }
             }
         }
@@ -512,6 +549,7 @@ Foam::faceReflecting::faceReflecting
     surfacesMesh_(),
     shootFacesIds_(),
     Cfs_(),
+    Nfs_(),
     solarCalc_(solar),
     includePatches_(),
     mapTriToGlobal_()
