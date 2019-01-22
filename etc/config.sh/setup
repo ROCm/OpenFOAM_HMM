@@ -51,7 +51,7 @@ _foamEcho "Locating ThirdParty directory"
 
 for WM_THIRD_PARTY_DIR in \
     "$WM_PROJECT_DIR/ThirdParty" \
-    "$prefixDir/ThirdParty-$FOAM_API" \
+    "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
     "$prefixDir/ThirdParty-v$FOAM_API" \
     "$prefixDir/ThirdParty-$FOAM_API" \
     "$prefixDir/ThirdParty-common" \

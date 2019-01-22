@@ -878,8 +878,6 @@ void Foam::boundaryCutter::updateMesh(const mapPolyMesh& morphMap)
 
             if (newStart >= 0 && newEnd >= 0)
             {
-                const labelList& addedPoints = iter.object();
-
                 labelList newAddedPoints(addedPoints.size());
                 label newI = 0;
 
