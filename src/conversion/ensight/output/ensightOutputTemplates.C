@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,6 +38,7 @@ License
 #include "uindirectPrimitivePatch.H"
 #include "interpolation.H"
 #include "linear.H"
+#include "processorFvPatch.H"
 
 // * * * * * * * * * * Static Private Member Functions * * * * * * * * * * * //
 
@@ -119,10 +120,8 @@ bool Foam::ensightOutput::writeFaceField
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -257,37 +256,36 @@ bool Foam::ensightOutput::writeField
         );
 
         // flat boundary field
-        // as per volPointInterpolation::flatBoundaryField()
+        // similar to volPointInterpolation::flatBoundaryField()
 
-        Field<Type> flat(mesh.nBoundaryFaces());
+        Field<Type> flat(mesh.nBoundaryFaces(), Zero);
 
         const fvBoundaryMesh& bm = mesh.boundary();
-        forAll(vf.boundaryField(), patchI)
+        forAll(vf.boundaryField(), patchi)
         {
-            const polyPatch& pp = bm[patchI].patch();
-            const label bFaceI = pp.start() - mesh.nInternalFaces();
+            const polyPatch& pp = bm[patchi].patch();
+            const auto& bf = vf.boundaryField()[patchi];
 
-            if
-            (
-                isA<emptyFvPatch>(bm[patchI])
-             || vf.boundaryField()[patchI].coupled()
-            )
+            if (isA<processorFvPatch>(bm[patchi]))
             {
+                // Use average value for processor faces
+                // own cell value = patchInternalField
+                // nei cell value = evaluated boundary values
                 SubList<Type>
                 (
                     flat,
-                    pp.size(),
-                    bFaceI
-                ) = Zero;
+                    bf.size(),
+                    pp.offset()
+                ) = (0.5 * (bf.patchInternalField() + bf));
             }
-            else
+            else if (!isA<emptyFvPatch>(bm[patchi]))
             {
                 SubList<Type>
                 (
                     flat,
-                    vf.boundaryField()[patchI].size(),
-                    bFaceI
-                ) = vf.boundaryField()[patchI];
+                    bf.size(),
+                    pp.offset()
+                ) = bf;
             }
         }
 
