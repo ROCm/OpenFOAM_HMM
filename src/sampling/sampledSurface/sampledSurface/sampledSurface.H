@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,17 @@ Description
     implementation should do nothing when the surface is already
     up-to-date.
 
+    Any sampler is assumed to work for the standard volume field types.
+    Some may also support surface fields.
+
+    Dictionary entries:
+    \table
+        Property    | Description                           | Required | Default
+        name        | Alternative name                      | no  |
+        enabled     | Enable/disable the surface?           | no  | yes
+        interpolate | Sample to nodes instead of faces      | no  | false
+    \endtable
+
 SourceFiles
     sampledSurface.C
     sampledSurfaceTemplates.C
@@ -80,7 +91,7 @@ class sampledSurface
 {
 private:
 
-    // Private data
+    // Private Data
 
         //- Name of sample surface
         word name_;
@@ -88,14 +99,16 @@ private:
         //- Reference to mesh
         const polyMesh& mesh_;
 
+        //- Should surface sampling be enabled?
+        bool enabled_;
+
         //- Do we intend to interpolate the information?
         const bool interpolate_;
 
-
-    // Demand-driven data
-
-        //- Total surface area
+        //- Total surface area (demand-driven)
         mutable scalar area_;
+
+
 
 
 protected:
@@ -121,16 +134,17 @@ protected:
         );
 
 
+        //- Additional cleanup when clearing the geometry
         virtual void clearGeom() const;
 
         //- Construct null
         explicit sampledSurface(const word& name, std::nullptr_t);
 
+
 public:
 
     //- Runtime type information
     TypeName("sampledSurface");
-
 
     //- Declare run-time constructor selection table
     declareRunTimeSelectionTable
@@ -149,7 +163,7 @@ public:
 
     // iNew helper class
 
-        //- Class used for the PtrLists read-construction
+        //- Class for PtrList read-construction
         class iNew
         {
             //- Reference to the volume mesh
@@ -209,7 +223,7 @@ public:
         );
 
 
-    //- Destructor
+    //- Destructor - calls clearGeom()
     virtual ~sampledSurface();
 
 
@@ -227,6 +241,12 @@ public:
         const word& name() const
         {
             return name_;
+        }
+
+        //- Sampling is enabled
+        bool enabled() const
+        {
+            return enabled_;
         }
 
         //- Interpolation requested for surface
@@ -310,6 +330,10 @@ public:
         (
             const interpolation<tensor>& sampler
         ) const = 0;
+
+
+        //- Can it sample surface-fields?
+        virtual bool withSurfaceFields() const;
 
 
         //- Sample surface field onto surface

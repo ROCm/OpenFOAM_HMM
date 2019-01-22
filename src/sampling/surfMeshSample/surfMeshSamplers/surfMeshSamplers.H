@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,14 +75,14 @@ Description
 
     Entries:
     \table
-        Property | Description                             | Required | Default
-        type     | surfMeshes                              | yes      |
-        surfaces | the list of sample surfaces             | recommended |
-        fields   | word/regex list of fields to sampled    | yes      |
-        derived  | additional derived fields pTotal/rhoU   | no       |
+        Property | Description                              | Required | Default
+        type     | surfMeshes                               | yes |
+        surfaces | list or dictionary of sample surfaces    | recommended |
+        fields   | word/regex list of fields to sampled     | yes |
+        derived  | additional derived fields pTotal/rhoU    | no  |
         rhoRef | reference density for derived fields (incompressible) | no | 1
-        sampleScheme | scheme to obtain face centre value  | no       | cell
-        createOnRead | Create surface immediately on read  | no       | false;
+        sampleScheme | scheme to obtain face centre value   | no  | cell
+        createOnRead | Create surface immediately on read   | no  | false
     \endtable
 
 Note
@@ -130,7 +130,7 @@ class surfMeshSamplers
 {
     // Static data members
 
-        //- output verbosity
+        //- Output verbosity
         static bool verbose_;
 
 
@@ -149,7 +149,7 @@ class surfMeshSamplers
         wordList derivedNames_;
 
         //- Sample scheme to obtain face values
-        word sampleScheme_;
+        word sampleFaceScheme_;
 
         //- Reference density (to convert from kinematic to static pressure)
         scalar rhoRef_;

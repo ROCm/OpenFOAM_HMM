@@ -81,14 +81,14 @@ Description
 
     Entries:
     \table
-        Property | Description                             | Required | Default
-        type     | surfaces                                | yes      |
-        surfaces | the list of sample surfaces             | recommended |
-        fields   | word/regex list of fields to sampled    | yes      |
-        sampleScheme | scheme to obtain face centre value  | no       | cell
-        interpolationScheme | scheme to obtain node values | yes      |
-        surfaceFormat | output surface format              | yes      |
-        formatOptions | dictionary of format options       | no       |
+        Property | Description                              | Required | Default
+        type     | surfaces                                 | yes |
+        surfaces | list or dictionary of sample surfaces    | recommended |
+        fields   | word/regex list of fields to sampled     | yes |
+        sampleScheme | scheme to obtain face centre value   | no  | cell
+        interpolationScheme | scheme to obtain node values  | no  | cellPoint
+        surfaceFormat | output surface format               | yes |
+        formatOptions | dictionary of format options        | no  |
     \endtable
 
 Note

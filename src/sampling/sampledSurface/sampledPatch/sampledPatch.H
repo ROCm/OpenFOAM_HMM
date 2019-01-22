@@ -272,6 +272,10 @@ public:
         ) const;
 
 
+        //- Can it sample surface-fields?
+        virtual bool withSurfaceFields() const;
+
+
         //- Sample boundary of surface field on surface
         virtual tmp<scalarField> sample
         (

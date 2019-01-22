@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -197,7 +197,7 @@ Foam::surfMeshSamplers::surfMeshSamplers
     mesh_(refCast<const fvMesh>(obr_)),
     fieldSelection_(),
     derivedNames_(),
-    sampleScheme_(word::null),
+    sampleFaceScheme_(),
     rhoRef_(1.0)
 {
     read(dict);
@@ -216,7 +216,7 @@ Foam::surfMeshSamplers::surfMeshSamplers
     mesh_(refCast<const fvMesh>(obr)),
     fieldSelection_(),
     derivedNames_(),
-    sampleScheme_(word::null),
+    sampleFaceScheme_(),
     rhoRef_(1.0)
 {
     read(dict);
@@ -293,7 +293,7 @@ bool Foam::surfMeshSamplers::execute()
                 s.update();
             }
 
-            s.sample(fields, sampleScheme_);
+            s.sample(fields, sampleFaceScheme_);
         }
     }
 
@@ -337,6 +337,7 @@ bool Foam::surfMeshSamplers::write()
 
 bool Foam::surfMeshSamplers::read(const dictionary& dict)
 {
+    PtrList<surfMeshSample>::clear();
     fieldSelection_.clear();
     derivedNames_.clear();
 
@@ -344,10 +345,64 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
 
     const bool createOnRead = dict.lookupOrDefault("createOnRead", false);
 
-    if (dict.found("surfaces"))
-    {
-        sampleScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
+    sampleFaceScheme_ =
+        dict.lookupOrDefault<word>("sampleScheme", "cell");
 
+    const entry* eptr = dict.findEntry("surfaces");
+
+    if (eptr && eptr->isDict())
+    {
+        PtrList<surfMeshSample> surfs(eptr->dict().size());
+
+        label surfi = 0;
+
+        for (const entry& dEntry : eptr->dict())
+        {
+            if (dEntry.isDict())
+            {
+                autoPtr<surfMeshSample> surf =
+                    surfMeshSample::New
+                    (
+                        dEntry.keyword(),
+                        mesh_,
+                        dEntry.dict()
+                    );
+
+                if (surf.valid() && surf->enabled())
+                {
+                    surfs.set(surfi, surf);
+                    ++surfi;
+                }
+            }
+        }
+
+        surfs.resize(surfi);
+        surfaces().transfer(surfs);
+    }
+    else if (eptr)
+    {
+        PtrList<surfMeshSample> surfs
+        (
+            eptr->stream(),
+            surfMeshSample::iNew(mesh_)
+        );
+
+        forAll(surfs, surfi)
+        {
+            if (!surfs[surfi].enabled())
+            {
+                surfs.set(surfi, nullptr);
+            }
+        }
+
+        surfs.resize(surfs.squeezeNull());
+
+        surfaces().transfer(surfs);
+    }
+
+    auto& surfs = surfaces();
+    if (surfs.size())
+    {
         dict.readEntry("fields", fieldSelection_);
         fieldSelection_.uniq();
 
@@ -359,36 +414,35 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
         }
         Info<< nl;
 
-        PtrList<surfMeshSample> newList
-        (
-            dict.lookup("surfaces"),
-            surfMeshSample::iNew(mesh_)
-        );
-        transfer(newList);
-
         // Ensure all surfaces and merge information are expired
         expire();
 
         // Need to initialize corresponding surfMesh for others in the chain.
         // This can simply be a zero-sized placeholder, or the real surface with
         // faces.
-        if (this->size())
+
+        label surfi = 0;
+        for (surfMeshSample& s : surfs)
         {
-            Info<< "Reading surface description:" << nl;
-            for (surfMeshSample& s : surfaces())
+            if (!surfi)
             {
-                Info<< "    " << s.name() << nl;
-                if (createOnRead)
-                {
-                    s.update();
-                }
-                else
-                {
-                    s.create();
-                }
+                Info<< "Sampled surface:" << nl;
             }
-            Info<< endl;
+            Info<< "    " << s.name() << nl;
+
+            if (createOnRead)
+            {
+                s.update();
+            }
+            else
+            {
+                s.create();
+            }
+
+            ++surfi;
         }
+
+        Info<< nl;
     }
 
     return true;

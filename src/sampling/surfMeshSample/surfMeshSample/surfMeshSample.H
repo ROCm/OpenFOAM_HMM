@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,12 @@ Group
 
 Description
     An abstract class for surfMesh with sampling.
+
+    Dictionary entries:
+    \table
+        Property    | Description                           | Required | Default
+        enabled     | Enable/disable the surface?           | no  | yes
+    \endtable
 
 SourceFiles
     surfMeshSample.C
@@ -69,13 +75,16 @@ class surfMeshSample;
 
 class surfMeshSample
 {
-    // Private data
+    // Private Data
 
         //- Name for surfMesh lookup
         word name_;
 
         //- Mesh reference
         const polyMesh& mesh_;
+
+        //- Should surface sampling be enabled?
+        bool enabled_;
 
 
 protected:
@@ -142,7 +151,7 @@ public:
 
    // iNew helper class
 
-        //- Class used for the PtrLists read-construction
+        //- Class for PtrList read-construction
         class iNew
         {
             //- Reference to the volume mesh
@@ -223,6 +232,11 @@ public:
             return name_;
         }
 
+        //- Sampling is enabled
+        bool enabled() const
+        {
+            return enabled_;
+        }
 
         //- Create surfMesh if required.
         void create() const;

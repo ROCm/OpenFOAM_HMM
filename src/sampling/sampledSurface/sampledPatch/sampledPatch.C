@@ -265,6 +265,12 @@ Foam::tmp<Foam::tensorField> Foam::sampledPatch::sample
 }
 
 
+bool Foam::sampledPatch::withSurfaceFields() const
+{
+    return true;
+}
+
+
 Foam::tmp<Foam::scalarField> Foam::sampledPatch::sample
 (
     const surfaceScalarField& sField

@@ -226,58 +226,120 @@ bool Foam::sampledSurfaces::write()
 
 bool Foam::sampledSurfaces::read(const dictionary& dict)
 {
-    if (dict.found("surfaces"))
+    PtrList<sampledSurface>::clear();
+    mergedList_.clear();
+    changedGeom_.clear();
+    fieldSelection_.clear();
+
+    sampleFaceScheme_ =
+        dict.lookupOrDefault<word>("sampleScheme", "cell");
+
+    sampleNodeScheme_ =
+        dict.lookupOrDefault<word>("interpolationScheme", "cellPoint");
+
+    const entry* eptr = dict.findEntry("surfaces");
+
+    if (eptr && eptr->isDict())
     {
-        sampleFaceScheme_ = dict.lookupOrDefault<word>("sampleScheme", "cell");
+        PtrList<sampledSurface> surfs(eptr->dict().size());
 
-        dict.readEntry("interpolationScheme", sampleNodeScheme_);
+        label surfi = 0;
+
+        for (const entry& dEntry : eptr->dict())
+        {
+            if (dEntry.isDict())
+            {
+                autoPtr<sampledSurface> surf =
+                    sampledSurface::New
+                    (
+                        dEntry.keyword(),
+                        mesh_,
+                        dEntry.dict()
+                    );
+
+                if (surf.valid() && surf->enabled())
+                {
+                    surfs.set(surfi, surf);
+                    ++surfi;
+                }
+            }
+        }
+
+        surfs.resize(surfi);
+        surfaces().transfer(surfs);
+    }
+    else if (eptr)
+    {
+        PtrList<sampledSurface> surfs
+        (
+            eptr->stream(),
+            sampledSurface::iNew(mesh_)
+        );
+
+        forAll(surfs, surfi)
+        {
+            if (!surfs[surfi].enabled())
+            {
+                surfs.set(surfi, nullptr);
+            }
+        }
+
+        surfs.resize(surfs.squeezeNull());
+
+        surfaces().transfer(surfs);
+    }
+
+
+    const auto& surfs = surfaces();
+    if (surfs.size())
+    {
         dict.readEntry("fields", fieldSelection_);
+        fieldSelection_.uniq();
 
-        const word writeType(dict.get<word>("surfaceFormat"));
+        // The surface writer and format options
+        const word writerType(dict.get<word>("surfaceFormat"));
+        const dictionary& formatOptions = dict.subOrEmptyDict("formatOptions");
 
         // Define the surface formatter
         // Optionally defined extra controls for the output formats
         formatter_ = surfaceWriter::New
         (
-            writeType,
-            dict.subOrEmptyDict("formatOptions").subOrEmptyDict(writeType)
+            writerType,
+            dict.subOrEmptyDict("formatOptions").subOrEmptyDict(writerType)
         );
-
-        PtrList<sampledSurface> newList
-        (
-            dict.lookup("surfaces"),
-            sampledSurface::iNew(mesh_)
-        );
-        transfer(newList);
 
         if (Pstream::parRun())
         {
-            mergedList_.setSize(size());
+            mergedList_.resize(size());
         }
 
         // Ensure all surfaces and merge information are expired
         expire();
 
-        if (this->size())
+        label surfi = 0;
+        for (const sampledSurface& s : surfs)
         {
-            Info<< "Reading surface description:" << nl;
-            forAll(*this, surfi)
+            if (!surfi)
             {
-                Info<< "    " << operator[](surfi).name() << nl;
+                Info<< "Sampled surface:" << nl;
             }
-            Info<< endl;
+            Info<< "    " << s.name() << " -> " << writerType << nl;
+
+            ++surfi;
         }
+        Info<< nl;
     }
 
-    if (Pstream::master() && debug)
+    if (debug && Pstream::master())
     {
         Pout<< "sample fields:" << fieldSelection_ << nl
             << "sample surfaces:" << nl << "(" << nl;
 
-        forAll(*this, surfi)
+        for (const sampledSurface& s : surfaces())
         {
-            Pout<< "  " << operator[](surfi) << nl;
+            Pout<< "  " << s << nl;
         }
+
         Pout<< ")" << endl;
     }
 

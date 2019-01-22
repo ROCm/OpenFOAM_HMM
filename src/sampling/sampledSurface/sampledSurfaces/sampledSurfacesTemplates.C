@@ -132,7 +132,10 @@ void Foam::sampledSurfaces::sampleAndWrite
     const GeometricField<Type, fvPatchField, volMesh>& vField
 )
 {
-    // sampler/interpolator for this field
+    // The sampler for this field
+    autoPtr<interpolation<Type>> samplePtr;
+
+    // The interpolator for this field
     autoPtr<interpolation<Type>> interpPtr;
 
     const word& fieldName = vField.name();
@@ -159,16 +162,16 @@ void Foam::sampledSurfaces::sampleAndWrite
         }
         else
         {
-            if (interpPtr.empty())
+            if (samplePtr.empty())
             {
-                interpPtr = interpolation<Type>::New
+                samplePtr = interpolation<Type>::New
                 (
                     sampleFaceScheme_,
                     vField
                 );
             }
 
-            values = s.sample(*interpPtr);
+            values = s.sample(*samplePtr);
         }
 
         writeSurface<Type>(values, surfi, fieldName, outputDir);

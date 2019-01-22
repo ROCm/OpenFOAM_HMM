@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,7 +101,8 @@ Foam::surfMeshSample::surfMeshSample
 )
 :
     name_(name),
-    mesh_(mesh)
+    mesh_(mesh),
+    enabled_(true)
 {}
 
 
@@ -112,11 +113,10 @@ Foam::surfMeshSample::surfMeshSample
     const dictionary& dict
 )
 :
-    name_(name),
-    mesh_(mesh)
-{
-    dict.readIfPresent("name", name_);
-}
+    name_(dict.lookupOrDefault<word>("name", name)),
+    mesh_(mesh),
+    enabled_(dict.lookupOrDefault("enabled", true))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

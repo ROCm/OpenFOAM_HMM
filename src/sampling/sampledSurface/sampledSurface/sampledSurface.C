@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,7 @@ Foam::sampledSurface::sampledSurface(const word& name, std::nullptr_t)
 :
     name_(name),
     mesh_(NullObjectRef<polyMesh>()),
+    enabled_(true),
     interpolate_(false),
     area_(-1)
 {}
@@ -96,6 +97,7 @@ Foam::sampledSurface::sampledSurface
 :
     name_(name),
     mesh_(mesh),
+    enabled_(true),
     interpolate_(interpolate),
     area_(-1)
 {}
@@ -108,13 +110,12 @@ Foam::sampledSurface::sampledSurface
     const dictionary& dict
 )
 :
-    name_(name),
+    name_(dict.lookupOrDefault<word>("name", name)),
     mesh_(mesh),
+    enabled_(dict.lookupOrDefault("enabled", true)),
     interpolate_(dict.lookupOrDefault("interpolate", false)),
     area_(-1)
-{
-    dict.readIfPresent("name", name_);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -135,6 +136,12 @@ Foam::scalar Foam::sampledSurface::area() const
     }
 
     return area_;
+}
+
+
+bool Foam::sampledSurface::withSurfaceFields() const
+{
+    return false;
 }
 
 
