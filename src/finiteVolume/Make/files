@@ -97,10 +97,10 @@ $(faceToCell)/MeshObjects/centredCFCFaceToCellStencilObject.C
 
 functionObjects/fvMeshFunctionObject/fvMeshFunctionObject.C
 functionObjects/volRegion/volRegion.C
-functionObjects/fieldSelection/fieldSelection.C
-functionObjects/fieldSelection/fileFieldSelection.C
-functionObjects/fieldSelection/volFieldSelection.C
-functionObjects/fieldSelection/solverFieldSelection.C
+functionObjects/fieldSelections/fieldSelection/fieldSelection.C
+functionObjects/fieldSelections/fileFieldSelection/fileFieldSelection.C
+functionObjects/fieldSelections/volFieldSelection/volFieldSelection.C
+functionObjects/fieldSelections/solverFieldSelection/solverFieldSelection.C
 
 fvPatchFields = fields/fvPatchFields
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
