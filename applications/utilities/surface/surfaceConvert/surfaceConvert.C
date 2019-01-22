@@ -89,20 +89,23 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
-        "writePrecision",
-        "label",
+        "precision",
+        "int",
         "Write to output with the specified precision"
     );
+    argList::addOptionCompat("precision", {"writePrecision", 1812});
 
     argList args(argc, argv);
 
-    if (args.found("writePrecision"))
     {
-        const label prec = args.opt<label>("writePrecision");
-        Info<< "Output write precision set to " << prec << endl;
+        const unsigned prec = args.lookupOrDefault<unsigned>("precision", 0u);
+        if (prec)
+        {
+            Info<< "Output write precision set to " << prec << endl;
 
-        IOstream::defaultPrecision(prec);
-        Sout.precision(prec);
+            IOstream::defaultPrecision(prec);
+            Sout.precision(prec);
+        }
     }
 
     const fileName importName = args[1];

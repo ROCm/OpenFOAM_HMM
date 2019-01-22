@@ -40,19 +40,32 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     //NONE Info<<"int16:" << pTraits<int16_t>::max << nl;
+    Info<<"=max=" << nl;
+    Info<<"uint8:" << std::numeric_limits<uint8_t>::max() << nl;
     Info<<"int16:" << std::numeric_limits<int16_t>::max() << nl;
     Info<<"int32:" << pTraits<int32_t>::max << nl;
-    Info<<"int64:" << pTraits<int64_t>::max << nl;
     Info<<"uint32:" << pTraits<uint32_t>::max << nl;
+    Info<<"int64:" << pTraits<int64_t>::max << nl;
     Info<<"uint64:" << pTraits<uint64_t>::max << nl;
 
     Info<< nl;
 
     cout<<"int16:" << std::numeric_limits<int16_t>::max() << nl;
     cout<<"int32:" << pTraits<int32_t>::max << nl;
-    cout<<"int64:" << pTraits<int64_t>::max << nl;
     cout<<"uint32:" << pTraits<uint32_t>::max << nl;
+    cout<<"int64:" << pTraits<int64_t>::max << nl;
     cout<<"uint64:" << pTraits<uint64_t>::max << nl;
+
+    Info<< nl << "=digits=" << nl;
+
+    cout<<"int16:" << std::numeric_limits<int16_t>::digits << nl;
+    cout<<"int32:" << std::numeric_limits<int32_t>::digits << nl;
+    cout<<"uint32:" << std::numeric_limits<uint32_t>::digits << nl;
+    cout<<"int64:" << std::numeric_limits<int64_t>::digits << nl;
+    cout<<"uint64:" << std::numeric_limits<uint64_t>::digits << nl;
+    cout<<"float:"  << std::numeric_limits<float>::digits << nl;
+    cout<<"double:" << std::numeric_limits<double>::digits << nl;
+    cout<<"long double:" << std::numeric_limits<long double>::digits << nl;
 
     Info << "---\nEnd\n" << endl;
 
