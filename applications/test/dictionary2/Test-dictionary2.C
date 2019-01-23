@@ -61,12 +61,12 @@ scalar try_readScalar(const dictionary& dict, const word& k)
         val = readScalar(dict.lookup(k));
         Info<< "readScalar(" << k << ") = " << val << nl;
     }
-    catch (Foam::IOerror& err)
+    catch (const Foam::IOerror& err)
     {
         Info<< "readScalar(" << k << ") Caught FatalIOError "
             << err << nl << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "readScalar(" << k << ") Caught FatalError "
             << err << nl << endl;
@@ -91,12 +91,12 @@ scalar try_getScalar(const dictionary& dict, const word& k)
         val = dict.get<scalar>(k);
         Info<< "get<scalar>(" << k << ") = " << val << nl;
     }
-    catch (Foam::IOerror& err)
+    catch (const Foam::IOerror& err)
     {
         Info<< "get<scalar>(" << k << ") Caught FatalIOError "
             << err << nl << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "get<scalar>(" << k << ") Caught FatalError "
             << err << nl << endl;
@@ -127,12 +127,12 @@ scalar try_getScalar(const entry* eptr, const word& k)
         val = eptr->get<scalar>();
         Info<< "entry get<scalar>(" << k << ") = " << val << nl;
     }
-    catch (Foam::IOerror& err)
+    catch (const Foam::IOerror& err)
     {
         Info<< "entry get<scalar>(" << k << ") Caught FatalIOError "
             << err << nl << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "entry get<scalar>(" << k << ") Caught FatalError "
             << err << nl << endl;

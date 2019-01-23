@@ -286,12 +286,12 @@ void Foam::vtkPVFoam::convertVolFields
                 // Convert
                 convertVolField(patchInterpList, fld);
             }
-            catch (Foam::IOerror& ioErr)
+            catch (const Foam::IOerror& ioErr)
             {
                 ioErr.write(Warning, false);
                 Info<< nl << endl;
             }
-            catch (Foam::error& err)
+            catch (const Foam::error& err)
             {
                 // Bit of trickery to get the original message
                 err.write(Warning, false);
@@ -368,12 +368,12 @@ void Foam::vtkPVFoam::convertDimFields
 
             convertVolField(patchInterpList, volFld);
         }
-        catch (Foam::IOerror& ioErr)
+        catch (const Foam::IOerror& ioErr)
         {
             ioErr.write(Warning, false);
             Info<< nl << endl;
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             // Bit of trickery to get the original message
             err.write(Warning, false);
@@ -496,12 +496,12 @@ void Foam::vtkPVFoam::convertAreaFields
                     dataset->GetCellData()->AddArray(cdata);
                 }
             }
-            catch (Foam::IOerror& ioErr)
+            catch (const Foam::IOerror& ioErr)
             {
                 ioErr.write(Warning, false);
                 Info<< nl << endl;
             }
-            catch (Foam::error& err)
+            catch (const Foam::error& err)
             {
                 // Bit of trickery to get the original message
                 err.write(Warning, false);
@@ -638,12 +638,12 @@ void Foam::vtkPVFoam::convertPointFields
                 dataset->GetPointData()->AddArray(pdata);
             }
         }
-        catch (Foam::IOerror& ioErr)
+        catch (const Foam::IOerror& ioErr)
         {
             ioErr.write(Warning, false);
             Info<< nl << endl;
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             // Bit of trickery to get the original message
             err.write(Warning, false);
@@ -817,12 +817,12 @@ void Foam::vtkPVFoam::convertLagrangianFields
                 vtkmesh->GetCellData()->AddArray(data);
                 vtkmesh->GetPointData()->AddArray(data);
             }
-            catch (Foam::IOerror& ioErr)
+            catch (const Foam::IOerror& ioErr)
             {
                 ioErr.write(Warning, false);
                 Info<< nl << endl;
             }
-            catch (Foam::error& err)
+            catch (const Foam::error& err)
             {
                 // Bit of trickery to get the original message
                 err.write(Warning, false);

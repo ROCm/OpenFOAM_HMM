@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
             }
             Info<< endl;
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             Info<< "Caught FatalError " << err << nl << endl;
             continue;
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
             Info<< "pass - null pointer is no expression" << endl;
         }
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
             Info<< "no match" << endl;
         }
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
             Info<< "no match" << endl;
         }
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
             Info<< "no match" << endl;
         }
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }
@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
             Info<< "pass - no match on empty expression" << endl;
         }
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }
@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
             Info<< "pass - no match on empty expression" << endl;
         }
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }

@@ -226,9 +226,9 @@ int main(int argc, char *argv[])
             // Report to output (avoid overwriting values from simulation)
             profiling::print(Info);
         }
-        catch (Foam::IOerror& err)
+        catch (const Foam::IOerror& err)
         {
-            Warning<< err << endl;
+            Warning << err << endl;
         }
 
         Info<< endl;

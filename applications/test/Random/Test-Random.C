@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
         Info<<"Random position(10,5): "
             << Random().position<label>(10, 5) << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }

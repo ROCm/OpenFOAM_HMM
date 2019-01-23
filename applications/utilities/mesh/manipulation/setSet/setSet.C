@@ -525,7 +525,7 @@ bool doCommand
             }
         }
     }
-    catch (Foam::IOerror& fIOErr)
+    catch (const Foam::IOerror& fIOErr)
     {
         ok = false;
 
@@ -536,7 +536,7 @@ bool doCommand
             Pout<< topoSetSource::usage(sourceType).c_str();
         }
     }
-    catch (Foam::error& fErr)
+    catch (const Foam::error& fErr)
     {
         ok = false;
 

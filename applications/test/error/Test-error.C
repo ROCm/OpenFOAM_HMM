@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
             << "Error 2"
             << exit(FatalError);
     }
-    catch (Foam::error& fErr)
+    catch (const Foam::error& fErr)
     {
         Serr<< "Caught Foam error " << fErr << nl << endl;
     }
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
             << "Error# 3"
             << exit(FatalError);
     }
-    catch (Foam::error& fErr)
+    catch (const Foam::error& fErr)
     {
         Serr<< "Caught Foam error " << fErr << nl << endl;
     }

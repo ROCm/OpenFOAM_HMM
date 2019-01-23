@@ -149,7 +149,7 @@ if (argList::postProcess(argc, argv))
             // Report to output (avoid overwriting values from simulation)
             profiling::print(Info);
         }
-        catch (IOerror& err)
+        catch (const IOerror& err)
         {
             Warning<< err << endl;
         }

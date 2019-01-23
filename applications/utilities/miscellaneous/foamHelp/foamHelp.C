@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     {
         utility.reset(helpType::New(utilityName));
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         utility.clear();
 

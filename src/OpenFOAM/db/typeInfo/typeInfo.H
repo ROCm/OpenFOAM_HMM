@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ inline To& dynamicCast(From& r)
     {
         return dynamic_cast<To&>(r);
     }
-    catch (std::bad_cast&)
+    catch (const std::bad_cast&)
     {
         FatalErrorInFunction
             << "Attempt to cast type " << typeid(r).name()
@@ -109,7 +109,7 @@ inline To& dynamicCast(From& r, const dictionary& d)
     {
         return dynamic_cast<To&>(r);
     }
-    catch (std::bad_cast&)
+    catch (const std::bad_cast&)
     {
         FatalIOErrorInFunction(d)
             << "Attempt to cast type " << typeid(r).name()
@@ -131,7 +131,7 @@ inline To& refCast(From& r)
     {
         return dynamic_cast<To&>(r);
     }
-    catch (std::bad_cast&)
+    catch (const std::bad_cast&)
     {
         FatalErrorInFunction
             << "Attempt to cast type " << r.type()
@@ -153,7 +153,7 @@ inline To& refCast(From& r, const dictionary& d)
     {
         return dynamic_cast<To&>(r);
     }
-    catch (std::bad_cast&)
+    catch (const std::bad_cast&)
     {
         FatalIOErrorInFunction(d)
             << "Attempt to cast type " << r.type()

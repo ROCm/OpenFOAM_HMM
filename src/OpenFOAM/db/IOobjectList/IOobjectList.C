@@ -141,10 +141,9 @@ Foam::IOobjectList::IOobjectList
             // Use object with local scope and current instance (no searching)
             ok = objectPtr->typeHeaderOk<IOList<label>>(false, false);
         }
-        catch (Foam::IOerror& err)
+        catch (const Foam::IOerror& err)
         {
-            Warning
-                << err << nl << endl;
+            Warning << err << nl << endl;
         }
 
         FatalIOError.throwExceptions(throwingIOerr);

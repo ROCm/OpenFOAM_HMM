@@ -805,12 +805,12 @@ bool Foam::functionObjectList::read()
                         foPtr = functionObject::New(key, time_, dict);
                     }
                 }
-                catch (Foam::IOerror& ioErr)
+                catch (const Foam::IOerror& ioErr)
                 {
                     Info<< ioErr << nl << endl;
                     ::exit(1);
                 }
-                catch (Foam::error& err)
+                catch (const Foam::error& err)
                 {
                     // Bit of trickery to get the original message
                     err.write(Warning, false);

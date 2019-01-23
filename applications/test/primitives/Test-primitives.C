@@ -107,7 +107,7 @@ unsigned testParsing
             result.second = function (test.second);
             result.first = true;
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             errMsg = err.message();
         }

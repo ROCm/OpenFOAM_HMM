@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         labelledTri l1{ 1, 2, 3, 10, 24 };
         Info<< "labelled:" << l1 << nl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         WarningInFunction
             << "Caught FatalError " << err << nl << endl;

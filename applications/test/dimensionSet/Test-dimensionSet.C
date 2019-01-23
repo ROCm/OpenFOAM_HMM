@@ -112,7 +112,7 @@ unsigned checkDimensions
             clip(a, b);
             dimsOk = true;
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             errMsg = err.message();
         }

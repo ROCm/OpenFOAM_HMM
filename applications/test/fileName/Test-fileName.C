@@ -783,7 +783,7 @@ int main(int argc, char *argv[])
                 << findEtcFile("<very-badName>", true) << nl
                 << endl;
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             Info<< nl << "findEtcFile() Caught FatalError "
                 << err << nl << endl;
