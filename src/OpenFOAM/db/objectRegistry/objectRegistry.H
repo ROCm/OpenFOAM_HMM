@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -430,14 +430,21 @@ public:
 
     // Edit
 
-        //- Rename
-        virtual void rename(const word& newName);
-
         //- Add a regIOobject to registry
         bool checkIn(regIOobject& io) const;
 
         //- Remove a regIOobject from registry
         bool checkOut(regIOobject& io) const;
+
+        //- Clear all entries from the registry
+        //  Performs a checkOut() for all objects that are ownedByRegistry
+        void clear();
+
+        //- Clear all entries from the registry and the table itself.
+        void clearStorage();
+
+        //- Rename
+        virtual void rename(const word& newName);
 
 
     // Reading

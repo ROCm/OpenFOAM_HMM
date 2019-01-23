@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,21 +85,7 @@ Foam::objectRegistry::objectRegistry(const IOobject& io, const label nObjects)
 
 Foam::objectRegistry::~objectRegistry()
 {
-    List<regIOobject*> myObjects(size());
-    label nObjects = 0;
-
-    for (iterator iter = begin(); iter != end(); ++iter)
-    {
-        if (iter.val()->ownedByRegistry())
-        {
-            myObjects[nObjects++] = iter.val();
-        }
-    }
-
-    for (label i=0; i < nObjects; ++i)
-    {
-        checkOut(*myObjects[i]);
-    }
+    objectRegistry::clear();
 }
 
 
@@ -262,6 +248,30 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
     }
 
     return false;
+}
+
+
+void Foam::objectRegistry::clear()
+{
+    // Free anything owned by the registry
+    for (iterator iter = begin(); iter != end(); ++iter)
+    {
+        regIOobject* ptr = iter.val();
+
+        if (ptr && ptr->ownedByRegistry())
+        {
+            delete ptr;
+        }
+    }
+
+    HashTable<regIOobject*>::clear();
+}
+
+
+void Foam::objectRegistry::clearStorage()
+{
+    objectRegistry::clear();
+    HashTable<regIOobject*>::clearStorage();
 }
 
 
