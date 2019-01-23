@@ -272,7 +272,7 @@ inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::set
     const autoPtr<T>& aptr
 )
 {
-    this->set(i, const_cast<autoPtr<T>&>(aptr).release());
+    return this->set(i, const_cast<autoPtr<T>&>(aptr).release());
 }
 
 
@@ -283,7 +283,7 @@ inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::set
     const tmp<T>& tptr
 )
 {
-    this->set(i, tptr.ptr());
+    return this->set(i, tptr.ptr());
 }
 
 
