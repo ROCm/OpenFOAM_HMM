@@ -68,6 +68,9 @@ class voxelMeshSearch
         //- Voxel to seed cell
         labelList seedCell_;
 
+        //- Cells visited
+        mutable DynamicList<label> track_;
+
 
    // Private Member Functions
 
@@ -93,7 +96,8 @@ public:
         voxelMeshSearch
         (
             const polyMesh&,
-            const labelVector&,
+            const boundBox& bb,
+            const labelVector& nDivs,
             const bool doUpdate = true
         );
 

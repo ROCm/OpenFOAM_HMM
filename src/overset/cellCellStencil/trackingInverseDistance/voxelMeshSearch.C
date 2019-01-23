@@ -281,6 +281,14 @@ Foam::voxelMeshSearch::voxelMeshSearch
         }
     }
 
+    // Redo the local bounding box
+    localBb_ = boundBox(mesh_.points(), false);
+
+    const point eps(1e-10, 1e-10, 1e-10);
+
+    localBb_.min() = localBb_.min()-eps;
+    localBb_.max() = localBb_.max()+eps;
+
     if (debug)
     {
         Pout<< "voxelMeshSearch : mesh:" << mesh_.name()
@@ -297,11 +305,13 @@ Foam::voxelMeshSearch::voxelMeshSearch
 Foam::voxelMeshSearch::voxelMeshSearch
 (
     const polyMesh& mesh,
+    const boundBox& localBb,
     const labelVector& nDivs,
     const bool doUpdate
 )
 :
     mesh_(mesh),
+    localBb_(localBb),
     nDivs_(nDivs)
 {
     if (doUpdate)
@@ -315,14 +325,6 @@ Foam::voxelMeshSearch::voxelMeshSearch
 
 bool Foam::voxelMeshSearch::update()
 {
-    // Redo the local bounding box
-    localBb_ = boundBox(mesh_.points(), false);
-
-    const point eps(1e-10, 1e-10, 1e-10);
-
-    localBb_.min() = localBb_.min()-eps;
-    localBb_.max() = localBb_.max()+eps;
-
     // Initialise seed cell array
 
     seedCell_.setSize(cmptProduct(nDivs_));
@@ -373,6 +375,7 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
         return -1;
     }
 
+
     // Locate the voxel index for this point. Do not clip.
     label voxeli = index(localBb_, nDivs_, p, false);
 
@@ -397,10 +400,14 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
             // found does not have to be the absolute 'correct' one as
             // long as at least one of the processors finds a cell.
 
-            label nextCellOld = -1;
-
+            track_.clear();
             while (true)
             {
+                if (track_.size() < 5)
+                {
+                    track_.append(celli);
+                }
+
                 // I am in celli now. How many faces do I have ?
                 label facei = findIntersectedFace(celli, p);
 
@@ -409,6 +416,7 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
                     return celli;
                 }
 
+                const label startOfTrack(max(0, track_.size()-5));
 
                 label nextCell;
                 if (mesh_.isInternalFace(facei))
@@ -416,21 +424,24 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
                     label own = mesh_.faceOwner()[facei];
                     label nei = mesh_.faceNeighbour()[facei];
                     nextCell = (own == celli ? nei : own);
+
+                    if (findIndex(track_, nextCell, startOfTrack) != -1)
+                    {
+                        return celli;
+                    }
                 }
                 else
                 {
                     nextCell = searchProcPatch(facei, p);
 
-                    if (nextCell == nextCellOld)
-                    {
-                        return -1; // point is really out
-                    }
-
                     if (nextCell == -1 || nextCell == celli)
                     {
                         return nextCell;
                     }
-                    nextCellOld = nextCell;
+                    else if (findIndex(track_, nextCell, startOfTrack) != -1)
+                    {
+                        return -1;  // point is really out
+                    }
                 }
 
                 celli = nextCell;

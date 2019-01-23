@@ -48,13 +48,13 @@ namespace cellCellStencils
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
+bool Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 (
     const fvMesh& mesh,
     const vector& smallVec,
 
     const boundBox& bb,
-    const labelVector& nDivs,
+    labelVector& nDivs,
     PackedList<2>& patchTypes,
 
     const labelList& cellMap,
@@ -62,6 +62,8 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 )
 {
     // Mark all voxels that overlap the bounding box of any patch
+
+    static bool hasWarned = false;
 
     const fvBoundaryMesh& pbm = mesh.boundary();
 
@@ -113,6 +115,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
         {
             //Info<< "Marking cells on overset patch " << fvp.name() << endl;
             const polyPatch& pp = fvp.patch();
+            const vectorField::subField faceCentres(pp.faceCentres());
             forAll(pp, i)
             {
                 // Mark in overall patch types
@@ -122,8 +125,54 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
                 boundBox faceBb(pp.points(), pp[i], false);
                 faceBb.min() -= smallVec;
                 faceBb.max() += smallVec;
-                if (bb.overlaps(faceBb))
+                if (!bb.contains(faceCentres[i]))
                 {
+                    if (!hasWarned)
+                    {
+                        hasWarned = true;
+                        WarningInFunction << "Patch " << pp.name()
+                            << " : face at " << faceCentres[i]
+                            << " is not inside search bounding box of"
+                            << " voxel mesh " << bb << endl
+                            << "    Is your 'searchBox' specification correct?"
+                            << endl;
+                    }
+                }
+                else
+                {
+                    // Test for having voxels already marked as patch
+                    // -> voxel mesh is too coarse
+                    if
+                    (
+                        voxelMeshSearch::overlaps
+                        (
+                            bb,
+                            nDivs,
+                            faceBb,
+                            patchTypes,
+                            static_cast<unsigned int>(patchCellType::PATCH)
+                        )
+                    )
+                    {
+                        // Determine number of voxels from number of cells
+                        // in mesh
+                        const labelVector& dim = mesh.geometricD();
+                        forAll(dim, i)
+                        {
+                            if (dim[i] != -1)
+                            {
+                                nDivs[i] *= 2;
+                            }
+                        }
+
+                        Pout<< "Voxel mesh too coarse. Bounding box "
+                            << faceBb
+                            << " contains both non-overset and overset patches"
+                            << ". Refining voxel mesh to " << nDivs << endl;
+
+                        return false;
+                    }
+
                     voxelMeshSearch::fill
                     (
                         patchTypes,
@@ -136,6 +185,8 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
             }
         }
     }
+
+    return true;
 }
 
 
@@ -522,64 +573,15 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
 
     DebugInfo<< FUNCTION_NAME << " : Moved zone sub-meshes" << endl;
 
-
     // Calculate fast search structure for each zone
-    PtrList<voxelMeshSearch> meshSearches(nZones);
-
-    List<labelVector> searchBoxDivisions;
-    if (dict_.readIfPresent("searchBoxDivisions", searchBoxDivisions))
+    List<labelVector> searchBoxDivisions(dict_["searchBoxDivisions"]);
+    if (searchBoxDivisions.size() != nZones)
     {
-        forAll(meshParts_, zonei)
-        {
-            meshSearches.set
-            (
-                zonei,
-                new voxelMeshSearch
-                (
-                    meshParts_[zonei].subMesh(),
-                    searchBoxDivisions[zonei],
-                    true
-                )
-            );
-        }
+        FatalIOErrorInFunction(dict_) << "Number of searchBoxDivisions "
+            << searchBoxDivisions.size()
+            << " should  equal the number of zones " << nZones
+            << exit(FatalIOError);
     }
-    else
-    {
-        forAll(meshParts_, zonei)
-        {
-            meshSearches.set
-            (
-                zonei,
-                new voxelMeshSearch
-                (
-                    meshParts_[zonei].subMesh(),
-                    true
-                )
-            );
-        }
-    }
-    DebugInfo<< FUNCTION_NAME << " : Constructed cell voxel meshes" << endl;
-
-    PtrList<fvMesh> voxelMeshes;
-    if (debug)
-    {
-        voxelMeshes.setSize(meshSearches.size());
-        forAll(meshSearches, zonei)
-        {
-            IOobject meshIO
-            (
-                word("voxelMesh" + Foam::name(zonei)),
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ
-            );
-
-            Pout<< "Constructing voxel mesh " << meshIO.objectPath() << endl;
-            voxelMeshes.set(zonei, meshSearches[zonei].makeMesh(meshIO));
-        }
-    }
-
-
 
     const boundBox& allBb(mesh_.bounds());
 
@@ -652,34 +654,77 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
             patchBb = meshBb;
         }
     }
-    if (patchDivisions.empty())
-    {
-        patchDivisions.setSize(nZones);
-        forAll(patchDivisions, zonei)
-        {
-            patchDivisions[zonei] = meshSearches[zonei].nDivs();
-        }
-    }
 
     forAll(patchParts, zonei)
     {
-        const labelVector& g = patchDivisions[zonei];
-        patchParts.set(zonei, new PackedList<2>(cmptProduct(g)));
+        while (true)
+        {
+            patchParts.set
+            (
+                zonei,
+                new PackedList<2>(cmptProduct(patchDivisions[zonei]))
+            );
 
-        markBoundaries
-        (
-            meshParts_[zonei].subMesh(),
-            smallVec_,
+            bool ok = markBoundaries
+            (
+                meshParts_[zonei].subMesh(),
+                smallVec_,
 
-            patchBb[zonei][Pstream::myProcNo()],
-            patchDivisions[zonei],
-            patchParts[zonei],
+                patchBb[zonei][Pstream::myProcNo()],
+                patchDivisions[zonei],
+                patchParts[zonei],
 
-            meshParts_[zonei].cellMap(),
-            allPatchTypes
-        );
+                meshParts_[zonei].cellMap(),
+                allPatchTypes
+            );
+
+            //if (returnReduce(ok, andOp<bool>()))
+            if (ok)
+            {
+                break;
+            }
+        }
     }
     DebugInfo<< FUNCTION_NAME << " : Calculated boundary voxel meshes" << endl;
+
+
+    PtrList<voxelMeshSearch> meshSearches(meshParts_.size());
+    forAll(meshParts_, zonei)
+    {
+        meshSearches.set
+        (
+            zonei,
+            new voxelMeshSearch
+            (
+                meshParts_[zonei].subMesh(),
+                patchBb[zonei][Pstream::myProcNo()],
+                patchDivisions[zonei],
+                true
+            )
+        );
+    }
+
+    DebugInfo<< FUNCTION_NAME << " : Constructed cell voxel meshes" << endl;
+
+    PtrList<fvMesh> voxelMeshes;
+    if (debug)
+    {
+        voxelMeshes.setSize(meshSearches.size());
+        forAll(meshSearches, zonei)
+        {
+            IOobject meshIO
+            (
+                word("voxelMesh" + Foam::name(zonei)),
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ
+            );
+
+            Pout<< "Constructing voxel mesh " << meshIO.objectPath() << endl;
+            voxelMeshes.set(zonei, meshSearches[zonei].makeMesh(meshIO));
+        }
+    }
+
 
     if (debug)
     {
