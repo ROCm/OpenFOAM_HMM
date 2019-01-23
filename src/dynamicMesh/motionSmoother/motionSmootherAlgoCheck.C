@@ -143,8 +143,9 @@ bool Foam::motionSmootherAlgo::checkMesh
                 << "Missing/incorrect required dictionary entries:" << nl
                 << nl
                 << IOerrorMsg.c_str() << nl
-                << errorMsg.c_str() << nl << nl
-                << "Exiting dry-run" << nl << endl;
+                << errorMsg.c_str() << nl
+                //<< nl << "Exiting dry-run" << nl
+                << endl;
 
             FatalError.clear();
             FatalIOError.clear();
@@ -576,17 +577,18 @@ bool Foam::motionSmootherAlgo::checkMesh
 
         if (errorMsg.size() || IOerrorMsg.size())
         {
-            errorMsg = "[dryRun] " + errorMsg;
-            errorMsg.replaceAll("\n", "\n[dryRun] ");
-            IOerrorMsg = "[dryRun] " + IOerrorMsg;
-            IOerrorMsg.replaceAll("\n", "\n[dryRun] ");
+            //errorMsg = "[dryRun] " + errorMsg;
+            //errorMsg.replaceAll("\n", "\n[dryRun] ");
+            //IOerrorMsg = "[dryRun] " + IOerrorMsg;
+            //IOerrorMsg.replaceAll("\n", "\n[dryRun] ");
 
             Perr<< nl
                 << "Missing/incorrect required dictionary entries:" << nl
                 << nl
                 << IOerrorMsg.c_str() << nl
-                << errorMsg.c_str() << nl << nl
-                << "Exiting dry-run" << nl << endl;
+                << errorMsg.c_str() << nl
+                //<< nl << "Exiting dry-run" << nl
+                << endl;
 
             FatalError.clear();
             FatalIOError.clear();

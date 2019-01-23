@@ -858,6 +858,11 @@ int main(int argc, char *argv[])
         writer<scalar>::New(setFormat)
     );
 
+    const scalar maxSizeRatio
+    (
+        meshDict.lookupOrDefault<scalar>("maxSizeRatio", 100.0)
+    );
+
 
     // Read decomposePar dictionary
     dictionary decomposeDict;
@@ -1121,10 +1126,10 @@ int main(int argc, char *argv[])
         // Check geometry
         allGeometry.checkGeometry
         (
-            100.0,      // max size ratio
-            1e-9,       // intersection tolerance
+            maxSizeRatio,   // max size ratio
+            1e-9,           // intersection tolerance
             setFormatter,
-            0.01,       // min triangle quality
+            0.01,           // min triangle quality
             true
         );
 
@@ -1146,12 +1151,12 @@ int main(int argc, char *argv[])
             const boundBox& bb = s.bounds();
 
             scalar ratio = bb.mag() / meshBb.mag();
-            if (ratio > 100.0 || ratio < 1.0/100.0)
+            if (ratio > maxSizeRatio || ratio < 1.0/maxSizeRatio)
             {
                 Warning
                     << "    " << allGeometry.names()[geomi]
                     << " bounds differ from mesh"
-                    << " by more than a factor 100:" << nl
+                    << " by more than a factor " << maxSizeRatio << ":" << nl
                     << "        bounding box      : " << bb << nl
                     << "        mesh bounding box : " << meshBb
                     << endl;
@@ -1259,10 +1264,10 @@ int main(int argc, char *argv[])
         OStringStream os;
         bool hasErrors = features.checkSizes
         (
-            100.0,  //const scalar maxRatio,
+            maxSizeRatio,   //const scalar maxRatio,
             mesh.bounds(),
-            true,   //const bool report,
-            os //FatalIOError
+            true,           //const bool report,
+            os              //FatalIOError
         );
         if (hasErrors)
         {
