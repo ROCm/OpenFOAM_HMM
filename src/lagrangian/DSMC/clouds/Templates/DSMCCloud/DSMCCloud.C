@@ -997,35 +997,32 @@ Foam::scalar Foam::DSMCCloud<ParcelType>::equipartitionInternalEnergy
     direction iDof
 )
 {
-    scalar Ei = 0.0;
-
-    if (iDof < SMALL)
+    if (iDof == 0)
     {
-        return Ei;
+        return 0;
     }
-    else if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
+    else if (iDof == 2)
     {
         // Special case for iDof = 2, i.e. diatomics;
-        Ei =
-           -log(rndGen_.sample01<scalar>())
-           *physicoChemical::k.value()*temperature;
+        return
+        (
+            -log(rndGen_.sample01<scalar>())
+            *physicoChemical::k.value()*temperature
+        );
     }
-    else
+
+
+    const scalar a = 0.5*iDof - 1;
+    scalar energyRatio = 0;
+    scalar P = -1;
+
+    do
     {
-        scalar a = 0.5*iDof - 1;
-        scalar energyRatio;
-        scalar P = -1;
+        energyRatio = 10*rndGen_.sample01<scalar>();
+        P = pow((energyRatio/a), a)*exp(a - energyRatio);
+    } while (P < rndGen_.sample01<scalar>());
 
-        do
-        {
-            energyRatio = 10*rndGen_.sample01<scalar>();
-            P = pow((energyRatio/a), a)*exp(a - energyRatio);
-        } while (P < rndGen_.sample01<scalar>());
-
-        Ei = energyRatio*physicoChemical::k.value()*temperature;
-    }
-
-    return Ei;
+    return energyRatio*physicoChemical::k.value()*temperature;
 }
 
 
