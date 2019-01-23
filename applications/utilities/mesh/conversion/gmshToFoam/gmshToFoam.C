@@ -297,8 +297,7 @@ void readPoints(IFstream& inFile, pointField& points, Map<label>& mshToFoam)
 
     Info<< "Vertices to be read:" << nVerts << endl;
 
-    points.setSize(nVerts);
-    mshToFoam.resize(2*nVerts);
+    points.resize(nVerts);
 
     for (label pointi = 0; pointi < nVerts; pointi++)
     {
@@ -351,8 +350,6 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
 
     Info<< "Physical names:" << nNames << endl;
 
-    physicalNames.resize(nNames);
-
     for (label i = 0; i < nNames; i++)
     {
         label regionI;
@@ -390,6 +387,10 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
                 Info<< "    " << "Volume " << regionI << '\t'
                     << word::validate(regionName) << endl;
             }
+        }
+        else
+        {
+            continue;
         }
 
         physicalNames.insert(regionI, word::validate(regionName));
