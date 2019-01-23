@@ -23,58 +23,58 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "solverFieldSelection.H"
+#include "IOobjectList.H"
+#include "GeometricField.H"
 #include "fvMesh.H"
-#include "volMesh.H"
-#include "fvPatchField.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-Foam::functionObjects::solverFieldSelection::solverFieldSelection
+template<class Type>
+void Foam::functionObjects::fileFieldSelection::addFromFile
 (
-    const objectRegistry& obr
-)
-:
-    volFieldSelection(obr)
+    const IOobjectList& allFileObjects,
+    DynamicList<fieldInfo>& set
+) const
 {
-    if (!isA<fvMesh>(obr))
+    for (const fieldInfo& fi : *this)
     {
-        FatalErrorInFunction
-            << "Registry must be of type " << fvMesh::typeName
-            << abort(FatalError);
+        const wordList names(allFileObjects.names(Type::typeName, fi.name()));
+        if (names.size())
+        {
+            for (const word& name : names)
+            {
+                set.append(fieldInfo(wordRe(name)));
+            }
+
+            fi.found() = true;
+        }
     }
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::solverFieldSelection::~solverFieldSelection()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::functionObjects::solverFieldSelection::updateSelection()
+template<template<class> class PatchType, class MeshType>
+void Foam::functionObjects::fileFieldSelection::addGeoFieldTypes
+(
+    DynamicList<fieldInfo>& set
+) const
 {
-    wordHashSet oldSet;
-    oldSet.swap(selection_);
-
-    wordHashSet volFields;
-    addRegisteredGeoFields<fvPatchField, volMesh>(volFields);
-
     const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
 
-    const Foam::dictionary& solverDict = mesh.solverPerformanceDict();
+    const IOobjectList allObjects(mesh, mesh.time().timeName());
 
-    for (const word& fieldName : volFields)
-    {
-        if (solverDict.found(fieldName))
-        {
-            selection_.insert(fieldName);
-        }
-    }
-
-    return selection_ != oldSet;
+    addFromFile<GeometricField<scalar, PatchType, MeshType>>(allObjects, set);
+    addFromFile<GeometricField<vector, PatchType, MeshType>>(allObjects, set);
+    addFromFile<GeometricField<sphericalTensor, PatchType, MeshType>>
+    (
+        allObjects,
+        set
+    );
+    addFromFile<GeometricField<symmTensor, PatchType, MeshType>>
+    (
+        allObjects,
+        set
+    );
+    addFromFile<GeometricField<tensor, PatchType, MeshType>>(allObjects, set);
 }
 
 

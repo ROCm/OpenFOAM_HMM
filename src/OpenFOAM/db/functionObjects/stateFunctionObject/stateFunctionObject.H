@@ -125,6 +125,12 @@ public:
             //- Return true if the property exists
             bool foundProperty(const word& entryName) const;
 
+            //- Get the current trigger index
+            label getTrigger() const;
+
+            //- Set the current trigger index
+            bool setTrigger(const label triggeri);
+
             //- Set dictionary, return true if set
             bool getDict
             (
@@ -244,6 +250,15 @@ public:
 
             //- Return result entries for named object
             List<word> objectResultEntries(const word& objectName) const;
+
+            //- Write the results entries for all objects to stream
+            void writeResultEntries(Ostream& os) const;
+
+            //- Write the results entries for named object to stream
+            void writeResultEntries(const word& objectName, Ostream& os) const;
+
+            //- Write the results entries for all objects to stream
+            void writeAllResultEntries(Ostream& os) const;
 };
 
 

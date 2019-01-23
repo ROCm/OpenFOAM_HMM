@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,12 +37,15 @@ SourceFiles
 #define functionObjects_runTimeControls_equationInitialResidualCondition_H
 
 #include "runTimeCondition.H"
-#include "Enum.H"
+#include "solverFieldSelection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+class fvMesh;
+
 namespace functionObjects
 {
 namespace runTimeControls
@@ -71,8 +74,8 @@ protected:
 
     // Protected data
 
-        //- Field name
-        const wordList fieldNames_;
+        //- Field names
+        solverFieldSelection fieldSelection_;
 
         //- Value to compare
         const scalar value_;
@@ -82,6 +85,21 @@ protected:
 
         //- Operating mode
         operatingMode mode_;
+
+
+    // Protected Member Functions
+
+        //- Set the residual (scalar) value
+        template<class Type>
+        void setResidual
+        (
+            const fvMesh& mesh,
+            const dictionary& dict,
+            const word& fieldName,
+            const label componenti,
+            bool& canSet,
+            scalar& residual
+        ) const;
 
 
 public:
@@ -99,7 +117,7 @@ public:
     );
 
     //- Destructor
-    virtual ~equationInitialResidualCondition();
+    virtual ~equationInitialResidualCondition() = default;
 
 
     // Public Member Functions
@@ -117,6 +135,12 @@ public:
 } // End namespace runTimeControls
 } // End namespace functionObjects
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "equationInitialResidualConditionTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,49 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOobjectList.H"
-#include "GeometricField.H"
-#include "fvMesh.H"
+inline Foam::HashSet<Foam::wordRe>
+Foam::functionObjects::fieldSelection::filters() const
+{
+    HashSet<wordRe> f;
+    for (const auto fieldInfo : *this)
+    {
+        f.insert(fieldInfo.name());
+    }
+
+    return f;
+}
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-template<class Type>
-void Foam::functionObjects::fileFieldSelection::addFromFile
-(
-    const IOobjectList& allFileObjects,
-    wordHashSet& set
-) const
+inline const Foam::List<Foam::functionObjects::fieldInfo>&
+Foam::functionObjects::fieldSelection::selection() const
 {
-    for (const wordRe& fieldName : *this)
-    {
-        set.insert(allFileObjects.names(Type::typeName, fieldName));
-    }
+    return selection_;
 }
 
 
-template<template<class> class PatchType, class MeshType>
-void Foam::functionObjects::fileFieldSelection::addGeoFieldTypes
-(
-    wordHashSet& set
-) const
+inline Foam::wordHashSet
+Foam::functionObjects::fieldSelection::selectionNames() const
 {
-    const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
+    wordHashSet names;
+    for (const fieldInfo& fi : *this)
+    {
+        names.insert(fi.name());
+    }
 
-    const IOobjectList allObjects(mesh, mesh.time().timeName());
-
-    addFromFile<GeometricField<scalar, PatchType, MeshType>>(allObjects, set);
-    addFromFile<GeometricField<vector, PatchType, MeshType>>(allObjects, set);
-    addFromFile<GeometricField<sphericalTensor, PatchType, MeshType>>
-    (
-        allObjects,
-        set
-    );
-    addFromFile<GeometricField<symmTensor, PatchType, MeshType>>
-    (
-        allObjects,
-        set
-    );
-    addFromFile<GeometricField<tensor, PatchType, MeshType>>(allObjects, set);
+    return names;
 }
 
 

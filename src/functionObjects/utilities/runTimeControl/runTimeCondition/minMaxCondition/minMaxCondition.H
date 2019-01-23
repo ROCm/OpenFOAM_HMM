@@ -112,7 +112,7 @@ public:
     );
 
     //- Destructor
-    virtual ~minMaxCondition();
+    virtual ~minMaxCondition() = default;
 
 
     // Public Member Functions

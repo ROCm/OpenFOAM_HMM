@@ -23,62 +23,68 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fieldSelection.H"
-#include "objectRegistry.H"
-#include "dictionary.H"
+#include "solverFieldSelection.H"
+#include "fvMesh.H"
+#include "volMesh.H"
+#include "fvPatchField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::fieldSelection::fieldSelection
+Foam::functionObjects::solverFieldSelection::solverFieldSelection
 (
-    const objectRegistry& obr
+    const objectRegistry& obr,
+    const bool includeComponents
 )
 :
-    HashSet<wordRe>(),
-    obr_(obr),
-    selection_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldSelection::~fieldSelection()
-{}
+    fieldSelection(obr, includeComponents)
+{
+    if (!isA<fvMesh>(obr))
+    {
+        FatalErrorInFunction
+            << "Registry must be of type " << fvMesh::typeName
+            << abort(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionObjects::fieldSelection::read(const dictionary& dict)
+bool Foam::functionObjects::solverFieldSelection::updateSelection()
 {
-    dict.readEntry("fields", *this);
+    List<fieldInfo> oldSet(std::move(selection_));
 
-    return true;
-}
+    DynamicList<fieldInfo> newSelection(oldSet.size());
 
+    const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
 
-bool Foam::functionObjects::fieldSelection::containsPattern() const
-{
-    for (const wordRe& fieldName : *this)
+    const dictionary& solverDict = mesh.solverPerformanceDict();
+
+    const wordList solvedFieldNames(solverDict.sortedToc());
+
+    for (const fieldInfo& fi : *this)
     {
-        if (fieldName.isPattern())
+        for (const word& solvedField : solvedFieldNames)
         {
-            return true;
+            if (fi.name().match(solvedField))
+            {
+                newSelection.append
+                (
+                    fieldInfo(wordRe(solvedField), fi.component())
+                );
+                fi.found() = true;
+            }
         }
     }
 
-    return false;
-}
+    selection_.transfer(newSelection);
 
+    if (!fieldSelection::checkSelection())
+    {
+        WarningInFunction
+            << "Valid solver fields are: " << solvedFieldNames;
+    }
 
-void Foam::functionObjects::fieldSelection::clearSelection()
-{
-    selection_.clear();
-}
-
-
-bool Foam::functionObjects::fieldSelection::updateSelection()
-{
-    return false;
+    return selection_ != oldSet;
 }
 
 

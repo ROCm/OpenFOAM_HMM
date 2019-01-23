@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "minTimeStepCondition.H"
+#include "maxDurationCondition.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
 
@@ -35,11 +35,11 @@ namespace functionObjects
 {
 namespace runTimeControls
 {
-    defineTypeNameAndDebug(minTimeStepCondition, 0);
+    defineTypeNameAndDebug(maxDurationCondition, 0);
     addToRunTimeSelectionTable
     (
         runTimeCondition,
-        minTimeStepCondition,
+        maxDurationCondition,
         dictionary
     );
 }
@@ -49,8 +49,8 @@ namespace runTimeControls
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::runTimeControls::minTimeStepCondition::
-minTimeStepCondition
+Foam::functionObjects::runTimeControls::maxDurationCondition::
+maxDurationCondition
 (
     const word& name,
     const objectRegistry& obr,
@@ -59,33 +59,54 @@ minTimeStepCondition
 )
 :
     runTimeCondition(name, obr, dict, state),
-    minValue_(dict.get<scalar>("minValue"))
-{}
+    duration_(dict.get<scalar>("duration")),
+    startTime_(-1),
+    initialised_(false),
+    resetOnRestart_(dict.lookupOrDefault("resetOnRestart", false))
+{
+    if
+    (
+        !resetOnRestart_
+     && conditionDict().readIfPresent("startTime", startTime_))
+    {
+        initialised_ = true;
+    }
+
+    duration_ = obr_.time().userTimeToTime(duration_);
+}
 
 
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
-bool Foam::functionObjects::runTimeControls::minTimeStepCondition::apply()
+bool Foam::functionObjects::runTimeControls::maxDurationCondition::apply()
 {
-    bool satisfied = false;
-
     if (!active_)
     {
         return true;
     }
 
-    if (obr_.time().deltaTValue() < minValue_)
+    if (!initialised_)
     {
-        satisfied = true;
+        startTime_ = obr_.time().value();
+        initialised_ = true;
     }
 
-    return satisfied;
+    scalar delta = obr_.time().value() - startTime_;
+    delta = obr_.time().timeToUserTime(delta);
+
+    Log << "    " << type() << ": " << name_ << nl
+        << "        Completed " << delta << " out of " << duration_ << nl;
+
+    return delta >= duration_;
 }
 
 
-void Foam::functionObjects::runTimeControls::minTimeStepCondition::write()
+void Foam::functionObjects::runTimeControls::maxDurationCondition::write()
 {
-    // do nothing
+    if (initialised_)
+    {
+        conditionDict().set("startTime", startTime_);
+    }
 }
 
 

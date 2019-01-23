@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::volFieldSelection
+    Foam::functionObjects::fileFieldSelection
 
 Description
-    Helper class to manage volume field selections
+    Helper class to manage file-based field selections
 
 SourceFiles
-    volFieldSelection.C
+    fieldSelection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_volFieldSelection_H
-#define functionObjects_volFieldSelection_H
+#ifndef functionObjects_fileFieldSelection_H
+#define functionObjects_fileFieldSelection_H
 
 #include "fieldSelection.H"
 
@@ -41,14 +41,17 @@ SourceFiles
 
 namespace Foam
 {
+
+class IOobjectList;
+
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class volFieldSelection Declaration
+                    Class fileFieldSelection Declaration
 \*---------------------------------------------------------------------------*/
 
-class volFieldSelection
+class fileFieldSelection
 :
     public fieldSelection
 {
@@ -57,7 +60,7 @@ private:
     // Private Member Functions
 
         //- No copy construct
-        volFieldSelection(const volFieldSelection&) = delete;
+        fileFieldSelection(const fileFieldSelection&) = delete;
 
 
 protected:
@@ -66,22 +69,40 @@ protected:
 
         //- Add registered GeometricField types to selection
         template<template<class> class PatchType, class MeshType>
-        void addRegisteredGeoFields(wordHashSet& set) const;
+        void addGeoFieldTypes(DynamicList<fieldInfo>& set) const;
+
+        //- Add registered Internal types to selection
+        void addInternalFieldTypes(DynamicList<fieldInfo>& set) const;
+
+        //- Add registered uniform types to selection
+        void addUniformFieldTypes(DynamicList<fieldInfo>& set) const;
+
+        //- Add objects of a given type
+        template<class Type>
+        void addFromFile
+        (
+            const IOobjectList& allFileObjects,
+            DynamicList<fieldInfo>& set
+        ) const;
 
 
 public:
 
     //- Construct from object registry
-    volFieldSelection(const objectRegistry& obr);
+    fileFieldSelection
+    (
+        const objectRegistry& obr,
+        const bool includeComponents = false
+    );
 
 
     //- Destructor
-    virtual ~volFieldSelection();
+    virtual ~fileFieldSelection() = default;
 
 
     // Member Functions
 
-        //- Update the selection using current contents of obr_
+        //- Update the selection
         virtual bool updateSelection();
 };
 
@@ -94,7 +115,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "volFieldSelectionTemplates.C"
+    #include "fileFieldSelectionTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

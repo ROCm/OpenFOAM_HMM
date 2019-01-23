@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,18 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::fileFieldSelection
+    Foam::functionObjects::volFieldSelection
 
 Description
-    Helper class to manage file-based field selections
+    Helper class to manage solver field selections
 
 SourceFiles
-    fieldSelection.C
+    solverFieldSelection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_fileFieldSelection_H
-#define functionObjects_fileFieldSelection_H
+#ifndef functionObjects_solverFieldSelection_H
+#define functionObjects_solverFieldSelection_H
 
 #include "fieldSelection.H"
 
@@ -41,17 +41,14 @@ SourceFiles
 
 namespace Foam
 {
-
-class IOobjectList;
-
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class fileFieldSelection Declaration
+                    Class solverFieldSelection Declaration
 \*---------------------------------------------------------------------------*/
 
-class fileFieldSelection
+class solverFieldSelection
 :
     public fieldSelection
 {
@@ -60,45 +57,26 @@ private:
     // Private Member Functions
 
         //- No copy construct
-        fileFieldSelection(const fileFieldSelection&) = delete;
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Add registered GeometricField types to selection
-        template<template<class> class PatchType, class MeshType>
-        void addGeoFieldTypes(wordHashSet& set) const;
-
-        //- Add registered Internal types to selection
-        void addInternalFieldTypes(wordHashSet& set) const;
-
-        //- Add registered uniform types to selection
-        void addUniformFieldTypes(wordHashSet& set) const;
-
-        //- Add objects of a given type
-        template<class Type>
-        void addFromFile
-        (
-            const IOobjectList& allFileObjects,
-            wordHashSet& set
-        ) const;
+        solverFieldSelection(const solverFieldSelection&) = delete;
 
 
 public:
 
     //- Construct from object registry
-    fileFieldSelection(const objectRegistry& obr);
+    solverFieldSelection
+    (
+        const objectRegistry& obr,
+        const bool includeComponents = false
+    );
 
 
     //- Destructor
-    virtual ~fileFieldSelection();
+    virtual ~solverFieldSelection() = default;
 
 
     // Member Functions
 
-        //- Update the selection
+        //- Update the selection using current contents of obr_
         virtual bool updateSelection();
 };
 
@@ -107,12 +85,6 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "fileFieldSelectionTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
