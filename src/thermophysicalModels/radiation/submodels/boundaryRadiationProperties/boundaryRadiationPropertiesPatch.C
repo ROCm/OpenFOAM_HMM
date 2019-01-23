@@ -110,6 +110,8 @@ boundaryRadiationPropertiesPatch
                 transmissivityModel::New(dict, mesh).ptr()
             );
         }
+        break;
+
         case LOOKUP:
         {
             //Do nothing
