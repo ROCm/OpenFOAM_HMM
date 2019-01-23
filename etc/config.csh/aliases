@@ -30,13 +30,6 @@ alias wmDP 'wmSet WM_PRECISION_OPTION=DP'
 alias wmUnset 'source $WM_PROJECT_DIR/etc/config.csh/unset'
 
 
-# Toggle wmakeScheduler on/off
-#  - also need to set WM_HOSTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-alias wmSchedOn 'setenv WM_SCHEDULER $WM_PROJECT_DIR/wmake/wmakeScheduler'
-alias wmSchedOff 'unsetenv WM_SCHEDULER'
-
-
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias foam 'cd $WM_PROJECT_DIR'

@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -68,10 +68,10 @@ options:
   -s | -silent      Quiet mode (does not echo commands)
   -a | -all         wmake all sub-directories, running Allwmake if present
   -q | -queue       wmakeCollect all sub-directories, running Allwmake if present
-  -k or -non-stop   Compile without stopping when errors occur
+  -k | -keep-going  Keep going without stopping when errors occur (-non-stop)
   -j                Compile using all local cores/hyperthreads
   -jN or -j N       Compile using N cores/hyperthreads
-  -no-scheduler     Compile without wmakeScheduler
+  -no-scheduler     Disable scheduled parallel compilation
   -update           Update lnInclude directories, dep files, remove deprecated
                     files and directories
   -h | -help        Print the usage
@@ -151,8 +151,8 @@ do
             export WM_NCOMPPROCS=${1#-j}
             echo "Compiling enabled on $WM_NCOMPPROCS cores"
             ;;
-        # Non-stop compilation, ignoring errors
-        -k | -non-stop)
+        # Keep going, ignoring errors
+        -k | -keep-going | -non-stop)
             export WM_CONTINUE_ON_ERROR=true
             ;;
         # Disable scheduled parallel compilation
@@ -205,27 +205,12 @@ checkEnv
 # Setup parallel compilation
 #------------------------------------------------------------------------------
 
-# Set WM_NCOMPPROCS automatically when both WM_HOSTS and WM_SCHEDULER are set
-if [ -z "$WM_NCOMPPROCS" -a -n "$WM_HOSTS" -a -n "$WM_SCHEDULER" ]
-then
-    WM_NCOMPPROCS=$(wmakeScheduler -count) || unset WM_NCOMPPROCS
-fi
-
 if [ -n "$WM_NCOMPPROCS" ]
 then
     parOpt="-j $WM_NCOMPPROCS"
 
     if [ "$WM_NCOMPPROCS" -gt 1 -a -z "$MAKEFLAGS" ]
     then
-        lockDir=$HOME/.$WM_PROJECT/.wmake
-
-        if [ -d $lockDir ]
-        then
-            rm -f $lockDir/*
-        else
-            mkdir -p $lockDir
-        fi
-
         make="$make --no-print-directory $parOpt"
     fi
 fi
@@ -338,12 +323,12 @@ then
     [ "$update" = true ] || wmakeLnIncludeAll $parOpt
 
     (
-        export WM_COLLECT_DIR=$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD////_}
-        export WM_SCHEDULER=wmakeCollect
+        export WM_COLLECT_DIR="$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD////_}"
+        export WM_SCHEDULER="$WM_DIR/wmakeCollect"
         trap '$WM_SCHEDULER -kill' TERM INT
-        $WM_SCHEDULER -clean \
+        "$WM_SCHEDULER" -clean \
      && wmake -all objects   \
-     && $WM_SCHEDULER
+     && "$WM_SCHEDULER"
     ) && wmake -all
     exit $?
 fi

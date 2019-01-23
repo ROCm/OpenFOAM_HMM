@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -66,8 +66,8 @@ do
         # If called from wmake (to avoid recursion)
         fromWmake=true
         ;;
-    -k | -non-stop)
-        # Non-stop compilation, ignoring errors
+    -k | -keep-going | -non-stop)
+        # Keep going, ignoring errors
         export WM_CONTINUE_ON_ERROR=true
         continue    # Permanently remove arg
         ;;
