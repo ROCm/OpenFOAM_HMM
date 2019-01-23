@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2109 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "volFields.H"
+#include "volFieldSelection.H"
+#include "volMesh.H"
+#include "fvPatchField.H"
 
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<template<class> class PatchType, class MeshType>
-void Foam::functionObjects::volFieldSelection::addRegisteredGeoFields
+Foam::functionObjects::volFieldSelection::volFieldSelection
 (
-    wordHashSet& set
-) const
+    const objectRegistry& obr,
+    const bool includeComponents
+)
+:
+    fieldSelection(obr, includeComponents)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObjects::volFieldSelection::updateSelection()
 {
-    addRegistered<GeometricField<scalar, PatchType, MeshType>>(set);
-    addRegistered<GeometricField<vector, PatchType, MeshType>>(set);
-    addRegistered<GeometricField<sphericalTensor, PatchType, MeshType>>(set);
-    addRegistered<GeometricField<symmTensor, PatchType, MeshType>>(set);
-    addRegistered<GeometricField<tensor, PatchType, MeshType>>(set);
+    List<fieldInfo> oldSet(std::move(selection_));
+
+    DynamicList<fieldInfo> newSet(oldSet.size());
+
+    addRegisteredGeoFields<fvPatchField, volMesh>(newSet);
+
+    selection_.transfer(newSet);
+
+    (void)fieldSelection::checkSelection();
+
+    return selection_ != oldSet;
 }
 
 

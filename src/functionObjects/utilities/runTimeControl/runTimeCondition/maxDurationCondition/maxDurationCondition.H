@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,24 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::runTimeControls::averageCondition
+    Foam::functionObjects::runTimeControls::maxDurationCondition
 
 Description
-    Average run time condition - satisfied when average does not change by
-    more than a given value.
+    Activated after a user-specified duration
 
 SourceFiles
-    averageCondition.H
-    averageCondition.C
+    maxDurationCondition.H
+    maxDurationCondition.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef averageCondition_H
-#define averageCondition_H
+#ifndef functionObjects_runTimeConditions_maxDurationCondition_H
+#define functionObjects_runTimeConditions_maxDurationCondition_H
 
 #include "runTimeCondition.H"
-#include "Switch.H"
-#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,77 +48,37 @@ namespace runTimeControls
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class averageCondition Declaration
+                    Class maxDurationCondition Declaration
 \*---------------------------------------------------------------------------*/
 
-class averageCondition
+class maxDurationCondition
 :
     public runTimeCondition
 {
-public:
-
-    // Public enumerations
-
-        enum class windowType
-        {
-            NONE,
-            APPROXIMATE,
-            EXACT
-        };
-
-        static const Enum<windowType> windowTypeNames;
-
-
 protected:
 
     // Protected data
 
-        //- Name of function object to retrieve data from
-        word functionObjectName_;
+        //- Duration
+        scalar duration_;
 
-        //- List of fields on which to operate
-        wordList fieldNames_;
+        //- Time when the condition is activated
+        scalar startTime_;
 
-        //- Satisfied when difference in mean values is less than this value
-        const scalar tolerance_;
+        //- Initialisation flag
+        bool initialised_;
 
-        //- Averaging window
-        const scalar window_;
-
-        //- Averaging window type
-        windowType windowType_;
-
-        //- Average time per field
-        List<scalar> totalTime_;
-
-        //- Reset the averaging process on restart flag
+        //- Reset on restart (ignores any state information)
         Switch resetOnRestart_;
-
-        //- Number of start-up iterations before allowing satisfied checks
-        label nIterStartUp_;
-
-        //- Current iteration count
-        label iter_;
-
-    // Protected Member Functions
-
-        //- Templated function to calculate the average
-        template<class Type>
-        void calc
-        (
-            const label fieldi,
-            bool& satisfied,
-            bool& processed
-        );
 
 
 public:
 
     //- Runtime type information
-    TypeName("average");
+    TypeName("maxDuration");
 
     //- Constructor
-    averageCondition
+    maxDurationCondition
     (
         const word& name,
         const objectRegistry& obr,
@@ -130,7 +87,7 @@ public:
     );
 
     //- Destructor
-    virtual ~averageCondition() = default;
+    virtual ~maxDurationCondition() = default;
 
 
     // Public Member Functions
@@ -148,12 +105,6 @@ public:
 } // End namespace runTimeControls
 } // End namespace functionObjects
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "averageConditionTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

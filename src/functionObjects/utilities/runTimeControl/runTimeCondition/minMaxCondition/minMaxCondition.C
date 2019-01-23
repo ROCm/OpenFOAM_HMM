@@ -90,12 +90,6 @@ Foam::functionObjects::runTimeControls::minMaxCondition::minMaxCondition
 {}
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::minMaxCondition::~minMaxCondition()
-{}
-
-
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
 bool Foam::functionObjects::runTimeControls::minMaxCondition::apply()
@@ -107,10 +101,8 @@ bool Foam::functionObjects::runTimeControls::minMaxCondition::apply()
         return satisfied;
     }
 
-    forAll(fieldNames_, fieldi)
+    for (const word& fieldName :fieldNames_)
     {
-        const word& fieldName = fieldNames_[fieldi];
-
         const word valueType =
             state_.objectResultType(functionObjectName_, fieldName);
 
@@ -153,13 +145,10 @@ bool Foam::functionObjects::runTimeControls::minMaxCondition::apply()
             }
         }
 
-        if (log_)
-        {
-            Info<< "    " << type() << ": " << modeTypeNames_[mode_] << " "
-                << fieldName << ": value = " << v
-                << ", threshold value = " << value_
-                << ", satisfied = " << ok << endl;
-        }
+        Log << "    " << type() << ": " << modeTypeNames_[mode_] << " "
+            << fieldName << ": value = " << v
+            << ", threshold value = " << value_
+            << ", satisfied = " << ok << endl;
 
         satisfied = satisfied && ok;
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,10 +32,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_solverFieldSelection_H
-#define functionObjects_solverFieldSelection_H
+#ifndef functionObjects_volFieldSelection_H
+#define functionObjects_volFieldSelection_H
 
-#include "volFieldSelection.H"
+#include "fieldSelection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,29 +45,42 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class solverFieldSelection Declaration
+                      Class volFieldSelection Declaration
 \*---------------------------------------------------------------------------*/
 
-class solverFieldSelection
+class volFieldSelection
 :
-    public volFieldSelection
+    public fieldSelection
 {
 private:
 
     // Private Member Functions
 
         //- No copy construct
-        solverFieldSelection(const solverFieldSelection&) = delete;
+        volFieldSelection(const volFieldSelection&) = delete;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Add registered GeometricField types to selection
+        template<template<class> class PatchType, class MeshType>
+        void addRegisteredGeoFields(DynamicList<fieldInfo>& set) const;
 
 
 public:
 
     //- Construct from object registry
-    solverFieldSelection(const objectRegistry& obr);
+    volFieldSelection
+    (
+        const objectRegistry& obr,
+        const bool includeComponents = false
+    );
 
 
     //- Destructor
-    virtual ~solverFieldSelection();
+    virtual ~volFieldSelection() = default;
 
 
     // Member Functions
@@ -81,6 +94,12 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "volFieldSelectionTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

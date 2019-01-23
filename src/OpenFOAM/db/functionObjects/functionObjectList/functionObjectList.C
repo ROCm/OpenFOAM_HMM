@@ -458,6 +458,15 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::label Foam::functionObjectList::triggerIndex() const
+{
+    label triggeri = labelMin;
+    stateDict().readIfPresent("triggerIndex", triggeri);
+
+    return triggeri;
+}
+
+
 void Foam::functionObjectList::resetState()
 {
     // Reset (re-read) the state dictionary

@@ -84,7 +84,7 @@ public:
     );
 
     //- Destructor
-    virtual ~equationMaxIterCondition();
+    virtual ~equationMaxIterCondition() = default;
 
 
     // Public Member Functions
