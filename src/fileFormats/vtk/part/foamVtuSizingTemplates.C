@@ -505,8 +505,6 @@ void Foam::vtk::vtuSizing::populateArrays
                         vertLabels[vrtLoc++] = nShapePoints;
                     }
 
-                    cellTypes[celLoc] = vtk::cellType::VTK_TETRA;
-
                     // See note above about the orientation.
                     if (isOwner)
                     {
