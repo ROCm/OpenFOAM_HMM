@@ -44,7 +44,6 @@ source archives.
 
 - 6-digit year-month-day (YYMMDD) integer corresponding to a patch-level
   for the given **released** API.
-  Development branches have a patch value of `0`.
 
 - Format is year-month-day, as per `date +%y%m%d`.
 
@@ -53,6 +52,9 @@ source archives.
   day, the patch level would jump accordingly.
 
 The patch value is only meaningful together with the api value.
+However, for *development* branches, the patch level should not be
+ascribed much meaning -- it can be `0` or have a value corresponding
+to the last merge with a *maintenance* (*eg*, `master`) branch.
 
 
 ## Flow of information
@@ -81,4 +83,4 @@ contains more permanent information, whereas the `build-info` is more
 transient in nature.
 
 ----
-2018-11-29
+2019-01-23
