@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,21 @@ License
 #include "StringStream.H"
 #include "mergePoints.H"
 #include "Map.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+static inline STLpoint getSTLpoint(Istream& is)
+{
+    scalar a = readScalar(is);
+    scalar b = readScalar(is);
+    scalar c = readScalar(is);
+
+    return STLpoint(a, b, c);
+}
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -72,34 +87,13 @@ bool Foam::fileFormats::TRIReader::readFile(const fileName& filename)
 
         IStringStream lineStream(line);
 
-        STLpoint p
-        (
-            readScalar(lineStream),
-            readScalar(lineStream),
-            readScalar(lineStream)
-        );
+        STLpoint p(getSTLpoint(lineStream));
 
         if (!lineStream) break;
 
         dynPoints.append(p);
-        dynPoints.append
-        (
-            STLpoint
-            (
-                readScalar(lineStream),
-                readScalar(lineStream),
-                readScalar(lineStream)
-            )
-        );
-        dynPoints.append
-        (
-            STLpoint
-            (
-                readScalar(lineStream),
-                readScalar(lineStream),
-                readScalar(lineStream)
-            )
-        );
+        dynPoints.append(getSTLpoint(lineStream));
+        dynPoints.append(getSTLpoint(lineStream));
 
         // zone/colour in .tri file starts with 0x. Skip.
         // ie, instead of having 0xFF, skip 0 and leave xFF to
