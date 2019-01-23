@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,55 +23,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMesh.H"
-#include "globalMeshData.H"
-#include "demandDrivenData.H"
+#include "polySurfaceFields.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::surfMesh::removeZones()
+namespace Foam
 {
-    DebugInFunction << "Removing surface zones." << endl;
 
-    // Remove the surface zones
-    surfZones_.clear();
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-    clearOut();
-}
+template<>
+const word polySurfaceLabelField::typeName
+("polySurfaceLabelField");
 
+template<>
+const word polySurfaceScalarField::typeName
+("polySurfaceScalarField");
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+template<>
+const word polySurfaceVectorField::typeName
+("polySurfaceVectorField");
 
-void Foam::surfMesh::clearGeom()
-{
-    DebugInFunction << "Clearing geometric data" << endl;
+template<>
+const word polySurfaceSphericalTensorField::typeName
+("polySurfaceSphericalTensorField");
 
-    MeshReference::clearGeom();
-}
+template<>
+const word polySurfaceSymmTensorField::typeName
+("polySurfaceSymmTensorField");
 
-
-void Foam::surfMesh::clearAddressing()
-{
-    DebugInFunction << "Clearing topology" << endl;
-
-    MeshReference::clearPatchMeshAddr();
-}
-
-
-void Foam::surfMesh::clearOut()
-{
-    MeshReference::clearOut();
-
-    clearGeom();
-    clearAddressing();
-}
+template<>
+const word polySurfaceTensorField::typeName
+("polySurfaceTensorField");
 
 
-void Foam::surfMesh::clearFields()
-{
-    // Clear the entire registry
-    surfaceRegistry::clear();
-}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 
 // ************************************************************************* //

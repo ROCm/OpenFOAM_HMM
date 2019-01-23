@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfMesh.H"
+#include "meshedSurf.H"
 #include "MeshedSurfaceProxy.H"
 
 #include "Time.H"
@@ -120,6 +121,51 @@ Foam::surfMesh::surfMesh(const IOobject& io, const word& surfName)
 
 Foam::surfMesh::surfMesh
 (
+    const word& surfName,
+    const objectRegistry& obr
+)
+:
+    surfaceRegistry(obr, surfName),
+    Allocator
+    (
+        IOobject
+        (
+            "points",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        IOobject
+        (
+            "faces",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    MeshReference(this->storedIOFaces(), this->storedIOPoints()),
+
+    surfZones_
+    (
+        IOobject
+        (
+            "surfZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    )
+{}
+
+
+Foam::surfMesh::surfMesh
+(
     const IOobject& io,
     const MeshedSurface<face>& surf,
     const word& surfName
@@ -170,7 +216,7 @@ Foam::surfMesh::surfMesh
         <<"  dbDir: " << io.db().dbDir() << nl
         <<"creating surfMesh at instance " << instance() << endl;
 
-    copyContents(surf);
+    copySurface(surf);
 }
 
 
@@ -272,13 +318,80 @@ void Foam::surfMesh::updateRefs()
 }
 
 
-void Foam::surfMesh::copyContents
+void Foam::surfMesh::copySurface
+(
+    const pointField& points,
+    const faceList& faces,
+    bool validate
+)
+{
+    clearOut(); // Clear addressing
+
+    if
+    (
+        this->nPoints() != points.size()
+     || this->nFaces() != faces.size()
+    )
+    {
+        // Geometry changed
+        clearFields();
+    }
+
+    this->storedIOPoints() = points;
+    this->storedIOFaces() = faces;
+    surfZones_.clear();
+
+    this->updateRefs();
+
+    // No zones
+}
+
+
+void Foam::surfMesh::copySurface
+(
+    const meshedSurf& surf,
+    bool validate
+)
+{
+    clearOut(); // Clear addressing
+
+    if
+    (
+        this->nPoints() != surf.points().size()
+     || this->nFaces() != surf.faces().size()
+    )
+    {
+        // Geometry changed
+        clearFields();
+    }
+
+    this->storedIOPoints() = surf.points();
+    this->storedIOFaces() = surf.faces();
+    surfZones_.clear();
+
+    this->updateRefs();
+
+    // No zones
+}
+
+
+void Foam::surfMesh::copySurface
 (
     const MeshedSurface<face>& surf,
     bool validate
 )
 {
     clearOut(); // Clear addressing
+
+    if
+    (
+        this->nPoints() != surf.points().size()
+     || this->nFaces() != surf.surfFaces().size()
+    )
+    {
+        // Geometry changed
+        clearFields();
+    }
 
     this->storedIOPoints() = surf.points();
     this->storedIOFaces() = surf.surfFaces();
@@ -327,6 +440,7 @@ Foam::surfMesh::releaseGeom()
 
     this->updateRefs(); // This may not be needed...
     clearOut(); // Clear addressing.
+    clearFields();
 
     return aptr;
 }

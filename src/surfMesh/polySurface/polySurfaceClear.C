@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,26 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfMesh.H"
+#include "polySurface.H"
 #include "globalMeshData.H"
 #include "demandDrivenData.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::surfMesh::removeZones()
-{
-    DebugInFunction << "Removing surface zones." << endl;
-
-    // Remove the surface zones
-    surfZones_.clear();
-
-    clearOut();
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::surfMesh::clearGeom()
+void Foam::polySurface::clearGeom()
 {
     DebugInFunction << "Clearing geometric data" << endl;
 
@@ -52,7 +37,7 @@ void Foam::surfMesh::clearGeom()
 }
 
 
-void Foam::surfMesh::clearAddressing()
+void Foam::polySurface::clearAddressing()
 {
     DebugInFunction << "Clearing topology" << endl;
 
@@ -60,7 +45,7 @@ void Foam::surfMesh::clearAddressing()
 }
 
 
-void Foam::surfMesh::clearOut()
+void Foam::polySurface::clearOut()
 {
     MeshReference::clearOut();
 
@@ -69,10 +54,12 @@ void Foam::surfMesh::clearOut()
 }
 
 
-void Foam::surfMesh::clearFields()
+void Foam::polySurface::clearFields()
 {
     // Clear the entire registry
-    surfaceRegistry::clear();
+    objectRegistry::clear();
+
+    // Do not reinstate PointData sub-registry
 }
 
 
