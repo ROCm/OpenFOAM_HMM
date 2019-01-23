@@ -123,11 +123,8 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         {
             scalar meanRes = gAverage(mag(*residualPtr)) + VSMALL;
 
-            if (log)
-            {
-                Log << nl << name() << " : " << nl;
-                Log << "    Average(mag(residuals)) :  " << meanRes << endl;
-            }
+            Log << nl << name() << " : " << nl
+                << "    Average(mag(residuals)) :  " << meanRes << endl;
 
             oldError_ = error_;
             oldErrorIntegral_ = errorIntegral_;
