@@ -283,38 +283,11 @@ then
 fi
 
 [ -f Allrun ] || cp -f "${FOAM_TUTORIALS:?}/Allrun" .
-./Allrun -test
 
+echo "Starting Allrun -test" 1>&2
+echo "    $PWD" 1>&2
+echo 1>&2
 
-# The rest here doesn't seem to be used
-sed -e :a -e '/\\$/N; s/\\\n//; ta' Allrun > temp
-APPLICATIONS=\
-    $(grep "applications=" temp | sed 's/applications=\"\([A-Za-z \t]*\)\"/\1/g')
-
-rm $SCHEMES_FILE > /dev/null 2>&1
-for APP in $APPLICATIONS
-do
-    echo $APP >> $SCHEMES_FILE
-    echo "$APP: " | tr -d "\n" >> $SOLVERS_FILE
-    for ST in $FV_SCHEMES
-    do
-        rm $SCHEMES_TEMP $SOLVERS_TEMP > /dev/null 2>&1
-        echo "  ${ST}" >> $SCHEMES_FILE
-        for LOG in $(find ${APP} -name "log.${APP}" -type f)
-        do
-            for S in $(grep ${ST} ${LOG} | cut -d" " -f4)
-            do
-                echo "    ${S}" >> $SCHEMES_TEMP
-            done
-        echo $(grep solver ${LOG} | cut -d" " -f4) >> $SOLVERS_TEMP
-        done
-        if [ -f $SCHEMES_TEMP ]
-        then
-            cat $SCHEMES_TEMP | sort -u >> $SCHEMES_FILE
-        fi
-    done
-    cat $SOLVERS_TEMP | tr " " "\n" | sort -u | tr "\n" " " >> $SOLVERS_FILE
-    echo "" >> $SOLVERS_FILE
-done
+exec ./Allrun -test
 
 #------------------------------------------------------------------------------
