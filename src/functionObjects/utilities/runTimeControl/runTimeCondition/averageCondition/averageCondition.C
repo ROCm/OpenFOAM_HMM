@@ -70,9 +70,9 @@ Foam::functionObjects::runTimeControls::averageCondition::averageCondition
     window_(dict.lookupOrDefault<scalar>("window", -1)),
     windowType_
     (
-        window_ > 0 ?
-            windowTypeNames.read(dict.lookup("windowType"))
-          : windowType::NONE
+        window_ > 0
+      ? windowTypeNames.get("windowType", dict)
+      : windowType::NONE
     ),
     totalTime_(fieldNames_.size(), scalar(0)),
     resetOnRestart_(dict.lookupOrDefault<bool>("resetOnRestart", false)),

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ void Foam::functionObjects::timeControl::readControls()
     if (dict_.readIfPresent("triggerStart", triggerStart_))
     {
         dict_.readIfPresent("triggerEnd", triggerEnd_);
-        controlMode_ = controlModeNames_.read(dict_.lookup("controlMode"));
+        controlMode_ = controlModeNames_.get("controlMode", dict_);
     }
 
     deltaTCoeff_ = GREAT;

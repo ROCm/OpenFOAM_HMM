@@ -150,7 +150,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
         }
 
         // Set the action to perform when all conditions are satisfied
-        // - set to end fro backwards compatibility with v1806
+        // - set to end for backwards compatibility with v1806
         satisfiedAction_ =
             satisfiedActionNames.lookupOrDefault
             (
@@ -161,7 +161,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
 
         if (satisfiedAction_ == satisfiedAction::SET_TRIGGER)
         {
-            triggerIndex_ = readLabel(dict.lookup("trigger"));
+            triggerIndex_ = dict.get<label>("trigger");
         }
 
         return true;

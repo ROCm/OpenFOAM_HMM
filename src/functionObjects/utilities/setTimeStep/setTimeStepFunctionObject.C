@@ -105,18 +105,12 @@ bool Foam::functionObjects::setTimeStepFunctionObject::read
 
     timeStepPtr_ = Function1<scalar>::New("deltaT", dict);
 
-    // Check that adjustTimeStep is active
-    const dictionary& controlDict = time_.controlDict();
-
-    Switch adjust;
-    if
-    (
-       !controlDict.readIfPresent<Switch>("adjustTimeStep", adjust)
-    || !adjust
-    )
+    // Ensure that adjustTimeStep is active
+    if (!time_.controlDict().lookupOrDefault<bool>("adjustTimeStep", false))
     {
         FatalIOErrorInFunction(dict)
             << "Need to set 'adjustTimeStep' true to allow timestep control"
+            << nl
             << exit(FatalIOError);
     }
 

@@ -71,7 +71,6 @@ SourceFiles
 
 #include "functionObject.H"
 #include "Function1.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -136,15 +135,12 @@ public:
         virtual bool adjustTimeStep();
 
         //- Read and set the function object if its data have changed
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
-        //- Called at each ++ or += of the time-loop.
-        //  postProcess overrides the usual executeControl behaviour and
-        //  forces execution (used in post-processing mode)
+        //- Execute does nothing
         virtual bool execute();
-        //- Called at each ++ or += of the time-loop.
-        //  postProcess overrides the usual writeControl behaviour and
-        //  forces writing always (used in post-processing mode)
+
+        //- Write does nothing
         virtual bool write();
 };
 
