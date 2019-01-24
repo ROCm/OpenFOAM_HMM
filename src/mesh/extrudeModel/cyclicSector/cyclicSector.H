@@ -27,6 +27,8 @@ Class
 Description
     Extrudes a sector.
 
+    Uses the sectorCoeffs dictionary.
+
 See also
     Foam::extrudeModels::sector
 
@@ -52,7 +54,6 @@ class cyclicSector
 :
     public sector
 {
-
 public:
 
     //- Runtime type information
@@ -61,11 +62,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        cyclicSector(const dictionary& dict);
+        explicit cyclicSector(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~cyclicSector();
+    virtual ~cyclicSector() = default;
 };
 
 

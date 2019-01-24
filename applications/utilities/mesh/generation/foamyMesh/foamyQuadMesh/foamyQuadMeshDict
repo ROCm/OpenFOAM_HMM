@@ -175,14 +175,12 @@ extrusion
         thickness       0.1;
     }
 
-    wedgeCoeffs
+    sectorCoeffs    //<- Also used for wedge
     {
-        axisPt      (0 0 0);
+        point       (0 0 0);
         axis        (1 0 0);
         angle       10;
     }
-
-    thickness       0.1;
 }
 
 

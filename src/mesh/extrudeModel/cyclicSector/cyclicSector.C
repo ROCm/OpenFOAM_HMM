@@ -48,12 +48,6 @@ cyclicSector::cyclicSector(const dictionary& dict)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-cyclicSector::~cyclicSector()
-{}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace extrudeModels

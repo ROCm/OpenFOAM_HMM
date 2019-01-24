@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,13 @@ Class
 
 Description
     Top level extrusion model class
+
+    Dictionary entries
+    \table
+        Property       | Description                        | Required | Default
+        nLayer         | Number of extrusion layers         | no  | 1
+        expansionRatio | Expansion ratio                    | no  | 1
+    \endtable
 
 SourceFiles
     extrudeModel.C
@@ -58,8 +65,6 @@ protected:
         label nLayers_;
 
         const scalar expansionRatio_;
-
-        const dictionary& dict_;
 
         const dictionary& coeffDict_;
 
@@ -94,27 +99,30 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary
-        extrudeModel(const word& modelType, const dictionary&);
+        //- Construct from dictionary for given model type
+        //  The corresponding model Coeffs dictionary must exist.
+        extrudeModel(const word& modelType, const dictionary& dict);
 
 
     // Selectors
 
         //- Select null constructed
-        static autoPtr<extrudeModel> New(const dictionary&);
+        static autoPtr<extrudeModel> New(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~extrudeModel();
+    virtual ~extrudeModel() = default;
 
 
     // Member Functions
 
         // Access
 
-            label nLayers() const;
+        //- Return the number of layers
+        label nLayers() const;
 
-            scalar expansionRatio() const;
+        //- Return the expansion ratio
+        scalar expansionRatio() const;
 
 
     // Member Operators

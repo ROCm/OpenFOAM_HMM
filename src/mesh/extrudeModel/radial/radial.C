@@ -49,12 +49,6 @@ radial::radial(const dictionary& dict)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-radial::~radial()
-{}
-
-
 // * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
 
 point radial::operator()

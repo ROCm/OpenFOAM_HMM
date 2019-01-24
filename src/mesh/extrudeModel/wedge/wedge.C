@@ -56,12 +56,6 @@ wedge::wedge(const dictionary& dict)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-wedge::~wedge()
-{}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace extrudeModels

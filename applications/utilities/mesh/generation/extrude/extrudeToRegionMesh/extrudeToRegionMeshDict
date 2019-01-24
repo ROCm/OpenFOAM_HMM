@@ -85,9 +85,9 @@ linearNormalCoeffs
     thickness       0.05;
 }
 
-wedgeCoeffs
+sectorCoeffs    //<- Also used for wedge
 {
-    axisPt      (0 0.1 -0.05);
+    point       (0 0.1 -0.05);
     axis        (-1 0 0);
     angle       360;  // For nLayers=1 assume symmetry so angle/2 on each side
 }
@@ -100,9 +100,8 @@ linearDirectionCoeffs
 
 linearRadialCoeffs
 {
-     R              0.1;
-    // Optional inner radius
-    Rsurface        0.01;
+    R               0.1;
+    Rsurface        0.01;  // Optional inner radius
 }
 
 radialCoeffs

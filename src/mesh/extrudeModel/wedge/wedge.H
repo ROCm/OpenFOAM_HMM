@@ -27,6 +27,8 @@ Class
 Description
     Extrudes by rotating a surface symmetrically around axis by 1 layer.
 
+    Uses the sectorCoeffs dictionary.
+
 See also
     Foam::extrudeModels::sector
 
@@ -45,7 +47,7 @@ namespace extrudeModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class wedge Declaration
+                    Class extrudeModels::wedge Declaration
 \*---------------------------------------------------------------------------*/
 
 class wedge
@@ -61,11 +63,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        wedge(const dictionary& dict);
+        explicit wedge(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~wedge();
+    virtual ~wedge() = default;
 };
 
 

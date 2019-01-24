@@ -48,12 +48,6 @@ linearRadial::linearRadial(const dictionary& dict)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-linearRadial::~linearRadial()
-{}
-
-
 // * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
 
 point linearRadial::operator()
@@ -66,6 +60,7 @@ point linearRadial::operator()
     // radius of the surface
     scalar rs = mag(surfacePoint);
     vector rsHat = surfacePoint/rs;
+
     if (Rsurface_ >= 0) rs = Rsurface_;
 
     scalar r = rs + (R_ - rs)*sumThickness(layer);

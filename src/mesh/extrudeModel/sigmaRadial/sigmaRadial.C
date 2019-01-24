@@ -57,12 +57,6 @@ sigmaRadial::sigmaRadial(const dictionary& dict)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-sigmaRadial::~sigmaRadial()
-{}
-
-
 // * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
 
 point sigmaRadial::operator()

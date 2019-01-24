@@ -14,18 +14,18 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-extrudeModel        wedge;
+extrudeModel    wedge;
 
 patchInfo
 {}
 
-patchType           wedge;
+patchType       wedge;
 
-sectorCoeffs
+sectorCoeffs    //<- Also used for wedge
 {
-    axisPt          (0 0 0);
-    axis            (1 0 0);
-    angle           10;
+    point       (0 0 0);
+    axis        (1 0 0);
+    angle       10;
 }
 
 

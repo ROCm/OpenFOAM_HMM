@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,14 @@ Class
     Foam::extrudeModels::linearRadial
 
 Description
+    Extrudes by transforming radially from the surface.
+
+    The linearRadialCoeffs dictionary entries
+    \table
+        Property  | Description                             | Required | Default
+        R         | The radial thickness                    | yes |
+        Rsurface  | Surface inner radius                    | no  | -1
+    \endtable
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,7 +49,7 @@ namespace extrudeModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class linearRadial Declaration
+                 Class extrudeModels::linearRadial Declaration
 \*---------------------------------------------------------------------------*/
 
 class linearRadial
@@ -62,15 +70,16 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        linearRadial(const dictionary& dict);
+        explicit linearRadial(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~linearRadial();
+    virtual ~linearRadial() = default;
 
 
     // Member Operators
 
+        //- Return point
         point operator()
         (
             const point& surfacePoint,

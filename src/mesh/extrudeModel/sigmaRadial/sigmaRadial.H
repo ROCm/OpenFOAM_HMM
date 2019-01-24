@@ -25,6 +25,15 @@ Class
     Foam::extrudeModels::sigmaRadial
 
 Description
+    Extrudes into sphere with grading according to pressure (atmospherics)
+
+    The sigmaRadialCoeffs dictionary entries
+    \table
+        Property  | Description                             | Required | Default
+        RTbyg     |                                         | yes |
+        pRef      |                                         | yes |
+        pStrat    |                                         | yes |
+    \endtable
 
 \*---------------------------------------------------------------------------*/
 
@@ -67,7 +76,7 @@ public:
 
 
     //-Destructor
-    virtual ~sigmaRadial();
+    virtual ~sigmaRadial() = default;
 
 
     // Member Operators

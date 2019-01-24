@@ -25,6 +25,13 @@ Class
     Foam::extrudeModels::radial
 
 Description
+    Extrudes radially according to the Function1 description.
+
+    The radialCoeffs dictionary entries
+    \table
+        Property  | Description                             | Required | Default
+        R         | The radii as a Function1                | yes |
+    \endtable
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,7 +49,7 @@ namespace extrudeModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class radial Declaration
+                    Class extrudeModels::radial Declaration
 \*---------------------------------------------------------------------------*/
 
 class radial
@@ -62,11 +69,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        radial(const dictionary& dict);
+        explicit radial(const dictionary& dict);
 
 
     //-Destructor
-    virtual ~radial();
+    virtual ~radial() = default;
 
 
     // Member Operators

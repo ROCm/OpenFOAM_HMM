@@ -43,15 +43,12 @@ Foam::extrudeModel::extrudeModel
 :
     nLayers_(dict.lookupOrDefault<label>("nLayers", 1)),
     expansionRatio_(dict.lookupOrDefault<scalar>("expansionRatio", 1)),
-    dict_(dict),
     coeffDict_(dict.optionalSubDict(modelType + "Coeffs"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::extrudeModel::~extrudeModel()
-{}
+{
+    DebugInfo
+        << "Selected extrudeModel for " << modelType
+        << "using coeffs " << coeffDict_ << nl;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
