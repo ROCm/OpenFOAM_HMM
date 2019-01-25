@@ -64,18 +64,15 @@ class fvMeshFunctionObject
 :
     public regionFunctionObject
 {
-
 protected:
 
-    // Protected member data
+    // Protected Member Data
 
         //- Reference to the fvMesh
         const fvMesh& mesh_;
 
 
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         fvMeshFunctionObject(const fvMeshFunctionObject&) = delete;
