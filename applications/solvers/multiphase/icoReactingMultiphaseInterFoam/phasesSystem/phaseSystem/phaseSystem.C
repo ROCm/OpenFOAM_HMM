@@ -1016,7 +1016,7 @@ void Foam::phaseSystem::addInterfacePorosity(fvVectorMatrix& UEqn)
 
     forAllConstIters(phaseModels_, iteri)
     {
-        const phaseModel& phasei = iteri();
+        const phaseModel& phasei = iteri()();
 
         auto iterk = iteri;
 

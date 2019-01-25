@@ -95,7 +95,7 @@ timeVaryingMappedFixedValueFvPatchField
     (
         new PatchFunction1Types::MappedFile<Type>
         (
-            ptf.uniformValue_,
+            ptf.uniformValue_(),
             p.patch()
         )
     )
@@ -114,7 +114,7 @@ timeVaryingMappedFixedValueFvPatchField
     (
         new PatchFunction1Types::MappedFile<Type>
         (
-            ptf.uniformValue_,
+            ptf.uniformValue_(),
             this->patch().patch()
         )
     )
@@ -134,7 +134,7 @@ timeVaryingMappedFixedValueFvPatchField
     (
         new PatchFunction1Types::MappedFile<Type>
         (
-            ptf.uniformValue_,
+            ptf.uniformValue_(),
             this->patch().patch()
         )
     )

@@ -422,7 +422,7 @@ Foam::dynamicRefineFvMesh::refine
     //    cellTreePtr_.clear();
 
     // Update fields
-    updateMesh(map);
+    updateMesh(*map);
 
 
     // Move mesh
@@ -442,7 +442,7 @@ Foam::dynamicRefineFvMesh::refine
 
 
     // Update numbering of cells/vertices.
-    meshCutter_.updateMesh(map);
+    meshCutter_.updateMesh(*map);
 
     // Update numbering of protectedCell_
     if (protectedCell_.size())
@@ -517,7 +517,7 @@ Foam::dynamicRefineFvMesh::unrefine
         << endl;
 
     // Update fields
-    updateMesh(map);
+    updateMesh(*map);
 
 
     // Move mesh
@@ -620,7 +620,7 @@ Foam::dynamicRefineFvMesh::unrefine
 
 
     // Update numbering of cells/vertices.
-    meshCutter_.updateMesh(map);
+    meshCutter_.updateMesh(*map);
 
     // Update numbering of protectedCell_
     if (protectedCell_.size())

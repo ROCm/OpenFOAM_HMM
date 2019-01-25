@@ -43,7 +43,7 @@ SourceFiles
 #ifndef autoPtr_H
 #define autoPtr_H
 
-// Transitional features/misfeatures:
+// Transitional features/misfeatures
 #define Foam_autoPtr_copyConstruct
 #define Foam_autoPtr_copyAssign
 #define Foam_autoPtr_castOperator
@@ -93,7 +93,7 @@ public:
         //      will be constructed.
         //
         //  \note Similar to New but for derived types.
-        //  In the future check for is_convertible on the pointer types
+        //  Future check for std::is_base_of ?
         template<class U, class... Args>
         inline static autoPtr<T> NewFrom(Args&&... args);
 
@@ -114,7 +114,7 @@ public:
 
         //- Move construct, transferring ownership from derived type.
         //  U must be derivable from T
-        //  \note In the future check for is_convertible on the pointer types
+        //  \note Future check for std::is_base_of ?
         template<class U>
         inline explicit autoPtr(autoPtr<U>&& ap);
 
@@ -226,10 +226,13 @@ public:
         //  Fatal error if no pointer is managed
         inline const T& operator()() const;
 
-        //- Automatic cast conversion to the underlying type reference
+        //- Deprecated(2019-01) Automatic cast conversion to underlying type
         //  Fatal error if no pointer is managed
+        //  \deprecated(2019-01) Can result in inadvertent conversions
+        //      where the user should really know or check if the pointer
+        //      is valid prior to using.
         #ifdef Foam_autoPtr_castOperator
-        inline operator const T&() const { return operator*(); }
+        operator const T&() const { return operator*(); }
         #else
         operator const T&() const = delete;
         #endif
@@ -258,7 +261,7 @@ public:
 
     // Housekeeping
 
-        //- No copy assignment from plain pointer
+        //- Deprecated(2018-02) No copy assignment from plain pointer
         //  \deprecated(2018-02) Convenient, but uncontrolled access
         void operator=(T* p) = delete;
 };

@@ -2742,7 +2742,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::directionalRefine
     autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh_, false);
 
     // Update fields
-    mesh_.updateMesh(morphMap);
+    mesh_.updateMesh(*morphMap);
 
     // Move mesh (since morphing does not do this)
     if (morphMap().hasMotionPoints())
@@ -2759,10 +2759,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::directionalRefine
     mesh_.setInstance(timeName());
 
     // Update stored refinement pattern
-    meshRefiner.updateMesh(morphMap);
+    meshRefiner.updateMesh(*morphMap);
 
     // Update intersection info
-    updateMesh(morphMap, getChangedFaces(morphMap, cellsToRefine));
+    updateMesh(*morphMap, getChangedFaces(*morphMap, cellsToRefine));
 
     return morphMap;
 }
