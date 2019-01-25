@@ -70,8 +70,8 @@ set projectDir=`lsof +p $$ |& \
 setenv WM_COMPILER_TYPE system
 
 # [WM_COMPILER] - Compiler:
-# = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-4] | Gcc7[1-3] | Gcc8[12] | GccKNL |
-#   Clang | Clang3[7-9] | Clang[4-6]0 | Icc | IccKNL | Cray | Arm
+# = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-4] | Gcc7[1-3] | Gcc8[12] |
+#   Clang | Clang3[7-9] | Clang[4-6]0 | Icc | Cray | Arm
 setenv WM_COMPILER Gcc
 
 # [WM_ARCH_OPTION] - Memory addressing:
@@ -88,8 +88,10 @@ setenv WM_PRECISION_OPTION DP
 # = 32 | 64
 setenv WM_LABEL_SIZE 32
 
-# [WM_COMPILE_OPTION] - Optimised, debug, profiling:
+# [WM_COMPILE_OPTION] - Optimised, debug, profiling, other:
 # = Opt | Debug | Prof
+# Other is processor or packaging specific, for example
+# = OptKNL
 setenv WM_COMPILE_OPTION Opt
 
 # [WM_MPLIB] - MPI implementation:

@@ -1,8 +1,6 @@
-SUFFIXES += .c
+include $(GENERAL_RULES)/Icc/c
 
 cc          = icc
-
-cWARN       =
 
 include $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 

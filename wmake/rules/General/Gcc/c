@@ -1,0 +1,7 @@
+SUFFIXES += .c
+
+cc          = gcc
+
+cDBUG       =
+cOPT        = -O2
+cWARN       = -Wall

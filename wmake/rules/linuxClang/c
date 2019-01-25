@@ -1,8 +1,6 @@
-SUFFIXES += .c
+include $(GENERAL_RULES)/Clang/c
 
 cc          = clang -m32
-
-cWARN       = -Wall
 
 include $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 
