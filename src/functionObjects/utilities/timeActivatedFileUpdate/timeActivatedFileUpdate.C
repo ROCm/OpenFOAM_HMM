@@ -89,8 +89,7 @@ Foam::functionObjects::timeActivatedFileUpdate::timeActivatedFileUpdate
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(runTime),
+    timeFunctionObject(name, runTime),
     fileToUpdate_("unknown-fileToUpdate"),
     timeVsFile_(),
     lastIndex_(-1),
@@ -98,12 +97,6 @@ Foam::functionObjects::timeActivatedFileUpdate::timeActivatedFileUpdate
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::timeActivatedFileUpdate::~timeActivatedFileUpdate()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

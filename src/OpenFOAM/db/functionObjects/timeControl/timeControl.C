@@ -66,12 +66,6 @@ Foam::timeControl::timeControl
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::timeControl::~timeControl()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::timeControl::entriesPresent
@@ -82,12 +76,7 @@ bool Foam::timeControl::entriesPresent
 {
     const word controlName(prefix + "Control");
 
-    if (dict.found(controlName))
-    {
-        return true;
-    }
-
-    return false;
+    return dict.found(controlName);
 }
 
 

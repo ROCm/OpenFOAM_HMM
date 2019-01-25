@@ -146,7 +146,7 @@ SourceFiles
 #ifndef functionObjects_externalCoupled_H
 #define functionObjects_externalCoupled_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "externalFileCoupler.H"
 #include "DynamicList.H"
 #include "wordReList.H"
@@ -173,7 +173,7 @@ namespace functionObjects
 
 class externalCoupled
 :
-    public functionObject,
+    public functionObjects::timeFunctionObject,
     public externalFileCoupler
 {
 public:
@@ -193,10 +193,7 @@ private:
         //- State end names (NB, only selectable values itemized)
         static const Enum<stateEnd> stateEndNames_;
 
-    // Private data
-
-        //- Reference to the time database
-        const Time& time_;
+    // Private Member Data
 
         //- Calculation frequency
         label calcFrequency_;

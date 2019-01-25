@@ -122,8 +122,7 @@ Foam::functionObjects::vtkWrite::vtkWrite
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(runTime),
+    timeFunctionObject(name, runTime),
     outputDir_(),
     printf_(),
     writeOpts_(vtk::formatType::INLINE_BASE64),

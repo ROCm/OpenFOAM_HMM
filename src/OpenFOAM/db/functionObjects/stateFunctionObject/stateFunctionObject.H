@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjectState
+    Foam::functionObjects::stateFunctionObject
 
 Description
     Base class for function objects, adding functionality to read/write state
@@ -46,7 +46,7 @@ SourceFiles
 #ifndef functionObjects_stateFunctionObject_H
 #define functionObjects_stateFunctionObject_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,12 +59,12 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class stateFunctionObject Declaration
+            Class functionObjects::stateFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class stateFunctionObject
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
 
 private:
@@ -75,24 +75,9 @@ private:
         static const word resultsName_;
 
 
-    // Private Member Functions
-
-        //- No copy construct
-        stateFunctionObject(const stateFunctionObject&) = delete;
-
-        //- No copy assignment
-        void operator=(const stateFunctionObject&) = delete;
-
-
 protected:
 
-    // Protected Member Data
-
-        //- Reference to the time database
-        const Time& time_;
-
-
-    // Protacted Member Functions
+    // Protected Member Functions
 
         //- Return a const reference to the state dictionary
         const IOdictionary& stateDict() const;
@@ -100,6 +85,12 @@ protected:
         //- Return non-const access to the state dictionary
         IOdictionary& stateDict();
 
+
+        //- No copy construct
+        stateFunctionObject(const stateFunctionObject&) = delete;
+
+        //- No copy assignment
+        void operator=(const stateFunctionObject&) = delete;
 
 
 public:
@@ -111,7 +102,7 @@ public:
 
 
     //- Destructor
-    ~stateFunctionObject();
+    virtual ~stateFunctionObject() = default;
 
 
     // Member Functions

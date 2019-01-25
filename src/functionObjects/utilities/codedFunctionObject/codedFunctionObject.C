@@ -124,13 +124,12 @@ Foam::functionObjects::codedFunctionObject::codeDict() const
 Foam::functionObjects::codedFunctionObject::codedFunctionObject
 (
     const word& name,
-    const Time& time,
+    const Time& runTime,
     const dictionary& dict
 )
 :
-    functionObject(name),
+    timeFunctionObject(name, runTime),
     codedBase(),
-    time_(time),
     dict_(dict)
 {
     read(dict_);
@@ -138,12 +137,6 @@ Foam::functionObjects::codedFunctionObject::codedFunctionObject
     updateLibrary(name_);
     redirectFunctionObject();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::codedFunctionObject::~codedFunctionObject()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

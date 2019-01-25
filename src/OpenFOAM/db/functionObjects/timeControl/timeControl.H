@@ -116,7 +116,7 @@ public:
 
 
     //- Destructor
-    ~timeControl();
+    ~timeControl() = default;
 
 
     // Member Functions

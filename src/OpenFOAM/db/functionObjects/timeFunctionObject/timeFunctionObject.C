@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,33 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "timeFunctionObject.H"
+#include "Time.H"
 
-inline const Foam::dictionary& Foam::functionObjects::timeControl::dict() const
-{
-    return dict_;
-}
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
-inline const Foam::timeControl&
-Foam::functionObjects::timeControl::executeControl() const
-{
-    return executeControl_;
-}
-
-
-inline const Foam::timeControl&
-Foam::functionObjects::timeControl::writeControl() const
-{
-    return writeControl_;
-}
-
-
-inline const Foam::functionObject&
-Foam::functionObjects::timeControl::filter() const
-{
-    return *foPtr_;
-}
+Foam::functionObjects::timeFunctionObject::timeFunctionObject
+(
+    const word& name,
+    const Time& runTime
+)
+:
+    functionObject(name),
+    time_(runTime)
+{}
 
 
 // ************************************************************************* //

@@ -442,12 +442,11 @@ void Foam::functionObjects::timeControl::calcDeltaTCoeff
 Foam::functionObjects::timeControl::timeControl
 (
     const word& name,
-    const Time& t,
+    const Time& runTime,
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(t),
+    timeFunctionObject(name, runTime),
     dict_(dict),
     controlMode_(controlMode::TIME),
     timeStart_(-VGREAT),
@@ -455,9 +454,9 @@ Foam::functionObjects::timeControl::timeControl
     triggerStart_(labelMax),
     triggerEnd_(labelMax),
     nStepsToStartTimeChange_(labelMax),
-    executeControl_(t, dict, "execute"),
-    writeControl_(t, dict, "write"),
-    foPtr_(functionObject::New(name, t, dict_)),
+    executeControl_(runTime, dict, "execute"),
+    writeControl_(runTime, dict, "write"),
+    foPtr_(functionObject::New(name, runTime, dict_)),
     executeTimeIndex_(-1),
     deltaT0_(0),
     seriesDTCoeff_(GREAT)

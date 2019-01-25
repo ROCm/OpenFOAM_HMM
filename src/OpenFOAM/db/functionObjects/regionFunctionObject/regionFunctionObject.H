@@ -48,14 +48,14 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class objectRegistry;
 
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class regionFunctionObject Declaration
+            Class functionObjects::regionFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class regionFunctionObject
@@ -65,7 +65,7 @@ class regionFunctionObject
 
 protected:
 
-    // Protected member data
+    // Protected Member Data
 
         //- Reference to the region objectRegistry
         const objectRegistry& obr_;
@@ -76,7 +76,7 @@ protected:
         const objectRegistry& subObr_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Selector for alternative sub-registry,
         //  when the keyword %subRegion is present in the dictionary
@@ -147,10 +147,6 @@ protected:
         //- Clear field from the (sub) objectRegistry if present
         bool clearObject(const word& fieldName);
 
-
-private:
-
-    // Private Member Functions
 
         //- No copy construct
         regionFunctionObject(const regionFunctionObject&) = delete;

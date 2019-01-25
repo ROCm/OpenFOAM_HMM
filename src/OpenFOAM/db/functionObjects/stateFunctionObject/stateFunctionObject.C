@@ -52,14 +52,7 @@ Foam::functionObjects::stateFunctionObject::stateFunctionObject
     const Time& runTime
 )
 :
-    functionObject(name),
-    time_(runTime)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::stateFunctionObject::~stateFunctionObject()
+    timeFunctionObject(name, runTime)
 {}
 
 

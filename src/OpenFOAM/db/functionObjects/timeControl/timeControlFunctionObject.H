@@ -56,7 +56,7 @@ SourceFiles
 #ifndef functionObjects_timeControl_H
 #define functionObjects_timeControl_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "dictionary.H"
 #include "timeControl.H"
 
@@ -68,12 +68,12 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class timeControl Declaration
+                Class functionObjects::timeControl Declaration
 \*---------------------------------------------------------------------------*/
 
 class timeControl
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
 public:
 
@@ -95,9 +95,6 @@ public:
 private:
 
     // Private data
-
-        //- Reference to the time database
-        const Time& time_;
 
         //- Input dictionary
         dictionary dict_;
@@ -198,17 +195,14 @@ public:
         timeControl
         (
             const word& name,
-            const Time&,
-            const dictionary&
+            const Time& runTime,
+            const dictionary& dict
         );
 
 
     // Member Functions
 
         // Access
-
-            //- Return time database
-            inline const Time& time() const;
 
             //- Return the input dictionary
             inline const dictionary& dict() const;

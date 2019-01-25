@@ -51,7 +51,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class writeFile Declaration
+                 Class functionObjects::writeFile Declaration
 \*---------------------------------------------------------------------------*/
 
 class writeFile
@@ -120,10 +120,6 @@ protected:
         //- Return the value width when writing to stream with optional offset
         Omanip<int> valueWidth(const label offset = 0) const;
 
-
-private:
-
-    // Private Member Functions
 
         //- No copy construct
         writeFile(const writeFile&) = delete;

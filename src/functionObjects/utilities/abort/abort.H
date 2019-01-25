@@ -86,7 +86,7 @@ SourceFiles
 #ifndef functionObjects_abort_H
 #define functionObjects_abort_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -102,12 +102,9 @@ namespace functionObjects
 
 class abort
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
     // Private Data
-
-        //- Reference to the Time
-        const Time& time_;
 
         //- The fully-qualified name of the trigger file
         fileName file_;

@@ -508,9 +508,8 @@ Foam::functionObjects::externalCoupled::externalCoupled
     const dictionary& dict
 )
 :
-    functionObject(name),
+    timeFunctionObject(name, runTime),
     externalFileCoupler(),
-    time_(runTime),
     calcFrequency_(-1),
     lastTrigger_(-1),
     initialisedCoupling_(false)

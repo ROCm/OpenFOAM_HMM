@@ -69,7 +69,7 @@ SourceFiles
 #ifndef functionObjects_timeActivatedFileUpdate_H
 #define functionObjects_timeActivatedFileUpdate_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "Tuple2.H"
 #include "Switch.H"
 
@@ -85,17 +85,14 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class timeActivatedFileUpdate Declaration
+          Class functionObjects::timeActivatedFileUpdate Declaration
 \*---------------------------------------------------------------------------*/
 
 class timeActivatedFileUpdate
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
-    // Private data
-
-        //- Reference to Time
-        const Time& time_;
+    // Private Member Data
 
         //- Name of file to update
         fileName fileToUpdate_;
@@ -140,7 +137,7 @@ public:
 
 
     //- Destructor
-    virtual ~timeActivatedFileUpdate();
+    virtual ~timeActivatedFileUpdate() = default;
 
 
     // Member Functions

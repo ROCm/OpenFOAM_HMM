@@ -102,12 +102,6 @@ Foam::functionObjects::logFiles::logFiles
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::logFiles::~logFiles()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::wordList& Foam::functionObjects::logFiles::names() const

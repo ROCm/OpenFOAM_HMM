@@ -138,8 +138,7 @@ Foam::functionObjects::abort::abort
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(runTime),
+    timeFunctionObject(name, runTime),
     file_(),
     defaultAction_(Time::stopAtControls::saUnknown),
     triggered_(false)

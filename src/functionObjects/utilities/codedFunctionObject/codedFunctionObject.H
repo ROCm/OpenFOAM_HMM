@@ -75,7 +75,7 @@ SourceFiles
 #ifndef functionObjects_codedFunctionObject_H
 #define functionObjects_codedFunctionObject_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "codedBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,15 +91,12 @@ namespace functionObjects
 
 class codedFunctionObject
 :
-    public functionObject,
+    public functionObjects::timeFunctionObject,
     public codedBase
 {
 protected:
 
     // Protected data
-
-        //- Reference to the time database
-        const Time& time_;
 
         //- Input dictionary
         dictionary dict_;
@@ -153,13 +150,13 @@ public:
         codedFunctionObject
         (
             const word& name,
-            const Time& time,
+            const Time& runTime,
             const dictionary& dict
         );
 
 
     //- Destructor
-    virtual ~codedFunctionObject();
+    virtual ~codedFunctionObject() = default;
 
 
     // Member Functions

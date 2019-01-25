@@ -132,7 +132,7 @@ SourceFiles
 #ifndef functionObjects_vtkWrite_H
 #define functionObjects_vtkWrite_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "foamVtkInternalWriter.H"
 #include "foamVtkPatchWriter.H"
 #include "foamVtkSeriesWriter.H"
@@ -152,12 +152,9 @@ namespace functionObjects
 
 class vtkWrite
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
     // Private Data
-
-        //- Reference to the time database
-        const Time& time_;
 
         //- The output directory
         fileName outputDir_;

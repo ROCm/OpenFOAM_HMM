@@ -53,27 +53,13 @@ Foam::functionObjects::setTimeStepFunctionObject::setTimeStepFunctionObject
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(runTime)
+    timeFunctionObject(name, runTime)
 {
     read(dict);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::setTimeStepFunctionObject::~setTimeStepFunctionObject()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::Time&
-Foam::functionObjects::setTimeStepFunctionObject::time() const
-{
-    return time_;
-}
-
 
 bool Foam::functionObjects::setTimeStepFunctionObject::adjustTimeStep()
 {

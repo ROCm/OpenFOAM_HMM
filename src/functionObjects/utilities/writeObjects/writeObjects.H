@@ -99,7 +99,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class writeObjects Declaration
+                Class functionObjects::writeObjects Declaration
 \*---------------------------------------------------------------------------*/
 
 class writeObjects
@@ -125,7 +125,7 @@ private:
 
     // Private data
 
-        //- Reference to Db
+        //- Reference to registry
         const objectRegistry& obr_;
 
         //- To only write objects of defined writeOption

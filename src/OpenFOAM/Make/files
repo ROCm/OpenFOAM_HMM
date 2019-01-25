@@ -284,14 +284,17 @@ $(dll)/dynamicCode/dynamicCode.C
 $(dll)/dynamicCode/dynamicCodeContext.C
 $(dll)/codedBase/codedBase.C
 
-db/functionObjects/functionObject/functionObject.C
-db/functionObjects/functionObjectList/functionObjectList.C
-db/functionObjects/stateFunctionObject/stateFunctionObject.C
-db/functionObjects/writeFile/writeFile.C
-db/functionObjects/logFiles/logFiles.C
-db/functionObjects/timeControl/timeControl.C
-db/functionObjects/timeControl/timeControlFunctionObject.C
-db/functionObjects/regionFunctionObject/regionFunctionObject.C
+funcObjs = db/functionObjects
+
+$(funcObjs)/functionObject/functionObject.C
+$(funcObjs)/functionObjectList/functionObjectList.C
+$(funcObjs)/stateFunctionObject/stateFunctionObject.C
+$(funcObjs)/timeFunctionObject/timeFunctionObject.C
+$(funcObjs)/writeFile/writeFile.C
+$(funcObjs)/logFiles/logFiles.C
+$(funcObjs)/timeControl/timeControl.C
+$(funcObjs)/timeControl/timeControlFunctionObject.C
+$(funcObjs)/regionFunctionObject/regionFunctionObject.C
 
 Time = db/Time
 $(Time)/TimePaths.C
