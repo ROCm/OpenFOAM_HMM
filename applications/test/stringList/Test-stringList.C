@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "stringListOps.H"
+#include "ListOps.H"
 #include "FlatOutput.H"
 #include "IOstreams.H"
 #include "StringStream.H"
@@ -57,10 +58,18 @@ int main(int argc, char *argv[])
     labelList matches = findStrings(regExp(".*ee.*"), strLst);
 
     Info<< "matches found for regexp .*ee.* :" << nl << matches << nl;
+
     forAll(matches, i)
     {
         Info<< " -> " << strLst[matches[i]] << nl;
     }
+
+    Info<< "Match found using ListOps = "
+        << ListOps::found(strLst, regExp(".*ee.*")) << nl;
+
+    Info<< "First index = "
+        << ListOps::find(strLst, regExp(".*ee.*")) << nl;
+
     Info<< endl;
 
     matches = findStrings(reLst, strLst);

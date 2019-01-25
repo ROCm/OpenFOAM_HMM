@@ -641,7 +641,7 @@ void Foam::isoSurfaceTopo::generateTriPoints
         forAll(f1, fp)
         {
             oppositeI = f1[fp];
-            if (findIndex(f0, oppositeI) == -1)
+            if (!f0.found(oppositeI))
             {
                 break;
             }

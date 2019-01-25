@@ -1097,6 +1097,43 @@ void Foam::ListOps::uniqueEqOp<T>::operator()
 }
 
 
+template<class ListType, class UnaryPredicate>
+Foam::label Foam::ListOps::find
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start
+)
+{
+    const label len = input.size();
+
+    if (start >= 0)
+    {
+        for (label i = start; i < len; ++i)
+        {
+            if (pred(input[i]))
+            {
+                return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
+
+template<class ListType, class UnaryPredicate>
+bool Foam::ListOps::found
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start
+)
+{
+    return (ListOps::find(input, pred, start) >= 0);
+}
+
+
 template<class T>
 void Foam::ListOps::setValue
 (

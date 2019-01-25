@@ -111,6 +111,7 @@ namespace Foam
 template<class T> class MinMax;
 
 // Common min/max types
+typedef MinMax<label> labelMinMax;
 typedef MinMax<scalar> scalarMinMax;
 
 

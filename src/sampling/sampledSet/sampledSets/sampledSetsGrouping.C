@@ -26,8 +26,8 @@ License
 #include "sampledSets.H"
 #include "volFields.H"
 #include "IOobjectList.H"
-#include "stringListOps.H"
 #include "UIndirectList.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -69,7 +69,7 @@ Foam::label Foam::sampledSets::classifyFields()
     // Detect missing fields
     forAll(fieldSelection_, i)
     {
-        if (findStrings(fieldSelection_[i], allFields).empty())
+        if (!ListOps::found(allFields, fieldSelection_[i]))
         {
             missed.append(i);
         }

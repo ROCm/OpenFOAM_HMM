@@ -425,7 +425,7 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
                     label nei = mesh_.faceNeighbour()[facei];
                     nextCell = (own == celli ? nei : own);
 
-                    if (findIndex(track_, nextCell, startOfTrack) != -1)
+                    if (track_.found(nextCell, startOfTrack))
                     {
                         return celli;
                     }
@@ -438,7 +438,7 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
                     {
                         return nextCell;
                     }
-                    else if (findIndex(track_, nextCell, startOfTrack) != -1)
+                    else if (track_.found(nextCell, startOfTrack))
                     {
                         return -1;  // point is really out
                     }

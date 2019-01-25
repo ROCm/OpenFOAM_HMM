@@ -582,6 +582,32 @@ struct greater
 };
 
 
+//- Find index of the first occurrence that satisfies the predicate.
+//  When start is specified, any occurrences before start are ignored.
+//  Linear search.
+//  \return position in list or -1 if not found.
+template<class ListType, class UnaryPredicate>
+label find
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start=0
+);
+
+
+//- True if there is a value in the list that satisfies the predicate.
+//  When start is specified, any occurences before start are ignored.
+//  Linear search.
+//  \return true if found.
+template<class ListType, class UnaryPredicate>
+bool found
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start=0
+);
+
+
 //- Set various locations of the list with a specified value.
 //
 //  \param list the list to modify
