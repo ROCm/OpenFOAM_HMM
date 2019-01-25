@@ -150,7 +150,7 @@ Foam::label Foam::mapNearestAMI<SourcePatch, TargetPatch>::findMappedSrcFace
 
                 for (const label nbrFacei : nbrFaces)
                 {
-                    if (findIndex(visitedFaces, nbrFacei) == -1)
+                    if (!visitedFaces.found(nbrFacei))
                     {
                         testFaces.append(nbrFacei);
                     }

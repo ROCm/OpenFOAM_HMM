@@ -740,12 +740,16 @@ Foam::labelList Foam::findIndices
 
     // Pass 1: count occurrences
     label count = 0;
-    for (label i = start; i < len; ++i)
+
+    if (start >= 0)
     {
-        if (input[i] == val)
+        for (label i = start; i < len; ++i)
         {
-            if (!count) start = i;  // adjust start for second pass
-            ++count;
+            if (input[i] == val)
+            {
+                if (!count) start = i;  // adjust start for second pass
+                ++count;
+            }
         }
     }
 
@@ -761,7 +765,7 @@ Foam::labelList Foam::findIndices
             if (input[i] == val)
             {
                 indices[count] = i;
-                if (++count == total)
+                if (++count == total)  // early termination
                 {
                     break;
                 }

@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     };
     Pout<< list2 << endl;
 
-    Info<< findIndex(list2, vector(3, 4, 5)) << endl;
+    Info<< list2.find(vector(3, 4, 5)) << endl;
 
     return 0;
 }

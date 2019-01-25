@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -366,7 +366,7 @@ List<OutputIntListType> invertManyToMany
 //  \return The index found or return -1 if not found.
 //  \deprecated(2017-10) - use the UList find/found methods
 template<class ListType>
-label findIndex
+label FOAM_DEPRECATED(2017-10) findIndex
 (
     const ListType& input,
     typename ListType::const_reference val,

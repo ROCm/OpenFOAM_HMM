@@ -60,8 +60,7 @@ void testFind(const T& val, const ListType& lst)
         <<" find() = " << lst.find(val)
         <<" rfind() = " << lst.rfind(val)
         <<" find(2) = " << lst.find(val, 2)
-        <<" rfind(2) = " << lst.rfind(val, 2)
-        <<" findIndex = " << findIndex(lst, val) << nl
+        <<" rfind(2) = " << lst.rfind(val, 2) << nl
         << nl;
 }
 

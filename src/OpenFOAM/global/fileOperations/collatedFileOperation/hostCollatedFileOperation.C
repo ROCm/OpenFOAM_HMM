@@ -69,7 +69,7 @@ Foam::labelList Foam::fileOperations::hostCollatedFileOperation::subRanks
         IStringStream is(ioRanksString);
         labelList ioRanks(is);
 
-        if (findIndex(ioRanks, 0) == -1)
+        if (!ioRanks.found(0))
         {
             FatalErrorInFunction
                 << "Rank 0 (master) should be in the IO ranks. Currently "
