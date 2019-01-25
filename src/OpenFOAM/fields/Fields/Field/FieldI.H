@@ -109,7 +109,6 @@ inline Foam::Field<Type>::Field(Field<Type>& fld, bool reuse)
 {}
 
 
-#ifndef NoConstructFromTmp
 template<class Type>
 inline Foam::Field<Type>::Field(const tmp<Field<Type>>& tfld)
 :
@@ -117,7 +116,6 @@ inline Foam::Field<Type>::Field(const tmp<Field<Type>>& tfld)
 {
     tfld.clear();
 }
-#endif
 
 
 template<class Type>

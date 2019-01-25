@@ -397,12 +397,10 @@ public:
         );
 
         //- Construct from tmp\<GeometricField\> deleting argument
-        #ifndef NoConstructFromTmp
         GeometricField
         (
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
-        #endif
 
         //- Construct as copy resetting IO parameters
         GeometricField
@@ -412,13 +410,11 @@ public:
         );
 
         //- Construct as copy of tmp<GeometricField> resetting IO parameters
-        #ifndef NoConstructFromTmp
         GeometricField
         (
             const IOobject& io,
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
-        #endif
 
         //- Copy construct with a new name
         GeometricField
@@ -428,13 +424,11 @@ public:
         );
 
         //- Construct with a new name from tmp\<GeometricField\>
-        #ifndef NoConstructFromTmp
         GeometricField
         (
             const word& newName,
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
-        #endif
 
         //- Construct as copy resetting IO parameters and patch type
         GeometricField
@@ -454,7 +448,6 @@ public:
         );
 
         //- Construct as copy resetting IO parameters and boundary types
-        #ifndef NoConstructFromTmp
         GeometricField
         (
             const IOobject& io,
@@ -462,7 +455,6 @@ public:
             const wordList& patchFieldTypes,
             const wordList& actualPatchTypes = wordList()
         );
-        #endif
 
         //- Clone
         tmp<GeometricField<Type, PatchField, GeoMesh>> clone() const;

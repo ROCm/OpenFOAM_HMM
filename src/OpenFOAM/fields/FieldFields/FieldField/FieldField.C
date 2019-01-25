@@ -166,7 +166,6 @@ FieldField<Field, Type>::FieldField(PtrList<Field<Type>>&& list)
 {}
 
 
-#ifndef NoConstructFromTmp
 template<template<class> class Field, class Type>
 FieldField<Field, Type>::FieldField(const tmp<FieldField<Field, Type>>& tf)
 :
@@ -174,7 +173,6 @@ FieldField<Field, Type>::FieldField(const tmp<FieldField<Field, Type>>& tf)
 {
     tf.clear();
 }
-#endif
 
 
 template<template<class> class Field, class Type>

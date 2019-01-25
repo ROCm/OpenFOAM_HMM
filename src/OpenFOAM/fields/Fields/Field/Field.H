@@ -219,9 +219,7 @@ public:
         inline Field(Field<Type>& fld, bool reuse);
 
         //- Copy or move construct from tmp
-        #ifndef NoConstructFromTmp
         inline Field(const tmp<Field<Type>>& tfld);
-        #endif
 
         //- Construct from Istream
         inline Field(Istream& is);
