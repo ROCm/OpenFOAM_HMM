@@ -67,6 +67,25 @@ void Foam::functionObjectList::createStateDict() const
 }
 
 
+void Foam::functionObjectList::createOutputRegistry() const
+{
+    objectsRegistryPtr_.reset
+    (
+        new objectRegistry
+        (
+            IOobject
+            (
+                "functionObjectObjects",
+                time_.timeName(),
+                time_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            )
+        )
+    );
+}
+
+
 Foam::autoPtr<Foam::functionObject> Foam::functionObjectList::remove
 (
     const word& key,
@@ -339,6 +358,7 @@ Foam::functionObjectList::functionObjectList
     time_(runTime),
     parentDict_(runTime.controlDict()),
     stateDictPtr_(),
+    objectsRegistryPtr_(),
     execution_(execution),
     updated_(false)
 {}
@@ -357,6 +377,7 @@ Foam::functionObjectList::functionObjectList
     time_(runTime),
     parentDict_(parentDict),
     stateDictPtr_(),
+    objectsRegistryPtr_(),
     execution_(execution),
     updated_(false)
 {}
@@ -488,6 +509,28 @@ const Foam::IOdictionary& Foam::functionObjectList::stateDict() const
     }
 
     return *stateDictPtr_;
+}
+
+
+Foam::objectRegistry& Foam::functionObjectList::storedObjects()
+{
+    if (!objectsRegistryPtr_.valid())
+    {
+        createOutputRegistry();
+    }
+
+    return *objectsRegistryPtr_;
+}
+
+
+const Foam::objectRegistry& Foam::functionObjectList::storedObjects() const
+{
+    if (!objectsRegistryPtr_.valid())
+    {
+        createOutputRegistry();
+    }
+
+    return *objectsRegistryPtr_;
 }
 
 

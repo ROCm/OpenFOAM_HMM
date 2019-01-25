@@ -39,4 +39,20 @@ Foam::functionObjects::timeFunctionObject::timeFunctionObject
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::objectRegistry&
+Foam::functionObjects::timeFunctionObject::storedObjects()
+{
+    return const_cast<Time&>(time_).functionObjects().storedObjects();
+}
+
+
+const Foam::objectRegistry&
+Foam::functionObjects::timeFunctionObject::storedObjects() const
+{
+    return time_.functionObjects().storedObjects();
+}
+
+
 // ************************************************************************* //

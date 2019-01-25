@@ -84,6 +84,9 @@ class functionObjectList
         //- Function object properties - stores state information
         mutable autoPtr<IOdictionary> stateDictPtr_;
 
+        //- Function objects output registry
+        mutable autoPtr<objectRegistry> objectsRegistryPtr_;
+
         //- Switch for the execution of the functionObjects
         bool execution_;
 
@@ -101,6 +104,9 @@ class functionObjectList
 
         //- Create state dictionary - attached to Time.
         void createStateDict() const;
+
+        //- Create registry for output objects - attached to Time.
+        void createOutputRegistry() const;
 
         //- Remove and return the function object pointer by name,
         //- and returns the old index (into digest) via the parameter.
@@ -188,10 +194,20 @@ public:
         void resetState();
 
         //- Write access to the state dictionary ("functionObjectProperties")
+        //- registered on Time
         IOdictionary& stateDict();
 
         //- Const access to the state dictionary ("functionObjectProperties")
+        //- registered on Time
         const IOdictionary& stateDict() const;
+
+        //- Write access to the output objects ("functionObjectObjects")
+        //- registered on Time
+        objectRegistry& storedObjects();
+
+        //- Const access to the output objects ("functionObjectObjects")
+        //- registered on Time
+        const objectRegistry& storedObjects() const;
 
         //- Clear the list of function objects
         void clear();

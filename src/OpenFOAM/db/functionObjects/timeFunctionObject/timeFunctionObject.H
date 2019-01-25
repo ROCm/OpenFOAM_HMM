@@ -92,6 +92,14 @@ public:
         {
             return time_;
         }
+
+        //- Write access to the output objects ("functionObjectObjects")
+        //- registered on Time
+        objectRegistry& storedObjects();
+
+        //- Const access to the output objects ("functionObjectObjects")
+        //- registered on Time
+        const objectRegistry& storedObjects() const;
 };
 
 
