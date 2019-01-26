@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -26,10 +26,10 @@ usage() {
 
 Usage: ${0##*/} [OPTION] [appName .. [appNameN]]
 options:
-  -dir dir          Directory to process
-  -gzip             Compressed manpage output
-  -pdf              Process as manpage and pass to ps2pdf
+  -dir DIR          Directory to process
   -output DIR       Write to alternative output directory
+  -pdf              Process as nroff man content and pass to ps2pdf
+  -gz | -gzip       Compress manpage output
   -version VER      Specify an alternative version
   -h | -help        Print the usage
 
@@ -38,9 +38,9 @@ and redirect to corresponding directory location.
 Default input:  \$FOAM_APPBIN only.
 Default output: $defaultOutputDir
 
-Uses the search directory if applications are specified.
+Uses the search directory if individual applications are specified.
 
-Copyright (C) 2018 OpenCFD Ltd.
+Copyright (C) 2018-2019 OpenCFD Ltd.
 USAGE
     exit 1
 }
@@ -80,13 +80,13 @@ do
     -pdf)
         outputType="pdf"
         ;;
-    -v | -version)
+    -version)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         version="$2"
         sedFilter='s/OpenFOAM-[^\"]*/OpenFOAM-'"$version/"
         shift
         ;;
-    -o | -output)
+    -output)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         outputDir="$2"
         shift
@@ -104,7 +104,7 @@ done
 : ${outputDir:=$defaultOutputDir}
 
 # Verify that output is writeable
-if [ -e x"$outputDir" ]
+if [ -e "$outputDir" ]
 then
     [ -d "$outputDir" ] && [ -w "$outputDir" ] || \
         die "Cannot write to $outputDir" "Not a directory, or no permission?"
