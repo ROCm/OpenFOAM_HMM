@@ -110,7 +110,7 @@ else
 
     if [ "$subType" = App -a ! -d Make ]
     then
-        "${WM_DIR:-$WM_PROJECT_DIR/wmake}/wmakeFilesAndOptions"
+        "${WM_DIR:-$WM_PROJECT_DIR/wmake}/scripts/wmakeFilesAndOptions"
     fi
 fi
 

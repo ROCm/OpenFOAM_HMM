@@ -26,7 +26,7 @@
 #     wmakeLnInclude
 #
 # Usage
-#     wmakeLnInclude [OPTION] [-root | <dir>]
+#     wmakeLnInclude [OPTION] [-pwd | <dir>]
 #
 # Description
 #     Link all the source files in the <dir> directory into <dir>/lnInclude
@@ -46,12 +46,12 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: $Script [OPTION] [-root | dir]
+Usage: $Script [OPTION] [-pwd | dir]
 
 options:
   -u | -update      Update
   -s | -silent      Use 'silent' mode (do not echo command)
-  -root             Locate root directory containing a Make/ directory.
+  -pwd              Locate root directory containing a Make/ directory.
   -h | -help        Print the usage
 
 Link all the source files in the <dir> into <dir>/lnInclude
@@ -72,7 +72,7 @@ USAGE
 # Option for 'ln'
 optLink="-s"
 
-unset update optQuiet optRoot
+unset update optQuiet optFindRootDir
 
 while [ "$#" -gt 0 ]
 do
@@ -87,8 +87,8 @@ do
         -s | -silent)
             optQuiet=true
             ;;
-        -root)
-            optRoot=true
+        -pwd)
+            optFindRootDir=true
             ;;
         -*)
             usage "unknown option: '$1'"
@@ -100,7 +100,7 @@ do
     shift
 done
 
-[ "$optRoot" = true ] || [ "$#" -eq 1 ] || \
+[ "$optFindRootDir" = true ] || [ "$#" -eq 1 ] || \
     usage "Error: incorrect number of arguments"
 
 #------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ unset dir
 baseDir="$1"
 
 # With -root, go on discovery
-if [ "$optRoot" = true ]
+if [ "$optFindRootDir" = true ]
 then
     if [ -n "$baseDir" ]
     then

@@ -69,8 +69,8 @@ then
 fi
 
 mkdir Make
-[ -e Make/files ]   || "${0%/*}"/scripts/makeFiles
-[ -e Make/options ] || "${0%/*}"/scripts/makeOptions
+[ -e Make/files ]   || "${0%/*}/makeFiles"
+[ -e Make/options ] || "${0%/*}/makeOptions"
 
 exit 0 # clean exit
 

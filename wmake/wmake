@@ -72,6 +72,7 @@ options:
   -j                Compile using all local cores/hyperthreads
   -jN or -j N       Compile using N cores/hyperthreads
   -no-scheduler     Disable scheduled parallel compilation
+  -pwd              Print root directory containing a Make/ directory and exit
   -update           Update lnInclude directories, dep files, remove deprecated
                     files and directories
   -h | -help        Print the usage
@@ -118,7 +119,7 @@ allCores()
 #------------------------------------------------------------------------------
 
 # Default to compiling the local target only
-unset all update
+unset all update optPrintRootDir
 
 while [ "$#" -gt 0 ]
 do
@@ -158,6 +159,10 @@ do
         # Disable scheduled parallel compilation
         -no-scheduler)
             unset WM_SCHEDULER
+            ;;
+        # Print root directory containing a Make/ directory and exit
+        -pwd)
+            optPrintRootDir=true
             ;;
         # Meant to be used following a pull, this will:
         # - remove dep files that depend on deleted files;
@@ -224,41 +229,78 @@ fi
 unset targetType
 MakeDir=Make
 
-if [ $# -ge 1 ]
+unset dir
+
+if [ -n "$optPrintRootDir" ]
 then
-    unset dir
-    if [ -d "$1" ]
+    if [ $# -ge 1 ]
     then
-        dir="${1%/}"
-    elif [ -f "$1" ]
-    then
-        dir="${1%/*}"
-        : "${dir:=.}"
-    else
-        targetType="$1"
-    fi
+        if [ -d "$1" ]
+        then
+            dir="${1%/}"
+        elif [ -f "$1" ]
+        then
+            dir="${1%/*}"
+            : "${dir:=.}"
+        else
+            echo "$Script error: not a file or directory" 1>&2
+            exit 1
+        fi
 
-    # Specified directory name:
-    [ $# -ge 2 ] && dir="${2%/}"
-
-    # Specified alternative name for the Make sub-directory:
-    [ $# -ge 3 ] && MakeDir="${3%/}"
-
-    if [ -n "$dir" ]
-    then
-        cd $dir 2>/dev/null || {
+        cd "$dir" 2>/dev/null || {
             echo "$Script error: could not change to directory '$dir'" 1>&2
             exit 1
         }
-    elif [ -f "$MakeDir/files" ]
-    then
-        dir="(${PWD##*/})"  # Implicit directory information
     fi
 
-    # Print command
-    echo "$Script $targetType${targetType:+ }$dir"
-    unset dir
+    # Locate target with Make/ directory
+    if dir="$(findTarget .)"
+    then
+        (cd "$dir" && pwd -L)
+        exit 0
+    else
+        exit 2
+    fi
+
+else
+
+    if [ $# -ge 1 ]
+    then
+        if [ -d "$1" ]
+        then
+            dir="${1%/}"
+        elif [ -f "$1" ]
+        then
+            dir="${1%/*}"
+            : "${dir:=.}"
+        else
+            targetType="$1"
+        fi
+
+        # Specified directory name:
+        [ $# -ge 2 ] && dir="${2%/}"
+
+        # Specified alternative name for the Make sub-directory:
+        [ $# -ge 3 ] && MakeDir="${3%/}"
+
+        if [ -n "$dir" ]
+        then
+            cd $dir 2>/dev/null || {
+                echo "$Script error: could not change to directory '$dir'" 1>&2
+                exit 1
+            }
+        elif [ -f "$MakeDir/files" ]
+        then
+            dir="(${PWD##*/})"  # Implicit directory information
+        fi
+
+        # Print command
+        echo "$Script $targetType${targetType:+ }$dir"
+        unset dir
+    fi
 fi
+
+unset dir
 
 
 #------------------------------------------------------------------------------
