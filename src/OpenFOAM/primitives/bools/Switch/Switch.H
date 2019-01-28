@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,9 @@ public:
         NO      = 2 /*!< "no" */,    YES  = 3 /*!< "yes" */,
         OFF     = 4 /*!< "off" */,   ON   = 5 /*!< "on" */,
         NONE    = 6 /*!< "none" */,
-        INVALID = 8 /*!< "invalid" */
+        INVALID = 8 /*!< "invalid" */,
+        DEFAULT_OFF = 0x10 /*!< off/false (as default value) */,
+        DEFAULT_ON = 0x11  /*!< on/true (as default value) */
     };
 
 
@@ -91,6 +93,7 @@ private:
 
         //- The logic and enumerated text representation stored in a byte
         unsigned char switch_;
+
 
     // Static Member Functions
 
@@ -152,6 +155,24 @@ public:
             switch_(parse(str, allowBad))
         {}
 
+        //- Construct from dictionary lookup.
+        //  FatalError if anything is incorrect.
+        Switch
+        (
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict  //!< dictionary
+        );
+
+        //- Find the key in the dictionary and return the corresponding
+        //- switch value, or the default value.
+        //  FatalError if anything is incorrect.
+        Switch
+        (
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict, //!< dictionary
+            const Switch defaultValue //!< fallback if not found
+        );
+
         //- Construct from Istream
         explicit Switch(Istream& is);
 
@@ -159,7 +180,7 @@ public:
     // Helpers
 
         //- Construct from dictionary, supplying default value so that if the
-        //  value is not found, it is added into the dictionary.
+        //- value is not found, it is added into the dictionary.
         static Switch lookupOrAddToDict
         (
             const word& name,
@@ -170,8 +191,17 @@ public:
 
     // Member Functions
 
-        //- Return true if the Switch has a valid value
+        //- True if the Switch has a valid value
         bool valid() const noexcept;
+
+        //- The underlying enumeration value
+        switchType type() const noexcept;
+
+        //- Underlying enumeration is DEFAULT_ON or DEFAULT_OFF
+        bool isDefault() const noexcept;
+
+        //- Underlying enumeration is not DEFAULT_ON or DEFAULT_OFF
+        bool nonDefault() const noexcept;
 
         //- A string representation of the Switch value
         const char* c_str() const noexcept;

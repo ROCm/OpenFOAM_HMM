@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,6 +121,54 @@ Foam::Switch Foam::Switch::lookupOrAddToDict
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::Switch::Switch
+(
+    const word& key,
+    const dictionary& dict
+)
+{
+    const word str(dict.get<word>(key, keyType::LITERAL));
+
+    (*this) = parse(str, true);
+
+    if (!valid())
+    {
+        FatalIOErrorInFunction(dict)
+            << "Expected 'true/false', 'on/off' ... found " << str << nl
+            << exit(FatalIOError);
+    }
+}
+
+
+Foam::Switch::Switch
+(
+    const word& key,
+    const dictionary& dict,
+    const Switch defaultValue
+)
+:
+    Switch(defaultValue)
+{
+    const entry* eptr = dict.findEntry(key, keyType::LITERAL);
+
+    if (eptr)
+    {
+        const word str(eptr->get<word>());
+
+        (*this) = parse(str, true);
+
+        if (!valid())
+        {
+            // Found entry, but was bad input
+
+            FatalIOErrorInFunction(dict)
+                << "Expected 'true/false', 'on/off' ... found " << str << nl
+                << exit(FatalIOError);
+        }
+    }
+}
+
+
 Foam::Switch::Switch(Istream& is)
 {
     is >> *this;
@@ -131,19 +179,37 @@ Foam::Switch::Switch(Istream& is)
 
 bool Foam::Switch::valid() const noexcept
 {
-    return switch_ <= switchType::NONE;
+    return switch_ != switchType::INVALID;
+}
+
+
+Foam::Switch::switchType Foam::Switch::type() const noexcept
+{
+    return switchType(switch_);
+}
+
+
+bool Foam::Switch::isDefault() const noexcept
+{
+    return (switch_ & 0x10);
+}
+
+
+bool Foam::Switch::nonDefault() const noexcept
+{
+    return !isDefault();
 }
 
 
 const char* Foam::Switch::c_str() const noexcept
 {
-    return names[switch_];
+    return names[(switch_ & 0x0F)];
 }
 
 
 std::string Foam::Switch::str() const
 {
-    return names[switch_];
+    return names[(switch_ & 0x0F)];
 }
 
 

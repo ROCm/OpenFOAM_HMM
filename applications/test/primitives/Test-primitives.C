@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,8 @@ Description
 #include "NASCore.H"
 #include "parsing.H"
 #include "Tuple2.H"
+#include "Switch.H"
+#include "dictionary.H"
 
 using namespace Foam;
 
@@ -42,6 +44,20 @@ using namespace Foam;
 inline scalar readNasScalar(const std::string& str)
 {
     return fileFormats::NASCore::readNasScalar(str);
+}
+
+
+// As a function
+inline Switch readSwitch(const std::string& str)
+{
+    Switch sw(str);
+
+    if (sw.type() == Switch::ON)
+    {
+        Info<< "Was 'on'" << nl;
+    }
+
+    return sw;
 }
 
 
@@ -96,7 +112,8 @@ unsigned testParsing
     string errMsg;
 
     // Expect some failures
-    const bool prev = FatalIOError.throwExceptions();
+    const bool prev1 = FatalError.throwExceptions();
+    const bool prev2 = FatalIOError.throwExceptions();
 
     for (const std::pair<bool, std::string>& test : tests)
     {
@@ -120,7 +137,8 @@ unsigned testParsing
         hadParsingError(test, result, errMsg);
     }
 
-    FatalIOError.throwExceptions(prev);
+    FatalError.throwExceptions(prev1);
+    FatalIOError.throwExceptions(prev2);
 
     return nFail;
 }
@@ -129,6 +147,36 @@ unsigned testParsing
 int main(int argc, char *argv[])
 {
     unsigned nFail = 0;
+
+    {
+        Info<< nl << "Test Switch parsing:" << nl;
+        nFail += testParsing
+        (
+            &readSwitch,
+            {
+                { false, "True" },
+                { true,  "false" },
+                { true,  "on" },
+                { false, "None" },
+                { false, "default" },
+            }
+        );
+
+        dictionary dict;
+        dict.add("key1" , "true");
+
+        {
+            Switch sw("key", dict, Switch::DEFAULT_ON);
+            Info<<"got: " << sw << " type is DEFAULT_ON? "
+                << (sw.type() == Switch::DEFAULT_ON) << nl;
+        }
+
+        {
+            Switch sw("key1", dict, Switch::DEFAULT_ON);
+            Info<<"got: " << sw << " type is DEFAULT_ON? "
+                << (sw.type() == Switch::DEFAULT_ON) << nl;
+        }
+    }
 
     {
         Info<< nl << "Test readDouble: (small=" << doubleScalarVSMALL
