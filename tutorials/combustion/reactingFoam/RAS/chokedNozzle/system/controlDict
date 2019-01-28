@@ -1,4 +1,4 @@
-/*--------------------------------*- C++ -*----------------------------------*\
+;/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  v1812                                 |
@@ -20,7 +20,7 @@ startFrom       startTime;
 
 startTime       0;
 
-stopAt          endTime;
+stopAt          writeNow;   //endTime;
 
 endTime         1;
 
@@ -50,5 +50,18 @@ maxCo           0.3;
 
 maxDeltaT       0.25;
 
-// ************************************************************************* //
 
+functions
+{
+    ywalls
+    {
+        type        writeObjects;
+        libs        ("libutilityFunctionObjects.so");
+        objects     (ywalls);
+        writeOption anyWrite;
+    }
+}
+
+
+
+// ************************************************************************* //
