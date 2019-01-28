@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,14 @@ License
 #include "etcFiles.H"
 #include "foamVersion.H"
 #include "OSspecific.H"
+
+// Note contains handling for compile-time configuration of some paths
+// via defines:
+// - FOAM_CONFIGURED_PROJECT_DIR
+// - FOAM_CONFIGURED_PROJECT_ETC
+
+// Eg,
+// #define FOAM_CONFIGURED_PROJECT_ETC "/usr/share/openfoam/etc"
 
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
@@ -108,8 +116,11 @@ static inline bool userResourceDir(Foam::fileName& queried)
 //
 // Corresponds to foamEtcFile -mode=g
 // Looks for
-//   - $WM_PROJECT_SITE/etc
-//   - $WM_PROJECT_DIR/site/etc
+//   - ${WM_PROJECT_SITE}/etc
+//   - ${WM_PROJECT_DIR}/site/etc
+//
+// Optionally (compile-time defined):
+//   - FOAM_CONFIGURED_PROJECT_DIR/site/etc
 static inline bool groupResourceDir(Foam::fileName& queried)
 {
     #ifdef FOAM_RESOURCE_SITE_ENVNAME
@@ -127,13 +138,23 @@ static inline bool groupResourceDir(Foam::fileName& queried)
 
     #ifdef FOAM_RESOURCE_SITE_FALLBACK_ENVNAME
     queried = Foam::getEnv(FOAM_RESOURCE_SITE_FALLBACK_ENVNAME)/"site/etc";
-    if (queried.size() > 8)
+    if (queried.size() > 8 && Foam::isDir(queried))
     {
-        return Foam::isDir(queried);
+        return true;
     }
     #elif defined FULLDEBUG
         #warning FOAM_RESOURCE_SITE_FALLBACK_ENVNAME \
         is undefined (was this intentional?)
+    #endif
+
+    // Compile-time paths
+
+    #ifdef FOAM_CONFIGURED_PROJECT_DIR
+    queried = FOAM_CONFIGURED_PROJECT_DIR/Foam::string("site/etc");
+    if (queried.size() > 8 && Foam::isDir(queried))
+    {
+        return true;
+    }
     #endif
 
     queried.clear();
@@ -147,14 +168,36 @@ static inline bool groupResourceDir(Foam::fileName& queried)
 //
 // Corresponds to foamEtcFile -mode=o
 // Looks for
-//   - $WM_PROJECT_DIR/etc
+//   - ${WM_PROJECT_DIR}/etc
+//
+// Optionally (compile-time defined):
+//   - FOAM_CONFIGURED_PROJECT_ETC
+//   - FOAM_CONFIGURED_PROJECT_DIR/"etc"
 static inline bool projectResourceDir(Foam::fileName& queried)
 {
     queried = Foam::getEnv("WM_PROJECT_DIR")/"etc";
-    if (queried.size() > 3)
+    if (queried.size() > 3 && Foam::isDir(queried))
     {
-        return Foam::isDir(queried);
+        return true;
     }
+
+    // Compile-time paths
+
+    #ifdef FOAM_CONFIGURED_PROJECT_ETC
+    queried = FOAM_CONFIGURED_PROJECT_ETC;
+    if (Foam::isDir(queried))
+    {
+        return true;
+    }
+    #endif
+
+    #ifdef FOAM_CONFIGURED_PROJECT_DIR
+    queried = FOAM_CONFIGURED_PROJECT_DIR/Foam::word("etc");
+    if (queried.size() > 3 && Foam::isDir(queried))
+    {
+        return true;
+    }
+    #endif
 
     queried.clear();
     return false;
