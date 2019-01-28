@@ -203,6 +203,12 @@ Foam::string Foam::error::message() const
 }
 
 
+void Foam::error::clear() const
+{
+    return messageStreamPtr_->reset();
+}
+
+
 void Foam::error::exit(const int errNo)
 {
     if (!throwExceptions_ && JobInfo::constructed)

@@ -165,6 +165,9 @@ private:
         //- All limit-refinement interaction
         const shellSurfaces& limitShells_;
 
+        //- Are we operating in test mode?
+        const bool dryRun_;
+
         //- Refinement engine
         hexRef8 meshCutter_;
 
@@ -819,7 +822,9 @@ public:
             const refinementSurfaces&,
             const refinementFeatures&,
             const shellSurfaces&,   // omnidirectional refinement
-            const shellSurfaces&    // limit refinement
+            const shellSurfaces&,   // limit refinement
+            const labelUList& checkFaces,   // initial faces to check
+            const bool dryRun
         );
 
 
@@ -885,15 +890,9 @@ public:
             }
 
             //- Per start-end edge the index of the surface hit
-            const labelList& surfaceIndex() const
-            {
-                return surfaceIndex_;
-            }
+            const labelList& surfaceIndex() const;
 
-            labelList& surfaceIndex()
-            {
-                return surfaceIndex_;
-            }
+            labelList& surfaceIndex();
 
             //- For faces originating from processor faces store the original
             //  patch
@@ -1530,6 +1529,33 @@ public:
             (
                 const EnumContainer& namedEnum,
                 const wordList& words
+            );
+
+            //- Wrapper around dictionary::get which does not exit
+            template<class Type>
+            static Type get
+            (
+                const dictionary& dict,
+                const word& keyword,
+                const bool noExit,
+                enum keyType::option matchOpt = keyType::REGEX,
+                const Type& defaultValue = Zero
+            );
+
+            //- Wrapper around dictionary::subDict which does not exit
+            static const dictionary& subDict
+            (
+                const dictionary& dict,
+                const word& keyword,
+                const bool noExit
+            );
+
+            //- Wrapper around dictionary::lookup which does not exit
+            static ITstream& lookup
+            (
+                const dictionary& dict,
+                const word& keyword,
+                const bool noExit
             );
 };
 

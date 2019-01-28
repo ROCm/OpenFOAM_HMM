@@ -106,6 +106,9 @@ private:
         //- From surface region to patch
         const labelList globalToSlavePatch_;
 
+        //- Are we operating in test mode?
+        const bool dryRun_;
+
 
     // Private Member Functions
 
@@ -618,7 +621,8 @@ public:
         (
             meshRefinement& meshRefiner,
             const labelList& globalToMasterPatch,
-            const labelList& globalToSlavePatch
+            const labelList& globalToSlavePatch,
+            const bool dryRun = false
         );
 
 

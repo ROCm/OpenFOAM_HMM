@@ -633,8 +633,8 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     if (checkCollapse)
     {
-        motionDict.readEntry("minArea", minArea);
-        motionDict.readEntry("maxNonOrtho", maxNonOrtho);
+        minArea = get<scalar>(motionDict, "minArea", dryRun_);
+        maxNonOrtho = get<scalar>(motionDict, "maxNonOrtho", dryRun_);
 
         Info<< "markFacesOnProblemCells :"
             << " Deleting all-anchor surface cells only if"
@@ -1123,7 +1123,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
         // Check initial mesh
         Info<< "Checking initial mesh ..." << endl;
         labelHashSet wrongFaces(mesh_.nFaces()/100);
-        motionSmoother::checkMesh(false, mesh_, motionDict, wrongFaces);
+        motionSmoother::checkMesh
+        (
+            false,
+            mesh_,
+            motionDict,
+            wrongFaces,
+            dryRun_
+        );
         const label nInitErrors = returnReduce
         (
             wrongFaces.size(),
@@ -1235,7 +1242,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             //    nWrongFaces = nNewWrongFaces;
             //}
 
-            scalar minArea(motionDict.get<scalar>("minArea"));
+            scalar minArea(get<scalar>(motionDict, "minArea", dryRun_));
             if (minArea > -SMALL)
             {
                 polyMeshGeometry::checkFaceArea
@@ -1262,7 +1269,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
                 nWrongFaces = nNewWrongFaces;
             }
 
-            scalar minDet(motionDict.get<scalar>("minDeterminant"));
+            scalar minDet(get<scalar>(motionDict, "minDeterminant", dryRun_));
             if (minDet > -1)
             {
                 polyMeshGeometry::checkCellDeterminant

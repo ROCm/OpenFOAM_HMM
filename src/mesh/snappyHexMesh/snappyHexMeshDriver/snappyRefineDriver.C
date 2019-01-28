@@ -43,6 +43,7 @@ License
 #include "searchableSurfaces.H"
 #include "fvMeshSubset.H"
 #include "interpolationTable.H"
+#include "snappyVoxelMeshDriver.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -61,7 +62,8 @@ Foam::snappyRefineDriver::snappyRefineDriver
     fvMeshDistribute& distributor,
     const labelUList& globalToMasterPatch,
     const labelUList& globalToSlavePatch,
-    const writer<scalar>& setFormatter
+    const writer<scalar>& setFormatter,
+    const bool dryRun
 )
 :
     meshRefiner_(meshRefiner),
@@ -69,7 +71,8 @@ Foam::snappyRefineDriver::snappyRefineDriver
     distributor_(distributor),
     globalToMasterPatch_(globalToMasterPatch),
     globalToSlavePatch_(globalToSlavePatch),
-    setFormatter_(setFormatter)
+    setFormatter_(setFormatter),
+    dryRun_(dryRun)
 {}
 
 
@@ -82,6 +85,11 @@ Foam::label Foam::snappyRefineDriver::featureEdgeRefine
     const label minRefine
 )
 {
+    if (dryRun_)
+    {
+        return 0;
+    }
+
     if (refineParams.minRefineCells() == -1)
     {
         // Special setting to be able to restart shm on meshes with inconsistent
@@ -199,6 +207,11 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
     const label maxIter
 )
 {
+    if (dryRun_)
+    {
+        return 0;
+    }
+
     if (refineParams.minRefineCells() == -1)
     {
         // Special setting to be able to restart shm on meshes with inconsistent
@@ -208,7 +221,6 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
 
     addProfiling(feature, "snappyHexMesh::refine::smallFeature");
     const fvMesh& mesh = meshRefiner_.mesh();
-
 
     label iter = 0;
 
@@ -329,6 +341,11 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
     const label maxIter
 )
 {
+    if (dryRun_)
+    {
+        return 0;
+    }
+
     if (refineParams.minRefineCells() == -1)
     {
         // Special setting to be able to restart shm on meshes with inconsistent
@@ -460,6 +477,11 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
     const label maxIter
 )
 {
+    if (dryRun_)
+    {
+        return 0;
+    }
+
     if (refineParams.minRefineCells() == -1)
     {
         // Special setting to be able to restart shm on meshes with inconsistent
@@ -706,6 +728,11 @@ Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
         return 0;
     }
 
+    if (dryRun_)
+    {
+        return 0;
+    }
+
     const fvMesh& mesh = meshRefiner_.mesh();
 
     label iter = 0;
@@ -852,6 +879,11 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
     {
         // Special setting to be able to restart shm on meshes with inconsistent
         // cellLevel/pointLevel
+        return 0;
+    }
+
+    if (dryRun_)
+    {
         return 0;
     }
 
@@ -1005,6 +1037,11 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
     {
         // Special setting to be able to restart shm on meshes with inconsistent
         // cellLevel/pointLevel
+        return 0;
+    }
+
+    if (dryRun_)
+    {
         return 0;
     }
 
@@ -1355,6 +1392,11 @@ void Foam::snappyRefineDriver::removeInsideCells
         return;
     }
 
+    if (dryRun_)
+    {
+        return;
+    }
+
     Info<< nl
         << "Removing mesh beyond surface intersections" << nl
         << "------------------------------------------" << nl
@@ -1420,6 +1462,11 @@ Foam::label Foam::snappyRefineDriver::shellRefine
     const label maxIter
 )
 {
+    if (dryRun_)
+    {
+        return 0;
+    }
+
     if (refineParams.minRefineCells() == -1)
     {
         // Special setting to be able to restart shm on meshes with inconsistent
@@ -1601,6 +1648,11 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
     const label maxIter
 )
 {
+    if (dryRun_)
+    {
+        return 0;
+    }
+
     addProfiling(shell, "snappyHexMesh::refine::directionalShell");
     const fvMesh& mesh = meshRefiner_.mesh();
     const shellSurfaces& shells = meshRefiner_.shells();
@@ -2323,6 +2375,11 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
     const dictionary& motionDict
 )
 {
+    if (dryRun_)
+    {
+        return;
+    }
+
     addProfiling(split, "snappyHexMesh::refine::splitting");
     Info<< nl
         << "Splitting mesh at surface intersections" << nl
@@ -2454,6 +2511,11 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
     const dictionary& motionDict
 )
 {
+    if (dryRun_)
+    {
+        return;
+    }
+
     Info<< nl
         << "Handling cells with snap problems" << nl
         << "---------------------------------" << nl
@@ -2656,6 +2718,11 @@ void Foam::snappyRefineDriver::mergePatchFaces
     const dictionary& motionDict
 )
 {
+    if (dryRun_)
+    {
+        return;
+    }
+
     addProfiling(merge, "snappyHexMesh::refine::merge");
     Info<< nl
         << "Merge refined boundary faces" << nl
@@ -2719,8 +2786,28 @@ void Foam::snappyRefineDriver::doRefine
 
     const fvMesh& mesh = meshRefiner_.mesh();
 
+
     // Check that all the keep points are inside the mesh.
     refineParams.findCells(true, mesh, refineParams.locationsInMesh());
+
+    // Check that all the keep points are inside the mesh.
+    if (dryRun_)
+    {
+        refineParams.findCells(true, mesh, refineParams.locationsOutsideMesh());
+    }
+
+    // Estimate cell sizes
+    if (dryRun_)
+    {
+        snappyVoxelMeshDriver voxelDriver
+        (
+            meshRefiner_,
+            globalToMasterPatch_,
+            globalToSlavePatch_
+        );
+        voxelDriver.doRefine(refineParams);
+    }
+
 
     // Refine around feature edges
     featureEdgeRefine
@@ -2892,7 +2979,7 @@ void Foam::snappyRefineDriver::doRefine
     }
 
 
-    if (Pstream::parRun())
+    if (!dryRun_ && Pstream::parRun())
     {
         Info<< nl
             << "Doing final balancing" << nl

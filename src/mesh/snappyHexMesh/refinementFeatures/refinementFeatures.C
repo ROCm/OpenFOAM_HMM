@@ -28,6 +28,7 @@ License
 #include "Tuple2.H"
 #include "DynamicField.H"
 #include "featureEdgeMesh.H"
+#include "meshRefinement.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -41,7 +42,17 @@ void Foam::refinementFeatures::read
     {
         const dictionary& dict = featDicts[featI];
 
-        fileName featFileName(dict.lookup("file"));
+        fileName featFileName
+        (
+            meshRefinement::get<fileName>
+            (
+                dict,
+                "file",
+                dryRun_,
+                keyType::REGEX,
+                fileName::null
+            )
+        );
 
 
         // Try reading extendedEdgeMesh first
@@ -66,10 +77,13 @@ void Foam::refinementFeatures::read
                 fName
             );
 
-            Info<< "Read extendedFeatureEdgeMesh " << extFeatObj.name()
-                << nl << incrIndent;
-            eMeshPtr().writeStats(Info);
-            Info<< decrIndent << endl;
+            if (!dryRun_)
+            {
+                Info<< "Read extendedFeatureEdgeMesh " << extFeatObj.name()
+                    << nl << incrIndent;
+                eMeshPtr().writeStats(Info);
+                Info<< decrIndent << endl;
+            }
 
             set(featI, new extendedFeatureEdgeMesh(extFeatObj, eMeshPtr()));
         }
@@ -97,16 +111,17 @@ void Foam::refinementFeatures::read
                     << exit(FatalIOError);
             }
 
-
             // Read as edgeMesh
             autoPtr<edgeMesh> eMeshPtr = edgeMesh::New(fName);
             const edgeMesh& eMesh = eMeshPtr();
 
-            Info<< "Read edgeMesh " << featObj.name() << nl
-                << incrIndent;
-            eMesh.writeStats(Info);
-            Info<< decrIndent << endl;
-
+            if (!dryRun_)
+            {
+                Info<< "Read edgeMesh " << featObj.name() << nl
+                    << incrIndent;
+                eMesh.writeStats(Info);
+                Info<< decrIndent << endl;
+            }
 
             // Analyse for feature points. These are all classified as mixed
             // points for lack of anything better
@@ -233,18 +248,33 @@ void Foam::refinementFeatures::read
         else
         {
             // Look up 'level' for single level
-            levels_[featI] = labelList(1, dict.get<label>("level"));
+            levels_[featI] =
+                labelList
+                (
+                    1,
+                    meshRefinement::get<label>
+                    (
+                        dict,
+                        "level",
+                        dryRun_,
+                        keyType::REGEX,
+                        0
+                    )
+                );
             distances_[featI] = scalarField(1, Zero);
         }
 
-        Info<< "Refinement level according to distance to "
-            << featFileName << " (" << eMesh.points().size() << " points, "
-            << eMesh.edges().size() << " edges)." << endl;
-        forAll(levels_[featI], j)
+        if (!dryRun_)
         {
-            Info<< "    level " << levels_[featI][j]
-                << " for all cells within " << distances_[featI][j]
-                << " metre." << endl;
+            Info<< "Refinement level according to distance to "
+                << featFileName << " (" << eMesh.points().size() << " points, "
+                << eMesh.edges().size() << " edges)." << endl;
+            forAll(levels_[featI], j)
+            {
+                Info<< "    level " << levels_[featI][j]
+                    << " for all cells within " << distances_[featI][j]
+                    << " metre." << endl;
+            }
         }
     }
 }
@@ -439,14 +469,16 @@ Foam::refinementFeatures::regionEdgeTrees() const
 Foam::refinementFeatures::refinementFeatures
 (
     const objectRegistry& io,
-    const PtrList<dictionary>& featDicts
+    const PtrList<dictionary>& featDicts,
+    const bool dryRun
 )
 :
     PtrList<extendedFeatureEdgeMesh>(featDicts.size()),
     distances_(featDicts.size()),
     levels_(featDicts.size()),
     edgeTrees_(featDicts.size()),
-    pointTrees_(featDicts.size())
+    pointTrees_(featDicts.size()),
+    dryRun_(dryRun)
 {
     // Read features
     read(io, featDicts);
@@ -530,6 +562,76 @@ Foam::refinementFeatures::refinementFeatures
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::refinementFeatures::checkSizes
+(
+    const scalar maxRatio,
+    const boundBox& meshBb,
+    const bool report,
+    Ostream& os
+) const
+{
+    if (report)
+    {
+        os<< "Checking for size." << endl;
+    }
+
+    bool hasError = false;
+
+    forAll(*this, i)
+    {
+        const extendedFeatureEdgeMesh& em = operator[](i);
+        const boundBox bb(em.points(), true);
+
+        for (label j = i+1; j < size(); j++)
+        {
+            const extendedFeatureEdgeMesh& em2 = operator[](j);
+            const boundBox bb2(em2.points(), true);
+
+            scalar ratio = bb.mag()/bb2.mag();
+
+            if (ratio > maxRatio || ratio < 1.0/maxRatio)
+            {
+                hasError = true;
+
+                if (report)
+                {
+                    os  << "    " << em.name()
+                        << " bounds differ from " << em2.name()
+                        << " by more than a factor 100:" << nl
+                        << "        bounding box : " << bb << nl
+                        << "        bounding box : " << bb2
+                        << endl;
+                }
+            }
+        }
+    }
+
+    forAll(*this, i)
+    {
+        const extendedFeatureEdgeMesh& em = operator[](i);
+        const boundBox bb(em.points(), true);
+        if (!meshBb.contains(bb))
+        {
+            if (report)
+            {
+                os  << "    " << em.name()
+                    << " bounds not fully contained in mesh"<< nl
+                    << "        bounding box      : " << bb << nl
+                    << "        mesh bounding box : " << meshBb
+                    << endl;
+            }
+        }
+    }
+
+    if (report)
+    {
+        os<< endl;
+    }
+
+    return returnReduce(hasError, orOp<bool>());
+}
+
 
 void Foam::refinementFeatures::findNearestEdge
 (

@@ -66,6 +66,9 @@ protected:
         //- Reference to point motion field
         pointVectorField& pointDisplacement_;
 
+        //- In dry-run mode?
+        const bool dryRun_;
+
 
     // Protected Member functions
 
@@ -110,9 +113,10 @@ public:
             (
                 const dictionary& dict,
                 const List<labelPair>& baffles,
-                pointVectorField& pointDisplacement
+                pointVectorField& pointDisplacement,
+                const bool dryRun
             ),
-            (dict, baffles, pointDisplacement)
+            (dict, baffles, pointDisplacement, dryRun)
         );
 
 
@@ -124,7 +128,8 @@ public:
         (
             const dictionary& dict,
             const List<labelPair>& baffles,
-            pointVectorField& pointDisplacement
+            pointVectorField& pointDisplacement,
+            const bool dryRun
         );
 
 
@@ -136,7 +141,8 @@ public:
             const word& type,
             const dictionary& dict,
             const List<labelPair>& baffles,
-            pointVectorField& pointDisplacement
+            pointVectorField& pointDisplacement,
+            const bool dryRun = false
         );
 
 

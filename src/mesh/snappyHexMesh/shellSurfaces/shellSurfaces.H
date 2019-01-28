@@ -74,6 +74,9 @@ private:
         //- Reference to all geometry.
         const searchableSurfaces& allGeometry_;
 
+        //- Dry-run mode?
+        const bool dryRun_;
+
         //- Indices of surfaces that are shells
         labelList shells_;
 
@@ -173,7 +176,8 @@ public:
         shellSurfaces
         (
             const searchableSurfaces& allGeometry,
-            const dictionary& shellsDict
+            const dictionary& shellsDict,
+            const bool dryRun = false
         );
 
 

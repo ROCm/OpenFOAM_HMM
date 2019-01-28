@@ -67,6 +67,9 @@ class refinementFeatures
         //- Features points
         PtrList<indexedOctree<treeDataPoint>> pointTrees_;
 
+        //- Dry-run mode?
+        const bool dryRun_;
+
         //- Region edge trees (demand driven)
         mutable autoPtr<PtrList<indexedOctree<treeDataEdge>>>
             regionEdgeTreesPtr_;
@@ -112,7 +115,8 @@ public:
         refinementFeatures
         (
             const objectRegistry& io,
-            const PtrList<dictionary>& featDicts
+            const PtrList<dictionary>& featDicts,
+            const bool dryRun = false
         );
 
 
@@ -189,6 +193,16 @@ public:
                 labelList& maxLevel
             ) const;
 
+        // Other
+
+            //- Check sizes - return true if error and stream to os
+            bool checkSizes
+            (
+                const scalar maxRatio,
+                const boundBox& meshBb,
+                const bool report,
+                Ostream& os
+            ) const;
 };
 
 

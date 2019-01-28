@@ -107,7 +107,8 @@ public:
             pointMesh& pMesh,
             indirectPrimitivePatch& pp,         //!< 'outside' points
             const labelList& adaptPatchIDs,     //!< patches forming 'outside'
-            const dictionary& paramDict
+            const dictionary& paramDict,
+            const bool dryRun = false
         );
 
         //- Construct from mesh, patches to work on and smoothing parameters and
@@ -118,7 +119,8 @@ public:
             indirectPrimitivePatch& pp,         //!< 'outside' points
             const labelList& adaptPatchIDs,     //!< patches forming 'outside'
             const pointVectorField& displacement,
-            const dictionary& paramDict
+            const dictionary& paramDict,
+            const bool dryRun = false
         );
 };
 

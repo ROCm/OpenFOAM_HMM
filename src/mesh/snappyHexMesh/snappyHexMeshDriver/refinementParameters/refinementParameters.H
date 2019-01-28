@@ -70,7 +70,7 @@ class refinementParameters
         scalar curvature_;
 
         //- Planarity criterion
-        scalar planarAngle_;
+        const scalar planarAngle_;
 
         //- Number of layers between different refinement levels
         const label nBufferLayers_;
@@ -93,20 +93,22 @@ class refinementParameters
 
         //- FaceZone faces allowed which have owner and neighbour in same
         //  cellZone?
-        Switch allowFreeStandingZoneFaces_;
+        const Switch allowFreeStandingZoneFaces_;
 
         //- Use old topology based problem-cell removal (cells with 8 points
         //  on surface)
-        Switch useTopologicalSnapDetection_;
+        const Switch useTopologicalSnapDetection_;
 
         //- Allowed load unbalance
-        scalar maxLoadUnbalance_;
+        const scalar maxLoadUnbalance_;
 
-        Switch handleSnapProblems_;
+        const Switch handleSnapProblems_;
 
-        Switch interfaceRefine_;
+        const Switch interfaceRefine_;
 
-        label nErodeCellZone_;
+        const label nErodeCellZone_;
+
+        const bool dryRun_;
 
 
     // Private Member Functions
@@ -123,7 +125,7 @@ public:
     // Constructors
 
         //- Construct from dictionary - new syntax
-        refinementParameters(const dictionary& dict);
+        refinementParameters(const dictionary& dict, const bool dryRun = false);
 
 
     // Member Functions

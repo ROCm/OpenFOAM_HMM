@@ -414,7 +414,8 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
                 false,  // report
                 mesh_,
                 motionDict,
-                errorFaces
+                errorFaces,
+                dryRun_
             );
 
             //if (checkEdgeConnectivity)
@@ -898,7 +899,8 @@ Foam::label Foam::meshRefinement::mergeEdgesUndo
                 false,  // report
                 mesh_,
                 motionDict,
-                errorFaces
+                errorFaces,
+                dryRun_
             );
             //if (checkEdgeConnectivity)
             //{

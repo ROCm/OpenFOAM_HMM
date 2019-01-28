@@ -109,13 +109,16 @@ void Foam::shellSurfaces::setAndCheckLevels
 
     if (modes_[shellI] == DISTANCE)
     {
-        Info<< "Refinement level according to distance to "
-            << shell.name() << endl;
-        forAll(levels_[shellI], j)
+        if (!dryRun_)
         {
-            Info<< "    level " << levels_[shellI][j]
-                << " for all cells within " << distances_[shellI][j]
-                << " metre." << endl;
+            Info<< "Refinement level according to distance to "
+                << shell.name() << endl;
+            forAll(levels_[shellI], j)
+            {
+                Info<< "    level " << levels_[shellI][j]
+                    << " for all cells within " << distances_[shellI][j]
+                    << " metre." << endl;
+            }
         }
     }
     else
@@ -130,15 +133,18 @@ void Foam::shellSurfaces::setAndCheckLevels
                 << exit(FatalError);
         }
 
-        if (modes_[shellI] == INSIDE)
+        if (!dryRun_)
         {
-            Info<< "Refinement level " << levels_[shellI][0]
-                << " for all cells inside " << shell.name() << endl;
-        }
-        else
-        {
-            Info<< "Refinement level " << levels_[shellI][0]
-                << " for all cells outside " << shell.name() << endl;
+            if (modes_[shellI] == INSIDE)
+            {
+                Info<< "Refinement level " << levels_[shellI][0]
+                    << " for all cells inside " << shell.name() << endl;
+            }
+            else
+            {
+                Info<< "Refinement level " << levels_[shellI][0]
+                    << " for all cells outside " << shell.name() << endl;
+            }
         }
     }
 }
@@ -233,7 +239,7 @@ void Foam::shellSurfaces::orient()
                     true
                 );
 
-                if (anyFlipped)
+                if (anyFlipped && !dryRun_)
                 {
                     // orientedSurface will have done a clearOut of the surface.
                     // we could do a clearout of the triSurfaceMeshes::trees()
@@ -569,10 +575,12 @@ void Foam::shellSurfaces::findLevel
 Foam::shellSurfaces::shellSurfaces
 (
     const searchableSurfaces& allGeometry,
-    const dictionary& shellsDict
+    const dictionary& shellsDict,
+    const bool dryRun
 )
 :
-    allGeometry_(allGeometry)
+    allGeometry_(allGeometry),
+    dryRun_(dryRun)
 {
     // Wilcard specification : loop over all surfaces and try to find a match.
 
@@ -652,13 +660,19 @@ Foam::shellSurfaces::shellSurfaces
 
                 if (modes_[shellI] == INSIDE)
                 {
-                    Info<< "Additional directional refinement level"
-                        << " for all cells inside " << geomName << endl;
+                    if (!dryRun_)
+                    {
+                        Info<< "Additional directional refinement level"
+                            << " for all cells inside " << geomName << endl;
+                    }
                 }
                 else if (modes_[shellI] == OUTSIDE)
                 {
-                    Info<< "Additional directional refinement level"
-                        << " for all cells outside " << geomName << endl;
+                    if (!dryRun_)
+                    {
+                        Info<< "Additional directional refinement level"
+                            << " for all cells outside " << geomName << endl;
+                    }
                 }
                 else
                 {

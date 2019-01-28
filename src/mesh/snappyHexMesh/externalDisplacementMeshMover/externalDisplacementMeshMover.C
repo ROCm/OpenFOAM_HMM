@@ -117,11 +117,13 @@ Foam::externalDisplacementMeshMover::externalDisplacementMeshMover
 (
     const dictionary& dict,
     const List<labelPair>& baffles,
-    pointVectorField& pointDisplacement
+    pointVectorField& pointDisplacement,
+    const bool dryRun
 )
 :
     baffles_(baffles),
-    pointDisplacement_(pointDisplacement)
+    pointDisplacement_(pointDisplacement),
+    dryRun_(dryRun)
 {}
 
 
@@ -133,7 +135,8 @@ Foam::externalDisplacementMeshMover::New
     const word& type,
     const dictionary& dict,
     const List<labelPair>& baffles,
-    pointVectorField& pointDisplacement
+    pointVectorField& pointDisplacement,
+    const bool dryRun
 )
 {
     Info<< "Selecting externalDisplacementMeshMover " << type << endl;
@@ -152,7 +155,7 @@ Foam::externalDisplacementMeshMover::New
 
     return autoPtr<externalDisplacementMeshMover>
     (
-        cstrIter()(dict, baffles, pointDisplacement)
+        cstrIter()(dict, baffles, pointDisplacement, dryRun)
     );
 }
 

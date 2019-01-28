@@ -3854,6 +3854,12 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurfaceFeature
 
 ) const
 {
+    if (dryRun_)
+    {
+        return nearestDisp;
+    }
+
+
     const Switch implicitFeatureAttraction = snapParams.implicitFeatureSnap();
     const Switch explicitFeatureAttraction = snapParams.explicitFeatureSnap();
     const Switch multiRegionFeatureSnap = snapParams.multiRegionFeatureSnap();
@@ -3863,7 +3869,6 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurfaceFeature
         << "   explicit features    : " << explicitFeatureAttraction << nl
         << "   multi-patch features : " << multiRegionFeatureSnap << nl
         << endl;
-
 
     const indirectPrimitivePatch& pp = meshMover.patch();
     const pointField& localPoints = pp.localPoints();

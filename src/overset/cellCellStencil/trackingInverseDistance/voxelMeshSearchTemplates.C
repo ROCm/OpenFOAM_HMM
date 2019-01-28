@@ -52,15 +52,67 @@ void Foam::voxelMeshSearch::fill
         minIds[cmpt] = max(minIds[cmpt], 0);
     }
 
-    for (label i = minIds[0]; i <= maxIds[0]; i++)
+    const labelVector off(offset(nDivs));
+    label voxeli = index(nDivs, minIds);
+    for (label k = minIds[2]; k <= maxIds[2]; k++)
     {
+        const label start1 = voxeli;
         for (label j = minIds[1]; j <= maxIds[1]; j++)
         {
-            for (label k = minIds[2]; k <= maxIds[2]; k++)
+            const label start0 = voxeli;
+            for (label i = minIds[0]; i <= maxIds[0]; i++)
             {
-                elems[i+j*nDivs.x()+k*nDivs.x()*nDivs.y()] = val;
+                elems[voxeli] = val;
+                voxeli += off[0];
             }
+            voxeli = start0 + off[1];
         }
+        voxeli = start1 + off[2];
+    }
+}
+
+
+template<class Container, class Type, class CombineOp>
+void Foam::voxelMeshSearch::fill
+(
+    Container& elems,
+    const boundBox& bb,
+    const labelVector& nDivs,
+    const boundBox& subBb,
+    const Type val,
+    const CombineOp& cop
+)
+{
+    labelVector minIds(index3(bb, nDivs, subBb.min()));
+    labelVector maxIds(index3(bb, nDivs, subBb.max()));
+
+    for (direction cmpt = 0; cmpt < 3; cmpt++)
+    {
+        if (maxIds[cmpt] < 0 || minIds[cmpt] >= nDivs[cmpt])
+        {
+            return;
+        }
+        // Clip
+        maxIds[cmpt] = min(maxIds[cmpt], nDivs[cmpt]-1);
+        minIds[cmpt] = max(minIds[cmpt], 0);
+    }
+
+    const labelVector off(offset(nDivs));
+    label voxeli = index(nDivs, minIds);
+    for (label k = minIds[2]; k <= maxIds[2]; k++)
+    {
+        const label start1 = voxeli;
+        for (label j = minIds[1]; j <= maxIds[1]; j++)
+        {
+            const label start0 = voxeli;
+            for (label i = minIds[0]; i <= maxIds[0]; i++)
+            {
+                cop(elems[voxeli], val);
+                voxeli += off[0];
+            }
+            voxeli = start0 + off[1];
+        }
+        voxeli = start1 + off[2];
     }
 }
 
@@ -100,19 +152,26 @@ bool Foam::voxelMeshSearch::overlaps
     }
 
 
-    for (label i = minIds[0]; i <= maxIds[0]; i++)
+    const labelVector off(offset(nDivs));
+    label voxeli = index(nDivs, minIds);
+    for (label k = minIds[2]; k <= maxIds[2]; k++)
     {
+        const label start1 = voxeli;
         for (label j = minIds[1]; j <= maxIds[1]; j++)
         {
-            for (label k = minIds[2]; k <= maxIds[2]; k++)
+            const label start0 = voxeli;
+            for (label i = minIds[0]; i <= maxIds[0]; i++)
             {
-                const Type elemVal = elems[i+j*nDivs.x()+k*nDivs.x()*nDivs.y()];
+                const Type elemVal = elems[voxeli];
                 if (isNot != (elemVal == val))
                 {
                     return true;
                 }
+                voxeli += off[0];
             }
+            voxeli = start0 + off[1];
         }
+        voxeli = start1 + off[2];
     }
     return false;
 }
@@ -136,19 +195,26 @@ void Foam::voxelMeshSearch::write
             << exit(FatalError);
     }
 
-    for (label i = 0; i < nDivs[0]; i++)
+    const labelVector off(offset(nDivs));
+    label voxeli = index(nDivs, labelVector(0, 0, 0));
+    for (label k = 0; k < nDivs[2]; k++)
     {
+        const label start1 = voxeli;
         for (label j = 0; j < nDivs[1]; j++)
         {
-            for (label k = 0; k < nDivs[2]; k++)
+            const label start0 = voxeli;
+            for (label i = 0; i < nDivs[0]; i++)
             {
-                const Type elemVal = elems[i+j*nDivs.x()+k*nDivs.x()*nDivs.y()];
+                const Type& elemVal = elems[voxeli];
                 if (isNot != (elemVal == val))
                 {
                     os.write(centre(bb, nDivs, labelVector(i, j, k)));
                 }
+                voxeli += off[0];
             }
+            voxeli = start0 + off[1];
         }
+        voxeli = start1 + off[2];
     }
 }
 

@@ -48,18 +48,51 @@ bool Foam::searchableSurfaces::connected
     const pointIndexHit& hit
 )
 {
-    const triFace& localFace = s.localFaces()[hit.index()];
     const edge& e = s.edges()[edgeI];
+    const labelList& mp = s.meshPoints();
+    const edge meshE(mp[e[0]], mp[e[1]]);
 
-    forAll(localFace, i)
+    const triFace& f = s[hit.index()];
+
+    forAll(f, i)
     {
-        if (e.otherVertex(localFace[i]) != -1)
+        if (meshE.otherVertex(f[i]) != -1)
         {
             return true;
         }
     }
 
-    return false;
+    // Account for triangle intersection routine going wrong for
+    // lines in same plane as triangle. Tbd!
+
+    vector eVec(meshE.vec(s.points()));
+    scalar magEVec(mag(eVec));
+    if (magEVec > ROOTVSMALL)
+    {
+        vector n(f.areaNormal(s.points()));
+        scalar magArea(mag(n));
+        if (magArea > ROOTVSMALL)
+        {
+            n /= magArea;
+            if (mag(n&(eVec/magEVec)) < SMALL)
+            {
+                // Bad intersection
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+    else
+    {
+        return true;
+    }
 }
 
 
@@ -619,20 +652,20 @@ bool Foam::searchableSurfaces::checkIntersection
             {
                 List<pointIndexHit> hits;
 
-                if (i == j)
-                {
-                    // Slightly shorten the edges to prevent finding lots of
-                    // intersections. The fast triangle intersection routine
-                    // has problems with rays passing through a point of the
-                    // triangle.
-                    vectorField d
-                    (
-                        max(tolerance, 10*s0.tolerance())
-                       *(end-start)
-                    );
-                    start += d;
-                    end -= d;
-                }
+                //if (i == j)
+                //{
+                //    // Slightly shorten the edges to prevent finding lots of
+                //    // intersections. The fast triangle intersection routine
+                //    // has problems with rays passing through a point of the
+                //    // triangle. Now done in 'connected' routine. Tbd.
+                //    vectorField d
+                //    (
+                //        max(tolerance, 10*s0.tolerance())
+                //       *(end-start)
+                //    );
+                //    start += d;
+                //    end -= d;
+                //}
 
                 operator[](j).findLineAny(start, end, hits);
 
@@ -653,6 +686,9 @@ bool Foam::searchableSurfaces::checkIntersection
                         nHits++;
                     }
                 }
+
+                // tdb. What about distributedTriSurfaceMesh?
+                //reduce(nHits, sumOp<label>());
 
                 if (nHits > 0)
                 {

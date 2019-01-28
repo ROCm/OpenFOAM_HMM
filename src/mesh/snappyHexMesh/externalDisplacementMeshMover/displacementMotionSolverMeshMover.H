@@ -112,7 +112,8 @@ public:
         (
             const dictionary& dict,
             const List<labelPair>& baffles,
-            pointVectorField& pointDisplacemen
+            pointVectorField& pointDisplacement,
+            const bool dryRun
         );
 
 

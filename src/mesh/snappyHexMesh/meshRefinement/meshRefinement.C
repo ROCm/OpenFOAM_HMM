@@ -285,10 +285,13 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
         }
         reduce(nChangedFaces, sumOp<label>());
 
-        Info<< "Edge intersection testing:" << nl
-            << "    Number of edges             : " << nMasterFaces << nl
-            << "    Number of edges to retest   : " << nChangedFaces
-            << endl;
+        if (!dryRun_)
+        {
+            Info<< "Edge intersection testing:" << nl
+                << "    Number of edges             : " << nMasterFaces << nl
+                << "    Number of edges to retest   : " << nChangedFaces
+                << endl;
+        }
     }
 
 
@@ -342,7 +345,11 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     label nHits = countHits();
     label nTotHits = returnReduce(nHits, sumOp<label>());
 
-    Info<< "    Number of intersected edges : " << nTotHits << endl;
+
+    if (!dryRun_)
+    {
+        Info<< "    Number of intersected edges : " << nTotHits << endl;
+    }
 
     // Set files to same time as mesh
     setInstance(mesh_.facesInstance());
@@ -487,7 +494,11 @@ void Foam::meshRefinement::checkData()
             neiBoundaryFc
         );
     }
+
     // Check meshRefinement
+    const labelList& surfIndex = surfaceIndex();
+
+
     {
         // Get boundary face centre and level. Coupled aware.
         labelList neiLevel(nBnd);
@@ -549,14 +560,14 @@ void Foam::meshRefinement::checkData()
         // Check
         forAll(surfaceHit, facei)
         {
-            if (surfaceIndex_[facei] != surfaceHit[facei])
+            if (surfIndex[facei] != surfaceHit[facei])
             {
                 if (mesh_.isInternalFace(facei))
                 {
                     WarningInFunction
                         << "Internal face:" << facei
                         << " fc:" << mesh_.faceCentres()[facei]
-                        << " cached surfaceIndex_:" << surfaceIndex_[facei]
+                        << " cached surfaceIndex_:" << surfIndex[facei]
                         << " current:" << surfaceHit[facei]
                         << " ownCc:"
                         << mesh_.cellCentres()[mesh_.faceOwner()[facei]]
@@ -566,14 +577,14 @@ void Foam::meshRefinement::checkData()
                 }
                 else if
                 (
-                    surfaceIndex_[facei]
+                    surfIndex[facei]
                  != neiHit[facei-mesh_.nInternalFaces()]
                 )
                 {
                     WarningInFunction
                         << "Boundary face:" << facei
                         << " fc:" << mesh_.faceCentres()[facei]
-                        << " cached surfaceIndex_:" << surfaceIndex_[facei]
+                        << " cached surfaceIndex_:" << surfIndex[facei]
                         << " current:" << surfaceHit[facei]
                         << " ownCc:"
                         << mesh_.cellCentres()[mesh_.faceOwner()[facei]]
@@ -996,7 +1007,8 @@ Foam::label Foam::meshRefinement::splitFacesUndo
             false,  // report
             mesh_,
             motionDict,
-            errorFaces
+            errorFaces,
+            dryRun_
         );
         if (!hasErrors)
         {
@@ -1208,7 +1220,9 @@ Foam::meshRefinement::meshRefinement
     const refinementSurfaces& surfaces,
     const refinementFeatures& features,
     const shellSurfaces& shells,
-    const shellSurfaces& limitShells
+    const shellSurfaces& limitShells,
+    const labelUList& checkFaces,
+    const bool dryRun
 )
 :
     mesh_(mesh),
@@ -1219,6 +1233,7 @@ Foam::meshRefinement::meshRefinement
     features_(features),
     shells_(shells),
     limitShells_(limitShells),
+    dryRun_(dryRun),
     meshCutter_
     (
         mesh,
@@ -1241,11 +1256,34 @@ Foam::meshRefinement::meshRefinement
     userFaceData_(0)
 {
     // recalculate intersections for all faces
-    updateIntersections(identity(mesh_.nFaces()));
+    updateIntersections(checkFaces);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::labelList& Foam::meshRefinement::surfaceIndex() const
+{
+    if (surfaceIndex_.size() != mesh_.nFaces())
+    {
+        const_cast<meshRefinement&>(*this).updateIntersections
+        (
+            identity(mesh_.nFaces())
+        );
+    }
+    return surfaceIndex_;
+}
+
+
+Foam::labelList& Foam::meshRefinement::surfaceIndex()
+{
+    if (surfaceIndex_.size() != mesh_.nFaces())
+    {
+        updateIntersections(identity(mesh_.nFaces()));
+    }
+    return surfaceIndex_;
+}
+
 
 Foam::label Foam::meshRefinement::countHits() const
 {
@@ -1254,9 +1292,11 @@ Foam::label Foam::meshRefinement::countHits() const
 
     label nHits = 0;
 
-    forAll(surfaceIndex_, facei)
+    const labelList& surfIndex = surfaceIndex();
+
+    forAll(surfIndex, facei)
     {
-        if (surfaceIndex_[facei] >= 0 && isMasterFace.test(facei))
+        if (surfIndex[facei] >= 0 && isMasterFace.test(facei))
         {
             ++nHits;
         }
@@ -1520,9 +1560,11 @@ Foam::labelList Foam::meshRefinement::intersectedFaces() const
 {
     label nBoundaryFaces = 0;
 
-    forAll(surfaceIndex_, facei)
+    const labelList& surfIndex = surfaceIndex();
+
+    forAll(surfIndex, facei)
     {
-        if (surfaceIndex_[facei] != -1)
+        if (surfIndex[facei] != -1)
         {
             nBoundaryFaces++;
         }
@@ -1531,9 +1573,9 @@ Foam::labelList Foam::meshRefinement::intersectedFaces() const
     labelList surfaceFaces(nBoundaryFaces);
     nBoundaryFaces = 0;
 
-    forAll(surfaceIndex_, facei)
+    forAll(surfIndex, facei)
     {
-        if (surfaceIndex_[facei] != -1)
+        if (surfIndex[facei] != -1)
         {
             surfaceFaces[nBoundaryFaces++] = facei;
         }
@@ -1550,9 +1592,11 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     bitSet isBoundaryPoint(mesh_.nPoints());
     label nBoundaryPoints = 0;
 
-    forAll(surfaceIndex_, facei)
+    const labelList& surfIndex = surfaceIndex();
+
+    forAll(surfIndex, facei)
     {
-        if (surfaceIndex_[facei] != -1)
+        if (surfIndex[facei] != -1)
         {
             const face& f = faces[facei];
 
@@ -3094,6 +3138,9 @@ void Foam::meshRefinement::write
     if (writeFlags && !(writeFlags & NOWRITEREFINEMENT))
     {
         meshCutter_.write();
+
+        // Force calculation before writing
+        (void)surfaceIndex();
         surfaceIndex_.write();
     }
 
@@ -3155,6 +3202,78 @@ void Foam::meshRefinement::writeLevel(const writeType flags)
 //{
 //    outputLevel_ = flags;
 //}
+
+
+const Foam::dictionary& Foam::meshRefinement::subDict
+(
+    const dictionary& dict,
+    const word& keyword,
+    const bool noExit
+)
+{
+    if (noExit)
+    {
+        // Find non-recursive with patterns
+        const dictionary::const_searcher finder
+        (
+            dict.csearch
+            (
+                keyword,
+                keyType::REGEX
+            )
+        );
+
+        if (!finder.found())
+        {
+            FatalIOErrorInFunction(dict)
+                << "Entry '" << keyword << "' not found in dictionary "
+                << dict.name();
+            return dictionary::null;
+        }
+        else
+        {
+            return finder.dict();
+        }
+    }
+    else
+    {
+        return dict.subDict(keyword);
+    }
+}
+
+
+Foam::ITstream& Foam::meshRefinement::lookup
+(
+    const dictionary& dict,
+    const word& keyword,
+    const bool noExit
+)
+{
+    if (noExit)
+    {
+        const dictionary::const_searcher finder
+        (
+            dict.csearch(keyword, keyType::REGEX)
+        );
+
+        if (!finder.found())
+        {
+            FatalIOErrorInFunction(dict)
+                << "Entry '" << keyword << "' not found in dictionary "
+                << dict.name();
+            // Fake entry
+            return dict.first()->stream();
+        }
+        else
+        {
+            return finder.ref().stream();
+        }
+    }
+    else
+    {
+        return dict.lookup(keyword);
+    }
+}
 
 
 // ************************************************************************* //
