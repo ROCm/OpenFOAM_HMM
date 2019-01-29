@@ -55,7 +55,7 @@ Usage
         trackLength     1e-3;
         nSubCycle       5;
         bounds          (0.2 -10 -10)(0.22 10 10);
-        cloudName       particleTracks;
+        cloud           particleTracks;
 
         seedSampleSet
         {
@@ -78,7 +78,7 @@ Usage
         lifetime     | Maximum number of particle tracking steps | yes |
         trackLength  | Tracking segment length | no          |
         nSubCycle    | Number of tracking steps per cell | no|
-        cloudName    | Cloud name to use       | yes         |
+        cloud        | Cloud name to use       | yes         |
         bounds       | Bounding box to trim tracks | no | invertedBox
         seedSampleSet| Seeding method (see below)| yes       |
     \endtable
