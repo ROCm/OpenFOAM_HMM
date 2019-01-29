@@ -165,9 +165,19 @@ SuSp
     );
     faMatrix<Type>& fam = tfam.ref();
 
-    fam.diag() += mesh.S()*max(sp.internalField(), scalar(0));
+   fam.diag() +=
+        mesh.S()*max
+        (
+            sp.internalField(),
+            dimensionedScalar("0", sp.dimensions(), Zero)
+        );
 
-    fam.source() -= mesh.S()*min(sp.internalField(), scalar(0))
+    fam.source() -=
+        mesh.S()*min
+        (
+            sp.internalField(),
+            dimensionedScalar("0", sp.dimensions(), Zero)
+        )
         *vf.internalField();
 
     return tfam;

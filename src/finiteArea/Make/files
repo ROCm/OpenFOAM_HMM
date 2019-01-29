@@ -48,7 +48,8 @@ $(derivedFaPatchFields)/fixedValueOutflow/fixedValueOutflowFaPatchFields.C
 $(derivedFaPatchFields)/inletOutlet/inletOutletFaPatchFields.C
 $(derivedFaPatchFields)/slip/slipFaPatchFields.C
 $(derivedFaPatchFields)/edgeNormalFixedValue/edgeNormalFixedValueFaPatchVectorField.C
-$(derivedFaPatchFields)/uniformFixedValue/uniformFixedValueFaPatchFields.C
+$(derivedFaPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueFaPatchFields.C
+$(derivedFaPatchFields)/clampedPlate/clampedPlateFaPatchFields.C
 
 faePatchFields = fields/faePatchFields
 $(faePatchFields)/faePatchField/faePatchFields.C
@@ -81,6 +82,7 @@ $(schemes)/upwind/upwindEdgeInterpolationMake.C
 $(schemes)/linearUpwind/linearUpwindEdgeInterpolationMake.C
 $(schemes)/Gamma/GammaEdgeInterpolationMake.C
 $(schemes)/blended/blendedEdgeInterpolationMake.C
+$(schemes)/skewCorrected/skewCorrectedEdgeInterpolationMake.C
 
 finiteArea/fa/fa.C
 finiteArea/faSchemes/faSchemes.C

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +48,6 @@ void Foam::edgeInterpolation::clearOut()
     deleteDemandDrivenData(differenceFactors_);
     deleteDemandDrivenData(correctionVectors_);
     deleteDemandDrivenData(skewCorrectionVectors_);
-//     deleteDemandDrivenData(leastSquarePvectors_);
-//     deleteDemandDrivenData(leastSquareNvectors_);
 }
 
 
@@ -64,8 +63,6 @@ Foam::edgeInterpolation::edgeInterpolation(const faMesh& fam)
     correctionVectors_(nullptr),
     skew_(true),
     skewCorrectionVectors_(nullptr)
-//     leastSquarePvectors_(nullptr),
-//     leastSquareNvectors_(nullptr)
 {}
 
 
@@ -161,30 +158,6 @@ Foam::edgeInterpolation::skewCorrectionVectors() const
 }
 
 
-// const Foam::edgeVectorField&
-// Foam::edgeInterpolation::leastSquarePvectors() const
-// {
-//     if (!leastSquarePvectors_)
-//     {
-//         makeLeastSquareVectors();
-//     }
-//
-//     return (*leastSquarePvectors_);
-// }
-
-
-// const Foam::edgeVectorField&
-// Foam::edgeInterpolation::leastSquareNvectors() const
-// {
-//     if (!leastSquareNvectors_)
-//     {
-//         makeLeastSquareVectors();
-//     }
-//
-//     return (*leastSquareNvectors_);
-// }
-
-
 bool Foam::edgeInterpolation::movePoints() const
 {
     deleteDemandDrivenData(lPN_);
@@ -196,9 +169,6 @@ bool Foam::edgeInterpolation::movePoints() const
 
     skew_ = true;
     deleteDemandDrivenData(skewCorrectionVectors_);
-
-//     deleteDemandDrivenData(leastSquarePvectors_);
-//     deleteDemandDrivenData(leastSquareNvectors_);
 
     return true;
 }
@@ -527,10 +497,12 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
           - deltaCoeffs[edgeI]*unitDelta;
     }
 
+
     edgeVectorField::Boundary& CorrVecsbf = CorrVecs.boundaryFieldRef();
-    for (faePatchVectorField& patchCorrVecs : CorrVecsbf)
+
+    forAll(CorrVecs.boundaryField(), patchI)
     {
-        patchCorrVecs = vector::zero;
+        mesh().boundary()[patchI].makeCorrectionVectors(CorrVecsbf[patchI]);
     }
 
     scalar NonOrthogCoeff = 0.0;

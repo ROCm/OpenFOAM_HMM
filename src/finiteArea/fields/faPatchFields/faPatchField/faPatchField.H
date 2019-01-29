@@ -81,7 +81,7 @@ class faPatchField
 :
     public Field<Type>
 {
-    // Private data
+    // Private Data
 
         //- Reference to a patch
         const faPatch& patch_;
@@ -94,8 +94,8 @@ class faPatchField
         bool updated_;
 
         //- Optional patch type, used to allow specified boundary conditions
-        //  to be applied to constraint patches by providing the constraint
-        //  patch type as 'patchType'
+        //- to be applied to constraint patches by providing the constraint
+        //- patch type as 'patchType'
         word patchType_;
 
 
@@ -217,7 +217,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new patchField created on freestore given
-        //  patch and internal field
+        //- patch and internal field
         //  (does not set the patch field values)
         static tmp<faPatchField<Type>> New
         (
@@ -228,7 +228,7 @@ public:
         );
 
         //- Return a pointer to a new patchField created on freestore given
-        //  patch and internal field
+        //- patch and internal field
         //  (does not set the patch field values)
         static tmp<faPatchField<Type>> New
         (
@@ -238,7 +238,7 @@ public:
         );
 
         //- Return a pointer to a new patchField created on freestore from
-        //  a given faPatchField mapped onto a new patch
+        //- a given faPatchField mapped onto a new patch
         static tmp<faPatchField<Type>> New
         (
             const faPatchField<Type>&,
@@ -248,7 +248,7 @@ public:
         );
 
         //- Return a pointer to a new patchField created on freestore
-        //  from dictionary
+        //- from dictionary
         static tmp<faPatchField<Type>> New
         (
             const faPatch&,
@@ -257,7 +257,7 @@ public:
         );
 
         //- Return a pointer to a new calculatedFaPatchField created on
-        //  freestore without setting patchField values
+        //- freestore without setting patchField values
         template<class Type2>
         static tmp<faPatchField<Type>> NewCalculatedType
         (
@@ -269,7 +269,7 @@ public:
     virtual ~faPatchField<Type>() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 
@@ -330,7 +330,7 @@ public:
             }
 
 
-        // Mapping functions
+        // Mapping
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap
@@ -346,7 +346,7 @@ public:
             );
 
 
-        // Evaluation functions
+        // Evaluation
 
             //- Return patch-normal gradient
             virtual tmp<Field<Type>> snGrad() const;
@@ -383,9 +383,8 @@ public:
                     Pstream::commsTypes::blocking
             );
 
-
             //- Return the matrix diagonal coefficients corresponding to the
-            //  evaluation of the value of this patchField with given weights
+            //- evaluation of the value of this patchField with given weights
             virtual tmp<Field<Type>> valueInternalCoeffs
             (
                 const tmp<Field<scalar>>&
@@ -396,7 +395,7 @@ public:
             }
 
             //- Return the matrix source coefficients corresponding to the
-            //  evaluation of the value of this patchField with given weights
+            //- evaluation of the value of this patchField with given weights
             virtual tmp<Field<Type>> valueBoundaryCoeffs
             (
                 const tmp<Field<scalar>>&
@@ -407,7 +406,7 @@ public:
             }
 
             //- Return the matrix diagonal coefficients corresponding to the
-            //  evaluation of the gradient of this patchField
+            //- evaluation of the gradient of this patchField
             virtual tmp<Field<Type>> gradientInternalCoeffs() const
             {
                 NotImplemented;
@@ -415,7 +414,7 @@ public:
             }
 
             //- Return the matrix source coefficients corresponding to the
-            //  evaluation of the gradient of this patchField
+            //- evaluation of the gradient of this patchField
             virtual tmp<Field<Type>> gradientBoundaryCoeffs() const
             {
                 NotImplemented;
@@ -423,8 +422,10 @@ public:
             }
 
 
-        //- Write
-        virtual void write(Ostream&) const;
+        // IO
+
+            //- Write
+            virtual void write(Ostream&) const;
 
 
         // Check
@@ -433,7 +434,7 @@ public:
             void check(const faPatchField<Type>&) const;
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&);
 

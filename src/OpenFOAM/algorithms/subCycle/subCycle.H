@@ -59,7 +59,12 @@ class subCycleField
         GeometricField& gf0_;
 
         //- Copy of the "real" old-time value of the field
-        GeometricField gf_0_;
+        tmp<GeometricField> gf_0_;
+
+        GeometricField& gf00_;
+
+        //- Copy of the "real" old-old-time value of the field
+        tmp<GeometricField> gf_00_;
 
 
 public:
@@ -71,19 +76,28 @@ public:
         :
             gf_(gf),
             gf0_(gf.oldTime()),
-            gf_0_(gf0_.name() + "_", gf0_)
-        {}
+            gf00_(gf.oldTime().oldTime())
+        {
+            {
+                gf_0_ = GeometricField::New(gf0_.name() + "_", gf0_);
+                gf_00_ = GeometricField::New(gf00_.name() + "_", gf00_);
+            }
+        }
 
 
     //- Destructor
     ~subCycleField()
     {
-        // Reset the old-time field
-        gf0_ = gf_0_;
+        if (gf_0_.valid())
+        {
+            // Reset the old-time field
+            gf0_ = gf_0_;
+
+            gf00_ = gf_00_;
 
         // Correct the time index of the field to correspond to the global time
-        gf_.timeIndex() = gf_.time().timeIndex();
-        gf0_.timeIndex() = gf_.time().timeIndex();
+            gf_.timeIndex() = gf_.time().timeIndex();
+        }
     }
 
 
@@ -96,7 +110,8 @@ public:
     void updateTimeIndex()
     {
         gf_.timeIndex() = gf_.time().timeIndex() + 1;
-        gf0_.timeIndex() = gf_.time().timeIndex() + 1;
+        gf0_.timeIndex() = gf0_.time().timeIndex() + 1;
+        gf00_.timeIndex() = gf00_.time().timeIndex() + 1;
     }
 };
 

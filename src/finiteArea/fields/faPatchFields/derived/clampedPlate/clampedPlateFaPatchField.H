@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2020 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,42 +24,42 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::uniformFixedValueFaPatchField
+    Foam::clampedPlateFaPatchField
 
 Description
-    This finiteArea boundary condition
-    provides a uniform fixed value condition, which can also be time-varying.
+    This BC provides a clamped BC. It sets zero fixe value and zeroGradient.
 
 Usage
-    \table
-        Property     | Description                  | Required | Default
-        uniformValue | uniform value                | yes |
-    \endtable
-
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        type            uniformFixedValue;
-        uniformValue    constant 0.2;
+        // Mandatory entries (unmodifiable)
+        type                clampedPlate;
+
+        // Mandatory/Optional (inherited) entries
+        ...
     }
     \endverbatim
 
-See also
-    Foam::Function1Types
-    Foam::fixedValueFvPatchField
-    Foam::uniformFixedValueFvPatchField.C
+    where the entries mean:
+    \table
+      Property | Description               | Type  | Reqd | Dflt
+      type     | Type name: clampedPlate   | word  | yes  | -
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link faPatchFields.H \endlink
 
 SourceFiles
-    uniformFixedValueFaPatchField.C
+    clampedPlateFaPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformFixedValueFaPatchField_H
-#define uniformFixedValueFaPatchField_H
+#ifndef clampedPlateFaPatchField_H
+#define clampedPlateFaPatchField_H
 
-#include "fixedValueFaPatchField.H"
-#include "Function1.H"
+#include "faPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,56 +67,51 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class uniformFixedValueFaPatch Declaration
+                      Class clampedPlateFaPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class uniformFixedValueFaPatchField
+class clampedPlateFaPatchField
 :
-    public fixedValueFaPatchField<Type>
+    public faPatchField<Type>
 {
-    // Private Data
-
-        //- Value
-        autoPtr<Function1<Type>> uniformValue_;
-
-
 public:
 
     //- Runtime type information
-    TypeName("uniformFixedValue");
+    TypeName("clampedPlate");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        uniformFixedValueFaPatchField
+        clampedPlateFaPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        uniformFixedValueFaPatchField
+        clampedPlateFaPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping onto a new patch
-        uniformFixedValueFaPatchField
+        //- Construct by mapping the given clampedPlateFaPatchField<Type>
+        //- onto a new patch
+        clampedPlateFaPatchField
         (
-            const uniformFixedValueFaPatchField<Type>&,
+            const clampedPlateFaPatchField<Type>&,
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
             const faPatchFieldMapper&
         );
 
-        //- Copy construct
-        uniformFixedValueFaPatchField
+        //- Construct as copy
+        clampedPlateFaPatchField
         (
-            const uniformFixedValueFaPatchField<Type>&
+            const clampedPlateFaPatchField<Type>&
         );
 
         //- Construct and return a clone
@@ -124,41 +119,81 @@ public:
         {
             return tmp<faPatchField<Type>>
             (
-                new uniformFixedValueFaPatchField<Type>(*this)
+                new clampedPlateFaPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        uniformFixedValueFaPatchField
+        clampedPlateFaPatchField
         (
-            const uniformFixedValueFaPatchField<Type>&,
+            const clampedPlateFaPatchField<Type>&,
             const DimensionedField<Type, areaMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type>> clone
+        virtual tmp<faPatchField<Type> > clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type>>
+            return tmp<faPatchField<Type> >
             (
-                new uniformFixedValueFaPatchField<Type>(*this, iF)
+                new clampedPlateFaPatchField<Type>(*this, iF)
             );
         }
 
 
-    //- Destructor
-    virtual ~uniformFixedValueFaPatchField() = default;
+     //- Destructor
+    virtual ~clampedPlateFaPatchField()
+    {}
 
 
     // Member Functions
 
-        //- Update the coefficients associated with the patch field
-        virtual void updateCoeffs();
+        // Evaluation
 
-        //- Write
-        virtual void write(Ostream& os) const;
+            //- Return gradient at boundary
+            virtual tmp<Field<Type>> snGrad() const
+            {
+                return tmp<Field<Type>>
+                (
+                    new Field<Type>(this->size(), Zero)
+                );
+            }
+
+            //- Evaluate the patch field
+            virtual void evaluate
+            (
+                const Pstream::commsTypes commsType=Pstream::commsTypes::blocking
+            );
+
+            //- Return the matrix diagonal coefficients corresponding to the
+            //- evaluation of the value of this patchField with given weights
+            virtual tmp<Field<Type> > valueInternalCoeffs
+            (
+                const tmp<scalarField>&
+            ) const;
+
+            //- Return the matrix source coefficients corresponding to the
+            //- evaluation of the value of this patchField with given weights
+            virtual tmp<Field<Type> > valueBoundaryCoeffs
+            (
+                const tmp<scalarField>&
+            ) const;
+
+            //- Return the matrix diagonal coefficients corresponding to the
+            //- evaluation of the gradient of this patchField
+            virtual tmp<Field<Type> > gradientInternalCoeffs() const;
+
+            //- Return the matrix source coefficients corresponding to the
+            //- evaluation of the gradient of this patchField
+            virtual tmp<Field<Type> > gradientBoundaryCoeffs() const;
+
+
+        // IO
+
+            //- Write
+            virtual void write(Ostream&) const;
 };
 
 
@@ -169,7 +204,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "uniformFixedValueFaPatchField.C"
+#   include "clampedPlateFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

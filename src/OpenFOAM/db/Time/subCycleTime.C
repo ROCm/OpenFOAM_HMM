@@ -36,7 +36,10 @@ Foam::subCycleTime::subCycleTime(Time& runTime, const label nCycles)
     total_(nCycles)
 {
     // Could avoid 0 or 1 nCycles here on construction
-    time_.subCycle(nCycles);
+    if (nCycles > 1)
+    {
+        time_.subCycle(nCycles);
+    }
 }
 
 
@@ -64,7 +67,10 @@ bool Foam::subCycleTime::end() const
 
 void Foam::subCycleTime::endSubCycle()
 {
-    time_.endSubCycle();
+    if (total_ > 1)
+    {
+        time_.endSubCycle();
+    }
 
     // If called manually, ensure status() will return false
 
@@ -89,8 +95,12 @@ bool Foam::subCycleTime::loop()
 
 Foam::subCycleTime& Foam::subCycleTime::operator++()
 {
-    ++time_;
-    ++index_;
+    if (total_ > 1)
+    {
+        time_++;
+    }
+
+    index_++;
 
     // Register index change with Time, in case someone wants this information
     time_.subCycleIndex(index_);

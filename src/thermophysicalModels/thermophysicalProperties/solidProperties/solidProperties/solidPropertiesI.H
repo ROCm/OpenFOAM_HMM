@@ -65,9 +65,22 @@ inline Foam::scalar Foam::solidProperties::emissivity() const
     return emissivity_;
 }
 
+
 inline Foam::scalar Foam::solidProperties::W() const
 {
     return W_;
+}
+
+
+inline Foam::scalar Foam::solidProperties::nu() const
+{
+    return nu_;
+}
+
+
+inline Foam::scalar Foam::solidProperties::E() const
+{
+    return E_;
 }
 
 
