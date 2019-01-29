@@ -48,7 +48,7 @@ inline Foam::wordHashSet
 Foam::functionObjects::fieldSelection::selectionNames() const
 {
     wordHashSet names;
-    for (const fieldInfo& fi : *this)
+    for (const fieldInfo& fi : selection_)
     {
         names.insert(fi.name());
     }
