@@ -54,7 +54,6 @@ namespace Foam
 {
 
 // Forward declarations
-
 class Switch;
 class dictionary;
 
@@ -81,9 +80,7 @@ public:
         NO      = 2 /*!< "no" */,    YES  = 3 /*!< "yes" */,
         OFF     = 4 /*!< "off" */,   ON   = 5 /*!< "on" */,
         NONE    = 6 /*!< "none" */,
-        INVALID = 8 /*!< "invalid" */,
-        DEFAULT_OFF = 0x10 /*!< off/false (as default value) */,
-        DEFAULT_ON = 0x11  /*!< on/true (as default value) */
+        INVALID = 8 /*!< "invalid" */
     };
 
 
@@ -143,14 +140,14 @@ public:
 
         //- Construct from string.
         //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const std::string& str, const bool allowBad)
+        Switch(const std::string& str, bool allowBad)
         :
             switch_(parse(str, allowBad))
         {}
 
         //- Construct from character array.
         //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const char* str, const bool allowBad)
+        Switch(const char* str, bool allowBad)
         :
             switch_(parse(str, allowBad))
         {}
@@ -183,25 +180,19 @@ public:
         //- value is not found, it is added into the dictionary.
         static Switch lookupOrAddToDict
         (
-            const word& name,
-            dictionary& dict,
-            const Switch defaultValue = switchType::FALSE
+            const word& name,           //!< Lookup key. Uses REGEX!
+            dictionary& dict,           //!< dictionary
+            const Switch defaultValue = switchType::FALSE //!< default to add
         );
 
 
     // Member Functions
 
-        //- True if the Switch has a valid value
+        //- True if the Switch represents a valid enumeration
         bool valid() const noexcept;
 
         //- The underlying enumeration value
         switchType type() const noexcept;
-
-        //- Underlying enumeration is DEFAULT_ON or DEFAULT_OFF
-        bool isDefault() const noexcept;
-
-        //- Underlying enumeration is not DEFAULT_ON or DEFAULT_OFF
-        bool nonDefault() const noexcept;
 
         //- A string representation of the Switch value
         const char* c_str() const noexcept;
@@ -210,7 +201,11 @@ public:
         std::string str() const;
 
         //- Update the value of the Switch if it is found in the dictionary
-        bool readIfPresent(const word& name, const dictionary& dict);
+        bool readIfPresent
+        (
+            const word& name,           //!< Lookup key. Uses REGEX!
+            const dictionary& dict      //!< dictionary
+        );
 
 
     // Member Operators
@@ -222,15 +217,17 @@ public:
         }
 
         //- Assignment from enumerated value
-        void operator=(const switchType sw) noexcept
+        Switch& operator=(const switchType sw) noexcept
         {
             switch_ = sw;
+            return *this;
         }
 
         //- Assignment from bool
-        void operator=(const bool b) noexcept
+        Switch& operator=(const bool b) noexcept
         {
             switch_ = (b ? Switch::TRUE : Switch::FALSE);
+            return *this;
         }
 
 

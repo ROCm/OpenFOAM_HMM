@@ -189,18 +189,6 @@ Foam::Switch::switchType Foam::Switch::type() const noexcept
 }
 
 
-bool Foam::Switch::isDefault() const noexcept
-{
-    return (switch_ & 0x10);
-}
-
-
-bool Foam::Switch::nonDefault() const noexcept
-{
-    return !isDefault();
-}
-
-
 const char* Foam::Switch::c_str() const noexcept
 {
     return names[(switch_ & 0x0F)];

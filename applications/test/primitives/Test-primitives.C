@@ -61,6 +61,12 @@ inline Switch readSwitch(const std::string& str)
 }
 
 
+void printInfo(const Switch& sw)
+{
+    Info<<"Switch " << sw.c_str() << " (enum=" << label(sw.type()) << ")\n";
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class T>
@@ -162,19 +168,22 @@ int main(int argc, char *argv[])
             }
         );
 
+        Info<< nl << "Test Switch defaults:" << nl;
+
         dictionary dict;
         dict.add("key1" , "true");
+        dict.add("key2" , "off");
 
+        for (const word& k : { "key", "key1", "key2" })
         {
-            Switch sw("key", dict, Switch::DEFAULT_ON);
-            Info<<"got: " << sw << " type is DEFAULT_ON? "
-                << (sw.type() == Switch::DEFAULT_ON) << nl;
-        }
+            Switch sw1(k, dict, Switch::YES);
+            Switch sw2(k, dict, Switch::NO);
 
-        {
-            Switch sw("key1", dict, Switch::DEFAULT_ON);
-            Info<<"got: " << sw << " type is DEFAULT_ON? "
-                << (sw.type() == Switch::DEFAULT_ON) << nl;
+            bool sw3(Switch(k, dict, Switch::YES));
+
+            printInfo(sw1);
+            printInfo(sw2);
+            Info<<"bool " << sw3 << nl;
         }
     }
 
