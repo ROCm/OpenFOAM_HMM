@@ -62,11 +62,11 @@ bool writeVolField
 
     autoPtr<ensightFile> os = ensCase.newData<Type>(field.name());
 
-    bool wrote = ensightOutput::writeField<Type>
+    bool wrote = ensightOutput::writeVolField<Type>
     (
         field,
         ensMesh,
-        os,
+        os.ref(),
         nodeValues
     );
 

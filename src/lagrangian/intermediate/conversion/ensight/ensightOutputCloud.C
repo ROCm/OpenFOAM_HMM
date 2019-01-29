@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,7 +73,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-bool Foam::ensightCloud::writePositions
+bool Foam::ensightOutput::writeCloudPositions
 (
     const fvMesh& mesh,
     const word& cloudName,
@@ -92,9 +92,9 @@ bool Foam::ensightCloud::writePositions
 
         auto outIter = positions.begin();
 
-        forAllConstIters(parcels, iter)
+        for (const passiveParticle& p : parcels)
         {
-            *outIter = iter().position();
+            *outIter = p.position();
             ++outIter;
         }
     }

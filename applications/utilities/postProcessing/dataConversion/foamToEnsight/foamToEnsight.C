@@ -99,8 +99,8 @@ Note
 #include "ensightCase.H"
 #include "ensightGeoFile.H"
 #include "ensightMesh.H"
-#include "ensightOutput.H"
 #include "ensightOutputCloud.H"
+#include "ensightOutputVolField.H"
 #include "fvMeshSubsetProxy.H"
 
 // local files

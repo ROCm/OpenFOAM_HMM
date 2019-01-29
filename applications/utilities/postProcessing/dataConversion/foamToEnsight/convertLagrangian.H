@@ -56,7 +56,7 @@ if (doLagrangian)
         {
             autoPtr<ensightFile> os = ensCase.newCloud(cloudName);
 
-            ensightCloud::writePositions
+            ensightOutput::writeCloudPositions
             (
                 mesh,
                 cloudName,
@@ -104,7 +104,7 @@ if (doLagrangian)
                 autoPtr<ensightFile> os =
                     ensCase.newCloudData<scalar>(cloudName, fieldName);
 
-                wrote = ensightCloud::writeCloudField<scalar>
+                wrote = ensightOutput::writeCloudField<scalar>
                 (
                     fieldObject, fieldExists, os
                 );
@@ -114,7 +114,7 @@ if (doLagrangian)
                 autoPtr<ensightFile> os =
                     ensCase.newCloudData<vector>(cloudName, fieldName);
 
-                wrote = ensightCloud::writeCloudField<vector>
+                wrote = ensightOutput::writeCloudField<vector>
                 (
                     fieldObject, fieldExists, os
                 );

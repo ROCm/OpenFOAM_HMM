@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,8 +219,8 @@ void Foam::ensightPartFaces::write
             }
         }
 
-        // write part
-        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
+        // Write part
+        for (int typei=0; typei < ensightFaces::nTypes; ++typei)
         {
             const ensightFaces::elemType what = ensightFaces::elemType(typei);
 
@@ -264,7 +264,7 @@ void Foam::ensightPartFaces::dumpInfo(Ostream& os) const
     os.writeEntry("start",  start_);
     os.writeEntry("size",   size());
 
-    for (label typei=0; typei < ensightFaces::nTypes; ++typei)
+    for (int typei=0; typei < ensightFaces::nTypes; ++typei)
     {
         const ensightFaces::elemType what = ensightFaces::elemType(typei);
         const labelUList& addr = this->faceIds(what);

@@ -62,7 +62,7 @@ public:
         };
 
         //- Number of element types (3)
-        static constexpr label nTypes = 3;
+        static constexpr int nTypes = 3;
 
         //- The ensight element type names
         static const char* elemNames[3];

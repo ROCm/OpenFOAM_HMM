@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +26,10 @@ License
 #include "IOmanip.H"
 #include "Fstream.H"
 #include "OSspecific.H"
+
 #include "ensightCase.H"
 #include "ensightPartFaces.H"
-#include "ensightSerialOutput.H"
+#include "ensightOutput.H"
 #include "ensightPTraits.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -140,13 +141,27 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
 
     // Write field
     osField.writeKeyword(ensightPTraits<Type>::typeName);
-    ensightSerialOutput::writeField
-    (
-        values,
-        ensPart,
-        osField,
-        isNodeValues
-    );
+
+    if (isNodeValues)
+    {
+        ensightOutput::Serial::writePointField
+        (
+            values,
+            ensPart,
+            osField
+            // false // serial
+        );
+    }
+    else
+    {
+        ensightOutput::Detail::writeFaceField
+        (
+            values,
+            ensPart,
+            osField,
+            false // serial
+        );
+    }
 
     return osCase.name();
 }
@@ -436,13 +451,27 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
 
     // Write field
     osField.writeKeyword(ensightPTraits<Type>::typeName);
-    ensightSerialOutput::writeField
-    (
-        values,
-        ensPart,
-        osField,
-        isNodeValues
-    );
+
+    if (isNodeValues)
+    {
+        ensightOutput::Serial::writePointField
+        (
+            values,
+            ensPart,
+            osField
+            // serial
+        );
+    }
+    else
+    {
+        ensightOutput::Detail::writeFaceField
+        (
+            values,
+            ensPart,
+            osField,
+            false // serial
+        );
+    }
 
     // Place a timestamp in the directory for future reference
     {

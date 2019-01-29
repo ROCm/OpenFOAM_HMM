@@ -23,191 +23,29 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightFile.H"
-#include "ensightOutput.H"
-#include "ensightPTraits.H"
+#include "ensightOutputVolField.H"
+#include "ensightMesh.H"
 
 #include "fvMesh.H"
-#include "volFields.H"
-#include "IOField.H"
-#include "OFstream.H"
-#include "IOmanip.H"
-#include "Time.H"
-#include "volPointInterpolation.H"
 #include "globalIndex.H"
-#include "uindirectPrimitivePatch.H"
+#include "volPointInterpolation.H"
 #include "interpolation.H"
 #include "linear.H"
 #include "processorFvPatch.H"
+#include "uindirectPrimitivePatch.H"
 
-// * * * * * * * * * * Static Private Member Functions * * * * * * * * * * * //
-
-template<template<typename> class FieldContainer, class Type>
-void Foam::ensightOutput::writeFieldContent
-(
-    const char* key,
-    const FieldContainer<Type>& fld,
-    ensightFile& os
-)
-{
-    if (returnReduce(fld.size(), sumOp<label>()) > 0)
-    {
-        if (Pstream::master())
-        {
-            os.writeKeyword(key);
-
-            for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-            {
-                const label cmpt = ensightPTraits<Type>::componentOrder[d];
-
-                os.writeList(fld.component(cmpt));
-
-                for (int slave=1; slave<Pstream::nProcs(); ++slave)
-                {
-                    IPstream fromSlave(Pstream::commsTypes::scheduled, slave);
-                    scalarField received(fromSlave);
-                    os.writeList(received);
-                }
-            }
-        }
-        else
-        {
-            for (direction d=0; d < pTraits<Type>::nComponents; ++d)
-            {
-                const label cmpt = ensightPTraits<Type>::componentOrder[d];
-
-                OPstream toMaster
-                (
-                    Pstream::commsTypes::scheduled,
-                    Pstream::masterNo()
-                );
-
-                toMaster
-                    << fld.component(cmpt);
-            }
-        }
-    }
-}
-
+// * * * * * * * * * * * * * * * *  Detail * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::ensightOutput::writeFaceField
-(
-    const Field<Type>& pf,
-    const ensightFaces& ensFaces,
-    Foam::ensightFile& os
-)
-{
-    if (ensFaces.total())
-    {
-        if (Pstream::master())
-        {
-            os.beginPart(ensFaces.index());
-        }
-
-        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
-        {
-            const ensightFaces::elemType what =
-                ensightFaces::elemType(typei);
-
-            writeFieldContent
-            (
-                ensightFaces::key(what),
-                Field<Type>(pf, ensFaces.faceIds(what)),
-                os
-            );
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-
-template<class Type>
-bool Foam::ensightOutput::writeFaceSubField
-(
-    const Field<Type>& pf,
-    const ensightFaces& ensFaces,
-    Foam::ensightFile& os
-)
-{
-    if (ensFaces.total())
-    {
-        if (Pstream::master())
-        {
-            os.beginPart(ensFaces.index());
-        }
-
-        label start = 0; // start of sublist
-        for (label typei=0; typei < ensightFaces::nTypes; ++typei)
-        {
-            const ensightFaces::elemType what =
-                ensightFaces::elemType(typei);
-
-            const label size = ensFaces.faceIds(what).size();
-
-            writeFieldContent
-            (
-                ensightFaces::key(what),
-                SubField<Type>(pf, size, start),
-                os
-            );
-
-            start += size; // start of next sublist
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-
-template<class Type>
-bool Foam::ensightOutput::writeCellField
-(
-    const Field<Type>& vf,
-    const ensightCells& ensCells,
-    ensightFile& os
-)
-{
-    if (ensCells.total())
-    {
-        if (Pstream::master())
-        {
-            os.beginPart(ensCells.index());
-        }
-
-        for (label typei=0; typei < ensightCells::nTypes; ++typei)
-        {
-            const ensightCells::elemType what =
-                ensightCells::elemType(typei);
-
-            writeFieldContent
-            (
-                ensightCells::key(what),
-                Field<Type>(vf, ensCells.cellIds(what)),
-                os
-            );
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-
-template<class Type>
-bool Foam::ensightOutput::writeField
+bool Foam::ensightOutput::Detail::writeVolField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const ensightMesh& ensMesh,
     ensightFile& os
 )
 {
+    constexpr bool parallel = true;
+
     const fvMesh& mesh = ensMesh.mesh();
     const ensightCells& meshCells = ensMesh.meshCells();
     const Map<word>&  patchLookup = ensMesh.patches();
@@ -219,7 +57,7 @@ bool Foam::ensightOutput::writeField
     //
     if (ensMesh.useInternalMesh())
     {
-        writeCellField(vf, meshCells, os);
+        Detail::writeCellField(vf, meshCells, os, parallel);
     }
 
     //
@@ -230,13 +68,14 @@ bool Foam::ensightOutput::writeField
     for (const label patchId : patchIds)
     {
         const word& patchName = patchLookup[patchId];
-        const ensightFaces& ensFaces = patchFaces[patchName];
+        const ensightFaces& part = patchFaces[patchName];
 
         writeFaceField
         (
             vf.boundaryField()[patchId],
-            ensFaces,
-            os
+            part,
+            os,
+            parallel
         );
     }
 
@@ -291,17 +130,17 @@ bool Foam::ensightOutput::writeField
 
         for (const word& zoneName : zoneNames)
         {
-            const ensightFaces& ensFaces = zoneFaces[zoneName];
+            const ensightFaces& part = zoneFaces[zoneName];
 
             // Field (local size)
-            Field<Type> values(ensFaces.size());
+            Field<Type> values(part.size());
 
             // Loop over face ids to store the needed field values
             // - internal faces use linear interpolation
             // - boundary faces use the corresponding patch value
-            forAll(ensFaces, i)
+            forAll(part, i)
             {
-                const label faceId = ensFaces[i];
+                const label faceId = part[i];
                 values[i] =
                 (
                     mesh.isInternalFace(faceId)
@@ -312,7 +151,7 @@ bool Foam::ensightOutput::writeField
 
             // The field is already copied in the proper order
             // - just need its corresponding sub-fields
-            writeFaceSubField(values, ensFaces, os);
+            Detail::writeFaceSubField(values, part, os, parallel);
         }
     }
 
@@ -321,13 +160,15 @@ bool Foam::ensightOutput::writeField
 
 
 template<class Type>
-bool Foam::ensightOutput::ensightPointField
+bool Foam::ensightOutput::Detail::writePointField
 (
     const GeometricField<Type, pointPatchField, pointMesh>& pf,
     const ensightMesh& ensMesh,
     ensightFile& os
 )
 {
+    constexpr bool parallel = true;
+
     const fvMesh& mesh = ensMesh.mesh();
     const Map<word>& patchLookup  = ensMesh.patches();
 
@@ -344,11 +185,12 @@ bool Foam::ensightOutput::ensightPointField
             os.beginPart(0); // 0 = internalMesh
         }
 
-        writeFieldContent
+        Detail::writeFieldComponents
         (
             "coordinates",
             Field<Type>(pf.internalField(), ensMesh.uniquePointMap()),
-            os
+            os,
+            parallel
         );
     }
 
@@ -360,7 +202,7 @@ bool Foam::ensightOutput::ensightPointField
     for (const label patchId : patchIds)
     {
         const word& patchName = patchLookup[patchId];
-        const ensightFaces& ensFaces = patchFaces[patchName];
+        const ensightFaces& part = patchFaces[patchName];
 
         const fvPatch& p = mesh.boundary()[patchId];
 
@@ -378,14 +220,15 @@ bool Foam::ensightOutput::ensightPointField
 
         if (Pstream::master())
         {
-            os.beginPart(ensFaces.index());
+            os.beginPart(part.index());
         }
 
-        writeFieldContent
+        Detail::writeFieldComponents
         (
             "coordinates",
             Field<Type>(pf.internalField(), uniqueMeshPointLabels),
-            os
+            os,
+            parallel
         );
     }
 
@@ -395,14 +238,14 @@ bool Foam::ensightOutput::ensightPointField
     const wordList zoneNames = zoneFaces.sortedToc();
     for (const word& zoneName : zoneNames)
     {
-        const ensightFaces& ensFaces = zoneFaces[zoneName];
+        const ensightFaces& part = zoneFaces[zoneName];
 
         uindirectPrimitivePatch p
         (
             UIndirectList<face>
             (
                 mesh.faces(),
-                ensFaces.faceIds()
+                part.faceIds()
             ),
             mesh.points()
         );
@@ -421,14 +264,15 @@ bool Foam::ensightOutput::ensightPointField
 
         if (Pstream::master())
         {
-            os.beginPart(ensFaces.index());
+            os.beginPart(part.index());
         }
 
-        writeFieldContent
+        Detail::writeFieldComponents
         (
             "coordinates",
             Field<Type>(pf.internalField(), uniqueMeshPointLabels),
-            os
+            os,
+            parallel
         );
     }
 
@@ -436,10 +280,10 @@ bool Foam::ensightOutput::ensightPointField
 }
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::ensightOutput::writeField
+bool Foam::ensightOutput::writeVolField
 (
     const GeometricField<Type, fvPatchField, volMesh>& vf,
     const ensightMesh& ensMesh,
@@ -456,12 +300,86 @@ bool Foam::ensightOutput::writeField
         pfld.ref().checkOut();
         pfld.ref().rename(vf.name());
 
-        return ensightPointField<Type>(pfld, ensMesh, os);
+        return Detail::writePointField<Type>(pfld, ensMesh, os);
     }
-    else
+
+    return Detail::writeVolField<Type>(vf, ensMesh, os);
+}
+
+
+// * * * * * * * * * * * * * * * *  Serial * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::ensightOutput::Serial::writeVolField
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const ensightPartFaces& part,
+    ensightFile& os
+)
+{
+    const label patchi = part.patchIndex();
+
+    if (patchi >= 0 && patchi < vf.boundaryField().size())
     {
-        return writeField<Type>(vf, ensMesh, os);
+        return ensightOutput::Detail::writeFaceField
+        (
+            vf.boundaryField()[patchi],
+            part,
+            os,
+            false // serial
+        );
     }
+
+    return false;
+}
+
+
+template<class Type>
+bool Foam::ensightOutput::Serial::writeVolField
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const ensightPartCells& part,
+    ensightFile& os
+)
+{
+    return ensightOutput::Detail::writeCellField
+    (
+        vf.internalField(),
+        part,
+        os,
+        false // serial
+    );
+}
+
+
+template<class Type>
+bool Foam::ensightOutput::Serial::writeVolField
+(
+    const GeometricField<Type, fvPatchField, volMesh>& vf,
+    const ensightParts& list,
+    ensightFile& os
+)
+{
+    for (const ensightPart& part : list)
+    {
+        const ensightPartFaces* fptr = isA<ensightPartFaces>(part);
+
+        if (fptr)
+        {
+            Serial::writeVolField(vf, *fptr, os);
+            continue;
+        }
+
+        const ensightPartCells* cptr = isA<ensightPartCells>(part);
+
+        if (cptr)
+        {
+            Serial::writeVolField(vf, *cptr, os);
+            continue;
+        }
+    }
+
+    return true;
 }
 
 

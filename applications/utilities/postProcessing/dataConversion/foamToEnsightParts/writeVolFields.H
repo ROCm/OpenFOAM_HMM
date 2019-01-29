@@ -61,11 +61,12 @@ bool writeVolField
 
     autoPtr<ensightFile> os = ensCase.newData<Type>(field.name());
 
-    bool wrote = ensightSerialOutput::writeField<Type>
+    // Currently serial only
+    bool wrote = ensightOutput::Serial::writeVolField<Type>
     (
         field,
         ensParts,
-        os
+        os.ref()
     );
 
     tfield.clear();

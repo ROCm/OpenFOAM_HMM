@@ -269,8 +269,8 @@ void Foam::ensightPartCells::write
             }
         }
 
-        // write each element type
-        for (label typei=0; typei < ensightCells::nTypes; ++typei)
+        // Write each element type
+        for (int typei=0; typei < ensightCells::nTypes; ++typei)
         {
             const ensightCells::elemType what = ensightCells::elemType(typei);
 
@@ -312,7 +312,7 @@ void Foam::ensightPartCells::dumpInfo(Ostream& os) const
     os.writeEntry("name",   name());
     os.writeEntry("size",   size());
 
-    for (label typei=0; typei < ensightCells::nTypes; ++typei)
+    for (int typei=0; typei < ensightCells::nTypes; ++typei)
     {
         const ensightCells::elemType what = ensightCells::elemType(typei);
         const labelUList& addr = this->cellIds(what);
