@@ -51,8 +51,18 @@ Usage
     <patchName>
     {
         type            nutUSpaldingWallFunction;
+
+        // .. nutWallFunctionFvPatchScalarField entries ..
+
     }
     \endverbatim
+
+    Additional entries (see below)
+    \table
+        Property  | Description               | Required   | Default value
+        maxIter   | Number of N-R iterations  | no         | 10
+        tolerance | Convergence tolerance     | no         | 0.01
+    \endtable
 
 See also
     Foam::nutWallFunctionFvPatchScalarField
@@ -62,7 +72,8 @@ Note
     turbulence->validate) returns a slightly different value every time
     it is called. This is since the seed for the Newton-Raphson iteration
     uses the current value of *this (= nut). Can be avoided by seeding the
-    NR with e.g. the laminar viscosity.
+    NR with e.g. the laminar viscosity or tightening the convergence tolerance
+    to e.g. 1e-7 and the max number of iterations to 100.
 
 SourceFiles
     nutUSpaldingWallFunctionFvPatchScalarField.C
@@ -73,7 +84,6 @@ SourceFiles
 #define nutUSpaldingWallFunctionFvPatchScalarField_H
 
 #include "nutWallFunctionFvPatchScalarField.H"
-#include "uint64.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,8 +102,17 @@ protected:
 
     // Protected data
 
-        mutable uint64_t invocations_;
-        mutable uint64_t iterations_;
+        //- Max iterations in calcNut
+        const label maxIter_;
+
+        //- Convergence tolerance
+        const scalar tolerance_;
+
+        //- Uncomment in case of intrumentation
+        //mutable uint64_t invocations_;
+        //mutable uint64_t nontrivial_;
+        //mutable uint64_t nonconvergence_;
+        //mutable uint64_t iterations_;
 
 
     // Protected Member Functions
@@ -103,6 +122,9 @@ protected:
 
         //- Calculate the friction velocity
         virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+
+        //- Write local wall function variables
+        virtual void writeLocalEntries(Ostream&) const;
 
 
 public:

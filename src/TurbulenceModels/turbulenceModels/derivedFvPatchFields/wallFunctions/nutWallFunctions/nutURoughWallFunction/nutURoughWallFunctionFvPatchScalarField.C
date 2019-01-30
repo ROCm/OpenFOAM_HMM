@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,8 +161,8 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcYPlus
                     }
                 } while
                 (
-                    mag(ryPlusLam*(yp - yPlusLast)) > 0.0001
-                 && ++iter < 10
+                    mag(ryPlusLam*(yp - yPlusLast)) > tolerance_
+                 && ++iter < maxIter_
                  && yp > VSMALL
                 );
 
@@ -190,13 +190,32 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcYPlus
                 yPlusLast = yp;
                 yp = (kappaRe + yp)/(1.0 + log(E_*yp));
 
-            } while (mag(ryPlusLam*(yp - yPlusLast)) > 0.0001 && ++iter < 10);
+            }
+            while
+            (
+                mag(ryPlusLam*(yp - yPlusLast)) > tolerance_
+             && ++iter < maxIter_
+            );
 
             yPlus[facei] = max(0.0, yp);
         }
     }
 
     return tyPlus;
+}
+
+
+void nutURoughWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
+    os.writeEntry("roughnessHeight", roughnessHeight_);
+    os.writeEntry("roughnessConstant", roughnessConstant_);
+    os.writeEntry("roughnessFactor", roughnessFactor_);
+    os.writeEntryIfDifferent<label>("maxIter", 10, maxIter_);
+    os.writeEntryIfDifferent<scalar>("tolerance", 0.0001, tolerance_);
 }
 
 
@@ -211,7 +230,9 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
     nutWallFunctionFvPatchScalarField(p, iF),
     roughnessHeight_(Zero),
     roughnessConstant_(Zero),
-    roughnessFactor_(Zero)
+    roughnessFactor_(Zero),
+    maxIter_(10),
+    tolerance_(0.0001)
 {}
 
 
@@ -226,7 +247,9 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
     nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
     roughnessHeight_(ptf.roughnessHeight_),
     roughnessConstant_(ptf.roughnessConstant_),
-    roughnessFactor_(ptf.roughnessFactor_)
+    roughnessFactor_(ptf.roughnessFactor_),
+    maxIter_(ptf.maxIter_),
+    tolerance_(ptf.tolerance_)
 {}
 
 
@@ -240,7 +263,9 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
     nutWallFunctionFvPatchScalarField(p, iF, dict),
     roughnessHeight_(dict.get<scalar>("roughnessHeight")),
     roughnessConstant_(dict.get<scalar>("roughnessConstant")),
-    roughnessFactor_(dict.get<scalar>("roughnessFactor"))
+    roughnessFactor_(dict.get<scalar>("roughnessFactor")),
+    maxIter_(dict.lookupOrDefault<label>("maxIter", 10)),
+    tolerance_(dict.lookupOrDefault<scalar>("tolerance", 0.0001))
 {}
 
 
@@ -252,7 +277,9 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
     nutWallFunctionFvPatchScalarField(rwfpsf),
     roughnessHeight_(rwfpsf.roughnessHeight_),
     roughnessConstant_(rwfpsf.roughnessConstant_),
-    roughnessFactor_(rwfpsf.roughnessFactor_)
+    roughnessFactor_(rwfpsf.roughnessFactor_),
+    maxIter_(rwfpsf.maxIter_),
+    tolerance_(rwfpsf.tolerance_)
 {}
 
 
@@ -265,7 +292,9 @@ nutURoughWallFunctionFvPatchScalarField::nutURoughWallFunctionFvPatchScalarField
     nutWallFunctionFvPatchScalarField(rwfpsf, iF),
     roughnessHeight_(rwfpsf.roughnessHeight_),
     roughnessConstant_(rwfpsf.roughnessConstant_),
-    roughnessFactor_(rwfpsf.roughnessFactor_)
+    roughnessFactor_(rwfpsf.roughnessFactor_),
+    maxIter_(rwfpsf.maxIter_),
+    tolerance_(rwfpsf.tolerance_)
 {}
 
 
@@ -294,9 +323,6 @@ void nutURoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
-    os.writeEntry("roughnessHeight", roughnessHeight_);
-    os.writeEntry("roughnessConstant", roughnessConstant_);
-    os.writeEntry("roughnessFactor", roughnessFactor_);
     writeEntry("value", os);
 }
 

@@ -37,6 +37,8 @@ Usage
         roughnessHeight | roughness height     | yes         |
         roughnessConstant | roughness constanr | yes         |
         roughnessFactor | scaling factor       | yes         |
+        maxIter    | Number of N-R iterations  | no          | 10
+        tolerance  | Convergence tolerance     | no          | 0.0001
     \endtable
 
     Example of the boundary condition specification:
@@ -53,7 +55,10 @@ Usage
 Note
     Suffers from non-exact restart since correctNut() (called through
     turbulence->validate) returns a slightly different value every time
-    it is called. See nutUSpaldingWallFunctionFvPatchScalarField.C
+    it is called. See nutUSpaldingWallFunctionFvPatchScalarField.C.
+    Can be avoided by seeding the NR with e.g. the laminar viscosity
+    or tightening the convergence tolerance
+    to e.g. 1e-7 and the max number of iterations to 100.
 
 See also
     Foam::nutWallFunctionFvPatchScalarField
@@ -95,6 +100,13 @@ class nutURoughWallFunctionFvPatchScalarField
             scalar roughnessFactor_;
 
 
+        //- Max iterations in calcNut
+        const label maxIter_;
+
+        //- Convergence tolerance
+        const scalar tolerance_;
+
+
     // Protected Member Functions
 
         //- Calculate yPlus
@@ -102,6 +114,9 @@ class nutURoughWallFunctionFvPatchScalarField
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
+
+        //- Write local wall function variables
+        virtual void writeLocalEntries(Ostream&) const;
 
 
 public:

@@ -119,23 +119,37 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
                 err = mag((ut - uTauNew)/ut);
                 ut = uTauNew;
 
-                if (debug)
-                {
-                    iterations_++;
-                }
+                //iterations_++;
 
-            } while (ut > ROOTVSMALL && err > 0.01 && ++iter < 10);
+            } while (ut > ROOTVSMALL && err > tolerance_ && ++iter < maxIter_);
 
             uTau[facei] = max(0.0, ut);
 
-            if (debug)
-            {
-                invocations_++;
-            }
+            //invocations_++;
+            //if (iter > 1)
+            //{
+            //    nontrivial_++;
+            //}
+            //if (iter >= maxIter_)
+            //{
+            //    nonconvergence_++;
+            //}
         }
     }
 
     return tuTau;
+}
+
+
+void Foam::nutUSpaldingWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
+
+    os.writeEntryIfDifferent<label>("maxIter", 10, maxIter_);
+    os.writeEntryIfDifferent<scalar>("tolerance", 0.01, tolerance_);
 }
 
 
@@ -149,8 +163,12 @@ nutUSpaldingWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(p, iF),
-    invocations_(0),
-    iterations_(0)
+    maxIter_(10),
+    tolerance_(0.01)
+    //invocations_(0),
+    //nontrivial_(0),
+    //nonconvergence_(0),
+    //iterations_(0)
 {}
 
 
@@ -164,8 +182,12 @@ nutUSpaldingWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
-    invocations_(0),
-    iterations_(0)
+    maxIter_(ptf.maxIter_),
+    tolerance_(ptf.tolerance_)
+    //invocations_(0),
+    //nontrivial_(0),
+    //nonconvergence_(0),
+    //iterations_(0)
 {}
 
 
@@ -178,8 +200,12 @@ nutUSpaldingWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(p, iF, dict),
-    invocations_(0),
-    iterations_(0)
+    maxIter_(dict.lookupOrDefault<label>("maxIter", 10)),
+    tolerance_(dict.lookupOrDefault<scalar>("tolerance", 0.01))
+    //invocations_(0),
+    //nontrivial_(0),
+    //nonconvergence_(0),
+    //iterations_(0)
 {}
 
 
@@ -190,8 +216,12 @@ nutUSpaldingWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(wfpsf),
-    invocations_(wfpsf.invocations_),
-    iterations_(wfpsf.iterations_)
+    maxIter_(wfpsf.maxIter_),
+    tolerance_(wfpsf.tolerance_)
+    //invocations_(wfpsf.invocations_),
+    //nontrivial_(wfpsf.nontrivial_),
+    //nonconvergence_(wfpsf.nonconvergence_),
+    //iterations_(wfpsf.iterations_)
 {}
 
 
@@ -203,8 +233,12 @@ nutUSpaldingWallFunctionFvPatchScalarField
 )
 :
     nutWallFunctionFvPatchScalarField(wfpsf, iF),
-    invocations_(0),
-    iterations_(0)
+    maxIter_(wfpsf.maxIter_),
+    tolerance_(wfpsf.tolerance_)
+    //invocations_(0),
+    //nontrivial_(0),
+    //nonconvergence_(0),
+    //iterations_(0)
 {}
 
 
@@ -213,15 +247,19 @@ nutUSpaldingWallFunctionFvPatchScalarField
 nutUSpaldingWallFunctionFvPatchScalarField::
 ~nutUSpaldingWallFunctionFvPatchScalarField()
 {
-    if (debug)
-    {
-        Info<< "nutUSpaldingWallFunctionFvPatchScalarField :"
-            << " total invocations:"
-            << returnReduce(invocations_, sumOp<label>())
-            << " total iterations:"
-            << returnReduce(iterations_, sumOp<label>())
-            << endl;
-    }
+    //if (debug)
+    //{
+    //    Info<< "nutUSpaldingWallFunctionFvPatchScalarField :"
+    //        << " total invocations:"
+    //        << returnReduce(invocations_, sumOp<label>())
+    //        << " total iterations:"
+    //        << returnReduce(iterations_, sumOp<label>())
+    //        << " total non-convergence:"
+    //        << returnReduce(nonconvergence_, sumOp<label>())
+    //        << " total non-trivial:"
+    //        << returnReduce(nontrivial_, sumOp<label>())
+    //        << endl;
+    //}
 }
 
 
