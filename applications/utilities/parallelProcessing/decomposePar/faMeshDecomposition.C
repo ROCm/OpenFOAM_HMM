@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           |
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -796,7 +796,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
             // calculate the size
             label nEdgesOnProcessor = curProcEdges.size();
 
-            for (const auto& bedges : interProcBEdges)
+            for (const auto& bedges : interProcBEdges[procI])
             {
                 nEdgesOnProcessor += bedges.size();
             }
