@@ -353,7 +353,7 @@ void Foam::ensightFile::writeList
 {
     for (const label id : addr)
     {
-        if (idx >= field.size() || std::isnan(field[id]))
+        if (id < 0 || id >= field.size() || std::isnan(field[id]))
         {
             writeUndef();
         }
