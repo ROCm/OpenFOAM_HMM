@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -195,11 +195,7 @@ public:
 
         //- Write an indirect list of scalars as "%12.5e" or as binary
         //  With carriage return after each value (ascii stream)
-        void writeList
-        (
-            const UList<scalar>& field,
-            const labelUList& idList
-        );
+        void writeList(const UList<scalar>& field, const labelUList& addr);
 
 };
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ class ensightPartCells
     public ensightCells,
     public ensightPart
 {
-    // Private data
+    // Private Data
 
         //- Mesh referenced
         const polyMesh& mesh_;
@@ -92,28 +92,36 @@ public:
         ensightPartCells
         (
             label partIndex,
-            const polyMesh&
+            const polyMesh& mesh
         );
 
-        //- Construct from polyMesh and list of (non-zoned) cells
+        //- Construct a "cells" part from polyMesh and list of cells
         ensightPartCells
         (
             label partIndex,
-            const polyMesh&,
-            const labelUList&
+            const polyMesh& mesh,
+            const labelUList& cellIds
         );
 
-        //- Construct from polyMesh and cellZone
+        //- Construct from polyMesh and cellZone with name of the zone.
         ensightPartCells
         (
             label partIndex,
-            const polyMesh&,
-            const cellZone&
+            const polyMesh& mesh,
+            const cellZone& zn
+        );
+
+        //- Construct a "cells" part from polyMesh and selection of cells
+        ensightPartCells
+        (
+            label partIndex,
+            const polyMesh& mesh,
+            const bitSet& selection
         );
 
 
     //- Destructor
-    virtual ~ensightPartCells();
+    virtual ~ensightPartCells() = default;
 
 
     // Member Functions
@@ -136,17 +144,17 @@ public:
     // Output
 
         //- Write geometry
-        virtual void write(ensightGeoFile&) const;
+        virtual void write(ensightGeoFile& os) const;
 
         //- Helper: write geometry given the pointField
-        virtual void write(ensightGeoFile&, const pointField&) const;
+        virtual void write(ensightGeoFile& os, const pointField& points) const;
 
 
         //- Write summary information about the object
-        virtual void writeSummary(Ostream&) const;
+        virtual void writeSummary(Ostream& os) const;
 
         //- Print various types of debugging information
-        virtual void dumpInfo(Ostream&) const;
+        virtual void dumpInfo(Ostream& os) const;
 
 };
 

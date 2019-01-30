@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "ensightCells.H"
 #include "error.H"
+#include "bitSet.H"
 #include "polyMesh.H"
 #include "cellModel.H"
 
@@ -90,7 +91,7 @@ Foam::ensightCells::ensightCells(const ensightCells& obj)
     // Need local sizes for the resize operation
     this->sizes_ = obj.sizes();
 
-    resizeAll(); // adjust allocation/sizing
+    resizeAll(); // Adjust allocation/sizing
 
     // Restore total (reduced) sizes
     this->sizes_ = totSizes;
@@ -153,10 +154,11 @@ void Foam::ensightCells::sort()
 }
 
 
-void Foam::ensightCells::classify
+template<class Addressing>
+void Foam::ensightCells::classifyImpl
 (
     const polyMesh& mesh,
-    const labelUList& addressing
+    const Addressing& cellIds
 )
 {
     // References to cell shape models
@@ -167,16 +169,11 @@ void Foam::ensightCells::classify
 
     const cellShapeList& shapes = mesh.cellShapes();
 
-    const bool indirect = notNull(addressing);
-    const label sz = indirect ? addressing.size() : mesh.nCells();
-
-    // Count the shapes
-    // Can avoid double looping, but only at the expense of allocation
+    // Pass 1: Count the shapes
 
     sizes_ = Zero;  // reset sizes
-    for (label listi = 0; listi < sz; ++listi)
+    for (const label id : cellIds)
     {
-        const label id = indirect ? addressing[listi] : listi;
         const cellModel& model = shapes[id].model();
 
         enum elemType what = NFACED;
@@ -203,10 +200,10 @@ void Foam::ensightCells::classify
     resizeAll();    // adjust allocation
     sizes_ = Zero;  // reset sizes - use for local indexing here
 
-    // Assign cell-id per shape type
-    for (label listi = 0; listi < sz; ++listi)
+    // Pass 2: Assign cell-id per shape type
+
+    for (const label id : cellIds)
     {
-        const label id = indirect ? addressing[listi] : listi;
         const cellModel& model = shapes[id].model();
 
         enum elemType what = NFACED;
@@ -233,6 +230,33 @@ void Foam::ensightCells::classify
         slice[sizes_[what]] = id;
         sizes_[what]++;
     }
+}
+
+
+void Foam::ensightCells::classify(const polyMesh& mesh)
+{
+    // All mesh cells
+    classifyImpl(mesh, labelRange::identity(mesh.nCells()));
+}
+
+
+void Foam::ensightCells::classify
+(
+    const polyMesh& mesh,
+    const labelUList& cellIds
+)
+{
+    classifyImpl(mesh, cellIds);
+}
+
+
+void Foam::ensightCells::classify
+(
+    const polyMesh& mesh,
+    const bitSet& selection
+)
+{
+    classifyImpl(mesh, selection);
 }
 
 

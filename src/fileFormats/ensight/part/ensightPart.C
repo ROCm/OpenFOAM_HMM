@@ -65,12 +65,6 @@ Foam::ensightPart::ensightPart(const string& description)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightPart::~ensightPart()
-{}
-
-
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::ensightGeoFile& Foam::operator<<

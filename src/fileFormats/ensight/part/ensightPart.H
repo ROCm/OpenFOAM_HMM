@@ -47,9 +47,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class ensightPart;
+
 ensightGeoFile& operator<<(ensightGeoFile&, const ensightPart&);
 
 
@@ -79,9 +79,8 @@ protected:
     // Protected Classes
 
         //- Track the points used by the part and map global to local indices
-        class localPoints
+        struct localPoints
         {
-        public:
             //- Number of points used
             label nPoints;
 
@@ -92,7 +91,7 @@ protected:
             localPoints()
             :
                 nPoints(0),
-                list(0)
+                list()
             {}
 
             //- Construct for mesh points
@@ -116,7 +115,7 @@ public:
 
 
     //- Destructor
-    virtual ~ensightPart();
+    virtual ~ensightPart() = default;
 
 
     // Access
@@ -130,16 +129,16 @@ public:
             return 0;
         }
 
-        //- Part name or description
+        //- Return the part name or description
         const string& name() const
         {
             return name_;
         }
 
-        //- non-const access to part name or description
-        void name(const string& value)
+        //- Change the part name or description
+        void name(string value)
         {
-            name_ = value;
+            name_ = std::move(value);
         }
 
 

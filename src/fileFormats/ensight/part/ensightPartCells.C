@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,12 +41,11 @@ Foam::ensightPart::localPoints Foam::ensightPartCells::calcLocalPoints() const
     labelList& usedPoints = ptList.list;
     label nPoints = 0;
 
-    // add all points from cells
+    // Add all points from cells
     const labelUList& idList = this->cellIds();
 
-    forAll(idList, i)
+    for (const label id : idList)
     {
-        const label id = idList[i];
         const labelUList& cFaces = mesh_.cells()[id];
 
         forAll(cFaces, cFacei)
@@ -98,14 +97,14 @@ Foam::ensightPartCells::ensightPartCells
 (
     label partIndex,
     const polyMesh& mesh,
-    const labelUList& idList
+    const labelUList& cellIds
 )
 :
     ensightCells(partIndex),
     ensightPart("cells"),
     mesh_(mesh)
 {
-    classify(mesh, idList);
+    classify(mesh, cellIds);
 }
 
 
@@ -113,21 +112,29 @@ Foam::ensightPartCells::ensightPartCells
 (
     label partIndex,
     const polyMesh& mesh,
-    const cellZone& cZone
+    const cellZone& zn
 )
 :
-    ensightCells(partIndex),
-    ensightPart(cZone.name()),
-    mesh_(mesh)
+    ensightPartCells(partIndex, mesh, static_cast<const labelList&>(zn))
 {
-    classify(mesh, cZone);
+    // Rename according to the zone name
+    name(zn.name());
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightPartCells::~ensightPartCells()
-{}
+Foam::ensightPartCells::ensightPartCells
+(
+    label partIndex,
+    const polyMesh& mesh,
+    const bitSet& selection
+)
+:
+    ensightCells(partIndex),
+    ensightPart("cells"),
+    mesh_(mesh)
+{
+    classify(mesh, selection);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

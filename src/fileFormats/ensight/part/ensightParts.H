@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,6 @@ SourceFiles
 #include "ensightPart.H"
 #include "ensightPartFaces.H"
 #include "ensightPartCells.H"
-#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,30 +71,30 @@ public:
     // Constructors
 
         //- Construct from polyMesh
-        ensightParts(const polyMesh&);
+        explicit ensightParts(const polyMesh& mesh);
 
 
     //- Destructor
-    ~ensightParts();
+    ~ensightParts() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Clear old information and construct anew from polyMesh
-        void recalculate(const polyMesh&);
+        void recalculate(const polyMesh& mesh);
 
         //- Number of parts
         using StorageType::size;
 
 
         //- Write the geometry
-        void write(ensightGeoFile&) const;
+        void write(ensightGeoFile& os) const;
 
         //- Write summary information about the objects
-        void writeSummary(Ostream&) const;
+        void writeSummary(Ostream& os) const;
 
         //- Print various types of debugging information
-        void dumpInfo(Ostream&) const;
+        void dumpInfo(Ostream& os) const;
 
 };
 

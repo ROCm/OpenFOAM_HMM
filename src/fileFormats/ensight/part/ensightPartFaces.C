@@ -126,12 +126,6 @@ Foam::ensightPartFaces::ensightPartFaces
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightPartFaces::~ensightPartFaces()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::ensightPartFaces::writeConnectivity

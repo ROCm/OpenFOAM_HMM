@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ensightParts.H"
+#include "bitSet.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -35,12 +37,6 @@ Foam::ensightParts::ensightParts(const polyMesh& mesh)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightParts::~ensightParts()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::ensightParts::recalculate(const polyMesh& mesh)
@@ -48,65 +44,46 @@ void Foam::ensightParts::recalculate(const polyMesh& mesh)
     StorageType::clear();
 
     label nPart = 0;
-    label nZoneCells = 0;
 
-    // do cell zones
-    forAll(mesh.cellZones(), zoneI)
+    // Track which cells are in a zone or not
+    bitSet selection(mesh.nCells());
+
+    // Do cell zones
+    for (const cellZone& zn : mesh.cellZones())
     {
-        const cellZone& cZone = mesh.cellZones()[zoneI];
-        nZoneCells += cZone.size();
-
-        if (cZone.size())
+        if (zn.size())
         {
-            this->append(new ensightPartCells(nPart++, mesh, cZone));
+            selection.set(zn);
+            this->append(new ensightPartCells(nPart++, mesh, zn));
         }
     }
 
-    // collect unzoned cells
-
-    // special case: no zones at all - do entire mesh
-    if (nZoneCells == 0)
+    if (selection.none())
     {
+        // No zones at all? - do entire mesh
         this->append(new ensightPartCells(nPart++, mesh));
     }
-    else if (mesh.nCells() > nZoneCells)
+    else
     {
-        // determine which cells are not in a cellZone
-        labelList unzoned(mesh.nCells(), -1);
+        // Flip from zoned to unzoned
+        selection.flip();
 
-        forAll(mesh.cellZones(), zoneI)
+        if (selection.any())
         {
-            const labelUList& idList = mesh.cellZones()[zoneI];
-
-            forAll(idList, i)
-            {
-                unzoned[idList[i]] = idList[i];
-            }
-        }
-
-        label nUnzoned = 0;
-        forAll(unzoned, i)
-        {
-            if (unzoned[i] < 0)
-            {
-                unzoned[nUnzoned] = i;
-                nUnzoned++;
-            }
-        }
-        unzoned.setSize(nUnzoned);
-
-        if (unzoned.size())
-        {
-            this->append(new ensightPartCells(nPart++, mesh, unzoned));
+            this->append(new ensightPartCells(nPart++, mesh, selection));
         }
     }
 
 
-    // do boundaries, skipping empty and processor patches
-    forAll(mesh.boundaryMesh(), patchi)
+    // Do boundaries, skipping empty and processor patches
+    for (const polyPatch& patch : mesh.boundaryMesh())
     {
-        const polyPatch& patch = mesh.boundaryMesh()[patchi];
-        if (patch.size() && !isA<processorPolyPatch>(patch))
+        if (isA<processorPolyPatch>(patch))
+        {
+            // No processor patches
+            break;
+        }
+        if (patch.size())
         {
             this->append(new ensightPartFaces(nPart++, mesh, patch));
         }
@@ -119,10 +96,10 @@ void Foam::ensightParts::write(ensightGeoFile& os) const
     // Some feedback
     Info<< "Write geometry part (" << flush;
 
-    forAllConstIter(StorageType, *this, iter)
+    for (const ensightPart& part : *this)
     {
-        Info<< ' ' << (*iter).index() << flush;
-        (*iter).write(os);
+        Info<< ' ' << part.index() << flush;
+        part.write(os);
     }
     Info<< " )" << endl;
 }
@@ -130,18 +107,18 @@ void Foam::ensightParts::write(ensightGeoFile& os) const
 
 void Foam::ensightParts::writeSummary(Ostream& os) const
 {
-    forAllConstIter(StorageType, *this, iter)
+    for (const ensightPart& part : *this)
     {
-        (*iter).writeSummary(os);
+        part.writeSummary(os);
     }
 }
 
 
 void Foam::ensightParts::dumpInfo(Ostream& os) const
 {
-    forAllConstIter(StorageType, *this, iter)
+    for (const ensightPart& part : *this)
     {
-        (*iter).dumpInfo(os);
+        part.dumpInfo(os);
     }
 }
 

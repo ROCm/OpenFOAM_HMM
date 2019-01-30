@@ -118,8 +118,8 @@ public:
         (
             label partIndex,
             const string& description,
-            const pointField&,
-            const faceList&,
+            const pointField& points,
+            const faceList& faces,
             const bool contiguousPoints = false
         );
 
@@ -127,54 +127,54 @@ public:
         ensightPartFaces
         (
             label partIndex,
-            const polyMesh&,
-            const polyPatch&
+            const polyMesh& mesh,
+            const polyPatch& patch
         );
 
 
     //- Destructor
-    virtual ~ensightPartFaces();
+    virtual ~ensightPartFaces() = default;
 
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Part index (0-based)
-            virtual label index() const
-            {
-                return ensightFaces::index();
-            }
-
-
-            //- Number of elements in this part
-            virtual label size() const
-            {
-                return ensightFaces::size();
-            }
+        //- Part index (0-based)
+        virtual label index() const
+        {
+            return ensightFaces::index();
+        }
 
 
-            //- Return the patch index, -1 when not in use.
-            inline label patchIndex() const
-            {
-                return patchIndex_;
-            }
+        //- Number of elements in this part
+        virtual label size() const
+        {
+            return ensightFaces::size();
+        }
 
 
-        // Output
-
-            //- Write summary information about the object
-            virtual void writeSummary(Ostream&) const;
-
-            //- Write geometry
-            virtual void write(ensightGeoFile&) const;
-
-            //- Helper: write geometry given the pointField
-            virtual void write(ensightGeoFile&, const pointField&) const;
+        //- Return the patch index, -1 when not in use.
+        inline label patchIndex() const
+        {
+            return patchIndex_;
+        }
 
 
-            //- Print various types of debugging information
-            virtual void dumpInfo(Ostream&) const;
+    // Output
+
+        //- Write summary information about the object
+        virtual void writeSummary(Ostream& os) const;
+
+        //- Write geometry
+        virtual void write(ensightGeoFile& os) const;
+
+        //- Helper: write geometry given the pointField
+        virtual void write(ensightGeoFile& os, const pointField& points) const;
+
+
+        //- Print various types of debugging information
+        virtual void dumpInfo(Ostream& os) const;
 };
 
 
