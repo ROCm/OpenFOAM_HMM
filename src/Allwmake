@@ -64,9 +64,9 @@ lagrangian/Allwmake $targetType $*
 
 wmake $targetType fvOptions
 wmake $targetType fvMotionSolver
+wmake $targetType overset
 
 mesh/Allwmake $targetType $*
-wmake $targetType overset
 renumber/Allwmake $targetType $*
 fvAgglomerationMethods/Allwmake $targetType $*
 wmake $targetType waveModels
