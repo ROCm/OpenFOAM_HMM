@@ -21,7 +21,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
+Namespace
     Foam::vtk::Tools
 
 Description
@@ -50,16 +50,23 @@ SourceFiles
 #include "symmTensor.H"
 
 // VTK includes
-#include <vtkCellArray.h>
-#include <vtkFloatArray.h>
-#include <vtkDoubleArray.h>
-#include <vtkIdTypeArray.h>
-#include <vtkSmartPointer.h>
-#include <vtkUnsignedCharArray.h>
-#include <vtkPoints.h>
-#include <vtkPolyData.h>
+#include "vtkCellArray.h"
+#include "vtkFloatArray.h"
+#include "vtkDoubleArray.h"
+#include "vtkIdTypeArray.h"
+#include "vtkSmartPointer.h"
+#include "vtkUnsignedCharArray.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
 
 #include <utility>
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Forward declarations
+class vtkDataSet;
+class vtkCellData;
+class vtkPointData;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,7 +78,6 @@ namespace vtk
 /*---------------------------------------------------------------------------*\
                         Class vtk::Caching Declaration
 \*---------------------------------------------------------------------------*/
-
 
 //- Bookkeeping for internal caching.
 //  Retain an original copy of the geometry as well as a shallow copy
@@ -158,13 +164,11 @@ struct Caching
 
 
 /*---------------------------------------------------------------------------*\
-                         Class vtk::Tools Declaration
+                             Namespace vtk::Tools
 \*---------------------------------------------------------------------------*/
 
-class Tools
+namespace Tools
 {
-public:
-
     //- Wrap vtkUnsignedCharArray as a UList
     inline static UList<uint8_t> asUList
     (

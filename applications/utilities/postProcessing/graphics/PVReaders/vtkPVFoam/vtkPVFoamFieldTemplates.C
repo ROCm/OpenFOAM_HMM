@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,7 +116,7 @@ void Foam::vtkPVFoam::convertVolField
         // To improve code reuse, we allocate the CellData as a zeroed-field
         // ahead of time.
 
-        vtkSmartPointer<vtkFloatArray> cdata = zeroField<Type>
+        vtkSmartPointer<vtkFloatArray> cdata = vtk::Tools::zeroField<Type>
         (
             fld.name(),
             dataset->GetNumberOfPolys()
@@ -147,11 +147,12 @@ void Foam::vtkPVFoam::convertVolField
                     fvPatchField<Type>(p, fld).patchInternalField()
                 );
 
-                coffset += transcribeFloatData(cdata, tpptf(), coffset);
+                coffset +=
+                    vtk::Tools::transcribeFloatData(cdata, tpptf(), coffset);
 
                 if (allowPdata && patchId < patchInterpList.size())
                 {
-                    pdata = convertFieldToVTK
+                    pdata = vtk::Tools::convertFieldToVTK
                     (
                         fld.name(),
                         patchInterpList[patchId].faceToPointInterpolate(tpptf)()
@@ -160,11 +161,12 @@ void Foam::vtkPVFoam::convertVolField
             }
             else
             {
-                coffset += transcribeFloatData(cdata, ptf, coffset);
+                coffset +=
+                    vtk::Tools::transcribeFloatData(cdata, ptf, coffset);
 
                 if (allowPdata && patchId < patchInterpList.size())
                 {
-                    pdata = convertFieldToVTK
+                    pdata = vtk::Tools::convertFieldToVTK
                     (
                         fld.name(),
                         patchInterpList[patchId].faceToPointInterpolate(ptf)()
@@ -488,11 +490,13 @@ void Foam::vtkPVFoam::convertAreaFields
                     foamVtpData& vtpData = iter.val();
                     auto dataset = vtpData.dataset;
 
-                    vtkSmartPointer<vtkFloatArray> cdata = convertFieldToVTK
-                    (
-                        fld.name(),
-                        fld
-                    );
+                    vtkSmartPointer<vtkFloatArray> cdata =
+                        vtk::Tools::convertFieldToVTK
+                        (
+                            fld.name(),
+                            fld
+                        );
+
                     dataset->GetCellData()->AddArray(cdata);
                 }
             }
@@ -585,11 +589,12 @@ void Foam::vtkPVFoam::convertPointFields
 
                 const label patchId = patchIds[0];
 
-                vtkSmartPointer<vtkFloatArray> pdata = convertFieldToVTK
-                (
-                    fieldName,
-                    pfld.boundaryField()[patchId].patchInternalField()()
-                );
+                vtkSmartPointer<vtkFloatArray> pdata =
+                    vtk::Tools::convertFieldToVTK
+                    (
+                        fieldName,
+                        pfld.boundaryField()[patchId].patchInternalField()()
+                    );
 
                 dataset->GetPointData()->AddArray(pdata);
             }
@@ -629,7 +634,7 @@ void Foam::vtkPVFoam::convertPointFields
                 );
 
                 vtkSmartPointer<vtkFloatArray> pdata =
-                    convertFieldToVTK
+                    vtk::Tools::convertFieldToVTK
                     (
                         fieldName,
                         znfld
@@ -807,7 +812,7 @@ void Foam::vtkPVFoam::convertLagrangianFields
                 IOField<Type> fld(ioobj);
 
                 vtkSmartPointer<vtkFloatArray> data =
-                    convertFieldToVTK
+                    vtk::Tools::convertFieldToVTK
                     (
                         ioobj.name(),
                         fld
