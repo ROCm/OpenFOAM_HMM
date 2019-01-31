@@ -64,8 +64,12 @@ lagrangian/Allwmake $targetType $*
 
 wmake $targetType fvOptions
 wmake $targetType fvMotionSolver
+
+# Make sure we have block.H accessible before building overset
+wmakeLnInclude -u mesh/blockMesh
 wmake $targetType overset
 
+# snappyHexMesh uses overset voxelMesh
 mesh/Allwmake $targetType $*
 renumber/Allwmake $targetType $*
 fvAgglomerationMethods/Allwmake $targetType $*
