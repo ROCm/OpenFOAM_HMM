@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "residuals.H"
+#include "solverInfo.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -32,12 +32,12 @@ namespace Foam
 {
 namespace functionObjects
 {
-    defineTypeNameAndDebug(residuals, 0);
+    defineTypeNameAndDebug(solverInfo, 0);
 
     addToRunTimeSelectionTable
     (
         functionObject,
-        residuals,
+        solverInfo,
         dictionary
     );
 }
@@ -46,7 +46,7 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::functionObjects::residuals::writeFileHeader(Ostream& os)
+void Foam::functionObjects::solverInfo::writeFileHeader(Ostream& os)
 {
     if (!fieldSet_.updateSelection())
     {
@@ -59,7 +59,7 @@ void Foam::functionObjects::residuals::writeFileHeader(Ostream& os)
     }
     else
     {
-        writeHeader(os, "Residuals");
+        writeHeader(os, "Solver information");
     }
 
     writeCommented(os, "Time");
@@ -79,9 +79,12 @@ void Foam::functionObjects::residuals::writeFileHeader(Ostream& os)
 }
 
 
-void Foam::functionObjects::residuals::createField(const word& fieldName)
+void Foam::functionObjects::solverInfo::createResidualField
+(
+    const word& fieldName
+)
 {
-    if (!writeFields_)
+    if (!writeResidualFields_)
     {
         return;
     }
@@ -109,7 +112,10 @@ void Foam::functionObjects::residuals::createField(const word& fieldName)
 }
 
 
-void Foam::functionObjects::residuals::writeField(const word& fieldName) const
+void Foam::functionObjects::solverInfo::writeResidualField
+(
+    const word& fieldName
+) const
 {
     const word residualName("initialResidual:" + fieldName);
 
@@ -143,7 +149,7 @@ void Foam::functionObjects::residuals::writeField(const word& fieldName) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObjects::residuals::residuals
+Foam::functionObjects::solverInfo::solverInfo
 (
     const word& name,
     const Time& runTime,
@@ -153,28 +159,23 @@ Foam::functionObjects::residuals::residuals
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
     fieldSet_(mesh_),
-    writeFields_(false),
+    writeResidualFields_(false),
     initialised_(false)
 {
     read(dict);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::residuals::~residuals()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionObjects::residuals::read(const dictionary& dict)
+bool Foam::functionObjects::solverInfo::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict))
     {
         fieldSet_.read(dict);
 
-        writeFields_ = dict.lookupOrDefault("writeFields", false);
+        writeResidualFields_ =
+            dict.lookupOrDefault("writeResidualFields", false);
 
         return true;
     }
@@ -183,7 +184,7 @@ bool Foam::functionObjects::residuals::read(const dictionary& dict)
 }
 
 
-bool Foam::functionObjects::residuals::execute()
+bool Foam::functionObjects::solverInfo::execute()
 {
     // Note: delaying initialisation until after first iteration so that
     // we can find wildcard fields
@@ -191,15 +192,15 @@ bool Foam::functionObjects::residuals::execute()
     {
         writeFileHeader(file());
 
-        if (writeFields_)
+        if (writeResidualFields_)
         {
             for (const word& fieldName : fieldSet_.selectionNames())
             {
-                initialiseField<scalar>(fieldName);
-                initialiseField<vector>(fieldName);
-                initialiseField<sphericalTensor>(fieldName);
-                initialiseField<symmTensor>(fieldName);
-                initialiseField<tensor>(fieldName);
+                initialiseResidualField<scalar>(fieldName);
+                initialiseResidualField<vector>(fieldName);
+                initialiseResidualField<sphericalTensor>(fieldName);
+                initialiseResidualField<symmTensor>(fieldName);
+                initialiseResidualField<tensor>(fieldName);
             }
         }
 
@@ -210,17 +211,17 @@ bool Foam::functionObjects::residuals::execute()
 }
 
 
-bool Foam::functionObjects::residuals::write()
+bool Foam::functionObjects::solverInfo::write()
 {
     writeTime(file());
 
     for (const word& fieldName : fieldSet_.selectionNames())
     {
-        writeResidual<scalar>(fieldName);
-        writeResidual<vector>(fieldName);
-        writeResidual<sphericalTensor>(fieldName);
-        writeResidual<symmTensor>(fieldName);
-        writeResidual<tensor>(fieldName);
+        writeSolverInfo<scalar>(fieldName);
+        writeSolverInfo<vector>(fieldName);
+        writeSolverInfo<sphericalTensor>(fieldName);
+        writeSolverInfo<symmTensor>(fieldName);
+        writeSolverInfo<tensor>(fieldName);
     }
 
     file() << endl;

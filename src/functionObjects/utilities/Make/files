@@ -10,7 +10,7 @@ vtkWrite/vtkWriteUpdate.C
 
 removeRegisteredObject/removeRegisteredObject.C
 
-residuals/residuals.C
+solverInfo/solverInfo.C
 
 runTimeControl/runTimeControl.C
 runTimeControl/runTimeCondition/runTimeCondition/runTimeCondition.C

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,37 +22,44 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjects::residuals
+    Foam::functionObjects::solverInfo
 
 Group
     grpUtilitiesFunctionObjects
 
 Description
-    Writes out the initial residual for specified fields.
+    Writes solver information for a list of user-specified fields
+
+    Information written to file includes:
+    - residual fields
+    - solver type
+    - initial residual
+    - final residual
+    - number of solver iterations
+    - convergecnce flag
 
 Usage
     Example of function object specification:
     \verbatim
-    residuals
+    solverInfo
     {
-        type            residuals;
+        type            solverInfo;
         libs            ("libutilityFunctionObjects.so");
         ...
         fields          (U p);
+        writeResidualFields yes;
     }
     \endverbatim
 
     Where the entries comprise:
     \table
         Property     | Description               | Required    | Default value
-        type         | Type name: residua  ls    | yes         |
+        type         | Type name: solverInfo     | yes         |
         fields       | List of fields to process | yes         |
-        writeFields  | Write the residual fields | no          | no
+        writeResidualFields | Write the residual fields | no          | no
     \endtable
 
-    Output data is written to the dir postProcessing/residuals/\<timeDir\>/
-    For vector/tensor fields, e.g. U, where an equation is solved for each
-    component, the largest residual of each component is written.
+    Output data is written to the dir postProcessing/solverInfo/\<timeDir\>/
 
 See also
     Foam::functionObject
@@ -61,12 +68,12 @@ See also
     Foam::functionObjects::timeControl
 
 SourceFiles
-    residuals.C
+    solverInfo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_residuals_H
-#define functionObjects_residuals_H
+#ifndef functionObjects_solverInfo_H
+#define functionObjects_solverInfo_H
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
@@ -80,10 +87,10 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class residuals Declaration
+                          Class solverInfo Declaration
 \*---------------------------------------------------------------------------*/
 
-class residuals
+class solverInfo
 :
     public fvMeshFunctionObject,
     public writeFile
@@ -92,11 +99,11 @@ protected:
 
     // Protected data
 
-        //- Fields to write residuals
+        //- Fields to process
         solverFieldSelection fieldSet_;
 
         //- Flag to write the residual as a vol field
-        bool writeFields_;
+        bool writeResidualFields_;
 
         //- Initialisation flag
         bool initialised_;
@@ -108,10 +115,10 @@ protected:
         void writeFileHeader(Ostream& os);
 
         //- Create and store a residual field on the mesh database
-        void createField(const word& fieldName);
+        void createResidualField(const word& fieldName);
 
         //- Write a residual field
-        void writeField(const word& fieldName) const;
+        void writeResidualField(const word& fieldName) const;
 
         //- Output file header information per primitive type value
         template<class Type>
@@ -119,11 +126,11 @@ protected:
 
         //- Initialise a residual field
         template<class Type>
-        void initialiseField(const word& fieldName);
+        void initialiseResidualField(const word& fieldName);
 
-        //- Calculate the residual
+        //- Calculate the solver information
         template<class Type>
-        void writeResidual(const word& fieldName);
+        void writeSolverInfo(const word& fieldName);
 
 
 private:
@@ -131,22 +138,22 @@ private:
     // Private member functions
 
         //- No copy construct
-        residuals(const residuals&) = delete;
+        solverInfo(const solverInfo&) = delete;
 
         //- No copy assignment
-        void operator=(const residuals&) = delete;
+        void operator=(const solverInfo&) = delete;
 
 
 public:
 
     //- Runtime type information
-    TypeName("residuals");
+    TypeName("solverInfo");
 
 
     // Constructors
 
         //- Construct from Time and dictionary
-        residuals
+        solverInfo
         (
             const word& name,
             const Time& runTime,
@@ -155,7 +162,7 @@ public:
 
 
     //- Destructor
-    virtual ~residuals();
+    virtual ~solverInfo() = default;
 
 
     // Member Functions
@@ -166,7 +173,7 @@ public:
         //- Execute, currently does nothing
         virtual bool execute();
 
-        //- Write the residuals
+        //- Write the solverInfo
         virtual bool write();
 };
 
@@ -179,7 +186,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "residualsTemplates.C"
+    #include "solverInfoTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "residuals.H"
+#include "solverInfo.H"
 #include "volFields.H"
 #include "ListOps.H"
 #include "zeroGradientFvPatchField.H"
@@ -31,7 +31,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::functionObjects::residuals::writeFileHeader
+void Foam::functionObjects::solverInfo::writeFileHeader
 (
     Ostream& os,
     const word& fieldName
@@ -52,7 +52,7 @@ void Foam::functionObjects::residuals::writeFileHeader
         {
             if (component(validComponents, cmpt) != -1)
             {
-                const word cmptName(pTraits<Type>::componentNames[cmpt]); 
+                const word cmptName(pTraits<Type>::componentNames[cmpt]);
                 const word fieldBase(fieldName + cmptName);
 
                 writeTabbed(os, fieldBase + "_initial");
@@ -67,7 +67,10 @@ void Foam::functionObjects::residuals::writeFileHeader
 
 
 template<class Type>
-void Foam::functionObjects::residuals::initialiseField(const word& fieldName)
+void Foam::functionObjects::solverInfo::initialiseResidualField
+(
+    const word& fieldName
+)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
 
@@ -91,7 +94,7 @@ void Foam::functionObjects::residuals::initialiseField(const word& fieldName)
                         fieldName + word(pTraits<Type>::componentNames[cmpt])
                     );
 
-                    createField(resultName);
+                    createResidualField(resultName);
                 }
             }
         }
@@ -100,7 +103,7 @@ void Foam::functionObjects::residuals::initialiseField(const word& fieldName)
 
 
 template<class Type>
-void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
+void Foam::functionObjects::solverInfo::writeSolverInfo(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
     typedef typename pTraits<Type>::labelType labelType;
@@ -121,7 +124,7 @@ void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
             const Type& initialResidual = sp0.initialResidual();
             const Type& finalResidual = sp0.finalResidual();
             const labelType nIterations = sp0.nIterations();
-            const bool converged = sp0.converged();
+            const Switch converged(sp0.converged());
 
             const labelType validComponents(mesh_.validComponents<Type>());
 
@@ -140,13 +143,13 @@ void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
                         << token::TAB << rf
                         << token::TAB << n;
 
-                    const word cmptName(pTraits<Type>::componentNames[cmpt]); 
+                    const word cmptName(pTraits<Type>::componentNames[cmpt]);
                     const word resultName(fieldName + cmptName);
                     setResult(resultName + "_initial", ri);
                     setResult(resultName + "_final", rf);
                     setResult(resultName + "_iters", n);
 
-                    writeField(resultName);
+                    writeResidualField(resultName);
                 }
             }
 

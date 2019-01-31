@@ -2,6 +2,8 @@ AMIWeights/AMIWeights.C
 
 columnAverage/columnAverage.C
 
+continuityError/continuityError.C
+
 fieldAverage/fieldAverage.C
 fieldAverage/fieldAverageItem/fieldAverageItem.C
 fieldAverage/fieldAverageItem/fieldAverageItemIO.C
