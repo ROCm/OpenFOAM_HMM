@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,8 +78,11 @@ EqOp(maxEq, x = max(x, y))
 EqOp(minEq, x = min(x, y))
 EqOp(minMagSqrEq, x = (magSqr(x) <= magSqr(y) ? x : y))
 EqOp(maxMagSqrEq, x = (magSqr(x) >= magSqr(y) ? x : y))
+
 EqOp(andEq, x = (x && y))
 EqOp(orEq,  x = (x || y))
+EqOp(bitAndEq, x = (x & y))
+EqOp(bitOrEq,  x = (x | y))
 
 EqOp(eqMinus, x = -y)
 
@@ -198,6 +201,9 @@ Op(min, min(x, y))
 Op(minMagSqr, (magSqr(x)<=magSqr(y) ? x : y))
 Op(maxMagSqr, (magSqr(x)>=magSqr(y) ? x : y))
 Op(minMod, minMod(x, y))
+
+Op(bitOr, (x | y))
+Op(bitAnd, (x & y))
 
 BoolOp(and, x && y)
 BoolOp(or, x || y)
