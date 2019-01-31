@@ -68,7 +68,7 @@ projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
 export WM_COMPILER_TYPE=system
 
 # [WM_COMPILER] - Compiler:
-# = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-4] | Gcc7[1-3] | Gcc8[12] |
+# = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-5] | Gcc7[1-4] | Gcc8[12] |
 #   Clang | Clang3[7-9] | Clang[4-6]0 | Icc | Cray | Arm
 export WM_COMPILER=Gcc
 

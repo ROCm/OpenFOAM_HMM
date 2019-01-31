@@ -60,6 +60,9 @@ ThirdParty)
     Gcc64*)
         gcc_version=gcc-6.4.0
         ;;
+    Gcc65*)
+        gcc_version=gcc-6.5.0
+        ;;
     Gcc71*)
         gcc_version=gcc-7.1.0
         ;;
@@ -68,6 +71,9 @@ ThirdParty)
         ;;
     Gcc73*)
         gcc_version=gcc-7.3.0
+        ;;
+    Gcc74*)
+        gcc_version=gcc-7.4.0
         ;;
     Gcc81*)
         gcc_version=gcc-8.1.0
