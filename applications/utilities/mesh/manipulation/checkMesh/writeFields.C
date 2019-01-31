@@ -1,5 +1,6 @@
 #include "writeFields.H"
 #include "volFields.H"
+#include "surfaceFields.H"
 #include "polyMeshTools.H"
 #include "zeroGradientFvPatchFields.H"
 #include "syncTools.H"
@@ -68,6 +69,52 @@ void minFaceToCell
 }
 
 
+void minFaceToCell
+(
+    const surfaceScalarField& faceData,
+    volScalarField& cellData,
+    const bool correctBoundaryConditions
+)
+{
+    scalarField& cellFld = cellData.ref();
+
+    cellFld = GREAT;
+
+    const labelUList& own = cellData.mesh().owner();
+    const labelUList& nei = cellData.mesh().neighbour();
+
+    // Internal faces
+    forAll(own, facei)
+    {
+        cellFld[own[facei]] = min(cellFld[own[facei]], faceData[facei]);
+        cellFld[nei[facei]] = min(cellFld[nei[facei]], faceData[facei]);
+    }
+
+    // Patch faces
+    forAll(faceData.boundaryField(), patchi)
+    {
+        const fvsPatchScalarField& fvp = faceData.boundaryField()[patchi];
+        const labelUList& fc = fvp.patch().faceCells();
+
+        forAll(fc, i)
+        {
+            cellFld[fc[i]] = min(cellFld[fc[i]], fvp[i]);
+        }
+    }
+
+    volScalarField::Boundary& bfld = cellData.boundaryFieldRef();
+
+    forAll(bfld, patchi)
+    {
+        bfld[patchi] = faceData.boundaryField()[patchi];
+    }
+    if (correctBoundaryConditions)
+    {
+        cellData.correctBoundaryConditions();
+    }
+}
+
+
 void Foam::writeFields
 (
     const fvMesh& mesh,
@@ -112,7 +159,8 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                false
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
@@ -127,17 +175,6 @@ void Foam::writeFields
 
     if (selectedFields.found("faceWeight"))
     {
-        const scalarField faceWeights
-        (
-            polyMeshTools::faceWeights
-            (
-                mesh,
-                mesh.faceCentres(),
-                mesh.faceAreas(),
-                mesh.cellCentres()
-            )
-        );
-
         volScalarField cellWeights
         (
             IOobject
@@ -146,14 +183,20 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                false
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
-            calculatedFvPatchScalarField::typeName
+            wordList                                // wanted bc types
+            (
+                mesh.boundary().size(),
+                calculatedFvPatchScalarField::typeName
+            ),
+            mesh.weights().boundaryField().types()  // current bc types
         );
         //- Take min
-        minFaceToCell(faceWeights, cellWeights);
+        minFaceToCell(mesh.weights(), cellWeights, false);
         Info<< "    Writing face interpolation weights (0..0.5) to "
             << cellWeights.name() << endl;
         cellWeights.write();
@@ -187,7 +230,8 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                false
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
@@ -346,7 +390,8 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                false
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
@@ -435,7 +480,8 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                false
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
