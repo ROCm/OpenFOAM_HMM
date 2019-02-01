@@ -96,15 +96,7 @@ solvers
         relTol          0;
     };
 
-    "e.*"
-    {
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
-        tolerance       1e-7;
-        relTol          0.0;
-    }
-
-     "(k.*|omega.*|Theta.*).*"
+     "(k.*|omega.*|Theta.*|T.*).*"
     {
         solver          PBiCGStab;
         preconditioner  DILU;

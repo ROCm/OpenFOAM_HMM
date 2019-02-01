@@ -33,7 +33,7 @@ divSchemes
     div(phi,omega)      Gauss upwind;
     div(phi,epsilon)    Gauss upwind;
     div(phi,k)          Gauss upwind;
-    div(rhoPhi,e)       Gauss upwind;
+    div(rhoCpPhi,T)       Gauss upwind;
     div(rhoPhi,K)       Gauss upwind;
     div(phi,alpha)      Gauss vanLeer;
     div(phirb,alpha)    Gauss linear;
