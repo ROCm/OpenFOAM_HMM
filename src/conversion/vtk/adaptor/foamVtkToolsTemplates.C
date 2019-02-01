@@ -21,22 +21,19 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
+InNamespace
     Foam::vtk::Tools
 
 \*---------------------------------------------------------------------------*/
-
-#ifndef foamVtkToolsTemplates_C
-#define foamVtkToolsTemplates_C
 
 // OpenFOAM includes
 #include "error.H"
 
 // VTK includes
-#include <vtkFloatArray.h>
-#include <vtkCellData.h>
-#include <vtkPointData.h>
-#include <vtkSmartPointer.h>
+#include "vtkFloatArray.h"
+#include "vtkCellData.h"
+#include "vtkPointData.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,9 +49,9 @@ Foam::vtk::Tools::Patch::points(const PatchType& p)
     vtkpoints->SetNumberOfPoints(pts.size());
 
     vtkIdType pointId = 0;
-    for (const point& p : pts)
+    for (const point& pt : pts)
     {
-        vtkpoints->SetPoint(pointId++, p.v_);
+        vtkpoints->SetPoint(pointId++, pt.v_);
     }
 
     return vtkpoints;
@@ -257,9 +254,5 @@ Foam::vtk::Tools::convertFieldToVTK
     return data;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

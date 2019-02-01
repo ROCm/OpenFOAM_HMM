@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -280,9 +280,11 @@ namespace Tools
 };
 
 
+// Specializations
+
 //- Template specialization for symmTensor ordering
 template<>
-inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(float data[])
+inline void Tools::remapTuple<Foam::symmTensor>(float data[])
 {
     std::swap(data[1], data[3]);    // swap XY <-> YY
     std::swap(data[2], data[5]);    // swap XZ <-> ZZ
@@ -291,7 +293,7 @@ inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(float data[])
 
 //- Template specialization for symmTensor ordering
 template<>
-inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(double data[])
+inline void Tools::remapTuple<Foam::symmTensor>(double data[])
 {
     std::swap(data[1], data[3]);    // swap XY <-> YY
     std::swap(data[2], data[5]);    // swap XZ <-> ZZ
@@ -302,6 +304,7 @@ inline void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(double data[])
 
 } // End namespace vtk
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
