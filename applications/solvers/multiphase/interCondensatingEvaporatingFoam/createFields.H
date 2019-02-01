@@ -40,9 +40,6 @@ autoPtr<temperaturePhaseChangeTwoPhaseMixture> mixture =
     temperaturePhaseChangeTwoPhaseMixture::New(thermo(), mesh);
 
 
-// Correct e from T and alpha
-//thermo->correct();
-
 volScalarField& alpha1(thermo->alpha1());
 volScalarField& alpha2(thermo->alpha2());
 
@@ -139,3 +136,17 @@ volScalarField pDivU
     dimensionedScalar(p.dimensions()/dimTime, Zero)
 );
 
+// Need to store rho for ddt(rhoCp, U)
+volScalarField rhoCp
+(
+    IOobject
+    (
+        "rhoCp",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE
+    ),
+    rho*thermo->Cp()
+);
+rhoCp.oldTime();
