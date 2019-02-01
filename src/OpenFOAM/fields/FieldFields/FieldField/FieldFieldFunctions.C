@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -521,6 +521,37 @@ Type average(const FieldField<Field, Type>& f)
 TMP_UNARY_FUNCTION(Type, average)
 
 
+template<template<class> class Field, class Type>
+MinMax<Type> minMax(const FieldField<Field, Type>& f)
+{
+    MinMax<Type> result;
+
+    forAll(f, i)
+    {
+        result += minMax(f[i]);
+    }
+
+    return result;
+}
+
+TMP_UNARY_FUNCTION(MinMax<Type>, minMax)
+
+template<template<class> class Field, class Type>
+scalarMinMax minMaxMag(const FieldField<Field, Type>& f)
+{
+    scalarMinMax result;
+
+    forAll(f, i)
+    {
+        result += minMaxMag(f[i]);
+    }
+
+    return result;
+}
+
+TMP_UNARY_FUNCTION(scalarMinMax, minMaxMag)
+
+
 #define G_UNARY_FUNCTION(returnType, gFunc, func, rFunc)                       \
                                                                                \
 template<template<class> class Field, class Type>                              \
@@ -536,6 +567,9 @@ G_UNARY_FUNCTION(Type, gMax, max, max)
 G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
 G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
+
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, minMax)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
 
 #undef G_UNARY_FUNCTION
 
@@ -579,6 +613,8 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
 
 
 /* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */

@@ -991,10 +991,10 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::writeMinMax
     Ostream& os
 ) const
 {
+    MinMax<Type> range = Foam::minMax(*this).value();
+
     os  << "min/max(" << this->name() << ") = "
-        << Foam::min(*this).value() << ", "
-        << Foam::max(*this).value()
-        << endl;
+        << range.min() << ", " << range.max() << endl;
 }
 
 
@@ -1096,17 +1096,6 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::replace
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::max
-(
-    const dimensioned<Type>& dt
-)
-{
-    Foam::max(primitiveFieldRef(), primitiveField(), dt.value());
-    Foam::max(boundaryFieldRef(), boundaryField(), dt.value());
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::min
 (
     const dimensioned<Type>& dt
@@ -1118,16 +1107,49 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::min
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::maxMin
+void Foam::GeometricField<Type, PatchField, GeoMesh>::max
 (
-    const dimensioned<Type>& minDt,
-    const dimensioned<Type>& maxDt
+    const dimensioned<Type>& dt
 )
 {
-    Foam::max(primitiveFieldRef(), primitiveField(), minDt.value());
-    Foam::max(boundaryFieldRef(), boundaryField(), minDt.value());
-    Foam::min(primitiveFieldRef(), primitiveField(), maxDt.value());
-    Foam::min(boundaryFieldRef(), boundaryField(), maxDt.value());
+    Foam::max(primitiveFieldRef(), primitiveField(), dt.value());
+    Foam::max(boundaryFieldRef(), boundaryField(), dt.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clip
+(
+    const dimensioned<MinMax<Type>>& range
+)
+{
+    Foam::clip(primitiveFieldRef(), primitiveField(), range.value());
+    Foam::clip(boundaryFieldRef(), boundaryField(), range.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clip
+(
+    const dimensioned<Type>& minVal,
+    const dimensioned<Type>& maxVal
+)
+{
+    MinMax<Type> range(minVal.value(), maxVal.value());
+
+    Foam::clip(primitiveFieldRef(), primitiveField(), range);
+    Foam::clip(boundaryFieldRef(), boundaryField(), range);
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::maxMin
+(
+    const dimensioned<Type>& minVal,
+    const dimensioned<Type>& maxVal
+)
+{
+    this->clip(minVal, maxVal);
 }
 
 

@@ -138,7 +138,23 @@ int main(int argc, char *argv[])
     minmax1 += values1;
     Pout<<"range: " << minmax1 << endl;
 
+
     Info<< "Reduced: "<< returnReduce(minmax1, plusOp<scalarMinMax>()) << nl;
+    Info<< "Reduced: "<< returnReduce(minmax1, minMaxOp<scalar>()) << nl;
+
+    // Info<< "gMinMax: "<< gMinMax(values1v) << nl;
+
+    vectorField values1v
+    (
+        ListOps::create<vector>
+        (
+            values1,
+            [](const scalar s) { return vector(s, 2*s, -2*s); }
+        )
+    );
+
+    Info<< "gMinMax: " << gMinMax(values1v) << nl;
+    Info<< "gMinMaxMag: " << gMinMaxMag(values1v) << nl;
 
     {
         MinMax<scalar> limiter(10, 200);
@@ -159,13 +175,14 @@ int main(int argc, char *argv[])
             Info<< "clipped : " << val << " = " << clip(val, limiter) << nl;
         }
 
-        Info<< nl << "inplace clip" << nl;
+        Info<< nl << "test clip(Field) with limiter: " << limiter << nl;
+        Info<< "clipped : " << clip(values1, limiter) << nl;
 
         scalarField values2(values1);
 
-        Info<< "before: " << flatOutput(values2) << nl;
+        Info<< nl << "inplace clip" << nl;
 
-        Info<< "before: " << flatOutput(values2) << nl;
+        Info<< "before " << flatOutput(values2) << nl;
 
         for (scalar& val : values2)
         {
@@ -176,7 +193,9 @@ int main(int argc, char *argv[])
 
         Info<< nl << "For list: " << flatOutput(values1) << nl
             << " minMax    : " << minMax(values1) << nl
-            << " minMaxMag : " << minMaxMag(values1) << nl;
+            << " minMaxMag : " << minMaxMag(values1)
+            << " = " << mag(minMaxMag(vector(1, 2, 3)))
+            << nl;
     }
 
 

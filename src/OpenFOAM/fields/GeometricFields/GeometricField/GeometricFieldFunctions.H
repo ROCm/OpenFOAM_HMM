@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,6 +228,10 @@ dimensioned<returnType> func                                                   \
 
 UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, max, maxOp)
 UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, min, minOp)
+
+// Same signature, but different implementation
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(MinMax<Type>, minMax, unused)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(scalarMinMax, minMaxMag, unused)
 
 #undef UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY
 
