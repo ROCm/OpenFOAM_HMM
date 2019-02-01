@@ -195,7 +195,7 @@ namespace Tools
     //- Convert OpenFOAM patch to vtkPolyData
     struct Patch
     {
-        //- Convert local patch points to vtkPoints
+        //- Return local patch points as vtkPoints
         template<class PatchType>
         static vtkSmartPointer<vtkPoints> points(const PatchType& p);
 
@@ -210,6 +210,10 @@ namespace Tools
         //- Convert patch face normals to vtkFloatArray
         template<class PatchType>
         static vtkSmartPointer<vtkFloatArray> faceNormals(const PatchType& p);
+
+        //- Return patch face centres as vtkPoints
+        template<class PatchType>
+        static vtkSmartPointer<vtkPoints> faceCentres(const PatchType& p);
     };
 
 

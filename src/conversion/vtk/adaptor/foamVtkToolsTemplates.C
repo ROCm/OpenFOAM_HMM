@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,6 +136,39 @@ Foam::vtk::Tools::Patch::faceNormals(const PatchType& p)
     }
 
     return array;
+}
+
+
+template<class PatchType>
+vtkSmartPointer<vtkPoints>
+Foam::vtk::Tools::Patch::faceCentres(const PatchType& p)
+{
+    auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+    vtkpoints->SetNumberOfPoints(p.size());
+
+    // Use cached values if available or loop over faces
+    // (avoid triggering cache)
+
+    vtkIdType pointId = 0;
+
+    if (p.hasFaceCentres())
+    {
+        for (const point& pt : p.faceCentres())
+        {
+            vtkpoints->SetPoint(pointId++, pt.v_);
+        }
+    }
+    else
+    {
+        for (const auto& f : p)
+        {
+            const point pt(f.centre(p.points()));
+            vtkpoints->SetPoint(pointId++, pt.v_);
+        }
+    }
+
+    return vtkpoints;
 }
 
 
