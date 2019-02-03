@@ -162,8 +162,9 @@ endif
 unalias wmSet
 unalias wmInt32
 unalias wmInt64
-unalias wmSP
 unalias wmDP
+unalias wmSP
+unalias wmSPDP
 
 unalias wmUnset
 

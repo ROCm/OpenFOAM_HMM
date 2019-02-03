@@ -156,8 +156,9 @@ fi
 unalias wmSet       2>/dev/null
 unalias wmInt32     2>/dev/null
 unalias wmInt64     2>/dev/null
-unalias wmSP        2>/dev/null
 unalias wmDP        2>/dev/null
+unalias wmSP        2>/dev/null
+unalias wmSPDP      2>/dev/null
 
 unalias wmUnset     2>/dev/null
 

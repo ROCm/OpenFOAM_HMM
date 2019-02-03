@@ -81,7 +81,7 @@ export WM_COMPILER=Gcc
 export WM_ARCH_OPTION=64
 
 # [WM_PRECISION_OPTION] - Floating-point precision:
-# = DP | SP
+# = DP | SP | SPDP
 export WM_PRECISION_OPTION=DP
 
 # [WM_LABEL_SIZE] - Label size in bits:

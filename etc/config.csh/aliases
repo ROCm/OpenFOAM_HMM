@@ -25,8 +25,9 @@
 alias wmSet 'source $WM_PROJECT_DIR/etc/cshrc'
 alias wmInt32 'wmSet WM_LABEL_SIZE=32'
 alias wmInt64 'wmSet WM_LABEL_SIZE=64'
-alias wmSP 'wmSet WM_PRECISION_OPTION=SP'
 alias wmDP 'wmSet WM_PRECISION_OPTION=DP'
+alias wmSP 'wmSet WM_PRECISION_OPTION=SP'
+alias wmSPDP 'wmSet WM_PRECISION_OPTION=SPDP'
 
 # Clear env
 alias wmUnset 'source $WM_PROJECT_DIR/etc/config.csh/unset'

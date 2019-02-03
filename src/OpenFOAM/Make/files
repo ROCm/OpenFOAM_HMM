@@ -79,7 +79,7 @@ primitives/Vector/complexVector/complexVector.C
 primitives/Vector/doubleVector/doubleVector.C
 primitives/Tensor/doubleTensor/doubleTensor.C
 #endif
-#if !defined(WM_SP)
+#if !defined(WM_SP) && !defined(WM_SPDP)
 primitives/Vector/floatVector/floatVector.C
 primitives/Tensor/floatTensor/floatTensor.C
 #endif
