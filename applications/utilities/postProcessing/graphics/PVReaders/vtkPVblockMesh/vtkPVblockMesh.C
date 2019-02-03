@@ -101,11 +101,9 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
     vtkDataArraySelection* select
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> updateInfoBlocks"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
-    }
+    DebugInfo
+        << "<beg> updateInfoBlocks"
+        << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
 
     rangeBlocks_.reset(select->GetNumberOfArrays());
 
@@ -132,10 +130,7 @@ void Foam::vtkPVblockMesh::updateInfoBlocks
         ++rangeBlocks_;
     }
 
-    if (debug)
-    {
-        Info<< "<end> updateInfoBlocks" << endl;
-    }
+    DebugInfo << "<end> updateInfoBlocks" << endl;
 }
 
 
@@ -144,11 +139,9 @@ void Foam::vtkPVblockMesh::updateInfoEdges
     vtkDataArraySelection* select
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> updateInfoEdges"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
-    }
+    DebugInfo
+        << "<beg> updateInfoEdges"
+        << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
 
     rangeEdges_.reset(select->GetNumberOfArrays());
 
@@ -168,10 +161,7 @@ void Foam::vtkPVblockMesh::updateInfoEdges
         ++rangeEdges_;
     }
 
-    if (debug)
-    {
-        Info<< "<end> updateInfoEdges" << endl;
-    }
+    DebugInfo << "<end> updateInfoEdges" << endl;
 }
 
 
@@ -192,10 +182,7 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
     rangeEdges_("edges"),
     rangeCorners_("corners")
 {
-    if (debug)
-    {
-        Info<< "vtkPVblockMesh - " << FileName << endl;
-    }
+    DebugInfo << "vtkPVblockMesh - " << FileName << endl;
 
     // avoid argList and get rootPath/caseName directly from the file
     fileName fullCasePath(fileName(FileName).path());
@@ -256,12 +243,10 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
         }
     }
 
-    if (debug)
-    {
-        Info<< "fullCasePath=" << fullCasePath << nl
-            << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
-            << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << endl;
-    }
+    DebugInfo
+        << "fullCasePath=" << fullCasePath << nl
+        << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
+        << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << endl;
 
     // Create time object
     dbPtr_.reset
@@ -284,10 +269,7 @@ Foam::vtkPVblockMesh::vtkPVblockMesh
 
 Foam::vtkPVblockMesh::~vtkPVblockMesh()
 {
-    if (debug)
-    {
-        Info<< "~vtkPVblockMesh" << endl;
-    }
+    DebugInfo << "~vtkPVblockMesh" << endl;
 
     delete meshPtr_;
 }
@@ -297,11 +279,9 @@ Foam::vtkPVblockMesh::~vtkPVblockMesh()
 
 void Foam::vtkPVblockMesh::updateInfo()
 {
-    if (debug)
-    {
-        Info<< "<beg> updateInfo"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "] " << endl;
-    }
+    DebugInfo
+        << "<beg> updateInfo"
+        << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "] " << endl;
 
     resetCounters();
 
@@ -339,19 +319,13 @@ void Foam::vtkPVblockMesh::updateInfo()
         setSelectedArrayEntries(edgeSelection,  enabledEdges);
     }
 
-    if (debug)
-    {
-        Info<< "<end> updateInfo" << endl;
-    }
+    DebugInfo << "<end> updateInfo" << endl;
 }
 
 
 void Foam::vtkPVblockMesh::updateFoamMesh()
 {
-    if (debug)
-    {
-        Info<< "<beg> updateFoamMesh" << endl;
-    }
+    DebugInfo << "<beg> updateFoamMesh" << endl;
 
     // Check to see if the OpenFOAM mesh has been created
     if (!meshPtr_)
@@ -398,10 +372,7 @@ void Foam::vtkPVblockMesh::updateFoamMesh()
     }
 
 
-    if (debug)
-    {
-        Info<< "<end> updateFoamMesh" << endl;
-    }
+    DebugInfo << "<end> updateFoamMesh" << endl;
 }
 
 

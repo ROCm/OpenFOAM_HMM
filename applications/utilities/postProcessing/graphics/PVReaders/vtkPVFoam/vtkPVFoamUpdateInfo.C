@@ -148,20 +148,14 @@ void Foam::vtkPVFoam::updateInfoInternalMesh
     vtkDataArraySelection* select
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<beg> " << FUNCTION_NAME << nl;
 
     // Determine mesh parts (internalMesh, patches...)
     // Add internal mesh as first entry
     rangeVolume_.reset(select->GetNumberOfArrays(), 1);
     select->AddArray("internalMesh");
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 
@@ -170,10 +164,7 @@ void Foam::vtkPVFoam::updateInfoAreaMesh
     vtkDataArraySelection* select
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<beg> " << FUNCTION_NAME << nl;
 
     rangeArea_.reset(select->GetNumberOfArrays(), 0);
 
@@ -198,10 +189,7 @@ void Foam::vtkPVFoam::updateInfoAreaMesh
         select->AddArray("areaMesh");
     }
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 
@@ -210,11 +198,9 @@ void Foam::vtkPVFoam::updateInfoLagrangian
     vtkDataArraySelection* select
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME << nl
-            << "    " << dbPtr_->timePath()/cloud::prefix << nl;
-    }
+    DebugInfo
+        << "<beg> " << FUNCTION_NAME << nl
+        << "    " << dbPtr_->timePath()/cloud::prefix << nl;
 
     // Use the db directly since this might be called without a mesh,
     // but the region must get added back in
@@ -245,10 +231,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
     rangeClouds_.reset(select->GetNumberOfArrays());
     rangeClouds_ += addToArray(select, "lagrangian/", names.sortedToc());
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 
@@ -258,11 +241,9 @@ void Foam::vtkPVFoam::updateInfoPatches
     HashSet<string>& enabledEntries
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME
-            << " [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]" << nl;
-    }
+    DebugInfo
+        << "<beg> " << FUNCTION_NAME
+        << " [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]" << nl;
 
     rangePatches_.reset(select->GetNumberOfArrays());
 
@@ -436,10 +417,7 @@ void Foam::vtkPVFoam::updateInfoPatches
         }
     }
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 
@@ -453,11 +431,9 @@ void Foam::vtkPVFoam::updateInfoZones
         return;
     }
 
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME
-            << " [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]" << nl;
-    }
+    DebugInfo
+        << "<beg> " << FUNCTION_NAME
+        << " [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]" << nl;
 
     // cellZones
     {
@@ -498,10 +474,7 @@ void Foam::vtkPVFoam::updateInfoZones
         rangePointZones_ += addToArray(select, "pointZone/", names);
     }
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 
@@ -515,10 +488,7 @@ void Foam::vtkPVFoam::updateInfoSets
         return;
     }
 
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<beg> " << FUNCTION_NAME << nl;
 
     // Add names of sets. Search for last time directory with a sets
     // subdirectory. Take care not to search beyond the last mesh.
@@ -540,11 +510,9 @@ void Foam::vtkPVFoam::updateInfoSets
 
     const IOobjectList objects(dbPtr_(), setsInstance, meshDir_/"sets");
 
-    if (debug)
-    {
-        Info<< "     updateInfoSets read "
-            << objects.names() << " from " << setsInstance << nl;
-    }
+    DebugInfo
+        << "     updateInfoSets read "
+        << objects.names() << " from " << setsInstance << nl;
 
 
     rangeCellSets_.reset(select->GetNumberOfArrays());
@@ -571,10 +539,7 @@ void Foam::vtkPVFoam::updateInfoSets
         objects
     );
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 
@@ -583,10 +548,7 @@ void Foam::vtkPVFoam::updateInfoContinuumFields
     vtkDataArraySelection* select
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<beg> " << FUNCTION_NAME << nl;
 
     // Preserve the enabled selections
     HashSet<string> enabled;
@@ -618,10 +580,7 @@ void Foam::vtkPVFoam::updateInfoContinuumFields
 
     setSelectedArrayEntries(select, enabled);  // Adjust/restore selected
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 
@@ -630,10 +589,7 @@ void Foam::vtkPVFoam::updateInfoPointFields
     vtkDataArraySelection* select
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<beg> " << FUNCTION_NAME << nl;
 
     // Preserve the enabled selections
     HashSet<string> enabled = getSelectedArraySet(select);
@@ -655,10 +611,7 @@ void Foam::vtkPVFoam::updateInfoPointFields
 
     setSelectedArrayEntries(select, enabled);  // Adjust/restore selected
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 
@@ -667,10 +620,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
     vtkDataArraySelection* select
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<beg> " << FUNCTION_NAME << nl;
 
     // Preserve the enabled selections
     HashSet<string> enabled = getSelectedArraySet(select);
@@ -733,10 +683,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
     // Restore the enabled selections
     setSelectedArrayEntries(select, enabled);
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << nl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << nl;
 }
 
 

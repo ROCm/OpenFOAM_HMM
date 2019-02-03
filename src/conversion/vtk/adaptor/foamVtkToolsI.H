@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,6 +61,61 @@ inline Foam::UList<vtkIdType> Foam::vtk::Tools::asUList
     cells->GetData()->SetNumberOfTuples(size);
 
     return UList<vtkIdType>(cells->WritePointer(nCells, size), size);
+}
+
+
+inline vtkSmartPointer<vtkPoints>
+Foam::vtk::Tools::Points(const UList<point>& pts)
+{
+    auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+    vtkpoints->SetNumberOfPoints(pts.size());
+
+    vtkIdType pointId = 0;
+    for (const point& pt : pts)
+    {
+        vtkpoints->SetPoint(pointId++, pt.v_);
+    }
+
+    return vtkpoints;
+}
+
+
+inline vtkSmartPointer<vtkPoints>
+Foam::vtk::Tools::Points(const UList<point>& pts, const labelUList& addr)
+{
+    auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+    vtkpoints->SetNumberOfPoints(addr.size());
+
+    vtkIdType pointId = 0;
+    for (const label pointi : addr)
+    {
+        vtkpoints->SetPoint(pointId++, pts[pointi].v_);
+    }
+
+    return vtkpoints;
+}
+
+
+inline Foam::scalarMinMax Foam::vtk::Tools::rangeOf(vtkDataArray* data)
+{
+    double range[2]{GREAT, -GREAT};
+
+    if (data)
+    {
+        if (data->GetNumberOfComponents() == 1)
+        {
+            data->GetRange(range);
+        }
+        else
+        {
+            // Mag
+            data->GetRange(range, -1);
+        }
+    }
+
+    return scalarMinMax(range[0], range[1]);
 }
 
 

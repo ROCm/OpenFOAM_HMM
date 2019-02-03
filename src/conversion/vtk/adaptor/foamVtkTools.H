@@ -48,6 +48,7 @@ SourceFiles
 #include "faceList.H"
 #include "pointField.H"
 #include "symmTensor.H"
+#include "MinMax.H"
 
 // VTK includes
 #include "vtkCellArray.h"
@@ -63,7 +64,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward declarations
+// Forward Declarations
 class vtkDataSet;
 class vtkCellData;
 class vtkPointData;
@@ -192,6 +193,27 @@ namespace Tools
     );
 
 
+    //- Return a list of points as vtkPoints
+    inline vtkSmartPointer<vtkPoints> Points
+    (
+        const UList<point>& pts
+    );
+
+    //- Return an indirect list of points as vtkPoints
+    inline vtkSmartPointer<vtkPoints> Points
+    (
+        const UList<point>& pts,
+        const labelUList& addr
+    );
+
+    //- Convert a list of faces (or triFaces) to vtk polygon cells
+    template<class Face>
+    vtkSmartPointer<vtkCellArray> Faces(const UList<Face>& faces);
+
+    //- Min/Max of scalar, or mag() of non-scalars. Includes nullptr check.
+    inline scalarMinMax rangeOf(vtkDataArray* data);
+
+
     //- Convert OpenFOAM patch to vtkPolyData
     struct Patch
     {
@@ -214,6 +236,14 @@ namespace Tools
         //- Return patch face centres as vtkPoints
         template<class PatchType>
         static vtkSmartPointer<vtkPoints> faceCentres(const PatchType& p);
+
+        //- Convert points/faces component to vtkPolyData
+        template<class Face>
+        static vtkSmartPointer<vtkPolyData> mesh
+        (
+            const UList<point>& pts,
+            const UList<Face>& fcs
+        );
     };
 
 

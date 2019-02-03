@@ -68,8 +68,7 @@ void Foam::vtkPVFoam::convertVolField
     autoPtr<GeometricField<Type, pointPatchField, pointMesh>> ptfPtr;
     if (interpField)
     {
-        DebugInfo
-            << "convertVolField interpolating:" << fld.name() << nl;
+        DebugInfo << "convertVolField interpolating:" << fld.name() << nl;
 
         ptfPtr.reset
         (
@@ -415,22 +414,17 @@ void Foam::vtkPVFoam::convertVolFieldBlock
         foamVtuData& vtuData = iter.val();
         auto dataset = vtuData.dataset;
 
-        vtkSmartPointer<vtkFloatArray> cdata = convertVolFieldToVTK
+        dataset->GetCellData()->AddArray
         (
-            fld,
-            vtuData
+            vtuData.convertField(fld)
         );
-        dataset->GetCellData()->AddArray(cdata);
 
         if (ptfPtr.valid())
         {
-            vtkSmartPointer<vtkFloatArray> pdata = convertPointField
+            dataset->GetPointData()->AddArray
             (
-                ptfPtr(),
-                fld,
-                vtuData
+                convertPointField(*ptfPtr, fld, vtuData)
             );
-            dataset->GetPointData()->AddArray(pdata);
         }
     }
 }
@@ -547,8 +541,7 @@ void Foam::vtkPVFoam::convertPointFields
             continue;
         }
 
-        DebugInfo
-            << "convertPointFields : " << fieldName << nl;
+        DebugInfo << "convertPointFields : " << fieldName << nl;
 
         // Throw FatalError, FatalIOError as exceptions
         const bool throwingError = FatalError.throwExceptions();
@@ -893,40 +886,6 @@ Foam::vtkPVFoam::convertFaceFieldToVTK
         }
 
         data->SetTuple(faceId++, scratch);
-    }
-
-    return data;
-}
-
-
-template<class Type>
-vtkSmartPointer<vtkFloatArray>
-Foam::vtkPVFoam::convertVolFieldToVTK
-(
-    const GeometricField<Type, fvPatchField, volMesh>& fld,
-    const foamVtuData& vtuData
-) const
-{
-    const labelUList& cellMap = vtuData.cellMap();
-
-    auto data = vtkSmartPointer<vtkFloatArray>::New();
-    data->SetName(fld.name().c_str());
-    data->SetNumberOfComponents(static_cast<int>(pTraits<Type>::nComponents));
-    data->SetNumberOfTuples(cellMap.size());
-
-    DebugInfo
-        << "Convert volField: " << fld.name() << " size="
-        << cellMap.size() << " (field "
-        << fld.size() << ") nComp="
-        << static_cast<int>(pTraits<Type>::nComponents) << nl;
-
-    float scratch[pTraits<Type>::nComponents];
-
-    vtkIdType celli = 0;
-    for (const label meshCelli : cellMap)
-    {
-        vtk::Tools::foamToVtkTuple(scratch, fld[meshCelli]);
-        data->SetTuple(celli++, scratch);
     }
 
     return data;

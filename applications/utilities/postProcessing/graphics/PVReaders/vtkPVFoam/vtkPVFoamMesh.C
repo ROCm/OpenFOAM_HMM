@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2005-2010, 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -69,19 +69,13 @@ void Foam::vtkPVFoam::convertMeshVolume()
         {
             if (meshState_ == polyMesh::UNCHANGED)
             {
-                if (debug)
-                {
-                    Info<< "reuse " << longName << nl;
-                }
+                DebugInfo << "reuse " << longName << nl;
                 vtuData.reuse(); // reuse
                 continue;
             }
             else if (meshState_ == polyMesh::POINTS_MOVED)
             {
-                if (debug)
-                {
-                    Info<< "move points " << longName << nl;
-                }
+                DebugInfo << "move points " << longName << nl;
                 vtkgeom = vtuData.getCopy();
                 vtkgeom->SetPoints(vtuData.points(mesh));
             }
@@ -163,10 +157,7 @@ void Foam::vtkPVFoam::convertMeshPatches()
             if (meshState_ == polyMesh::UNCHANGED)
             {
                 // Without movement is easy.
-                if (debug)
-                {
-                    Info<< "reuse " << longName << nl;
-                }
+                DebugInfo << "reuse " << longName << nl;
                 vtpData.reuse();
                 continue;
             }
@@ -196,11 +187,9 @@ void Foam::vtkPVFoam::convertMeshPatches()
             const labelList& patchIds =
                 patches.groupPatchIDs().lookup(partName, labelList());
 
-            if (debug)
-            {
-                Info<< "Creating VTK mesh for patches [" << patchIds <<"] "
-                    << longName << nl;
-            }
+            DebugInfo
+                << "Creating VTK mesh for patches [" << patchIds <<"] "
+                << longName << nl;
 
             // Store good patch ids as additionalIds
             vtpData.additionalIds().reserve(patchIds.size());
@@ -250,11 +239,9 @@ void Foam::vtkPVFoam::convertMeshPatches()
 
             const label patchId = patches.findPatchID(partName);
 
-            if (debug)
-            {
-                Info<< "Creating VTK mesh for patch [" << patchId <<"] "
-                    << partName << nl;
-            }
+            DebugInfo
+                << "Creating VTK mesh for patch [" << patchId <<"] "
+                << partName << nl;
 
             if (patchId >= 0)
             {
@@ -324,19 +311,13 @@ void Foam::vtkPVFoam::convertMeshArea()
 //         {
 //             if (meshState_ == polyMesh::UNCHANGED)
 //             {
-//                 if (debug)
-//                 {
-//                     Info<< "reuse " << longName << nl;
-//                 }
+//                 DebugInfo << "reuse " << longName << nl;
 //                 vtpData.reuse(); // reuse
 //                 continue;
 //             }
 //             else if (meshState_ == polyMesh::POINTS_MOVED)
 //             {
-//                 if (debug)
-//                 {
-//                     Info<< "move points " << longName << nl;
-//                 }
+//                 DebugInfo << "move points " << longName << nl;
 //                 vtkgeom = vtpData.getCopy();
 //                 vtkgeom->SetPoints(movePoints(mesh, vtpData));
 //             }
@@ -392,11 +373,9 @@ void Foam::vtkPVFoam::convertMeshCellZones()
             continue;
         }
 
-        if (debug)
-        {
-            Info<< "Creating VTK mesh for cellZone[" << zoneId << "] "
-                << zoneName << nl;
-        }
+        DebugInfo
+            << "Creating VTK mesh for cellZone[" << zoneId << "] "
+            << zoneName << nl;
 
         foamVtuData& vtuData = cachedVtu_(longName);
 
@@ -405,19 +384,13 @@ void Foam::vtkPVFoam::convertMeshCellZones()
         {
             if (meshState_ == polyMesh::UNCHANGED)
             {
-                if (debug)
-                {
-                    Info<< "reuse " << longName << nl;
-                }
+                DebugInfo << "reuse " << longName << nl;
                 vtuData.reuse();
                 continue;
             }
             else if (meshState_ == polyMesh::POINTS_MOVED)
             {
-                if (debug)
-                {
-                    Info<< "move points " << longName << nl;
-                }
+                DebugInfo << "move points " << longName << nl;
                 vtkgeom = vtuData.getCopy();
                 vtkgeom->SetPoints(vtuData.points(mesh, vtuData.pointMap()));
             }
@@ -459,10 +432,7 @@ void Foam::vtkPVFoam::convertMeshCellSets()
         const auto& longName = selectedPartIds_[partId];
         const word partName = getFoamName(longName);
 
-        if (debug)
-        {
-            Info<< "Creating VTK mesh for cellSet=" << partName << nl;
-        }
+        DebugInfo << "Creating VTK mesh for cellSet=" << partName << nl;
 
         foamVtuData& vtuData = cachedVtu_(longName);
 
@@ -471,19 +441,13 @@ void Foam::vtkPVFoam::convertMeshCellSets()
         {
             if (meshState_ == polyMesh::UNCHANGED)
             {
-                if (debug)
-                {
-                    Info<< "reuse " << longName << nl;
-                }
+                DebugInfo << "reuse " << longName << nl;
                 vtuData.reuse();
                 continue;
             }
             else if (meshState_ == polyMesh::POINTS_MOVED)
             {
-                if (debug)
-                {
-                    Info<< "move points " << longName << nl;
-                }
+                DebugInfo << "move points " << longName << nl;
                 vtkgeom = vtuData.getCopy();
                 vtkgeom->SetPoints(vtuData.points(mesh, vtuData.pointMap()));
             }
@@ -536,11 +500,9 @@ void Foam::vtkPVFoam::convertMeshFaceZones()
         {
             continue;
         }
-        if (debug)
-        {
-            Info<< "Creating VTKmesh for faceZone[" << zoneId << "] "
-                << zoneName << nl;
-        }
+        DebugInfo
+            << "Creating VTKmesh for faceZone[" << zoneId << "] "
+            << zoneName << nl;
 
         foamVtpData& vtpData = cachedVtp_(longName);
 
@@ -550,10 +512,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones()
             if (meshState_ == polyMesh::UNCHANGED)
             {
                 // Without movement is easy.
-                if (debug)
-                {
-                    Info<<"reuse " << longName << nl;
-                }
+                DebugInfo <<"reuse " << longName << nl;
                 vtpData.reuse();
                 continue;
             }
@@ -600,10 +559,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets()
         const auto& longName = selectedPartIds_[partId];
         const word partName = getFoamName(longName);
 
-        if (debug)
-        {
-            Info<< "Creating VTK mesh for faceSet=" << partName << nl;
-        }
+        DebugInfo << "Creating VTK mesh for faceSet=" << partName << nl;
 
         foamVtpData& vtpData = cachedVtp_(longName);
 
@@ -613,10 +569,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets()
             if (meshState_ == polyMesh::UNCHANGED)
             {
                 // Without movement is easy.
-                if (debug)
-                {
-                    Info<<"reuse " << longName << nl;
-                }
+                DebugInfo <<"reuse " << longName << nl;
                 vtpData.reuse();
                 continue;
             }
@@ -700,19 +653,13 @@ void Foam::vtkPVFoam::convertMeshPointZones()
         {
             if (meshState_ == polyMesh::UNCHANGED)
             {
-                if (debug)
-                {
-                    Info<< "reusing " << longName << nl;
-                }
+                DebugInfo << "reusing " << longName << nl;
                 vtpData.reuse();
                 continue;
             }
             else if (meshState_ == polyMesh::POINTS_MOVED)
             {
-                if (debug)
-                {
-                    Info<< "move points " << longName << nl;
-                }
+                DebugInfo << "move points " << longName << nl;
                 vtkgeom = vtpData.getCopy();
             }
         }
@@ -772,19 +719,13 @@ void Foam::vtkPVFoam::convertMeshPointSets()
         {
             if (meshState_ == polyMesh::UNCHANGED)
             {
-                if (debug)
-                {
-                    Info<< "reusing " << longName << nl;
-                }
+                DebugInfo << "reusing " << longName << nl;
                 vtpData.reuse();
                 continue;
             }
             else if (meshState_ == polyMesh::POINTS_MOVED)
             {
-                if (debug)
-                {
-                    Info<< "move points " << longName << nl;
-                }
+                DebugInfo << "move points " << longName << nl;
                 vtkgeom = vtpData.getCopy();
             }
         }

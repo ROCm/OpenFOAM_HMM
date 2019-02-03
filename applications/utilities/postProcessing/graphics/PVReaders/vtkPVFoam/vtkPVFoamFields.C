@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2005-2010, 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -130,10 +130,7 @@ void Foam::vtkPVFoam::convertPointFields()
 
     if (selectedFields.empty())
     {
-        if (debug)
-        {
-            Info<< "no point fields selected" << nl;
-        }
+        DebugInfo << "no point fields selected" << nl;
         return;
     }
 

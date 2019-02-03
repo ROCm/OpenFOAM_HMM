@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2011, 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -73,10 +73,7 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
     {
         Cloud<passiveParticle> parcels(mesh, cloudName, false);
 
-        if (debug)
-        {
-            Info<< "cloud with " << parcels.size() << " parcels" << nl;
-        }
+        DebugInfo << "cloud with " << parcels.size() << " parcels" << nl;
 
         auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
         vtkpoints->SetNumberOfPoints(parcels.size());
