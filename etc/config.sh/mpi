@@ -33,7 +33,7 @@ unset MPI_ARCH_PATH MPI_HOME
 export FOAM_MPI=dummy  # Fallback value
 
 case "$WM_MPLIB" in
-SYSTEMOPENMPI)
+SYSTEMOPENMPI*)
     # The system installed openmpi, locations discovery via mpicc.
     export FOAM_MPI=openmpi-system
 
@@ -261,7 +261,7 @@ SGIMPI)
     _foamAddLib     $MPI_ARCH_PATH/lib
     ;;
 
-INTELMPI)
+INTELMPI*)
     if [ -n "$I_MPI_ROOT" ]
     then
         # I_MPI_ROOT: The Intel MPI Library installation directory
@@ -303,15 +303,8 @@ INTELMPI)
 
     export FOAM_MPI MPI_ARCH_PATH
 
-    # Newer versions (5.0.3 or earlier?) with intel64/bin ...
-    if [ -d "$MPI_ARCH_PATH/intel64/bin" ]
-    then
-        _foamAddPath    "$MPI_ARCH_PATH/intel64/bin"
-        _foamAddLib     "$MPI_ARCH_PATH/intel64/lib"
-    else
-        _foamAddPath    "$MPI_ARCH_PATH/bin64"
-        _foamAddLib     "$MPI_ARCH_PATH/lib64"
-    fi
+    _foamAddPath    "$MPI_ARCH_PATH/intel64/bin"
+    _foamAddLib     "$MPI_ARCH_PATH/intel64/lib"
     ;;
 esac
 
