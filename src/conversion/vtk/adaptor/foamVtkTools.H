@@ -222,10 +222,18 @@ namespace Tools
     template<class Type>
     inline static void remapTuple(float data[]) {}
 
+    //- Template specialization for symmTensor ordering
+    template<>
+    inline void remapTuple<symmTensor>(float data[]);
+
     //- Remapping for some OpenFOAM data types (eg, symmTensor)
     //  \param data[in,out] The data to be remapped in-place
     template<class Type>
     inline static void remapTuple(double data[]) {}
+
+    //- Template specialization for symmTensor ordering
+    template<>
+    inline void remapTuple<symmTensor>(double data[]);
 
     //- Copy/transcribe OpenFOAM data types to VTK format
     //  This allows a change of data type (float vs double) as well as
@@ -282,13 +290,18 @@ namespace Tools
         const label size
     );
 };
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace vtk
+} // End namespace Foam
+
 
 
 // Specializations
 
 //- Template specialization for symmTensor ordering
 template<>
-inline void Tools::remapTuple<Foam::symmTensor>(float data[])
+void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(float data[])
 {
     std::swap(data[1], data[3]);    // swap XY <-> YY
     std::swap(data[2], data[5]);    // swap XZ <-> ZZ
@@ -297,17 +310,12 @@ inline void Tools::remapTuple<Foam::symmTensor>(float data[])
 
 //- Template specialization for symmTensor ordering
 template<>
-inline void Tools::remapTuple<Foam::symmTensor>(double data[])
+void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(double data[])
 {
     std::swap(data[1], data[3]);    // swap XY <-> YY
     std::swap(data[2], data[5]);    // swap XZ <-> ZZ
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace vtk
-} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
