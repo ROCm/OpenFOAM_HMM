@@ -815,7 +815,35 @@ bool Foam::functionObjectList::read()
                         "functionObject::" + objPtr->name() + "::read"
                     );
 
-                    enabled = objPtr->read(dict);
+                    if (functionObjects::timeControl::entriesPresent(dict))
+                    {
+                        if (isA<functionObjects::timeControl>(objPtr()))
+                        {
+                            // Already a time control - normal read
+                            enabled = objPtr->read(dict);
+                        }
+                        else
+                        {
+                            // Was not a time control - need to re-create
+                            objPtr.reset
+                            (
+                                new functionObjects::timeControl
+                                (
+                                    key,
+                                    time_,
+                                    dict
+                                )
+                            );
+
+                            enabled = true;
+                        }
+                    }
+                    else
+                    {
+                        // Plain function object - normal read
+                        enabled = objPtr->read(dict);
+                    }
+
                     ok = enabled && ok;
                 }
 
