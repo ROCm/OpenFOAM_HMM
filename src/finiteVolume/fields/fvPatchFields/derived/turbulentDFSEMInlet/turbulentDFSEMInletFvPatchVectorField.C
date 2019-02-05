@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -854,6 +854,8 @@ turbulentDFSEMInletFvPatchVectorField
 {
     eddy::debug = debug;
 
+    checkStresses(R_);
+
     // Set UMean as patch area average value
     UMean_ = gSum(U_*patch().magSf())/(gSum(patch().magSf()) + ROOTVSMALL);
 }
@@ -946,14 +948,74 @@ turbulentDFSEMInletFvPatchVectorField
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::turbulentDFSEMInletFvPatchVectorField::~
-turbulentDFSEMInletFvPatchVectorField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
+(
+    const symmTensorField& Rf
+)
+{
+    // Perform checks based on constraints imposed by Lund coefficients
+    // a11..a33
+
+    for (const symmTensor& R : Rf)
+    {
+        if (R.xx() <= 0)
+        {
+            FatalErrorInFunction
+                << "Reynold stress " << R
+                << " does not obey the Lund coefficient constraint: "
+                << "R.xx() > 0"
+                << exit(FatalError);
+        }
+
+        scalar a11 = sqrt(R.xx());
+
+        scalar a21 = R.xy()/a11;
+
+        scalar a22_2 = R.yy() - sqr(a21);
+
+        if (a22_2 < 0)
+        {
+            FatalErrorInFunction
+                << "Reynold stress " << R
+                << " does not obey the Lund coefficient constraint: "
+                << "R.yy() - sqr(a21) >= 0"
+                << exit(FatalError);
+        }
+
+        scalar a22 = Foam::sqrt(a22_2);
+
+        scalar a31 = R.xz()/a11;
+
+        scalar a32 = (R.yz() - a21*a31)*a22;
+
+        scalar a33_2 = R.zz() - sqr(a31) - sqr(a32);
+
+        if (a33_2 < 0)
+        {
+            FatalErrorInFunction
+                << "Reynold stress " << R
+                << " does not obey the Lund coefficient constraint: "
+                << "R.zz() - sqr(a31) - sqr(a32) >= 0"
+                << exit(FatalError);
+        }
+
+        scalar a33 = Foam::sqrt(a33_2);
+
+        if (debug)
+        {
+            Pout<< "R: " << R
+                << " a11:" << a11 << " a21:" << a21 << " a31:" << a31
+                <<                   " a21:" << a22 << " a32:" << a32
+                <<                                     " a33:" << a33
+                << endl;
+        }
+    }
+
+    return true;
+}
+
 
 void Foam::turbulentDFSEMInletFvPatchVectorField::autoMap
 (
