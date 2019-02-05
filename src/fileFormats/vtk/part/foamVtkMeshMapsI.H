@@ -35,12 +35,6 @@ inline Foam::foamVtkMeshMaps::foamVtkMeshMaps(const label size)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-inline Foam::foamVtkMeshMaps::~foamVtkMeshMaps()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline void Foam::foamVtkMeshMaps::clear()
