@@ -53,17 +53,57 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    return max
+
+    // Calculate new viscosity
+    tmp<scalarField> tnutw
     (
-        scalar(0),
-        sqr(calcUTau(magGradU))/(magGradU + ROOTVSMALL) - nuw
+        max
+        (
+            scalar(0),
+            sqr(calcUTau(magGradU))/(magGradU + ROOTVSMALL) - nuw
+        )
     );
+
+    if (tolerance_ != 0.01)
+    {
+        // User-specified tolerance. Find out if current nut already satisfies
+        // eqns.
+
+        // Run ut for one iteration
+        scalarField err;
+        tmp<scalarField> UTau(calcUTau(magGradU, 1, err));
+
+        // Preserve nutw if the initial error (err) already lower than the
+        // tolerance.
+
+        scalarField& nutw = tnutw.ref();
+        forAll(err, facei)
+        {
+            if (err[facei] < tolerance_)
+            {
+                nutw[facei] = this->operator[](facei);
+            }
+        }
+    }
+    return tnutw;
 }
 
 
 tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 (
     const scalarField& magGradU
+) const
+{
+    scalarField err;
+    return calcUTau(magGradU, maxIter_, err);
+}
+
+
+tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
+(
+    const scalarField& magGradU,
+    const label maxIter,
+    scalarField& err
 ) const
 {
     const label patchi = patch().index();
@@ -89,6 +129,9 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
     tmp<scalarField> tuTau(new scalarField(patch().size(), Zero));
     scalarField& uTau = tuTau.ref();
 
+    err.setSize(uTau.size());
+    err = 0.0;
+
     forAll(uTau, facei)
     {
         scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
@@ -98,7 +141,6 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
         if (ut > ROOTVSMALL)
         {
             int iter = 0;
-            scalar err = GREAT;
 
             do
             {
@@ -116,12 +158,17 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
                   + 1/E_*kUu*fkUu/ut;
 
                 scalar uTauNew = ut + f/df;
-                err = mag((ut - uTauNew)/ut);
+                err[facei] = mag((ut - uTauNew)/ut);
                 ut = uTauNew;
 
                 //iterations_++;
 
-            } while (ut > ROOTVSMALL && err > tolerance_ && ++iter < maxIter_);
+            } while
+            (
+                ut > ROOTVSMALL
+             && err[facei] > tolerance_
+             && ++iter < maxIter
+            );
 
             uTau[facei] = max(0.0, ut);
 

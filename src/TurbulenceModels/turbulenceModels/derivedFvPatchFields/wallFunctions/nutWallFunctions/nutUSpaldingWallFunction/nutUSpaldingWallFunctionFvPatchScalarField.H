@@ -71,9 +71,18 @@ Note
     Suffers from non-exact restart since correctNut() (called through
     turbulence->validate) returns a slightly different value every time
     it is called. This is since the seed for the Newton-Raphson iteration
-    uses the current value of *this (= nut). Can be avoided by seeding the
-    NR with e.g. the laminar viscosity or tightening the convergence tolerance
-    to e.g. 1e-7 and the max number of iterations to 100.
+    uses the current value of *this (= nut).
+
+    This can be avoided by overriding the tolerance. This also switches on
+    a pre-detection whether the current nut already satisfies the turbulence
+    conditions and if so does not change it at all. This means that the nut
+    only changes if it 'has really changed'. This probably should be used with
+    a tight tolerance, e.g.
+
+        maxIter     100;
+        tolerance   1e-7;
+
+    to make sure to kick every iteration.
 
 SourceFiles
     nutUSpaldingWallFunctionFvPatchScalarField.C
@@ -122,6 +131,15 @@ protected:
 
         //- Calculate the friction velocity
         virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+
+        //- Calculate the friction velocity and number of iterations for
+        //  convergence
+        virtual tmp<scalarField> calcUTau
+        (
+            const scalarField& magGradU,
+            const label maxIter,
+            scalarField& err
+        ) const;
 
         //- Write local wall function variables
         virtual void writeLocalEntries(Ostream&) const;
