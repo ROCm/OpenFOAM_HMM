@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010, 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -104,9 +104,6 @@ protected:
             const word&,
             bool& isOwner
         );
-
-        //- Lookup and check out field
-        void lookupAndCheckout(const char* name) const;
 
         //- Return the enthalpy/internal energy field boundary types
         //  by interrogating the temperature field boundary types

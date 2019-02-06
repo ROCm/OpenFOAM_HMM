@@ -438,6 +438,10 @@ public:
         //- object is ownedByRegistry
         bool checkOut(regIOobject& io) const;
 
+        //- Remove a regIOobject by name from registry and frees memory if the
+        //- object is ownedByRegistry
+        bool checkOut(const word& key) const;
+
         //- Clear all entries from the registry
         //  Performs a checkOut() for all objects that are ownedByRegistry
         void clear();

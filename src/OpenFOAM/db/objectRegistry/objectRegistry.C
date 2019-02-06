@@ -285,6 +285,12 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
 }
 
 
+bool Foam::objectRegistry::checkOut(const word& key) const
+{
+    return const_cast<objectRegistry&>(*this).erase(key);
+}
+
+
 void Foam::objectRegistry::clear()
 {
     // Free anything owned by the registry
