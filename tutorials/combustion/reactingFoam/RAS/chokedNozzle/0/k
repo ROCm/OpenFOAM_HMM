@@ -13,6 +13,7 @@ FoamFile
     location        "0";
     object          k;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [ 0 2 -2 0 0 0 0 ];
 
@@ -24,18 +25,18 @@ boundaryField
     {
         type            turbulentIntensityKineticEnergyInlet;
         intensity       0.02;
-        value           uniform 1;
+        value           $internalField;
     }
     outlet
     {
         type            zeroGradient;//inletOutlet;
-        inletValue      uniform 1;
-        value           uniform 1;
+        inletValue      $internalField;
+        value           $internalField;
     }
     walls
     {
         type            kqRWallFunction;
-        value           uniform 1;
+        value           $internalField;
     }
 }
 

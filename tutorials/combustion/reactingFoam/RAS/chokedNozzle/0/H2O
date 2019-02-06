@@ -24,13 +24,13 @@ boundaryField
     inletair
     {
         type            fixedValue;
-        value           uniform 0;
+        value           $internalField;
     }
     outlet
     {
         type            zeroGradient;
-        inletValue      uniform 0;
-        value           uniform 0;
+        inletValue      $internalField;
+        value           $internalField;
     }
     walls
     {

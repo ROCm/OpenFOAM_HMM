@@ -13,6 +13,7 @@ FoamFile
     location        "0";
     object          T;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [ 0 0 0 1 0 0 0 ];
 
@@ -37,8 +38,8 @@ boundaryField
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform 292;
-        value           uniform 292;
+        inletValue      $internalField;
+        value           $internalField;
     }
     walls
     {

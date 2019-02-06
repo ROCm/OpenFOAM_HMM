@@ -1,4 +1,4 @@
-;/*--------------------------------*- C++ -*----------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  v1812                                 |
@@ -7,12 +7,13 @@
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version         2;
-    format          ascii;
-    class           dictionary;
-    location        "system";
-    object          controlDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 application     reactingFoam;
 
@@ -20,7 +21,7 @@ startFrom       startTime;
 
 startTime       0;
 
-stopAt          writeNow;   //endTime;
+stopAt          endTime;
 
 endTime         1;
 
@@ -49,19 +50,6 @@ adjustTimeStep  yes;
 maxCo           0.3;
 
 maxDeltaT       0.25;
-
-
-functions
-{
-    ywalls
-    {
-        type        writeObjects;
-        libs        ("libutilityFunctionObjects.so");
-        objects     (ywalls);
-        writeOption anyWrite;
-    }
-}
-
 
 
 // ************************************************************************* //

@@ -24,12 +24,12 @@ boundaryField
     inletair
     {
         type            calculated;
-        value           uniform 0;
+        value           $internalField;
     }
     outlet
     {
         type            calculated;
-        value           uniform 0;
+        value           $internalField;
     }
     walls
     {
@@ -37,7 +37,7 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
-        value           uniform 0;
+        value           $internalField;
     }
 }
 

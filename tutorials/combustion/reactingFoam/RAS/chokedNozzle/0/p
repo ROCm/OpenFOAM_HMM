@@ -13,6 +13,7 @@ FoamFile
     location        "0";
     object          p;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [ 1 -1 -2 0 0 0 0 ];
 
@@ -31,7 +32,7 @@ boundaryField
         choked          true;
         relax           0.1;
         M               0.3;
-        value           uniform 250000;
+        value           $internalField;
     }
     walls
     {

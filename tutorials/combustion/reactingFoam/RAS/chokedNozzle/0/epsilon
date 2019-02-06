@@ -13,6 +13,7 @@ FoamFile
     location        "0";
     object          epsilon;
 }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 dimensions      [ 0 2 -3 0 0 0 0 ];
 
@@ -26,13 +27,13 @@ boundaryField
         mixingLength    0.005;
         phi             phi;
         k               k;
-        value           uniform 200;
+        value           $internalField;
     }
     outlet
     {
         type            inletOutlet;
-        inletValue      uniform 200;
-        value           uniform 200;
+        inletValue      $internalField;
+        value           $internalField;
     }
     walls
     {
@@ -40,7 +41,7 @@ boundaryField
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
-        value           uniform 200;
+        value           $internalField;
     }
 }
 
