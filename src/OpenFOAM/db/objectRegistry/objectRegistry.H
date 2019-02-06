@@ -152,8 +152,7 @@ public:
         explicit objectRegistry(const IOobject& io, const label nObjects=128);
 
 
-    //- Destructor, performs a checkOut() for all objects that are
-    //- ownedByRegistry
+    //- Destructor, with checkOut() for all objects that are ownedByRegistry
     virtual ~objectRegistry();
 
 
@@ -433,7 +432,8 @@ public:
         //- Add a regIOobject to registry
         bool checkIn(regIOobject& io) const;
 
-        //- Remove a regIOobject from registry
+        //- Remove a regIOobject from registry and frees memory if the
+        //- object is ownedByRegistry
         bool checkOut(regIOobject& io) const;
 
         //- Clear all entries from the registry
@@ -442,6 +442,26 @@ public:
 
         //- Clear all entries from the registry and the table itself.
         void clearStorage();
+
+        //- Erase an entry specified by the given iterator.
+        //  Performs a checkOut() if the object was ownedByRegistry.
+        //  \return True if the entry existed and was removed
+        bool erase(const iterator& iter);
+
+        //- Erase an entry specified by the given key
+        //  Performs a checkOut() if the object was ownedByRegistry.
+        //  \return True if the entry existed and was removed
+        bool erase(const word& key);
+
+        //- Remove entries given by the listed keys
+        //  Performs a checkOut() for all objects that are ownedByRegistry.
+        //  \return The number of items removed
+        label erase(std::initializer_list<word> keys);
+
+        //- Remove entries given by the listed keys
+        //  Performs a checkOut() for all objects that are ownedByRegistry.
+        //  \return The number of items removed
+        label erase(const UList<word>& keys);
 
         //- Rename
         virtual void rename(const word& newName);

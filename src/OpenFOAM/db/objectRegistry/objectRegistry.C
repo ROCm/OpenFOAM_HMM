@@ -35,6 +35,37 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Templated implementation for erase() with iterator range.
+// Prefer not to expose directly.
+template<class InputIter>
+static label eraseImpl(objectRegistry& obr, InputIter first, InputIter last)
+{
+    label changed = 0;
+
+    for
+    (
+        const label nTotal = obr.size();
+        changed < nTotal && first != last; // Terminate early
+        ++first
+    )
+    {
+        if (obr.erase(*first))
+        {
+            ++changed;
+        }
+    }
+
+    return changed;
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::objectRegistry::parentNotTime() const
@@ -193,24 +224,38 @@ bool Foam::objectRegistry::checkIn(regIOobject& io) const
             << endl;
     }
 
-    return const_cast<objectRegistry&>(*this).insert(io.name(), &io);
+    objectRegistry& obr = const_cast<objectRegistry&>(*this);
+
+    bool ok = obr.insert(io.name(), &io);
+
+    if (!ok && objectRegistry::debug)
+    {
+        WarningInFunction
+            << name() << " : attempted to checkIn object with name "
+            << io.name() << " which was already checked in"
+            << endl;
+    }
+
+    return ok;
 }
 
 
 bool Foam::objectRegistry::checkOut(regIOobject& io) const
 {
-    iterator iter = const_cast<objectRegistry&>(*this).find(io.name());
+    objectRegistry& obr = const_cast<objectRegistry&>(*this);
+
+    iterator iter = obr.find(io.name());
 
     if (iter.found())
     {
         if (objectRegistry::debug)
         {
             Pout<< "objectRegistry::checkOut(regIOobject&) : "
-                << name() << " : checking out " << iter.key()
+                << name() << " : checking out " << io.name()
                 << endl;
         }
 
-        if (iter() != &io)
+        if (iter.val() != &io)
         {
             if (objectRegistry::debug)
             {
@@ -222,29 +267,16 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
 
             return false;
         }
-        else
-        {
-            regIOobject* object = iter();
 
-            bool hasErased = const_cast<objectRegistry&>(*this).erase(iter);
-
-            if (io.ownedByRegistry())
-            {
-                delete object;
-            }
-
-            return hasErased;
-        }
+        return obr.erase(iter);
     }
-    else
+
+
+    if (objectRegistry::debug)
     {
-        if (objectRegistry::debug)
-        {
-            Pout<< "objectRegistry::checkOut(regIOobject&) : "
-                << name() << " : could not find " << io.name()
-                << " in registry " << name()
-                << endl;
-        }
+        Pout<< "objectRegistry::checkOut(regIOobject&) : "
+            << name() << " : could not find " << io.name() << " in registry"
+            << endl;
     }
 
     return false;
@@ -272,6 +304,46 @@ void Foam::objectRegistry::clearStorage()
 {
     objectRegistry::clear();
     HashTable<regIOobject*>::clearStorage();
+}
+
+
+bool Foam::objectRegistry::erase(const iterator& iter)
+{
+    // Free anything owned by the registry
+
+    if (iter.found())
+    {
+        regIOobject* ptr = iter.val();
+
+        bool ok = HashTable<regIOobject*>::erase(iter);
+
+        if (ptr && ptr->ownedByRegistry())
+        {
+            delete ptr;
+        }
+
+        return ok;
+    }
+
+    return false;
+}
+
+
+bool Foam::objectRegistry::erase(const word& key)
+{
+    return erase(find(key));
+}
+
+
+Foam::label Foam::objectRegistry::erase(std::initializer_list<word> keys)
+{
+     return eraseImpl(*this, keys.begin(), keys.end());
+}
+
+
+Foam::label Foam::objectRegistry::erase(const UList<word>& keys)
+{
+    return eraseImpl(*this, keys.begin(), keys.end());
 }
 
 
