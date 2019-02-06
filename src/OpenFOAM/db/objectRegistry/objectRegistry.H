@@ -340,6 +340,59 @@ public:
         template<class Type>
         HashTable<Type*> lookupClass(const bool strict = false);
 
+
+        //- Can the regIOobject object be found (by name).
+        //
+        //  \param recursive search parent registries
+        bool found(const word& name, const bool recursive = false) const;
+
+
+        //- Return const pointer to the regIOobject.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found.
+        const regIOobject* cfindIOobject
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
+
+        //- Return const pointer to the regIOobject.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found.
+        const regIOobject* findIOobject
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
+
+        //- Return non-const pointer to the regIOobject.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found.
+        regIOobject* findIOobject
+        (
+            const word& name,
+            const bool recursive = false
+        );
+
+        //- Return non-const pointer to the regIOobject,
+        //- using a const-cast to have it behave like a mutable.
+        //  Exercise caution when using.
+        //
+        //  \param recursive search parent registries.
+        //
+        //  \return nullptr if the object was not found.
+        regIOobject* getIOobjectPtr
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
+
         //- Is the named Type found?
         //
         //  \param recursive search parent registries

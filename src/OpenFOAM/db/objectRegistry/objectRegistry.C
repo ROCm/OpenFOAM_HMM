@@ -373,6 +373,67 @@ void Foam::objectRegistry::rename(const word& newName)
 }
 
 
+bool Foam::objectRegistry::found
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    return cfindIOobject(name, recursive);
+}
+
+
+const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const_iterator iter = cfind(name);
+
+    if (iter.found())
+    {
+        return iter.val();
+    }
+    else if (recursive && this->parentNotTime())
+    {
+        return parent_.cfindIOobject(name, recursive);
+    }
+
+    return nullptr;
+}
+
+
+const Foam::regIOobject* Foam::objectRegistry::findIOobject
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    return cfindIOobject(name, recursive);
+}
+
+
+Foam::regIOobject* Foam::objectRegistry::findIOobject
+(
+    const word& name,
+    const bool recursive
+)
+{
+    return const_cast<regIOobject*>(cfindIOobject(name, recursive));
+}
+
+
+Foam::regIOobject* Foam::objectRegistry::getIOobjectPtr
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    return const_cast<regIOobject*>(cfindIOobject(name, recursive));
+}
+
+
 bool Foam::objectRegistry::modified() const
 {
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
