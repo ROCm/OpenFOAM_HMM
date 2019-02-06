@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 Alexey Matveichev
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018 Alexey Matveichev
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.

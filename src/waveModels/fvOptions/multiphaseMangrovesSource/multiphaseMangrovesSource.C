@@ -3,7 +3,9 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2017 IH-Cantabria
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.

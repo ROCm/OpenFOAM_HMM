@@ -3,8 +3,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) YEAR AUTHOR,AFFILIATION
+#   \\  /    A nd           |
 #    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) YEAR AUTHOR,AFFILIATION
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
