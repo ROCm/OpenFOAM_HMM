@@ -47,9 +47,8 @@ source archives.
 
 - Format is year-month-day, as per `date +%y%m%d`.
 
-- The first release is by definition unpatched, and thus carries
-  a patch value of `0`. If this release were to be patched the following
-  day, the patch level would jump accordingly.
+- The first release can have a patch value of `0` (unpatched = just
+  released) or a patch value corresponding to the release date.
 
 The patch value is only meaningful together with the api value.
 However, for *development* branches, the patch level should not be
