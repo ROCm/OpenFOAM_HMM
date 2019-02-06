@@ -44,6 +44,16 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * //
 
+void Foam::functionObjects::momentum::purgeFields()
+{
+    objectRegistry& obr = const_cast<objectRegistry&>(obr_);
+
+    obr.erase(scopedName("momentum"));
+    obr.erase(scopedName("angularMomentum"));
+    obr.erase(scopedName("angularVelocity"));
+}
+
+
 template<class GeoField>
 Foam::autoPtr<GeoField>
 Foam::functionObjects::momentum::newField
@@ -74,6 +84,13 @@ Foam::functionObjects::momentum::newField
 void Foam::functionObjects::momentum::calc()
 {
     initialise();
+
+    // Ensure volRegion is properly up-to-date.
+    // Purge old fields if anything has changed (eg, mesh size etc)
+    if (volRegion::update())
+    {
+        purgeFields();
+    }
 
     // When field writing is not enabled we need our local storage
     // for the momentum and angular velocity fields
@@ -292,22 +309,27 @@ void Foam::functionObjects::momentum::initialise()
 
 void Foam::functionObjects::momentum::writeValues(Ostream& os)
 {
-    Log << type() << " " << name() << " write:" << nl;
-
-    Log << "    Sum of Momentum";
-
-    if (regionType_ != vrtAll)
+    if (log)
     {
-        Log << ' ' << regionTypeNames_[regionType_]
-            << ' ' << regionName_;
-    }
+        Info<< type() << " " << name() << " write:" << nl;
 
-    Log << nl
-        << "        linear  : " << sumMomentum_ << nl;
+        Info<< "    Sum of Momentum";
 
-    if (hasCsys_)
-    {
-        Log << "        angular : " << sumAngularMom_ << nl;
+        if (regionType_ != vrtAll)
+        {
+            Info<< ' ' << regionTypeNames_[regionType_]
+                << ' ' << regionName_;
+        }
+
+        Info<< " (volume " << volRegion::V() << ')' << nl
+            << "        linear  : " << sumMomentum_ << nl;
+
+        if (hasCsys_)
+        {
+            Info<< "        angular : " << sumAngularMom_ << nl;
+        }
+
+        Info<< endl;
     }
 
     if (writeToFile())
@@ -323,8 +345,6 @@ void Foam::functionObjects::momentum::writeValues(Ostream& os)
 
         os << tab << volRegion::V() << endl;
     }
-
-    Log << endl;
 }
 
 
@@ -496,7 +516,7 @@ bool Foam::functionObjects::momentum::write()
 {
     if (writeMomentum_ || (hasCsys_ && (writeVelocity_ || writePosition_)))
     {
-        Log <<"Writing fields" << nl;
+        Log << "Writing fields" << nl;
 
         const volVectorField* fieldPtr;
 
@@ -572,12 +592,14 @@ bool Foam::functionObjects::momentum::write()
 void Foam::functionObjects::momentum::updateMesh(const mapPolyMesh& mpm)
 {
     volRegion::updateMesh(mpm);
+    purgeFields();  // Mesh motion makes calculated fields dubious
 }
 
 
 void Foam::functionObjects::momentum::movePoints(const polyMesh& pm)
 {
     volRegion::movePoints(pm);
+    purgeFields();  // Mesh motion makes calculated fields dubious
 }
 
 

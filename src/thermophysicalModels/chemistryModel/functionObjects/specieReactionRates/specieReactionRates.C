@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,14 +82,6 @@ specieReactionRates
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class ChemistryModelType>
-Foam::functionObjects::specieReactionRates<ChemistryModelType>::
-~specieReactionRates()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ChemistryModelType>
@@ -117,8 +109,11 @@ bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::write()
     const label nSpecie = chemistryModel_.nSpecie();
     const label nReaction = chemistryModel_.nReaction();
 
-    // Region volume
-    const scalar V = this->V();
+    volRegion::update();        // Ensure cached values are valid
+
+    const scalar volTotal = this->volRegion::V();
+
+    const bool useAll = (volRegion::vrtAll == this->volRegion::regionType());
 
     for (label ri=0; ri<nReaction; ri++)
     {
@@ -134,7 +129,7 @@ bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::write()
 
             scalar sumVRRi = 0;
 
-            if (isNull(cellIDs()))
+            if (useAll)
             {
                 sumVRRi = fvc::domainIntegrate(RR).value();
             }
@@ -146,7 +141,7 @@ bool Foam::functionObjects::specieReactionRates<ChemistryModelType>::write()
                 );
             }
 
-            file() << token::TAB << sumVRRi/V;
+            file() << token::TAB << sumVRRi / volTotal;
         }
 
         file() << nl;

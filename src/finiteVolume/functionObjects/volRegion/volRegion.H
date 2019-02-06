@@ -30,6 +30,11 @@ Group
 Description
     Volume (cell) region selection class.
 
+    The adjustments for mesh changes have been implemented with a lazy
+    evaluation, to avoid unnecessary recalculation until the values are
+    actually required. The update() method is used to ensure the cache
+    values are up-to-date.
+
     Examples of function object specification:
     \verbatim
     volRegion0
@@ -95,6 +100,9 @@ class volRegion
     // Private Member Data
 
         const fvMesh& volMesh_;
+
+        //- Flag to indicate whether the volRegion requires updating
+        bool requireUpdate_;
 
         //- The cell ids, from cellSet
         labelList cellIds_;
@@ -177,6 +185,10 @@ public:
 
         //- Return total volume of the selected region
         inline scalar V() const;
+
+        //- Update the cached values as required
+        //  \return False if the values were already up to date
+        bool update();
 
 
         //- Read from dictionary

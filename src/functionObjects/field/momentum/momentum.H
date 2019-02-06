@@ -134,6 +134,9 @@ class momentum
 {
     // Private Member Functions
 
+        //- Remove calculated fields from the registry
+        void purgeFields();
+
         //- Calculate the fields and integral values
         void calc();
 

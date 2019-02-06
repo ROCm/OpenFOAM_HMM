@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -229,12 +229,6 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldValues::volFieldValue::~volFieldValue()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::fieldValues::volFieldValue::read
@@ -251,6 +245,8 @@ bool Foam::functionObjects::fieldValues::volFieldValue::read
 
 bool Foam::functionObjects::fieldValues::volFieldValue::write()
 {
+    volRegion::update();        // Ensure cached values are valid
+
     fieldValue::write();
 
     if (Pstream::master())

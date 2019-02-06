@@ -109,6 +109,8 @@ void Foam::functionObjects::volRegion::calculateCache()
             << "    Region has no cells"
             << exit(FatalError);
     }
+
+    requireUpdate_ = false;
 }
 
 
@@ -137,6 +139,7 @@ Foam::functionObjects::volRegion::volRegion
 )
 :
     volMesh_(mesh),
+    requireUpdate_(true),
     cellIds_(),
     nCells_(0),
     V_(Zero),
@@ -158,10 +161,7 @@ Foam::functionObjects::volRegion::volRegion
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionObjects::volRegion::read
-(
-    const dictionary& dict
-)
+bool Foam::functionObjects::volRegion::read(const dictionary& dict)
 {
     switch (regionType_)
     {
@@ -195,6 +195,15 @@ bool Foam::functionObjects::volRegion::read
 
 const Foam::labelList& Foam::functionObjects::volRegion::cellIDs() const
 {
+    #ifdef FULLDEBUG
+    if (requireUpdate_)
+    {
+        FatalErrorInFunction
+            << "Retrieving cached values that are not up-to-date" << nl
+            << exit(FatalError);
+    }
+    #endif
+
     switch (regionType_)
     {
         case vrtCellSet:
@@ -213,15 +222,27 @@ const Foam::labelList& Foam::functionObjects::volRegion::cellIDs() const
 }
 
 
+bool Foam::functionObjects::volRegion::update()
+{
+    if (requireUpdate_)
+    {
+        calculateCache();
+        return true;
+    }
+
+    return false;
+}
+
+
 void Foam::functionObjects::volRegion::updateMesh(const mapPolyMesh&)
 {
-    calculateCache();
+    requireUpdate_ = true;
 }
 
 
 void Foam::functionObjects::volRegion::movePoints(const polyMesh&)
 {
-    calculateCache();
+    requireUpdate_ = true;
 }
 
 

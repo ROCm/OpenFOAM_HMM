@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -260,14 +260,12 @@ Foam::functionObjects::fieldValues::volFieldValue::filterField
     const Field<Type>& field
 ) const
 {
-    if (isNull(cellIDs()))
+    if (volRegion::vrtAll == this->volRegion::regionType())
     {
         return field;
     }
-    else
-    {
-        return tmp<Field<Type>>::New(field, cellIDs());
-    }
+
+    return tmp<Field<Type>>::New(field, cellIDs());
 }
 
 
