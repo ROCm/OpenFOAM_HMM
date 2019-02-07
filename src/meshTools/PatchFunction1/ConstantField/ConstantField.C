@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,22 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
     isUniform_(isUniform),
     uniformValue_(uniformValue),
     value_(nonUniformValue)
-{}
+{
+    if (faceValues && nonUniformValue.size() != pp.size())
+    {
+        FatalIOErrorInFunction(dict)
+            << "Supplied field size " << nonUniformValue.size()
+            << " is not equal to the number of faces " << pp.size()
+            << " of patch " << pp.name() << exit(FatalIOError);
+    }
+    else if (!faceValues && nonUniformValue.size() != pp.nPoints())
+    {
+        FatalIOErrorInFunction(dict)
+            << "Supplied field size " << nonUniformValue.size()
+            << " is not equal to the number of points " << pp.nPoints()
+            << " of patch " << pp.name() << exit(FatalIOError);
+    }
+}
 
 
 template<class Type>
@@ -132,6 +147,7 @@ Foam::Field<Type> Foam::PatchFunction1Types::ConstantField<Type>::getValue
             fld = uniformValue;
         }
     }
+
     return fld;
 }
 
@@ -147,7 +163,17 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
 )
 :
     PatchFunction1<Type>(pp, entryName, dict, faceValues),
-    value_(getValue(entryName, dict, pp.size(), isUniform_, uniformValue_))
+    value_
+    (
+        getValue
+        (
+            entryName,
+            dict,
+            (faceValues ? pp.size() : pp.nPoints()),
+            isUniform_,
+            uniformValue_
+        )
+    )
 {}
 
 
@@ -177,7 +203,12 @@ Foam::PatchFunction1Types::ConstantField<Type>::ConstantField
     value_(cnst.value_)
 {
     // If different sizes do what?
-    value_.setSize(this->patch_.size());
+    value_.setSize
+    (
+        this->faceValues_
+      ? this->patch_.size()
+      : this->patch_.nPoints()
+    );
     if (isUniform_)
     {
         value_ = uniformValue_;
