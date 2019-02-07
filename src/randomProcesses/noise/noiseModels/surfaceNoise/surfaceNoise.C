@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -275,22 +275,19 @@ Foam::scalar surfaceNoise::writeSurfaceData
                 }
             }
 
-            // Could also have meshedSurface implement meshedSurf
             if (writeSurface)
             {
-                fileName outFileName = writerPtr_->write
+                writerPtr_->open
                 (
-                    outDir,
-                    fName,
-                    meshedSurfRef
-                    (
-                        surf.points(),
-                        surf.surfFaces()
-                    ),
-                    title,
-                    allData,
-                    false
+                    surf.points(),
+                    surf.surfFaces(),
+                    (outDir / fName),
+                    false  // serial - already merged
                 );
+
+                writerPtr_->write(title, allData);
+
+                writerPtr_->clear();
             }
 
             // TO BE VERIFIED: area-averaged values
@@ -305,22 +302,19 @@ Foam::scalar surfaceNoise::writeSurfaceData
     {
         const meshedSurface& surf = readerPtr_->geometry();
 
-        // Could also have meshedSurface implement meshedSurf
         if (writeSurface)
         {
-            writerPtr_->write
+            writerPtr_->open
             (
-                outDir,
-                fName,
-                meshedSurfRef
-                (
-                    surf.points(),
-                    surf.surfFaces()
-                ),
-                title,
-                data,
-                false
+                surf.points(),
+                surf.surfFaces(),
+                (outDir / fName),
+                false  // serial - already merged
             );
+
+            writerPtr_->write(title, data);
+
+            writerPtr_->clear();
         }
 
         // TO BE VERIFIED: area-averaged values
@@ -442,12 +436,11 @@ bool surfaceNoise::read(const dictionary& dict)
 
         const word writerType(dict.get<word>("writer"));
 
-        dictionary optDict
+        writerPtr_ = surfaceWriter::New
         (
+            writerType,
             dict.subOrEmptyDict("writeOptions").subOrEmptyDict(writerType)
         );
-
-        writerPtr_ = surfaceWriter::New(writerType, optDict);
 
         return true;
     }

@@ -8,7 +8,6 @@
 #include "wedgePolyPatch.H"
 #include "unitConversion.H"
 #include "polyMeshTetDecomposition.H"
-#include "surfaceWriter.H"
 #include "checkTools.H"
 #include "functionObject.H"
 
@@ -482,7 +481,7 @@ Foam::label Foam::checkGeometry
 (
     const polyMesh& mesh,
     const bool allGeometry,
-    const autoPtr<surfaceWriter>& surfWriter,
+    autoPtr<surfaceWriter>& surfWriter,
     const autoPtr<writer<scalar>>& setWriter
 )
 {
@@ -542,7 +541,7 @@ Foam::label Foam::checkGeometry
                 nonAlignedPoints.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter(), nonAlignedPoints);
+                    mergeAndWrite(*setWriter, nonAlignedPoints);
                 }
             }
         }
@@ -576,7 +575,7 @@ Foam::label Foam::checkGeometry
                 cells.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), cells);
+                    mergeAndWrite(*surfWriter, cells);
                 }
             }
         }
@@ -592,7 +591,7 @@ Foam::label Foam::checkGeometry
             aspectCells.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), aspectCells);
+                mergeAndWrite(*surfWriter, aspectCells);
             }
         }
     }
@@ -613,7 +612,7 @@ Foam::label Foam::checkGeometry
                 faces.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), faces);
+                    mergeAndWrite(*surfWriter, faces);
                 }
             }
         }
@@ -635,7 +634,7 @@ Foam::label Foam::checkGeometry
                 cells.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), cells);
+                    mergeAndWrite(*surfWriter, cells);
                 }
             }
         }
@@ -658,7 +657,7 @@ Foam::label Foam::checkGeometry
             faces.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), faces);
+                mergeAndWrite(*surfWriter, faces);
             }
         }
     }
@@ -680,7 +679,7 @@ Foam::label Foam::checkGeometry
                 faces.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), faces);
+                    mergeAndWrite(*surfWriter, faces);
                 }
             }
         }
@@ -702,7 +701,7 @@ Foam::label Foam::checkGeometry
                 faces.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), faces);
+                    mergeAndWrite(*surfWriter, faces);
                 }
             }
         }
@@ -726,7 +725,7 @@ Foam::label Foam::checkGeometry
                 faces.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), faces);
+                    mergeAndWrite(*surfWriter, faces);
                 }
             }
         }
@@ -759,7 +758,7 @@ Foam::label Foam::checkGeometry
                 faces.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), faces);
+                    mergeAndWrite(*surfWriter, faces);
                 }
             }
         }
@@ -784,7 +783,7 @@ Foam::label Foam::checkGeometry
                 points.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter(), points);
+                    mergeAndWrite(*setWriter, points);
                 }
             }
         }
@@ -807,7 +806,7 @@ Foam::label Foam::checkGeometry
                 nearPoints.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter(), nearPoints);
+                    mergeAndWrite(*setWriter, nearPoints);
                 }
             }
         }
@@ -831,7 +830,7 @@ Foam::label Foam::checkGeometry
                 faces.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), faces);
+                    mergeAndWrite(*surfWriter, faces);
                 }
             }
         }
@@ -854,7 +853,7 @@ Foam::label Foam::checkGeometry
                 faces.write();
                 if (surfWriter.valid())
                 {
-                    mergeAndWrite(surfWriter(), faces);
+                    mergeAndWrite(*surfWriter, faces);
                 }
             }
         }
@@ -875,7 +874,7 @@ Foam::label Foam::checkGeometry
             cells.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), cells);
+                mergeAndWrite(*surfWriter, cells);
             }
         }
     }
@@ -895,7 +894,7 @@ Foam::label Foam::checkGeometry
             cells.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), cells);
+                mergeAndWrite(*surfWriter, cells);
             }
         }
     }
@@ -916,7 +915,7 @@ Foam::label Foam::checkGeometry
             faces.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), faces);
+                mergeAndWrite(*surfWriter, faces);
             }
         }
     }
@@ -937,7 +936,7 @@ Foam::label Foam::checkGeometry
             faces.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), faces);
+                mergeAndWrite(*surfWriter, faces);
             }
         }
     }
@@ -952,14 +951,10 @@ Foam::label Foam::checkGeometry
         autoPtr<surfaceWriter> patchWriter;
         if (!surfWriter.valid())
         {
-            patchWriter.reset(new vtkSurfaceWriter());
+            patchWriter.reset(new surfaceWriters::vtkWriter());
         }
-        const surfaceWriter& wr =
-        (
-            surfWriter.valid()
-          ? surfWriter()
-          : patchWriter()
-        );
+
+        surfaceWriter& wr = (surfWriter.valid() ? *surfWriter : *patchWriter);
 
         // Currently only do AMI checks
 
@@ -1017,22 +1012,22 @@ Foam::label Foam::checkGeometry
 
                         if (Pstream::master())
                         {
-                            wr.write
+                            const word fName
                             (
-                                outputDir,
-                                (
-                                    "patch" + Foam::name(cpp.index())
-                                  + "-src_" + tmName
-                                ),
-                                meshedSurfRef
-                                (
-                                    mergedPoints,
-                                    mergedFaces
-                                ),
-                                "weightsSum",
-                                mergedWeights,
-                                false
+                                "patch" + Foam::name(cpp.index())
+                              + "-src_" + tmName
                             );
+
+                            wr.open
+                            (
+                                mergedPoints,
+                                mergedFaces,
+                                (outputDir / fName),
+                                false  // serial - already merged
+                            );
+
+                            wr.write("weightsSum", mergedWeights);
+                            wr.clear();
                         }
 
                         if (isA<cyclicACMIPolyPatch>(pbm[patchi]))
@@ -1049,22 +1044,22 @@ Foam::label Foam::checkGeometry
 
                             if (Pstream::master())
                             {
-                                wr.write
+                                const word fName
                                 (
-                                    outputDir,
-                                    (
-                                        "patch" + Foam::name(cpp.index())
-                                      + "-src_" + tmName
-                                    ),
-                                    meshedSurfRef
-                                    (
-                                        mergedPoints,
-                                        mergedFaces
-                                    ),
-                                    "mask",
-                                    mergedMask,
-                                    false
+                                    "patch" + Foam::name(cpp.index())
+                                  + "-src_" + tmName
                                 );
+
+                                wr.open
+                                (
+                                    mergedPoints,
+                                    mergedFaces,
+                                    (outputDir / fName),
+                                    false  // serial - already merged
+                                );
+
+                                wr.write("mask", mergedMask);
+                                wr.clear();
                             }
                         }
                     }
@@ -1101,22 +1096,22 @@ Foam::label Foam::checkGeometry
 
                         if (Pstream::master())
                         {
-                            wr.write
+                            const word fName
                             (
-                                outputDir,
-                                (
-                                    "patch" + Foam::name(cpp.index())
-                                  + "-tgt_" + tmName
-                                ),
-                                meshedSurfRef
-                                (
-                                    mergedPoints,
-                                    mergedFaces
-                                ),
-                                "weightsSum",
-                                mergedWeights,
-                                false
+                                "patch" + Foam::name(cpp.index())
+                              + "-tgt_" + tmName
                             );
+
+                            wr.open
+                            (
+                                mergedPoints,
+                                mergedFaces,
+                                (outputDir / fName),
+                                false  // serial - already merged
+                            );
+
+                            wr.write("weightsSum", mergedWeights);
+                            wr.clear();
                         }
 
                         if (isA<cyclicACMIPolyPatch>(pbm[patchi]))
@@ -1129,24 +1124,25 @@ Foam::label Foam::checkGeometry
                                 pp.neighbPatch().mask(),
                                 mergedMask
                             );
+
                             if (Pstream::master())
                             {
-                                wr.write
+                                const word fName
                                 (
-                                    outputDir,
-                                    (
-                                        "patch" + Foam::name(cpp.index())
-                                      + "-tgt_" + tmName
-                                    ),
-                                    meshedSurfRef
-                                    (
-                                        mergedPoints,
-                                        mergedFaces
-                                    ),
-                                    "mask",
-                                    mergedMask,
-                                    false
+                                    "patch" + Foam::name(cpp.index())
+                                  + "-tgt_" + tmName
                                 );
+
+                                wr.open
+                                (
+                                    mergedPoints,
+                                    mergedFaces,
+                                    (outputDir / fName),
+                                    false  // serial - already merged
+                                );
+
+                                wr.write("mask", mergedMask);
+                                wr.clear();
                             }
                         }
                     }

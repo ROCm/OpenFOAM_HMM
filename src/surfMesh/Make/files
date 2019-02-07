@@ -57,4 +57,20 @@ triSurface/fields/triSurfaceFields.C
 triSurface/patches/geometricSurfacePatch.C
 triSurface/patches/surfacePatch.C
 
+
+writers = writers
+
+$(writers)/surfaceWriter.C
+$(writers)/boundaryData/boundaryDataSurfaceWriter.C
+$(writers)/ensight/ensightSurfaceWriter.C
+$(writers)/foam/foamSurfaceWriter.C
+$(writers)/nastran/nastranSurfaceWriter.C
+$(writers)/null/nullSurfaceWriter.C
+$(writers)/proxy/proxySurfaceWriter.C
+$(writers)/raw/rawSurfaceWriter.C
+$(writers)/starcd/starcdSurfaceWriter.C
+$(writers)/vtk/vtkSurfaceWriter.C
+/* $(writers)/x3d/x3dSurfaceWriter.C */
+
+
 LIB = $(FOAM_LIBBIN)/libsurfMesh

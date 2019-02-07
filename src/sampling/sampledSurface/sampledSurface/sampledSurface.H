@@ -65,17 +65,15 @@ SourceFiles
 #ifndef sampledSurface_H
 #define sampledSurface_H
 
-#include "meshedSurf.H"
-#include "word.H"
-#include "labelList.H"
-#include "faceList.H"
+#include "polySurface.H"
+#include "surfMesh.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
+#include "polyMesh.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "surfaceMesh.H"
-#include "polyMesh.H"
 #include "interpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -84,18 +82,26 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class sampledSurface Declaration
+                       Class sampledSurface Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledSurface
 :
     public meshedSurf
 {
+public:
+
+    // Public Static Data
+
+        //- Class names for surface field types
+        static const wordList surfaceFieldTypes;
+
+
 private:
 
     // Private Data
 
-        //- Name of sample surface
+        //- The name of the sample surface
         word name_;
 
         //- Reference to mesh
@@ -104,13 +110,11 @@ private:
         //- Should surface sampling be enabled?
         bool enabled_;
 
-        //- Do we intend to interpolate the information?
-        const bool interpolate_;
+        //- Interpolate information to the nodes?
+        bool interpolate_;
 
         //- Total surface area (demand-driven)
         mutable scalar area_;
-
-
 
 
 protected:
@@ -163,9 +167,7 @@ public:
     );
 
 
-    // iNew helper class
-
-        //- Class for PtrList read-construction
+        //- PtrList read-construction helper
         class iNew
         {
             //- Reference to the volume mesh
@@ -184,6 +186,34 @@ public:
                 dictionary dict(is);
 
                 return sampledSurface::New(name, mesh_, dict);
+            }
+        };
+
+
+        //- PtrList read-construction helper that captures dictionaries used
+        //- during creation.
+        class iNewCapture
+        {
+            //- Reference to the volume mesh
+            const polyMesh& mesh_;
+
+            //- Captured (recorded) dictionaries
+            DynamicList<dictionary>& capture_;
+
+        public:
+
+            iNewCapture(const polyMesh& mesh, DynamicList<dictionary>& capture)
+            :
+                mesh_(mesh),
+                capture_(capture)
+            {}
+
+            autoPtr<sampledSurface> operator()(Istream& is) const
+            {
+                word name(is);
+                capture_.append(dictionary(is));
+
+                return sampledSurface::New(name, mesh_, capture_.last());
             }
         };
 
@@ -245,13 +275,13 @@ public:
             return name_;
         }
 
-        //- Sampling is enabled
+        //- Surface is enabled
         bool enabled() const
         {
             return enabled_;
         }
 
-        //- Interpolation requested for surface
+        //- interpolation to nodes requested for surface
         bool interpolate() const
         {
             return interpolate_;
@@ -299,6 +329,99 @@ public:
         {
             return labelList::null();
         }
+
+
+    // General registry storage (optional)
+
+        //- Get surface from registry if available.
+        //  \param obr The objectRegistry to use
+        //  \param lookupName Optional lookup name, use surface name if empty
+        //  \return surface or nullptr
+        polySurface* getRegistrySurface
+        (
+            const objectRegistry& obr,
+            word lookupName = ""
+        ) const;
+
+        //- Copy surface into registry.
+        //  \param obr The objectRegistry to use
+        //  \param lookupName Optional lookup name, use surface name if empty
+        //  \return surface or nullptr it surface should not be stored
+        polySurface* storeRegistrySurface
+        (
+            objectRegistry& obr,
+            word lookupName = ""
+        ) const;
+
+        //- Remove surface from registry.
+        //  \param obr The objectRegistry to use
+        //  \param lookupName Optional lookup name, use surface name if empty
+        //  \return True if surface existed and was removed
+        bool removeRegistrySurface
+        (
+            objectRegistry& obr,
+            word lookupName = ""
+        ) const;
+
+        //- Copy/store sampled field onto registered surface (if it exists)
+        template<class Type, class GeoMeshType>
+        bool storeRegistryField
+        (
+            const objectRegistry& obr,
+            const word& fieldName,
+            const dimensionSet& dims,
+            const Field<Type>& values,
+            word lookupName = ""
+        ) const;
+
+        //- Move/store sampled field onto registered surface (if it exists)
+        template<class Type, class GeoMeshType>
+        bool storeRegistryField
+        (
+            const objectRegistry& obr,
+            const word& fieldName,
+            const dimensionSet& dims,
+            Field<Type>&& values,
+            word lookupName = ""
+        ) const;
+
+
+    // Specialized surfMesh storage (optional)
+
+        //- Get surface from registry if available.
+        //  \param lookupName Optional lookup name, use surface name if empty
+        //  \return surface or nullptr
+        surfMesh* getSurfMesh(word lookupName = "") const;
+
+        //- Copy surface into registry.
+        //  \param lookupName Optional lookup name, use surface name if empty
+        //  \return surface or nullptr it surface should not be stored
+        surfMesh* storeSurfMesh(word lookupName = "") const;
+
+        //- Remove surface from registry.
+        //  \param lookupName Optional lookup name, use surface name if empty
+        //  \return True if surface existed and was removed
+        bool removeSurfMesh(word lookupName = "") const;
+
+        //- Copy/store sampled Face field onto surfMesh (if it exists)
+        template<class Type, class GeoMeshType>
+        bool storeSurfMeshField
+        (
+            const word& fieldName,
+            const dimensionSet& dims,
+            const Field<Type>& values,
+            word lookupName = ""
+        ) const;
+
+        //- Move/store sampled Face field onto surfMesh (if it exists)
+        template<class Type, class GeoMeshType>
+        bool storeSurfMeshField
+        (
+            const word& fieldName,
+            const dimensionSet& dims,
+            Field<Type>&& values,
+            word lookupName = ""
+        ) const;
 
 
     // Sample (faces)

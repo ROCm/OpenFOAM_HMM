@@ -953,19 +953,22 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
     {
         const word formatName(dict.get<word>("surfaceFormat"));
 
-        if (formatName != "none")
-        {
-            surfaceWriterPtr_.reset
+        surfaceWriterPtr_.reset
+        (
+            surfaceWriter::New
             (
-                surfaceWriter::New
-                (
-                    formatName,
-                    dict.subOrEmptyDict("formatOptions")
-                        .subOrEmptyDict(formatName)
-                )
-            );
+                formatName,
+                dict.subOrEmptyDict("formatOptions").subOrEmptyDict(formatName)
+            )
+        );
 
+        if (surfaceWriterPtr_->enabled())
+        {
             Info<< "    surfaceFormat = " << formatName << nl;
+        }
+        else
+        {
+            surfaceWriterPtr_->clear();
         }
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -462,40 +462,26 @@ void Foam::ParticleCollector<CloudType>::write()
         << endl;
 
 
-    if (surfaceFormat_ != "none")
+    if (surfaceFormat_ != "none" && Pstream::master())
     {
-        if (Pstream::master())
-        {
-            autoPtr<surfaceWriter> writer
-            (
-                surfaceWriter::New
-                (
-                    surfaceFormat_,
-                    this->coeffDict().subOrEmptyDict("formatOptions").
-                        subOrEmptyDict(surfaceFormat_)
-                )
-            );
+        auto writer = surfaceWriter::New
+        (
+            surfaceFormat_,
+            this->coeffDict().subOrEmptyDict("formatOptions")
+                .subOrEmptyDict(surfaceFormat_)
+        );
 
-            writer->write
-            (
-                this->writeTimeDir(),
-                "collector",
-                meshedSurfRef(points_, faces_),
-                "massTotal",
-                faceMassTotal,
-                false
-            );
+        writer->open
+        (
+            points_,
+            faces_,
+            (this->writeTimeDir() / "collector"),
+            false  // serial - already merged
+        );
 
-            writer->write
-            (
-                this->writeTimeDir(),
-                "collector",
-                meshedSurfRef(points_, faces_),
-                "massFlowRate",
-                faceMassFlowRate,
-                false
-            );
-        }
+        writer->write("massFlowRate", faceMassFlowRate);
+
+        writer->write("massTotal", faceMassTotal);
     }
 
 

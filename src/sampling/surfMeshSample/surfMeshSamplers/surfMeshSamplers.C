@@ -243,6 +243,7 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
         surfaces().transfer(surfs);
     }
 
+
     auto& surfs = surfaces();
     if (surfs.size())
     {
@@ -251,9 +252,6 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
 
         Info<< type() << " fields:  " << flatOutput(fieldSelection_) << nl;
         Info<< nl;
-
-        // Ensure all surfaces and merge information are expired
-        expire();
 
         // Need to initialize corresponding surfMesh for others in the chain.
         // This can simply be a zero-sized placeholder, or the real surface with
@@ -346,18 +344,18 @@ bool Foam::surfMeshSamplers::needsUpdate() const
 
 bool Foam::surfMeshSamplers::expire()
 {
-    bool justExpired = false;
+    label nChanged = 0;
 
     for (surfMeshSample& s : surfaces())
     {
         if (s.expire())
         {
-            justExpired = true;
+            ++nChanged;
         }
     }
 
     // True if any surfaces just expired
-    return justExpired;
+    return nChanged;
 }
 
 
@@ -368,16 +366,17 @@ bool Foam::surfMeshSamplers::update()
         return false;
     }
 
-    bool updated = false;
+    label nUpdated = 0;
+
     for (surfMeshSample& s : surfaces())
     {
         if (s.update())
         {
-            updated = true;
+            ++nUpdated;
         }
     }
 
-    return updated;
+    return nUpdated;
 }
 
 

@@ -384,22 +384,26 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
         Field<Type> values(getFieldValues<Type>(fieldName, true));
 
         // Write raw values on surface if specified
-        if (surfaceWriterPtr_.valid())
+        if (surfaceWriterPtr_.valid() && surfaceWriterPtr_->enabled())
         {
             Field<Type> allValues(values);
             combineFields(allValues);
 
             if (Pstream::master())
             {
-                surfaceWriterPtr_->write
+                surfaceWriterPtr_->open
                 (
-                    outputDir(),
-                    regionTypeNames_[regionType_] + ("_" + regionName_),
                     surfToWrite,
-                    fieldName,
-                    allValues,
-                    false
+                    (
+                        outputDir()
+                      / regionTypeNames_[regionType_] + ("_" + regionName_)
+                    ),
+                    false  // serial - already merged
                 );
+
+                surfaceWriterPtr_->write(fieldName, allValues);
+
+                surfaceWriterPtr_->clear();
             }
         }
 

@@ -209,7 +209,7 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 void Foam::mergeAndWrite
 (
     const polyMesh& mesh,
-    const surfaceWriter& writer,
+    surfaceWriter& writer,
     const word& name,
     const indirectPrimitivePatch& setPatch,
     const fileName& outputDir
@@ -242,37 +242,37 @@ void Foam::mergeAndWrite
         // Write
         if (Pstream::master())
         {
-            writer.write
+            writer.open
             (
-                outputDir,
-                name,
-                meshedSurfRef
-                (
-                    mergedPoints,
-                    mergedFaces
-                )
+                mergedPoints,
+                mergedFaces,
+                (outputDir / name),
+                false  // serial - already merged
             );
+
+            writer.writeGeometry();
+            writer.clear();
         }
     }
     else
     {
-        writer.write
+        writer.open
         (
-            outputDir,
-            name,
-            meshedSurfRef
-            (
-                setPatch.localPoints(),
-                setPatch.localFaces()
-            )
+            setPatch.localPoints(),
+            setPatch.localFaces(),
+            (outputDir / name),
+            false  // serial - already merged
         );
+
+        writer.writeGeometry();
+        writer.clear();
     }
 }
 
 
 void Foam::mergeAndWrite
 (
-    const surfaceWriter& writer,
+    surfaceWriter& writer,
     const faceSet& set
 )
 {
@@ -299,7 +299,7 @@ void Foam::mergeAndWrite
 
 void Foam::mergeAndWrite
 (
-    const surfaceWriter& writer,
+    surfaceWriter& writer,
     const cellSet& set
 )
 {

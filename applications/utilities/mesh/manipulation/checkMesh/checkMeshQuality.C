@@ -10,7 +10,7 @@ Foam::label Foam::checkMeshQuality
 (
     const polyMesh& mesh,
     const dictionary& dict,
-    const autoPtr<surfaceWriter>& writer
+    autoPtr<surfaceWriter>& writer
 )
 {
     label noFailedChecks = 0;
@@ -29,9 +29,10 @@ Foam::label Foam::checkMeshQuality
                 << " faces in error to set " << faces.name() << endl;
             faces.instance() = mesh.pointsInstance();
             faces.write();
+
             if (writer.valid())
             {
-                mergeAndWrite(writer(), faces);
+                mergeAndWrite(*writer, faces);
             }
         }
     }

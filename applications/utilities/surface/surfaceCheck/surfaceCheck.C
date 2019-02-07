@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -128,7 +128,7 @@ labelList countBins
 
 void writeZoning
 (
-    const surfaceWriter& writer,
+    surfaceWriter& writer,
     const triSurface& surf,
     const labelList& faceZone,
     const word& fieldName,
@@ -136,43 +136,23 @@ void writeZoning
     const fileName& surfFileNameBase
 )
 {
-    Info<< "Writing zoning to "
-        <<  fileName
-            (
-                surfFilePath
-              / fieldName
-              + '_'
-              + surfFileNameBase
-              + '.'
-              + writer.type()
-            )
-        << " ..." << endl << endl;
+    // Transcribe faces
+    faceList faces;
+    surf.triFaceFaces(faces);
 
-    // Convert data
-    scalarField scalarFaceZone(faceZone.size());
-    forAll(faceZone, i)
-    {
-        scalarFaceZone[i] = faceZone[i];
-    }
-    faceList faces(surf.size());
-    forAll(surf, i)
-    {
-        faces[i] = surf[i];
-    }
-
-    writer.write
+    writer.open
     (
-        surfFilePath,
-        surfFileNameBase,
-        meshedSurfRef
-        (
-            surf.points(),
-            faces
-        ),
-        fieldName,
-        scalarFaceZone,
-        false               // face based data
+        surf.points(),
+        faces,
+        (surfFilePath / surfFileNameBase),
+        false  // serial - already merged
     );
+
+    fileName outputName = writer.write(fieldName, labelField(faceZone));
+
+    writer.clear();
+
+    Info<< "Wrote zoning to " << outputName << nl << endl;
 }
 
 
@@ -213,7 +193,7 @@ void writeParts
         fileName subName
         (
             surfFilePath
-           /surfFileNameBase + "_" + name(zone) + ".obj"
+          / surfFileNameBase + "_" + name(zone) + ".obj"
         );
 
         Info<< "writing part " << zone << " size " << subSurf.size()
@@ -377,6 +357,7 @@ int main(int argc, char *argv[])
     if (writeSets)
     {
         surfWriter = surfaceWriter::New(surfaceFormat);
+
         // Option1: hard-coded format
         edgeFormat = "obj";
         //// Option2: same type as surface format. Problem is e.g. .obj format
@@ -514,38 +495,29 @@ int main(int argc, char *argv[])
                     )
                 );
 
-                const fileName qualityName
+
+                // Transcribe faces
+                faceList faces;
+                subSurf.triFaceFaces(faces);
+
+                surfWriter->open
                 (
-                    surfFilePath
-                  / "illegal"
-                  + '_'
-                  + surfFileNameBase
-                  + '.'
-                  + surfWriter().type()
+                    subSurf.points(),
+                    faces,
+                    (surfFilePath / surfFileNameBase),
+                    false // serial - already merged
                 );
-                Info<< "Writing illegal triangles to "
-                    << qualityName << " ..." << endl << endl;
 
-                // Convert data
-                faceList faces(subSurf.size());
-                forAll(subSurf, i)
-                {
-                    faces[i] = subSurf[i];
-                }
-
-                surfWriter().write
+                fileName outputName = surfWriter->write
                 (
-                    surfFilePath,
-                    surfFileNameBase,
-                    meshedSurfRef
-                    (
-                        subSurf.points(),
-                        faces
-                    ),
                     "illegal",
-                    scalarField(subSurf.size(), Zero),
-                    false               // face based data
+                    scalarField(subSurf.size(), Zero)
                 );
+
+                surfWriter->clear();
+
+                Info<< "Wrote illegal triangles to "
+                    << outputName << nl << endl;
             }
             else if (outputThreshold > 0)
             {
@@ -645,38 +617,24 @@ int main(int argc, char *argv[])
         // Dump for subsetting
         if (surfWriter.valid())
         {
-            const fileName qualityName
-            (
-                surfFilePath
-              / "quality"
-              + '_'
-              + surfFileNameBase
-              + '.'
-              + surfWriter().type()
-            );
-            Info<< "Writing triangle-quality to "
-                << qualityName << " ..." << endl << endl;
-
-            // Convert data
+            // Transcribe faces
             faceList faces(surf.size());
-            forAll(surf, i)
-            {
-                faces[i] = surf[i];
-            }
+            surf.triFaceFaces(faces);
 
-            surfWriter().write
+            surfWriter->open
             (
-                surfFilePath,
-                surfFileNameBase,
-                meshedSurfRef
-                (
-                    surf.points(),
-                    faces
-                ),
-                "quality",
-                triQ,
-                false               // face based data
+                surf.points(),
+                faces,
+                (surfFilePath / surfFileNameBase),
+                false // serial - already merged
             );
+
+            fileName outputName = surfWriter->write("quality", triQ);
+
+            surfWriter->clear();
+
+            Info<< "Wrote triangle-quality to "
+                << outputName << nl << endl;
         }
         else if (outputThreshold > 0)
         {
@@ -926,11 +884,12 @@ int main(int argc, char *argv[])
 
             if (!surfWriter.valid())
             {
-                surfWriter.reset(new vtkSurfaceWriter());
+                surfWriter.reset(new surfaceWriters::vtkWriter());
             }
+
             writeZoning
             (
-                surfWriter(),
+                *surfWriter,
                 surf,
                 faceZone,
                 "zone",
@@ -991,11 +950,12 @@ int main(int argc, char *argv[])
         {
             if (!surfWriter.valid())
             {
-                surfWriter.reset(new vtkSurfaceWriter());
+                surfWriter.reset(new surfaceWriters::vtkWriter());
             }
+
             writeZoning
             (
-                surfWriter(),
+                *surfWriter,
                 surf,
                 normalZone,
                 "normal",
