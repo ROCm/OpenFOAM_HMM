@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,10 +33,8 @@ License
 #include "fvMesh.H"
 #include "volFields.H"
 #include "OBJstream.H"
-#include "surfaceWriter.H"
-#include "meshedSurfRef.H"
 #include "PatchTools.H"
-#include "vtkSurfaceWriter.H"
+#include "foamVtkSurfaceWriter.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -583,9 +581,9 @@ void Foam::shortestPathSet::genSamples
                     }
                 }
 
-                if 
+                if
                 (
-                    frontCellI != -1 
+                    frontCellI != -1
                  && allCellInfo[frontCellI].distance() < minCellDistance
                 )
                 {
@@ -840,20 +838,16 @@ Foam::shortestPathSet::shortestPathSet
 {
     if (debug)
     {
-        fileName outputDir;
-        if (Pstream::master())
-        {
-            outputDir =
-                mesh.time().globalPath()
-              / functionObject::outputPrefix
-              / mesh.pointsInstance();
-            outputDir.clean();
-            mkDir(outputDir);
-            Info<< "shortestPathSet : Writing blocked faces to "
-                << outputDir << endl;
-        }
+        fileName outputDir =
+        (
+            mesh.time().globalPath()
+          / functionObject::outputPrefix
+          / mesh.pointsInstance()
+        );
+        outputDir.clean();
 
-        const vtkSurfaceWriter surfWriter;
+        Info<< "shortestPathSet : Writing blocked faces to "
+            << outputDir << endl;
 
         const indirectPrimitivePatch setPatch
         (
@@ -864,8 +858,10 @@ Foam::shortestPathSet::shortestPathSet
             ),
             mesh.points()
         );
+
         if (Pstream::parRun())
         {
+            // Topological merge
             labelList pointToGlobal;
             labelList uniqueMeshPointLabels;
             autoPtr<globalIndex> globalPoints;
@@ -891,30 +887,28 @@ Foam::shortestPathSet::shortestPathSet
             // Write
             if (Pstream::master())
             {
-                surfWriter.write
+                vtk::surfaceWriter writer
                 (
-                    outputDir,
-                    "blockedFace",
-                    meshedSurfRef
-                    (
-                        mergedPoints,
-                        mergedFaces
-                    )
+                    mergedPoints,
+                    mergedFaces,
+                    (outputDir / "blockedFace"),
+                    false  // serial only - already merged
                 );
+
+                writer.writeGeometry();
             }
         }
         else
         {
-            surfWriter.write
+            vtk::surfaceWriter writer
             (
-                outputDir,
-                "blockedFace",
-                meshedSurfRef
-                (
-                    setPatch.localPoints(),
-                    setPatch.localFaces()
-                )
+                setPatch.localPoints(),
+                setPatch.localFaces(),
+                (outputDir / "blockedFace"),
+                false  // serial only - redundant
             );
+
+            writer.writeGeometry();
         }
     }
 
