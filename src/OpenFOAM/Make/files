@@ -699,7 +699,6 @@ $(constraintPointPatchFields)/wedge/wedgePointPatchFields.C
 derivedPointPatchFields = $(pointPatchFields)/derived
 $(derivedPointPatchFields)/slip/slipPointPatchFields.C
 $(derivedPointPatchFields)/fixedNormalSlip/fixedNormalSlipPointPatchFields.C
-$(derivedPointPatchFields)/uniformFixedValue/uniformFixedValuePointPatchFields.C
 $(derivedPointPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValuePointPatchFields.C
 $(derivedPointPatchFields)/codedFixedValue/codedFixedValuePointPatchFields.C
 

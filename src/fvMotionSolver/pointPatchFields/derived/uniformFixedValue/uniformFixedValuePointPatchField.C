@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -26,6 +26,27 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "uniformFixedValuePointPatchField.H"
+#include "SubField.H"
+#include "polyPatch.H"
+
+// * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * //
+
+template<class Type>
+const Foam::polyPatch&
+Foam::uniformFixedValuePointPatchField<Type>::getPatch(const pointPatch& p)
+{
+    const polyMesh& mesh = p.boundaryMesh().mesh()();
+    label patchi = mesh.boundaryMesh().findPatchID(p.name());
+
+    if (patchi == -1)
+    {
+        FatalErrorInFunction
+            << "Cannot use uniformFixedValue on patch " << p.name()
+            << " since there is no underlying mesh patch" << exit(FatalError);
+    }
+    return mesh.boundaryMesh()[patchi];
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
 
@@ -52,7 +73,16 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(p, iF, dict, false),
-    uniformValue_(Function1<Type>::New("uniformValue", dict))
+    uniformValue_
+    (
+        PatchFunction1<Type>::New
+        (
+            this->getPatch(p),
+            "uniformValue",
+            dict,
+            false           // generate point values
+        )
+    )
 {
     if (dict.found("value"))
     {
@@ -63,8 +93,7 @@ uniformFixedValuePointPatchField
     }
     else
     {
-        const scalar t = this->db().time().timeOutputValue();
-        fixedValuePointPatchField<Type>::operator=(uniformValue_->value(t));
+        this->evaluate();
     }
 }
 
@@ -80,11 +109,18 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, p, iF, mapper),
-    uniformValue_(ptf.uniformValue_.clone())
+    uniformValue_(ptf.uniformValue_.clone(this->getPatch(p)))
 {
-    // For safety re-evaluate
-    const scalar t = this->db().time().timeOutputValue();
-    fixedValuePointPatchField<Type>::operator=(uniformValue_->value(t));
+    if (mapper.direct() && !mapper.hasUnmapped())
+    {
+        // Use mapping instead of re-evaluation
+        this->map(ptf, mapper);
+    }
+    else
+    {
+        // Evaluate since value not mapped
+        this->evaluate();
+    }
 }
 
 
@@ -96,7 +132,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_.clone())
+    uniformValue_(ptf.uniformValue_.clone(this->getPatch(this->patch())))
 {}
 
 
@@ -109,15 +145,44 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_.clone())
-{
-    // For safety re-evaluate
-    const scalar t = this->db().time().timeOutputValue();
-    fixedValuePointPatchField<Type>::operator==(uniformValue_->value(t));
-}
+    uniformValue_(ptf.uniformValue_.clone(this->getPatch(this->patch())))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::uniformFixedValuePointPatchField<Type>::autoMap
+(
+    const pointPatchFieldMapper& mapper
+)
+{
+    fixedValuePointPatchField<Type>::autoMap(mapper);
+    uniformValue_().autoMap(mapper);
+
+    if (uniformValue_().constant())
+    {
+        // If mapper is not dependent on time we're ok to evaluate
+        this->evaluate();
+    }
+}
+
+
+template<class Type>
+void Foam::uniformFixedValuePointPatchField<Type>::rmap
+(
+    const pointPatchField<Type>& ptf,
+    const labelList& addr
+)
+{
+    fixedValuePointPatchField<Type>::rmap(ptf, addr);
+
+    const uniformFixedValuePointPatchField& tiptf =
+        refCast<const uniformFixedValuePointPatchField>(ptf);
+
+    uniformValue_().rmap(tiptf.uniformValue_(), addr);
+}
+
 
 template<class Type>
 void Foam::uniformFixedValuePointPatchField<Type>::updateCoeffs()
@@ -126,10 +191,8 @@ void Foam::uniformFixedValuePointPatchField<Type>::updateCoeffs()
     {
         return;
     }
-
     const scalar t = this->db().time().timeOutputValue();
     fixedValuePointPatchField<Type>::operator==(uniformValue_->value(t));
-
     fixedValuePointPatchField<Type>::updateCoeffs();
 }
 

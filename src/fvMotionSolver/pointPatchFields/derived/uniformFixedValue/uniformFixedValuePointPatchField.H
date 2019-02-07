@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -51,12 +51,14 @@ SourceFiles
 #define uniformFixedValuePointPatchField_H
 
 #include "fixedValuePointPatchField.H"
-#include "Function1.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+class polyPatch;
 
 /*---------------------------------------------------------------------------*\
           Class uniformFixedValuePointPatchField Declaration
@@ -67,9 +69,14 @@ class uniformFixedValuePointPatchField
 :
     public fixedValuePointPatchField<Type>
 {
+    // Private Member Functions
+
+        static const polyPatch& getPatch(const pointPatch&);
+
+
     // Private data
 
-        autoPtr<Function1<Type>> uniformValue_;
+        autoPtr<PatchFunction1<Type>> uniformValue_;
 
 
 public:
@@ -156,6 +163,23 @@ public:
             {
                 return uniformValue_;
             }
+
+
+        // Mapping functions
+
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap
+            (
+                const pointPatchFieldMapper&
+            );
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const pointPatchField<Type>&,
+                const labelList&
+            );
+
 
         // Evaluation functions
 

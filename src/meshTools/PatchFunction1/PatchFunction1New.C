@@ -102,7 +102,8 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
                     pp,
                     PatchFunction1Types::ConstantField<Type>::typeName,
                     entryName,
-                    dict
+                    dict,
+                    faceValues
                 )
             );
         }
