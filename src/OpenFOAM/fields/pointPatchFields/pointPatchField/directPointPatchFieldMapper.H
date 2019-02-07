@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013 OpenFOAM Foundation
@@ -65,17 +65,12 @@ public:
         directPointPatchFieldMapper(const labelUList& directAddressing)
         :
             directAddressing_(directAddressing),
-            hasUnmapped_(false)
-        {
-            if (directAddressing_.size() && min(directAddressing_) < 0)
-            {
-                hasUnmapped_ = true;
-            }
-        }
+            hasUnmapped_(directAddressing_.size() && min(directAddressing_) < 0)
+        {}
+
 
     //- Destructor
-    virtual ~directPointPatchFieldMapper()
-    {}
+    virtual ~directPointPatchFieldMapper() = default;
 
 
     // Member Functions

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -386,7 +386,7 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
 )
 {
     // Re-assign the zone Ids
-    if (isNull(faceMap) || faceMap.empty())
+    if (faceMap.empty())
     {
         return;
     }

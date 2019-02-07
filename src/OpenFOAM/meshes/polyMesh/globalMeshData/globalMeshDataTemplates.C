@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -56,7 +56,7 @@ void Foam::globalMeshData::syncData
         const labelList& transformSlavePoints =
         (
             transformedSlaves.empty()
-          ? Foam::emptyLabelList
+          ? labelList::null()
           : transformedSlaves[i]
         );
 
@@ -119,7 +119,7 @@ void Foam::globalMeshData::syncData
         const labelList& transformSlavePoints =
         (
             transformedSlaves.empty()
-          ? Foam::emptyLabelList
+          ? labelList::null()
           : transformedSlaves[i]
         );
 

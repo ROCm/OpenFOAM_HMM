@@ -157,7 +157,7 @@ public:
             return MeshStorage::surfFaces();
         }
 
-        //- Const access to per-face zone/region information
+        //- Per-face zone/region information
         virtual const labelList& zoneIds() const
         {
             return MeshStorage::zoneIds();

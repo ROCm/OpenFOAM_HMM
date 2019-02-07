@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,7 +76,7 @@ void Foam::cuttingSurfaceBase::performCut
 
 void Foam::cuttingSurfaceBase::remapFaces(const labelUList& faceMap)
 {
-    if (notNull(faceMap) && !faceMap.empty())
+    if (!faceMap.empty())
     {
         MeshStorage::remapFaces(faceMap);
 

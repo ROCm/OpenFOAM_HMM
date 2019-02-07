@@ -60,6 +60,7 @@ void Foam::pointPatchMapper::calcAddressing() const
             if (addr[i] < 0)
             {
                 hasUnmapped_ = true;
+                break;
             }
         }
     }

@@ -297,7 +297,7 @@ public:
         //- when hasFaceIds is true.
         virtual const labelList& originalIds() const
         {
-            return Foam::emptyLabelList;
+            return labelList::null();
         }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2016 OpenFOAM Foundation
@@ -79,11 +79,12 @@ public:
             weights_(weights),
             hasUnmapped_(false)
         {
-            forAll(addressing_, i)
+            for (const labelList& addr : addressing)
             {
-                if (addressing_[i].size() == 0)
+                if (addr.empty())
                 {
                     hasUnmapped_ = true;
+                    break;
                 }
             }
 
@@ -99,8 +100,7 @@ public:
         }
 
     //- Destructor
-    virtual ~distributedWeightedFvPatchFieldMapper()
-    {}
+    virtual ~distributedWeightedFvPatchFieldMapper() = default;
 
 
     // Member Functions

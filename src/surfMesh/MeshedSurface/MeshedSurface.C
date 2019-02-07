@@ -466,7 +466,7 @@ void Foam::MeshedSurface<Face>::remapFaces
     const labelUList& faceMap
 )
 {
-    if (isNull(faceMap) || faceMap.empty())
+    if (faceMap.empty())
     {
         return;
     }

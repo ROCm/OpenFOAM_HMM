@@ -76,6 +76,7 @@ typedef List<char> charList;
 typedef List<label> labelList;
 
 //- A zero-sized list of labels
+//  \deprecated(2019-02) use labelList::null() instead
 extern const labelList emptyLabelList;
 
 

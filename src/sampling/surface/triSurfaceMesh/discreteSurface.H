@@ -270,7 +270,7 @@ public:
         bool update(const treeBoundBox&);
 
 
-        //- Const access to per-face zone/region information
+        //- Per-face zone/region information
         virtual const labelList& zoneIds() const
         {
             return zoneIds_;

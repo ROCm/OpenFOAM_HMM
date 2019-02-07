@@ -2662,7 +2662,7 @@ const Foam::labelList& Foam::indexedOctree<Type>::findIndices
 {
     if (nodes_.empty())
     {
-        return Foam::emptyLabelList;
+        return labelList::null();
     }
 
     labelBits index = findNode(0, sample);
@@ -2677,7 +2677,7 @@ const Foam::labelList& Foam::indexedOctree<Type>::findIndices
         return contents_[getContent(contentIndex)];
     }
 
-    return Foam::emptyLabelList;
+    return labelList::null();
 }
 
 
