@@ -49,24 +49,6 @@ namespace Foam
 
 bool Foam::surfMeshSamplers::verbose_ = false;
 
-void Foam::surfMeshSamplers::checkOutNames
-(
-    const objectRegistry& registry,
-    const UList<word>& names
-)
-{
-    objectRegistry& reg = const_cast<objectRegistry&>(registry);
-
-    for (const word& fldName : names)
-    {
-        objectRegistry::iterator iter = reg.find(fldName);
-        if (iter.found())
-        {
-            registry.checkOut(*iter());
-        }
-    }
-}
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -297,7 +279,11 @@ bool Foam::surfMeshSamplers::execute()
         }
     }
 
-    checkOutNames(db, cleanup);
+    // Cleanup any locally introduced names
+    for (const word& fieldName : cleanup)
+    {
+        db.checkOut(fieldName);
+    }
 
     return true;
 }

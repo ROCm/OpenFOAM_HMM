@@ -157,14 +157,6 @@ class surfMeshSamplers
 
     // Private Member Functions
 
-        //- Remove items by name from objectRegistry
-        static void checkOutNames
-        (
-            const objectRegistry& registry,
-            const UList<word>& names
-        );
-
-
         //- Hard-coded derived field (rho * U)
         //  \return true if field did not previously exist
         bool add_rhoU(const word& derivedName);

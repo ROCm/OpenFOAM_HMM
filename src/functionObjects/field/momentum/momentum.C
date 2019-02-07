@@ -46,11 +46,9 @@ namespace functionObjects
 
 void Foam::functionObjects::momentum::purgeFields()
 {
-    objectRegistry& obr = const_cast<objectRegistry&>(obr_);
-
-    obr.erase(scopedName("momentum"));
-    obr.erase(scopedName("angularMomentum"));
-    obr.erase(scopedName("angularVelocity"));
+    obr_.checkOut(scopedName("momentum"));
+    obr_.checkOut(scopedName("angularMomentum"));
+    obr_.checkOut(scopedName("angularVelocity"));
 }
 
 

@@ -160,15 +160,6 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
 }
 
 
-void Foam::basicThermo::lookupAndCheckout(const char* name) const
-{
-    if (db().foundObject<volScalarField>(name))
-    {
-         db().checkOut(*db()[name]);
-    }
-}
-
-
 Foam::basicThermo::basicThermo
 (
     const fvMesh& mesh,
@@ -326,7 +317,7 @@ Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New
 
 Foam::basicThermo::~basicThermo()
 {
-    lookupAndCheckout("p");
+    db().checkOut("p");
 }
 
 

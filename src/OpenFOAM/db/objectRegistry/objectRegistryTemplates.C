@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -391,23 +391,7 @@ const Type* Foam::objectRegistry::cfindObject
     const bool recursive
 ) const
 {
-    const_iterator iter = cfind(name);
-
-    if (iter.found())
-    {
-        const Type* ptr = dynamic_cast<const Type*>(iter());
-
-        if (ptr)
-        {
-            return ptr;
-        }
-    }
-    else if (recursive && this->parentNotTime())
-    {
-        return parent_.cfindObject<Type>(name, recursive);
-    }
-
-    return nullptr;
+    return dynamic_cast<const Type*>(this->cfindIOobject(name, recursive));
 }
 
 
@@ -429,9 +413,7 @@ Type* Foam::objectRegistry::findObject
     const bool recursive
 )
 {
-    const Type* ptr = this->cfindObject<Type>(name, recursive);
-
-    return const_cast<Type*>(ptr);
+    return const_cast<Type*>(this->cfindObject<Type>(name, recursive));
 }
 
 
@@ -442,9 +424,7 @@ Type* Foam::objectRegistry::getObjectPtr
     const bool recursive
 ) const
 {
-    const Type* ptr = this->cfindObject<Type>(name, recursive);
-
-    return const_cast<Type*>(ptr);
+    return const_cast<Type*>(this->cfindObject<Type>(name, recursive));
 }
 
 

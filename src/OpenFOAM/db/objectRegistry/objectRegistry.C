@@ -285,6 +285,12 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
 }
 
 
+bool Foam::objectRegistry::checkOut(const word& key) const
+{
+    return const_cast<objectRegistry&>(*this).erase(key);
+}
+
+
 void Foam::objectRegistry::clear()
 {
     // Free anything owned by the registry
@@ -364,6 +370,67 @@ void Foam::objectRegistry::rename(const word& newName)
     {
         dbDir_.replace(i+1, string::npos, newName);
     }
+}
+
+
+bool Foam::objectRegistry::found
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    return cfindIOobject(name, recursive);
+}
+
+
+const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    const_iterator iter = cfind(name);
+
+    if (iter.found())
+    {
+        return iter.val();
+    }
+    else if (recursive && this->parentNotTime())
+    {
+        return parent_.cfindIOobject(name, recursive);
+    }
+
+    return nullptr;
+}
+
+
+const Foam::regIOobject* Foam::objectRegistry::findIOobject
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    return cfindIOobject(name, recursive);
+}
+
+
+Foam::regIOobject* Foam::objectRegistry::findIOobject
+(
+    const word& name,
+    const bool recursive
+)
+{
+    return const_cast<regIOobject*>(cfindIOobject(name, recursive));
+}
+
+
+Foam::regIOobject* Foam::objectRegistry::getIOobjectPtr
+(
+    const word& name,
+    const bool recursive
+) const
+{
+    return const_cast<regIOobject*>(cfindIOobject(name, recursive));
 }
 
 
