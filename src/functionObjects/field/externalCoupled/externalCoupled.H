@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -160,7 +160,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class fvMesh;
 class IFstream;
 
@@ -168,7 +168,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-              Class functionObjects::externalCoupled Declaration
+                       Class externalCoupled Declaration
 \*---------------------------------------------------------------------------*/
 
 class externalCoupled

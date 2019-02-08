@@ -118,11 +118,11 @@ protected:
         //- List of calls to execute - every step
         stringList executeCalls_;
 
-        //- List of calls to execute when exiting the time-loop
-        stringList endCalls_;
-
         //- List of calls to execute - write steps
         stringList writeCalls_;
+
+        //- List of calls to execute when exiting the time-loop
+        stringList endCalls_;
 
         //- Perform system calls on the master only
         bool masterOnly_;

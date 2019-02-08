@@ -71,14 +71,14 @@ bool Foam::functionObjects::regionFunctionObject::writeObject
     const word& fieldName
 )
 {
-    const regIOobject* obj = this->findObject<regIOobject>(fieldName);
+    const regIOobject* ptr = this->cfindObject<regIOobject>(fieldName);
 
-    if (obj)
+    if (ptr)
     {
         Log << "    functionObjects::" << type() << " " << name()
-            << " writing field: " << obj->name() << endl;
+            << " writing field: " << ptr->name() << endl;
 
-        obj->write();
+        ptr->write();
 
         return true;
     }
@@ -93,13 +93,13 @@ bool Foam::functionObjects::regionFunctionObject::clearObject
 )
 {
     // Same as getObjectPtr, since the object is already non-const
-    regIOobject* obj = this->findObject<regIOobject>(fieldName);
+    regIOobject* ptr = this->findObject<regIOobject>(fieldName);
 
-    if (obj)
+    if (ptr)
     {
-        if (obj->ownedByRegistry())
+        if (ptr->ownedByRegistry())
         {
-            return obj->checkOut();
+            return ptr->checkOut();
         }
         else
         {
@@ -109,6 +109,23 @@ bool Foam::functionObjects::regionFunctionObject::clearObject
     else
     {
         return true;
+    }
+}
+
+
+void Foam::functionObjects::regionFunctionObject::clearObjects
+(
+    const wordList& objNames
+)
+{
+    for (const word& objName : objNames)
+    {
+        regIOobject* ptr = this->findObject<regIOobject>(objName);
+
+        if (ptr && ptr->ownedByRegistry())
+        {
+            ptr->checkOut();
+        }
     }
 }
 

@@ -39,6 +39,22 @@ Foam::functionObjects::timeFunctionObject::timeFunctionObject
 {}
 
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::functionObjects::timeFunctionObject::clearOutputObjects
+(
+    const wordList& objNames
+)
+{
+    objectRegistry& obr = storedObjects();
+
+    for (const word& objName : objNames)
+    {
+        obr.checkOut(objName);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::objectRegistry&

@@ -61,17 +61,14 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-            Class functionObjects::stateFunctionObject Declaration
+                     Class stateFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class stateFunctionObject
 :
     public functionObjects::timeFunctionObject
 {
-
-private:
-
-    // Private member data
+    // Private Member Data
 
         //- Name of the results dictionary
         static const word resultsName_;

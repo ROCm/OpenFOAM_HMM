@@ -28,8 +28,11 @@ License
 #include "stateFunctionObject.H"
 #include "Time.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 const Foam::word Foam::functionObjects::stateFunctionObject::resultsName_ =
     "results";
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 

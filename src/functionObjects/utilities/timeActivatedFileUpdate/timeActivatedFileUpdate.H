@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -80,14 +80,14 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Time;
 
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-          Class functionObjects::timeActivatedFileUpdate Declaration
+                   Class timeActivatedFileUpdate Declaration
 \*---------------------------------------------------------------------------*/
 
 class timeActivatedFileUpdate

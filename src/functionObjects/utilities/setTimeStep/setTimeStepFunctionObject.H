@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -82,7 +82,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-         Class functionObjects::setTimeStepFunctionObject Declaration
+                  Class setTimeStepFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class setTimeStepFunctionObject

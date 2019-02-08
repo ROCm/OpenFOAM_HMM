@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -89,7 +89,7 @@ bool Foam::functionObjects::setTimeStepFunctionObject::read
     const dictionary& dict
 )
 {
-    functionObject::read(dict);
+    timeFunctionObject::read(dict);
 
     timeStepPtr_ = Function1<scalar>::New("deltaT", dict);
 

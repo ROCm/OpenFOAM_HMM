@@ -136,12 +136,7 @@ public:
     // Constructors
 
         //- Construct from Time and dictionary
-        abort
-        (
-            const word& name,
-            const Time& runTime,
-            const dictionary& dict
-        );
+        abort(const word& name, const Time& runTime, const dictionary& dict);
 
 
     //- Destructor

@@ -49,7 +49,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-             Class functionObjects::timeFunctionObject Declaration
+                     Class timeFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class timeFunctionObject
@@ -66,6 +66,10 @@ protected:
 
     // Protected Member Functions
 
+        //- Remove specified items from "functionObjectObjects"
+        void clearOutputObjects(const wordList& objNames);
+
+
         //- No copy construct
         timeFunctionObject(const timeFunctionObject&) = delete;
 
@@ -77,7 +81,7 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from Time
         timeFunctionObject(const word& name, const Time& runTime);
 
 

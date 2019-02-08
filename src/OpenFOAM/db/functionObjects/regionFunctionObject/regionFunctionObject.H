@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -57,7 +57,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-            Class functionObjects::regionFunctionObject Declaration
+                    Class regionFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class regionFunctionObject
@@ -148,6 +148,9 @@ protected:
 
         //- Clear field from the (sub) objectRegistry if present
         bool clearObject(const word& fieldName);
+
+        //- Clear fields from the (sub) objectRegistry if present
+        void clearObjects(const wordList& objNames);
 
 
         //- No copy construct

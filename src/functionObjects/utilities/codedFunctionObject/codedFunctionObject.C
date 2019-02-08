@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -185,7 +185,7 @@ bool Foam::functionObjects::codedFunctionObject::end()
 
 bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
 {
-    functionObject::read(dict);
+    timeFunctionObject::read(dict);
 
     dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 

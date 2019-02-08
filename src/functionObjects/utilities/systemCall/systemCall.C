@@ -90,8 +90,8 @@ Foam::functionObjects::systemCall::systemCall
 :
     functionObject(name),
     executeCalls_(),
-    endCalls_(),
     writeCalls_(),
+    endCalls_(),
     masterOnly_(false)
 {
     read(dict);
