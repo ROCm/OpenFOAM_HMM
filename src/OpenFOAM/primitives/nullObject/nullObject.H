@@ -80,7 +80,7 @@ class NullObject
         //  Could also rely on bit-wise zero initialization for union content
         NullObject()
         :
-           data_{nullptr, nullptr, nullptr, nullptr}
+           data_{{nullptr}, {nullptr}, {nullptr}, {nullptr}}
         {}
 
         //- No copy construct
