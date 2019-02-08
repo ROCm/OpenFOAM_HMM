@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
-     \\/     M anipulation  | OpenCFD Ltd 2016
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-    Class activePressureForceBaffleVelocityFvPatchVectorField Declaration
+     Class activePressureForceBaffleVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class activePressureForceBaffleVelocityFvPatchVectorField
@@ -119,7 +119,7 @@ class activePressureForceBaffleVelocityFvPatchVectorField
     // Private data
 
         //- Name of the pressure field used to calculate the force
-        //  on the active baffle
+        //- on the active baffle
         word pName_;
 
         //- Name of the cyclic patch used when the active baffle is open
@@ -144,7 +144,7 @@ class activePressureForceBaffleVelocityFvPatchVectorField
         scalar openingTime_;
 
         //- Maximum fractional change to the active baffle openness
-        //  per time-step
+        //- per time-step
         scalar maxOpenFractionDelta_;
 
         label curTimeIndex_;
