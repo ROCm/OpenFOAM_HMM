@@ -21,6 +21,8 @@ internalField   uniform 100;
 
 boundaryField
 {
+    #includeEtc "caseDicts/setConstraintTypes"
+
     inlet_air
     {
         type            turbulentMixingLengthDissipationRateInlet;

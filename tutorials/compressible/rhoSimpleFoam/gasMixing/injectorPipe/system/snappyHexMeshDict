@@ -18,7 +18,7 @@ FoamFile
 // Which of the steps to run
 castellatedMesh true;
 snap            true;
-addLayers       false;
+addLayers       true;
 
 
 // Geometry. Definition of all surfaces. All surfaces are of class
@@ -124,7 +124,7 @@ castellatedMeshControls
     {
         inlet_air
         {
-            level (4 4);
+            level (3 3);
             patchInfo
             {
                 type patch;
@@ -132,7 +132,7 @@ castellatedMeshControls
         }
         inlet_fuel
         {
-            level (6 6);
+            level (5 5);
             patchInfo
             {
                 type patch;
@@ -140,7 +140,7 @@ castellatedMeshControls
         }
         outlet
         {
-            level (4 4);
+            level (3 3);
             patchInfo
             {
                 type patch;
@@ -148,7 +148,7 @@ castellatedMeshControls
         }
         inlet_entrainment
         {
-            level (4 4);
+            level (3 3);
             patchInfo
             {
                 type patch;
@@ -156,10 +156,10 @@ castellatedMeshControls
         }
         walls
         {
-            level (4 4);
+            level (3 3);
             regions
             {
-                pipe_fuel { level (6 6); }
+                pipe_fuel { level (5 5); }
             }
             patchInfo
             {
@@ -190,7 +190,7 @@ castellatedMeshControls
         refinementBox
         {
             mode inside;
-            levels ((4 4));
+            levels ((3 3));
         }
     }
 

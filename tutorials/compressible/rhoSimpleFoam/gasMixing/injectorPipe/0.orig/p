@@ -21,6 +21,8 @@ internalField   uniform 1e5;
 
 boundaryField
 {
+    #includeEtc "caseDicts/setConstraintTypes"
+
     outlet
     {
         type            fixedValue;

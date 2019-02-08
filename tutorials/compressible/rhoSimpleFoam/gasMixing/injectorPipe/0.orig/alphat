@@ -21,6 +21,8 @@ internalField   uniform 1e-3;
 
 boundaryField
 {
+    #includeEtc "caseDicts/setConstraintTypes"
+
     "inlet.*"
     {
         type            calculated;
