@@ -13,8 +13,12 @@ fieldTransfer
     executeControl  timeStep;
     executeInterval 1;
 
-    fields  (rho U tracer0);
-    derived (rhoU);
+    // Includes a rhoU derived field
+    fields  (rho U tracer0 rhoU);
+
+    // Remove derived fields we created prior
+    removeFieldsOnExecute   (pTotal);
+
 
     baseCfg
     {

@@ -14,7 +14,9 @@ fieldTransfer
     executeInterval 1;
 
     fields      (p rho U T);
-    derived     (rhoU pTotal);
+
+    // Remove derived fields we created prior
+    removeFieldsOnExecute   (rhoU pTotal);
 
     _plane
     {

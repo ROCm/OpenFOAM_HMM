@@ -77,93 +77,6 @@ bool Foam::surfMeshSamplers::verbose_ = false;
 //     return tmpRegistry().subRegistry(subName, true, false);
 // }
 
-bool Foam::surfMeshSamplers::add_rhoU(const word& derivedName)
-{
-    const objectRegistry& db = mesh_.thisDb();
-
-    const bool existed = db.foundObject<volVectorField>(derivedName);
-
-    if (existed)
-    {
-        return false; // Volume field already existed - not added.
-    }
-
-
-    // rhoU = rho * U
-
-    const auto* rhoPtr = mesh_.findObject<volScalarField>("rho");
-    const volVectorField& U = mesh_.lookupObject<volVectorField>("U");
-
-    tmp<volVectorField> tresult;
-
-    if (rhoPtr)
-    {
-        const auto& rho = *rhoPtr;
-
-        tresult = tmp<volVectorField>::New
-        (
-            derivedName, (rho * U)
-        );
-    }
-    else
-    {
-        const dimensionedScalar rho("rho", dimDensity, rhoRef_);
-
-        tresult = tmp<volVectorField>::New
-        (
-            derivedName, (rho * U)
-        );
-    }
-
-    db.store(tresult.ptr());
-
-    return !existed;
-}
-
-
-bool Foam::surfMeshSamplers::add_pTotal(const word& derivedName)
-{
-    const objectRegistry& db = mesh_.thisDb();
-
-    const bool existed = db.foundObject<volVectorField>(derivedName);
-
-    if (existed)
-    {
-        return false; // Volume field already existed - not added.
-    }
-
-    // pTotal = p + rho * U^2 / 2
-
-    const auto* rhoPtr = mesh_.findObject<volScalarField>("rho");
-    const volScalarField& p = mesh_.lookupObject<volScalarField>("p");
-    const volVectorField& U = mesh_.lookupObject<volVectorField>("U");
-
-    tmp<volScalarField> tresult;
-
-    if (rhoPtr)
-    {
-        const auto& rho = *rhoPtr;
-
-        tresult = tmp<volScalarField>::New
-        (
-            derivedName, (p + 0.5 * rho * magSqr(U))
-        );
-    }
-    else
-    {
-        const dimensionedScalar rho("rho", dimDensity, rhoRef_);
-
-        tresult = tmp<volScalarField>::New
-        (
-            derivedName, (rho * (p + 0.5 * magSqr(U)))
-        );
-    }
-
-    db.store(tresult.ptr());
-
-    return !existed;
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -177,9 +90,7 @@ Foam::surfMeshSamplers::surfMeshSamplers
     functionObjects::fvMeshFunctionObject(name, runTime, dict),
     PtrList<surfMeshSample>(),
     fieldSelection_(),
-    derivedNames_(),
-    sampleFaceScheme_(),
-    rhoRef_(1.0)
+    sampleFaceScheme_()
 {
     read(dict);
 }
@@ -195,9 +106,7 @@ Foam::surfMeshSamplers::surfMeshSamplers
     functionObjects::fvMeshFunctionObject(name, obr, dict),
     PtrList<surfMeshSample>(),
     fieldSelection_(),
-    derivedNames_(),
-    sampleFaceScheme_(),
-    rhoRef_(1.0)
+    sampleFaceScheme_()
 {
     read(dict);
 }
@@ -218,44 +127,8 @@ bool Foam::surfMeshSamplers::execute()
         return true;
     }
 
-    const objectRegistry& db = mesh_.thisDb();
-
-    // Manage derived names
-    DynamicList<word> added(derivedNames_.size());
-    DynamicList<word> cleanup(derivedNames_.size());
-
-    for (const word& derivedName : derivedNames_)
-    {
-        // This is a fairly ugly dispatch mechanism
-
-        if (derivedName == "rhoU")
-        {
-            if (add_rhoU(derivedName))
-            {
-                cleanup.append(derivedName);
-            }
-            added.append(derivedName);
-        }
-        else if (derivedName == "pTotal")
-        {
-            if (add_pTotal(derivedName))
-            {
-                cleanup.append(derivedName);
-            }
-            added.append(derivedName);
-        }
-        else
-        {
-            WarningInFunction
-                << "unknown derived name: " << derivedName << nl
-                << "Use one of 'rhoU', 'pTotal'" << nl
-                << endl;
-        }
-    }
-
-
     // The acceptable fields
-    wordHashSet acceptable(added);
+    wordHashSet acceptable;
     acceptable.insert(acceptType<scalar>());
     acceptable.insert(acceptType<vector>());
     acceptable.insert(acceptType<sphericalTensor>());
@@ -277,11 +150,7 @@ bool Foam::surfMeshSamplers::execute()
         }
     }
 
-    // Cleanup any locally introduced names
-    for (const word& fieldName : cleanup)
-    {
-        db.checkOut(fieldName);
-    }
+    clearObjects(removeFieldsOnExecute_);
 
     return true;
 }
@@ -294,26 +163,12 @@ bool Foam::surfMeshSamplers::write()
     // Doesn't bother checking which fields have been generated here
     // or elsewhere
 
-    // This could be more efficient
-    wordRes select(fieldSelection_.size() + derivedNames_.size());
-
-    label nElem = 0;
-    for (const wordRe& item : fieldSelection_)
-    {
-        select[nElem++] = item;
-    }
-    for (const auto& derivedName : derivedNames_)
-    {
-        select[nElem++] = derivedName;
-    }
-
-    // Avoid duplicate entries
-    select.uniq();
-
     for (const surfMeshSample& s : surfaces())
     {
-        s.write(select);
+        s.write(fieldSelection_);
     }
+
+    clearObjects(removeFieldsOnWrite_);
 
     return true;
 }
@@ -325,9 +180,11 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
 
     PtrList<surfMeshSample>::clear();
     fieldSelection_.clear();
-    derivedNames_.clear();
+    removeFieldsOnExecute_.clear();
+    removeFieldsOnWrite_.clear();
 
-    rhoRef_ = dict.lookupOrDefault<scalar>("rhoRef", 1);
+    dict.readIfPresent("removeFieldsOnExecute", removeFieldsOnExecute_);
+    dict.readIfPresent("removeFieldsOnWrite", removeFieldsOnWrite_);
 
     const bool createOnRead = dict.lookupOrDefault("createOnRead", false);
 
@@ -393,11 +250,6 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
         fieldSelection_.uniq();
 
         Info<< type() << " fields:  " << flatOutput(fieldSelection_) << nl;
-
-        if (dict.readIfPresent("derived", derivedNames_))
-        {
-            Info<< type() << " derived: " << flatOutput(derivedNames_) << nl;
-        }
         Info<< nl;
 
         // Ensure all surfaces and merge information are expired
@@ -430,6 +282,20 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
 
         Info<< nl;
     }
+
+    if (removeFieldsOnExecute_.size())
+    {
+        Info<< type() << " Remove fields on-execute : "
+            << removeFieldsOnExecute_ << nl;
+    }
+    if (removeFieldsOnWrite_.size())
+    {
+        Info<< type() << " Remove fields on-write   :"
+            << removeFieldsOnWrite_ << nl;
+    }
+
+    // Ensure all surfaces are expired (unsampled)
+    expire();
 
     return true;
 }

@@ -4,6 +4,8 @@ columnAverage/columnAverage.C
 
 continuityError/continuityError.C
 
+derivedFields/derivedFields.C
+
 fieldAverage/fieldAverage.C
 fieldAverage/fieldAverageItem/fieldAverageItem.C
 fieldAverage/fieldAverageItem/fieldAverageItemIO.C

@@ -2,6 +2,7 @@
 
 // ************************************************************************* //
 
+#include "derivedFields"
 #include "fieldTransfer"
 #include "avg-tracer0"
 #include "sum-tracer0"

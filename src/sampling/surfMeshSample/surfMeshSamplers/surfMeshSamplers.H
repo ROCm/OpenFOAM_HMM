@@ -51,15 +51,12 @@ Description
         // Scheme to obtain face centre value
         sampleScheme    cell;
 
-        // Optional: pre-defined derived fields to be sampled
-        derived         (rhoU pTotal);
-
-        // Reference density for incompressible
-        rhoRef          1.25;
-
         // Optional: create surface immediately on read
         // The default is to create a placeholder without any faces.
         createOnRead    false;
+
+        // Optional: remove derived fields created prior
+        removeFieldsOnExecute ( someDerivedField );
 
         surfaces
         (
@@ -83,13 +80,13 @@ Description
         rhoRef | reference density for derived fields (incompressible) | no | 1
         sampleScheme | scheme to obtain face centre value   | no  | cell
         createOnRead | Create surface immediately on read   | no  | false
+        removeFieldsOnExecute | List of fields to remove as "consumed" | no  |
+        removeFieldsOnWrite   | List of fields to remove as "consumed" | no  |
     \endtable
 
 Note
     The default is to create a placeholder surMesh without any faces on
     construction. This behaviour can be changed by the createOnRead option.
-    For incompressible cases, \c rhoRef can be specified for use in the
-    derived quantities. The default is 1.
 
 See also
     Foam::sampledSurfaces
@@ -134,26 +131,17 @@ class surfMeshSamplers
         //- Names of fields to sample
         wordRes fieldSelection_;
 
-        //- Names of derived fields to create and sample
-        wordList derivedNames_;
+        //- List of fields to remove as "consumed"
+        wordList removeFieldsOnExecute_;
+
+        //- List of fields to remove as "consumed"
+        wordList removeFieldsOnWrite_;
 
         //- Sample scheme to obtain face values
         word sampleFaceScheme_;
 
-        //- Reference density (to convert from kinematic to static pressure)
-        scalar rhoRef_;
-
 
     // Private Member Functions
-
-        //- Hard-coded derived field (rho * U)
-        //  \return true if field did not previously exist
-        bool add_rhoU(const word& derivedName);
-
-        //- Hard-coded derived field (p + 1/2 * rho * U)
-        //  \return true if field did not previously exist
-        bool add_pTotal(const word& derivedName);
-
 
         //- Access the sampling surfaces
         inline const PtrList<surfMeshSample>& surfaces() const
