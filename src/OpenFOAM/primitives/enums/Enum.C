@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,6 +71,24 @@ EnumType Foam::Enum<EnumType>::get(const word& enumName) const
         FatalErrorInFunction
             << enumName << " is not in enumeration: " << *this << nl
             << exit(FatalError);
+    }
+
+    return EnumType(vals_[idx]);
+}
+
+
+template<class EnumType>
+EnumType Foam::Enum<EnumType>::get
+(
+    const word& enumName,
+    const EnumType defaultValue
+) const
+{
+    const label idx = find(enumName);
+
+    if (idx < 0)
+    {
+        return defaultValue;
     }
 
     return EnumType(vals_[idx]);

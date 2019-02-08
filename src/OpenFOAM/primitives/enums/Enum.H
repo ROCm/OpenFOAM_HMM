@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,6 +129,10 @@ public:
         //- The enumeration corresponding to the given name.
         //  FatalError if not found.
         EnumType get(const word& enumName) const;
+
+        //- The enumeration corresponding to the given name.
+        //  \return The enumeration or default if not found.
+        EnumType get(const word& enumName, const EnumType defaultValue) const;
 
         //- The name corresponding to the given enumeration.
         //  Return an empty word if not found.
