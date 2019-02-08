@@ -73,8 +73,9 @@ template<class T> Istream& operator>>(Istream&, UList<T>&);
 template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 
 // Common list types
-typedef UList<char> charUList;
-typedef UList<label> labelUList;
+typedef UList<bool> boolUList;      //!< A UList of bools
+typedef UList<char> charUList;      //!< A UList of chars
+typedef UList<label> labelUList;    //!< A UList of labels
 
 
 /*---------------------------------------------------------------------------*\

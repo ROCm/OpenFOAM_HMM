@@ -72,12 +72,9 @@ template<class T> class BiIndirectList;
 template<class T> Istream& operator>>(Istream& is, List<T>& list);
 
 // Common list types
-typedef List<char> charList;
-typedef List<label> labelList;
-
-//- A zero-sized list of labels
-//  \deprecated(2019-02) use labelList::null() instead
-extern const labelList emptyLabelList;
+typedef List<bool> boolList;        //!< A List of bools
+typedef List<char> charList;        //!< A List of chars
+typedef List<label> labelList;      //!< A List of labels
 
 
 /*---------------------------------------------------------------------------*\

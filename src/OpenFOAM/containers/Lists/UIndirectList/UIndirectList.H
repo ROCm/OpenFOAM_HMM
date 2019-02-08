@@ -53,9 +53,9 @@ namespace Foam
 // Forward declarations
 template<class T> class UIndirectList;
 
-// Commonly required list types
-typedef UIndirectList<bool> boolUIndList;
-typedef UIndirectList<label> labelUIndList;
+// Common list types
+typedef UIndirectList<bool> boolUIndList;       //!< UIndirectList of bools
+typedef UIndirectList<label> labelUIndList;     //!< UIndirectList of labels
 
 /*---------------------------------------------------------------------------*\
                         Class UIndirectList Declaration

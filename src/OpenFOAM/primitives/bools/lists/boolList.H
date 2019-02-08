@@ -24,18 +24,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::boolList
-
-Description
-    A List of bools.
-
-Typedef
-    Foam::boolUList
-
-Description
-    A UList of bools.
-
-Typedef
     Foam::boolListList
 
 Description
@@ -53,9 +41,10 @@ Description
 
 namespace Foam
 {
-    typedef UList<bool> boolUList;
+    // boolUlist   = defined in UList.H
+    // boolList    = defined in List.H
+    // boolSubList = defined in SubList.H
 
-    typedef List<bool> boolList;
     typedef List<List<bool>> boolListList;
 }
 

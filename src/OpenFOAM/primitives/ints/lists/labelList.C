@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "List.H"
+#include "labelList.H"
 #include <numeric>
 
 // * * * * * * * * * * * * * * Global Data Members * * * * * * * * * * * * * //
