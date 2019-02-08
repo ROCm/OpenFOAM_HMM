@@ -5,7 +5,7 @@
     \\  /    A nd           |
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2018 OpenFOAM Foundation
+                            | Copyright (C) 2011-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,9 @@ private:
         //- Iso value
         const scalar iso_;
 
+        //- Corrected version of tetBasePtIs
+        labelList tetBasePtIs_;
+
         //- Per point: originating mesh vertex/cc. See encoding above
         edgeList pointToVerts_;
 
@@ -107,6 +110,14 @@ private:
 
 
     // Private Member Functions
+
+        scalar minTetQ
+        (
+            const label facei,
+            const label faceBasePtI
+        ) const;
+
+        void fixTetBasePtIs();
 
         //- Does any edge of triangle cross iso value?
         bool isTriCut
@@ -162,7 +173,6 @@ private:
         //- Generate triangles from cell
         void generateTriPoints
         (
-            const polyMesh& mesh,
             const label celli,
             const bool isTet,
 
@@ -235,7 +245,7 @@ public:
             return pointToFace_;
         }
 
-        //- Per point: originating mesh vertex/cc. See encoding above�
+        //- Per point: originating mesh vertex/cc. See encoding above
         const edgeList& pointToVerts() const
         {
             return pointToVerts_;
