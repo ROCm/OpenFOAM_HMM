@@ -197,7 +197,11 @@ TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 
 template<class Type>
-scalar sumProd(const UList<Type>& f1, const UList<Type>& f2);
+typename pTraits<Type>::cmptType sumProd
+(
+    const UList<Type>& f1,
+    const UList<Type>& f2
+);
 
 template<class Type>
 Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2);
@@ -244,7 +248,7 @@ G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
 #undef G_UNARY_FUNCTION
 
 template<class Type>
-scalar gSumProd
+typename pTraits<Type>::cmptType gSumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2,

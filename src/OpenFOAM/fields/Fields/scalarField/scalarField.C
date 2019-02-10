@@ -92,14 +92,26 @@ tmp<scalarField> stabilise(const tmp<scalarField>& tsf, const scalar s)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-scalar sumProd(const UList<scalar>& f1, const UList<scalar>& f2)
+float sumProd(const UList<float>& f1, const UList<float>& f2)
 {
-    scalar SumProd = 0.0;
+    float result = 0.0;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, scalar, f1, *, scalar, f2)
+        TFOR_ALL_S_OP_F_OP_F(float, result, +=, float, f1, *, float, f2)
     }
-    return SumProd;
+    return result;
+}
+
+
+template<>
+double sumProd(const UList<double>& f1, const UList<double>& f2)
+{
+    double result = 0.0;
+    if (f1.size() && (f1.size() == f2.size()))
+    {
+        TFOR_ALL_S_OP_F_OP_F(double, result, +=, double, f1, *, double, f2)
+    }
+    return result;
 }
 
 

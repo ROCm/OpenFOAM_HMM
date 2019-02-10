@@ -74,6 +74,12 @@ scalarField Im(const UList<complex>& cf);
 //- Sum real and imag components
 scalarField ReImSum(const UList<complex>& cf);
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Sum product
+template<>
+complex sumProd(const UList<complex>& f1, const UList<complex>& f2);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

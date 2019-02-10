@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
         c.Im() *= 5;
     }
 
+    Info<< "sumProd: " << sumProd(fld1, fld2) << nl;
 
     fld1 *= 10;
     Info<< "scalar multiply: " << flatOutput(fld1) << nl;

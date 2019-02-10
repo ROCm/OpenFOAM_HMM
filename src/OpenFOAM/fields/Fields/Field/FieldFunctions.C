@@ -423,14 +423,17 @@ Type minMagSqr(const UList<Type>& f)
 TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 template<class Type>
-scalar sumProd(const UList<Type>& f1, const UList<Type>& f2)
+typename pTraits<Type>::cmptType
+sumProd(const UList<Type>& f1, const UList<Type>& f2)
 {
-    scalar SumProd = 0;
+    typedef typename pTraits<Type>::cmptType outType;
+
+    outType result = Zero;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, Type, f1, &&, Type, f2)
+        TFOR_ALL_S_OP_F_OP_F(outType, result, +=, Type, f1, &&, Type, f2)
     }
-    return SumProd;
+    return result;
 }
 
 
@@ -544,16 +547,18 @@ G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
 
 
 template<class Type>
-scalar gSumProd
+typename pTraits<Type>::cmptType gSumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2,
     const label comm
 )
 {
-    scalar SumProd = sumProd(f1, f2);
-    reduce(SumProd, sumOp<scalar>(), Pstream::msgType(), comm);
-    return SumProd;
+    typedef typename pTraits<Type>::cmptType outType;
+
+    outType result = sumProd(f1, f2);
+    reduce(result, sumOp<outType>(), Pstream::msgType(), comm);
+    return result;
 }
 
 template<class Type>
@@ -658,7 +663,7 @@ tmp<Field<typename product<Type1, Type2>::type>>                               \
 operator Op(const UList<Type1>& f1, const tmp<Field<Type2>>& tf2)              \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    auto tres = reuseTmp<productType, Type2>::New(tf2);     \
+    auto tres = reuseTmp<productType, Type2>::New(tf2);                        \
     OpFunc(tres.ref(), f1, tf2());                                             \
     tf2.clear();                                                               \
     return tres;                                                               \
@@ -669,7 +674,7 @@ tmp<Field<typename product<Type1, Type2>::type>>                               \
 operator Op(const tmp<Field<Type1>>& tf1, const UList<Type2>& f2)              \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    auto tres = reuseTmp<productType, Type1>::New(tf1);     \
+    auto tres = reuseTmp<productType, Type1>::New(tf1);                        \
     OpFunc(tres.ref(), tf1(), f2);                                             \
     tf1.clear();                                                               \
     return tres;                                                               \

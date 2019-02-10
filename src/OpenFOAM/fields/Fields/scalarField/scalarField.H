@@ -76,8 +76,13 @@ tmp<scalarField> stabilise(const tmp<scalarField>&, const scalar s);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//- Sum product for float
 template<>
-scalar sumProd(const UList<scalar>& f1, const UList<scalar>& f2);
+float sumProd(const UList<float>& f1, const UList<float>& f2);
+
+//- Sum product for double
+template<>
+double sumProd(const UList<double>& f1, const UList<double>& f2);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

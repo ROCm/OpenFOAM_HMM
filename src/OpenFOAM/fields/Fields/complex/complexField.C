@@ -132,6 +132,18 @@ Foam::scalarField Foam::Im(const UList<complex>& cf)
 namespace Foam
 {
 
+template<>
+complex sumProd(const UList<complex>& f1, const UList<complex>& f2)
+{
+    complex result = Zero;
+    if (f1.size() && (f1.size() == f2.size()))
+    {
+        TFOR_ALL_S_OP_F_OP_F(complex, result, +=, complex, f1, *, complex, f2)
+    }
+    return result;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 UNARY_FUNCTION(complex, complex, pow3)
