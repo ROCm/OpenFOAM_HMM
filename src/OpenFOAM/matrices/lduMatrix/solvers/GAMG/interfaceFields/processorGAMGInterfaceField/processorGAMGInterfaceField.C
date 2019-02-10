@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -94,9 +94,9 @@ Foam::processorGAMGInterfaceField::~processorGAMGInterfaceField()
 
 void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 (
-    scalarField&,
+    solveScalarField&,
     const bool,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField&,
     const direction,
     const Pstream::commsTypes commsType
@@ -145,9 +145,9 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 
 void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField&,
+    const solveScalarField&,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes commsType
@@ -187,9 +187,13 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     }
     else
     {
-        scalarField pnf
+        solveScalarField pnf
         (
-            procInterface_.compressedReceive<scalar>(commsType, coeffs.size())
+            procInterface_.compressedReceive<solveScalar>
+            (
+                commsType,
+                coeffs.size()
+            )
         );
         transformCoupleField(pnf, cmpt);
 

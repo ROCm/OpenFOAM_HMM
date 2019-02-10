@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -183,16 +183,16 @@ public:
             //- Transform given patch component field
             virtual void transformCoupleField
             (
-                scalarField& f,
+                solveScalarField& f,
                 const direction cmpt
             ) const = 0;
 
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
             (
-                scalarField& result,
+                solveScalarField& result,
                 const bool add,
-                const scalarField& psiInternal,
+                const solveScalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction,
                 const Pstream::commsTypes commsType

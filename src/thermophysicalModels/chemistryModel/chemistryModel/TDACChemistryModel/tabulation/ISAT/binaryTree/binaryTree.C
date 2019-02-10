@@ -658,7 +658,7 @@ void Foam::binaryTree<CompType, ThermoType>::balance()
         chemPoints[chemPointi++] = x;
         x = treeSuccessor(x);
     }
-    mean /= size_;
+    mean /= scalar(size_);
 
     //3) compute the variance for each space direction
     List<scalar> variance(n, Zero);

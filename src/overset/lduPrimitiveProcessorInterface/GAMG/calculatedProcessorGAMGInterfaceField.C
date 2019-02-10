@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,20 +84,13 @@ calculatedProcessorGAMGInterfaceField
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::calculatedProcessorGAMGInterfaceField::
-~calculatedProcessorGAMGInterfaceField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::calculatedProcessorGAMGInterfaceField::initInterfaceMatrixUpdate
 (
-    scalarField&,
-    const bool,
-    const scalarField& psiInternal,
+    solveScalarField&,
+    const bool add,
+    const solveScalarField& psiInternal,
     const scalarField&,
     const direction,
     const Pstream::commsTypes commsType
@@ -147,9 +140,9 @@ void Foam::calculatedProcessorGAMGInterfaceField::initInterfaceMatrixUpdate
 
 void Foam::calculatedProcessorGAMGInterfaceField::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField&,
+    const solveScalarField&,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes commsType
@@ -189,9 +182,13 @@ void Foam::calculatedProcessorGAMGInterfaceField::updateInterfaceMatrix
     }
     else
     {
-        scalarField pnf
+        solveScalarField pnf
         (
-            procInterface_.compressedReceive<scalar>(commsType, coeffs.size())
+            procInterface_.compressedReceive<solveScalar>
+            (
+                commsType,
+                this->size()
+            )()
         );
         transformCoupleField(pnf, cmpt);
 

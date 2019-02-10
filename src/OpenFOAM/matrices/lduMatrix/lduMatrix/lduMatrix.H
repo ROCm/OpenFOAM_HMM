@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -262,12 +262,12 @@ public:
 
             //- Return the matrix norm used to normalise the residual for the
             //- stopping criterion
-            scalar normFactor
+            solveScalarField::cmptType normFactor
             (
-                const scalarField& psi,
-                const scalarField& source,
-                const scalarField& Apsi,
-                scalarField& tmpField
+                const solveScalarField& psi,
+                const solveScalarField& source,
+                const solveScalarField& Apsi,
+                solveScalarField& tmpField
             ) const;
     };
 
@@ -404,8 +404,17 @@ public:
             //- Smooth the solution for a given number of sweeps
             virtual void smooth
             (
-                scalarField& psi,
+                solveScalarField& psi,
                 const scalarField& source,
+                const direction cmpt,
+                const label nSweeps
+            ) const = 0;
+
+            //- Smooth the solution for a given number of sweeps
+            virtual void scalarSmooth
+            (
+                solveScalarField& psi,
+                const solveScalarField& source,
                 const direction cmpt,
                 const label nSweeps
             ) const = 0;
@@ -495,8 +504,8 @@ public:
             //- Return wA the preconditioned form of residual rA
             virtual void precondition
             (
-                scalarField& wA,
-                const scalarField& rA,
+                solveScalarField& wA,
+                const solveScalarField& rA,
                 const direction cmpt=0
             ) const = 0;
 
@@ -505,8 +514,8 @@ public:
             //  This is only required for preconditioning asymmetric matrices.
             virtual void preconditionT
             (
-                scalarField& wT,
-                const scalarField& rT,
+                solveScalarField& wT,
+                const solveScalarField& rT,
                 const direction cmpt=0
             ) const
             {
@@ -624,8 +633,8 @@ public:
             //- Matrix multiplication with updated interfaces.
             void Amul
             (
-                scalarField&,
-                const tmp<scalarField>&,
+                solveScalarField&,
+                const tmp<solveScalarField>&,
                 const FieldField<Field, scalar>&,
                 const lduInterfaceFieldPtrsList&,
                 const direction cmpt
@@ -634,8 +643,8 @@ public:
             //- Matrix transpose multiplication with updated interfaces.
             void Tmul
             (
-                scalarField&,
-                const tmp<scalarField>&,
+                solveScalarField&,
+                const tmp<solveScalarField>&,
                 const FieldField<Field, scalar>&,
                 const lduInterfaceFieldPtrsList&,
                 const direction cmpt
@@ -645,7 +654,7 @@ public:
             //- Sum the coefficients on each row of the matrix
             void sumA
             (
-                scalarField&,
+                solveScalarField&,
                 const FieldField<Field, scalar>&,
                 const lduInterfaceFieldPtrsList&
             ) const;
@@ -653,17 +662,17 @@ public:
 
             void residual
             (
-                scalarField& rA,
-                const scalarField& psi,
+                solveScalarField& rA,
+                const solveScalarField& psi,
                 const scalarField& source,
                 const FieldField<Field, scalar>& interfaceBouCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
                 const direction cmpt
             ) const;
 
-            tmp<scalarField> residual
+            tmp<solveScalarField> residual
             (
-                const scalarField& psi,
+                const solveScalarField& psi,
                 const scalarField& source,
                 const FieldField<Field, scalar>& interfaceBouCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
@@ -678,8 +687,8 @@ public:
                 const bool add,
                 const FieldField<Field, scalar>& interfaceCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
-                const scalarField& psiif,
-                scalarField& result,
+                const solveScalarField& psiif,
+                solveScalarField& result,
                 const direction cmpt
             ) const;
 
@@ -689,8 +698,8 @@ public:
                 const bool add,
                 const FieldField<Field, scalar>& interfaceCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
-                const scalarField& psiif,
-                scalarField& result,
+                const solveScalarField& psiif,
+                solveScalarField& result,
                 const direction cmpt
             ) const;
 
@@ -698,7 +707,7 @@ public:
             //- if it exists
             void setResidualField
             (
-                const Field<scalar>& residual,
+                const scalarField& residual,
                 const word& fieldName,
                 const bool initial
             ) const;

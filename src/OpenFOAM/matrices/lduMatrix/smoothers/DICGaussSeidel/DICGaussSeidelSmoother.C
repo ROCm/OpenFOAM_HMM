@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -80,7 +80,7 @@ Foam::DICGaussSeidelSmoother::DICGaussSeidelSmoother
 
 void Foam::DICGaussSeidelSmoother::smooth
 (
-    scalarField& psi,
+    solveScalarField& psi,
     const scalarField& source,
     const direction cmpt,
     const label nSweeps
@@ -88,6 +88,19 @@ void Foam::DICGaussSeidelSmoother::smooth
 {
     dicSmoother_.smooth(psi, source, cmpt, nSweeps);
     gsSmoother_.smooth(psi, source, cmpt, nSweeps);
+}
+
+
+void Foam::DICGaussSeidelSmoother::scalarSmooth
+(
+    solveScalarField& psi,
+    const solveScalarField& source,
+    const direction cmpt,
+    const label nSweeps
+) const
+{
+    dicSmoother_.scalarSmooth(psi, source, cmpt, nSweeps);
+    gsSmoother_.scalarSmooth(psi, source, cmpt, nSweeps);
 }
 
 

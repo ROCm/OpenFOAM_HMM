@@ -213,9 +213,9 @@ void Foam::calculatedProcessorFvPatchField<Type>::evaluate
 template<class Type>
 void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes commsType
@@ -268,14 +268,13 @@ void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
 }
 
 
-
 template<class Type>
 void Foam::calculatedProcessorFvPatchField<Type>::addToInternalField
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
     const scalarField& coeffs,
-    const scalarField& vals
+    const solveScalarField& vals
 ) const
 {
     const labelUList& faceCells = this->procInterface_.faceCells();
@@ -300,9 +299,9 @@ void Foam::calculatedProcessorFvPatchField<Type>::addToInternalField
 template<class Type>
 void Foam::calculatedProcessorFvPatchField<Type>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes commsType

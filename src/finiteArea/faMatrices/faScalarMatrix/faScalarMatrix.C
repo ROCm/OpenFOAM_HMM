@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -30,6 +30,7 @@ Description
 
 #include "faScalarMatrix.H"
 #include "zeroGradientFaPatchFields.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -101,21 +102,27 @@ Foam::tmp<Foam::scalarField> Foam::faMatrix<Foam::scalar>::residual() const
     scalarField boundaryDiag(psi_.size(), Zero);
     addBoundaryDiag(boundaryDiag, 0);
 
-    tmp<scalarField> tres
+    const scalarField& psif = psi_.internalField();
+    ConstPrecisionAdaptor<solveScalar, scalar> tpsi(psif);
+    const solveScalarField& psi = tpsi();
+
+    tmp<solveScalarField> tres
     (
         lduMatrix::residual
         (
-            psi_.internalField(),
-            source_ - boundaryDiag*psi_.internalField(),
+            psi,
+            source_ - boundaryDiag*psif,
             boundaryCoeffs_,
             psi_.boundaryField().scalarInterfaces(),
             0
         )
     );
 
-    addBoundarySource(tres.ref());
+    ConstPrecisionAdaptor<scalar, solveScalar> tres_s(tres);
 
-    return tres;
+    addBoundarySource(tres_s.ref());
+
+    return tres_s;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -170,12 +170,12 @@ void Foam::lduMatrix::solver::read(const dictionary& solverControls)
 }
 
 
-Foam::scalar Foam::lduMatrix::solver::normFactor
+Foam::solveScalarField::cmptType Foam::lduMatrix::solver::normFactor
 (
-    const scalarField& psi,
-    const scalarField& source,
-    const scalarField& Apsi,
-    scalarField& tmpField
+    const solveScalarField& psi,
+    const solveScalarField& source,
+    const solveScalarField& Apsi,
+    solveScalarField& tmpField
 ) const
 {
     // --- Calculate A dot reference value of psi

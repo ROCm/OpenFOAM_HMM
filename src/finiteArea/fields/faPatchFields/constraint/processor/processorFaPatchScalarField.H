@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -40,7 +40,7 @@ namespace Foam
 template<>
 void processorFaPatchField<scalar>::transformCoupleField
 (
-    scalarField& f,
+    solveScalarField& f,
     const direction cmpt
 ) const;
 
@@ -48,9 +48,9 @@ void processorFaPatchField<scalar>::transformCoupleField
 template<>
 void processorFaPatchField<scalar>::initInterfaceMatrixUpdate
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField&,
+    const solveScalarField&,
     const scalarField& coeffs,
     const direction,
     const Pstream::commsTypes commsType
@@ -60,9 +60,9 @@ void processorFaPatchField<scalar>::initInterfaceMatrixUpdate
 template<>
 void processorFaPatchField<scalar>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField&,
+    const solveScalarField&,
     const scalarField& coeffs,
     const direction,
     const Pstream::commsTypes commsType

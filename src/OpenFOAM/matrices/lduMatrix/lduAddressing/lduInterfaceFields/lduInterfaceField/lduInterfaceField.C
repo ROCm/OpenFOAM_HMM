@@ -35,10 +35,4 @@ defineTypeNameAndDebug(lduInterfaceField, 0);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::lduInterfaceField::~lduInterfaceField()
-{}
-
-
 // ************************************************************************* //

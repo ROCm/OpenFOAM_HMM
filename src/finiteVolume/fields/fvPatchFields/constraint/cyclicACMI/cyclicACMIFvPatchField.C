@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -215,9 +215,9 @@ Foam::cyclicACMIFvPatchField<Type>::nonOverlapPatchField() const
 template<class Type>
 void Foam::cyclicACMIFvPatchField<Type>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes
@@ -230,7 +230,7 @@ void Foam::cyclicACMIFvPatchField<Type>::updateInterfaceMatrix
     const labelUList& nbrFaceCellsCoupled =
         cpp.neighbPatch().faceCells();
 
-    scalarField pnf(psiInternal, nbrFaceCellsCoupled);
+    solveScalarField pnf(psiInternal, nbrFaceCellsCoupled);
 
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
