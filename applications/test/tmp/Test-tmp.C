@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -41,14 +41,30 @@ struct myScalarField : public scalarField
 };
 
 
+template<class T>
+void printInfo(const tmp<T>& tmpItem)
+{
+    Info<< "tmp valid:" << tmpItem.valid()
+        << " isTmp:" << tmpItem.isTmp()
+        << " addr: " << long(tmpItem.get());
+
+    if (tmpItem.valid())
+    {
+        Info<< " refCount:" << tmpItem->count();
+    }
+
+    Info<< nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main()
 {
-    {
-        scalarField f1(1000000, 1.0), f2(1000000, 2.0), f3(1000000, 3.0);
+    scalarField f1(1000000, 1.0), f2(1000000, 2.0), f3(1000000, 3.0);
 
+    {
         for (int iter=0; iter < 50; ++iter)
         {
             f1 = f2 + f3 + f2 + f3;
@@ -60,30 +76,33 @@ int main()
     {
         auto tfld1 = tmp<scalarField>::New(20, Zero);
 
-        Info<< "tmp refCount = " << tfld1->count() << nl;
+        printInfo(tfld1);
+
         if (tfld1.valid())
         {
             Info<<"tmp: " << tfld1() << nl;
         }
-
-        Info<<"tmp addr: " << long(tfld1.get()) << nl;
 
         // Hold on to the old content for a bit
 
         tmp<scalarField> tfld2 =
             tmp<scalarField>::NewFrom<myScalarField>(20, Zero);
 
-        Info<< "tmp refCount = " << tfld2->count() << nl;
+        printInfo(tfld2);
         if (tfld2.valid())
         {
             Info<<"tmp: " << tfld2() << nl;
         }
 
-        Info<<"tmp addr: " << long(tfld2.get()) << nl;
-
         tfld2.clear();
 
-        Info<<"after clear: " << long(tfld2.get()) << nl;
+        Info<<"After clear : ";
+        printInfo(tfld2);
+
+        tfld2.cref(f1);
+
+        Info<<"Reset const-ref : ";
+        printInfo(tfld2);
     }
 
     Info<< "\nEnd" << endl;

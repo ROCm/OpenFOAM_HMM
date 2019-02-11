@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -353,6 +353,15 @@ inline void Foam::tmp<T>::reset(T* p) noexcept
     clear();
     ptr_ = p;
     type_ = PTR;
+}
+
+
+template<class T>
+inline void Foam::tmp<T>::cref(const T& obj) noexcept
+{
+    clear();
+    ptr_ = const_cast<T*>(&obj);
+    type_ = CREF;
 }
 
 

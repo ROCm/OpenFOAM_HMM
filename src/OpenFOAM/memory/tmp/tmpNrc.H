@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -197,6 +197,9 @@ public:
 
         //- Delete managed temporary object and set to new given pointer
         inline void reset(T* p) noexcept;
+
+        //- Delete managed temporary object and set to const reference
+        inline void cref(const T& obj) noexcept;
 
         //- Swaps the managed object with other tmpNrc.
         inline void swap(tmpNrc<T>& other) noexcept;
