@@ -191,6 +191,9 @@ public:
         //- Begin a "particle coordinates" block (measured data)
         void beginParticleCoordinates(const label nparticles);
 
+        //- Write a list of integers as float values
+        void writeList(const UList<label>& field);
+
         //- Write a list of floats as "%12.5e" or as binary
         //  With carriage return after each value (ascii stream)
         void writeList(const UList<scalar>& field);

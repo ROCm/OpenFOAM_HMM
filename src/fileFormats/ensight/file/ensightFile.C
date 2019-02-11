@@ -326,10 +326,17 @@ void Foam::ensightFile::beginParticleCoordinates(const label nparticles)
 }
 
 
-void Foam::ensightFile::writeList
-(
-    const UList<scalar>& field
-)
+void Foam::ensightFile::writeList(const UList<label>& field)
+{
+    for (const label val : field)
+    {
+        write(scalar(val));
+        newline();
+    }
+}
+
+
+void Foam::ensightFile::writeList(const UList<scalar>& field)
 {
     for (const scalar& val : field)
     {
@@ -345,6 +352,7 @@ void Foam::ensightFile::writeList
         newline();
     }
 }
+
 
 
 void Foam::ensightFile::writeList
@@ -367,5 +375,6 @@ void Foam::ensightFile::writeList
         newline();
     }
 }
+
 
 // ************************************************************************* //
