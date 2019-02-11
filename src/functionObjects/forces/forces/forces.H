@@ -393,7 +393,7 @@ public:
 
 
     //- Destructor
-    virtual ~forces();
+    virtual ~forces() = default;
 
 
     // Member Functions

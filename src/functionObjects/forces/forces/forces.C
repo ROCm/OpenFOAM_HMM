@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -802,12 +802,6 @@ Foam::functionObjects::forces::forces
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::forces::~forces()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::forces::read(const dictionary& dict)
@@ -840,11 +834,13 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         // Reference density needed for incompressible calculations
         if (rhoName_ == "rhoInf")
         {
-            dict.readEntry("rhoInf", rhoRef_);
+            rhoRef_ = dict.get<scalar>("rhoInf");
+            Info<< "    Freestream density (rhoInf) set to " << rhoRef_ << endl;
         }
 
         // Reference pressure, 0 by default
         pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
+        Info<< "    Reference pressure (pRef) set to " << pRef_ << endl;
     }
 
     coordSys_.clear();
@@ -902,6 +898,7 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         }
         else
         {
+            Info<< "    Employing " << nBin_ << " bins" << endl;
             binDict.readEntry("cumulative", binCumulative_);
             binDict.readEntry("direction", binDir_);
             binDir_.normalise();
