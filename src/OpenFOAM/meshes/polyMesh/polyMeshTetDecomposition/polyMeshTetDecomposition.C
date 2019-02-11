@@ -53,7 +53,7 @@ Foam::scalar Foam::polyMeshTetDecomposition::minQuality
     const face& f = mesh.faces()[fI];
     const point& tetBasePt = pPts[f[faceBasePtI]];
 
-    scalar thisBaseMinTetQuality = vGreat;
+    scalar thisBaseMinTetQuality = VGREAT;
 
     for (label tetPtI = 1; tetPtI < f.size() - 1; tetPtI++)
     {
