@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -84,22 +84,22 @@ Usage
         log          | write data to standard output    | no          | no
         writeFields  | Write the region field values    | yes         |
         writeArea    | Write the area of the surfaceFieldValue | no   |
-        surfaceFormat | output value format             | no          |
-        regionType   | face regionType: see below       | yes         |
-        name         | name of face regionType if required  | no      |
-        operation    | operation to perform             | yes         |
-        postOperation | post-operation to perform       | no          | none
-        weightField  | name of field to apply weighting | no          |
-        scaleFactor  | scale factor                     | no          | 1
-        fields       | list of fields to operate on     | yes         |
+        surfaceFormat | Output value format             | no          |
+        regionType   | Face regionType: see below       | yes         |
+        name         | Name of face regionType if required  | no      |
+        operation    | Operation to perform             | yes         |
+        postOperation | Post-operation to perform       | no          | none
+        weightField  | Name of field to apply weighting | no          |
+        scaleFactor  | Scale factor                     | no          | 1
+        fields       | List of fields to operate on     | yes         |
     \endtable
 
     Where \c regionType is defined by
     \plaintable
-        faceZone     | requires a \b name entry to specify the faceZone
-        patch        | requires a \b name entry to specify the patch
-        surface      | requires a \b name entry to specify the surfMesh
-        sampledSurface | requires a \b sampledSurfaceDict sub-dictionary
+        faceZone     | Requires a \b name entry to specify the faceZone
+        patch        | Requires a \b name entry to specify the patch
+        surface      | Requires a \b name entry to specify the surfMesh
+        sampledSurface | Requires a \b sampledSurfaceDict sub-dictionary
     \endplaintable
 
     The \c operation is one of:
@@ -373,7 +373,7 @@ protected:
             boolList faceFlip_;
 
 
-        //- Underlying sampledSurface (if operating on sampledSurface)
+        //- The sampledSurface (if operating on sampledSurface)
         autoPtr<sampledSurface> surfacePtr_;
 
         //- Surface writer
@@ -527,7 +527,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceFieldValue();
+    virtual ~surfaceFieldValue() = default;
 
 
     // Public Member Functions

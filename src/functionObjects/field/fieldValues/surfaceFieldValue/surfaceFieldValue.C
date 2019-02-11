@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -434,7 +434,7 @@ combineSurfaceGeometry
 Foam::scalar
 Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
 {
-    scalar totalArea;
+    scalar totalArea = 0;
 
     if (regionType_ == stSurface)
     {
@@ -488,37 +488,34 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
 {
     dict.readEntry("name", regionName_);
 
+    totalArea_ = 0;
+    nFaces_ = 0;
+    faceId_.clear();
+    facePatchId_.clear();
+    faceFlip_.clear();
+    surfacePtr_.clear();
+    surfaceWriterPtr_.clear();
+
     switch (regionType_)
     {
         case stFaceZone:
         {
             setFaceZoneFaces();
-            surfacePtr_.clear();
             break;
         }
         case stPatch:
         {
             setPatchFaces();
-            surfacePtr_.clear();
             break;
         }
         case stSurface:
         {
             const surfMesh& s = dynamicCast<const surfMesh>(obr());
             nFaces_ = returnReduce(s.size(), sumOp<label>());
-
-            faceId_.clear();
-            facePatchId_.clear();
-            faceFlip_.clear();
-            surfacePtr_.clear();
             break;
         }
         case stSampledSurface:
         {
-            faceId_.clear();
-            facePatchId_.clear();
-            faceFlip_.clear();
-
             surfacePtr_ = sampledSurface::New
             (
                 name(),
@@ -614,8 +611,6 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
         fields_.append(orientedFields);
     }
 
-
-    surfaceWriterPtr_.clear();
     if (writeFields_)
     {
         const word surfaceFormat(dict.get<word>("surfaceFormat"));
@@ -916,6 +911,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
         )
     ),
     weightFieldName_("none"),
+    totalArea_(0),
     writeArea_(dict.lookupOrDefault("writeArea", false)),
     nFaces_(0),
     faceId_(),
@@ -948,6 +944,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
         )
     ),
     weightFieldName_("none"),
+    totalArea_(0),
     writeArea_(dict.lookupOrDefault("writeArea", false)),
     nFaces_(0),
     faceId_(),
@@ -957,12 +954,6 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
     read(dict);
     writeFileHeader(file());
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldValues::surfaceFieldValue::~surfaceFieldValue()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
