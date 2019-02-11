@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -123,9 +123,8 @@ Foam::sampledSurfaces::sampledSurfaces
     const dictionary& dict
 )
 :
-    functionObjects::regionFunctionObject(name, runTime, dict),
+    functionObjects::fvMeshFunctionObject(name, runTime, dict),
     PtrList<sampledSurface>(),
-    mesh_(refCast<const fvMesh>(obr_)),
     loadFromFiles_(false),
     outputPath_
     (
@@ -152,9 +151,8 @@ Foam::sampledSurfaces::sampledSurfaces
     const bool loadFromFiles
 )
 :
-    functionObjects::regionFunctionObject(name, obr, dict),
+    functionObjects::fvMeshFunctionObject(name, obr, dict),
     PtrList<sampledSurface>(),
-    mesh_(refCast<const fvMesh>(obr)),
     loadFromFiles_(loadFromFiles),
     outputPath_
     (
@@ -228,6 +226,8 @@ bool Foam::sampledSurfaces::write()
 
 bool Foam::sampledSurfaces::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     PtrList<sampledSurface>::clear();
     mergedList_.clear();
     changedGeom_.clear();

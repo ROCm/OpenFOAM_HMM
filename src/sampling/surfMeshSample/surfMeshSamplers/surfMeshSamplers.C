@@ -174,9 +174,8 @@ Foam::surfMeshSamplers::surfMeshSamplers
     const dictionary& dict
 )
 :
-    functionObjects::regionFunctionObject(name, runTime, dict),
+    functionObjects::fvMeshFunctionObject(name, runTime, dict),
     PtrList<surfMeshSample>(),
-    mesh_(refCast<const fvMesh>(obr_)),
     fieldSelection_(),
     derivedNames_(),
     sampleFaceScheme_(),
@@ -193,9 +192,8 @@ Foam::surfMeshSamplers::surfMeshSamplers
     const dictionary& dict
 )
 :
-    functionObjects::regionFunctionObject(name, obr, dict),
+    functionObjects::fvMeshFunctionObject(name, obr, dict),
     PtrList<surfMeshSample>(),
-    mesh_(refCast<const fvMesh>(obr)),
     fieldSelection_(),
     derivedNames_(),
     sampleFaceScheme_(),
@@ -323,6 +321,8 @@ bool Foam::surfMeshSamplers::write()
 
 bool Foam::surfMeshSamplers::read(const dictionary& dict)
 {
+    fvMeshFunctionObject::read(dict);
+
     PtrList<surfMeshSample>::clear();
     fieldSelection_.clear();
     derivedNames_.clear();

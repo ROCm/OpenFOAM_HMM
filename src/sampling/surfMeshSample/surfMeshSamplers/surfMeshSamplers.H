@@ -102,7 +102,7 @@ SourceFiles
 #ifndef surfMeshSamplers_H
 #define surfMeshSamplers_H
 
-#include "regionFunctionObject.H"
+#include "fvMeshFunctionObject.H"
 #include "surfMeshSample.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
@@ -114,33 +114,22 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class Time;
-class fvMesh;
-class dictionary;
-
 /*---------------------------------------------------------------------------*\
                       Class surfMeshSamplers Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfMeshSamplers
 :
-    public functionObjects::regionFunctionObject,
+    public functionObjects::fvMeshFunctionObject,
     public PtrList<surfMeshSample>
 {
-    // Static data members
+    // Static Data Members
 
         //- Output verbosity
         static bool verbose_;
 
 
-    // Private data
-
-        //- Const reference to fvMesh
-        const fvMesh& mesh_;
-
-
-    // Read from dictionary
+    // Private Data
 
         //- Names of fields to sample
         wordRes fieldSelection_;

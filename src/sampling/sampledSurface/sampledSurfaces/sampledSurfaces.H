@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -108,7 +108,7 @@ SourceFiles
 #ifndef sampledSurfaces_H
 #define sampledSurfaces_H
 
-#include "regionFunctionObject.H"
+#include "fvMeshFunctionObject.H"
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
 #include "mergedSurf.H"
@@ -122,21 +122,16 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class Time;
-class fvMesh;
-class dictionary;
-
 /*---------------------------------------------------------------------------*\
                        Class sampledSurfaces Declaration
 \*---------------------------------------------------------------------------*/
 
 class sampledSurfaces
 :
-    public functionObjects::regionFunctionObject,
+    public functionObjects::fvMeshFunctionObject,
     public PtrList<sampledSurface>
 {
-    // Static data members
+    // Static Data Members
 
         //- Output verbosity
         static bool verbose_;
@@ -145,10 +140,7 @@ class sampledSurfaces
         static scalar mergeTol_;
 
 
-    // Private data
-
-        //- Const reference to fvMesh
-        const fvMesh& mesh_;
+    // Private Data
 
         //- Load fields from files (not from objectRegistry)
         const bool loadFromFiles_;
