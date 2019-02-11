@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -64,12 +64,6 @@ Foam::functionObjects::removeRegisteredObject::removeRegisteredObject
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::removeRegisteredObject::~removeRegisteredObject()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::removeRegisteredObject::read(const dictionary& dict)
@@ -86,7 +80,7 @@ bool Foam::functionObjects::removeRegisteredObject::execute()
 {
     for (const word& objName : objectNames_)
     {
-        regIOobject* ptr = getObjectPtr<regIOobject>(objName);
+        regIOobject* ptr = findObject<regIOobject>(objName);
 
         if (ptr && ptr->ownedByRegistry())
         {
@@ -94,8 +88,7 @@ bool Foam::functionObjects::removeRegisteredObject::execute()
                 << "    removing object " << ptr->name() << nl
                 << endl;
 
-            ptr->release();
-            delete ptr;
+            ptr->checkOut();
         }
     }
 
