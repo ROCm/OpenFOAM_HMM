@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -52,13 +52,13 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInFunction
+            FatalIOErrorInFunction(dict)
                 << "Unknown Function1 type "
                 << Function1Type << " for Function1 "
                 << entryName << nl << nl
                 << "Valid Function1 types :" << nl
                 << dictionaryConstructorTablePtr_->sortedToc() << nl
-                << exit(FatalError);
+                << exit(FatalIOError);
         }
 
         return cstrIter()(entryName, coeffsDict);
@@ -90,23 +90,31 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
                 Function1Type = firstToken.wordToken();
             }
         }
-        else
+        else if (redirectType != word::null)
         {
             Function1Type = redirectType;
         }
-
+        else
+        {
+            FatalIOErrorInFunction(dict)
+                << "Cannot find specification for Function1 "
+                << entryName << nl << nl
+                << "Valid Function1 types :" << nl
+                << dictionaryConstructorTablePtr_->sortedToc() << nl
+                << exit(FatalIOError);
+        }
 
         auto cstrIter = dictionaryConstructorTablePtr_->cfind(Function1Type);
 
         if (!cstrIter.found())
         {
-            FatalErrorInFunction
+            FatalIOErrorInFunction(dict)
                 << "Unknown Function1 type "
                 << Function1Type << " for Function1 "
                 << entryName << nl << nl
                 << "Valid Function1 types :" << nl
                 << dictionaryConstructorTablePtr_->sortedToc() << nl
-                << exit(FatalError);
+                << exit(FatalIOError);
         }
 
         return cstrIter()
