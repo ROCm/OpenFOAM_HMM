@@ -137,6 +137,20 @@ class objectRegistry
         void operator=(const objectRegistry&) = delete;
 
 
+    // Protected Member Functions
+
+        //- Return const pointer to the regIOobject.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found.
+        const regIOobject* cfindIOobject
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
+
+
 public:
 
     //- Declare type name for this IOobject
@@ -346,52 +360,6 @@ public:
         //  \param recursive search parent registries
         bool found(const word& name, const bool recursive = false) const;
 
-
-        //- Return const pointer to the regIOobject.
-        //
-        //  \param recursive search parent registries
-        //
-        //  \return nullptr if the object was not found.
-        const regIOobject* cfindIOobject
-        (
-            const word& name,
-            const bool recursive = false
-        ) const;
-
-        //- Return const pointer to the regIOobject.
-        //
-        //  \param recursive search parent registries
-        //
-        //  \return nullptr if the object was not found.
-        const regIOobject* findIOobject
-        (
-            const word& name,
-            const bool recursive = false
-        ) const;
-
-        //- Return non-const pointer to the regIOobject.
-        //
-        //  \param recursive search parent registries
-        //
-        //  \return nullptr if the object was not found.
-        regIOobject* findIOobject
-        (
-            const word& name,
-            const bool recursive = false
-        );
-
-        //- Return non-const pointer to the regIOobject,
-        //- using a const-cast to have it behave like a mutable.
-        //  Exercise caution when using.
-        //
-        //  \param recursive search parent registries.
-        //
-        //  \return nullptr if the object was not found.
-        regIOobject* getIOobjectPtr
-        (
-            const word& name,
-            const bool recursive = false
-        ) const;
 
         //- Is the named Type found?
         //
