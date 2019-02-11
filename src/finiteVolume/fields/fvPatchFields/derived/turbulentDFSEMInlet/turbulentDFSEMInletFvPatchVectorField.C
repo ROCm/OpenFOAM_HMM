@@ -957,60 +957,61 @@ bool Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
     const symmTensorField& Rf
 )
 {
-    // Perform checks based on constraints imposed by Lund coefficients
-    // a11..a33
+    // Perform checks of the stress tensor based on Cholesky decomposition
+    // constraints
 
-    for (const symmTensor& R : Rf)
+    forAll(Rf, facei)
     {
+        const symmTensor& R = Rf[facei];
+
         if (R.xx() <= 0)
         {
             FatalErrorInFunction
-                << "Reynold stress " << R
-                << " does not obey the Lund coefficient constraint: "
-                << "R.xx() > 0"
+                << "Reynolds stress " << R << " at face " << facei
+                << " does not obey the constraint: R_xx > 0"
                 << exit(FatalError);
         }
 
-        scalar a11 = sqrt(R.xx());
+        scalar a_xx = sqrt(R.xx());
 
-        scalar a21 = R.xy()/a11;
+        scalar a_xy = R.xy()/a_xx;
 
-        scalar a22_2 = R.yy() - sqr(a21);
+        scalar a_yy_2 = R.yy() - sqr(a_xy);
 
-        if (a22_2 < 0)
+        if (a_yy_2 < 0)
         {
             FatalErrorInFunction
-                << "Reynold stress " << R
-                << " does not obey the Lund coefficient constraint: "
-                << "R.yy() - sqr(a21) >= 0"
+                << "Reynolds stress " << R << " at face " << facei
+                << " leads to an invalid Cholesky decomposition due to the "
+                << "constraint R_yy - sqr(a_xy) >= 0"
                 << exit(FatalError);
         }
 
-        scalar a22 = Foam::sqrt(a22_2);
+        scalar a_yy = Foam::sqrt(a_yy_2);
 
-        scalar a31 = R.xz()/a11;
+        scalar a_xz = R.xz()/a_xx;
 
-        scalar a32 = (R.yz() - a21*a31)*a22;
+        scalar a_yz = (R.yz() - a_xy*a_xz)*a_yy;
 
-        scalar a33_2 = R.zz() - sqr(a31) - sqr(a32);
+        scalar a_zz_2 = R.zz() - sqr(a_xz) - sqr(a_yz);
 
-        if (a33_2 < 0)
+        if (a_zz_2 < 0)
         {
             FatalErrorInFunction
-                << "Reynold stress " << R
-                << " does not obey the Lund coefficient constraint: "
-                << "R.zz() - sqr(a31) - sqr(a32) >= 0"
+                << "Reynolds stress " << R << " at face " << facei
+                << " leads to an invalid Cholesky decomposition due to the "
+                << "constraint R_zz - sqr(a_xz) - sqr(a_yz) >= 0"
                 << exit(FatalError);
         }
 
-        scalar a33 = Foam::sqrt(a33_2);
+        scalar a_zz = Foam::sqrt(a_zz_2);
 
         if (debug)
         {
             Pout<< "R: " << R
-                << " a11:" << a11 << " a21:" << a21 << " a31:" << a31
-                <<                   " a21:" << a22 << " a32:" << a32
-                <<                                     " a33:" << a33
+                << " a_xx:" << a_xx << " a_xy:" << a_xy << " a_xz:" << a_xy
+                <<                     " a_yy:" << a_yy << " a_yz:" << a_yz
+                <<                                         " a_zz:" << a_zz
                 << endl;
         }
     }
