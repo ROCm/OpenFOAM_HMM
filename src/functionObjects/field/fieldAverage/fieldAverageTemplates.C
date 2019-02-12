@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -77,9 +77,11 @@ void Foam::functionObjects::fieldAverage::addMeanFieldType
                     meanFieldName,
                     obr().time().timeName(obr().time().startTime().value()),
                     obr(),
-                    restartOnOutput_ ?
-                        IOobject::NO_READ
-                      : IOobject::READ_IF_PRESENT,
+                    (
+                        restartOnOutput_
+                      ? IOobject::NO_READ
+                      : IOobject::READ_IF_PRESENT
+                    ),
                     IOobject::NO_WRITE
                 ),
                 1*baseField

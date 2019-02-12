@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -57,7 +57,7 @@ void Foam::functionObjects::fieldsExpression::setResultName
         if (!fieldNames_.empty())
         {
             resultName_ = typeName + '(' + fieldNames_[0];
-            for (label i=1; i<fieldNames_.size(); i++)
+            for (label i=1; i<fieldNames_.size(); ++i)
             {
                 resultName_ += ',' + fieldNames_[i];
             }
@@ -99,12 +99,6 @@ Foam::functionObjects::fieldsExpression::fieldsExpression
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldsExpression::~fieldsExpression()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::fieldsExpression::read(const dictionary& dict)
@@ -116,10 +110,7 @@ bool Foam::functionObjects::fieldsExpression::read(const dictionary& dict)
         dict.readEntry("fields", fieldNames_);
     }
 
-    if (dict.found("result"))
-    {
-        dict.readEntry("result", resultName_);
-    }
+    dict.readIfPresent("result", resultName_);
 
     return true;
 }
@@ -138,10 +129,8 @@ bool Foam::functionObjects::fieldsExpression::execute()
 
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 

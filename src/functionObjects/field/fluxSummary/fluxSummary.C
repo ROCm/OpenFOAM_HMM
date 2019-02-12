@@ -74,20 +74,7 @@ Foam::functionObjects::fluxSummary::modeTypeNames_
 
 bool Foam::functionObjects::fluxSummary::isSurfaceMode() const
 {
-    bool isSurf = false;
-
-    switch (mode_)
-    {
-        case mdSurface:
-        case mdSurfaceAndDirection:
-            isSurf = true;
-            break;
-
-        default:
-            break;
-    }
-
-    return isSurf;
+    return (mdSurface == mode_ || mdSurfaceAndDirection == mode_);
 }
 
 
@@ -99,8 +86,8 @@ Foam::word Foam::functionObjects::fluxSummary::checkFlowType
 {
     // Surfaces are multipled by their area, so account for that
     // in the dimension checking
-    dimensionSet dims =
-        fieldDims * (isSurfaceMode() ? dimTime*dimArea : dimTime);
+    const dimensionSet dims =
+        (fieldDims * (isSurfaceMode() ? dimTime*dimArea : dimTime));
 
     if (dims == dimVolume)
     {
@@ -110,16 +97,14 @@ Foam::word Foam::functionObjects::fluxSummary::checkFlowType
     {
         return "mass";
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Unsupported flux field " << fieldName << " with dimensions "
-            << fieldDims
-            << ".  Expected either mass flow or volumetric flow rate."
-            << abort(FatalError);
 
-        return Foam::word::null;
-    }
+    FatalErrorInFunction
+        << "Unsupported flux field " << fieldName << " with dimensions "
+        << fieldDims
+        << ".  Expected either mass flow or volumetric flow rate."
+        << abort(FatalError);
+
+    return word::null;
 }
 
 
@@ -143,8 +128,8 @@ void Foam::functionObjects::fluxSummary::initialiseSurface
     }
 
     names.append(surfName);
-    directions.append(Zero);      // dummy value
-    faceFlip.append(boolList());  // no flip-map
+    directions.append(Zero);        // Dummy value
+    faceFlip.append(boolList());    // No flip-map
 }
 
 
@@ -168,19 +153,19 @@ void Foam::functionObjects::fluxSummary::initialiseSurfaceAndDirection
             << exit(FatalError);
     }
 
-    const surfMesh& s = *surfptr;
+    const auto& s = *surfptr;
     const vector refDir = dir/(mag(dir) + ROOTVSMALL);
 
     names.append(surfName);
     directions.append(refDir);
-    faceFlip.append(boolList(0));
+    faceFlip.append(boolList());    // No flip-map
 
     boolList& flips = faceFlip[faceFlip.size()-1];
     flips.setSize(s.size(), false);
 
     forAll(s, i)
     {
-        // orientation set by comparison with reference direction
+        // Orientation set by comparison with reference direction
         const vector& n = s.faceNormals()[i];
 
         if ((n & refDir) > tolerance_)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -85,12 +85,6 @@ Foam::functionObjects::fieldExpression::fieldExpression
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldExpression::~fieldExpression()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::fieldExpression::read(const dictionary& dict)
@@ -102,10 +96,7 @@ bool Foam::functionObjects::fieldExpression::read(const dictionary& dict)
         dict.readEntry("field", fieldName_);
     }
 
-    if (dict.found("result"))
-    {
-        dict.readEntry("result", resultName_);
-    }
+    dict.readIfPresent("result", resultName_);
 
     return true;
 }
@@ -124,10 +115,8 @@ bool Foam::functionObjects::fieldExpression::execute()
 
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -71,7 +71,7 @@ protected:
         word resultName_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         void setResultName
         (
@@ -93,12 +93,8 @@ protected:
         template<class FOType>
         bool calcAllTypes(FOType& fo);
 
+        //- Calculate expression
         virtual bool calc() = 0;
-
-
-private:
-
-    // Private Member Functions
 
         //- No copy construct
         fieldsExpression(const fieldsExpression&) = delete;
@@ -127,13 +123,13 @@ public:
 
 
     //- Destructor
-    virtual ~fieldsExpression();
+    virtual ~fieldsExpression() = default;
 
 
     // Member Functions
 
         //- Read the fieldsExpression data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Calculate the result fields
         virtual bool execute();

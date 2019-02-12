@@ -269,23 +269,17 @@ Foam::functionObjects::fieldAverage::fieldAverage
 :
     fvMeshFunctionObject(name, runTime, dict),
     prevTimeIndex_(-1),
+    initialised_(false),
     restartOnRestart_(false),
     restartOnOutput_(false),
     periodicRestart_(false),
     restartPeriod_(GREAT),
     restartTime_(GREAT),
-    initialised_(false),
     faItems_(),
     periodIndex_(1)
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fieldAverage::~fieldAverage()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

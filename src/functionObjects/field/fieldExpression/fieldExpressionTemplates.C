@@ -40,18 +40,16 @@ bool Foam::functionObjects::fieldExpression::foundObject
     {
         return true;
     }
-    else
-    {
-        if (debug || verbose)
-        {
-            Warning
-                << "    functionObjects::" << type() << " " << this->name()
-                << " cannot find required object " << name << " of type "
-                << Type::typeName << endl;
-        }
 
-        return false;
+    if (debug || verbose)
+    {
+        Warning
+            << "    functionObjects::" << type() << " " << this->name()
+            << " cannot find required object " << name << " of type "
+            << Type::typeName << endl;
     }
+
+    return false;
 }
 
 

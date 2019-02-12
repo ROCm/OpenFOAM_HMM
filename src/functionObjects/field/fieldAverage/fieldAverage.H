@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -161,6 +161,9 @@ protected:
         //- Time at last call, prevents repeated averaging
         label prevTimeIndex_;
 
+        //- Initialised flag
+        bool initialised_;
+
         //- Restart the averaging process on restart
         Switch restartOnRestart_;
 
@@ -175,9 +178,6 @@ protected:
 
         //- Specific restart time
         scalar restartTime_;
-
-        //- Initialised flag
-        bool initialised_;
 
         //- List of field average items, describing what averages to be
         //  calculated and output
@@ -301,7 +301,7 @@ public:
 
 
     //- Destructor
-    virtual ~fieldAverage();
+    virtual ~fieldAverage() = default;
 
 
     // Member Functions

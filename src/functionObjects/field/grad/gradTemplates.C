@@ -53,10 +53,8 @@ bool Foam::functionObjects::grad::calcGrad()
             mesh_.changing() && mesh_.cache(resultName_)
         );
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

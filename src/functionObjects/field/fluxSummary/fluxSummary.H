@@ -58,12 +58,12 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: fluxSummary  | yes         |
-        write        | write flux data to file |  no  | yes
-        log          | write flux data to standard output | no | yes
-        mode         | mode to generate faces to test | yes |
-        scaleFactor  | optional factor to scale result | no | 1
+        Property    | Description                           | Required | Default
+        type        | Type name: fluxSummary                | yes |
+        write       | Write flux data to file               | no  | yes
+        log         | Write flux data to standard output    | no  | yes
+        mode        | Mode to generate faces to test        | yes |
+        scaleFactor | Optional factor to scale result       | no  | 1
     \endtable
 
     The mode is one of:
@@ -97,6 +97,8 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward Declarations
 class dimensionSet;
 
 namespace functionObjects
@@ -288,7 +290,7 @@ public:
     // Member Functions
 
         //- Read the field fluxSummary data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute, currently does nothing
         virtual bool execute();
