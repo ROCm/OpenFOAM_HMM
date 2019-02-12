@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -131,19 +131,20 @@ void Foam::functionObjects::fluxSummary::initialiseSurface
     DynamicList<boolList>& faceFlip
 ) const
 {
-    const surfMesh* sPtr = mesh_.findObject<surfMesh>(surfName);
-    if (!sPtr)
+    const surfMesh* surfptr = mesh_.cfindObject<surfMesh>(surfName);
+
+    if (!surfptr)
     {
         FatalErrorInFunction
             << "Unable to find surface " << surfName
-            << ".  Valid surfaces are: " << mesh_.sortedNames<surfMesh>()
-            << '.'
+            << ".  Valid surfaces: "
+            << mesh_.sortedNames<surfMesh>() << nl
             << exit(FatalError);
     }
 
     names.append(surfName);
-    directions.append(Zero); // dummy value
-    faceFlip.append(boolList(0)); // no flip-map
+    directions.append(Zero);      // dummy value
+    faceFlip.append(boolList());  // no flip-map
 }
 
 
@@ -156,17 +157,18 @@ void Foam::functionObjects::fluxSummary::initialiseSurfaceAndDirection
     DynamicList<boolList>& faceFlip
 ) const
 {
-    const surfMesh* sPtr = mesh_.findObject<surfMesh>(surfName);
-    if (!sPtr)
+    const surfMesh* surfptr = mesh_.cfindObject<surfMesh>(surfName);
+
+    if (!surfptr)
     {
         FatalErrorInFunction
             << "Unable to find surface " << surfName
-            << ".  Valid surfaces are: " << mesh_.sortedNames<surfMesh>()
-            << '.'
+            << ".  Valid surfaces: "
+            << mesh_.sortedNames<surfMesh>() << nl
             << exit(FatalError);
     }
 
-    const surfMesh& s = *sPtr;
+    const surfMesh& s = *surfptr;
     const vector refDir = dir/(mag(dir) + ROOTVSMALL);
 
     names.append(surfName);
@@ -198,8 +200,8 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
     const word& faceZoneName,
     DynamicList<word>& names,
     DynamicList<vector>& directions,
-    DynamicList<List<label>>& faceID,
-    DynamicList<List<label>>& facePatchID,
+    DynamicList<labelList>& faceID,
+    DynamicList<labelList>& facePatchID,
     DynamicList<boolList>& faceFlip
 ) const
 {
@@ -208,7 +210,8 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
     {
         FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName
-            << ".  Valid faceZones are: " << mesh_.faceZones().names()
+            << ".  Valid zones: "
+            << mesh_.faceZones().sortedNames() << nl
             << exit(FatalError);
     }
     const faceZone& fZone = mesh_.faceZones()[zonei];
@@ -287,8 +290,8 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
     const vector& dir,
     DynamicList<word>& names,
     DynamicList<vector>& directions,
-    DynamicList<List<label>>& faceID,
-    DynamicList<List<label>>& facePatchID,
+    DynamicList<labelList>& faceID,
+    DynamicList<labelList>& facePatchID,
     DynamicList<boolList>& faceFlip
 ) const
 {
@@ -299,7 +302,8 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZoneAndDirection
     {
          FatalErrorInFunction
             << "Unable to find faceZone " << faceZoneName
-            << ".  Valid faceZones are: " << mesh_.faceZones().names()
+            << ".  Valid zones: "
+            << mesh_.faceZones().sortedNames() << nl
             << exit(FatalError);
     }
     const faceZone& fZone = mesh_.faceZones()[zonei];
@@ -393,8 +397,8 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     const vector& dir,
     DynamicList<word>& names,
     DynamicList<vector>& directions,
-    DynamicList<List<label>>& faceID,
-    DynamicList<List<label>>& facePatchID,
+    DynamicList<labelList>& faceID,
+    DynamicList<labelList>& facePatchID,
     DynamicList<boolList>& faceFlip
 ) const
 {
@@ -405,7 +409,8 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
     {
         FatalErrorInFunction
             << "Unable to find cellZone " << cellZoneName
-            << ". Valid zones are: " << mesh_.cellZones().names()
+            << ".  Valid zones: "
+            << mesh_.cellZones().sortedNames() << nl
             << exit(FatalError);
     }
 
@@ -781,67 +786,29 @@ bool Foam::functionObjects::fluxSummary::surfaceModeWrite()
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fluxSummary::fluxSummary
-(
-    const word& name,
-    const Time& runTime,
-    const dictionary& dict
-)
-:
-    fvMeshFunctionObject(name, runTime, dict),
-    writeFile(obr_, name),
-    mode_(mdFaceZone),
-    scaleFactor_(1),
-    phiName_("phi"),
-    zoneNames_(),
-    faceID_(),
-    facePatchID_(),
-    faceFlip_(),
-    filePtrs_(),
-    tolerance_(0.8)
+bool Foam::functionObjects::fluxSummary::update()
 {
-    read(dict);
-}
+    if (!needsUpdate_)
+    {
+        return false;
+    }
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fluxSummary::~fluxSummary()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
-{
-    fvMeshFunctionObject::read(dict);
-    writeFile::read(dict);
-
-    mode_ = modeTypeNames_.get("mode", dict);
-    phiName_ = dict.lookupOrDefault<word>("phi", "phi");
-    scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
-    tolerance_   = dict.lookupOrDefault<scalar>("tolerance", 0.8);
-
-    // Initialise with capacity of 10 faceZones
-    DynamicList<word> faceZoneName(10);
-    DynamicList<vector>       refDir(faceZoneName.capacity());
-    DynamicList<List<label>>  faceID(faceZoneName.capacity());
-    DynamicList<List<label>>  facePatchID(faceZoneName.capacity());
-    DynamicList<boolList>     faceFlips(faceZoneName.capacity());
+    // Initialise with capacity == number of input names
+    DynamicList<word> faceZoneName(zoneNames_.size());
+    DynamicList<vector>    refDir(faceZoneName.capacity());
+    DynamicList<labelList> faceID(faceZoneName.capacity());
+    DynamicList<labelList> facePatchID(faceZoneName.capacity());
+    DynamicList<boolList>  faceFlips(faceZoneName.capacity());
 
     switch (mode_)
     {
         case mdFaceZone:
         {
-            wordList zones(dict.get<wordList>("faceZones"));
-
-            forAll(zones, i)
+            forAll(zoneNames_, zonei)
             {
                 initialiseFaceZone
                 (
-                    zones[i],
+                    zoneNames_[zonei],
                     faceZoneName,
                     refDir, // fill with dummy value
                     faceID,
@@ -853,15 +820,12 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
         case mdFaceZoneAndDirection:
         {
-            List<Tuple2<word, vector>> zoneAndDirection;
-            dict.readEntry("faceZoneAndDirection", zoneAndDirection);
-
-            forAll(zoneAndDirection, i)
+            forAll(zoneNames_, zonei)
             {
                 initialiseFaceZoneAndDirection
                 (
-                    zoneAndDirection[i].first(),
-                    zoneAndDirection[i].second(),
+                    zoneNames_[zonei],
+                    zoneDirections_[zonei],
                     faceZoneName,
                     refDir,
                     faceID,
@@ -873,15 +837,12 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
         case mdCellZoneAndDirection:
         {
-            List<Tuple2<word, vector>> zoneAndDirection;
-            dict.readEntry("cellZoneAndDirection", zoneAndDirection);
-
-            forAll(zoneAndDirection, i)
+            forAll(zoneNames_, zonei)
             {
                 initialiseCellZoneAndDirection
                 (
-                    zoneAndDirection[i].first(),
-                    zoneAndDirection[i].second(),
+                    zoneNames_[zonei],
+                    zoneDirections_[zonei],
                     faceZoneName,
                     refDir,
                     faceID,
@@ -893,13 +854,11 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
         case mdSurface:
         {
-            wordList surfs(dict.get<wordList>("surfaces"));
-
-            forAll(surfs, i)
+            forAll(zoneNames_, zonei)
             {
                 initialiseSurface
                 (
-                    surfs[i],
+                    zoneNames_[zonei],
                     faceZoneName,
                     refDir,
                     faceFlips
@@ -909,15 +868,12 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
         }
         case mdSurfaceAndDirection:
         {
-            List<Tuple2<word, vector>> surfAndDirection;
-            dict.readEntry("surfaceAndDirection", surfAndDirection);
-
-            forAll(surfAndDirection, i)
+            forAll(zoneNames_, zonei)
             {
                 initialiseSurfaceAndDirection
                 (
-                    surfAndDirection[i].first(),
-                    surfAndDirection[i].second(),
+                    zoneNames_[zonei],
+                    zoneDirections_[zonei],
                     faceZoneName,
                     refDir,
                     faceFlips
@@ -925,12 +881,8 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
             }
             break;
         }
-        default:
-        {
-            FatalIOErrorInFunction(dict)
-                << "unhandled enumeration " << modeTypeNames_[mode_]
-                << abort(FatalIOError);
-        }
+
+        // Compiler warning if we forgot an enumeration
     }
 
     zoneNames_.transfer(faceZoneName);
@@ -962,7 +914,7 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
 
     if (writeToFile())
     {
-        filePtrs_.setSize(zoneNames_.size());
+        filePtrs_.resize(zoneNames_.size());
 
         forAll(filePtrs_, zonei)
         {
@@ -977,6 +929,118 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
             );
         }
     }
+
+    Info<< endl;
+
+    needsUpdate_ = false;
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::functionObjects::fluxSummary::fluxSummary
+(
+    const word& name,
+    const Time& runTime,
+    const dictionary& dict
+)
+:
+    fvMeshFunctionObject(name, runTime, dict),
+    writeFile(obr_, name),
+    needsUpdate_(true),
+    mode_(mdFaceZone),
+    scaleFactor_(1),
+    phiName_("phi"),
+    zoneNames_(),
+    zoneDirections_(),
+    faceID_(),
+    facePatchID_(),
+    faceFlip_(),
+    filePtrs_(),
+    tolerance_(0.8)
+{
+    read(dict);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
+{
+    fvMeshFunctionObject::read(dict);
+    writeFile::read(dict);
+
+    needsUpdate_ = true;
+    mode_ = modeTypeNames_.get("mode", dict);
+    phiName_ = dict.lookupOrDefault<word>("phi", "phi");
+    scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
+    tolerance_   = dict.lookupOrDefault<scalar>("tolerance", 0.8);
+
+    zoneNames_.clear();
+    zoneDirections_.clear();
+
+    List<Tuple2<word, vector>> nameAndDirection;
+
+    switch (mode_)
+    {
+        case mdFaceZone:
+        {
+            dict.readEntry("faceZones", zoneNames_);
+            break;
+        }
+        case mdFaceZoneAndDirection:
+        {
+            dict.readEntry("faceZoneAndDirection", nameAndDirection);
+            break;
+        }
+        case mdCellZoneAndDirection:
+        {
+            dict.readEntry("cellZoneAndDirection", nameAndDirection);
+            break;
+        }
+        case mdSurface:
+        {
+            dict.readEntry("surfaces", zoneNames_);
+            break;
+        }
+        case mdSurfaceAndDirection:
+        {
+            dict.readEntry("surfaceAndDirection", nameAndDirection);
+            break;
+        }
+        default:
+        {
+            FatalIOErrorInFunction(dict)
+                << "unhandled enumeration " << modeTypeNames_[mode_]
+                << abort(FatalIOError);
+        }
+    }
+
+
+    // Split name/vector into separate lists
+    if (nameAndDirection.size())
+    {
+        zoneNames_.resize(nameAndDirection.size());
+        zoneDirections_.resize(nameAndDirection.size());
+
+        label zonei = 0;
+
+        for (const Tuple2<word, vector>& nameDirn : nameAndDirection)
+        {
+            zoneNames_[zonei] = nameDirn.first();
+            zoneDirections_[zonei] = nameDirn.second();
+            ++zonei;
+        }
+
+        nameAndDirection.clear();
+    }
+
+
+    Info<< type() << ' ' << name() << " ("
+        << modeTypeNames_[mode_] << ") with selection:\n    "
+        << flatOutput(zoneNames_) << endl;
 
     return !zoneNames_.empty();
 }
@@ -1033,6 +1097,8 @@ bool Foam::functionObjects::fluxSummary::execute()
 
 bool Foam::functionObjects::fluxSummary::write()
 {
+    update();
+
     if (isSurfaceMode())
     {
         return surfaceModeWrite();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -92,7 +92,6 @@ SourceFiles
 #include "writeFile.H"
 #include "vector.H"
 #include "DynamicList.H"
-#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -102,6 +101,7 @@ class dimensionSet;
 
 namespace functionObjects
 {
+
 /*---------------------------------------------------------------------------*\
                          Class fluxSummary Declaration
 \*---------------------------------------------------------------------------*/
@@ -131,7 +131,10 @@ public:
 
 protected:
 
-    // Protected data
+    // Protected Data
+
+        //- Track if the surface needs an update
+        bool needsUpdate_;
 
         //- Mode for face determination
         modeType mode_;
@@ -148,11 +151,14 @@ protected:
             //- Region (zone/surface) names
             List<word> zoneNames_;
 
+            //- Region (zone/surface) directions
+            List<vector> zoneDirections_;
+
             //- Face IDs
-            List<List<label>> faceID_;
+            List<labelList> faceID_;
 
             //- Face patch IDs
-            List<List<label>> facePatchID_;
+            List<labelList> facePatchID_;
 
             //- Face flip map signs
             List<boolList> faceFlip_;
@@ -203,8 +209,8 @@ protected:
             const word& faceZoneName,
             DynamicList<word>& names,
             DynamicList<vector>& dir,
-            DynamicList<List<label>>& faceID,
-            DynamicList<List<label>>& facePatchID,
+            DynamicList<labelList>& faceID,
+            DynamicList<labelList>& facePatchID,
             DynamicList<boolList>& faceFlip
         ) const;
 
@@ -215,8 +221,8 @@ protected:
             const vector& refDir,
             DynamicList<word>& names,
             DynamicList<vector>& dir,
-            DynamicList<List<label>>& faceID,
-            DynamicList<List<label>>& facePatchID,
+            DynamicList<labelList>& faceID,
+            DynamicList<labelList>& facePatchID,
             DynamicList<boolList>& faceFlip
         ) const;
 
@@ -227,13 +233,17 @@ protected:
             const vector& refDir,
             DynamicList<word>& names,
             DynamicList<vector>& dir,
-            DynamicList<List<label>>& faceID,
-            DynamicList<List<label>>& facePatchID,
+            DynamicList<labelList>& faceID,
+            DynamicList<labelList>& facePatchID,
             DynamicList<boolList>& faceFlip
         ) const;
 
         //- Calculate the total area for the surface or derived faceZone
         scalar totalArea(const label idx) const;
+
+        //- Initialise - after read(), before write()
+        bool update();
+
 
         //- Output file header information
         virtual void writeFileHeader
@@ -272,7 +282,7 @@ public:
 
 
     //- Destructor
-    virtual ~fluxSummary();
+    virtual ~fluxSummary() = default;
 
 
     // Member Functions
