@@ -79,27 +79,27 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description                      | Required    | Default
-        type         | type name: surfaceFieldValue     | yes         |
-        log          | write data to standard output    | no          | no
-        writeFields  | Write the region field values    | yes         |
-        writeArea    | Write the area of the surfaceFieldValue | no   |
-        surfaceFormat | Output value format             | no          |
-        regionType   | Face regionType: see below       | yes         |
-        name         | Name of face regionType if required  | no      |
-        operation    | Operation to perform             | yes         |
-        postOperation | Post-operation to perform       | no          | none
-        weightField  | Name of field to apply weighting | no          |
-        scaleFactor  | Scale factor                     | no          | 1
-        fields       | List of fields to operate on     | yes         |
+        Property     | Description                          | Required | Default
+        type         | Type name: surfaceFieldValue         | yes |
+        log          | Write data to standard output        | no  | no
+        regionType   | Face regionType: see below           | yes |
+        name         | Name for regionType                  | yes |
+        operation    | Operation to perform                 | yes |
+        postOperation | Post-operation to perform           | no  | none
+        fields       | List of fields to operate on         | yes |
+        weightField  | Name of field to apply weighting     | no  |
+        scaleFactor  | Output value scaling factor          | no  | 1
+        writeArea    | Write the surface area               | no  |
+        writeFields  | Write the region field values        | yes |
+        surfaceFormat | Output value format                 | no  | none
     \endtable
 
     Where \c regionType is defined by
     \plaintable
-        faceZone     | Requires a \b name entry to specify the faceZone
-        patch        | Requires a \b name entry to specify the patch
-        surface      | Requires a \b name entry to specify the surfMesh
-        sampledSurface | Requires a \b sampledSurfaceDict sub-dictionary
+        faceZone     | The \b name entry to specify the faceZone
+        patch        | The \b name entry to specify the patch
+        surface      | The \b name entry to specify the surfMesh
+        sampledSurface | A \b sampledSurfaceDict sub-dictionary and \b name
     \endplaintable
 
     The \c operation is one of:
@@ -191,6 +191,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class sampledSurface;
 class surfaceWriter;
 
@@ -214,10 +215,10 @@ public:
         //- Region type enumeration
         enum regionTypes
         {
-            stFaceZone,         //!< Calculate on a faceZone
-            stPatch,            //!< Calculate on a patch
-            stSurface,          //!< Calculate with fields on a surfMesh
-            stSampledSurface    //!< Sample onto surface and calculate
+            stFaceZone = 0x01,   //!< Calculate on a faceZone
+            stPatch    = 0x02,   //!< Calculate on a patch
+            stSurface  = 0x11,   //!< Calculate with fields on a surfMesh
+            stSampled  = 0x12    //!< Sample onto surface and calculate
         };
 
         //- Region type names
@@ -336,7 +337,7 @@ private:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Region type
         regionTypes regionType_;
@@ -350,11 +351,14 @@ protected:
         //- Weight field name - optional
         word weightFieldName_;
 
-        //- Total area of the surfaceFieldValue
-        scalar totalArea_;
+        //- Track if the surface needs an update
+        bool needsUpdate_;
 
         //- Optionally write the area of the surfaceFieldValue
         bool writeArea_;
+
+        //- Total area of the surfaceFieldValue
+        scalar totalArea_;
 
         //- Global number of faces
         label nFaces_;
@@ -372,9 +376,8 @@ protected:
             //  (false: use as-is, true: negate)
             boolList faceFlip_;
 
-
-        //- The sampledSurface (if operating on sampledSurface)
-        autoPtr<sampledSurface> surfacePtr_;
+        //- The sampledSurface (when operating on sampledSurface)
+        autoPtr<sampledSurface> sampledPtr_;
 
         //- Surface writer
         autoPtr<surfaceWriter> surfaceWriterPtr_;
@@ -384,6 +387,12 @@ protected:
 
         //- The volume mesh or surface registry being used
         const objectRegistry& obr() const;
+
+        //- Can the surface definition sample surface-fields?
+        inline bool withSurfaceFields() const;
+
+        //- Can use mesh topological merge?
+        inline bool withTopologicalMerge() const;
 
         //- Return the local list of face IDs
         inline const labelList& faceId() const;
@@ -408,8 +417,9 @@ protected:
         template<class WeightType>
         inline bool canWeight(const Field<WeightType>& weightField) const;
 
-        //- Initialise, e.g. face addressing
-        void initialise(const dictionary& dict);
+        //- Update the surface and surface information as required.
+        //  Do nothing (and return false) if no update was required
+        bool update();
 
         //- Return true if the field name is known and a valid type
         template<class Type>
@@ -420,7 +430,7 @@ protected:
         tmp<Field<Type>> getFieldValues
         (
             const word& fieldName,
-            const bool mustGet = false
+            const bool mandatory = false
         ) const;
 
         //- Apply the 'operation' to the values. Operation must preserve Type.
@@ -533,7 +543,7 @@ public:
     // Public Member Functions
 
         //- Return the region type
-        inline const regionTypes& regionType() const;
+        inline regionTypes regionType() const;
 
         //- Return the output directory
         inline fileName outputDir() const;

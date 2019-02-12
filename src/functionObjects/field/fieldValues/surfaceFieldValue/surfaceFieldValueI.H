@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -28,6 +28,20 @@ License
 #include "Time.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::
+withSurfaceFields() const
+{
+    return (stFaceZone == regionType_ || stPatch == regionType_);
+}
+
+
+inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::
+withTopologicalMerge() const
+{
+    return (stFaceZone == regionType_ || stPatch == regionType_);
+}
+
 
 inline const Foam::labelList&
 Foam::functionObjects::fieldValues::surfaceFieldValue::faceId() const
@@ -68,7 +82,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::usesWeight() const
 }
 
 
-inline const Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes&
+inline Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes
 Foam::functionObjects::fieldValues::surfaceFieldValue::regionType() const
 {
     return regionType_;

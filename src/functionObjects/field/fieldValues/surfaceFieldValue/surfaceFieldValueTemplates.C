@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -64,7 +64,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::validField
     (
         foundObject<smt>(fieldName)
      || foundObject<vf>(fieldName)
-     || (regionType_ != stSampledSurface && foundObject<sf>(fieldName))
+     || (withSurfaceFields() && foundObject<sf>(fieldName))
     );
 }
 
@@ -74,7 +74,7 @@ Foam::tmp<Foam::Field<Type>>
 Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
 (
     const word& fieldName,
-    const bool mustGet
+    const bool mandatory
 ) const
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
@@ -85,7 +85,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
     {
         return lookupObject<smt>(fieldName);
     }
-    else if (regionType_ != stSampledSurface && foundObject<sf>(fieldName))
+    else if (withSurfaceFields() && foundObject<sf>(fieldName))
     {
         return filterField(lookupObject<sf>(fieldName));
     }
@@ -93,16 +93,16 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
     {
         const vf& fld = lookupObject<vf>(fieldName);
 
-        if (surfacePtr_.valid())
+        if (sampledPtr_.valid())
         {
-            if (surfacePtr_().interpolate())
+            if (sampledPtr_().interpolate())
             {
                 const interpolationCellPoint<Type> interp(fld);
-                tmp<Field<Type>> tintFld(surfacePtr_().interpolate(interp));
+                tmp<Field<Type>> tintFld(sampledPtr_().interpolate(interp));
                 const Field<Type>& intFld = tintFld();
 
                 // Average
-                const faceList& faces = surfacePtr_().faces();
+                const faceList& faces = sampledPtr_().faces();
                 auto tavg = tmp<Field<Type>>::New(faces.size(), Zero);
                 auto& avg = tavg.ref();
 
@@ -122,7 +122,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
             {
                 const interpolationCell<Type> interp(fld);
 
-                return surfacePtr_().sample(interp);
+                return sampledPtr_().sample(interp);
             }
         }
         else
@@ -131,7 +131,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
         }
     }
 
-    if (mustGet)
+    if (mandatory)
     {
         FatalErrorInFunction
             << "Field " << fieldName << " not found in database"
