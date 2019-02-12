@@ -27,7 +27,7 @@ License
 
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
+#include "polySurfaceFields.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -36,7 +36,7 @@ bool Foam::functionObjects::fieldsExpression::calcFieldTypes(FOType& fo)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> SurfFieldType;
 
     if (foundObject<VolFieldType>(fieldNames_[0]))
     {

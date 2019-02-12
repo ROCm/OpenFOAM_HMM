@@ -27,7 +27,7 @@ License
 
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
+#include "polySurfaceFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -36,7 +36,7 @@ bool Foam::functionObjects::magSqr::calcMagSqr()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> SurfFieldType;
 
     if (foundObject<VolFieldType>(fieldName_, false))
     {

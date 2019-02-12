@@ -28,7 +28,7 @@ License
 #include "fieldAverageItem.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
+#include "polySurfaceFields.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -99,7 +99,7 @@ void Foam::functionObjects::fieldAverage::addMeanField
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> SurfFieldType;
 
     if (item.mean())
     {
@@ -169,7 +169,7 @@ void Foam::functionObjects::fieldAverage::restoreWindowFields
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> SurfFieldType;
 
     if (item.window() > 0)
     {
@@ -243,11 +243,11 @@ void Foam::functionObjects::fieldAverage::addPrime2MeanField
 {
     typedef GeometricField<Type1, fvPatchField, volMesh> VolFieldType1;
     typedef GeometricField<Type1, fvsPatchField, surfaceMesh> SurfaceFieldType1;
-    typedef DimensionedField<Type1, surfGeoMesh> SurfFieldType1;
+    typedef DimensionedField<Type1, polySurfaceGeoMesh> SurfFieldType1;
 
     typedef GeometricField<Type2, fvPatchField, volMesh> VolFieldType2;
     typedef GeometricField<Type2, fvsPatchField, surfaceMesh> SurfaceFieldType2;
-    typedef DimensionedField<Type2, surfGeoMesh> SurfFieldType2;
+    typedef DimensionedField<Type2, polySurfaceGeoMesh> SurfFieldType2;
 
     if (item.prime2Mean())
     {
@@ -312,7 +312,7 @@ void Foam::functionObjects::fieldAverage::storeWindowFields()
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> SurfFieldType;
 
     for (fieldAverageItem& item : faItems_)
     {
@@ -331,7 +331,7 @@ void Foam::functionObjects::fieldAverage::calculateMeanFields() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> SurfFieldType;
 
     for (const fieldAverageItem& item : faItems_)
     {
@@ -347,11 +347,11 @@ void Foam::functionObjects::fieldAverage::calculatePrime2MeanFields() const
 {
     typedef GeometricField<Type1, fvPatchField, volMesh> VolFieldType1;
     typedef GeometricField<Type1, fvsPatchField, surfaceMesh> SurfaceFieldType1;
-    typedef DimensionedField<Type1, surfGeoMesh> SurfFieldType1;
+    typedef DimensionedField<Type1, polySurfaceGeoMesh> SurfFieldType1;
 
     typedef GeometricField<Type2, fvPatchField, volMesh> VolFieldType2;
     typedef GeometricField<Type2, fvsPatchField, surfaceMesh> SurfaceFieldType2;
-    typedef DimensionedField<Type2, surfGeoMesh> SurfFieldType2;
+    typedef DimensionedField<Type2, polySurfaceGeoMesh> SurfFieldType2;
 
     for (const fieldAverageItem& item : faItems_)
     {
@@ -391,11 +391,11 @@ void Foam::functionObjects::fieldAverage::addMeanSqrToPrime2Mean() const
 {
     typedef GeometricField<Type1, fvPatchField, volMesh> VolFieldType1;
     typedef GeometricField<Type1, fvsPatchField, surfaceMesh> SurfaceFieldType1;
-    typedef DimensionedField<Type1, surfGeoMesh> SurfFieldType1;
+    typedef DimensionedField<Type1, polySurfaceGeoMesh> SurfFieldType1;
 
     typedef GeometricField<Type2, fvPatchField, volMesh> VolFieldType2;
     typedef GeometricField<Type2, fvsPatchField, surfaceMesh> SurfaceFieldType2;
-    typedef DimensionedField<Type2, surfGeoMesh> SurfFieldType2;
+    typedef DimensionedField<Type2, polySurfaceGeoMesh> SurfFieldType2;
 
     for (const fieldAverageItem& item : faItems_)
     {
@@ -431,7 +431,7 @@ void Foam::functionObjects::fieldAverage::writeFields() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> SurfFieldType;
 
     for (const fieldAverageItem& item : faItems_)
     {

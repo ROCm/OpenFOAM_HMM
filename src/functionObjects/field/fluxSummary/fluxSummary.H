@@ -120,14 +120,14 @@ public:
         //- Face mode type
         enum modeType
         {
-            mdFaceZone,                 //!< face zone
-            mdFaceZoneAndDirection,     //!< face zone with prescribed direction
-            mdCellZoneAndDirection,     //!< cell zone with prescribed direction
-            mdSurface,                  //!< surfMesh
-            mdSurfaceAndDirection       //!< surfMesh with prescribed direction
+            mdFaceZone,             //!< Face zone
+            mdFaceZoneAndDirection, //!< Face zone with prescribed direction
+            mdCellZoneAndDirection, //!< Cell zone with prescribed direction
+            mdSurface,              //!< A functionObject surface
+            mdSurfaceAndDirection   //!< A surface with prescribed direction
         };
 
-        //- Mode type names
+        //- Face mode names
         static const Enum<modeType> modeTypeNames_;
 
 

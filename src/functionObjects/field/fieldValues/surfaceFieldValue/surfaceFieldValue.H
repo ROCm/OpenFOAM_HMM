@@ -98,7 +98,7 @@ Usage
     \plaintable
         faceZone     | The \b name entry to specify the faceZone
         patch        | The \b name entry to specify the patch
-        surface      | The \b name entry to specify the surfMesh
+        functionObjectSurface | The \b name entry to specify a polySurface
         sampledSurface | A \b sampledSurfaceDict sub-dictionary and \b name
     \endplaintable
 
@@ -134,13 +134,14 @@ Note
     - The values reported by the areaNormalAverage and areaNormalIntegrate
       operations are written as the first component of a field with the same
       rank as the input field.
-    - faces on empty patches get ignored
-    - if the field is a volField the \c faceZone can only consist of boundary
+    - Faces on empty patches get ignored
+    - If the field is a volField the \c faceZone can only consist of boundary
       faces
-    - Using \c surface:
+    - Using \c functionObjectSurface:
       - The keyword %subRegion should not be used to select surfaces.
-        Specify instead the regionType 'surface' and provide the surface name.
-    - using \c sampledSurface:
+        Instead specify the regionType 'functionObjectSurface' and provide
+        the name.
+    - Using \c sampledSurface:
         - not available for surface fields
         - if interpolate=true they use \c interpolationCellPoint
           otherwise they use cell values
@@ -180,11 +181,11 @@ SourceFiles
 
 #include "fieldValue.H"
 #include "Enum.H"
-#include "meshedSurf.H"
 #include "surfaceMesh.H"
+#include "polySurface.H"
 #include "fvsPatchField.H"
 #include "volFieldsFwd.H"
-#include "surfFieldsFwd.H"
+#include "polySurfaceFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -217,7 +218,7 @@ public:
         {
             stFaceZone = 0x01,   //!< Calculate on a faceZone
             stPatch    = 0x02,   //!< Calculate on a patch
-            stSurface  = 0x11,   //!< Calculate with fields on a surfMesh
+            stObject   = 0x11,   //!< Calculate with function object surface
             stSampled  = 0x12    //!< Sample onto surface and calculate
         };
 

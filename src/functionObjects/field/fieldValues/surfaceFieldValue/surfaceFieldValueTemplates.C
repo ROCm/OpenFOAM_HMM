@@ -27,7 +27,7 @@ License
 
 #include "surfaceFieldValue.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
+#include "polySurfaceFields.H"
 #include "volFields.H"
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
@@ -58,7 +58,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::validField
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
     typedef GeometricField<Type, fvPatchField, volMesh> vf;
-    typedef DimensionedField<Type, surfGeoMesh> smt;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> smt;
 
     return
     (
@@ -79,7 +79,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
     typedef GeometricField<Type, fvPatchField, volMesh> vf;
-    typedef DimensionedField<Type, surfGeoMesh> smt;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> smt;
 
     if (foundObject<smt>(fieldName))
     {

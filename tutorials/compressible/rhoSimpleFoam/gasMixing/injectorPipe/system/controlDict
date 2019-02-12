@@ -55,8 +55,6 @@ endTime         1200;
 deltaT          1;
 writeInterval   100;
 
-#include "sampleControls"
-
 functions
 {
     #include "abort"

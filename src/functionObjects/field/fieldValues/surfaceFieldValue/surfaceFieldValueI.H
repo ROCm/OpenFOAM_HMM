@@ -26,13 +26,19 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Time.H"
+#include "sampledSurface.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::
 withSurfaceFields() const
 {
-    return (stFaceZone == regionType_ || stPatch == regionType_);
+    return
+    (
+        stFaceZone == regionType_
+     || stPatch == regionType_
+     || (sampledPtr_.valid() && sampledPtr_->withSurfaceFields())
+    );
 }
 
 

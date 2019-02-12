@@ -1,17 +1,19 @@
 // -*- C++ -*-
 
-// ************************************************************************* //
-
-// Transcribe volume fields to surfaces.
-fieldTransfer
+// Sample volume fields to surfaces and hold on registry.
+sampled
 {
-    type    surfMeshes;
+    type    surfaces;
     libs    ("libsampling.so");
     log     true;
-    writeControl    none;
-    createOnRead    true;
+    verbose true;
+
     executeControl  timeStep;
     executeInterval 1;
+    writeControl    none;
+    surfaceFormat   none;
+
+    sampleOnExecute true;
 
     // Includes a rhoU derived field
     fields  (rho U tracer0 rhoU);
@@ -19,31 +21,31 @@ fieldTransfer
     // Remove derived fields we created prior
     removeFieldsOnExecute   (pTotal);
 
-
-    baseCfg
+    _sampleMesh
     {
-        type        sampledTriSurfaceMesh;
-        source      cells;
+        type    sampledTriSurfaceMesh;
+        source  cells;
+        store   true;
     }
 
     surfaces
-    (
+    {
         plane-0.25
         {
-            $baseCfg
+            ${_sampleMesh}
             surface     plane-0.25.stl;
         }
         plane-0.45
         {
-            $baseCfg
+            ${_sampleMesh}
             surface     plane-0.45.stl;
         }
         plane-0.55
         {
-            $baseCfg
+            ${_sampleMesh}
             surface     plane-0.55.stl;
         }
-    );
+    }
 }
 
 // ************************************************************************* //
