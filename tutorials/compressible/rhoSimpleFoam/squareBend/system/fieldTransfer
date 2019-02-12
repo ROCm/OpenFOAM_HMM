@@ -13,7 +13,7 @@ fieldTransfer
     executeControl  timeStep;
     executeInterval 1;
 
-    fields      (p rho U T);
+    fields      (p rho U T rhoU pTotal);
 
     // Remove derived fields we created prior
     removeFieldsOnExecute   (rhoU pTotal);
