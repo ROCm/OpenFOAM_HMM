@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -43,26 +43,22 @@ namespace functionObjects
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 const Foam::objectRegistry&
-Foam::functionObjects::regionFunctionObject::whichSubRegistry
-(
-    const objectRegistry& obr,
-    const dictionary& dict
-)
-{
-    word subName;
-    if (dict.readIfPresent("subRegion", subName))
-    {
-        return obr.lookupObject<objectRegistry>(subName);
-    }
-
-    return obr;
-}
-
-
-const Foam::objectRegistry&
 Foam::functionObjects::regionFunctionObject::obr() const
 {
-    return subObr_;
+    if (!obrPtr_ && !subRegistryName_.empty())
+    {
+        // Recursive - so we also find things registered on Time
+        obrPtr_ = obr_.cfindObject<objectRegistry>(subRegistryName_, true);
+
+        // Also search functionObject output ("functionObjectObjects")
+        if (!obrPtr_)
+        {
+            obrPtr_ =
+                storedObjects().cfindObject<objectRegistry>(subRegistryName_);
+        }
+    }
+
+    return (obrPtr_ ? *obrPtr_ : obr_);
 }
 
 
@@ -140,6 +136,7 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
 )
 :
     stateFunctionObject(name, runTime),
+    subRegistryName_(dict.lookupOrDefault<word>("subRegion", word::null)),
     obr_
     (
         runTime.lookupObject<objectRegistry>
@@ -147,7 +144,7 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
             dict.lookupOrDefault("region", polyMesh::defaultRegion)
         )
     ),
-    subObr_(whichSubRegistry(obr_, dict))
+    obrPtr_(nullptr)
 {}
 
 
@@ -159,8 +156,9 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
 )
 :
     stateFunctionObject(name, obr.time()),
+    subRegistryName_(dict.lookupOrDefault<word>("subRegion", word::null)),
     obr_(obr),
-    subObr_(whichSubRegistry(obr_, dict))
+    obrPtr_(nullptr)
 {}
 
 
@@ -168,7 +166,13 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
 
 bool Foam::functionObjects::regionFunctionObject::read(const dictionary& dict)
 {
-    return stateFunctionObject::read(dict);
+    stateFunctionObject::read(dict);
+
+    subRegistryName_ = dict.lookupOrDefault<word>("subRegion", word::null);
+
+    obrPtr_ = nullptr;
+
+    return true;
 }
 
 

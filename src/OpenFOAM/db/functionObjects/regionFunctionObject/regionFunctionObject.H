@@ -29,8 +29,17 @@ Class
 Description
     Specialization of Foam::functionObject for a region and providing a
     reference to the region Foam::objectRegistry.
-    Also provides support for referencing a sub-region, which is typically
-    needed when dealing with surfMesh and their fields.
+
+    Also provides support for referencing an alternative objectRegistry
+    that can hold fields. This may be used, for example, to access
+    stored surfaces and fields.
+
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        region      | Name of the mesh region               | no | region0
+        subRegion   | Name for alternative objectRegistry   | no | ""
+    \endtable
 
 See also
     Foam::functionObjects::stateFunctionObject
@@ -69,24 +78,18 @@ protected:
 
     // Protected Member Data
 
+        //- Name for alternative object registry
+        word subRegistryName_;
+
         //- Reference to the region objectRegistry
         const objectRegistry& obr_;
 
-        //- Optional reference to the sub-region objectRegistry.
-        //  If a sub-region is not in effect, this reference is identical
-        //  to the usual region objectRegistry.
-        const objectRegistry& subObr_;
+        //- Pointer to alternative (eg, sub-region) objectRegistry.
+        //  If a sub-region is not in effect, this is a nullptr
+        mutable const objectRegistry* obrPtr_;
 
 
     // Protected Member Functions
-
-        //- Selector for alternative sub-registry,
-        //  when the keyword %subRegion is present in the dictionary
-        static const objectRegistry& whichSubRegistry
-        (
-            const objectRegistry& obr,
-            const dictionary& dict
-        );
 
         //- The region or sub-region registry being used
         virtual const objectRegistry& obr() const;
