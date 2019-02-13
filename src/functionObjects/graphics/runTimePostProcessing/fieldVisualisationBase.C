@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,25 +27,27 @@ License
 #include "fieldVisualisationBase.H"
 #include "runTimePostProcessing.H"
 
+#include "doubleVector.H"
+#include "foamVtkTools.H"
+
 // VTK includes
 #include "vtkArrowSource.h"
+#include "vtkCellDataToPointData.h"
 #include "vtkCellData.h"
 #include "vtkColorTransferFunction.h"
-#include "vtkFloatArray.h"
+#include "vtkCompositeDataSet.h"
+#include "vtkDataObjectTreeIterator.h"
+#include "vtkFieldData.h"
 #include "vtkGlyph3D.h"
 #include "vtkLookupTable.h"
 #include "vtkPointData.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
-#include "vtkScalarBarActor.h"
 #include "vtkSmartPointer.h"
 #include "vtkSphereSource.h"
-#include "vtkTextActor.h"
-#include "vtkTextProperty.h"
-#include "vtkCellDataToPointData.h"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::Enum
 <
@@ -69,11 +69,321 @@ const Foam::Enum
 Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
 colourMapTypeNames
 ({
-    { colourMapType::cmRainbow, "rainbow" },
-    { colourMapType::cmBlueWhiteRed, "blueWhiteRed" },
+    { colourMapType::cmCoolToWarm, "coolToWarm" },
+    { colourMapType::cmCoolToWarm, "blueWhiteRed" },
+    { colourMapType::cmColdAndHot, "coldAndHot" },
     { colourMapType::cmFire, "fire" },
+    { colourMapType::cmRainbow, "rainbow" },
     { colourMapType::cmGreyscale, "greyscale" },
+    { colourMapType::cmGreyscale, "grayscale" },
+    { colourMapType::cmXray, "xray" },
 });
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::fieldSummary
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+queryFieldSummary
+(
+    const word& fieldName,
+    vtkDataSet* dataset
+)
+{
+    fieldSummary queried;
+
+    if (dataset)
+    {
+        vtkDataArray* array;
+
+        array = vtkDataArray::SafeDownCast
+        (
+            dataset->GetCellData()->GetAbstractArray(fieldName.c_str())
+        );
+
+        if (array)
+        {
+            queried.nComponents_ = array->GetNumberOfComponents();
+            queried.association_ |= FieldAssociation::CELL_DATA;
+            queried.range_ += vtk::Tools::rangeOf(array);
+        }
+
+        array = vtkDataArray::SafeDownCast
+        (
+            dataset->GetPointData()->GetAbstractArray(fieldName.c_str())
+        );
+
+        if (array)
+        {
+            queried.nComponents_ = array->GetNumberOfComponents();
+            queried.association_ |= FieldAssociation::POINT_DATA;
+            queried.range_ += vtk::Tools::rangeOf(array);
+        }
+    }
+
+    return queried;
+}
+
+
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::fieldSummary
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+queryFieldSummary
+(
+    const word& fieldName,
+    vtkCompositeDataSet* data
+)
+{
+    fieldSummary queried;
+
+    auto iter = vtkSmartPointer<vtkDataObjectTreeIterator>::New();
+
+    iter->SetDataSet(data);
+    iter->VisitOnlyLeavesOn();
+    iter->SkipEmptyNodesOn();
+
+    for
+    (
+        iter->InitTraversal();
+        !iter->IsDoneWithTraversal();
+        iter->GoToNextItem()
+    )
+    {
+        vtkDataSet* dataset = vtkDataSet::SafeDownCast
+        (
+            iter->GetCurrentDataObject()
+        );
+
+        if (dataset)
+        {
+            fieldSummary local(queryFieldSummary(fieldName, dataset));
+
+            if (!queried.nComponents_)
+            {
+                queried.nComponents_ = local.nComponents_;
+            }
+
+            queried.association_ |= local.association_;
+            queried.range_ += local.range_;
+        }
+    }
+
+    return queried;
+}
+
+
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::FieldAssociation
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+queryFieldAssociation
+(
+    const word& fieldName,
+    vtkDataSet* dataset
+)
+{
+    unsigned where(FieldAssociation::NO_DATA);
+
+    if (dataset)
+    {
+        if (dataset->GetCellData()->HasArray(fieldName.c_str()))
+        {
+            where |= FieldAssociation::CELL_DATA;
+        }
+        if (dataset->GetPointData()->HasArray(fieldName.c_str()))
+        {
+            where |= FieldAssociation::POINT_DATA;
+        }
+    }
+
+    return FieldAssociation(where);
+}
+
+
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::FieldAssociation
+Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+queryFieldAssociation
+(
+    const word& fieldName,
+    vtkCompositeDataSet* data
+)
+{
+    unsigned where(FieldAssociation::NO_DATA);
+
+    auto iter = vtkSmartPointer<vtkDataObjectTreeIterator>::New();
+
+    iter->SetDataSet(data);
+    iter->VisitOnlyLeavesOn();
+    iter->SkipEmptyNodesOn();
+
+    for
+    (
+        iter->InitTraversal();
+        !iter->IsDoneWithTraversal();
+        iter->GoToNextItem()
+    )
+    {
+        vtkDataSet* dataset = vtkDataSet::SafeDownCast
+        (
+            iter->GetCurrentDataObject()
+        );
+
+        where |= queryFieldAssociation(fieldName, dataset);
+    }
+
+    return FieldAssociation(where);
+}
+
+
+void Foam::functionObjects::runTimePostPro::fieldVisualisationBase::addMagField
+(
+    const word& fieldName,
+    vtkFieldData* fieldData
+)
+{
+    if (!fieldData)
+    {
+        return;
+    }
+
+    vtkDataArray* input = vtkDataArray::SafeDownCast
+    (
+        fieldData->GetAbstractArray(fieldName.c_str())
+    );
+
+    if (!input)
+    {
+        return;
+    }
+
+    const word magFieldName = "mag(" + fieldName + ")";
+
+    vtkDataArray* output = vtkDataArray::SafeDownCast
+    (
+        fieldData->GetAbstractArray(magFieldName.c_str())
+    );
+
+    if (output)
+    {
+        return;
+    }
+
+
+    // Simplfy and only handle scalar/vector input
+
+    const int nCmpt = input->GetNumberOfComponents();
+    const vtkIdType len = input->GetNumberOfTuples();
+
+    if (nCmpt == 1)
+    {
+        auto data = vtkSmartPointer<vtkFloatArray>::New();
+
+        data->SetName(magFieldName.c_str());
+        data->SetNumberOfComponents(1);
+        data->SetNumberOfTuples(len);
+
+        double scratch;
+        for (vtkIdType i=0; i < len; ++i)
+        {
+            input->GetTuple(i, &scratch);
+
+            scratch = Foam::mag(scratch);
+            data->SetTuple(i, &scratch);
+        }
+
+        fieldData->AddArray(data);
+    }
+    else if (nCmpt == 3)
+    {
+        auto data = vtkSmartPointer<vtkFloatArray>::New();
+
+        data->SetName(magFieldName.c_str());
+        data->SetNumberOfComponents(1);
+        data->SetNumberOfTuples(len);
+
+        doubleVector scratch;
+        for (vtkIdType i=0; i < len; ++i)
+        {
+            input->GetTuple(i, scratch.v_);
+
+            scratch.x() = Foam::mag(scratch);
+
+            data->SetTuple(i, scratch.v_);
+        }
+
+        fieldData->AddArray(data);
+    }
+}
+
+
+void Foam::functionObjects::runTimePostPro::fieldVisualisationBase::addMagField
+(
+    const word& fieldName,
+    vtkDataSet* dataset
+)
+{
+    if (dataset)
+    {
+        addMagField(fieldName, dataset->GetCellData());
+        addMagField(fieldName, dataset->GetPointData());
+    }
+}
+
+
+void Foam::functionObjects::runTimePostPro::fieldVisualisationBase::addMagField
+(
+    const word& fieldName,
+    vtkCompositeDataSet* data
+)
+{
+    auto iter = vtkSmartPointer<vtkDataObjectTreeIterator>::New();
+
+    iter->SetDataSet(data);
+    iter->VisitOnlyLeavesOn();
+    iter->SkipEmptyNodesOn();
+
+    for
+    (
+        iter->InitTraversal();
+        !iter->IsDoneWithTraversal();
+        iter->GoToNextItem()
+    )
+    {
+        vtkDataSet* dataset = vtkDataSet::SafeDownCast
+        (
+            iter->GetCurrentDataObject()
+        );
+        addMagField(fieldName, dataset);
+    }
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::functionObjects::runTimePostPro::fieldVisualisationBase::
+fieldSummary::reduce()
+{
+    if (Pstream::parRun())
+    {
+        Foam::reduce(nComponents_, maxOp<int>());
+        Foam::reduce(association_, bitOrOp<unsigned>());
+        Foam::reduce(range_, minMaxOp<scalar>());
+    }
+}
+
+
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy
+    <
+        functionObjects::runTimePostPro::fieldVisualisationBase::fieldSummary
+    >& proxy
+)
+{
+    os  << "nComponents:" << proxy.t_.nComponents_
+        << " association:" << label(proxy.t_.association_)
+        << " min/max:" << proxy.t_.range_;
+
+    return os;
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -84,7 +394,7 @@ setColourMap
     vtkLookupTable* lut
 ) const
 {
-    label nColours = 256;
+    constexpr label nColours = 256;
 
     lut->SetNumberOfColors(nColours);
 
@@ -92,47 +402,73 @@ setColourMap
 
     switch (colourMap_)
     {
+        case cmCoolToWarm:  // ParaView: "Cool To Warm"
+        {
+            ctf->SetColorSpaceToDiverging();
+            ctf->AddRGBPoint(0.0, 0.231372, 0.298039, 0.752941);
+            ctf->AddRGBPoint(0.5, 0.865003, 0.865003, 0.865003);
+            ctf->AddRGBPoint(1.0, 0.705882, 0.0156863, 0.14902);
+            // ctf->SetNanColor(1, 1, 0);
+            break;
+        }
+
+        case cmColdAndHot:  // ParaView : "Cold and Hot"
+        {
+            ctf->SetColorSpaceToRGB();
+            ctf->AddRGBPoint(0, 0, 1, 1);
+            ctf->AddRGBPoint(0.45, 0, 0, 1);
+            ctf->AddRGBPoint(0.5, 0, 0, 0.5019608);
+            ctf->AddRGBPoint(0.55, 1, 0, 0);
+            ctf->AddRGBPoint(1, 1, 1, 0);
+            break;
+        }
+
+        case cmFire:  // ParaView: Black-Body Radiation
+        {
+            ctf->SetColorSpaceToRGB();
+            ctf->AddRGBPoint(0, 0, 0, 0);
+            ctf->AddRGBPoint(0.4, 0.901961, 0, 0);
+            ctf->AddRGBPoint(0.8, 0.901961, 0.901961, 0);
+            ctf->AddRGBPoint(1, 1, 1, 1);
+            // ctf->SetNanColor(0, 0.49804, 1);
+            break;
+        }
+
         case cmRainbow:
         {
             ctf->SetColorSpaceToHSV();
             ctf->AddRGBPoint(0, 0, 0, 1);
             ctf->AddRGBPoint(0.5, 0, 1, 0);
             ctf->AddRGBPoint(1, 1, 0, 0);
+            // ctf->SetNanColor(0.498039, 0.498039, 0.498039);
             break;
         }
-        case cmBlueWhiteRed:
-        {
-            // Values taken from ParaView settings
-            ctf->SetColorSpaceToDiverging();
-            ctf->AddRGBPoint(0.0, 0.231373, 0.298039, 0.752941);
-            ctf->AddRGBPoint(0.5, 0.865003, 0.865003, 0.865003);
-            ctf->AddRGBPoint(1.0, 0.705882, 0.0156863, 0.14902);
-            break;
-        }
-        case cmFire:
-        {
-            // Values taken from ParaView settings
-            ctf->SetColorSpaceToRGB();
-            ctf->AddRGBPoint(0, 0, 0, 0);
-            ctf->AddRGBPoint(0.4, 0.901961, 0, 0);
-            ctf->AddRGBPoint(0.8, 0.901961, 0.901961, 0);
-            ctf->AddRGBPoint(1, 1, 1, 1);
-            break;
-        }
-        case cmGreyscale:
+
+        case cmGreyscale: // ParaView: grayscale
         {
             ctf->SetColorSpaceToRGB();
             ctf->AddRGBPoint(0, 0, 0, 0);
             ctf->AddRGBPoint(1, 1, 1, 1);
+            // ctf->SetNanColor(1, 0, 0);
+            break;
+        }
+
+        case cmXray: // ParaView: "X ray"
+        {
+            ctf->SetColorSpaceToRGB();
+            ctf->AddRGBPoint(0, 1, 1, 1);
+            ctf->AddRGBPoint(1, 0, 0, 0);
+            // ctf->SetNanColor(1, 0, 0);
             break;
         }
     }
 
 
-    for (label i = 0; i < nColours; i++)
+    double rgba[4] = { 0, 0, 0, 1 };
+    for (label i = 0; i < nColours; ++i)
     {
-        double* c = ctf->GetColor(scalar(i)/scalar(nColours));
-        lut->SetTableValue(i, c[0], c[1], c[2], 1.0);
+        ctf->GetColor(scalar(i)/scalar(nColours), rgba);
+        lut->SetTableValue(i, rgba);
     }
 }
 
@@ -145,105 +481,11 @@ addScalarBar
     vtkLookupTable* lut
 ) const
 {
-    // Add scalar bar legend
-    if (!scalarBar_.visible_)
+    // Add the scalar bar - only once!
+    if (renderer && Pstream::master())
     {
-        return;
+        scalarBar_.add(colours_["text"]->value(position), renderer, lut);
     }
-
-    auto sbar = vtkSmartPointer<vtkScalarBarActor>::New();
-    sbar->SetLookupTable(lut);
-    sbar->SetNumberOfLabels(scalarBar_.numberOfLabels_);
-
-    const vector textColour = colours_["text"]->value(position);
-
-    // Work-around to supply our own scalarbar title
-    // - Default scalar bar title text is scales by the scalar bar box
-    //   dimensions so if the title is a long string, the text is shrunk to fit
-    //   Instead, suppress title and set the title using a vtkTextActor
-    auto titleActor = vtkSmartPointer<vtkTextActor>::New();
-    sbar->SetTitle(" ");
-    titleActor->SetInput(scalarBar_.title_.c_str());
-    titleActor->GetTextProperty()->SetFontFamilyToArial();
-    titleActor->GetTextProperty()->SetFontSize(3*scalarBar_.fontSize_);
-    titleActor->GetTextProperty()->SetJustificationToCentered();
-    titleActor->GetTextProperty()->SetVerticalJustificationToBottom();
-    titleActor->GetTextProperty()->BoldOn();
-    titleActor->GetTextProperty()->ItalicOff();
-    titleActor->GetTextProperty()->SetColor
-    (
-        textColour[0],
-        textColour[1],
-        textColour[2]
-    );
-    titleActor->GetPositionCoordinate()->
-        SetCoordinateSystemToNormalizedViewport();
-
-    // How to use the standard scalar bar text
-    // sbar->SetTitle(scalarBar_.title_.c_str());
-    // sbar->GetTitleTextProperty()->SetColor
-    // (
-    //     textColour[0],
-    //     textColour[1],
-    //     textColour[2]
-    // );
-    // sbar->GetTitleTextProperty()->SetFontSize(scalarBar_.fontSize_);
-    // sbar->GetTitleTextProperty()->ShadowOff();
-    // sbar->GetTitleTextProperty()->BoldOn();
-    // sbar->GetTitleTextProperty()->ItalicOff();
-
-    sbar->GetLabelTextProperty()->SetColor
-    (
-        textColour[0],
-        textColour[1],
-        textColour[2]
-    );
-    sbar->GetLabelTextProperty()->SetFontSize(scalarBar_.fontSize_);
-    sbar->GetLabelTextProperty()->ShadowOff();
-    sbar->GetLabelTextProperty()->BoldOff();
-    sbar->GetLabelTextProperty()->ItalicOff();
-    sbar->SetLabelFormat(scalarBar_.labelFormat_.c_str());
-
-    sbar->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
-    sbar->GetPositionCoordinate()->SetValue
-    (
-        scalarBar_.position_.first(),
-        scalarBar_.position_.second()
-    );
-    if (scalarBar_.vertical_)
-    {
-        sbar->SetOrientationToVertical();
-        sbar->SetWidth(0.1);
-        sbar->SetHeight(0.75);
-        sbar->SetTextPositionToSucceedScalarBar();
-    }
-    else
-    {
-        sbar->SetOrientationToHorizontal();
-
-        // Adjustments since not using scalarbar title property
-        sbar->SetWidth(0.75);
-        sbar->SetHeight(0.07);
-        sbar->SetBarRatio(0.5);
-        // sbar->SetHeight(0.1);
-        // sbar->SetTitleRatio(0.01);
-        sbar->SetTextPositionToPrecedeScalarBar();
-    }
-
-    titleActor->GetPositionCoordinate()->SetValue
-    (
-        scalarBar_.position_.first() + 0.5*sbar->GetWidth(),
-        scalarBar_.position_.second() + sbar->GetHeight()
-    );
-
-    // sbar->DrawFrameOn();
-    // sbar->DrawBackgroundOn();
-    // sbar->UseOpacityOff();
-    // sbar->VisibilityOff();
-    sbar->VisibilityOn();
-
-    renderer->AddActor(sbar);
-    renderer->AddActor2D(titleActor);
 }
 
 
@@ -252,9 +494,9 @@ setField
 (
     const scalar position,
     const word& colourFieldName,
-    vtkPolyDataMapper* mapper,
-    vtkRenderer* renderer,
-    vtkPolyData* pData
+    const FieldAssociation fieldAssociation,
+    vtkMapper* mapper,
+    vtkRenderer* renderer
 ) const
 {
     mapper->InterpolateScalarsBeforeMappingOn();
@@ -266,6 +508,7 @@ setField
             mapper->ScalarVisibilityOff();
             break;
         }
+
         case cbField:
         {
             // Create look-up table for colours
@@ -277,15 +520,15 @@ setField
             const char* fieldName = colourFieldName.c_str();
             mapper->SelectColorArray(fieldName);
 
-            // Set to use either point or cell data
-            // Note: if both point and cell data exists, preferentially
-            //       choosing point data.  This is often the case when using
-            //       glyphs
-            if (pData->GetPointData()->HasArray(fieldName))
+            // Use either point or cell data
+            // - if both point and cell data exists, preferentially choose
+            //   point data.  This is often the case when using glyphs.
+
+            if (fieldAssociation & FieldAssociation::POINT_DATA)
             {
                 mapper->SetScalarModeToUsePointFieldData();
             }
-            else if (pData->GetCellData()->HasArray(fieldName))
+            else if (fieldAssociation & FieldAssociation::CELL_DATA)
             {
                 mapper->SetScalarModeToUseCellFieldData();
             }
@@ -301,7 +544,7 @@ setField
             mapper->SetLookupTable(lut);
             mapper->ScalarVisibilityOn();
 
-            // Add the bar
+            // Add the scalar bar
             addScalarBar(position, renderer, lut);
             break;
         }
@@ -316,43 +559,20 @@ addGlyphs
 (
     const scalar position,
     const word& scaleFieldName,
+    const fieldSummary& scaleFieldInfo,
     const word& colourFieldName,
+    const fieldSummary& colourFieldInfo,
     const scalar maxGlyphLength,
+
     vtkPolyData* data,
     vtkActor* actor,
     vtkRenderer* renderer
 ) const
 {
-    auto glyph = vtkSmartPointer<vtkGlyph3D>::New();
-    auto glyphMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    glyphMapper->SetInputConnection(glyph->GetOutputPort());
+    // Determine whether we have CellData/PointData and (scalar/vector)
+    // or if we need to a cell->point data filter.
 
-    glyph->SetInputData(data);
-    glyph->ScalingOn();
-
-    bool needPointData = false;
-
-    // Determine whether we have scalar or vector data
-    // and if we need to convert CellData -> PointData
-
-    label nComponents = -1;
-    const char* scaleFieldNameChar = scaleFieldName.c_str();
-    if (data->GetPointData()->HasArray(scaleFieldNameChar))
-    {
-        nComponents =
-            data->GetPointData()->GetArray(scaleFieldNameChar)
-                ->GetNumberOfComponents();
-    }
-    else if (data->GetCellData()->HasArray(scaleFieldNameChar))
-    {
-        // Need to convert CellData to PointData
-        needPointData = true;
-
-        nComponents =
-            data->GetCellData()->GetArray(scaleFieldNameChar)
-                ->GetNumberOfComponents();
-    }
-    else
+    if (!scaleFieldInfo.exists())
     {
         WarningInFunction
             << "Cannot add glyphs. No such cell or point field: "
@@ -360,30 +580,46 @@ addGlyphs
         return;
     }
 
-
-    const bool ok = (nComponents == 1 || nComponents == 3);
-
-    if (!ok)
+    if (!scaleFieldInfo.isScalar() && !scaleFieldInfo.isVector())
     {
         WarningInFunction
             << "Glyphs can only be added to scalar or vector data. "
             << "Unable to process field " << scaleFieldName << endl;
         return;
     }
-    else if (needPointData)
-    {
-        auto cellToPoint = vtkSmartPointer<vtkCellDataToPointData>::New();
-        cellToPoint->SetInputData(data);
-        cellToPoint->Update();
-        vtkDataSet* pds = cellToPoint->GetOutput();
-        vtkDataArray* pData = pds->GetPointData()->GetArray(scaleFieldNameChar);
 
-        // Store in main vtkPolyData
-        data->GetPointData()->AddArray(pData);
+
+    // Setup glyphs
+
+    // The min/max data range for the input data (cell or point),
+    // which will be slightly less after using a cell->point filter
+    // (since it averages), but is still essentially OK.
+
+
+    auto glyph = vtkSmartPointer<vtkGlyph3D>::New();
+    glyph->ScalingOn();
+
+    auto glyphMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    glyphMapper->SetInputConnection(glyph->GetOutputPort());
+
+    vtkSmartPointer<vtkCellDataToPointData> cellToPoint;
+
+    // The data source is filtered or original (PointData)
+    if (!scaleFieldInfo.hasPointData() || !colourFieldInfo.hasPointData())
+    {
+        // CellData - Need a cell->point filter
+        cellToPoint = vtkSmartPointer<vtkCellDataToPointData>::New();
+        cellToPoint->SetInputData(data);
+
+        glyph->SetInputConnection(cellToPoint->GetOutputPort());
+    }
+    else
+    {
+        glyph->SetInputData(data);
     }
 
 
-    if (nComponents == 1)
+    if (scaleFieldInfo.nComponents_ == 1)
     {
         auto sphere = vtkSmartPointer<vtkSphereSource>::New();
         sphere->SetCenter(0, 0, 0);
@@ -397,12 +633,12 @@ addGlyphs
 
         if (maxGlyphLength > 0)
         {
-            // Can get range from point data:
-
-            // double range[2];
-            // vtkDataArray* values =
-            //     data->GetPointData()->GetScalars(scaleFieldNameChar);
-            // values->GetRange(range);
+            // Using range from the data:
+            // glyph->SetRange
+            // (
+            //     scaleFieldInfo.range_.first(),
+            //     scaleFieldInfo.range_.second()
+            // );
 
             // Set range according to user-supplied limits
             glyph->ClampingOn();
@@ -421,14 +657,14 @@ addGlyphs
         glyph->SetColorModeToColorByScalar();
         glyph->SetInputArrayToProcess
         (
-            0, // scalars
-            0,
-            0,
+            0, // index (0) = scalars
+            0, // port
+            0, // connection
             vtkDataObject::FIELD_ASSOCIATION_POINTS,
-            scaleFieldNameChar
+            scaleFieldName.c_str()
         );
     }
-    else if (nComponents == 3)
+    else if (scaleFieldInfo.nComponents_ == 3)
     {
         auto arrow = vtkSmartPointer<vtkArrowSource>::New();
         arrow->SetTipResolution(10);
@@ -441,24 +677,13 @@ addGlyphs
 
         if (maxGlyphLength > 0)
         {
-            vtkDataArray* values =
-                data->GetPointData()->GetVectors(scaleFieldNameChar);
-
-            double range[6];
-            values->GetRange(range);
-
-            // Attempt to set range for vectors...
-            // scalar x0 = sqrt(sqr(range_.first())/3.0);
-            // scalar x1 = sqrt(sqr(range_.second())/3.0);
-            // range[0] = x0;
-            // range[1] = x0;
-            // range[2] = x0;
-            // range[3] = x1;
-            // range[4] = x1;
-            // range[5] = x1;
-
+            // Set range according data limits
             glyph->ClampingOn();
-            glyph->SetRange(range);
+            glyph->SetRange
+            (
+                scaleFieldInfo.range_.first(),
+                scaleFieldInfo.range_.second()
+            );
             glyph->SetScaleFactor(maxGlyphLength);
         }
         else
@@ -471,20 +696,30 @@ addGlyphs
         glyph->SetColorModeToColorByVector();
         glyph->SetInputArrayToProcess
         (
-            1, // vectors
-            0,
-            0,
+            1, // index (1) = vectors
+            0, // port
+            0, // connection
             vtkDataObject::FIELD_ASSOCIATION_POINTS,
-            scaleFieldNameChar
+            scaleFieldName.c_str()
         );
     }
 
 
-    if (ok)
+    // Apply colouring etc.
+    // We already established PointData, which as either in the original,
+    // or generated with vtkCellDataToPointData filter.
+
     {
         glyph->Update();
 
-        setField(position, colourFieldName, glyphMapper, renderer, data);
+        setField
+        (
+            position,
+            colourFieldName,
+            FieldAssociation::POINT_DATA,  // Original or after filter
+            glyphMapper,
+            renderer
+        );
 
         glyphMapper->Update();
 
@@ -506,9 +741,11 @@ fieldVisualisationBase
 :
     colours_(colours),
     fieldName_(dict.get<word>("field")),
+    smooth_(dict.lookupOrDefault("smooth", false)),
     colourBy_(cbColour),
     colourMap_(cmRainbow),
-    range_()
+    range_(),
+    scalarBar_()
 {
     colourByTypeNames.readEntry("colourBy", dict, colourBy_);
 
@@ -516,26 +753,24 @@ fieldVisualisationBase
     {
         case cbColour:
         {
-            scalarBar_.visible_ = false;
+            scalarBar_.hide();
             break;
         }
+
         case cbField:
         {
             dict.readEntry("range", range_);
-
             colourMapTypeNames.readIfPresent("colourMap", dict, colourMap_);
 
-            const dictionary& sbDict = dict.subDict("scalarBar");
-            sbDict.readEntry("visible", scalarBar_.visible_);
+            const dictionary* sbar = dict.findDict("scalarBar");
 
-            if (scalarBar_.visible_)
+            if (sbar)
             {
-                sbDict.readEntry("vertical", scalarBar_.vertical_);
-                sbDict.readEntry("position", scalarBar_.position_);
-                sbDict.readEntry("title", scalarBar_.title_);
-                sbDict.readEntry("fontSize", scalarBar_.fontSize_);
-                sbDict.readEntry("labelFormat", scalarBar_.labelFormat_);
-                sbDict.readEntry("numberOfLabels", scalarBar_.numberOfLabels_);
+                scalarBar_.read(*sbar);
+            }
+            else
+            {
+                scalarBar_.hide();
             }
             break;
         }

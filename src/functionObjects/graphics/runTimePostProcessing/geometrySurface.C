@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +75,7 @@ static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
     // Not extremely elegant...
     vtkSmartPointer<vtkPolyData> dataset;
 
-    if (fName.ext() == "vtk")
+    if ("vtk" == fName.ext())
     {
         auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
 
@@ -88,7 +86,7 @@ static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
         return dataset;
     }
 
-    if (fName.ext() == "vtp")
+    if ("vtp" == fName.ext())
     {
         auto reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
 
@@ -99,7 +97,7 @@ static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
         return dataset;
     }
 
-    if (fName.ext() == "obj")
+    if ("obj" == fName.ext())
     {
         auto reader = vtkSmartPointer<vtkOBJReader>::New();
 
@@ -110,7 +108,7 @@ static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
         return dataset;
     }
 
-    if (fName.ext() == "stl" || fName.ext() == "stlb")
+    if ("stl" == fName.ext() || "stlb" == fName.ext())
     {
         auto reader = vtkSmartPointer<vtkSTLReader>::New();
 
@@ -147,6 +145,12 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
     const fileName& fName
 ) const
 {
+    // Master-only, since that is where the files are.
+    if (!visible_ || !renderer || !Pstream::master())
+    {
+        return;
+    }
+
     if (representation_ == rtGlyph)
     {
         FatalErrorInFunction
@@ -154,9 +158,11 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
             << " object" << exit(FatalError);
     }
 
+    DebugInfo << "    Add geometry surface: " << fName << nl;
+
     auto surf = getPolyDataFile(fName);
 
-    if (!surf || surf->GetNumberOfPoints() == 0)
+    if (!surf || !surf->GetNumberOfPoints())
     {
         FatalErrorInFunction
             << "Could not read "<< fName << nl

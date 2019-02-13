@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +25,22 @@ Class
     Foam::functionObjects::runTimePostPro::functionObjectSurface
 
 Description
-    Visualisation of surface data from function object output
+    Visualisation of surface data from function object output,
+    typically the result of a prior sampled surfaces operation.
+
+    Operates in a "live" mode, in which the previously sampled surfaces
+    are retrieved from the functionObject registry.
+    Or in the traditional file-based mode, in which the sampling is used
+    to generate a file and its name is retrieved from the functionObject
+    properties.
+
+    File-based import is restricted to "vtk" and "vtp" formats.
+
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        type        | The type: functionObjectSurface       | yes |
+    \endtable
 
 SourceFiles
     functionObjectfunctionObjectSurface.C
@@ -72,7 +85,7 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("functionObjectSurface");
+    TypeNameNoDebug("functionObjectSurface");
 
 
     // Constructors
@@ -87,10 +100,24 @@ public:
 
 
     //- Destructor
-    virtual ~functionObjectSurface();
+    virtual ~functionObjectSurface() = default;
 
 
     // Member Functions
+
+        //- Add functionObjectSurface to scene (using simulation source)
+        bool addGeometry
+        (
+            const scalar position,
+            vtkRenderer* renderer
+        );
+
+        //- Add functionObjectSurface to scene (using file source)
+        bool addGeometryFromFile
+        (
+            const scalar position,
+            vtkRenderer* renderer
+        );
 
         //- Add functionObjectSurface(s) to scene
         virtual void addGeometryToScene

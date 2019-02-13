@@ -8,7 +8,7 @@
 
 residuals
 {
-    type            residuals;
+    type            solverInfo;
     libs            ("libutilityFunctionObjects.so");
     writeFields     true;
     writeControl    outputTime;

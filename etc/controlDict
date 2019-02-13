@@ -820,6 +820,7 @@ DebugSwitches
     rotatedBoxToCell    0;
     rotatingPressureInletOutletVelocity 0;
     rotatingTotalPressure 0;
+    runTimePostPro::geometryBase        0;
     sampledPatch        0;
     sampledPlane        0;
     sampledSet          0;

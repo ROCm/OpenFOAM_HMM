@@ -52,6 +52,9 @@ functions
 {
     #include "ensightWrite"
     #include "vtkWrite"
+
+    // Demonstrate runTimePostProcessing
+    #include "visualization"
 }
 
 

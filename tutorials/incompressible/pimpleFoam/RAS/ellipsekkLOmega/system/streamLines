@@ -10,7 +10,8 @@ streamLines
 {
     type    streamLine;
 
-    writeControl    writeTime;
+    // Time control etc
+    ${_visualization};
 
     setFormat       vtk;
 

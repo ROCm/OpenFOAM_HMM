@@ -49,10 +49,8 @@ runTimeModifiable true;
 
 functions
 {
-    // Demonstrate runtime postprocessing
-    #include "streamLines"
-    #include "cuttingPlane"
-    #include "runTimePostProcessing"
+    // Demonstrate runTimePostProcessing
+    #include "visualization"
 
     // Do some other functionObjects
     #include "forceCoeffs"

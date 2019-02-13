@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +39,6 @@ Description
         // Optional entry
 
         shadow      false;
-        visible     yes;
 
         // Optionally override default colour
         // colour    (0 1 1);
@@ -56,6 +53,7 @@ Description
         Property    | Description                          | Required | Default
         string      | Text to display                      | yes |
         position    | The (x y) viewport position          | yes |
+        positions   | Multiple (x y) viewport positions    | no  |
         size        | The font size in points              | yes |
         halign      | Text justification (left/centre/ right) | no | left
         bold        | Use bold font                        | yes |
@@ -68,9 +66,13 @@ Description
     Inherited controls
     \table
         Property    | Description                          | Required | Default
-        visible     | Display the object                   | yes |
+        visible     | Display the object                   | no  | true
         opacity     | Object opacity                       | no  | 1.0
     \endtable
+
+Note
+    The string text is expanded on input using stringOps::inplaceExpand()
+    to expand dictionary and environment variable entries.
 
 SourceFiles
     text.C
@@ -85,7 +87,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward declarations
+// Forward Declarations
 class vtkRenderer;
 
 namespace Foam
@@ -96,7 +98,7 @@ namespace runTimePostPro
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class text Declaration
+                            Class text Declaration
 \*---------------------------------------------------------------------------*/
 
 class text
@@ -105,9 +107,9 @@ class text
 {
 public:
 
-    // Public enumerations
+    // Public Enumerations
 
-        //- Horizontal alignment type
+        //- Horizontal alignment type. Values to match VTK definitions
         enum halignType
         {
             LEFT   = 0,   //!< Left-justified text - default ("left")
@@ -126,13 +128,13 @@ protected:
         //- Text
         string string_;
 
-        //- Position
-        Tuple2<scalar, scalar> position_;
+        //- Position(s)
+        List<Tuple2<scalar, scalar>> positions_;
 
-        //- Size
+        //- Font size
         scalar size_;
 
-        //- Colour
+        //- Text colour
         autoPtr<Function1<vector>> colour_;
 
         //- Horizontal alignment
@@ -179,7 +181,7 @@ public:
 
     // Member Functions
 
-        //- Add surface(s) to scene
+        //- Add text to scene
         virtual void addGeometryToScene
         (
             const scalar position,
@@ -189,7 +191,7 @@ public:
         //- Update actors
         virtual void updateActors(const scalar position);
 
-        //- Clear files used to create the object(s)
+        //- Clear files used to create the object(s) - no-op
         virtual bool clear();
 };
 

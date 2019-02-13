@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +44,7 @@ namespace functionObjects
 {
 namespace runTimePostPro
 {
-    defineTypeNameAndDebug(pathline, 0);
+    defineTypeName(pathline);
     defineRunTimeSelectionTable(pathline, dictionary);
 }
 }
@@ -94,7 +92,6 @@ void Foam::functionObjects::runTimePostPro::pathline::addLines
             mapper->SetInputData(data);
             mapper->Update();
             break;
-
         }
         case rtTube:
         {
@@ -107,9 +104,7 @@ void Foam::functionObjects::runTimePostPro::pathline::addLines
 
             mapper->SetInputConnection(tubes->GetOutputPort());
             mapper->Update();
-
             break;
-
         }
         case rtVector:
         {
@@ -133,7 +128,7 @@ Foam::functionObjects::runTimePostPro::pathline::pathline
     (
         representationTypeNames.get("representation", dict)
     ),
-    tubeRadius_(0.0),
+    tubeRadius_(0.001),
     lineColour_(nullptr)
 {
     if (dict.found("lineColour"))
@@ -165,7 +160,6 @@ Foam::functionObjects::runTimePostPro::pathline::pathline
             break;
         }
     }
-
 }
 
 
@@ -180,10 +174,7 @@ Foam::functionObjects::runTimePostPro::pathline::New
     const word& pathlineType
 )
 {
-    if (debug)
-    {
-        Info<< "Selecting pathline " << pathlineType << endl;
-    }
+    DebugInfo << "Selecting pathline " << pathlineType << endl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(pathlineType);
 

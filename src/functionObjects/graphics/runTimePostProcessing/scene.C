@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -137,6 +135,8 @@ void Foam::functionObjects::runTimePostPro::scene::setActorVisibility
     const bool visible
 ) const
 {
+    if (!renderer) return;
+
     vtkActorCollection *actors = renderer->GetActors();
     for (int i = 0; i < actors->GetNumberOfItems(); ++i)
     {
@@ -157,27 +157,30 @@ void Foam::functionObjects::runTimePostPro::scene::initialise
 
     outputName_ = outputName;
 
+    if (!renderer) return;
+
+
     // Set the background
-    const vector backgroundColour = colours_["background"]->value(position_);
-    renderer->SetBackground
-    (
-        backgroundColour.x(),
-        backgroundColour.y(),
-        backgroundColour.z()
-    );
+    const vector bgColour = colours_["background"]->value(position_);
+
+    renderer->SetBackground(bgColour.x(), bgColour.y(), bgColour.z());
 
     // Apply gradient background if "background2" defined
     if (colours_.found("background2"))
     {
-        renderer->GradientBackgroundOn();
-        vector backgroundColour2 = colours_["background2"]->value(position_);
+        const vector bg2Colour = colours_["background2"]->value(position_);
 
-        renderer->SetBackground2
-        (
-            backgroundColour2.x(),
-            backgroundColour2.y(),
-            backgroundColour2.z()
-        );
+        renderer->GradientBackgroundOn();
+        renderer->SetBackground2(bg2Colour.x(), bg2Colour.y(), bg2Colour.z());
+    }
+    else if (Pstream::parRun())
+    {
+        // Oddly enough we seem a gradient background for parallel rendering,
+        // otherwise the colours look quite funny.
+        // Doesn't seem to matter if we use SetBackground2() though
+
+        renderer->GradientBackgroundOn();
+        renderer->SetBackground2(bgColour.x(), bgColour.y(), bgColour.z());
     }
 
     // Depth peeling
@@ -224,6 +227,8 @@ void Foam::functionObjects::runTimePostPro::scene::setCamera
     vtkRenderer* renderer
 ) const
 {
+    if (!renderer) return;
+
     vtkCamera* camera = renderer->GetActiveCamera();
 
     if (parallelProjection_)
@@ -355,14 +360,18 @@ bool Foam::functionObjects::runTimePostPro::scene::loop(vtkRenderer* renderer)
         return true;
     }
 
-    // Ensure that all objects can be seen without clipping
-    // Note: can only be done after all objects have been added!
-    renderer->ResetCameraClippingRange();
+    if (renderer)
+    {
 
-    // Save image from last iteration
-    saveImage(renderer->GetRenderWindow());
+        // Ensure that all objects can be seen without clipping
+        // Note: can only be done after all objects have been added!
+        renderer->ResetCameraClippingRange();
 
-    currentFrameI_++;
+        // Save image from last iteration
+        saveImage(renderer->GetRenderWindow());
+    }
+
+    ++currentFrameI_;
 
     position_ = startPosition_ + currentFrameI_*dPosition_;
 
@@ -390,15 +399,14 @@ void Foam::functionObjects::runTimePostPro::scene::saveImage
 
     const Time& runTime = obr_.time();
 
-    const fileName prefix
+    const fileName fName
     (
         runTime.globalPath()
       / functionObject::outputPrefix
       / name_
       / runTime.timeName()
+      / outputName_ + '.' + frameIndexStr() + ".png"
     );
-
-    mkDir(prefix);
 
     renderWindow->Render();
 
@@ -415,15 +423,21 @@ void Foam::functionObjects::runTimePostPro::scene::saveImage
     windowToImageFilter->Update();
 
     // Save the image
-    auto writer = vtkSmartPointer<vtkPNGWriter>::New();
-    fileName fName(prefix/outputName_ + '.' + frameIndexStr() + ".png");
-    writer->SetFileName(fName.c_str());
-    writer->SetInputConnection(windowToImageFilter->GetOutputPort());
 
-    Info<< "    Generating image: " << fName << endl;
+    if (Pstream::master())
+    {
+        mkDir(fName.path());
 
-    writer->Write();
+        auto writer = vtkSmartPointer<vtkPNGWriter>::New();
+        writer->SetFileName(fName.c_str());
+        writer->SetInputConnection(windowToImageFilter->GetOutputPort());
+
+        Info<< "    Generating image: " << runTime.relativePath(fName) << endl;
+
+        writer->Write();
+    }
 }
+
 
 
 // ************************************************************************* //

@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,9 +54,53 @@ Description
     - Selection of colour maps
     .
 
-    Scene configuration is performed using standard OpenFOAM dictionaries, using
-    the main headings of: output=, camera, colours, points, lines,
-    surfaces and text.
+    Mandatory entries:
+    \verbatim
+    output
+    {
+        name        image;
+        width       800;
+        height      600;
+    }
+
+    camera
+    {
+        ...
+    }
+
+    colours
+    {
+        ...
+    }
+
+    text
+    {
+    }
+    \endverbatim
+
+    Optional entries:
+    \verbatim
+    points
+    {
+    }
+
+    lines
+    {
+        ...
+    }
+
+    surfaces
+    {
+        ...
+    }
+    \endverbatim
+
+    Dictionary controls
+    \table
+        Property    | Description                          | Required | Default
+        type        | Type-name: runTimePostProcessing     | yes |
+        debug       | Additional debug information         | no  | false
+    \endtable
 
 SourceFiles
     runTimePostProcessing.C
@@ -76,14 +118,20 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward declarations
-class vtkRenderer;
+// Forward Declarations
+class vtkMultiPieceDataSet;
+class vtkMultiProcessController;
 class vtkRenderWindow;
+class vtkRenderer;
+template<class T> class vtkSmartPointer;
 
 namespace Foam
 {
 namespace functionObjects
 {
+// Forward declarations
+class runTimePostProcessing;
+
 namespace runTimePostPro
 {
 // Forward declarations
@@ -101,11 +149,9 @@ class runTimePostProcessing
 :
     public fvMeshFunctionObject
 {
-private:
+    // Private Data
 
-    // Private data
-
-        // Output
+        //- Output information
         struct outputType
         {
             word name_;
@@ -115,6 +161,9 @@ private:
 
         //- Output instance
         outputType output_;
+
+        //- Parallel rendering
+        bool parallel_;
 
         //- Scene manager
         runTimePostPro::scene scene_;
@@ -137,6 +186,15 @@ private:
         //- Helper function to read scene objects
         template<class Type>
         void readObjects(const dictionary& dict, PtrList<Type>& objects) const;
+
+        //- Construct controller and dispatch to render
+        void render();
+
+        //- Static function for SetSingleMethod binding
+        static void render(vtkMultiProcessController* ctrl, void* data);
+
+        //- Render scene using given controller
+        void render(vtkMultiProcessController* ctrl);
 
 
 public:
@@ -162,10 +220,25 @@ public:
 
     // Member Functions
 
+        //- Parallel rendering
+        bool parallel() const
+        {
+            return parallel_;
+        }
+
+        //- May need to gather parts to render on single-processor
+        //  True when OpenFOAM is running in parallel but VTK is not.
+        bool needsCollective() const
+        {
+            return Pstream::parRun() && !parallel_;
+        }
+
+        //- Reference to the underlying OpenFOAM mesh
         const fvMesh& mesh() const
         {
             return mesh_;
         }
+
 
         //- Read the post-processing controls
         virtual bool read(const dictionary& dict);

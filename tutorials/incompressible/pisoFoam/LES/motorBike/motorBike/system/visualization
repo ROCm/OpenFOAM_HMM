@@ -6,32 +6,25 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-cuttingPlane
+// Demonstrate runTimePostProcessing
+
+// Timing
+_visualization
 {
-    type            surfaces;
-    libs            ("libsampling.so");
     writeControl    writeTime;
 
-    surfaceFormat   vtk;
-    fields          (p U);
+    // enabled         true;
 
-    interpolationScheme cellPoint;
-
-    surfaces
-    (
-        yNormal
-        {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            pointAndNormalDict
-            {
-                point   (0 0 0);
-                normal  (0 1 0);
-            }
-            interpolate     true;
-        }
-    );
+    // Debug: writeControl    timeStep;
+    // Debug: writeInterval   10;
 }
+
+
+#include "streamLines"
+#include "samples"
+#include "runTimePostProcessing"
+
+#remove _visualization
 
 
 // ************************************************************************* //
