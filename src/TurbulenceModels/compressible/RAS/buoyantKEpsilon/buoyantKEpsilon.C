@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2015 OpenFOAM Foundation
@@ -92,10 +92,8 @@ bool buoyantKEpsilon<BasicTurbulenceModel>::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -123,10 +121,8 @@ buoyantKEpsilon<BasicTurbulenceModel>::kSource() const
     {
         return -fvm::SuSp(Gcoef(), this->k_);
     }
-    else
-    {
-        return kEpsilon<BasicTurbulenceModel>::kSource();
-    }
+
+    return kEpsilon<BasicTurbulenceModel>::kSource();
 }
 
 
@@ -150,10 +146,8 @@ buoyantKEpsilon<BasicTurbulenceModel>::epsilonSource() const
 
         return -fvm::SuSp(this->C1_*tanh(mag(v)/u)*Gcoef(), this->epsilon_);
     }
-    else
-    {
-        return kEpsilon<BasicTurbulenceModel>::epsilonSource();
-    }
+
+    return kEpsilon<BasicTurbulenceModel>::epsilonSource();
 }
 
 

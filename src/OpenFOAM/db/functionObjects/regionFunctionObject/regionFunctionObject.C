@@ -102,10 +102,8 @@ bool Foam::functionObjects::regionFunctionObject::clearObject
             return false;
         }
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 

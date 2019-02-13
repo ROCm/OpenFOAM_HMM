@@ -980,10 +980,8 @@ Foam::word Foam::GeometricField<Type, PatchField, GeoMesh>::select
     {
         return this->name() + "Final";
     }
-    else
-    {
-        return this->name();
-    }
+
+    return this->name();
 }
 
 

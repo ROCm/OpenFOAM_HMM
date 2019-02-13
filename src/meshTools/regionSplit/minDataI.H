@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2016 OpenFOAM Foundation
@@ -113,10 +113,8 @@ inline bool Foam::minData::updateCell
         operator=(neighbourInfo);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -132,16 +130,13 @@ inline bool Foam::minData::updateFace
 )
 {
     // From cell to its faces.
-
     if (neighbourInfo.data_ < data_)
     {
         operator=(neighbourInfo);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -161,10 +156,8 @@ inline bool Foam::minData::updateFace
         operator=(neighbourInfo);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

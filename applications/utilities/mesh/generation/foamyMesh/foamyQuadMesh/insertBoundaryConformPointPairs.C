@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2015 OpenFOAM Foundation
@@ -147,10 +147,8 @@ bool Foam::CV2D::insertPointPairAtIntersection
         insertPointPair(vit, interPoint, interTri, interHitSurface);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

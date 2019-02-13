@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -86,15 +86,9 @@ bool Foam::searchableSurfaces::connected
                 return false;
             }
         }
-        else
-        {
-            return true;
-        }
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 

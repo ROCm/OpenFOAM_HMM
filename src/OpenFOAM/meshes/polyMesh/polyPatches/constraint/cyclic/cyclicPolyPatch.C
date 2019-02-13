@@ -1380,7 +1380,7 @@ bool Foam::cyclicPolyPatch::order
                 << "    Continuing with incorrect face ordering from now on!"
                 << endl;
 
-                return false;
+            return false;
         }
 
 

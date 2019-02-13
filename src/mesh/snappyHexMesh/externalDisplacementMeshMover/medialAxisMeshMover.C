@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2015 OpenFOAM Foundation
@@ -116,10 +116,8 @@ bool Foam::medialAxisMeshMover::isMaxEdge
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -700,10 +698,8 @@ bool Foam::medialAxisMeshMover::unmarkExtrusion
         patchDisp[patchPointI] = Zero;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

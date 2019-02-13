@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -316,6 +316,7 @@ bool Foam::polyMeshGeometry::checkFaceTet
             return true;
         }
     }
+
     return false;
 }
 
@@ -523,15 +524,13 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Non-orthogonality check OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Non-orthogonality check OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -696,15 +695,13 @@ bool Foam::polyMeshGeometry::checkFacePyramids
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Face pyramids OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Face pyramids OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -919,15 +916,13 @@ bool Foam::polyMeshGeometry::checkFaceTets
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Face tets OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Face tets OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -1125,16 +1120,14 @@ bool Foam::polyMeshGeometry::checkFaceSkewness
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Max skewness = " << 100*maxSkew
-                << " percent.  Face skewness OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Max skewness = " << 100*maxSkew
+            << " percent.  Face skewness OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -1275,16 +1268,14 @@ bool Foam::polyMeshGeometry::checkFaceWeights
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Min weight = " << minWeight
-                << ".  Weights OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Min weight = " << minWeight
+            << ".  Weights OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -1409,16 +1400,14 @@ bool Foam::polyMeshGeometry::checkVolRatio
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Min ratio = " << minRatio
-                << ".  Ratios OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Min ratio = " << minRatio
+            << ".  Ratios OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -1547,10 +1536,8 @@ bool Foam::polyMeshGeometry::checkFaceAngles
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1696,10 +1683,8 @@ bool Foam::polyMeshGeometry::checkFaceTwist
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1845,10 +1830,8 @@ bool Foam::polyMeshGeometry::checkTriangleTwist
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1940,10 +1923,8 @@ bool Foam::polyMeshGeometry::checkFaceFlatness
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1999,10 +1980,8 @@ bool Foam::polyMeshGeometry::checkFaceArea
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -2093,10 +2072,8 @@ bool Foam::polyMeshGeometry::checkCellDeterminant
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

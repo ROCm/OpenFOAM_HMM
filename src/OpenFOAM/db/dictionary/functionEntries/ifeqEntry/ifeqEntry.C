@@ -1,8 +1,8 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           |
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2018 OpenFOAM Foundation
@@ -109,10 +109,8 @@ Foam::token Foam::functionEntries::ifeqEntry::expand
         // Re-form as a string token so we can compare to string
         return token(keyword, t.lineNumber());
     }
-    else
-    {
-        return t;
-    }
+
+    return t;
 }
 
 
@@ -134,10 +132,8 @@ Foam::token Foam::functionEntries::ifeqEntry::expand
     {
         return expand(dict, t.stringToken(), t);
     }
-    else
-    {
-        return t;
-    }
+
+    return t;
 }
 
 
@@ -173,10 +169,7 @@ bool Foam::functionEntries::ifeqEntry::equalToken
                 wordRe w2(t2.stringToken(), wordRe::DETECT);
                 return w2.match(t1.wordToken(), false);
             }
-            else
-            {
-                return false;
-            }
+            return false;
 
         case token::STRING:
             if (eqType)
@@ -190,11 +183,7 @@ bool Foam::functionEntries::ifeqEntry::equalToken
                 const wordRe w1(t1.stringToken(), wordRe::DETECT);
                 return w1.match(t2.wordToken(), false);
             }
-            else
-            {
-                return false;
-            }
-
+            return false;
 
         case token::VARIABLE:
         case token::VERBATIMSTRING:
@@ -206,10 +195,7 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             {
                 return t1.stringToken() == t2.wordToken();
             }
-            else
-            {
-                return false;
-            }
+            return false;
 
         case token::LABEL:
             if (eqType)
@@ -220,10 +206,7 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             {
                 return t1.labelToken() == t2.scalarToken();
             }
-            else
-            {
-                return false;
-            }
+            return false;
 
         case token::FLOAT_SCALAR:
             if (eqType)
@@ -234,10 +217,7 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             {
                 return t1.scalarToken() == t2.scalarToken();
             }
-            else
-            {
-                return false;
-            }
+            return false;
 
         case token::DOUBLE_SCALAR:
             if (eqType)
@@ -248,10 +228,7 @@ bool Foam::functionEntries::ifeqEntry::equalToken
             {
                 return t1.scalarToken() == t2.scalarToken();
             }
-            else
-            {
-                return false;
-            }
+            return false;
 
         case token::COMPOUND:
             return false;
@@ -259,6 +236,7 @@ bool Foam::functionEntries::ifeqEntry::equalToken
         case token::ERROR:
             return eqType;
     }
+
     return false;
 }
 

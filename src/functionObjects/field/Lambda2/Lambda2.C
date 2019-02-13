@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -69,10 +69,8 @@ bool Foam::functionObjects::Lambda2::calc()
            -eigenValues(SSplusWW)().component(vector::Y)
         );
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

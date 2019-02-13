@@ -436,6 +436,7 @@ Foam::label Foam::triSurfaceTools::vertexUsesFace
             return face1I;
         }
     }
+
     return -1;
 }
 
@@ -615,6 +616,7 @@ Foam::scalar Foam::triSurfaceTools::edgeCosAngle
                 << v1 << " of collapsed edge" << abort(FatalError);
         }
     }
+
     return cosAngle;
 }
 
@@ -1020,6 +1022,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
             }
         }
     }
+
     return cut;
 }
 
@@ -2030,10 +2033,8 @@ Foam::triSurface Foam::triSurfaceTools::mergePoints
             true                //reuse storage
         );
     }
-    else
-    {
-        return surf;
-    }
+
+    return surf;
 }
 
 
@@ -3057,6 +3058,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::trackToEdge
         }
         snapToEnd(s, end, nearest);
     }
+
     return nearest;
 }
 

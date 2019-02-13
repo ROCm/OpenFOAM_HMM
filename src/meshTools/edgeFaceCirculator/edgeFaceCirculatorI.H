@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -208,10 +208,8 @@ Foam::label Foam::edgeFaceCirculator::cellLabel() const
     {
         return mesh().faceNeighbour()[faceLabel_];
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 

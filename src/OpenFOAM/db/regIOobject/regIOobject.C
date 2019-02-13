@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -247,6 +247,7 @@ Foam::label Foam::regIOobject::addWatch(const fileName& f)
             watchIndices_.append(fileHandler().addWatch(f));
         }
     }
+
     return index;
 }
 
@@ -355,10 +356,8 @@ bool Foam::regIOobject::upToDate(const regIOobject& a) const
         // My event number higher than a
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

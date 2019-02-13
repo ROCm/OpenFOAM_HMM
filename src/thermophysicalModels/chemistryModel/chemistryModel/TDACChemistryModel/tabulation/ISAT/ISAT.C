@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 OpenFOAM Foundation
@@ -295,11 +295,9 @@ bool Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::grow
     {
         return phi0->grow(phiq);
     }
+
     // The actual solution and the approximation given by ISAT are too different
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 
@@ -501,12 +499,11 @@ bool Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::retrieve
         ++nRetrieved_;
         return true;
     }
-    else
-    {
-        // This point is reached when every retrieve trials have failed
-        // or if the tree is empty
-        return false;
-    }
+
+
+    // This point is reached when every retrieve trials have failed
+    // or if the tree is empty
+    return false;
 }
 
 

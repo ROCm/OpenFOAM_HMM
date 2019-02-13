@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -27,12 +27,8 @@ License
 
 #include "polyMesh.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 inline Foam::pointTopoDistanceData::pointTopoDistanceData()
 :
     data_(-1),
@@ -40,7 +36,6 @@ inline Foam::pointTopoDistanceData::pointTopoDistanceData()
 {}
 
 
-// Construct from components
 inline Foam::pointTopoDistanceData::pointTopoDistanceData
 (
     const label data,
@@ -126,10 +121,8 @@ inline bool Foam::pointTopoDistanceData::updatePoint
         distance_ = edgeInfo.distance_ + 1;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -149,10 +142,8 @@ inline bool Foam::pointTopoDistanceData::updatePoint
         operator=(newPointInfo);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -170,10 +161,8 @@ inline bool Foam::pointTopoDistanceData::updatePoint
         operator=(newPointInfo);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -194,10 +183,8 @@ inline bool Foam::pointTopoDistanceData::updateEdge
         operator=(pointInfo);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

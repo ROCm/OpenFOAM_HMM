@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -87,20 +87,18 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
             fvPatchField<scalar>::calculatedType()
         );
     }
-    else
-    {
-        if (!rhoInfInitialised_)
-        {
-            FatalErrorInFunction
-                << type() << " " << name() << ": "
-                << "pressure identified as incompressible, but reference "
-                << "density is not set.  Please set 'rho' to 'rhoInf', and "
-                << "set an appropriate value for 'rhoInf'"
-                << exit(FatalError);
-        }
 
-        return dimensionedScalar("rhoInf", dimDensity, rhoInf_)*p;
+    if (!rhoInfInitialised_)
+    {
+        FatalErrorInFunction
+            << type() << " " << name() << ": "
+            << "pressure identified as incompressible, but reference "
+            << "density is not set.  Please set 'rho' to 'rhoInf', and "
+            << "set an appropriate value for 'rhoInf'"
+            << exit(FatalError);
     }
+
+    return dimensionedScalar("rhoInf", dimDensity, rhoInf_)*p;
 }
 
 

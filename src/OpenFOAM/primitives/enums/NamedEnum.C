@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -158,10 +158,8 @@ EnumType Foam::NamedEnum<EnumType, nEnum>::lookupOrDefault
     {
         return lookup(key, dict);
     }
-    else
-    {
-        return deflt;
-    }
+
+    return deflt;
 }
 
 

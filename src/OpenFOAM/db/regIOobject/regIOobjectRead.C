@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -78,10 +78,8 @@ bool Foam::regIOobject::readHeaderOk
     {
         return fileHandler().read(*this, masterOnly, format, typeName);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -296,10 +294,8 @@ bool Foam::regIOobject::readIfModified()
 
         return read();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

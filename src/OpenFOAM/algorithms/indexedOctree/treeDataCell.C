@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -33,7 +33,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(treeDataCell, 0);
+    defineTypeNameAndDebug(treeDataCell, 0);
 }
 
 
@@ -178,10 +178,8 @@ bool Foam::treeDataCell::overlaps
     {
         return cubeBb.overlaps(bbs_[index]);
     }
-    else
-    {
-        return cubeBb.overlaps(calcCellBb(cellLabels_[index]));
-    }
+
+    return cubeBb.overlaps(calcCellBb(cellLabels_[index]));
 }
 
 

@@ -173,10 +173,8 @@ Foam::label Foam::ManualInjection<CloudType>::parcelsToInject
     {
         return positions_.size();
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
@@ -192,10 +190,8 @@ Foam::scalar Foam::ManualInjection<CloudType>::volumeToInject
     {
         return this->volumeTotal_;
     }
-    else
-    {
-        return 0.0;
-    }
+
+    return 0.0;
 }
 
 

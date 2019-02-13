@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -172,10 +172,8 @@ Foam::label Foam::FieldActivatedInjection<CloudType>::parcelsToInject
     {
         return positions_.size();
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
@@ -190,10 +188,8 @@ Foam::scalar Foam::FieldActivatedInjection<CloudType>::volumeToInject
     {
         return this->volumeTotal_/nParcelsPerInjector_;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0.0;
 }
 
 

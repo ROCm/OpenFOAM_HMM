@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -120,10 +120,8 @@ tmp<fvScalarMatrix> singleStepCombustion<ReactionThermo, ThermoType>::R
 
         return -fNorm*wSpecie*fres + scalar(fNorm)*fvm::Sp(wSpecie, Y);
     }
-    else
-    {
-        return wSpecie + fvm::Sp(0.0*wSpecie, Y);
-    }
+
+    return wSpecie + fvm::Sp(0.0*wSpecie, Y);
 }
 
 
@@ -146,10 +144,8 @@ bool singleStepCombustion<ReactionThermo, ThermoType>::read()
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

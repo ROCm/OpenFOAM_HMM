@@ -284,10 +284,8 @@ bool SpalartAllmaras<BasicTurbulenceModel>::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

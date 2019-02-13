@@ -800,10 +800,8 @@ const Foam::fileName& Foam::polyMesh::dbDir() const
     {
         return parent().dbDir();
     }
-    else
-    {
-        return objectRegistry::dbDir();
-    }
+
+    return objectRegistry::dbDir();
 }
 
 

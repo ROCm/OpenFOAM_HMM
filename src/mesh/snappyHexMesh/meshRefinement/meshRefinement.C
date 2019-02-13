@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -2981,17 +2981,14 @@ const
 }
 
 
-//- Return either time().constant() or oldInstance
 Foam::word Foam::meshRefinement::timeName() const
 {
     if (overwrite_ && mesh_.time().timeIndex() == 0)
     {
         return oldInstance_;
     }
-    else
-    {
-        return mesh_.time().timeName();
-    }
+
+    return mesh_.time().timeName();
 }
 
 
@@ -3237,10 +3234,8 @@ const Foam::dictionary& Foam::meshRefinement::subDict
             return finder.dict();
         }
     }
-    else
-    {
-        return dict.subDict(keyword);
-    }
+
+    return dict.subDict(keyword);
 }
 
 
@@ -3271,10 +3266,8 @@ Foam::ITstream& Foam::meshRefinement::lookup
             return finder.ref().stream();
         }
     }
-    else
-    {
-        return dict.lookup(keyword);
-    }
+
+    return dict.lookup(keyword);
 }
 
 

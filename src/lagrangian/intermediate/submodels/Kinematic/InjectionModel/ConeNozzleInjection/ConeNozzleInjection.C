@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -314,10 +314,8 @@ Foam::label Foam::ConeNozzleInjection<CloudType>::parcelsToInject
     {
         return floor((time1 - time0)*parcelsPerSecond_);
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
@@ -332,10 +330,8 @@ Foam::scalar Foam::ConeNozzleInjection<CloudType>::volumeToInject
     {
         return flowRateProfile_.integrate(time0, time1);
     }
-    else
-    {
-        return 0.0;
-    }
+
+    return 0.0;
 }
 
 

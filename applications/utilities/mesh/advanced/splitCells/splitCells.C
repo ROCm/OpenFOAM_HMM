@@ -359,10 +359,8 @@ bool splitCell
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

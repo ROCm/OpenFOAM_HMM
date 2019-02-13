@@ -161,10 +161,8 @@ bool Foam::ORourkeCollision<CloudType>::collideParcels
             return collideSorted(dt, p2, p1, m2, m1);
         }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -253,15 +253,14 @@ bool Foam::checkWedges
 
         return true;
     }
-    else
+
+    if (report)
     {
-        if (report)
-        {
-            Info<< "    All edges aligned with or perpendicular to "
-                << "non-empty directions." << endl;
-        }
-        return false;
+        Info<< "    All edges aligned with or perpendicular to "
+            << "non-empty directions." << endl;
     }
+
+    return false;
 }
 
 
@@ -468,16 +467,14 @@ bool Foam::checkCoupledPoints
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "    Coupled point location match (average "
-                << avgMismatch << ") OK." << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "    Coupled point location match (average "
+            << avgMismatch << ") OK." << endl;
     }
+
+    return false;
 }
 
 

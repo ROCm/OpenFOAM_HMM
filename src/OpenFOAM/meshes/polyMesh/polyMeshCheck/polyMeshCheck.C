@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -157,15 +157,13 @@ bool Foam::polyMesh::checkFaceOrthogonality
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Non-orthogonality check OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Non-orthogonality check OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -259,15 +257,13 @@ bool Foam::polyMesh::checkFaceSkewness
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Max skewness = " << maxSkew << " OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Max skewness = " << maxSkew << " OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -395,15 +391,14 @@ bool Foam::polyMesh::checkEdgeAlignment
 
         return true;
     }
-    else
+
+    if (debug || report)
     {
-        if (debug || report)
-        {
-            Info<< "    All edges aligned with or perpendicular to "
-                << "non-empty directions." << endl;
-        }
-        return false;
+        Info<< "    All edges aligned with or perpendicular to "
+            << "non-empty directions." << endl;
     }
+
+    return false;
 }
 
 
@@ -475,14 +470,10 @@ bool Foam::polyMesh::checkCellDeterminant
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Cell determinant check OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Cell determinant check OK." << endl;
     }
 
     return false;
@@ -570,14 +561,10 @@ bool Foam::polyMesh::checkFaceWeight
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Face interpolation weight check OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Face interpolation weight check OK." << endl;
     }
 
     return false;
@@ -657,14 +644,10 @@ bool Foam::polyMesh::checkVolRatio
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Face volume ratio check OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Face volume ratio check OK." << endl;
     }
 
     return false;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 OpenFOAM Foundation
@@ -117,10 +117,9 @@ bool Foam::binaryTree<CompType, ThermoType>::inSubTree
                     return false;
                 }
             }
-            else // test for n2ndSearch is done in the call of inSubTree
-            {
-                return inSubTree(phiq, y->nodeRight(), x);
-            }
+
+            // Test for n2ndSearch is done in the call of inSubTree
+            return inSubTree(phiq, y->nodeRight(), x);
         }
         else
         {
@@ -159,16 +158,12 @@ bool Foam::binaryTree<CompType, ThermoType>::inSubTree
                     return false;
                 }
             }
-            else
-            {
-                return inSubTree(phiq, y->nodeLeft(), x);
-            }
+
+            return inSubTree(phiq, y->nodeLeft(), x);
         }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -238,13 +233,10 @@ Foam::binaryTree<CompType, ThermoType>::chemPSibling(node* y)
         {
             return y->parent()->leafLeft();
         }
-        else
-        {
-            FatalErrorInFunction
-                << "wrong addressing of the initial node"
-                << exit(FatalError);
-            return nullptr;
-        }
+
+        FatalErrorInFunction
+            << "wrong addressing of the initial node"
+            << exit(FatalError);
     }
 
     // the binaryNode is root_ and has no sibling
@@ -269,14 +261,12 @@ Foam::binaryTree<CompType, ThermoType>::chemPSibling(chemPoint* x)
             // x is on the right, return left side
             return x->node()->leafLeft();
         }
-        else
-        {
-            FatalErrorInFunction
-                << "wrong addressing of the initial leaf"
-                << exit(FatalError);
-            return nullptr;
-        }
+
+        FatalErrorInFunction
+            << "wrong addressing of the initial leaf"
+            << exit(FatalError);
     }
+
     // there is only one leaf attached to the root_, no sibling
     return nullptr;
 }
@@ -297,14 +287,12 @@ Foam::binaryTree<CompType, ThermoType>::nodeSibling(node* y)
         {
             return y->parent()->nodeLeft();
         }
-        else
-        {
-            FatalErrorInFunction
-                << "wrong addressing of the initial node"
-                << exit(FatalError);
-        return nullptr;
-        }
+
+        FatalErrorInFunction
+            << "wrong addressing of the initial node"
+            << exit(FatalError);
     }
+
     return nullptr;
 }
 
@@ -325,14 +313,12 @@ Foam::binaryTree<CompType, ThermoType>::nodeSibling(chemPoint* x)
             // x is on the right, return left side
             return x->node()->nodeLeft();
         }
-        else
-        {
-            FatalErrorInFunction
-                << "wrong addressing of the initial leaf"
-                << exit(FatalError);
-            return nullptr;
-        }
+
+        FatalErrorInFunction
+            << "wrong addressing of the initial leaf"
+            << exit(FatalError);
     }
+
     return nullptr;
 }
 
@@ -556,10 +542,11 @@ bool Foam::binaryTree<CompType, ThermoType>::secondaryBTSearch
         {
             return true;
         }
+
         // if we reach this point, no leafs were found at this depth or lower
         // we move upward in the tree
         node* y = x->node();
-        while((y->parent()!= nullptr) && (n2ndSearch_ < max2ndSearch_))
+        while ((y->parent()!= nullptr) && (n2ndSearch_ < max2ndSearch_))
         {
             xS = chemPSibling(y);
             if (xS != nullptr)
@@ -577,15 +564,14 @@ bool Foam::binaryTree<CompType, ThermoType>::secondaryBTSearch
             }
             y = y->parent();
         }
+
         // if we reach this point it is either because
         // we did not find another covering EOA in the entire tree or
         // we reach the maximum number of secondary search
         return false;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -748,18 +734,16 @@ template<class CompType, class ThermoType>
 Foam::chemPointISAT<CompType, ThermoType>*
 Foam::binaryTree<CompType, ThermoType>::treeMin(node* subTreeRoot)
 {
-    if (subTreeRoot!=nullptr)
+    if (subTreeRoot != nullptr)
     {
-        while(subTreeRoot->nodeLeft() != nullptr)
+        while (subTreeRoot->nodeLeft() != nullptr)
         {
             subTreeRoot = subTreeRoot->nodeLeft();
         }
         return subTreeRoot->leafLeft();
     }
-    else
-    {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 
@@ -798,19 +782,16 @@ Foam::binaryTree<CompType, ThermoType>::treeSuccessor(chemPoint* x)
                 }
                 y = y->parent();
             }
+
             // when we reach this point, y points to the root and
             // never entered in the if loop (coming from the right)
             // so we are at the tree maximum and there is no successor
             return nullptr;
         }
-        else
-        {
-            FatalErrorInFunction
-                << "inconsistent structure of the tree, no leaf and no node"
-                << exit(FatalError);
 
-            return nullptr;
-        }
+        FatalErrorInFunction
+            << "inconsistent structure of the tree, no leaf and no node"
+            << exit(FatalError);
     }
 
     return nullptr;

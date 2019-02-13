@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2019 OpenFOAM Foundation
@@ -488,15 +488,13 @@ bool Foam::polyMeshTetDecomposition::checkFaceTets
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "    Face tets OK." << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "    Face tets OK." << endl;
     }
+
+    return false;
 }
 
 

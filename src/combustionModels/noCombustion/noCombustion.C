@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -97,14 +97,7 @@ Foam::combustionModels::noCombustion<ReactionThermo>::Qdot() const
 template<class ReactionThermo>
 bool Foam::combustionModels::noCombustion<ReactionThermo>::read()
 {
-    if (ThermoCombustion<ReactionThermo>::read())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return ThermoCombustion<ReactionThermo>::read();
 }
 
 

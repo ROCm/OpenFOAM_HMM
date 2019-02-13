@@ -234,10 +234,8 @@ bool Foam::snappyLayerDriver::unmarkExtrusion
         patchDisp[patchPointi] = Zero;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1998,10 +1996,8 @@ bool Foam::snappyLayerDriver::sameEdgeNeighbour
     {
         return edge(myGlobalFacei, nbrGlobFacei) == edge(eFaces[0], eFaces[1]);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -2619,6 +2615,7 @@ bool Foam::snappyLayerDriver::cellsUseFace
             }
         }
     }
+
     return false;
 }
 

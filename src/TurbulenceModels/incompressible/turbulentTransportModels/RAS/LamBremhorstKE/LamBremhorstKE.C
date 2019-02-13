@@ -200,10 +200,8 @@ bool LamBremhorstKE::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

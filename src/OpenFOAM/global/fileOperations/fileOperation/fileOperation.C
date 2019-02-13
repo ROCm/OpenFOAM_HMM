@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017-2018 OpenFOAM Foundation
@@ -1052,10 +1052,8 @@ Foam::fileName Foam::fileOperation::processorsPath
 
         return dir.path()/procsDir;
     }
-    else
-    {
-        return fileName::null;
-    }
+
+    return fileName::null;
 }
 
 

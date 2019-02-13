@@ -441,30 +441,26 @@ Foam::volumeType Foam::indexedOctree<Type>::getVolumeType
             // Content. Defer to shapes.
             return volumeType(shapes_.getVolumeType(*this, sample));
         }
-        else
-        {
-            // Empty node. Cannot have 'mixed' as its type since not divided
-            // up and has no items inside it.
-            FatalErrorInFunction
-                << "Sample:" << sample << " node:" << nodeI
-                << " with bb:" << nodes_[nodeI].bb_ << nl
-                << "Empty subnode has invalid volume type MIXED."
-                << abort(FatalError);
 
-            return volumeType::UNKNOWN;
-        }
-    }
-    else
-    {
+        // Empty node. Cannot have 'mixed' as its type since not divided
+        // up and has no items inside it.
         FatalErrorInFunction
-            << "Sample:" << sample << " at node:" << nodeI
-            << " octant:" << octant
-            << " with bb:" << nod.bb_.subBbox(octant) << nl
-            << "Node has invalid volume type " << octantType
+            << "Sample:" << sample << " node:" << nodeI
+            << " with bb:" << nodes_[nodeI].bb_ << nl
+            << "Empty subnode has invalid volume type MIXED."
             << abort(FatalError);
 
         return volumeType::UNKNOWN;
     }
+
+    FatalErrorInFunction
+        << "Sample:" << sample << " at node:" << nodeI
+        << " octant:" << octant
+        << " with bb:" << nod.bb_.subBbox(octant) << nl
+        << "Node has invalid volume type " << octantType
+        << abort(FatalError);
+
+    return volumeType::UNKNOWN;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -391,10 +391,8 @@ Foam::label Foam::meshSearch::findCellLinear(const point& location) const
     {
         return celli;
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
@@ -720,10 +718,8 @@ Foam::label Foam::meshSearch::findNearestCell
             return findNearestCellLinear(location);
         }
     }
-    else
-    {
-        return findNearestCellWalk(location, seedCelli);
-    }
+
+    return findNearestCellWalk(location, seedCelli);
 }
 
 
@@ -745,10 +741,8 @@ Foam::label Foam::meshSearch::findNearestFace
             return findNearestFaceLinear(location);
         }
     }
-    else
-    {
-        return findNearestFaceWalk(location, seedFacei);
-    }
+
+    return findNearestFaceWalk(location, seedFacei);
 }
 
 
@@ -771,10 +765,8 @@ Foam::label Foam::meshSearch::findCell
             return findCellLinear(location);
         }
     }
-    else
-    {
-        return findCellWalk(location, seedCelli);
-    }
+
+    return findCellWalk(location, seedCelli);
 }
 
 
@@ -839,10 +831,8 @@ Foam::label Foam::meshSearch::findNearestBoundaryFace
             return minFacei;
         }
     }
-    else
-    {
-        return findNearestBoundaryFaceWalk(location, seedFacei);
-    }
+
+    return findNearestBoundaryFaceWalk(location, seedFacei);
 }
 
 

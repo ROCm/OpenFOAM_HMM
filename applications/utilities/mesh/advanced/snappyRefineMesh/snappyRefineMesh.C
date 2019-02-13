@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -417,14 +417,12 @@ bool limitRefinementLevel
         }
         return true;
     }
-    else
-    {
-        Info<< "Added no additional cells"
-            << " to satisfy 1:" << limitDiff << " refinement level"
-            << endl;
 
-        return false;
-    }
+    Info<< "Added no additional cells"
+        << " to satisfy 1:" << limitDiff << " refinement level"
+        << endl;
+
+    return false;
 }
 
 

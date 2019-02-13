@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2014-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -291,10 +291,8 @@ Foam::word Foam::dynamicOversetFvMesh::baseName(const word& name)
     {
         return baseName(name.substr(0, name.size()-2));
     }
-    else
-    {
-        return name;
-    }
+
+    return name;
 }
 
 
