@@ -210,6 +210,19 @@ namespace Tools
     template<class Face>
     vtkSmartPointer<vtkCellArray> Faces(const UList<Face>& faces);
 
+    //- Return vtkPolyData of vertices for each point
+    inline vtkSmartPointer<vtkPolyData> Vertices
+    (
+        const UList<point>& pts
+    );
+
+    //- Return vtkPolyData of vertices for each point
+    inline vtkSmartPointer<vtkPolyData> Vertices
+    (
+        const UList<point>& pts,
+        const labelUList& addr
+    );
+
     //- Min/Max of scalar, or mag() of non-scalars. Includes nullptr check.
     inline scalarMinMax rangeOf(vtkDataArray* data);
 

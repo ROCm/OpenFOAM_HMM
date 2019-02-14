@@ -98,6 +98,30 @@ Foam::vtk::Tools::Points(const UList<point>& pts, const labelUList& addr)
 }
 
 
+inline vtkSmartPointer<vtkPolyData>
+Foam::vtk::Tools::Vertices(const UList<point>& pts)
+{
+    auto vtkmesh = vtkSmartPointer<vtkPolyData>::New();
+
+    vtkmesh->SetPoints(Tools::Points(pts));
+    vtkmesh->SetVerts(Tools::identityVertices(pts.size()));
+
+    return vtkmesh;
+}
+
+
+inline vtkSmartPointer<vtkPolyData>
+Foam::vtk::Tools::Vertices(const UList<point>& pts, const labelUList& addr)
+{
+    auto vtkmesh = vtkSmartPointer<vtkPolyData>::New();
+
+    vtkmesh->SetPoints(Tools::Points(pts, addr));
+    vtkmesh->SetVerts(Tools::identityVertices(addr.size()));
+
+    return vtkmesh;
+}
+
+
 inline Foam::scalarMinMax Foam::vtk::Tools::rangeOf(vtkDataArray* data)
 {
     double range[2]{GREAT, -GREAT};
