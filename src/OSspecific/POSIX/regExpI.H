@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-inline bool Foam::regExp::meta(const char c)
+inline bool Foam::regExp::meta(char c)
 {
     return
     (

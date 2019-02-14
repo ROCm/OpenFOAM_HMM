@@ -72,9 +72,9 @@ Foam::Istream& Foam::operator>>(Istream& is, fileName& val)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const fileName& fn)
+Foam::Ostream& Foam::operator<<(Ostream& os, const fileName& val)
 {
-    os.write(fn);
+    os.write(val);
     os.check(FUNCTION_NAME);
     return os;
 }

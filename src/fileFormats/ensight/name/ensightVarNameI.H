@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,28 +51,7 @@ inline Foam::ensight::VarName::VarName(const std::string& s)
 }
 
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline void Foam::ensight::VarName::stripInvalid()
-{
-    string::stripInvalid<VarName>(*this);
-
-    if (empty())
-    {
-        FatalErrorInFunction
-            << "ensight::VarName empty after stripping" << nl
-            << exit(FatalError);
-    }
-
-    // prefix with '_' to avoid starting with leading digits
-    std::string::iterator iter = begin();
-    if (isdigit(*iter))
-    {
-        insert(iter, '_');
-    }
-}
-
 
 inline bool Foam::ensight::VarName::valid(char c)
 {
@@ -94,6 +73,26 @@ inline bool Foam::ensight::VarName::valid(char c)
      && c != ']'
      && c != '^'
     );
+}
+
+
+inline void Foam::ensight::VarName::stripInvalid()
+{
+    string::stripInvalid<VarName>(*this);
+
+    if (empty())
+    {
+        FatalErrorInFunction
+            << "ensight::VarName empty after stripping" << nl
+            << exit(FatalError);
+    }
+
+    // Prefix with '_' to avoid starting with leading digits
+    std::string::iterator iter = begin();
+    if (isdigit(*iter))
+    {
+        insert(iter, '_');
+    }
 }
 
 

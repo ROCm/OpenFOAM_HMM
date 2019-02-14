@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -35,9 +35,10 @@ License
 
 void Foam::Ostream::decrIndent()
 {
-    if (indentLevel_ == 0)
+    if (!indentLevel_)
     {
-        cerr<< "Ostream::decrIndent() : attempt to decrement 0 indent level"
+        std::cerr
+            << "Ostream::decrIndent() : attempt to decrement 0 indent level"
             << std::endl;
     }
     else
@@ -56,17 +57,17 @@ Foam::Ostream& Foam::Ostream::write(const keyType& kw)
 Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 {
     indent();
-    write(kw);
+    writeQuoted(kw, kw.isPattern());
 
     label nSpaces = entryIndentation_ - label(kw.size());
 
-    // pattern is surrounded by quotes
+    // Account for quotes surrounding pattern
     if (kw.isPattern())
     {
         nSpaces -= 2;
     }
 
-    // could also increment by indentSize_ ...
+    // Could also increment by indentSize_ ...
     if (nSpaces < 1)
     {
         nSpaces = 1;
@@ -81,9 +82,9 @@ Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 }
 
 
-Foam::Ostream& Foam::Ostream::beginBlock(const keyType& keyword)
+Foam::Ostream& Foam::Ostream::beginBlock(const keyType& kw)
 {
-    indent(); write(keyword); write('\n');
+    indent(); writeQuoted(kw, kw.isPattern()); write('\n');
     beginBlock();
 
     return *this;

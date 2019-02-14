@@ -47,11 +47,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class hashedWordList;
-inline Istream& operator>>(Istream& is, hashedWordList& list);
-
-
 /*---------------------------------------------------------------------------*\
                        Class hashedWordList Declaration
 \*---------------------------------------------------------------------------*/
@@ -182,9 +177,6 @@ public:
         //- Move assignment from list of words. Rehashes the indices.
         inline void operator=(wordList&& list);
 
-        //- Read from an input stream. Rehashes the indices.
-        inline friend Istream& operator>>(Istream& is, hashedWordList& list);
-
 
     // Housekeeping
 
@@ -196,6 +188,10 @@ public:
             return this-found(name);
         }
 };
+
+
+//- Read from an input stream. Rehashes the indices.
+inline Istream& operator>>(Istream& is, hashedWordList& list);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

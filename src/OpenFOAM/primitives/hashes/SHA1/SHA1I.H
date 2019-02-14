@@ -136,7 +136,7 @@ inline Foam::SHA1::operator Foam::SHA1Digest() const
 
 inline Foam::Ostream& Foam::operator<<(Ostream& os, const SHA1& sha)
 {
-    return os  << sha.digest();
+    return (os << sha.digest());
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -53,28 +53,6 @@ inline Foam::word Foam::word::printf
     word output;
     string_printf(output, fmt, val);
     return output;
-}
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-inline void Foam::word::stripInvalid()
-{
-    // Skip stripping unless debug is active (to avoid costly operations)
-    if (debug && string::stripInvalid<word>(*this))
-    {
-        std::cerr
-            << "word::stripInvalid() called for word "
-            << this->c_str() << std::endl;
-
-        if (debug > 1)
-        {
-            std::cerr
-                << "    For debug level (= " << debug
-                << ") > 1 this is considered fatal" << std::endl;
-            std::abort();
-        }
-    }
 }
 
 
@@ -163,6 +141,26 @@ inline bool Foam::word::valid(char c)
 }
 
 
+inline void Foam::word::stripInvalid()
+{
+    // Only strip when debug is active (potentially costly operation)
+    if (debug && string::stripInvalid<word>(*this))
+    {
+        std::cerr
+            << "word::stripInvalid() called for word "
+            << this->c_str() << std::endl;
+
+        if (debug > 1)
+        {
+            std::cerr
+                << "    For debug level (= " << debug
+                << ") > 1 this is considered fatal" << std::endl;
+            std::abort();
+        }
+    }
+}
+
+
 inline bool Foam::word::hasExt() const
 {
     return string::hasExt();
@@ -176,6 +174,28 @@ inline bool Foam::word::removeExt()
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline Foam::word& Foam::word::operator=(const word& s)
+{
+    // Self-assignment is a no-op
+    if (this != &s)
+    {
+        assign(s);
+    }
+    return *this;
+}
+
+
+inline Foam::word& Foam::word::operator=(word&& s)
+{
+    // Self-assignment is a no-op
+    if (this != &s)
+    {
+        assign(std::move(s));
+    }
+    return *this;
+}
+
 
 inline Foam::word& Foam::word::operator=(const string& s)
 {

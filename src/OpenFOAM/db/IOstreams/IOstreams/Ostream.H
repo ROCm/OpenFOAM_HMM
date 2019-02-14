@@ -185,7 +185,7 @@ public:
 
             //- Write begin block group with the given name
             //  Increments indentation, adds newline.
-            virtual Ostream& beginBlock(const keyType& keyword);
+            virtual Ostream& beginBlock(const keyType& kw);
 
             //- Write begin block group without a name
             //  Increments indentation, adds newline.

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,11 +56,6 @@ class FileName
 :
     public fileName
 {
-    // Private Member Functions
-
-        //- Strip invalid characters
-        inline void stripInvalid();
-
 public:
 
     // Constructors
@@ -79,6 +74,9 @@ public:
 
         //- Is this character valid for an ensight file-name
         inline static bool valid(char c);
+
+        //- Strip invalid characters
+        inline void stripInvalid();
 
 
     // Member Operators

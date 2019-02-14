@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -48,13 +48,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class keyType;
+// Forward Declarations
 class Istream;
 class Ostream;
-Istream& operator>>(Istream& is, keyType& kw);
-Ostream& operator<<(Ostream& os, const keyType& kw);
-
 
 /*---------------------------------------------------------------------------*\
                            Class keyType Declaration
@@ -64,9 +60,9 @@ class keyType
 :
     public word
 {
-    // Private data
+    // Private Data
 
-        //- Is the keyType a pattern (regular expression)
+        //- Treat keyType as a pattern (regular expression)
         bool isPattern_;
 
 
@@ -78,13 +74,13 @@ class keyType
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- An empty keyType
         static const keyType null;
 
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration for search/match modes as bitmask
         //  eg, (keyType::REGEX | keyType::RECURSIVE)
@@ -142,18 +138,40 @@ public:
         //  permit brace-brackets, which are valid for some regexs.
         inline static bool valid(char c);
 
+
+    // Access
+
         //- The keyType is treated as literal, not as pattern.
         inline bool isLiteral() const;
 
         //- The keyType is treated as a pattern, not as literal string.
         inline bool isPattern() const;
 
-        //- Swap contents
+
+    // Infrastructure
+
+        //- Mark as regular expression
+        inline bool compile();
+
+        //- Mark as literal, instead of a regular expression.
+        //  Optionally strip invalid word characters.
+        inline void uncompile(bool doStrip = false);
+
+
+    // Editing
+
+        //- Clear string and set as literal
+        inline void clear();
+
+        //- Swap contents. Self-swapping is a no-op.
         inline void swap(keyType& s);
+
+
+    // Matching/Searching
 
         //- Smart match as regular expression or as a string.
         //  Optionally force a literal match only
-        bool match(const std::string& text, bool literal = false) const;
+        bool match(const std::string& text, bool literal=false) const;
 
 
     // Member Operators
@@ -164,9 +182,11 @@ public:
 
 
         //- Copy assignment, retaining type (literal or regex)
+        //  Self-assignment is a no-op.
         inline void operator=(const keyType& s);
 
         //- Move assignment, retaining type (literal or regex)
+        //  Self-assignment is a no-op.
         inline void operator=(keyType&& s);
 
         //- Assign as word, treat as literal
@@ -177,13 +197,16 @@ public:
 
         //- Assign as word, treat as literal
         inline void operator=(const char* s);
-
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream& is, keyType& kw);
-        friend Ostream& operator<<(Ostream& os, const keyType& kw);
 };
+
+
+// IOstream Operators
+
+//- Read operator
+Istream& operator>>(Istream& is, keyType& val);
+
+//- Write operator
+Ostream& operator<<(Ostream& os, const keyType& val);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

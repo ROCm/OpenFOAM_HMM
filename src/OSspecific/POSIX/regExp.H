@@ -84,7 +84,7 @@ public:
         //  - range: '[', ']' \n
         //
         // \note The presence of '{', '}' regex bounds is not considered
-        inline static bool meta(const char c);
+        inline static bool meta(char c);
 
 
     // Constructors

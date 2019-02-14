@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -62,10 +62,6 @@ typedef List<word> wordList;
 class wordRe;
 class fileName;
 
-Istream& operator>>(Istream&, fileName&);
-Ostream& operator<<(Ostream&, const fileName&);
-
-
 /*---------------------------------------------------------------------------*\
                           Class fileName Declaration
 \*---------------------------------------------------------------------------*/
@@ -74,12 +70,6 @@ class fileName
 :
     public string
 {
-    // Private Member Functions
-
-        //- Strip invalid characters
-        inline void stripInvalid();
-
-
 public:
 
     //- Enumerations to handle directory entry types.
@@ -94,7 +84,10 @@ public:
 
     // Static data members
 
+        //- The typeName
         static const char* const typeName;
+
+        //- Debugging
         static int debug;
 
         //- An empty fileName
@@ -161,6 +154,8 @@ public:
         //- that ignores duplicate or trailing slashes.
         static bool equals(const std::string& s1, const std::string& s2);
 
+        //- Strip invalid characters
+        inline void stripInvalid();
 
         //- Cleanup filename
         //
@@ -353,15 +348,17 @@ public:
         ) const;
 
 
-    // Member operators
+    // Member Operators
 
     // Assignment
 
         //- Copy assignment, no character validation required
-        fileName& operator=(const fileName&) = default;
+        //  Self-assignment is a no-op.
+        inline fileName& operator=(const fileName& str);
 
         //- Move assignment, no character validation required
-        fileName& operator=(fileName&&) = default;
+        //  Self-assignment is a no-op.
+        inline fileName& operator=(fileName&& str);
 
         //- Copy assignment, no character validation required
         inline fileName& operator=(const word& str);
@@ -390,13 +387,16 @@ public:
         //- Append a path element with '/' separator.
         //  No '/' separator is added if this or the argument are empty.
         fileName& operator/=(const string& other);
-
-
-    // IOstream operators
-
-        friend Istream& operator>>(Istream& is, fileName& fn);
-        friend Ostream& operator<<(Ostream& os, const fileName& fn);
 };
+
+
+// IOstream Operators
+
+//- Read operator
+Istream& operator>>(Istream& is, fileName& val);
+
+//- Write operator
+Ostream& operator<<(Ostream& os, const fileName& val);
 
 
 // Global Operators

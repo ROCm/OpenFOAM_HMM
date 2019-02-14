@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,6 +53,17 @@ inline Foam::ensight::FileName::FileName(const std::string& s)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline bool Foam::ensight::FileName::valid(char c)
+{
+    return
+    (
+        fileName::valid(c)  // includes space, quotes
+     && c != '*'   // wild-card
+     && c != '%'   // structured block continuation
+    );
+}
+
+
 inline void Foam::ensight::FileName::stripInvalid()
 {
     string::stripInvalid<FileName>(*this);
@@ -66,17 +77,6 @@ inline void Foam::ensight::FileName::stripInvalid()
             << "ensight::FileName empty after stripping" << nl
             << exit(FatalError);
     }
-}
-
-
-inline bool Foam::ensight::FileName::valid(char c)
-{
-    return
-    (
-        fileName::valid(c)  // includes space, quotes
-     && c != '*'   // wild-card
-     && c != '%'   // structured block continuation
-    );
 }
 
 

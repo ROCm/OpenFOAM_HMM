@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -61,14 +61,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class wordRe;
+// Forward Declarations
 class Istream;
 class Ostream;
-
-Istream& operator>>(Istream& is, wordRe& w);
-Ostream& operator<<(Ostream& os, const wordRe& w);
-
 
 /*---------------------------------------------------------------------------*\
                            Class wordRe Declaration
@@ -78,21 +73,21 @@ class wordRe
 :
     public word
 {
-    // Private member data
+    // Private Member Data
 
         //- The regular expression
-        mutable regExp re_;
+        regExp re_;
 
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- An empty wordRe
         static const wordRe null;
 
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration with compile options
         //  Note that 'REGEX' is implicit if 'ICASE' is specified alone.
@@ -107,18 +102,6 @@ public:
             REGEX_ICASE  = (REGEX|ICASE),   //!< Combined REGEX and ICASE
             DETECT_ICASE = (DETECT|ICASE),  //!< Combined DETECT and ICASE
         };
-
-
-        //- Is this a meta character?
-        inline static bool meta(const char c);
-
-        //- Is this character valid for a wordRe?
-        //  This is largely identical with what word accepts, but also
-        //  permit brace-brackets, which are valid for some regexs.
-        inline static bool valid(char c);
-
-        //- Test string for regular expression meta characters
-        inline static bool isPattern(const std::string& str);
 
 
     // Constructors
@@ -169,9 +152,21 @@ public:
 
     // Member Functions
 
+        //- Is this a meta character?
+        inline static bool meta(char c);
+
+        //- Is this character valid for a wordRe?
+        //  This is largely identical with what word accepts, but also
+        //  permit brace-brackets, which are valid for some regexs.
+        inline static bool valid(char c);
+
+        //- Test string for regular expression meta characters
+        inline static bool isPattern(const std::string& str);
+
+
     // Access
 
-        //- The wordRe is treated as literal, not as pattern.
+        //- The wordRe is treated as literal string, not as pattern.
         inline bool isLiteral() const;
 
         //- The wordRe is treated as a pattern, not as literal string.
@@ -181,14 +176,14 @@ public:
     // Infrastructure
 
         //- Compile the regular expression
-        inline bool compile() const;
+        inline bool compile();
 
         //- Possibly compile the regular expression, with greater control
-        inline bool compile(const compOption opt) const;
+        inline bool compile(const compOption opt);
 
         //- Make wordRe a literal again, instead of a regular expression.
         //  Optionally strip invalid word characters.
-        inline void uncompile(bool doStrip = false) const;
+        inline void uncompile(bool doStrip = false);
 
 
     // Editing
@@ -202,7 +197,7 @@ public:
         //- Clear string and regular expression
         inline void clear();
 
-        //- Swap contents
+        //- Swap contents. Self-swapping is a no-op
         inline void swap(wordRe& str);
 
 
@@ -230,6 +225,7 @@ public:
 
 
         //- Copy assignment, retaining type (literal or regex)
+        //  Self-assignment is a no-op.
         inline void operator=(const wordRe& str);
 
         //- Copy word, never a regular expression
@@ -252,14 +248,18 @@ public:
         inline void operator=(const char* str);
 
         //- Move assignment.
+        //  Self-assignment is a no-op.
         inline void operator=(wordRe&& str);
-
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream& is, wordRe& w);
-        friend Ostream& operator<<(Ostream& os, const wordRe& w);
 };
+
+
+// IOstream Operators
+
+//- Read operator
+Istream& operator>>(Istream& is, wordRe& val);
+
+//- Write operator
+Ostream& operator<<(Ostream& os, const wordRe& val);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

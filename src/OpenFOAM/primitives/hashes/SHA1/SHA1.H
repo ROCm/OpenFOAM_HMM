@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -55,15 +55,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class Ostream;
-
-// Forward declaration of friend functions and operators
-class SHA1;
-class SHA1Digest;
-Ostream& operator<<(Ostream&, const SHA1&);
-
-
 /*---------------------------------------------------------------------------*\
                             Class SHA1 Declaration
 \*---------------------------------------------------------------------------*/
@@ -90,6 +81,7 @@ class SHA1
 
         //- The input processing buffer
         uint32_t buffer_[32];
+
 
     // Private Member Functions
 
@@ -172,14 +164,13 @@ public:
         //- Convert to a SHA1Digest,
         //  calculate current %digest from appended data
         inline operator SHA1Digest() const;
-
-
-    // Friend Operators
-
-        //- Output the %digest
-        inline friend Ostream& operator<<(Ostream&, const SHA1&);
-
 };
+
+
+// IOstream Operators
+
+//- Output the %digest
+inline Ostream& operator<<(Ostream& os, const SHA1& sha);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
