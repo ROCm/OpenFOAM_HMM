@@ -44,7 +44,6 @@ SourceFiles
 #ifndef foamVtkTools_H
 #define foamVtkTools_H
 
-#include "labelList.H"
 #include "faceList.H"
 #include "pointField.H"
 #include "symmTensor.H"
@@ -171,21 +170,21 @@ struct Caching
 namespace Tools
 {
     //- Wrap vtkUnsignedCharArray as a UList
-    inline static UList<uint8_t> asUList
+    inline UList<uint8_t> asUList
     (
         vtkUnsignedCharArray* array,
         const label size
     );
 
     //- Wrap vtkIdTypeArray as a UList
-    inline static UList<vtkIdType> asUList
+    inline UList<vtkIdType> asUList
     (
         vtkIdTypeArray* array,
         const label size
     );
 
     //- Wrap vtkCellArray as a UList
-    inline static UList<vtkIdType> asUList
+    inline UList<vtkIdType> asUList
     (
         vtkCellArray* cells,
         const label nCells,
@@ -263,7 +262,7 @@ namespace Tools
     //- Remapping for some OpenFOAM data types (eg, symmTensor)
     //  \param data[in,out] The data to be remapped in-place
     template<class Type>
-    inline static void remapTuple(float data[]) {}
+    inline void remapTuple(float data[]) {}
 
     //- Template specialization for symmTensor ordering
     template<>
@@ -272,7 +271,7 @@ namespace Tools
     //- Remapping for some OpenFOAM data types (eg, symmTensor)
     //  \param data[in,out] The data to be remapped in-place
     template<class Type>
-    inline static void remapTuple(double data[]) {}
+    inline void remapTuple(double data[]) {}
 
     //- Template specialization for symmTensor ordering
     template<>
@@ -286,7 +285,7 @@ namespace Tools
     //     to hold the result.
     //  \param val[in] The input data to copy/transcribe
     template<class Type>
-    inline static void foamToVtkTuple(float output[], const Type& val);
+    inline void foamToVtkTuple(float output[], const Type& val);
 
     //- Copy/transcribe OpenFOAM data types to VTK format
     //  This allows a change of data type (float vs double) as well as
@@ -296,7 +295,7 @@ namespace Tools
     //     to hold the result.
     //  \param val[in] The input data to copy/transcribe
     template<class Type>
-    inline static void foamToVtkTuple(double output[], const Type& val);
+    inline void foamToVtkTuple(double output[], const Type& val);
 
 
     // Field Conversion Functions
@@ -304,7 +303,7 @@ namespace Tools
     //- Copy list to pre-allocated vtk array.
     //  \return number of input items copied
     template<class Type>
-    static label transcribeFloatData
+    label transcribeFloatData
     (
         vtkFloatArray* array,
         const UList<Type>& input,
@@ -313,7 +312,7 @@ namespace Tools
 
     //- Create named field initialized to zero
     template<class Type>
-    static vtkSmartPointer<vtkFloatArray> zeroField
+    vtkSmartPointer<vtkFloatArray> zeroField
     (
         const word& name,
         const label size
@@ -321,24 +320,27 @@ namespace Tools
 
     //- Convert field data to a vtkFloatArray
     template<class Type>
-    static vtkSmartPointer<vtkFloatArray> convertFieldToVTK
+    vtkSmartPointer<vtkFloatArray> convertFieldToVTK
     (
         const word& name,
         const UList<Type>& fld
     );
 
     //- An identity list of VTK_VERTEX
-    static inline vtkSmartPointer<vtkCellArray> identityVertices
+    inline vtkSmartPointer<vtkCellArray> identityVertices
     (
         const label size
     );
-};
+
+} // End namespace Tools
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace vtk
 } // End namespace Foam
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Specializations
 
@@ -358,7 +360,6 @@ void Foam::vtk::Tools::remapTuple<Foam::symmTensor>(double data[])
     std::swap(data[1], data[3]);    // swap XY <-> YY
     std::swap(data[2], data[5]);    // swap XZ <-> ZZ
 }
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
