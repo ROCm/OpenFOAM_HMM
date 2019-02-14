@@ -482,6 +482,7 @@ DebugSwitches
     directionMixed      0;
     directional         0;
     disallowGenericFvPatchField 0;
+    disallowGenericFvsPatchField 0;
     disallowGenericPointPatchField 0;
     disallowGenericPolyPatch    0;
     dispersionLESModel  0;
@@ -571,7 +572,7 @@ DebugSwitches
     fvSymmTensorMatrix  0;
     fvTensorMatrix      0;
     fvVectorMatrix      0;
-    fvsPatchField       0;
+    fvsPatchField       1;
     general             0;
     generic             0;
     genericPatch        0;
