@@ -349,6 +349,14 @@ Foam::label Foam::scotchDecomp::decomposeSerial
             Info<< "scotchDecomp : Using procesor weights " << processorWeights
                 << endl;
         }
+        if (processorWeights.size() != nDomains_)
+        {
+            FatalIOErrorInFunction(coeffsDict_)
+                << "processorWeights not the same size"
+                << " as the wanted number of domains " << nDomains_
+                << exit(FatalIOError);
+        }
+
         check
         (
             SCOTCH_archCmpltw
