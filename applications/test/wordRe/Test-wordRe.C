@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -36,6 +36,7 @@ Description
 #include "keyType.H"
 #include "wordRes.H"
 #include "predicates.H"
+#include "Random.H"
 
 using namespace Foam;
 
@@ -138,6 +139,34 @@ int main(int argc, char *argv[])
     Info<< "string match: "  << string("this").match("xyz") << nl;
     Info<< "string match: "  << string("x.*")("xyz") << nl;
     Info<< "string match: "  << string("x.*")(keyre) << nl;
+
+
+    // Test uniq
+    {
+        Random rnd;
+        const label last = wres1.size()-1;
+
+        for (label i = 0; i < 8; ++i)
+        {
+            // Make a copy
+            wordRe wre(wres1[rnd.position<label>(0,last)]);
+
+            // Append
+            wres1.append(wre);
+        }
+
+        // Add some entropy
+        Foam::shuffle(wres1);
+
+        Info<< nl
+            << "Test uniq on " << wres1
+            << "  ==  " << wordRes::uniq(wres1) << nl;
+
+        // Inplace
+        wres1.uniq();
+        Info<< nl << "Inplace: " << wres1 << nl;
+    }
+    Info<< nl;
 
     wordRe(s1, wordRe::DETECT).info(Info) << nl;
     wordRe(s2).info(Info) << nl;

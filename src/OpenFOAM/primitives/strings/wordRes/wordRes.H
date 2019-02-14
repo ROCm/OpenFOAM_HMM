@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -101,8 +101,8 @@ public:
         //- Return a null wordRes - a reference to the NullObject
         inline static const wordRes& null();
 
-        //- Return a wordRes with duplicate words filtered out.
-        //  No filtering attempted on regular expressions.
+        //- Return a wordRes with duplicate entries filtered out.
+        //  No distinction made between literals or regular expressions.
         static wordRes uniq(const UList<wordRe>& input);
 
 
@@ -118,8 +118,8 @@ public:
 
     // Member Functions
 
-        //- Filter out duplicate words (inplace).
-        //  No filtering attempted on regular expressions.
+        //- Filter out duplicate entries (inplace).
+        //  No distinction made between literals or regular expressions.
         void uniq();
 
         //- Smart match as literal or regex, stopping on the first match.
