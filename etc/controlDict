@@ -572,7 +572,7 @@ DebugSwitches
     fvSymmTensorMatrix  0;
     fvTensorMatrix      0;
     fvVectorMatrix      0;
-    fvsPatchField       1;
+    fvsPatchField       0;
     general             0;
     generic             0;
     genericPatch        0;
