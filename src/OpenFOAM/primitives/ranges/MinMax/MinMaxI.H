@@ -79,28 +79,28 @@ inline Foam::MinMax<T>::MinMax(const UList<T>& vals)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline const T& Foam::MinMax<T>::min() const
+inline const T& Foam::MinMax<T>::min() const noexcept
 {
     return this->first();
 }
 
 
 template<class T>
-inline T& Foam::MinMax<T>::min()
+inline T& Foam::MinMax<T>::min() noexcept
 {
     return this->first();
 }
 
 
 template<class T>
-inline const T& Foam::MinMax<T>::max() const
+inline const T& Foam::MinMax<T>::max() const noexcept
 {
     return this->second();
 }
 
 
 template<class T>
-inline T& Foam::MinMax<T>::max()
+inline T& Foam::MinMax<T>::max() noexcept
 {
     return this->second();
 }

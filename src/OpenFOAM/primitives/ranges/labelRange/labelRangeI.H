@@ -161,9 +161,13 @@ inline const Foam::labelRange::const_iterator Foam::labelRange::cend() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::labelRange Foam::labelRange::identity(const label len) noexcept
+inline Foam::labelRange Foam::labelRange::identity
+(
+    const label len,
+    const label start
+) noexcept
 {
-    return labelRange(0, len);
+    return labelRange(start, len);
 }
 
 
@@ -227,6 +231,18 @@ inline Foam::label Foam::labelRange::size() const noexcept
 inline Foam::label Foam::labelRange::start() const noexcept
 {
     return start_;
+}
+
+
+inline Foam::label Foam::labelRange::min() const noexcept
+{
+    return start_;
+}
+
+
+inline Foam::label Foam::labelRange::max() const noexcept
+{
+    return start_ + size_ - 1;
 }
 
 

@@ -112,8 +112,8 @@ template<class T> class MinMax;
 class zero;
 
 // Common min/max types
-typedef MinMax<label> labelMinMax;
-typedef MinMax<scalar> scalarMinMax;
+typedef MinMax<label> labelMinMax;      //!< A label min/max range
+typedef MinMax<scalar> scalarMinMax;    //!< A scalar min/max range
 
 
 /*---------------------------------------------------------------------------*\
@@ -164,16 +164,16 @@ public:
     // Access
 
         //- The min value (first)
-        inline const T& min() const;
+        inline const T& min() const noexcept;
 
         //- The min value (first)
-        inline T& min();
+        inline T& min() noexcept;
 
         //- The max value (second)
-        inline const T& max() const;
+        inline const T& max() const noexcept;
 
         //- The max value (second)
-        inline T& max();
+        inline T& max() noexcept;
 
         //- The min/max average value
         inline T centre() const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "labelRange.H"
+#include "MinMax.H"
 #include "List.H"
 #include "token.H"
 #include <numeric>
@@ -41,6 +42,19 @@ const Foam::labelRange Foam::labelRange::null;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::labelRange::labelRange(const MinMax<label>& range) noexcept
+:
+    start_(0),
+    size_(0)
+{
+    if (range.min() < range.max())
+    {
+        start_ = range.min();
+        size_  = (range.max() - range.min()); // Hope for no overflow?
+    }
+}
+
 
 Foam::labelRange::labelRange(Istream& is)
 :

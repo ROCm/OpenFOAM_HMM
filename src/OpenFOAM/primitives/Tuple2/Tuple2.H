@@ -114,25 +114,25 @@ public:
     // Member Functions
 
         //- Return first
-        inline const T1& first() const
+        inline const T1& first() const noexcept
         {
             return f_;
         }
 
         //- Return first
-        inline T1& first()
+        inline T1& first() noexcept
         {
             return f_;
         }
 
         //- Return second
-        inline const T2& second() const
+        inline const T2& second() const noexcept
         {
             return s_;
         }
 
         //- Return second
-        inline T2& second()
+        inline T2& second() noexcept
         {
             return s_;
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -44,11 +44,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class labelRange;
 class Istream;
 class Ostream;
 template<class T> class List;
+template<class T> class MinMax;
 
 Istream& operator>>(Istream& is, labelRange& range);
 Ostream& operator<<(Ostream& os, const labelRange& range);
@@ -67,6 +68,7 @@ class labelRange
         //- The length of the interval
         label size_;
 
+
 public:
 
     // STL type definitions
@@ -83,6 +85,7 @@ public:
 
     // Static Data Members
 
+        //- Debugging
         static int debug;
 
         //- An empty range with start=0, size=0.
@@ -106,14 +109,25 @@ public:
             const bool adjustStart
         ) noexcept;
 
+        //- Construct from a min/max range, enforcing non-negative size.
+        //- Does not adjust the start.
+        //  Passing an invalid min/max range results in an empty labelRange
+        explicit labelRange(const MinMax<label>& range) noexcept;
+
         //- Construct from Istream.
-        labelRange(Istream& is);
+        explicit labelRange(Istream& is);
 
 
     // Static Member Functions
 
-        //- An identity range with range[i] == i.
-        inline static labelRange identity(const label len) noexcept;
+        //- An identity range corresponding to (map[i] == i), or with
+        //- an optional start index, so that (map[i] == i+start)
+        //  The order of parameters is as per the Foam::identity() function.
+        inline static labelRange identity
+        (
+            const label len,
+            const label start=0
+        ) noexcept;
 
 
     // Member Functions
@@ -157,10 +171,16 @@ public:
         //- The effective size of the range
         inline label size() const noexcept;
 
-        //- The (inclusive) lower value of the range - same as start
+        //- The (inclusive) lower value of the range - same as start(), first()
+        inline label min() const noexcept;
+
+        //- The (inclusive) upper value of the range - same as last()
+        inline label max() const noexcept;
+
+        //- The (inclusive) lower value of the range - same as start()
         inline label first() const noexcept;
 
-        //- The (inclusive) upper value of the range
+        //- The (inclusive) upper value of the range - same as max()
         inline label last() const noexcept;
 
         //- The value before the start of the range

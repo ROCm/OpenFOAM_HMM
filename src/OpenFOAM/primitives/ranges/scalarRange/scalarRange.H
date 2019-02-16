@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,9 +50,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class scalarRange;
 class Ostream;
+template<class T> class MinMax;
+
 Ostream& operator<<(Ostream& os, const scalarRange& range);
 
 
@@ -65,20 +67,18 @@ class scalarRange
     //- Enumeration defining type of range test to use
     enum testType
     {
-        NONE = 0,   //!< An empty, invalid (inverse) range. Never matches.
+        NONE = 0,   //!< Empty or invalid (inverse) range. Never matches.
         EQ,         //!< A single value test.
         GE,         //!< Greater-than-equal.
         GT,         //!< Greater-than.
         LE,         //!< Less-than-equal.
         LT,         //!< Less-than.
-        GE_LE       //!< An inclusive range.
+        GE_LE,      //!< An inclusive range.
+        ALWAYS      //!< Placeholder range that always matches
     };
 
 
     // Private Member Data
-
-        //- The type of range test
-        enum testType type_;
 
         //- The min value of the range
         scalar min_;
@@ -86,22 +86,53 @@ class scalarRange
         //- The max value of the range
         scalar max_;
 
+        //- The type of range test
+        enum testType type_;
+
         //- Construct from components without sanity checking
-        inline scalarRange(const testType type, scalar minVal, scalar maxVal);
+        inline scalarRange
+        (
+            const testType type,
+            const scalar minVal,
+            const scalar maxVal
+        ) noexcept;
 
 
 public:
 
+    // STL type definitions
+
+        //- Type of values the range contains
+        typedef scalar value_type;
+
+
+    // Static Data Members
+
+        //- An empty/inverted range that never matches
+        static const scalarRange null;
+
+        //- A range that always matches
+        static const scalarRange always;
+
+
     // Constructors
 
         //- Construct an empty (inverse) range
-        inline scalarRange();
+        inline scalarRange() noexcept;
 
         //- Construct an exact value matcher
-        inline explicit scalarRange(const scalar value);
+        inline explicit scalarRange(const scalar value) noexcept;
 
         //- Construct a range from min-value to max-value
-        inline scalarRange(const scalar minVal, const scalar maxVal);
+        inline scalarRange(const scalar minVal, const scalar maxVal) noexcept;
+
+        //- Copy construct from a min/max range.
+        //  Automatically decides if this is a GE_LE or NONE range
+        explicit scalarRange(const MinMax<label>& range) noexcept;
+
+        //- Copy construct from a min/max range.
+        //  Automatically decides if this is a GE_LE or NONE range
+        explicit scalarRange(const MinMax<scalar>& range) noexcept;
 
 
     // Static Constructors
@@ -124,37 +155,37 @@ public:
 
 
         //- Construct a greater-than-equals bound
-        inline static scalarRange ge(const scalar minVal);
+        inline static scalarRange ge(const scalar minVal) noexcept;
 
         //- Construct a greater-than bound
-        inline static scalarRange gt(const scalar minVal);
+        inline static scalarRange gt(const scalar minVal) noexcept;
 
         //- Construct a less-than-equals bound
-        inline static scalarRange le(const scalar maxVal);
+        inline static scalarRange le(const scalar maxVal) noexcept;
 
         //- Construct a less-than bound
-        inline static scalarRange lt(const scalar maxVal);
+        inline static scalarRange lt(const scalar maxVal) noexcept;
 
 
     // Member Functions
 
         //- Reset to an empty (inverse) range.
-        inline void clear();
+        inline void clear() noexcept;
 
-        //- True if bounds are empty (eg, inverted)
-        inline bool empty() const;
+        //- True if range is empty (eg, inverted)
+        inline bool empty() const noexcept;
 
-        //- True if bounds are non-empty.
-        inline bool valid() const;
+        //- True if range is non-empty.
+        inline bool valid() const noexcept;
 
-        //- True if the bounds represents a single value.
-        inline bool single() const;
+        //- True if the range bounds represent a single value.
+        inline bool single() const noexcept;
 
         //- The min value of the range.
-        inline scalar min() const;
+        inline scalar min() const noexcept;
 
         //- The max value of the range.
-        inline scalar max() const;
+        inline scalar max() const noexcept;
 
         //- A representative (average) value for the range.
         //  For GE, LE bounds it is the min/max value, respectively.
@@ -169,13 +200,13 @@ public:
         //- Identical to match(), for use as a predicate.
         inline bool operator()(const scalar& value) const;
 
-        inline bool operator==(const scalarRange& rhs) const;
-        inline bool operator!=(const scalarRange& rhs) const;
+        inline bool operator==(const scalarRange& rhs) const noexcept;
+        inline bool operator!=(const scalarRange& rhs) const noexcept;
 
 
     // IOstream Operators
 
-        //- Print information about the bounds.
+        //- Print information about the range.
         friend Ostream& operator<<(Ostream& os, const scalarRange& range);
 };
 
