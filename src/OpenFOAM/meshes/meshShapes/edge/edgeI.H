@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -454,6 +454,34 @@ inline Foam::linePointRef Foam::edge::line(const UList<point>& pts) const
     #endif
 
     return linePointRef(pts[first()], pts[second()]);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline Foam::label& Foam::edge::operator[](const label i)
+{
+    #ifdef FULLDEBUG
+    if (i < 0 || i > 1)
+    {
+        FatalErrorInFunction
+            << "Index " << i << " out of range [0,1]" << abort(FatalError);
+    }
+    #endif
+    return (i ? second() : first());
+}
+
+
+inline const Foam::label& Foam::edge::operator[](const label i) const
+{
+    #ifdef FULLDEBUG
+    if (i < 0 || i > 1)
+    {
+        FatalErrorInFunction
+            << "Index " << i << " out of range [0,1]" << abort(FatalError);
+    }
+    #endif
+    return (i ? second() : first());
 }
 
 

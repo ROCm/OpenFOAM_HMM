@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -168,7 +168,7 @@ public:
         inline label collapse();
 
 
-    // Hash-like functions
+    // Hash-like Functions
 
         //- Return the number of unique, valid (non -1) point labels.
         //  Similar to a HashTable::size().
@@ -233,7 +233,7 @@ public:
         inline label erase(const labelUList& list);
 
 
-    // Geometric functions
+    // Geometric Functions
 
         //- Return centre point (centroid) of the edge.
         //  No special handling of negative point labels.
@@ -264,6 +264,15 @@ public:
         //  - +1: identical values and order used
         //  - -1: identical values, but in different order
         static inline int compare(const edge& a, const edge& b);
+
+
+    // Member Operators
+
+        //- Return edge element. Index should be limited to 0/1.
+        inline label& operator[](const label i);
+
+        //- Return constant edge element. Index should be limited to 0/1.
+        inline const label& operator[](const label i) const;
 
 
     // Hashing
