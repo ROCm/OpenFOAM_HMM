@@ -207,6 +207,10 @@ public:
         //  Must be called within the CELL_DATA state.
         bool writeProcIDs();
 
+        //- Write point ids as PointData.
+        //  Must be called within the POINT_DATA state.
+        void writePointIDs();
+
 
     // Write
 

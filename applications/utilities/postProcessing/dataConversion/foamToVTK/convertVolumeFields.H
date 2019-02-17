@@ -313,7 +313,13 @@ Description
             internalWriter->beginPointData
             (
                 nVolFields + nDimFields + nPointFields
+              + (withPointIds ? 1 : 0)
             );
+
+            if (withPointIds)
+            {
+                internalWriter->writePointIDs();
+            }
         }
 
         forAll(patchWriters, writeri)

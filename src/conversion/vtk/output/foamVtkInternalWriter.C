@@ -730,4 +730,75 @@ bool Foam::vtk::internalWriter::writeProcIDs()
 }
 
 
+void Foam::vtk::internalWriter::writePointIDs()
+{
+    if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") - should be (" << stateNames[outputState::POINT_DATA]
+            << ") for pointID field" << nl << endl
+            << exit(FatalError);
+    }
+
+    if (format_)
+    {
+        if (legacy())
+        {
+            vtk::legacy::intField<1>(format(), "pointID", numberOfPoints_);
+        }
+        else
+        {
+            const uint64_t payLoad = vtk::sizeofData<label>(numberOfPoints_);
+
+            format().beginDataArray<label>("pointID");
+            format().writeSize(payLoad);
+        }
+    }
+
+
+    // Point offset for regular mesh points (without decomposed)
+    const label pointOffset =
+    (
+        parallel_ ? globalIndex(vtuCells_.nPoints()).localStart() : 0
+    );
+
+    // Cell offset for *regular* mesh cells (without decomposed)
+    const label cellOffset =
+    (
+        parallel_ ? globalIndex(vtuCells_.nCells()).localStart() : 0
+    );
+
+
+    labelList pointIds = identity(vtuCells_.nFieldPoints(), pointOffset);
+
+    // The pointID for added points is the cellID, tag as a negative number
+    label pointi = vtuCells_.nPoints();
+    for (const label celli : vtuCells_.addPointCellLabels())
+    {
+        pointIds[pointi] = (-1 - celli - cellOffset);
+        ++pointi;
+    }
+
+    if (parallel_)
+    {
+        vtk::writeListParallel(format_.ref(), pointIds);
+    }
+    else
+    {
+        vtk::writeList(format(), pointIds);
+    }
+
+    if (format_)
+    {
+        format().flush();
+        format().endDataArray();
+    }
+}
+
+
 // ************************************************************************* //

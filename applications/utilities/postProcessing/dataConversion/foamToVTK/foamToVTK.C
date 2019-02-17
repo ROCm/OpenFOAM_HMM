@@ -91,6 +91,9 @@ Usage
       - \par -no-point-data
         Suppress conversion of pointFields. No interpolated PointData.
 
+      - \par -with-point-ids
+        Additional pointID field for internal mesh
+
       - \par -poly-decomp
         Decompose polyhedral cells into tets/pyramids
 
@@ -381,6 +384,12 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
+        "with-point-ids",
+        "Additional pointID field for internal mesh"
+    );
+
+    argList::addBoolOption
+    (
         "one-boundary",  // allPatches
         "Combine all patches into a single file"
     );
@@ -493,6 +502,19 @@ int main(int argc, char *argv[])
         Info<< "Point fields and interpolated point data"
             << " disabled with the '-no-point-data' option"
             << nl;
+    }
+
+    const bool withPointIds = args.found("with-point-ids");
+    if (withPointIds)
+    {
+        Info<< "Write point ids requested";
+
+        if (noPointValues)
+        {
+            Info<< ", but ignored due to the '-no-point-data' option";
+        }
+
+        Info<< nl;
     }
 
     wordRes includePatches, excludePatches;
