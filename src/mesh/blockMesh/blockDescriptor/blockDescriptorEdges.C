@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -50,10 +50,8 @@ Foam::label Foam::blockDescriptor::edgePointsWeights
     // Set the edge points/weights
     // The edge is a straight-line if it is not in the list of blockEdges
 
-    forAll(edges_, cedgei)
+    for (const blockEdge& cedge : blockEdges_)
     {
-        const blockEdge& cedge = edges_[cedgei];
-
         const int cmp = cedge.compare(blockLabels[start], blockLabels[end]);
 
         if (cmp)

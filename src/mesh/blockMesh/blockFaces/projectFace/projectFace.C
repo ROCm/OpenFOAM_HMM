@@ -52,13 +52,13 @@ const Foam::searchableSurface& Foam::blockFaces::projectFace::lookupSurface
     Istream& is
 ) const
 {
-    word name(is);
+    const word name(is);
 
-    forAll(geometry, i)
+    for (const searchableSurface& geom : geometry)
     {
-        if (geometry[i].name() == name)
+        if (geom.name() == name)
         {
-            return geometry[i];
+            return geom;
         }
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -55,7 +55,7 @@ class projectFace
 :
     public blockFace
 {
-    // Private data
+    // Private Data
 
         //- The surface onto which the points are projected
         const searchableSurface& surface_;
@@ -106,13 +106,12 @@ public:
             const dictionary& dict,
             const label index,
             const searchableSurfaces& geometry,
-            Istream&
+            Istream& is
         );
 
 
     //- Destructor
-    virtual ~projectFace()
-    {}
+    virtual ~projectFace() = default;
 
 
     // Member Functions

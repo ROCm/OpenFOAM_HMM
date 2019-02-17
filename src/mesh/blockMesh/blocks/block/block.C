@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -48,11 +48,11 @@ Foam::block::block
     const word& zoneName
 )
 :
-    blockDescriptor(bshape, vertices, edges, faces, density, expand, zoneName)
-{
-    createPoints();
-    createBoundary();
-}
+    blockDescriptor(bshape, vertices, edges, faces, density, expand, zoneName),
+    points_(),
+    blockCells_(),
+    blockPatches_()
+{}
 
 
 Foam::block::block
@@ -65,21 +65,23 @@ Foam::block::block
     Istream& is
 )
 :
-    blockDescriptor(dict, index, vertices, edges, faces, is)
-{
-    createPoints();
-    createBoundary();
-}
+    blockDescriptor(dict, index, vertices, edges, faces, is),
+    points_(),
+    blockCells_(),
+    blockPatches_()
+{}
 
 
 Foam::block::block(const blockDescriptor& blockDesc)
 :
-    blockDescriptor(blockDesc)
-{
-    createPoints();
-    createBoundary();
-}
+    blockDescriptor(blockDesc),
+    points_(),
+    blockCells_(),
+    blockPatches_()
+{}
 
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::block> Foam::block::New
 (
@@ -91,10 +93,7 @@ Foam::autoPtr<Foam::block> Foam::block::New
     Istream& is
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing block" << endl;
-    }
+    DebugInFunction << "Constructing block" << endl;
 
     const word blockOrCellShapeType(is);
 

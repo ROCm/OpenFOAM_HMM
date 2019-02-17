@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -29,14 +29,36 @@ License
 
 inline const Foam::pointField& Foam::block::points() const
 {
+    if (points_.empty())
+    {
+        const_cast<block&>(*this).createPoints();
+    }
+
     return points_;
+}
+
+
+inline const Foam::List<Foam::FixedList<Foam::label, 8>>&
+Foam::block::cells() const
+{
+    if (blockCells_.empty())
+    {
+        const_cast<block&>(*this).createCells();
+    }
+
+    return blockCells_;
 }
 
 
 inline const Foam::FixedList<Foam::List<Foam::FixedList<Foam::label, 4>>, 6>&
 Foam::block::boundaryPatches() const
 {
-    return boundaryPatches_;
+    if (blockPatches_.empty())
+    {
+        const_cast<block&>(*this).createBoundary();
+    }
+
+    return blockPatches_;
 }
 
 

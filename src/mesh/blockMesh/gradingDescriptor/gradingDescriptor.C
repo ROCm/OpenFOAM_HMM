@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -57,8 +57,8 @@ Foam::gradingDescriptor::gradingDescriptor
     const scalar expansionRatio
 )
 :
-    blockFraction_(1.0),
-    nDivFraction_(1.0),
+    blockFraction_(1),
+    nDivFraction_(1),
     expansionRatio_(expansionRatio)
 {}
 
@@ -67,12 +67,6 @@ Foam::gradingDescriptor::gradingDescriptor(Istream& is)
 {
     is >> *this;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::gradingDescriptor::~gradingDescriptor()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

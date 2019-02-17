@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -68,7 +68,7 @@ Ostream& operator<<(Ostream&, const gradingDescriptor&);
 
 class gradingDescriptor
 {
-    // Private data
+    // Private Data
 
         scalar blockFraction_;
         scalar nDivFraction_;
@@ -94,46 +94,42 @@ public:
         );
 
         //- Construct from expansionRatio
-        gradingDescriptor
-        (
-            const scalar expansionRatio
-        );
+        explicit gradingDescriptor(const scalar expansionRatio);
 
         //- Construct from Istream
-        gradingDescriptor(Istream&);
+        explicit gradingDescriptor(Istream& is);
 
 
     //- Destructor
-    ~gradingDescriptor();
+    ~gradingDescriptor() = default;
 
 
     // Member Functions
 
-        // Access
+    // Access
 
-            scalar blockFraction() const
-            {
-                return blockFraction_;
-            }
+        scalar blockFraction() const
+        {
+            return blockFraction_;
+        }
 
-            scalar nDivFraction() const
-            {
-                return nDivFraction_;
-            }
+        scalar nDivFraction() const
+        {
+            return nDivFraction_;
+        }
 
-            scalar expansionRatio() const
-            {
-                return expansionRatio_;
-            }
+        scalar expansionRatio() const
+        {
+            return expansionRatio_;
+        }
 
-
-    // Member functions
+    // Member Functions
 
         //- Return the inverse gradingDescriptor with 1/expansionRatio
         gradingDescriptor inv() const;
 
 
-    // Member operators
+    // Member Operators
 
         bool operator==(const gradingDescriptor&) const;
         bool operator!=(const gradingDescriptor&) const;

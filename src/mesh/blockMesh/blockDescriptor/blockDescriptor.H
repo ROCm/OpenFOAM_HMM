@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -63,18 +63,12 @@ SourceFiles
 #include "blockEdgeList.H"
 #include "blockFaceList.H"
 #include "gradingDescriptors.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
-class blockDescriptor;
-Ostream& operator<<(Ostream&, const blockDescriptor&);
 
 /*---------------------------------------------------------------------------*\
                        Class blockDescriptor Declaration
@@ -82,16 +76,16 @@ Ostream& operator<<(Ostream&, const blockDescriptor&);
 
 class blockDescriptor
 {
-    // Private data
+    // Private Data
 
         //- Reference to point field defining the block mesh
         const pointField& vertices_;
 
         //- Reference to a list of block edges
-        const blockEdgeList& edges_;
+        const blockEdgeList& blockEdges_;
 
         //- Reference to the list of curved faces
-        const blockFaceList& faces_;
+        const blockFaceList& blockFaces_;
 
         //- Block shape
         cellShape blockShape_;
@@ -131,9 +125,6 @@ class blockDescriptor
 
         void findCurvedFaces();
 
-
-    // Private Member Functions
-
         //- No copy assignment
         void operator=(const blockDescriptor&) = delete;
 
@@ -145,10 +136,10 @@ public:
         //- Construct from components. Optional cellSet/zone name.
         blockDescriptor
         (
-            const cellShape&,
+            const cellShape& bshape,
             const pointField& vertices,
-            const blockEdgeList&,
-            const blockFaceList&,
+            const blockEdgeList& edges,
+            const blockFaceList& faces,
             const Vector<label>& density,
             const UList<gradingDescriptors>& expand,
             const word& zoneName = ""
@@ -160,9 +151,9 @@ public:
             const dictionary& dict,
             const label index,
             const pointField& vertices,
-            const blockEdgeList&,
-            const blockFaceList&,
-            Istream&
+            const blockEdgeList& edges,
+            const blockFaceList& faces,
+            Istream& is
         );
 
 
@@ -172,7 +163,7 @@ public:
         inline const pointField& vertices() const;
 
         //- Return reference to the list of curved faces
-        inline const blockFaceList& faces() const;
+        inline const blockFaceList& blockFaces() const;
 
         //- Return the block shape
         inline const cellShape& blockShape() const;
@@ -180,14 +171,26 @@ public:
         //- Return the mesh density (number of cells) in the i,j,k directions
         inline const Vector<label>& density() const;
 
+        //- Expansion ratios in all directions
+        const List<gradingDescriptors>& grading() const;
+
         //- Return the (optional) zone name
         inline const word& zoneName() const;
 
-        //- Return the number of points
+        //- The number of meshed points described: (nx+1) * (ny+1) * (nz+1)
         inline label nPoints() const;
 
-        //- Return the number of cells
+        //- The number of meshed cells described: (nx * ny * nz)
         inline label nCells() const;
+
+        //- The number of meshed faces described
+        inline label nFaces() const;
+
+        //- The number of meshed internal faces described
+        inline label nInternalFaces() const;
+
+        //- The number of meshed internal faces described
+        inline label nBoundaryFaces() const;
 
         //- Curved-face labels for each block-face (-1 for flat faces)
         inline const FixedList<label, 6>& curvedFaces() const;
@@ -197,6 +200,22 @@ public:
 
         //- Return block point for local label i
         inline const point& blockPoint(const label i) const;
+
+        //- Check indices are within valid range ni,nj,nk
+        inline void checkIndex
+        (
+            const label i,
+            const label j,
+            const label k
+        ) const;
+
+        //- Cell label offset for a particular i,j,k position
+        inline label cellLabel
+        (
+            const label i,
+            const label j,
+            const label k
+        ) const;
 
         //- Vertex label offset for a particular i,j,k position
         inline label pointLabel
@@ -246,11 +265,19 @@ public:
         //- Write block index with dictionary lookup
         static void write(Ostream&, const label blocki, const dictionary&);
 
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream&, const blockDescriptor&);
+        //- Return info proxy
+        inline InfoProxy<blockDescriptor> info() const
+        {
+            return *this;
+        }
 };
+
+
+//- Output Operator
+Ostream& operator<<(Ostream& os, const blockDescriptor& bd);
+
+//- Info output
+Ostream& operator<<(Ostream& os, const InfoProxy<blockDescriptor>& info);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

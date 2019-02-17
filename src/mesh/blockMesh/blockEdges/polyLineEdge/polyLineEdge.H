@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -89,12 +89,12 @@ public:
             const label index,
             const searchableSurfaces& geometry,
             const pointField&,
-            Istream&
+            Istream& is
         );
 
 
-        //- Destructor
-        virtual ~polyLineEdge();
+    //- Destructor
+    virtual ~polyLineEdge() = default;
 
 
     // Member Functions

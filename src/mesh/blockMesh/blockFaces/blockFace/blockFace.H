@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -44,8 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class blockDescriptor;
 class blockFace;
 
@@ -98,7 +97,7 @@ public:
         (
             const dictionary& dict,
             const label index,
-            Istream&
+            Istream& is
         );
 
         //- Clone function
@@ -138,8 +137,7 @@ public:
 
 
     //- Destructor
-    virtual ~blockFace()
-    {}
+    virtual ~blockFace() = default;
 
 
     // Member Functions

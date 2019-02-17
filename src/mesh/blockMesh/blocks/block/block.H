@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -31,7 +31,8 @@ Description
     cells in each direction and an expansion ratio.
 
 Note
-    The vertices and cells for filling the block are demand-driven.
+    The vertices, cells, boundary patches for filling the block are
+    demand-driven.
 
 SourceFiles
     block.C
@@ -43,21 +44,13 @@ SourceFiles
 #define block_H
 
 #include "pointField.H"
-#include "labelList.H"
-
+#include "faceList.H"
 #include "blockDescriptor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
-class block;
-Ostream& operator<<(Ostream&, const block&);
 
 /*---------------------------------------------------------------------------*\
                            Class block Declaration
@@ -67,22 +60,37 @@ class block
 :
     public blockDescriptor
 {
-    // Private data
+    // Private Data
 
         //- List of points
         pointField points_;
 
+        //- The cells (hex)
+        List<FixedList<label, 8>> blockCells_;
+
         //- Boundary patches
-        FixedList<List<FixedList<label, 4>>, 6> boundaryPatches_;
+        FixedList<List<FixedList<label, 4>>, 6> blockPatches_;
 
 
     // Private Member Functions
 
-        //- Creates vertices for cells filling the block
+        //- Create vertices for cells filling the block
         void createPoints();
 
-        //- Creates boundary patch faces for the block
+        //- Create cells
+        void createCells();
+
+        //- Create boundary patch faces for the block
         void createBoundary();
+
+        //- Add boundary faces to output list at iterator location
+        template<class OutputIterator>
+        OutputIterator addBoundaryFaces
+        (
+            const int shapeFacei,
+            OutputIterator iter
+        ) const;
+
 
         //- No copy construct
         block(const block&) = delete;
@@ -142,7 +150,7 @@ public:
         );
 
         //- Construct from a block definition
-        block(const blockDescriptor&);
+        block(const blockDescriptor& blockDesc);
 
         //- Clone
         autoPtr<block> clone() const
@@ -197,29 +205,28 @@ public:
 
 
     //- Destructor
-    virtual ~block()
-    {}
+    virtual ~block() = default;
 
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return the points for filling the block
-            inline const pointField& points() const;
+        //- The points for filling the block
+        inline const pointField& points() const;
 
-            //- Return the cells for filling the block
-            List<FixedList<label, 8>> cells() const;
+        //- The cells for filling the block
+        inline const List<FixedList<label, 8>>& cells() const;
 
-            //- Return the boundary patch faces for the block
-            inline const FixedList<List<FixedList<label, 4>>, 6>&
-                boundaryPatches() const;
-
-
-    // Ostream Operator
-
-        friend Ostream& operator<<(Ostream&, const block&);
+        //- The boundary patch faces for the block
+        inline const FixedList<List<FixedList<label, 4>>, 6>&
+        boundaryPatches() const;
 };
+
+
+//- Ostream Operator
+Ostream& operator<<(Ostream& os, const block& blk);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

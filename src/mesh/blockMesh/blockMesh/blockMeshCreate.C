@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -105,11 +105,11 @@ void Foam::blockMesh::createCells() const
 
     cells_.setSize(nCells_);
 
-    label cellLabel = 0;
+    label celli = 0;
 
     forAll(blocks, blocki)
     {
-        const List<FixedList<label, 8>> blockCells(blocks[blocki].cells());
+        const List<FixedList<label, 8>>& blockCells = blocks[blocki].cells();
 
         forAll(blockCells, blockCelli)
         {
@@ -126,9 +126,9 @@ void Foam::blockMesh::createCells() const
             }
 
             // Construct collapsed cell and add to list
-            cells_[cellLabel] = cellShape(hex, cellPoints, true);
+            cells_[celli] = cellShape(hex, cellPoints, true);
 
-            cellLabel++;
+            ++celli;
         }
     }
 }
