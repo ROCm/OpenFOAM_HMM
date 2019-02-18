@@ -471,6 +471,12 @@ public:
                 return nodes_[0].bb_;
             }
 
+            //- Per node, per octant whether is fully inside/outside/mixed.
+            PackedList<2>& nodeTypes() const
+            {
+                return nodeTypes_;
+            }
+
 
         // Conversions for entries in subNodes_.
 

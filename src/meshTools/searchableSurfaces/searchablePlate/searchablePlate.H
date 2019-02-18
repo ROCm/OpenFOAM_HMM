@@ -152,6 +152,12 @@ public:
             return false;
         }
 
+        //- What is type of points outside bounds
+        virtual volumeType outsideVolumeType() const
+        {
+            return volumeType::UNKNOWN;
+        }
+
         //- Range of local indices that can be returned.
         virtual label size() const
         {

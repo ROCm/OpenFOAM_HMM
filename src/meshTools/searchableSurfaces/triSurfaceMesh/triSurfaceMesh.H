@@ -52,8 +52,8 @@ SourceFiles
 #ifndef triSurfaceMesh_H
 #define triSurfaceMesh_H
 
-#include "treeBoundBox.H"
 #include "searchableSurface.H"
+#include "treeBoundBox.H"
 #include "objectRegistry.H"
 #include "indexedOctree.H"
 #include "treeDataTriSurface.H"
@@ -79,6 +79,8 @@ class triSurfaceMesh
     public triSurface,
     public triSurfaceRegionSearch
 {
+protected:
+
     // Private member data
 
         //- Supplied fileName override
@@ -110,7 +112,7 @@ class triSurfaceMesh
         //  IOobject
         static fileName relativeFilePath
         (
-            const regIOobject&,
+            const IOobject&,
             const fileName&,
             const bool isGlobal
         );
@@ -118,7 +120,7 @@ class triSurfaceMesh
         //- Return fileName to load IOobject from. Optional override of fileName
         static fileName checkFile
         (
-            const regIOobject&,
+            const IOobject&,
             const dictionary&,
             const bool isGlobal
         );
@@ -179,15 +181,22 @@ public:
 
 
         // Special constructors for use by distributedTriSurface. File search
-        // status (local/global) supplied.
+        // method supplied:
 
-            triSurfaceMesh(const IOobject& io, const bool isGlobal);
+            enum readAction
+            {
+                localOnly,      // load from (processor-)local file only
+                localOrGlobal,  // load from (processor-)local or global file
+                masterOnly      // as localOrGlobal but only load on master
+            };
+
+            triSurfaceMesh(const IOobject& io, const readAction r);
 
             triSurfaceMesh
             (
                 const IOobject& io,
                 const dictionary& dict,
-                const bool isGlobal
+                const readAction r
             );
 
 
@@ -215,6 +224,9 @@ public:
 
             //- Whether supports volume type (below) - i.e. whether is closed.
             virtual bool hasVolumeType() const;
+
+            //- If surface is closed, what is type of points outside bounds
+            virtual volumeType outsideVolumeType() const;
 
             //- Range of local indices that can be returned.
             virtual label size() const

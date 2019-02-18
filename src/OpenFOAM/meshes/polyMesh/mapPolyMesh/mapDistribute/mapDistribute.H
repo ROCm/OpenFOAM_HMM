@@ -330,10 +330,10 @@ public:
         mapDistribute();
 
         //- Copy construct
-        mapDistribute(const mapDistribute& map);
+        explicit mapDistribute(const mapDistribute& map);
 
         //- Move construct
-        mapDistribute(mapDistribute&& map);
+        explicit mapDistribute(mapDistribute&& map);
 
         //- Move construct from components
         mapDistribute
