@@ -96,7 +96,7 @@ protected:
         word UName_;
 
         //- Number of cells in I-J-K directions
-        Vector<label> N_;
+        Vector<int> N_;
 
         //- Reference point
         vector c0_;
@@ -121,7 +121,7 @@ protected:
             const vectorField& C,
             const vector& c0,
             const vector& deltaC,
-            const Vector<label>& N,
+            const Vector<int>& N,
             const scalar kappaNorm
         );
 
