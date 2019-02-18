@@ -200,6 +200,7 @@ $(derivedFvPatchFields)/translatingWallVelocity/translatingWallVelocityFvPatchVe
 $(derivedFvPatchFields)/turbulentDFSEMInlet/turbulentDFSEMInletFvPatchVectorField.C
 $(derivedFvPatchFields)/turbulentDFSEMInlet/eddy/eddy.C
 $(derivedFvPatchFields)/turbulentDFSEMInlet/eddy/eddyIO.C
+$(derivedFvPatchFields)/turbulentDigitalFilterInlet/turbulentDigitalFilterInletFvPatchVectorField.C
 $(derivedFvPatchFields)/turbulentInlet/turbulentInletFvPatchFields.C
 $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityKineticEnergyInletFvPatchScalarField.C
 $(derivedFvPatchFields)/uniformDensityHydrostaticPressure/uniformDensityHydrostaticPressureFvPatchScalarField.C
