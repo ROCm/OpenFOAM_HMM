@@ -12,4 +12,6 @@ wmake $targetType solvers
 
 ./graphics/Allwmake $targetType
 
+./randomProcesses/Allwmake $targetType
+
 #------------------------------------------------------------------------------
