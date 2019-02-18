@@ -1240,7 +1240,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
 
                 // Nearest to face interior. Use faceNormal to determine side
                 //scalar c = sampleNearestVec & surf.faceNormals()[facei];
-                scalar c = sampleNearestVec & surf[facei].normal(points);
+                scalar c = sampleNearestVec & surf[facei].areaNormal(points);
 
                 if (c > 0)
                 {
@@ -1292,7 +1292,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
                     label facei = pFaces[pFacei];
                     const triSurface::FaceType& f = surf[facei];
 
-                    label fp = findIndex(f, pointi);
+                    label fp = f.find(pointi);
                     label p1 = f[f.fcIndex(fp)];
                     label pMin1 = f[f.rcIndex(fp)];
 
