@@ -300,7 +300,6 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
 
         // The surface writer and format options
         const word writerType(dict.get<word>("surfaceFormat"));
-        const dictionary& formatOptions = dict.subOrEmptyDict("formatOptions");
 
         // Define the surface formatter
         // Optionally defined extra controls for the output formats
