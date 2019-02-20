@@ -27,7 +27,7 @@ License
 
 #include "surfaceFieldValue.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
+#include "polySurfaceFields.H"
 #include "volFields.H"
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
@@ -58,7 +58,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::validField
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
     typedef GeometricField<Type, fvPatchField, volMesh> vf;
-    typedef DimensionedField<Type, surfGeoMesh> smt;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> smt;
 
     return
     (
@@ -79,7 +79,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
     typedef GeometricField<Type, fvPatchField, volMesh> vf;
-    typedef DimensionedField<Type, surfGeoMesh> smt;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> smt;
 
     if (foundObject<smt>(fieldName))
     {
@@ -384,22 +384,26 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
         Field<Type> values(getFieldValues<Type>(fieldName, true));
 
         // Write raw values on surface if specified
-        if (surfaceWriterPtr_.valid())
+        if (surfaceWriterPtr_.valid() && surfaceWriterPtr_->enabled())
         {
             Field<Type> allValues(values);
             combineFields(allValues);
 
             if (Pstream::master())
             {
-                surfaceWriterPtr_->write
+                surfaceWriterPtr_->open
                 (
-                    outputDir(),
-                    regionTypeNames_[regionType_] + ("_" + regionName_),
                     surfToWrite,
-                    fieldName,
-                    allValues,
-                    false
+                    (
+                        outputDir()
+                      / regionTypeNames_[regionType_] + ("_" + regionName_)
+                    ),
+                    false  // serial - already merged
                 );
+
+                surfaceWriterPtr_->write(fieldName, allValues);
+
+                surfaceWriterPtr_->clear();
             }
         }
 

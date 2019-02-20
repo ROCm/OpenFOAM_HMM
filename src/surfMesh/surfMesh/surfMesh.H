@@ -45,12 +45,16 @@ SourceFiles
 #include "SubField.H"
 #include "surfZoneIOList.H"
 
+#include "surfFieldsFwd.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
 // Forward declarations
+class dimensionSet;
+class meshedSurf;
 template<class Face> class MeshedSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -141,9 +145,6 @@ protected:
         //- Update references to storedPoints/storedFaces
         virtual void updateRefs();
 
-        //- Update with new contents
-        void copyContents(const MeshedSurface<face>& surf, bool validate=false);
-
 
 public:
 
@@ -172,6 +173,9 @@ public:
         //- Read construct from IOobject, with alternative surface name
         //  Writing = NO_WRITE
         surfMesh(const IOobject& io, const word& surfName);
+
+        //- Construct null with specified name on the given registry.
+        surfMesh(const word& surfName, const objectRegistry& obr);
 
         //- Copy construct from MeshedSurface<face>
         surfMesh
@@ -283,12 +287,59 @@ public:
 
     // Modification
 
+        //- Update with new contents
+        void copySurface
+        (
+            const pointField& points,
+            const faceList& faces,
+            bool validate=false
+        );
+
+        //- Update with new contents
+        void copySurface
+        (
+            const meshedSurf& surf,
+            bool validate=false
+        );
+
+        //- Update with new contents
+        void copySurface
+        (
+            const MeshedSurface<face>& surf,
+            bool validate=false
+        );
+
         //- Transfer the contents of the argument and annul the argument
         //  Optionally validate the zone coverage.
         void transfer(MeshedSurface<face>& surf, bool validate=false);
 
         //- Update mesh based on the files saved in time directories
         virtual readUpdateState readUpdate();
+
+
+    // Fields
+
+        //- Copy/store named field as face or point data (template parameter).
+        //
+        //  Default is face-data (surfGeoMesh as template).
+        template<class Type, class GeoMeshType = surfGeoMesh>
+        void storeField
+        (
+            const word& fieldName,
+            const dimensionSet& dims,
+            const Field<Type>& values
+        );
+
+        //- Move/store named field as face or point data (template parameter).
+        //
+        //  Default is face-data (surfGeoMesh as template).
+        template<class Type, class GeoMeshType = surfGeoMesh>
+        void storeField
+        (
+            const word& fieldName,
+            const dimensionSet& dims,
+            Field<Type>&& values
+        );
 
 
     // Writing
@@ -341,6 +392,9 @@ public:
         //- Clear primitive data (points, faces and cells)
         void clearPrimitives();
 
+        //- Clear stored fields
+        void clearFields();
+
         //- Remove all files from mesh instance
         void removeFiles(const fileName& instanceDir) const;
 
@@ -352,6 +406,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "surfMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

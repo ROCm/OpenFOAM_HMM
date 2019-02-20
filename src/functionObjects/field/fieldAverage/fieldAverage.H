@@ -32,7 +32,9 @@ Group
 Description
     Calculates average quantities for a user-specified selection of volumetric
     and surface fields.
-    With the %subRegion option, also supports fields on a surfMesh.
+    With the %subRegion option, also supports fields on functionObject
+    surface output (eg, sampledSurfaces).
+
 
     Fields are entered as a list of sub-dictionaries, which indicate the type of
     averages to perform, and can be updated during the calculation.  The current
@@ -104,15 +106,15 @@ Usage
 
     Where the entries comprise:
     \table
-        Property          | Description               | Required | Default
-        type              | type name: fieldAverage              | yes |
-        restartOnRestart  | Restart the averaging on restart     | no  | no
-        restartOnOutput   | Restart the averaging on output      | no  | no
-        periodicRestart   | Periodically restart the averaging   | no  | no
-        restartPeriod     | Periodic restart period              | conditional |
-        restartTime       | One-shot reset of the averaging | no | great
-        fields            | list of fields and averaging options | yes |
-        subRegion         | name of a sub-region such as a surface name | no |
+        Property        | Description                       | Required | Default
+        type            | Type name: fieldAverage           | yes |
+        restartOnRestart| Restart the averaging on restart  | no  | no
+        restartOnOutput | Restart the averaging on output   | no  | no
+        periodicRestart | Periodically restart the averaging | no  | no
+        restartPeriod   | Periodic restart period            | conditional |
+        restartTime     | One-shot reset of the averaging    | no | great
+        fields          | list of fields and averaging options | yes |
+        subRegion       | Name for alternative objectRegistry  | no  | ""
     \endtable
 
 

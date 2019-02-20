@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,10 +29,14 @@ Description
 
     Dictionary controls
     \table
-        Property     | Description                      | Required    | Default
-        functionObject | The data source                | yes         |
-        clearObjects  | Remove file after use           | no          | no
+        Property     | Description                          | Required | Default
+        functionObject | The data source                    | yes |
+        clearObjects | Remove file after use                | no  | no
+        liveObject   | Prefer simulation data source        | no  | true
     \endtable
+
+    The "live" keyword indiates that from within the simulation (in memory)
+    is preferred over data from disk (for example).
 
 SourceFiles
     functionObjectBase.C
@@ -64,13 +68,16 @@ class functionObjectBase
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to the state
         const stateFunctionObject& state_;
 
-        //- The function object name which provides the source data
+        //- The function object name that provides the source data
         word functionObjectName_;
+
+        //- Flag to indicate "live" (simulation) data source should be used
+        bool liveObject_;
 
         //- Flag to indicate that source data should be cleared after use
         bool clearObjects_;
@@ -109,6 +116,7 @@ protected:
         //  \note does not change the stateFunctionObject
         bool removeFile(const word& keyword, const word& subDictName);
 
+
         //- No copy construct
         functionObjectBase(const functionObjectBase&) = delete;
 
@@ -117,10 +125,6 @@ protected:
 
 
 public:
-
-    //- Run-time type information
-    TypeName("functionObjectBase");
-
 
     // Constructors
 

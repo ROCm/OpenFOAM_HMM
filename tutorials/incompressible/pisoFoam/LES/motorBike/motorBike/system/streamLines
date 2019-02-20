@@ -8,11 +8,10 @@
 
 streamLines
 {
-    type            streamLine;
+    type    streamLine;
 
-    // Output every
-    writeControl    writeTime;
-    // writeInterval 10;
+    // Time control etc
+    ${_visualization};
 
     setFormat       vtk; //gnuplot; //xmgr; //raw; //jplot; //csv; //ensight;
 

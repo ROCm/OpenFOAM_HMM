@@ -1,0 +1,29 @@
+// -*- C++ -*-
+//
+// Summary of fluxes
+
+flux
+{
+    type            fluxSummary;
+    libs            ("libfieldFunctionObjects.so");
+    log             on;
+    enabled         true;
+
+    executeControl  none;
+    writeControl    timeStep;
+    writeInterval   4;
+
+    mode            functionObjectSurface;
+
+    phi             rhoU;
+
+    surfaces
+    (
+        sampled.plane-0.25
+        sampled.plane-0.45
+        sampled.plane-0.55
+    );
+}
+
+
+// ************************************************************************* //

@@ -1,16 +1,134 @@
-// -*- C++ -*-
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1812                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      sampling;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// ************************************************************************* //
+// Setup for surfaceFieldValue
+//
+//   restartTime:
+//     - a 'one-shot' reset at a particular time
+//
+// fields [required]
+//     Pairs of fields to use for calculating the deviation.
+//     The fields must already exist on the surfaces.
+//
+// weightField [optional]
+//     A scalar or vector field for weighting.
+//
+// postOperation [optional]
+//     Modify the results by particular operations.
+//     (none | sqrt)
+//     The sqrt operation is useful when determining RMS values.
+//
+// The 'output/write' control triggers the calculation.
+__surfaceFieldValue
+{
+    type            surfaceFieldValue;
+    libs            ("libfieldFunctionObjects.so");
+    log             on;
+    enabled         true;
 
-#include "derivedFields"
-#include "fieldTransfer"
+    writeControl    timeStep;
+    writeInterval   1;
+
+    writeFields     false;
+    surfaceFormat   vtk;
+    // writeArea       true;
+
+    // resetOnStartUp  true;
+    // resetOnOutput   false;
+    // periodicRestart true;
+    // restartPeriod   0.0005;
+}
+
+
+// * * * * * * * * * * * * * * * * Sampling  * * * * * * * * * * * * * * * * //
+
+// Sample volume fields to surfaces and hold on registry.
+sampled
+{
+    type    surfaces;
+    libs    ("libsampling.so");
+    log     true;
+
+    executeControl  timeStep;
+    executeInterval 1;
+    writeControl    none;
+    sampleOnExecute true;
+
+    surfaceFormat   none;
+
+    fields      (p rho U T rhoU pTotal);
+
+    // Remove derived fields we created prior
+    removeFieldsOnExecute   (rhoU pTotal);
+
+    _plane
+    {
+        type    plane;
+        source  cells;
+        store   true;
+
+        planeType   pointAndNormal;
+
+        pointAndNormalDict
+        {
+            normal (-1 0 0);
+            point  (-0.04 0 0);
+        }
+    }
+
+    surfaces
+    {
+        // Top channel
+        plane1
+        {
+            ${_plane}
+            bounds (-1 0 -1) (0 1 1);
+        }
+
+        // Bottom channel
+        plane2
+        {
+            ${_plane}
+            bounds (-1 -1 -1) (0 0 1);
+        }
+
+        // Angled plane - for general testing
+        plane3
+        {
+            type        distanceSurface;
+            distance    0;
+            signed      true;
+            store       true;
+
+            surfaceType triSurfaceMesh;
+            surfaceName angledPlane.obj;
+        }
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Calculations  * * * * * * * * * * * * * * * //
 
 massflow
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane1;
+    regionType      functionObjectSurface;
+    name            sampled.plane1;
 
     operation       areaNormalIntegrate;
 
@@ -21,8 +139,8 @@ areaAverage
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane1;
+    regionType      functionObjectSurface;
+    name            sampled.plane1;
 
     operation       weightedAreaAverage;
     weightField     rhoU;
@@ -33,8 +151,8 @@ areaIntegrate
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane1;
+    regionType      functionObjectSurface;
+    name            sampled.plane1;
 
     operation       weightedAreaIntegrate;
     weightField     rhoU;
@@ -46,8 +164,8 @@ UI1
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane1;
+    regionType      functionObjectSurface;
+    name            sampled.plane1;
 
     operation       uniformity;
     fields          ( U T );
@@ -59,8 +177,8 @@ UI2
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane2;
+    regionType      functionObjectSurface;
+    name            sampled.plane2;
 
     operation       uniformity;
     fields          ( U T );
@@ -72,8 +190,8 @@ UI3
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane3;
+    regionType      functionObjectSurface;
+    name            sampled.plane3;
 
     operation       uniformity;
     fields          ( U T );
@@ -86,8 +204,8 @@ T_UI1
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane1;
+    regionType      functionObjectSurface;
+    name            sampled.plane1;
 
     operation       weightedUniformity;
     weightField     T;
@@ -100,8 +218,8 @@ rhoU_UI1
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane1;
+    regionType      functionObjectSurface;
+    name            sampled.plane1;
 
     operation       weightedUniformity;
     weightField     rhoU;
@@ -114,13 +232,18 @@ rhoU_UI2
 {
     ${__surfaceFieldValue}
 
-    regionType      surface;
-    name            plane2;
+    regionType      functionObjectSurface;
+    name            sampled.plane2;
 
     operation       weightedUniformity;
     weightField     rhoU;
     fields          ( p rho U rhoU );
 }
+
+
+// * * * * * * * * * * * * * * * * * Cleanup * * * * * * * * * * * * * * * * //
+
+#remove "__.*"
 
 
 // ************************************************************************* //

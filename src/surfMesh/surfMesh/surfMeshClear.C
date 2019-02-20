@@ -69,4 +69,11 @@ void Foam::surfMesh::clearOut()
 }
 
 
+void Foam::surfMesh::clearFields()
+{
+    // Clear the entire registry
+    surfaceRegistry::clear();
+}
+
+
 // ************************************************************************* //

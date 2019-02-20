@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -28,8 +28,8 @@ License
 #include "FacePostProcessing.H"
 #include "Pstream.H"
 #include "ListListOps.H"
-#include "surfaceWriter.H"
 #include "globalIndex.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -194,35 +194,26 @@ void Foam::FacePostProcessing<CloudType>::write()
                     )
                 );
 
-                autoPtr<surfaceWriter> writer
+                auto writer = surfaceWriter::New
                 (
-                    surfaceWriter::New
-                    (
-                        surfaceFormat_,
-                        this->coeffDict().subOrEmptyDict("formatOptions").
-                            subOrEmptyDict(surfaceFormat_)
-                    )
+                    surfaceFormat_,
+                    this->coeffDict().subOrEmptyDict("formatOptions")
+                        .subOrEmptyDict(surfaceFormat_)
                 );
 
-                writer->write
+                writer->open
                 (
-                    this->writeTimeDir(),
-                    fZone.name(),
-                    meshedSurfRef(allPoints, allFaces),
-                    "massTotal",
-                    zoneMassTotal[zoneI],
-                    false
+                    allPoints,
+                    allFaces,
+                    (this->writeTimeDir() / fZone.name()),
+                    false  // serial - already merged
                 );
 
-                writer->write
-                (
-                    this->writeTimeDir(),
-                    fZone.name(),
-                    meshedSurfRef(allPoints, allFaces),
-                    "massFlowRate",
-                    zoneMassFlowRate[zoneI],
-                    false
-                );
+                writer->write("massTotal", zoneMassTotal[zoneI]);
+
+                writer->write("massFlowRate", zoneMassFlowRate[zoneI]);
+
+                writer->clear();
             }
         }
     }

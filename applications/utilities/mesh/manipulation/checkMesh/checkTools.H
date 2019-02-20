@@ -5,12 +5,12 @@
 namespace Foam
 {
     class polyMesh;
-    class surfaceWriter;
     class pointSet;
     class faceSet;
     class cellSet;
     class fileName;
     class polyMesh;
+    class surfaceWriter;
 
     void printMeshStats(const polyMesh& mesh, const bool allTopology);
 
@@ -19,7 +19,7 @@ namespace Foam
     void mergeAndWrite
     (
         const polyMesh& mesh,
-        const surfaceWriter& writer,
+        surfaceWriter& writer,
         const word& name,
         const indirectPrimitivePatch& setPatch,
         const fileName& outputDir
@@ -27,15 +27,15 @@ namespace Foam
 
     //- Write vtk representation of (assembled) faceSet to surface file in
     //  postProcessing/ directory
-    void mergeAndWrite(const surfaceWriter&, const faceSet&);
+    void mergeAndWrite(surfaceWriter& writer, const faceSet& set);
 
     //- Write vtk representation of (assembled) cellSet to surface file in
     //  postProcessing/ directory
-    void mergeAndWrite(const surfaceWriter&, const cellSet&);
+    void mergeAndWrite(surfaceWriter& writer, const cellSet& set);
 
     //- Write vtk representation of (assembled) pointSet to 'set' file in
     //  postProcessing/ directory
-    void mergeAndWrite(const writer<scalar>&, const pointSet&);
+    void mergeAndWrite(const writer<scalar>& writer, const pointSet& set);
 }
 
 

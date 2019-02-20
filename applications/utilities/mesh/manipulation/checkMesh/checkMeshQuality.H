@@ -6,8 +6,8 @@ namespace Foam
 
     label checkMeshQuality
     (
-        const polyMesh&,
-        const dictionary&,
-        const autoPtr<surfaceWriter>&
+        const polyMesh& mesh,
+        const dictionary& dict,
+        autoPtr<surfaceWriter>& writer
     );
 }

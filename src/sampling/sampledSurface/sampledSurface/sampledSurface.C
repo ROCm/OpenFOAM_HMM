@@ -38,6 +38,17 @@ namespace Foam
 }
 
 
+const Foam::wordList Foam::sampledSurface::surfaceFieldTypes
+({
+    "surfaceScalarField",
+    "surfaceVectorField",
+    "surfaceSphericalTensorField",
+    "surfaceSymmTensorField",
+    "surfaceTensorField"
+});
+
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::sampledSurface::clearGeom() const
@@ -57,10 +68,8 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
 {
     const word sampleType(dict.get<word>("type"));
 
-    if (debug)
-    {
-        Info<< "Selecting sampledType " << sampleType << endl;
-    }
+    DebugInfo
+        << "Selecting sampledType " << sampleType << endl;
 
     auto cstrIter = wordConstructorTablePtr_->cfind(sampleType);
 

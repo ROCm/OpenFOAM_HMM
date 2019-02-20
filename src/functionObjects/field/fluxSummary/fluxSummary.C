@@ -27,8 +27,7 @@ License
 
 #include "fluxSummary.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
-#include "surfMesh.H"
+#include "polySurfaceFields.H"
 #include "dictionary.H"
 #include "Time.H"
 #include "syncTools.H"
@@ -65,6 +64,7 @@ Foam::functionObjects::fluxSummary::modeTypeNames_
     { modeType::mdFaceZone , "faceZone" },
     { modeType::mdFaceZoneAndDirection, "faceZoneAndDirection" },
     { modeType::mdCellZoneAndDirection, "cellZoneAndDirection" },
+    { modeType::mdSurface, "functionObjectSurface" },
     { modeType::mdSurface, "surface" },
     { modeType::mdSurfaceAndDirection, "surfaceAndDirection" },
 });
@@ -116,14 +116,15 @@ void Foam::functionObjects::fluxSummary::initialiseSurface
     DynamicList<boolList>& faceFlip
 ) const
 {
-    const surfMesh* surfptr = mesh_.cfindObject<surfMesh>(surfName);
+    const polySurface* surfptr =
+        storedObjects().cfindObject<polySurface>(surfName);
 
     if (!surfptr)
     {
         FatalErrorInFunction
             << "Unable to find surface " << surfName
             << ".  Valid surfaces: "
-            << mesh_.sortedNames<surfMesh>() << nl
+            << storedObjects().sortedNames<polySurface>() << nl
             << exit(FatalError);
     }
 
@@ -142,14 +143,15 @@ void Foam::functionObjects::fluxSummary::initialiseSurfaceAndDirection
     DynamicList<boolList>& faceFlip
 ) const
 {
-    const surfMesh* surfptr = mesh_.cfindObject<surfMesh>(surfName);
+    const polySurface* surfptr =
+        storedObjects().cfindObject<polySurface>(surfName);
 
     if (!surfptr)
     {
         FatalErrorInFunction
             << "Unable to find surface " << surfName
             << ".  Valid surfaces: "
-            << mesh_.sortedNames<surfMesh>() << nl
+            << storedObjects().sortedNames<polySurface>() << nl
             << exit(FatalError);
     }
 
@@ -661,7 +663,9 @@ Foam::scalar Foam::functionObjects::fluxSummary::totalArea
 
     if (isSurfaceMode())
     {
-        const surfMesh& s = mesh_.lookupObject<surfMesh>(zoneNames_[idx]);
+        const polySurface& s =
+            storedObjects().lookupObject<polySurface>(zoneNames_[idx]);
+
         sumMagSf = sum(s.magSf());
     }
     else
@@ -693,11 +697,12 @@ Foam::scalar Foam::functionObjects::fluxSummary::totalArea
 
 bool Foam::functionObjects::fluxSummary::surfaceModeWrite()
 {
-    if (zoneNames_.size())
+    for (const word& surfName : zoneNames_)
     {
-        const label surfi = 0;
-        const surfMesh& s = mesh_.lookupObject<surfMesh>(zoneNames_[surfi]);
-        const surfVectorField& phi = s.lookupObject<surfVectorField>(phiName_);
+        const polySurface& s =
+            storedObjects().lookupObject<polySurface>(surfName);
+
+        const auto& phi = s.lookupObject<polySurfaceVectorField>(phiName_);
 
         Log << type() << ' ' << name() << ' '
             << checkFlowType(phi.dimensions(), phi.name()) << " write:" << nl;
@@ -706,8 +711,10 @@ bool Foam::functionObjects::fluxSummary::surfaceModeWrite()
 
     forAll(zoneNames_, surfi)
     {
-        const surfMesh& s = mesh_.lookupObject<surfMesh>(zoneNames_[surfi]);
-        const surfVectorField& phi = s.lookupObject<surfVectorField>(phiName_);
+        const polySurface& s =
+            storedObjects().lookupObject<polySurface>(zoneNames_[surfi]);
+
+        const auto& phi = s.lookupObject<polySurfaceVectorField>(phiName_);
 
         checkFlowType(phi.dimensions(), phi.name());
 

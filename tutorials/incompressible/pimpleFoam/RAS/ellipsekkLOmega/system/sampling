@@ -6,94 +6,58 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-plane0
+planes
 {
     type            surfaces;
     libs            ("libsampling.so");
-    writeControl    writeTime;
 
-    surfaceFormat   vtk;
+        // Time control etc
+    ${_visualization};
+
     fields          ( p U );
+
+    // surfaceFormat   vtk;
+    surfaceFormat   none;
+
+    store           true;
 
     interpolationScheme cellPoint;
 
+    _plane
+    {
+        type        plane; //cuttingPlane;
+        planeType   pointAndNormal;
+        interpolate false;
+
+        pointAndNormalDict
+        {
+            point   (0 0 0);
+            normal  (1 0 0);
+        }
+    }
+
     surfaces
-    (
+    {
         plane0
         {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            interpolate     true;
+            ${_plane}
             pointAndNormalDict
             {
                 point   (0 0 0);
-                normal  (1 0 0);
             }
         }
-    );
-}
 
-
-plane1
-{
-    ${plane0}
-
-    surfaces
-    (
         plane1
         {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            interpolate     true;
+            ${_plane}
             pointAndNormalDict
             {
-                point   (0.1 0 0);
-                normal  (1 0 0);
+                point   (-0.1 0 0);
             }
         }
-    );
-}
+    }
 
-
-plane2
-{
-    ${plane0}
-
-    surfaces
-    (
-        plane2
-        {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            interpolate     true;
-            pointAndNormalDict
-            {
-                point   (0.2 0 0);
-                normal  (1 0 0);
-            }
-        }
-    );
-}
-
-
-plane3
-{
-    ${plane0}
-
-    surfaces
-    (
-        plane3
-        {
-            type            cuttingPlane;
-            planeType       pointAndNormal;
-            interpolate     true;
-            pointAndNormalDict
-            {
-                point   (0.3 0 0);
-                normal  (1 0 0);
-            }
-        }
-    );
+    #remove _plane
 }
 
 

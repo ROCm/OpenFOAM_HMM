@@ -5,8 +5,8 @@
 namespace Foam
 {
     class polyMesh;
-    class surfaceWriter;
     class pointSet;
+    class surfaceWriter;
 
     template<class PatchType>
     void checkPatch
@@ -19,10 +19,10 @@ namespace Foam
 
     label checkTopology
     (
-        const polyMesh&,
-        const bool,
-        const bool,
-        const autoPtr<surfaceWriter>&,
-        const autoPtr<writer<scalar>>&
+        const polyMesh& mesh,
+        const bool allTopology,
+        const bool allGeometry,
+        autoPtr<surfaceWriter>& surfWriter,
+        const autoPtr<writer<scalar>>& setWriter
     );
 }

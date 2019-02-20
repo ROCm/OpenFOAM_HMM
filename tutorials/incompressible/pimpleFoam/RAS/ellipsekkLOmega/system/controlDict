@@ -53,9 +53,8 @@ maxCo           0.2;
 
 functions
 {
-    #include "sampling"
-    #include "streamLines"
-    #include "runTimePostProcessing"
+    // Demonstrate runTimePostProcessing
+    #include "visualization"
 }
 
 // ************************************************************************* //

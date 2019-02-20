@@ -8,15 +8,21 @@
 
 postPro1
 {
-    type            runTimePostProcessing;
-    libs            ("librunTimePostProcessing.so");
-    writeControl    writeTime;
+    #includeEtc "caseDicts/postProcessing/visualization/runTimePostPro.cfg"
+
+    // Time control etc
+    ${_visualization};
+
+    // debug       true;
+    // parallel    true;
+
     output
     {
         name        image;
         width       800;
         height      600;
     }
+
     camera
     {
         // If camera is moving, optionally provide start and end times
@@ -42,14 +48,10 @@ postPro1
     // they are locally overridden
     colours
     {
-        background      (0.317647 0.341176 0.431373);
-        background2     ${background};
-        text            (0.75 0.75 0.75);
-        edge            (1 0 0);
-        surface         (0.5 0.5 0.5);
-        line            (1 0 0);
+        ${..colourScheme.paraview};
     }
 
+    // Line data
     lines
     {
         streamline
@@ -70,11 +72,11 @@ postPro1
         }
     }
 
-    _plane
+    // Surface data
+    _surface
     {
         type            functionObjectSurface;
-        functionObject  cuttingPlane;
-        colourMap       blueWhiteRed;
+        colourMap       coolToWarm;
         representation  glyph;
         maxGlyphLength  0.1;
         visible         yes;
@@ -83,12 +85,7 @@ postPro1
         field           U;
         range           (0 10);
         opacity         1;
-        scalarBar
-        {
-            visible     no;
-        }
     }
-
 
     surfaces
     {
@@ -102,26 +99,51 @@ postPro1
             visible         yes;
             featureEdges    no;
             opacity         0.8;
+            visible         false;
         }
+
+        patches
+        {
+            type            patches;
+            patches         (hole);
+            renderMode      phong;
+            representation  surface;
+            colourMap       coolToWarm;
+            colourBy        field;
+            field           U;
+            range           (0 10);
+            nearCellValue   true;
+            smooth          true;
+        }
+
         plane0
         {
-            ${_plane};
-            functionObject  plane0;
+            ${_surface};
+            functionObject  planes.plane0;
         }
         plane1
         {
-            ${_plane};
-            functionObject  plane1;
+            ${_surface};
+            functionObject  planes.plane1;
         }
-        plane2
+
+        cutting
         {
-            ${_plane};
-            functionObject  plane2;
-        }
-        plane3
-        {
-            ${_plane};
-            functionObject  plane3;
+            // Same colours and scaling as surface
+            ${_surface};
+
+            type            plane;
+            planeType       pointAndNormal;
+
+            pointAndNormalDict
+            {
+                point   (0 0 0);
+                normal  (1 0 0);
+            }
+
+            offsets         (0.1 0.2 0.3 0.4 0.5);
+
+            colourMap       coolToWarm;
         }
     }
 

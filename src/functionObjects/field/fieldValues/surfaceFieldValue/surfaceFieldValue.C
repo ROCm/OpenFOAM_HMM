@@ -60,7 +60,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypeNames_
 ({
     { regionTypes::stFaceZone, "faceZone" },
     { regionTypes::stPatch, "patch" },
-    { regionTypes::stSurface, "surface" },
+    { regionTypes::stObject, "functionObjectSurface" },
     { regionTypes::stSampled, "sampledSurface" },
 });
 
@@ -118,9 +118,9 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationTypeNames_
 const Foam::objectRegistry&
 Foam::functionObjects::fieldValues::surfaceFieldValue::obr() const
 {
-    if (stSurface == regionType_)
+    if (stObject == regionType_)
     {
-        return mesh_.lookupObject<objectRegistry>(regionName_);
+        return storedObjects().lookupObject<polySurface>(regionName_);
     }
 
     return mesh_;
@@ -368,9 +368,9 @@ combineSurfaceGeometry
     pointField& points
 ) const
 {
-    if (stSurface == regionType_)
+    if (stObject == regionType_)
     {
-        const surfMesh& s = dynamicCast<const surfMesh>(obr());
+        const polySurface& s = dynamicCast<const polySurface>(obr());
 
         if (Pstream::parRun())
         {
@@ -436,9 +436,9 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
 {
     scalar totalArea = 0;
 
-    if (stSurface == regionType_)
+    if (stObject == regionType_)
     {
-        const surfMesh& s = dynamicCast<const surfMesh>(obr());
+        const polySurface& s = dynamicCast<const polySurface>(obr());
 
         totalArea = gSum(s.magSf());
     }
@@ -505,9 +505,9 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::update()
             setPatchFaces();
             break;
         }
-        case stSurface:
+        case stObject:
         {
-            const surfMesh& s = dynamicCast<const surfMesh>(obr());
+            const polySurface& s = dynamicCast<const polySurface>(obr());
             nFaces_ = returnReduce(s.size(), sumOp<label>());
             break;
         }
@@ -953,19 +953,22 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
     {
         const word formatName(dict.get<word>("surfaceFormat"));
 
-        if (formatName != "none")
-        {
-            surfaceWriterPtr_.reset
+        surfaceWriterPtr_.reset
+        (
+            surfaceWriter::New
             (
-                surfaceWriter::New
-                (
-                    formatName,
-                    dict.subOrEmptyDict("formatOptions")
-                        .subOrEmptyDict(formatName)
-                )
-            );
+                formatName,
+                dict.subOrEmptyDict("formatOptions").subOrEmptyDict(formatName)
+            )
+        );
 
+        if (surfaceWriterPtr_->enabled())
+        {
             Info<< "    surfaceFormat = " << formatName << nl;
+        }
+        else
+        {
+            surfaceWriterPtr_->clear();
         }
     }
 
@@ -1004,9 +1007,9 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
     vectorField Sf;
     if (usesSf())
     {
-        if (stSurface == regionType_)
+        if (stObject == regionType_)
         {
-            const surfMesh& s = dynamicCast<const surfMesh>(obr());
+            const polySurface& s = dynamicCast<const polySurface>(obr());
             Sf = s.Sf();
         }
         else if (sampledPtr_.valid())

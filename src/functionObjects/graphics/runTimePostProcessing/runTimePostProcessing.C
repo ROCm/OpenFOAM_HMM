@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +32,7 @@ License
 #include "text.H"
 #include "Time.H"
 #include "sigFpe.H"
+#include "polySurfaceFields.H"
 #include "addToRunTimeSelectionTable.H"
 
 // VTK includes
@@ -42,6 +41,16 @@ License
 #include "vtkRenderWindow.h"
 #include "vtkSmartPointer.h"
 #include "vtkLight.h"
+
+#ifdef FOAM_USING_VTK_MPI
+# include "vtkMPICommunicator.h"
+# include "vtkMPIController.h"
+#endif
+#include "vtkDummyController.h"
+
+#include "vtkSynchronizedRenderWindows.h"
+#include "vtkCompositedSynchronizedRenderers.h"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -103,6 +112,168 @@ static void cleanup(PtrList<Type>& objects)
 } // End namespace Foam
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::functionObjects::runTimePostProcessing::render
+(
+    vtkMultiProcessController* controller
+)
+{
+    // Some feedback
+    if (controller)
+    {
+        Log << name() << " render (" << controller->GetNumberOfProcesses()
+            << " processes)" << endl;
+    }
+    else
+    {
+        Log << name() << " render" << endl;
+    }
+
+
+    // Normal rendering elements
+    vtkSmartPointer<vtkRenderer> renderer;
+    vtkSmartPointer<vtkRenderWindow> renderWindow;
+
+    // Multi-process synchronization
+    vtkSmartPointer<vtkSynchronizedRenderWindows> syncWindows;
+    vtkSmartPointer<vtkCompositedSynchronizedRenderers> syncRenderers;
+
+
+    // Disable any floating point trapping
+    // (some low-level rendering functionality does not like it)
+
+    sigFpe::ignore sigFpeHandling; //<- disable in local scope
+
+
+    // Initialise render window
+    if (controller || Pstream::master())
+    {
+        renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
+        renderer = vtkSmartPointer<vtkRenderer>::New();
+
+        renderWindow->OffScreenRenderingOn();
+        renderWindow->SetSize(output_.width_, output_.height_);
+
+        // Legacy rendering - was deprecated for 8.1.0
+        #if (VTK_MAJOR_VERSION < 8) || \
+            ((VTK_MAJOR_VERSION == 8) && (VTK_MINOR_VERSION < 2))
+        renderWindow->SetAAFrames(10);
+        #endif
+        renderWindow->SetAlphaBitPlanes(true);
+        renderWindow->SetMultiSamples(0);
+        // renderWindow->PolygonSmoothingOn();
+
+        renderWindow->AddRenderer(renderer);
+    }
+
+    // Synchronization
+    if (controller)
+    {
+        syncWindows =
+            vtkSmartPointer<vtkSynchronizedRenderWindows>::New();
+
+        syncRenderers =
+            vtkSmartPointer<vtkCompositedSynchronizedRenderers>::New();
+
+        syncWindows->SetRenderWindow(renderWindow);
+        syncWindows->SetParallelController(controller);
+        syncWindows->SetIdentifier(1);
+
+        // false = Call Render() manually on each process - don't use RMI
+        syncWindows->SetParallelRendering(true);
+
+        syncRenderers->SetRenderer(renderer);
+        syncRenderers->SetParallelController(controller);
+    }
+
+    // ---------------------
+
+    scene_.initialise(renderer, output_.name_);
+
+    addGeometryToScene(points_, 0, renderer);
+    addGeometryToScene(lines_, 0, renderer);
+    addGeometryToScene(surfaces_, 0, renderer);
+    addGeometryToScene(text_, 0, renderer);
+
+    while (scene_.loop(renderer))
+    {
+        const scalar position = scene_.position();
+
+        updateActors(text_, position);
+        updateActors(points_, position);
+        updateActors(lines_, position);
+        updateActors(surfaces_, position);
+    }
+
+    // Cleanup
+    cleanup(text_);
+    cleanup(points_);
+    cleanup(lines_);
+    cleanup(surfaces_);
+
+
+    // Instead of relying on the destructor, manually restore the previous
+    // SIGFPE state.
+    // This is only to avoid compiler complaints about unused variables.
+
+    sigFpeHandling.restore();
+}
+
+
+void Foam::functionObjects::runTimePostProcessing::render
+(
+    vtkMultiProcessController* controller,
+    void* processData
+)
+{
+    reinterpret_cast<runTimePostProcessing*>(processData)->render(controller);
+}
+
+
+void Foam::functionObjects::runTimePostProcessing::render()
+{
+    #ifdef FOAM_USING_VTK_MPI
+    if (parallel_)
+    {
+        // Create vtkMPIController if MPI is configured,
+        // vtkThreadedController otherwise.
+        auto ctrl = vtkSmartPointer<vtkMPIController>::New();
+        ctrl->Initialize(nullptr, nullptr, 1);
+
+        ctrl->SetSingleMethod(runTimePostProcessing::render, this);
+        ctrl->SingleMethodExecute();
+
+        ctrl->Finalize(1);
+    }
+    else
+    #endif
+    {
+        // Normally we would have a fallback controller like this:
+
+        // if (Pstream::master())
+        // {
+        //     auto ctrl = vtkSmartPointer<vtkDummyController>::New();
+        //     ctrl->Initialize(nullptr, nullptr, 1);
+        //
+        //     ctrl->SetSingleMethod(runTimePostProcessing::render, this);
+        //     ctrl->SingleMethodExecute();
+        //
+        //     ctrl->Finalize(1);
+        // }
+
+        // However, this would prevent us from doing any of our own MPI
+        // since this would only be spawned the master.
+
+        // Instead pass in nullptr for the controller and handling
+        // logic internally.
+
+        vtkDummyController* dummy = nullptr;
+        render(dummy);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::runTimePostProcessing::runTimePostProcessing
@@ -113,6 +284,8 @@ Foam::functionObjects::runTimePostProcessing::runTimePostProcessing
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
+    output_(),
+    parallel_(false),
     scene_(runTime, name),
     points_(),
     lines_(),
@@ -129,7 +302,20 @@ bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
 
-    Info<< type() << " " << name() << ": reading post-processing data" << endl;
+    #ifdef FOAM_USING_VTK_MPI
+    parallel_ = (Pstream::parRun() && dict.lookupOrDefault("parallel", true));
+    #else
+    parallel_ = false;
+    #endif
+
+    Info<< type() << " " << name() << ": reading post-processing data ("
+        << (parallel_ ? "parallel" : "serial") << " rendering)" << endl;
+
+    if (dict.lookupOrDefault("debug", false))
+    {
+        runTimePostPro::geometryBase::debug = 1;
+        Info<< "    debugging on" << endl;
+    }
 
     scene_.read(dict);
 
@@ -179,68 +365,7 @@ bool Foam::functionObjects::runTimePostProcessing::execute()
 
 bool Foam::functionObjects::runTimePostProcessing::write()
 {
-    if (!Pstream::master())
-    {
-        return true;
-    }
-
-    Info<< type() << " " << name() <<  " output:" << nl
-        << "    Constructing scene" << endl;
-
-
-    // Disable any floating point trapping
-    // (some low-level rendering functionality does not like it)
-
-    sigFpe::ignore sigFpeHandling; //<- disable in local scope
-
-    // Initialise render window
-    auto renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
-    renderWindow->OffScreenRenderingOn();
-    renderWindow->SetSize(output_.width_, output_.height_);
-
-    // Legacy rendering - was deprecated for 8.1.0
-    #if (VTK_MAJOR_VERSION < 8) || \
-        ((VTK_MAJOR_VERSION == 8) && (VTK_MINOR_VERSION < 2))
-    renderWindow->SetAAFrames(10);
-    #endif
-    renderWindow->SetAlphaBitPlanes(true);
-    renderWindow->SetMultiSamples(0);
-//    renderWindow->PolygonSmoothingOn();
-
-    auto renderer = vtkSmartPointer<vtkRenderer>::New();
-    scene_.initialise(renderer, output_.name_);
-
-    renderWindow->AddRenderer(renderer);
-
-
-    addGeometryToScene(points_, 0, renderer);
-    addGeometryToScene(lines_, 0, renderer);
-    addGeometryToScene(surfaces_, 0, renderer);
-    addGeometryToScene(text_, 0, renderer);
-
-    while (scene_.loop(renderer))
-    {
-        const scalar position = scene_.position();
-
-        updateActors(text_, position);
-        updateActors(points_, position);
-        updateActors(lines_, position);
-        updateActors(surfaces_, position);
-    }
-
-    // Cleanup
-    cleanup(text_);
-    cleanup(points_);
-    cleanup(lines_);
-    cleanup(surfaces_);
-
-
-    // Instead of relying on the destructor, manually restore the previous
-    // SIGFPE state.
-    // This is only to avoid compiler complaints about unused variables.
-
-    sigFpeHandling.restore();
-
+    render();
     return true;
 }
 

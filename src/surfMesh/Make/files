@@ -1,15 +1,16 @@
-surfZone/surfZone.C
-surfZone/surfZoneIOList.C
-
 MeshedSurfaceAllocator/MeshedSurfaceIOAllocator.C
-
 MeshedSurface/MeshedSurfaceCore.C
 MeshedSurface/MeshedSurfaces.C
 UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
-
 MeshedSurfaceProxy/MeshedSurfaceProxys.C
 
 mergedSurf/mergedSurf.C
+
+polySurface/polySurface.C
+polySurface/polySurfaceClear.C
+polySurface/polySurfaceIO.C
+polySurface/fields/polySurfaceFields.C
+polySurface/fields/polySurfacePointFields.C
 
 surfaceRegistry/surfaceRegistry.C
 surfMesh/surfMesh.C
@@ -17,6 +18,9 @@ surfMesh/surfMeshClear.C
 surfMesh/surfMeshIO.C
 surfMesh/fields/surfFields.C
 surfMesh/fields/surfPointFields.C
+
+surfZone/surfZone.C
+surfZone/surfZoneIOList.C
 
 surfaceFormats = surfaceFormats
 $(surfaceFormats)/surfaceFormatsCore.C
@@ -52,5 +56,21 @@ triSurface/triSurfaceStitch.C
 triSurface/fields/triSurfaceFields.C
 triSurface/patches/geometricSurfacePatch.C
 triSurface/patches/surfacePatch.C
+
+
+writers = writers
+
+$(writers)/surfaceWriter.C
+$(writers)/boundaryData/boundaryDataSurfaceWriter.C
+$(writers)/ensight/ensightSurfaceWriter.C
+$(writers)/foam/foamSurfaceWriter.C
+$(writers)/nastran/nastranSurfaceWriter.C
+$(writers)/null/nullSurfaceWriter.C
+$(writers)/proxy/proxySurfaceWriter.C
+$(writers)/raw/rawSurfaceWriter.C
+$(writers)/starcd/starcdSurfaceWriter.C
+$(writers)/vtk/vtkSurfaceWriter.C
+/* $(writers)/x3d/x3dSurfaceWriter.C */
+
 
 LIB = $(FOAM_LIBBIN)/libsurfMesh

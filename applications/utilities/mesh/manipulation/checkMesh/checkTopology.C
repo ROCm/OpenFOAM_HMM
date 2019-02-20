@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -35,7 +35,7 @@ License
 #include "IOmanip.H"
 #include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
-#include "surfaceWriter.H"
+#include "vtkSurfaceWriter.H"
 #include "checkTools.H"
 #include "treeBoundBox.H"
 
@@ -114,7 +114,7 @@ Foam::label Foam::checkTopology
     const polyMesh& mesh,
     const bool allTopology,
     const bool allGeometry,
-    const autoPtr<surfaceWriter>& surfWriter,
+    autoPtr<surfaceWriter>& surfWriter,
     const autoPtr<writer<scalar>>& setWriter
 )
 {
@@ -203,7 +203,7 @@ Foam::label Foam::checkTopology
             cells.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), cells);
+                mergeAndWrite(*surfWriter, cells);
             }
         }
         else
@@ -227,7 +227,7 @@ Foam::label Foam::checkTopology
             points.write();
             if (setWriter.valid())
             {
-                mergeAndWrite(setWriter(), points);
+                mergeAndWrite(*setWriter, points);
             }
         }
     }
@@ -249,7 +249,7 @@ Foam::label Foam::checkTopology
             faces.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), faces);
+                mergeAndWrite(*surfWriter, faces);
             }
         }
     }
@@ -269,7 +269,7 @@ Foam::label Foam::checkTopology
             faces.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), faces);
+                mergeAndWrite(*surfWriter, faces);
             }
         }
     }
@@ -290,7 +290,7 @@ Foam::label Foam::checkTopology
             cells.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), cells);
+                mergeAndWrite(*surfWriter, cells);
             }
 
         }
@@ -314,7 +314,7 @@ Foam::label Foam::checkTopology
             faces.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), faces);
+                mergeAndWrite(*surfWriter, faces);
             }
         }
     }
@@ -369,7 +369,7 @@ Foam::label Foam::checkTopology
             oneCells.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), oneCells);
+                mergeAndWrite(*surfWriter, oneCells);
             }
         }
 
@@ -385,7 +385,7 @@ Foam::label Foam::checkTopology
             twoCells.write();
             if (surfWriter.valid())
             {
-                mergeAndWrite(surfWriter(), twoCells);
+                mergeAndWrite(*surfWriter, twoCells);
             }
         }
     }
@@ -530,7 +530,7 @@ Foam::label Foam::checkTopology
                 points.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter(), points);
+                    mergeAndWrite(*setWriter, points);
                 }
             }
         }
@@ -641,7 +641,7 @@ Foam::label Foam::checkTopology
         points.write();
         if (setWriter.valid())
         {
-            mergeAndWrite(setWriter(), points);
+            mergeAndWrite(*setWriter, points);
         }
     }
 
