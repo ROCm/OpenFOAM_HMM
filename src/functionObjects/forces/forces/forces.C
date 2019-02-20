@@ -722,11 +722,11 @@ Foam::functionObjects::forces::forces
     forceBinFilePtr_(),
     momentBinFilePtr_(),
     patchSet_(),
-    pName_(word::null),
-    UName_(word::null),
-    rhoName_(word::null),
+    pName_("p"),
+    UName_("U"),
+    rhoName_("rho"),
     directForceDensity_(false),
-    fDName_(""),
+    fDName_("fD"),
     rhoRef_(VGREAT),
     pRef_(0),
     coordSys_(),
@@ -767,11 +767,11 @@ Foam::functionObjects::forces::forces
     forceBinFilePtr_(),
     momentBinFilePtr_(),
     patchSet_(),
-    pName_(word::null),
-    UName_(word::null),
-    rhoName_(word::null),
+    pName_("p"),
+    UName_("U"),
+    rhoName_("rho"),
     directForceDensity_(false),
-    fDName_(""),
+    fDName_("fD"),
     rhoRef_(VGREAT),
     pRef_(0),
     coordSys_(),
@@ -826,14 +826,26 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
     if (directForceDensity_)
     {
         // Optional entry for fDName
-        fDName_ = dict.lookupOrDefault<word>("fD", "fD");
+        if (dict.readIfPresent<word>("fD", fDName_))
+        {
+            Info<< "    fD: " << fDName_ << endl;
+        }
     }
     else
     {
-        // Optional entries U and p
-        pName_ = dict.lookupOrDefault<word>("p", "p");
-        UName_ = dict.lookupOrDefault<word>("U", "U");
-        rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
+        // Optional field name entries
+        if (dict.readIfPresent<word>("p", pName_))
+        {
+            Info<< "    p: " << pName_ << endl;
+        }
+        if (dict.readIfPresent<word>("U", UName_))
+        {
+            Info<< "    U: " << UName_ << endl;
+        }
+        if (dict.readIfPresent<word>("rho", rhoName_))
+        {
+            Info<< "    rho: " << rhoName_ << endl;
+        }
 
         // Reference density needed for incompressible calculations
         if (rhoName_ == "rhoInf")
@@ -843,10 +855,11 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         }
 
         // Reference pressure, 0 by default
-        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
-        Info<< "    Reference pressure (pRef) set to " << pRef_ << endl;
+        if (dict.readIfPresent<scalar>("pRef", pRef_))
+        {
+            Info<< "    Reference pressure (pRef) set to " << pRef_ << endl;
+        }
     }
-
 
     dict.readIfPresent("porosity", porosity_);
     if (porosity_)
