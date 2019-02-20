@@ -240,6 +240,9 @@ protected:
                 //- Minimum bin bounds
                 scalar binMin_;
 
+                //- Maximum bin bounds
+                scalar binMax_;
+
                 //- Bin positions along binDir
                 List<point> binPoints_;
 
