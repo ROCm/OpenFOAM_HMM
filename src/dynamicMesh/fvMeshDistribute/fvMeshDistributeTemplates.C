@@ -45,13 +45,13 @@ void Foam::fvMeshDistribute::printFieldInfo(const fvMesh& mesh)
             //<< " value:" << fld
             << endl;
 
-        forAll(fld.boundaryField(), patchi)
+        for (const auto& patchFld : fld.boundaryField())
         {
-            Pout<< "    " << patchi
-                << ' ' << fld.boundaryField()[patchi].patch().name()
-                << ' ' << fld.boundaryField()[patchi].type()
-                << ' ' << fld.boundaryField()[patchi].size()
-                << endl;
+            Pout<< "    " << patchFld.patch().index()
+                << ' ' << patchFld.patch().name()
+                << ' ' << patchFld.type()
+                << ' ' << patchFld.size()
+                << nl;
         }
     }
 }
@@ -288,10 +288,48 @@ void Foam::fvMeshDistribute::correctBoundaryConditions()
 
 
 template<class GeoField>
+void Foam::fvMeshDistribute::getFieldNames
+(
+    const fvMesh& mesh,
+    HashTable<wordList>& allFieldNames,
+    const bool syncPar
+)
+{
+    wordList& list = allFieldNames(GeoField::typeName);
+    list = mesh.sortedNames<GeoField>();
+
+    // Check all procs have same names
+    if (syncPar)
+    {
+        List<wordList> allNames(Pstream::nProcs());
+        allNames[Pstream::myProcNo()] = list;
+        Pstream::gatherList(allNames);
+        Pstream::scatterList(allNames);
+
+        for (label proci = 1; proci < Pstream::nProcs(); proci++)
+        {
+            if (allNames[proci] != allNames[0])
+            {
+                FatalErrorInFunction
+                    << "When checking for equal "
+                    << GeoField::typeName
+                    << " :" << nl
+                    << "processor0 has:" << allNames[0] << endl
+                    << "processor" << proci << " has:" << allNames[proci] << nl
+                    << GeoField::typeName
+                    << " need to be synchronised on all processors."
+                    << exit(FatalError);
+            }
+        }
+    }
+}
+
+
+template<class GeoField>
 void Foam::fvMeshDistribute::sendFields
 (
     const label domain,
-    const wordList& fieldNames,
+    const HashTable<wordList>& allFieldNames,
     const fvMeshSubset& subsetter,
     Ostream& toNbr
 )
@@ -315,24 +353,28 @@ void Foam::fvMeshDistribute::sendFields
 
     // volVectorField {U {internalField ..; boundaryField ..;}}
 
+    const wordList& fieldNames =
+        allFieldNames.lookup(GeoField::typeName, wordList::null());
+
     toNbr << GeoField::typeName << token::NL << token::BEGIN_BLOCK << token::NL;
-    forAll(fieldNames, i)
+
+    for (const word& fieldName : fieldNames)
     {
         if (debug)
         {
-            Pout<< "Subsetting field " << fieldNames[i]
+            Pout<< "Subsetting field " << fieldName
                 << " for domain:" << domain << endl;
         }
 
         // Send all fieldNames. This has to be exactly the same set as is
         // being received!
         const GeoField& fld =
-            subsetter.baseMesh().lookupObject<GeoField>(fieldNames[i]);
+            subsetter.baseMesh().lookupObject<GeoField>(fieldName);
 
         tmp<GeoField> tsubfld = subsetter.interpolate(fld);
 
         toNbr
-            << fieldNames[i] << token::NL << token::BEGIN_BLOCK
+            << fieldName << token::NL << token::BEGIN_BLOCK
             << tsubfld
             << token::NL << token::END_BLOCK << token::NL;
     }
@@ -344,13 +386,20 @@ template<class GeoField>
 void Foam::fvMeshDistribute::receiveFields
 (
     const label domain,
-    const wordList& fieldNames,
+    const HashTable<wordList>& allFieldNames,
     fvMesh& mesh,
     PtrList<GeoField>& fields,
-    const dictionary& fieldDicts
+    const dictionary& allFieldsDict
 )
 {
     // Opposite of sendFields
+
+    const wordList& fieldNames =
+        allFieldNames.lookup(GeoField::typeName, wordList::null());
+
+    const dictionary& fieldDicts =
+        allFieldsDict.subDict(GeoField::typeName);
+
 
     if (debug)
     {
@@ -358,31 +407,32 @@ void Foam::fvMeshDistribute::receiveFields
             << " from domain:" << domain << endl;
     }
 
-    fields.setSize(fieldNames.size());
+    fields.resize(fieldNames.size());
 
-    forAll(fieldNames, i)
+    label fieldi = 0;
+    for (const word& fieldName : fieldNames)
     {
         if (debug)
         {
-            Pout<< "Constructing field " << fieldNames[i]
+            Pout<< "Constructing field " << fieldName
                 << " from domain:" << domain << endl;
         }
 
         fields.set
         (
-            i,
+            fieldi++,
             new GeoField
             (
                 IOobject
                 (
-                    fieldNames[i],
+                    fieldName,
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
                     IOobject::AUTO_WRITE
                 ),
                 mesh,
-                fieldDicts.subDict(fieldNames[i])
+                fieldDicts.subDict(fieldName)
             )
         );
     }
