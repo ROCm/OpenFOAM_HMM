@@ -116,24 +116,25 @@ Foam::label Foam::blockDescriptor::edgesPointsWeights
     scalarList (&edgeWeights)[12]
 ) const
 {
+    const label ni = sizes().x();
+    const label nj = sizes().y();
+    const label nk = sizes().z();
+
     label nCurvedEdges = 0;
 
     // X-direction
-    const label ni = density_.x();
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 0,  0, 1, ni);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 1,  3, 2, ni);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 2,  7, 6, ni);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 3,  4, 5, ni);
 
     // Y-direction
-    const label nj = density_.y();
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 4,  0, 3, nj);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 5,  1, 2, nj);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 6,  5, 6, nj);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 7,  4, 7, nj);
 
     // Z-direction
-    const label nk = density_.z();
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 8,  0, 4, nk);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 9,  1, 5, nk);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 10, 2, 6, nk);

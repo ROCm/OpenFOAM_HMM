@@ -133,16 +133,16 @@ Foam::blockDescriptor::blockDescriptor
     const pointField& vertices,
     const blockEdgeList& edges,
     const blockFaceList& faces,
-    const Vector<label>& density,
+    const labelVector& density,
     const UList<gradingDescriptors>& expand,
     const word& zoneName
 )
 :
+    ijkMesh(density),
     vertices_(vertices),
     blockEdges_(edges),
     blockFaces_(faces),
     blockShape_(bshape),
-    density_(density),
     expand_(expand),
     zoneName_(zoneName),
     curvedFaces_(-1),
@@ -173,10 +173,10 @@ Foam::blockDescriptor::blockDescriptor
     Istream& is
 )
 :
+    ijkMesh(),
     vertices_(vertices),
     blockEdges_(edges),
     blockFaces_(faces),
-    density_(0, 0, 0),
     expand_(12, gradingDescriptors()),
     zoneName_(),
     curvedFaces_(-1),
@@ -212,7 +212,7 @@ Foam::blockDescriptor::blockDescriptor
         // New-style: read a list of 3 values
         if (t.pToken() == token::BEGIN_LIST)
         {
-            is >> density_;
+            is >> ijkMesh::sizes();
         }
         else
         {
@@ -225,9 +225,9 @@ Foam::blockDescriptor::blockDescriptor
     else
     {
         // Old-style: read three labels
-        is  >> density_.x()
-            >> density_.y()
-            >> density_.z();
+        is  >> ijkMesh::sizes().x()
+            >> ijkMesh::sizes().y()
+            >> ijkMesh::sizes().z();
     }
 
     is >> t;
@@ -285,13 +285,12 @@ Foam::blockDescriptor::blockDescriptor
 Foam::FixedList<Foam::pointField, 6>
 Foam::blockDescriptor::facePoints(const pointField& points) const
 {
+    const label ni = sizes().x();
+    const label nj = sizes().y();
+    const label nk = sizes().z();
+
     // Caches points for curvature correction
     FixedList<pointField, 6> facePoints;
-
-    // Set local variables for mesh specification
-    const label ni = density_.x();
-    const label nj = density_.y();
-    const label nk = density_.z();
 
     facePoints[0].setSize((nj + 1)*(nk + 1));
     facePoints[1].setSize((nj + 1)*(nk + 1));

@@ -31,8 +31,7 @@ Description
     cells in each direction and an expansion ratio.
 
 Note
-    The vertices, cells, boundary patches for filling the block are
-    demand-driven.
+    The cells for filling the block are demand-driven.
 
 SourceFiles
     block.C
@@ -83,11 +82,12 @@ class block
         //- Create boundary patch faces for the block
         void createBoundary();
 
-        //- Add boundary faces to output list at iterator location
+        //- Add boundary faces for the shape face to the output list at
+        //- the iterator location
         template<class OutputIterator>
         OutputIterator addBoundaryFaces
         (
-            const int shapeFacei,
+            const direction shapeFacei,
             OutputIterator iter
         ) const;
 
@@ -133,7 +133,7 @@ public:
             const pointField& vertices,
             const blockEdgeList& edges,
             const blockFaceList& faces,
-            const Vector<label>& density,
+            const labelVector& density,
             const UList<gradingDescriptors>& expand,
             const word& zoneName = ""
         );

@@ -29,14 +29,17 @@ Class
 Description
     Handles the specification for grading within a section of a block
 
-    blockFraction: the fraction of the block the section occupies
+    The grading specification is handled is controlled by three parameters:
 
-    nDivFraction: the fraction of the divisions of the block allocated to
+    - blockFraction: the fraction of the block the section occupies
+
+    - nDivFraction: the fraction of the divisions of the block allocated to
         the section
 
-    expansionRatio: the expansions ratio for the grading with the section of
-        block defined as the ratio of the size of the division at either and
-        of the section.
+    - expansionRatio:
+       the expansion ratio for the grading with the section of
+       block defined as the ratio of end-size / start-size for the section.
+       A negative value is trapped and treated as its inverse.
 
 SourceFiles
     gradingDescriptor.C
@@ -53,12 +56,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class Istream;
 class Ostream;
-
-// Forward declaration of friend functions and operators
 class gradingDescriptor;
 class gradingDescriptors;
+
 Istream& operator>>(Istream&, gradingDescriptor&);
 Ostream& operator<<(Ostream&, const gradingDescriptor&);
 

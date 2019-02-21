@@ -43,7 +43,7 @@ Foam::block::block
     const pointField& vertices,
     const blockEdgeList& edges,
     const blockFaceList& faces,
-    const Vector<label>& density,
+    const labelVector& density,
     const UList<gradingDescriptors>& expand,
     const word& zoneName
 )
@@ -52,7 +52,11 @@ Foam::block::block
     points_(),
     blockCells_(),
     blockPatches_()
-{}
+{
+    // Always need points, and demand-driven data leaves dangling addressing?
+    createPoints();
+    createBoundary();
+}
 
 
 Foam::block::block
@@ -69,7 +73,11 @@ Foam::block::block
     points_(),
     blockCells_(),
     blockPatches_()
-{}
+{
+    // Always need points, and demand-driven data leaves dangling addressing?
+    createPoints();
+    createBoundary();
+}
 
 
 Foam::block::block(const blockDescriptor& blockDesc)
@@ -78,7 +86,11 @@ Foam::block::block(const blockDescriptor& blockDesc)
     points_(),
     blockCells_(),
     blockPatches_()
-{}
+{
+    // Always need points, and demand-driven data leaves dangling addressing?
+    createPoints();
+    createBoundary();
+}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //

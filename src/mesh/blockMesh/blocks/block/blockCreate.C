@@ -383,7 +383,7 @@ void Foam::block::createCells()
 template<class OutputIterator>
 OutputIterator Foam::block::addBoundaryFaces
 (
-    const int shapeFacei,
+    const direction shapeFacei,
     OutputIterator iter
 ) const
 {
@@ -524,7 +524,7 @@ void Foam::block::createBoundary()
     const label county = (density().z() * density().x());
     const label countz = (density().x() * density().y());
 
-    int patchi = 0;
+    direction patchi = 0;
 
     // 0 == x-min
     blockPatches_[patchi].resize(countx);

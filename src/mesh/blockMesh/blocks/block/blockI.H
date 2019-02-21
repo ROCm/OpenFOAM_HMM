@@ -29,11 +29,6 @@ License
 
 inline const Foam::pointField& Foam::block::points() const
 {
-    if (points_.empty())
-    {
-        const_cast<block&>(*this).createPoints();
-    }
-
     return points_;
 }
 
@@ -53,11 +48,6 @@ Foam::block::cells() const
 inline const Foam::FixedList<Foam::List<Foam::FixedList<Foam::label, 4>>, 6>&
 Foam::block::boundaryPatches() const
 {
-    if (blockPatches_.empty())
-    {
-        const_cast<block&>(*this).createBoundary();
-    }
-
     return blockPatches_;
 }
 

@@ -57,6 +57,7 @@ SourceFiles
 #ifndef blockDescriptor_H
 #define blockDescriptor_H
 
+#include "ijkMesh.H"
 #include "cellShape.H"
 #include "pointField.H"
 #include "scalarList.H"
@@ -75,6 +76,8 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class blockDescriptor
+:
+    public ijkMesh
 {
     // Private Data
 
@@ -89,9 +92,6 @@ class blockDescriptor
 
         //- Block shape
         cellShape blockShape_;
-
-        //- The number of cells in the i,j,k directions
-        Vector<label> density_;
 
         //- Expansion ratios in all directions
         List<gradingDescriptors> expand_;
@@ -140,7 +140,7 @@ public:
             const pointField& vertices,
             const blockEdgeList& edges,
             const blockFaceList& faces,
-            const Vector<label>& density,
+            const labelVector& density,
             const UList<gradingDescriptors>& expand,
             const word& zoneName = ""
         );
@@ -169,28 +169,13 @@ public:
         inline const cellShape& blockShape() const;
 
         //- Return the mesh density (number of cells) in the i,j,k directions
-        inline const Vector<label>& density() const;
+        inline const labelVector& density() const;
 
         //- Expansion ratios in all directions
         const List<gradingDescriptors>& grading() const;
 
         //- Return the (optional) zone name
         inline const word& zoneName() const;
-
-        //- The number of meshed points described: (nx+1) * (ny+1) * (nz+1)
-        inline label nPoints() const;
-
-        //- The number of meshed cells described: (nx * ny * nz)
-        inline label nCells() const;
-
-        //- The number of meshed faces described
-        inline label nFaces() const;
-
-        //- The number of meshed internal faces described
-        inline label nInternalFaces() const;
-
-        //- The number of meshed internal faces described
-        inline label nBoundaryFaces() const;
 
         //- Curved-face labels for each block-face (-1 for flat faces)
         inline const FixedList<label, 6>& curvedFaces() const;
@@ -201,34 +186,11 @@ public:
         //- Return block point for local label i
         inline const point& blockPoint(const label i) const;
 
-        //- Check indices are within valid range ni,nj,nk
-        inline void checkIndex
-        (
-            const label i,
-            const label j,
-            const label k
-        ) const;
-
-        //- Cell label offset for a particular i,j,k position
-        inline label cellLabel
-        (
-            const label i,
-            const label j,
-            const label k
-        ) const;
-
-        //- Vertex label offset for a particular i,j,k position
-        inline label pointLabel
-        (
-            const label i,
-            const label j,
-            const label k
-        ) const;
-
         //- Face vertex label offset for a particular i,j,k position
+        //- on hex face (0-5)
         inline label facePointLabel
         (
-            const label facei,
+            const direction facei,
             const label i,
             const label j
         ) const;

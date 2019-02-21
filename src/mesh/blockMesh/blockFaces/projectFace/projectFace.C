@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -74,7 +74,7 @@ Foam::label Foam::blockFaces::projectFace::index
 (
     const labelPair& n,
     const labelPair& coord
-) const
+)
 {
     return coord.first() + coord.second()*n.first();
 }
@@ -175,24 +175,24 @@ void Foam::blockFaces::projectFace::project
         case 0:
         case 1:
         {
-            n.first() = desc.density()[1] + 1;
-            n.second() = desc.density()[2] + 1;
+            n.first() = desc.density().y() + 1;
+            n.second() = desc.density().z() + 1;
         }
         break;
 
         case 2:
         case 3:
         {
-            n.first() = desc.density()[0] + 1;
-            n.second() = desc.density()[2] + 1;
+            n.first() = desc.density().x() + 1;
+            n.second() = desc.density().z() + 1;
         }
         break;
 
         case 4:
         case 5:
         {
-            n.first() = desc.density()[0] + 1;
-            n.second() = desc.density()[1] + 1;
+            n.first() = desc.density().x() + 1;
+            n.second() = desc.density().y() + 1;
         }
         break;
     }

@@ -49,7 +49,12 @@ Foam::gradingDescriptor::gradingDescriptor
     blockFraction_(blockFraction),
     nDivFraction_(nDivFraction),
     expansionRatio_(expansionRatio)
-{}
+{
+    if (expansionRatio_ < 0)
+    {
+        expansionRatio_ = 1.0/(-expansionRatio_);
+    }
+}
 
 
 Foam::gradingDescriptor::gradingDescriptor
@@ -60,7 +65,12 @@ Foam::gradingDescriptor::gradingDescriptor
     blockFraction_(1),
     nDivFraction_(1),
     expansionRatio_(expansionRatio)
-{}
+{
+    if (expansionRatio_ < 0)
+    {
+        expansionRatio_ = 1.0/(-expansionRatio_);
+    }
+}
 
 
 Foam::gradingDescriptor::gradingDescriptor(Istream& is)
