@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -570,7 +570,7 @@ bool Foam::twoPhaseMixtureEThermo::read()
 {
     if (basicThermo::read() && thermoIncompressibleTwoPhaseMixture::read())
     {
-        basicThermo::readEntry("pDivU", pDivU_);
+        basicThermo::readIfPresent("pDivU", pDivU_);
         basicThermo::readEntry("TSat", TSat_);
         return true;
     }

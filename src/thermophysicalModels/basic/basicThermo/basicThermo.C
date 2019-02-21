@@ -242,7 +242,9 @@ Foam::basicThermo::basicThermo
         ),
         mesh,
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
-    )
+    ),
+
+    dpdt_(lookupOrDefault<Switch>("dpdt", true))
 {}
 
 
