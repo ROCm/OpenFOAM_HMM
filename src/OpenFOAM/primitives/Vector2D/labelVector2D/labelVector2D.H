@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::vector2D
+    Foam::labelVector2D
 
 Description
-    A 2D vector of scalars obtained from the generic Vector2D.
+    A 2D vector of labels obtained from the generic Vector2D.
 
 SourceFiles
-    vector2D.C
+    labelVector2D.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vector2D_H
-#define vector2D_H
+#ifndef labelVector2D_H
+#define labelVector2D_H
 
-#include "scalar.H"
+#include "label.H"
 #include "Vector2D.H"
 #include "contiguous.H"
 
@@ -48,12 +46,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef Vector2D<scalar> vector2D;
+typedef Vector2D<label> labelVector2D;
 
 
-//- Data associated with vector2D type are contiguous
+//- Data associated with labelVector2D type are contiguous
 template<>
-inline bool contiguous<vector2D>() {return true;}
+inline bool contiguous<labelVector2D>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

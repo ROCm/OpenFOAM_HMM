@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,45 +21,53 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::vector2D
-
-Description
-    A 2D vector of scalars obtained from the generic Vector2D.
-
-SourceFiles
-    vector2D.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef vector2D_H
-#define vector2D_H
+#include "labelVector2D.H"
 
-#include "scalar.H"
-#include "Vector2D.H"
-#include "contiguous.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef Vector2D<scalar> vector2D;
-
-
-//- Data associated with vector2D type are contiguous
 template<>
-inline bool contiguous<vector2D>() {return true;}
+const char* const Foam::labelVector2D::vsType::typeName = "labelVector2D";
 
+template<>
+const char* const Foam::labelVector2D::vsType::componentNames[] = { "x", "y" };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+const Foam::labelVector2D Foam::labelVector2D::vsType::zero
+(
+    labelVector2D::uniform(0)
+);
 
-} // End namespace Foam
+template<>
+const Foam::labelVector2D Foam::labelVector2D::vsType::one
+(
+    labelVector2D::uniform(1)
+);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+const Foam::labelVector2D Foam::labelVector2D::vsType::max
+(
+    labelVector2D::uniform(labelMax)
+);
 
-#endif
+template<>
+const Foam::labelVector2D Foam::labelVector2D::vsType::min
+(
+    labelVector2D::uniform(-labelMax)
+);
+
+template<>
+const Foam::labelVector2D Foam::labelVector2D::vsType::rootMax
+(
+    labelVector2D::uniform(sqrt(scalar(labelMax)))
+);
+
+template<>
+const Foam::labelVector2D Foam::labelVector2D::vsType::rootMin
+(
+    labelVector2D::uniform(-sqrt(scalar(labelMax)))
+);
+
 
 // ************************************************************************* //
