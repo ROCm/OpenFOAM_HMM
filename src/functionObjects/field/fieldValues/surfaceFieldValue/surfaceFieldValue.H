@@ -494,7 +494,8 @@ protected:
         (
             const vectorField& Sf,
             const Field<WeightType>& weightField,
-            const meshedSurf& surfToWrite
+            const pointField& points,
+            const faceList& faces
         );
 
         //- Templated helper function to output field values
@@ -504,7 +505,8 @@ protected:
             const word& fieldName,
             const vectorField& Sf,
             const Field<WeightType>& weightField,
-            const meshedSurf& surfToWrite
+            const pointField& points,
+            const faceList& faces
         );
 
 

@@ -33,7 +33,6 @@ License
 #include "mergePoints.H"
 #include "indirectPrimitivePatch.H"
 #include "PatchTools.H"
-#include "meshedSurfRef.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -962,6 +961,11 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
             )
         );
 
+        if (debug)
+        {
+            surfaceWriterPtr_->verbose() = true;
+        }
+
         if (surfaceWriterPtr_->enabled())
         {
             Info<< "    surfaceFormat = " << formatName << nl;
@@ -1038,8 +1042,6 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
         }
     }
 
-    meshedSurfRef surfToWrite(points, faces);
-
     // Only a few weight types (scalar, vector)
     if (weightFieldName_ != "none")
     {
@@ -1051,7 +1053,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
             );
 
             // Process the fields
-            writeAll(Sf, weightField, surfToWrite);
+            writeAll(Sf, weightField, points, faces);
         }
         else if (validField<vector>(weightFieldName_))
         {
@@ -1061,7 +1063,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
             );
 
             // Process the fields
-            writeAll(Sf, weightField, surfToWrite);
+            writeAll(Sf, weightField, points, faces);
         }
         else
         {
@@ -1077,7 +1079,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
         scalarField weightField;
 
         // Process the fields
-        writeAll(Sf, weightField, surfToWrite);
+        writeAll(Sf, weightField, points, faces);
     }
 
     if (operation_ != opNone && Pstream::master())

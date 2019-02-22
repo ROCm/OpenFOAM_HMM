@@ -334,7 +334,8 @@ Foam::label Foam::functionObjects::fieldValues::surfaceFieldValue::writeAll
 (
     const vectorField& Sf,
     const Field<WeightType>& weightField,
-    const meshedSurf& surfToWrite
+    const pointField& points,
+    const faceList& faces
 )
 {
     label nProcessed = 0;
@@ -343,14 +344,14 @@ Foam::label Foam::functionObjects::fieldValues::surfaceFieldValue::writeAll
     {
         if
         (
-            writeValues<scalar>(fieldName, Sf, weightField, surfToWrite)
-         || writeValues<vector>(fieldName, Sf, weightField, surfToWrite)
+            writeValues<scalar>(fieldName, Sf, weightField, points, faces)
+         || writeValues<vector>(fieldName, Sf, weightField, points, faces)
          || writeValues<sphericalTensor>
             (
-                fieldName, Sf, weightField, surfToWrite
+                fieldName, Sf, weightField, points, faces
             )
-         || writeValues<symmTensor>(fieldName, Sf, weightField, surfToWrite)
-         || writeValues<tensor>(fieldName, Sf, weightField, surfToWrite)
+         || writeValues<symmTensor>(fieldName, Sf, weightField, points, faces)
+         || writeValues<tensor>(fieldName, Sf, weightField, points, faces)
         )
         {
             ++nProcessed;
@@ -374,7 +375,8 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
     const word& fieldName,
     const vectorField& Sf,
     const Field<WeightType>& weightField,
-    const meshedSurf& surfToWrite
+    const pointField& points,
+    const faceList& faces
 )
 {
     const bool ok = validField<Type>(fieldName);
@@ -393,7 +395,8 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
             {
                 surfaceWriterPtr_->open
                 (
-                    surfToWrite,
+                    points,
+                    faces,
                     (
                         outputDir()
                       / regionTypeNames_[regionType_] + ("_" + regionName_)
