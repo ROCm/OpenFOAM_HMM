@@ -103,7 +103,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObjectList::remove
         oldIndex = *iter;
 
         // Remove pointer from the old list
-        oldptr = this->set(oldIndex, nullptr);
+        oldptr = this->release(oldIndex);
         indices_.erase(iter);
     }
     else

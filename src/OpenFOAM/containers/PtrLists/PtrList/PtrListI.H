@@ -68,6 +68,20 @@ inline Foam::PtrList<T>::PtrList(PtrList<T>&& list)
 
 
 template<class T>
+inline Foam::PtrList<T>::PtrList(UList<T*>& list)
+:
+    UPtrList<T>(list.size())
+{
+    // Take ownership of the pointer
+    forAll(list, i)
+    {
+        set(i, list[i]);
+        list[i] = nullptr;
+    }
+}
+
+
+template<class T>
 template<class CloneArg>
 inline Foam::PtrList<T>::PtrList
 (
@@ -156,6 +170,18 @@ template<class T>
 inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, const tmp<T>& tptr)
 {
     return set(i, tptr.ptr());
+}
+
+
+template<class T>
+inline Foam::autoPtr<T> Foam::PtrList<T>::release(const label i)
+{
+    if (i < 0 || i >= this->size())
+    {
+        return nullptr;
+    }
+
+    return autoPtr<T>(UPtrList<T>::set(i, nullptr));
 }
 
 

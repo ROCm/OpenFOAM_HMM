@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class T, int SizeMin> class PtrDynList;
 
@@ -62,10 +62,17 @@ class PtrDynList
 {
     static_assert(SizeMin > 0, "Invalid min size parameter");
 
-    // Private data
+    // Private Data
 
         //- The capacity (allocated size) of the list.
         label capacity_;
+
+
+    // Private Member Functions
+
+        //- Adjust addressable size
+        void setAddressableSize(const label len);
+
 
 public:
 
@@ -82,6 +89,9 @@ public:
 
         //- Move construct
         inline PtrDynList(PtrDynList<T, SizeMin>&& list);
+
+        //- Take ownerskip of pointers in the list, set old pointers to null.
+        inline explicit PtrDynList(UList<T*>& list);
 
 
     //- Destructor

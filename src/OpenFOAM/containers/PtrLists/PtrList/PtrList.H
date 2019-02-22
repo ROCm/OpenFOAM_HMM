@@ -53,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class T> class autoPtr;
 template<class T> class tmp;
@@ -97,6 +97,9 @@ public:
 
         //- Move construct
         inline PtrList(PtrList<T>&& list);
+
+        //- Take ownerskip of pointers in the list, set old pointers to null.
+        inline explicit PtrList(UList<T*>& list);
 
         //- Copy construct using 'clone()' method on each element
         template<class CloneArg>
@@ -167,6 +170,10 @@ public:
 
         //- Set element to given tmp and return old element
         inline autoPtr<T> set(const label i, const tmp<T>& tptr);
+
+        //- Release ownership of the pointer at the given position.
+        //  Out of bounds addressing is a no-op and returns nullptr.
+        inline autoPtr<T> release(const label i);
 
 
     // Member Operators

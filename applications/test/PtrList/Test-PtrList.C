@@ -204,6 +204,39 @@ Ostream& print
 
 
 template<class T>
+Ostream& print
+(
+    Ostream& os,
+    const UList<T*>& list
+)
+{
+    const label len = list.size();
+
+    // Size and start delimiter
+    os  << nl << indent << len << nl
+        << indent << token::BEGIN_LIST << incrIndent << nl;
+
+    for (label i=0; i < len; ++i)
+    {
+        const T* ptr = list[i];
+
+        if (ptr)
+        {
+            os << *ptr << nl;
+        }
+        else
+        {
+            os << "nullptr" << nl;
+        }
+    }
+
+    // End delimiter
+    os << decrIndent << indent << token::END_LIST << nl;
+    return os;
+}
+
+
+template<class T>
 Ostream& report
 (
     Ostream& os,
@@ -304,11 +337,59 @@ int main(int argc, char *argv[])
         <<"list2: " << list2 << nl
         <<"list-appended: " << listApp << endl;
 
-    Info<<"indirectly delete some items via set(.., 0) :" << endl;
-    for (label i = 0; i < 3; i++)
+
+    // Release values
+    {
+        DynamicList<Scalar*> ptrs;
+
+        forAll(listApp, i)
+        {
+            auto old = listApp.release(i);
+
+            if (old)
+            {
+                ptrs.append(old.release());
+            }
+        }
+
+        Info<<"Released pointers from";
+        print(Info, listApp) << nl;
+
+        Info<<"Into plain list of pointers";
+        print(Info, ptrs) << nl;
+
+        PtrDynList<Scalar> newlist1(ptrs);
+
+        Info<<"Constructed from plain list of pointers";
+        print(Info, ptrs) << nl;
+        print(Info, newlist1) << nl;
+    }
+
+
+    Info<<"indirectly delete some items via set(.., nullptr) :" << endl;
+    for (label i = 2; i < 5; i++)
     {
         list1.set(i, nullptr);
     }
+
+    Info<<"release some items:" << endl;
+
+    for (label i = -2; i < 5; i++)
+    {
+        auto old = list1.release(i);
+
+        if (!old)
+        {
+            Info<< i << " was already released" << nl;
+        }
+    }
+
+    Info<<"list1: ";
+    print(Info, list1) << nl;
+
+    list1.resize(list1.squeezeNull());
+    Info<<"squeezed null: ";
+    print(Info, list1) << nl;
 
     Info<<"transfer list2 -> list1:" << endl;
     list1.transfer(list2);

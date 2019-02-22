@@ -391,7 +391,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
         {
             const dictionary& surfDict = capture[inputi];
 
-            autoPtr<sampledSurface> surf = input.set(inputi, nullptr);
+            autoPtr<sampledSurface> surf = input.release(inputi);
 
             if (!surf.valid() || !surf->enabled())
             {

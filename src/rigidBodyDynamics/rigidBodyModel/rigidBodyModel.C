@@ -306,7 +306,7 @@ void Foam::RBD::rigidBodyModel::makeComposite(const label bodyID)
     if (!isA<compositeBody>(bodies_[bodyID]))
     {
         // Retrieve the un-merged body
-        autoPtr<rigidBody> bodyPtr = bodies_.set(bodyID, nullptr);
+        autoPtr<rigidBody> bodyPtr = bodies_.release(bodyID);
 
         // Insert the compositeBody containing the original body
         bodies_.set
