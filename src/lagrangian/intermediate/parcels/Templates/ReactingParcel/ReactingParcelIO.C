@@ -182,7 +182,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
         label i = 0;
         for (const ReactingParcel<ParcelType>& p : c)
         {
-            mass0[i++] = p.mass0_;
+            mass0[i] = p.mass0_;
 
             ++i;
         }
