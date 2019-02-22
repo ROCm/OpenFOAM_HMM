@@ -185,6 +185,12 @@ Foam::surfaceWriter::surfaceWriter
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::surfaceWriter::~surfaceWriter()
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::surfaceWriter::setTime(const instant& inst)
@@ -264,6 +270,31 @@ void Foam::surfaceWriter::open
 }
 
 
+void Foam::surfaceWriter::open
+(
+    const meshedSurf& surf,
+    const fileName& outputPath
+)
+{
+    close();
+    setSurface(surf, parallel_);
+    open(outputPath);
+}
+
+
+void Foam::surfaceWriter::open
+(
+    const pointField& points,
+    const faceList& faces,
+    const fileName& outputPath
+)
+{
+    close();
+    setSurface(points, faces, parallel_);
+    open(outputPath);
+}
+
+
 void Foam::surfaceWriter::close()
 {
     outputPath_.clear();
@@ -286,6 +317,7 @@ void Foam::surfaceWriter::setSurface
 {
     expire();
     surf_ = std::cref<meshedSurf>(surf);
+    parallel_ = (parallel && Pstream::parRun());
 }
 
 
@@ -298,6 +330,25 @@ void Foam::surfaceWriter::setSurface
 {
     expire();
     setSurface(meshedSurfRef(points, faces), parallel);
+}
+
+
+void Foam::surfaceWriter::setSurface
+(
+    const meshedSurf& surf
+)
+{
+    setSurface(surf, parallel_);
+}
+
+
+void Foam::surfaceWriter::setSurface
+(
+    const pointField& points,
+    const faceList& faces
+)
+{
+    setSurface(points, faces, parallel_);
 }
 
 

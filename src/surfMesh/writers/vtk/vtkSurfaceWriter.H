@@ -159,7 +159,7 @@ public:
 
 
     //- Destructor
-    virtual ~vtkWriter() = default;
+    virtual ~vtkWriter();
 
 
     // Member Functions

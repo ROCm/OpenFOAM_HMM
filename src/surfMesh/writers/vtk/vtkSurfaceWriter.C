@@ -150,6 +150,12 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::surfaceWriters::vtkWriter::~vtkWriter()
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::surfaceWriters::vtkWriter::close()

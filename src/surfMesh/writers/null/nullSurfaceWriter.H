@@ -108,7 +108,7 @@ public:
         virtual void setSurface
         (
             const meshedSurf& s,
-            bool parallel = Pstream::parRun()
+            bool parallel
         ); // override
 
         //- Change association with a surface (no-op).
@@ -116,7 +116,7 @@ public:
         (
             const pointField& points,
             const faceList& faces,
-            bool parallel = Pstream::parRun()
+            bool parallel
         ); // override
 
 

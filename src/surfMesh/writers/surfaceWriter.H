@@ -261,7 +261,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceWriter() = default;
+    virtual ~surfaceWriter();
 
 
     // Member Functions
@@ -301,19 +301,36 @@ public:
 
     // Surface association
 
-        //- Change association with a surface and expire the writer
+        //- Change association with a surface, expire the writer
+        //- with defined parallel/serial treatment
         virtual void setSurface
         (
             const meshedSurf& surf,
-            bool parallel = Pstream::parRun()
+            bool parallel
         );
 
-        //- Change association with a surface and expire the writer
+        //- Change association with a surface, expire the writer
+        //- with defined parallel/serial treatment
         virtual void setSurface
         (
             const pointField& points,
             const faceList& faces,
-            bool parallel = Pstream::parRun()
+            bool parallel
+        );
+
+        //- Change association with a surface, expire the writer
+        //- with the current parallel/serial treatment
+        virtual void setSurface
+        (
+            const meshedSurf& surf
+        );
+
+        //- Change association with a surface, expire the writer
+        //- with the current parallel/serial treatment
+        virtual void setSurface
+        (
+            const pointField& points,
+            const faceList& faces
         );
 
 
@@ -407,7 +424,7 @@ public:
             const pointField& points,
             const faceList& faces,
             const fileName& outputPath,
-            bool parallel = Pstream::parRun()
+            bool parallel
         );
 
         //- Open from components
@@ -415,7 +432,22 @@ public:
         (
             const meshedSurf& surf,
             const fileName& outputPath,
-            bool parallel = Pstream::parRun()
+            bool parallel
+        );
+
+        //- Open from components, with the current parallel/serial treatment
+        virtual void open
+        (
+            const pointField& points,
+            const faceList& faces,
+            const fileName& outputPath
+        );
+
+        //- Open from components, with the current parallel/serial treatment
+        virtual void open
+        (
+            const meshedSurf& surf,
+            const fileName& outputPath
         );
 
         //- Finish output, performing any necessary cleanup
