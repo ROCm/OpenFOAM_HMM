@@ -164,19 +164,18 @@ void Foam::sampledSurfaces::countFields()
     }
 
     // Now propagate field counts (per surface)
+    // - can update writer even when not writing without problem
 
-    label surfi = 0;
-
-    for (const sampledSurface& s : surfaces())
+    forAll(*this, surfi)
     {
+        const sampledSurface& s = (*this)[surfi];
+
         writers_[surfi].nFields() =
         (
             nVolumeFields
           + (s.withSurfaceFields() ? nSurfaceFields : 0)
           + ((s.hasFaceIds() && !s.interpolate()) ? 1 : 0)
         );
-
-        ++surfi;
     }
 }
 
@@ -446,9 +445,10 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
         dict.readEntry("fields", fieldSelection_);
         fieldSelection_.uniq();
 
-        label surfi = 0;
-        for (const sampledSurface& s : surfs)
+        forAll(*this, surfi)
         {
+            const sampledSurface& s = (*this)[surfi];
+
             if (!surfi)
             {
                 Info<< "Sampled surface:" << nl;
@@ -465,8 +465,6 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
                 Info<< ", store as surfMesh (deprecated)";
             }
             Info<< nl;
-
-            ++surfi;
         }
         Info<< nl;
     }
@@ -492,35 +490,33 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
 
 bool Foam::sampledSurfaces::performAction(unsigned request)
 {
-    if
-    (
-        empty()
-     || (request == ACTION_NONE)
-     || !testAny
-        (
-            actions_,
-            [=] (unsigned action) { return (request & action); }
-        )
-    )
+    // Update surfaces, writer associations etc.
+
+    bool ok = false;
+
+    forAll(*this, surfi)
     {
+        sampledSurface& s = (*this)[surfi];
+
+        if (request & actions_[surfi])
+        {
+            if (s.update())
+            {
+                writers_[surfi].expire();
+            }
+
+            nFaces_[surfi] = returnReduce(s.faces().size(), sumOp<label>());
+
+            ok = ok || nFaces_[surfi];
+        }
+    }
+
+    if (!ok)
+    {
+        // No surface with faces or an applicable action
         return true;
     }
 
-
-    // Finalize surfaces, update information, writer associations etc.
-    update();
-
-    bool noFaces = true;
-    for (const label n : nFaces_)
-    {
-        if (n) noFaces = false;
-    }
-
-    if (noFaces)
-    {
-        // No surfaces with faces at all.
-        return true;
-    }
 
     // Determine the per-surface number of fields, including Ids etc.
     // Only seems to be needed for VTK legacy
@@ -530,6 +526,15 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
     forAll(*this, surfi)
     {
         const sampledSurface& s = (*this)[surfi];
+
+        if (!(request & actions_[surfi]))
+        {
+            continue;
+        }
+
+        // TDB: do we store empty surfaces, skip them, or remove them
+        // from the registry?
+        // - For now, just skip touching them.
 
         if (!nFaces_[surfi])
         {
@@ -689,10 +694,10 @@ bool Foam::sampledSurfaces::expire()
 
     label nChanged = 0;
 
-    label surfi = 0;
-
-    for (sampledSurface& s : surfaces())
+    forAll(*this, surfi)
     {
+        sampledSurface& s = (*this)[surfi];
+
         if (s.expire())
         {
             ++nChanged;
@@ -701,8 +706,6 @@ bool Foam::sampledSurfaces::expire()
         writers_[surfi].expire();
         writers_[surfi].mergeDim() = mergeDim;
         nFaces_[surfi] = 0;
-
-        ++surfi;
     }
 
     // True if any surfaces just expired
@@ -719,10 +722,10 @@ bool Foam::sampledSurfaces::update()
 
     label nUpdated = 0;
 
-    label surfi = 0;
-
-    for (sampledSurface& s : surfaces())
+    forAll(*this, surfi)
     {
+        sampledSurface& s = (*this)[surfi];
+
         if (s.update())
         {
             ++nUpdated;
@@ -730,8 +733,6 @@ bool Foam::sampledSurfaces::update()
         }
 
         nFaces_[surfi] = returnReduce(s.faces().size(), sumOp<label>());
-
-        ++surfi;
     }
 
     return nUpdated;
