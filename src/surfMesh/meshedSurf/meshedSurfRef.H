@@ -50,24 +50,33 @@ class meshedSurfRef
 {
     std::reference_wrapper<const pointField> points_;
     std::reference_wrapper<const faceList> faces_;
-    std::reference_wrapper<const labelList> zoneIds_;
+    std::reference_wrapper<const labelList> ids_;
 
 
 public:
 
     // Constructors
 
+        //- Construct null
+        meshedSurfRef()
+        :
+            points_(std::cref<pointField>(pointField::null())),
+            faces_(std::cref<faceList>(faceList::null())),
+            ids_(std::cref<labelList>(labelList::null()))
+        {}
+
+
         //- Construct from components
         meshedSurfRef
         (
             const pointField& pts,
-            const faceList& faces,
+            const faceList& fcs,
             const labelList& ids = labelList::null()
         )
         :
             points_(std::cref<pointField>(pts)),
-            faces_(std::cref<faceList>(faces)),
-            zoneIds_(std::cref<labelList>(ids))
+            faces_(std::cref<faceList>(fcs)),
+            ids_(std::cref<labelList>(ids))
         {}
 
 
@@ -92,10 +101,31 @@ public:
         //- Per-face zone/region information.
         virtual const labelList& zoneIds() const
         {
-            return zoneIds_.get();
+            return ids_.get();
         }
 
+        //- Remove all references by redirecting to null objects
+        void clear()
+        {
+            points_ = std::cref<pointField>(pointField::null());
+            faces_ = std::cref<faceList>(faceList::null());
+            ids_ = std::cref<labelList>(labelList::null());
+        }
+
+        //- Reset components
+        void reset
+        (
+            const pointField& pts,
+            const faceList& fcs,
+            const labelList& ids = labelList::null()
+        )
+        {
+            points_ = std::cref<pointField>(pts);
+            faces_ = std::cref<faceList>(fcs);
+            ids_ = std::cref<labelList>(ids);
+        }
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
