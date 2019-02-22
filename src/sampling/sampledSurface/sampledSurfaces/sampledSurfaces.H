@@ -118,9 +118,6 @@ Note
     The interpolationScheme is only used if interpolate=true is used by any
     of the surfaces.
 
-See also
-    Foam::surfMeshSamplers
-
 SourceFiles
     sampledSurfaces.C
 

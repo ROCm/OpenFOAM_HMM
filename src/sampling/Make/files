@@ -33,12 +33,6 @@ surface/isoSurface/isoSurfaceTopo.C
 surface/thresholdCellFaces/thresholdCellFaces.C
 surface/triSurfaceMesh/discreteSurface.C
 
-surfMeshSample/surfMeshSample/surfMeshSample.C
-surfMeshSample/surfMeshSamplers/surfMeshSamplers.C
-surfMeshSample/distanceSurface/surfMeshSampleDistanceSurface.C
-surfMeshSample/plane/surfMeshSamplePlane.C
-surfMeshSample/triSurfaceMesh/surfMeshSampleDiscrete.C
-
 sampledSurface/sampledNone/sampledNone.C
 sampledSurface/sampledPatch/sampledPatch.C
 sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
