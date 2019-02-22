@@ -471,6 +471,11 @@ void Foam::ParticleCollector<CloudType>::write()
                 .subOrEmptyDict(surfaceFormat_)
         );
 
+        if (debug)
+        {
+            writer->verbose() = true;
+        }
+
         writer->open
         (
             points_,
@@ -522,7 +527,9 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
     mode_(mtUnknown),
     parcelType_(this->coeffDict().lookupOrDefault("parcelType", -1)),
-    removeCollected_(this->coeffDict().lookup("removeCollected")),
+    removeCollected_(this->coeffDict().getBool("removeCollected")),
+    resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
+    log_(this->coeffDict().getBool("log")),
     points_(),
     faces_(),
     faceTris_(),
@@ -535,12 +542,10 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
         this->coeffDict().getBool("negateParcelsOppositeNormal")
     ),
     surfaceFormat_(this->coeffDict().lookup("surfaceFormat")),
-    resetOnWrite_(this->coeffDict().lookup("resetOnWrite")),
     totalTime_(0.0),
     mass_(),
     massTotal_(),
     massFlowRate_(),
-    log_(this->coeffDict().lookup("log")),
     outputFilePtr_(),
     timeOld_(owner.mesh().time().value()),
     hitFaceIDs_()
@@ -608,6 +613,8 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     mode_(pc.mode_),
     parcelType_(pc.parcelType_),
     removeCollected_(pc.removeCollected_),
+    resetOnWrite_(pc.resetOnWrite_),
+    log_(pc.log_),
     points_(pc.points_),
     faces_(pc.faces_),
     faceTris_(pc.faceTris_),
@@ -618,12 +625,10 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     normal_(pc.normal_),
     negateParcelsOppositeNormal_(pc.negateParcelsOppositeNormal_),
     surfaceFormat_(pc.surfaceFormat_),
-    resetOnWrite_(pc.resetOnWrite_),
     totalTime_(pc.totalTime_),
     mass_(pc.mass_),
     massTotal_(pc.massTotal_),
     massFlowRate_(pc.massFlowRate_),
-    log_(pc.log_),
     outputFilePtr_(),
     timeOld_(0.0),
     hitFaceIDs_()

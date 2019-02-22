@@ -201,6 +201,11 @@ void Foam::FacePostProcessing<CloudType>::write()
                         .subOrEmptyDict(surfaceFormat_)
                 );
 
+                if (debug)
+                {
+                    writer->verbose() = true;
+                }
+
                 writer->open
                 (
                     allPoints,
@@ -212,8 +217,6 @@ void Foam::FacePostProcessing<CloudType>::write()
                 writer->write("massTotal", zoneMassTotal[zoneI]);
 
                 writer->write("massFlowRate", zoneMassFlowRate[zoneI]);
-
-                writer->clear();
             }
         }
     }
@@ -251,12 +254,12 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
     faceZoneIDs_(),
     surfaceFormat_(this->coeffDict().lookup("surfaceFormat")),
-    resetOnWrite_(this->coeffDict().lookup("resetOnWrite")),
+    resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
+    log_(this->coeffDict().getBool("log")),
     totalTime_(0.0),
     mass_(),
     massTotal_(),
     massFlowRate_(),
-    log_(this->coeffDict().lookup("log")),
     outputFilePtr_(),
     timeOld_(owner.mesh().time().value())
 {
@@ -333,11 +336,11 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     faceZoneIDs_(pff.faceZoneIDs_),
     surfaceFormat_(pff.surfaceFormat_),
     resetOnWrite_(pff.resetOnWrite_),
+    log_(pff.log_),
     totalTime_(pff.totalTime_),
     mass_(pff.mass_),
     massTotal_(pff.massTotal_),
     massFlowRate_(pff.massFlowRate_),
-    log_(pff.log_),
     outputFilePtr_(),
     timeOld_(0.0)
 {}

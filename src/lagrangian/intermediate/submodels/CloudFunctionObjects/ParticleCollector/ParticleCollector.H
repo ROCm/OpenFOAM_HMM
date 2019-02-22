@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -97,7 +97,6 @@ SourceFiles
 #include "CloudFunctionObject.H"
 #include "cylindricalCS.H"
 #include "face.H"
-#include "Switch.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -126,12 +125,10 @@ public:
 
 private:
 
+        //- Convenience typedef for parcel type
+        typedef typename CloudType::parcelType parcelType;
+
     // Private Data
-
-        // Typedefs
-
-            //- Convenience typedef for parcel type
-            typedef typename CloudType::parcelType parcelType;
 
         //- Collector mode type
         modeType mode_;
@@ -140,7 +137,13 @@ private:
         const label parcelType_;
 
         //- Flag to remove collected particles
-        Switch removeCollected_;
+        bool removeCollected_;
+
+        //- Should data be reset/cleared on writing?
+        bool resetOnWrite_;
+
+        //- Flag to indicate whether data should be written to file
+        bool log_;
 
         //- List of points
         Field<point> points_;
@@ -178,9 +181,6 @@ private:
         //- Surface output format
         const word surfaceFormat_;
 
-        //- Flag to indicate whether data should be reset/cleared on writing
-        Switch resetOnWrite_;
-
         //- Total time
         scalar totalTime_;
 
@@ -192,9 +192,6 @@ private:
 
         //- Mass flow rate storage
         List<scalar> massFlowRate_;
-
-        //- Flag to indicate whether data should be written to file
-        Switch log_;
 
         //- Output file pointer
         autoPtr<OFstream> outputFilePtr_;
@@ -280,22 +277,22 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return const access to the reset on write flag
-            inline const Switch& resetOnWrite() const;
+        //- Should data be reset on write?
+        inline bool resetOnWrite() const;
 
 
-        // Evaluation
+    // Evaluation
 
-            //- Post-move hook
-            virtual void postMove
-            (
-                parcelType& p,
-                const scalar dt,
-                const point& position0,
-                bool& keepParticle
-            );
+        //- Post-move hook
+        virtual void postMove
+        (
+            parcelType& p,
+            const scalar dt,
+            const point& position0,
+            bool& keepParticle
+        );
 };
 
 
