@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -186,7 +186,7 @@ public:
         explicit fvMesh(const IOobject& io);
 
         //- Construct from IOobject or as zero-sized mesh
-        //  Boundary is added using addPatches() member function
+        //  Boundary is added using addFvPatches() member function
         fvMesh(const IOobject& io, const zero, bool syncPar=true);
 
         //- Construct from components without boundary.
@@ -202,7 +202,7 @@ public:
         );
 
         //- Construct without boundary from cells rather than owner/neighbour.
-        //  Boundary is added using addPatches() member function
+        //  Boundary is added using addFvPatches() member function
         fvMesh
         (
             const IOobject& io,
@@ -220,6 +220,13 @@ public:
     // Member Functions
 
         // Helpers
+
+            //- Add boundary patches. Constructor helper
+            void addFvPatches
+            (
+                PtrList<polyPatch>& plist,
+                const bool validBoundary = true
+            );
 
             //- Add boundary patches. Constructor helper
             void addFvPatches

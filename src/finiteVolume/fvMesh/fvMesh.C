@@ -478,7 +478,7 @@ Foam::SolverPerformance<Foam::tensor> Foam::fvMesh::solve
 
 void Foam::fvMesh::addFvPatches
 (
-    const List<polyPatch*>& p,
+    PtrList<polyPatch>& plist,
     const bool validBoundary
 )
 {
@@ -489,9 +489,21 @@ void Foam::fvMesh::addFvPatches
             << abort(FatalError);
     }
 
-    // first add polyPatches
-    addPatches(p, validBoundary);
+    addPatches(plist, validBoundary);
     boundary_.addPatches(boundaryMesh());
+}
+
+
+void Foam::fvMesh::addFvPatches
+(
+    const List<polyPatch*>& p,
+    const bool validBoundary
+)
+{
+    // Acquire ownership of the pointers
+    PtrList<polyPatch> plist(const_cast<List<polyPatch*>&>(p));
+
+    addFvPatches(plist, validBoundary);
 }
 
 

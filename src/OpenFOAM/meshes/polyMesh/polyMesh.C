@@ -927,7 +927,7 @@ Foam::polyMesh::cellTree() const
 
 void Foam::polyMesh::addPatches
 (
-    const List<polyPatch*>& p,
+    PtrList<polyPatch>& plist,
     const bool validBoundary
 )
 {
@@ -942,13 +942,7 @@ void Foam::polyMesh::addPatches
     geometricD_ = Zero;
     solutionD_ = Zero;
 
-    boundary_.setSize(p.size());
-
-    // Copy the patch pointers
-    forAll(p, pI)
-    {
-        boundary_.set(pI, p[pI]);
-    }
+    boundary_.transfer(plist);
 
     // parallelData depends on the processorPatch ordering so force
     // recalculation. Problem: should really be done in removeBoundary but
@@ -1024,6 +1018,19 @@ void Foam::polyMesh::addZones
 
         cellZones_.writeOpt() = IOobject::AUTO_WRITE;
     }
+}
+
+
+void Foam::polyMesh::addPatches
+(
+    const List<polyPatch*>& p,
+    const bool validBoundary
+)
+{
+    // Acquire ownership of the pointers
+    PtrList<polyPatch> plist(const_cast<List<polyPatch*>&>(p));
+
+    addPatches(plist, validBoundary);
 }
 
 

@@ -573,7 +573,14 @@ public:
             //- Add boundary patches
             void addPatches
             (
-                const List<polyPatch*>&,
+                PtrList<polyPatch>& plist,
+                const bool validBoundary = true
+            );
+
+            //- Add boundary patches
+            void addPatches
+            (
+                const List<polyPatch*>& p,
                 const bool validBoundary = true
             );
 
