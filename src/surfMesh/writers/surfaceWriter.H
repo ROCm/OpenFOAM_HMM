@@ -98,16 +98,22 @@ class surfaceWriter
 {
 protected:
 
-   // Static data members
+   // Static Data Members
 
         //- Placeholder
         static const meshedSurf::emptySurface emptySurface_;
 
 
-    // Protected data
+    // Protected Data
 
-        //- Reference to the surface
+        //- Reference to a surface
         std::reference_wrapper<const meshedSurf> surf_;
+
+        //- Reference to raw surface components
+        meshedSurfRef surfComp_;
+
+        //- Use raw surface components instead of surface reference
+        bool useComponents_;
 
         //- The topology/surface is up-to-date?
         mutable bool upToDate_;

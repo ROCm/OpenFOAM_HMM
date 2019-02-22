@@ -153,7 +153,9 @@ Foam::surfaceWriters::vtkWriter::vtkWriter
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::surfaceWriters::vtkWriter::~vtkWriter()
-{}
+{
+    close();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

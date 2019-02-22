@@ -135,6 +135,8 @@ Foam::surfaceWriter::New
 Foam::surfaceWriter::surfaceWriter()
 :
     surf_(std::cref<meshedSurf>(emptySurface_)),
+    surfComp_(),
+    useComponents_(false),
     upToDate_(false),
     parallel_(true),
     useTimeDir_(false),
@@ -188,7 +190,9 @@ Foam::surfaceWriter::surfaceWriter
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::surfaceWriter::~surfaceWriter()
-{}
+{
+    close();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -305,7 +309,9 @@ void Foam::surfaceWriter::clear()
 {
     close();
     expire();
+    useComponents_ = false;
     surf_ = std::cref<meshedSurf>(emptySurface_);
+    surfComp_.clear();
 }
 
 
@@ -316,7 +322,9 @@ void Foam::surfaceWriter::setSurface
 )
 {
     expire();
+    useComponents_ = false;
     surf_ = std::cref<meshedSurf>(surf);
+    surfComp_.clear();
     parallel_ = (parallel && Pstream::parRun());
 }
 
@@ -329,7 +337,10 @@ void Foam::surfaceWriter::setSurface
 )
 {
     expire();
-    setSurface(meshedSurfRef(points, faces), parallel);
+    useComponents_ = true;
+    surf_ = std::cref<meshedSurf>(emptySurface_);
+    surfComp_.reset(points, faces);
+    parallel_ = (parallel && Pstream::parRun());
 }
 
 
@@ -372,13 +383,18 @@ bool Foam::surfaceWriter::expire()
 
 bool Foam::surfaceWriter::hasSurface() const
 {
-    return (&emptySurface_ != &(surf_.get()));
+    return (useComponents_ || (&emptySurface_ != &(surf_.get())));
 }
 
 
 bool Foam::surfaceWriter::empty() const
 {
-    const bool value = surf_.get().faces().empty();
+    const bool value =
+    (
+        useComponents_
+      ? surfComp_.faces().empty()
+      : surf_.get().faces().empty()
+    );
 
     return (parallel_ ? returnReduce(value, andOp<bool>()) : value);
 }
@@ -386,7 +402,12 @@ bool Foam::surfaceWriter::empty() const
 
 Foam::label Foam::surfaceWriter::size() const
 {
-    const label value = surf_.get().faces().size();
+    const bool value =
+    (
+        useComponents_
+      ? surfComp_.faces().empty()
+      : surf_.get().faces().empty()
+    );
 
     return (parallel_ ? returnReduce(value, sumOp<label>()) : value);
 }
@@ -411,7 +432,14 @@ bool Foam::surfaceWriter::merge() const
 
     if (parallel_ && Pstream::parRun() && !upToDate_)
     {
-        changed = merged_.merge(surf_.get(), mergeDim_);
+        if (useComponents_)
+        {
+            changed = merged_.merge(surfComp_, mergeDim_);
+        }
+        else
+        {
+            changed = merged_.merge(surf_.get(), mergeDim_);
+        }
     }
     upToDate_ = true;
 
@@ -428,7 +456,14 @@ const Foam::meshedSurf& Foam::surfaceWriter::surface() const
         return merged_;
     }
 
-    return surf_.get();
+    if (useComponents_)
+    {
+        return surfComp_;
+    }
+    else
+    {
+        return surf_.get();
+    }
 }
 
 
