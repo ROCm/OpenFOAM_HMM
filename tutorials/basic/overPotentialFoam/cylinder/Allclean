@@ -2,10 +2,10 @@
 cd ${0%/*} || exit 1                        # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
 
-# Extrude mesh around cylinder
+# An extruded mesh around cylinder
 (cd cylinderAndBackground && ./Allclean)
 
-# Add background mesh
+# The background mesh
 (cd cylinderMesh && foamCleanTutorials)
 
 #------------------------------------------------------------------------------

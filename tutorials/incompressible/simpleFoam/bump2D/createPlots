@@ -1,8 +1,8 @@
 #!/bin/sh
 # Note: CFL3D data available from:
 # https://turbmodels.larc.nasa.gov/bump_sa.html
-cd ${0%/*} || exit 1    # run from this directory
 
+cd ${0%/*} || exit 1                        # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 #set -x
@@ -102,3 +102,5 @@ then
 
     \rm -f Cx.$$ tau.$$ cp.$$ profiles.dat
 fi
+
+# ------------------------------------------------------------------------------

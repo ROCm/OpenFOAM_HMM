@@ -15,7 +15,7 @@ fi
 removeLogs
 
 echo "Cleaning tutorials ..."
-foamCleanTutorials cases
+foamCleanTutorials -self
 
 echo "--------"
 

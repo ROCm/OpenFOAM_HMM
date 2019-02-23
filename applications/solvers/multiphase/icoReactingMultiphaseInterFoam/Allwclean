@@ -7,4 +7,4 @@ wclean libso CompressibleMultiPhaseTurbulenceModels
 wclean libso laserDTRM
 wclean
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

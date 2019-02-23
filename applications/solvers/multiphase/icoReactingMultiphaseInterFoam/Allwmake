@@ -11,4 +11,4 @@ wmake $targetType CompressibleMultiPhaseTurbulenceModels
 wmake $targetType laserDTRM
 wmake $targetType
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------
