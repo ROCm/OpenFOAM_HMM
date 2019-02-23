@@ -87,6 +87,10 @@ public:
         //- The number of boundary faces in the i-j-k mesh
         inline label nBoundaryFaces() const;
 
+        //- The number of boundary faces on the box face
+        //  Face: 0=x-min, 1=x-max, 2=y-min, 3=y-max, 4=z-min, 5=z-max
+        inline label nBoundaryFaces(const direction shapeFacei) const;
+
         //- The linear cell index for an i-j-k position - same as index()
         inline label cellLabel
         (
@@ -94,6 +98,9 @@ public:
             const label j,
             const label k
         ) const;
+
+        //- The linear cell index for an i-j-k position - same as index()
+        inline label cellLabel(const labelVector& ijk) const;
 
         //- The linear point index for an i-j-k position.
         //  Addressable in the range (ni+1, nj+1, nk+1).
@@ -103,6 +110,10 @@ public:
             const label j,
             const label k
         ) const;
+
+        //- The linear point index for an i-j-k position.
+        //  Addressable in the range (ni+1, nj+1, nk+1).
+        inline label pointLabel(const labelVector& ijk) const;
 };
 
 

@@ -90,24 +90,45 @@ public:
         //- Change the sizing parameters
         inline void reset(const label ni, const label nj, const label nk);
 
+        //- Change the sizing parameters
+        inline void reset(const labelVector& newSizes);
+
         //- Linear addressing index (offset) for an i,j,k position.
         inline label index(const label i, const label j, const label k) const;
+
+        //- Linear addressing index (offset) for an i,j,k position.
+        inline label index(const labelVector& ijk) const;
 
 
     // Checks
 
-        //- Check indices are within valid ni,nj,nk range.
+        //- Check indices are within ni,nj,nk range.
         //  Optionally allow an extra index for point addressing
         inline void checkIndex
         (
             const label i,
             const label j,
             const label k,
-            const bool isPoint = false
+            const bool allowExtra = false
         ) const;
 
-        //- Check that sizes() are valid
+        //- Check indices are within ni,nj,nk range.
+        //  Optionally allow an extra index for point addressing
+        inline void checkIndex
+        (
+            const labelVector& ijk,
+            const bool allowExtra = false
+        ) const;
+
+        //- Check that all components of sizes() are non-negative
         inline void checkSizes() const;
+
+        //- Check that all components of sizes() match
+        inline void checkSizes(const labelVector& other) const;
+
+        //- Check that the total size matches
+        inline void checkSizes(const label nTotal) const;
+
 };
 
 

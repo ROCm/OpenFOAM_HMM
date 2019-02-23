@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2011, 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -109,6 +109,8 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
+    argList::noFunctionObjects();
+
     argList::addBoolOption
     (
         "blockTopology",
@@ -134,7 +136,7 @@ int main(int argc, char *argv[])
     (
         "time",
         "time",
-        "specify a time to write mesh to"
+        "Specify a time to write mesh to (default: constant)"
     );
 
     #include "addRegionOption.H"
@@ -234,15 +236,15 @@ int main(int argc, char *argv[])
     {
         Info<< "Writing polyMesh to " << meshInstance << nl << endl;
 
-        // Make sure that the time is seen to be the current time. This
-        // is the logic inside regIOobject which resets the instance to the
-        // current time before writing
+        // Make sure that the time is seen to be the current time.
+        // This is the logic inside regIOobject that resets the instance
+        // to the current time before writing
         runTime.setTime(instant(meshInstance), 0);
     }
 
     if (!args.found("noClean"))
     {
-        fileName polyMeshPath
+        const fileName polyMeshPath
         (
             runTime.path()/meshInstance/regionPath/polyMesh::meshSubDir
         );
@@ -251,14 +253,14 @@ int main(int argc, char *argv[])
         {
             if (exists(polyMeshPath/dictName))
             {
-                Info<< "Not deleting polyMesh directory " << nl
-                    << "    " << polyMeshPath << nl
+                Info<< "Not deleting polyMesh directory "
+                    << runTime.relativePath(polyMeshPath) << nl
                     << "    because it contains " << dictName << endl;
             }
             else
             {
-                Info<< "Deleting polyMesh directory" << nl
-                    << "    " << polyMeshPath << endl;
+                Info<< "Deleting polyMesh directory "
+                    << runTime.relativePath(polyMeshPath) << endl;
                 rmDir(polyMeshPath);
             }
         }
@@ -266,9 +268,6 @@ int main(int argc, char *argv[])
 
 
     Info<< nl << "Creating polyMesh from blockMesh" << endl;
-
-    word defaultFacesName = "defaultFaces";
-    word defaultFacesType = emptyPolyPatch::typeName;
 
     polyMesh mesh
     (
@@ -283,8 +282,8 @@ int main(int argc, char *argv[])
         blocks.patches(),
         blocks.patchNames(),
         blocks.patchDicts(),
-        defaultFacesName,
-        defaultFacesType
+        "defaultFaces",               // Default patch name
+        emptyPolyPatch::typeName      // Default patch type
     );
 
 
@@ -297,9 +296,8 @@ int main(int argc, char *argv[])
 
     // Detect any cyclic patches and force re-ordering of the faces
     {
-        const polyPatchList& patches = mesh.boundaryMesh();
         bool hasCyclic = false;
-        for (const polyPatch& pp : patches)
+        for (const polyPatch& pp : mesh.boundaryMesh())
         {
             if (isA<cyclicPolyPatch>(pp))
             {
@@ -350,8 +348,6 @@ int main(int argc, char *argv[])
 
     // Write summary
     {
-        const polyPatchList& patches = mesh.boundaryMesh();
-
         Info<< "----------------" << nl
             << "Mesh Information" << nl
             << "----------------" << nl
@@ -365,7 +361,7 @@ int main(int argc, char *argv[])
             << "Patches" << nl
             << "----------------" << nl;
 
-        for (const polyPatch& p : patches)
+        for (const polyPatch& p : mesh.boundaryMesh())
         {
             Info<< "  " << "patch " << p.index()
                 << " (start: " << p.start()

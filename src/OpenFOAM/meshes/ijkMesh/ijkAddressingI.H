@@ -72,7 +72,7 @@ inline Foam::labelVector& Foam::ijkAddressing::sizes()
 
 inline Foam::label Foam::ijkAddressing::size() const
 {
-    // Could also use  cmptProduct(sizes_);
+    // Could also use cmptProduct(sizes_);
     return (sizes_.x() * sizes_.y() * sizes_.z());
 }
 
@@ -106,6 +106,16 @@ inline void Foam::ijkAddressing::reset
 }
 
 
+inline void Foam::ijkAddressing::reset(const labelVector& newSizes)
+{
+    sizes_ = newSizes;
+
+    #ifdef FULLDEBUG
+    checkSizes();
+    #endif
+}
+
+
 inline Foam::label Foam::ijkAddressing::index
 (
     const label i,
@@ -121,15 +131,25 @@ inline Foam::label Foam::ijkAddressing::index
 }
 
 
+inline Foam::label Foam::ijkAddressing::index(const labelVector& ijk) const
+{
+    #ifdef FULLDEBUG
+    checkIndex(ijk);
+    #endif
+
+    return (ijk.x() + (sizes_.x() * (ijk.y() + (sizes_.y() * ijk.z()))));
+}
+
+
 inline void Foam::ijkAddressing::checkIndex
 (
     const label i,
     const label j,
     const label k,
-    const bool isPoint
+    const bool allowExtra
 ) const
 {
-    const label extra = (isPoint ? 1 : 0);
+    const label extra = (allowExtra ? 1 : 0);
 
     if (i < 0 || i >= (sizes_.x() + extra))
     {
@@ -155,6 +175,16 @@ inline void Foam::ijkAddressing::checkIndex
 }
 
 
+inline void Foam::ijkAddressing::checkIndex
+(
+    const labelVector& ijk,
+    const bool allowExtra
+) const
+{
+    checkIndex(ijk.x(), ijk.y(), ijk.z(), allowExtra);
+}
+
+
 inline void Foam::ijkAddressing::checkSizes() const
 {
     if (sizes_.x() < 0)
@@ -173,6 +203,30 @@ inline void Foam::ijkAddressing::checkSizes() const
     {
         FatalErrorInFunction
             << "The k-size is negative" << nl
+            << abort(FatalError);
+    }
+}
+
+
+inline void Foam::ijkAddressing::checkSizes(const labelVector& other) const
+{
+    if (sizes_ != other)
+    {
+        FatalErrorInFunction
+            << "The i-j-k sizes are different. "
+            << sizes_ << " vs. " << other << nl
+            << abort(FatalError);
+    }
+}
+
+
+inline void Foam::ijkAddressing::checkSizes(const label nTotal) const
+{
+    if (size() != nTotal)
+    {
+        FatalErrorInFunction
+            << "The total size is different. "
+            << size() << " vs. " << nTotal << nl
             << abort(FatalError);
     }
 }

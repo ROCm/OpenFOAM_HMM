@@ -24,7 +24,7 @@ autoPtr<IOdictionary> meshDictPtr;
         )
     )
     {
-        // Dictionary present constant polyMesh directory (old-style)
+        // Dictionary present in constant polyMesh directory (old-style)
 
         dictPath =
             runTime.constant()
@@ -63,8 +63,8 @@ autoPtr<IOdictionary> meshDictPtr;
             << exit(FatalError);
     }
 
-    Info<< "Creating block mesh from\n    "
-        << meshDictIO.objectPath() << endl;
+    Info<< "Creating block mesh from "
+        << runTime.relativePath(meshDictIO.objectPath()) << endl;
 
     meshDictPtr = autoPtr<IOdictionary>::New(meshDictIO);
 }

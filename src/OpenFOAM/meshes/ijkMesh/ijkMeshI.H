@@ -123,6 +123,43 @@ inline Foam::label Foam::ijkMesh::nBoundaryFaces() const
 }
 
 
+inline Foam::label Foam::ijkMesh::nBoundaryFaces
+(
+    const direction shapeFacei
+) const
+{
+    if (ijkAddressing::empty())
+    {
+        return 0;
+    }
+
+    const labelVector& n = ijkAddressing::sizes();
+
+    switch (shapeFacei)
+    {
+        // Face 0,1 == x-min, x-max
+        case 0:
+        case 1:
+            return n.y()*n.z();
+            break;
+
+        // Face 2, 3 == y-min, y-max
+        case 2:
+        case 3:
+            return n.z()*n.x();
+            break;
+
+        // Face 4, 5 == z-min, z-max
+        case 4:
+        case 5:
+            return n.x()*n.y();
+            break;
+    }
+
+    return 0;
+}
+
+
 inline Foam::label Foam::ijkMesh::cellLabel
 (
     const label i,
@@ -131,6 +168,12 @@ inline Foam::label Foam::ijkMesh::cellLabel
 ) const
 {
     return ijkAddressing::index(i, j, k);
+}
+
+
+inline Foam::label Foam::ijkMesh::cellLabel(const labelVector& ijk) const
+{
+    return ijkAddressing::index(ijk);
 }
 
 
@@ -148,6 +191,18 @@ inline Foam::label Foam::ijkMesh::pointLabel
     const labelVector& n = sizes();
 
     return (i + ((n.x()+1) * (j + (n.y()+1) * k)));
+}
+
+
+Foam::label Foam::ijkMesh::pointLabel(const labelVector& ijk) const
+{
+    #ifdef FULLDEBUG
+    checkIndex(ijk, true);
+    #endif
+
+    const labelVector& n = sizes();
+
+    return (ijk.x() + ((n.x()+1) * (ijk.y() + (n.y()+1) * ijk.z())));
 }
 
 
