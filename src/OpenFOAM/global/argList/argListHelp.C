@@ -284,7 +284,6 @@ void Foam::argList::printMan() const
     // Standard documentation/help options
 
     printManOption("doc", "Display documentation in browser");
-    printManOption("doc-source", "Display source code in browser");
     printManOption("help", "Display short help and exit");
     printManOption("help-full", "Display full help and exit");
 
@@ -300,6 +299,8 @@ void Foam::argList::printMan() const
             printManOption(optName);
         }
     }
+
+    printManOption("doc-source", "Display source code in browser");
 
 
     const bool hasCompat =
@@ -393,7 +394,10 @@ void Foam::argList::printUsage(bool full) const
     // Place documentation/help options at the end
 
     printOption("doc", "Display documentation in browser");
-    printOption("doc-source", "Display source code in browser");
+    if (full)
+    {
+        printOption("doc-source", "Display source code in browser");
+    }
     printOption("help", "Display short help and exit");
 
     if
