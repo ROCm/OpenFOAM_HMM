@@ -4,6 +4,7 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 #------------------------------------------------------------------------------
 
+wmake -all $targetType PDRblockMesh
 wmake -all $targetType blockMesh
 wmake -all $targetType extrude
 wmake -all $targetType extrude2DMesh
