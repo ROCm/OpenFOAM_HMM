@@ -211,7 +211,7 @@ class surfaceFieldValue
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Region type enumeration
         enum regionTypes
