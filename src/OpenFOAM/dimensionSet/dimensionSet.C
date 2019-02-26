@@ -463,13 +463,13 @@ Foam::dimensionSet Foam::inv(const dimensionSet& ds)
 {
     return dimensionSet
     (
-        -ds[dimensionSet::MASS],
-        -ds[dimensionSet::LENGTH],
-        -ds[dimensionSet::TIME],
-        -ds[dimensionSet::TEMPERATURE],
-        -ds[dimensionSet::MOLES],
-        -ds[dimensionSet::CURRENT],
-        -ds[dimensionSet::LUMINOUS_INTENSITY]
+        0.0-ds[dimensionSet::MASS],
+        0.0-ds[dimensionSet::LENGTH],
+        0.0-ds[dimensionSet::TIME],
+        0.0-ds[dimensionSet::TEMPERATURE],
+        0.0-ds[dimensionSet::MOLES],
+        0.0-ds[dimensionSet::CURRENT],
+        0.0-ds[dimensionSet::LUMINOUS_INTENSITY]
     );
 }
 
