@@ -25,17 +25,11 @@ Class
     Foam::IjkField
 
 Description
-    Generic templated field type.
+    Generic templated field type with i-j-k addressing.
 
 SourceFiles
-    IjkFieldFunctions.H
-    IjkFieldFunctionsM.H
-    IjkFieldMapper.H
     IjkFieldI.H
-    IjkFieldM.H
     IjkField.C
-    IjkFieldFunctions.C
-    IjkFieldFunctionsM.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -64,9 +58,6 @@ class IjkField
         //- The i-j-k addressing
         ijkAddressing ijk_;
 
-        //- Copy construct
-        inline IjkField(const IjkField<Type>& fld);
-
 
 public:
 
@@ -74,6 +65,12 @@ public:
 
         //- Construct zero-sized
         inline IjkField();
+
+        //- Copy construct
+        inline IjkField(const IjkField<Type>& field);
+
+        //- Move construct
+        inline IjkField(IjkField<Type>&& field);
 
         //- Construct with sizing information, leaving values uninitialized
         inline explicit IjkField(const labelVector& ijk);

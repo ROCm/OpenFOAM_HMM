@@ -36,7 +36,8 @@ template<class T>
 Ostream& print(const IjkField<T>& fld)
 {
     Info<< static_cast<const Field<T>&>(fld).size()
-        << " " << fld.sizes() << ' ' << flatOutput(fld);
+        << " addr:" << long(fld.cdata()) << ' ' << fld.sizes() << ' '
+        << flatOutput(fld);
 
     return Info;
 }
@@ -101,6 +102,11 @@ int main(int argc, char *argv[])
     field1 /= 1.2;
 
     Info<< "/= operator: "; print(field1) << nl;
+
+    IjkField<scalar> field3(std::move(field2));
+
+    Info<< "Move construct: "; print(field2) << nl;
+    print(field3) << nl;
 
     // Field operations are still limited, but we can bypass things too
 

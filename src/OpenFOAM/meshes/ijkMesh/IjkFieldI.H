@@ -34,6 +34,22 @@ inline Foam::IjkField<Type>::IjkField()
 
 
 template<class Type>
+inline Foam::IjkField<Type>::IjkField(const IjkField<Type>& field)
+:
+    Field<Type>(field),
+    ijk_(field.ijk())
+{}
+
+
+template<class Type>
+inline Foam::IjkField<Type>::IjkField(IjkField<Type>&& field)
+:
+    Field<Type>(std::move(field)),
+    ijk_(field.ijk())
+{}
+
+
+template<class Type>
 inline Foam::IjkField<Type>::IjkField(const labelVector& ijk)
 :
     Field<Type>(cmptProduct(ijk)),
