@@ -67,14 +67,14 @@ Foam::simplifiedMeshes::simplifiedDynamicFvMeshBase::New
         if (cstrIter.found())
         {
             Info<< "Selecting simplified mesh model " << modelType << endl;
-            return autoPtr<dynamicFvMesh>(cstrIter()(io.time()));
+            return autoPtr<dynamicFvMesh>(cstrIter()(io.time(), io.name()));
         }
     }
 
     Info<< "Selecting simplified mesh model " << staticFvMesh::typeName << endl;
     return autoPtr<dynamicFvMesh>
     (
-        new SimplifiedDynamicFvMesh<staticFvMesh>(io.time())
+        new SimplifiedDynamicFvMesh<staticFvMesh>(io.time(), io.name())
     );
 }
 

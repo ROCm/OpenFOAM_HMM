@@ -62,7 +62,7 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
     (
         "boundary",
         localInstance_,
-        polyMesh::meshSubDir,
+        regionPrefix_ + polyMesh::meshSubDir,
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
@@ -97,7 +97,12 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
     else
     {
         // No boundary file - try reading from a field
-        IOobjectList objects(runTime, runTime.timeName());
+        IOobjectList objects
+        (
+            runTime,
+            runTime.timeName(),
+            (regionName_ == fvMesh::defaultRegion ? "" : regionName_)
+        );
 
         if (objects.empty())
         {
@@ -202,7 +207,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialise(const Time& runTime)
         (
             "points",
             localInstance_,
-            polyMesh::meshSubDir,
+            regionPrefix_ + polyMesh::meshSubDir,
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
@@ -371,12 +376,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::addLocalPatches
 
     if (debug)
     {
-        Pout<< "patches:" << nl << endl;
-        forAll(patches, patchi)
-        {
-            Pout<< "patch: " << patches[patchi]->name() << nl
-                << *patches[patchi] << endl;
-        }
+        Pout<< "patches:" << nl << mesh.boundaryMesh() << endl;
     }
 }
 
@@ -400,13 +400,24 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialiseZones(fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo(const Time& runTime)
+Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo
+(
+    const Time& runTime,
+    const word& regionName
+)
 :
+    regionName_(regionName),
+    regionPrefix_
+    (
+        regionName_ == fvMesh::defaultRegion
+      ? ""
+      : regionName_ + '/'
+    ),
     localInstance_
     (
         runTime.findInstance
         (
-            polyMesh::meshSubDir,
+            regionPrefix_ + polyMesh::meshSubDir,
             "boundary",
             IOobject::READ_IF_PRESENT
         )
@@ -428,14 +439,18 @@ Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo(const Time& runTime)
 }
 
 
-Foam::simplifiedMeshes::columnFvMesh::columnFvMesh(const Time& runTime)
+Foam::simplifiedMeshes::columnFvMesh::columnFvMesh
+(
+    const Time& runTime,
+    const word& regionName
+)
 :
-    columnFvMeshInfo(runTime),
+    columnFvMeshInfo(runTime, regionName),
     simplifiedFvMesh
     (
         IOobject
         (
-            fvMesh::defaultRegion,
+            regionName,
             runTime.constant(),
             runTime,
             IOobject::NO_READ, // Do not read any existing mesh

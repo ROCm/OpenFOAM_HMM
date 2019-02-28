@@ -1,4 +1,5 @@
 Foam::autoPtr<Foam::fvMesh> meshPtr(nullptr);
+Foam::word regionName = Foam::fvMesh::defaultRegion;
 
 if (args.found("dry-run") || args.found("dry-run-write"))
 {
@@ -6,10 +7,16 @@ if (args.found("dry-run") || args.found("dry-run-write"))
         << "Operating in 'dry-run' mode: case will run for 1 time step.  "
         << "All checks assumed OK on a clean exit" << Foam::endl;
 
+    // Allow region in combination with dry-run
+    args.readIfPresent("region", regionName);
+
     Foam::FieldBase::allowConstructFromLargerSize = true;
 
     // Create a simplified 1D mesh and attempt to re-create boundary conditions
-    meshPtr.reset(new Foam::simplifiedMeshes::columnFvMesh(runTime));
+    meshPtr.reset
+    (
+        new Foam::simplifiedMeshes::columnFvMesh(runTime, regionName)
+    );
 
     // Stop after 1 iteration of the simplified mesh
 
@@ -30,9 +37,18 @@ if (args.found("dry-run") || args.found("dry-run-write"))
 }
 else
 {
-    Foam::Info
-        << "Create mesh for time = "
-        << runTime.timeName() << Foam::nl << Foam::endl;
+    if (args.readIfPresent("region", regionName))
+    {
+        Foam::Info
+            << "Create mesh " << regionName << " for time = "
+            << runTime.timeName() << Foam::nl << Foam::endl;
+    }
+    else
+    {
+        Foam::Info
+            << "Create mesh for time = "
+            << runTime.timeName() << Foam::nl << Foam::endl;
+    }
 
     meshPtr.reset
     (
@@ -40,7 +56,7 @@ else
         (
             Foam::IOobject
             (
-                Foam::fvMesh::defaultRegion,
+                regionName,
                 runTime.timeName(),
                 runTime,
                 Foam::IOobject::MUST_READ

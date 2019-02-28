@@ -67,9 +67,10 @@ public:
             dynamicFvMesh,
             time,
             (
-                const Time& runTime
+                const Time& runTime,
+                const word& regionName
             ),
-            (runTime)
+            (runTime, regionName)
         );
 
 
@@ -101,7 +102,7 @@ public:
     ClassNameNoDebug(DynamicMeshType::typeName_.c_str());
 
     //- Constructor
-    SimplifiedDynamicFvMesh(const Time& runTime);
+    SimplifiedDynamicFvMesh(const Time& runTime, const word& regionName);
 
     //- Update the mesh for both mesh motion and topology change
     virtual bool update()
