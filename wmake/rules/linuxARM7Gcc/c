@@ -1,6 +1,6 @@
 include $(GENERAL_RULES)/Gcc/c
 
-cc          = gcc
+cc          = gcc -mcpu=cortex-a9
 
 include $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 
