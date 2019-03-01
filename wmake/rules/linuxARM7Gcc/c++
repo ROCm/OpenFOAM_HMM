@@ -1,6 +1,6 @@
 include $(GENERAL_RULES)/Gcc/c++
 
-CC          = g++ -std=c++11
+CC          = g++ -std=c++11 -mcpu=cortex-a9
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 
