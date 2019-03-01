@@ -140,10 +140,6 @@ protected:
         }
 
 
-        //- Update with new contents
-        void copyContents(const MeshedSurface<face>& surf, bool validate=false);
-
-
 public:
 
     // Public Typedefs

@@ -490,8 +490,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
 
 bool Foam::sampledSurfaces::performAction(unsigned request)
 {
-    // Update surfaces, writer associations etc.
-
+    // Update surfaces and store
     bool ok = false;
 
     forAll(*this, surfi)
@@ -508,12 +507,27 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
             nFaces_[surfi] = returnReduce(s.faces().size(), sumOp<label>());
 
             ok = ok || nFaces_[surfi];
+
+
+            // Store surfaces (even empty ones) otherwise we miss geometry
+            // updates.
+            // Any associated fields will be removed if the size changes
+
+            if ((request & actions_[surfi]) & ACTION_STORE)
+            {
+                storeRegistrySurface(s);
+            }
+
+            if ((request & actions_[surfi]) & ACTION_SURF_MESH)
+            {
+                s.storeSurfMesh();
+            }
         }
     }
 
     if (!ok)
     {
-        // No surface with faces or an applicable action
+        // No surface with an applicable action or with faces to sample
         return true;
     }
 
@@ -522,36 +536,13 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
     // Only seems to be needed for VTK legacy
     countFields();
 
+    // Update writers
 
     forAll(*this, surfi)
     {
         const sampledSurface& s = (*this)[surfi];
 
-        if (!(request & actions_[surfi]))
-        {
-            continue;
-        }
-
-        // TDB: do we store empty surfaces, skip them, or remove them
-        // from the registry?
-        // - For now, just skip touching them.
-
-        if (!nFaces_[surfi])
-        {
-            continue;
-        }
-
-        if ((request & actions_[surfi]) & ACTION_STORE)
-        {
-            storeRegistrySurface(s);
-        }
-
-        if ((request & actions_[surfi]) & ACTION_SURF_MESH)
-        {
-            s.storeSurfMesh();
-        }
-
-        if ((request & actions_[surfi]) & ACTION_WRITE)
+        if (((request & actions_[surfi]) & ACTION_WRITE) && nFaces_[surfi])
         {
             // Output writers
             surfaceWriter& outWriter = writers_[surfi];
@@ -587,6 +578,8 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
             }
         }
     }
+
+    // Sample fields
 
     const IOobjectList objects(obr_, obr_.time().timeName());
 
