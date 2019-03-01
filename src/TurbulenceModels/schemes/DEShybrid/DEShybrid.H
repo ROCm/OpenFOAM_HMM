@@ -197,13 +197,26 @@ class DEShybrid
                 CH3_*Omega*max(S, Omega)
                /max(0.5*(sqr(S) + sqr(Omega)), sqr(OmegaLim_/tau0_))
             );
+
             const volScalarField K
             (
                 max(Foam::sqrt(0.5*(sqr(S) + sqr(Omega))), 0.1/tau0_)
             );
 
-            const volScalarField lTurb(Foam::sqrt(nuEff/(pow(0.09, 1.5)*K)));
+            const volScalarField lTurb
+            (
+                Foam::sqrt
+                (
+                    max
+                    (
+                        nuEff/(pow(0.09, 1.5)*K),
+                        dimensionedScalar("l0", sqr(dimLength), 0)
+                    )
+                )
+            );
+
             const volScalarField g(tanh(pow4(B)));
+
             const volScalarField A
             (
                 CH2_*max
