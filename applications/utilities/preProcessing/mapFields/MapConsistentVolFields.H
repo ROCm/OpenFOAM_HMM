@@ -58,8 +58,8 @@ void MapConsistentVolFields
         Info<< "    interpolating " << fieldIter()->name()
             << endl;
 
-        // Read field
-        fieldType fieldSource(*fieldIter(), meshSource);
+        // Read field. Do not auto-load old-time field
+        fieldType fieldSource(*fieldIter(), meshSource, false);
 
         IOobject fieldTargetIOobject
         (
@@ -73,7 +73,7 @@ void MapConsistentVolFields
         if (fieldTargetIOobject.typeHeaderOk<fieldType>(true))
         {
             // Read fieldTarget
-            fieldType fieldTarget(fieldTargetIOobject, meshTarget);
+            fieldType fieldTarget(fieldTargetIOobject, meshTarget, false);
 
             // Interpolate field
             meshToMesh0Interp.interpolate

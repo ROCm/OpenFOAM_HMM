@@ -68,14 +68,15 @@ void MapVolFields
         {
             Info<< "    interpolating " << fieldIter()->name() << endl;
 
-            // Read field fieldSource
-            fieldType fieldSource(*fieldIter(), meshSource);
+            // Read field fieldSource. Do not auto-load old-time fields
+            fieldType fieldSource(*fieldIter(), meshSource, false);
 
-            // Read fieldTarget
+            // Read fieldTarget. Do not auto-load old-time fields
             fieldType fieldTarget
             (
                 fieldTargetIOobject,
-                meshTarget
+                meshTarget,
+                false
             );
 
             // Interpolate field

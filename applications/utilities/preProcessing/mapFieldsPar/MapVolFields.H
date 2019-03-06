@@ -143,7 +143,7 @@ void MapVolFields
 
     for (const word& fieldName : fieldNames)
     {
-        const fieldType fieldSource(*(objects[fieldName]), meshSource);
+        const fieldType fieldSource(*(objects[fieldName]), meshSource, false);
 
         IOobject targetIO
         (
@@ -158,7 +158,7 @@ void MapVolFields
             Info<< "    interpolating onto existing field "
                 << fieldName << endl;
 
-            fieldType fieldTarget(targetIO, meshTarget);
+            fieldType fieldTarget(targetIO, meshTarget, false);
 
             interp.mapSrcToTgt(fieldSource, cop, fieldTarget);
 

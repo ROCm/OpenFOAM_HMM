@@ -90,7 +90,7 @@ bool setCellFieldType
             << fieldHeader.headerClassName()
             << " " << fieldName << endl;
 
-        fieldType field(fieldHeader, mesh);
+        fieldType field(fieldHeader, mesh, false);
 
         const Type& value = pTraits<Type>(fieldValueStream);
 
