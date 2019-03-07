@@ -80,11 +80,13 @@ protected:
 
         // Marching front
 
-            //- Calculate addressing and weights using temporary storage
+            //- Calculate addressing, weights and centroids using temporary
+            //- storage
             virtual void calcAddressing
             (
                 List<DynamicList<label>>& srcAddress,
                 List<DynamicList<scalar>>& srcWeights,
+                List<DynamicList<point>>& srcCentroids,
                 List<DynamicList<label>>& tgtAddress,
                 List<DynamicList<scalar>>& tgtWeights,
                 label srcFacei,
@@ -100,6 +102,7 @@ protected:
                 DynamicList<label>& visitedFaces,
                 List<DynamicList<label>>& srcAddr,
                 List<DynamicList<scalar>>& srcWght,
+                List<DynamicList<point>>& srcCtr,
                 List<DynamicList<label>>& tgtAddr,
                 List<DynamicList<scalar>>& tgtWght
             );
@@ -109,6 +112,7 @@ protected:
             (
                 List<DynamicList<label>>& srcAddr,
                 List<DynamicList<scalar>>& srcWght,
+                List<DynamicList<point>>& srcCtr,
                 List<DynamicList<label>>& tgtAddr,
                 List<DynamicList<scalar>>& tgtWght
             );
@@ -119,20 +123,22 @@ protected:
                 label& startSeedi,
                 label& srcFacei,
                 label& tgtFacei,
-                const boolList& mapFlag,
+                const bitSet& mapFlag,
                 labelList& seedFaces,
                 const DynamicList<label>& visitedFaces,
-                bool errorOnNotFound = true
+                const bool errorOnNotFound = true
             ) const;
 
 
         // Evaluation
 
             //- Area of intersection between source and target faces
-            virtual scalar interArea
+            virtual void calcInterArea
             (
                 const label srcFacei,
-                const label tgtFacei
+                const label tgtFacei,
+                scalar& area,
+                vector& centroid
             ) const;
 
             //- Return true if faces overlap
@@ -165,18 +171,19 @@ public:
 
 
     //- Destructor
-    virtual ~faceAreaWeightAMI();
+    virtual ~faceAreaWeightAMI() = default;
 
 
     // Member Functions
 
         // Manipulation
 
-            //- Update addressing and weights
+            //- Update addressing, weights and centroids
             virtual void calculate
             (
                 labelListList& srcAddress,
                 scalarListList& srcWeights,
+                pointListList& srcCentroids,
                 labelListList& tgtAddress,
                 scalarListList& tgtWeights,
                 label srcFacei = -1,

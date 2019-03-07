@@ -123,7 +123,7 @@ public:
 
 
     //- Destructor
-    virtual ~mapNearestAMI();
+    virtual ~mapNearestAMI() = default;
 
 
     // Member Functions
@@ -135,6 +135,7 @@ public:
             (
                 labelListList& srcAddress,
                 scalarListList& srcWeights,
+                pointListList& srcCentroids,
                 labelListList& tgtAddress,
                 scalarListList& tgtWeights,
                 label srcFacei = -1,

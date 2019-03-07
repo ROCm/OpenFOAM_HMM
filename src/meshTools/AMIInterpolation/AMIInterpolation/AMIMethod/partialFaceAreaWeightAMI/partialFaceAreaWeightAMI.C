@@ -35,7 +35,7 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     label& startSeedi,
     label& srcFacei,
     label& tgtFacei,
-    const boolList& mapFlag,
+    const bitSet& mapFlag,
     labelList& seedFaces,
     const DynamicList<label>& visitedFaces,
     const bool errorOnNotFound
@@ -78,14 +78,6 @@ partialFaceAreaWeightAMI
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::
-~partialFaceAreaWeightAMI()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
@@ -100,6 +92,7 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 (
     labelListList& srcAddress,
     scalarListList& srcWeights,
+    pointListList& srcCentroids,
     labelListList& tgtAddress,
     scalarListList& tgtWeights,
     label srcFacei,
@@ -122,9 +115,12 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
         return;
     }
 
+    srcCentroids.setSize(srcAddress.size());
+
     // temporary storage for addressing and weights
     List<DynamicList<label>> srcAddr(this->srcPatch_.size());
     List<DynamicList<scalar>> srcWght(srcAddr.size());
+    List<DynamicList<point>> srcCtr(srcAddr.size());
     List<DynamicList<label>> tgtAddr(this->tgtPatch_.size());
     List<DynamicList<scalar>> tgtWght(tgtAddr.size());
 
@@ -132,6 +128,7 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
     (
         srcAddr,
         srcWght,
+        srcCtr,
         tgtAddr,
         tgtWght,
         srcFacei,
@@ -143,6 +140,7 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
     {
         srcAddress[i].transfer(srcAddr[i]);
         srcWeights[i].transfer(srcWght[i]);
+        srcCentroids[i].transfer(srcCtr[i]);
     }
     forAll(tgtAddr, i)
     {

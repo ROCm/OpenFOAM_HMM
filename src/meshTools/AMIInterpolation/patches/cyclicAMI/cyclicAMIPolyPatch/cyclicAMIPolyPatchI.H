@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +28,36 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+inline bool Foam::cyclicAMIPolyPatch::canResetAMI() const
+{
+    return Pstream::parRun() || !boundaryMesh().mesh().time().processorCase();
+}
+
+
+inline void Foam::cyclicAMIPolyPatch::setUpdated(const bool flag) const
+{
+    updated_ = flag;
+}
+
+
+inline bool Foam::cyclicAMIPolyPatch::updated() const
+{
+    return updated_;
+}
+
+
+inline bool Foam::cyclicAMIPolyPatch::createAMIFaces() const
+{
+    return createAMIFaces_;
+}
+
+
+inline bool Foam::cyclicAMIPolyPatch::updatingAMI() const
+{
+    return updatingAMI_;
+}
+
+
 inline const Foam::word& Foam::cyclicAMIPolyPatch::neighbPatchName() const
 {
     if (nbrPatchName_.empty())
@@ -39,6 +70,38 @@ inline const Foam::word& Foam::cyclicAMIPolyPatch::neighbPatchName() const
     return nbrPatchName_;
 }
 
+inline const Foam::scalarListList& Foam::cyclicAMIPolyPatch::weights() const
+{
+    if (owner())
+    {
+        return AMI().srcWeights();
+    }
+
+    return neighbPatch().AMI().tgtWeights();
+}
+
+
+inline const Foam::scalarField& Foam::cyclicAMIPolyPatch::weightsSum() const
+{
+    if (owner())
+    {
+        return AMI().srcWeightsSum();
+    }
+
+    return neighbPatch().AMI().tgtWeightsSum();
+}
+
+
+inline Foam::vectorField& Foam::cyclicAMIPolyPatch::faceAreas0() const
+{
+    return faceAreas0_;
+}
+
+
+inline Foam::vectorField& Foam::cyclicAMIPolyPatch::faceCentres0() const
+{
+    return faceCentres0_;
+}
 
 inline const Foam::vector& Foam::cyclicAMIPolyPatch::rotationAxis() const
 {

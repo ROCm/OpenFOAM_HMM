@@ -726,12 +726,22 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 
 Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
 {
+    DebugInFunction << endl;
+
     // Grab old time volumes if the time has been incremented
     // This will update V0, V00
     if (curTimeIndex_ < time().timeIndex())
     {
         storeOldVol(V());
     }
+
+
+    // Move the polyMesh and set the mesh motion fluxes to the swept-volumes
+
+    scalar rDeltaT = 1.0/time().deltaTValue();
+
+    tmp<scalarField> tsweptVols = polyMesh::movePoints(p);
+    scalarField& sweptVols = tsweptVols.ref();
 
     if (!phiPtr_)
     {
@@ -761,14 +771,6 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     }
 
     surfaceScalarField& phi = *phiPtr_;
-
-    // Move the polyMesh and set the mesh motion fluxes to the swept-volumes
-
-    scalar rDeltaT = 1.0/time().deltaTValue();
-
-    tmp<scalarField> tsweptVols = polyMesh::movePoints(p);
-    scalarField& sweptVols = tsweptVols.ref();
-
     phi.primitiveFieldRef() =
         scalarField::subField(sweptVols, nInternalFaces());
     phi.primitiveFieldRef() *= rDeltaT;
@@ -776,7 +778,6 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     const fvPatchList& patches = boundary();
 
     surfaceScalarField::Boundary& phibf = phi.boundaryFieldRef();
-
     forAll(patches, patchi)
     {
         phibf[patchi] = patches[patchi].patchSlice(sweptVols);
@@ -805,6 +806,8 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
 
 void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
 {
+    DebugInFunction << endl;
+
     // Update polyMesh. This needs to keep volume existent!
     polyMesh::updateMesh(mpm);
 

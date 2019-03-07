@@ -94,7 +94,7 @@ class IOobject;
 template<class T, class Container> class CompactListList;
 
 /*---------------------------------------------------------------------------*\
-                           Class polyTopoChange Declaration
+                       Class polyTopoChange Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyTopoChange
@@ -121,7 +121,7 @@ class polyTopoChange
             DynamicList<label> pointMap_;
 
             //- For all original and added points contains new point label.
-            //  (used to map return value of addPoint to new mesh point)
+            //- (used to map return value of addPoint to new mesh point)
             DynamicList<label> reversePointMap_;
 
             //- Zone of point
@@ -324,10 +324,10 @@ class polyTopoChange
         );
 
         //- Remove all unused/removed points/faces/cells and update
-        //  face ordering (always), cell ordering (bandcompression,
-        //  orderCells=true),
-        //  point ordering (sorted into internal and boundary points,
-        //  orderPoints=true)
+        //- face ordering (always), cell ordering (bandcompression,
+        //- orderCells=true),
+        //- point ordering (sorted into internal and boundary points,
+        //- orderPoints=true)
         void compact
         (
             const bool orderCells,
@@ -433,7 +433,7 @@ public:
     // Constructors
 
         //- Construct without mesh. Either specify nPatches or use
-        //  setNumPatches before trying to make a mesh (makeMesh, changeMesh)
+        //- setNumPatches before trying to make a mesh (makeMesh, changeMesh)
         polyTopoChange(const label nPatches, const bool strict = true);
 
         //- Construct from mesh. Adds all points/face/cells from mesh.
@@ -471,15 +471,15 @@ public:
             }
 
             //- Is point removed?
-            //  Considered removed if point is GREAT.
+            //- Considered removed if point is GREAT.
             inline bool pointRemoved(const label pointi) const;
 
             //- Is face removed?
-            //  Considered removed if face is empty
+            //- Considered removed if face is empty
             inline bool faceRemoved(const label facei) const;
 
             //- Is cell removed?
-            //  Considered removed if the cellMap is -2
+            //- Considered removed if the cellMap is -2
             inline bool cellRemoved(const label celli) const;
 
 
@@ -489,7 +489,7 @@ public:
             void clear();
 
             //- Add all points/faces/cells of mesh. Additional offset for patch
-            //  or zone ids.
+            //- or zone ids.
             void addMesh
             (
                 const polyMesh& mesh,
@@ -500,7 +500,7 @@ public:
             );
 
             //- Explicitly pre-size the dynamic storage for expected mesh
-            //  size for if construct-without-mesh
+            //- size for if construct-without-mesh
             void setCapacity
             (
                 const label nPoints,
@@ -590,7 +590,7 @@ public:
             void removeCell(const label celli, const label mergeCelli);
 
             //- Explicitly set the number of patches if construct-without-mesh
-            //  used.
+            //- used.
             inline void setNumPatches(const label nPatches);
 
         // Other
@@ -628,7 +628,6 @@ public:
                 const bool orderCells = false,
                 const bool orderPoints = false
             );
-
 };
 
 

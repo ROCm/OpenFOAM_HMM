@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,9 +60,6 @@ private:
 
     // Private data
 
-        //- Fraction of face area below which face is considered disconnected
-        static const scalar tolerance_;
-
         //- Name of non-overlapping patch
         const word nonOverlapPatchName_;
 
@@ -75,20 +72,39 @@ private:
         //- Mask/weighting for target patch
         mutable scalarField tgtMask_;
 
-        //- Flag to indicate that AMI has been updated
-        mutable bool updated_;
-
 
 protected:
 
     // Protected Member Functions
 
-        //- Reset the AMI interpolator
+        //- Report coverage statics, e.g. number of uncovered/blended/covered
+        //- faces
+        void reportCoverage
+        (
+            const word& name,
+            const scalarField& weightSum
+        ) const;
+
+        //- Reset the AMI interpolator, supply patch points
+        virtual void resetAMI
+        (
+            const UList<point>& points,
+            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
+                AMIPatchToPatchInterpolation::imFaceAreaWeight
+        ) const;
+
+        //-  Reset the AMI interpolator, use current patch points
         virtual void resetAMI
         (
             const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
                 AMIPatchToPatchInterpolation::imFaceAreaWeight
         ) const;
+
+        //- Scale patch face areas to maintain physical area
+        virtual void scalePatchFaceAreas();
+
+        //- Scale patch face areas to maintain physical area
+        virtual void scalePatchFaceAreas(const cyclicACMIPolyPatch& acmipp);
 
         //- Initialise the calculation of the patch geometry
         virtual void initGeometry(PstreamBuffers&);
@@ -110,12 +126,6 @@ protected:
 
         //- Clear geometry
         virtual void clearGeom();
-
-        //- Return the mask/weighting for the source patch
-        virtual const scalarField& srcMask() const;
-
-        //- Return the mask/weighting for the target patch
-        virtual const scalarField& tgtMask() const;
 
 
 public:
@@ -235,18 +245,12 @@ public:
 
 
     //- Destructor
-    virtual ~cyclicACMIPolyPatch();
+    virtual ~cyclicACMIPolyPatch() = default;
 
 
     // Member Functions
 
         // Access
-
-            //- Reset the updated flag
-            inline void setUpdated(bool flag) const;
-
-            //- Return access to the updated flag
-            inline bool updated() const;
 
             //- Return a reference to the neighbour patch
             virtual const cyclicACMIPolyPatch& neighbPatch() const;
@@ -263,8 +267,14 @@ public:
             //- Return a reference to the non-overlapping patch
             inline polyPatch& nonOverlapPatch();
 
-            //- Mask field where 1 = overlap, 0 = no-overlap
+            //- Mask field where 1 = overlap(coupled), 0 = no-overlap
             inline const scalarField& mask() const;
+
+            //- Return the mask/weighting for the source patch
+            virtual const scalarField& srcMask() const;
+
+            //- Return the mask/weighting for the target patch
+            virtual const scalarField& tgtMask() const;
 
             //- Overlap tolerance
             inline static scalar tolerance();

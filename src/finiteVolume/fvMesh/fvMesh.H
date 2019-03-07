@@ -91,6 +91,8 @@ class fvMesh
     public fvSolution,
     public data
 {
+protected:
+
     // Private data
 
         //- Boundary mesh

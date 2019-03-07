@@ -28,6 +28,7 @@ License
 
 #include "faceAreaWeightAMI.H"
 #include "profiling.H"
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -36,6 +37,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
 (
     List<DynamicList<label>>& srcAddr,
     List<DynamicList<scalar>>& srcWght,
+    List<DynamicList<point>>& srcCtr,
     List<DynamicList<label>>& tgtAddr,
     List<DynamicList<scalar>>& tgtWght,
     label srcFacei,
@@ -60,7 +62,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
     seedFaces[srcFacei] = tgtFacei;
 
     // list to keep track of whether src face can be mapped
-    boolList mapFlag(nFacesRemaining, true);
+    bitSet mapFlag(nFacesRemaining, true);
 
     // reset starting seed
     label startSeedi = 0;
@@ -68,6 +70,9 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
     DynamicList<label> nonOverlapFaces;
     do
     {
+        nbrFaces.clear();
+        visitedFaces.clear();
+
         // Do advancing front starting from srcFacei,tgtFacei
         bool faceProcessed = processSourceFace
         (
@@ -79,11 +84,12 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
 
             srcAddr,
             srcWght,
+            srcCtr,
             tgtAddr,
             tgtWght
         );
 
-        mapFlag[srcFacei] = false;
+        mapFlag.unset(srcFacei);
 
         nFacesRemaining--;
 
@@ -122,9 +128,10 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
     // list of faces currently visited for srcFacei to avoid multiple hits
     DynamicList<label>& visitedFaces,
 
-    // temporary storage for addressing and weights
+    // temporary storage for addressing, weights and centroid
     List<DynamicList<label>>& srcAddr,
     List<DynamicList<scalar>>& srcWght,
+    List<DynamicList<point>>& srcCtr,
     List<DynamicList<label>>& tgtAddr,
     List<DynamicList<scalar>>& tgtWght
 )
@@ -135,9 +142,6 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
     {
         return false;
     }
-
-    nbrFaces.clear();
-    visitedFaces.clear();
 
     // append initial target face and neighbours
     nbrFaces.append(tgtStartFacei);
@@ -158,16 +162,24 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
         // process new target face
         label tgtFacei = nbrFaces.remove();
         visitedFaces.append(tgtFacei);
-        scalar area = interArea(srcFacei, tgtFacei);
+
+        scalar interArea = 0;
+        vector interCentroid(Zero);
+        calcInterArea(srcFacei, tgtFacei, interArea, interCentroid);
 
         // store when intersection fractional area > tolerance
-        if (area/this->srcMagSf_[srcFacei] > faceAreaIntersect::tolerance())
+        if
+        (
+            interArea/this->srcMagSf_[srcFacei]
+          > faceAreaIntersect::tolerance()
+        )
         {
             srcAddr[srcFacei].append(tgtFacei);
-            srcWght[srcFacei].append(area);
+            srcWght[srcFacei].append(interArea);
+            srcCtr[srcFacei].append(interCentroid);
 
             tgtAddr[tgtFacei].append(srcFacei);
-            tgtWght[tgtFacei].append(area);
+            tgtWght[tgtFacei].append(interArea);
 
             this->appendNbrFaces
             (
@@ -199,10 +211,10 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     label& startSeedi,
     label& srcFacei,
     label& tgtFacei,
-    const boolList& mapFlag,
+    const bitSet& mapFlag,
     labelList& seedFaces,
     const DynamicList<label>& visitedFaces,
-    bool errorOnNotFound
+    const bool errorOnNotFound
 ) const
 {
     addProfiling(ami, "faceAreaWeightAMI::setNextFaces");
@@ -216,15 +228,14 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     bool valuesSet = false;
     for (label faceS: srcNbrFaces)
     {
-        if (mapFlag[faceS] && seedFaces[faceS] == -1)
+        if (mapFlag.test(faceS) && seedFaces[faceS] == -1)
         {
             for (label faceT : visitedFaces)
             {
                 const scalar threshold =
                     this->srcMagSf_[faceS]*faceAreaIntersect::tolerance();
 
-                // store when intersection fractional area > tolerance
-                // Check that faces have enough overlap for robust walking
+                // Store when intersection fractional area > threshold
                 if (overlaps(faceS, faceT, threshold))
                 {
                     seedFaces[faceS] = faceT;
@@ -248,25 +259,31 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     else
     {
         // try to use existing seed
-        bool foundNextSeed = false;
-        for (label facei = startSeedi; facei < mapFlag.size(); ++facei)
+        label facei = startSeedi;
+        if (!mapFlag.test(startSeedi))
         {
-            if (mapFlag[facei])
+            facei = mapFlag.find_next(facei);
+        }
+        const label startSeedi0 = facei;
+
+        bool foundNextSeed = false;
+        while (facei != -1)
+        {
+            if (!foundNextSeed)
             {
-                if (!foundNextSeed)
-                {
-                    startSeedi = facei;
-                    foundNextSeed = true;
-                }
-
-                if (seedFaces[facei] != -1)
-                {
-                    srcFacei = facei;
-                    tgtFacei = seedFaces[facei];
-
-                    return;
-                }
+                startSeedi = facei;
+                foundNextSeed = true;
             }
+
+            if (seedFaces[facei] != -1)
+            {
+                srcFacei = facei;
+                tgtFacei = seedFaces[facei];
+
+                return;
+            }
+
+            facei = mapFlag.find_next(facei);
         }
 
         // perform new search to find match
@@ -276,25 +293,18 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
                 << "target face" << endl;
         }
 
-        foundNextSeed = false;
-        for (label facei = startSeedi; facei < mapFlag.size(); ++facei)
+        facei = startSeedi0;
+        while (facei != -1)
         {
-            if (mapFlag[facei])
+            srcFacei = facei;
+            tgtFacei = this->findTargetFace(srcFacei, visitedFaces);
+
+            if (tgtFacei >= 0)
             {
-                if (!foundNextSeed)
-                {
-                    startSeedi = facei + 1;
-                    foundNextSeed = true;
-                }
-
-                srcFacei = facei;
-                tgtFacei = this->findTargetFace(srcFacei);
-
-                if (tgtFacei >= 0)
-                {
-                    return;
-                }
+                return;
             }
+
+            facei = mapFlag.find_next(facei);
         }
 
         if (errorOnNotFound)
@@ -307,15 +317,15 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
 
 
 template<class SourcePatch, class TargetPatch>
-Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
+void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcInterArea
 (
     const label srcFacei,
-    const label tgtFacei
+    const label tgtFacei,
+    scalar& area,
+    vector& centroid
 ) const
 {
     addProfiling(ami, "faceAreaWeightAMI::interArea");
-
-    scalar area = 0;
 
     const pointField& srcPoints = this->srcPatch_.points();
     const pointField& tgtPoints = this->tgtPatch_.points();
@@ -331,7 +341,7 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
      || (this->tgtMagSf_[tgtFacei] < ROOTVSMALL)
     )
     {
-        return area;
+        return;
     }
 
     // create intersection object
@@ -359,7 +369,7 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
 
     if (magN > ROOTVSMALL)
     {
-        area = inter.calc(src, tgt, n/magN);
+        inter.calc(src, tgt, n/magN, area, centroid);
     }
     else
     {
@@ -371,13 +381,24 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
             << endl;
     }
 
+    if
+    (
+        AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_
+     && debug
+    )
+    {
+        static OBJstream tris("intersectionTris.obj");
+        const auto& triPts = inter.triangles();
+        for (const auto& tp : triPts)
+        {
+            tris.write(triPointRef(tp[0], tp[1], tp[2]), false);
+        }
+    }
 
     if ((debug > 1) && (area > 0))
     {
         this->writeIntersectionOBJ(area, src, tgt, srcPoints, tgtPoints);
     }
-
-    return area;
 }
 
 
@@ -452,95 +473,70 @@ restartUncoveredSourceFace
 (
     List<DynamicList<label>>& srcAddr,
     List<DynamicList<scalar>>& srcWght,
+    List<DynamicList<point>>& srcCtr,
     List<DynamicList<label>>& tgtAddr,
     List<DynamicList<scalar>>& tgtWght
 )
 {
     addProfiling(ami, "faceAreaWeightAMI::restartUncoveredSourceFace");
 
-    // Collect all src faces with a low weight
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Note: exclude faces in srcNonOverlap_ for ACMI?
 
-    labelHashSet lowWeightFaces(100);
+    label nBelowMinWeight = 0;
+    const scalar minWeight = 0.95;
+
+    // list of tgt face neighbour faces
+    DynamicList<label> nbrFaces(10);
+
+    // list of faces currently visited for srcFacei to avoid multiple hits
+    DynamicList<label> visitedFaces(10);
+
     forAll(srcWght, srcFacei)
     {
-        scalar s = sum(srcWght[srcFacei]);
-        scalar t = s/this->srcMagSf_[srcFacei];
+        const scalar s = sum(srcWght[srcFacei]);
+        const scalar t = s/this->srcMagSf_[srcFacei];
 
-        if (t < 0.5)
+        if (t < minWeight)
         {
-            lowWeightFaces.insert(srcFacei);
-        }
-    }
+            ++nBelowMinWeight;
 
-    if (debug)
-    {
-        Pout<< "faceAreaWeightAMI: restarting search on "
-            << lowWeightFaces.size() << " faces since sum of weights < 0.5"
-            << endl;
-    }
+            const face& f = this->srcPatch_[srcFacei];
 
-    if (lowWeightFaces.size() > 0)
-    {
-        // Erase all the lowWeight source faces from the target
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        DynamicList<label> okSrcFaces(10);
-        DynamicList<scalar> okSrcWeights(10);
-        forAll(tgtAddr, tgtFacei)
-        {
-            okSrcFaces.clear();
-            okSrcWeights.clear();
-            DynamicList<label>& srcFaces = tgtAddr[tgtFacei];
-            DynamicList<scalar>& srcWeights = tgtWght[tgtFacei];
-            forAll(srcFaces, i)
+            forAll(f, fpi)
             {
-                if (!lowWeightFaces.found(srcFaces[i]))
+                const label tgtFacei =
+                    this->findTargetFace(srcFacei, srcAddr[srcFacei], fpi);
+
+                if (tgtFacei != -1)
                 {
-                    okSrcFaces.append(srcFaces[i]);
-                    okSrcWeights.append(srcWeights[i]);
+                    nbrFaces.clear();
+                    visitedFaces = srcAddr[srcFacei];
+
+                    (void)processSourceFace
+                    (
+                        srcFacei,
+                        tgtFacei,
+
+                        nbrFaces,
+                        visitedFaces,
+
+                        srcAddr,
+                        srcWght,
+                        srcCtr,
+                        tgtAddr,
+                        tgtWght
+                    );
                 }
             }
-            if (okSrcFaces.size() < srcFaces.size())
-            {
-                srcFaces.transfer(okSrcFaces);
-                srcWeights.transfer(okSrcWeights);
-            }
         }
+    }
 
-
-
-        // Restart search from best hit
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-        // list of tgt face neighbour faces
-        DynamicList<label> nbrFaces(10);
-
-        // list of faces currently visited for srcFacei to avoid multiple hits
-        DynamicList<label> visitedFaces(10);
-
-        for (const label srcFacei : lowWeightFaces)
-        {
-            const label tgtFacei = this->findTargetFace(srcFacei);
-            if (tgtFacei != -1)
-            {
-                //bool faceProcessed =
-                processSourceFace
-                (
-                    srcFacei,
-                    tgtFacei,
-
-                    nbrFaces,
-                    visitedFaces,
-
-                    srcAddr,
-                    srcWght,
-                    tgtAddr,
-                    tgtWght
-                );
-                // ? Check faceProcessed to see if restarting has worked.
-            }
-        }
+    if (debug && nBelowMinWeight)
+    {
+        WarningInFunction
+            << "Restarted search on " << nBelowMinWeight
+            << " faces since sum of weights < " << minWeight
+            << endl;
     }
 }
 
@@ -572,14 +568,43 @@ Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::faceAreaWeightAMI
 {
     this->triangulatePatch(srcPatch, srcTris_, this->srcMagSf_);
     this->triangulatePatch(tgtPatch, tgtTris_, this->tgtMagSf_);
+
+    if (debug)
+    {
+        static label nAMI = 0;
+
+        // Write out triangulated surfaces as OBJ files
+        OBJstream srcTriObj("srcTris_" + Foam::name(nAMI) + ".obj");
+        const pointField& srcPts = srcPatch.points();
+        forAll(srcTris_, facei)
+        {
+            const DynamicList<face>& faces = srcTris_[facei];
+            for (const face& f : faces)
+            {
+                srcTriObj.write
+                (
+                    triPointRef(srcPts[f[0]], srcPts[f[1]], srcPts[f[2]])
+                );
+            }
+        }
+
+        OBJstream tgtTriObj("tgtTris_" + Foam::name(nAMI) + ".obj");
+        const pointField& tgtPts = tgtPatch.points();
+        forAll(tgtTris_, facei)
+        {
+            const DynamicList<face>& faces = tgtTris_[facei];
+            for (const face& f : faces)
+            {
+                tgtTriObj.write
+                (
+                    triPointRef(tgtPts[f[0]], tgtPts[f[1]], tgtPts[f[2]])
+                );
+            }
+        }
+
+        ++nAMI;
+    }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::~faceAreaWeightAMI()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -589,6 +614,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
 (
     labelListList& srcAddress,
     scalarListList& srcWeights,
+    pointListList& srcCentroids,
     labelListList& tgtAddress,
     scalarListList& tgtWeights,
     label srcFacei,
@@ -608,6 +634,9 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
             tgtFacei
         );
 
+    srcCentroids.setSize(srcAddress.size());
+
+
     if (!ok)
     {
         return;
@@ -616,6 +645,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
     // temporary storage for addressing and weights
     List<DynamicList<label>> srcAddr(this->srcPatch_.size());
     List<DynamicList<scalar>> srcWght(srcAddr.size());
+    List<DynamicList<point>> srcCtr(srcAddr.size());
     List<DynamicList<label>> tgtAddr(this->tgtPatch_.size());
     List<DynamicList<scalar>> tgtWght(tgtAddr.size());
 
@@ -623,6 +653,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
     (
         srcAddr,
         srcWght,
+        srcCtr,
         tgtAddr,
         tgtWght,
         srcFacei,
@@ -644,17 +675,18 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
         (
             srcAddr,
             srcWght,
+            srcCtr,
             tgtAddr,
             tgtWght
         );
     }
 
-
-    // transfer data to persistent storage
+    // Transfer data to persistent storage
     forAll(srcAddr, i)
     {
         srcAddress[i].transfer(srcAddr[i]);
         srcWeights[i].transfer(srcWght[i]);
+        srcCentroids[i].transfer(srcCtr[i]);
     }
     forAll(tgtAddr, i)
     {

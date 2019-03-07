@@ -205,13 +205,6 @@ Foam::directAMI<SourcePatch, TargetPatch>::directAMI
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::directAMI<SourcePatch, TargetPatch>::~directAMI()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
@@ -219,6 +212,7 @@ void Foam::directAMI<SourcePatch, TargetPatch>::calculate
 (
     labelListList& srcAddress,
     scalarListList& srcWeights,
+    pointListList& srcCentroids,
     labelListList& tgtAddress,
     scalarListList& tgtWeights,
     label srcFacei,

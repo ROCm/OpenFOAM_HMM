@@ -61,6 +61,7 @@ SourceFiles
 #include "globalIndex.H"
 #include "ops.H"
 #include "Enum.H"
+#include "pointList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,6 +147,9 @@ private:
             //- Sum of weights of target faces per source face
             scalarField srcWeightsSum_;
 
+            //- Centroid of target faces per source face
+            pointListList srcCentroids_;
+
 
         // Target patch
 
@@ -160,6 +164,9 @@ private:
 
             //- Sum of weights of source faces per target face
             scalarField tgtWeightsSum_;
+
+            //- Centroid of source faces per target face
+            pointListList tgtCentroids_;
 
 
         //- Face triangulation mode
@@ -347,7 +354,7 @@ public:
 
 
     //- Destructor
-    ~AMIInterpolation();
+    ~AMIInterpolation() = default;
 
     // Typedef to SourcePatch type this AMIInterpolation is instantiated on
     typedef SourcePatch sourcePatchType;
@@ -399,6 +406,12 @@ public:
                 //- patch weights (i.e. the sum before normalisation)
                 inline scalarField& srcWeightsSum();
 
+                //- Return const access to source patch face centroids
+                inline const pointListList& srcCentroids() const;
+
+                //- Return access to source patch face centroids
+                inline pointListList& srcCentroids();
+
                 //- Source map pointer - valid only if singlePatchProc = -1
                 //- This gets source data into a form to be consumed by
                 //- tgtAddress, tgtWeights
@@ -447,6 +460,22 @@ public:
                 const SourcePatch& srcPatch,
                 const TargetPatch& tgtPatch
             );
+
+            void update
+            (
+                autoPtr<mapDistribute>&& srcToTgtMap,
+                autoPtr<mapDistribute>&& tgtToSrcMap,
+                labelListList&& srcAddress,
+                scalarListList&& srcWeights,
+                labelListList&& tgtAddress,
+                scalarListList&& tgtWeights
+            );
+
+            void setAreas(const scalarList& srcMagSf, const scalarList& tgtMagSf)
+            {
+                srcMagSf_ = srcMagSf;
+                tgtMagSf_ = tgtMagSf;
+            }
 
             //- Append additional addressing and weights
             void append
@@ -581,6 +610,10 @@ public:
 
 
         // Checks
+
+            //- Check if src addresses are present in tgt addresses and
+            //- viceversa
+            bool checkSymmetricWeights(const bool log) const;
 
             //- Write face connectivity as OBJ file
             void writeFaceConnectivity

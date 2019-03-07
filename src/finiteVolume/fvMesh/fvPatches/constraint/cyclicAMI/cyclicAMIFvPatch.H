@@ -68,6 +68,9 @@ protected:
         //- Make patch weighting factors
         void makeWeights(scalarField&) const;
 
+        //- Correct patches after moving points
+        virtual void movePoints();
+
 
 public:
 

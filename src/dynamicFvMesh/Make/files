@@ -10,4 +10,9 @@ dynamicMotionSolverListFvMesh/dynamicMotionSolverListFvMesh.C
 simplifiedDynamicFvMesh/simplifiedDynamicFvMeshes.C
 simplifiedDynamicFvMesh/simplifiedDynamicFvMesh.C
 
+
+
+dynamicMotionSolverFvMeshAMI/dynamicMotionSolverFvMeshAMI.C
+
+
 LIB = $(FOAM_LIBBIN)/libdynamicFvMesh

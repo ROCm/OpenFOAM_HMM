@@ -172,7 +172,6 @@ void Foam::surfaceInterpolation::makeWeights() const
 
     // ... and reference to the internal field of the weighting factors
     scalarField& w = weights.primitiveFieldRef();
-
     forAll(owner, facei)
     {
         // Note: mag in the dot-product.

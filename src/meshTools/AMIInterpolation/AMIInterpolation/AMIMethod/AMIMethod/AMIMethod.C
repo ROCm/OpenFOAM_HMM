@@ -31,6 +31,8 @@ License
 #include "mapDistribute.H"
 #include "unitConversion.H"
 
+#include "findNearestMaskedOp.H"
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
@@ -231,17 +233,25 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::resetTree()
 template<class SourcePatch, class TargetPatch>
 Foam::label Foam::AMIMethod<SourcePatch, TargetPatch>::findTargetFace
 (
-    const label srcFacei
+    const label srcFacei,
+    const UList<label>& excludeFaces,
+    const label srcFacePti
 ) const
 {
     label targetFacei = -1;
 
     const pointField& srcPts = srcPatch_.points();
     const face& srcFace = srcPatch_[srcFacei];
-    const point srcPt = srcFace.centre(srcPts);
-    const scalar srcFaceArea = srcMagSf_[srcFacei];
 
-    pointIndexHit sample = treePtr_->findNearest(srcPt, 10.0*srcFaceArea);
+    findNearestMaskedOp<TargetPatch> fnOp(*treePtr_, excludeFaces);
+
+    boundBox bb(srcPts, srcFace, false);
+
+    const point srcPt =
+        srcFacePti == -1 ? bb.centre() : srcPts[srcFace[srcFacePti]];
+
+    const pointIndexHit sample =
+        treePtr_->findNearest(srcPt, magSqr(bb.max() - bb.centre()), fnOp);
 
     if (sample.hit())
     {

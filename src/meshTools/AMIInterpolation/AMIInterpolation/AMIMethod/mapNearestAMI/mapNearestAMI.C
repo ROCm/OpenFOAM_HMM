@@ -190,13 +190,6 @@ Foam::mapNearestAMI<SourcePatch, TargetPatch>::mapNearestAMI
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::mapNearestAMI<SourcePatch, TargetPatch>::~mapNearestAMI()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
@@ -204,6 +197,7 @@ void Foam::mapNearestAMI<SourcePatch, TargetPatch>::calculate
 (
     labelListList& srcAddress,
     scalarListList& srcWeights,
+    pointListList& srcCentroids,
     labelListList& tgtAddress,
     scalarListList& tgtWeights,
     label srcFacei,

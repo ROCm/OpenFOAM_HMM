@@ -116,6 +116,22 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcWeightsSum()
 
 
 template<class SourcePatch, class TargetPatch>
+inline const Foam::pointListList&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcCentroids() const
+{
+    return srcCentroids_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline Foam::pointListList&
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcCentroids()
+{
+    return srcCentroids_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::mapDistribute&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMap() const
 {

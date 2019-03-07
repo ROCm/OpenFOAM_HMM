@@ -65,11 +65,14 @@ protected:
 
     // Protected Member functions
 
-        //- Update the patch areas after AMI update
-        void updateAreas() const;
+        //- Helper function to reset the FV patch areas from the primitive patch
+        void resetPatchAreas(const fvPatch& fvp) const;
 
         //- Make patch weighting factors
         void makeWeights(scalarField&) const;
+
+        //- Correct patches after moving points
+        virtual void movePoints();
 
 
 public:
@@ -134,12 +137,7 @@ public:
             //- Return a reference to the AMI interpolator
             virtual const AMIPatchToPatchInterpolation& AMI() const
             {
-                const AMIPatchToPatchInterpolation& AMI =
-                    cyclicACMIPolyPatch_.AMI();
-
-                updateAreas();
-
-                return AMI;
+                return cyclicACMIPolyPatch_.AMI();
             }
 
             //- Are the cyclic planes parallel
@@ -169,8 +167,8 @@ public:
             }
 
             //- Return true if this patch is coupled. This is equivalent
-            //  to the coupledPolyPatch::coupled() if parallel running or
-            //  both sides present, false otherwise
+            //- to the coupledPolyPatch::coupled() if parallel running or
+            //- both sides present, false otherwise
             virtual bool coupled() const;
 
             //- Return delta (P to N) vectors across coupled patch
@@ -183,8 +181,6 @@ public:
                 const Field<Type>& fld
             ) const
             {
-                updateAreas();
-
                 return
                     cyclicACMIPolyPatch_.cyclicAMIPolyPatch::interpolate
                     (
@@ -192,7 +188,7 @@ public:
                     );
             }
 
-            //- Interpolate (make sure to have uptodate areas)
+            //- Interpolate (make sure to have up-to-date areas)
             template<class Type>
             tmp<Field<Type>> interpolate
             (
@@ -206,7 +202,7 @@ public:
         // Interface transfer functions
 
             //- Return the values of the given internal data adjacent to
-            //  the interface as a field
+            //- the interface as a field
             virtual tmp<labelField> interfaceInternalField
             (
                 const labelUList& internalData

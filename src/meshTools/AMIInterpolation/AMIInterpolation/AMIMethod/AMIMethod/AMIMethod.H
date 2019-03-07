@@ -45,6 +45,7 @@ SourceFiles
 #include "treeDataPrimitivePatch.H"
 #include "treeBoundBoxList.H"
 #include "runTimeSelectionTables.H"
+#include "pointList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -101,7 +102,7 @@ protected:
         List<scalar> tgtMagSf_;
 
         //- Labels of faces that are not overlapped by any target faces
-        //- (should be empty for correct functioning)
+        //- (should be empty for correct functioning for fully covered AMIs)
         labelList srcNonOverlap_;
 
         //- Octree used to find face seeds
@@ -145,8 +146,12 @@ protected:
             //- Reset the octree for the target patch face search
             void resetTree();
 
-            //- Find face on target patch that overlaps source face
-            label findTargetFace(const label srcFacei) const;
+            label findTargetFace
+            (
+                const label srcFacei,
+                const UList<label>& excludeFaces = UList<label>::null(),
+                const label srcFacePti = -1
+            ) const;
 
             //- Add faces neighbouring facei to the ID list
             void appendNbrFaces
@@ -251,6 +256,7 @@ public:
             (
                 labelListList& srcAddress,
                 scalarListList& srcWeights,
+                pointListList& srcCentroids,
                 labelListList& tgtAddress,
                 scalarListList& tgtWeights,
                 label srcFacei = -1,

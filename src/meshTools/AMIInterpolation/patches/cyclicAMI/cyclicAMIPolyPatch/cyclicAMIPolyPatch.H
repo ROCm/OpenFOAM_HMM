@@ -74,6 +74,9 @@ protected:
 
     // Protected data
 
+        //- Flag to indicate that AMI has been updated
+        mutable bool updated_;
+
         //- Name of other half
         mutable word nbrPatchName_;
 
@@ -129,9 +132,47 @@ protected:
         const dictionary surfDict_;
 
 
+        // Change of topology as AMI is updated
+
+            //- Flag to indicate that new AMI faces will created
+            //  Set by the call to changeTopology
+            mutable bool createAMIFaces_;
+
+            mutable bool updatingAMI_;
+
+            labelListList srcFaceIDs_;
+
+            labelListList tgtFaceIDs_;
+
+            //- Temporary storage for AMI face areas
+            mutable vectorField faceAreas0_;
+
+            //- Temporary storage for AMI face centres
+            mutable vectorField faceCentres0_;
+
+
     // Protected Member Functions
 
-        //- Reset the AMI interpolator
+        // Topology change
+
+            virtual bool removeAMIFaces(polyTopoChange& topoChange);
+
+            virtual bool addAMIFaces(polyTopoChange& topoChange);
+
+            virtual void setAMIFaces();
+
+            virtual void restoreScaledGeometry();
+
+
+        //- Reset the AMI interpolator, supply patch points
+        virtual void resetAMI
+        (
+            const UList<point>& points,
+            const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
+                AMIPatchToPatchInterpolation::imFaceAreaWeight
+        ) const;
+
+        //-  Reset the AMI interpolator, use current patch points
         virtual void resetAMI
         (
             const AMIPatchToPatchInterpolation::interpolationMethod& AMIMethod =
@@ -274,15 +315,45 @@ public:
 
 
     //- Destructor
-    virtual ~cyclicAMIPolyPatch();
+    virtual ~cyclicAMIPolyPatch() = default;
 
 
     // Member Functions
 
         // Access
 
+            //- Tolerance used e.g. for area calculations/limits
+            static const scalar tolerance_;
+
+            //- Flag to indicate whether the AMI can be reset
+            inline bool canResetAMI() const;
+
+             //- Reset the updated flag
+            inline void setUpdated(bool flag) const;
+
+            //- Return access to the updated flag
+            inline bool updated() const;
+
+            //- Return access to the createAMIFaces flag
+            inline bool createAMIFaces() const;
+
+            //- Return access to the updated flag
+            inline bool updatingAMI() const;
+
+void clearAMI() const
+{
+    AMIPtr_.clear();
+}
+
+            //- Return true if this patch changes the mesh topology
+            //  True when createAMIFaces is true
+            virtual bool changeTopology() const;
+
+            //- Set topology changes in the polyTopoChange object
+            virtual bool setTopology(polyTopoChange& topoChange);
+
             //- Is patch 'coupled'. Note that on AMI the geometry is not
-            //  coupled but the fields are!
+            //- coupled but the fields are!
             virtual bool coupled() const
             {
                 return false;
@@ -306,8 +377,22 @@ public:
             //- Return a reference to the AMI interpolator
             const AMIPatchToPatchInterpolation& AMI() const;
 
+            //- Helper function to return the weights
+            inline const scalarListList& weights() const;
+
+            //- Helper function to return the weights sum
+            inline const scalarField& weightsSum() const;
+
             //- Return true if applying the low weight correction
             bool applyLowWeightCorrection() const;
+
+            //- Return access to the initial face areas
+            //  Used for topology change
+            inline vectorField& faceAreas0() const;
+
+            //- Return access to the initial face centres
+            //  Used for topology change
+            inline vectorField& faceCentres0() const;
 
 
             // Transformations
@@ -388,7 +473,7 @@ public:
         );
 
         //- Initialize ordering for primitivePatch. Does not
-        //  refer to *this (except for name() and type() etc.)
+        //- refer to *this (except for name() and type() etc.)
         virtual void initOrder
         (
             PstreamBuffers&,
@@ -409,7 +494,7 @@ public:
         ) const;
 
         //- Return face index on neighbour patch which shares point p
-        //  following trajectory vector n
+        //- following trajectory vector n
         label pointFace
         (
             const label facei,
