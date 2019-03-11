@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -99,10 +99,23 @@ inline constexpr scalar atmToPa(const scalar atm) noexcept
     return (atm*101325.0);
 }
 
-//- Conversion from atm to Pa
+//- Conversion from bar to Pa
+inline constexpr scalar barToPa(const scalar bar) noexcept
+{
+    return (bar*100000.0);
+}
+
+
+//- Conversion from Pa to atm
 inline constexpr scalar paToAtm(const scalar pa) noexcept
 {
     return (pa/101325.0);
+}
+
+//- Conversion from Pa to bar
+inline constexpr scalar paToBar(const scalar pa) noexcept
+{
+    return (pa/100000.0);
 }
 
 
