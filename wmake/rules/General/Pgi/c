@@ -1,0 +1,7 @@
+SUFFIXES += .c
+
+cc          = pgcc
+
+cDBUG       =
+cOPT        = -O2
+cWARN       =

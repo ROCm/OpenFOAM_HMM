@@ -73,7 +73,7 @@ setenv WM_COMPILER_TYPE system
 
 # [WM_COMPILER] - Compiler:
 # = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-5] | Gcc7[1-4] | Gcc8[12] |
-#   Clang | Clang3[7-9] | Clang[4-6]0 | Icc | Cray | Arm
+#   Clang | Clang3[7-9] | Clang[4-6]0 | Icc | Cray | Arm | Pgi
 setenv WM_COMPILER Gcc
 
 # [WM_ARCH_OPTION] - Memory addressing:

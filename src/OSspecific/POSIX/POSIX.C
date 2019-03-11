@@ -65,6 +65,12 @@ Description
 #ifdef darwin
     #include <mach-o/dyld.h>
 #else
+
+    // PGI does not have __int128_t
+    #ifdef __PGIC__
+        #define __ILP32__
+    #endif
+
     #include <link.h>
 #endif
 

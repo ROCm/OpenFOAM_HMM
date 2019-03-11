@@ -249,6 +249,10 @@ Arm*)     # Arm system compilers
     export WM_CC='armclang'
     export WM_CXX='armclang++'
     ;;
+Pgi*)     # Pgi system compilers
+    export WM_CC='pgcc'
+    export WM_CXX='pgc++'
+    ;;
 esac
 
 # Clear prior to sourcing

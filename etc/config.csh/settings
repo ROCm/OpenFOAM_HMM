@@ -249,6 +249,10 @@ case Arm*:    # Arm system compilers
     setenv WM_CC 'armclang'
     setenv WM_CXX 'armclang++'
     breaksw
+case Pgi*:    # Pgi system compilers
+    setenv WM_CC 'pgcc'
+    setenv WM_CXX 'pgc++'
+    breaksw
 endsw
 
 # Clear prior to sourcing
