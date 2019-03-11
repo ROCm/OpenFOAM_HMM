@@ -250,7 +250,7 @@ void Foam::mergeAndWrite
                 false  // serial - already merged
             );
 
-            writer.writeGeometry();
+            writer.write();
             writer.clear();
         }
     }
@@ -264,7 +264,7 @@ void Foam::mergeAndWrite
             false  // serial - already merged
         );
 
-        writer.writeGeometry();
+        writer.write();
         writer.clear();
     }
 }

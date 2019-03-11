@@ -146,7 +146,7 @@ public:
             return true;
         }
 
-        //- Write single surface geometry to file.
+        //- Write surface geometry to file.
         virtual fileName write(); // override
 
         declareSurfaceWriterWriteMethod(label);

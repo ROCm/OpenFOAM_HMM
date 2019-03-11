@@ -114,6 +114,12 @@ void Foam::surfaceWriters::nullWriter::open(const fileName& outputPath)
 {}
 
 
+Foam::fileName Foam::surfaceWriters::nullWriter::write()
+{
+    return fileName::null;
+}
+
+
 // Field writing methods
 defineSurfaceWriterWriteFields(Foam::surfaceWriters::nullWriter);
 

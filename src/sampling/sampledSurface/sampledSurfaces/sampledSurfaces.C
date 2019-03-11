@@ -560,7 +560,7 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
             // Write geometry if no fields would otherwise be written
             if (!outWriter.nFields() || outWriter.separateGeometry())
             {
-                outWriter.writeGeometry();
+                outWriter.write();
                 continue;
             }
 

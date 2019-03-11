@@ -174,7 +174,7 @@ public:
         //  False if geometry and field must be in a single file
         virtual bool separateGeometry() const;
 
-        //- Write single surface geometry to file.
+        //- Write surface geometry to file.
         virtual fileName write(); // override
 
         declareSurfaceWriterWriteMethod(label);

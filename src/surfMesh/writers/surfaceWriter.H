@@ -462,11 +462,8 @@ public:
 
     // Write
 
-        //- Write single surface geometry to file.
-        virtual fileName writeGeometry() const
-        {
-            return fileName::null;
-        }
+        //- Write separate surface geometry to file.
+        virtual fileName write() = 0;
 
 
 #undef  declareSurfaceWriterWriteMethod

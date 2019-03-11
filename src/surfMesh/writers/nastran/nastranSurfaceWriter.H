@@ -236,8 +236,6 @@ public:
 
     // Member Functions
 
-    // Write
-
         //- Write surface geometry to file.
         virtual fileName write(); // override
 

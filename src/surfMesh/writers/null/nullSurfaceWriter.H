@@ -102,7 +102,7 @@ public:
         virtual bool enabled() const;
 
 
-    // Surface association
+    // Surface Association
 
         //- Change association with a surface (no-op).
         virtual void setSurface
@@ -127,6 +127,8 @@ public:
 
 
     // Write
+
+        virtual fileName write(); // override;
 
         declareSurfaceWriterWriteMethod(label);
         declareSurfaceWriterWriteMethod(scalar);

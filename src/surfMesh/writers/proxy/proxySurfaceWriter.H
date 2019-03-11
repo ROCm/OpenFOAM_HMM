@@ -119,22 +119,11 @@ public:
 
     // Member Functions
 
-    // Capability
-
         //- A separate file is required for geometry.
         virtual bool separateGeometry() const
         {
             return true;
         }
-
-
-    // Output
-
-        //- Open for output on specified path, using existing surface
-        virtual void open(const fileName& outputPath); // override
-
-
-    // Write
 
         //- Write surface geometry to file.
         virtual fileName write(); // override

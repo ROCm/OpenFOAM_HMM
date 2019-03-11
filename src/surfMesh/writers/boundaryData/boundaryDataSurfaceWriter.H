@@ -165,13 +165,12 @@ public:
         //- Write surface geometry to file.
         virtual fileName write(); // override
 
-
-    declareSurfaceWriterWriteMethod(label);
-    declareSurfaceWriterWriteMethod(scalar);
-    declareSurfaceWriterWriteMethod(vector);
-    declareSurfaceWriterWriteMethod(sphericalTensor);
-    declareSurfaceWriterWriteMethod(symmTensor);
-    declareSurfaceWriterWriteMethod(tensor);
+        declareSurfaceWriterWriteMethod(label);
+        declareSurfaceWriterWriteMethod(scalar);
+        declareSurfaceWriterWriteMethod(vector);
+        declareSurfaceWriterWriteMethod(sphericalTensor);
+        declareSurfaceWriterWriteMethod(symmTensor);
+        declareSurfaceWriterWriteMethod(tensor);
 };
 
 

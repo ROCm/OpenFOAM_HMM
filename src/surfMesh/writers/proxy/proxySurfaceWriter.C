@@ -93,16 +93,6 @@ Foam::surfaceWriters::proxyWriter::proxyWriter
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::surfaceWriters::proxyWriter::open
-(
-    const fileName& outputPath
-)
-{
-    fileExtension_ = outputPath.ext();
-    surfaceWriter::open(outputPath);
-}
-
-
 Foam::fileName Foam::surfaceWriters::proxyWriter::write()
 {
     checkOpen();
