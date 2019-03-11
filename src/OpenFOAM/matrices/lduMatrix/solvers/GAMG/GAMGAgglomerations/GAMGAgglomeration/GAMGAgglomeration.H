@@ -490,7 +490,7 @@ public:
             labelList& newRestrict,
             label& nNewCoarse,
             const lduAddressing& fineAddressing,
-            const labelUList& restrict,
+            const labelUList& restriction,
             const label nCoarse
         );
 };
