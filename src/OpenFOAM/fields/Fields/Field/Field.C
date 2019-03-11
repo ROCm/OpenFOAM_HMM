@@ -620,7 +620,7 @@ VSForm Foam::Field<Type>::block(const label start) const
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::T() const
 {
-    auto tres = tmp<Field<cmptType>>::New(this->size());
+    auto tres = tmp<Field<Type>>::New(this->size());
     ::Foam::T(tres.ref(), *this);
     return tres;
 }
