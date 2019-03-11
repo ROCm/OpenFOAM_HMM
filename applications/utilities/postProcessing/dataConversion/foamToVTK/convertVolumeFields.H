@@ -262,22 +262,35 @@ Description
         // Begin CellData
         if (internalWriter.valid())
         {
-            // cellIds + procIds (parallel)
+            // Optionally with cellID and procID fields
             internalWriter->beginCellData
             (
-                1 + (internalWriter->parallel() ? 1 : 0)
+                (withMeshIds ? 1 + (internalWriter->parallel() ? 1 : 0) : 0)
               + nVolFields + nDimFields
             );
-            internalWriter->writeCellIDs();
-            internalWriter->writeProcIDs(); // parallel only
+
+            if (withMeshIds)
+            {
+                internalWriter->writeCellIDs();
+                internalWriter->writeProcIDs(); // parallel only
+            }
         }
 
         if (nVolFields)
         {
             for (vtk::patchWriter& writer : patchWriters)
             {
-                writer.beginCellData(1 + nVolFields);
-                writer.writePatchIDs();
+                // Optionally with patchID field
+                writer.beginCellData
+                (
+                    (withMeshIds ? 1 : 0)
+                  + nVolFields
+                );
+
+                if (withMeshIds)
+                {
+                    writer.writePatchIDs();
+                }
             }
         }
 

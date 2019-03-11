@@ -98,7 +98,7 @@ Description
         directory   | The output directory name     | no | postProcessing/NAME
         width       | Padding width for file name           | no  | 8
         decompose   | Decompose polyhedral cells            | no  | false
-        writeIds    | Write cell/patch ids as field         | no  | false
+        writeIds    | Write cell,patch,proc id fields       | no  | false
     \endtable
 
     \heading Output Selection

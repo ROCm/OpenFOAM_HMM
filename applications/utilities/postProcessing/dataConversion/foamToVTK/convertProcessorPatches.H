@@ -121,14 +121,20 @@ Description
     {
         for (vtk::patchWriter& writer : patchWriters)
         {
+            // Optionally with patchID, procID, neighID fields
+            // - use Pstream::parRun() not writer.parallel() !!
             writer.beginCellData
             (
-                1 + (Pstream::parRun() ? 2 : 0)
+                (withMeshIds ? 1 + (Pstream::parRun() ? 2 : 0) : 0)
               + nVolFields
             );
-            writer.writePatchIDs();
-            writer.writeProcIDs();
-            writer.writeNeighIDs();
+
+            if (withMeshIds)
+            {
+                writer.writePatchIDs();
+                writer.writeProcIDs();  // parallel only
+                writer.writeNeighIDs(); // parallel only
+            }
         }
 
         writeAllVolFields

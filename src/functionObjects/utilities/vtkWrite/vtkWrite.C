@@ -528,15 +528,13 @@ bool Foam::functionObjects::vtkWrite::write()
         {
             if (internalWriter.valid())
             {
-                // cellIds + procIds (parallel)
+                // Optionally with cellID and procID fields
                 internalWriter->beginCellData
                 (
                     (writeIds_ ? 1 + (internalWriter->parallel() ? 1 : 0) : 0)
-                  + (internalWriter->parallel() ? 1 : 0)
                   + nVolFields + nDimFields
                 );
 
-                // Write cellID field + procID (parallel only)
                 if (writeIds_)
                 {
                     internalWriter->writeCellIDs();
@@ -548,11 +546,13 @@ bool Foam::functionObjects::vtkWrite::write()
             {
                 for (vtk::patchWriter& writer : patchWriters)
                 {
+                    // Optionally with patchID field
                     writer.beginCellData
                     (
                         (writeIds_ ? 1 : 0)
                       + nVolFields
                     );
+
                     if (writeIds_)
                     {
                         writer.writePatchIDs();

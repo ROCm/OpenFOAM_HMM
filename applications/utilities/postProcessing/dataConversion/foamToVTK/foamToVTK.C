@@ -91,6 +91,9 @@ Usage
       - \par -no-point-data
         Suppress conversion of pointFields. No interpolated PointData.
 
+      - \par -with-ids
+        Additional mesh id fields (cellID, procID, patchID)
+
       - \par -with-point-ids
         Additional pointID field for internal mesh
 
@@ -271,7 +274,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "legacy",
-        "Write legacy format instead of xml"
+        "Write legacy format instead of xml",
+        true  // mark as an advanced option
     );
     argList::addBoolOption
     (
@@ -323,7 +327,8 @@ int main(int argc, char *argv[])
         "faceZones",
         "wordRes",
         "Specify single or multiple faceZones to write\n"
-        "Eg, 'cells' or '( slice \"mfp-.*\" )'."
+        "Eg, 'cells' or '( slice \"mfp-.*\" )'.",
+        true  // mark as an advanced option
     );
 
     argList::addOption
@@ -384,8 +389,16 @@ int main(int argc, char *argv[])
 
     argList::addBoolOption
     (
+        "with-ids",
+        "Additional mesh id fields (cellID, procID, patchID)",
+        true  // mark as an advanced option
+    );
+
+    argList::addBoolOption
+    (
         "with-point-ids",
-        "Additional pointID field for internal mesh"
+        "Additional pointID field for internal mesh",
+        true  // mark as an advanced option
     );
 
     argList::addBoolOption
@@ -515,6 +528,12 @@ int main(int argc, char *argv[])
         }
 
         Info<< nl;
+    }
+
+    const bool withMeshIds = args.found("with-ids");
+    if (withMeshIds)
+    {
+        Info<< "Writing mesh ids (cell, patch, proc) requested" << nl;
     }
 
     wordRes includePatches, excludePatches;
