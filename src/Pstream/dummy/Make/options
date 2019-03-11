@@ -1,1 +1,1 @@
-LIB_LIBS = -lpthread
+LIB_LIBS =
