@@ -162,6 +162,7 @@ int main(int argc, char *argv[])
         "Mesh motion and topological mesh changes utility"
     );
 
+    #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     argList::addBoolOption
     (
@@ -179,6 +180,10 @@ int main(int argc, char *argv[])
     {
         Info<< "Writing VTK files with weights of AMI patches." << nl << endl;
     }
+
+    const bool overwrite = args.found("overwrite");
+    const word oldInstance = mesh.pointsInstance();
+
 
     pimpleControl pimple(mesh);
 
@@ -198,6 +203,15 @@ int main(int argc, char *argv[])
                 mesh.update();
             }
         }
+
+        if (overwrite)
+        {
+            mesh.setInstance(oldInstance);
+            runTime.write();
+            runTime.printExecutionTime(Info);
+            break;
+        }
+
 
         mesh.checkMesh(true);
 
