@@ -352,19 +352,19 @@ public:
         void verbose(const bool verbosity = true);
 
         //- Read the sampledSurfaces dictionary
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
-        //- Execute, currently does nothing
+        //- Sample and store if the sampleOnExecute is enabled.
         virtual bool execute();
 
         //- Sample and write
         virtual bool write();
 
         //- Update for changes of mesh - expires the surfaces
-        virtual void updateMesh(const mapPolyMesh&);
+        virtual void updateMesh(const mapPolyMesh& mpm);
 
         //- Update for mesh point-motion - expires the surfaces
-        virtual void movePoints(const polyMesh&);
+        virtual void movePoints(const polyMesh& mesh);
 
         //- Update for changes of mesh due to readUpdate - expires the surfaces
         virtual void readUpdate(const polyMesh::readUpdateState state);
@@ -372,7 +372,7 @@ public:
         //- Get merge tolerance
         static scalar mergeTol();
 
-        //- Set tolerance (and return old tolerance)
+        //- Set tolerance and return old tolerance
         static scalar mergeTol(const scalar tol);
 };
 

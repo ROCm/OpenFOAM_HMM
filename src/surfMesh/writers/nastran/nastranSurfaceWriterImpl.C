@@ -255,6 +255,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::writeTemplate
             << "ENDDATA" << endl;
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 

@@ -97,6 +97,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated()
         osGeom << ensPart;
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 
@@ -245,6 +246,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeUncollated
         }
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 

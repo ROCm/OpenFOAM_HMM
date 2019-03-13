@@ -87,6 +87,12 @@ bool Foam::surfaceWriters::nullWriter::needsUpdate() const
 }
 
 
+bool Foam::surfaceWriters::nullWriter::wroteData() const
+{
+    return true;
+}
+
+
 bool Foam::surfaceWriters::nullWriter::enabled() const
 {
     return false;
@@ -116,6 +122,7 @@ void Foam::surfaceWriters::nullWriter::open(const fileName& outputPath)
 
 Foam::fileName Foam::surfaceWriters::nullWriter::write()
 {
+    wroteGeom_ = true;
     return fileName::null;
 }
 

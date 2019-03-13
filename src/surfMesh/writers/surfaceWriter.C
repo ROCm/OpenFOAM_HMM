@@ -138,6 +138,7 @@ Foam::surfaceWriter::surfaceWriter()
     surfComp_(),
     useComponents_(false),
     upToDate_(false),
+    wroteGeom_(false),
     parallel_(true),
     useTimeDir_(false),
     isPointData_(false),
@@ -244,6 +245,7 @@ void Foam::surfaceWriter::endTime()
 void Foam::surfaceWriter::open(const fileName& outputPath)
 {
     outputPath_ = outputPath;
+    wroteGeom_ = false;
 }
 
 
@@ -302,6 +304,7 @@ void Foam::surfaceWriter::open
 void Foam::surfaceWriter::close()
 {
     outputPath_.clear();
+    wroteGeom_ = false;
 }
 
 
@@ -369,11 +372,18 @@ bool Foam::surfaceWriter::needsUpdate() const
 }
 
 
+bool Foam::surfaceWriter::wroteData() const
+{
+    return wroteGeom_;
+}
+
+
 bool Foam::surfaceWriter::expire()
 {
     const bool changed = upToDate_;
 
     upToDate_ = false;
+    wroteGeom_ = false;
     nFields_ = 0;
     merged_.clear();
 
@@ -442,6 +452,11 @@ bool Foam::surfaceWriter::merge() const
         }
     }
     upToDate_ = true;
+
+    if (changed)
+    {
+        wroteGeom_ = false;
+    }
 
     return changed;
 }

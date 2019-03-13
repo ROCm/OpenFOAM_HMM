@@ -34,7 +34,8 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated()
     // Geometry:  rootdir/surfaceName/surfaceName.case
     // Geometry:  rootdir/surfaceName/surfaceName.mesh
 
-    return fileName();
+    wroteGeom_ = true;
+    return fileName::null;
 }
 
 
@@ -368,7 +369,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
         }
     }
 
-
+    wroteGeom_ = true;
     return outputFile;
 }
 

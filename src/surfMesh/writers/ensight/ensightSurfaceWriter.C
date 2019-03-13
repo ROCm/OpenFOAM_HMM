@@ -185,6 +185,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::write()
     // {
     //     return writeUncollated();
     // }
+
     return writeUncollated();
 }
 

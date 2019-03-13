@@ -135,6 +135,7 @@ Foam::fileName Foam::surfaceWriters::proxyWriter::write()
         );
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 

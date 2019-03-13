@@ -142,6 +142,7 @@ Foam::fileName Foam::surfaceWriters::foamWriter::write()
         OFstream(surfaceDir/"faceCentres")() << faceCentres;
     }
 
+    wroteGeom_ = true;
     return surfaceDir;
 }
 
@@ -155,6 +156,12 @@ Foam::fileName Foam::surfaceWriters::foamWriter::writeTemplate
     const Field<Type>& localValues
 )
 {
+    // Separate geometry
+    if (!wroteGeom_)
+    {
+        write();
+    }
+
     checkOpen();
 
     // Geometry should already have been written
@@ -197,6 +204,7 @@ Foam::fileName Foam::surfaceWriters::foamWriter::writeTemplate
         OFstream(outputFile)() << tfield();
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 

@@ -248,6 +248,7 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::write()
         writer_->writeGeometry();
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 
@@ -288,6 +289,7 @@ Foam::fileName Foam::surfaceWriters::vtkWriter::writeTemplate
         writer_->write(fieldName, tfield());
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 

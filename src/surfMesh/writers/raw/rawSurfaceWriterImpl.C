@@ -197,6 +197,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::writeTemplate
         }
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 

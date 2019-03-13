@@ -536,6 +536,7 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
     // Only seems to be needed for VTK legacy
     countFields();
 
+
     // Update writers
 
     forAll(*this, surfi)
@@ -544,7 +545,6 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
 
         if (((request & actions_[surfi]) & ACTION_WRITE) && nFaces_[surfi])
         {
-            // Output writers
             surfaceWriter& outWriter = writers_[surfi];
 
             if (outWriter.needsUpdate())
@@ -556,24 +556,14 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
 
             outWriter.beginTime(obr_.time());
 
-
-            // Write geometry if no fields would otherwise be written
-            if (!outWriter.nFields() || outWriter.separateGeometry())
-            {
-                outWriter.write();
-                continue;
-            }
-
-            // Write original ids - as label or scalar field
-
-            const word fieldName("Ids");
+            // Write original ids
             if (s.hasFaceIds() && !s.interpolate())
             {
                 writeSurface
                 (
                     outWriter,
                     Field<label>(s.originalIds()),
-                    fieldName
+                    "Ids"
                 );
             }
         }
@@ -610,8 +600,16 @@ bool Foam::sampledSurfaces::performAction(unsigned request)
     // Finish this time step
     forAll(writers_, surfi)
     {
-        if ((request & actions_[surfi]) & ACTION_WRITE)
+        if (((request & actions_[surfi]) & ACTION_WRITE) && nFaces_[surfi])
         {
+            // Write geometry if no fields were written so that we still
+            // can have something to look at
+
+            if (!writers_[surfi].wroteData())
+            {
+                writers_[surfi].write();
+            }
+
             writers_[surfi].endTime();
         }
     }

@@ -159,6 +159,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
         //pts.writeEndDivider(os);
     }
 
+    wroteGeom_ = true;
     return surfaceDir;
 }
 
@@ -264,6 +265,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
         OFstream(outputFile)() << tfield();
     }
 
+    wroteGeom_ = true;
     return surfaceDir;
 }
 

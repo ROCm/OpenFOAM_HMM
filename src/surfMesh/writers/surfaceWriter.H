@@ -56,10 +56,14 @@ Description
         verbose  | Additional output verbosity             | no  | no
     \endtable
 
+Note
+    For surface formats that require geometry in a separate file,
+    it is the responsibility of the implementation (not the caller)
+    to ensure that this occurs.
+
 SourceFiles
-    sampledWriter.C
-    sampledWriterI.H
-    sampledWriterImpl.C
+    surfaceWriter.C
+    surfaceWriterI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -83,7 +87,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Time;
 class surfaceWriter;
 
@@ -118,10 +122,13 @@ protected:
         //- The topology/surface is up-to-date?
         mutable bool upToDate_;
 
-        //- Writing in parallel (vai master)
+        //- Track if geometry has been written since the last open
+        mutable bool wroteGeom_;
+
+        //- Writing in parallel (via master)
         bool parallel_;
 
-        //- Writer should do something funny
+        //- Insert additional time sub-directory in the output path
         bool useTimeDir_;
 
         //- Is point vs cell data
@@ -185,13 +192,17 @@ protected:
             const Field<Type>& localValues  //!< Local field values to write
         )
         {
+            if (!wroteGeom_)
+            {
+                return this->write();
+            }
             return fileName::null;
         }
 
 
 public:
 
-    // Public data
+    // Public Data
 
         //- The default merge dimension (1e-8)
         static scalar defaultMergeDim;
@@ -293,6 +304,9 @@ public:
 
         //- Does the writer need an update (eg, lagging behind surface changes)
         virtual bool needsUpdate() const;
+
+        //- Geometry or fields written since the last open?
+        virtual bool wroteData() const;
 
         //- Mark that surface changed and the writer will need an update,
         //- and set nFields = 0.

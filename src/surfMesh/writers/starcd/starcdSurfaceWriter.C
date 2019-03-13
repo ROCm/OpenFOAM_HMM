@@ -145,6 +145,7 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::write()
         ).write(outputFile, "inp");
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 
@@ -158,6 +159,12 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::writeTemplate
     const Field<Type>& localValues
 )
 {
+    // Separate geometry
+    if (!wroteGeom_)
+    {
+        write();
+    }
+
     checkOpen();
 
     // Field:  rootdir/<TIME>/<field>_surfaceName.usr
@@ -206,6 +213,7 @@ Foam::fileName Foam::surfaceWriters::starcdWriter::writeTemplate
         }
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 

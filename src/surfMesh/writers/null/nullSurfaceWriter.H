@@ -94,10 +94,13 @@ public:
 
     // Capability
 
-        //- Never needs an update.
+        //- False: never needs an update.
         virtual bool needsUpdate() const;
 
-        //- The null writer is always disabled, which lets the caller
+        //- True: like a /dev/null device.
+        virtual bool wroteData() const;
+
+        //- False: The null writer is never enabled, which lets the caller
         //- skip various (possibly expensive) preparatory operations.
         virtual bool enabled() const;
 

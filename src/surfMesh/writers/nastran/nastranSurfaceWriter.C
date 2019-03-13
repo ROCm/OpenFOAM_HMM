@@ -437,6 +437,7 @@ Foam::fileName Foam::surfaceWriters::nastranWriter::write()
             << "ENDDATA" << nl;
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 

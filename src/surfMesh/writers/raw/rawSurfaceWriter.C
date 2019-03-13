@@ -178,6 +178,7 @@ Foam::fileName Foam::surfaceWriters::rawWriter::write()
         os  << nl;
     }
 
+    wroteGeom_ = true;
     return outputFile;
 }
 
