@@ -280,7 +280,6 @@ class sampledSurfaces
         //  \return True if surface existed and was removed
         bool removeRegistrySurface(const sampledSurface& s);
 
-
         //- Store sampled field onto surface registry if it exists
         template<class Type, class GeoMeshType>
         bool storeRegistryField
@@ -291,10 +290,20 @@ class sampledSurfaces
             Field<Type>&& values
         );
 
-
         //- Test surfaces for condition
         template<class Container, class Predicate>
         static bool testAny(const Container& items, const Predicate& pred);
+
+        //- Do any surfaces need an update?
+        virtual bool needsUpdate() const;
+
+        //- Mark the surfaces as needing an update.
+        //  Return false if all surfaces were already marked as expired.
+        virtual bool expire();
+
+        //- Update the surfaces as required.
+        //  Return false if no surfaces required an update.
+        virtual bool update();
 
         //- No copy construct
         sampledSurfaces(const sampledSurfaces&) = delete;
@@ -336,18 +345,6 @@ public:
 
     // Member Functions
 
-        //- Does any of the surfaces need an update?
-        virtual bool needsUpdate() const;
-
-        //- Mark the surfaces as needing an update.
-        //  May also free up unneeded data.
-        //  Return false if all surfaces were already marked as expired.
-        virtual bool expire();
-
-        //- Update the surfaces as required and merge surface points (parallel).
-        //  Return false if no surfaces required an update.
-        virtual bool update();
-
         //- Set verbosity level
         void verbose(const bool verbosity = true);
 
@@ -372,7 +369,7 @@ public:
         //- Get merge tolerance
         static scalar mergeTol();
 
-        //- Set tolerance and return old tolerance
+        //- Set merge tolerance and return old value
         static scalar mergeTol(const scalar tol);
 };
 

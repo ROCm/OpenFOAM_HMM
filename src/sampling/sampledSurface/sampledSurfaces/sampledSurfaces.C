@@ -29,10 +29,8 @@ License
 #include "polySurface.H"
 
 #include "mapPolyMesh.H"
-#include "stringListOps.H"
 #include "volFields.H"
 #include "HashOps.H"
-#include "PstreamCombineReduceOps.H"
 #include "Time.H"
 #include "UIndirectList.H"
 #include "addToRunTimeSelectionTable.H"
