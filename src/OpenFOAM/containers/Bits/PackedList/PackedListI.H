@@ -716,10 +716,9 @@ template<unsigned Width>
 inline typename Foam::PackedList<Width>::reference
 Foam::PackedList<Width>::operator[](const label i)
 {
-    // Leave enabled during testing period (MAR-2018)
-    // #ifdef FULLDEBUG
+    #ifdef FULLDEBUG
     checkIndex(i);
-    // #endif
+    #endif
     return reference(this, i);
 }
 

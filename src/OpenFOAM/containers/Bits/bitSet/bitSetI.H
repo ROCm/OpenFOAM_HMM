@@ -635,10 +635,9 @@ inline unsigned int Foam::bitSet::operator[](const label i) const
 
 inline Foam::bitSet::reference Foam::bitSet::operator[](const label i)
 {
-    // Leave enabled during testing period (MAR-2018) ... and perhaps later too
-    // #ifdef FULLDEBUG
+    #ifdef FULLDEBUG
     checkIndex(i);
-    // #endif
+    #endif
     return reference(this, i);
 }
 
