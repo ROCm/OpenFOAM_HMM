@@ -137,14 +137,26 @@ public:
         //- Shrink the allocated space to the number of elements used.
         inline void shrink();
 
+        //- Squeeze out intermediate nullptr entries in the list of pointers
+        //- and adjust the addressable size accordingly.
+        //  \return the number of non-null entries
+        inline label squeezeNull();
+
         //- Append an element to the end of the list
         inline void append(T* ptr);
 
-        //- Append an element to the end of the list
+        //- Move append an element to the end of the list
         inline void append(const autoPtr<T>& aptr);
 
-        //- Append an element to the end of the list
+        //- Move or clone append a tmp to the end of the list
         inline void append(const tmp<T>& tptr);
+
+        //- Move append another list to the end of this list.
+        inline void append(PtrList<T>&& other);
+
+        //- Move append another list to the end of this list.
+        template<int AnySizeMin>
+        inline void append(PtrDynList<T, AnySizeMin>&& other);
 
         //- Remove and return the top element
         inline autoPtr<T> remove();

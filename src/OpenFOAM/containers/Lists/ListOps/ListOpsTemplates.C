@@ -349,10 +349,7 @@ void Foam::sortedOrder
         order.resize(len);
     }
 
-    for (label i=0; i < len; ++i)
-    {
-        order[i] = i; // identity
-    }
+    ListOps::identity(order);
 
     Foam::stableSort(order, comp);
 }

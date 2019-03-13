@@ -57,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class T> class PtrList;
 template<class T> class UPtrList;
@@ -191,8 +191,15 @@ public:
         //  No-op if the new pointer value is identical to the current content.
         inline T* set(const label i, T* ptr);
 
-        //- Reorder elements. Reordering must be unique (ie, shuffle).
-        void reorder(const labelUList& oldToNew);
+        //- Reorder elements.
+        //- Reordering must be unique (ie, shuffle).
+        //  Optionally verify that all pointers have been set.
+        void reorder(const labelUList& oldToNew, const bool testNull = true);
+
+        //- Reorder elements according to new order mapping (newToOld).
+        //- Reordering must be unique (ie, shuffle).
+        //  Optionally verify that all pointers have been set.
+        void sortOrder(const labelUList& order, const bool testNull = true);
 
 
     // Member Operators

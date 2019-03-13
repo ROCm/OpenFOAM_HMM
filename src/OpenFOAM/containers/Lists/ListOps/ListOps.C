@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
+#include <numeric>
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -156,6 +157,12 @@ void Foam::inplaceReorder
 )
 {
     input = reorder(oldToNew, input, prune);
+}
+
+
+void Foam::ListOps::identity(labelList& map, label start)
+{
+    std::iota(map.begin(), map.end(), start);
 }
 
 

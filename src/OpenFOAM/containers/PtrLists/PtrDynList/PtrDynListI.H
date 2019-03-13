@@ -217,6 +217,15 @@ inline void Foam::PtrDynList<T, SizeMin>::shrink()
 
 
 template<class T, int SizeMin>
+inline Foam::label Foam::PtrDynList<T, SizeMin>::squeezeNull()
+{
+    const label newLen = UPtrList<T>::squeezeNull();
+    resize(newLen);
+    return newLen;
+}
+
+
+template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::append(T* ptr)
 {
     const label idx = this->size();
@@ -228,14 +237,52 @@ inline void Foam::PtrDynList<T, SizeMin>::append(T* ptr)
 template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::append(const autoPtr<T>& aptr)
 {
-    return this->append(const_cast<autoPtr<T>&>(aptr).release());
+    this->append(const_cast<autoPtr<T>&>(aptr).release());
 }
 
 
 template<class T, int SizeMin>
 inline void Foam::PtrDynList<T, SizeMin>::append(const tmp<T>& tptr)
 {
-    return this->append(tptr.ptr());
+    this->append(tptr.ptr());
+}
+
+
+template<class T, int SizeMin>
+inline void Foam::PtrDynList<T, SizeMin>::append(PtrList<T>&& other)
+{
+    const label idx = this->size();
+    const label len = other.size();
+
+    resize(idx + len);
+
+    for (label i=0; i < len; ++i)
+    {
+        set(idx + i, other.release(i));  // moves pointer
+    }
+
+    other.clear();
+}
+
+
+template<class T, int SizeMin>
+template<int AnySizeMin>
+inline void Foam::PtrDynList<T, SizeMin>::append
+(
+    PtrDynList<T, AnySizeMin>&& other
+)
+{
+    const label idx = this->size();
+    const label len = other.size();
+
+    resize(idx + len);
+
+    for (label i=0; i < len; ++i)
+    {
+        set(idx + i, other.release(i));  // moves pointer
+    }
+
+    other.clearStorage();  // Ensure capacity=0
 }
 
 

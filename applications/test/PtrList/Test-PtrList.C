@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -36,6 +36,7 @@ Description
 #include "SLPtrList.H"
 #include "plane.H"
 #include "DynamicList.H"
+#include "PtrListOps.H"
 
 using namespace Foam;
 
@@ -597,6 +598,39 @@ int main(int argc, char *argv[])
 
     Info<<"After pruning nullptr entries" << endl;
     report(Info, dynPlanes, true);
+
+
+    {
+        PtrDynList<plane> dynPlanes2;
+
+        dynPlanes2.append(new plane(vector::one, vector::one));
+        dynPlanes2.append(new plane(vector(1,2,3), vector::one));
+        dynPlanes2.append(nullptr);
+
+        dynPlanes2.set(6, new plane(vector(2,2,1), vector::one));
+        dynPlanes2.set(10, new plane(Zero, vector::one));
+
+        labelList order;
+        sortedOrder(dynPlanes2, order);
+        Info<< "sorted order: " << flatOutput(order) << nl;
+
+        sortedOrder(dynPlanes2, order, PtrListOps::greater<plane>(dynPlanes2));
+        Info<< "sorted order: " << flatOutput(order) << nl;
+
+        sort(dynPlanes2);
+        // dynPlanes2.squeezeNull();
+
+        Info<<"Append" << endl;
+        report(Info, dynPlanes2, false);
+
+        dynPlanes.append(std::move(dynPlanes2));
+
+        Info<<"Result" << endl;
+        report(Info, dynPlanes, false);
+
+        Info<<"From" << endl;
+        report(Info, dynPlanes2, false);
+    }
 
     Info<<"free()" << endl;
 
