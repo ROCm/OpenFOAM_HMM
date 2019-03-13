@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -81,11 +81,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward Declarations
-class plane;
-Ostream& operator<<(Ostream& os, const plane& pln);
-
 
 /*---------------------------------------------------------------------------*\
                             Class plane Declaration
@@ -177,7 +172,7 @@ public:
 
     // Constructors
 
-        //- Construct null. Does not set normal and point.
+        //- Construct zero-initialised.
         inline plane();
 
         //- Construct from normal vector through the origin.
@@ -221,8 +216,11 @@ public:
         //- The plane unit normal
         inline const vector& normal() const;
 
-        //- The plane base point (same as refPoint)
+        //- The plane base point
         inline const point& origin() const;
+
+        //- The plane base point, for modification
+        inline point& origin();
 
         //- The plane base point (same as origin)
         inline const point& refPoint() const;
@@ -293,20 +291,25 @@ public:
 
         //- Write to dictionary
         void writeDict(Ostream& os) const;
-
-
-    // IOstream Operators
-
-        //- Write plane properties
-        friend Ostream& operator<<(Ostream& os, const plane& pln);
-
 };
+
+
+// IOstream Operators
+
+//- Write plane normal, origin
+Ostream& operator<<(Ostream& os, const plane& pln);
 
 
 // Global Operators
 
+//- Test for equality of origin and normal
 inline bool operator==(const plane& a, const plane& b);
+
+//- Test for inequality of origin or normal
 inline bool operator!=(const plane& a, const plane& b);
+
+//- Compare origin
+inline bool operator<(const plane& a, const plane& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

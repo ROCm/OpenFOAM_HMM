@@ -444,7 +444,7 @@ void Foam::plane::writeDict(Ostream& os) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const plane& pln)
 {

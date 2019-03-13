@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,9 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::plane::plane()
+:
+    normal_(Zero),
+    origin_(Zero)
 {}
 
 
@@ -38,6 +41,12 @@ inline const Foam::vector& Foam::plane::normal() const
 
 
 inline const Foam::point& Foam::plane::origin() const
+{
+    return origin_;
+}
+
+
+inline Foam::point& Foam::plane::origin()
 {
     return origin_;
 }
@@ -100,6 +109,12 @@ inline bool Foam::operator==(const plane& a, const plane& b)
 inline bool Foam::operator!=(const plane& a, const plane& b)
 {
     return !(a == b);
+}
+
+
+inline bool Foam::operator<(const plane& a, const plane& b)
+{
+    return (a.origin() < b.origin());
 }
 
 

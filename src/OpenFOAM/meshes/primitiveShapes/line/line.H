@@ -97,7 +97,7 @@ public:
         );
 
         //- Construct from Istream
-        inline line(Istream&);
+        inline explicit line(Istream& is);
 
 
     // Member Functions
@@ -149,7 +149,7 @@ public:
         ) const;
 
 
-    // Ostream operator
+    // IOstream operators
 
         friend Istream& operator>> <Point, PointRef>
         (
