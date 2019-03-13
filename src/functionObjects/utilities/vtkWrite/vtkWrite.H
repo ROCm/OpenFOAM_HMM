@@ -321,7 +321,7 @@ public:
         //- Write fields
         virtual bool write();
 
-        //- On end - provide feedback about disconnecting from catatyst.
+        //- On end - cleanup internal allocations
         virtual bool end();
 
         //- Update for changes of mesh
