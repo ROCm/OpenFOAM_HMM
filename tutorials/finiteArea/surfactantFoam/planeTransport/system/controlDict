@@ -43,6 +43,9 @@ timePrecision       6;
 
 runTimeModifiable   yes;
 
+functions
+{
+    #include "areaWrite"
+}
 
 // ************************************************************************* //
-

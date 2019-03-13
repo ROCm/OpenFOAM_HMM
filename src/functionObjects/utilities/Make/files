@@ -2,6 +2,8 @@ abort/abort.C
 
 codedFunctionObject/codedFunctionObject.C
 
+areaWrite/areaWrite.C
+
 ensightWrite/ensightWrite.C
 ensightWrite/ensightWriteUpdate.C
 
