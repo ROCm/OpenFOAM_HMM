@@ -50,7 +50,7 @@ class ijkAddressing
 {
     // Private Data
 
-        //- The number of cells in the i,j,k directions.
+        //- The number of items in the i,j,k directions.
         labelVector sizes_;
 
 
@@ -98,6 +98,9 @@ public:
 
         //- Linear addressing index (offset) for an i,j,k position.
         inline label index(const labelVector& ijk) const;
+
+        //- The i,j,k indexing from linear addressing.
+        inline labelVector index(const label idx) const;
 
 
     // Checks

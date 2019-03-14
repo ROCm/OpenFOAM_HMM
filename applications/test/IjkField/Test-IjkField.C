@@ -49,6 +49,36 @@ Ostream& print(const IjkField<T>& fld)
 
 int main(int argc, char *argv[])
 {
+    // Basic addressing checks
+    #if 0
+    {
+        ijkAddressing addr1(3, 4, 5);
+
+        Info<< "addressing: " << addr1.sizes() << nl;
+        Info<< "index of (2,2,2) " << addr1.index(2,2,2) << nl;
+
+        for (const label idx : labelRange(0, addr1.size()))
+        {
+            Info<< "index of " << idx << " => " << addr1.index(idx) << nl;
+        }
+
+        for (label k=0; k < addr1.sizes().z(); ++k)
+        {
+            for (label j=0; j < addr1.sizes().y(); ++j)
+            {
+                for (label i=0; i < addr1.sizes().x(); ++i)
+                {
+                    labelVector ijk(i,j,k);
+
+                    Info<< "index of " << addr1.index(ijk)
+                        << " <= " << ijk << nl;
+                }
+            }
+        }
+    }
+    #endif
+
+
     // Create with inconsistent sizes
     IjkField<label> field0({1, 2, 3}, identity(10));
 

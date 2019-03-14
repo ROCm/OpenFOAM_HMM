@@ -266,6 +266,13 @@ public:
         inline scalar width(const labelVector& ijk) const;
 
 
+    // Searching
+
+        //- Return i,j,k index for cell enclosing this location
+        //  The value (-1,-1,-1) is returned for out-of-bounds (not found).
+        labelVector findCell(const point& pt) const;
+
+
     // Mesh generation
 
         //- Create polyMesh for grid definition and patch information

@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PDRblock.H"
+#include "ListOps.H"
 #include "emptyPolyPatch.H"
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -434,6 +435,26 @@ bool Foam::PDRblock::read(const dictionary& dict)
     readBoundary(dict);
 
     return true;
+}
+
+
+Foam::labelVector Foam::PDRblock::findCell(const point& pt) const
+{
+    // Out-of-bounds is handled explicitly, for efficiency and consistency,
+    // but principally to ensure that findLower() returns a valid
+    // result when the point is to the right of the bounds.
+
+    labelVector pos(-1,-1,-1);
+    if (bounds_.contains(pt))
+    {
+        for (direction cmpt=0; cmpt < labelVector::nComponents; ++cmpt)
+        {
+            // Binary search
+            pos[cmpt] = findLower(grid_[cmpt], pt[cmpt]);
+        }
+    }
+
+    return pos;
 }
 
 

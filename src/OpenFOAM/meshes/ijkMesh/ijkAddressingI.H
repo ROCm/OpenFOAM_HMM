@@ -141,6 +141,19 @@ inline Foam::label Foam::ijkAddressing::index(const labelVector& ijk) const
 }
 
 
+inline Foam::labelVector Foam::ijkAddressing::index(const label idx) const
+{
+    // No checkIndex
+
+    return labelVector
+    (
+        idx % (sizes_.x()),
+        idx / (sizes_.x()),
+        idx / (sizes_.x() * sizes_.y())
+    );
+}
+
+
 inline void Foam::ijkAddressing::checkIndex
 (
     const label i,

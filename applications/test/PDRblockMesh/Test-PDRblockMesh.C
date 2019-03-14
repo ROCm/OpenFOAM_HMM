@@ -157,6 +157,28 @@ int main(int argc, char *argv[])
             << "  length = " << mesh.width(mid) << nl;
     }
 
+    // Test findCell
+    {
+        Info<< nl << "findCell:" << nl;
+
+        for
+        (
+            const point& pt
+          : {
+                mesh.bounds().centre(),
+                mesh.bounds().min() - 0.1 * mesh.bounds().span(),
+                mesh.bounds().max() + 0.1 * mesh.bounds().span()
+            }
+        )
+        {
+            labelVector ijk = mesh.findCell(pt);
+
+            Info<< "    " << pt << " = " << ijk;
+            if (cmptMin(ijk) < 0) Info<< " [not found]";
+            Info<< nl;
+        }
+    }
+
     Info<< nl;
 
     // Fatal with FULLDEBUG
