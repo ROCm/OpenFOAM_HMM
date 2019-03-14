@@ -87,9 +87,3 @@
 }
 
 rho = thermo.rho();
-
-if (thermo.dpdt())
-{
-    dpdt = fvc::ddt(p);
-}
-
