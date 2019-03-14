@@ -120,6 +120,7 @@ $(strings)/word/wordIOList.C
 $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
+$(strings)/regex/regExpCxx.C
 $(strings)/wordRe/wordRe.C
 $(strings)/wordRes/wordRes.C
 $(strings)/lists/CStringList.C

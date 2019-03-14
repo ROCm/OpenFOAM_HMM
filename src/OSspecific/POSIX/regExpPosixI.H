@@ -28,7 +28,7 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-inline bool Foam::regExp::meta(char c)
+inline bool Foam::regExpPosix::meta(char c)
 {
     return
     (
@@ -42,13 +42,13 @@ inline bool Foam::regExp::meta(char c)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::regExp::regExp()
+inline Foam::regExpPosix::regExpPosix()
 :
     preg_(nullptr)
 {}
 
 
-inline Foam::regExp::regExp(const char* pattern)
+inline Foam::regExpPosix::regExpPosix(const char* pattern)
 :
     preg_(nullptr)
 {
@@ -56,7 +56,7 @@ inline Foam::regExp::regExp(const char* pattern)
 }
 
 
-inline Foam::regExp::regExp(const std::string& pattern)
+inline Foam::regExpPosix::regExpPosix(const std::string& pattern)
 :
     preg_(nullptr)
 {
@@ -64,7 +64,7 @@ inline Foam::regExp::regExp(const std::string& pattern)
 }
 
 
-inline Foam::regExp::regExp(const char* pattern, bool ignoreCase)
+inline Foam::regExpPosix::regExpPosix(const char* pattern, bool ignoreCase)
 :
     preg_(nullptr)
 {
@@ -72,7 +72,7 @@ inline Foam::regExp::regExp(const char* pattern, bool ignoreCase)
 }
 
 
-inline Foam::regExp::regExp(const std::string& pattern, bool ignoreCase)
+inline Foam::regExpPosix::regExpPosix(const std::string& pattern, bool ignoreCase)
 :
     preg_(nullptr)
 {
@@ -80,7 +80,7 @@ inline Foam::regExp::regExp(const std::string& pattern, bool ignoreCase)
 }
 
 
-inline Foam::regExp::regExp(regExp&& rgx)
+inline Foam::regExpPosix::regExpPosix(regExpPosix&& rgx)
 :
     preg_(rgx.preg_)
 {
@@ -90,7 +90,7 @@ inline Foam::regExp::regExp(regExp&& rgx)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-inline Foam::regExp::~regExp()
+inline Foam::regExpPosix::~regExpPosix()
 {
     clear();
 }
@@ -98,31 +98,31 @@ inline Foam::regExp::~regExp()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-inline bool Foam::regExp::empty() const
+inline bool Foam::regExpPosix::empty() const
 {
     return !preg_;
 }
 
 
-inline bool Foam::regExp::exists() const
+inline bool Foam::regExpPosix::exists() const
 {
     return preg_ ? true : false;
 }
 
 
-inline unsigned Foam::regExp::ngroups() const
+inline unsigned Foam::regExpPosix::ngroups() const
 {
     return preg_ ? preg_->re_nsub : 0;
 }
 
 
-inline bool Foam::regExp::search(const std::string& text) const
+inline bool Foam::regExpPosix::search(const std::string& text) const
 {
     return std::string::npos != find(text);
 }
 
 
-inline void Foam::regExp::swap(regExp& rgx)
+inline void Foam::regExpPosix::swap(regExpPosix& rgx)
 {
     std::swap(preg_, rgx.preg_);
 }
@@ -130,26 +130,26 @@ inline void Foam::regExp::swap(regExp& rgx)
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-inline bool Foam::regExp::operator()(const std::string& text) const
+inline bool Foam::regExpPosix::operator()(const std::string& text) const
 {
     return match(text);
 }
 
 
-inline void Foam::regExp::operator=(regExp&& rgx)
+inline void Foam::regExpPosix::operator=(regExpPosix&& rgx)
 {
     clear();
     swap(rgx);
 }
 
 
-inline void Foam::regExp::operator=(const char* pattern)
+inline void Foam::regExpPosix::operator=(const char* pattern)
 {
     set(pattern);
 }
 
 
-inline void Foam::regExp::operator=(const std::string& pattern)
+inline void Foam::regExpPosix::operator=(const std::string& pattern)
 {
     set(pattern);
 }

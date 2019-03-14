@@ -277,8 +277,8 @@ Foam::dictionary::const_searcher Foam::dictionary::csearch
 
     if ((matchOpt & keyType::REGEX) && patterns_.size())
     {
-        pattern_const_iterator wcLink = patterns_.begin();
-        regexp_const_iterator  reLink = regexps_.begin();
+        auto wcLink = patterns_.cbegin();
+        auto reLink = regexps_.cbegin();
 
         // Find in patterns using regular expressions only
         if (findInPatterns(true, keyword, wcLink, reLink))
@@ -584,8 +584,8 @@ bool Foam::dictionary::remove(const word& keyword)
     if (iter.found())
     {
         // Delete from patterns
-        pattern_iterator wcLink = patterns_.begin();
-        regexp_iterator  reLink = regexps_.begin();
+        auto wcLink = patterns_.begin();
+        auto reLink = regexps_.begin();
 
         // Find in pattern using exact match only
         if (findInPatterns(false, keyword, wcLink, reLink))
@@ -645,8 +645,8 @@ bool Foam::dictionary::changeKeyword
             if (iter2()->keyword().isPattern())
             {
                 // Delete from patterns
-                pattern_iterator wcLink = patterns_.begin();
-                regexp_iterator  reLink = regexps_.begin();
+                auto wcLink = patterns_.begin();
+                auto reLink = regexps_.begin();
 
                 // Find in patterns using exact match only
                 if (findInPatterns(false, iter2()->keyword(), wcLink, reLink))

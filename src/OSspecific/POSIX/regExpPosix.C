@@ -25,11 +25,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "regExp.H"
+#include "regExpPosix.H"
 #include "SubStrings.H"
 #include "error.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+int Foam::regExpPosix::grammar(0);
+
+
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
 
 // Verify that the entire len was matched
 static inline bool fullMatch(const regmatch_t& m, const regoff_t len)
@@ -37,10 +45,12 @@ static inline bool fullMatch(const regmatch_t& m, const regoff_t len)
     return (m.rm_so == 0 && m.rm_eo == len);
 }
 
+} // End anonymous namespace
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::regExp::clear()
+bool Foam::regExpPosix::clear()
 {
     if (preg_)
     {
@@ -55,7 +65,7 @@ bool Foam::regExp::clear()
 }
 
 
-bool Foam::regExp::set(const char* pattern, bool ignoreCase)
+bool Foam::regExpPosix::set(const char* pattern, bool ignoreCase)
 {
     clear();
 
@@ -106,13 +116,13 @@ bool Foam::regExp::set(const char* pattern, bool ignoreCase)
 }
 
 
-bool Foam::regExp::set(const std::string& pattern, bool ignoreCase)
+bool Foam::regExpPosix::set(const std::string& pattern, bool ignoreCase)
 {
     return set(pattern.c_str(), ignoreCase);
 }
 
 
-std::string::size_type Foam::regExp::find(const std::string& text) const
+std::string::size_type Foam::regExpPosix::find(const std::string& text) const
 {
     if (preg_ && !text.empty())
     {
@@ -129,7 +139,7 @@ std::string::size_type Foam::regExp::find(const std::string& text) const
 }
 
 
-bool Foam::regExp::match(const std::string& text) const
+bool Foam::regExpPosix::match(const std::string& text) const
 {
     const auto len = text.size();
 
@@ -151,7 +161,7 @@ bool Foam::regExp::match(const std::string& text) const
 }
 
 
-bool Foam::regExp::match
+bool Foam::regExpPosix::match
 (
     const std::string& text,
     SubStrings<std::string>& matches

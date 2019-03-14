@@ -100,14 +100,14 @@ SeeAlso
 // Some common data types
 #include "label.H"
 #include "scalar.H"
+#include "regExpFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
-class regExp;
+// Forward Declarations
 class dictionary;
 class SHA1Digest;
 
@@ -282,7 +282,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Report optional keywords and values if not present in dictionary
         //  Set/unset via an InfoSwitch
@@ -308,12 +308,6 @@ private:
 
         //- The storage container
         typedef IDLList<entry> parent_type;
-
-        typedef DLList<entry*>::iterator pattern_iterator;
-        typedef DLList<entry*>::const_iterator pattern_const_iterator;
-
-        typedef DLList<autoPtr<regExp>>::iterator regexp_iterator;
-        typedef DLList<autoPtr<regExp>>::const_iterator regexp_const_iterator;
 
 
     // Private Member Functions

@@ -29,11 +29,20 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef regExp_H
-#define regExp_H
+#ifndef regExpFwd_H
+#define regExpFwd_H
 
-#include "regExpPosix.H"
-#include "regExpFwd.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    class regExpCxx;
+    class regExpPosix;
+
+    typedef regExpPosix regExp;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

@@ -4,7 +4,7 @@ signals/sigInt.C
 signals/sigQuit.C
 signals/sigStopAtWriteNow.C
 signals/sigWriteNow.C
-regExp.C
+regExpPosix.C
 timer.C
 fileStat.C
 POSIX.C
