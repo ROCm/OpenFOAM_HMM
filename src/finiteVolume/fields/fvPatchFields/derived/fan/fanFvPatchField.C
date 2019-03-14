@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -53,8 +53,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     rhoName_("rho"),
     uniformJump_(false),
     nonDimensional_(false),
-    rpm_(0.0),
-    dm_(0.0)
+    rpm_(0),
+    dm_(0)
 {}
 
 
@@ -71,8 +71,8 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     uniformJump_(dict.lookupOrDefault("uniformJump", false)),
     nonDimensional_(dict.lookupOrDefault("nonDimensional", false)),
-    rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
-    dm_(dict.lookupOrDefault<scalar>("dm", 0.0))
+    rpm_(0),
+    dm_(0)
 {
     if (nonDimensional_)
     {
@@ -158,9 +158,13 @@ void Foam::fanFvPatchField<Type>::write(Ostream& os) const
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     os.writeEntryIfDifferent<bool>("uniformJump", false, uniformJump_);
-    os.writeEntryIfDifferent<bool>("nonDimensional", false, nonDimensional_);
-    os.writeEntryIfDifferent<scalar>("rpm", false, rpm_);
-    os.writeEntryIfDifferent<scalar>("dm", false, dm_);
+
+    if (nonDimensional_)
+    {
+        os.writeEntry("nonDimensional", nonDimensional_);
+        os.writeEntry("rpm", rpm_);
+        os.writeEntry("dm", dm_);
+    }
 }
 
 

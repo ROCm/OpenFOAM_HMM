@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -34,38 +34,42 @@ Description
     condition as a base.
 
     The jump is specified as a \c Function1 type, to enable the use of, e.g.
-    contant, polynomial, table values.
+    constant, polynomial, table values.
 
-    The switch nonDimensional can be used for a non-dimensional table. It needs
-    inputs rpm and dm of the fan. It should be used with uniformJump true.
+    The switch nonDimensional can be used for a non-dimensional table,
+    in combination with uniformJump = true.
+    As inputs it needs the fan RPM (rpm) and the mean diameter (dm).
 
-    The nonDimensional U for the table is calculate as :
+    The non-dimensional U for the table is calculated as follows:
 
+    \verbatim
         phi = 120*Un/(PI^3*dm*rpm)
         where:
             dm is the mean diameter.
             rpm is the RPM of the fan.
+    \endverbatim
 
-    The nonDimensinal pressure :
+    The non-dimensional pressure:
 
+    \verbatim
         Psi = 2 deltaP/(rho*(sqr(PI*omega*dm)))
         where:
             deltaP is the pressure drop
+    \endverbatim
 
     The non-dimensional table should be given as Psi = F(phi).
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        patchType    | underlying patch type should be \c cyclic| yes |
-        jumpTable    | jump data, e.g. \c csvFile | yes      |
-        phi          | flux field name         | no          | phi
-        rho          | density field name      | no          | none
-        uniformJump  | applies a uniform pressure based on the averaged
-                       velocity | no | false
-        nonDimensional | uses non-dimensional table | no | false
-        rpm          | fan rpm for non-dimensional table | no | 0.0
-        dm           | mean diameter for non-dimensional table | no | 0.0
+        Property    | Description                           | Required | Default
+        patchType   | underlying patch type should be \c cyclic | yes |
+        jumpTable   | jump data, e.g. \c csvFile            | yes |
+        phi         | flux field name                       | no  | phi
+        rho         | density field name                    | no  | rho
+        uniformJump | apply uniform pressure based on avg velocity | no | false
+        nonDimensional | use non-dimensional table          | no | false
+        rpm         | fan rpm (non-dimensional table)       | no | 0
+        dm          | mean diameter (non-dimensional table) | no | 0
     \endtable
 
     Example of the boundary condition specification:
@@ -75,7 +79,8 @@ Usage
         type            fan;
         patchType       cyclic;
         jumpTable       csvFile;
-        csvFileCoeffs
+
+        jumpTableCoeffs
         {
             nHeaderLine     1;
             refColumn       0;
@@ -109,7 +114,6 @@ SourceFiles
 #define fanFvPatchField_H
 
 #include "uniformJumpFvPatchField.H"
-#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,14 +134,13 @@ class fanFvPatchField
         //- Name of the flux transporting the field
         word phiName_;
 
-        //- Name of the density field used to normalise the mass flux
-        //- if necessary
+        //- Name of the density field for normalising the mass flux if necessary
         word rhoName_;
 
-        //- Uniform pressure drop
+        //- Apply uniform pressure drop
         bool uniformJump_;
 
-        //- Swtich for using non-dimensional curve
+        //- Use non-dimensional curve
         bool nonDimensional_;
 
         // Parameters for non-dimensional table
@@ -228,7 +231,7 @@ public:
         virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

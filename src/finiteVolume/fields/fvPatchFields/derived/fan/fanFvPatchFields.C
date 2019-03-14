@@ -100,9 +100,15 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     uniformJump_(dict.lookupOrDefault("uniformJump", false)),
     nonDimensional_(dict.lookupOrDefault("nonDimensional", false)),
-    rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
-    dm_(dict.lookupOrDefault<scalar>("dm", 0.0))
+    rpm_(0),
+    dm_(0)
 {
+    if (nonDimensional_)
+    {
+        dict.readEntry("rpm", rpm_);
+        dict.readEntry("dm", dm_);
+    }
+
     if (this->cyclicPatch().owner())
     {
         this->jumpTable_ = Function1<scalar>::New("jumpTable", dict);

@@ -36,9 +36,9 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        patchType    | underlying patch type should be \c cyclic| yes |
-        jumpTable    | jump value              | yes         |
+        Property    | Description                           | Required | Default
+        patchType   | underlying patch type should be \c cyclic | yes |
+        jumpTable   | jump value                            | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -171,7 +171,7 @@ public:
         virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 
