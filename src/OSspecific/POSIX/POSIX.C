@@ -99,16 +99,24 @@ static inline Foam::fileName fileNameConcat
         if (b.size())
         {
             // Two non-empty strings: can concatenate
-            return Foam::fileName((a + '/' + b), false);
+
+            if (a.back() == '/' || b.front() == '/')
+            {
+                return Foam::fileName(a + b, false);
+            }
+            else
+            {
+                return Foam::fileName(a + '/' + b, false);
+            }
         }
 
+        // The second string was empty
         return Foam::fileName(a, false);
     }
 
-    // Or, if the first string is empty
-
     if (b.size())
     {
+        // The first string is empty
         return Foam::fileName(b, false);
     }
 
@@ -1586,21 +1594,22 @@ int Foam::system(const Foam::UList<Foam::string>& command, const bool bg)
 }
 
 
-void* Foam::dlOpen(const fileName& lib, const bool check)
+void* Foam::dlOpen(const fileName& libName, const bool check)
 {
     if (POSIX::debug)
     {
-        std::cout<< "dlOpen(const fileName&)"
-            << " : dlopen of " << lib << std::endl;
+        std::cout
+            << "dlOpen(const fileName&)"
+            << " : dlopen of " << libName << std::endl;
     }
-    void* handle = ::dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+    void* handle = ::dlopen(libName.c_str(), RTLD_LAZY|RTLD_GLOBAL);
 
     #ifdef darwin
     // Re-try "libXX.so" as "libXX.dylib"
-    if (!handle && lib.hasExt("so"))
+    if (!handle && libName.hasExt("so"))
     {
-        const fileName dylib(lib.lessExt().ext("dylib"));
-        handle = ::dlopen(dylib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+        const fileName dylibName(libName.lessExt().ext("dylib"));
+        handle = ::dlopen(dylibName.c_str(), RTLD_LAZY|RTLD_GLOBAL);
     }
     #endif
 
@@ -1615,7 +1624,7 @@ void* Foam::dlOpen(const fileName& lib, const bool check)
     {
         std::cout
             << "dlOpen(const fileName&)"
-            << " : dlopen of " << lib
+            << " : dlopen of " << libName
             << " handle " << handle << std::endl;
     }
 

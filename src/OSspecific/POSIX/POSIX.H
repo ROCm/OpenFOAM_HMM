@@ -48,7 +48,7 @@ namespace Foam
 
 namespace POSIX
 {
-    //- Declare name of the class and its debug switch
+    //- Declare namespace and its debug switch
     NamespaceName("POSIX");
 
     const label pathLengthChunk = 256;

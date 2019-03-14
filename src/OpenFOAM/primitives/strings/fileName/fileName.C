@@ -495,7 +495,8 @@ Foam::fileName Foam::operator/(const string& a, const string& b)
             }
         }
 
-        return a;  // The second string was empty
+        // The second string was empty
+        return a;
     }
 
     if (b.size())
