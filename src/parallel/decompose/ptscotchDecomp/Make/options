@@ -24,6 +24,6 @@ LIB_LIBS = \
     -lscotch
 
 /* May require librt, but scotch does not declare the dependency */
-ifeq ("$(SO)","so")
+ifeq ("$(EXT_SO)", ".so")
     LIB_LIBS += -lrt
 endif

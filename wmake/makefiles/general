@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #                           | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -70,21 +70,23 @@ LIB_LIBS        =
 # Declare default name of libraries and executables
 #------------------------------------------------------------------------------
 
-# Library
-LIB             = libNULL
+# Shared library extension (with '.' separator)
+EXT_SO  = .so
 
-# Shared library extension
-ifneq (,$(findstring darwin,$(WM_ARCH)))
-SO              = dylib
-else
-SO              = so
-endif
+# Executable extension (with '.' separator)
+EXE_EXT =
 
-# Project executable
-EXE             = $(WM_PROJECT).out
+# Library (default which is to be overridden)
+LIB     = libNULL
 
-# Standalone executable
-SEXE            = a.out
+# Project executable (default which is to be overridden)
+EXE     = $(WM_PROJECT).out
+
+# Standalone executable (default which is to be overridden)
+SEXE    = a.out
+
+#DEBUG $(info "EXE_SO  = ${EXE_SO}")
+#DEBUG $(info "EXE_EXT = ${EXE_EXT}")
 
 
 #------------------------------------------------------------------------------
@@ -127,28 +129,28 @@ LIB_HEADER_DIRS = \
 #------------------------------------------------------------------------------
 
 .PHONY: all
-all: $(EXE)
+all: $(EXE)$(EXE_EXT)
 	@:
 
 .PHONY: silent
 silent:
 	@:
 
-$(EXE): $(OBJECTS)
+$(EXE)$(EXE_EXT): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(EXE)
-	$(call QUIET_MESSAGE,ld,$(EXE))
+	$(call QUIET_MESSAGE,ld,$(EXE)$(EXE_EXT))
 	$E $(LINKEXE) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) \
-	    $(LINK_LIBS) $(GLIBS) -o $(EXE)
+	    $(LINK_LIBS) $(GLIBS) -o $(EXE)$(EXE_EXT)
 
 .PHONY: exe
-exe: $(SEXE) | silent
+exe: $(SEXE)$(EXE_EXT) | silent
 
-$(SEXE): $(OBJECTS)
+$(SEXE)$(EXE_EXT): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(SEXE)
-	$(call QUIET_MESSAGE,ld,$(SEXE))
+	$(call QUIET_MESSAGE,ld,$(SEXE)$(EXE_EXT))
 	$E $(LINKEXE) $(OBJECTS) $(EXE_LIBS) \
-	    $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(SEXE)
+	    $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(SEXE)$(EXE_EXT)
 
 
 #------------------------------------------------------------------------------
@@ -159,13 +161,13 @@ $(SEXE): $(OBJECTS)
 objects: $(OBJECTS) | silent
 
 .PHONY: libso
-libso: $(LIB).$(SO) | silent
+libso: $(LIB)$(EXT_SO) | silent
 
-$(LIB).$(SO): $(OBJECTS)
+$(LIB)$(EXT_SO): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
-	$(call QUIET_MESSAGE,ld,$(LIB).$(SO))
+	$(call QUIET_MESSAGE,ld,$(LIB)$(EXT_SO))
 	$E $(LINKLIBSO) $(OBJECTS) -L$(LIB_PLATFORMS) \
-	    $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB).$(SO)
+	    $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB)$(EXT_SO)
 
 .PHONY: lib
 lib: $(LIB).a | silent

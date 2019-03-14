@@ -31,5 +31,4 @@ sinclude $(RULES)/general
 sinclude $(RULES)/c++
 include $(GENERAL_RULES)/transform
 
-
 #------------------------------------------------------------------------------
