@@ -23,13 +23,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "endian.H"
-
 #ifdef __GNUC__
     #define USE_BUILTIN_BYTESWAP
 #else
     #undef USE_BUILTIN_BYTESWAP
 #endif
+
 // for Debugging:
 // #undef USE_BUILTIN_BYTESWAP
 
@@ -70,7 +69,7 @@ inline uint32_t Foam::endian::swap32(uint32_t u)
       | (((u) & 0x000000ff) << 24)      // 3 <- 0
     );
 
-    // alternative formulation
+    // Alternative formulation
     //
     // u = ((u<<8) & 0xFF00FF00) | ((u>>8) & 0x00FF00FF);
     // u = (u>>16) | (u<<16);
@@ -96,7 +95,7 @@ inline uint64_t Foam::endian::swap64(uint64_t u)
       | (((u) & 0x00000000000000ffull) << 56)   // 7 <- 0
     );
 
-    // alternative formulation
+    // Alternative formulation
     /*
      u = ((u<< 8) & 0xFF00FF00FF00FF00ull) | ((u>> 8) & 0x00FF00FF00FF00FFull);
      u = ((u<<16) & 0xFFFF0000FFFF0000ull) | ((u>>16) & 0x0000FFFF0000FFFFull);

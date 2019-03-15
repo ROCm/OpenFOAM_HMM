@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,60 +25,33 @@ Description
     Help with architecture-specific aspects.
 
     Defines WM_BIG_ENDIAN or WM_LITTLE_ENDIAN as well as providing a
-    few runtime methods. Primarily used as a namespace, but provided
-    as a class for possible future expansion.
+    few runtime methods. Primarily used as a namespace, but defined as
+    a class to allow pTraits specialization.
 
 SourceFiles
     endianI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamEndian_H  // prefixed with 'foam' to avoid potential collisions
+#ifndef foamEndian_H  // Prefixed with 'foam' to avoid any name clashes
 #define foamEndian_H
 
 #include <cstdint>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef darwin
-    #include <machine/endian.h>
-#elif defined __GNUC__
-    #include <endian.h>
-#elif defined __mips
-    #include <standards.h>
-    #include <sys/endian.h>
-#endif
-
-#ifdef __BYTE_ORDER
-    #if (__BYTE_ORDER == __LITTLE_ENDIAN)
+#ifdef __BYTE_ORDER__
+    // Clang, Gcc, Icc, Pgi
+    #if (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
         #define WM_LITTLE_ENDIAN
-    #elif (__BYTE_ORDER == __BIG_ENDIAN)
+    #elif (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
         #define WM_BIG_ENDIAN
     #else
-        #error "__BYTE_ORDER defined, but not __LITTLE_ENDIAN or __BIG_ENDIAN."
-    #endif
-#elif defined(__LITTLE_ENDIAN)  \
-   || defined(_LITTLE_ENDIAN)   \
-   || defined(LITTLE_ENDIAN)
-   #define WM_LITTLE_ENDIAN
-#elif defined(__BIG_ENDIAN)     \
-   || defined(_BIG_ENDIAN)      \
-   || defined(BIG_ENDIAN)
-   #define WM_BIG_ENDIAN
-#endif
-
-// Special handling for OS-X
-#ifdef __DARWIN_BYTE_ORDER
-    #if (__DARWIN_BYTE_ORDER == __DARWIN_BIG_ENDIAN)
-        #define WM_BIG_ENDIAN
-        #undef  WM_LITTLE_ENDIAN
-    #elif (__DARWIN_BYTE_ORDER == __DARWIN_LITTLE_ENDIAN)
-        #define WM_LITTLE_ENDIAN
-        #undef  WM_BIG_ENDIAN
+        #error "__BYTE_ORDER__ is not BIG or LITTLE endian"
     #endif
 #endif
 
-// Could also downgrade to a warning, but then user always needs runtime check.
+// Could downgrade to a warning, but then user always needs runtime check.
 #if !defined(WM_BIG_ENDIAN) && !defined(WM_LITTLE_ENDIAN)
     #error "Cannot determine BIG or LITTLE endian."
     #error "Please add to compilation options"
@@ -95,17 +68,9 @@ namespace Foam
 
 class endian
 {
-    // Private Member Functions
-
-        //- No copy construct
-        endian(const endian&) = delete;
-
-        //- No copy assignment
-        void operator=(const endian&) = delete;
-
 public:
 
-    // Public data
+    // Public Methods
 
         //- Runtime check for big endian.
         inline static bool isBig();
