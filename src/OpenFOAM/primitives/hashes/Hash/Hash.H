@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2012 OpenFOAM Foundation
@@ -51,10 +51,10 @@ namespace Foam
                             Class Hash Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class PrimitiveType>
+template<class T>
 struct Hash
 {
-    inline unsigned operator()(const PrimitiveType& obj, unsigned seed=0) const
+    inline unsigned operator()(const T& obj, unsigned seed=0) const
     {
         return Hasher(&obj, sizeof(obj), seed);
     }
@@ -140,19 +140,18 @@ struct Hash<Foam::keyType>
 };
 
 
-//- Hash specialization for pointers.
-//  Interpret pointer as a long (works for 32-bit and 64-bit pointers).
+//- Hash specialization for pointers, interpret pointer as a integer type.
 template<>
 struct Hash<void*>
 {
     inline unsigned operator()(const void* const& obj, unsigned seed) const
     {
-        return Hash<long>()(long(obj), seed);
+        return Hash<intptr_t>()(intptr_t(obj), seed);
     }
 
     inline unsigned operator()(const void* const& obj) const
     {
-        return Hash<long>()(long(obj));
+        return Hash<intptr_t>()(intptr_t(obj));
     }
 };
 
