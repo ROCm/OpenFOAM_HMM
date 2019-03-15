@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -85,31 +85,42 @@ inline Scalar atan2(const Scalar y, const Scalar x)
     return ::atan2(y, x);
 }
 
-inline Scalar jn(const int n, const Scalar s)
-{
-    return ::jn(n, s);
-}
-
-inline Scalar yn(const int n, const Scalar s)
-{
-    return ::yn(n, s);
-}
 
 // Normal (double-precision) transcendental functions
-#define transFunc(func)            \
-inline Scalar func(const Scalar s) \
-{                                  \
-    return ::func(s);              \
+#define transFunc(func)                                         \
+inline Scalar func(const Scalar s)                              \
+{                                                               \
+    return ::func(s);                                           \
 }
 
-
-// Double-precision bessel functions
-#define besselFunc(func)           \
-inline Scalar func(const Scalar s) \
-{                                  \
-    return ::func(s);              \
-}
-
+// Normal (double-precision) bessel functions.
+// May not be available on all systems
+#ifdef Foam_no_besselFunc
+    // Not available
+    #define besselFunc(func)                                    \
+    inline Scalar func(const Scalar s)                          \
+    {                                                           \
+        std::cerr<< "No '" << #func << "' function\n";          \
+        return 0;                                               \
+    }
+    #define besselFunc2(func)                                   \
+    inline Scalar func(const int n, const Scalar s)             \
+    {                                                           \
+        std::cerr<< "No '" << #func << "' function\n";          \
+        return 0;                                               \
+    }
+#else
+    #define besselFunc(func)                                    \
+    inline Scalar func(const Scalar s)                          \
+    {                                                           \
+        return ::func(s);                                       \
+    }
+    #define besselFunc2(func)                                   \
+    inline Scalar func(const int n, const Scalar s)             \
+    {                                                           \
+        return ::func(n, s);                                    \
+    }
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -127,6 +138,7 @@ inline Scalar func(const Scalar s) \
 #undef ScalarRead
 #undef transFunc
 #undef besselFunc
+#undef besselFunc2
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

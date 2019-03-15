@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -184,6 +184,8 @@ besselFunc(j0)
 besselFunc(j1)
 besselFunc(y0)
 besselFunc(y1)
+besselFunc2(jn)
+besselFunc2(yn)
 
 
 inline Scalar& setComponent(Scalar& s, const direction)
