@@ -47,7 +47,7 @@ Note
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class boundBox;
 class plane;
 template<class T> class tmp;
@@ -69,7 +69,15 @@ class boundBox
 
 public:
 
-    // Static data members
+    // Static Data Members
+
+        //- Bits used for (x/y/z) direction encoding.
+        enum directionBit : direction
+        {
+            XDIR = 0x1,  //!< 0: x-direction (vector component 0)
+            YDIR = 0x2,  //!< 2: y-direction (vector component 1)
+            ZDIR = 0x4   //!< 4: z-direction (vector component 2)
+        };
 
         //- A large boundBox: min/max == -/+ ROOTVGREAT
         static const boundBox greatBox;
