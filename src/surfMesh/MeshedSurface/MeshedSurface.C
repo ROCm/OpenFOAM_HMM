@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -1104,6 +1104,21 @@ void Foam::MeshedSurface<Face>::swap
     this->storedPoints().swap(surf.storedPoints());
     this->storedFaces().swap(surf.storedFaces());
     this->storedZones().swap(surf.storedZones());
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::transfer
+(
+    pointField& pointLst,
+    List<Face>& faceLst
+)
+{
+    ParentType::clearOut();  // Topology changes
+
+    this->storedPoints().transfer(pointLst);
+    this->storedFaces().transfer(faceLst);
+    this->storedZones().clear();
 }
 
 

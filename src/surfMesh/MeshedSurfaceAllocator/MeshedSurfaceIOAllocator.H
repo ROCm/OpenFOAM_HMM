@@ -53,7 +53,7 @@ namespace Detail
 
 class MeshedSurfaceIOAllocator
 {
-    // Private data
+    // Private Data
 
         //- Points
         pointIOField points_;
@@ -139,7 +139,7 @@ public:
         }
 
 
-    //  Storage Management
+    // Storage Management
 
         //- Clear primitive data (points, faces)
         void clear();

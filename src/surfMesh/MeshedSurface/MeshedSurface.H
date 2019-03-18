@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -481,6 +481,9 @@ public:
 
         //- Swap contents
         void swap(MeshedSurface<Face>& surf);
+
+        //- Transfer the components
+        void transfer(pointField& pointLst, List<Face>& faceLst);
 
         //- Transfer the contents of the argument and annul the argument
         void transfer(MeshedSurface<Face>& surf);
