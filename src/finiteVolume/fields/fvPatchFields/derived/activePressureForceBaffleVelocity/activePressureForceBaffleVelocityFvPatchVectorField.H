@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -64,16 +64,15 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        p            | pressure field name     | no          | p
-        cyclicPatch  | cyclic patch name       | yes         |
-        openFraction | current open fraction [0-1] | yes |
-        openingTime  | time taken to open or close the baffle | yes |
+        Property     | Description                          | Required | Default
+        p            | Pressure field name                  | no  | p
+        cyclicPatch  | Cyclic patch name                    | yes |
+        openFraction | Current open fraction [0-1]          | yes |
+        openingTime  | Time taken to open or close the baffle | yes |
         maxOpenFractionDelta | max fraction change per timestep | yes |
-        minThresholdValue | minimum absolute pressure or
-                            force difference for activation | yes |
-        forceBased   | force (true) or pressure-based (false) activation | yes |
-        opening      | Baffle is opening or closing (1 opening, 0 closing) | yes
+        minThresholdValue | Min absolute pressure or force difference for activation | yes |
+        forceBased   | Force (true) or pressure-based (false) activation | yes |
+        opening      | Baffle is opening (true) or closing (false) | yes |
     \endtable
 
     Example of the boundary condition specification:
