@@ -51,6 +51,7 @@ SourceFiles
 #include "pointField.H"
 #include "faceList.H"
 #include "instant.H"
+#include <functional>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,10 +71,10 @@ class surfaceWriter
     // Private Member Data
 
         //- Reference to the points
-        const pointField& points_;
+        std::reference_wrapper<const pointField> points_;
 
         //- Reference to the faces
-        const faceList& faces_;
+        std::reference_wrapper<const faceList> faces_;
 
         //- The numer of field points for the current Piece
         label numberOfPoints_;
@@ -208,6 +209,9 @@ public:
 
         //- Write the currently set time as "TimeValue" FieldData
         void writeTimeValue();
+
+        //- Reset point, face references to begin a new piece
+        void piece(const pointField& points, const faceList& faces);
 
 
     // Write

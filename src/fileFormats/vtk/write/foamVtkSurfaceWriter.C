@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,11 +32,11 @@ License
 void Foam::vtk::surfaceWriter::beginPiece()
 {
     // Basic sizes
-    nLocalPoints_ = points_.size();
-    nLocalFaces_  = faces_.size();
+    nLocalPoints_ = points_.get().size();
+    nLocalFaces_  = faces_.get().size();
     nLocalVerts_  = 0;
 
-    for (const face& f : faces_)
+    for (const face& f : faces_.get())
     {
         nLocalVerts_ += f.size();
     }
@@ -90,7 +90,7 @@ void Foam::vtk::surfaceWriter::writePoints()
     if (parallel_ ? Pstream::master() : true)
     {
         {
-            vtk::writeList(format(), points_);
+            vtk::writeList(format(), points_.get());
         }
     }
 
@@ -128,7 +128,7 @@ void Foam::vtk::surfaceWriter::writePoints()
             );
 
             {
-                toMaster << points_;
+                toMaster << points_.get();
             }
         }
     }
@@ -182,7 +182,7 @@ void Foam::vtk::surfaceWriter::writePolysLegacy(const label pointOffset)
         label off = pointOffset;
 
         {
-            for (const face& f : faces_)
+            for (const face& f : faces_.get())
             {
                 *iter = f.size();       // The size prefix
                 ++iter;
@@ -193,7 +193,7 @@ void Foam::vtk::surfaceWriter::writePolysLegacy(const label pointOffset)
                     ++iter;
                 }
             }
-            // off += points_.size();
+            // off += points_.get().size();
         }
     }
 
@@ -251,7 +251,7 @@ void Foam::vtk::surfaceWriter::writePolys(const label pointOffset)
             label off = pointOffset;
 
             {
-                for (const face& f : faces_)
+                for (const face& f : faces_.get())
                 {
                     for (const label pfi : f)
                     {
@@ -259,7 +259,7 @@ void Foam::vtk::surfaceWriter::writePolys(const label pointOffset)
                         ++iter;
                     }
                 }
-                // off += points_.size();
+                // off += points_.get().size();
             }
         }
 
@@ -312,7 +312,7 @@ void Foam::vtk::surfaceWriter::writePolys(const label pointOffset)
         auto iter = vertOffsets.begin();
 
         {
-            for (const face& f : faces_)
+            for (const face& f : faces_.get())
             {
                 off += f.size();   // End offset
                 *iter = off;
@@ -355,8 +355,8 @@ Foam::vtk::surfaceWriter::surfaceWriter
 )
 :
     vtk::fileWriter(vtk::fileTag::POLY_DATA, opts),
-    points_(points),
-    faces_(faces),
+    points_(std::cref<pointField>(points)),
+    faces_(std::cref<faceList>(faces)),
     numberOfPoints_(0),
     numberOfCells_(0),
     nLocalPoints_(0),
@@ -470,6 +470,19 @@ void Foam::vtk::surfaceWriter::writeTimeValue()
     {
         vtk::fileWriter::writeTimeValue(instant_.value());
     }
+}
+
+
+void Foam::vtk::surfaceWriter::piece
+(
+    const pointField& points,
+    const faceList& faces
+)
+{
+    endPiece();
+
+    points_ = std::cref<pointField>(points);
+    faces_ = std::cref<faceList>(faces);
 }
 
 
