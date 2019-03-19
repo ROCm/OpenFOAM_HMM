@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,14 +100,14 @@ class surfaceWriter
         //- and begin piece
         void beginPiece();
 
-        //- Write patch points
+        //- Write points
         void writePoints();
 
-        //- Write patch faces, legacy format
+        //- Write faces, legacy format
         //  \param pointOffset processor-local point offset
         void writePolysLegacy(const label pointOffset);
 
-        //- Write patch faces
+        //- Write faces
         //  \param pointOffset processor-local point offset
         void writePolys(const label pointOffset);
 
@@ -211,6 +211,10 @@ public:
 
 
     // Write
+
+        //- Write a uniform field of Cell (Face) or Point values
+        template<class Type>
+        void writeUniform(const word& fieldName, const Type& val);
 
         //- Write a list of Cell (Face) or Point values
         template<class Type>

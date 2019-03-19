@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,60 +23,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include <type_traits>
+#include "foamVtkOutput.H"
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::vtk::surfaceWriter::writeUniform
+void Foam::vtk::fileWriter::writeUniform
 (
     const word& fieldName,
-    const Type& val
+    const Type& val,
+    const label nValues
 )
 {
-    if (isState(outputState::CELL_DATA))
-    {
-        ++nCellData_;
-        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfCells_);
-    }
-    else if (isState(outputState::POINT_DATA))
-    {
-        ++nPointData_;
-        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfPoints_);
-    }
-    else
-    {
-        WarningInFunction
-            << "Ignore bad writer state (" << stateNames[state_]
-            << ") for field " << fieldName << nl << endl
-            << exit(FatalError);
-    }
-}
-
-
-template<class Type>
-void Foam::vtk::surfaceWriter::write
-(
-    const word& fieldName,
-    const UList<Type>& field
-)
-{
-    if (isState(outputState::CELL_DATA))
-    {
-        ++nCellData_;
-    }
-    else if (isState(outputState::POINT_DATA))
-    {
-        ++nPointData_;
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Bad writer state (" << stateNames[state_]
-            << ") - should be (" << stateNames[outputState::CELL_DATA]
-            << ") or (" << stateNames[outputState::POINT_DATA]
-            << ") for field " << fieldName << nl << endl
-            << exit(FatalError);
-    }
-
     static_assert
     (
         (
@@ -86,19 +45,7 @@ void Foam::vtk::surfaceWriter::write
         "Label and Floating-point vector space only"
     );
 
-
     const direction nCmpt(pTraits<Type>::nComponents);
-
-    label nValues = field.size();
-
-    // Could check sizes:
-    //     nValues == nLocalFaces (CELL_DATA)
-    //     nValues == nLocalPoints (POINT_DATA)
-
-    if (parallel_)
-    {
-        reduce(nValues, sumOp<label>());
-    }
 
     if (format_)
     {
@@ -132,16 +79,13 @@ void Foam::vtk::surfaceWriter::write
         }
     }
 
-
-    if (parallel_)
+    if (format_)
     {
-        vtk::writeListParallel(format_.ref(), field);
+        for (label i=0; i < nValues; ++i)
+        {
+            vtk::write(format(), val);
+        }
     }
-    else
-    {
-        vtk::writeList(format(), field);
-    }
-
 
     if (format_)
     {

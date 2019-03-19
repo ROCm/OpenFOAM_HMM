@@ -233,6 +233,10 @@ public:
 
     // Write
 
+        //- Write a uniform field of Cell (Face) or Point values
+        template<class Type>
+        void writeUniform(const word& fieldName, const Type& val);
+
         //- Write point field
         template<class Type, template<class> class PatchField>
         void write

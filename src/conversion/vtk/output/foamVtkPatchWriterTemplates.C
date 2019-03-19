@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,33 @@ License
 #include "foamVtkOutput.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::vtk::patchWriter::writeUniform
+(
+    const word& fieldName,
+    const Type& val
+)
+{
+    if (isState(outputState::CELL_DATA))
+    {
+        ++nCellData_;
+        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfCells_);
+    }
+    else if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfPoints_);
+    }
+    else
+    {
+        WarningInFunction
+            << "Ignore bad writer state (" << stateNames[state_]
+            << ") for field " << fieldName << nl << endl
+            << exit(FatalError);
+    }
+}
+
 
 template<class Type, template<class> class PatchField>
 void Foam::vtk::patchWriter::write

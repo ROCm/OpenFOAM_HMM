@@ -25,6 +25,34 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+
+template<class Type>
+void Foam::vtk::indirectPatchWriter::writeUniform
+(
+    const word& fieldName,
+    const Type& val
+)
+{
+    if (isState(outputState::CELL_DATA))
+    {
+        ++nCellData_;
+        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfCells_);
+    }
+    else if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfPoints_);
+    }
+    else
+    {
+        WarningInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") for field " << fieldName << nl << endl
+            << exit(FatalError);
+    }
+}
+
+
 template<class Type>
 void Foam::vtk::indirectPatchWriter::write
 (
