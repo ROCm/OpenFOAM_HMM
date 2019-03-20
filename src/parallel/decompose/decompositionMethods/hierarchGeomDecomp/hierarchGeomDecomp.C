@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -54,36 +54,37 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::hierarchGeomDecomp::setDecompOrder()
+void Foam::hierarchGeomDecomp::setOrder()
 {
-    word order;
+    const word order(coeffsDict_.lookupOrDefault<word>("order", ""));
 
-    if (coeffsDict_.readIfPresent("order", order))
+    if (order.empty())
     {
-        if (order.size() != 3)
+        return;
+    }
+    else if (order.size() != 3)
+    {
+        FatalIOErrorInFunction(decompDict_)
+            << "Number of characters in order (" << order << ") != 3"
+            << exit(FatalIOError);
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        // Change [x-z] -> [0-2]
+
+        switch (order[i])
         {
-            FatalIOErrorInFunction(decompDict_)
-                << "number of characters in order (" << order << ") != 3"
-                << exit(FatalIOError);
-        }
+            case 'x': order_[i] = 0; break;
+            case 'y': order_[i] = 1; break;
+            case 'z': order_[i] = 2; break;
 
-        for (int i = 0; i < 3; ++i)
-        {
-            // Change [x-z] -> [0-2]
-
-            switch (order[i])
-            {
-                case 'x': decompOrder_[i] = 0; break;
-                case 'y': decompOrder_[i] = 1; break;
-                case 'z': decompOrder_[i] = 2; break;
-
-                default:
-                    FatalIOErrorInFunction(decompDict_)
-                        << "Illegal decomposition order " << order << nl
-                        << "It should only contain x, y or z"
-                        << exit(FatalError);
-                    break;
-            }
+            default:
+                FatalIOErrorInFunction(decompDict_)
+                    << "Illegal decomposition order " << order << nl
+                    << "It should only contain x, y or z"
+                    << exit(FatalError);
+                break;
         }
     }
 }
@@ -91,25 +92,25 @@ void Foam::hierarchGeomDecomp::setDecompOrder()
 
 Foam::label Foam::hierarchGeomDecomp::findLower
 (
-    const List<scalar>& l,
-    const scalar t,
-    const label initLow,
-    const label initHigh
+    const UList<scalar>& list,
+    const scalar val,
+    const label first,
+    const label last
 )
 {
-    if (initHigh <= initLow)
-    {
-        return initLow;
-    }
+    label low = first;
+    label high = last;
 
-    label low = initLow;
-    label high = initHigh;
+    if (high <= low)
+    {
+        return low;
+    }
 
     while ((high - low) > 1)
     {
-        label mid = (low + high)/2;
+        const label mid = (low + high)/2;
 
-        if (l[mid] < t)
+        if (list[mid] < val)
         {
             low = mid;
         }
@@ -121,18 +122,14 @@ Foam::label Foam::hierarchGeomDecomp::findLower
 
     // high and low can still differ by one. Choose best.
 
-    label tIndex = -1;
-
-    if (l[high-1] < t)
+    if (list[high-1] < val)
     {
-        tIndex = high;
+        return high;
     }
     else
     {
-        tIndex = low;
+        return low;
     }
-
-    return tIndex;
 }
 
 
@@ -184,12 +181,11 @@ bool Foam::hierarchGeomDecomp::findBinary
     scalar& midValue            // value at mid
 )
 {
-    label low = minIndex;
     scalar lowValue = minValue;
-
     scalar highValue = maxValue;
-    // (one beyond) index of highValue
-    label high = values.size();
+
+    label low = minIndex;
+    label high = values.size();  // (one beyond) index of highValue
 
     // Safeguards to avoid infinite loop.
     scalar midValuePrev = VGREAT;
@@ -340,13 +336,13 @@ Foam::label Foam::hierarchGeomDecomp::sortComponent
     const label sizeTol,
     const pointField& points,
     const labelList& current,       // slice of points to decompose
-    const direction componentIndex, // index in decompOrder_
+    const direction componentIndex, // index in order_
     const label mult,               // multiplication factor for finalDecomp
     labelList& finalDecomp
 ) const
 {
     // Current component
-    const label compI = decompOrder_[componentIndex];
+    const label compI = order_[componentIndex];
 
     // Track the number of times that findBinary() did not converge
     label nWarnings = 0;
@@ -532,13 +528,13 @@ Foam::label Foam::hierarchGeomDecomp::sortComponent
     const scalarField& weights,
     const pointField& points,
     const labelList& current,       // slice of points to decompose
-    const direction componentIndex, // index in decompOrder_
+    const direction componentIndex, // index in order_
     const label mult,               // multiplication factor for finalDecomp
     labelList& finalDecomp
 ) const
 {
     // Current component
-    const label compI = decompOrder_[componentIndex];
+    const label compI = order_[componentIndex];
 
     // Track the number of times that findBinary() did not converge
     label nWarnings = 0;
@@ -727,9 +723,9 @@ Foam::hierarchGeomDecomp::hierarchGeomDecomp
 )
 :
     geomDecomp(typeName, decompDict),
-    decompOrder_({0,1,2})
+    order_({0,1,2})
 {
-    setDecompOrder();
+    setOrder();
 }
 
 
@@ -740,9 +736,9 @@ Foam::hierarchGeomDecomp::hierarchGeomDecomp
 )
 :
     geomDecomp(typeName, decompDict, regionName),
-    decompOrder_({0,1,2})
+    order_({0,1,2})
 {
-    setDecompOrder();
+    setOrder();
 }
 
 
@@ -773,7 +769,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
         sizeTol,
         rotatedPoints,
         slice,
-        0,              // Sort first component in decompOrder.
+        0,              // Sort first component in order_
         1,              // Offset for different x bins.
         finalDecomp
     );
@@ -816,7 +812,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
         weights,
         rotatedPoints,
         slice,
-        0,              // Sort first component in decompOrder.
+        0,              // Sort first component in order_
         1,              // Offset for different x bins.
         finalDecomp
     );
