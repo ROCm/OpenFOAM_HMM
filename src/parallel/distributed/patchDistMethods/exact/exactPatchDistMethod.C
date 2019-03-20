@@ -67,8 +67,9 @@ Foam::patchDistMethods::exact::patchSurface() const
             "distributionType",
             distributedTriSurfaceMesh::distributionTypeNames_
             [
-                //distributedTriSurfaceMesh::FOLLOW
-                distributedTriSurfaceMesh::INDEPENDENT
+                //distributedTriSurfaceMesh::FOLLOW         // use mesh bb
+                //distributedTriSurfaceMesh::INDEPENDENT    // master-only
+                distributedTriSurfaceMesh::DISTRIBUTED      // parallel decomp
             ]
         );
         dict.add("mergeDistance", 1e-6*localBb.mag());
