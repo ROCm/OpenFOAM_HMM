@@ -74,7 +74,7 @@ public:
         //- Bits used for (x/y/z) direction encoding.
         enum directionBit : direction
         {
-            XDIR = 0x1,  //!< 0: x-direction (vector component 0)
+            XDIR = 0x1,  //!< 1: x-direction (vector component 0)
             YDIR = 0x2,  //!< 2: y-direction (vector component 1)
             ZDIR = 0x4   //!< 4: z-direction (vector component 2)
         };
