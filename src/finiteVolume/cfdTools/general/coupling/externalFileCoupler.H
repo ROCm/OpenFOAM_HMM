@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,6 +54,7 @@ Description
         waitInterval    1;
         timeOut         100;
         initByExternal  no;
+        shutdown        done;
     }
     \endverbatim
 
@@ -106,7 +107,7 @@ class externalFileCoupler
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- The run state (ie, who is currently in charge)
         enum runState
@@ -117,16 +118,18 @@ public:
             DONE        //!< Finished
         };
 
-
 private:
 
-    // Private data
+    // Private Data
 
         //- The current run (and initialization) state
         mutable runState runState_;
 
         //- Local path to communications directory
         fileName commsDir_;
+
+        //- Value for "status=..." on termination
+        word statusEnd_;
 
         //- Interval time between checking for return data [s]
         unsigned waitInterval_;

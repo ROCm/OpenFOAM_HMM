@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,7 +93,8 @@ static enum Time::stopAtControls getStopAction(const std::string& filename)
 Foam::externalFileCoupler::externalFileCoupler()
 :
     runState_(NONE),
-    commsDir_("$FOAM_CASE/comms"),
+    commsDir_("<case>/comms"),
+    statusEnd_("done"),
     waitInterval_(1u),
     timeOut_(100u),
     slaveFirst_(false),
@@ -108,6 +109,7 @@ Foam::externalFileCoupler::externalFileCoupler(const fileName& commsDir)
 :
     runState_(NONE),
     commsDir_(commsDir),
+    statusEnd_("done"),
     waitInterval_(1u),
     timeOut_(100u),
     slaveFirst_(false),
@@ -155,6 +157,7 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
         dict.readEntry("commsDir", commsDir_);
         commsDir_.expand();
         commsDir_.clean();
+        statusEnd_ = dict.lookupOrDefault<word>("shutdown", "done");
         slaveFirst_ = dict.lookupOrDefault("initByExternal", false);
 
         Info<< type() << ": initialize" << nl
@@ -188,7 +191,7 @@ Foam::externalFileCoupler::useMaster(const bool wait) const
         if (!wasInit)
         {
             // First time
-            Foam::mkDir(commsDir_);
+            mkDir(commsDir_);
         }
 
         const fileName lck(lockFile());
@@ -196,7 +199,8 @@ Foam::externalFileCoupler::useMaster(const bool wait) const
         // Create lock file - only if it doesn't already exist
         if (!Foam::isFile(lck))
         {
-            Log << type() << ": creating lock file" << endl;
+            Log << type()
+                << ": creating lock file with status=openfoam" << endl;
 
             std::ofstream os(lck);
             os << "status=openfoam\n";
@@ -223,7 +227,7 @@ Foam::externalFileCoupler::useSlave(const bool wait) const
         if (!wasInit)
         {
             // First time
-            Foam::mkDir(commsDir_);
+            mkDir(commsDir_);
         }
 
         Log << type() << ": removing lock file" << endl;
@@ -356,10 +360,10 @@ void Foam::externalFileCoupler::shutdown() const
 {
     if (Pstream::master() && runState_ == MASTER && Foam::isDir(commsDir_))
     {
-        Log << type() << ": lock file status=done" << endl;
+        Log << type() << ": lock file status=" << statusEnd_ << endl;
 
         std::ofstream os(lockFile());
-        os  << "status=done\n";
+        os << "status=" << statusEnd_ << nl;
     }
 
     runState_ = DONE;   // Avoid re-triggering in destructor

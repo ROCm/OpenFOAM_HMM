@@ -88,7 +88,7 @@ Usage
         log             yes;
         commsDir        "<case>/comms";
         initByExternal  yes;
-        stateEnd        remove;  // (remove | done)
+        shutdown        done;  // Any arbitrary status=... value
 
         regions
         {
@@ -103,7 +103,6 @@ Usage
         }
     }
     \endverbatim
-
 
     This reads/writes (on the master processor) the directory:
     \verbatim
@@ -125,17 +124,16 @@ Usage
 
     The entries comprise:
     \table
-        Property     | Description             | Required | Default value
-        type         | type name: externalCoupled | yes |
-        commsDir     | communication directory | yes |
-        waitInterval | wait interval in (s)    | no | 1
-        timeOut      | timeout in (s)          | no | 100*waitInterval
-        stateEnd     | Lockfile treatment on termination | no | done
-        initByExternal | initialization values supplied by external app | yes
-        calcFrequency | calculation frequency  | no | 1
-        regions  | the regions to couple | yes
+        Property     | Description                          | Required | Default
+        type         | Type name: externalCoupled           | yes |
+        commsDir     | Communication directory              | yes |
+        waitInterval | wait interval in (s)                 | no  | 1
+        timeOut      | timeout in (s)                    | no | 100*waitInterval
+        shutdown     | Lockfile status=... on termination   | no  | done
+        initByExternal | Initialization values supplied by external app | yes
+        calcFrequency | Calculation frequency               | no  | 1
+        regions      | The regions to couple                | yes |
     \endtable
-
 
 SourceFiles
     externalCoupled.C
@@ -151,8 +149,6 @@ SourceFiles
 #include "DynamicList.H"
 #include "wordReList.H"
 #include "scalarField.H"
-#include "Enum.H"
-#include "Switch.H"
 #include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -176,22 +172,6 @@ class externalCoupled
     public functionObjects::timeFunctionObject,
     public externalFileCoupler
 {
-public:
-
-    // Public data types
-
-        //- Lockfile state on termination
-        enum stateEnd
-        {
-            REMOVE,     //!< Remove lock file on end
-            DONE,       //!< Lock file contains status=done on end
-            IGNORE      //!< Internal use only (for handling cleanup).
-        };
-
-private:
-
-        //- State end names (NB, only selectable values itemized)
-        static const Enum<stateEnd> stateEndNames_;
 
     // Private Member Data
 
