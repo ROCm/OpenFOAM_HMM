@@ -37,6 +37,66 @@ Foam::globalIndex::globalIndex(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::globalIndex::bin
+(
+    const labelUList& offsets,
+    const labelUList& globalIds,
+    labelList& order,
+    CompactListList<label>& bins,
+    DynamicList<label>& validBins
+)
+{
+    sortedOrder(globalIds, order);
+
+    bins.m() = UIndirectList<label>(globalIds, order);
+
+    labelList& binOffsets = bins.offsets();
+    binOffsets.setSize(offsets.size());
+    binOffsets = 0;
+
+    validBins.clear();
+
+    if (globalIds.size())
+    {
+        const label id = bins.m()[0];
+        label proci = findLower(offsets, id+1);
+
+        validBins.append(proci);
+        label binSize = 1;
+
+        for (label i = 1; i < order.size(); i++)
+        {
+            const label id = bins.m()[i];
+
+            if (id < offsets[proci+1])
+            {
+                binSize++;
+            }
+            else
+            {
+                // Not local. Reset proci
+                label oldProci = proci;
+                proci = findLower(offsets, id+1);
+
+                // Set offsets
+                for (label j = oldProci+1; j < proci; ++j)
+                {
+                    binOffsets[j] = binOffsets[oldProci]+binSize;
+                }
+                binOffsets[proci] = i;
+                validBins.append(proci);
+                binSize = 1;
+            }
+        }
+
+        for (label j = proci+1; j < binOffsets.size(); ++j)
+        {
+            binOffsets[j] = binOffsets[proci]+binSize;
+        }
+    }
+}
+
+
 void Foam::globalIndex::reset
 (
     const label localSize,

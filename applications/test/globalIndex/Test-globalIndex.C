@@ -36,6 +36,7 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "IOstreams.H"
+#include "Random.H"
 
 using namespace Foam;
 
@@ -160,6 +161,54 @@ int main(int argc, char *argv[])
                 << "Problem. globalCelli:" << nextProcCelli
                 << " not calculated as local on processor:" << proci
                 << abort(FatalError);
+        }
+    }
+
+
+
+    // Get a few cell indices
+    const label nTotalCells = globalNumbering.size();
+
+    Random rndGen(Pstream::myProcNo());
+    DynamicList<label> globalIDs;
+    for (label i = 0; i < 100; i++)
+    {
+        globalIDs.append(rndGen.position(0, nTotalCells-1));
+    }
+
+    // Get the cell centres at those cell indices
+    List<point> ccs;
+    globalNumbering.get
+    (
+        ccs,
+        globalIDs,
+        [&mesh](List<point>& ccs, const labelUList& localIds)
+        {
+            ccs = UIndirectList<point>(mesh.cellCentres(), localIds);
+        }
+    );
+
+    // Do the brute-force method as well : collect all cell centres on all
+    // processors
+    pointField allCcs(globalNumbering.size());
+    globalNumbering.gather
+    (
+        Pstream::worldComm,
+        Pstream::procID(Pstream::worldComm),
+        mesh.cellCentres(),
+        allCcs
+    );
+    Pstream::scatter(allCcs);
+
+    // Compare
+    forAll(ccs, i)
+    {
+        const point& cc = ccs[i];
+        const point& allCc = allCcs[globalIDs[i]];
+        if (cc != allCc)
+        {
+            FatalErrorInFunction << "Problem cc:" << cc
+                << " allCc:" << allCc << exit(FatalError);
         }
     }
 

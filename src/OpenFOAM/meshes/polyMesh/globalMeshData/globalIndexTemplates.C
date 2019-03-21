@@ -461,4 +461,88 @@ void Foam::globalIndex::scatter
 }
 
 
+template<class Type, class CombineOp>
+void Foam::globalIndex::get
+(
+    List<Type>& allFld,
+    const labelUList& globalIds,
+    const CombineOp& cop,
+    const label comm,
+    const int tag
+) const
+{
+    allFld.setSize(globalIds.size());
+    if (globalIds.size())
+    {
+        // Sort according to processor
+        labelList order;
+        CompactListList<label> bins;
+        DynamicList<label> validBins(Pstream::nProcs());
+        bin
+        (
+            offsets(),
+            globalIds,
+            order,
+            bins,
+            validBins
+        );
+
+        // Send local indices to individual processors as local index
+        PstreamBuffers sendBufs(Pstream::commsTypes::nonBlocking, tag, comm);
+
+        for (const auto proci : validBins)
+        {
+            const labelUList& es = bins[proci];
+
+            labelList localIDs(es.size());
+            forAll(es, i)
+            {
+                localIDs[i] = toLocal(proci, es[i]);
+            }
+
+            UOPstream os(proci, sendBufs);
+            os << localIDs;
+        }
+        labelList recvSizes;
+        sendBufs.finishedSends(recvSizes);
+
+
+        PstreamBuffers returnBufs(Pstream::commsTypes::nonBlocking, tag, comm);
+
+        forAll(recvSizes, proci)
+        {
+            if (recvSizes[proci])
+            {
+                UIPstream is(proci, sendBufs);
+                labelList localIDs(is);
+
+                // Collect entries
+                List<Type> fld(localIDs.size());
+                cop(fld, localIDs);
+
+                UOPstream os(proci, returnBufs);
+                os << fld;
+            }
+        }
+        returnBufs.finishedSends();
+
+        // Slot back
+        for (const auto proci : validBins)
+        {
+            label start = bins.offsets()[proci];
+            const SubList<label> es
+            (
+                order,
+                bins.offsets()[proci+1]-start,  // start
+                start
+            );
+            UIPstream is(proci, returnBufs);
+            List<Type> fld(is);
+
+            UIndirectList<Type>(allFld, es) = fld;
+        }
+    }
+}
+
+
 // ************************************************************************* //

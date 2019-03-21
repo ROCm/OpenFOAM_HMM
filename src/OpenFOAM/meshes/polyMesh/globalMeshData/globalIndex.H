@@ -44,6 +44,8 @@ SourceFiles
 #define globalIndex_H
 
 #include "Pstream.H"
+#include "CompactListList.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,6 +67,19 @@ Ostream& operator<<(Ostream& os, const globalIndex& gi);
 
 class globalIndex
 {
+    // Private Member Functions
+
+        //- Sort and bin. validBins contains bins with non-zero size.
+        static void bin
+        (
+            const labelUList& offsets,
+            const labelUList& globalIds,
+            labelList& order,
+            CompactListList<label>& sortedElems,
+            DynamicList<label>& validBins
+        );
+
+
     // Private data
 
         //- Start of proci. Size is nProcs()+1. (so like CompactListList)
@@ -361,6 +376,18 @@ public:
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes commsType =
                     Pstream::commsTypes::nonBlocking
+            ) const;
+
+            //- Get (potentially remote) data. Elements required given as
+            //  global indices
+            template<class Type, class CombineOp>
+            void get
+            (
+                List<Type>& allFld,
+                const labelUList& globalIds,
+                const CombineOp& cop,
+                const label comm = Pstream::worldComm,
+                const int tag = UPstream::msgType()
             ) const;
 
 
