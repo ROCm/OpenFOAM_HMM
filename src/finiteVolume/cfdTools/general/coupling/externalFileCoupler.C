@@ -94,7 +94,7 @@ Foam::externalFileCoupler::externalFileCoupler()
 :
     runState_(NONE),
     commsDir_("<case>/comms"),
-    statusEnd_("done"),
+    statusDone_("done"),
     waitInterval_(1u),
     timeOut_(100u),
     slaveFirst_(false),
@@ -109,7 +109,7 @@ Foam::externalFileCoupler::externalFileCoupler(const fileName& commsDir)
 :
     runState_(NONE),
     commsDir_(commsDir),
-    statusEnd_("done"),
+    statusDone_("done"),
     waitInterval_(1u),
     timeOut_(100u),
     slaveFirst_(false),
@@ -157,7 +157,7 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
         dict.readEntry("commsDir", commsDir_);
         commsDir_.expand();
         commsDir_.clean();
-        statusEnd_ = dict.lookupOrDefault<word>("shutdown", "done");
+        statusDone_ = dict.lookupOrDefault<word>("statusDone", "done");
         slaveFirst_ = dict.lookupOrDefault("initByExternal", false);
 
         Info<< type() << ": initialize" << nl
@@ -360,10 +360,10 @@ void Foam::externalFileCoupler::shutdown() const
 {
     if (Pstream::master() && runState_ == MASTER && Foam::isDir(commsDir_))
     {
-        Log << type() << ": lock file status=" << statusEnd_ << endl;
+        Log << type() << ": lock file status=" << statusDone_ << endl;
 
         std::ofstream os(lockFile());
-        os << "status=" << statusEnd_ << nl;
+        os << "status=" << statusDone_ << nl;
     }
 
     runState_ = DONE;   // Avoid re-triggering in destructor

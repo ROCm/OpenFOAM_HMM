@@ -88,7 +88,7 @@ Usage
         log             yes;
         commsDir        "<case>/comms";
         initByExternal  yes;
-        shutdown        done;  // Any arbitrary status=... value
+        statusDone      done;  // Any arbitrary status=... value
 
         regions
         {
@@ -129,7 +129,7 @@ Usage
         commsDir     | Communication directory              | yes |
         waitInterval | wait interval in (s)                 | no  | 1
         timeOut      | timeout in (s)                    | no | 100*waitInterval
-        shutdown     | Lockfile status=... on termination   | no  | done
+        statusDone   | Lockfile status=... on termination   | no  | done
         initByExternal | Initialization values supplied by external app | yes
         calcFrequency | Calculation frequency               | no  | 1
         regions      | The regions to couple                | yes |

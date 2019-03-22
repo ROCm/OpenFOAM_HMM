@@ -8,7 +8,7 @@
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software: you can redistribute it and/or modify i
+    OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
@@ -54,7 +54,7 @@ Description
         waitInterval    1;
         timeOut         100;
         initByExternal  no;
-        shutdown        done;
+        statusDone      done;
     }
     \endverbatim
 
@@ -129,7 +129,7 @@ private:
         fileName commsDir_;
 
         //- Value for "status=..." on termination
-        word statusEnd_;
+        word statusDone_;
 
         //- Interval time between checking for return data [s]
         unsigned waitInterval_;
@@ -283,6 +283,7 @@ public:
 
 
         //- Generate \c status=done in lock (only when run-state = master)
+        //  The exact text can be specified via the statusDone keyword
         void shutdown() const;
 
         //- Remove files written by OpenFOAM
