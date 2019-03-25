@@ -31,11 +31,18 @@ inline Foam::PDRblock::PDRblock()
     verbose_(false),
     grid_(),
     bounds_(),
-    patches_()
+    patches_(),
+    minEdgeLen_(Zero)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool Foam::PDRblock::location::valid() const
+{
+    return (scalarList::size() > 1);
+}
+
 
 inline Foam::label Foam::PDRblock::location::nCells() const
 {
@@ -49,19 +56,25 @@ inline Foam::label Foam::PDRblock::location::nPoints() const
 }
 
 
-inline Foam::label Foam::PDRblock::location::size() const
+inline bool Foam::PDRblock::location::contains(const scalar p) const
 {
-    return (scalarList::size()-1);
+    return (scalarList::size() > 1 && first() <= p && p <= last());
+}
+
+
+inline Foam::scalar Foam::PDRblock::location::centre() const
+{
+    return scalarList::empty() ? 0 : (0.5*first() + 0.5*last());
 }
 
 
 inline void Foam::PDRblock::location::checkIndex(const label i) const
 {
-    if (i < 0 || i >= size())
+    if (i < 0 || i >= nCells())
     {
         FatalErrorInFunction
             << "The index " << i
-            << " is out of range [0," << size() << ']' << nl
+            << " is out of range [0," << nCells() << ']' << nl
             << abort(FatalError);
     }
 }
@@ -79,11 +92,45 @@ inline Foam::scalar Foam::PDRblock::location::width(const label i) const
 
 inline Foam::scalar Foam::PDRblock::location::C(const label i) const
 {
+    if (i == -1)
+    {
+        #ifdef FULLDEBUG
+        checkIndex(0);
+        #endif
+
+        // "Halo" centre [-1] == x0 - 1/2 (x1 - x0)
+        return first() - 0.5*(operator[](1) - first());
+    }
+    else if (i > 1 && i == scalarList::size()-1)
+    {
+        // "Halo" centre [nCells] == xN + 1/2 (xN - xN1)
+        return last() + 0.5*(last() - operator[](scalarList::size()-2));
+    }
+
     #ifdef FULLDEBUG
     checkIndex(i);
     #endif
 
-    return (operator[](i+1) + operator[](i));
+    return 0.5*(operator[](i+1) + operator[](i));
+}
+
+
+inline const Foam::scalar&
+Foam::PDRblock::location::clip(const scalar& val) const
+{
+    if (scalarList::size())
+    {
+        if (val < first())
+        {
+            return first();
+        }
+        else if (last() < val)
+        {
+            return last();
+        }
+    }
+
+    return val; // Pass-through
 }
 
 
@@ -91,6 +138,12 @@ inline const Foam::Vector<Foam::PDRblock::location>&
 Foam::PDRblock::grid() const
 {
     return grid_;
+}
+
+
+inline const Foam::scalar& Foam::PDRblock::minEdgeLen() const
+{
+    return minEdgeLen_;
 }
 
 

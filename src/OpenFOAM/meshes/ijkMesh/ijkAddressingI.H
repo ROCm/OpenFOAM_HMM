@@ -58,6 +58,12 @@ inline Foam::ijkAddressing::ijkAddressing
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+inline bool Foam::ijkAddressing::empty() const
+{
+    return (!sizes_.x() || !sizes_.y() || !sizes_.z());
+}
+
+
 inline const Foam::labelVector& Foam::ijkAddressing::sizes() const
 {
     return sizes_;
@@ -77,9 +83,12 @@ inline Foam::label Foam::ijkAddressing::size() const
 }
 
 
-inline bool Foam::ijkAddressing::empty() const
+inline const Foam::label& Foam::ijkAddressing::size
+(
+    const vector::components cmpt
+) const
 {
-    return (!sizes_.x() || !sizes_.y() || !sizes_.z());
+    return sizes_[cmpt];
 }
 
 

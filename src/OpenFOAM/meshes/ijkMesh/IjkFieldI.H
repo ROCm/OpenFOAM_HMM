@@ -158,6 +158,16 @@ inline Foam::labelVector& Foam::IjkField<Type>::sizes()
 
 
 template<class Type>
+inline const Foam::label& Foam::IjkField<Type>::size
+(
+    const vector::components cmpt
+) const
+{
+    return ijk_.size(cmpt);
+}
+
+
+template<class Type>
 inline void Foam::IjkField<Type>::clear()
 {
     ijk_.clear();

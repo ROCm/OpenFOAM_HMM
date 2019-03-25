@@ -104,6 +104,12 @@ public:
         //- Return i,j,k addressing sizes for modification
         inline labelVector& sizes();
 
+        //- The field size
+        using Field<Type>::size;
+
+        //- The addressing dimension in the given direction
+        inline const label& size(const vector::components cmpt) const;
+
 
     // Edit
 
