@@ -134,6 +134,13 @@ class snappyRefineDriver
             const label maxIter
         );
 
+        //- Block all cells in small gaps
+        label surfaceProximityBlock
+        (
+            const refinementParameters& refineParams,
+            const label maxIter
+        );
+
         //- Refine all cells in large gaps
         label bigGapOnlyRefine
         (

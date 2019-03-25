@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -92,6 +92,7 @@ Foam::refinementParameters::refinementParameters
         dict.lookupOrDefault<Switch>("interfaceRefine", true)
     ),
     nErodeCellZone_(dict.lookupOrDefault<label>("nCellZoneErodeIter", 0)),
+    nFilterIter_(dict.lookupOrDefault<label>("nFilterIter", 2)),
     dryRun_(dryRun)
 {
     point locationInMesh;

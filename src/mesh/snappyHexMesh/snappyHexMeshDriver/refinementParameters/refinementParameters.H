@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2014 OpenFOAM Foundation
@@ -90,7 +90,7 @@ class refinementParameters
             wordList zonesInMesh_;
 
             //- Information on how to handle faces on faceZones
-            dictionary faceZoneControls_;
+            const dictionary faceZoneControls_;
 
 
         //- FaceZone faces allowed which have owner and neighbour in same
@@ -109,6 +109,8 @@ class refinementParameters
         const Switch interfaceRefine_;
 
         const label nErodeCellZone_;
+
+        const label nFilterIter_;
 
         const bool dryRun_;
 
@@ -219,9 +221,17 @@ public:
                 return interfaceRefine_;
             }
 
+            //- Number of iterations of erosion to get a consistent cellZone
             label nErodeCellZone() const
             {
                 return nErodeCellZone_;
+            }
+
+            //- Number of iterations of infill/erosion to get a smoother
+            //  blockage
+            label nFilterIter() const
+            {
+                return nFilterIter_;
             }
 
 

@@ -106,7 +106,7 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
     {
         const fileName rawFName(fName);
 
-        fName = relativeFilePath(io, fName, isGlobal);
+        fName = relativeFilePath(io, rawFName, isGlobal);
 
         if (!exists(fName))
         {

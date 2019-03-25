@@ -88,6 +88,10 @@ class refinementSurfaces
         //- From global region number to small-gap level
         labelList gapLevel_;
 
+        //- From global region number to cell level at which blockage detection
+        //  needs to apply
+        labelList blockLevel_;
+
         //- From global region number to small-gap level specification
         List<FixedList<label, 3>> extendedGapLevel_;
 
@@ -202,6 +206,13 @@ public:
                 return gapLevel_;
             }
 
+            //- From global region number to cell level at which blockage
+            //- detection is applied
+            const labelList& blockLevel() const
+            {
+                return blockLevel_;
+            }
+
             //- From global region number to specification of gap and its
             //  refinement: 3 labels specifying
             //  - minimum wanted number of cells in the gap
@@ -287,25 +298,31 @@ public:
                 labelList& surfaceLevel
             ) const;
 
-            //- Find all intersections of edge. Unsorted order.
-            void findAllHigherIntersections
+            //- Find all intersections of edge with any surface with applicable
+            //  min/max refinement level. Unsorted order.
+            void findAllIntersections
             (
                 const pointField& start,
                 const pointField& end,
                 const labelList& currentLevel,  // current cell refinement level
-                const labelList& globalRegionLevel, // level per surfregion
+
+                const labelList& globalMinLevel,    // level per surfregion
+                const labelList& globalMaxLevel,    // level per surfregion
 
                 List<vectorList>& surfaceNormal,
                 labelListList& surfaceLevel
             ) const;
 
-            //- Find all intersections of edge. Unsorted order.
-            void findAllHigherIntersections
+            //- Find all intersections of edge with any surface with applicable
+            //  min/max refinement level. Unsorted order.
+            void findAllIntersections
             (
                 const pointField& start,
                 const pointField& end,
                 const labelList& currentLevel,  // current cell refinement level
-                const labelList& globalRegionLevel, // level per surfregion
+
+                const labelList& globalMinLevel,    // level per surfregion
+                const labelList& globalMaxLevel,    // level per surfregion
 
                 List<pointList>& surfaceLocation,
                 List<vectorList>& surfaceNormal,

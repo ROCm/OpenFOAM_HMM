@@ -193,6 +193,18 @@ public:
                 return shells_;
             }
 
+            //- Per shell, per region the small-gap level specification
+            const List<List<FixedList<label, 3>>>& extendedGapLevel() const
+            {
+                return extendedGapLevel_;
+            }
+
+            //- Per shell, per region the small-gap level specification
+            const List<List<volumeType>>& extendedGapMode() const
+            {
+                return extendedGapMode_;
+            }
+
         // Query
 
             //- Highest shell level
