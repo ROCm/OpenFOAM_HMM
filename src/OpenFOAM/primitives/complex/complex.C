@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -28,13 +28,12 @@ License
 #include "complex.H"
 #include "IOstreams.H"
 
-#include <sstream>
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::complex::typeName = "complex";
 const Foam::complex Foam::complex::zero(0, 0);
 const Foam::complex Foam::complex::one(1, 1);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -48,9 +47,7 @@ Foam::complex::complex(Istream& is)
 
 Foam::word Foam::name(const complex& c)
 {
-    std::ostringstream buf;
-    buf << '(' << c.Re() << ',' << c.Im() << ')';
-    return buf.str();
+    return '(' + std::to_string(c.Re()) + ',' + std::to_string(c.Im()) + ')';
 }
 
 
@@ -58,12 +55,10 @@ Foam::word Foam::name(const complex& c)
 
 Foam::Istream& Foam::operator>>(Istream& is, complex& c)
 {
-    // Read beginning of complex
     is.readBegin("complex");
 
     is  >> c.re >> c.im;
 
-    // Read end of complex
     is.readEnd("complex");
 
     is.check(FUNCTION_NAME);

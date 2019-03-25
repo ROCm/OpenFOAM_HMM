@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,51 +25,75 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline complex::complex()
+inline constexpr Foam::complex::complex() noexcept
+:
+    re(0),
+    im(0)
 {}
 
 
-inline complex::complex(const scalar Re, const scalar Im)
+inline constexpr Foam::complex::complex(const Foam::zero) noexcept
 :
-    re(Re),
-    im(Im)
+    re(0),
+    im(0)
+{}
+
+
+inline constexpr Foam::complex::complex(const scalar r) noexcept
+:
+    re(r),
+    im(0)
+{}
+
+
+inline constexpr Foam::complex::complex(const scalar r, const scalar i) noexcept
+:
+    re(r),
+    im(i)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline scalar complex::Re() const
+inline void Foam::complex::real(scalar val)
+{
+    re = val;
+}
+
+
+inline void Foam::complex::imag(scalar val)
+{
+    im = val;
+}
+
+
+inline Foam::scalar Foam::complex::Re() const
 {
     return re;
 }
 
 
-inline scalar complex::Im() const
+inline Foam::scalar Foam::complex::Im() const
 {
     return im;
 }
 
 
-inline scalar& complex::Re()
+inline Foam::scalar& Foam::complex::Re()
 {
     return re;
 }
 
 
-inline scalar& complex::Im()
+inline Foam::scalar& Foam::complex::Im()
 {
     return im;
 }
 
 
-inline complex complex::conjugate() const
+inline Foam::complex Foam::complex::conjugate() const
 {
     return complex(re, -im);
 }
@@ -77,85 +101,98 @@ inline complex complex::conjugate() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void complex::operator=(const complex& c)
+inline void Foam::complex::operator=(const complex& c)
 {
     re = c.re;
     im = c.im;
 }
 
 
-inline void complex::operator+=(const complex& c)
+inline void Foam::complex::operator=(const Foam::zero)
+{
+    re = 0;
+    im = 0;
+}
+
+
+inline void Foam::complex::operator+=(const complex& c)
 {
     re += c.re;
     im += c.im;
 }
 
 
-inline void complex::operator-=(const complex& c)
+inline void Foam::complex::operator-=(const complex& c)
 {
     re -= c.re;
     im -= c.im;
 }
 
 
-inline void complex::operator*=(const complex& c)
+inline void Foam::complex::operator*=(const complex& c)
 {
     *this = (*this)*c;
 }
 
 
-inline void complex::operator/=(const complex& c)
+inline void Foam::complex::operator/=(const complex& c)
 {
     *this = *this/c;
 }
 
 
-inline void complex::operator=(const scalar s)
+inline void Foam::complex::operator=(const scalar s)
 {
     re = s;
-    im = 0.0;
+    im = 0;
 }
 
 
-inline void complex::operator+=(const scalar s)
+inline void Foam::complex::operator+=(const scalar s)
 {
     re += s;
 }
 
 
-inline void complex::operator-=(const scalar s)
+inline void Foam::complex::operator-=(const scalar s)
 {
     re -= s;
 }
 
 
-inline void complex::operator*=(const scalar s)
+inline void Foam::complex::operator*=(const scalar s)
 {
     re *= s;
     im *= s;
 }
 
 
-inline void complex::operator/=(const scalar s)
+inline void Foam::complex::operator/=(const scalar s)
 {
     re /= s;
     im /= s;
 }
 
 
-inline complex complex::operator!() const
+inline Foam::complex Foam::complex::operator~() const
 {
     return conjugate();
 }
 
 
-inline bool complex::operator==(const complex& c) const
+inline Foam::complex Foam::complex::operator!() const
+{
+    return conjugate();
+}
+
+
+inline bool Foam::complex::operator==(const complex& c) const
 {
     return (equal(re, c.re) && equal(im, c.im));
 }
 
 
-inline bool complex::operator!=(const complex& c) const
+inline bool Foam::complex::operator!=(const complex& c) const
 {
     return !operator==(c);
 }
@@ -164,9 +201,18 @@ inline bool complex::operator!=(const complex& c) const
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
 
+namespace Foam
+{
+
 inline scalar magSqr(const complex& c)
 {
     return (c.re*c.re + c.im*c.im);
+}
+
+
+inline scalar mag(const complex& c)
+{
+    return sqrt(magSqr(c)); // OR std::hypot(c.re, c.im);
 }
 
 
@@ -176,35 +222,25 @@ inline complex sqr(const complex& c)
 }
 
 
-inline scalar mag(const complex& c)
+inline const complex& min(const complex& c1, const complex& c2)
 {
-    return sqrt(magSqr(c));
+    if (magSqr(c1) < magSqr(c2))
+    {
+        return c1;
+    }
+
+    return c2;
 }
 
 
 inline const complex& max(const complex& c1, const complex& c2)
 {
-    if (mag(c1) > mag(c2))
-    {
-        return c1;
-    }
-    else
+    if (magSqr(c1) < magSqr(c2))
     {
         return c2;
     }
-}
 
-
-inline const complex& min(const complex& c1, const complex& c2)
-{
-    if (mag(c1) < mag(c2))
-    {
-        return c1;
-    }
-    else
-    {
-        return c2;
-    }
+    return c1;
 }
 
 
@@ -220,8 +256,7 @@ inline const complex& sum(const complex& c)
 }
 
 
-template<class Cmpt>
-class Tensor;
+template<class Cmpt> class Tensor;
 
 inline complex transform(const Tensor<scalar>&, const complex c)
 {
@@ -273,7 +308,7 @@ inline complex operator*(const complex& c1, const complex& c2)
 
 inline complex operator/(const complex& c1, const complex& c2)
 {
-    scalar sqrC2 = magSqr(c2);
+    const scalar sqrC2 = magSqr(c2);
 
     return complex
     (

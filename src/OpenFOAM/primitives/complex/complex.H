@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,7 @@ Class
     Foam::complex
 
 Description
-    Extension to the c++ complex library type.
+    A complex number, similar to the C++ complex type.
 
 SourceFiles
     complexI.H
@@ -39,8 +39,8 @@ SourceFiles
 #define complex_H
 
 #include "scalar.H"
-#include "bool.H"
 #include "word.H"
+#include "zero.H"
 #include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,15 +48,14 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class complex;
 
 inline scalar magSqr(const complex&);
-inline complex sqr(const complex&);
 inline scalar mag(const complex&);
-inline const complex& max(const complex&, const complex&);
+inline complex sqr(const complex&);
 inline const complex& min(const complex&, const complex&);
+inline const complex& max(const complex&, const complex&);
 inline complex limit(const complex&, const complex&);
 inline const complex& sum(const complex&);
 inline complex operator+(const complex&, const complex&);
@@ -68,8 +67,9 @@ inline complex operator*(const scalar, const complex&);
 inline complex operator*(const complex&, const scalar);
 inline complex operator/(const complex&, const scalar);
 inline complex operator/(const scalar, const complex&);
-Istream& operator>>(Istream&, complex&);
-Ostream& operator<<(Ostream&, const complex&);
+
+Istream& operator>>(Istream& is, complex& c);
+Ostream& operator<<(Ostream& os, const complex& c);
 
 
 /*---------------------------------------------------------------------------*\
@@ -78,10 +78,11 @@ Ostream& operator<<(Ostream&, const complex&);
 
 class complex
 {
-    // private data
+    // Private Data
 
-        //- Real and imaginary parts of the complex number
+        //- Real and imaginary parts
         scalar re, im;
+
 
 public:
 
@@ -89,103 +90,154 @@ public:
     typedef complex cmptType;
 
 
-    // Static data members
+    // Static Data Members
 
+        //- The type name is "complex"
         static const char* const typeName;
 
+        //- A complex zero (0,0)
         static const complex zero;
+
+        //- A complex one (1,1)
         static const complex one;
 
 
     // Constructors
 
-        //- Construct null
-        inline complex();
+        //- Construct null as zero-initialized
+        inline constexpr complex() noexcept;
 
-        //- Construct given real and imaginary parts
-        inline complex(const scalar Re, const scalar Im);
+        //- Default copy constructor
+        complex(const complex&) = default;
+
+        //- Construct zero-initialized from zero class
+        inline constexpr complex(const Foam::zero) noexcept;
+
+        //- Construct from real component
+        inline explicit constexpr complex(const scalar r) noexcept;
+
+        //- Construct from real and imaginary parts
+        inline constexpr complex(const scalar r, const scalar i) noexcept;
 
         //- Construct from Istream
-        complex(Istream&);
+        explicit complex(Istream& is);
 
 
-    // Member functions
+    // Member Functions
 
-           // Access
+    // STL getter/setter
 
-               inline scalar Re() const;
-               inline scalar Im() const;
+        //- Real part of complex number - STL naming
+        constexpr scalar real() const
+        {
+            return re;
+        }
 
-           // Edit
+        //- Imaginary part of complex number - STL naming
+        constexpr scalar imag() const
+        {
+            return im;
+        }
 
-               inline scalar& Re();
-               inline scalar& Im();
+        //- Set real part of complex number - STL naming
+        inline void real(scalar val);
 
-           // Operators
+        //- Set imaginary part of complex number - STL naming
+        inline void imag(scalar val);
 
-               inline complex conjugate() const;
+
+    // Access
+
+        //- Real part of complex number
+        inline scalar Re() const;
+
+        //- Imaginary part of complex number
+        inline scalar Im() const;
 
 
-    // Member operators
+    // Edit
 
-        inline void operator=(const complex&);
-        inline void operator+=(const complex&);
-        inline void operator-=(const complex&);
-        inline void operator*=(const complex&);
-        inline void operator/=(const complex&);
+        //- Real part of complex number
+        inline scalar& Re();
 
-        inline void operator=(const scalar);
-        inline void operator+=(const scalar);
-        inline void operator-=(const scalar);
-        inline void operator*=(const scalar);
-        inline void operator/=(const scalar);
+        //- Imaginary part of complex number
+        inline scalar& Im();
 
+
+    // Operations
+
+        //- Complex conjugate
+        inline complex conjugate() const;
+
+
+    // Member Operators
+
+        //- Copy assignment
+        inline void operator=(const complex& c);
+
+        //- Assign zero
+        inline void operator=(const Foam::zero);
+
+        inline void operator+=(const complex& c);
+        inline void operator-=(const complex& c);
+        inline void operator*=(const complex& c);
+        inline void operator/=(const complex& c);
+
+        inline void operator=(const scalar s);
+        inline void operator+=(const scalar s);
+        inline void operator-=(const scalar s);
+        inline void operator*=(const scalar s);
+        inline void operator/=(const scalar s);
+
+        //- Conjugate
+        inline complex operator~() const;
+
+        //- Conjugate
         inline complex operator!() const;
 
-        inline bool operator==(const complex&) const;
-        inline bool operator!=(const complex&) const;
+        inline bool operator==(const complex& c) const;
+        inline bool operator!=(const complex& c) const;
 
 
-    // Friend functions
+    // Friend Functions
 
         friend scalar magSqr(const complex& c);
-        friend complex sqr(const complex& c);
         friend scalar mag(const complex& c);
-        friend const complex& max(const complex&, const complex&);
+        friend complex sqr(const complex& c);
         friend const complex& min(const complex&, const complex&);
+        friend const complex& max(const complex&, const complex&);
 
         friend complex limit(const complex&, const complex&);
 
         friend const complex& sum(const complex&);
 
 
-    // Friend operators
+    // Friend Operators
 
-        friend complex operator+(const complex&, const complex&);
-        friend complex operator-(const complex&);
-        friend complex operator-(const complex&, const complex&);
-        friend complex operator*(const complex&, const complex&);
-        friend complex operator/(const complex&, const complex&);
+        friend complex operator+(const complex& c1, const complex& c2);
+        friend complex operator-(const complex& c);
+        friend complex operator-(const complex& c1, const complex& c2);
+        friend complex operator*(const complex& c1, const complex& c2);
+        friend complex operator/(const complex& c1, const complex& c2);
 
-        friend complex operator*(const scalar, const complex&);
-        friend complex operator*(const complex&, const scalar);
-        friend complex operator/(const complex&, const scalar);
-        friend complex operator/(const scalar, const complex&);
+        friend complex operator*(const scalar s, const complex& c);
+        friend complex operator*(const complex& c, const scalar s);
+        friend complex operator/(const complex& c, const scalar s);
+        friend complex operator/(const scalar s, const complex& c);
 
 
-    // IOstream operators
+    // IOstream Operators
 
-        friend Istream& operator>>(Istream&, complex&);
-        friend Ostream& operator<<(Ostream&, const complex&);
-
+        friend Istream& operator>>(Istream& is, complex& c);
+        friend Ostream& operator<<(Ostream& os, const complex& c);
 };
 
 
-// * * * * * * * * * * * * * * Global functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-//- Return a string representation of a complex
-word name(const complex&);
 
+//- Return string representation of complex
+word name(const complex& c);
 
 //- Data associated with complex type are contiguous
 template<>

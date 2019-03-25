@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -44,13 +44,13 @@ const char* const Foam::complexVector::vsType::componentNames[] =
 template<>
 const Foam::complexVector Foam::complexVector::vsType::zero
 (
-    complexVector::uniform(complex(0, 0))
+    complexVector::uniform(complex::zero)
 );
 
 template<>
 const Foam::complexVector Foam::complexVector::vsType::one
 (
-    complexVector::uniform(complex(1, 1))
+    complexVector::uniform(complex::one)
 );
 
 template<>

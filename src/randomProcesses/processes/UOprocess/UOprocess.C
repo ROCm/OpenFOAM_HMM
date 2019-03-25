@@ -51,7 +51,6 @@ complexVector UOprocess::WeinerProcess()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 UOprocess::UOprocess
 (
     const Kmesh& kmesh,
@@ -85,12 +84,7 @@ UOprocess::UOprocess
         }
         else
         {
-            UOfield[i] = complexVector
-            (
-                complex(0, 0),
-                complex(0, 0),
-                complex(0, 0)
-            );
+            UOfield[i] = complexVector::zero;
         }
     }
 }
