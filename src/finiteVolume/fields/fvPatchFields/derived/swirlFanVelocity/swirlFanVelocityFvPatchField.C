@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,8 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
 {
     if (this->cyclicPatch().owner())
     {
+        const scalar rpm = rpm_->value(this->db().time().timeOutputValue());
+
         const surfaceScalarField& phi =
             db().lookupObject<surfaceScalarField>(phiName_);
 
@@ -80,7 +82,7 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
                 if (rMag > rInner_ && rMag < rOuter_)
                 {
                     magTangU[i] =
-                        deltaP[i]/rMag/fanEff_/rpmToRads(rpm_);
+                        deltaP[i]/rMag/fanEff_/rpmToRads(rpm);
                 }
             }
         }
@@ -94,7 +96,7 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
                     << exit(FatalError);
             }
             magTangU =
-                deltaP/rEff_/fanEff_/rpmToRads(rpm_);
+                deltaP/rEff_/fanEff_/rpmToRads(rpm);
         }
 
         // Calculate the tangential velocity
@@ -119,7 +121,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     pName_("p"),
     rhoName_("rho"),
     origin_(),
-    rpm_(0.0),
+    rpm_(),
     rEff_(0.0),
     fanEff_(1.0),
     useRealRadius_(false),
@@ -149,7 +151,13 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
           : Zero
         )
     ),
-    rpm_(dict.lookupOrDefault<scalar>("rpm", 0)),
+    rpm_
+    (
+        this->cyclicPatch().owner()
+      ? Function1<scalar>::New("rpm", dict)
+      : nullptr
+
+    ),
     rEff_(dict.lookupOrDefault<scalar>("rEff", 0)),
     fanEff_(dict.lookupOrDefault<scalar>("fanEff", 1)),
     useRealRadius_(dict.lookupOrDefault("useRealRadius", false)),
@@ -171,7 +179,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     pName_(ptf.pName_),
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
-    rpm_(ptf.rpm_),
+    rpm_(ptf.rpm_.clone()),
     rEff_(ptf.rEff_),
     fanEff_(ptf.fanEff_),
     useRealRadius_(ptf.useRealRadius_),
@@ -190,7 +198,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     pName_(ptf.pName_),
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
-    rpm_(ptf.rpm_),
+    rpm_(ptf.rpm_.clone()),
     rEff_(ptf.rEff_),
     useRealRadius_(ptf.useRealRadius_),
     rInner_(ptf.rInner_),
@@ -209,7 +217,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     pName_(ptf.pName_),
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
-    rpm_(ptf.rpm_),
+    rpm_(ptf.rpm_.clone()),
     rEff_(ptf.rEff_),
     useRealRadius_(ptf.useRealRadius_),
     rInner_(ptf.rInner_),
@@ -240,7 +248,7 @@ void Foam::swirlFanVelocityFvPatchField::write(Ostream& os) const
         os.writeEntryIfDifferent<word>("p", "p", pName_);
         os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
         os.writeEntry("origin", origin_);
-        os.writeEntry("rpm", rpm_);
+        rpm_->writeData(os);
 
         os.writeEntryIfDifferent<scalar>("rEff", 0.0, rEff_);
         os.writeEntryIfDifferent<bool>("useRealRadius", false, useRealRadius_);
