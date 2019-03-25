@@ -1191,13 +1191,14 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
         // Per segment the list of levels of the surfaces
         labelListList surfaceLevel;
 
-        surfaces_.findAllHigherIntersections
+        surfaces_.findAllIntersections
         (
             start,
             end,
             minLevel,           // max level of surface has to be bigger
                                 // than min level of neighbouring cells
 
+            labelList(surfaces_.maxLevel().size(), 0),  // min level
             surfaces_.maxLevel(),
 
             surfaceNormal,
@@ -1572,13 +1573,17 @@ bool Foam::meshRefinement::isGap
 bool Foam::meshRefinement::isNormalGap
 (
     const scalar planarCos,
+    const label level0,
     const vector& point0,
     const vector& normal0,
 
+    const label level1,
     const vector& point1,
     const vector& normal1
 ) const
 {
+    //const scalar edge0Len = meshCutter_.level0EdgeLength();
+
     //- Hits differ and angles are oppositeish and
     //  hits have a normal distance
     vector d = point1-point0;
@@ -1588,24 +1593,31 @@ bool Foam::meshRefinement::isNormalGap
     {
         scalar cosAngle = (normal0 & normal1);
 
-        vector avg = Zero;
+        vector avgNormal = Zero;
         if (cosAngle < (-1+planarCos))
         {
             // Opposite normals
-            avg = 0.5*(normal0-normal1);
+            avgNormal = 0.5*(normal0-normal1);
         }
         else if (cosAngle > (1-planarCos))
         {
-            avg = 0.5*(normal0+normal1);
+            avgNormal = 0.5*(normal0+normal1);
         }
 
-        if (avg != vector::zero)
+        if (avgNormal != vector::zero)
         {
-            avg /= mag(avg);
-            d /= magD;
+            avgNormal /= mag(avgNormal);
+
+            //scalar normalDist = mag(d&avgNormal);
+            //const scalar avgCellSize = edge0Len/pow(2.0, 0.5*(level0+level1));
+            //if (normalDist > 1*avgCellSize)
+            //{
+            //    Pout<< "** skipping large distance " << endl;
+            //    return false;
+            //}
 
             // Check average normal with respect to intersection locations
-            if (mag(avg&d) > Foam::cos(degToRad(45.0)))
+            if (mag(avgNormal&d/magD) > Foam::cos(degToRad(45.0)))
             {
                 return true;
             }
@@ -1628,7 +1640,7 @@ bool Foam::meshRefinement::checkProximity
     const label cellI,
 
     label& cellMaxLevel,        // cached max surface level for this cell
-    vector& cellMaxLocation,    // cached surface normal for this cell
+    vector& cellMaxLocation,    // cached surface location for this cell
     vector& cellMaxNormal,      // cached surface normal for this cell
 
     labelList& refineCell,
@@ -1657,8 +1669,10 @@ bool Foam::meshRefinement::checkProximity
             bool closeSurfaces = isNormalGap
             (
                 planarCos,
+                cellLevel[cellI],   //cellMaxLevel,
                 cellMaxLocation,
                 cellMaxNormal,
+                cellLevel[cellI],   //surfaceLevel,
                 surfaceLocation,
                 surfaceNormal
             );
@@ -1702,6 +1716,10 @@ bool Foam::meshRefinement::checkProximity
 Foam::label Foam::meshRefinement::markProximityRefinement
 (
     const scalar planarCos,
+
+    const labelList& surfaceMinLevel,
+    const labelList& surfaceMaxLevel,
+
     const label nAllowRefine,
     const labelList& neiLevel,
     const pointField& neiCc,
@@ -1723,7 +1741,7 @@ Foam::label Foam::meshRefinement::markProximityRefinement
 
     // Collect candidate faces (i.e. intersecting any surface and
     // owner/neighbour not yet refined.
-    labelList testFaces(getRefineCandidateFaces(refineCell));
+    const labelList testFaces(getRefineCandidateFaces(refineCell));
 
     // Collect segments
     pointField start(testFaces.size());
@@ -1755,14 +1773,15 @@ Foam::label Foam::meshRefinement::markProximityRefinement
         // Per segment the list of levels of the surfaces
         labelListList surfaceLevel;
 
-        surfaces_.findAllHigherIntersections
+        surfaces_.findAllIntersections
         (
             start,
             end,
             minLevel,           // gap level of surface has to be bigger
                                 // than min level of neighbouring cells
 
-            surfaces_.gapLevel(),
+            surfaceMinLevel,
+            surfaceMaxLevel,
 
             surfaceLocation,
             surfaceNormal,
@@ -1777,7 +1796,7 @@ Foam::label Foam::meshRefinement::markProximityRefinement
         //OBJstream str
         //(
         //    mesh_.time().path()
-        //  / "findAllHigherIntersections_"
+        //  / "findAllIntersections_"
         //  + mesh_.time().timeName()
         //  + ".obj"
         //);
@@ -1785,7 +1804,7 @@ Foam::label Foam::meshRefinement::markProximityRefinement
         //OBJstream str2
         //(
         //    mesh_.time().path()
-        //  / "findAllHigherIntersections2_"
+        //  / "findAllIntersections2_"
         //  + mesh_.time().timeName()
         //  + ".obj"
         //);
@@ -1884,8 +1903,10 @@ Foam::label Foam::meshRefinement::markProximityRefinement
                 isNormalGap
                 (
                     planarCos,
+                    cellLevel[own], //cellMaxLevel[own],
                     cellMaxLocation[own],
                     cellMaxNormal[own],
+                    cellLevel[nei], //cellMaxLevel[nei],
                     cellMaxLocation[nei],
                     cellMaxNormal[nei]
                 )
@@ -1954,8 +1975,10 @@ Foam::label Foam::meshRefinement::markProximityRefinement
                 isNormalGap
                 (
                     planarCos,
+                    cellLevel[own], //cellMaxLevel[own],
                     cellMaxLocation[own],
                     cellMaxNormal[own],
+                    neiLevel[bFaceI], //neiBndMaxLevel[bFaceI],
                     neiBndMaxLocation[bFaceI],
                     neiBndMaxNormal[bFaceI]
                 )
@@ -2217,19 +2240,25 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         // Refinement based on gap (only neighbouring cells)
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        const labelList& surfaceGapLevel = surfaces_.gapLevel();
+
         if
         (
             gapRefinement
          && (planarCos >= -1 && planarCos <= 1)
-         && (max(surfaces_.gapLevel()) > -1)
+         && (max(surfaceGapLevel) > -1)
         )
         {
-            Info<< "Specified gap level : " << max(surfaces_.gapLevel())
+            Info<< "Specified gap level : " << max(surfaceGapLevel)
                 << ", planar angle " << planarAngle << endl;
 
             label nGap = markProximityRefinement
             (
                 planarCos,
+
+                labelList(surfaceGapLevel.size(), -1),  // surface min level
+                surfaceGapLevel,                        // surface max level
+
                 nAllowRefine,
                 neiLevel,
                 neiCc,

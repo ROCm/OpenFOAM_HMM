@@ -42,8 +42,6 @@ License
 
 #include "snapParameters.H"
 #include "motionSmoother.H"
-#include "topoDistanceData.H"
-#include "FaceCellWave.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -372,94 +370,6 @@ bool Foam::meshRefinement::isCollapsedCell
     {
         return false;
     }
-}
-
-
-Foam::labelList Foam::meshRefinement::nearestPatch
-(
-    const labelList& adaptPatchIDs
-) const
-{
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    labelList nearestAdaptPatch;
-
-    if (adaptPatchIDs.size())
-    {
-        nearestAdaptPatch.setSize(mesh_.nFaces(), adaptPatchIDs[0]);
-
-
-        // Count number of faces in adaptPatchIDs
-        label nFaces = 0;
-        forAll(adaptPatchIDs, i)
-        {
-            const polyPatch& pp = patches[adaptPatchIDs[i]];
-            nFaces += pp.size();
-        }
-
-        // Field on cells and faces.
-        List<topoDistanceData> cellData(mesh_.nCells());
-        List<topoDistanceData> faceData(mesh_.nFaces());
-
-        // Start of changes
-        labelList patchFaces(nFaces);
-        List<topoDistanceData> patchData(nFaces);
-        nFaces = 0;
-        forAll(adaptPatchIDs, i)
-        {
-            label patchi = adaptPatchIDs[i];
-            const polyPatch& pp = patches[patchi];
-
-            forAll(pp, i)
-            {
-                patchFaces[nFaces] = pp.start()+i;
-                patchData[nFaces] = topoDistanceData(patchi, 0);
-                nFaces++;
-            }
-        }
-
-        // Propagate information inwards
-        FaceCellWave<topoDistanceData> deltaCalc
-        (
-            mesh_,
-            patchFaces,
-            patchData,
-            faceData,
-            cellData,
-            mesh_.globalData().nTotalCells()+1
-        );
-
-        // And extract
-
-        bool haveWarned = false;
-        forAll(faceData, facei)
-        {
-            if (!faceData[facei].valid(deltaCalc.data()))
-            {
-                if (!haveWarned)
-                {
-                    WarningInFunction
-                        << "Did not visit some faces, e.g. face " << facei
-                        << " at " << mesh_.faceCentres()[facei] << endl
-                        << "Assigning  these cells to patch "
-                        << adaptPatchIDs[0]
-                        << endl;
-                    haveWarned = true;
-                }
-            }
-            else
-            {
-                nearestAdaptPatch[facei] = faceData[facei].data();
-            }
-        }
-    }
-    else
-    {
-        // Use patch 0
-        nearestAdaptPatch.setSize(mesh_.nFaces(), 0);
-    }
-
-    return nearestAdaptPatch;
 }
 
 

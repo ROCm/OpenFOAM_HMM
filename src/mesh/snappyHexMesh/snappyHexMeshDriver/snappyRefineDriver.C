@@ -549,6 +549,22 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
 
         if (debug&meshRefinement::MESH)
         {
+            Pout<< "Writing current mesh to time "
+                << meshRefiner_.timeName() << endl;
+            meshRefiner_.write
+            (
+                meshRefinement::debugType(debug),
+                meshRefinement::writeType
+                (
+                    meshRefinement::writeLevel()
+                  | meshRefinement::WRITEMESH
+                ),
+                mesh.time().path()/meshRefiner_.timeName()
+            );
+            Pout<< "Dumped mesh in = "
+                << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
+
+
             Pout<< "Dumping " << candidateCells.size()
                 << " cells to cellSet candidateCellsFromGap." << endl;
             cellSet c(mesh, "candidateCellsFromGap", candidateCells);
@@ -716,6 +732,56 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
 }
 
 
+Foam::label Foam::snappyRefineDriver::surfaceProximityBlock
+(
+    const refinementParameters& refineParams,
+    const label maxIter
+)
+{
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
+    fvMesh& mesh = meshRefiner_.mesh();
+
+    if (min(meshRefiner_.surfaces().blockLevel()) == labelMax)
+    {
+        return 0;
+    }
+
+    label iter = 0;
+
+    for (iter = 0; iter < maxIter; iter++)
+    {
+        Info<< nl
+            << "Gap blocking iteration " << iter << nl
+            << "------------------------" << nl
+            << endl;
+
+
+        // Determine cells to block
+        // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+        meshRefiner_.removeGapCells
+        (
+            refineParams.planarAngle(),
+            meshRefiner_.surfaces().blockLevel(),
+            globalToMasterPatch_,
+            refineParams.nFilterIter()
+        );
+
+        if (debug)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
+    }
+    return iter;
+}
+
+
 Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
 (
     const refinementParameters& refineParams,
@@ -787,6 +853,21 @@ Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
 
         if (debug&meshRefinement::MESH)
         {
+            Pout<< "Writing current mesh to time "
+                << meshRefiner_.timeName() << endl;
+            meshRefiner_.write
+            (
+                meshRefinement::debugType(debug),
+                meshRefinement::writeType
+                (
+                    meshRefinement::writeLevel()
+                  | meshRefinement::WRITEMESH
+                ),
+                mesh.time().path()/meshRefiner_.timeName()
+            );
+            Pout<< "Dumped mesh in = "
+                << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
+
             Pout<< "Dumping " << candidateCells.size()
                 << " cells to cellSet candidateCellsFromBigGap." << endl;
             cellSet c(mesh, "candidateCellsFromBigGap", candidateCells);
@@ -1421,7 +1502,7 @@ void Foam::snappyRefineDriver::removeInsideCells
     );
 
     // Fix any additional (e.g. locationsOutsideMesh). Note: probably not
-    // nessecary.
+    // necessary.
     meshRefiner_.splitMesh
     (
         nBufferLayers,                  // nBufferLayers
@@ -2857,6 +2938,13 @@ void Foam::snappyRefineDriver::doRefine
     (
         refineParams,
         100     // maxIter
+    );
+
+    // Remove cells inbetween two surfaces
+    surfaceProximityBlock
+    (
+        refineParams,
+        1  //100     // maxIter
     );
 
     // Remove cells (a certain distance) beyond surface intersections
