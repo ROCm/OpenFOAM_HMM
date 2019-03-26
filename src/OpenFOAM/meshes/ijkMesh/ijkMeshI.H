@@ -143,13 +143,13 @@ inline Foam::label Foam::ijkMesh::nBoundaryFaces
             return n.y()*n.z();
             break;
 
-        // Face 2, 3 == y-min, y-max
+        // Face 2,3 == y-min, y-max
         case 2:
         case 3:
             return n.z()*n.x();
             break;
 
-        // Face 4, 5 == z-min, z-max
+        // Face 4,5 == z-min, z-max
         case 4:
         case 5:
             return n.x()*n.y();

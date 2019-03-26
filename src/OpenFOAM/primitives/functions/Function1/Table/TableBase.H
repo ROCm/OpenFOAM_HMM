@@ -62,7 +62,7 @@ class TableBase
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Table name
         const word name_;
@@ -92,9 +92,6 @@ protected:
 
         //- Return (demand driven) interpolator
         const interpolationWeights& interpolator() const;
-
-
-private:
 
         //- No copy assignment
         void operator=(const TableBase<Type>&) = delete;

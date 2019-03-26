@@ -104,51 +104,51 @@ Foam::instantList Foam::fileOperation::sortTimes
 )
 {
     // Initialise instant list
-    instantList Times(dirEntries.size() + 1);
+    instantList times(dirEntries.size() + 1);
     label nTimes = 0;
 
     // Check for "constant"
     bool haveConstant = false;
-    forAll(dirEntries, i)
+    for (const fileName& dirName : dirEntries)
     {
-        if (dirEntries[i] == constantName)
+        if (dirName == constantName)
         {
-            Times[nTimes].value() = 0;
-            Times[nTimes].name() = dirEntries[i];
-            nTimes++;
             haveConstant = true;
+            times[nTimes].value() = 0;
+            times[nTimes].name() = constantName;
+            ++nTimes;
             break;
         }
     }
 
     // Read and parse all the entries in the directory
-    forAll(dirEntries, i)
+    for (const fileName& dirName : dirEntries)
     {
         scalar timeValue;
-        if (readScalar(dirEntries[i], timeValue))
+        if (readScalar(dirName, timeValue))
         {
-            Times[nTimes].value() = timeValue;
-            Times[nTimes].name() = dirEntries[i];
-            nTimes++;
+            times[nTimes].value() = timeValue;
+            times[nTimes].name() = dirName;
+            ++nTimes;
         }
     }
 
     // Reset the length of the times list
-    Times.setSize(nTimes);
+    times.setSize(nTimes);
 
     if (haveConstant)
     {
         if (nTimes > 2)
         {
-            std::sort(&Times[1], Times.end(), instant::less());
+            std::sort(&times[1], times.end(), instant::less());
         }
     }
     else if (nTimes > 1)
     {
-        std::sort(&Times[0], Times.end(), instant::less());
+        std::sort(&times[0], times.end(), instant::less());
     }
 
-    return Times;
+    return times;
 }
 
 
@@ -161,15 +161,15 @@ void Foam::fileOperation::mergeTimes
 {
     if (extraTimes.size())
     {
-        bool haveConstant =
+        const bool haveConstant =
         (
-            times.size() > 0
+            times.size()
          && times[0].name() == constantName
         );
 
-        bool haveExtraConstant =
+        const bool haveExtraConstant =
         (
-            extraTimes.size() > 0
+            extraTimes.size()
          && extraTimes[0].name() == constantName
         );
 
@@ -228,9 +228,7 @@ void Foam::fileOperation::mergeTimes
 
 bool Foam::fileOperation::isFileOrDir(const bool isFile, const fileName& f)
 {
-    return
-        (isFile && Foam::isFile(f))
-     || (!isFile && Foam::isDir(f));
+    return (isFile ? Foam::isFile(f) : Foam::isDir(f));
 }
 
 
@@ -431,10 +429,8 @@ Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::New
     bool verbose
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing fileHandler" << endl;
-    }
+    DebugInFunction
+        << "Constructing fileHandler" << endl;
 
     auto cstrIter = wordConstructorTablePtr_->cfind(handlerType);
 
@@ -570,14 +566,12 @@ Foam::fileName Foam::fileOperation::filePath(const fileName& fName) const
         }
         return fName;
     }
-    else
+
+    if (debug)
     {
-        if (debug)
-        {
-            Pout<< "fileOperation::filePath : Not found" << endl;
-        }
-        return fileName::null;
+        Pout<< "fileOperation::filePath : Not found" << endl;
     }
+    return fileName::null;
 }
 
 
@@ -755,13 +749,10 @@ Foam::IOobject Foam::fileOperation::findInstance
 
     if (exists(io))
     {
-        if (debug)
-        {
-            InfoInFunction
-                << "Found exact match for \"" << io.name()
-                << "\" in " << io.instance()/io.local()
-                << endl;
-        }
+        DebugInFunction
+            << "Found exact match for \"" << io.name()
+            << "\" in " << io.instance()/io.local()
+            << endl;
 
         return io;
     }
@@ -770,9 +761,9 @@ Foam::IOobject Foam::fileOperation::findInstance
     // closest to and lower than current time
 
     instantList ts = time.times();
-    label instanceI;
+    label instanceI = ts.size()-1;
 
-    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
+    for (; instanceI >= 0; --instanceI)
     {
         if (ts[instanceI].value() <= startValue)
         {
@@ -780,7 +771,7 @@ Foam::IOobject Foam::fileOperation::findInstance
         }
     }
 
-    // continue searching from here
+    // Continue searching from here
     for (; instanceI >= 0; --instanceI)
     {
         // Shortcut: if actual directory is the timeName we've already tested it
@@ -796,13 +787,10 @@ Foam::IOobject Foam::fileOperation::findInstance
         io.instance() = ts[instanceI].name();
         if (exists(io))
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Found exact match for \"" << io.name()
-                    << "\" in " << io.instance()/io.local()
-                    << endl;
-            }
+            DebugInFunction
+                << "Found exact match for \"" << io.name()
+                << "\" in " << io.instance()/io.local()
+                << endl;
 
             return io;
         }
@@ -810,11 +798,8 @@ Foam::IOobject Foam::fileOperation::findInstance
         // Check if hit minimum instance
         if (ts[instanceI].name() == stopInstance)
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Hit stopInstance " << stopInstance << endl;
-            }
+            DebugInFunction
+                << "Hit stopInstance " << stopInstance << endl;
 
             if
             (
@@ -845,27 +830,30 @@ Foam::IOobject Foam::fileOperation::findInstance
         }
     }
 
-    // times() usually already includes the constant() so would have been
-    // checked above. Re-test if
-    // - times() is empty. Sometimes this can happen (e.g. decomposePar with
-    //   collated)
-    // - times()[0] is not constant
-    if (!ts.size() || ts[0].name() != time.constant())
-    {
-        // Note. This needs to be a hard-coded constant, rather than the
-        // constant function of the time, because the latter points to
-        // the case constant directory in parallel cases
+    // Times usually already includes 'constant' so would have been checked
+    // above.
+    // However, re-test under these conditions:
+    // - Times is empty.
+    //   Sometimes this can happen (eg, decomposePar with collated)
+    // - Times[0] is not constant
+    // - The startValue is negative (eg, kivaTest).
+    //   This plays havoc with the reverse search, causing it to miss 'constant'
 
+    if
+    (
+        ts.empty()
+     || ts.first().name() != time.constant()
+     || startValue < 0
+    )
+    {
         io.instance() = time.constant();
         if (exists(io))
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Found constant match for \"" << io.name()
-                    << "\" in " << io.instance()/io.local()
-                    << endl;
-            }
+            DebugInFunction
+                << "Found constant match for \"" << io.name()
+                << "\" in " << io.instance()/io.local()
+                << endl;
+
             return io;
         }
     }

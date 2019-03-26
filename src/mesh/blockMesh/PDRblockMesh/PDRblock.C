@@ -39,7 +39,86 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+bool Foam::PDRblock::checkMonotonic
+(
+    const direction cmpt,
+    const UList<scalar>& pts
+)
+{
+    const label len = pts.size();
+
+    if (!len)
+    {
+        return false;
+    }
+
+    const scalar& minVal = pts[0];
+
+    for (label i=1; i < len; ++i)
+    {
+        if (pts[i] <= minVal)
+        {
+            FatalErrorInFunction
+                << "Points in " << vector::componentNames[cmpt]
+                << " direction do not increase monotonically" << nl
+                << flatOutput(pts) << nl << nl
+                << exit(FatalError);
+        }
+    }
+
+    return true;
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::PDRblock::adjustSizes()
+{
+    // Adjust i-j-k addressing
+    sizes().x() = grid_.x().nCells();
+    sizes().y() = grid_.y().nCells();
+    sizes().z() = grid_.z().nCells();
+
+    if (sizes().x() <= 0 || sizes().y() <= 0 || sizes().z() <= 0)
+    {
+        // Sanity check. Silently disallow bad sizing
+        ijkMesh::clear();
+
+        grid_.x().clear();
+        grid_.y().clear();
+        grid_.z().clear();
+
+        bounds_ = boundBox::invertedBox;
+        minEdgeLen_ = Zero;
+        return;
+    }
+
+    // Adjust boundBox
+    bounds_.min().x() = grid_.x().first();
+    bounds_.min().y() = grid_.y().first();
+    bounds_.min().z() = grid_.z().first();
+
+    bounds_.max().x() = grid_.x().last();
+    bounds_.max().y() = grid_.y().last();
+    bounds_.max().z() = grid_.z().last();
+
+    // Min edge length
+    minEdgeLen_ = GREAT;
+
+    for (direction cmpt=0; cmpt < vector::nComponents; ++cmpt)
+    {
+        const label nEdge = grid_[cmpt].nCells();
+
+        for (label edgei=0; edgei < nEdge; ++edgei)
+        {
+            const scalar len = grid_[cmpt].width(edgei);
+            minEdgeLen_ = min(minEdgeLen_, len);
+        }
+    }
+}
+
 
 void Foam::PDRblock::readGridControl
 (
@@ -89,22 +168,7 @@ void Foam::PDRblock::readGridControl
     }
 
     // Do points increase monotonically?
-    {
-        const scalar& minVal = knots.first();
-
-        for (label pointi = 1; pointi < knots.size(); ++pointi)
-        {
-            if (knots[pointi] <= minVal)
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Points are not monotonically increasing:"
-                    << " in " << vector::componentNames[cmpt]
-                    << " direction" << nl
-                    << exit(FatalIOError);
-            }
-        }
-    }
-
+    checkMonotonic(cmpt, knots);
 
     if (verbose_)
     {
@@ -394,6 +458,33 @@ void Foam::PDRblock::readBoundary(const dictionary& dict)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::PDRblock::PDRblock
+(
+    const UList<scalar>& xgrid,
+    const UList<scalar>& ygrid,
+    const UList<scalar>& zgrid
+)
+:
+    PDRblock()
+{
+    // Default boundaries with patchi == shapeFacei
+    patches_.resize(6);
+    for (label patchi=0; patchi < 6; ++patchi)
+    {
+        patches_.set(patchi, new boundaryEntry());
+
+        boundaryEntry& bentry = patches_[patchi];
+
+        bentry.name_ = "patch" + Foam::name(patchi);
+        bentry.type_ = "patch";
+        bentry.size_ = 0;
+        bentry.faces_ = labelList(one(), patchi);
+    }
+
+    reset(xgrid, ygrid, zgrid);
+}
+
+
 Foam::PDRblock::PDRblock(const dictionary& dict, bool verbose)
 :
     PDRblock()
@@ -411,28 +502,92 @@ bool Foam::PDRblock::read(const dictionary& dict)
     // Mark no scaling with invalid value
     const scalar scaleFactor = dict.lookupOrDefault<scalar>("scale", -1);
 
-    // Grid controls
     readGridControl(0, dict.subDict("x"), scaleFactor);
     readGridControl(1, dict.subDict("y"), scaleFactor);
     readGridControl(2, dict.subDict("z"), scaleFactor);
 
-    // Adjust i-j-k addressing
-    sizes().x() = grid_.x().nCells();
-    sizes().y() = grid_.y().nCells();
-    sizes().z() = grid_.z().nCells();
+    adjustSizes();
 
-    // Adjust boundBox
-    bounds_.min().x() = grid_.x().first();
-    bounds_.min().y() = grid_.y().first();
-    bounds_.min().z() = grid_.z().first();
-
-    bounds_.max().x() = grid_.x().last();
-    bounds_.max().y() = grid_.y().last();
-    bounds_.max().z() = grid_.z().last();
-
-
-    // Boundaries
     readBoundary(dict);
+
+    return true;
+}
+
+
+void Foam::PDRblock::reset
+(
+    const UList<scalar>& xgrid,
+    const UList<scalar>& ygrid,
+    const UList<scalar>& zgrid
+)
+{
+    static_cast<scalarList&>(grid_.x()) = xgrid;
+    static_cast<scalarList&>(grid_.y()) = ygrid;
+    static_cast<scalarList&>(grid_.z()) = zgrid;
+
+    #ifdef FULLDEBUG
+    for (direction cmpt=0; cmpt < vector::nComponents; ++cmpt)
+    {
+        checkMonotonic(cmpt, grid_[cmpt]);
+    }
+    #endif
+
+    adjustSizes();
+
+    // Adjust boundaries
+    for (boundaryEntry& bentry : patches_)
+    {
+        bentry.size_ = 0;
+
+        // Count patch faces
+        for (const label shapeFacei : bentry.faces_)
+        {
+            bentry.size_ += nBoundaryFaces(shapeFacei);
+        }
+    }
+}
+
+
+bool Foam::PDRblock::findCell(const point& pt, labelVector& pos) const
+{
+    // Out-of-bounds is handled explicitly, for efficiency and consistency,
+    // but principally to ensure that findLower() returns a valid
+    // result when the point is to the right of the bounds.
+
+    // Since findLower returns the lower index, it corresponds to the
+    // cell in which the point is found
+
+    if (!bounds_.contains(pt))
+    {
+        return false;
+    }
+
+    for (direction cmpt=0; cmpt < labelVector::nComponents; ++cmpt)
+    {
+        // Binary search
+        pos[cmpt] = findLower(grid_[cmpt], pt[cmpt]);
+    }
+
+    return true;
+}
+
+
+bool Foam::PDRblock::gridIndex
+(
+    const point& pt,
+    labelVector& pos,
+    const scalar relTol
+) const
+{
+    const scalar tol = relTol * minEdgeLen_;
+
+    for (direction cmpt=0; cmpt < labelVector::nComponents; ++cmpt)
+    {
+        // Linear search
+        pos[cmpt] = grid_[cmpt].findIndex(pt[cmpt], tol);
+
+        if (pos[cmpt] < 0) return false;
+    }
 
     return true;
 }
@@ -440,21 +595,31 @@ bool Foam::PDRblock::read(const dictionary& dict)
 
 Foam::labelVector Foam::PDRblock::findCell(const point& pt) const
 {
-    // Out-of-bounds is handled explicitly, for efficiency and consistency,
-    // but principally to ensure that findLower() returns a valid
-    // result when the point is to the right of the bounds.
+    labelVector pos;
 
-    labelVector pos(-1,-1,-1);
-    if (bounds_.contains(pt))
+    if (findCell(pt, pos))
     {
-        for (direction cmpt=0; cmpt < labelVector::nComponents; ++cmpt)
-        {
-            // Binary search
-            pos[cmpt] = findLower(grid_[cmpt], pt[cmpt]);
-        }
+        return pos;
     }
 
-    return pos;
+    return labelVector(-1,-1,-1);
+}
+
+
+Foam::labelVector Foam::PDRblock::gridIndex
+(
+    const point& pt,
+    const scalar relTol
+) const
+{
+    labelVector pos;
+
+    if (gridIndex(pt, pos, relTol))
+    {
+        return pos;
+    }
+
+    return labelVector(-1,-1,-1);
 }
 
 

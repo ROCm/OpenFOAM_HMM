@@ -98,25 +98,8 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
             if (sampledPtr_().interpolate())
             {
                 const interpolationCellPoint<Type> interp(fld);
-                tmp<Field<Type>> tintFld(sampledPtr_().interpolate(interp));
-                const Field<Type>& intFld = tintFld();
 
-                // Average
-                const faceList& faces = sampledPtr_().faces();
-                auto tavg = tmp<Field<Type>>::New(faces.size(), Zero);
-                auto& avg = tavg.ref();
-
-                forAll(faces, facei)
-                {
-                    const face& f = faces[facei];
-                    for (const label labi : f)
-                    {
-                        avg[facei] += intFld[labi];
-                    }
-                    avg[facei] /= f.size();
-                }
-
-                return tavg;
+                return sampledPtr_().sample(interp);
             }
             else
             {

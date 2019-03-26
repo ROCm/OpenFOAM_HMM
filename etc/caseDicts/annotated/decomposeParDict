@@ -53,10 +53,9 @@ regions
 }
 
 
-// Coefficients for the decomposition method are either as a
-// general "coeffs" dictionary or method-specific "<method>Coeffs".
+// Coefficients for the decomposition method are either as a general
+// "coeffs" dictionary or method-specific "<method>Coeffs".
 // For multiLevel, using multiLevelCoeffs only.
-
 
 multiLevelCoeffs
 {
@@ -70,12 +69,12 @@ multiLevelCoeffs
     level0
     {
         numberOfSubdomains  16;
-        method scotch;
+        method  scotch;
     }
     level1
     {
         numberOfSubdomains  2;
-        method scotch;
+        method  scotch;
         coeffs
         {
             n       (2 1 1);
@@ -85,8 +84,8 @@ multiLevelCoeffs
     level2
     {
         numberOfSubdomains  8;
-        // method simple;
-        method scotch;
+        // method  simple;
+        method  scotch;
     }
 }
 
@@ -107,17 +106,22 @@ multiLevelCoeffs
 
 // Other example coefficients
 
+coeffs
+{
+    n       (2 1 1);
+}
+
 simpleCoeffs
 {
-    n           (2 1 1);
-    // delta       0.001;  //< default value = 0.001
+    n       (2 1 1);
+    // delta   0.001;  //< default value = 0.001
 }
 
 hierarchicalCoeffs
 {
-    n           (1 2 1);
-    // delta       0.001;  //< default value = 0.001
-    // order       xyz;    //< default order = xyz
+    n       (1 2 1);
+    // delta   0.001;  //< default value = 0.001
+    // order   xyz;    //< default order = xyz
 }
 
 metisCoeffs

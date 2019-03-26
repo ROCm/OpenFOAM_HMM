@@ -94,7 +94,7 @@ protected:
 
     // Protected data
 
-        //- "jump" table
+        //- The "jump" table
         autoPtr<Function1<Type>> jumpTable_;
 
 

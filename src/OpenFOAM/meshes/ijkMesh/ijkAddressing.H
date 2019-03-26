@@ -36,6 +36,7 @@ SourceFiles
 #define ijkAddressing_H
 
 #include "labelVector.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,17 +73,20 @@ public:
 
     // Access
 
-        //- Return the i,j,k addressing sizes
+        //- Addressing is considered empty if any component is zero
+        inline bool empty() const;
+
+        //- The (i,j,k) addressing dimensions
         inline const labelVector& sizes() const;
 
-        //- Return the i,j,k addressing sizes for modification
+        //- Return the (i,j,k) dimensions for modification
         inline labelVector& sizes();
 
         //- Return the total i*j*k size
         inline label size() const;
 
-        //- Addressing is considered empty if any component is zero
-        inline bool empty() const;
+        //- The addressing dimension in the given direction
+        inline const label& size(const vector::components cmpt) const;
 
         //- Reset to (0,0,0) sizing
         inline void clear();
@@ -93,13 +97,13 @@ public:
         //- Change the sizing parameters
         inline void reset(const labelVector& newSizes);
 
-        //- Linear addressing index (offset) for an i,j,k position.
+        //- Linear addressing index (offset) for an (i,j,k) position.
         inline label index(const label i, const label j, const label k) const;
 
-        //- Linear addressing index (offset) for an i,j,k position.
+        //- Linear addressing index (offset) for an (i,j,k) position.
         inline label index(const labelVector& ijk) const;
 
-        //- The i,j,k indexing from linear addressing.
+        //- The (i,j,k) indexing from linear addressing.
         inline labelVector index(const label idx) const;
 
 
