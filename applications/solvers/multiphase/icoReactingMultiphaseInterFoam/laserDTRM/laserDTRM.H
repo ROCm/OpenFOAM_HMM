@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -177,9 +177,6 @@ private:
 
         // Fields
 
-
-            //- Incident radiative heat flux [W/m2]
-            volScalarField Qin_;
 
             //- Absorption coefficient
             volScalarField a_;

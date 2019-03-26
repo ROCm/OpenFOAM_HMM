@@ -353,19 +353,6 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
 
     alphaCut_(lookupOrDefault<scalar>("alphaCut", 0.5)),
 
-    Qin_
-    (
-        IOobject
-        (
-            "Qin",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimPower/dimArea, Zero)
-    ),
     a_
     (
         IOobject
@@ -462,19 +449,6 @@ Foam::radiation::laserDTRM::laserDTRM
 
     alphaCut_(lookupOrDefault<scalar>("alphaCut", 0.5)),
 
-    Qin_
-    (
-        IOobject
-        (
-            "Qin",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimPower/dimArea, Zero)
-    ),
     a_
     (
         IOobject
@@ -586,8 +560,7 @@ void Foam::radiation::laserDTRM::calculate()
     volVectorField& nHat = tnHat.ref();
 
 
-    // Reset the fields
-    Qin_ == dimensionedScalar(Qin_.dimensions(), Zero);
+    // Reset the field
     Q_ == dimensionedScalar(Q_.dimensions(), Zero);
 
     a_ = absorptionEmission_->a();
