@@ -107,7 +107,6 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
 }
 
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
@@ -156,7 +155,6 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
         this->cyclicPatch().owner()
       ? Function1<scalar>::New("rpm", dict)
       : nullptr
-
     ),
     rEff_(dict.lookupOrDefault<scalar>("rEff", 0)),
     fanEff_(dict.lookupOrDefault<scalar>("fanEff", 1)),
@@ -248,7 +246,11 @@ void Foam::swirlFanVelocityFvPatchField::write(Ostream& os) const
         os.writeEntryIfDifferent<word>("p", "p", pName_);
         os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
         os.writeEntry("origin", origin_);
-        rpm_->writeData(os);
+
+        if (rpm_)
+        {
+            rpm_->writeData(os);
+        }
 
         os.writeEntryIfDifferent<scalar>("rEff", 0.0, rEff_);
         os.writeEntryIfDifferent<bool>("useRealRadius", false, useRealRadius_);
