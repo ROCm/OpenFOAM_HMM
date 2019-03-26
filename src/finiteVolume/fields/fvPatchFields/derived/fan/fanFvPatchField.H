@@ -87,7 +87,7 @@ Usage
             componentColumns 1(1);
             separator       ",";
             mergeSeparators no;
-            file            "<constant>/pressureVsU";
+            file            "<constant>/UvsPressure";
         }
         value           uniform 0;
     }

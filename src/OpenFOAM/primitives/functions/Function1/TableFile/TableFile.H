@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -27,7 +27,7 @@ Class
     Foam::Function1Types::TableFile
 
 Description
-    Templated table container function where data is read from file.
+    Templated table container function where data are read from file.
 
     Usage:
     \verbatim
@@ -40,8 +40,8 @@ Description
         }
     \endverbatim
 
-    Data is stored as a list of Tuple2's. First column is always stored as
-    scalar entries.  Data is read in the form, e.g. for an entry \<entryName\>
+    Data are stored as a list of Tuple2's. First column is always stored as
+    scalar entries.  Data are read in the form, e.g. for an entry \<entryName\>
     that is (scalar, vector):
     \verbatim
         (
@@ -77,7 +77,7 @@ class TableFile
 :
     public TableBase<Type>
 {
-    // Private data
+    // Private Data
 
         //- File name for csv table (optional)
         fileName fName_;
@@ -97,7 +97,7 @@ public:
 
     // Constructors
 
-        //- Construct from entry name and Istream
+        //- Construct from entry name and "file" found in dictionary
         TableFile(const word& entryName, const dictionary& dict);
 
         //- Copy constructor
@@ -105,7 +105,7 @@ public:
 
 
     //- Destructor
-    virtual ~TableFile();
+    virtual ~TableFile() = default;
 
 
     // I/O
