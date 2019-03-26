@@ -1,15 +1,22 @@
-Info<< "Mean pressure:" << p.weightedAverage(mesh.V()).value() << endl;
-Info<< "Mean temperature:" << thermo.T().weightedAverage(mesh.V()).value()
-    << endl;
-Info<< "Mean u':"
-    << (sqrt((2.0/3.0)*turbulence->k()))().weightedAverage(mesh.V()).value()
-    << endl;
+{
+    const scalar meanP = p.weightedAverage(mesh.V()).value();
+    const scalar meanT = thermo.T().weightedAverage(mesh.V()).value();
+    const scalar meanUp =
+        (sqrt((2.0/3.0)*turbulence->k()))().weightedAverage(mesh.V()).value();
+    const scalar meanB = b.weightedAverage(mesh.V()).value();
 
-logSummaryFile()
-    << runTime.theta() << tab
-    << p.weightedAverage(mesh.V()).value() << tab
-    << thermo.T().weightedAverage(mesh.V()).value() << tab
-    << (sqrt((2.0/3.0)*turbulence->k()))().weightedAverage(mesh.V()).value()
-    << tab
-    << 1 - b.weightedAverage(mesh.V()).value()
-    << endl;
+    Info<< "Mean pressure:" << meanP << nl
+        << "Mean temperature:" << meanT << nl
+        << "Mean u':" << meanUp << endl;
+
+    if (Pstream::master())
+    {
+        logSummaryFile()
+            << runTime.theta() << tab
+            << meanP << tab
+            << meanT << tab
+            << meanUp << tab
+            << 1 - meanB
+            << endl;
+    }
+}
