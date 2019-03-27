@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -663,14 +663,6 @@ inline Foam::bitSet& Foam::bitSet::operator=(bitSet&& bitset)
 }
 
 
-inline Foam::bitSet Foam::bitSet::operator~() const
-{
-    bitSet result(*this);
-    result.flip();
-    return result;
-}
-
-
 inline Foam::bitSet& Foam::bitSet::operator&=(const bitSet& other)
 {
     return andEq(other);
@@ -696,6 +688,14 @@ inline Foam::bitSet& Foam::bitSet::operator-=(const bitSet& other)
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+inline Foam::bitSet Foam::operator~(const bitSet& bitset)
+{
+    bitSet result(bitset);
+    result.flip();
+    return result;
+}
+
 
 inline Foam::bitSet Foam::operator&(const bitSet& a, const bitSet& b)
 {
