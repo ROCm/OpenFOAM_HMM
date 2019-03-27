@@ -551,14 +551,6 @@ public:
         {
             return *this;
         }
-
-
-    // Housekeeping
-
-        //- Deprecated(2018-04) compatibility name for PackedBoolList
-        //  \deprecated(2018-04) - use toc() method
-        inline labelList used() const { return toc(); }
-
 };
 
 
