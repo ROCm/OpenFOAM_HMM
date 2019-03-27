@@ -174,18 +174,6 @@ inline void Foam::complex::operator/=(const scalar s)
 }
 
 
-inline Foam::complex Foam::complex::operator~() const
-{
-    return conjugate();
-}
-
-
-inline Foam::complex Foam::complex::operator!() const
-{
-    return conjugate();
-}
-
-
 inline bool Foam::complex::operator==(const complex& c) const
 {
     return (equal(re, c.re) && equal(im, c.im));
@@ -195,6 +183,14 @@ inline bool Foam::complex::operator==(const complex& c) const
 inline bool Foam::complex::operator!=(const complex& c) const
 {
     return !operator==(c);
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+inline Foam::complex Foam::operator~(const complex& c)
+{
+    return c.conjugate();
 }
 
 

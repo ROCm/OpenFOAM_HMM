@@ -98,7 +98,7 @@ public:
         //- A complex zero (0,0)
         static const complex zero;
 
-        //- A complex one (1,1)
+        //- A complex one (1,0)
         static const complex one;
 
 
@@ -189,12 +189,6 @@ public:
         inline void operator*=(const scalar s);
         inline void operator/=(const scalar s);
 
-        //- Conjugate
-        inline complex operator~() const;
-
-        //- Conjugate
-        inline complex operator!() const;
-
         inline bool operator==(const complex& c) const;
         inline bool operator!=(const complex& c) const;
 
@@ -242,6 +236,12 @@ word name(const complex& c);
 //- Data associated with complex type are contiguous
 template<>
 inline bool contiguous<complex>() {return true;}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+//- Complex conjugate
+inline complex operator~(const complex& c);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

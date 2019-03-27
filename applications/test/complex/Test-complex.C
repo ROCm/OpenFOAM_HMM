@@ -56,11 +56,10 @@ int main(int argc, char *argv[])
         << "complexVector::one  : " << complexVector::one << nl
         << nl;
 
-    // Comparison
-
-    for (complex c :  { complex{1, 0}, complex{1, 2}} )
+    for (complex c : { complex{1, 0}, complex{1, 2}} )
     {
         print1(c);
+
         // TDB: allow implicit construct from scalar?
         //
         // if (c == 1.0)

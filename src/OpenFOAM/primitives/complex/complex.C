@@ -32,7 +32,7 @@ License
 
 const char* const Foam::complex::typeName = "complex";
 const Foam::complex Foam::complex::zero(0, 0);
-const Foam::complex Foam::complex::one(1, 1);
+const Foam::complex Foam::complex::one(1, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

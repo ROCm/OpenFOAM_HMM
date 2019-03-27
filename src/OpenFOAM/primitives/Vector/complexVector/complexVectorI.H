@@ -23,10 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    complexVector specific part of 3D complexVector obtained from
-    generic Vector.
-
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,7 +30,7 @@ Description
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 inline complexVector operator*(const complex& v1, const complexVector& v2)
 {
@@ -80,8 +76,7 @@ inline complexVector operator/(const complex& v1, const complexVector& v2)
 }
 
 
-// complexVector dot product
-
+//- Dot product for complexVector
 inline complex operator&(const complexVector& v1, const complexVector& v2)
 {
     return complex
@@ -93,8 +88,7 @@ inline complex operator&(const complexVector& v1, const complexVector& v2)
 }
 
 
-// complexVector cross product
-
+//- Cross product for complexVector
 inline complexVector operator^(const complexVector& v1, const complexVector& v2)
 {
     return complexVector
@@ -106,8 +100,7 @@ inline complexVector operator^(const complexVector& v1, const complexVector& v2)
 }
 
 
-// complexVector cross product
-
+//- Cross product for complexVector
 inline complexVector operator^(const vector& v1, const complexVector& v2)
 {
     return complexVector
