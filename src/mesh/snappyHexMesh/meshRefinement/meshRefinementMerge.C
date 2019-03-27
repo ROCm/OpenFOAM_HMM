@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2014 OpenFOAM Foundation
@@ -42,7 +42,8 @@ Foam::label Foam::meshRefinement::mergePatchFaces
     const scalar minCos,
     const scalar concaveCos,
     const label mergeSize,
-    const labelList& patchIDs
+    const labelList& patchIDs,
+    const meshRefinement::FaceMergeType mergeType
 )
 {
     // Patch face merging engine
@@ -73,7 +74,8 @@ Foam::label Foam::meshRefinement::mergePatchFaces
         (
             minCos,
             concaveCos,
-            boundaryCells
+            boundaryCells,
+            (mergeType == FaceMergeType::IGNOREPATCH) // merge across patches?
         )
     );
 
@@ -249,7 +251,8 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
     const scalar concaveCos,
     const labelList& patchIDs,
     const dictionary& motionDict,
-    const labelList& preserveFaces
+    const labelList& preserveFaces,
+    const meshRefinement::FaceMergeType mergeType
 )
 {
     // Patch face merging engine
@@ -286,7 +289,8 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
         (
             minCos,
             concaveCos,
-            boundaryCells
+            boundaryCells,
+            (mergeType == FaceMergeType::IGNOREPATCH) // merge across patches?
         )
     );
 

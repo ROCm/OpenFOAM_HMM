@@ -129,6 +129,7 @@ bool Foam::combineFaces::validFace
 void Foam::combineFaces::regioniseFaces
 (
     const scalar minCos,
+    const bool mergeAcrossPatches,
     const label celli,
     const labelList& cEdges,
     Map<label>& faceRegion
@@ -143,16 +144,31 @@ void Foam::combineFaces::regioniseFaces
         label f0, f1;
         meshTools::getEdgeFaces(mesh_, celli, edgeI, f0, f1);
 
+        const vector& a0 = mesh_.faceAreas()[f0];
+        const vector& a1 = mesh_.faceAreas()[f1];
+
         const label p0 = patches.whichPatch(f0);
         const label p1 = patches.whichPatch(f1);
 
         // Face can be merged if
-        // - same non-coupled patch
         // - small angle
-        if (p0 != -1 && p0 == p1 && !patches[p0].coupled())
+        // - mergeAcrossPatches=false : same non-coupled patch
+        // - mergeAcrossPatches=true  : always
+        if
+        (
+            p0 != -1
+         && p1 != -1
+         && !patches[p0].coupled()
+         && !patches[p1].coupled()
+        )
         {
-            const vector f0Normal = normalised(mesh_.faceAreas()[f0]);
-            const vector f1Normal = normalised(mesh_.faceAreas()[f1]);
+            if (!mergeAcrossPatches && (p0 != p1))
+            {
+                continue;
+            }
+
+            const vector f0Normal = normalised(a0);
+            const vector f1Normal = normalised(a1);
 
             if ((f0Normal & f1Normal) > minCos)
             {
@@ -285,7 +301,8 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 (
     const scalar featureCos,
     const scalar minConcaveCos,
-    const labelHashSet& boundaryCells
+    const labelHashSet& boundaryCells,
+    const bool mergeAcrossPatches
 ) const
 {
     // Lists of faces that can be merged.
@@ -303,7 +320,14 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 
         // Region per face
         Map<label> faceRegion(cFaces.size());
-        regioniseFaces(featureCos, celli, cEdges, faceRegion);
+        regioniseFaces
+        (
+            featureCos,
+            mergeAcrossPatches,
+            celli,
+            cEdges,
+            faceRegion
+        );
 
         // Now we have in faceRegion for every face the region with planar
         // face sharing the same region. We now check whether the resulting
@@ -338,7 +362,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 
             // For every set check if it forms a valid convex face
 
-            forAllConstIters(regionToFaces, iter)
+            forAllIters(regionToFaces, iter)
             {
                 // Make face out of setFaces
                 indirectPrimitivePatch bigFace
@@ -354,7 +378,33 @@ Foam::labelListList Foam::combineFaces::getMergeSets
                 // Only store if -only one outside loop -which forms convex face
                 if (validFace(minConcaveCos, bigFace))
                 {
-                    allFaceSets.append(iter.val());
+                    labelList& faceIDs = iter.val();
+
+                    // For cross-patch merging we want to make the
+                    // largest face the one to decide the final patch
+                    // (i.e. master face)
+                    if (mergeAcrossPatches)
+                    {
+                        const vectorField& areas = mesh_.faceAreas();
+
+                        label maxIndex = 0;
+                        scalar maxMagSqr = magSqr(areas[faceIDs[0]]);
+                        for (label i = 1; i < faceIDs.size(); ++i)
+                        {
+                            const scalar a2 = magSqr(areas[faceIDs[i]]);
+                            if (a2 > maxMagSqr)
+                            {
+                                maxMagSqr = a2;
+                                maxIndex = i;
+                            }
+                        }
+                        if (maxIndex != 0)
+                        {
+                            Swap(faceIDs[0], faceIDs[maxIndex]);
+                        }
+                    }
+
+                    allFaceSets.append(faceIDs);
                 }
             }
         }
@@ -367,7 +417,8 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 Foam::labelListList Foam::combineFaces::getMergeSets
 (
     const scalar featureCos,
-    const scalar minConcaveCos
+    const scalar minConcaveCos,
+    const bool mergeAcrossPatches
 ) const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
@@ -388,7 +439,13 @@ Foam::labelListList Foam::combineFaces::getMergeSets
         }
     }
 
-    return getMergeSets(featureCos, minConcaveCos, boundaryCells);
+    return getMergeSets
+    (
+        featureCos,
+        minConcaveCos,
+        boundaryCells,
+        mergeAcrossPatches
+    );
 }
 
 

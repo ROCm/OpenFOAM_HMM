@@ -634,7 +634,8 @@ public:
             void mergePatchFacesUndo
             (
                 const layerParameters& layerParams,
-                const dictionary& motionDict
+                const dictionary& motionDict,
+                const meshRefinement::FaceMergeType mergeType
             );
 
             //- Add cell layers
@@ -654,12 +655,11 @@ public:
                 const dictionary& shrinkDict,
                 const dictionary& motionDict,
                 const layerParameters& layerParams,
-                const bool mergePatchFaces,         // merging patch faces
+                const meshRefinement::FaceMergeType mergeType,
                 const bool preBalance,              // balance before adding?
                 decompositionMethod& decomposer,
                 fvMeshDistribute& distributor
             );
-
 };
 
 

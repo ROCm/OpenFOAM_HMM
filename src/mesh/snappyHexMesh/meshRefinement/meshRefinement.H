@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -127,6 +127,16 @@ public:
             MASTERONLY = 1, //!< maintain master only
             KEEPALL = 2,    //!< have slaves (upon refinement) from master
             REMOVE = 4      //!< set value to -1 any face that was refined
+        };
+
+        //- Enumeration for what to do with co-planar patch faces on a single
+        //  cell
+        enum FaceMergeType
+        {
+            NONE,           // no merging
+            GEOMETRIC,      // use feature angle
+            IGNOREPATCH     // use feature angle, allow merging of different
+                            // patches
         };
 
 
@@ -1463,7 +1473,8 @@ public:
                     const scalar minCos,
                     const scalar concaveCos,
                     const label mergeSize,
-                    const labelList& patchIDs
+                    const labelList& patchIDs,
+                    const meshRefinement::FaceMergeType mergeType
                 );
 
                 //- Merge coplanar faces. preserveFaces is != -1 for faces
@@ -1474,7 +1485,8 @@ public:
                     const scalar concaveCos,
                     const labelList& patchIDs,
                     const dictionary& motionDict,
-                    const labelList& preserveFaces
+                    const labelList& preserveFaces,
+                    const meshRefinement::FaceMergeType mergeType
                 );
 
                 autoPtr<mapPolyMesh> doRemovePoints

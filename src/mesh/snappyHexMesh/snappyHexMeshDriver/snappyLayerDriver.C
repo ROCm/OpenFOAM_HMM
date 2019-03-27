@@ -3219,7 +3219,8 @@ Foam::snappyLayerDriver::snappyLayerDriver
 void Foam::snappyLayerDriver::mergePatchFacesUndo
 (
     const layerParameters& layerParams,
-    const dictionary& motionDict
+    const dictionary& motionDict,
+    const meshRefinement::FaceMergeType mergeType
 )
 {
     // Clip to 30 degrees. Not helpful!
@@ -3260,7 +3261,8 @@ void Foam::snappyLayerDriver::mergePatchFacesUndo
         concaveCos,
         meshRefiner_.meshedPatches(),
         motionDict,
-        duplicateFace
+        duplicateFace,
+        mergeType   // How to merge co-planar patch faces
     );
 
     nChanged += meshRefiner_.mergeEdgesUndo(minCos, motionDict);
@@ -4635,7 +4637,7 @@ void Foam::snappyLayerDriver::doLayers
     const dictionary& shrinkDict,
     const dictionary& motionDict,
     const layerParameters& layerParams,
-    const bool mergePatchFaces,
+    const meshRefinement::FaceMergeType mergeType,
     const bool preBalance,
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor
@@ -4653,9 +4655,13 @@ void Foam::snappyLayerDriver::doLayers
     Info<< "Using mesh parameters " << motionDict << nl << endl;
 
     // Merge coplanar boundary faces
-    if (mergePatchFaces)
+    if
+    (
+        mergeType == meshRefinement::FaceMergeType::GEOMETRIC
+     || mergeType == meshRefinement::FaceMergeType::IGNOREPATCH
+    )
     {
-        mergePatchFacesUndo(layerParams, motionDict);
+        mergePatchFacesUndo(layerParams, motionDict, mergeType);
     }
 
 

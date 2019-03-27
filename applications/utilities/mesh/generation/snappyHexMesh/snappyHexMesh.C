@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -1691,17 +1691,39 @@ int main(int argc, char *argv[])
     }
 
 
-    const bool mergePatchFaces
-    (
-        meshDict.lookupOrDefault("mergePatchFaces", true)
-    );
-
-    if (!mergePatchFaces)
+    // How to treat co-planar faces
+    meshRefinement::FaceMergeType mergeType =
+        meshRefinement::FaceMergeType::GEOMETRIC;
     {
-        Info<< "Not merging patch-faces of cell to preserve"
-            << " (split)hex cell shape."
-            << nl << endl;
+        const bool mergePatchFaces
+        (
+            meshDict.lookupOrDefault("mergePatchFaces", true)
+        );
+
+        if (!mergePatchFaces)
+        {
+            Info<< "Not merging patch-faces of cell to preserve"
+                << " (split)hex cell shape."
+                << nl << endl;
+            mergeType = meshRefinement::FaceMergeType::NONE;
+        }
+        else
+        {
+            const bool mergeAcrossPatches
+            (
+                meshDict.lookupOrDefault("mergeAcrossPatches", false)
+            );
+
+            if (mergeAcrossPatches)
+            {
+                Info<< "Merging co-planar patch-faces of cells"
+                    << ", regardless of patch assignment"
+                    << nl << endl;
+                mergeType = meshRefinement::FaceMergeType::IGNOREPATCH;
+            }
+        }
     }
+
 
 
     if (wantRefine)
@@ -1732,7 +1754,7 @@ int main(int argc, char *argv[])
             refineParams,
             snapParams,
             refineParams.handleSnapProblems(),
-            mergePatchFaces,        // merge co-planar faces
+            mergeType,
             motionDict
         );
 
@@ -1784,7 +1806,7 @@ int main(int argc, char *argv[])
         (
             snapDict,
             motionDict,
-            mergePatchFaces,
+            mergeType,
             curvature,
             planarAngle,
             snapParams
@@ -1851,7 +1873,7 @@ int main(int argc, char *argv[])
             layerDict,
             motionDict,
             layerParams,
-            mergePatchFaces,
+            mergeType,
             preBalance,
             decomposer,
             distributor

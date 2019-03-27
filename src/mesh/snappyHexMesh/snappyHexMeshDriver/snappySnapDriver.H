@@ -781,12 +781,11 @@ public:
             (
                 const dictionary& snapDict,
                 const dictionary& motionDict,
-                const bool mergePatchFaces,
+                const meshRefinement::FaceMergeType mergeType,
                 const scalar featureCos,
                 const scalar planarAngle,
                 const snapParameters& snapParams
             );
-
 };
 
 
