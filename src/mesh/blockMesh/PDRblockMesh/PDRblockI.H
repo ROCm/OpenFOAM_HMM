@@ -62,6 +62,18 @@ inline bool Foam::PDRblock::location::contains(const scalar p) const
 }
 
 
+inline const Foam::scalar& Foam::PDRblock::location::min() const
+{
+    return scalarList::empty() ? pTraits<scalar>::rootMax : first();
+}
+
+
+inline const Foam::scalar& Foam::PDRblock::location::max() const
+{
+    return scalarList::empty() ? pTraits<scalar>::rootMin : last();
+}
+
+
 inline Foam::scalar Foam::PDRblock::location::centre() const
 {
     return scalarList::empty() ? 0 : (0.5*first() + 0.5*last());
@@ -203,6 +215,29 @@ inline Foam::vector Foam::PDRblock::span
 inline Foam::vector Foam::PDRblock::span(const labelVector& ijk) const
 {
     return vector(dx(ijk), dy(ijk), dz(ijk));
+}
+
+
+inline Foam::point Foam::PDRblock::grid
+(
+    const label i,
+    const label j,
+    const label k
+) const
+{
+    return point(grid_.x()[i], grid_.y()[j], grid_.z()[k]);
+}
+
+
+inline Foam::point Foam::PDRblock::grid(const labelVector& ijk) const
+{
+    return
+        point
+        (
+            grid_.x()[ijk.x()],
+            grid_.y()[ijk.y()],
+            grid_.z()[ijk.z()]
+        );
 }
 
 
