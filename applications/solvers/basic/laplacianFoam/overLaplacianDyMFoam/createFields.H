@@ -13,23 +13,6 @@
         mesh
     );
 
-    // Add overset specific interpolations
-    {
-        dictionary oversetDict;
-        oversetDict.add("T", true);
-
-        const_cast<dictionary&>
-        (
-            mesh.schemesDict()
-        ).add
-        (
-            "oversetInterpolationRequired",
-            oversetDict,
-            true
-        );
-    }
-
-
     Info<< "Reading transportProperties\n" << endl;
 
     IOdictionary transportProperties

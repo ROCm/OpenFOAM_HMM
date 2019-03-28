@@ -121,21 +121,14 @@ mesh.setFluxRequired(Phi.name());
 
 #include "createMRF.H"
 
-// Add overset specific interpolations
+// Add solver-specific interpolations
 {
-    dictionary oversetDict;
-    oversetDict.add("Phi", true);
-    oversetDict.add("U", true);
+    wordHashSet& nonInt =
+        const_cast<wordHashSet&>(Stencil::New(mesh).nonInterpolatedFields());
 
-    const_cast<dictionary&>
-    (
-        mesh.schemesDict()
-    ).add
-    (
-        "oversetInterpolationRequired",
-        oversetDict,
-        true
-    );
+    nonInt.insert("cellMask");
+    nonInt.insert("interpolatedCells");
+
 }
 
 // Mask field for zeroing out contributions on hole cells
