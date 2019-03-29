@@ -38,6 +38,7 @@ SourceFiles
 #ifndef complex_H
 #define complex_H
 
+#include <complex>
 #include "scalar.H"
 #include "word.H"
 #include "zero.H"
@@ -67,9 +68,6 @@ inline complex operator*(const scalar, const complex&);
 inline complex operator*(const complex&, const scalar);
 inline complex operator/(const complex&, const scalar);
 inline complex operator/(const scalar, const complex&);
-
-Istream& operator>>(Istream& is, complex& c);
-Ostream& operator<<(Ostream& os, const complex& c);
 
 
 /*---------------------------------------------------------------------------*\
@@ -118,6 +116,12 @@ public:
 
         //- Construct from real and imaginary parts
         inline constexpr complex(const scalar r, const scalar i) noexcept;
+
+        //- Construct from std::complex
+        inline complex(const std::complex<float>& c);
+
+        //- Construct from std::complex
+        inline complex(const std::complex<double>& c);
 
         //- Construct from Istream
         explicit complex(Istream& is);
@@ -172,6 +176,13 @@ public:
 
     // Member Operators
 
+        //- Conversion to std::complex
+        inline operator std::complex<scalar>() const
+        {
+            return std::complex<scalar>(re, im);
+        }
+
+
         //- Copy assignment
         inline void operator=(const complex& c);
 
@@ -218,17 +229,19 @@ public:
         friend complex operator*(const complex& c, const scalar s);
         friend complex operator/(const complex& c, const scalar s);
         friend complex operator/(const scalar s, const complex& c);
-
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream& is, complex& c);
-        friend Ostream& operator<<(Ostream& os, const complex& c);
 };
 
 
-// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
+Istream& operator>>(Istream& is, complex& c);
+Ostream& operator<<(Ostream& os, const complex& c);
+
+//- Complex conjugate
+inline complex operator~(const complex& c);
+
+
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Return string representation of complex
 word name(const complex& c);
@@ -236,12 +249,6 @@ word name(const complex& c);
 //- Data associated with complex type are contiguous
 template<>
 inline bool contiguous<complex>() {return true;}
-
-
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
-
-//- Complex conjugate
-inline complex operator~(const complex& c);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

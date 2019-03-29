@@ -55,11 +55,14 @@ Foam::word Foam::name(const complex& c)
 
 Foam::Istream& Foam::operator>>(Istream& is, complex& c)
 {
+    scalar r, i;
+
     is.readBegin("complex");
-
-    is  >> c.re >> c.im;
-
+    is >> r >> i;
     is.readEnd("complex");
+
+    c.real(r);
+    c.imag(i);
 
     is.check(FUNCTION_NAME);
     return is;
@@ -69,7 +72,7 @@ Foam::Istream& Foam::operator>>(Istream& is, complex& c)
 Foam::Ostream& Foam::operator<<(Ostream& os, const complex& c)
 {
     os  << token::BEGIN_LIST
-        << c.re << token::SPACE << c.im
+        << c.real() << token::SPACE << c.imag()
         << token::END_LIST;
 
     return os;

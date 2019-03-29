@@ -25,12 +25,13 @@ Application
 
 Description
     Some tests for complex numbers
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
 #include "complex.H"
 #include "complexVector.H"
-#include "Field.H"
+#include "complexFields.H"
 
 using namespace Foam;
 
@@ -52,13 +53,25 @@ int main(int argc, char *argv[])
         << "complex(scalar) : " << complex(3.14519) << nl
         << nl;
 
+    std::complex<scalar> c1(10, -3);
+    Info<< "std::complex : " << c1 << nl;
+    Info<< "sin: " << std::sin(c1) << nl;
+
+
     Info<< "complexVector::zero : " << complexVector::zero << nl
         << "complexVector::one  : " << complexVector::one << nl
         << nl;
 
     for (complex c : { complex{1, 0}, complex{1, 2}} )
     {
+        Info<< nl;
         print1(c);
+
+        Info<< "sin: " << sin(c) << nl;
+        Info<< "pow(3): " << pow(c, 3) << nl;
+        Info<< "pow3: " << pow3(c) << nl;
+        Info<< "log: " << log(c) << nl;
+        Info<< "pow025: " << pow025(c) << nl;
 
         // TDB: allow implicit construct from scalar?
         //
@@ -68,7 +81,7 @@ int main(int argc, char *argv[])
         // }
     }
 
-    Field<complex> fld1(3, complex(2.0, 1.0));
+    complexField fld1(3, complex(2.0, 1.0));
 
     Info<< "Field " << flatOutput(fld1) << nl;
 
@@ -77,6 +90,12 @@ int main(int argc, char *argv[])
 
     fld1 *= 10;
     Info<< "Multiply: " << flatOutput(fld1) << nl;
+
+    // Not yet:
+    // #ifdef TEST_FOAM_OVERLOAD
+    // Info<< "sin: " << sin(fld1) << nl;
+    // #endif
+
 
     for (complex& c : fld1)
     {
