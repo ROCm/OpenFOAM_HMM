@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -24,28 +24,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::complexField
-
-Description
-    Specialisation of Field\<T\> for complex.
-
-Typedef
     Foam::complexVectorField
 
 Description
     Specialisation of Field\<T\> for complexVector.
 
 SourceFiles
-    complexFields.C
+    complexVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef complexFields_H
-#define complexFields_H
+#ifndef complexVectorField_H
+#define complexVectorField_H
 
 #include "complex.H"
 #include "complexVector.H"
-#include "primitiveFields.H"
+#include "vectorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,31 +48,35 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef Field<complex> complexField;
-
-complexField ComplexField(const UList<scalar>&, const UList<scalar>&);
-complexField ReComplexField(const UList<scalar>&);
-complexField ImComplexField(const UList<scalar>&);
-scalarField Re(const UList<complex>&);
-scalarField Im(const UList<complex>&);
-scalarField ReImSum(const UList<complex>&);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 typedef Field<complexVector> complexVectorField;
 
-complexVectorField ComplexField(const UList<vector>&, const UList<vector>&);
-complexVectorField ReComplexField(const UList<vector>&);
-complexVectorField ImComplexField(const UList<vector>&);
-vectorField Re(const UList<complexVector>&);
-vectorField Im(const UList<complexVector>&);
-vectorField ReImSum(const UList<complexVector>&);
+//- Zip up two lists of values into a list of complex
+complexVectorField ComplexField
+(
+    const UList<vector>& re,
+    const UList<vector>& im
+);
+
+
+//- Create complex field from a list of real (using imag == 0)
+complexVectorField ReComplexField(const UList<vector>& re);
+
+//- Create complex field from a list of imag (using real == 0)
+complexVectorField ImComplexField(const UList<vector>& im);
+
+//- Extract real component
+vectorField Re(const UList<complexVector>& cvf);
+
+//- Extract imag component
+vectorField Im(const UList<complexVector>& cvf);
+
+//- Sum real and imag components
+vectorField ReImSum(const UList<complexVector>& cvf);
 
 complexVectorField operator^
 (
-    const UList<vector>&,
-    const UList<complexVector>&
+    const UList<vector>& vf,
+    const UList<complexVector>& cvf
 );
 
 

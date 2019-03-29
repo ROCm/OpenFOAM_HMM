@@ -29,8 +29,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "complex.H"
-#include "complexVector.H"
 #include "complexFields.H"
 
 using namespace Foam;
@@ -82,27 +80,45 @@ int main(int argc, char *argv[])
     }
 
     complexField fld1(3, complex(2.0, 1.0));
+    complexField fld2(fld1);
+
+    for (complex& c : fld2)
+    {
+        c = ~c;
+    }
 
     Info<< "Field " << flatOutput(fld1) << nl;
+    Info<< "Conjugate: " << flatOutput(fld2) << nl;
+
+    // Some arbitrary change
+    for (complex& c : fld2)
+    {
+        c.Im() *= 5;
+    }
+
 
     Info<< "sum = " << sum(fld1) << nl;
     // Not yet Info<< "min = " << min(fld1) << nl;
 
     fld1 *= 10;
-    Info<< "Multiply: " << flatOutput(fld1) << nl;
+    Info<< "scalar multiply: " << flatOutput(fld1) << nl;
 
-    // Not yet:
-    // #ifdef TEST_FOAM_OVERLOAD
-    // Info<< "sin: " << sin(fld1) << nl;
-    // #endif
+    fld1 /= 10;
+    Info<< "scalar divide: " << flatOutput(fld1) << nl;
 
+    Info<< "sin: " << sin(fld1) << nl;
 
-    for (complex& c : fld1)
-    {
-        c = ~c;
-    }
+    Info<< "operator + : " << (fld1 + fld2) << nl;
 
-    Info<< "Conjugate: " << flatOutput(fld1) << nl;
+    // Some operators are still incomplete
+
+    // Info<< "operator * : " << (fld1 * fld2) << nl;
+    // Info<< "operator / : " << (fld1 / fld2) << nl;
+    Info<< "operator / : " << (fld1 / 2) << nl;
+    // Info<< "operator / : " << (fld1 / fld2) << nl;
+    Info<< "sqrt   : " << sqrt(fld1) << nl;
+    // Info<< "pow(2) : " << pow(fld1, 2) << nl;
+
 
     Info<< "\nEnd\n" << endl;
     return 0;
