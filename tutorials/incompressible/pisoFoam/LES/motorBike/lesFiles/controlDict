@@ -49,7 +49,7 @@ runTimeModifiable true;
 
 functions
 {
-    #include "cuttingPlane"
+    #include "samples"
     #include "streamLines"
     #include "forceCoeffs"
 }
