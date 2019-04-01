@@ -77,6 +77,11 @@ options:
   -pwd              Print root directory containing a Make/ directory and exit
   -update           Update lnInclude directories, dep files, remove deprecated
                     files and directories
+  -show             Identical to -show-compile
+  -show-api         Print api value and exit
+  -show-compile     Print C++ compiler value/flags and exit
+  -show-cxx         Print C++ compiler value and exit
+  -show-cxxflags    Print C++ compiler flags and exit
   -h | -help        Print the usage
 
 
@@ -121,7 +126,7 @@ allCores()
 #------------------------------------------------------------------------------
 
 # Default to compiling the local target only
-unset all update optPrintRootDir
+unset all optShow update optPrintRootDir
 
 while [ "$#" -gt 0 ]
 do
@@ -132,6 +137,14 @@ do
             ;;
         -s | -silent)
             export WM_QUIET=true
+            ;;
+        -show | -show-compile)
+            $make -f $WM_DIR/makefiles/info compile
+            optShow=true
+            ;;
+        -show-api | -show-cxx | -show-cxxflags | -show-c | -show-cflags)
+            $make -f $WM_DIR/makefiles/info "${1#-show-}"
+            optShow=true
             ;;
         -a | -all | all)
             all=all
@@ -147,12 +160,12 @@ do
 
             [ "$nCores" = 0 ] && allCores
             export WM_NCOMPPROCS=$nCores
-            echo "Compiling enabled on $WM_NCOMPPROCS cores"
+            echo "Compiling enabled on $WM_NCOMPPROCS cores" 1>&2
             ;;
         # Parallel compilation on specified number of cores
         -j[1-9]*)
             export WM_NCOMPPROCS=${1#-j}
-            echo "Compiling enabled on $WM_NCOMPPROCS cores"
+            echo "Compiling enabled on $WM_NCOMPPROCS cores" 1>&2
             ;;
         # Keep going, ignoring errors
         -k | -keep-going | -non-stop)
@@ -189,6 +202,11 @@ do
     esac
     shift
 done
+
+if [ "$optShow" = true ]
+then
+    exit 0
+fi
 
 
 #------------------------------------------------------------------------------

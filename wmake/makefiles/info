@@ -1,0 +1,74 @@
+#----------------------------*- makefile-gmake -*------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# File
+#     wmake/makefiles/info
+#
+# Description
+#     Makefile to generate information.
+#     Used by wmake -show-*
+#
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Use POSIX shell. Default to POSIX for the OS.
+#------------------------------------------------------------------------------
+
+SHELL   = /bin/sh
+
+#------------------------------------------------------------------------------
+# No default suffix rules used
+#------------------------------------------------------------------------------
+
+.SUFFIXES:
+
+
+#------------------------------------------------------------------------------
+# Compilation rules
+#------------------------------------------------------------------------------
+
+GENERAL_RULES = $(WM_DIR)/rules/General
+include $(GENERAL_RULES)/general
+
+
+#------------------------------------------------------------------------------
+# Display information
+#------------------------------------------------------------------------------
+
+export WM_VERSION
+
+
+.PHONY: compile
+compile:
+	@echo "$(strip $(CC) $(c++FLAGS))"
+
+.PHONY: api
+api:
+	@echo "$${WM_VERSION#*=}"
+
+.PHONY: c
+c:
+	@echo "$(strip $(cc))"
+
+.PHONY: cflags
+cflags:
+	@echo "$(strip $(cFLAGS))"
+
+.PHONY: cxx
+cxx:
+	@echo "$(strip $(CC))"
+
+.PHONY: cxxflags
+cxxflags:
+	@echo "$(strip $(c++FLAGS))"
+
+
+#----------------------------- vim: set ft=make: ------------------------------
