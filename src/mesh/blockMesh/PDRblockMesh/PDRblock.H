@@ -110,6 +110,12 @@ public:
             //- True if the location is within the range
             inline bool contains(const scalar p) const;
 
+            //- The first() value is considered the min value.
+            inline const scalar& min() const;
+
+            //- The last() value is considered the max value.
+            inline const scalar& max() const;
+
             //- Mid-point location, zero for an empty list.
             inline scalar centre() const;
 
@@ -304,6 +310,12 @@ public:
 
         //- Cell dimensions at i,j,k position.
         inline vector span(const labelVector& ijk) const;
+
+        //- Grid point at i,j,k position.
+        inline point grid(const label i, const label j, const label k) const;
+
+        //- Grid point at i,j,k position.
+        inline point grid(const labelVector& ijk) const;
 
         //- Cell centre at i,j,k position.
         inline point C(const label i, const label j, const label k) const;

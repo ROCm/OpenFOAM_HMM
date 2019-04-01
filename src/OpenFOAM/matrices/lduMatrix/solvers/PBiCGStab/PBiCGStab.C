@@ -208,7 +208,11 @@ Foam::solverPerformance Foam::PBiCGStab::solve
             solverPerf.finalResidual() =
                 gSumMag(sA, matrix().mesh().comm())/normFactor;
 
-            if (solverPerf.checkConvergence(tolerance_, relTol_))
+            if
+            (
+                solverPerf.nIterations() >= minIter_
+             && solverPerf.checkConvergence(tolerance_, relTol_)
+            )
             {
                 for (label cell=0; cell<nCells; cell++)
                 {

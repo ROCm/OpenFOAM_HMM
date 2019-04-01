@@ -30,6 +30,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "localMax.H"
+#include "fvcCellReduce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,6 +83,40 @@ limitedSnGrad<Type>::correction
             << "limiter min: " << min(limiter.primitiveField())
             << " max: "<< max(limiter.primitiveField())
             << " avg: " << average(limiter.primitiveField()) << endl;
+
+
+        if (fv::debug & 2)
+        {
+            static scalar oldTime = -1;
+            static label subIter = 0;
+            if (vf.mesh().time().value() != oldTime)
+            {
+                oldTime = vf.mesh().time().value();
+                subIter = 0;
+            }
+            else
+            {
+                ++subIter;
+            }
+            word fieldName("limiter_" + Foam::name(subIter));
+
+            GeometricField<scalar, fvPatchField, volMesh> volLimiter
+            (
+                IOobject
+                (
+                    fieldName,
+                    vf.mesh().time().timeName(),
+                    vf.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                fvc::cellReduce(limiter, minEqOp<scalar>(), scalar(1.0))
+            );
+            Info<< "Writing limiter field to " << volLimiter.objectPath()
+                << endl;
+            volLimiter.write();
+        }
     }
 
     return limiter*corr;

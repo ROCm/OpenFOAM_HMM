@@ -55,7 +55,7 @@ Description
 #include "faceSet.H"
 #include "pointSet.H"
 #include "processorMeshes.H"
-#include "hexRef8.H"
+#include "hexRef8Data.H"
 
 #ifdef HAVE_ZOLTAN
     #include "zoltanRenumber.H"
@@ -1327,8 +1327,24 @@ int main(int argc, char *argv[])
 
     // Remove old procAddressing files
     processorMeshes::removeFiles(mesh);
-    // Remove refinement data
-    hexRef8::removeFiles(mesh);
+
+    // Update refinement data
+    hexRef8Data refData
+    (
+        IOobject
+        (
+            "dummy",
+            mesh.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+    refData.updateMesh(map());
+    refData.write();
+
     // Update sets
     topoSet::updateMesh(mesh.facesInstance(), map(), cellSets);
     topoSet::updateMesh(mesh.facesInstance(), map(), faceSets);

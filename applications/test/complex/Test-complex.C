@@ -25,12 +25,11 @@ Application
 
 Description
     Some tests for complex numbers
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "complex.H"
-#include "complexVector.H"
-#include "Field.H"
+#include "complexFields.H"
 
 using namespace Foam;
 
@@ -52,15 +51,26 @@ int main(int argc, char *argv[])
         << "complex(scalar) : " << complex(3.14519) << nl
         << nl;
 
+    std::complex<scalar> c1(10, -3);
+    Info<< "std::complex : " << c1 << nl;
+    Info<< "sin: " << std::sin(c1) << nl;
+
+
     Info<< "complexVector::zero : " << complexVector::zero << nl
         << "complexVector::one  : " << complexVector::one << nl
         << nl;
 
-    // Comparison
-
-    for (complex c :  { complex{1, 0}, complex{1, 2}} )
+    for (complex c : { complex{1, 0}, complex{1, 2}} )
     {
+        Info<< nl;
         print1(c);
+
+        Info<< "sin: " << sin(c) << nl;
+        Info<< "pow(3): " << pow(c, 3) << nl;
+        Info<< "pow3: " << pow3(c) << nl;
+        Info<< "log: " << log(c) << nl;
+        Info<< "pow025: " << pow025(c) << nl;
+
         // TDB: allow implicit construct from scalar?
         //
         // if (c == 1.0)
@@ -69,22 +79,46 @@ int main(int argc, char *argv[])
         // }
     }
 
-    Field<complex> fld1(3, complex(2.0, 1.0));
+    complexField fld1(3, complex(2.0, 1.0));
+    complexField fld2(fld1);
+
+    for (complex& c : fld2)
+    {
+        c = ~c;
+    }
 
     Info<< "Field " << flatOutput(fld1) << nl;
+    Info<< "Conjugate: " << flatOutput(fld2) << nl;
+
+    // Some arbitrary change
+    for (complex& c : fld2)
+    {
+        c.Im() *= 5;
+    }
+
 
     Info<< "sum = " << sum(fld1) << nl;
     // Not yet Info<< "min = " << min(fld1) << nl;
 
     fld1 *= 10;
-    Info<< "Multiply: " << flatOutput(fld1) << nl;
+    Info<< "scalar multiply: " << flatOutput(fld1) << nl;
 
-    for (complex& c : fld1)
-    {
-        c = ~c;
-    }
+    fld1 /= 10;
+    Info<< "scalar divide: " << flatOutput(fld1) << nl;
 
-    Info<< "Conjugate: " << flatOutput(fld1) << nl;
+    Info<< "sin: " << sin(fld1) << nl;
+
+    Info<< "operator + : " << (fld1 + fld2) << nl;
+
+    // Some operators are still incomplete
+
+    // Info<< "operator * : " << (fld1 * fld2) << nl;
+    // Info<< "operator / : " << (fld1 / fld2) << nl;
+    Info<< "operator / : " << (fld1 / 2) << nl;
+    // Info<< "operator / : " << (fld1 / fld2) << nl;
+    Info<< "sqrt   : " << sqrt(fld1) << nl;
+    // Info<< "pow(2) : " << pow(fld1, 2) << nl;
+
 
     Info<< "\nEnd\n" << endl;
     return 0;

@@ -55,6 +55,20 @@ inline constexpr Foam::complex::complex(const scalar r, const scalar i) noexcept
 {}
 
 
+inline Foam::complex::complex(const std::complex<float>& c)
+:
+    re(c.real()),
+    im(c.imag())
+{}
+
+
+inline Foam::complex::complex(const std::complex<double>& c)
+:
+    re(c.real()),
+    im(c.imag())
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline void Foam::complex::real(scalar val)
@@ -174,18 +188,6 @@ inline void Foam::complex::operator/=(const scalar s)
 }
 
 
-inline Foam::complex Foam::complex::operator~() const
-{
-    return conjugate();
-}
-
-
-inline Foam::complex Foam::complex::operator!() const
-{
-    return conjugate();
-}
-
-
 inline bool Foam::complex::operator==(const complex& c) const
 {
     return (equal(re, c.re) && equal(im, c.im));
@@ -198,8 +200,15 @@ inline bool Foam::complex::operator!=(const complex& c) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
+inline Foam::complex Foam::operator~(const complex& c)
+{
+    return c.conjugate();
+}
+
+
+// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -341,9 +350,97 @@ inline complex operator/(const scalar s, const complex& c)
     return complex(s/c.re, s/c.im);
 }
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Complex transcendental functions
+namespace Foam
+{
+    #define transFunc(func)                                                   \
+    inline complex func(const Foam::complex& z)                               \
+    {                                                                         \
+        return std:: func (std::complex<scalar>(z));                          \
+    }
+
+transFunc(sqrt)
+transFunc(exp)
+transFunc(log)
+transFunc(log10)
+transFunc(sin)
+transFunc(cos)
+transFunc(tan)
+transFunc(asin)
+transFunc(acos)
+transFunc(atan)
+transFunc(sinh)
+transFunc(cosh)
+transFunc(tanh)
+transFunc(asinh)
+transFunc(acosh)
+transFunc(atanh)
+
+// Special treatment for pow()
+inline complex pow(const complex& x, const complex& y)
+{
+    return std::pow(std::complex<scalar>(x), std::complex<scalar>(y));
+}
+
+
+// Combinations of complex and real
+#define powFuncs(type2)                                                       \
+    inline complex pow(const complex& x, const type2& y)                      \
+    {                                                                         \
+        return std::pow(std::complex<scalar>(x), scalar(y));                  \
+    }                                                                         \
+                                                                              \
+    inline Foam::complex pow(const type2& x, const complex& y)                \
+    {                                                                         \
+        return std::pow(scalar(x), std::complex<scalar>(y));                  \
+    }
+
+
+powFuncs(float)
+powFuncs(double)
+powFuncs(int)
+powFuncs(long)
+
+
+inline complex pow3(const complex& c)
+{
+    return c*sqr(c);
+}
+
+
+inline complex pow4(const complex& c)
+{
+    return sqr(sqr(c));
+}
+
+
+inline complex pow5(const complex& c)
+{
+    return c*pow4(c);
+}
+
+
+inline complex pow6(const complex& c)
+{
+    return pow3(sqr(c));
+}
+
+
+inline complex pow025(const complex& c)
+{
+    return sqrt(sqrt(c));
+}
+
+} // End namespace Foam
+
+#undef transFunc
+#undef powFuncs
 
 // ************************************************************************* //

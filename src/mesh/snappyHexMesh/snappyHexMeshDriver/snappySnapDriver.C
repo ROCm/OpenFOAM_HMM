@@ -2528,7 +2528,7 @@ void Foam::snappySnapDriver::doSnap
 (
     const dictionary& snapDict,
     const dictionary& motionDict,
-    const bool mergePatchFaces,
+    const meshRefinement::FaceMergeType mergeType,
     const scalar featureCos,
     const scalar planarAngle,
     const snapParameters& snapParams
@@ -3031,7 +3031,11 @@ void Foam::snappySnapDriver::doSnap
         repatchToSurface(snapParams, adaptPatchIDs, duplicateFace);
     }
 
-    if (mergePatchFaces)
+    if
+    (
+        mergeType == meshRefinement::FaceMergeType::GEOMETRIC
+     || mergeType == meshRefinement::FaceMergeType::IGNOREPATCH
+    )
     {
         labelList duplicateFace(getInternalOrBaffleDuplicateFace());
 
@@ -3044,7 +3048,8 @@ void Foam::snappySnapDriver::doSnap
             featureCos,     // concaveCos
             meshRefiner_.meshedPatches(),
             motionDict,
-            duplicateFace   // faces not to merge
+            duplicateFace,  // faces not to merge
+            mergeType
         );
 
         nChanged += meshRefiner_.mergeEdgesUndo(featureCos, motionDict);

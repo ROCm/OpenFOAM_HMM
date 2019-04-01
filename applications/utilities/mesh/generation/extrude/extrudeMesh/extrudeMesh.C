@@ -217,6 +217,7 @@ int main(int argc, char *argv[])
     );
 
     #include "addRegionOption.H"
+    argList::addOption("dict", "file", "Use alternative extrudeMeshDict");
     #include "setRootCase.H"
     #include "createTimeExtruded.H"
 
@@ -236,15 +237,19 @@ int main(int argc, char *argv[])
             << runTimeExtruded.timeName() << nl << endl;
     }
 
-
-    IOdictionary dict
+    const IOdictionary dict
     (
-        IOobject
+        IOobject::selectIO
         (
-            "extrudeMeshDict",
-            runTimeExtruded.system(),
-            runTimeExtruded,
-            IOobject::MUST_READ_IF_MODIFIED
+            IOobject
+            (
+                "extrudeMeshDict",
+                runTimeExtruded.system(),
+                runTimeExtruded,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE
+            ),
+            args.opt<fileName>("dict", "")
         )
     );
 

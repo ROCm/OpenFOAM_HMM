@@ -43,6 +43,7 @@ SourceFiles
 #include "writer.H"
 #include "DynamicList.H"
 #include "labelVector.H"
+#include "meshRefinement.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,7 +54,6 @@ namespace Foam
 class refinementParameters;
 class snapParameters;
 
-class meshRefinement;
 class decompositionMethod;
 class fvMeshDistribute;
 class fvMesh;
@@ -226,7 +226,7 @@ class snappyRefineDriver
         //- Merge refined boundary faces (from exposing coarser cell)
         void mergePatchFaces
         (
-            const bool geometricMerge,
+            const meshRefinement::FaceMergeType mergeType,
             const refinementParameters& refineParams,
             const dictionary& motionDict
         );
@@ -268,7 +268,7 @@ public:
             const refinementParameters& refineParams,
             const snapParameters& snapParams,
             const bool prepareForSnapping,
-            const bool mergePatchFaces,
+            const meshRefinement::FaceMergeType mergeType,
             const dictionary& motionDict
         );
 

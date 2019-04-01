@@ -672,7 +672,8 @@ $(Fields)/quaternionField/quaternionField.C
 $(Fields)/quaternionField/quaternionIOField.C
 $(Fields)/triadField/triadField.C
 $(Fields)/triadField/triadIOField.C
-$(Fields)/complexFields/complexFields.C
+$(Fields)/complex/complexField.C
+$(Fields)/complex/complexVectorField.C
 $(Fields)/transformField/transformField.C
 $(Fields)/fieldTypes.C
 

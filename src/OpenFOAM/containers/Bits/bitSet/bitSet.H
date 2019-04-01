@@ -513,10 +513,6 @@ public:
         //- Move assignment
         inline bitSet& operator=(bitSet&& bitset);
 
-        //- Complement operator.
-        //  Return a copy of the existing set with all its bits flipped.
-        inline bitSet operator~() const;
-
         //- Bitwise-AND all the bits in other with the bits in this bitset.
         //  The operands may have dissimilar sizes without affecting the size
         //  of the set.
@@ -555,14 +551,6 @@ public:
         {
             return *this;
         }
-
-
-    // Housekeeping
-
-        //- Deprecated(2018-04) compatibility name for PackedBoolList
-        //  \deprecated(2018-04) - use toc() method
-        inline labelList used() const { return toc(); }
-
 };
 
 
@@ -575,6 +563,9 @@ Ostream& operator<<(Ostream& os, const bitSet& bitset);
 //- Output bitset information
 Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
 
+
+//- Bitset complement, returns a copy of the bitset with all its bits flipped
+inline bitSet operator~(const bitSet& bitset);
 
 //- Bitwise-AND of two bitsets.
 //  See bitSet::operator&= for more details.

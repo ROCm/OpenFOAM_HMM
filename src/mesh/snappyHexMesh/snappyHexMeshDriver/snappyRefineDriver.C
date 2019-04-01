@@ -2794,7 +2794,7 @@ void Foam::snappyRefineDriver::addFaceZones
 
 void Foam::snappyRefineDriver::mergePatchFaces
 (
-    const bool geometricMerge,
+    const meshRefinement::FaceMergeType mergeType,
     const refinementParameters& refineParams,
     const dictionary& motionDict
 )
@@ -2812,7 +2812,11 @@ void Foam::snappyRefineDriver::mergePatchFaces
 
     const fvMesh& mesh = meshRefiner_.mesh();
 
-    if (geometricMerge)
+    if
+    (
+        mergeType == meshRefinement::FaceMergeType::GEOMETRIC
+     || mergeType == meshRefinement::FaceMergeType::IGNOREPATCH
+    )
     {
         meshRefiner_.mergePatchFacesUndo
         (
@@ -2820,7 +2824,8 @@ void Foam::snappyRefineDriver::mergePatchFaces
             Foam::cos(degToRad(45.0)),
             meshRefiner_.meshedPatches(),
             motionDict,
-            labelList(mesh.nFaces(), -1)
+            labelList(mesh.nFaces(), -1),
+            mergeType
         );
     }
     else
@@ -2831,7 +2836,8 @@ void Foam::snappyRefineDriver::mergePatchFaces
             Foam::cos(degToRad(45.0)),
             Foam::cos(degToRad(45.0)),
             4,          // only merge faces split into 4
-            meshRefiner_.meshedPatches()
+            meshRefiner_.meshedPatches(),
+            meshRefinement::FaceMergeType::GEOMETRIC // no merge across patches
         );
     }
 
@@ -2855,7 +2861,7 @@ void Foam::snappyRefineDriver::doRefine
     const refinementParameters& refineParams,
     const snapParameters& snapParams,
     const bool prepareForSnapping,
-    const bool doMergePatchFaces,
+    const meshRefinement::FaceMergeType mergeType,
     const dictionary& motionDict
 )
 {
@@ -3063,7 +3069,7 @@ void Foam::snappyRefineDriver::doRefine
     // Do something about cells with refined faces on the boundary
     if (prepareForSnapping)
     {
-        mergePatchFaces(doMergePatchFaces, refineParams, motionDict);
+        mergePatchFaces(mergeType, refineParams, motionDict);
     }
 
 

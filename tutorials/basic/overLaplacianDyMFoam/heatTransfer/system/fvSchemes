@@ -74,9 +74,13 @@ oversetInterpolation
     //searchBoxDivisions  (100 100 1);
 }
 
-oversetInterpolationRequired
+
+// Any additional fields that should not be interpolated
+oversetInterpolationSuppresed
 {
-    // Any additional fields that require overset interpolation
+    // For backwards compatibility; should not really be suppressed
+    grad(T);
 }
+
 
 // ************************************************************************* //

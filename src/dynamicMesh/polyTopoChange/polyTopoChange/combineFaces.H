@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C)2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -103,6 +103,7 @@ class combineFaces
         void regioniseFaces
         (
             const scalar minCos,
+            const bool mergeAcrossPatches,
             const label celli,
             const labelList& cEdges,
             Map<label>& faceRegion
@@ -155,20 +156,27 @@ public:
         // Helper functions
 
             //- Extract lists of all (non-coupled) boundary faces on selected
-            //  cells that can be merged. Uses getFaceRegions.
+            //  cells that can be merged. Uses getFaceRegions. Optionally
+            //  allow faces-on-different-patches to be merged (into the largest
+            //  area face - could be improved). Note: causes a problem in
+            //  undoing - all restored faces get the patch/zone from the
+            //  master face.
             labelListList getMergeSets
             (
                 const scalar featureCos,
                 const scalar minConcaveCos,
-                const labelHashSet& boundaryCells
+                const labelHashSet& boundaryCells,
+                const bool mergeAcrossPatches = false
             ) const;
 
             //- Extract lists of all (non-coupled) boundary faces that can
-            //  be merged. Uses getFaceRegions.
+            //  be merged. Uses getFaceRegions. See note above about
+            //  mergeAcrossPatches.
             labelListList getMergeSets
             (
                 const scalar featureCos,
-                const scalar minConcaveCos
+                const scalar minConcaveCos,
+                const bool mergeAcrossPatches = false
             ) const;
 
             //- Gets outside of patch as a face (in mesh point labels)
@@ -197,7 +205,8 @@ public:
             //  Returns maps from added restored point to
             //  original point label (i.e. content of savedPointLabels_).
             //  (only restoredPoints are actually set; rest are just for
-            //   generalness)
+            //   generalness). See note above about restoring faces from
+            //  different patches (mergeAcrossPatches)
             void setUnrefinement
             (
                 const labelList& masterFaces,
