@@ -87,7 +87,8 @@ public:
         {
             pdGaussian,
             pdManual,
-            pdUniform
+            pdUniform,
+            pdGaussianPeak
         };
 
 
@@ -152,6 +153,9 @@ private:
 
                 //- Sigma deviation
                 scalar sigma_;
+
+                //- Peak flux for GaussianPeak mode
+                scalar I0_;
 
                 //- Power
                 autoPtr<Function1<scalar>> laserPower_;

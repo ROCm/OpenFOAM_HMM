@@ -63,6 +63,7 @@ Foam::radiation::laserDTRM::powerDistNames_
     { powerDistributionMode::pdGaussian, "Gaussian" },
     { powerDistributionMode::pdManual,   "manual" },
     { powerDistributionMode::pdUniform,  "uniform" },
+    { powerDistributionMode::pdGaussianPeak, "GaussianPeak" },
 };
 
 
@@ -74,6 +75,11 @@ Foam::scalar Foam::radiation::laserDTRM::calculateIp(scalar r, scalar theta)
     const scalar power = laserPower_->value(t);
     switch (mode_)
     {
+        case pdGaussianPeak:
+        {
+            return I0_*exp(-2.0*sqr(r)/sqr(sigma_));
+            break;
+        }
         case pdGaussian:
         {
             scalar I0 = power/(mathematical::twoPi*sqr(sigma_));
@@ -196,6 +202,12 @@ void Foam::radiation::laserDTRM::initialise()
 
     switch (mode_)
     {
+        case pdGaussianPeak:
+        {
+            I0_ = get<scalar>("I0");
+            sigma_ = get<scalar>("sigma");
+            break;
+        }
         case pdGaussian:
         {
             sigma_ = get<scalar>("sigma");
@@ -346,6 +358,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
     ),
 
     sigma_(0),
+    I0_(0),
     laserPower_(Function1<scalar>::New("laserPower", *this)),
     powerDistribution_(),
 
@@ -442,6 +455,7 @@ Foam::radiation::laserDTRM::laserDTRM
     ),
 
     sigma_(0),
+    I0_(0),
     laserPower_(Function1<scalar>::New("laserPower", *this)),
     powerDistribution_(),
 
