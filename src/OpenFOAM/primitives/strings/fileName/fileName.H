@@ -90,6 +90,9 @@ public:
         //- Debugging
         static int debug;
 
+        //- Allow space character in fileName. To be used with caution.
+        static int allowSpaceInFileName;
+
         //- An empty fileName
         static const fileName null;
 
@@ -141,14 +144,10 @@ public:
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
 
-        //- Construct validated fileName (no invalid characters).
-        //  Optionally perform some additional cleanup such as removing
-        //  duplicate or trailing slashes.
-        static fileName validate
-        (
-            const std::string& s,
-            const bool doClean=false
-        );
+        //- Construct fileName with no invalid characters, possibly applying
+        //- other transformations such as changing the path separator, 
+        //- removing duplicate or trailing slashes, etc.
+        static fileName validate(const std::string& s, const bool doClean=true);
 
         //- This is a specialized (possibly slower) version of compare()
         //- that ignores duplicate or trailing slashes.

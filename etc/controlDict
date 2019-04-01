@@ -64,6 +64,9 @@ InfoSwitches
 
     // Allow case-supplied C++ code (#codeStream, codedFixedValue)
     allowSystemOperations   1;
+
+    // Allow space character in fileName (use with caution)
+    allowSpaceInFileName    0;
 }
 
 

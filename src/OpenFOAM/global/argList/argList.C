@@ -648,7 +648,7 @@ void Foam::argList::setCasePaths()
 
     if (optIter.found())
     {
-        caseDir = optIter.val();
+        caseDir = fileName::validate(optIter.val());
         caseDir.clean();
 
         if (caseDir.empty() || caseDir == ".")

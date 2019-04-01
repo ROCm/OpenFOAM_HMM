@@ -36,7 +36,11 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::fileName::typeName = "fileName";
-int Foam::fileName::debug(debug::debugSwitch(fileName::typeName, 0));
+int Foam::fileName::debug(Foam::debug::debugSwitch(fileName::typeName, 0));
+int Foam::fileName::allowSpaceInFileName
+(
+    Foam::debug::infoSwitch("allowSpaceInFileName", 0)
+);
 const Foam::fileName Foam::fileName::null;
 
 
@@ -48,16 +52,27 @@ Foam::fileName Foam::fileName::validate
     const bool doClean
 )
 {
+    // The logic is very similar to stripInvalid,
+    // but silently removes bad characters
+
     fileName out;
     out.resize(s.size());
 
-    char prev = 0;
     std::string::size_type len = 0;
 
-    // Largely as per stripInvalid
+    char prev = 0;
     for (auto iter = s.cbegin(); iter != s.cend(); ++iter)
     {
-        const char c = *iter;
+        char c = *iter;
+
+        // Treat raw backslash like a path separator. There is no "normal"
+        // way for these to be there (except for an OS that uses them), but
+        // could also cause issues when writing strings, shell commands etc.
+
+        if (c == '\\')
+        {
+            c = '/';
+        }
 
         if (fileName::valid(c))
         {
