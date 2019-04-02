@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,12 +57,12 @@ namespace Foam
 // Forward declarations
 class fileStat;
 
-Istream& operator>>(Istream& is, fileStat& fStat);
-Ostream& operator<<(Ostream& os, const fileStat& fStat);
+Istream& operator>>(Istream& is, fileStat& fs);
+Ostream& operator<<(Ostream& os, const fileStat& fs);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class fileStat Declaration
+                          Class fileStat Declaration
 \*---------------------------------------------------------------------------*/
 
 class fileStat
@@ -71,7 +71,7 @@ class fileStat
 
         struct stat status_;
 
-        bool isValid_;
+        bool valid_;
 
 
 public:
@@ -126,9 +126,9 @@ public:
         }
 
         //- Was file-stat successful?
-        bool isValid() const
+        bool valid() const
         {
-            return isValid_;
+            return valid_;
         }
 
         //- Size in bytes. Zero for an invalid file-stat.
@@ -157,8 +157,16 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream& is, fileStat& fStat);
-        friend Ostream& operator<<(Ostream& os, const fileStat& fStat);
+        friend Istream& operator>>(Istream& is, fileStat& fs);
+        friend Ostream& operator<<(Ostream& os, const fileStat& fs);
+
+
+    // Housekeeping
+
+        //- Deprecated(2019-04) Was file-stat successful?
+        //  \deprecated(2019-04) - use valid() method
+        bool isValid() const { return valid_; }
+
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2018 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ License
 
 Foam::fileStat::fileStat()
 :
-    isValid_(false)
+    valid_(false)
 {}
 
 
@@ -50,7 +50,7 @@ Foam::fileStat::fileStat
     const unsigned int maxTime
 )
 :
-    isValid_(false)
+    valid_(false)
 {
     if (!fName || !fName[0])
     {
@@ -75,7 +75,7 @@ Foam::fileStat::fileStat
     }
 
     // Copy into (non-volatile, possible register based) member var
-    isValid_ = locIsValid;
+    valid_ = locIsValid;
 }
 
 
@@ -100,13 +100,13 @@ Foam::fileStat::fileStat(Istream& is)
 
 Foam::label Foam::fileStat::size() const
 {
-    return isValid_ ? label(status_.st_size) : 0;
+    return valid_ ? label(status_.st_size) : 0;
 }
 
 
 time_t Foam::fileStat::modTime() const
 {
-    return isValid_ ? status_.st_mtime : 0;
+    return valid_ ? status_.st_mtime : 0;
 }
 
 
@@ -114,7 +114,7 @@ double Foam::fileStat::dmodTime() const
 {
     return
     (
-        isValid_
+        valid_
       ?
         #ifdef __APPLE__
         (status_.st_mtime + 1e-9*status_.st_mtimespec.tv_nsec)
@@ -129,7 +129,7 @@ double Foam::fileStat::dmodTime() const
 bool Foam::fileStat::sameDevice(const fileStat& other) const
 {
     return
-        isValid_
+        valid_
      && (
             major(status_.st_dev) == major(other.status_.st_dev)
          && minor(status_.st_dev) == minor(other.status_.st_dev)
@@ -139,64 +139,64 @@ bool Foam::fileStat::sameDevice(const fileStat& other) const
 
 bool Foam::fileStat::sameINode(const fileStat& other) const
 {
-    return isValid_ && (status_.st_ino == other.status_.st_ino);
+    return valid_ && (status_.st_ino == other.status_.st_ino);
 }
 
 
 bool Foam::fileStat::sameINode(const label iNode) const
 {
-    return isValid_ && (status_.st_ino == ino_t(iNode));
+    return valid_ && (status_.st_ino == ino_t(iNode));
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, fileStat& fStat)
+Foam::Istream& Foam::operator>>(Istream& is, fileStat& fs)
 {
-    FixedList<label, 13> stat(is);
+    FixedList<label, 13> list(is);
 
-    fStat.isValid_ = stat[0];
+    fs.valid_ = list[0];
 
-    dev_t st_dev = makedev(stat[1], stat[2]);
-    fStat.status_.st_dev = st_dev;
+    dev_t st_dev = makedev(list[1], list[2]);
+    fs.status_.st_dev = st_dev;
 
-    fStat.status_.st_ino = stat[3];
-    fStat.status_.st_mode = stat[4];
-    fStat.status_.st_uid = stat[5];
-    fStat.status_.st_gid = stat[6];
+    fs.status_.st_ino = list[3];
+    fs.status_.st_mode = list[4];
+    fs.status_.st_uid = list[5];
+    fs.status_.st_gid = list[6];
 
-    dev_t st_rdev = makedev(stat[7], stat[8]);
-    fStat.status_.st_rdev = st_rdev;
+    dev_t st_rdev = makedev(list[7], list[8]);
+    fs.status_.st_rdev = st_rdev;
 
-    fStat.status_.st_size = stat[9];
-    fStat.status_.st_atime = stat[10];
-    fStat.status_.st_mtime = stat[11];
-    fStat.status_.st_ctime = stat[12];
+    fs.status_.st_size = list[9];
+    fs.status_.st_atime = list[10];
+    fs.status_.st_mtime = list[11];
+    fs.status_.st_ctime = list[12];
 
     is.check(FUNCTION_NAME);
     return is;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const fileStat& fStat)
+Foam::Ostream& Foam::operator<<(Ostream& os, const fileStat& fs)
 {
-    FixedList<label, 13> stat;
+    FixedList<label, 13> list;
 
-    stat[0] = label(fStat.isValid_);
-    stat[1] = label(major(fStat.status_.st_dev));
-    stat[2] = label(minor(fStat.status_.st_dev));
-    stat[3] = label(fStat.status_.st_ino);
-    stat[4] = label(fStat.status_.st_mode);
-    stat[5] = label(fStat.status_.st_uid);
-    stat[6] = label(fStat.status_.st_gid);
-    stat[7] = label(major(fStat.status_.st_rdev));
-    stat[8] = label(minor(fStat.status_.st_rdev));
-    stat[9] = label(fStat.status_.st_size);
-    stat[10] = label(fStat.status_.st_atime);
-    stat[11] = label(fStat.status_.st_mtime);
-    stat[12] = label(fStat.status_.st_ctime);
+    list[0] = label(fs.valid_);
+    list[1] = label(major(fs.status_.st_dev));
+    list[2] = label(minor(fs.status_.st_dev));
+    list[3] = label(fs.status_.st_ino);
+    list[4] = label(fs.status_.st_mode);
+    list[5] = label(fs.status_.st_uid);
+    list[6] = label(fs.status_.st_gid);
+    list[7] = label(major(fs.status_.st_rdev));
+    list[8] = label(minor(fs.status_.st_rdev));
+    list[9] = label(fs.status_.st_size);
+    list[10] = label(fs.status_.st_atime);
+    list[11] = label(fs.status_.st_mtime);
+    list[12] = label(fs.status_.st_ctime);
 
-    return os << stat;
+    return os << list;
 }
 
 
