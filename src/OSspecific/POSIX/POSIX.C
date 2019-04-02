@@ -414,135 +414,122 @@ bool Foam::mkDir(const fileName& pathName, mode_t mode)
         // Directory made OK so return true
         return true;
     }
-    else
+
+    switch (errno)
     {
-        switch (errno)
+        case EPERM:
         {
-            case EPERM:
-            {
-                FatalErrorInFunction
-                    << "The filesystem containing " << pathName
-                    << " does not support the creation of directories."
-                    << exit(FatalError);
+            FatalErrorInFunction
+                << "The filesystem containing " << pathName
+                << " does not support the creation of directories."
+                << exit(FatalError);
+            break;
+        }
 
-                return false;
+        case EEXIST:
+        {
+            // Directory already exists so simply return true
+            return true;
+        }
+
+        case EFAULT:
+        {
+            FatalErrorInFunction
+                << "" << pathName
+                << " points outside your accessible address space."
+                << exit(FatalError);
+            break;
+        }
+
+        case EACCES:
+        {
+            FatalErrorInFunction
+                << "The parent directory does not allow write "
+                   "permission to the process,"<< nl
+                << " or one of the directories in " << pathName
+                << " did not allow search (execute) permission."
+                << exit(FatalError);
+            break;
+        }
+
+        case ENAMETOOLONG:
+        {
+            FatalErrorInFunction
+                << "" << pathName << " is too long."
+                << exit(FatalError);
+            break;
+        }
+
+        case ENOENT:
+        {
+            // Part of the path does not exist so try to create it
+            if (pathName.path().size() && mkDir(pathName.path(), mode))
+            {
+                return mkDir(pathName, mode);
             }
 
-            case EEXIST:
-            {
-                // Directory already exists so simply return true
-                return true;
-            }
+            FatalErrorInFunction
+                << "Couldn't create directory " << pathName
+                << exit(FatalError);
+            break;
+        }
 
-            case EFAULT:
-            {
-                FatalErrorInFunction
-                    << "" << pathName
-                    << " points outside your accessible address space."
-                    << exit(FatalError);
+        case ENOTDIR:
+        {
+            FatalErrorInFunction
+                << "A component used as a directory in " << pathName
+                << " is not, in fact, a directory."
+                << exit(FatalError);
+            break;
+        }
 
-                return false;
-            }
+        case ENOMEM:
+        {
+            FatalErrorInFunction
+                << "Insufficient kernel memory was available to make directory "
+                << pathName << '.'
+                << exit(FatalError);
+            break;
+        }
 
-            case EACCES:
-            {
-                FatalErrorInFunction
-                    << "The parent directory does not allow write "
-                       "permission to the process,"<< nl
-                    << "or one of the directories in " << pathName
-                    << " did not allow search (execute) permission."
-                    << exit(FatalError);
+        case EROFS:
+        {
+            FatalErrorInFunction
+                << "" << pathName
+                << " refers to a file on a read-only filesystem."
+                << exit(FatalError);
+            break;
+        }
 
-                return false;
-            }
+        case ELOOP:
+        {
+            FatalErrorInFunction
+                << "Too many symbolic links were encountered in resolving "
+                << pathName << '.'
+                << exit(FatalError);
+            break;
+        }
 
-            case ENAMETOOLONG:
-            {
-                FatalErrorInFunction
-                    << "" << pathName << " is too long."
-                    << exit(FatalError);
+        case ENOSPC:
+        {
+            FatalErrorInFunction
+                << "The device containing " << pathName
+                << " has no room for the new directory or "
+                << "the user's disk quota is exhausted."
+                << exit(FatalError);
+            break;
+        }
 
-                return false;
-            }
-
-            case ENOENT:
-            {
-                // Part of the path does not exist so try to create it
-                if (pathName.path().size() && mkDir(pathName.path(), mode))
-                {
-                    return mkDir(pathName, mode);
-                }
-                else
-                {
-                    FatalErrorInFunction
-                        << "Couldn't create directory " << pathName
-                        << exit(FatalError);
-
-                    return false;
-                }
-            }
-
-            case ENOTDIR:
-            {
-                FatalErrorInFunction
-                    << "A component used as a directory in " << pathName
-                    << " is not, in fact, a directory."
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            case ENOMEM:
-            {
-                FatalErrorInFunction
-                    << "Insufficient kernel memory was available to make "
-                       "directory " << pathName << '.'
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            case EROFS:
-            {
-                FatalErrorInFunction
-                    << "" << pathName
-                    << " refers to a file on a read-only filesystem."
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            case ELOOP:
-            {
-                FatalErrorInFunction
-                    << "Too many symbolic links were encountered in resolving "
-                    << pathName << '.'
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            case ENOSPC:
-            {
-                FatalErrorInFunction
-                    << "The device containing " << pathName
-                    << " has no room for the new directory or "
-                    << "the user's disk quota is exhausted."
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            default:
-            {
-                FatalErrorInFunction
-                    << "Couldn't create directory " << pathName
-                    << exit(FatalError);
-
-                return false;
-            }
+        default:
+        {
+            FatalErrorInFunction
+                << "Couldn't create directory " << pathName
+                << exit(FatalError);
+            break;
         }
     }
+
+    return false;
 }
 
 
@@ -1100,12 +1087,10 @@ bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
     {
         const fileName dstName(dst/src.name());
 
-        return ::rename(src.c_str(), dstName.c_str()) == 0;
+        return (0 == ::rename(src.c_str(), dstName.c_str()));
     }
-    else
-    {
-        return ::rename(src.c_str(), dst.c_str()) == 0;
-    }
+
+    return (0 == ::rename(src.c_str(), dst.c_str()));
 }
 
 
@@ -1146,7 +1131,7 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
             // possible index where we have no choice
             if (!exists(dstName, false) || n == maxIndex)
             {
-                return ::rename(src.c_str(), dstName.c_str()) == 0;
+                return (0 == ::rename(src.c_str(), dstName.c_str()));
             }
         }
     }
@@ -1174,15 +1159,13 @@ bool Foam::rm(const fileName& file)
         return false;
     }
 
-    // Try returning plain file name; if not there, try with .gz
-    if (::remove(file.c_str()) == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return ::remove(string(file + ".gz").c_str()) == 0;
-    }
+    // If removal of plain file name fails, try with .gz
+
+    return
+    (
+        0 == ::remove(file.c_str())
+     || 0 == ::remove((file + ".gz").c_str())
+    );
 }
 
 
