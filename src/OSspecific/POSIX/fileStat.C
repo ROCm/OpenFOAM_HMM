@@ -29,7 +29,6 @@ License
 #include "IOstreams.H"
 #include "timer.H"
 
-#include <signal.h>
 #include <unistd.h>
 #ifndef darwin
     #include <sys/sysmacros.h>

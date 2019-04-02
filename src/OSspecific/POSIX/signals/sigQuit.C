@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -30,9 +30,11 @@ License
 #include "JobInfo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// File-local functions
+#include "signalMacros.C"
 
-struct sigaction Foam::sigQuit::oldAction_;
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::sigQuit::sigActive_ = false;
 
@@ -41,17 +43,11 @@ bool Foam::sigQuit::sigActive_ = false;
 
 void Foam::sigQuit::sigHandler(int)
 {
-    // Reset old handling
-    if (sigaction(SIGQUIT, &oldAction_, nullptr) < 0)
-    {
-        FatalErrorInFunction
-            << "Cannot reset SIGQUIT trapping"
-            << abort(FatalError);
-    }
+    resetHandler("SIGQUIT", SIGQUIT);
 
     jobInfo.signalEnd();        // Update jobInfo file
     error::printStack(Perr);
-    raise(SIGQUIT);             // Throw signal (to old handler)
+    ::raise(SIGQUIT);           // Throw signal (to old handler)
 }
 
 
@@ -75,35 +71,25 @@ Foam::sigQuit::~sigQuit()
 
 void Foam::sigQuit::set(bool)
 {
-    if (!sigActive_)
+    if (sigActive_)
     {
-        struct sigaction newAction;
-        newAction.sa_handler = sigHandler;
-        newAction.sa_flags = SA_NODEFER;
-        sigemptyset(&newAction.sa_mask);
-        if (sigaction(SIGQUIT, &newAction, &oldAction_) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot call more than once"
-                << abort(FatalError);
-        }
-        sigActive_ = true;
+        return;
     }
+    sigActive_ = true;
+
+    setHandler("SIGQUIT", SIGQUIT, sigHandler);
 }
 
 
 void Foam::sigQuit::unset(bool)
 {
-    if (sigActive_)
+    if (!sigActive_)
     {
-        if (sigaction(SIGQUIT, &oldAction_, nullptr) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot unset SIGQUIT trapping"
-                << abort(FatalError);
-        }
-        sigActive_ = false;
+        return;
     }
+    sigActive_ = false;
+
+    resetHandler("SIGQUIT", SIGQUIT);
 }
 
 

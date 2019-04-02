@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -46,8 +46,6 @@ SourceFiles
 #ifndef sigSegv_H
 #define sigSegv_H
 
-#include <signal.h>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -59,12 +57,9 @@ namespace Foam
 
 class sigSegv
 {
-    // Private data
+    // Private Data
 
-        //- Saved old signal trapping setting
-        static struct sigaction oldAction_;
-
-        //- Flag to indicate signal trapping is enabled
+        //- Signal trapping enabled?
         static bool sigActive_;
 
 

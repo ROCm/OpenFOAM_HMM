@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2015 OpenFOAM Foundation
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sigInt.H"
 #include "error.H"
-#include "JobInfo.H"
-#include "IOstreams.H"
+#include "timer.H"
+
+#include <unistd.h>
 
 // File-local functions
 #include "signalMacros.C"
@@ -36,59 +36,78 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-bool Foam::sigInt::sigActive_ = false;
+namespace Foam
+{
+    defineTypeNameAndDebug(timer, 0);
+}
+
+jmp_buf Foam::timer::envAlarm;
+
+unsigned int Foam::timer::oldTimeOut_ = 0;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::sigInt::sigHandler(int)
+void Foam::timer::sigHandler(int)
 {
-    resetHandler("SIGINT", SIGINT);
+    DebugInFunction<< "Timed out. Jumping." << endl;
 
-    jobInfo.signalEnd();        // Update jobInfo file
-    ::raise(SIGINT);            // Throw signal (to old handler)
+    longjmp(envAlarm, 1);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sigInt::sigInt()
+Foam::timer::timer(unsigned int seconds)
+:
+    timeOut_(seconds)
 {
-    set(false);
+    if (!timeOut_)
+    {
+        return;
+    }
+
+    // Singleton since handler is static function
+    if (oldTimeOut_)
+    {
+        FatalErrorInFunction
+            << "timer already used."
+            << abort(FatalError);
+    }
+
+    // Set alarm signal handler
+    // - do not block any signals while in it
+    // - clear list of signals to mask
+
+    setHandler("SIGALRM", SIGALRM, sigHandler);
+
+    // Set alarm timer
+    oldTimeOut_ = ::alarm(timeOut_);
+
+    DebugInFunction
+        << "Installing timeout " << int(timeOut_) << " seconds"
+        << " (overriding old timeout " << int(oldTimeOut_) << ")." << endl;
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::sigInt::~sigInt()
+Foam::timer::~timer()
 {
-    unset(false);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::sigInt::set(bool)
-{
-    if (sigActive_)
+    if (!timeOut_)
     {
         return;
     }
-    sigActive_ = true;
 
-    setHandler("SIGINT", SIGINT, sigHandler);
-}
+    DebugInFunction
+        << "timeOut=" << int(timeOut_)
+        << " : resetting timeOut to " << int(oldTimeOut_) << endl;
 
+    // Reset alarm timer
+    ::alarm(oldTimeOut_);
+    oldTimeOut_ = 0;
 
-void Foam::sigInt::unset(bool)
-{
-    if (!sigActive_)
-    {
-        return;
-    }
-    sigActive_ = false;
-
-    resetHandler("SIGINT", SIGINT);
+    resetHandler("SIGALRM", SIGALRM);
 }
 
 

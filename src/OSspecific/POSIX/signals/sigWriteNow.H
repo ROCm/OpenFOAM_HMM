@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -27,9 +27,8 @@ Class
     Foam::sigWriteNow
 
 Description
-    Signal handler for interupt defined by OptimisationSwitches::writeNowSignal
-
-    Write once and continue.
+    Signal handler to write once and continue.
+    The interrupt is defined by OptimisationSwitches::writeNowSignal
 
 SourceFiles
     sigWriteNow.C
@@ -39,31 +38,24 @@ SourceFiles
 #ifndef sigWriteNow_H
 #define sigWriteNow_H
 
-#include <signal.h>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class Time;
 
 /*---------------------------------------------------------------------------*\
-                           Class sigWriteNow Declaration
+                         Class sigWriteNow Declaration
 \*---------------------------------------------------------------------------*/
 
 class sigWriteNow
 {
-    // Private data
+    // Private Data
 
-        //- Number of signal to use
+        //- Signal number to use
         static int signal_;
-
-        //- Pointer to Time
-        static Time* runTimePtr_;
-
-        //- Saved old signal trapping setting
-        static struct sigaction oldAction_;
 
 
     // Private Member Functions
@@ -73,8 +65,6 @@ class sigWriteNow
 
 
 public:
-
-    friend class sigStopAtWriteNow;
 
     //- Allow setter access to signal_
     friend class addwriteNowSignalToOpt;
@@ -96,9 +86,12 @@ public:
     // Member Functions
 
         //- Is active?
-        bool active() const;
+        static bool active();
 
-        //- (re)set signal catcher
+        //- The signal number being used
+        static int signalNumber();
+
+        //- Set/reset signal handler
         static void set(bool verbose=false);
 
 };

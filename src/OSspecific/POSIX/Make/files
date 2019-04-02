@@ -3,14 +3,16 @@ clockValue/clockValue.C
 cpuInfo/cpuInfo.C
 cpuTime/cpuTime.C
 memInfo/memInfo.C
+
 signals/sigFpe.C
 signals/sigSegv.C
 signals/sigInt.C
 signals/sigQuit.C
 signals/sigStopAtWriteNow.C
 signals/sigWriteNow.C
+signals/timer.C
+
 regExpPosix.C
-timer.C
 fileStat.C
 POSIX.C
 
