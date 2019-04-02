@@ -120,7 +120,7 @@ public:
     // Constructors
 
         //- Construct null
-        fileMonitor(const bool useInotify);
+        explicit fileMonitor(const bool useInotify);
 
 
     //- Destructor

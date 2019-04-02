@@ -51,8 +51,8 @@ namespace POSIX
     //- Declare namespace and its debug switch
     NamespaceName("POSIX");
 
-    const label pathLengthChunk = 256;
-    const label pathLengthMax = 4096;
+    constexpr label pathLengthChunk = 256;
+    constexpr label pathLengthMax = 4096;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -114,9 +114,8 @@ public:
 
     // Constructors
 
-        //- Construct from components.
-        //  newTimeOut=0 makes it do nothing.
-        timer(const unsigned int newTimeOut);
+        //- Construct with specified time-out, a value of 0 makes it a no-op.
+        explicit timer(unsigned int seconds);
 
 
     //- Destructor
