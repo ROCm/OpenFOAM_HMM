@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -34,14 +34,11 @@ Description
 
 #include "OSspecific.H"
 #include "POSIX.H"
-#include "foamVersion.H"
 #include "fileName.H"
 #include "fileStat.H"
 #include "timer.H"
-#include "IFstream.H"
 #include "DynamicList.H"
 #include "CStringList.H"
-#include "SubList.H"
 #include "IOstreams.H"
 #include "Pstream.H"
 
@@ -49,7 +46,7 @@ Description
 #include <cstdlib>
 #include <cctype>
 
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 #include <dirent.h>
 #include <pwd.h>
@@ -896,14 +893,14 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
             return false;
         }
 
-        // Open and check streams.
-        std::ifstream srcStream(src);
+        // Open and check streams. Enforce binary for extra safety
+        std::ifstream srcStream(src, ios_base::in | ios_base::binary);
         if (!srcStream)
         {
             return false;
         }
 
-        std::ofstream destStream(destFile);
+        std::ofstream destStream(destFile, ios_base::out | ios_base::binary);
         if (!destStream)
         {
             return false;

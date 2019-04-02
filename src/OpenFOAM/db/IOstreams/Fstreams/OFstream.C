@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -55,7 +55,7 @@ Foam::Detail::OFstreamAllocator::OFstreamAllocator
         }
     }
 
-    std::ios_base::openmode mode(std::ios_base::out);
+    std::ios_base::openmode mode(std::ios_base::out|std::ios_base::binary);
     if (append)
     {
         mode |= std::ios_base::app;

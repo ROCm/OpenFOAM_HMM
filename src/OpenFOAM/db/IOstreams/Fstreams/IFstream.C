@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -52,7 +52,9 @@ Foam::Detail::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
         }
     }
 
-    allocatedPtr_ = new std::ifstream(pathname);
+    const std::ios_base::openmode mode(std::ios_base::in|std::ios_base::binary);
+
+    allocatedPtr_ = new std::ifstream(pathname, mode);
 
     // If the file is compressed, decompress it before reading.
     if (!allocatedPtr_->good() && isFile(pathname + ".gz", false))
@@ -63,7 +65,7 @@ Foam::Detail::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
         }
 
         delete allocatedPtr_;
-        allocatedPtr_ = new igzstream((pathname + ".gz").c_str());
+        allocatedPtr_ = new igzstream((pathname + ".gz").c_str(), mode);
 
         if (allocatedPtr_->good())
         {
