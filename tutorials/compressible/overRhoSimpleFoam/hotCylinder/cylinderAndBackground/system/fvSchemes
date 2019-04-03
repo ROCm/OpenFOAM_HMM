@@ -61,11 +61,8 @@ oversetInterpolation
     method          inverseDistance;
 }
 
-oversetInterpolationRequired
+oversetInterpolationSuppressed
 {
-    epsilon;
-    k;
-    nut;
 }
 
 // ************************************************************************* //

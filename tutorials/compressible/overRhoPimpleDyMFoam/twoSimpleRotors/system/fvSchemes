@@ -68,10 +68,6 @@ fluxRequired
 
 oversetInterpolationSuppressed
 {
-    grad(p);
-    surfaceIntegrate(phiHbyA);
-    //grad(pcorr);
-    //surfaceIntegrate(((rAUf*magSf)*snGradCorr(pcorr)));
 }
 
 // ************************************************************************* //
