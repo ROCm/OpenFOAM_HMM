@@ -116,7 +116,7 @@ void Foam::entry::checkITstream(const ITstream& is) const
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
-            ::exit(1);
+            std::exit(1);
         }
     }
     else if (!is.size())
@@ -149,7 +149,7 @@ void Foam::entry::checkITstream(const ITstream& is) const
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
-            ::exit(1);
+            std::exit(1);
         }
     }
 }

@@ -153,7 +153,7 @@ void Foam::IOerror::SafeFatalIOError
             << "    in file " << sourceFileName
             << " at line " << sourceFileLineNumber << '.'
             << std::endl;
-        ::exit(1);
+        std::exit(1);
     }
 }
 
@@ -210,7 +210,7 @@ void Foam::IOerror::exit(const int)
         {
             Perr<< endl << *this << endl
                 << "\nFOAM exiting\n" << endl;
-            ::exit(1);
+            std::exit(1);
         }
     }
 }
@@ -229,7 +229,7 @@ void Foam::IOerror::abort()
         Perr<< endl << *this << endl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
         printStack(Perr);
-        ::abort();
+        std::abort();
     }
 
     if (Pstream::parRun())
@@ -256,7 +256,7 @@ void Foam::IOerror::abort()
             Perr<< endl << *this << endl
                 << "\nFOAM aborting\n" << endl;
             printStack(Perr);
-            ::abort();
+            std::abort();
         }
     }
 }

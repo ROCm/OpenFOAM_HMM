@@ -147,7 +147,7 @@ Foam::dictionary& Foam::debug::switchSet
                 << controlDict().name().c_str()
                 << std::endl << std::endl;
 
-            ::exit(1);
+            std::exit(1);
         }
 
         subDictPtr = &(eptr->dict());

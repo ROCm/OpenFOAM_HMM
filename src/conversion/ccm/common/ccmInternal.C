@@ -118,7 +118,7 @@ bool Foam::ccm::ccmGlobalState::assertNoError
             << "\n    libccmio reports -> " << errorMsg(err) << " <-\n"
             << endl;
 
-        ::exit(1);
+        std::exit(1);
     }
 
     return (err == kCCMIONoErr);

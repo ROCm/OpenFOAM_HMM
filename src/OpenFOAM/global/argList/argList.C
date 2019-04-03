@@ -906,7 +906,7 @@ void Foam::argList::parse
 
         if (quickExit)
         {
-            ::exit(0);
+            std::exit(0);
         }
     }
 

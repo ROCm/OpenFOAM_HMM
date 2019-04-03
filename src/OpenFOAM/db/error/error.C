@@ -244,7 +244,7 @@ void Foam::error::exit(const int errNo)
     {
         Perr<< endl << *this << endl
             << "\nFOAM exiting\n" << endl;
-        ::exit(errNo);
+        std::exit(errNo);
     }
 }
 
@@ -262,7 +262,7 @@ void Foam::error::abort()
         Perr<< endl << *this << endl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
         printStack(Perr);
-        ::abort();
+        std::abort();
     }
 
     if (throwExceptions_)
@@ -287,7 +287,7 @@ void Foam::error::abort()
         Perr<< endl << *this << endl
             << "\nFOAM aborting\n" << endl;
         printStack(Perr);
-        ::abort();
+        std::abort();
     }
 }
 

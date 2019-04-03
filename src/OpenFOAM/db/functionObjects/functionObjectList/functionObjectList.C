@@ -887,7 +887,7 @@ bool Foam::functionObjectList::read()
                 catch (const Foam::IOerror& ioErr)
                 {
                     Info<< ioErr << nl << endl;
-                    ::exit(1);
+                    std::exit(1);
                 }
                 catch (const Foam::error& err)
                 {
