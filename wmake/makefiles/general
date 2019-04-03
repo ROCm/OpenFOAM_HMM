@@ -175,7 +175,7 @@ lib: $(LIB).a | silent
 $(LIB).a: $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	@rm -f $(LIB).a
-	$(call QUIET_MESSAGE,ar,$(LIB))
+	$(call QUIET_MESSAGE,ar,$(LIB).a)
 	$E $(AR) $(ARFLAGS) $(LIB).a $(OBJECTS)
 	$(call QUIET_MESSAGE,ranlib,$(notdir $(LIB)))
 	$E $(RANLIB) $(LIB).a

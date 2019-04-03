@@ -43,16 +43,13 @@ include $(GENERAL_RULES)/general
 # Display information
 #------------------------------------------------------------------------------
 
-export WM_VERSION
-
-
 .PHONY: compile
 compile:
 	@echo "$(strip $(CC) $(c++FLAGS))"
 
 .PHONY: api
 api:
-	@echo "$${WM_VERSION#*=}"
+	@echo "$(WM_VERSION)" | sed -e 's/^.*=//'
 
 .PHONY: c
 c:
