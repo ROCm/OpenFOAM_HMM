@@ -104,6 +104,141 @@ static inline void redirects(const bool bg)
 }
 
 
+// * * * * * * * * * * * * * * * * Local Classes * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace POSIX
+{
+
+//- A simple directory contents iterator
+class directoryIterator
+{
+    DIR* dirptr_;
+
+    bool exists_;
+
+    bool hidden_;
+
+    std::string item_;
+
+    //- Accept file/dir name
+    inline bool accept() const
+    {
+        return
+        (
+            item_.size() && item_ != "." && item_ != ".."
+         && (hidden_ || item_[0] != '.')
+        );
+    }
+
+
+public:
+
+    // Constructors
+
+        //- Construct for dirName, optionally allowing hidden files/dirs
+        directoryIterator(const fileName& dirName, bool allowHidden = false)
+        :
+            dirptr_(nullptr),
+            exists_(false),
+            hidden_(allowHidden),
+            item_()
+        {
+            if (!dirName.empty())
+            {
+                dirptr_ = ::opendir(dirName.c_str());
+                exists_ = (dirptr_ != nullptr);
+                next(); // Move to first element
+            }
+        }
+
+
+    //- Destructor
+    ~directoryIterator()
+    {
+        close();
+    }
+
+
+    // Member Functions
+
+        //- Directory open succeeded
+        bool exists() const
+        {
+            return exists_;
+        }
+
+        //- Directory pointer is valid
+        bool good() const
+        {
+            return dirptr_;
+        }
+
+        //- Close directory
+        void close()
+        {
+            if (dirptr_)
+            {
+                ::closedir(dirptr_);
+                dirptr_ = nullptr;
+            }
+        }
+
+        //- The current item
+        const std::string& val() const
+        {
+            return item_;
+        }
+
+        //- Read next item, always ignoring "." and ".." entries.
+        //  Normally also ignore hidden files/dirs (beginning with '.')
+        //  Automatically close when there are no more items
+        bool next()
+        {
+            struct dirent *list;
+
+            while (dirptr_ && (list = ::readdir(dirptr_)) != nullptr)
+            {
+                item_ = list->d_name;
+
+                if (accept())
+                {
+                    return true;
+                }
+            }
+            close(); // No more items
+
+            return false;
+        }
+
+
+    // Member Operators
+
+        //- Same as good()
+        operator bool() const
+        {
+            return good();
+        }
+
+        //- Same as val()
+        const std::string& operator*() const
+        {
+            return val();
+        }
+
+        //- Same as next()
+        directoryIterator& operator++()
+        {
+            next();
+            return *this;
+        }
+};
+
+} // End namespace POSIX
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 pid_t Foam::pid()
@@ -743,7 +878,7 @@ Foam::fileNameList Foam::readDir
 )
 {
     // Initial filename list size and the increment when resizing the list
-    static const int maxNnames = 100;
+    constexpr int maxNnames = 100;
 
     // Basic sanity: cannot strip '.gz' from directory names
     const bool stripgz = filtergz && (type != fileName::DIRECTORY);
@@ -751,14 +886,10 @@ Foam::fileNameList Foam::readDir
 
     fileNameList dirEntries;
 
-    // Open directory and set the structure pointer
-    // Do not attempt to open an empty directory name
-    DIR *source;
-    if
-    (
-        directory.empty()
-     || (source = ::opendir(directory.c_str())) == nullptr
-    )
+    // Iterate contents (ignores an empty directory name)
+
+    POSIX::directoryIterator dirIter(directory);
+    if (!dirIter.exists())
     {
         if (POSIX::debug)
         {
@@ -781,19 +912,12 @@ Foam::fileNameList Foam::readDir
 
     label nFailed = 0;     // Entries with invalid characters
     label nEntries = 0;    // Number of selected entries
-    dirEntries.setSize(maxNnames);
+    dirEntries.resize(maxNnames);
 
-    // Read and parse all the entries in the directory
-    for (struct dirent *list; (list = ::readdir(source)) != nullptr; /*nil*/)
+    // Process the directory entries
+    for (/*nil*/; dirIter; ++dirIter)
     {
-        const std::string item(list->d_name);
-
-        // Ignore files/directories beginning with "."
-        // These are the ".", ".." directories and any hidden files/dirs
-        if (item.empty() || item[0] == '.')
-        {
-            continue;
-        }
+        const std::string& item = *dirIter;
 
         // Validate filename without spaces, quotes, etc in the name.
         // No duplicate slashes to strip - dirent will not have them anyhow.
@@ -813,7 +937,7 @@ Foam::fileNameList Foam::readDir
             {
                 if (nEntries >= dirEntries.size())
                 {
-                    dirEntries.setSize(dirEntries.size() + maxNnames);
+                    dirEntries.resize(dirEntries.size() + maxNnames);
                 }
 
                 if (stripgz && name.hasExt(extgz))
@@ -827,10 +951,9 @@ Foam::fileNameList Foam::readDir
             }
         }
     }
-    ::closedir(source);
 
     // Finalize the length of the entries list
-    dirEntries.setSize(nEntries);
+    dirEntries.resize(nEntries);
 
     if (nFailed && POSIX::debug)
     {
@@ -1171,14 +1294,11 @@ bool Foam::rm(const fileName& file)
 
 bool Foam::rmDir(const fileName& directory, const bool silent)
 {
-    // Open directory and set the structure pointer
-    // Do not attempt to open an empty directory name
-    DIR *source;
-    if
-    (
-        directory.empty()
-     || (source = ::opendir(directory.c_str())) == nullptr
-    )
+    // Iterate contents (ignores an empty directory name)
+    // Also retain hidden files/dirs for removal
+
+    POSIX::directoryIterator dirIter(directory, true);
+    if (!dirIter.exists())
     {
         if (!silent)
         {
@@ -1201,18 +1321,13 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
 
     // Process each directory entry, counting any errors encountered
     label nErrors = 0;
-    for (struct dirent *list; (list = ::readdir(source)) != nullptr; /*nil*/)
-    {
-        const std::string item(list->d_name);
 
-        // Ignore "." and ".." directories
-        if (item.empty() || item == "." || item == "..")
-        {
-            continue;
-        }
+    for (/*nil*/; dirIter; ++dirIter)
+    {
+        const std::string& item = *dirIter;
 
         // Allow invalid characters (spaces, quotes, etc),
-        // otherwise we cannot subdirs with these types of names.
+        // otherwise we cannot remove subdirs with these types of names.
         // -> const fileName path = directory/name; <-
 
         const fileName path(fileName::concat(directory, item));
@@ -1256,7 +1371,6 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
     }
 
     // clean up
-    ::closedir(source);
     return !nErrors;
 }
 
