@@ -30,6 +30,8 @@ Description
 
 #include "argList.H"
 #include "complexFields.H"
+#include "ops.H"
+#include "ListOps.H"
 
 using namespace Foam;
 
@@ -97,9 +99,6 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "sum = " << sum(fld1) << nl;
-    // Not yet Info<< "min = " << min(fld1) << nl;
-
     fld1 *= 10;
     Info<< "scalar multiply: " << flatOutput(fld1) << nl;
 
@@ -119,6 +118,36 @@ int main(int argc, char *argv[])
     Info<< "sqrt   : " << sqrt(fld1) << nl;
     // Info<< "pow(2) : " << pow(fld1, 2) << nl;
 
+
+    // Make some changes
+    {
+        label i = 1;
+        for (complex& c : fld1)
+        {
+            c.Re() += i;
+            c.Im() -= 10 - i;
+            ++i;
+        }
+    }
+
+    Info<< nl
+        << "field = " << fld1 << nl;
+
+    Info<< "magSqr = "
+        << ListOps::create<scalar>
+           (
+               fld1,
+               [](const complex& c) { return magSqr(c); }
+           )
+        << nl;
+
+    Info
+        << "sum = " << sum(fld1) << nl
+        << "min = " << min(fld1) << nl
+        << "max = " << max(fld1) << nl;
+
+    // MinMax fails since there is no less comparison operator
+    // Info<< "min/max = " << MinMax<complex>(fld1) << nl;
 
     Info<< "\nEnd\n" << endl;
     return 0;

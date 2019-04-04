@@ -232,6 +232,70 @@ public:
 };
 
 
+// Template specialisation for pTraits<complex>
+template<>
+class pTraits<complex>
+{
+    complex p_;
+
+public:
+
+    //- Component type
+    typedef complex cmptType;
+
+    //- Equivalent type of labels used for valid component indexing
+    typedef label labelType;
+
+
+    // Member constants
+
+        //- Dimensionality of space
+        static constexpr direction dim = 3;
+
+        //- Rank of complex is 0
+        static constexpr direction rank = 0;
+
+        //- Number of components in complex is 2
+        static constexpr direction nComponents = 2;
+
+
+    // Static Data Members
+
+        static const char* const typeName;
+        static const char* const componentNames[];
+        static const complex zero;
+        static const complex one;
+        static const complex max;
+        static const complex min;
+        static const complex rootMax;
+        static const complex rootMin;
+
+
+    // Constructors
+
+        //- Construct from primitive
+        explicit pTraits(const complex& val);
+
+        //- Construct from Istream
+        pTraits(Istream& is);
+
+
+    // Member Functions
+
+        //- Access to the value
+        operator complex() const
+        {
+            return p_;
+        }
+
+        //- Access to the value
+        operator complex&()
+        {
+            return p_;
+        }
+};
+
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 Istream& operator>>(Istream& is, complex& c);
