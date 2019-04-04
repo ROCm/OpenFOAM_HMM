@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -31,27 +31,23 @@ License
 #include "ops.H"
 #include <type_traits>
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace()
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Foam::VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace()
 {}
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace(const Foam::zero)
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Foam::VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace(const Foam::zero)
 {
     VectorSpaceOps<Ncmpts,0>::eqOpS(*this, Zero, eqOp<Cmpt>());
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Foam::VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace
 (
     const VectorSpace<Form, Cmpt, Ncmpts>& vs
 )
@@ -60,9 +56,9 @@ inline VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
+template<class Form, class Cmpt, Foam::direction Ncmpts>
 template<class Form2, class Cmpt2>
-inline VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace
+inline Foam::VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace
 (
     const VectorSpace<Form2, Cmpt2, Ncmpts>& vs
 )
@@ -71,10 +67,10 @@ inline VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-template<class SubVector, direction BStart>
-inline
-VectorSpace<Form, Cmpt, Ncmpts>::ConstBlock<SubVector, BStart>::ConstBlock
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+template<class SubVector, Foam::direction BStart>
+inline Foam::VectorSpace<Form, Cmpt, Ncmpts>::ConstBlock<SubVector, BStart>
+    ::ConstBlock
 (
     const vsType& vs
 )
@@ -91,15 +87,15 @@ VectorSpace<Form, Cmpt, Ncmpts>::ConstBlock<SubVector, BStart>::ConstBlock
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline direction VectorSpace<Form, Cmpt, Ncmpts>::size()
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline constexpr Foam::direction Foam::VectorSpace<Form, Cmpt, Ncmpts>::size()
 {
     return Ncmpts;
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline const Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::component
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline const Cmpt& Foam::VectorSpace<Form, Cmpt, Ncmpts>::component
 (
     const direction d
 ) const
@@ -117,8 +113,8 @@ inline const Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::component
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::component
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Cmpt& Foam::VectorSpace<Form, Cmpt, Ncmpts>::component
 (
     const direction d
 )
@@ -136,8 +132,8 @@ inline Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::component
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline void VectorSpace<Form, Cmpt, Ncmpts>::component
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline void Foam::VectorSpace<Form, Cmpt, Ncmpts>::component
 (
     Cmpt& c,
     const direction d
@@ -156,8 +152,8 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::component
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline void VectorSpace<Form, Cmpt, Ncmpts>::replace
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline void Foam::VectorSpace<Form, Cmpt, Ncmpts>::replace
 (
     const direction d,
     const Cmpt& c
@@ -176,8 +172,8 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::replace
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline Form VectorSpace<Form, Cmpt, Ncmpts>::uniform(const Cmpt& s)
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Form Foam::VectorSpace<Form, Cmpt, Ncmpts>::uniform(const Cmpt& s)
 {
     Form v;
     VectorSpaceOps<Ncmpts,0>::eqOpS(v, s, eqOp<Cmpt>());
@@ -185,20 +181,64 @@ inline Form VectorSpace<Form, Cmpt, Ncmpts>::uniform(const Cmpt& s)
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-template<class SubVector, direction BStart>
-inline const typename VectorSpace<Form, Cmpt, Ncmpts>::template
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+template<class SubVector, Foam::direction BStart>
+inline const typename Foam::VectorSpace<Form, Cmpt, Ncmpts>::template
     ConstBlock<SubVector, BStart>
-VectorSpace<Form, Cmpt, Ncmpts>::block() const
+Foam::VectorSpace<Form, Cmpt, Ncmpts>::block() const
 {
     return *this;
 }
 
 
+// * * * * * * * * * * * * * * * * Iterator  * * * * * * * * * * * * * * * * //
+
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::begin()
+{
+    return v_;
+}
+
+
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::end()
+{
+    return (v_ + Ncmpts);
+}
+
+
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::cbegin() const
+{
+    return v_;
+}
+
+
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::cend() const
+{
+    return (v_ + Ncmpts);
+}
+
+
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::begin() const
+{
+    return v_;
+}
+
+
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::end() const
+{
+    return (v_ + Ncmpts);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline const Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::operator[]
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline const Cmpt& Foam::VectorSpace<Form, Cmpt, Ncmpts>::operator[]
 (
     const direction d
 ) const
@@ -216,8 +256,8 @@ inline const Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::operator[]
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::operator[]
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Cmpt& Foam::VectorSpace<Form, Cmpt, Ncmpts>::operator[]
 (
     const direction d
 )
@@ -235,10 +275,10 @@ inline Cmpt& VectorSpace<Form, Cmpt, Ncmpts>::operator[]
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-template<class SubVector, direction BStart>
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+template<class SubVector, Foam::direction BStart>
 inline const Cmpt&
-VectorSpace<Form, Cmpt, Ncmpts>::
+Foam::VectorSpace<Form, Cmpt, Ncmpts>::
 ConstBlock<SubVector, BStart>::operator[]
 (
     const direction d
@@ -257,10 +297,10 @@ ConstBlock<SubVector, BStart>::operator[]
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-template<class SubVector, direction BStart>
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+template<class SubVector, Foam::direction BStart>
 inline const Cmpt&
-VectorSpace<Form, Cmpt, Ncmpts>::
+Foam::VectorSpace<Form, Cmpt, Ncmpts>::
 ConstBlock<SubVector, BStart>::operator()
 (
     const direction i,
@@ -275,7 +315,7 @@ ConstBlock<SubVector, BStart>::operator()
             << abort(FatalError);
     }
 
-    if (j != 0)
+    if (j)
     {
         FatalErrorInFunction
             << "index " << j << " != 0"
@@ -287,8 +327,8 @@ ConstBlock<SubVector, BStart>::operator()
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline void VectorSpace<Form, Cmpt, Ncmpts>::operator=
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline void Foam::VectorSpace<Form, Cmpt, Ncmpts>::operator=
 (
     const VectorSpace<Form, Cmpt, Ncmpts>& vs
 )
@@ -297,8 +337,8 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::operator=
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline void VectorSpace<Form, Cmpt, Ncmpts>::operator+=
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline void Foam::VectorSpace<Form, Cmpt, Ncmpts>::operator+=
 (
     const VectorSpace<Form, Cmpt, Ncmpts>& vs
 )
@@ -307,8 +347,8 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::operator+=
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline void VectorSpace<Form, Cmpt, Ncmpts>::operator-=
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline void Foam::VectorSpace<Form, Cmpt, Ncmpts>::operator-=
 (
     const VectorSpace<Form, Cmpt, Ncmpts>& vs
 )
@@ -317,15 +357,15 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::operator-=
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline void VectorSpace<Form, Cmpt, Ncmpts>::operator=(const Foam::zero)
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline void Foam::VectorSpace<Form, Cmpt, Ncmpts>::operator=(const Foam::zero)
 {
     VectorSpaceOps<Ncmpts,0>::eqOpS(*this, 0, eqOp<Cmpt>());
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline void VectorSpace<Form, Cmpt, Ncmpts>::operator*=
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline void Foam::VectorSpace<Form, Cmpt, Ncmpts>::operator*=
 (
     const scalar s
 )
@@ -334,8 +374,8 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::operator*=
 }
 
 
-template<class Form, class Cmpt, direction Ncmpts>
-inline void VectorSpace<Form, Cmpt, Ncmpts>::operator/=
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline void Foam::VectorSpace<Form, Cmpt, Ncmpts>::operator/=
 (
     const scalar s
 )
@@ -343,6 +383,11 @@ inline void VectorSpace<Form, Cmpt, Ncmpts>::operator/=
     VectorSpaceOps<Ncmpts,0>::eqOpS(*this, s, divideEqOp2<Cmpt, scalar>());
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 

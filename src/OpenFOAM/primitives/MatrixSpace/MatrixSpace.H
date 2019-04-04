@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -68,20 +68,20 @@ public:
 
     // Member constants
 
-        static const direction mRows = Mrows;
-        static const direction nCols = Ncols;
+        static constexpr direction mRows = Mrows;
+        static constexpr direction nCols = Ncols;
 
 
     // Static member functions
 
         //- Return the number of rows
-        static direction m()
+        static direction m() noexcept
         {
             return Mrows;
         }
 
         //- Return the number of columns
-        static direction n()
+        static direction n() noexcept
         {
             return Ncols;
         }

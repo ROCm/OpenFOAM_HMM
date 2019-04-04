@@ -38,18 +38,15 @@ Foam::VectorSpace<Form, Cmpt, Ncmpts>::VectorSpace
     Istream& is
 )
 {
-    // Read beginning of VectorSpace<Cmpt>
-    is.readBegin("VectorSpace<Form, Cmpt, Ncmpts>");
+    is.readBegin("VectorSpace");
 
     for (direction i=0; i<Ncmpts; i++)
     {
         is >> v_[i];
     }
 
-    // Read end of VectorSpace<Cmpt>
-    is.readEnd("VectorSpace<Form, Cmpt, Ncmpts>");
+    is.readEnd("VectorSpace");
 
-    // Check state of Istream
     is.check(FUNCTION_NAME);
 }
 
@@ -64,7 +61,7 @@ Foam::word Foam::name
 
     buf << '(' << vs.v_[0];
 
-    for (direction i=1; i<Ncmpts; i++)
+    for (direction i=1; i<Ncmpts; ++i)
     {
         buf << ',' << vs.v_[i];
     }
@@ -84,18 +81,15 @@ Foam::Istream& Foam::operator>>
     VectorSpace<Form, Cmpt, Ncmpts>& vs
 )
 {
-    // Read beginning of VectorSpace<Cmpt, Ncmpts>
-    is.readBegin("VectorSpace<Form, Cmpt, Ncmpts>");
+    is.readBegin("VectorSpace");
 
     for (direction i=0; i<Ncmpts; i++)
     {
         is >> vs.v_[i];
     }
 
-    // Read end of VectorSpace<Cmpt, Ncmpts>
-    is.readEnd("VectorSpace<Form, Cmpt, Ncmpts>");
+    is.readEnd("VectorSpace");
 
-    // Check state of Istream
     is.check(FUNCTION_NAME);
 
     return is;
@@ -111,7 +105,7 @@ Foam::Ostream& Foam::operator<<
 {
     os << token::BEGIN_LIST << vs.v_[0];
 
-    for (direction i=1; i<Ncmpts; i++)
+    for (direction i=1; i<Ncmpts; ++i)
     {
         os << token::SPACE << vs.v_[i];
     }

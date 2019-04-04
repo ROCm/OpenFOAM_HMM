@@ -345,7 +345,7 @@ inline const Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::operator()
 ) const
 {
     #ifdef FULLDEBUG
-    if (i > Mrows-1 || j > Ncols-1)
+    if (i >= Mrows || j >= Ncols)
     {
         FatalErrorInFunction
             << "indices out of range"
@@ -365,7 +365,7 @@ inline Cmpt& Foam::MatrixSpace<Form, Cmpt, Mrows, Ncols>::operator()
 )
 {
     #ifdef FULLDEBUG
-    if (i > Mrows-1 || j > Ncols-1)
+    if (i >= Mrows || j >= Ncols)
     {
         FatalErrorInFunction
             << "indices out of range"
