@@ -253,8 +253,17 @@ void Foam::PatchFunction1Types::ConstantField<Type>::writeData
 ) const
 {
     PatchFunction1<Type>::writeData(os);
-    //os  << token::SPACE << value_ << token::END_STATEMENT << nl;
-    value_.writeEntry(this->name_, os);
+
+    if (isUniform_)
+    {
+        os.writeKeyword(this->name_)
+            << "constant " << uniformValue_
+            << token::END_STATEMENT << nl;
+    }
+    else
+    {
+        value_.writeEntry(this->name_, os);
+    }
 }
 
 
