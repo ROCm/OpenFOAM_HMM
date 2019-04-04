@@ -15,7 +15,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Make sure all preprocessing tools know about the 'overset' bc
-libs            ("liboverset.so");
+libs            ("liboverset.so" "libfvMotionSolvers.so");
 
 application     overLaplacianDyMFoam;
 
