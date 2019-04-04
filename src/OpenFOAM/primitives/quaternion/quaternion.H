@@ -110,7 +110,7 @@ public:
     // Member constants
 
         //- Rank of quaternion is 1
-        static const direction rank = 1;
+        static constexpr direction rank = 1;
 
 
     // Static data members
