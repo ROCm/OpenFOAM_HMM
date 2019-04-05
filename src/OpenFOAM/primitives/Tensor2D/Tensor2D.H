@@ -70,7 +70,7 @@ public:
     // Member constants
 
         //- Rank of Tensor2D is 2
-        static const direction rank = 2;
+        static constexpr direction rank = 2;
 
 
     // Static data members

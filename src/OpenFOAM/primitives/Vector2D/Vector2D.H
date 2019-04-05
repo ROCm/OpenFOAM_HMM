@@ -65,7 +65,7 @@ public:
     // Member constants
 
         //- Rank of Vector2D is 1
-        static const direction rank = 1;
+        static constexpr direction rank = 1;
 
 
     //- Component labeling enumeration

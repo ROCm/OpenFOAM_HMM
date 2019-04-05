@@ -82,7 +82,7 @@ static inline void errorMandatoryNotFound
         << locationToString(location) << ")\n    '"
         << name << "'\n"
         << std::endl;
-    ::exit(1);
+    std::exit(1);
 }
 
 

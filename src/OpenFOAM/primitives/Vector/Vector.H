@@ -72,7 +72,7 @@ public:
     // Member constants
 
         //- Rank of Vector is 1
-        static const direction rank = 1;
+        static constexpr direction rank = 1;
 
 
     //- Component labeling enumeration

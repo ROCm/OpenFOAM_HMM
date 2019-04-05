@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -89,23 +89,23 @@ public:
     typedef Cmpt cmptType;
 
 
-    // Static constants
+    // Static Constants
 
         //- Dimensionality of space
-        static const direction dim = 3;
+        static constexpr direction dim = 3;
 
         //- Number of components in this vector space
-        static const direction nComponents = Ncmpts;
+        static constexpr direction nComponents = Ncmpts;
 
 
         // VectorSpace currently defaults to a column-vector
         // This will be removed when column-vector is introduced
         // as a specialization
-        static const direction mRows = Ncmpts;
-        static const direction nCols = 1;
+        static constexpr direction mRows = Ncmpts;
+        static constexpr direction nCols = 1;
 
 
-    // Static data members
+    // Static Data Members
 
         static const char* const typeName;
         static const char* const componentNames[];
@@ -120,11 +120,7 @@ public:
     // Sub-Block Classes
 
         //- Const sub-block type
-        template
-        <
-            class SubVector,
-            direction BStart
-        >
+        template<class SubVector, direction BStart>
         class ConstBlock
         {
             const vsType& vs_;
@@ -158,12 +154,12 @@ public:
         inline VectorSpace(const Foam::zero);
 
         //- Construct from Istream
-        VectorSpace(Istream&);
+        VectorSpace(Istream& is);
 
-        //- Construct as copy
-        inline VectorSpace(const VectorSpace<Form, Cmpt, Ncmpts>&);
+        //- Copy construct
+        inline VectorSpace(const VectorSpace<Form, Cmpt, Ncmpts>& vs);
 
-        //- Construct as copy of a VectorSpace with the same size
+        //- Copy construct of a VectorSpace with the same size
         template<class Form2, class Cmpt2>
         inline explicit VectorSpace(const VectorSpace<Form2, Cmpt2, Ncmpts>&);
 
@@ -171,7 +167,7 @@ public:
     // Member Functions
 
         //- Return the number of elements in the VectorSpace = Ncmpts.
-        inline static direction size();
+        inline static constexpr direction size();
 
         inline const Cmpt& component(const direction) const;
         inline Cmpt& component(const direction);
@@ -198,6 +194,39 @@ public:
         inline void operator=(const Foam::zero);
         inline void operator*=(const scalar);
         inline void operator/=(const scalar);
+
+
+    // Iterators
+
+        //- Random access iterator for traversing VectorSpace
+        typedef Cmpt* iterator;
+
+        //- Random access iterator for traversing VectorSpace
+        typedef const Cmpt* const_iterator;
+
+
+    // Random access iterator (non-const)
+
+        //- Return an iterator to begin of VectorSpace
+        inline iterator begin();
+
+        //- Return an iterator to end of UListVectorSpace
+        inline iterator end();
+
+
+    // Random access iterator (const)
+
+        //- Return const_iterator to begin of VectorSpace
+        inline const_iterator cbegin() const;
+
+        //- Return const_iterator to end of VectorSpace
+        inline const_iterator cend() const;
+
+        //- Return const_iterator to begin of VectorSpace
+        inline const_iterator begin() const;
+
+        //- Return const_iterator to end of VectorSpace
+        inline const_iterator end() const;
 
 
     // IOstream Operators

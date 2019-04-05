@@ -41,7 +41,8 @@ wmakeLnInclude -u decompositionMethods
 if have_scotch
 then
     wmake $targetType scotchDecomp
-    if [ -d "$FOAM_LIBBIN/$FOAM_MPI" ]
+
+    if have_ptscotch
     then
         wmakeMpiLib "$SCOTCH_VERSION" ptscotchDecomp
     fi

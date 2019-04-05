@@ -67,7 +67,7 @@ public:
     // Member constants
 
         //- Rank of BarycentricTensor is 2
-        static const direction rank = 2;
+        static constexpr direction rank = 2;
 
 
     //- Component labeling enumeration

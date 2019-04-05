@@ -3916,7 +3916,7 @@ void Foam::snappyLayerDriver::addLayers
                     else
                     {
                         Perr<< "\nFOAM exiting\n" << endl;
-                        ::exit(0);
+                        std::exit(0);
                     }
                 }
             }

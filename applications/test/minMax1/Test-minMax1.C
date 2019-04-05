@@ -32,6 +32,7 @@ Description
 #include "HashOps.H"
 #include "ListOps.H"
 #include "scalarField.H"
+#include "complexField.H"
 #include "MinMax.H"
 #include "dimensionedScalar.H"
 
@@ -44,6 +45,19 @@ Ostream& printInfo(const MinMax<T>& range)
     Info<< range << " valid=" << range.valid();
 
     return Info;
+}
+
+
+template<class T>
+void testUniformField(const T& val)
+{
+    constexpr label N = 10;
+
+    //    Field<T> fld(N, val);
+    List<T> fld(N, val);
+
+    Info<< "field:   " << fld << nl
+        << "min/max: " << minMaxMag(fld) << nl;
 }
 
 
@@ -224,6 +238,15 @@ int main(int argc, char *argv[])
 
         Info<< "filtered: " << hashed << nl;
     }
+
+
+    // Min/max of uniform fields
+    {
+        testUniformField<scalar>(100);
+        // testUniformField<complex>(complex(100, 0));
+    }
+
+    Info<< "\nEnd\n" << nl;
 
     return 0;
 }

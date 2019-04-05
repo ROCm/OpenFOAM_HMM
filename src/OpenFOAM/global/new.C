@@ -46,7 +46,7 @@ void newError()
         "by e.g. bad use of pointers or an out of date shared library"
         << std::endl;
 
-    ::abort();
+    std::abort();
 }
 
 void (*old_new_handler)() = std::set_new_handler(newError);

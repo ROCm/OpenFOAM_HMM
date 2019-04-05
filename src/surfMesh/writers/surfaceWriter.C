@@ -384,8 +384,10 @@ bool Foam::surfaceWriter::expire()
 
     upToDate_ = false;
     wroteGeom_ = false;
-    nFields_ = 0;
     merged_.clear();
+
+    // Field count (nFields_) is a different type of accounting
+    // and is unaffected by geometry changes
 
     return changed;
 }

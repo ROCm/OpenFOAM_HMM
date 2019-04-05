@@ -272,7 +272,7 @@ void Foam::dictionary::checkITstream
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
-            ::exit(1);
+            std::exit(1);
         }
     }
     else if (!is.size())
@@ -305,7 +305,7 @@ void Foam::dictionary::checkITstream
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
-            ::exit(1);
+            std::exit(1);
         }
     }
 }

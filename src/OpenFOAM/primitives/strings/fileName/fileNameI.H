@@ -102,9 +102,9 @@ inline bool Foam::fileName::valid(char c)
 {
     return
     (
-        !isspace(c)
-     && c != '"'   // string quote
-     && c != '\''  // string quote
+        c != '"'    // string quote
+     && c != '\''   // string quote
+     && (!isspace(c) || (allowSpaceInFileName && c == ' '))
     );
 }
 
@@ -134,7 +134,10 @@ inline void Foam::fileName::stripInvalid()
 
 inline bool Foam::fileName::isAbsolute(const std::string& str)
 {
-    return !str.empty() && str[0] == '/';
+    return
+    (
+        !str.empty() && str[0] == '/'
+    );
 }
 
 

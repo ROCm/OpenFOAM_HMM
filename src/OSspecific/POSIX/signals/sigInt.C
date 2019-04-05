@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -30,9 +30,11 @@ License
 #include "JobInfo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// File-local functions
+#include "signalMacros.C"
 
-struct sigaction Foam::sigInt::oldAction_;
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::sigInt::sigActive_ = false;
 
@@ -41,16 +43,10 @@ bool Foam::sigInt::sigActive_ = false;
 
 void Foam::sigInt::sigHandler(int)
 {
-    // Reset old handling
-    if (sigaction(SIGINT, &oldAction_, nullptr) < 0)
-    {
-        FatalErrorInFunction
-            << "Cannot reset SIGINT trapping"
-            << abort(FatalError);
-    }
+    resetHandler("SIGINT", SIGINT);
 
     jobInfo.signalEnd();        // Update jobInfo file
-    raise(SIGINT);              // Throw signal (to old handler)
+    ::raise(SIGINT);            // Throw signal (to old handler)
 }
 
 
@@ -74,35 +70,25 @@ Foam::sigInt::~sigInt()
 
 void Foam::sigInt::set(bool)
 {
-    if (!sigActive_)
+    if (sigActive_)
     {
-        struct sigaction newAction;
-        newAction.sa_handler = sigHandler;
-        newAction.sa_flags = SA_NODEFER;
-        sigemptyset(&newAction.sa_mask);
-        if (sigaction(SIGINT, &newAction, &oldAction_) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot call sigInt::set() more than once"
-                << abort(FatalError);
-        }
-        sigActive_ = true;
+        return;
     }
+    sigActive_ = true;
+
+    setHandler("SIGINT", SIGINT, sigHandler);
 }
 
 
 void Foam::sigInt::unset(bool)
 {
-    if (sigActive_)
+    if (!sigActive_)
     {
-        if (sigaction(SIGINT, &oldAction_, nullptr) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot set SIGINT trapping"
-                << abort(FatalError);
-        }
-        sigActive_ = false;
+        return;
     }
+    sigActive_ = false;
+
+    resetHandler("SIGINT", SIGINT);
 }
 
 

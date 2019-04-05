@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -46,8 +46,6 @@ SourceFiles
 #ifndef sigQuit_H
 #define sigQuit_H
 
-#include <signal.h>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -59,12 +57,9 @@ namespace Foam
 
 class sigQuit
 {
-    // Private data
+    // Private Data
 
-        //- Saved old signal trapping setting
-        static struct sigaction oldAction_;
-
-        //- Flag to indicate signal trapping is enabled
+        //- Signal trapping enabled?
         static bool sigActive_;
 
 
@@ -86,7 +81,7 @@ public:
     ~sigQuit();
 
 
-    // Member functions
+    // Member Functions
 
         //- Activate SIGQUIT signal handler
         static void set(bool verbose=false);

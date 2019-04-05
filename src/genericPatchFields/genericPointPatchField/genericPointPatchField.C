@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -55,242 +55,234 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
     actualTypeName_(dict.get<word>("type")),
     dict_(dict)
 {
+    const label patchSize = this->size();
+
     for (const entry& dEntry : dict_)
     {
         const keyType& key = dEntry.keyword();
 
-        if (key != "type")
+        if
+        (
+            key == "type"
+         || !dEntry.isStream() || dEntry.stream().empty()
+        )
         {
-            if
-            (
-                dEntry.isStream()
-             && dEntry.stream().size()
-            )
+            continue;
+        }
+
+
+        ITstream& is = dEntry.stream();
+
+        // Read first token
+        token firstToken(is);
+
+        if
+        (
+            firstToken.isWord()
+         && firstToken.wordToken() == "nonuniform"
+        )
+        {
+            token fieldToken(is);
+
+            if (!fieldToken.isCompound())
             {
-                ITstream& is = dEntry.stream();
-
-                // Read first token
-                token firstToken(is);
-
                 if
                 (
-                    firstToken.isWord()
-                 && firstToken.wordToken() == "nonuniform"
+                    fieldToken.isLabel()
+                 && fieldToken.labelToken() == 0
                 )
                 {
-                    token fieldToken(is);
-
-                    if (!fieldToken.isCompound())
-                    {
-                        if
-                        (
-                            fieldToken.isLabel()
-                         && fieldToken.labelToken() == 0
-                        )
-                        {
-                            scalarFields_.insert
-                            (
-                                key,
-                                autoPtr<scalarField>::New()
-                            );
-                        }
-                        else
-                        {
-                            FatalIOErrorInFunction(dict)
-                                << "\n    token following 'nonuniform' "
-                                   "is not a compound"
-                                << "\n    on patch " << this->patch().name()
-                                << " of field "
-                                << this->internalField().name()
-                                << " in file "
-                                << this->internalField().objectPath()
-                            << exit(FatalIOError);
-                        }
-                    }
-                    else if
-                    (
-                        fieldToken.compoundToken().type()
-                     == token::Compound<List<scalar>>::typeName
-                    )
-                    {
-                        auto fPtr = autoPtr<scalarField>::New();
-
-                        fPtr->transfer
-                        (
-                            dynamicCast<token::Compound<List<scalar>>>
-                            (
-                                fieldToken.transferCompoundToken(is)
-                            )
-                        );
-
-                        if (fPtr->size() != this->size())
-                        {
-                            FatalIOErrorInFunction(dict)
-                                << "\n    size of field " << key
-                                << " (" << fPtr->size() << ')'
-                                << " is not the same size as the patch ("
-                                << this->size() << ')'
-                                << "\n    on patch " << this->patch().name()
-                                << " of field "
-                                << this->internalField().name()
-                                << " in file "
-                                << this->internalField().objectPath()
-                                << exit(FatalIOError);
-                        }
-
-                        scalarFields_.insert(key, fPtr);
-                    }
-                    else if
-                    (
-                        fieldToken.compoundToken().type()
-                     == token::Compound<List<vector>>::typeName
-                    )
-                    {
-                        auto fPtr = autoPtr<vectorField>::New();
-
-                        fPtr->transfer
-                        (
-                            dynamicCast<token::Compound<List<vector>>>
-                            (
-                                fieldToken.transferCompoundToken(is)
-                            )
-                        );
-
-                        if (fPtr->size() != this->size())
-                        {
-                            FatalIOErrorInFunction(dict)
-                                << "\n    size of field " << key
-                                << " (" << fPtr->size() << ')'
-                                << " is not the same size as the patch ("
-                                << this->size() << ')'
-                                << "\n    on patch " << this->patch().name()
-                                << " of field "
-                                << this->internalField().name()
-                                << " in file "
-                                << this->internalField().objectPath()
-                                << exit(FatalIOError);
-                        }
-
-                        vectorFields_.insert(key, fPtr);
-                    }
-                    else if
-                    (
-                        fieldToken.compoundToken().type()
-                     == token::Compound<List<sphericalTensor>>::typeName
-                    )
-                    {
-                        auto fPtr = autoPtr<sphericalTensorField>::New();
-
-                        fPtr->transfer
-                        (
-                            dynamicCast
-                            <
-                                token::Compound<List<sphericalTensor>>
-                            >
-                            (
-                                fieldToken.transferCompoundToken(is)
-                            )
-                        );
-
-                        if (fPtr->size() != this->size())
-                        {
-                            FatalIOErrorInFunction(dict)
-                                << "\n    size of field " << key
-                                << " (" << fPtr->size() << ')'
-                                << " is not the same size as the patch ("
-                                << this->size() << ')'
-                                << "\n    on patch " << this->patch().name()
-                                << " of field "
-                                << this->internalField().name()
-                                << " in file "
-                                << this->internalField().objectPath()
-                                << exit(FatalIOError);
-                        }
-
-                        sphTensorFields_.insert(key, fPtr);
-                    }
-                    else if
-                    (
-                        fieldToken.compoundToken().type()
-                     == token::Compound<List<symmTensor>>::typeName
-                    )
-                    {
-                        auto fPtr = autoPtr<symmTensorField>::New();
-
-                        fPtr->transfer
-                        (
-                            dynamicCast
-                            <
-                                token::Compound<List<symmTensor>>
-                            >
-                            (
-                                fieldToken.transferCompoundToken(is)
-                            )
-                        );
-
-                        if (fPtr->size() != this->size())
-                        {
-                            FatalIOErrorInFunction(dict)
-                                << "\n    size of field " << key
-                                << " (" << fPtr->size() << ')'
-                                << " is not the same size as the patch ("
-                                << this->size() << ')'
-                                << "\n    on patch " << this->patch().name()
-                                << " of field "
-                                << this->internalField().name()
-                                << " in file "
-                                << this->internalField().objectPath()
-                                << exit(FatalIOError);
-                        }
-
-                        symmTensorFields_.insert(key, fPtr);
-                    }
-                    else if
-                    (
-                        fieldToken.compoundToken().type()
-                     == token::Compound<List<tensor>>::typeName
-                    )
-                    {
-                        auto fPtr = autoPtr<tensorField>::New();
-
-                        fPtr->transfer
-                        (
-                            dynamicCast<token::Compound<List<tensor>>>
-                            (
-                                fieldToken.transferCompoundToken(is)
-                            )
-                        );
-
-                        if (fPtr->size() != this->size())
-                        {
-                            FatalIOErrorInFunction(dict)
-                                << "\n    size of field " << key
-                                << " (" << fPtr->size() << ')'
-                                << " is not the same size as the patch ("
-                                << this->size() << ')'
-                                << "\n    on patch " << this->patch().name()
-                                << " of field "
-                                << this->internalField().name()
-                                << " in file "
-                                << this->internalField().objectPath()
-                                << exit(FatalIOError);
-                        }
-
-                        tensorFields_.insert(key, fPtr);
-                    }
-                    else
-                    {
-                        FatalIOErrorInFunction(dict)
-                            << "\n    compound " << fieldToken.compoundToken()
-                            << " not supported"
-                            << "\n    on patch " << this->patch().name()
-                            << " of field "
-                            << this->internalField().name()
-                            << " in file "
-                            << this->internalField().objectPath()
-                            << exit(FatalIOError);
-                    }
+                    scalarFields_.insert(key, autoPtr<scalarField>::New());
                 }
+                else
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "\n    token following 'nonuniform' "
+                           "is not a compound"
+                        << "\n    on patch " << this->patch().name()
+                        << " of field "
+                        << this->internalField().name()
+                        << " in file "
+                        << this->internalField().objectPath() << nl
+                        << exit(FatalIOError);
+                }
+            }
+            else if
+            (
+                fieldToken.compoundToken().type()
+             == token::Compound<List<scalar>>::typeName
+            )
+            {
+                auto fPtr = autoPtr<scalarField>::New();
+
+                fPtr->transfer
+                (
+                    dynamicCast<token::Compound<List<scalar>>>
+                    (
+                        fieldToken.transferCompoundToken(is)
+                    )
+                );
+
+                if (fPtr->size() != patchSize)
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "\n    size of field " << key
+                        << " (" << fPtr->size() << ')'
+                        << " is not the same size as the patch ("
+                        << patchSize << ')'
+                        << "\n    on patch " << this->patch().name()
+                        << " of field "
+                        << this->internalField().name()
+                        << " in file "
+                        << this->internalField().objectPath() << nl
+                        << exit(FatalIOError);
+                }
+
+                scalarFields_.insert(key, fPtr);
+            }
+            else if
+            (
+                fieldToken.compoundToken().type()
+             == token::Compound<List<vector>>::typeName
+            )
+            {
+                auto fPtr = autoPtr<vectorField>::New();
+
+                fPtr->transfer
+                (
+                    dynamicCast<token::Compound<List<vector>>>
+                    (
+                        fieldToken.transferCompoundToken(is)
+                    )
+                );
+
+                if (fPtr->size() != patchSize)
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "\n    size of field " << key
+                        << " (" << fPtr->size() << ')'
+                        << " is not the same size as the patch ("
+                        << patchSize << ')'
+                        << "\n    on patch " << this->patch().name()
+                        << " of field "
+                        << this->internalField().name()
+                        << " in file "
+                        << this->internalField().objectPath() << nl
+                        << exit(FatalIOError);
+                }
+
+                vectorFields_.insert(key, fPtr);
+            }
+            else if
+            (
+                fieldToken.compoundToken().type()
+             == token::Compound<List<sphericalTensor>>::typeName
+            )
+            {
+                auto fPtr = autoPtr<sphericalTensorField>::New();
+
+                fPtr->transfer
+                (
+                    dynamicCast<token::Compound<List<sphericalTensor>>>
+                    (
+                        fieldToken.transferCompoundToken(is)
+                    )
+                );
+
+                if (fPtr->size() != patchSize)
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "\n    size of field " << key
+                        << " (" << fPtr->size() << ')'
+                        << " is not the same size as the patch ("
+                        << patchSize << ')'
+                        << "\n    on patch " << this->patch().name()
+                        << " of field "
+                        << this->internalField().name()
+                        << " in file "
+                        << this->internalField().objectPath() << nl
+                        << exit(FatalIOError);
+                }
+
+                sphTensorFields_.insert(key, fPtr);
+            }
+            else if
+            (
+                fieldToken.compoundToken().type()
+             == token::Compound<List<symmTensor>>::typeName
+            )
+            {
+                auto fPtr = autoPtr<symmTensorField>::New();
+
+                fPtr->transfer
+                (
+                    dynamicCast<token::Compound<List<symmTensor>>>
+                    (
+                        fieldToken.transferCompoundToken(is)
+                    )
+                );
+
+                if (fPtr->size() != patchSize)
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "\n    size of field " << key
+                        << " (" << fPtr->size() << ')'
+                        << " is not the same size as the patch ("
+                        << patchSize << ')'
+                        << "\n    on patch " << this->patch().name()
+                        << " of field "
+                        << this->internalField().name()
+                        << " in file "
+                        << this->internalField().objectPath() << nl
+                        << exit(FatalIOError);
+                }
+
+                symmTensorFields_.insert(key, fPtr);
+            }
+            else if
+            (
+                fieldToken.compoundToken().type()
+             == token::Compound<List<tensor>>::typeName
+            )
+            {
+                auto fPtr = autoPtr<tensorField>::New();
+
+                fPtr->transfer
+                (
+                    dynamicCast<token::Compound<List<tensor>>>
+                    (
+                        fieldToken.transferCompoundToken(is)
+                    )
+                );
+
+                if (fPtr->size() != patchSize)
+                {
+                    FatalIOErrorInFunction(dict)
+                        << "\n    size of field " << key
+                        << " (" << fPtr->size() << ')'
+                        << " is not the same size as the patch ("
+                        << patchSize << ')'
+                        << "\n    on patch " << this->patch().name()
+                        << " of field "
+                        << this->internalField().name()
+                        << " in file "
+                        << this->internalField().objectPath() << nl
+                        << exit(FatalIOError);
+                }
+
+                tensorFields_.insert(key, fPtr);
+            }
+            else
+            {
+                FatalIOErrorInFunction(dict)
+                    << "\n    compound " << fieldToken.compoundToken()
+                    << " not supported"
+                    << "\n    on patch " << this->patch().name()
+                    << " of field "
+                    << this->internalField().name()
+                    << " in file "
+                    << this->internalField().objectPath() << nl
+                    << exit(FatalIOError);
             }
         }
     }
@@ -488,41 +480,42 @@ void Foam::genericPointPatchField<Type>::write(Ostream& os) const
     {
         const keyType& key = dEntry.keyword();
 
-        if (key != "type")
+        if (key == "type" || key == "value")
         {
-            if
-            (
-                dEntry.isStream()
-             && dEntry.stream().size()
-             && dEntry.stream()[0].isWord()
-             && dEntry.stream()[0].wordToken() == "nonuniform"
-            )
+            continue;
+        }
+        else if
+        (
+            dEntry.isStream()
+         && dEntry.stream().size()
+         && dEntry.stream()[0].isWord()
+         && dEntry.stream()[0].wordToken() == "nonuniform"
+        )
+        {
+            if (scalarFields_.found(key))
             {
-                if (scalarFields_.found(key))
-                {
-                    scalarFields_.find(key)()->writeEntry(key, os);
-                }
-                else if (vectorFields_.found(key))
-                {
-                    vectorFields_.find(key)()->writeEntry(key, os);
-                }
-                else if (sphTensorFields_.found(key))
-                {
-                    sphTensorFields_.find(key)()->writeEntry(key, os);
-                }
-                else if (symmTensorFields_.found(key))
-                {
-                    symmTensorFields_.find(key)()->writeEntry(key, os);
-                }
-                else if (tensorFields_.found(key))
-                {
-                    tensorFields_.find(key)()->writeEntry(key, os);
-                }
+                scalarFields_.cfind(key)()->writeEntry(key, os);
             }
-            else
+            else if (vectorFields_.found(key))
             {
-                dEntry.write(os);
+                vectorFields_.cfind(key)()->writeEntry(key, os);
             }
+            else if (sphTensorFields_.found(key))
+            {
+                sphTensorFields_.cfind(key)()->writeEntry(key, os);
+            }
+            else if (symmTensorFields_.found(key))
+            {
+                symmTensorFields_.cfind(key)()->writeEntry(key, os);
+            }
+            else if (tensorFields_.found(key))
+            {
+                tensorFields_.cfind(key)()->writeEntry(key, os);
+            }
+        }
+        else
+        {
+            dEntry.write(os);
         }
     }
 }

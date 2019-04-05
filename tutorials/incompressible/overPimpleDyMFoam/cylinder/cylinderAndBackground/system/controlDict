@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
-libs            ("liboverset.so");
+libs            ("liboverset.so" "libfvMotionSolvers.so");
 
 application     overPimpleDyMFoam;
 

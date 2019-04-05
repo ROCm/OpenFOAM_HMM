@@ -111,7 +111,7 @@ public:
         );
 
         //- Construct from Istream
-        fileStat(Istream& is);
+        explicit fileStat(Istream& is);
 
 
     // Member Functions

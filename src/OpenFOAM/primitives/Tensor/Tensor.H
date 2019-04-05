@@ -53,8 +53,9 @@ See also
 namespace Foam
 {
 
-template<class Cmpt>
-class SymmTensor;
+// Forward Declarations
+template<class Cmpt> class SymmTensor;
+
 
 /*---------------------------------------------------------------------------*\
                            Class Tensor Declaration
@@ -75,7 +76,7 @@ public:
     // Member constants
 
         //- Rank of Tensor is 2
-        static const direction rank = 2;
+        static constexpr direction rank = 2;
 
 
     // Static data members

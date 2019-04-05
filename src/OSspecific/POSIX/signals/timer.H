@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -46,13 +46,14 @@ Description
     Constructor set signal handler on sigalarm and alarm(). Destructor
     clears these.
 
-    timedOut is macro because setjmp can't be in member function of timer.
-    ?something to do with stack frames.
-
 Warning
     The setjmp restores complete register state so including local vars
     held in regs. So if in blocking part something gets calced in a stack
     based variable make sure it is declared 'volatile'.
+
+Note
+    timedOut is macro because setjmp can't be in member function of timer.
+    ?something to do with stack frames.
 
 SourceFiles
     timer.C
@@ -63,16 +64,14 @@ SourceFiles
 #define timer_H
 
 #include "className.H"
-
-#include <signal.h>
-#include <setjmp.h>
+#include <csetjmp>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Check it a timeout has occured
+//- Check if timeout has occurred
 //  keep setjmp in same stack frame so no function calls
 #define timedOut(x) \
-    (((x).newTimeOut_ > 0) ? setjmp(Foam::timer::envAlarm) : false)
+    ((x).timeOut_ ? setjmp(Foam::timer::envAlarm) : false)
 
 namespace Foam
 {
@@ -83,10 +82,7 @@ namespace Foam
 
 class timer
 {
-    // Private data
-
-        //- Old signal masks
-        static struct sigaction oldAction_;
+    // Private Data
 
         //- Old alarm() value
         static unsigned int oldTimeOut_;
@@ -95,18 +91,18 @@ class timer
     // Private Member Functions
 
         //- Alarm handler
-        static void signalHandler(int);
+        static void sigHandler(int);
 
 
 public:
 
-    // Public data
+    // Public Data
 
         //- Declare name of the class and its debug switch
         ClassName("timer");
 
-        //- Current time out value. Needed by macro timedOut
-        unsigned int newTimeOut_;
+        //- The time-out value (seconds). Needed by macro timedOut
+        unsigned int timeOut_;
 
         //- State for setjmp. Needed by macro timedOut
         static jmp_buf envAlarm;
@@ -114,12 +110,11 @@ public:
 
     // Constructors
 
-        //- Construct from components.
-        //  newTimeOut=0 makes it do nothing.
-        timer(const unsigned int newTimeOut);
+        //- Construct with specified time-out, a value of 0 makes it a no-op.
+        explicit timer(unsigned int seconds);
 
 
-    //- Destructor
+    //- Destructor. Restores the alarm and signal handler as required.
     ~timer();
 };
 

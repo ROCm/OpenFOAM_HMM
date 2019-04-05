@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -47,8 +47,6 @@ SourceFiles
 #ifndef sigInt_H
 #define sigInt_H
 
-#include <signal.h>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -62,10 +60,7 @@ class sigInt
 {
     // Private data
 
-        //- Saved old signal trapping setting
-        static struct sigaction oldAction_;
-
-        //- Flag to indicate signal trapping is enabled
+        //- Signal trapping enabled?
         static bool sigActive_;
 
 

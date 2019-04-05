@@ -59,13 +59,13 @@ public:
     // Member constants
 
         //- Dimensionality of space
-        static const direction dim = 3;
+        static constexpr direction dim = 3;
 
         //- Rank of Scalar is 0
-        static const direction rank = 0;
+        static constexpr direction rank = 0;
 
         //- Number of components in Scalar is 1
-        static const direction nComponents = 1;
+        static constexpr direction nComponents = 1;
 
 
     // Static data members

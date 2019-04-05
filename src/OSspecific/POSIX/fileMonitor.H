@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -54,6 +54,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class fileMonitor;
 class fileMonitorWatcher;
 
@@ -63,7 +64,6 @@ class fileMonitorWatcher;
 
 class fileMonitor
 {
-
 public:
 
     // Public data types
@@ -79,6 +79,7 @@ public:
         static const Enum<fileState> fileStateNames_;
 
 private:
+
     // Private data
 
         //- Whether to use inotify (requires -DFOAM_USE_INOTIFY, see above)
@@ -120,7 +121,7 @@ public:
     // Constructors
 
         //- Construct null
-        fileMonitor(const bool useInotify);
+        explicit fileMonitor(const bool useInotify);
 
 
     //- Destructor

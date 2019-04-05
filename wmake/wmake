@@ -70,18 +70,20 @@ options:
   -s | -silent      Quiet mode (does not echo commands)
   -a | -all         wmake all sub-directories, running Allwmake if present
   -q | -queue       wmakeCollect all sub-directories, running Allwmake if present
-  -k | -keep-going  Keep going without stopping when errors occur (-non-stop)
+  -k | -keep-going  Keep going even when errors occur (-non-stop)
   -j                Compile using all local cores/hyperthreads
-  -jN or -j N       Compile using N cores/hyperthreads
+  -jN | -j N        Compile using N cores/hyperthreads
   -no-scheduler     Disable scheduled parallel compilation
-  -pwd              Print root directory containing a Make/ directory and exit
-  -update           Update lnInclude directories, dep files, remove deprecated
-                    files and directories
-  -show             Identical to -show-compile
-  -show-api         Print api value and exit
-  -show-compile     Print C++ compiler value/flags and exit
-  -show-cxx         Print C++ compiler value and exit
-  -show-cxxflags    Print C++ compiler flags and exit
+  -pwd              Print root directory containing a Make/ directory
+  -update           Update lnInclude dirs, dep files, remove deprecated files/dirs
+  -show-api         Print api value
+  -show-ext-so      Print shared library extension (with '.' separator)
+  -show-compile-c   Same as '-show-c -show-cflags'
+  -show-compile-cxx Same as '-show-cxx -show-cxxflags'
+  -show-c           Print C compiler value
+  -show-cflags      Print C compiler flags
+  -show-cxx         Print C++ compiler value
+  -show-cxxflags    Print C++ compiler flags
   -h | -help        Print the usage
 
 
@@ -138,11 +140,9 @@ do
         -s | -silent)
             export WM_QUIET=true
             ;;
-        -show | -show-compile)
-            $make -f $WM_DIR/makefiles/info compile
-            optShow=true
-            ;;
-        -show-api | -show-cxx | -show-cxxflags | -show-c | -show-cflags)
+        -show-api | -show-ext-so | \
+        -show-compile-c | -show-c | -show-cflags | \
+        -show-compile-cxx | -show-cxx | -show-cxxflags)
             $make -f $WM_DIR/makefiles/info "${1#-show-}"
             optShow=true
             ;;

@@ -213,7 +213,7 @@ void Foam::UPstream::exit(int errnum)
     if (!flag)
     {
         // Not initialized - just exit
-        ::exit(errnum);
+        std::exit(errnum);
         return;
     }
 
@@ -224,7 +224,7 @@ void Foam::UPstream::exit(int errnum)
         WarningInFunction
             << "MPI was already finalized (perhaps by a connected program)"
             << endl;
-        ::exit(1);
+        std::exit(1);
         return;
     }
 
@@ -271,7 +271,7 @@ void Foam::UPstream::exit(int errnum)
     if (errnum == 0)
     {
         MPI_Finalize();
-        ::exit(errnum);
+        std::exit(errnum);
     }
     else
     {

@@ -350,6 +350,7 @@ inline complex operator/(const scalar s, const complex& c)
     return complex(s/c.re, s/c.im);
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

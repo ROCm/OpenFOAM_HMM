@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -33,6 +33,8 @@ License
 #include "Switch.H"
 #include "UList.H"
 
+#include <limits>
+
 #if defined(__linux__) && defined(__GNUC__)
     #ifndef __USE_GNU
         #define __USE_GNU      // To use feenableexcept()
@@ -47,7 +49,9 @@ License
     #include "feexceptErsatz.H"
 #endif
 
-#include <limits>
+// File-local functions
+#include "signalMacros.C"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -56,8 +60,6 @@ bool Foam::sigFpe::switchNan_(Foam::debug::optimisationSwitch("setNaN", 0));
 
 bool Foam::sigFpe::sigActive_ = false;
 bool Foam::sigFpe::nanActive_ = false;
-
-struct sigaction Foam::sigFpe::oldAction_;
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -123,17 +125,11 @@ void Foam::sigFpe::sigHandler(int)
 {
     #if (defined(__linux__) && defined(__GNUC__)) || defined(darwin)
 
-    // Reset old handling
-    if (sigaction(SIGFPE, &oldAction_, nullptr) < 0)
-    {
-        FatalErrorInFunction
-            << "Cannot reset SIGFPE trapping"
-            << abort(FatalError);
-    }
+    resetHandler("SIGFPE", SIGFPE);
 
     jobInfo.signalEnd();        // Update jobInfo file
     error::printStack(Perr);
-    raise(SIGFPE);              // Throw signal (to old handler)
+    ::raise(SIGFPE);            // Throw signal (to old handler)
 
     #endif  // (__linux__ && __GNUC__) || darwin
 }
@@ -203,17 +199,7 @@ void Foam::sigFpe::set(bool verbose)
           | FE_OVERFLOW
         );
 
-        struct sigaction newAction;
-        newAction.sa_handler = sigHandler;
-        newAction.sa_flags = SA_NODEFER;
-        sigemptyset(&newAction.sa_mask);
-
-        if (sigaction(SIGFPE, &newAction, &oldAction_) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot set SIGFPE trapping"
-                << abort(FatalError);
-        }
+        setHandler("SIGFPE", SIGFPE, sigHandler);
 
         sigActive_ = true;
 
@@ -293,12 +279,7 @@ void Foam::sigFpe::unset(bool verbose)
                 << endl;
         }
 
-        if (sigaction(SIGFPE, &oldAction_, nullptr) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot reset SIGFPE trapping"
-                << abort(FatalError);
-        }
+        resetHandler("SIGFPE", SIGFPE);
 
         // Reset exception raising
         const int oldExcept = fedisableexcept

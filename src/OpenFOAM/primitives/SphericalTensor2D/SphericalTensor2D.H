@@ -61,7 +61,7 @@ public:
     // Member constants
 
         //- Rank of SphericalTensor2D is 2
-        static const direction rank = 2;
+        static constexpr direction rank = 2;
 
 
     // Static data members

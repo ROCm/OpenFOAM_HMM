@@ -1,13 +1,12 @@
 /*
- * NB: mplib PINC must appear after the SCOTCH_ARCH_PATH/include/FOAM_MPI
- * to ensure we do not accidentally get a ptscotch header from the
- * mpi distribution.
+ * NB: mplib PINC must appear after PTSCOTCH_INC_DIR to ensure we
+ * do not accidentally get a ptscotch header from the MPI distribution.
  */
 sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
 sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
 
 EXE_INC = \
-    -I$(SCOTCH_ARCH_PATH)/include/$(FOAM_MPI) \
+    -I$(PTSCOTCH_INC_DIR) \
     -I$(SCOTCH_INC_DIR) \
     $(PFLAGS) $(PINC) \
     -I../decompositionMethods/lnInclude
@@ -17,9 +16,8 @@ EXE_INC = \
  * ptscotch 6 requires scotch linked in, but does not declare the dependency
  */
 LIB_LIBS = \
+    -L$(PTSCOTCH_LIB_DIR) \
     -L$(SCOTCH_LIB_DIR) \
-    -L$(FOAM_EXT_LIBBIN)/$(FOAM_MPI) \
-    -L$(FOAM_EXT_LIBBIN) \
     -lptscotch -lptscotcherrexit \
     -lscotch
 

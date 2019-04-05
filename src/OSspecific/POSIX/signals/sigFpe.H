@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -56,7 +56,6 @@ SourceFiles
 #ifndef sigFpe_H
 #define sigFpe_H
 
-#include <signal.h>
 #include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -64,7 +63,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T> class UList;
 
 /*---------------------------------------------------------------------------*\
@@ -73,7 +72,7 @@ template<class T> class UList;
 
 class sigFpe
 {
-    // Private data
+    // Private Data
 
         //- Flag that floating point trapping should be used.
         //  Can override with FOAM_SIGFPE env variable
@@ -83,20 +82,16 @@ class sigFpe
         //  Can override with FOAM_SETNAN env variable
         static bool switchNan_;
 
-        //- Flag to indicate floating point trapping is currently active
+        //- Floating point trapping currently active?
         static bool sigActive_;
 
         //- Flag to indicate mallocNan is currently active
         static bool nanActive_;
 
-        //- Saved old signal trapping setting
-        static struct sigaction oldAction_;
-
 
     // Private Member Functions
 
-        //- Handler for caught signals.
-        //  Ends job and prints stack
+        //- Handler for caught signals - ends job and prints stack
         static void sigHandler(int);
 
 
