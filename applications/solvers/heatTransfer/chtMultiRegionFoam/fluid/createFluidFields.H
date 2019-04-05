@@ -25,6 +25,11 @@ PtrList<fv::options> fluidFvOptions(fluidRegions.size());
 List<label> pRefCellFluid(fluidRegions.size());
 List<scalar> pRefValueFluid(fluidRegions.size());
 
+PtrList<dimensionedScalar> rhoMinFluid(fluidRegions.size());
+PtrList<dimensionedScalar> rhoMaxFluid(fluidRegions.size());
+
+PtrList<pressureControl> pressureControls(fluidRegions.size());
+
 const uniformDimensionedVectorField& g = meshObjects::gravity::New(runTime);
 
 // Populate fluid field pointer lists
@@ -255,6 +260,24 @@ forAll(fluidRegions, i)
     const dictionary& pimpleDict =
         fluidRegions[i].solutionDict().subDict("PIMPLE");
     pimpleDict.readIfPresent("frozenFlow", frozenFlowFluid[i]);
+
+    rhoMaxFluid.set
+    (
+        i,
+        new dimensionedScalar("rhoMax", dimDensity, GREAT, pimpleDict)
+    );
+
+    rhoMinFluid.set
+    (
+        i,
+        new dimensionedScalar("rhoMin", dimDensity, Zero, pimpleDict)
+    );
+
+    pressureControls.set
+    (
+        i,
+        new pressureControl(thermoFluid[i].p(), rhoFluid[i], pimpleDict, false)
+    );
 
     Info<< "    Adding MRF\n" << endl;
     MRFfluid.set

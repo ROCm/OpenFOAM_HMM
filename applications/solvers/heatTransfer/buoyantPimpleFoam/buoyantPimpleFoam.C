@@ -44,6 +44,7 @@ Description
 #include "radiationModel.H"
 #include "fvOptions.H"
 #include "pimpleControl.H"
+#include "pressureControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
