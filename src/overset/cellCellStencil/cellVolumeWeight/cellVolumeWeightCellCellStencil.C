@@ -48,7 +48,7 @@ namespace cellCellStencils
 }
 
 Foam::scalar
-Foam::cellCellStencils::cellVolumeWeight::defaultOverlapTolerance_ = 1e-3;
+Foam::cellCellStencils::cellVolumeWeight::defaultOverlapTolerance_ = 1e-9;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
