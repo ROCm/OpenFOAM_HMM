@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -41,6 +41,10 @@ Description
         \f[
             p_0 = p_{ref} + p + 0.5 \rho |U|^2
         \f]
+    - isentropic pressure
+        \f[
+            p_iso = p*(1 + ((gamma-1)*M^2)/2)^(gamma/(gamma - 1))
+        \f]
     - static pressure coefficient
         \f[
             Cp = \frac{p - p_{\inf}}{0.5 \rho_{\inf} |U_{\inf}|^2}
@@ -61,6 +65,7 @@ Description
         p           | Pressure [Pa]
         p_0         | Total pressure [Pa]
         p_{ref}     | Reference pressure level [Pa]
+        p_iso       | Total isentropic pressure
         Cp          | Pressure coefficient
         Cp_0        | Total pressure coefficient
     \endvartable
@@ -71,11 +76,12 @@ Description
 
     The modes of operation are:
     \table
-        Mode                        | calcTotal | calcCoeff
-        Static pressure             | no        | no
-        Total pressure              | yes       | no
-        Pressure coefficient        | no        | yes
-        Total pressure coefficient  | yes       | yes
+        Mode                        | calcTotal | calcCoeff | calcIsen
+        Static pressure             | no        | no        | no
+        Total pressure              | yes       | no        | no
+        Pressure coefficient        | no        | yes       | no
+        Total pressure coefficient  | yes       | yes       | no
+        Total isentropic pressure   | no        | no        | yes
     \endtable
 
 Usage
@@ -100,6 +106,7 @@ Usage
         rho          | Name of the density field   | no         | rho
         result       | Name of the resulting field | no         | derived from p
         calcTotal    | Calculate total coefficient | yes        |
+        calcIsen     | Calculate total isentropic  | no         | no
         pRef         | Reference pressure for total pressure | no | 0
         calcCoeff    | Calculate pressure coefficient | yes     |
         pInf         | Freestream pressure for coefficient calculation | no |
@@ -151,6 +158,9 @@ class pressure
 
             //- Flag to calculate total pressure
             bool calcTotal_;
+
+            //- Flag to calculate identropic total pressure
+            bool calcIsen_;
 
             //- Reference pressure level
             scalar pRef_;

@@ -27,6 +27,7 @@ License
 
 #include "pressure.H"
 #include "volFields.H"
+#include "fluidThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -50,6 +51,10 @@ Foam::word Foam::functionObjects::pressure::resultName() const
     if (calcTotal_)
     {
         rName = "total(" + fieldName_ + ")";
+    }
+    else if (calcIsen_)
+    {
+        rName = "totalIsen(" + fieldName_ + ")";
     }
     else
     {
@@ -145,6 +150,21 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::pDyn
             tp
           + rhoScale(p, 0.5*magSqr(lookupObject<volVectorField>(UName_)));
     }
+    else if (calcIsen_)
+    {
+        const fluidThermo* thermoPtr =
+            p.mesh().lookupObjectPtr<fluidThermo>(basicThermo::dictName);
+
+        const volScalarField gamma(thermoPtr->gamma());
+
+        const volScalarField Mb
+        (
+            mag(lookupObject<volVectorField>(UName_))
+           /sqrt(gamma*tp.ref()/thermoPtr->rho())
+        );
+
+        return tp.ref()*(pow(1 + (gamma-1)/2*sqr(Mb), gamma/(gamma-1)));
+    }
     else
     {
         return std::move(tp);
@@ -220,6 +240,7 @@ Foam::functionObjects::pressure::pressure
     UName_("U"),
     rhoName_("rho"),
     calcTotal_(false),
+    calcIsen_(false),
     pRef_(0),
     calcCoeff_(false),
     pInf_(0),
@@ -251,6 +272,8 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
         dict.readEntry("rhoInf", rhoInf_);
         rhoInfInitialised_ = true;
     }
+
+    calcIsen_ = dict.lookupOrDefault<bool>("calcIsen", false);
 
     dict.readEntry("calcTotal", calcTotal_);
     if (calcTotal_)
