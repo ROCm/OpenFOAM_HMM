@@ -48,12 +48,18 @@ then
     esac
 
 
-    # True if OS is Darwin.
-    # Uses libso extension to cache the value
-    # (instead of calling 'uname -s' each time)
+    # True if target OS is Darwin.
+    # Uses cached value from libso extension
     isDarwin()
     {
         test "$extLibso" = ".dylib"
+    }
+
+    # True if target OS is Windows
+    # Uses cached value from libso extension
+    isWindows()
+    {
+        test "$extLibso" = ".dll"
     }
 
 
