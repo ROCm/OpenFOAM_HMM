@@ -32,40 +32,57 @@ SHELL   = /bin/sh
 
 
 #------------------------------------------------------------------------------
+# Some default values
+#------------------------------------------------------------------------------
+
+# Shared library extension (with '.' separator)
+EXT_SO  = .so
+
+#------------------------------------------------------------------------------
 # Compilation rules
 #------------------------------------------------------------------------------
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 include $(GENERAL_RULES)/general
 
+# Commands
+COMPILE_C    := $(strip $(cc) $(cFLAGS))
+COMPILE_CXX  := $(strip $(CC) $(c++FLAGS))
 
 #------------------------------------------------------------------------------
 # Display information
 #------------------------------------------------------------------------------
 
-.PHONY: compile
-compile:
-	@echo "$(strip $(CC) $(c++FLAGS))"
-
 .PHONY: api
 api:
-	@echo "$(WM_VERSION)" | sed -e 's/^.*=//'
+	@echo "$(lastword $(subst =, ,$(WM_VERSION)))"
+
+.PHONY: ext-so
+ext-so:
+	@echo "$(EXT_SO)"
+
+.PHONY: compile-c
+compile-c:
+	@echo "$(COMP_C)"
 
 .PHONY: c
 c:
-	@echo "$(strip $(cc))"
+	@echo "$(firstword $(cc))"
 
 .PHONY: cflags
 cflags:
-	@echo "$(strip $(cFLAGS))"
+	@echo "$(wordlist 2,$(words $(COMPILE_C)), $(COMPILE_C))"
+
+.PHONY: compile-cxx
+compile-cxx:
+	@echo "$(COMPILE_CXX)"
 
 .PHONY: cxx
 cxx:
-	@echo "$(strip $(CC))"
+	@echo "$(firstword $(CC))"
 
 .PHONY: cxxflags
 cxxflags:
-	@echo "$(strip $(c++FLAGS))"
-
+	@echo "$(wordlist 2,$(words $(COMPILE_CXX)), $(COMPILE_CXX))"
 
 #----------------------------- vim: set ft=make: ------------------------------
