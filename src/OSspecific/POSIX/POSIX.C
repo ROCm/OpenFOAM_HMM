@@ -87,44 +87,6 @@ static bool cwdPreference_(Foam::debug::optimisationSwitch("cwd", 0));
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-// Like fileName "/" global operator, but retain any invalid characters
-static inline Foam::fileName fileNameConcat
-(
-    const std::string& a,
-    const std::string& b
-)
-{
-    if (a.size())
-    {
-        if (b.size())
-        {
-            // Two non-empty strings: can concatenate
-
-            if (a.back() == '/' || b.front() == '/')
-            {
-                return Foam::fileName(a + b, false);
-            }
-            else
-            {
-                return Foam::fileName(a + '/' + b, false);
-            }
-        }
-
-        // The second string was empty
-        return Foam::fileName(a, false);
-    }
-
-    if (b.size())
-    {
-        // The first string is empty
-        return Foam::fileName(b, false);
-    }
-
-    // Both strings are empty
-    return Foam::fileName();
-}
-
-
 // After a fork in system(), before the exec() do the following
 // - close stdin when executing in background (daemon-like)
 // - redirect stdout to stderr when infoDetailLevel == 0
@@ -1273,7 +1235,7 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
         // otherwise we cannot subdirs with these types of names.
         // -> const fileName path = directory/name; <-
 
-        const fileName path(fileNameConcat(directory, item));
+        const fileName path(fileName::concat(directory, item));
 
         if (path.type(false) == fileName::DIRECTORY)
         {

@@ -82,7 +82,7 @@ public:
     };
 
 
-    // Static data members
+    // Static Data Members
 
         //- The typeName
         static const char* const typeName;
@@ -148,6 +148,12 @@ public:
         //- other transformations such as changing the path separator, 
         //- removing duplicate or trailing slashes, etc.
         static fileName validate(const std::string& s, const bool doClean=true);
+
+        //- Join two strings with '/' as a path separator.
+        //  No '/' separator is added if either argument is an empty string or
+        //  if the arguments already had the path separator at the junction.
+        //  Invalid characters are \em not stripped (ie, retained).
+        static fileName concat(const std::string& s1, const std::string& s2);
 
         //- This is a specialized (possibly slower) version of compare()
         //- that ignores duplicate or trailing slashes.
@@ -402,7 +408,7 @@ Ostream& operator<<(Ostream& os, const fileName& val);
 
 //- Assemble words and fileNames as pathnames by adding a '/' separator.
 //  No '/' separator is added if either argument is an empty string.
-fileName operator/(const string& a, const string& b);
+fileName operator/(const string& s1, const string& s2);
 
 
 //- Recursively search the given directory for the file
