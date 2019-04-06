@@ -198,18 +198,20 @@ Foam::labelRange Foam::labelRange::subset0(const label size) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
 {
+    label start, size;
+
     is.readBegin("labelRange");
-    is  >> range.start_ >> range.size_;
+    is >> start >> size;
     is.readEnd("labelRange");
 
-    if (range.size_ < 0)
-    {
-        range.size_ = 0;  // No negative sizes
-    }
+    if (size < 0) size = 0;  // No negative sizes
+
+    range.setStart(start);
+    range.setSize(size);
 
     is.check(FUNCTION_NAME);
     return is;
@@ -218,7 +220,6 @@ Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const labelRange& range)
 {
-    // Only write as ASCII for now
     os  << token::BEGIN_LIST
         << range.start() << token::SPACE << range.size()
         << token::END_LIST;
