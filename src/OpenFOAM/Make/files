@@ -147,6 +147,7 @@ $(ranges)/labelRange/labelRange.C
 $(ranges)/labelRange/labelRanges.C
 $(ranges)/scalarRange/scalarRange.C
 $(ranges)/scalarRange/scalarRanges.C
+$(ranges)/sliceRange/sliceRange.C
 $(ranges)/tableBounds/tableBounds.C
 
 spatialVectorAlgebra = primitives/spatialVectorAlgebra
