@@ -74,11 +74,13 @@ namespace vtk
 \*---------------------------------------------------------------------------*/
 
 //- Bookkeeping for vtkUnstructuredGrid
-struct vtuAdaptor
+class vtuAdaptor
 :
     public vtk::Caching<vtkUnstructuredGrid>,
     public foamVtkMeshMaps
 {
+public:
+
     // Member Functions
 
     // Mesh Conversion

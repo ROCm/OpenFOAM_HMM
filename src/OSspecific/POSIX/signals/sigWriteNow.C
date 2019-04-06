@@ -53,10 +53,12 @@ namespace Foam
 {
 
 // Register re-reader
-struct addwriteNowSignalToOpt
+class addwriteNowSignalToOpt
 :
     public ::Foam::simpleRegIOobject
 {
+public:
+
     addwriteNowSignalToOpt(const char* name)
     :
         ::Foam::simpleRegIOobject(Foam::debug::addOptimisationObject, name)
