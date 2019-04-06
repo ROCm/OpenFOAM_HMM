@@ -635,7 +635,7 @@ Foam::label Foam::IOobjectList::filterClasses
         // Matches? either prune (pruning) or keep (!pruning)
         if
         (
-            (pred(iter.val()->headerClassName()) ? pruning : !pruning)
+            (pred(iter->headerClassName()) ? pruning : !pruning)
          && erase(iter)
         )
         {

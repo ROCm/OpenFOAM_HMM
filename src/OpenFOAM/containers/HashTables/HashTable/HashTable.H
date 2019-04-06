@@ -715,6 +715,14 @@ public:
             inline reference operator*() const  { return this->val(); }
             inline reference operator()() const { return this->val(); }
 
+            //- For pointer types, allow direct pointer dereferencing
+            template<class TypeT = T>
+            typename std::enable_if
+            <
+                std::is_pointer<TypeT>::value,
+                T
+            >::type operator->() const { return this->val(); }
+
             inline iterator& operator++();
             inline iterator operator++(int);
         };
@@ -777,8 +785,17 @@ public:
             inline reference operator*() const  { return this->val(); }
             inline reference operator()() const { return this->val(); }
 
+            //- For pointer types, allow direct pointer dereferencing
+            template<class TypeT = T>
+            typename std::enable_if
+            <
+                std::is_pointer<TypeT>::value,
+                const T
+            >::type operator->() const { return this->val(); }
+
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
+
 
         // Assignment
 

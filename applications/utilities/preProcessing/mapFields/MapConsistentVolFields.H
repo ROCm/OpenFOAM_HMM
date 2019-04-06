@@ -55,7 +55,7 @@ void MapConsistentVolFields
 
     forAllConstIters(fields, fieldIter)
     {
-        Info<< "    interpolating " << fieldIter()->name()
+        Info<< "    interpolating " << fieldIter->name()
             << endl;
 
         // Read field. Do not auto-load old-time field
@@ -63,7 +63,7 @@ void MapConsistentVolFields
 
         IOobject fieldTargetIOobject
         (
-            fieldIter()->name(),
+            fieldIter->name(),
             meshTarget.time().timeName(),
             meshTarget,
             IOobject::MUST_READ,

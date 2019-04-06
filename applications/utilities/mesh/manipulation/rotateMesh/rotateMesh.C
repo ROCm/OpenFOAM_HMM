@@ -58,7 +58,7 @@ void RotateFields
 
     forAllConstIters(fields, fieldIter)
     {
-        Info<< "    Rotating " << fieldIter()->name() << endl;
+        Info<< "    Rotating " << fieldIter->name() << endl;
 
         GeometricField fld(*fieldIter(), mesh);
         transform(fld, dimensionedTensor(rotT), fld);

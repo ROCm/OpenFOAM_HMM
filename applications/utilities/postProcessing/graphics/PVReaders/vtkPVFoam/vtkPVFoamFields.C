@@ -73,8 +73,8 @@ void Foam::vtkPVFoam::convertVolFields()
         Info<< "<beg> " << FUNCTION_NAME << nl;
         forAllConstIters(objects, iter)
         {
-            Info<< "  " << iter()->name()
-                << " == " << iter()->objectPath() << nl;
+            Info<< "  " << iter->name()
+                << " == " << iter->objectPath() << nl;
         }
         printMemory();
     }
@@ -149,8 +149,8 @@ void Foam::vtkPVFoam::convertPointFields()
         Info<< "<beg> convert volume -> point fields" << nl;
         forAllConstIters(objects, iter)
         {
-            Info<< "  " << iter()->name()
-                << " == " << iter()->objectPath() << nl;
+            Info<< "  " << iter->name()
+                << " == " << iter->objectPath() << nl;
         }
         printMemory();
     }
@@ -205,8 +205,8 @@ void Foam::vtkPVFoam::convertAreaFields()
         Info<< "<beg> " << FUNCTION_NAME << nl;
         forAllConstIters(objects, iter)
         {
-            Info<< "  " << iter()->name()
-                << " == " << iter()->objectPath() << nl;
+            Info<< "  " << iter->name()
+                << " == " << iter->objectPath() << nl;
         }
         printMemory();
     }
@@ -282,8 +282,8 @@ void Foam::vtkPVFoam::convertLagrangianFields()
             Info<< "converting OpenFOAM lagrangian fields" << nl;
             forAllConstIters(objects, iter)
             {
-                Info<< "  " << iter()->name()
-                    << " == " << iter()->objectPath() << nl;
+                Info<< "  " << iter->name()
+                    << " == " << iter->objectPath() << nl;
             }
         }
 

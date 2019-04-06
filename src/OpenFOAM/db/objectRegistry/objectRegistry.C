@@ -410,7 +410,7 @@ bool Foam::objectRegistry::modified() const
 {
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        if (iter()->modified())
+        if (iter->modified())
         {
             return true;
         }
@@ -431,7 +431,7 @@ void Foam::objectRegistry::readModifiedObjects()
                 << iter.key() << endl;
         }
 
-        iter()->readIfModified();
+        iter->readIfModified();
     }
 }
 
@@ -460,15 +460,15 @@ bool Foam::objectRegistry::writeObject
             Pout<< "objectRegistry::write() : "
                 << name() << " : Considering writing object "
                 << iter.key()
-                << " of type " << iter()->type()
-                << " with writeOpt " << iter()->writeOpt()
-                << " to file " << iter()->objectPath()
+                << " of type " << iter->type()
+                << " with writeOpt " << iter->writeOpt()
+                << " to file " << iter->objectPath()
                 << endl;
         }
 
-        if (iter()->writeOpt() != NO_WRITE)
+        if (iter->writeOpt() != NO_WRITE)
         {
-            ok = iter()->writeObject(fmt, ver, cmp, valid) && ok;
+            ok = iter->writeObject(fmt, ver, cmp, valid) && ok;
         }
     }
 
