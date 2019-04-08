@@ -3,10 +3,8 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
-#    \\/     M anipulation  |
-#------------------------------------------------------------------------------
-#                           | Copyright (C) 2016-2017 CINECA
+#   \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 CINECA
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -29,8 +27,10 @@
 #
 # Description
 #     Script to create module settings.
+#
 #     This is still incomplete, but can be a useful basis when using a module
 #     system.
+#
 #------------------------------------------------------------------------------
 usage() {
     exec 1>&2
@@ -40,7 +40,8 @@ usage() {
 usage: ${0##*/} [OPTION] projectDir
 options:
   -output=file      The output name (default: ModuleInclude.tcl)
-  -preload=file     Specify (module) file to preload. Can use multiple times
+  -prefs=file       A preferences file (OpenFOAM) to load.
+  -preload=file     Specify a shell file to preload. Can use multiple times
   -tmpdir=file      The tmp directory to use.
   -help             Print the usage
 
@@ -65,7 +66,7 @@ die()
 
 #------------------------------------------------------------------------------
 
-unset optBackend optDebug preload projectDir
+unset optBackend optDebug optPrefs preloads projectDir
 unset moduleOutput moduleTmpDir
 
 # Parse some options
@@ -81,8 +82,11 @@ do
     -debug)
         optDebug=true
         ;;
+    -prefs=*)
+        optPrefs="${1#*=}"
+        ;;
     -preload=*)
-        preload="$preload${preload:+ }${1#*=}"
+        preloads="$preloads${preloads:+ }${1#*=}"
         ;;
     --recursive-backend--)
         optBackend=true
@@ -132,7 +136,7 @@ then
         die "Incorrect projectDir? $projectDir"
 
     # Check preloads
-    for file in $preloads
+    for file in "$preloads"
     do
         [ -f "$file" ] || echo "No such file to preload: $file" 1>&2
     done
@@ -148,7 +152,8 @@ then
         $0 \
         --recursive-backend-- \
         "${optDebug:+-debug}" \
-        "${output:+-output=$moduleOutput}" \
+        "${optPrefs:+-prefs=$optPrefs}" \
+        "${moduleOutput:+-output=$moduleOutput}" \
         "${preloads:+-preload=$preloads}" \
         "${moduleTmpDir:+-tmpdir=$moduleTmpDir}" \
         $projectDir
@@ -166,7 +171,7 @@ fi
 : ${moduleTmpDir:=${TMPDIR:-/tmp}}
 
 # Preload any/all modules
-for file in $preloads
+for file in "$preloads"
 do
     [ -f "$file" ] && . "$file" ''
 done
@@ -215,7 +220,7 @@ printEnv   > $tmpFiles.env.pre.log
 printAlias > $tmpFiles.alias.pre.log
 
 # OpenFOAM settings
-. $projectDir/etc/bashrc ''
+. $projectDir/etc/bashrc "$optPrefs"
 
 echo "Using openfoam: $WM_PROJECT_DIR" 1>&2
 echo "==> $moduleOutput" 1>&2
@@ -229,7 +234,9 @@ unset SCOTCH_VERSION
 
 # Also remove user directories as being unreliable
 
-foamOldDirs="$CEI_HOME $BOOST_ARCH_PATH $CGAL_ARCH_PATH $FFTW_ARCH_PATH $MPI_ARCH_PATH $SCOTCH_ARCH_PATH \
+foamOldDirs="$BOOST_ARCH_PATH $CGAL_ARCH_PATH $FFTW_ARCH_PATH \
+$MESA_ARCH_PATH $LLVM_ARCH_PATH \
+$MPI_ARCH_PATH $SCOTCH_ARCH_PATH \
 $FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN $WM_PROJECT_SITE \
 $FOAM_USER_APPBIN $FOAM_USER_LIBBIN"
 foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
@@ -247,9 +254,6 @@ then
         unset FOAM_EXT_LIBBIN
     fi
 fi
-unset CEI_HOME
-unset ENSIGHT9_INPUT  ENSIGHT9_READER
-unset ENSIGHT10_INPUT ENSIGHT10_READER
 
 # Always consider site to be bogus. If needed, should be done elsewhere.
 unset FOAM_SITE_APPBIN FOAM_SITE_LIBBIN WM_PROJECT_SITE

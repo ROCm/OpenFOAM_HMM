@@ -107,7 +107,7 @@ Description
             );
 
             Info<< "    Surface   : "
-                << runTime.relativePath(writer.output()) << nl;
+                << args.relativePath(writer.output()) << nl;
 
 
             writer.writeTimeValue(timeValue);
@@ -211,7 +211,7 @@ Description
             );
 
             Info<< "    FaceZone  : "
-                << runTime.relativePath(writer.output()) << nl;
+                << args.relativePath(writer.output()) << nl;
 
 
             writer.beginFile(fz.name());

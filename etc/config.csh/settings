@@ -162,8 +162,8 @@ else
 endif
 
 # Shared site (group) executables/libraries
-setenv FOAM_SITE_APPBIN "$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin"
-setenv FOAM_SITE_LIBBIN "$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib"
+setenv FOAM_SITE_APPBIN "$siteDir/$FOAM_API/platforms/$WM_OPTIONS/bin"
+setenv FOAM_SITE_LIBBIN "$siteDir/$FOAM_API/platforms/$WM_OPTIONS/lib"
 
 # User executables/libraries
 setenv FOAM_USER_APPBIN "$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin"

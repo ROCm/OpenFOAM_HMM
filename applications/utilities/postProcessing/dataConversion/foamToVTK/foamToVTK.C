@@ -647,7 +647,7 @@ int main(int argc, char *argv[])
 
     fvMeshSubsetProxy::subsetType cellSubsetType = fvMeshSubsetProxy::NONE;
 
-    string vtkName = runTime.globalCaseName();
+    string vtkName = args.globalCaseName();
 
     if (regionNames.size() == 1)
     {
@@ -700,7 +700,7 @@ int main(int argc, char *argv[])
     // Sub-directory for output
     const word vtkDirName = args.opt<word>("name", "VTK");
 
-    const fileName outputDir(runTime.globalPath()/vtkDirName);
+    const fileName outputDir(args.globalPath()/vtkDirName);
 
     if (Pstream::master())
     {
@@ -722,7 +722,7 @@ int main(int argc, char *argv[])
             if (args.found("overwrite") && isDir(regionDir))
             {
                 Info<< "Removing old directory "
-                    << runTime.relativePath(regionDir)
+                    << args.relativePath(regionDir)
                     << nl << endl;
                 rmDir(regionDir);
             }
