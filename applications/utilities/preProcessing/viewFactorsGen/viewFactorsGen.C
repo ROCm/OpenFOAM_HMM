@@ -189,11 +189,6 @@ void writeRays
         }
     }
     str.flush();
-
-    Pout<< "cmd: objToVTK " << fName.c_str() << endl;
-
-    stringList cmd({"objToVTK", fName, fName.lessExt().ext("vtk")});
-    Foam::system(cmd);
 }
 
 

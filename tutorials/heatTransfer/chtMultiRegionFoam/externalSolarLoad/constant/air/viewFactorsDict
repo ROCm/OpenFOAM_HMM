@@ -17,6 +17,8 @@ FoamFile
 writeViewFactorMatrix     true;
 writeFacesAgglomeration   true;
 writePatchViewFactors     false;
+// dumpRays    true;
 
 maxDynListLength     200000;
+
 // ************************************************************************* //
