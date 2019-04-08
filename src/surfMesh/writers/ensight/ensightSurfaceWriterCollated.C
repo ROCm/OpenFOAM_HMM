@@ -98,7 +98,7 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
             mkDir(outputFile.path());
         }
 
-        scalar meshValue = 0;
+        scalar meshValue = timeValue;
         label meshIndex = 0;
         label timeIndex = 0;
 
