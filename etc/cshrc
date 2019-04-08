@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -22,9 +22,9 @@
 #         -  $WM_PROJECT_DIR/etc/prefs.csh
 #
 #       - User or group values (first file found):
-#         -  ~/.OpenFOAM/$WM_PROJECT_API/prefs.csh
+#         -  ~/.OpenFOAM/$FOAM_API/prefs.csh
 #         -  ~/.OpenFOAM/prefs.csh
-#         -  $WM_PROJECT_SITE/$WM_PROJECT_API/etc/prefs.csh
+#         -  $WM_PROJECT_SITE/$FOAM_API/etc/prefs.csh
 #         -  $WM_PROJECT_SITE/prefs.csh
 #
 # Environment
@@ -95,6 +95,7 @@ setenv WM_COMPILE_OPTION Opt
 # [WM_MPLIB] - MPI implementation:
 # = SYSTEMOPENMPI | OPENMPI | SYSTEMMPI | MPI | MPICH | MPICH-GM |
 #   HPMPI | CRAY-MPICH | FJMPI | QSMPI | SGIMPI | INTELMPI | USERMPI
+# Also possible to use INTELMPI-xyz etc and define your own wmake rule
 setenv WM_MPLIB SYSTEMOPENMPI
 
 

@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -71,6 +71,17 @@ eval \
     "$($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=LD_LIBRARY_PATH \
     $ParaView_DIR $archDir/ParaView- $archDir/qt-)"
 
+# Evaluate command-line parameters for ParaView and cmake
+for i
+do
+    case "$i" in
+    (cmake*=* | ParaView*=*)
+        # name=value  -> export name=value
+        eval "export $i"
+        ;;
+    esac
+done
+
 # ThirdParty cmake
 cmake="$archDir/$cmake_version"
 if [ -r "$cmake/bin/cmake" ]
@@ -78,17 +89,6 @@ then
     # _foamAddPath not available when foamPV function is used
     PATH="$cmake/bin:$PATH"
 fi
-
-# Evaluate command-line parameters for ParaView
-for i
-do
-    case "$i" in
-    (ParaView*=*)
-        # name=value  -> export name=value
-        eval "export $i"
-        ;;
-    esac
-done
 
 case "$ParaView_VERSION" in
 ('')

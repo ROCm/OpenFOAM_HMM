@@ -96,9 +96,12 @@ Foam::regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
     eventNo_(db().getEvent()),
     isPtr_(nullptr)
 {
-    if (registerCopy && rio.registered_)
+    if (registerCopy)
     {
-        const_cast<regIOobject&>(rio).checkOut();
+        if (rio.registered_)
+        {
+            const_cast<regIOobject&>(rio).checkOut();
+        }
         checkIn();
     }
 }

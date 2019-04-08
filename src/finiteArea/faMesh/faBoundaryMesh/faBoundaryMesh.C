@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -173,6 +173,12 @@ Foam::faBoundaryMesh::faBoundaryMesh
 
 void Foam::faBoundaryMesh::calcGeometry()
 {
+    // processorFaPatch geometry triggers calculation of pointNormals.
+    // This uses parallel comms and hence will not be trigggered
+    // on processors that do not have a processorFaPatch so instead
+    // force construction.
+    (void)mesh_.pointAreaNormals();
+
     forAll(*this, patchi)
     {
         operator[](patchi).initGeometry();
@@ -377,6 +383,12 @@ bool Foam::faBoundaryMesh::checkDefinition(const bool report) const
 
 void Foam::faBoundaryMesh::movePoints(const pointField& p)
 {
+    // processorFaPatch geometry triggers calculation of pointNormals.
+    // This uses parallel comms and hence will not be trigggered
+    // on processors that do not have a processorFaPatch so instead
+    // force construction.
+    (void)mesh_.pointAreaNormals();
+
     faPatchList& patches = *this;
 
     forAll(patches, patchi)

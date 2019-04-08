@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2017-2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -33,7 +33,7 @@ unset MPI_ARCH_PATH MPI_HOME
 export FOAM_MPI=dummy  # Fallback value
 
 case "$WM_MPLIB" in
-SYSTEMOPENMPI)
+SYSTEMOPENMPI*)
     # The system installed openmpi, locations discovery via mpicc.
     export FOAM_MPI=openmpi-system
 
@@ -58,7 +58,7 @@ SYSTEMOPENMPI)
     fi
     ;;
 
-OPENMPI)
+OPENMPI*)
     export FOAM_MPI=openmpi-1.10.4
     _foamEtc -config  openmpi                   # <- Adjustments (optional)
 
@@ -261,7 +261,7 @@ SGIMPI)
     _foamAddLib     $MPI_ARCH_PATH/lib
     ;;
 
-INTELMPI)
+INTELMPI*)
     if [ -n "$I_MPI_ROOT" ]
     then
         # I_MPI_ROOT: The Intel MPI Library installation directory
@@ -303,8 +303,8 @@ INTELMPI)
 
     export FOAM_MPI MPI_ARCH_PATH
 
-    _foamAddPath    $MPI_ARCH_PATH/bin64
-    _foamAddLib     $MPI_ARCH_PATH/lib64
+    _foamAddPath    "$MPI_ARCH_PATH/intel64/bin"
+    _foamAddLib     "$MPI_ARCH_PATH/intel64/lib"
     ;;
 esac
 

@@ -193,7 +193,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
     scalar timeValue = 0.0;
     readScalar(timeDir, timeValue);
 
-    scalar meshValue = 0;
+    scalar meshValue = timeValue;
 
     if (!isDir(baseDir))
     {

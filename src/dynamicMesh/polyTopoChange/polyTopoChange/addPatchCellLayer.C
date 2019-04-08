@@ -171,9 +171,29 @@ Foam::labelPair Foam::addPatchCellLayer::getEdgeString
             // - which hasn't been handled yet
             // - with same neighbour
             // - that needs extrusion
+
+            const label initFp = startFp;
             while (true)
             {
                 label prevFp = fEdges.rcIndex(startFp);
+
+                if (prevFp == initFp)
+                {
+                    const edge& e = pp.edges()[fEdges[initFp]];
+                    const face& localF = pp.localFaces()[patchFacei];
+
+                    FatalErrorInFunction
+                        << "On face:" << patchFacei
+                        << " fc:" << pp.faceCentres()[patchFacei]
+                        << " vertices:" << localF
+                        << " points:"
+                        << UIndirectList<point>(pp.points(), pp[patchFacei])
+                        << " edges:" << fEdges
+                        << " All edges of face seem to have same neighbour "
+                        << nbrGlobalFacei
+                        << " starting walking from edge " << e
+                        << exit(FatalError);
+                }
 
                 if
                 (

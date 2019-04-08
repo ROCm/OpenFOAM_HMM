@@ -94,7 +94,7 @@ if (doLagrangian)
         );
 
         Info<< "    Lagrangian: "
-            << runTime.relativePath(writer.output()) << nl;
+            << args.relativePath(writer.output()) << nl;
 
         writer.writeTimeValue(mesh.time().value());
         writer.writeGeometry();

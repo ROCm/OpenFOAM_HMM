@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -24,8 +24,8 @@
 #
 #------------------------------------------------------------------------------
 
-# [WM_PROJECT_API] - The API level for the project
-setenv WM_PROJECT_API `$WM_PROJECT_DIR/bin/foamEtcFile -show-api`
+# [FOAM_API] - The API level for the project
+setenv FOAM_API `$WM_PROJECT_DIR/bin/foamEtcFile -show-api`
 
 # The installation parent directory
 set prefixDir="${WM_PROJECT_DIR:h}"
@@ -51,8 +51,8 @@ _foamEcho "Locating ThirdParty directory"
 foreach foamDir (\
     "$WM_PROJECT_DIR/ThirdParty" \
     "$prefixDir/ThirdParty-$WM_PROJECT_VERSION" \
-    "$prefixDir/ThirdParty-v$WM_PROJECT_API" \
-    "$prefixDir/ThirdParty-$WM_PROJECT_API" \
+    "$prefixDir/ThirdParty-v$FOAM_API" \
+    "$prefixDir/ThirdParty-$FOAM_API" \
     "$prefixDir/ThirdParty-common" \
 )
     _foamEcho "... $foamDir"
@@ -139,7 +139,6 @@ _foamEtc -config  settings
 _foamEtc -config  mpi
 _foamEtc -config  paraview -- "$FOAM_SETTINGS"  # Pass through for evaluation
 _foamEtc -config  vtk
-_foamEtc -config  ensight
 ## _foamEtc -config  ADIOS
 ## _foamEtc -config  ADIOS2
 _foamEtc -config  CGAL

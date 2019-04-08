@@ -143,7 +143,7 @@ inline Foam::scalar Foam::boundBox::avgDim() const
 }
 
 
-Foam::label Foam::boundBox::nDim() const
+inline Foam::label Foam::boundBox::nDim() const
 {
     label ngood = 0;
 

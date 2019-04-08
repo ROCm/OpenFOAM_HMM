@@ -1,8 +1,8 @@
 // Read time index from */uniform/time, but treat 0 and constant specially
 // or simply increment from the '-index' option if it was supplied
 
-    label timeIndex = 0;
-
+label timeIndex = 0;
+{
     if (optIndex)
     {
         timeIndex = indexingNumber++;
@@ -37,7 +37,4 @@
             continue;
         }
     }
-
-    Info<< nl << "Time [" << timeIndex << "] = " << runTime.timeName() << nl;
-
-// end-of-file
+}

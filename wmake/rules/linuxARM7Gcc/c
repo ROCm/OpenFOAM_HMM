@@ -1,6 +1,6 @@
 SUFFIXES += .c
 
-cc          = gcc
+cc          = gcc -mcpu=cortex-a9
 
 cWARN       = -Wall
 

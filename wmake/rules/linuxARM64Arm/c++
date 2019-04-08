@@ -1,6 +1,6 @@
 include $(GENERAL_RULES)/Clang/c++
 
-CC          = armclang++ -std=c++11
+CC          = armclang++ -std=c++11 -mcpu=native
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 
@@ -13,5 +13,5 @@ cpptoo      = $(Ctoo)
 
 LINK_LIBS   = $(c++DBUG)
 
-LINKLIBSO   = $(CC) $(c++FLAGS) -shared
-LINKEXE     = $(CC) $(c++FLAGS) -Xlinker --add-needed
+LINKLIBSO   = $(CC) $(c++FLAGS) -shared -armpl
+LINKEXE     = $(CC) $(c++FLAGS) -Xlinker --add-needed -armpl

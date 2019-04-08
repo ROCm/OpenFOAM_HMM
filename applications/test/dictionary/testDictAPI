@@ -10,49 +10,10 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      controlDict;
+    object      testDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libOpenFOAM.so" "libfieldFunctionObjects.so");
+_FOAM_API  $FOAM_API;
 
-application     pisoFoam;
-
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         0.7;
-
-deltaT          1e-4;
-
-writeControl    timeStep;
-
-writeInterval   1000;
-
-purgeWrite      0;
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-
-functions
-{
-    #include "samples"
-    #include "streamLines"
-    #include "forceCoeffs"
-}
-
-
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
