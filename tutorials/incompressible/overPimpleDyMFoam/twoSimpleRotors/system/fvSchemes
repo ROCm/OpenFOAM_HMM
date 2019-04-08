@@ -53,12 +53,12 @@ snGradSchemes
 
 oversetInterpolation
 {
-    method          cellVolumeWeight;
+    //method          cellVolumeWeight;
 
     // Faster but less accurate
-    //method              trackingInverseDistance;
-    //searchBox           (0 0 0)(0.02 0.01 0.01);
-    //searchBoxDivisions  3{(64 64 1)};
+    method              trackingInverseDistance;
+    searchBox           (0 0 0)(0.02 0.01 0.01);
+    searchBoxDivisions  3{(64 64 1)};
 }
 
 fluxRequired

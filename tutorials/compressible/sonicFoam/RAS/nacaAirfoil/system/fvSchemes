@@ -41,7 +41,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear limited corrected 0.5;
+    default         Gauss linear corrected; //limited corrected 1;   //0.5;
 }
 
 interpolationSchemes
