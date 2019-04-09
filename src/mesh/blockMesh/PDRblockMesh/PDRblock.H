@@ -94,10 +94,12 @@ public:
         //- Grid locations in an axis direction.
         //  The number of points is one larger than the number of elements
         //  it represents
-        struct location
+        class location
         :
             public scalarList
         {
+        public:
+
             //- The locations are valid if they contain 2 or more points
             inline bool valid() const;
 
@@ -187,7 +189,11 @@ private:
     // Private Member Functions
 
         //- Check that points increase monotonically
-        static bool checkMonotonic(const direction cmpt, const UList<scalar>& pts);
+        static bool checkMonotonic
+        (
+            const direction cmpt,
+            const UList<scalar>& pts
+        );
 
         //- Adjust sizing for updated grid points
         void adjustSizes();
@@ -241,6 +247,12 @@ private:
 
 
 public:
+
+    // Static Member Functions
+
+        //- Return a PDRblock reference to a nullObject
+        static const PDRblock& null();
+
 
     // Constructors
 
