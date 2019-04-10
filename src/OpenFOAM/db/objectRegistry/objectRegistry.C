@@ -323,6 +323,14 @@ void Foam::objectRegistry::clear()
 
         if (ptr && ptr->ownedByRegistry())
         {
+            // TBD: may wish to have ptr->clearWatches();
+
+            if (objectRegistry::debug)
+            {
+                Pout<< "objectRegistry::clear : " << ptr->name()
+                    <<  " watches :" << flatOutput(ptr->watchIndices()) << nl;
+
+            }
             delete ptr;
         }
     }
@@ -350,6 +358,7 @@ bool Foam::objectRegistry::erase(const iterator& iter)
 
         if (ptr && ptr->ownedByRegistry())
         {
+            // TBD: may wish to have ptr->clearWatches();
             delete ptr;
         }
 
