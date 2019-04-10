@@ -73,8 +73,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
     {
         if (isA<oversetFvPatch>(fvm[patchI]))
         {
-            Pout<< "Storing faces on patch " << fvm[patchI].name() << endl;
-
+            //Pout<< "Storing faces on patch " << fvm[patchI].name() << endl;
             forAll(fvm[patchI], i)
             {
                 isFront.set(fvm[patchI].start()+i);
@@ -286,11 +285,10 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
                 {
                     if (regionType[ownRegion] == 0)
                     {
-                        Pout<< "Mark region:" << ownRegion
-                            << " on zone:" << zoneID[own[faceI]]
-                            << " as next to blockage at:"
-                            << mesh.faceCentres()[faceI] << endl;
-
+                        //Pout<< "Mark region:" << ownRegion
+                        //    << " on zone:" << zoneID[own[faceI]]
+                        //    << " as next to blockage at:"
+                        //    << mesh.faceCentres()[faceI] << endl;
                         regionType[ownRegion] = 1;
                     }
                 }
@@ -301,10 +299,10 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
                 {
                     if (regionType[neiRegion] == 0)
                     {
-                        Pout<< "Mark region:" << neiRegion
-                            << " on zone:" << zoneID[nei[faceI]]
-                            << " as next to blockage at:"
-                            << mesh.faceCentres()[faceI] << endl;
+                        //Pout<< "Mark region:" << neiRegion
+                        //    << " on zone:" << zoneID[nei[faceI]]
+                        //    << " as next to blockage at:"
+                        //    << mesh.faceCentres()[faceI] << endl;
                         regionType[neiRegion] = 1;
                     }
                 }
@@ -323,10 +321,10 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
 
                 if (regionType[ownRegion] == 0)
                 {
-                    Pout<< "Mark region:" << ownRegion
-                        << " on zone:" << zoneID[own[faceI]]
-                        << " as next to blockage at:"
-                        << mesh.faceCentres()[faceI] << endl;
+                    //Pout<< "Mark region:" << ownRegion
+                    //    << " on zone:" << zoneID[own[faceI]]
+                    //    << " as next to blockage at:"
+                    //    << mesh.faceCentres()[faceI] << endl;
                     regionType[ownRegion] = 1;
                 }
             }
@@ -343,8 +341,8 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
         {}
         else if (!fvPatch::constraintType(fvp.type()))
         {
-            Pout<< "Proper patch " << fvp.name() << " of type " << fvp.type()
-                << endl;
+            //Pout<< "Proper patch " << fvp.name() << " of type " << fvp.type()
+            //    << endl;
 
             const labelList& fc = fvp.faceCells();
             forAll(fc, i)
@@ -353,10 +351,9 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
 
                 if (cellTypes[fc[i]] != HOLE && regionType[regionI] != 2)
                 {
-                    Pout<< "reachable region : " << regionI
-                        << " at cell " << mesh.cellCentres()[fc[i]]
-                        << " on zone " << zoneID[fc[i]]
-                        << endl;
+                    //Pout<< "reachable region : " << regionI
+                    //    << " at cell " << mesh.cellCentres()[fc[i]]
+                    //    << " on zone " << zoneID[fc[i]] << endl;
                     regionType[regionI] = 2;
                 }
             }
@@ -407,10 +404,9 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
 
                             if (otherType == 2)
                             {
-                                Pout<< "Reachable through interpolation : "
-                                    << regionI << " at cell "
-                                    << mesh.cellCentres()[cellI]
-                                    << endl;
+                                //Pout<< "Reachable through interpolation : "
+                                //    << regionI << " at cell "
+                                //    << mesh.cellCentres()[cellI] << endl;
                                 regionType[regionI] = 2;
                                 nChanged++;
                                 break;
@@ -458,7 +454,7 @@ void Foam::cellCellStencils::cellVolumeWeight::markPatchCells
 
         if (isA<oversetFvPatch>(fvp))
         {
-            Pout<< "Marking cells on overset patch " << fvp.name() << endl;
+            //Pout<< "Marking cells on overset patch " << fvp.name() << endl;
             forAll(fc, i)
             {
                 label cellI = fc[i];
@@ -467,8 +463,8 @@ void Foam::cellCellStencils::cellVolumeWeight::markPatchCells
         }
         else if (!fvPatch::constraintType(fvp.type()))
         {
-            Pout<< "Marking cells on proper patch " << fvp.name()
-                << " with type " << fvp.type() << endl;
+            //Pout<< "Marking cells on proper patch " << fvp.name()
+            //    << " with type " << fvp.type() << endl;
             forAll(fc, i)
             {
                 label cellI = fc[i];
