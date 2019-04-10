@@ -114,8 +114,6 @@ have_adios2()
         return 2
     }
 
-    header="${header%/*}"   # Strip one-level (include/adios2/...)
-
     # OK
     export HAVE_ADIOS2=true
     export ADIOS2_ARCH_PATH="$prefix"
