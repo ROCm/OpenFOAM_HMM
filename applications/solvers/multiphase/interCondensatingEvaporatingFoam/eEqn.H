@@ -7,8 +7,6 @@
 
     pDivU = dimensionedScalar("pDivU", p.dimensions()/dimTime, Zero);
 
-DebugVar(fvc::interpolate(rho));
-
     if (thermo->pDivU())
     {
         pDivU = (p*fvc::div(rhoPhi/fvc::interpolate(rho)));

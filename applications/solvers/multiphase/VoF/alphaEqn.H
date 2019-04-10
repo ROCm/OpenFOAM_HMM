@@ -153,33 +153,6 @@
 
         surfaceScalarField phir(phic*mixture.nHatf());
 
-DebugVar(phir.oriented());
-DebugVar(phiCN().oriented());
-DebugVar(alpha1.oriented());
-DebugVar(alpha1.oldTime().oriented());
-
-tmp<surfaceScalarField> f1
-(
-    fvc::flux
-    (
-        phiCN(),
-        cnCoeff*alpha1 + (1.0 - cnCoeff)*alpha1.oldTime(),
-        alphaScheme
-    )
-);
-DebugVar(f1().oriented());
-tmp<surfaceScalarField> f2
-(
-    fvc::flux
-    (
-       -fvc::flux(-phir, alpha2, alpharScheme),
-        alpha1,
-        alpharScheme
-    )
-);
-DebugVar(f2().oriented());
-
-
         tmp<surfaceScalarField> talphaPhi1Un
         (
             fvc::flux

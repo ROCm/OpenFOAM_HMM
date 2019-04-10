@@ -28,10 +28,7 @@ gradSchemes
 divSchemes
 {
     div(rhoPhi,U)   Gauss linearUpwind grad(U);
-//    div(phi,alpha)  Gauss vanLeer;
-div(phi,alpha)      Gauss CoBlended 1.0 Minmod 2.0 upwind;
-
-
+    div(phi,alpha)  Gauss vanLeer;
     div(phirb,alpha) Gauss linear;
     div(phi,k)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;

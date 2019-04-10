@@ -1,5 +1,4 @@
 EXE_INC = \
-    -g -O0 \
     -I../VoF \
     -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
     -I$(LIB_SRC)/transportModels \

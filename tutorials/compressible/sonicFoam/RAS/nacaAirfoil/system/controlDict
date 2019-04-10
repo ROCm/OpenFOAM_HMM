@@ -15,11 +15,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//DebugSwitches
-//{
-//    fv  2;
-//}
-
 application     sonicFoam;
 
 startFrom       latestTime;

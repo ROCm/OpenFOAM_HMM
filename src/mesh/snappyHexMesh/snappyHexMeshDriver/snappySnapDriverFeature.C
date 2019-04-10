@@ -308,7 +308,7 @@ void Foam::snappySnapDriver::calcNearestFace
         (
             labelList(1, zoneSurfi),
             fc,
-            sqr(scalarField(faceSnapDist, ppFaces)),// sqr of attract dist
+            sqr(faceSnapDist),// sqr of attract dist
             hitSurface,
             hitInfo,
             hitRegion,
@@ -384,7 +384,7 @@ void Foam::snappySnapDriver::calcNearestFace
     (
         unzonedSurfaces,
         fc,
-        sqr(scalarField(faceSnapDist, ppFaces)),// sqr of attract dist
+        sqr(faceSnapDist),// sqr of attract dist
         hitSurface,
         hitInfo,
         hitRegion,
