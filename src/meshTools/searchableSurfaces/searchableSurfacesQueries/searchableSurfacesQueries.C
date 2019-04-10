@@ -356,6 +356,13 @@ void Foam::searchableSurfacesQueries::findNearest
 {
     // Find nearest. Return -1 or nearest point
 
+    if (samples.size() != nearestDistSqr.size())
+    {
+        FatalErrorInFunction << "Inconsistent sizes. samples:" << samples.size()
+            << " search-radius:" << nearestDistSqr.size()
+            << exit(FatalError);
+    }
+
     // Initialise
     nearestSurfaces.setSize(samples.size());
     nearestSurfaces = -1;
@@ -406,6 +413,14 @@ void Foam::searchableSurfacesQueries::findNearest
 )
 {
     // Find nearest. Return -1 or nearest point
+
+    if (samples.size() != nearestDistSqr.size())
+    {
+        FatalErrorInFunction << "Inconsistent sizes. samples:" << samples.size()
+            << " search-radius:" << nearestDistSqr.size()
+            << exit(FatalError);
+    }
+
 
     if (regionIndices.empty())
     {
@@ -469,6 +484,15 @@ void Foam::searchableSurfacesQueries::findNearest
 )
 {
     // Multi-surface findNearest
+
+
+    if (start.size() != distSqr.size())
+    {
+        FatalErrorInFunction << "Inconsistent sizes. samples:" << start.size()
+            << " search-radius:" << distSqr.size()
+            << exit(FatalError);
+    }
+
 
     vectorField normal;
     List<pointIndexHit> info;
