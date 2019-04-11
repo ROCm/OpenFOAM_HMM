@@ -29,7 +29,12 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void Foam::error::safePrintStack(std::ostream& os)
+{}
+
+
 void Foam::error::printStack(Ostream& os)
 {}
+
 
 // ************************************************************************* //
