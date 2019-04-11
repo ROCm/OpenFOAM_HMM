@@ -160,7 +160,7 @@ void Foam::inplaceReorder
 }
 
 
-void Foam::ListOps::identity(labelList& map, label start)
+void Foam::ListOps::identity(labelUList& map, label start)
 {
     std::iota(map.begin(), map.end(), start);
 }

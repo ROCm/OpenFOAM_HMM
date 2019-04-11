@@ -586,7 +586,7 @@ struct greater
 
 //- Set identity map with (map[i] == i)
 //  Optionally with an alternative start index, so that (map[i] == i+start)
-void identity(labelList& map, label start=0);
+void identity(labelUList& map, label start=0);
 
 
 //- Find index of the first occurrence that satisfies the predicate.
