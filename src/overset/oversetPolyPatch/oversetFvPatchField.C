@@ -212,6 +212,59 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
 
 
 template<class Type>
+void Foam::oversetFvPatchField<Type>::initInterfaceMatrixUpdate
+(
+    scalarField&,
+    const bool add,
+    const scalarField& psiInternal,
+    const scalarField&,
+    const direction,
+    const Pstream::commsTypes commsType
+) const
+{
+    // Add remote values
+
+    const oversetFvPatch& ovp = this->oversetPatch_;
+
+    if (ovp.master())
+    {
+        const fvMesh& mesh = this->patch().boundaryMesh().mesh();
+
+        // Try to find out if the solve routine comes from the mesh
+        // TBD. This should be cleaner.
+        if (&mesh.lduAddr() == &mesh.fvMesh::lduAddr())
+        {
+            return;
+        }
+
+        const mapDistribute& map = ovp.cellInterpolationMap();
+
+        // Transfer the current state (similar to processorFvPatchField). Note
+        // use of separate tag to avoid clashes with any outstanding processor
+        // exchanges
+        if (this->pBufs_.valid())
+        {
+            this->pBufs_().clear();
+        }
+        else
+        {
+            this->pBufs_.set
+            (
+                new PstreamBuffers
+                (
+                    Pstream::commsTypes::nonBlocking,
+                    UPstream::msgType()+1
+                )
+            );
+        }
+
+        // Start sending
+        map.mapDistributeBase::send(this->pBufs_(), psiInternal);
+    }
+}
+
+
+template<class Type>
 void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
@@ -251,11 +304,14 @@ void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
         const scalarList& factor = ovp.cellInterpolationWeight();
         const scalarField& normalisation = ovp.normalisation();
 
-
         // Since we're inside initEvaluate/evaluate there might be processor
         // comms underway. Change the tag we use.
-        scalarField work(psiInternal);
-        map.mapDistributeBase::distribute(work, UPstream::msgType()+1);
+        //scalarField work(psiInternal);
+        //map.mapDistributeBase::distribute(work, UPstream::msgType()+1);
+
+        // Receive the outstanding data
+        scalarField work;
+        map.receive(this->pBufs_(), work);
 
         forAll(cellIDs, i)
         {
@@ -263,6 +319,7 @@ void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
 
             const scalarList& w = wghts[celli];
             const labelList& nbrs = stencil[celli];
+
             scalar f = factor[celli];
             const scalar norm = normalisation[celli];
 

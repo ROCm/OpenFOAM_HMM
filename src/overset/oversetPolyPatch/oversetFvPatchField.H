@@ -56,6 +56,14 @@ class oversetFvPatchField
 :
     public semiImplicitOversetFvPatchField<Type>
 {
+protected:
+
+    // Protected data
+
+        //- Send/receive buffer
+        mutable autoPtr<PstreamBuffers> pBufs_;
+
+
 public:
 
     //- Runtime type information
@@ -126,6 +134,18 @@ public:
 
             //- Initialise the evaluation of the patch field
             virtual void initEvaluate(const Pstream::commsTypes commsType);
+
+            //- Initialise neighbour matrix update. Add
+            //  or subtract coupled contributions to matrix
+            virtual void initInterfaceMatrixUpdate
+            (
+                scalarField&,
+                const bool add,
+                const scalarField&,
+                const scalarField&,
+                const direction,
+                const Pstream::commsTypes commsType
+            ) const;
 
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
