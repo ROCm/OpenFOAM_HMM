@@ -5,6 +5,8 @@
     \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -22,25 +24,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::clockValue
+    Foam::clockTime
 
 Description
-    Access to clock value (approx. 2 microsecond resolution) with
-    some and basic operations.
+    Starts timing (using rtc) and returns elapsed time from start.
+    Better resolution (2uSec instead of ~20mSec) than cpuTime.
 
 SourceFiles
-    clockValue.C
+    clockTime.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef clockValue_H
-#define clockValue_H
+#ifndef clockTime_H
+#define clockTime_H
 
-#include <string>
-#include <sys/types.h>
-#ifdef darwin
-    #include <sys/time.h>
-#endif
+#include "clockValue.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,76 +46,45 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class clockValue Declaration
+                          Class clockTime Declaration
 \*---------------------------------------------------------------------------*/
 
-class clockValue
+class clockTime
 {
     // Private Data
 
-        //- Time structure used
-        typedef struct timeval value_type;
+        //- The values being used.
+        typedef clockValue value_type;
 
-        value_type value_;
+        //- Start time, at the time of construction
+        value_type start_;
+
+        //- Last time when elapsedTime or timeIncrement was called
+        mutable value_type last_;
+
 
 public:
 
     // Constructors
 
-        //- Construct null, zero initialized
-        clockValue();
+        //- Construct with the current clock time for the starting value
+        clockTime();
 
-        //- Construct zero initialized or with current time
-        clockValue(bool useNow);
-
-
-    // Factory Methods
-
-        //- Return the current time value from the system
-        inline static clockValue now()
-        {
-            return clockValue(true);
-        }
+        //- Construct with the given clock value for the starting value
+        clockTime(const clockValue& clockval);
 
 
     // Member Functions
 
-        //- Reset to zero
-        void clear();
+        //- Reset to use the current time for the start time
+        void resetTime();
 
-        //- Update to the current now() time from the system
-        void update();
+        //- Return time (in seconds) from the start
+        double elapsedTime() const;
 
-        //- The time elapsed from now() since the start time.
-        clockValue elapsed() const;
-
-        //- The value in seconds (rounded)
-        long seconds() const;
-
-        //- Format as day-hh:mm:ss string
-        std::string str() const;
-
-
-    // Operators
-
-        //- Conversion operator to seconds
-        operator double() const;
-
-        //- Subtract time value
-        clockValue& operator-=(const clockValue& rhs);
-
-        //- Add time value
-        clockValue& operator+=(const clockValue& rhs);
+        //- Return time (in seconds) since last call to timeIncrement()
+        double timeIncrement() const;
 };
-
-
-// Global Operators
-
-//- Subtraction of clock values
-clockValue operator-(const clockValue& a, const clockValue& b);
-
-//- Addition of clock values
-clockValue operator+(const clockValue& a, const clockValue& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

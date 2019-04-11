@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,39 +25,31 @@ License
 
 #include "clockValue.H"
 #include "IOstreams.H"
-#include <sys/time.h>
+
 #include <sstream>
 #include <iomanip>
-
-// * * * * * * * * * * * * * * * * Local Data  * * * * * * * * * * * * * * * //
-
-namespace
-{
-
-    constexpr int factorMicro = (1000000);  //!< From usec to sec
-    constexpr int factorMicro2 = (500000);  //!< Rounding usec to sec
-    constexpr int factorHundred = (10000);  //!< From usec to 0.01 sec
-
-} // End anonymous namespace
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::clockValue::clockValue()
 :
-    clockValue(false)
+    value_(value_type::zero())
+{}
+
+
+Foam::clockValue::clockValue(const value_type& value)
+:
+    value_(value)
 {}
 
 
 Foam::clockValue::clockValue(bool useNow)
+:
+    value_(value_type::zero())
 {
     if (useNow)
     {
         update();
-    }
-    else
-    {
-        clear();
     }
 }
 
@@ -66,14 +58,13 @@ Foam::clockValue::clockValue(bool useNow)
 
 void Foam::clockValue::clear()
 {
-    value_.tv_sec  = 0;
-    value_.tv_usec = 0;
+    value_ = value_type::zero();
 }
 
 
 void Foam::clockValue::update()
 {
-    gettimeofday(&value_, 0);
+    value_ = std::chrono::high_resolution_clock::now().time_since_epoch();
 }
 
 
@@ -85,13 +76,7 @@ Foam::clockValue Foam::clockValue::elapsed() const
 
 long Foam::clockValue::seconds() const
 {
-    long sec = value_.tv_sec;
-    if (sec > 0 && value_.tv_usec > factorMicro2)
-    {
-        ++sec;
-    }
-
-    return sec;
+    return std::chrono::duration_cast<std::chrono::seconds>(value_).count();
 }
 
 
@@ -99,22 +84,23 @@ std::string Foam::clockValue::str() const
 {
     std::ostringstream os;
 
-    const unsigned long ss = value_.tv_sec;
+    // seconds
+    const unsigned long ss =
+         std::chrono::duration_cast<std::chrono::seconds>(value_).count();
 
     // days
     const auto dd = (ss / 86400);
 
-    if (dd) os << dd << '-';
-
     // hours
     const int hh = ((ss / 3600) % 24);
+
+    if (dd) os << dd << '-';
 
     if (dd || hh)
     {
         os  << std::setw(2) << std::setfill('0')
             << hh << ':';
     }
-
 
     // minutes
     os  << std::setw(2) << std::setfill('0')
@@ -124,12 +110,16 @@ std::string Foam::clockValue::str() const
     os  << std::setw(2) << std::setfill('0')
         << (ss % 60);
 
-    // 1/100th seconds. As none or 2 decimal places
-    const int hundredths = (value_.tv_sec % factorHundred);
+    // milliseconds. As none or 3 decimal places
+    const long ms =
+    (
+        std::chrono::duration_cast<std::chrono::milliseconds>(value_).count()
+      - (ss * 1000)
+    );
 
-    if (hundredths)
+    if (ms > 0)
     {
-        os  << '.' << std::setw(2) << std::setfill('0') << hundredths;
+        os  << '.' << std::setw(3) << std::setfill('0') << ms;
     }
 
     return os.str();
@@ -140,38 +130,24 @@ std::string Foam::clockValue::str() const
 
 Foam::clockValue::operator double () const
 {
-    return (value_.tv_sec + 1e-6*value_.tv_usec);
+    return
+    (
+        (double(value_.count()) * value_type::period::num)
+      / value_type::period::den
+    );
 }
 
 
 Foam::clockValue& Foam::clockValue::operator-=(const clockValue& rhs)
 {
-    const value_type& b = rhs.value_;
-
-    value_.tv_sec -= b.tv_sec;
-
-    if (value_.tv_usec < b.tv_usec)
-    {
-        --(value_.tv_sec);
-        value_.tv_usec += factorMicro;
-    }
-
-    value_.tv_usec -= b.tv_usec;
-
+    value_ -= rhs.value_;
     return *this;
 }
 
 
 Foam::clockValue& Foam::clockValue::operator+=(const clockValue& rhs)
 {
-    const value_type& b = rhs.value_;
-
-    // Microseconds first
-    value_.tv_usec += b.tv_usec;
-
-    value_.tv_sec  += b.tv_sec + (value_.tv_usec / factorMicro);
-    value_.tv_usec %= factorMicro;
-
+    value_ += rhs.value_;
     return *this;
 }
 
@@ -180,19 +156,13 @@ Foam::clockValue& Foam::clockValue::operator+=(const clockValue& rhs)
 
 Foam::clockValue Foam::operator-(const clockValue& a, const clockValue& b)
 {
-    clockValue result(a);
-    result -= b;
-
-    return result;
+    return clockValue(a.value() - b.value());
 }
 
 
 Foam::clockValue Foam::operator+(const clockValue& a, const clockValue& b)
 {
-    clockValue result(a);
-    result += b;
-
-    return result;
+    return clockValue(a.value() + b.value());
 }
 
 

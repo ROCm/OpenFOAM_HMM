@@ -1,5 +1,3 @@
-clockTime/clockTime.C
-clockValue/clockValue.C
 cpuInfo/cpuInfo.C
 cpuTime/cpuTime.C
 memInfo/memInfo.C

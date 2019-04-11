@@ -75,6 +75,7 @@ std::string Foam::clock::dateTime()
     return os.str();
 }
 
+
 std::string Foam::clock::date()
 {
     time_t t = getTime();
