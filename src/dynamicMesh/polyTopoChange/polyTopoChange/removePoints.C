@@ -430,7 +430,7 @@ void Foam::removePoints::setRefinement
                         mesh_.points(),
                         savedPoints_,
                         savedFaces_[saveI]  // saved face
-                    )
+                    )()
                 );
 
                 if (meshPoints != keptPoints)

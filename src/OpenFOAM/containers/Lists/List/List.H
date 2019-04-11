@@ -67,7 +67,6 @@ template<class T> class PtrList;
 template<class T> class SortableList;
 template<class T> class IndirectList;
 template<class T> class UIndirectList;
-template<class T> class BiIndirectList;
 
 template<class T> Istream& operator>>(Istream& is, List<T>& list);
 
@@ -173,9 +172,6 @@ public:
         //- Construct as copy of UIndirectList<T>
         explicit List(const UIndirectList<T>& list);
 
-        //- Construct as copy of BiIndirectList<T>
-        explicit List(const BiIndirectList<T>& list);
-
         //- Construct from an initializer list
         List(std::initializer_list<T> list);
 
@@ -272,9 +268,6 @@ public:
 
         //- Assignment to UIndirectList operator. Takes linear time
         void operator=(const UIndirectList<T>& list);
-
-        //- Assignment to BiIndirectList operator. Takes linear time
-        void operator=(const BiIndirectList<T>& list);
 
         //- Assignment to an initializer list
         void operator=(std::initializer_list<T> list);

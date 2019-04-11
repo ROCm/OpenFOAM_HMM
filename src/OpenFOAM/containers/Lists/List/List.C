@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -32,7 +32,6 @@ License
 #include "SLList.H"
 #include "IndirectList.H"
 #include "UIndirectList.H"
-#include "BiIndirectList.H"
 #include "contiguous.H"
 #include <utility>
 
@@ -341,16 +340,6 @@ Foam::List<T>::List(const UIndirectList<T>& list)
 
 
 template<class T>
-Foam::List<T>::List(const BiIndirectList<T>& list)
-:
-    UList<T>(nullptr, list.size())
-{
-    doAlloc();
-    copyList(list);
-}
-
-
-template<class T>
 Foam::List<T>::List(std::initializer_list<T> list)
 :
     List<T>(list.begin(), list.end(), list.size())
@@ -523,25 +512,6 @@ void Foam::List<T>::operator=(const SLList<T>& list)
 
 template<class T>
 void Foam::List<T>::operator=(const UIndirectList<T>& list)
-{
-    const label len = list.size();
-
-    reAlloc(len);
-
-    if (len)
-    {
-        List_ACCESS(T, (*this), vp);
-
-        for (label i=0; i<len; ++i)
-        {
-            vp[i] = list[i];
-        }
-    }
-}
-
-
-template<class T>
-void Foam::List<T>::operator=(const BiIndirectList<T>& list)
 {
     const label len = list.size();
 
