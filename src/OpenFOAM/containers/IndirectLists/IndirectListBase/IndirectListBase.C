@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,23 +25,22 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T>
-inline Foam::label Foam::UIndirectList<T>::find
+template<class T, class Addr>
+Foam::label Foam::IndirectListBase<T, Addr>::find
 (
     const T& val,
     const label start
 ) const
 {
-    if (start >= 0)
+    const label len = addr_.size();
+
+    if (start >= 0 && len)
     {
         List_CONST_ACCESS(T, values_, vals);
-        List_CONST_ACCESS(label, addressing_, addr);
-
-        const label len = addressing_.size();
 
         for (label i = start; i < len; ++i)
         {
-            if (vals[addr[i]] == val)
+            if (vals[addr_[i]] == val)
             {
                 return i;
             }
@@ -52,29 +51,21 @@ inline Foam::label Foam::UIndirectList<T>::find
 }
 
 
-template<class T>
-inline Foam::label Foam::UIndirectList<T>::rfind
+template<class T, class Addr>
+Foam::label Foam::IndirectListBase<T, Addr>::rfind
 (
     const T& val,
     const label pos
 ) const
 {
     List_CONST_ACCESS(T, values_, vals);
-    List_CONST_ACCESS(label, addressing_, addr);
 
-    for
-    (
-        label i =
-        (
-            pos < 0
-          ? (addressing_.size()-1)
-          : min(pos, (addressing_.size()-1))
-        );
-        i >= 0;
-        --i
-    )
+    const label len1 = (addr_.size()-1);
+
+    // pos == -1 has same meaning as std::string::npos - search from end
+    for (label i = ((pos >= 0 && pos < len1) ? pos : len1); i >= 0; --i)
     {
-        if (vals[addr[i]] == val)
+        if (vals[addr_[i]] == val)
         {
             return i;
         }

@@ -65,8 +65,7 @@ template<class T, int SizeMin> class DynamicList;
 
 template<class T> class PtrList;
 template<class T> class SortableList;
-template<class T> class IndirectList;
-template<class T> class UIndirectList;
+template<class T, class Addr> class IndirectListBase;
 
 template<class T> Istream& operator>>(Istream& is, List<T>& list);
 
@@ -169,8 +168,9 @@ public:
         //- Construct as copy of SLList<T>
         explicit List(const SLList<T>& list);
 
-        //- Construct as copy of UIndirectList<T>
-        explicit List(const UIndirectList<T>& list);
+        //- Construct as copy of IndirectList contents
+        template<class Addr>
+        explicit List(const IndirectListBase<T, Addr>& list);
 
         //- Construct from an initializer list
         List(std::initializer_list<T> list);
@@ -234,8 +234,9 @@ public:
             //- Append a List to the end of this list
             inline void append(const UList<T>& list);
 
-            //- Append a UIndirectList at the end of this list
-            inline void append(const UIndirectList<T>& list);
+            //- Append IndirectList contents at the end of this list
+            template<class Addr>
+            inline void append(const IndirectListBase<T, Addr>& list);
 
             //- Transfer the contents of the argument List into this list
             //- and annul the argument list
@@ -266,8 +267,9 @@ public:
         //- Assignment to SLList operator. Takes linear time
         void operator=(const SLList<T>& list);
 
-        //- Assignment to UIndirectList operator. Takes linear time
-        void operator=(const UIndirectList<T>& list);
+        //- Assignment from IndirectList. Takes linear time
+        template<class Addr>
+        void operator=(const IndirectListBase<T, Addr>& list);
 
         //- Assignment to an initializer list
         void operator=(std::initializer_list<T> list);

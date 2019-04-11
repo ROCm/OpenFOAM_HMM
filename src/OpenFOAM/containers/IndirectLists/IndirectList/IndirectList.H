@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -30,8 +30,7 @@ Description
     A List with indirect addressing.
 
 See also
-    Foam::UIndirectList for a version without any allocation for the
-    addressing.
+    Foam::UIndirectList for a version without any addressing allocation.
 
 SourceFiles
     IndirectListI.H
@@ -41,6 +40,7 @@ SourceFiles
 #ifndef IndirectList_H
 #define IndirectList_H
 
+#include "IndirectListAddressing.H"
 #include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,96 +49,36 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class IndirectListAddressing Declaration
-\*---------------------------------------------------------------------------*/
-
-//- A helper class for storing addresses.
-class IndirectListAddressing
-{
-    // Private data
-
-        //- Storage for the list addressing
-        List<label> addressing_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        IndirectListAddressing(const IndirectListAddressing&) = delete;
-
-        //- No copy assignment
-        void operator=(const IndirectListAddressing&) = delete;
-
-
-protected:
-
-    // Constructors
-
-        //- Copy construct from addressing array
-        inline explicit IndirectListAddressing(const labelUList& addr);
-
-        //- Move construct from addressing array
-        inline explicit IndirectListAddressing(List<label>&& addr);
-
-
-    // Member Functions
-
-        //- Return the list addressing
-        inline const List<label>& addressing() const;
-
-        //- Copy reset addressing
-        inline void resetAddressing(const labelUList& addr);
-
-        //- Move reset addressing
-        inline void resetAddressing(List<label>&& addr);
-
-};
-
-
-/*---------------------------------------------------------------------------*\
                         Class IndirectList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
 class IndirectList
 :
-    private IndirectListAddressing,
-    public  UIndirectList<T>
+    private IndirectListAddressing<labelList>,
+    public UIndirectList<T>
 {
-    // Private Member Functions
-
-        //- No copy assignment
-        void operator=(const IndirectList<T>&) = delete;
-
-        //- No copy assignment from UIndirectList
-        void operator=(const UIndirectList<T>&) = delete;
-
-
 public:
 
     // Constructors
 
-        //- Copy construct addressing, shallow copy values list reference.
+        //- Copy construct addressing, shallow copy values list reference
         inline IndirectList(const UList<T>& values, const labelUList& addr);
 
-        //- Move construct addressing, shallow copy values list reference.
-        inline IndirectList(const UList<T>& values, List<label>&& addr);
+        //- Move construct addressing, shallow copy values list reference
+        inline IndirectList(const UList<T>& values, labelList&& addr);
 
-        //- Copy construct addressing, shallow copy values list reference.
+        //- Copy construct addressing, shallow copy values list reference
         inline IndirectList(const IndirectList<T>& list);
 
         //- Copy construct addressing, shallow copy values list reference
-        //- from UIndirectList
         inline explicit IndirectList(const UIndirectList<T>& list);
 
 
     // Member Functions
 
-        //- Return the list addressing
-        using UIndirectList<T>::addressing;
-
-        //- Reset the list addressing
-        using IndirectListAddressing::resetAddressing;
+        //- The list addressing
+        using IndirectListAddressing::addressing;
 
 
     // Member Operators
@@ -146,6 +86,11 @@ public:
         //- Assignment operator
         using UIndirectList<T>::operator=;
 
+        //- Deep copy values, Fatal if list sizes are not identical
+        void operator=(const IndirectList<T>& rhs)
+        {
+            this->copyList(rhs);
+        }
 };
 
 

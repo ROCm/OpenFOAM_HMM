@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -208,7 +208,8 @@ inline void Foam::List<T>::append(const UList<T>& list)
 
 
 template<class T>
-inline void Foam::List<T>::append(const UIndirectList<T>& list)
+template<class Addr>
+inline void Foam::List<T>::append(const IndirectListBase<T, Addr>& list)
 {
     label idx = this->size();
     const label n = list.size();

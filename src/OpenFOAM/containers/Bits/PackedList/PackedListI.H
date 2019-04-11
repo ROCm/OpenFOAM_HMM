@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -242,7 +242,11 @@ inline Foam::PackedList<Width>::PackedList(const labelUList& values)
 
 
 template<unsigned Width>
-inline Foam::PackedList<Width>::PackedList(const labelUIndList& values)
+template<class Addr>
+inline Foam::PackedList<Width>::PackedList
+(
+    const IndirectListBase<label, Addr>& values
+)
 :
     blocks_(num_blocks(values.size()), 0u),
     size_(values.size())

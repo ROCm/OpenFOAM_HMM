@@ -30,8 +30,6 @@ License
 #include "FixedList.H"
 #include "PtrList.H"
 #include "SLList.H"
-#include "IndirectList.H"
-#include "UIndirectList.H"
 #include "contiguous.H"
 #include <utility>
 
@@ -330,7 +328,8 @@ Foam::List<T>::List(const SLList<T>& list)
 
 
 template<class T>
-Foam::List<T>::List(const UIndirectList<T>& list)
+template<class Addr>
+Foam::List<T>::List(const IndirectListBase<T, Addr>& list)
 :
     UList<T>(nullptr, list.size())
 {
@@ -511,7 +510,8 @@ void Foam::List<T>::operator=(const SLList<T>& list)
 
 
 template<class T>
-void Foam::List<T>::operator=(const UIndirectList<T>& list)
+template<class Addr>
+void Foam::List<T>::operator=(const IndirectListBase<T, Addr>& list)
 {
     const label len = list.size();
 

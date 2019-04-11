@@ -75,7 +75,7 @@ inline Foam::SortableList<T>::SortableList(SortableList<T>&& lst)
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(const UList<T>& values)
+inline Foam::SortableList<T>::SortableList(const UList<T>& values)
 :
     List<T>(values)
 {
@@ -84,7 +84,7 @@ Foam::SortableList<T>::SortableList(const UList<T>& values)
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(List<T>&& values)
+inline Foam::SortableList<T>::SortableList(List<T>&& values)
 :
     List<T>(std::move(values))
 {
@@ -107,7 +107,7 @@ inline Foam::SortableList<T>::SortableList
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(std::initializer_list<T> values)
+inline Foam::SortableList<T>::SortableList(std::initializer_list<T> values)
 :
     List<T>(values)
 {
@@ -138,8 +138,8 @@ void Foam::SortableList<T>::sort()
 {
     Foam::sortedOrder(*this, indices_);
 
-    List<T> lst(*this, indices_); // Copy with indices for mapping
-    List<T>::transfer(lst);
+    List<T> list(*this, indices_); // Copy with indices for mapping
+    List<T>::transfer(list);
 }
 
 

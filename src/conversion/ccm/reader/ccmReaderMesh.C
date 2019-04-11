@@ -555,7 +555,7 @@ void Foam::ccm::reader::readCells
             }
         }
 
-        ccmLookupOrder.resetAddressing(std::move(addr));
+        ccmLookupOrder.addressing() = std::move(addr);
     }
 
 

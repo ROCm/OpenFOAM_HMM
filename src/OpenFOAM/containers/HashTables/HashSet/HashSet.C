@@ -84,7 +84,8 @@ Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& list)
 
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>::HashSet(const UIndirectList<Key>& list)
+template<class Addr>
+Foam::HashSet<Key, Hash>::HashSet(const IndirectListBase<Key, Addr>& list)
 :
     parent_type(2*list.size())
 {
@@ -177,9 +178,10 @@ inline Foam::label Foam::HashSet<Key, Hash>::insert
 
 
 template<class Key, class Hash>
+template<class Addr>
 inline  Foam::label Foam::HashSet<Key, Hash>::insert
 (
-    const UIndirectList<Key>& list
+    const IndirectListBase<Key, Addr>& list
 )
 {
     return insert(list.begin(), list.end());
@@ -230,9 +232,10 @@ inline Foam::label Foam::HashSet<Key, Hash>::unset
 
 
 template<class Key, class Hash>
+template<class Addr>
 inline Foam::label Foam::HashSet<Key, Hash>::unset
 (
-    const UIndirectList<Key>& list
+    const IndirectListBase<Key, Addr>& list
 )
 {
     return unset(list.begin(), list.end());

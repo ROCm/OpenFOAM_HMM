@@ -65,7 +65,7 @@ Description
 #define HashSet_H
 
 #include "HashTable.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -143,7 +143,8 @@ public:
         explicit HashSet(const UList<Key>& list);
 
         //- Construct from an indirect list
-        explicit HashSet(const UIndirectList<Key>& list);
+        template<class Addr>
+        explicit HashSet(const IndirectListBase<Key, Addr>& list);
 
         //- Construct from an initializer list of Key
         HashSet(std::initializer_list<Key> list);
@@ -222,7 +223,8 @@ public:
 
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
-        inline label insert(const UIndirectList<Key>& list);
+        template<class Addr>
+        inline label insert(const IndirectListBase<Key, Addr>& list);
 
         //- Same as insert (no value to overwrite)
         template<class InputIter>
@@ -251,7 +253,8 @@ public:
         }
 
         //- Same as insert (no value to overwrite)
-        inline label set(const UIndirectList<Key>& list)
+        template<class Addr>
+        inline label set(const IndirectListBase<Key, Addr>& list)
         {
             return insert(list);
         }
@@ -284,7 +287,8 @@ public:
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
-        inline label unset(const UIndirectList<Key>& list);
+        template<class Addr>
+        inline label unset(const IndirectListBase<Key, Addr>& list);
 
 
     // STL iterators

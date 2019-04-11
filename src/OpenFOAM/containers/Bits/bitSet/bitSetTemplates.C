@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,25 @@ Foam::bitSet::bitSet(const FixedList<label, N>& locations)
 
     setMany(locations.begin(), locations.end());
 }
+
+
+template<class Addr>
+Foam::bitSet::bitSet
+(
+    const bitSet& bitset,
+    const IndirectListBase<label, Addr>& addr
+)
+:
+    bitSet(addr.size())
+{
+    const label len = addr.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        set(i, bitset.get(addr[i]));
+    }
+}
+
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

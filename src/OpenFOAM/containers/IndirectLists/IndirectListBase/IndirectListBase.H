@@ -24,24 +24,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::UIndirectList
+    Foam::IndirectListBase
 
 Description
-    A List with indirect addressing.
-
-    Like IndirectList but does not store addressing.
-
-    Note the const_cast of the list values. This is so we can use it both
-    on const and non-const lists. Alternative would be to have a const_
-    variant etc.
+    Base for lists with indirect addressing, templated on the list contents
+    type and the addressing type. Storage for both values and addressing
+    is held outside of the class.
 
 SourceFiles
-    UIndirectListI.H
+    IndirectListBase.H
+    IndirectListBase.C
+    IndirectListBaseI.H
+    IndirectListBaseIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef UIndirectList_H
-#define UIndirectList_H
+#ifndef IndirectListBase_H
+#define IndirectListBase_H
 
 #include "List.H"
 
@@ -50,28 +49,34 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-template<class T> class UIndirectList;
-
-// Common list types
-typedef UIndirectList<bool> boolUIndList;       //!< UIndirectList of bools
-typedef UIndirectList<label> labelUIndList;     //!< UIndirectList of labels
-
 /*---------------------------------------------------------------------------*\
-                        Class UIndirectList Declaration
+                      Class IndirectListBase Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
-class UIndirectList
+template<class T, class Addr>
+class IndirectListBase
 {
-    // Private data
+    // Private Data
 
+        //- The list values
         UList<T>& values_;
-        const labelUList& addressing_;
+
+        //- Reference to the addressing for the list values
+        const Addr& addr_;
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Copy values The number of elements in the list
+        template<class ListType>
+        inline void copyList(const ListType& rhs);
+
 
 public:
 
-    // STL type definitions
+    // Type definitions (STL)
 
         //- Type of values the list contains.
         typedef T value_type;
@@ -100,43 +105,79 @@ public:
         //- Forward iterator with const access
         class const_iterator;
 
+        //- The addressing type (non-stl definition)
+        typedef Addr addressing_type;
+
 
     // Constructors
 
-        //- Copy construct from the values list and the addressing array
-        inline UIndirectList(const UList<T>& values, const labelUList& addr);
+        //- No null construct
+        IndirectListBase() = delete;
+
+        //- Store references to the values list and the addressing array
+        inline IndirectListBase(const UList<T>& values, const Addr& addr);
 
 
     // Member Functions
 
     // Access
 
-        //- Return the number of elements in the list
-        inline label size() const;
+        //- The number of elements in the list
+        inline label size() const
+        {
+            return addr_.size();
+        }
 
-        //- Return true if the list is empty (ie, size() is zero).
-        inline bool empty() const;
+        //- True if the list is empty (ie, size() is zero).
+        inline bool empty() const
+        {
+            return addr_.empty();
+        }
 
         //- True if all entries have identical values, and list is non-empty
         inline bool uniform() const;
 
-        //- Return the first element of the list.
-        inline T& first();
+        //- The first element of the list.
+        inline T& first()
+        {
+            return values_[addr_.first()];
+        }
 
-        //- Return first element of the list.
-        inline const T& first() const;
+        //- The first element of the list.
+        inline const T& first() const
+        {
+            return values_[addr_.first()];
+        }
 
-        //- Return the last element of the list.
-        inline T& last();
+        //- The last element of the list.
+        inline T& last()
+        {
+            return values_[addr_.last()];
+        }
 
-        //- Return the last element of the list.
-        inline const T& last() const;
+        //- The last element of the list.
+        inline const T& last() const
+        {
+            return values_[addr_.last()];
+        }
 
-        //- Return the complete list of values
-        inline const UList<T>& completeList() const;
+        //- The list of values (without addressing)
+        inline const UList<T>& values() const
+        {
+            return values_;
+        }
 
-        //- Return the list addressing
-        inline const List<label>& addressing() const;
+        //- The list of values (without addressing)
+        inline UList<T>& values()
+        {
+            return values_;
+        }
+
+        //- The addressing used for the list
+        inline const Addr& addressing() const
+        {
+            return addr_;
+        }
 
 
     // Search
@@ -162,26 +203,39 @@ public:
         //- Return the addressed elements as a List
         inline List<T> operator()() const;
 
-        //- Return non-const access to an element
+        //- Non-const access to an element in the list
         inline T& operator[](const label i);
 
-        //- Return const access to an element
+        //- Const access to an element in the list
         inline const T& operator[](const label i) const;
 
-        //- Copy assignment from a list of the addressed elements
-        inline void operator=(const UList<T>& rhs);
-
-        //- Copy assignment from a indirect list of the addressed elements
-        inline void operator=(const UIndirectList<T>& rhs);
-
-        //- Assignment of all entries to the given value
+        //- Assign all addressed elements to the given value
         inline void operator=(const T& val);
 
-        //- An iterator for an indirect list
+        //- Assignment of all entries to zero
+        inline void operator=(const zero);
+
+        //- Deep copy values from a list of the addressed elements
+        //  Fatal if list sizes are not identical
+        inline void operator=(const UList<T>& rhs);
+
+        //- Deep copy values from a list of the addressed elements
+        //  Fatal if list sizes are not identical
+        inline void operator=(const IndirectListBase<T, Addr>& rhs);
+
+        //- Deep copy values from a list of the addressed elements
+        //  Fatal if list sizes are not identical
+        template<class AnyAddr>
+        inline void operator=(const IndirectListBase<T, AnyAddr>& rhs);
+
+
+    // Iterators
+
+        //- A non-const iterator for an indirect list
         class iterator
         {
             typename UList<T>::pointer data_;
-            labelUList::const_iterator base_;
+            typename addressing_type::const_iterator iter_;
 
         public:
 
@@ -194,32 +248,32 @@ public:
             iterator
             (
                 UList<T>& list,
-                labelUList::const_iterator baseIter
+                typename addressing_type::const_iterator baseIter
             )
             :
                 data_(list.begin()),
-                base_(baseIter)
+                iter_(baseIter)
             {}
 
             reference operator*() const
             {
-                return data_[*base_];
+                return data_[*iter_];
             }
 
             iterator& operator++()
             {
-                ++base_;
+                ++iter_;
                 return *this;
             }
 
             bool operator==(iterator& rhs) const
             {
-                return base_ == rhs.base_;
+                return iter_ == rhs.iter_;
             }
 
             bool operator!=(iterator& rhs) const
             {
-                return (base_ != rhs.base_);
+                return (iter_ != rhs.iter_);
             }
         };
 
@@ -228,7 +282,7 @@ public:
         class const_iterator
         {
             typename UList<T>::const_pointer data_;
-            labelUList::const_iterator base_;
+            typename addressing_type::const_iterator iter_;
 
         public:
 
@@ -241,63 +295,63 @@ public:
             const_iterator
             (
                 const UList<T>& list,
-                labelUList::const_iterator baseIter
+                typename addressing_type::const_iterator baseIter
             )
             :
                 data_(list.begin()),
-                base_(baseIter)
+                iter_(baseIter)
             {}
 
             reference operator*() const
             {
-                return data_[*base_];
+                return data_[*iter_];
             }
 
             const_iterator& operator++()
             {
-                ++base_;
+                ++iter_;
                 return *this;
             }
 
             bool operator==(const_iterator& rhs) const
             {
-                return base_ == rhs.base_;
+                return iter_ == rhs.iter_;
             }
 
             bool operator!=(const_iterator& rhs) const
             {
-                return base_ != rhs.base_;
+                return iter_ != rhs.iter_;
             }
         };
 
 
-    // iterator (non-const)
+    // Iterator (non-const)
 
         //- Return an iterator at begin of list
         inline iterator begin()
         {
-            return iterator(values_, addressing_.cbegin());
+            return iterator(values_, addr_.cbegin());
         }
 
         //- Return an iterator at end of list
         inline iterator end()
         {
-            return iterator(values_, addressing_.cend());
+            return iterator(values_, addr_.cend());
         }
 
 
-    // iterator (const)
+    // Iterator (const)
 
         //- Return a const_iterator at begin of list
         inline const_iterator cbegin() const
         {
-            return const_iterator(values_, addressing_.cbegin());
+            return const_iterator(values_, addr_.cbegin());
         }
 
         //- Return a const_iterator at end of list
         inline const_iterator cend() const
         {
-            return const_iterator(values_, addressing_.cend());
+            return const_iterator(values_, addr_.cend());
         }
 
         //- Return a const_iterator at end of list
@@ -325,8 +379,8 @@ public:
 
 //- Write List to Ostream, as per UList::writeList() with default length.
 //  The default short-length is given by Detail::ListPolicy::short_length
-template<class T>
-Ostream& operator<<(Ostream& os, const UIndirectList<T>& list)
+template<class T, class Addr>
+Ostream& operator<<(Ostream& os, const IndirectListBase<T, Addr>& list)
 {
     return list.writeList(os, Detail::ListPolicy::short_length<T>::value);
 }
@@ -338,11 +392,11 @@ Ostream& operator<<(Ostream& os, const UIndirectList<T>& list)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "UIndirectListI.H"
+#include "IndirectListBaseI.H"
 
 #ifdef NoRepository
-    #include "UIndirectList.C"
-    #include "UIndirectListIO.C"
+    #include "IndirectListBase.C"
+    #include "IndirectListBaseIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
