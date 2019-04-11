@@ -1,5 +1,5 @@
 cpuInfo/cpuInfo.C
-cpuTime/cpuTime.C
+cpuTime/cpuTimePosix.C
 memInfo/memInfo.C
 
 signals/sigFpe.C

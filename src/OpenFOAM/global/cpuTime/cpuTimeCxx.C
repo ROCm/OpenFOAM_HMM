@@ -2,11 +2,9 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2014 OpenFOAM Foundation
--------------------------------------------------------------------------------
+-------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -25,35 +23,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cpuTime.H"
-#include <unistd.h>
+#include "cpuTimeCxx.H"
 
-// * * * * * * * * * * * * * * * Static Members  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-const long Foam::cpuTime::clockTicks_(sysconf(_SC_CLK_TCK));
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-double Foam::cpuTime::diff(const value_type& a, const value_type& b)
+inline double Foam::cpuTimeCxx::diff(const value_type& a, const value_type& b)
 {
-    return
-    (
-        double((a.tms_utime + a.tms_stime) - (b.tms_utime + b.tms_stime))
-      / clockTicks_
-    );
+    return std::difftime(a.value, b.value) / CLOCKS_PER_SEC;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cpuTime::value_type::value_type()
+Foam::cpuTimeCxx::value_type::value_type()
 {
     update();
 }
 
 
-Foam::cpuTime::cpuTime()
+Foam::cpuTimeCxx::cpuTimeCxx()
 :
     start_(),
     last_(start_)
@@ -62,27 +50,27 @@ Foam::cpuTime::cpuTime()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::cpuTime::value_type::update()
+void Foam::cpuTimeCxx::value_type::update()
 {
-    ::times(this);
+    value = std::clock();
 }
 
 
-void Foam::cpuTime::resetCpuTime()
+void Foam::cpuTimeCxx::resetCpuTime()
 {
     last_.update();
     start_ = last_;
 }
 
 
-double Foam::cpuTime::elapsedCpuTime() const
+double Foam::cpuTimeCxx::elapsedCpuTime() const
 {
     last_.update();
     return diff(last_, start_);
 }
 
 
-double Foam::cpuTime::cpuTimeIncrement() const
+double Foam::cpuTimeCxx::cpuTimeIncrement() const
 {
     const value_type prev(last_);
     last_.update();

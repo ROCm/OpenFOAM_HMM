@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::cpuTime
+    Foam::cpuTimePosix
 
 Description
     Starts timing CPU usage and return elapsed time from start.
@@ -33,12 +33,12 @@ See also
     clockTime
 
 SourceFiles
-    cpuTime.C
+    cpuTimePosix.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cpuTime_H
-#define cpuTime_H
+#ifndef cpuTimePosix_H
+#define cpuTimePosix_H
 
 #include <string>
 #include <ctime>
@@ -50,10 +50,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cpuTime Declaration
+                           Class cpuTimePosix Declaration
 \*---------------------------------------------------------------------------*/
 
-class cpuTime
+class cpuTimePosix
 {
     //- Time structure used, with additional methods
     struct value_type : tms
@@ -74,14 +74,11 @@ class cpuTime
         //- Last time when elapsedTime or timeIncrement was called
         mutable value_type last_;
 
-        //- Clock-ticks per second
-        static const long clockTicks_;
-
 
     // Private Member Functions
 
-        //- Difference between two times  (a - b)
-        static double diff(const value_type& a, const value_type& b);
+        //- Difference between two times (a - b)
+        inline static double diff(const value_type& a, const value_type& b);
 
 
 public:
@@ -89,7 +86,7 @@ public:
     // Constructors
 
         //- Construct with the current clock time
-        cpuTime();
+        cpuTimePosix();
 
 
     // Member Functions
