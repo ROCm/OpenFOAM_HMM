@@ -28,7 +28,7 @@ wmakeMpiLib()
         whichmpi="$objectsDir/using:$FOAM_MPI"
         whichdecomp="$objectsDir/using:$decompName"
         [ -e "$whichmpi" -a -e "$whichdecomp" ] || wclean $libName
-        echo "wmake $targetType $libName"
+        echo "wmake $targetType $libName (mpi=$WM_MPLIB)"
         wmake $targetType $libName
         mkdir -p "$objectsDir"
         touch "$whichdecomp" "$whichmpi"

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -27,7 +27,6 @@ License
 
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
-#include "OSspecific.H"
 #include "PstreamGlobals.H"
 #include "SubList.H"
 #include "allReduce.H"
@@ -35,7 +34,6 @@ License
 #include "collatedFileOperation.H"
 
 #include <mpi.h>
-
 #include <cstring>
 #include <cstdlib>
 #include <csignal>
