@@ -825,6 +825,12 @@ int main(int argc, char *argv[])
     {
         string line;
         inFile.getLine(line);
+
+        if (line.empty())
+        {
+            continue;
+        }
+
         IStringStream lineStr(line);
 
         word tag(lineStr);
