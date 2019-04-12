@@ -20,7 +20,7 @@ POSIX.C
  */
 fileMonitor.C
 
-#ifdef SunOS64
+#ifdef __sun__
 dummyPrintStack.C
 #else
 printStack.C

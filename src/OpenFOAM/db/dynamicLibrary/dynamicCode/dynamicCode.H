@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -223,7 +223,7 @@ public:
         //  Corresponds to codeRoot()/libSubDir()/lib\<codeName\>.so
         fileName libPath() const
         {
-            #ifdef darwin
+            #ifdef __APPLE__
             return codeRoot_/libSubDir_/"lib" + codeName_ + ".dylib";
             #else
             return codeRoot_/libSubDir_/"lib" + codeName_ + ".so";

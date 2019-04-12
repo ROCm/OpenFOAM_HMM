@@ -1,4 +1,4 @@
-CPP        = cpp -traditional-cpp $(GFLAGS) -Ddarwin
+CPP        = cpp -traditional-cpp $(GFLAGS)
 
 PROJECT_LIBS = -l$(WM_PROJECT) -ldl
 
@@ -10,8 +10,5 @@ include $(DEFAULT_RULES)/c++
 
 # Shared library extension (with '.' separator)
 EXT_SO  = .dylib
-
-# Define general os-type
-GFLAGS  += -Ddarwin
 
 # -----------------------------------------------------------------------------

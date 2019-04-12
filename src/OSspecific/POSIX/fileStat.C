@@ -30,7 +30,7 @@ License
 #include "timer.H"
 
 #include <unistd.h>
-#ifndef darwin
+#ifndef __APPLE__
     #include <sys/sysmacros.h>
 #endif
 
@@ -115,7 +115,7 @@ double Foam::fileStat::dmodTime() const
     (
         isValid_
       ?
-        #ifdef darwin
+        #ifdef __APPLE__
         (status_.st_mtime + 1e-9*status_.st_mtimespec.tv_nsec)
         #else
         (status_.st_mtime + 1e-9*status_.st_mtim.tv_nsec)

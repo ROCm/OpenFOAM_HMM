@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -319,7 +319,7 @@ Foam::fileName Foam::dynamicCode::codeRelPath() const
 
 Foam::fileName Foam::dynamicCode::libRelPath() const
 {
-    #ifdef darwin
+    #ifdef __APPLE__
     return codeRelPath()/libSubDir_/"lib" + codeName_ + ".dylib";
     #else
     return codeRelPath()/libSubDir_/"lib" + codeName_ + ".so";

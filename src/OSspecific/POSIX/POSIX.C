@@ -28,7 +28,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifdef solarisGcc
+#if defined(__sun__) && defined(__GNUC__)
+    // Not certain if this is still required
     #define _SYS_VNODE_H
 #endif
 
@@ -59,7 +60,7 @@ Description
 #include <netinet/in.h>
 #include <dlfcn.h>
 
-#ifdef darwin
+#ifdef __APPLE__
     #include <mach-o/dyld.h>
 #else
 
@@ -1660,7 +1661,7 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     }
     void* handle = ::dlopen(libName.c_str(), RTLD_LAZY|RTLD_GLOBAL);
 
-    #ifdef darwin
+    #ifdef __APPLE__
     // Re-try "libXX.so" as "libXX.dylib"
     if (!handle && libName.hasExt("so"))
     {
@@ -1753,7 +1754,7 @@ bool Foam::dlSymFound(void* handle, const std::string& symbol)
 }
 
 
-#ifndef darwin
+#ifndef __APPLE__
 static int collectLibsCallback
 (
     struct dl_phdr_info *info,
@@ -1772,7 +1773,7 @@ static int collectLibsCallback
 Foam::fileNameList Foam::dlLoaded()
 {
     DynamicList<fileName> libs;
-    #ifdef darwin
+    #ifdef __APPLE__
     for (uint32_t i=0; i < _dyld_image_count(); ++i)
     {
        libs.append(_dyld_get_image_name(i));

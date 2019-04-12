@@ -43,7 +43,7 @@ License
     #include <malloc.h>
 #endif
 
-#ifdef darwin
+#ifdef __APPLE__
     #include "feexceptErsatz.H"
 #endif
 
@@ -121,7 +121,7 @@ void* Foam::sigFpe::mallocNan(size_t size)
 
 void Foam::sigFpe::sigHandler(int)
 {
-    #if (defined(__linux__) && defined(__GNUC__)) || defined(darwin)
+    #if (defined(__linux__) && defined(__GNUC__)) || defined(__APPLE__)
 
     resetHandler("SIGFPE", SIGFPE);
 
@@ -129,7 +129,7 @@ void Foam::sigFpe::sigHandler(int)
     error::printStack(Perr);
     ::raise(SIGFPE);            // Throw signal (to old handler)
 
-    #endif  // (__linux__ && __GNUC__) || darwin
+    #endif  // (__linux__ && __GNUC__) || __APPLE__
 }
 
 
@@ -188,7 +188,7 @@ void Foam::sigFpe::set(bool verbose)
 {
     if (!sigActive_ && requested())
     {
-        #if (defined(__linux__) && defined(__GNUC__)) || defined(darwin)
+        #if (defined(__linux__) && defined(__GNUC__)) || defined(__APPLE__)
 
         feenableexcept
         (
@@ -244,7 +244,7 @@ void Foam::sigFpe::set(bool verbose)
 
 void Foam::sigFpe::unset(bool verbose)
 {
-    #if (defined(__linux__) && defined(__GNUC__)) || defined(darwin)
+    #if (defined(__linux__) && defined(__GNUC__)) || defined(__APPLE__)
     if (sigActive_)
     {
         if (verbose)

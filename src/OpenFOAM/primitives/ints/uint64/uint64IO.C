@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2016 OpenFOAM Foundation
@@ -124,7 +124,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const uint64_t val)
 }
 
 
-#ifdef darwin
+#ifdef __APPLE__
 Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long val)
 {
     os << uint64_t(val);

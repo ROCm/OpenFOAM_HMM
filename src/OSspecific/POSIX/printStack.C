@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -89,7 +89,7 @@ string pOpen(const string& cmd, label line=0)
 inline word addressToWord(const uintptr_t addr)
 {
     OStringStream os;
-    #ifdef darwin
+    #ifdef __APPLE__
     os << "0x" << hex << uint64_t(addr);
     #else
     os << "0x" << hex << addr;
@@ -121,7 +121,7 @@ void printSourceFileAndLine
     // Darwin addr2line implementation.
     // On other systems (Linux), only use relative addresses for libraries.
 
-    #ifndef darwin
+    #ifndef __APPLE__
     if (filename.hasExt("so"))
     #endif
     {

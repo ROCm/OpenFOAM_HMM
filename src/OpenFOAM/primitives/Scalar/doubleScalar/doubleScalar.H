@@ -109,6 +109,18 @@ inline Scalar func(const Scalar s)                              \
         std::cerr<< "No '" << #func << "' function\n";          \
         return 0;                                               \
     }
+#elif defined(__MINGW32__)
+    // Mingw: with '_' prefix
+    #define besselFunc(func)                                    \
+    inline Scalar func(const Scalar s)                          \
+    {                                                           \
+        return _##func(s);                                      \
+    }
+    #define besselFunc2(func)                                   \
+    inline Scalar func(const int n, const Scalar s)             \
+    {                                                           \
+        return _##func(n, s);                                   \
+    }
 #else
     #define besselFunc(func)                                    \
     inline Scalar func(const Scalar s)                          \
@@ -121,6 +133,7 @@ inline Scalar func(const Scalar s)                              \
         return ::func(n, s);                                    \
     }
 #endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

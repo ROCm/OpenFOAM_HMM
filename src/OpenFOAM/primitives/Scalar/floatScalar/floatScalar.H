@@ -109,8 +109,8 @@ inline Scalar func(const Scalar s)                              \
         std::cerr<< "No '" << #func << "' function\n";          \
         return 0;                                               \
     }
-#elif defined(darwin)
-    // No float version for darwin - use a cast.
+#elif defined(__APPLE__)
+    // Darwin: no float version (use a cast)
     #define besselFunc(func)                                    \
     inline Scalar func(const Scalar s)                          \
     {                                                           \
@@ -121,7 +121,18 @@ inline Scalar func(const Scalar s)                              \
     {                                                           \
         return Scalar(::func(n, double(s)));                    \
     }
-
+#elif defined(__MINGW32__)
+    // Mingw: with '_' prefix, no float version (use a cast)
+    #define besselFunc(func)                                    \
+    inline Scalar func(const Scalar s)                          \
+    {                                                           \
+        return _##func(s);                                      \
+    }
+    #define besselFunc2(func)                                   \
+    inline Scalar func(const int n, const Scalar s)             \
+    {                                                           \
+        return Scalar(_##func(n, double(s)));                   \
+    }
 #else
     // With 'f' (float) appended to the name
     #define besselFunc(func)                                    \
