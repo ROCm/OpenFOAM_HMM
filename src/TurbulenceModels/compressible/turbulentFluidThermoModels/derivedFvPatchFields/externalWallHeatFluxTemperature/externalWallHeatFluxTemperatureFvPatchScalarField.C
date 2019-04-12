@@ -411,14 +411,14 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
                     scalarField lambdaTa4(pow4((1 - TpLambda)*Ta));
 
                     hp += emissivity_*sigma.value()*(pow4(Ts) - lambdaTa4)/Tp;
-                    hpTa += sigma.value()*(emissivity_*lambdaTa4 + pow4(Ta));
+                    hpTa += emissivity_*sigma.value()*(lambdaTa4 + pow4(Ta));
                 }
                 else
                 {
                     // ... if there is no solid wall thermal resistance use
                     // the current wall temperature
                     hp += emissivity_*sigma.value()*pow3(Tp);
-                    hpTa += sigma.value()*pow4(Ta);
+                    hpTa += emissivity_*sigma.value()*pow4(Ta);
                 }
             }
 
@@ -454,20 +454,14 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
     mixedFvPatchScalarField::updateCoeffs();
 
-    if (debug)
-    {
-        const scalar Q = gSum(kappa(Tp)*patch().magSf()*snGrad());
-
-        Info<< patch().boundaryMesh().mesh().name() << ':'
-            << patch().name() << ':'
-            << internalField().name() << " :"
-            << " heat transfer rate:" << Q
-            << " wall temperature "
-            << " min:" << gMin(*this)
-            << " max:" << gMax(*this)
-            << " avg:" << gAverage(*this)
-            << endl;
-    }
+    DebugInfo
+        << patch().boundaryMesh().mesh().name() << ':' << patch().name() << ':'
+        << internalField().name() << " :"
+        << " heat transfer rate:" << gSum(kappa(Tp)*patch().magSf()*snGrad())
+        << " wall temperature "
+        << " min:" << gMin(*this)
+        << " max:" << gMax(*this)
+        << " avg:" << gAverage(*this) << nl;
 }
 
 
