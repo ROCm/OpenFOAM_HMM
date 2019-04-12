@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -34,16 +34,19 @@ then
     # Load once, but do not rely on this variable elsewhere
     WMAKE_SCRIPTS_SYSFUNCTIONS=loaded
 
-    # Static library extension. Default=.a
+    # Static library extension (default=".a")
     extLiba=".a"
 
-    # Shared library extension. Default=.so
+    # Shared library extension (default=".so")
+    extLibso=".so"
+
+    # Adjustments
     case "$(uname -s 2>/dev/null)" in
     Darwin)
         extLibso=".dylib"
         ;;
     *)
-        extLibso=".so"
+        ## Other. Eg, extLibso=".dll" or extLibso=".dll.a"
         ;;
     esac
 
@@ -59,7 +62,7 @@ then
     # Uses cached value from libso extension
     isWindows()
     {
-        test "$extLibso" = ".dll"
+        test "$extLibso" = ".dll" || "$extLibso" = ".dll.a"
     }
 
 

@@ -1,8 +1,8 @@
 #!/bin/sh
 # Allwmake with scan-build (clang)
 
-c_compiler="$(command -v $WM_CC)"
-cxx_compiler"$(command -v $WM_CXX)"
+c_compiler="$(command -v "$(wmake -show-c)")"
+cxx_compiler="$(command -v "$(wmake -show-cxx)")"
 
 set -x
 
