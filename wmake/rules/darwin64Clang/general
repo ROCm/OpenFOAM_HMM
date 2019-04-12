@@ -11,4 +11,7 @@ include $(DEFAULT_RULES)/c++
 # Shared library extension (with '.' separator)
 EXT_SO  = .dylib
 
+# Define general os-type
+GFLAGS  += -Ddarwin
+
 # -----------------------------------------------------------------------------

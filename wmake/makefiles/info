@@ -65,24 +65,32 @@ ext-so:
 compile-c:
 	@echo "$(COMP_C)"
 
-.PHONY: c
-c:
-	@echo "$(firstword $(cc))"
-
-.PHONY: cflags
-cflags:
-	@echo "$(wordlist 2,$(words $(COMPILE_C)), $(COMPILE_C))"
-
 .PHONY: compile-cxx
 compile-cxx:
 	@echo "$(COMPILE_CXX)"
+
+.PHONY: c
+c:
+	@echo "$(firstword $(cc))"
 
 .PHONY: cxx
 cxx:
 	@echo "$(firstword $(CC))"
 
+.PHONY: cflags
+cflags:
+	@echo "$(wordlist 2,$(words $(COMPILE_C)), $(COMPILE_C))"
+
 .PHONY: cxxflags
 cxxflags:
 	@echo "$(wordlist 2,$(words $(COMPILE_CXX)), $(COMPILE_CXX))"
+
+.PHONY: cflags-arch
+cflags-arch:
+	@echo "$(strip $(cARCH))"
+
+.PHONY: cxxflags-arch
+cxxflags-arch:
+	@echo "$(strip $(c++ARCH))"
 
 #----------------------------- vim: set ft=make: ------------------------------

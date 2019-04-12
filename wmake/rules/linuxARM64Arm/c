@@ -1,16 +1,18 @@
 SUFFIXES += .c
 
-cc          = armclang -mcpu=native
+cc          = armclang
+
+cARCH       = -mcpu=native
 
 cWARN       = -Wall
 
 include $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 
-cFLAGS      = $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -fPIC
+cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS) -fPIC
 
 ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
 
 LINK_LIBS   = $(cDBUG)
 
-LINKLIBSO   = $(cc) -shared -armpl
-LINKEXE     = $(cc) -Xlinker --add-needed -Xlinker -z -Xlinker nodefs -armpl
+LINKLIBSO   = $(cc) $(cARCH) -shared -armpl
+LINKEXE     = $(cc) $(cARCH) -Xlinker --add-needed -Xlinker -z -Xlinker nodefs -armpl

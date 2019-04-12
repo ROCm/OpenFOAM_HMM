@@ -2,6 +2,7 @@ SUFFIXES += .c
 
 cc          = gcc
 
+cARCH       =
 cDBUG       =
 cOPT        = -O2
 cWARN       = -Wall

@@ -2,6 +2,7 @@ SUFFIXES += .C .cc .cpp .cxx
 
 CC          = icpc -std=c++11
 
+c++ARCH     =
 c++DBUG     =
 c++OPT      = -O2
 ptFLAGS     = -DNoRepository
