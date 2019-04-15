@@ -104,7 +104,10 @@ bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
 template<class Mesh, template<class> class MeshObjectType, class Type>
 Foam::MeshObject<Mesh, MeshObjectType, Type>::~MeshObject()
 {
-    MeshObjectType<Mesh>::release();
+    // We should not do a 'release' at this point since that will upset
+    // the destructor of regIOobject itself (which gets called after this).
+    // This now would no longer have the owned-by-registry setting so
+    // will not clean up after itself
 }
 
 
