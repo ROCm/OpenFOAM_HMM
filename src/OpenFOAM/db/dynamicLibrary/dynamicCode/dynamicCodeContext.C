@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -124,11 +124,16 @@ Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 void Foam::dynamicCodeContext::addLineDirective
 (
     string& code,
-    const label lineNum,
+    label lineNum,
     const fileName& name
 )
 {
-    code = "#line " + Foam::name(lineNum + 1) + " \"" + name + "\"\n" + code;
+    ++lineNum;  // Change from 0-based to 1-based
+
+    if (lineNum > 0 && !name.empty())
+    {
+        code = "#line " + Foam::name(lineNum) + " \"" + name + "\"\n" + code;
+    }
 }
 
 
