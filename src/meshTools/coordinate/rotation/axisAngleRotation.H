@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ Note
     The rotation axis will be normalized internally.
 
 SourceFiles
-    axisAngle.C
+    axisAngleRotation.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -110,6 +110,9 @@ public:
 
         //- Construct from axis and angle
         axisAngle(const vector& axis, scalar angle, bool degrees);
+
+        //- Construct from x/y/z axis enumeration and angle
+        axisAngle(const vector::components axis, scalar angle, bool degrees);
 
         //- Construct from dictionary
         explicit axisAngle(const dictionary& dict);
