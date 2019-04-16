@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -152,12 +152,18 @@ bool Foam::IOobject::fileNameComponents
 
         name = word::validate(path);
     }
-    else if (first == 0)
+    else if
+    (
+        first == 0
+        #ifdef _WIN32
+     || (first == 2 && path[1] == ':')  // Eg, d:/path
+        #endif
+    )
     {
         // Absolute path (starts with '/')
         // => no local
 
-        instance = path.substr(0, last);
+        instance = path.substr(first, last);
 
         const std::string ending = path.substr(last+1);
         nameLen = ending.size();  // The raw length of name

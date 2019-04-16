@@ -60,8 +60,20 @@ Foam::fileName Foam::fileName::validate
 
     std::string::size_type len = 0;
 
+    auto iter = s.cbegin();
+
+    #ifdef _WIN32
+    // Preserve UNC \\server-name\...
+    if (s.length() > 2 && s[0] == '\\' && s[1] == '\\')
+    {
+        len += 2;
+        ++iter;
+        ++iter;
+    }
+    #endif
+
     char prev = 0;
-    for (auto iter = s.cbegin(); iter != s.cend(); ++iter)
+    for (/*nil*/; iter != s.cend(); ++iter)
     {
         char c = *iter;
 
@@ -73,6 +85,9 @@ Foam::fileName Foam::fileName::validate
         {
             c = '/';
         }
+
+        // Could explicitly allow space character or rely on
+        // allowSpaceInFileName via fileName::valid()
 
         if (fileName::valid(c))
         {

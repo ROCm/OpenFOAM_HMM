@@ -136,7 +136,18 @@ inline bool Foam::fileName::isAbsolute(const std::string& str)
 {
     return
     (
-        !str.empty() && str[0] == '/'
+        (!str.empty() && str[0] == '/')
+        #ifdef _WIN32
+        ||
+        (
+            // Eg, d:/path or \\machine/path
+            (str.length() > 2) &&
+            (
+                (str[1] == ':'  && str[2] == '/')
+             || (str[0] == '\\' && str[1] == '\\')
+            )
+        )
+        #endif
     );
 }
 
