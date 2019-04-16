@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,6 +99,12 @@ namespace Foam
         //- Test if the patch string appears to be in use,
         //- which is when it is defined (non-zero).
         bool patched();
+
+        //- Extract label size (in bytes) from "label=" tag in string
+        unsigned labelByteSize(const std::string& str);
+
+        //- Extract scalar size (in bytes) from "scalar=" tag in string
+        unsigned scalarByteSize(const std::string& str);
 
         //- Print information about version, build, arch to Info
         //

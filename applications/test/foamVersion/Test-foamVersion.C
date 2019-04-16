@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,17 @@ Description
 #include "IOstreams.H"
 
 using namespace Foam;
+
+
+// Test extraction
+void testExtraction(const std::string& str)
+{
+    Info<< "Extract: " << str << " =>"
+        << " label: " << foamVersion::labelByteSize(str) << " bytes"
+        << " scalar: " << foamVersion::scalarByteSize(str) << " bytes"
+        << nl;
+}
+
 
 int main()
 {
@@ -69,6 +80,29 @@ int main()
         << "\nVerify memory addesses are identical:" << nl
         << "macro     " << long(Foam::FOAMversion) << nl
         << "namespace " << long(&(foamVersion::version[0])) << nl;
+
+
+    // Test extraction
+    {
+        Info<< "\nTest size extraction routines" << nl;
+
+        for
+        (
+            const std::string& str :
+            {
+                "MSB;label=32;scalar=64",
+                "LSB;label=64;scalar=32",
+                "LSB;label=;scalar=junk",
+                "LSB;label==;scalar=128",
+                "",
+                "LSB;label;scalar",
+                "LSB label=32 scalar=64",
+            }
+        )
+        {
+            testExtraction(str);
+        }
+    }
 
     Info
         << "\nEnd\n" << endl;

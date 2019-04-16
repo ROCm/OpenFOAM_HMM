@@ -267,7 +267,9 @@ Foam::IOobject::IOobject
     wOpt_(wo),
     registerObject_(registerObject),
     globalObject_(false),
-    objState_(GOOD)
+    objState_(GOOD),
+    labelByteSize_(sizeof(Foam::label)),
+    scalarByteSize_(sizeof(Foam::scalar))
 {
     if (objectRegistry::debug)
     {
@@ -301,7 +303,9 @@ Foam::IOobject::IOobject
     wOpt_(wo),
     registerObject_(registerObject),
     globalObject_(globalObject),
-    objState_(GOOD)
+    objState_(GOOD),
+    labelByteSize_(sizeof(Foam::label)),
+    scalarByteSize_(sizeof(Foam::scalar))
 {
     if (objectRegistry::debug)
     {
@@ -333,7 +337,9 @@ Foam::IOobject::IOobject
     wOpt_(wo),
     registerObject_(registerObject),
     globalObject_(globalObject),
-    objState_(GOOD)
+    objState_(GOOD),
+    labelByteSize_(sizeof(Foam::label)),
+    scalarByteSize_(sizeof(Foam::scalar))
 {
     if (!fileNameComponents(path, instance_, local_, name_))
     {
@@ -368,7 +374,9 @@ Foam::IOobject::IOobject
     wOpt_(io.wOpt_),
     registerObject_(io.registerObject_),
     globalObject_(io.globalObject_),
-    objState_(io.objState_)
+    objState_(io.objState_),
+    labelByteSize_(io.labelByteSize_),
+    scalarByteSize_(io.scalarByteSize_)
 {}
 
 
@@ -388,7 +396,9 @@ Foam::IOobject::IOobject
     wOpt_(io.wOpt_),
     registerObject_(io.registerObject_),
     globalObject_(io.globalObject_),
-    objState_(io.objState_)
+    objState_(io.objState_),
+    labelByteSize_(io.labelByteSize_),
+    scalarByteSize_(io.scalarByteSize_)
 {}
 
 

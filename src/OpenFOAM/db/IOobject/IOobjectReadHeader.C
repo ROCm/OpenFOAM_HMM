@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -27,6 +27,7 @@ License
 
 #include "IOobject.H"
 #include "dictionary.H"
+#include "foamVersion.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -93,6 +94,20 @@ bool Foam::IOobject::readHeader(Istream& is)
 
         // The note entry is optional
         headerDict.readIfPresent("note", note_);
+
+        labelByteSize_ = sizeof(Foam::label);
+        scalarByteSize_ = sizeof(Foam::scalar);
+
+        // The arch information is optional
+        string arch;
+        if (headerDict.readIfPresent("arch", arch))
+        {
+            unsigned val = foamVersion::labelByteSize(arch);
+            if (val) labelByteSize_ = val;
+
+            val = foamVersion::scalarByteSize(arch);
+            if (val) scalarByteSize_ = val;
+        }
     }
     else
     {
