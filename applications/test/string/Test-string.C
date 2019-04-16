@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -40,6 +40,7 @@ Description
 #include "Switch.H"
 #include "fileName.H"
 #include "stringList.H"
+#include "stringOps.H"
 
 using namespace Foam;
 
@@ -132,7 +133,8 @@ int main(int argc, char *argv[])
             string output(stringOps::expand(input));
 
             Info<< "input:  " << input  << nl
-                << "expand: " << output << nl << nl;
+                << "expand: " << output << nl
+                << "split: " << stringOps::split(output, "/") << nl << nl;
         }
     }
 

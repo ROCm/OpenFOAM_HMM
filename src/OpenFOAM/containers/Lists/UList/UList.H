@@ -58,6 +58,7 @@ SourceFiles
 #include <initializer_list>
 #include <iterator>
 #include <type_traits>
+#include <vector>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -567,6 +568,10 @@ Ostream& operator<<(Ostream& os, const UList<T>& list)
     return list.writeList(os, Detail::ListPolicy::short_length<T>::value);
 }
 
+//- Write std::vector to Ostream
+template<class T>
+Ostream& operator<<(Ostream& os, const std::vector<T>& list);
+
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
@@ -666,6 +671,7 @@ struct sizeOp
 
 #ifdef NoRepository
     #include "UList.C"
+    #include "stdVectorIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
