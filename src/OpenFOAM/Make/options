@@ -1,3 +1,8 @@
+/* Preclude any possible issues if WM_PROJECT == OpenFOAM */
+ifeq ($(WM_PROJECT),OpenFOAM)
+    PROJECT_LIBS =
+endif
+
 EXE_INC = \
     -I$(OBJECTS_DIR)
 

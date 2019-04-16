@@ -32,13 +32,13 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# The Makefile use a POSIX shell
+# Use POSIX shell
 #------------------------------------------------------------------------------
 
-SHELL      = /bin/sh
+SHELL   = /bin/sh
 
 #------------------------------------------------------------------------------
-# Unset suffices list (suffix rules are not used)
+# No default suffix rules used
 #------------------------------------------------------------------------------
 
 .SUFFIXES:
@@ -62,10 +62,10 @@ include $(GENERAL_RULES)/general
 .PHONY: all clean
 
 all:  $(WMAKE_BIN)/dirToString $(WMAKE_BIN)/wmkdep $(WMAKE_BIN)/wmkdepend
-	@echo built wmake-bin for $(WM_ARCH)$(WM_COMPILER)
+	@echo "built wmake-bin for $(WM_ARCH)$(WM_COMPILER)"
 
 clean:
-	@echo clean wmake-bin for $(WM_ARCH)$(WM_COMPILER)
+	@echo "clean wmake-bin for $(WM_ARCH)$(WM_COMPILER)"
 	@rm -rf $(WMAKE_BIN) 2>/dev/null
 	@rmdir $(shell dirname $(WMAKE_BIN)) 2>/dev/null || true
 

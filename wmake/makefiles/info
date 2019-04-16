@@ -19,7 +19,7 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# Use POSIX shell. Default to POSIX for the OS.
+# Use POSIX shell
 #------------------------------------------------------------------------------
 
 SHELL   = /bin/sh
@@ -63,7 +63,7 @@ ext-so:
 
 .PHONY: compile-c
 compile-c:
-	@echo "$(COMP_C)"
+	@echo "$(COMPILE_C)"
 
 .PHONY: compile-cxx
 compile-cxx:

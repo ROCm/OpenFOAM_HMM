@@ -38,7 +38,7 @@ endif
 
 
 #------------------------------------------------------------------------------
-# Set the directory containing the wmake scripts
+# Directory containing the wmake scripts
 #------------------------------------------------------------------------------
 
 WM_SCRIPTS      = $(WM_DIR)/scripts
