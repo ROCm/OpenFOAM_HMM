@@ -470,7 +470,7 @@ bool Foam::objectRegistry::writeObject
                 << name() << " : Considering writing object "
                 << iter.key()
                 << " of type " << iter->type()
-                << " with writeOpt " << iter->writeOpt()
+                << " with writeOpt " << static_cast<char>(iter->writeOpt())
                 << " to file " << iter->objectPath()
                 << endl;
         }
