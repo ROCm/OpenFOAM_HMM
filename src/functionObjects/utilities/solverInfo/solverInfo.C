@@ -110,41 +110,8 @@ void Foam::functionObjects::solverInfo::createResidualField
             );
 
         fieldPtr->store();
-    }
-}
 
-
-void Foam::functionObjects::solverInfo::writeResidualField
-(
-    const word& fieldName
-) const
-{
-    const word residualName("initialResidual:" + fieldName);
-
-    const auto* residualPtr = mesh_.findObject<IOField<scalar>>(residualName);
-
-    if (residualPtr)
-    {
-        volScalarField residual
-        (
-            IOobject
-            (
-                residualName,
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchField<scalar>::typeName
-        );
-
-        residual.primitiveFieldRef() = *residualPtr;
-        residual.correctBoundaryConditions();
-
-        residual.write();
+        residualFieldNames_.insert(residualName);
     }
 }
 
@@ -162,6 +129,7 @@ Foam::functionObjects::solverInfo::solverInfo
     writeFile(obr_, name, typeName, dict),
     fieldSet_(mesh_),
     writeResidualFields_(false),
+    residualFieldNames_(),
     initialised_(false)
 {
     read(dict);
@@ -174,10 +142,14 @@ bool Foam::functionObjects::solverInfo::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict))
     {
+        initialised_ = false;
+
         fieldSet_.read(dict);
 
         writeResidualFields_ =
             dict.lookupOrDefault("writeResidualFields", false);
+
+        residualFieldNames_.clear();
 
         return true;
     }
@@ -209,24 +181,54 @@ bool Foam::functionObjects::solverInfo::execute()
         initialised_ = true;
     }
 
+    writeTime(file());
+
+    for (const word& fieldName : fieldSet_.selectionNames())
+    {
+        updateSolverInfo<scalar>(fieldName);
+        updateSolverInfo<vector>(fieldName);
+        updateSolverInfo<sphericalTensor>(fieldName);
+        updateSolverInfo<symmTensor>(fieldName);
+        updateSolverInfo<tensor>(fieldName);
+    }
+
+    file() << endl;
+
     return true;
 }
 
 
 bool Foam::functionObjects::solverInfo::write()
 {
-    writeTime(file());
-
-    for (const word& fieldName : fieldSet_.selectionNames())
+    for (const word& residualName : residualFieldNames_)
     {
-        writeSolverInfo<scalar>(fieldName);
-        writeSolverInfo<vector>(fieldName);
-        writeSolverInfo<sphericalTensor>(fieldName);
-        writeSolverInfo<symmTensor>(fieldName);
-        writeSolverInfo<tensor>(fieldName);
-    }
+        const auto* residualPtr =
+            mesh_.findObject<IOField<scalar>>(residualName);
 
-    file() << endl;
+        if (residualPtr)
+        {
+            volScalarField residual
+            (
+                IOobject
+                (
+                    residualName,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                mesh_,
+                dimensionedScalar(dimless, Zero),
+                zeroGradientFvPatchField<scalar>::typeName
+            );
+
+            residual.primitiveFieldRef() = *residualPtr;
+            residual.correctBoundaryConditions();
+
+            residual.write();
+        }
+    }
 
     return true;
 }

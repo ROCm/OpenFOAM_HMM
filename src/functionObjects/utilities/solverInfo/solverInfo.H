@@ -107,6 +107,9 @@ protected:
         //- Flag to write the residual as a vol field
         bool writeResidualFields_;
 
+        //- Names of (result) residual fields
+        wordHashSet residualFieldNames_;
+
         //- Initialisation flag
         bool initialised_;
 
@@ -119,9 +122,6 @@ protected:
         //- Create and store a residual field on the mesh database
         void createResidualField(const word& fieldName);
 
-        //- Write a residual field
-        void writeResidualField(const word& fieldName) const;
-
         //- Output file header information per primitive type value
         template<class Type>
         void writeFileHeader(Ostream& os, const word& fileName) const;
@@ -132,7 +132,7 @@ protected:
 
         //- Calculate the solver information
         template<class Type>
-        void writeSolverInfo(const word& fieldName);
+        void updateSolverInfo(const word& fieldName);
 
 
 private:

@@ -105,7 +105,7 @@ void Foam::functionObjects::solverInfo::initialiseResidualField
 
 
 template<class Type>
-void Foam::functionObjects::solverInfo::writeSolverInfo(const word& fieldName)
+void Foam::functionObjects::solverInfo::updateSolverInfo(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
     typedef typename pTraits<Type>::labelType labelType;
@@ -150,8 +150,6 @@ void Foam::functionObjects::solverInfo::writeSolverInfo(const word& fieldName)
                     setResult(resultName + "_initial", ri);
                     setResult(resultName + "_final", rf);
                     setResult(resultName + "_iters", n);
-
-                    writeResidualField(resultName);
                 }
             }
 
