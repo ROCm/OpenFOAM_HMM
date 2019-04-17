@@ -106,8 +106,8 @@ Foam::MeshObject<Mesh, MeshObjectType, Type>::~MeshObject()
 {
     // We should not do a 'release' at this point since that will upset
     // the destructor of regIOobject itself (which gets called after this).
-    // This now would no longer have the owned-by-registry setting so
-    // will not clean up after itself
+    // However this is only a problem for Time-based MeshObject.
+    MeshObjectType<Mesh>::release();
 }
 
 
