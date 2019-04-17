@@ -205,7 +205,7 @@ public:
         // Access
 
             //- Return the solution dictionary
-            inline const dictionary dict() const;
+            virtual const dictionary dict() const;
 
             //- Current corrector loop index
             inline label corr() const;
