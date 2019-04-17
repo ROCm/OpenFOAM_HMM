@@ -79,6 +79,11 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
 
     const word schemeName(schemeData);
 
+    if (fv::debug)
+    {
+        InfoInFunction << "schemeName:" << schemeName << endl;
+    }
+
     auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
     if (!cstrIter.found())
