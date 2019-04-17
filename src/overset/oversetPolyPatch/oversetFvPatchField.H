@@ -135,8 +135,10 @@ public:
             //- Initialise the evaluation of the patch field
             virtual void initEvaluate(const Pstream::commsTypes commsType);
 
+            using LduInterfaceField<Type>::initInterfaceMatrixUpdate;
+
             //- Initialise neighbour matrix update. Add
-            //  or subtract coupled contributions to matrix
+            //- or subtract coupled contributions to matrix
             virtual void initInterfaceMatrixUpdate
             (
                 scalarField&,
