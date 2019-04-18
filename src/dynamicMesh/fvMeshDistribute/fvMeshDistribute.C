@@ -1913,11 +1913,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // Find out schedule
     // ~~~~~~~~~~~~~~~~~
 
-    labelListList nSendCells(Pstream::nProcs());
-    nSendCells[Pstream::myProcNo()] = countCells(distribution);
-    Pstream::gatherList(nSendCells);
-    Pstream::scatterList(nSendCells);
-
+    labelList nSendCells(countCells(distribution));
+    labelList nRevcCells(Pstream::nProcs());
+    Pstream::allToAll(nSendCells, nRevcCells);
 
     // Allocate buffers
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
@@ -1929,13 +1927,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     bool oldParRun = UPstream::parRun();
     UPstream::parRun() = false;
 
-    forAll(nSendCells[Pstream::myProcNo()], recvProc)
+    forAll(nSendCells, recvProc)
     {
-        if
-        (
-            recvProc != Pstream::myProcNo()
-         && nSendCells[Pstream::myProcNo()][recvProc] > 0
-        )
+        if (recvProc != Pstream::myProcNo() && nSendCells[recvProc] > 0)
         {
             // Send to recvProc
 
@@ -1944,7 +1938,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 Pout<< nl
                     << "SUBSETTING FOR DOMAIN " << recvProc
                     << " cells to send:"
-                    << nSendCells[Pstream::myProcNo()][recvProc]
+                    << nSendCells[recvProc]
                     << nl << endl;
             }
 
@@ -2261,21 +2255,17 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     oldParRun = UPstream::parRun();
     UPstream::parRun() = false;
 
-    forAll(nSendCells, sendProc)
+    forAll(nRevcCells, sendProc)
     {
         // Did processor sendProc send anything to me?
-        if
-        (
-            sendProc != Pstream::myProcNo()
-         && nSendCells[sendProc][Pstream::myProcNo()] > 0
-        )
+        if (sendProc != Pstream::myProcNo() && nRevcCells[sendProc] > 0)
         {
             if (debug)
             {
                 Pout<< nl
                     << "RECEIVING FROM DOMAIN " << sendProc
                     << " cells to receive:"
-                    << nSendCells[sendProc][Pstream::myProcNo()]
+                    << nRevcCells[sendProc]
                     << nl << endl;
             }
 
