@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -91,67 +91,49 @@ Foam::fv::gradScheme<Type>::grad
     typedef typename outerProduct<vector, Type>::type GradType;
     typedef GeometricField<GradType, fvPatchField, volMesh> GradFieldType;
 
-    if (!this->mesh().changing() && this->mesh().cache(name))
+    GradFieldType* pgGrad =
+        mesh().objectRegistry::template getObjectPtr<GradFieldType>(name);
+
+    if (!this->mesh().cache(name) || this->mesh().changing())
     {
-        if (!mesh().objectRegistry::template foundObject<GradFieldType>(name))
-        {
-            solution::cachePrintMessage("Calculating and caching", name, vsf);
-            tmp<GradFieldType> tgGrad = calcGrad(vsf, name);
-            regIOobject::store(tgGrad.ptr());
-        }
-
-        solution::cachePrintMessage("Retrieving", name, vsf);
-        GradFieldType& gGrad =
-            mesh().objectRegistry::template lookupObjectRef<GradFieldType>
-            (
-                name
-            );
-
-        if (gGrad.upToDate(vsf))
-        {
-            return gGrad;
-        }
-        else
+        // Delete any old occurrences to avoid double registration
+        if (pgGrad && pgGrad->ownedByRegistry())
         {
             solution::cachePrintMessage("Deleting", name, vsf);
-            gGrad.release();
-            delete &gGrad;
-
-            solution::cachePrintMessage("Recalculating", name, vsf);
-            tmp<GradFieldType> tgGrad = calcGrad(vsf, name);
-
-            solution::cachePrintMessage("Storing", name, vsf);
-            regIOobject::store(tgGrad.ptr());
-            GradFieldType& gGrad =
-                mesh().objectRegistry::template lookupObjectRef<GradFieldType>
-                (
-                    name
-                );
-
-            return gGrad;
-        }
-    }
-    else
-    {
-        if (mesh().objectRegistry::template foundObject<GradFieldType>(name))
-        {
-            GradFieldType& gGrad =
-                mesh().objectRegistry::template lookupObjectRef<GradFieldType>
-                (
-                    name
-                );
-
-            if (gGrad.ownedByRegistry())
-            {
-                solution::cachePrintMessage("Deleting", name, vsf);
-                gGrad.release();
-                delete &gGrad;
-            }
+            pgGrad->release();
+            delete pgGrad;
         }
 
         solution::cachePrintMessage("Calculating", name, vsf);
         return calcGrad(vsf, name);
     }
+
+
+    if (!pgGrad)
+    {
+        solution::cachePrintMessage("Calculating and caching", name, vsf);
+
+        pgGrad = calcGrad(vsf, name).ptr();
+        regIOobject::store(pgGrad);
+    }
+    else
+    {
+        if (pgGrad->upToDate(vsf))
+        {
+            solution::cachePrintMessage("Reusing", name, vsf);
+        }
+        else
+        {
+            solution::cachePrintMessage("Updating", name, vsf);
+            pgGrad->release();
+            delete pgGrad;
+
+            pgGrad = calcGrad(vsf, name).ptr();
+            regIOobject::store(pgGrad);
+        }
+    }
+
+    return *pgGrad;
 }
 
 
