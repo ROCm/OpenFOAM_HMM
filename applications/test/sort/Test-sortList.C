@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -65,6 +65,10 @@ int main(int argc, char *argv[])
 
     list1r.reverseSort();
     Info<< "reverse ..." << nl;
+    printInfo(list1r);
+
+    list1r.partialSort(list1r.size()/2);
+    Info<< "partial sorted ..." << nl;
     printInfo(list1r);
 
     SortableList<label> list2(orig);

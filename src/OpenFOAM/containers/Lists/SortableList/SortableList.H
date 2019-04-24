@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -129,6 +129,12 @@ public:
         //- Reverse (stable) sort the list
         //  Resizes the indices as required
         void reverseSort();
+
+        //- Forward partial sort the list until the middle point
+        void partialSort(label n, label start=0);
+
+        //- Reverse partial sort the list until the middle point
+        void partialReverseSort(label n, label start=0);
 
         //- Swap content with another SortableList in constant time
         inline void swap(SortableList<T>& lst);
