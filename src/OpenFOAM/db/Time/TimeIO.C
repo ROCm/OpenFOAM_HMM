@@ -655,7 +655,11 @@ bool Foam::Time::writeObject
             // Does the writeTime trigger purging?
             if (writeTime_ && purgeWrite_)
             {
-                if (previousWriteTimes_.top() != timeName())
+                if
+                (
+                    previousWriteTimes_.empty()
+                 || previousWriteTimes_.top() != timeName()
+                )
                 {
                     previousWriteTimes_.push(timeName());
                 }
