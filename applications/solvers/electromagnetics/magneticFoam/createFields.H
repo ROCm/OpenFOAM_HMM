@@ -37,7 +37,7 @@
             mesh
         ),
         mesh,
-        1
+        dimensionedScalar("one", dimless, 1.0)
     );
 
     surfaceScalarField Mrf
@@ -51,6 +51,7 @@
         mesh,
         dimensionedScalar(dimensionSet(0, 1, 0, 0, 0, 1, 0), Zero)
     );
+    Mrf.setOriented(true);
 
     forAll(magnets, i)
     {
