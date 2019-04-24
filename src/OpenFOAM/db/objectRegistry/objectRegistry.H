@@ -452,14 +452,21 @@ public:
 
     // Edit
 
+        //- Add a regIOobject to registry. A nullptr is ignored.
+        bool checkIn(regIOobject* io) const;
+
         //- Add a regIOobject to registry
         bool checkIn(regIOobject& io) const;
 
-        //- Remove a regIOobject from registry and frees memory if the
-        //- object is ownedByRegistry
+        //- Remove a regIOobject from registry and free memory if the
+        //- object is ownedByRegistry. A nullptr is ignored.
+        bool checkOut(regIOobject* io) const;
+
+        //- Remove a regIOobject from registry and free memory if the
+        //- object is ownedByRegistry.
         bool checkOut(regIOobject& io) const;
 
-        //- Remove a regIOobject by name from registry and frees memory if the
+        //- Remove a regIOobject by name from registry and free memory if the
         //- object is ownedByRegistry
         bool checkOut(const word& key) const;
 

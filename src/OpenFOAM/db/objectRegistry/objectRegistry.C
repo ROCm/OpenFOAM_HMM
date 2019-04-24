@@ -239,25 +239,27 @@ Foam::label Foam::objectRegistry::getEvent() const
 }
 
 
-bool Foam::objectRegistry::checkIn(regIOobject& io) const
+bool Foam::objectRegistry::checkIn(regIOobject* io) const
 {
+    if (!io) return false;
+
     if (objectRegistry::debug)
     {
-        Pout<< "objectRegistry::checkIn(regIOobject&) : "
-            << name() << " : checking in " << io.name()
-            << " of type " << io.type()
+        Pout<< "objectRegistry::checkIn : "
+            << name() << " : checking in " << io->name()
+            << " of type " << io->type()
             << endl;
     }
 
     objectRegistry& obr = const_cast<objectRegistry&>(*this);
 
-    bool ok = obr.insert(io.name(), &io);
+    bool ok = obr.insert(io->name(), io);
 
     if (!ok && objectRegistry::debug)
     {
         WarningInFunction
             << name() << " : attempted to checkIn object with name "
-            << io.name() << " which was already checked in"
+            << io->name() << " which was already checked in"
             << endl;
     }
 
@@ -265,22 +267,25 @@ bool Foam::objectRegistry::checkIn(regIOobject& io) const
 }
 
 
-bool Foam::objectRegistry::checkOut(regIOobject& io) const
+bool Foam::objectRegistry::checkOut(regIOobject* io) const
 {
+    if (!io) return false;
+
     objectRegistry& obr = const_cast<objectRegistry&>(*this);
 
-    iterator iter = obr.find(io.name());
+    iterator iter = obr.find(io->name());
 
     if (iter.found())
     {
         if (objectRegistry::debug)
         {
-            Pout<< "objectRegistry::checkOut(regIOobject&) : "
-                << name() << " : checking out " << io.name()
+            Pout<< "objectRegistry::checkOut : "
+                << name() << " : checking out " << io->name()
+                << " of type " << io->type()
                 << endl;
         }
 
-        if (iter.val() != &io)
+        if (iter.val() != io)
         {
             if (objectRegistry::debug)
             {
@@ -299,12 +304,24 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
 
     if (objectRegistry::debug)
     {
-        Pout<< "objectRegistry::checkOut(regIOobject&) : "
-            << name() << " : could not find " << io.name() << " in registry"
+        Pout<< "objectRegistry::checkOut : "
+            << name() << " : could not find " << io->name() << " in registry"
             << endl;
     }
 
     return false;
+}
+
+
+bool Foam::objectRegistry::checkIn(regIOobject& io) const
+{
+    return checkIn(&io);
+}
+
+
+bool Foam::objectRegistry::checkOut(regIOobject& io) const
+{
+    return checkOut(&io);
 }
 
 
