@@ -28,6 +28,7 @@ License
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
 #include "PstreamGlobals.H"
+#include "profilingPstream.H"
 #include "SubList.H"
 #include "allReduce.H"
 #include "int.H"
@@ -501,6 +502,8 @@ void Foam::UPstream::allToAll
     }
     else
     {
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Alltoall
@@ -522,6 +525,8 @@ void Foam::UPstream::allToAll
                 << " on communicator " << communicator
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addAllToAllTime();
     }
 }
 
@@ -572,6 +577,8 @@ void Foam::UPstream::allToAll
     }
     else
     {
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Alltoallv
@@ -594,6 +601,8 @@ void Foam::UPstream::allToAll
                 << " communicator " << communicator
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addAllToAllTime();
     }
 }
 
@@ -634,6 +643,8 @@ void Foam::UPstream::gather
     }
     else
     {
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Gatherv
@@ -656,6 +667,8 @@ void Foam::UPstream::gather
                 << " communicator " << communicator
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addGatherTime();
     }
 }
 
@@ -693,6 +706,8 @@ void Foam::UPstream::scatter
     }
     else
     {
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Scatterv
@@ -715,6 +730,8 @@ void Foam::UPstream::scatter
                 << " communicator " << communicator
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addScatterTime();
     }
 }
 
@@ -869,6 +886,8 @@ void Foam::UPstream::waitRequests(const label start)
             start
         );
 
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Waitall
@@ -882,6 +901,8 @@ void Foam::UPstream::waitRequests(const label start)
             FatalErrorInFunction
                 << "MPI_Waitall returned with error" << Foam::endl;
         }
+
+        profilingPstream::addWaitTime();
 
         resetRequests(start);
     }
@@ -911,6 +932,8 @@ void Foam::UPstream::waitRequest(const label i)
             << Foam::abort(FatalError);
     }
 
+    profilingPstream::beginTiming();
+
     if
     (
         MPI_Wait
@@ -923,6 +946,8 @@ void Foam::UPstream::waitRequest(const label i)
         FatalErrorInFunction
             << "MPI_Wait returned with error" << Foam::endl;
     }
+
+    profilingPstream::addWaitTime();
 
     if (debug)
     {
