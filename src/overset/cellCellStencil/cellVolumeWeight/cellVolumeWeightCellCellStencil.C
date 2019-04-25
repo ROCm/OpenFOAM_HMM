@@ -585,18 +585,24 @@ void Foam::cellCellStencils::cellVolumeWeight::combineCellTypes
 
             case PATCH:
             {
-                if (allCellTypes[cellI] != HOLE)
-                {
-                    scalar overlapVol = sum(weights[subCellI]);
-                    scalar v = mesh_.V()[cellI];
-                    if (overlapVol < (1.0-overlapTolerance_)*v)
-                    {
-                        //Pout<< "** Patch overlap:" << cellI
-                        //    << " at:" << mesh_.cellCentres()[cellI] << endl;
-                        allCellTypes[cellI] = HOLE;
-                        validDonors = false;
-                    }
-                }
+                // Patch-patch interaction... For now disable always
+                allCellTypes[cellI] = HOLE;
+                validDonors = false;
+
+                // Alternative is to look at the amount of overlap but this
+                // is not very robust
+                //if (allCellTypes[cellI] != HOLE)
+                //{
+                //    scalar overlapVol = sum(weights[subCellI]);
+                //    scalar v = mesh_.V()[cellI];
+                //    if (overlapVol < (1.0-overlapTolerance_)*v)
+                //    {
+                //        //Pout<< "** Patch overlap:" << cellI
+                //        //    << " at:" << mesh_.cellCentres()[cellI] << endl;
+                //        allCellTypes[cellI] = HOLE;
+                //        validDonors = false;
+                //    }
+                //}
             }
             break;
 
@@ -994,6 +1000,41 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     }
 
 
+    // Check previous iteration cellTypes_ for any hole->calculated changes
+    // If so set the cell either to interpolated (if there are donors) or
+    // holes (if there are no donors). Note that any interpolated cell might
+    // still be overwritten by the flood filling
+    {
+        label nCalculated = 0;
+
+        forAll(cellTypes_, celli)
+        {
+            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+            {
+                if (allStencil[celli].size() == 0)
+                {
+                    // Reset to hole
+                    allCellTypes[celli] = HOLE;
+                    allWeights[celli].clear();
+                    allStencil[celli].clear();
+                }
+                else
+                {
+                    allCellTypes[celli] = INTERPOLATED;
+                    nCalculated++;
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Detected " << nCalculated << " cells changing from hole"
+                << " to calculated. Changed these to interpolated"
+                << endl;
+        }
+    }
+
+
     // Mark unreachable bits
     findHoles(globalCells, mesh_, zoneID, allStencil, allCellTypes);
 
@@ -1020,40 +1061,6 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         );
         //tfld.ref().correctBoundaryConditions();
         tfld().write();
-    }
-
-    // Check previous iteration cellTypes_ for any hole->calculated changes
-    {
-        label nCalculated = 0;
-
-        forAll(cellTypes_, celli)
-        {
-            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
-            {
-                if (allStencil[celli].size() == 0)
-                {
-                    FatalErrorInFunction
-                        << "Cell:" << celli
-                        << " at:" << mesh_.cellCentres()[celli]
-                        << " zone:" << zoneID[celli]
-                        << " changed from hole to calculated"
-                        << " but there is no donor"
-                        << exit(FatalError);
-                }
-                else
-                {
-                    allCellTypes[celli] = INTERPOLATED;
-                    nCalculated++;
-                }
-            }
-        }
-
-        if (debug)
-        {
-            Pout<< "Detected " << nCalculated << " cells changing from hole"
-                << " to calculated. Changed these to interpolated"
-                << endl;
-        }
     }
 
     // Normalise weights, Clear storage

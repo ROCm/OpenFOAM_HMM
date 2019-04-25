@@ -2048,6 +2048,41 @@ bool Foam::cellCellStencils::inverseDistance::update()
         tfld().write();
     }
 
+
+    // Check previous iteration cellTypes_ for any hole->calculated changes
+    // If so set the cell either to interpolated (if there are donors) or
+    // holes (if there are no donors). Note that any interpolated cell might
+    // still be overwritten by the flood filling
+    {
+        label nCalculated = 0;
+
+        forAll(cellTypes_, celli)
+        {
+            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+            {
+                if (allStencil[celli].size() == 0)
+                {
+                    // Reset to hole
+                    allCellTypes[celli] = HOLE;
+                    allStencil[celli].clear();
+                }
+                else
+                {
+                    allCellTypes[celli] = INTERPOLATED;
+                    nCalculated++;
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Detected " << nCalculated << " cells changing from hole"
+                << " to calculated. Changed to interpolated"
+                << endl;
+        }
+    }
+
+
     // Mark unreachable bits
     findHoles(globalCells, mesh_, zoneID, allStencil, allCellTypes);
 
@@ -2085,47 +2120,6 @@ bool Foam::cellCellStencils::inverseDistance::update()
             createField(mesh_, "allCellTypes_front", allCellTypes)
         );
         tfld().write();
-    }
-
-
-    // Check previous iteration cellTypes_ for any hole->calculated changes
-    {
-        label nCalculated = 0;
-
-        forAll(cellTypes_, celli)
-        {
-            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
-            {
-                if (allStencil[celli].size() == 0)
-                {
-                    FatalErrorInFunction
-                    //WarningInFunction
-                        << "Cell:" << celli
-                        << " at:" << mesh_.cellCentres()[celli]
-                        << " zone:" << zoneID[celli]
-                        << " changed from hole to calculated"
-                        << " but there is no donor"
-                        //<< endl;
-                        << exit(FatalError);
-                }
-                else
-                {
-                    //Pout<< "cell:" << mesh_.cellCentres()[celli]
-                    //    << " changed from hole to calculated"
-                    //    << " using donors:" << allStencil[celli]
-                    //    << endl;
-                    allCellTypes[celli] = INTERPOLATED;
-                    nCalculated++;
-                }
-            }
-        }
-
-        if (debug)
-        {
-            Pout<< "Detected " << nCalculated << " cells changing from hole"
-                << " to calculated. Changed to interpolated"
-                << endl;
-        }
     }
 
 
