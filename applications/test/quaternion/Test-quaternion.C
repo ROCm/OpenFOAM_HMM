@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -34,12 +34,29 @@ Description
 #include "argList.H"
 #include "quaternion.H"
 #include "septernion.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "Tuple2.H"
 #include "IOstreams.H"
 #include "transform.H"
+#include "axisAngleRotation.H"
+#include "EulerCoordinateRotation.H"
 
 using namespace Foam;
+using namespace Foam::coordinateRotations;
+
+
+void printRotation(const tensor& rot)
+{
+    Info<< "rotation = " << rot << nl;
+}
+
+
+void printRotation(const quaternion& quat)
+{
+    printRotation(quat.R());
+    Info<< "quaternion " << quat << nl;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,7 +74,24 @@ int main(int argc, char *argv[])
         "vector",
         "Rotate by '(yaw pitch roll)' in degrees"
     );
-
+    argList::addOption
+    (
+        "euler",
+        "vector",
+        "Rotate by '(phi theta psi)' in degrees"
+    );
+    argList::addOption
+    (
+        "xyz",
+        "vector",
+        "Rotate about x-y-z axes in degrees"
+    );
+    argList::addOption
+    (
+        "zyx",
+        "vector",
+        "Rotate about z-y-x axes in degrees"
+    );
     argList::addOption
     (
         "rotate-angle",
@@ -70,34 +104,77 @@ int main(int argc, char *argv[])
 
     if (args.readIfPresent("rollPitchYaw", rotVector))
     {
-        Info<< "Rotate by" << nl
+        Info<< nl
+            << "Rotate by" << nl
             << "    roll  " << rotVector.x() << nl
             << "    pitch " << rotVector.y() << nl
             << "    yaw   " << rotVector.z() << nl;
 
-        // degToRad
-        rotVector *= constant::mathematical::pi/180.0;
+        rotVector *= degToRad();
 
         const quaternion quat(quaternion::rotationSequence::XYZ, rotVector);
 
-        Info<< "quaternion " << quat << endl;
-        Info<< "rotation   = " << quat.R() << endl;
+        printRotation(quat);
     }
     if (args.readIfPresent("yawPitchRoll", rotVector))
     {
-        Info<< "Rotate by" << nl
+        Info<< nl
+            << "Rotate by" << nl
             << "    yaw   " << rotVector.x() << nl
             << "    pitch " << rotVector.y() << nl
             << "    roll  " << rotVector.z() << nl;
 
-        // degToRad
-        rotVector *= constant::mathematical::pi/180.0;
+        rotVector *= degToRad();
 
         const quaternion quat(quaternion::rotationSequence::ZYX, rotVector);
 
-        Info<< "quaternion " << quat << endl;
-        Info<< "rotation   = " << quat.R() << endl;
+        printRotation(quat);
     }
+    if (args.readIfPresent("euler", rotVector))
+    {
+        Info<< nl
+            << "Rotate by" << nl
+            << "    phi   " << rotVector.x() << nl
+            << "    theta " << rotVector.y() << nl
+            << "    psi   " << rotVector.z() << nl;
+
+        printRotation(euler(rotVector, true).R());
+    }
+    if (args.readIfPresent("xyz", rotVector))
+    {
+        Info<< nl
+            << "Rotate about" << nl
+            << "    x   " << rotVector.x() << nl
+            << "    y   " << rotVector.y() << nl
+            << "    z   " << rotVector.z() << nl;
+
+        Vector<tensor> Rs
+        (
+            axisAngle(vector(1,0,0), rotVector.x(), true).R(),
+            axisAngle(vector(0,1,0), rotVector.y(), true).R(),
+            axisAngle(vector(0,0,1), rotVector.z(), true).R()
+        );
+
+        printRotation(Rs.x() & Rs.y() & Rs.z());
+    }
+    if (args.readIfPresent("zyx", rotVector))
+    {
+        Info<< nl
+            << "Rotate about" << nl
+            << "    z   " << rotVector.x() << nl
+            << "    y   " << rotVector.y() << nl
+            << "    x   " << rotVector.z() << nl;
+
+        Vector<tensor> Rs
+        (
+            axisAngle(vector(1,0,0), rotVector.z(), true).R(),
+            axisAngle(vector(0,1,0), rotVector.y(), true).R(),
+            axisAngle(vector(0,0,1), rotVector.x(), true).R()
+        );
+
+        printRotation(Rs.z() & Rs.y() & Rs.x());
+    }
+
     if (args.found("rotate-angle"))
     {
         const Tuple2<vector, scalar> axisAngle
@@ -105,60 +182,61 @@ int main(int argc, char *argv[])
             args.lookup("rotate-angle")()
         );
 
-        Info<< "Rotate" << nl
+        Info<< nl
+            << "Rotate" << nl
             << "    about " << axisAngle.first() << nl
             << "    angle " << axisAngle.second() << nl;
 
         const quaternion quat
         (
             axisAngle.first(),
-            axisAngle.second() * constant::mathematical::pi/180.0  // degToRad
+            degToRad(axisAngle.second())
         );
 
-        Info<< "quaternion " << quat << endl;
-        Info<< "rotation   = " << quat.R() << endl;
+        printRotation(quat);
 
         Info<< "transform Ra = "
             << Ra
                (
                    axisAngle.first() / mag(axisAngle.first()),
                    axisAngle.second() * constant::mathematical::pi/180.0
-               ) << endl;
+               ) << nl;
         Info<< "-ve Ra = "
             << Ra
                (
                    axisAngle.first() / mag(axisAngle.first()),
                    -axisAngle.second() * constant::mathematical::pi/180.0
-               ) << endl;
+               ) << nl;
     }
+
 
     Info<< nl << nl;
 
     quaternion q(vector(1, 2, 3), 0.7853981);
-    Info<< "q " << q << endl;
+    Info<< "q " << q << nl;
 
     vector v(0.1, 0.4, 2.1);
-    Info<< "v " << v << endl;
+    Info<< "v " << v << nl;
 
-    Info<< "inv(q)*q " << inv(q)*q << endl;
+    Info<< "inv(q)*q " << inv(q)*q << nl;
 
     Info<< "q*quaternion(0, v)*conjugate(q) "
-        << q*quaternion(0, v)*conjugate(q) << endl;
+        << q*quaternion(0, v)*conjugate(q) << nl;
 
-    Info<< "q.R() " << q.R() << endl;
-    Info<< "q.transform(v) " << q.transform(v) << endl;
-    Info<< "q.R() & v " << (q.R() & v) << endl;
+    Info<< "q.R() " << q.R() << nl;
+    Info<< "q.transform(v) " << q.transform(v) << nl;
+    Info<< "q.R() & v " << (q.R() & v) << nl;
     Info<< "quaternion(q.R()).transform(v) "
-        << (quaternion(q.R()).transform(v)) << endl;
+        << (quaternion(q.R()).transform(v)) << nl;
 
-    Info<< "q.invTransform(v) " << q.invTransform(v) << endl;
+    Info<< "q.invTransform(v) " << q.invTransform(v) << nl;
 
     septernion tr(vector(0, 0.1, 0), q);
-    Info<< "tr " << tr << endl;
+    Info<< "tr " << tr << nl;
 
-    Info<< "inv(tr)*tr " << inv(tr)*tr << endl;
+    Info<< "inv(tr)*tr " << inv(tr)*tr << nl;
 
-    Info<< "tr.transform(v) " << tr.transformPoint(v) << endl;
+    Info<< "tr.transform(v) " << tr.transformPoint(v) << nl;
 
     vector origin(1, 2, 4);
 
@@ -168,9 +246,9 @@ int main(int argc, char *argv[])
         <<  " "
         << septernion(-origin)
           .transformPoint(q.transform(septernion(origin).transformPoint(v)))
-        << endl;
+        << nl;
 
-    Info<< "Test conversion from and to Euler-angles" << endl;
+    Info<< "Test conversion from and to Euler-angles" << nl;
     vector angles(0.1, 0.2, 0.3);
     for (int rs=quaternion::ZYX; rs<quaternion::XZX; ++rs)
     {
@@ -188,7 +266,7 @@ int main(int argc, char *argv[])
             FatalErrorInFunction
                 << "Inconsistent conversion for rotation sequence "
                 << rs << exit(FatalError)
-                << endl;
+                << nl;
         }
     }
 
@@ -202,9 +280,9 @@ int main(int argc, char *argv[])
     ss[2] = septernion(vector(0, 0.3, 0), quaternion(0.3, vector(3, 2, 1)));
     w[2] = 0.4;
 
-    Info<< "average(ss, w) " << average(ss, w) << endl;
+    Info<< "average(ss, w) " << average(ss, w) << nl;
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }
