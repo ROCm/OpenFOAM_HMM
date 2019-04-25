@@ -456,7 +456,8 @@ Foam::refinementSurfaces::refinementSurfaces
         // Initialise to global (i.e. per surface)
         for (label i = 0; i < nRegions; i++)
         {
-            label globalRegionI = regionOffset_[surfI] + i;
+            const label globalRegionI = regionOffset_[surfI] + i;
+
             minLevel_[globalRegionI] = globalMinLevel[surfI];
             maxLevel_[globalRegionI] = globalMaxLevel[surfI];
             gapLevel_[globalRegionI] =
@@ -479,7 +480,7 @@ Foam::refinementSurfaces::refinementSurfaces
         // Overwrite with region specific information
         forAllConstIters(regionMinLevel[surfI], iter)
         {
-            label globalRegionI = regionOffset_[surfI] + iter.key();
+            const label globalRegionI = regionOffset_[surfI] + iter.key();
 
             minLevel_[globalRegionI] = iter.val();
             maxLevel_[globalRegionI] = regionMaxLevel[surfI][iter.key()];
@@ -493,24 +494,25 @@ Foam::refinementSurfaces::refinementSurfaces
         }
         forAllConstIters(regionAngle[surfI], iter)
         {
-            label globalRegionI = regionOffset_[surfI] + iter.key();
+            const label globalRegionI = regionOffset_[surfI] + iter.key();
 
-            perpendicularAngle_[globalRegionI] = regionAngle[surfI][iter.key()];
+            perpendicularAngle_[globalRegionI] = iter.val();
         }
 
         const Map<autoPtr<dictionary>>& localInfo = regionPatchInfo[surfI];
         forAllConstIters(localInfo, iter)
         {
-            label globalRegionI = regionOffset_[surfI] + iter.key();
+            const label globalRegionI = regionOffset_[surfI] + iter.key();
             const dictionary& dict = *(iter.val());
 
             patchInfo_.set(globalRegionI, dict.clone());
         }
 
-        forAllConstIter(Map<label>, regionBlockLevel[surfI], iter)
+        forAllConstIters(regionBlockLevel[surfI], iter)
         {
-            label globalRegionI = regionOffset_[surfI] + iter.key();
-            blockLevel_[globalRegionI] = regionBlockLevel[surfI][iter.key()];
+            const label globalRegionI = regionOffset_[surfI] + iter.key();
+
+            blockLevel_[globalRegionI] = iter.val();
         }
     }
 }
