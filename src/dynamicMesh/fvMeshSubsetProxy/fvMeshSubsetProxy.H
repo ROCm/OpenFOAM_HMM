@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -91,6 +91,9 @@ private:
         //- Selection for multiple cell zones
         wordRes names_;
 
+        //- The (cached) cell selection
+        bitSet selectedCells_;
+
 
     // Private Member Functions
 
@@ -173,11 +176,18 @@ public:
             return name_;
         }
 
+        //- The current cell selection, when subsetting is active
+        inline const bitSet& selectedCells() const
+        {
+            return selectedCells_;
+        }
+
 
     // Edit
 
-        //- Update of mesh subset
-        void correct(bool verbose = false);
+        //- Update of mesh subset.
+        //  Return true if the subset changed from previous call.
+        bool correct(bool verbose = false);
 
         //- Read mesh. Correct on topo-change
         polyMesh::readUpdateState readUpdate();
