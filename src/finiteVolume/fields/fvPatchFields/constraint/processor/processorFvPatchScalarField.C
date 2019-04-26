@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -27,15 +27,10 @@ License
 
 #include "processorFvPatchScalarField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<>
-void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
+void Foam::processorFvPatchField<Foam::scalar>::initInterfaceMatrixUpdate
 (
     scalarField&,
     const bool add,
@@ -96,7 +91,7 @@ void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 
 
 template<>
-void processorFvPatchField<scalar>::updateInterfaceMatrix
+void Foam::processorFvPatchField<Foam::scalar>::updateInterfaceMatrix
 (
     scalarField& result,
     const bool add,
@@ -147,9 +142,5 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
     const_cast<processorFvPatchField<scalar>&>(*this).updatedMatrix() = true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
