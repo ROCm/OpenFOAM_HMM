@@ -33,6 +33,7 @@ License
 void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
 {}
 
+
 bool Foam::UPstream::initNull()
 {
     WarningInFunction

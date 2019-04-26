@@ -57,11 +57,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class error;
-Ostream& operator<<(Ostream& os, const error& err);
-
-
 /*---------------------------------------------------------------------------*\
                             Class error Declaration
 \*---------------------------------------------------------------------------*/
@@ -112,7 +107,7 @@ public:
         static void warnAboutAge(const char* what, const int version);
 
 
-    // Member functions
+    // Member Functions
 
         string message() const;
 
@@ -212,17 +207,7 @@ public:
 
         //- Print error message
         void write(Ostream& os, const bool includeTitle = true) const;
-
-
-    // Ostream operator
-
-        friend Ostream& operator<<(Ostream& os, const error& err);
 };
-
-
-// Forward declarations
-class IOerror;
-Ostream& operator<<(Ostream& os, const IOerror& err);
 
 
 /*---------------------------------------------------------------------------*\
@@ -328,12 +313,16 @@ public:
 
         //- Print error message
         void write(Ostream& os, const bool includeTitle = true) const;
-
-
-    // Ostream operator
-
-        friend Ostream& operator<<(Ostream& os, const IOerror& err);
 };
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+//- Ostream operator
+Ostream& operator<<(Ostream& os, const error& err);
+
+//- Ostream operator
+Ostream& operator<<(Ostream& os, const IOerror& err);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -123,7 +123,7 @@ inline void Foam::fileName::stripInvalid()
             std::cerr
                 << "    For debug level (= " << debug
                 << ") > 1 this is considered fatal" << std::endl;
-            std::abort();
+            std::exit(1);
         }
 
         removeRepeated('/');
