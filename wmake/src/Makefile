@@ -61,7 +61,10 @@ include $(GENERAL_RULES)/general
 
 .PHONY: all clean
 
-all:  $(WMAKE_BIN)/dirToString $(WMAKE_BIN)/wmkdep $(WMAKE_BIN)/wmkdepend
+all: \
+    $(WMAKE_BIN)/dirToString$(EXT_EXE) \
+    $(WMAKE_BIN)/wmkdep$(EXT_EXE) \
+    $(WMAKE_BIN)/wmkdepend$(EXT_EXE)
 	@echo "built wmake-bin for $(WM_ARCH)$(WM_COMPILER)"
 
 clean:
@@ -69,23 +72,23 @@ clean:
 	@rm -rf $(WMAKE_BIN) 2>/dev/null
 	@rmdir $(shell dirname $(WMAKE_BIN)) 2>/dev/null || true
 
-$(WMAKE_BIN)/dirToString: dirToString.c
+$(WMAKE_BIN)/dirToString$(EXT_EXE): dirToString.c
 	@mkdir -p $(WMAKE_BIN)
 	$(call QUIET_MESSAGE,compile,$(<F))
 	$E $(cc) $(cFLAGS) $(<F) -o $@
 
-$(WMAKE_BIN)/wmkdep: wmkdep.l
+$(WMAKE_BIN)/wmkdep$(EXT_EXE): wmkdep.l
 	@mkdir -p $(WMAKE_BIN)
 	$(call QUIET_MESSAGE,flex,$(<F))
 	$E flex -o $@.c $(<F) && $(cc) $(cFLAGS) $@.c -o $@
 	@rm -f $@.c 2>/dev/null
 
-$(WMAKE_BIN)/wmkdepend: wmkdepend.cpp
+$(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.cpp
 	@mkdir -p $(WMAKE_BIN)
 	$(call QUIET_MESSAGE,wmkdepend,$(<F))
 	$E $(CC) $(c++FLAGS) $(c++LESSWARN) $(<F) -o $@
 
-# $(WMAKE_BIN)/wmkdepend: wmkdepend.rl
+# $(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.rl
 # 	@mkdir -p $(WMAKE_BIN)
 # 	$(call QUIET_MESSAGE,ragel,$(<F))
 # 	$E ragel -G2 -o $@.cpp $(<F) && $(CC) $(c++FLAGS) $(c++LESSWARN) $@.cpp -o $@

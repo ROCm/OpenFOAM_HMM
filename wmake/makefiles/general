@@ -74,7 +74,7 @@ LIB_LIBS        =
 EXT_SO  = .so
 
 # Executable extension (with '.' separator)
-EXE_EXT =
+EXT_EXE =
 
 # Library (default which is to be overridden)
 LIB     = libNULL
@@ -86,7 +86,7 @@ EXE     = $(WM_PROJECT).out
 SEXE    = a.out
 
 #DEBUG $(info "EXE_SO  = ${EXE_SO}")
-#DEBUG $(info "EXE_EXT = ${EXE_EXT}")
+#DEBUG $(info "EXT_EXE = ${EXT_EXE}")
 
 
 #------------------------------------------------------------------------------
@@ -129,28 +129,28 @@ LIB_HEADER_DIRS = \
 #------------------------------------------------------------------------------
 
 .PHONY: all
-all: $(EXE)$(EXE_EXT)
+all: $(EXE)$(EXT_EXE)
 	@:
 
 .PHONY: silent
 silent:
 	@:
 
-$(EXE)$(EXE_EXT): $(OBJECTS)
+$(EXE)$(EXT_EXE): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(EXE)
-	$(call QUIET_MESSAGE,ld,$(EXE)$(EXE_EXT))
+	$(call QUIET_MESSAGE,ld,$(EXE)$(EXT_EXE))
 	$E $(LINKEXE) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(EXE_LIBS) $(PROJECT_LIBS) $(SYS_LIBS) \
-	    $(LINK_LIBS) $(GLIBS) -o $(EXE)$(EXE_EXT)
+	    $(LINK_LIBS) $(GLIBS) -o $(EXE)$(EXT_EXE)
 
 .PHONY: exe
-exe: $(SEXE)$(EXE_EXT) | silent
+exe: $(SEXE)$(EXT_EXE) | silent
 
-$(SEXE)$(EXE_EXT): $(OBJECTS)
+$(SEXE)$(EXT_EXE): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(SEXE)
-	$(call QUIET_MESSAGE,ld,$(SEXE)$(EXE_EXT))
+	$(call QUIET_MESSAGE,ld,$(SEXE)$(EXT_EXE))
 	$E $(LINKEXE) $(OBJECTS) $(EXE_LIBS) \
-	    $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(SEXE)$(EXE_EXT)
+	    $(SYS_LIBS) $(LINK_LIBS) $(GLIBS) -o $(SEXE)$(EXT_EXE)
 
 
 #------------------------------------------------------------------------------
