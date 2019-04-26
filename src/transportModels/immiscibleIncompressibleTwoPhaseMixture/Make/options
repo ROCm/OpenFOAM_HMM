@@ -9,5 +9,4 @@ LIB_LIBS = \
     -ltwoPhaseMixture \
     -lincompressibleTransportModels \
     -linterfaceProperties \
-    -ltwoPhaseProperties \
     -lfiniteVolume

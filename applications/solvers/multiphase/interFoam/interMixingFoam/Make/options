@@ -7,7 +7,6 @@ EXE_INC = \
     -IincompressibleThreePhaseMixture \
     -IthreePhaseInterfaceProperties \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
-    -I$(LIB_SRC)/transportModels/twoPhaseProperties/alphaContactAngle/alphaContactAngle \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
@@ -18,7 +17,7 @@ EXE_INC = \
 
 EXE_LIBS = \
     -ltwoPhaseMixture \
-    -ltwoPhaseProperties \
+    -linterfaceProperties \
     -lincompressibleTransportModels \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \
