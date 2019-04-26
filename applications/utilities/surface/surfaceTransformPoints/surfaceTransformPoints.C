@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -49,12 +49,11 @@ Description
 #include "Pair.H"
 #include "Tuple2.H"
 #include "quaternion.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 #include "MeshedSurfaces.H"
 
 using namespace Foam;
-using namespace Foam::constant::mathematical;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -200,7 +199,7 @@ int main(int argc, char *argv[])
         const quaternion quat
         (
             axisAngle.first(),
-            axisAngle.second() * pi/180.0  // degToRad
+            degToRad(axisAngle.second())
         );
 
         Info<< "Rotating points by quaternion " << quat << endl;
@@ -213,8 +212,7 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    yaw   " << v.z() << nl;
 
-        // degToRad
-        v *= pi/180.0;
+        v *= degToRad();
 
         const quaternion quat(quaternion::rotationSequence::XYZ, v);
 
@@ -228,8 +226,7 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    roll  " << v.z() << nl;
 
-        // degToRad
-        v *= pi/180.0;
+        v *= degToRad();
 
         const quaternion quat(quaternion::rotationSequence::ZYX, v);
 

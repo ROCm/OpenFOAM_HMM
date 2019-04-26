@@ -199,13 +199,13 @@ int main(int argc, char *argv[])
             << Ra
                (
                    axisAngle.first() / mag(axisAngle.first()),
-                   axisAngle.second() * constant::mathematical::pi/180.0
+                   degToRad(axisAngle.second())
                ) << nl;
         Info<< "-ve Ra = "
             << Ra
                (
                    axisAngle.first() / mag(axisAngle.first()),
-                   -axisAngle.second() * constant::mathematical::pi/180.0
+                   degToRad(-axisAngle.second())
                ) << nl;
     }
 

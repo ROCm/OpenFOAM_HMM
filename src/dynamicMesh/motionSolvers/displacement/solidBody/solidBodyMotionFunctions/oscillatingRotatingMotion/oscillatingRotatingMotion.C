@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -27,9 +27,7 @@ License
 
 #include "oscillatingRotatingMotion.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
-
-using namespace Foam::constant::mathematical;
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -81,7 +79,7 @@ transformation() const
     vector eulerAngles = amplitude_*sin(omega_*t);
 
     // Convert the rotational motion from deg to rad
-    eulerAngles *= pi/180.0;
+    eulerAngles *= degToRad();
 
     quaternion R(quaternion::XYZ, eulerAngles);
     septernion TR(septernion(-origin_)*R*septernion(origin_));

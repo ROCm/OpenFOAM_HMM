@@ -73,10 +73,9 @@ Usage
 #include "pointFields.H"
 #include "transformField.H"
 #include "transformGeometricField.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 using namespace Foam;
-using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -310,7 +309,7 @@ int main(int argc, char *argv[])
         const quaternion quat
         (
             axisAngle.first(),
-            axisAngle.second() * pi/180.0  // degToRad
+            degToRad(axisAngle.second())
         );
 
         Info<< "Rotating points by quaternion " << quat << endl;
@@ -328,8 +327,7 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    yaw   " << v.z() << nl;
 
-        // degToRad
-        v *= pi/180.0;
+        v *= degToRad();
 
         const quaternion quat(quaternion::rotationSequence::XYZ, v);
 
@@ -348,8 +346,7 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    roll  " << v.z() << nl;
 
-        // degToRad
-        v *= pi/180.0;
+        v *= degToRad();
 
         const quaternion quat(quaternion::rotationSequence::ZYX, v);
 

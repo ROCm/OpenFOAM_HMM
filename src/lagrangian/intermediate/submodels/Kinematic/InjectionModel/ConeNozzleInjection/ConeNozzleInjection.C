@@ -27,7 +27,7 @@ License
 
 #include "ConeNozzleInjection.H"
 #include "TimeFunction1.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "distributionModel.H"
 
 using namespace Foam::constant;
@@ -417,14 +417,11 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
     Random& rndGen = this->owner().rndGen();
 
     // Set particle velocity
-    const scalar deg2Rad = mathematical::pi/180.0;
-
     scalar t = time - this->SOI_;
     scalar ti = thetaInner_.value(t);
     scalar to = thetaOuter_.value(t);
-    scalar coneAngle = rndGen.sample01<scalar>()*(to - ti) + ti;
+    scalar coneAngle = degToRad(rndGen.sample01<scalar>()*(to - ti) + ti);
 
-    coneAngle *= deg2Rad;
     scalar alpha = sin(coneAngle);
     scalar dcorr = cos(coneAngle);
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -185,7 +185,7 @@ void Foam::ParticleErosion<CloudType>::postPatch
         const vector Udir = U/magU;
 
         // determine impact angle, alpha
-        const scalar alpha = mathematical::pi/2.0 - acos(nw & Udir);
+        const scalar alpha = mathematical::piByTwo - acos(nw & Udir);
 
         const scalar coeff = p.nParticle()*p.mass()*sqr(magU)/(p_*psi_*K_);
 

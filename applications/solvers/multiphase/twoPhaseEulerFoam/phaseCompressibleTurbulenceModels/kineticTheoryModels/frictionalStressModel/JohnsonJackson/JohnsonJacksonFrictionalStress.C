@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -27,7 +27,7 @@ License
 
 #include "JohnsonJacksonFrictionalStress.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -66,7 +66,7 @@ JohnsonJackson
     phi_("phi", dimless, coeffDict_),
     alphaDeltaMin_("alphaDeltaMin", dimless, coeffDict_)
 {
-    phi_ *= constant::mathematical::pi/180.0;
+    phi_ *= degToRad();
 }
 
 
@@ -139,7 +139,7 @@ bool Foam::kineticTheoryModels::frictionalStressModels::JohnsonJackson::read()
     p_.read(coeffDict_);
 
     phi_.read(coeffDict_);
-    phi_ *= constant::mathematical::pi/180.0;
+    phi_ *= degToRad();
 
     alphaDeltaMin_.read(coeffDict_);
 

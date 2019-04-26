@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -32,7 +32,7 @@ License
 #include "polyMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "word.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -72,7 +72,7 @@ void Foam::circleSet::calcSamples
     }
 
     // Add remaining points
-    const scalar alpha = constant::mathematical::pi/180.0*dTheta_;
+    const scalar alpha = degToRad(dTheta_);
     const scalar sinAlpha = sin(alpha);
     const scalar cosAlpha = cos(alpha);
 
@@ -107,10 +107,7 @@ void Foam::circleSet::calcSamples
             samplingCells.append(celli);
             samplingFaces.append(-1);
             samplingSegments.append(nPoint);
-            samplingCurveDist.append
-            (
-                radius*constant::mathematical::pi/180.0*theta
-            );
+            samplingCurveDist.append(radius*degToRad(theta));
 
             ++nPoint;
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -30,9 +30,8 @@ License
 #include "Tuple2.H"
 #include "IFstream.H"
 #include "interpolateSplineXY.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
-using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -104,7 +103,7 @@ Foam::solidBodyMotionFunctions::tabulated6DoFMotion::transformation() const
     );
 
     // Convert the rotational motion from deg to rad
-    TRV[1] *= pi/180.0;
+    TRV[1] *= degToRad();
 
     quaternion R(quaternion::XYZ, TRV[1]);
     septernion TR(septernion(-CofG_ + -TRV[0])*R*septernion(CofG_));

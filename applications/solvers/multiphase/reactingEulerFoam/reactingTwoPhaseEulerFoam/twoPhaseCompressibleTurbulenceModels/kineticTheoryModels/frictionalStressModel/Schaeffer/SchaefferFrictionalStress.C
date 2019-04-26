@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -27,6 +27,7 @@ License
 
 #include "SchaefferFrictionalStress.H"
 #include "addToRunTimeSelectionTable.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -60,7 +61,7 @@ Foam::kineticTheoryModels::frictionalStressModels::Schaeffer::Schaeffer
     coeffDict_(dict.optionalSubDict(typeName + "Coeffs")),
     phi_("phi", dimless, coeffDict_)
 {
-    phi_ *= constant::mathematical::pi/180.0;
+    phi_ *= degToRad();
 }
 
 
@@ -183,7 +184,7 @@ bool Foam::kineticTheoryModels::frictionalStressModels::Schaeffer::read()
     coeffDict_ <<= dict_.optionalSubDict(typeName + "Coeffs");
 
     phi_.read(coeffDict_);
-    phi_ *= constant::mathematical::pi/180.0;
+    phi_ *= degToRad();
 
     return true;
 }
