@@ -120,6 +120,7 @@ protected:
         //  A and B can have different sizes. Sizing behaviour as per orEq.
         bitSet& xorEq(const bitSet& other, const bool strict=true);
 
+
 public:
 
     // Forward declaration of access classes
@@ -554,7 +555,7 @@ public:
 };
 
 
-// Global Operators
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 //- Write bitset to Ostream, as per bitSet::writeList() with default length
 //- of 40 items.

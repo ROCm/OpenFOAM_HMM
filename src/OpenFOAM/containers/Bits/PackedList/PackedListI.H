@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -741,6 +741,30 @@ template<unsigned Width>
 inline void Foam::PackedList<Width>::operator=(PackedList<Width>&& rhs)
 {
     transfer(rhs);
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+template<unsigned Width>
+inline bool Foam::operator==
+(
+    const PackedList<Width>& a,
+    const PackedList<Width>& b
+)
+{
+    return a.equal(b);
+}
+
+
+template<unsigned Width>
+inline bool Foam::operator!=
+(
+    const PackedList<Width>& a,
+    const PackedList<Width>& b
+)
+{
+    return !a.equal(b);
 }
 
 

@@ -146,6 +146,29 @@ bool Foam::PackedList<Width>::uniform() const
 
 
 template<unsigned Width>
+bool Foam::PackedList<Width>::equal(const PackedList<Width>& other) const
+{
+    if (size() != other.size())
+    {
+        return false;
+    }
+
+    const label nblocks = num_blocks(size());
+    const auto& rhs = other.blocks_;
+
+    for (label blocki = 0; blocki < nblocks; ++blocki)
+    {
+        if (blocks_[blocki] != rhs[blocki])
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+template<unsigned Width>
 Foam::labelList Foam::PackedList<Width>::values() const
 {
     return this->unpack<label>();

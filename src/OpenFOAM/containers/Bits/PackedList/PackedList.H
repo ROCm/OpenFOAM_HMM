@@ -286,6 +286,9 @@ public:
         //- True if all entries have identical values, and list is non-empty
         bool uniform() const;
 
+        //- Test for equality of sizes and the bits set
+        bool equal(const PackedList<Width>& other) const;
+
 
     // Access
 
@@ -495,7 +498,7 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 //- Write List to Ostream, as per UList::writeList() with default length.
 //  The default short-length is given by Detail::ListPolicy::short_length
@@ -504,6 +507,15 @@ Ostream& operator<<(Ostream& os, const PackedList<Width>& list)
 {
     return list.writeList(os, Detail::ListPolicy::short_length<void>::value);
 }
+
+
+//- Test for equality of sizes and the bits set
+template<unsigned Width>
+inline bool operator==(const PackedList<Width>& a, const PackedList<Width>& b);
+
+//- Test for inequality of sizes or the bits set
+template<unsigned Width>
+inline bool operator!=(const PackedList<Width>& a, const PackedList<Width>& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
