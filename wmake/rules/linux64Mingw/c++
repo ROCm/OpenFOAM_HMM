@@ -1,0 +1,35 @@
+include $(GENERAL_RULES)/Gcc/c++
+
+c++ARCH     = -m64
+
+# With gnu++11 (not c++11) to ensure __STRICT_ANSI__ is not defined
+CC          = x86_64-w64-mingw32-g++ -std=gnu++11
+
+include $(RULES)/c++$(WM_COMPILE_OPTION)
+
+c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS)
+
+Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
+cxxtoo      = $(Ctoo)
+cctoo       = $(Ctoo)
+cpptoo      = $(Ctoo)
+
+LINK_LIBS   = $(c++DBUG)
+
+# Using "-Wl,--no-undefined,--enable-runtime-pseudo-reloc"
+# does not forgive undefined symbols during linking
+
+LINKLIBSO   = $(CC) $(c++FLAGS) \
+    -Wl,--output-def=$(LIB).def \
+    -Wl,--out-implib=$(LIB).dll.a \
+    -Wl,--no-undefined \
+    -Wl,--enable-runtime-pseudo-reloc \
+    -Wl,--enable-auto-import \
+    -Wl,--enable-auto-image-base \
+    -Wl,--strip-all \
+    -shared
+
+LINKEXE     = $(CC) $(c++FLAGS) \
+    -Wl,--enable-auto-import \
+    -Wl,--strip-all \
+    -Wl,--force-exe-suffix

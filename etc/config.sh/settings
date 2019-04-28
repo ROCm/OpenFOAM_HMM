@@ -227,6 +227,17 @@ export FOAM_RUN="$WM_PROJECT_USER_DIR/run"
 # Default to system compiler
 : ${WM_COMPILER_TYPE:=system}; export WM_COMPILER_TYPE
 
+# Cross-compiling
+case "$WM_COMPILER" in
+(Mingw*)
+    export WM_OSTYPE=MSwindows
+    export WM_CC="$(wmake -show-c)"
+    export WM_CXX="$(wmake -show-cxx)"
+    export WM_CFLAGS="$(wmake -show-cflags)"
+    export WM_CXXFLAGS="$(wmake -show-cxxflags)"
+    ;;
+esac
+
 # Adjust for non-gcc compilers
 case "$WM_COMPILER" in
 Clang*)    # Clang compiler suite
