@@ -8,6 +8,8 @@ EXE_INC = \
 
 LIB_LIBS = \
     -lfiniteVolume \
+    -lfileFormats \
+    -lsurfMesh \
     -lmeshTools \
     -ldynamicMesh \
     -llagrangian

@@ -15,42 +15,44 @@ cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR/src" 2>/dev/null || {
 
 #------------------------------------------------------------------------------
 
-# Trigger update of version strings as required
-wmakeBuildInfo -check || wrmo OpenFOAM/global/global.o 2>/dev/null
-
 wmakeLnInclude -u OpenFOAM
 wmakeLnInclude -u OSspecific/"${WM_OSTYPE:-POSIX}"
+
 OSspecific/"${WM_OSTYPE:-POSIX}"/Allwmake $targetType $*
 
 Pstream/Allwmake $targetType $*
 
+# Trigger update of version info (as required)
+wmakeBuildInfo -check || wrmo OpenFOAM/global/global.o 2>/dev/null
 wmake $targetType OpenFOAM
+
 wmake $targetType fileFormats
 wmake $targetType surfMesh
 wmake $targetType meshTools
 
-# Decomposition methods needed by dummyThirdParty
-# (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
+wmake $targetType finiteArea
+wmake $targetType finiteVolume
+wmake $targetType genericPatchFields
+wmake $targetType mesh/extrudeModel
+wmake $targetType dynamicMesh
+
+wmake $targetType parallel/decompose/decompositionMethods
+
+# Make dummy decomposition methods (dummyThirdParty)
 parallel/decompose/AllwmakeLnInclude
 dummyThirdParty/Allwmake $targetType $*
 
 wmakeLnInclude -u fvOptions
 
-wmake $targetType finiteVolume
 wmake $targetType lagrangian/basic
 wmake $targetType lagrangian/distributionModels
-wmake $targetType finiteArea
-wmake $targetType genericPatchFields
 
-conversion/Allwmake $targetType $*
-wmake $targetType mesh/extrudeModel
-wmake $targetType dynamicMesh
+parallel/Allwmake $targetType $*
+
 wmake $targetType dynamicFvMesh
-wmake $targetType sampling
 wmake $targetType topoChangerFvMesh
 
-# Compile scotchDecomp, metisDecomp etc.
-parallel/Allwmake $targetType $*
+wmake $targetType sampling
 randomProcesses/Allwmake $targetType $*
 
 wmake $targetType ODE
@@ -65,7 +67,7 @@ lagrangian/Allwmake $targetType $*
 wmake $targetType fvOptions
 wmake $targetType fvMotionSolver
 
-# Make sure we have block.H accessible before building overset
+# Ensure we have block.H accessible before building overset
 wmake $targetType mesh/blockMesh
 wmake $targetType overset
 
@@ -78,6 +80,7 @@ wmake $targetType waveModels
 wmake $targetType engine
 wmake $targetType regionCoupled
 
+conversion/Allwmake $targetType $*
 functionObjects/Allwmake $targetType $*
 
 wmake $targetType lumpedPointMotion

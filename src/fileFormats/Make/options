@@ -1,2 +1,4 @@
-/* EXE_INC = */
-/* EXE_LIBS = */
+EXE_INC =
+
+LIB_LIBS = \
+    -lOpenFOAM

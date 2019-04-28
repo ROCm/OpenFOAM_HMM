@@ -7,7 +7,9 @@ EXE_INC = \
     -I$(LIB_SRC)/lagrangian/intermediate/lnInclude
 
 EXE_LIBS = \
+    -lfiniteVolume \
+    -lfileFormats \
     -ldynamicMesh \
-    -lgenericPatchFields \
+    -lconversion \
     -llagrangianIntermediate \
-    -lconversion
+    -lgenericPatchFields

@@ -29,7 +29,7 @@ echo "wmake $targetType dummy (mpi=$WM_MPLIB)"
 wmake $targetType dummy
 
 case "$WM_MPLIB" in
-*MPI*)
+(*MPI*)
     wmakeMpiLib mpi
     ;;
 esac

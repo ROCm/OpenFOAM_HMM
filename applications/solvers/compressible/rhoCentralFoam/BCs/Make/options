@@ -9,4 +9,3 @@ LIB_LIBS = \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie
-

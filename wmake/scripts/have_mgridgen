@@ -147,7 +147,7 @@ have_mgridgen()
         ;;
     esac
     case "$WM_PRECISION_OPTION:$scalar" in
-    (SP:float | DP:double)
+    (SP:float | SPDP:float | DP:double)
         good=true
         ;;
 

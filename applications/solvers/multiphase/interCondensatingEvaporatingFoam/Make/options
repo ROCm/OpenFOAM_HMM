@@ -4,27 +4,27 @@ EXE_INC = \
     -I. \
     -ItemperaturePhaseChangeTwoPhaseMixtures/lnInclude \
     -I$(interPhaseChangePath) \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/fvOptions/lnInclude\
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
     -I$(LIB_SRC)/transportModels \
+    -I$(LIB_SRC)/transportModels/twoPhaseMixture/lnInclude \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/transportModels/interfaceProperties/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
-    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(LIB_SRC)/fvOptions/lnInclude\
-    -I$(LIB_SRC)/sampling/lnInclude
+    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude
 
 EXE_LIBS = \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lmeshTools \
+    -lsampling \
     -lphaseTemperatureChangeTwoPhaseMixtures \
     -ltwoPhaseMixture \
     -linterfaceProperties \
     -lincompressibleTransportModels \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \
-    -lfiniteVolume \
-    -lmeshTools \
-    -lfvOptions \
-    -lsampling \
     -lfluidThermophysicalModels
