@@ -85,7 +85,8 @@ bool Foam::UOPstream::write
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
 
-        profilingPstream::addGatherTime();
+        // Assume these are from scatters ...
+        profilingPstream::addScatterTime();
 
         if (debug)
         {
@@ -107,7 +108,8 @@ bool Foam::UOPstream::write
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
 
-        profilingPstream::addWaitTime();
+        // Assume these are from scatters ...
+        profilingPstream::addScatterTime();
 
         if (debug)
         {
