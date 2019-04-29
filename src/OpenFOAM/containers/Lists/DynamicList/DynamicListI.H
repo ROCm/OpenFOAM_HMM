@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -169,9 +169,10 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 
 
 template<class T, int SizeMin>
+template<class Addr>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const UIndirectList<T>& lst
+    const IndirectListBase<T, Addr>& lst
 )
 :
     List<T>(lst),
@@ -555,10 +556,11 @@ Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
+template<class Addr>
 inline Foam::DynamicList<T, SizeMin>&
 Foam::DynamicList<T, SizeMin>::append
 (
-    const UIndirectList<T>& lst
+    const IndirectListBase<T, Addr>& lst
 )
 {
     label idx = List<T>::size();
@@ -827,9 +829,10 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 
 
 template<class T, int SizeMin>
+template<class Addr>
 inline void Foam::DynamicList<T, SizeMin>::operator=
 (
-    const UIndirectList<T>& lst
+    const IndirectListBase<T, Addr>& lst
 )
 {
     assignDynList(lst);

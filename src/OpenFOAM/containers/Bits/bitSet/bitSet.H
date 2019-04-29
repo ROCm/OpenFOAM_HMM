@@ -157,7 +157,12 @@ public:
         bitSet(const bitSet& bitset, const labelUList& addr);
 
         //- Copy construct a subset
-        bitSet(const bitSet& bitset, const labelUIndList& addr);
+        template<class Addr>
+        bitSet
+        (
+            const bitSet& bitset,
+            const IndirectListBase<label, Addr>& addr
+        );
 
         //- Copy construct a subset range
         bitSet(const bitSet& bitset, const labelRange& range);
@@ -171,7 +176,12 @@ public:
 
         //- Construct with given size with all bits set to 0,
         //- subsequently add specified locations as 1.
-        inline bitSet(const label n, const labelUIndList& locations);
+        template<class Addr>
+        bitSet
+        (
+            const label n,
+            const IndirectListBase<label, Addr>& locations
+        );
 
         //- Construct with given size with all bits set to 0,
         //- subsequently add specified locations as 1.
@@ -188,7 +198,8 @@ public:
 
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
-        inline explicit bitSet(const labelUIndList& locations);
+        template<class Addr>
+        inline explicit bitSet(const IndirectListBase<label, Addr>& locations);
 
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
@@ -382,7 +393,8 @@ public:
         //  Does auto-vivify for non-existent entries.
         //
         //  \return number of locations changed
-        inline label set(const labelUIndList& locations);
+        template<class Addr>
+        inline label set(const IndirectListBase<label, Addr>& locations);
 
         //- Set the listed locations to true.
         //  Does auto-vivify for non-existent entries.
@@ -406,7 +418,8 @@ public:
         //- Unset the listed locations, never auto-vivifies.
         //
         //  \return number of locations changed
-        inline label unset(const labelUIndList& locations);
+        template<class Addr>
+        inline label unset(const IndirectListBase<label, Addr>& locations);
 
         //- Unset the listed locations, never auto-vivifies.
         //

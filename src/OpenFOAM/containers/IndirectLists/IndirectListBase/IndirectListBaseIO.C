@@ -25,21 +25,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "UIndirectList.H"
+#include "IndirectListBase.H"
 #include "Ostream.H"
 #include "token.H"
 #include "contiguous.H"
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template<class T>
-Foam::Ostream& Foam::UIndirectList<T>::writeList
+template<class T, class Addr>
+Foam::Ostream& Foam::IndirectListBase<T, Addr>::writeList
 (
     Ostream& os,
     const label shortLen
 ) const
 {
-    const UIndirectList<T>& list = *this;
+    const IndirectListBase<T, Addr>& list = *this;
 
     const label len = list.size();
 

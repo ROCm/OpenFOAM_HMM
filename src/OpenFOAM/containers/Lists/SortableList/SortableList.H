@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -30,7 +30,7 @@ Description
     A list that is sorted upon construction or when explicitly requested
     with the sort() method.
 
-    Uses the Foam::stableSort() algorithm.
+    Uses the std::stable_sort() algorithm.
 
 SourceFiles
     SortableList.C
@@ -88,10 +88,10 @@ public:
         inline SortableList(SortableList<T>&& lst);
 
         //- Copy construct from UList, sorting immediately
-        explicit SortableList(const UList<T>& values);
+        explicit inline SortableList(const UList<T>& values);
 
         //- Move construct from List, sorting immediately
-        SortableList(List<T>&& values);
+        inline SortableList(List<T>&& values);
 
         //- Construct given begin/end iterators.
         //  Uses std::distance to determine the size.
@@ -99,7 +99,7 @@ public:
         inline SortableList(InputIterator begIter, InputIterator endIter);
 
         //- Construct from an initializer list, sorting immediately
-        SortableList(std::initializer_list<T> values);
+        inline SortableList(std::initializer_list<T> values);
 
 
     // Member Functions
@@ -122,12 +122,19 @@ public:
         //- Clear the indices and return a reference to the underlying List
         List<T>& shrink();
 
-        //- (stable) sort the list (if changed after construction time).
+        //- Forward (stable) sort the list (if changed after construction).
         //  Resizes the indices as required
         void sort();
 
         //- Reverse (stable) sort the list
+        //  Resizes the indices as required
         void reverseSort();
+
+        //- Forward partial sort the list until the middle point
+        void partialSort(label n, label start=0);
+
+        //- Reverse partial sort the list until the middle point
+        void partialReverseSort(label n, label start=0);
 
         //- Swap content with another SortableList in constant time
         inline void swap(SortableList<T>& lst);

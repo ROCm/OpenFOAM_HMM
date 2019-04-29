@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -120,8 +120,9 @@ public:
         //- Copy construct from UList\<Type\>
         inline explicit Field(const UList<Type>& list);
 
-        //- Copy construct from UIndirectList\<Type\>
-        inline explicit Field(const UIndirectList<Type>& list);
+        //- Copy construct from IndirectList
+        template<class Addr>
+        inline explicit Field(const IndirectListBase<Type, Addr>& list);
 
         //- Move construct from Field
         inline Field(Field<Type>&& fld);

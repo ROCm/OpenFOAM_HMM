@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -27,24 +27,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::IndirectListAddressing::IndirectListAddressing
-(
-    const labelUList& addr
-)
-:
-    addressing_(addr)
-{}
-
-
-inline Foam::IndirectListAddressing::IndirectListAddressing
-(
-    List<label>&& addr
-)
-:
-    addressing_(std::move(addr))
-{}
-
-
 template<class T>
 inline Foam::IndirectList<T>::IndirectList
 (
@@ -52,11 +34,11 @@ inline Foam::IndirectList<T>::IndirectList
     const labelUList& addr
 )
 :
-    IndirectListAddressing(addr),
+    IndirectListAddressing<labelList>(addr),
     UIndirectList<T>
     (
         values,
-        IndirectListAddressing::addressing()
+        IndirectListAddressing<labelList>::addressing()
     )
 {}
 
@@ -65,73 +47,42 @@ template<class T>
 inline Foam::IndirectList<T>::IndirectList
 (
     const UList<T>& values,
-    List<label>&& addr
+    labelList&& addr
 )
 :
-    IndirectListAddressing(std::move(addr)),
+    IndirectListAddressing<labelList>(std::move(addr)),
     UIndirectList<T>
     (
         values,
-        IndirectListAddressing::addressing()
+        IndirectListAddressing<labelList>::addressing()
     )
 {}
 
 
 template<class T>
-inline Foam::IndirectList<T>::IndirectList
-(
-    const IndirectList<T>& list
-)
+inline Foam::IndirectList<T>::IndirectList(const IndirectList<T>& list)
 :
-    IndirectListAddressing(list.addressing()),  // Copy addressing
+    // Copy addressing
+    IndirectListAddressing<labelList>(list.addressing()),
     UIndirectList<T>
     (
-        list.completeList(),
-        IndirectListAddressing::addressing()
+        list.values(),
+        IndirectListAddressing<labelList>::addressing()
     )
 {}
 
 
 template<class T>
-inline Foam::IndirectList<T>::IndirectList
-(
-    const UIndirectList<T>& list
-)
+inline Foam::IndirectList<T>::IndirectList(const UIndirectList<T>& list)
 :
-    IndirectListAddressing(list.addressing()),  // Copy addressing
+    // Copy addressing
+    IndirectListAddressing<labelList>(list.addressing()),
     UIndirectList<T>
     (
-        list.completeList(),
-        IndirectListAddressing::addressing()
+        list.values(),
+        IndirectListAddressing<labelList>::addressing()
     )
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::List<Foam::label>&
-Foam::IndirectListAddressing::addressing() const
-{
-    return addressing_;
-}
-
-
-inline void Foam::IndirectListAddressing::resetAddressing
-(
-    const labelUList& addr
-)
-{
-    addressing_ = addr;
-}
-
-
-inline void Foam::IndirectListAddressing::resetAddressing
-(
-    List<label>&& addr
-)
-{
-    addressing_.transfer(addr);
-}
 
 
 // ************************************************************************* //

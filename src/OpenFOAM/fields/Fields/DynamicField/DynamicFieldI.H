@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -132,9 +132,10 @@ inline Foam::DynamicField<T, SizeMin>::DynamicField
 
 
 template<class T, int SizeMin>
+template<class Addr>
 inline Foam::DynamicField<T, SizeMin>::DynamicField
 (
-    const UIndirectList<T>& list
+    const IndirectListBase<T, Addr>& list
 )
 :
     Field<T>(list),

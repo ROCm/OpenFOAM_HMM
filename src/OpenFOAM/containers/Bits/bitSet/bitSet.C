@@ -306,19 +306,6 @@ Foam::bitSet::bitSet(const bitSet& bitset, const labelUList& addr)
 }
 
 
-Foam::bitSet::bitSet(const bitSet& bitset, const labelUIndList& addr)
-:
-    bitSet(addr.size())
-{
-    const label len = addr.size();
-
-    for (label i = 0; i < len; ++i)
-    {
-        set(i, bitset.get(addr[i]));
-    }
-}
-
-
 Foam::bitSet::bitSet(const bitSet& bitset, const labelRange& range)
 :
     bitSet(range.size())

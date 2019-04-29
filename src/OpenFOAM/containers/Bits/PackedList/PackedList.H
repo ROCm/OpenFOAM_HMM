@@ -93,7 +93,7 @@ SourceFiles
 
 #include "BitOps.H"
 #include "labelList.H"
-#include "UIndirectList.H"
+#include "IndirectListBase.H"
 #include "InfoProxy.H"
 #include "PackedListCore.H"
 
@@ -252,7 +252,12 @@ public:
         PackedList(const PackedList<Width>& list, const labelUList& addr);
 
         //- Copy construct a subset
-        PackedList(const PackedList<Width>& list, const labelUIndList& addr);
+        template<class Addr>
+        PackedList
+        (
+            const PackedList<Width>& list,
+            const IndirectListBase<label, Addr>& addr
+        );
 
         //- Copy construct a subset range
         PackedList(const PackedList<Width>& list, const labelRange& range);
@@ -260,8 +265,9 @@ public:
         //- Construct from a list of values
         inline explicit PackedList(const labelUList& values);
 
-        //- Construct from a list of values
-        inline explicit PackedList(const labelUIndList& values);
+        //- Construct from a indirect list of values
+        template<class Addr>
+        inline explicit PackedList(const IndirectListBase<label, Addr>& values);
 
         //- Clone
         inline autoPtr<PackedList<Width>> clone() const;

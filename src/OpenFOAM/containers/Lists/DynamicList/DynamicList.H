@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -151,8 +151,9 @@ public:
         //- Construct from an initializer list. Size set to list size.
         inline explicit DynamicList(std::initializer_list<T> lst);
 
-        //- Construct from UIndirectList. Size set to UIndirectList size.
-        inline explicit DynamicList(const UIndirectList<T>& lst);
+        //- Construct from IndirectList. Size set to addressing size.
+        template<class Addr>
+        inline explicit DynamicList(const IndirectListBase<T, Addr>& lst);
 
         //- Move construct.
         inline DynamicList(DynamicList<T, SizeMin>&& lst);
@@ -259,9 +260,10 @@ public:
             inline DynamicList<T, SizeMin>&
             append(std::initializer_list<T> lst);
 
-            //- Append a UIndirectList at the end of this list
+            //- Append a IndirectList at the end of this list
+            template<class Addr>
             inline DynamicList<T, SizeMin>&
-            append(const UIndirectList<T>& lst);
+            append(const IndirectListBase<T, Addr>& lst);
 
             //- Move append list
             inline DynamicList<T, SizeMin>& append(List<T>&& lst);
@@ -338,8 +340,9 @@ public:
             //- Assignment from initializer list
             inline void operator=(std::initializer_list<T> lst);
 
-            //- Assignment to UIndirectList
-            inline void operator=(const UIndirectList<T>& lst);
+            //- Assignment from IndirectList
+            template<class Addr>
+            inline void operator=(const IndirectListBase<T, Addr>& lst);
 
             //- Move assignment
             inline void operator=(List<T>&& lst);

@@ -120,7 +120,12 @@ inline Foam::bitSet::bitSet(const label n, const labelUList& locations)
 }
 
 
-inline Foam::bitSet::bitSet(const label n, const labelUIndList& locations)
+template<class Addr>
+inline Foam::bitSet::bitSet
+(
+    const label n,
+    const IndirectListBase<label, Addr>& locations
+)
 :
     bitSet(n)
 {
@@ -148,7 +153,11 @@ inline Foam::bitSet::bitSet(const labelUList& locations)
 }
 
 
-inline Foam::bitSet::bitSet(const labelUIndList& locations)
+template<class Addr>
+inline Foam::bitSet::bitSet
+(
+    const IndirectListBase<label, Addr>& locations
+)
 :
     bitSet()
 {
@@ -537,7 +546,11 @@ inline Foam::label Foam::bitSet::set(const labelUList& locations)
 }
 
 
-inline Foam::label Foam::bitSet::set(const labelUIndList& locations)
+template<class Addr>
+inline Foam::label Foam::bitSet::set
+(
+    const IndirectListBase<label, Addr>& locations
+)
 {
     return setMany(locations.begin(), locations.end());
 }
@@ -549,7 +562,11 @@ inline Foam::label Foam::bitSet::unset(const labelUList& locations)
 }
 
 
-inline Foam::label Foam::bitSet::unset(const labelUIndList& locations)
+template<class Addr>
+inline Foam::label Foam::bitSet::unset
+(
+    const IndirectListBase<label, Addr>& locations
+)
 {
     return unset(locations.begin(), locations.end());
 }

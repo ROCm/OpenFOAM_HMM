@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,8 @@ inline Foam::Field<Type>::Field(const UList<Type>& list)
 
 
 template<class Type>
-inline Foam::Field<Type>::Field(const UIndirectList<Type>& list)
+template<class Addr>
+inline Foam::Field<Type>::Field(const IndirectListBase<Type, Addr>& list)
 :
     List<Type>(list)
 {}

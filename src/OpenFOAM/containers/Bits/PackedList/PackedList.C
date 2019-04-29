@@ -47,10 +47,11 @@ Foam::PackedList<Width>::PackedList
 
 
 template<unsigned Width>
+template<class Addr>
 Foam::PackedList<Width>::PackedList
 (
     const PackedList<Width>& list,
-    const labelUIndList& addr
+    const IndirectListBase<label, Addr>& addr
 )
 :
     PackedList<Width>(addr.size())

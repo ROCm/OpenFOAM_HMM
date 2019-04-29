@@ -29,6 +29,9 @@ Description
 #include "labelList.H"
 #include "FixedList.H"
 #include "sliceRange.H"
+#include "SliceList.H"
+#include "IndirectList.H"
+#include "Random.H"
 
 using namespace Foam;
 
@@ -128,9 +131,60 @@ int main(int argc, char *argv[])
         }
     }
 
+    // Sliced lists
+    {
+        List<scalar> list1(100);
+
+        Random rnd(1234);
+
+        for (scalar& val : list1)
+        {
+            val = 100 * rnd.sample01<scalar>();
+        }
+
+        Info<< nl << "Random list: " << flatOutput(list1) << nl;
+
+        SliceList<scalar> slice1(list1, sliceRange(0, 15, 3));
+
+        Info<< nl << "slicing with: " << slice1.addressing() << nl;
+
+        Info<< nl << "Sliced list: " << flatOutput(slice1) << nl;
+
+        for (scalar& val : slice1)
+        {
+            val = -val;
+        }
+
+        // Changed list via slice:
+        Info<< nl << "Changed via slice: " << flatOutput(list1) << nl;
+
+        // Some indirect list
+
+        IndirectList<scalar> indlist
+        (
+            list1,
+            identity(slice1.size(), list1.size()-slice1.size())
+        );
+
+        Info<< nl << "Indirect slice: " << flatOutput(indlist) << nl;
+
+        indlist = 1000;
+        Info<< nl << "zeroed slice: " << flatOutput(indlist) << nl;
+
+        slice1 = indlist;
+
+        Info<< nl << "self-copy: " << flatOutput(list1) << nl;
+
+        slice1 = 100000;
+
+        Info<< nl << "set values: " << flatOutput(slice1) << nl
+            << " = " << flatOutput(list1) << nl;
+    }
+
     Info<< "\nEnd\n" << endl;
 
     return 0;
 }
+
 
 // ************************************************************************* //

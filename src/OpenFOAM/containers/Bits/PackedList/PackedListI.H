@@ -242,7 +242,11 @@ inline Foam::PackedList<Width>::PackedList(const labelUList& values)
 
 
 template<unsigned Width>
-inline Foam::PackedList<Width>::PackedList(const labelUIndList& values)
+template<class Addr>
+inline Foam::PackedList<Width>::PackedList
+(
+    const IndirectListBase<label, Addr>& values
+)
 :
     blocks_(num_blocks(values.size()), 0u),
     size_(values.size())
