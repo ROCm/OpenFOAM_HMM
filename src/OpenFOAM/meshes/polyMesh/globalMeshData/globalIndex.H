@@ -226,12 +226,12 @@ public:
 
             //- Collect data in processor order on master (== procIDs[0]).
             //  Needs offsets only on master.
-            template<class Type>
+            template<class Container, class Type>
             static void gather
             (
                 const labelUList& offsets,
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
@@ -241,11 +241,11 @@ public:
 
             //- Collect data in processor order on master (== procIDs[0]).
             //  Needs offsets only on master.
-            template<class Type>
+            template<class Container, class Type>
             void gather
             (
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
@@ -283,12 +283,12 @@ public:
 
             //- Inplace collect in processor order on master (== procIDs[0]).
             //- Needs offsets only on master.
-            template<class Type>
+            template<class Container, class Type>
             static void gather
             (
                 const labelUList& offsets,
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes commsType =
@@ -297,11 +297,11 @@ public:
 
             //- Inplace collect in processor order on master (== procIDs[0]).
             //- Needs offsets only on master.
-            template<class Type>
+            template<class Container, class Type>
             void gather
             (
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes commsType =
@@ -337,12 +337,12 @@ public:
 
 
             //- Distribute data in processor order. Requires fld to be sized!
-            template<class Type>
+            template<class Container, class Type>
             static void scatter
             (
                 const labelUList& offsets,
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
@@ -351,11 +351,11 @@ public:
             );
 
             //- Distribute data in processor order. Requires fld to be sized!
-            template<class Type>
+            template<class Container, class Type>
             void scatter
             (
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),

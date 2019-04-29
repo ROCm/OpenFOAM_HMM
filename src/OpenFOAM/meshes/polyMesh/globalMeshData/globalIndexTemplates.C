@@ -29,12 +29,12 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Container, class Type>
 void Foam::globalIndex::gather
 (
     const labelUList& off,
     const label comm,
-    const labelList& procIDs,
+    const Container& procIDs,
     const UList<Type>& fld,
     List<Type>& allFld,
     const int tag,
@@ -193,7 +193,7 @@ void Foam::globalIndex::gather
     gather
     (
         UPstream::worldComm,
-        identity(Pstream::nProcs(UPstream::worldComm)),
+        UPstream::procID(UPstream::worldComm),
         fld,
         allFld,
         tag,
@@ -215,12 +215,12 @@ void Foam::globalIndex::gatherOp
 }
 
 
-template<class Type>
+template<class Container, class Type>
 void Foam::globalIndex::gather
 (
     const labelUList& off,
     const label comm,
-    const labelList& procIDs,
+    const Container& procIDs,
     List<Type>& fld,
     const int tag,
     const Pstream::commsTypes commsType
@@ -250,7 +250,7 @@ void Foam::globalIndex::gather
     gather
     (
         UPstream::worldComm,
-        identity(Pstream::master(UPstream::worldComm)),
+        UPstream::procID(UPstream::worldComm),
         fld,
         allFld,
         tag,
@@ -280,12 +280,12 @@ void Foam::globalIndex::gatherOp
 }
 
 
-template<class Type>
+template<class Container, class Type>
 void Foam::globalIndex::scatter
 (
     const labelUList& off,
     const label comm,
-    const labelList& procIDs,
+    const Container& procIDs,
     const UList<Type>& allFld,
     UList<Type>& fld,
     const int tag,
@@ -452,7 +452,7 @@ void Foam::globalIndex::scatter
     (
         offsets_,
         UPstream::worldComm,
-        identity(Pstream::nProcs(UPstream::worldComm)),
+        UPstream::procID(UPstream::worldComm),
         allFld,
         fld,
         tag,

@@ -34,8 +34,8 @@ License
 Foam::sliceRange::sliceRange(const FixedList<label,3>& coeffs)
 :
     start_(coeffs[0]),
-    size_(std::max(0,coeffs[1])),   // No negative size
-    stride_(std::max(0,coeffs[2]))  // No negative stride
+    size_(std::max(label(0),coeffs[1])),   // No negative size
+    stride_(std::max(label(0),coeffs[2]))  // No negative stride
 {}
 
 

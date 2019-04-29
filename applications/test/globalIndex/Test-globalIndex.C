@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     DynamicList<label> globalIDs;
     for (label i = 0; i < 100; i++)
     {
-        globalIDs.append(rndGen.position(0, nTotalCells-1));
+        globalIDs.append(rndGen.position(label(0), nTotalCells-1));
     }
 
     // Get the cell centres at those cell indices

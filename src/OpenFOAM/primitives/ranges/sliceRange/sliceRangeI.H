@@ -43,8 +43,8 @@ inline Foam::sliceRange::sliceRange
 ) noexcept
 :
     start_(start),
-    size_(std::max(0,size)),    // No negative size
-    stride_(std::max(0,stride)) // No negative stride
+    size_(std::max(label(0),size)),    // No negative size
+    stride_(std::max(label(0),stride)) // No negative stride
 {}
 
 
