@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -30,6 +30,7 @@ Description
 
 #include "UIPstream.H"
 #include "PstreamGlobals.H"
+#include "profilingPstream.H"
 #include "IOstreams.H"
 
 #include <mpi.h>
@@ -85,6 +86,8 @@ Foam::UIPstream::UIPstream
         // and set it
         if (!wantedSize)
         {
+            profilingPstream::beginTiming();
+
             MPI_Probe
             (
                 fromProcNo_,
@@ -93,6 +96,9 @@ Foam::UIPstream::UIPstream
                 &status
             );
             MPI_Get_count(&status, MPI_BYTE, &messageSize_);
+
+            // Assume these are from gathers ...
+            profilingPstream::addGatherTime();
 
             externalBuf_.setCapacity(messageSize_);
             wantedSize = messageSize_;
@@ -186,6 +192,8 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
         // and set it
         if (!wantedSize)
         {
+            profilingPstream::beginTiming();
+
             MPI_Probe
             (
                 fromProcNo_,
@@ -194,6 +202,9 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
                 &status
             );
             MPI_Get_count(&status, MPI_BYTE, &messageSize_);
+
+            // Assume these are from gathers ...
+            profilingPstream::addGatherTime();
 
             externalBuf_.setCapacity(messageSize_);
             wantedSize = messageSize_;
@@ -257,6 +268,8 @@ Foam::label Foam::UIPstream::read
         error::printStack(Pout);
     }
 
+    profilingPstream::beginTiming();
+
     if (commsType == commsTypes::blocking || commsType == commsTypes::scheduled)
     {
         MPI_Status status;
@@ -282,6 +295,7 @@ Foam::label Foam::UIPstream::read
             return 0;
         }
 
+        profilingPstream::addGatherTime();
 
         // Check size of message read
 
@@ -332,6 +346,8 @@ Foam::label Foam::UIPstream::read
             return 0;
         }
 
+        profilingPstream::addWaitTime();
+
         if (debug)
         {
             Pout<< "UIPstream::read : started read from:" << fromProcNo
@@ -346,15 +362,12 @@ Foam::label Foam::UIPstream::read
         // Assume the message is completely received.
         return bufSize;
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Unsupported communications type "
-            << int(commsType)
-            << Foam::abort(FatalError);
 
-        return 0;
-    }
+    FatalErrorInFunction
+        << "Unsupported communications type " << int(commsType)
+        << Foam::abort(FatalError);
+
+    return 0;
 }
 
 

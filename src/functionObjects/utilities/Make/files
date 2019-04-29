@@ -12,6 +12,8 @@ vtkWrite/vtkWriteUpdate.C
 
 removeRegisteredObject/removeRegisteredObject.C
 
+parProfiling/parProfiling.C
+
 solverInfo/solverInfo.C
 
 runTimeControl/runTimeControl.C

@@ -55,6 +55,8 @@ functions
 
     // Demonstrate runTimePostProcessing
     #include "visualization"
+
+    #include "profiling"
 }
 
 

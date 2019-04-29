@@ -11,6 +11,7 @@ global/profiling/profiling.C
 global/profiling/profilingInformation.C
 global/profiling/profilingSysInfo.C
 global/profiling/profilingTrigger.C
+global/profiling/profilingPstream.C
 global/etcFiles/etcFiles.C
 global/version/foamVersion.C
 
