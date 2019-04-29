@@ -52,15 +52,13 @@ echo_readline()
 # -> HAVE_LIBREADLINE, READLINE_INC_DIR, READLINE_LIB_DIR
 have_readline()
 {
-    local prefix header library static settings warn
+    local prefix header library incName libName settings warn
     # warn="==> skip readline"
 
-    # Location
+    # Expected location, include/library names
     prefix=system
-
-    # Header/library names
-    header="readline/readline.h"
-    library="libreadline$extLibso"
+    incName="readline/readline.h"
+    libName="libreadline"
 
     # ----------------------------------
     if isNone "$prefix"
@@ -69,38 +67,33 @@ have_readline()
         return 1
     elif hasAbsdir "$prefix"
     then
-        header=$(findFirstFile "$prefix/include/$header")
-
-        library=$(findFirstFile \
-            "$prefix/lib/$library" \
-            "$prefix/lib$WM_COMPILER_LIB_ARCH/$library" \
-        )
+        header=$(findFirstFile "$prefix/include/$incName")
+        library="$(findExtLib $libName)"
     elif isSystem "$prefix"
     then
-        prefix=/usr
-        header=$(findFirstFile "/usr/local/include/$header" "/usr/include/$header")
-        case "$header" in (/usr/local/*) prefix=/usr/local ;; esac
-
-        library=$(findFirstFile \
-            "$prefix/lib/$library" \
-            "$prefix/lib$WM_COMPILER_LIB_ARCH/$library" \
-        )
+        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        prefix=$(sysPrefix "$header")
     else
-        unset prefix header library
+        unset prefix
     fi
     # ----------------------------------
 
-    # Header found?
+    # Header
     [ -n "$header" ] || {
         [ -n "$warn" ] && echo "$warn (no header)"
         return 2
     }
 
-    # Library found?
-    [ -n "$library" ] || {
+    # Library
+    [ -n "$library" ] || library=$(findLibrary \
+        "$prefix/lib/$libName" \
+        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
+    ) || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
+
+    # ----------------------------------
 
     header="${header%/*}"   # Strip one-level (include/readline/...)
 

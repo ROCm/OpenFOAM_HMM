@@ -53,10 +53,10 @@ echo_ccmio()
 # -> HAVE_CCMIO, CCMIO_INC_DIR, CCMIO_LIB_DIR
 have_ccmio()
 {
-    local prefix header library static settings warn
+    local prefix header library incName libName settings warn
     warn="==> skip ccmio"
 
-    #  Setup
+    # Setup
     if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ccmio)
     then
         . "$settings"
@@ -65,13 +65,11 @@ have_ccmio()
         return 2
     fi
 
-    # Location
-    prefix="$CCMIO_ARCH_PATH"
-
-    # Header/library names.
+    # Expected location, include/library names
     # Link with static libccmio only (fewer issues)
-    header="libccmio/ccmio.h"
-    static="libccmio$extLiba"
+    prefix="$CCMIO_ARCH_PATH"
+    incName="libccmio/ccmio.h"
+    libName="libccmio.a"
 
     # ----------------------------------
     if isNone "$prefix"
@@ -80,30 +78,29 @@ have_ccmio()
         return 1
     elif hasAbsdir "$prefix"
     then
-        header=$(findFirstFile "$prefix/include/$header")
-
-        library=$(findFirstFile \
-            "$(thirdExtLib $library)" \
-            "$prefix/lib/$static" \
-            "$prefix/lib$WM_COMPILER_LIB_ARCH/$static" \
-        )
+        header=$(findFirstFile "$prefix/include/$incName")
+        library="$(findExtLib $libName)"
     else
-        unset prefix header library
+        unset prefix
     fi
     # ----------------------------------
 
-    # Header found?
+    # Header
     [ -n "$header" ] || {
         [ -n "$warn" ] && echo "$warn (no header)"
         return 2
     }
 
-    # Library found?
-    [ -n "$library" ] || {
+    # Library
+    [ -n "$library" ] || library=$(findLibrary \
+        "$prefix/lib/$libName" \
+        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
+    ) || {
         [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
 
+    # ----------------------------------
 
     # The libccmio uses int32_t.
     # The OpenFOAM adapter thus requires additional work for 64-bit labels.
