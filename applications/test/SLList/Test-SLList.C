@@ -41,8 +41,8 @@ using namespace Foam;
 template<class T>
 void printAddress(const UList<T>& list)
 {
-    Info<< "list addr: " << long(&list)
-        << " data addr: " << long(list.cdata()) << nl;
+    Info<< "list addr: " << uintptr_t(&list)
+        << " data addr: " << uintptr_t(list.cdata()) << nl;
 }
 
 

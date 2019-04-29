@@ -50,7 +50,7 @@ void printInfo
         Info<< " size=\"" << lst.size() << "\"";
         if (lst.cdata())
         {
-            Info<< " ptr=\"" << long(lst.cdata()) << "\"";
+            Info<< " ptr=\"" << uintptr_t(lst.cdata()) << "\"";
         }
         else
         {
@@ -76,7 +76,7 @@ void printInfo
             << "\" capacity=\"" << lst.capacity() << "\"";
         if (lst.cdata())
         {
-            Info<< " ptr=\"" << long(lst.cdata()) << "\"";
+            Info<< " ptr=\"" << uintptr_t(lst.cdata()) << "\"";
         }
         else
         {

@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
             if (iter.good())
             {
                 Info<< "have " << k << nl
-                    << "    addr: " << long(*iter) << nl
+                    << "    addr: " << uintptr_t(*iter) << nl
                     << "    info: " << (*iter)->info() << nl
                     << "    info: " << iter->info() << nl
                     << "    incr: " << iter->increment() << nl
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
             if (iter1.good())
             {
                 Info<< "have " << k << nl
-                    << "    addr: " << long(*iter1) << nl
+                    << "    addr: " << uintptr_t(*iter1) << nl
                     << "    info: " << (*iter1)->info() << nl
                     << "    info: " << iter1->info() << nl
                     << "    incr: " << iter1->increment() << nl
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
             if (iter2.good())
             {
                 Info<< "have " << k << nl
-                    << "    addr: " << long(*iter2) << nl
+                    << "    addr: " << uintptr_t(*iter2) << nl
                     << "    info: " << (*iter2)->info() << nl
                     << "    info: " << iter2->info() << nl
                     // Good: does not compile
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
             if (iter3.good())
             {
                 Info<< "have " << k << nl
-                    << "    addr: " << long(*iter3) << nl
+                    << "    addr: " << uintptr_t(*iter3) << nl
                     << "    info: " << (*iter3)->info() << nl
                     << "    info: " << iter3->info() << nl
                     // Good: does not compile

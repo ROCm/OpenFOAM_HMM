@@ -45,7 +45,7 @@ void printTable(const HashPtrTable<T>& table)
         Info<< iter.key() << " = ";
         if (ptr)
         {
-            Info<< *ptr << " (" << long(ptr) << ")";
+            Info<< *ptr << " (" << uintptr_t(ptr) << ")";
         }
         else
         {

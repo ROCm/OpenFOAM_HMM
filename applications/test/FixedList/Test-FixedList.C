@@ -50,7 +50,7 @@ Ostream& printInfo(const FixedList<List<T>, N>& list)
     Info<< list << " addresses:";
     for (unsigned i = 0; i < N; ++i)
     {
-        Info<< " " << long(list[i].cdata());
+        Info<< " " << uintptr_t(list[i].cdata());
     }
     Info<< nl;
     return Info;
@@ -210,21 +210,24 @@ int main(int argc, char *argv[])
             << "list2: " << list2 << nl;
 
         // Addresses don't change with swap
-        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+        Info<< "mem: "
+            << uintptr_t(list1.data()) << " " << uintptr_t(list2.data()) << nl;
 
         list1.swap(list2);
         Info<< "The swap() method" << nl;
         Info<< "list1: " << list1 << nl
             << "list2: " << list2 << nl;
 
-        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+        Info<< "mem: "
+            << uintptr_t(list1.data()) << " " << uintptr_t(list2.data()) << nl;
 
         Swap(list1, list2);
         Info<< "The Swap() function" << nl;
         Info<< "list1: " << list1 << nl
             << "list2: " << list2 << nl;
 
-        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+        Info<< "mem: "
+            << uintptr_t(list1.data()) << " " << uintptr_t(list2.data()) << nl;
 
         Info<< "====" << nl;
 

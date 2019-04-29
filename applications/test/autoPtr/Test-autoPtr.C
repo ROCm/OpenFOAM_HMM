@@ -90,16 +90,17 @@ int main(int argc, char *argv[])
     {
         auto source = identity(8);
         Info<<"move construct from "
-            << flatOutput(source) << " @ " << long(source.cdata())
+            << flatOutput(source) << " @ " << uintptr_t(source.cdata())
             << nl << nl;
 
         auto list = autoPtr<labelList>::New(std::move(source));
 
-        Info<<"created: " << flatOutput(*list) << " @ " << long(list->cdata())
+        Info<<"created: "
+            << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
             << nl << nl;
 
         Info<<"orig: "
-            << flatOutput(source) << " @ " << long(source.cdata())
+            << flatOutput(source) << " @ " << uintptr_t(source.cdata())
             << nl << nl;
     }
 
@@ -136,7 +137,7 @@ int main(int argc, char *argv[])
 
         auto list = autoPtr<labelList>::New(identity(8));
         Info<<"forward to function from "
-            << flatOutput(*list) << " @ " << long(list->cdata())
+            << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
             << nl << nl;
 
         testTransfer2(std::move(list));
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
         if (list)
         {
             Info<< nl
-                << flatOutput(*list) << " @ " << long(list->cdata())
+                << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
                 << nl;
         }
         else
@@ -184,7 +185,7 @@ int main(int argc, char *argv[])
 
         auto list = autoPtr<labelList>::New(identity(8));
         Info<<"forward to function from "
-            << flatOutput(*list) << " @ " << long(list->cdata())
+            << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
             << nl << nl;
 
         testTransfer2(std::move(list));
@@ -194,7 +195,7 @@ int main(int argc, char *argv[])
         if (list.valid())
         {
             Info<< nl
-                << flatOutput(*list) << " @ " << long(list->cdata())
+                << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
                 << nl;
         }
         else

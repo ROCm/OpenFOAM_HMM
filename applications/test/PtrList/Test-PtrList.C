@@ -107,7 +107,7 @@ Ostream& printAddr
 
     for (label i=0; i < len; ++i)
     {
-        os << "addr=" << long(list(i)) << nl;
+        os << "addr=" << uintptr_t(list(i)) << nl;
     }
 
     // End delimiter
@@ -193,7 +193,7 @@ Ostream& print
         {
             const T* ptr = list(i);
 
-            os << "unused " << long(ptr) << nl;
+            os << "unused " << uintptr_t(ptr) << nl;
         }
     }
 

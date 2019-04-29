@@ -78,8 +78,8 @@ int main()
 
     Info
         << "\nVerify memory addesses are identical:" << nl
-        << "macro     " << long(Foam::FOAMversion) << nl
-        << "namespace " << long(&(foamVersion::version[0])) << nl;
+        << "macro     " << uintptr_t(Foam::FOAMversion) << nl
+        << "namespace " << uintptr_t(&(foamVersion::version[0])) << nl;
 
 
     // Test extraction

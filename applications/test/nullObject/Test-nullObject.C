@@ -55,16 +55,14 @@ public:
 template<class T>
 void printInfo(const UList<T>& list)
 {
-    typedef unsigned long ptrval;
-
     std::cout
         << nl
-        << "List : addr: " << ptrval(&list)
+        << "List : addr: " << uintptr_t(&list)
         << " (null: " << isNull(list) << ")" << nl
         << "    size: " << list.size() << " empty: " << list.empty() << nl
-        << "    data: " << ptrval(list.cdata())
-        << " begin=" << ptrval(list.begin())
-        << " end=" << ptrval(list.end()) << nl;
+        << "    data: " << uintptr_t(list.cdata())
+        << " begin=" << uintptr_t(list.begin())
+        << " end=" << uintptr_t(list.end()) << nl;
 
     Info<< list << nl;
 }
@@ -79,10 +77,8 @@ int main()
     SimpleClass* ptrToClass = new SimpleClass;
     SimpleClass& refToClass(*ptrToClass);
 
-    typedef unsigned long ptrval;
-
     std::cout
-        << "nullObject addr=" << ptrval(&(nullObjectPtr)) << nl
+        << "nullObject addr=" << uintptr_t(&(nullObjectPtr)) << nl
         << "  sizeof(nullObject) = " << sizeof(NullObject::nullObject) << nl
         << "  sizeof(void*) = " << sizeof(void*) << nl
         << "  sizeof(labelList) = " << sizeof(labelList) << nl
@@ -90,7 +86,7 @@ int main()
 
     std::cout
         << "nullObject" << nl
-        << "  pointer:" << ptrval(nullObjectPtr->pointer()) << nl
+        << "  pointer:" << uintptr_t(nullObjectPtr->pointer()) << nl
         << "  value:"   << nullObjectPtr->value() << nl << nl;
 
     if (notNull(ptrToClass))

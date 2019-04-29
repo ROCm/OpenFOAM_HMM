@@ -621,7 +621,7 @@ int main(int argc, char *argv[])
             os << "file=<" << file << ">" << nl;
         }
 
-        const int oldPosix = POSIX::debug;
+        const int oldDebug = POSIX::debug;
         POSIX::debug = 1;
 
 
@@ -687,7 +687,7 @@ int main(int argc, char *argv[])
             Foam::rmDir(lnB);
         }
 
-        POSIX::debug = oldPosix;
+        POSIX::debug = oldDebug;
 
         // Verify that rmDir works with bad names too
         Foam::rmDir(dirA);

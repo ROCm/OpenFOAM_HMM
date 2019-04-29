@@ -46,7 +46,7 @@ void printInfo(const tmp<T>& tmpItem)
 {
     Info<< "tmp valid:" << tmpItem.valid()
         << " isTmp:" << tmpItem.isTmp()
-        << " addr: " << long(tmpItem.get());
+        << " addr: " << uintptr_t(tmpItem.get());
 
     if (tmpItem.valid())
     {
