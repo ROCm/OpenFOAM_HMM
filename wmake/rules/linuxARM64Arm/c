@@ -1,10 +1,9 @@
-SUFFIXES += .c
+# A clang variant
+include $(GENERAL_RULES)/Clang/c
 
 cc          = armclang
 
 cARCH       = -mcpu=native
-
-cWARN       = -Wall
 
 include $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 
