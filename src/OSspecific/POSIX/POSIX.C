@@ -1701,56 +1701,42 @@ bool Foam::dlClose(void* handle)
 }
 
 
-void* Foam::dlSym(void* handle, const std::string& symbol)
+void* Foam::dlSymFind(void* handle, const std::string& symbol, bool required)
 {
+    if (!required && (!handle || symbol.empty()))
+    {
+        return nullptr;
+    }
+
     if (POSIX::debug)
     {
         std::cout
-            << "dlSym(void*, const std::string&)"
+            << "dlSymFind(void*, const std::string&, bool)"
             << " : dlsym of " << symbol << std::endl;
     }
-    // clear any old errors - see manpage dlopen
+
+    // Clear any old errors - see manpage dlopen
     (void) ::dlerror();
 
-    // get address of symbol
+    // Get address of symbol
     void* fun = ::dlsym(handle, symbol.c_str());
 
-    // find error (if any)
-    char *error = ::dlerror();
+    // Any error?
+    char *err = ::dlerror();
 
-    if (error)
+    if (err)
     {
+        if (!required)
+        {
+            return nullptr;
+        }
+
         WarningInFunction
-            << "Cannot lookup symbol " << symbol << " : " << error
+            << "Cannot lookup symbol " << symbol << " : " << err
             << endl;
     }
 
     return fun;
-}
-
-
-bool Foam::dlSymFound(void* handle, const std::string& symbol)
-{
-    if (handle && !symbol.empty())
-    {
-        if (POSIX::debug)
-        {
-            std::cout
-                << "dlSymFound(void*, const std::string&)"
-                << " : dlsym of " << symbol << std::endl;
-        }
-
-        // clear any old errors - see manpage dlopen
-        (void) ::dlerror();
-
-        // get address of symbol
-        (void) ::dlsym(handle, symbol.c_str());
-
-        // symbol can be found if there was no error
-        return !::dlerror();
-    }
-
-    return false;
 }
 
 

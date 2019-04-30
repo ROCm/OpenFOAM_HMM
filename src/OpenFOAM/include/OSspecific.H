@@ -160,7 +160,7 @@ time_t lastModified(const fileName& name, const bool followLink=true);
 
 //- Return time of last file modification
 //  Using an empty name is a no-op and always returns 0.
-double highResLastModified(const fileName&, const bool followLink = true);
+double highResLastModified(const fileName&, const bool followLink=true);
 
 //- Read a directory and return the entries as a fileName List.
 //  Using an empty directory name returns an empty list.
@@ -259,13 +259,30 @@ void* dlOpen(const fileName& lib, const bool check = true);
 //- Close a dlopened library using handle. Return true if successful
 bool dlClose(void* handle);
 
-//- Lookup a symbol in a dlopened library using handle to library
-void* dlSym(void* handle, const std::string& symbol);
 
-//- Report if symbol in a dlopened library could be found.
+//- Look for symbol in a dlopened library.
+//  If the symbol is not 'required', using a null handle or an empty symbol
+//  name is a no-op and returns nullptr without error.
+//
+//  \return the symbol or nullptr.
+void* dlSymFind(void* handle, const std::string& symbol, bool required=false);
+
+//- Lookup a symbol in a dlopened library using handle to library
+//  \return the symbol or nullptr.
+inline void* dlSym(void* handle, const std::string& symbol)
+{
+    return dlSymFind(handle, symbol, true);
+}
+
+//- Check for symbol in a dlopened library.
 //  Using a null handle or an empty symbol name is a no-op and always
-//  returns false.
-bool dlSymFound(void* handle, const std::string& symbol);
+//  returns nullptr.
+//  \return the symbol or nullptr.
+inline void* dlSymFound(void* handle, const std::string& symbol)
+{
+    return dlSymFind(handle, symbol, false);
+}
+
 
 //- Return all loaded libraries
 fileNameList dlLoaded();
