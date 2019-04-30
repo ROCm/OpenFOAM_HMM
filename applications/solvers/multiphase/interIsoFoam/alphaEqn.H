@@ -1,6 +1,19 @@
 {
+    // Temporarily making U relative to mesh motion
+    if (mesh.moving())
+    {
+        U -= fvc::reconstruct(mesh.phi());
+    }
+
     // Updating alpha1
     advector.advect();
+
+    // Making U absolute again after advection step
+    if (mesh.moving())
+    {
+        U += fvc::reconstruct(mesh.phi());
+    }
+
     #include "rhofs.H"
     rhoPhi = advector.getRhoPhi(rho1f, rho2f);
 
