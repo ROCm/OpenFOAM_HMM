@@ -8,4 +8,8 @@ LIB_LIBS = \
     $(FOAM_LIBBIN)/libOSspecific.o \
     -lz
 
-LIB_LIBS += -L$(FOAM_LIBBIN)/dummy -lPstream
+ifeq ($(FOAM_LINK_DUMMY_PSTREAM),libo)
+    LIB_LIBS += $(FOAM_LIBBIN)/dummy/libPstream.o
+else
+    LIB_LIBS += -L$(FOAM_LIBBIN)/dummy -lPstream
+endif

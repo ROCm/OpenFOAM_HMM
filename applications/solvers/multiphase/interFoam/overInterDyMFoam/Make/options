@@ -21,6 +21,8 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lfvOptions \
     -lsampling \
+    -lincompressibleTransportModels \
+    -linterfaceProperties \
     -limmiscibleIncompressibleTwoPhaseMixture \
     -lturbulenceModels \
     -lincompressibleTurbulenceModels \

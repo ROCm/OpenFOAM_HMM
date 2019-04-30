@@ -36,6 +36,7 @@ EXE_LIBS = \
     -lspecie \
     -lincompressibleTransportModels \
     -limmiscibleIncompressibleTwoPhaseMixture \
+    -linterfaceProperties \
     -lturbulenceModels \
     -lsampling \
     -lregionModels \

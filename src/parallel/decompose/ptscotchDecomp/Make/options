@@ -16,12 +16,18 @@ EXE_INC = \
  * ptscotch 6 requires scotch linked in, but does not declare the dependency
  */
 LIB_LIBS = \
+    -L$(FOAM_LIBBIN) -ldecompositionMethods \
     -L$(PTSCOTCH_LIB_DIR) \
     -L$(SCOTCH_LIB_DIR) \
-    -lptscotch -lptscotcherrexit \
-    -lscotch
+    -lscotch \
+    -lptscotch
+
+/* Combined into libptscotch for windows compile */
+ifneq ($(WM_OSTYPE),MSwindows)
+    LIB_LIBS += -lptscotcherrexit
+endif
 
 /* May require librt, but scotch does not declare the dependency */
-ifeq ("$(EXT_SO)", ".so")
+ifeq ($(EXT_SO),.so)
     LIB_LIBS += -lrt
 endif

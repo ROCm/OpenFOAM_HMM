@@ -3,10 +3,16 @@ EXE_INC = \
     -I../decompositionMethods/lnInclude
 
 LIB_LIBS = \
+    -ldecompositionMethods \
     -L$(SCOTCH_LIB_DIR) \
-    -lscotch -lscotcherrexit
+    -lscotch
+
+/* Combined into libscotch for windows compile */
+ifneq ($(WM_OSTYPE),MSwindows)
+    LIB_LIBS += -lscotcherrexit
+endif
 
 /* May require librt, but scotch does not declare the dependency */
-ifeq ("$(EXT_SO)", ".so")
+ifeq ($(EXT_SO),.so)
     LIB_LIBS += -lrt
 endif
