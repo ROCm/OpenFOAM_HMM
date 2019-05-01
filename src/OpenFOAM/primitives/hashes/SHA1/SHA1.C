@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -36,9 +36,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "SHA1.H"
-#include "IOstreams.H"
 #include "endian.H"
-
+#include "IOstreams.H"
 #include <cstring>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -77,17 +76,17 @@ static inline void set_uint32(unsigned char *dst, uint32_t v)
 
 void Foam::SHA1::processBytes(const void *data, size_t len)
 {
-    // already finalized, thus need to restart from nothing
+    // Already finalized, thus need to restart from nothing
     if (finalized_)
     {
         clear();
     }
 
-    // complete filling of internal buffer
+    // Complete filling of internal buffer
     if (bufLen_)
     {
-        size_t remaining = bufLen_;
-        size_t add =
+        const size_t remaining = bufLen_;
+        const size_t add =
         (
             sizeof(buffer_) - remaining > len
           ? len
@@ -158,10 +157,10 @@ void Foam::SHA1::processBytes(const void *data, size_t len)
 void Foam::SHA1::processBlock(const void *data, size_t len)
 {
     const uint32_t *words = reinterpret_cast<const uint32_t*>(data);
-    size_t nwords = len / sizeof(uint32_t);
+    const size_t nwords = len / sizeof(uint32_t);
     const uint32_t *endp = words + nwords;
 
-    // calculate with sixteen words of 32-bits
+    // Calculate with sixteen words of 32-bits
     uint32_t x[16];
     uint32_t a = hashsumA_;
     uint32_t b = hashsumB_;
@@ -295,7 +294,7 @@ void Foam::SHA1::calcDigest(SHA1Digest& dig) const
 {
     if (bufTotal_[0] || bufTotal_[1])
     {
-        unsigned char *r = dig.v_;
+        unsigned char *r = dig.data();
 
         set_uint32(r + 0 * sizeof(uint32_t), swapBytes(hashsumA_));
         set_uint32(r + 1 * sizeof(uint32_t), swapBytes(hashsumB_));
@@ -305,8 +304,7 @@ void Foam::SHA1::calcDigest(SHA1Digest& dig) const
     }
     else
     {
-        // no data!
-        dig.clear();
+        dig.clear();   // No data!
     }
 }
 
@@ -334,24 +332,24 @@ bool Foam::SHA1::finalize()
     {
         finalized_ = true;
 
-        // account for unprocessed bytes
-        uint32_t bytes = bufLen_;
-        size_t size = (bytes < 56 ? 64 : 128) / sizeof(uint32_t);
+        // Account for unprocessed bytes
+        const uint32_t bytes = bufLen_;
+        const size_t size = (bytes < 56 ? 64 : 128) / sizeof(uint32_t);
 
-        // count remaining bytes.
+        // Count remaining bytes.
         bufTotal_[0] += bytes;
         if (bufTotal_[0] < bytes)
         {
             ++bufTotal_[1];
         }
 
-        // finalized, but no data!
+        // Finalized, but no data!
         if (!bufTotal_[0] && !bufTotal_[1])
         {
             return false;
         }
 
-        // place the 64-bit file length in *bits* at the end of the buffer.
+        // Place the 64-bit length in *bits* at the end of the buffer.
         buffer_[size-2] = swapBytes((bufTotal_[1] << 3) | (bufTotal_[0] >> 29));
         buffer_[size-1] = swapBytes(bufTotal_[0] << 3);
 
@@ -364,28 +362,6 @@ bool Foam::SHA1::finalize()
     }
 
     return true;
-}
-
-
-Foam::SHA1Digest Foam::SHA1::digest() const
-{
-    SHA1Digest dig;
-
-    if (finalized_)
-    {
-        calcDigest(dig);
-    }
-    else
-    {
-        // avoid disturbing our data - use a copy
-        SHA1 sha(*this);
-        if (sha.finalize())
-        {
-            sha.calcDigest(dig);
-        }
-    }
-
-    return dig;
 }
 
 

@@ -45,9 +45,7 @@ SourceFiles
 #define SHA1_H
 
 #include <string>
-#include <cstddef>
-
-#include "int.H"
+#include <cstdint>
 #include "SHA1Digest.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,7 +59,7 @@ namespace Foam
 
 class SHA1
 {
-    // Private data
+    // Private Data
 
         //- Track if the hashsum has been finalized (added count, etc)
         bool finalized_;
@@ -91,8 +89,9 @@ class SHA1
         //- Process for the next LEN bytes, LEN need not be a multiple of 64.
         void processBytes(const void *data, size_t len);
 
-        //- Calculate current digest from appended data.
-        void calcDigest(SHA1Digest&) const;
+        //- Calculate digest from current data.
+        void calcDigest(SHA1Digest& dig) const;
+
 
 public:
 
@@ -101,11 +100,12 @@ public:
         //- Construct null
         inline SHA1();
 
-        //- Construct null and append initial std::string
-        inline explicit SHA1(const std::string&);
-
         //- Construct null and append initial string
-        inline explicit SHA1(const char*);
+        inline explicit SHA1(const char* str);
+
+        //- Construct null and append initial std::string
+        inline explicit SHA1(const std::string& str);
+
 
     // Member Functions
 
@@ -113,29 +113,47 @@ public:
         void clear();
 
         //- Append data for processing
+        inline SHA1& append(const char* str);
+
+        //- Append data for processing
         inline SHA1& append(const char* data, size_t len);
 
         //- Append string for processing
-        inline SHA1& append(const std::string&);
+        inline SHA1& append(const std::string& str);
 
-        //- Append string for processing
-        inline SHA1& append(const char* str);
+        //- Append substring for processing
+        inline SHA1& append
+        (
+            const std::string& str,
+            size_t pos,
+            size_t len = std::string::npos
+        );
 
         //- Finalized the calculations (normally not needed directly).
         //  Returns false if no bytes were passed for processing
         bool finalize();
 
-        //- Calculate current digest from appended data.
-        SHA1Digest digest() const;
+        //- Calculate digest from current data.
+        inline SHA1Digest digest() const;
+
+        //- The digest (40-byte) text representation, optionally with '_' prefix
+        inline std::string str(const bool prefixed=false) const;
+
+        //- Write digest (40-byte) representation, optionally with '_' prefix
+        inline Ostream& write(Ostream& os, const bool prefixed=false) const;
 
 
     // Member Operators
 
+        //- Cast conversion to a SHA1Digest,
+        //  calculates the %digest from the current data
+        inline operator SHA1Digest() const;
+
         //- Equality operator, compares %digests
-        inline bool operator==(const SHA1&) const;
+        inline bool operator==(const SHA1& rhs) const;
 
         //- Compare %digest
-        inline bool operator==(const SHA1Digest&) const;
+        inline bool operator==(const SHA1Digest& dig) const;
 
         //- Compare %digest to (40-byte) text representation (eg, from sha1sum)
         //  An %empty string is equivalent to
@@ -146,7 +164,6 @@ public:
         //  A %null or %empty string is equivalent to
         //  "0000000000000000000000000000000000000000"
         inline bool operator==(const char* hexdigits) const;
-
 
         //- Inequality operator, compares %digests
         inline bool operator!=(const SHA1&) const;
@@ -159,11 +176,6 @@ public:
 
         //- Inequality operator, compare %digest
         inline bool operator!=(const char* hexdigits) const;
-
-
-        //- Convert to a SHA1Digest,
-        //  calculate current %digest from appended data
-        inline operator SHA1Digest() const;
 };
 
 

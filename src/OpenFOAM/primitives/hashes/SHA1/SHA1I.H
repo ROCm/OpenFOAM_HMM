@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -36,14 +36,14 @@ inline Foam::SHA1::SHA1()
 }
 
 
-inline Foam::SHA1::SHA1(const std::string& str)
+inline Foam::SHA1::SHA1(const char* str)
 {
     clear();
     append(str);
 }
 
 
-inline Foam::SHA1::SHA1(const char* str)
+inline Foam::SHA1::SHA1(const std::string& str)
 {
     clear();
     append(str);
@@ -59,16 +59,9 @@ inline Foam::SHA1& Foam::SHA1::append(const char* data, size_t len)
 }
 
 
-inline Foam::SHA1& Foam::SHA1::append(const std::string& str)
-{
-    processBytes(str.data(), str.size());
-    return *this;
-}
-
-
 inline Foam::SHA1& Foam::SHA1::append(const char* str)
 {
-    if (str)
+    if (str && *str)
     {
         processBytes(str, strlen(str));
     }
@@ -76,7 +69,75 @@ inline Foam::SHA1& Foam::SHA1::append(const char* str)
 }
 
 
+inline Foam::SHA1& Foam::SHA1::append(const std::string& str)
+{
+    processBytes(str.data(), str.size());
+    return *this;
+}
+
+
+inline Foam::SHA1& Foam::SHA1::append
+(
+    const std::string& str,
+    size_t pos,
+    size_t len
+)
+{
+    if (std::string::npos != pos && pos < str.length())
+    {
+        if (std::string::npos == len || pos + len > str.length())
+        {
+            len = str.length() - pos;
+        }
+
+        processBytes(str.data() + pos, len);
+    }
+
+    return *this;
+}
+
+
+inline Foam::SHA1Digest Foam::SHA1::digest() const
+{
+    SHA1Digest dig;
+
+    if (finalized_)
+    {
+        calcDigest(dig);
+    }
+    else
+    {
+        // Avoid disturbing current data - use a copy
+        SHA1 sha(*this);
+        if (sha.finalize())
+        {
+            sha.calcDigest(dig);
+        }
+    }
+
+    return dig;
+}
+
+
+inline std::string Foam::SHA1::str(const bool prefixed) const
+{
+    return digest().str(prefixed);
+}
+
+
+inline Foam::Ostream& Foam::SHA1::write(Ostream& os, const bool prefixed) const
+{
+    return digest().write(os, prefixed);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline Foam::SHA1::operator Foam::SHA1Digest() const
+{
+    return digest();
+}
+
 
 inline bool Foam::SHA1::operator==(const SHA1& rhs) const
 {
@@ -84,9 +145,9 @@ inline bool Foam::SHA1::operator==(const SHA1& rhs) const
 }
 
 
-inline bool Foam::SHA1::operator==(const SHA1Digest& rhs) const
+inline bool Foam::SHA1::operator==(const SHA1Digest& dig) const
 {
-    return this->digest() == rhs;
+    return this->digest() == dig;
 }
 
 
@@ -126,17 +187,11 @@ inline bool Foam::SHA1::operator!=(const char* rhs) const
 }
 
 
-inline Foam::SHA1::operator Foam::SHA1Digest() const
-{
-    return digest();
-}
-
-
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 inline Foam::Ostream& Foam::operator<<(Ostream& os, const SHA1& sha)
 {
-    return (os << sha.digest());
+    return sha.write(os);
 }
 
 
