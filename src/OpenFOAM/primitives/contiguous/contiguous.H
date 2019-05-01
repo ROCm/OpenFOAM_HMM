@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -45,7 +45,7 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 template<class T, unsigned N> class FixedList;
 template<class T> class Pair;
 
@@ -55,12 +55,7 @@ template<class T> class Pair;
 template<class T>
 inline bool contiguous()
 {
-    return
-    std::integral_constant
-    <
-        bool,
-        std::is_integral<T>::value || std::is_floating_point<T>::value
-    >::value;
+    return std::is_arithmetic<T>::value;
 }
 
 //

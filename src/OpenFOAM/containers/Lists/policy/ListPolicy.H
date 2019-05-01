@@ -71,15 +71,7 @@ struct short_length : std::integral_constant<label,10> {};
 //  Default definition: (integral | floating-point) are contiguous and thus
 //  never need any line breaks
 template<class T>
-struct no_linebreak
-:
-    std::integral_constant
-    <
-        bool,
-        std::is_integral<T>::value || std::is_floating_point<T>::value
-    >
-{};
-
+struct no_linebreak : std::is_arithmetic<T> {};
 
 // Specialization for word, wordRe, keyType
 // These elements are normally fairly short, so ok to output a few (eg, 10)
