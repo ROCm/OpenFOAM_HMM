@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -622,11 +622,16 @@ Foam::label Foam::IOobjectList::filterClasses
     const bool pruning
 )
 {
-//    return HashPtrTable<IOobject>::filterValues
-//    (
-//        [&](const IOobject* io){ return pred(io->headerClassName()); },
-//        pruning
-//    );
+// This is like
+// return HashPtrTable<IOobject>::filterValues
+// (
+//     [&](const IOobject* io){ return pred(io->headerClassName()); },
+//     pruning
+// );
+// which is really
+// return HashTable<IOobject*>::filterValues
+//
+// except that it does not leak
 
     label changed = 0;
 
@@ -654,7 +659,29 @@ Foam::label Foam::IOobjectList::filterObjects
     const bool pruning
 )
 {
-    return HashPtrTable<IOobject>::filterKeys(pred, pruning);
+// This is like
+// return HashPtrTable<IOobject>::filterKeys(pred, pruning);
+// which is really
+// return HashTable<IOobject*>::filterKeys(pred, pruning);
+//
+// except that it does not leak
+
+    label changed = 0;
+
+    for (iterator iter = begin(); iter != end(); ++iter)
+    {
+        // Matches? either prune (pruning) or keep (!pruning)
+        if
+        (
+            (pred(iter.key()) ? pruning : !pruning)
+         && erase(iter)
+        )
+        {
+            ++changed;
+        }
+    }
+
+    return changed;
 }
 
 
