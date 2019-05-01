@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) YEAR AUTHOR,AFFILIATION
@@ -51,18 +51,11 @@ ${localCode}
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-extern "C"
+extern "C" void ${typeName}(Ostream& os, const dictionary& dict)
 {
-    void ${typeName}
-    (
-        Ostream& os,
-        const dictionary& dict
-    )
-    {
 //{{{ begin code
-        ${code}
+    ${code}
 //}}} end code
-    }
 }
 
 

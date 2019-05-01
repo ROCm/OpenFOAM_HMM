@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -61,10 +61,6 @@ namespace functionEntries
 }
 
 
-const Foam::word Foam::functionEntries::codeStream::codeTemplateC
-    = "codeStreamTemplate.C";
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::dlLibraryTable& Foam::functionEntries::codeStream::libs
@@ -94,27 +90,19 @@ bool Foam::functionEntries::codeStream::doingMasterOnlyReading
             topDict
         );
 
-        if (debug)
-        {
-            Pout<< "codeStream : baseIOdictionary:" << dict.name()
-                << " master-only-reading:" << d.globalObject()
-                << endl;
-        }
+        DebugPout
+            << "codeStream : baseIOdictionary:" << dict.name()
+            << " master-only-reading:" << d.globalObject() << endl;
 
         return d.globalObject();
     }
-    else
-    {
-        if (debug)
-        {
-            Pout<< "codeStream : not a baseIOdictionary:" << dict.name()
-                << " master-only-reading:" << regIOobject::masterOnlyReading
-                << endl;
-        }
 
-        // Fall back to regIOobject::masterOnlyReading
-        return regIOobject::masterOnlyReading;
-    }
+    DebugPout
+        << "codeStream : not a baseIOdictionary:" << dict.name()
+        << " master-only-reading:" << regIOobject::masterOnlyReading << endl;
+
+    // Fall back to regIOobject::masterOnlyReading
+    return regIOobject::masterOnlyReading;
 }
 
 
@@ -147,17 +135,13 @@ Foam::functionEntries::codeStream::getFunction
         lib = libs(parentDict).findLibrary(libPath);
     }
 
-    if (!lib)
-    {
-        DetailInfo
-            << "Using #codeStream with " << libPath << endl;
-    }
-
-
     // nothing loaded
     // avoid compilation if possible by loading an existing library
     if (!lib)
     {
+        DetailInfo
+            << "Using #codeStream with " << libPath << endl;
+
         if (isA<baseIOdictionary>(topDict))
         {
             // Cached access to dl libs. Guarantees clean up upon destruction
@@ -199,7 +183,7 @@ Foam::functionEntries::codeStream::getFunction
                     "EXE_INC = -g \\\n"
                   + context.options()
                   + "\n\nLIB_LIBS = \\\n"
-                  + "    -lOpenFOAM \\\n"
+                    "    -lOpenFOAM \\\n"
                   + context.libs()
                 );
 
@@ -237,26 +221,21 @@ Foam::functionEntries::codeStream::getFunction
             off_t masterSize = mySize;
             Pstream::scatter(masterSize);
 
-            if (debug)
-            {
-                Pout<< endl<< "on processor " << Pstream::myProcNo()
-                    << " have masterSize:" << masterSize
-                    << " and localSize:" << mySize
-                    << endl;
-            }
-
+            DebugPout
+                << nl << "on processor " << Pstream::myProcNo()
+                << " have masterSize:" << masterSize
+                << " and localSize:" << mySize << endl;
 
             if (mySize < masterSize)
             {
-                if (debug)
-                {
-                    Pout<< "Local file " << libPath
-                        << " not of same size (" << mySize
-                        << ") as master ("
-                        << masterSize << "). Waiting for "
-                        << regIOobject::fileModificationSkew
-                        << " seconds." << endl;
-                }
+                DebugPout
+                    << "Local file " << libPath
+                    << " not of same size (" << mySize
+                    << ") as master ("
+                    << masterSize << "). Waiting for "
+                    << regIOobject::fileModificationSkew
+                    << " seconds." << endl;
+
                 Foam::sleep(regIOobject::fileModificationSkew);
 
                 // Recheck local size
@@ -278,13 +257,10 @@ Foam::functionEntries::codeStream::getFunction
                 }
             }
 
-            if (debug)
-            {
-                Pout<< endl<< "on processor " << Pstream::myProcNo()
-                    << " after waiting: have masterSize:" << masterSize
-                    << " and localSize:" << mySize
-                    << endl;
-            }
+            DebugPout
+                << nl << "on processor " << Pstream::myProcNo()
+                << " after waiting: have masterSize:" << masterSize
+                << " and localSize:" << mySize << endl;
         }
 
         if (isA<baseIOdictionary>(topDict))
@@ -293,10 +269,8 @@ Foam::functionEntries::codeStream::getFunction
             // of Time.
             dlLibraryTable& dlLibs = libs(parentDict);
 
-            if (debug)
-            {
-                Pout<< "Opening cached dictionary:" << libPath << endl;
-            }
+            DebugPout
+                << "Opening cached dictionary:" << libPath << endl;
 
             if (!dlLibs.open(libPath, false))
             {
@@ -312,10 +286,9 @@ Foam::functionEntries::codeStream::getFunction
         else
         {
             // Uncached opening of libPath
-            if (debug)
-            {
-                Pout<< "Opening uncached dictionary:" << libPath << endl;
-            }
+            DebugPout
+                << "Opening uncached dictionary:" << libPath << endl;
+
             lib = dlOpen(libPath, true);
         }
     }

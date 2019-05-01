@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) YEAR AUTHOR,AFFILIATION
@@ -49,23 +49,20 @@ addRemovableToRunTimeSelectionTable
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-extern "C"
+// dynamicCode:
+// SHA1 = ${SHA1sum}
+//
+// unique function name that can be checked if the correct library version
+// has been loaded
+extern "C" void ${typeName}_${SHA1sum}(bool load)
 {
-    // dynamicCode:
-    // SHA1 = ${SHA1sum}
-    //
-    // unique function name that can be checked if the correct library version
-    // has been loaded
-    void ${typeName}_${SHA1sum}(bool load)
+    if (load)
     {
-        if (load)
-        {
-            // code that can be explicitly executed after loading
-        }
-        else
-        {
-            // code that can be explicitly executed before unloading
-        }
+        // Code that can be explicitly executed after loading
+    }
+    else
+    {
+        // Code that can be explicitly executed before unloading
     }
 }
 
@@ -101,7 +98,7 @@ tmp<pointField> ${typeName}Points0MotionSolver::curPoints() const
 {
     if (${verbose:-false})
     {
-        Info<<"curPoints ${typeName} sha1: ${SHA1sum}\n";
+        printMessage("curPoints ${typeName}");
     }
 
 //{{{ begin code

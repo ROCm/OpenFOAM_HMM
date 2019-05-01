@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) YEAR AUTHOR,AFFILIATION
@@ -49,23 +49,20 @@ addRemovableToRunTimeSelectionTable
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-extern "C"
+// dynamicCode:
+// SHA1 = ${SHA1sum}
+//
+// unique function name that can be checked if the correct library version
+// has been loaded
+extern "C" void ${typeName}_${SHA1sum}(bool load)
 {
-    // dynamicCode:
-    // SHA1 = ${SHA1sum}
-    //
-    // unique function name that can be checked if the correct library version
-    // has been loaded
-    void ${typeName}_${SHA1sum}(bool load)
+    if (load)
     {
-        if (load)
-        {
-            // code that can be explicitly executed after loading
-        }
-        else
-        {
-            // code that can be explicitly executed before unloading
-        }
+        // Code that can be explicitly executed after loading
+    }
+    else
+    {
+        // Code that can be explicitly executed before unloading
     }
 }
 
@@ -112,7 +109,7 @@ bool ${typeName}FunctionObject::read(const dictionary& dict)
 {
     if (${verbose:-false})
     {
-        Info<<"read ${typeName} sha1: ${SHA1sum}\n";
+        printMessage("read ${typeName}");
     }
 
 //{{{ begin code
@@ -127,7 +124,7 @@ bool ${typeName}FunctionObject::execute()
 {
     if (${verbose:-false})
     {
-        Info<<"execute ${typeName} sha1: ${SHA1sum}\n";
+        printMessage("execute ${typeName}");
     }
 
 //{{{ begin code
@@ -142,7 +139,7 @@ bool ${typeName}FunctionObject::write()
 {
     if (${verbose:-false})
     {
-        Info<<"write ${typeName} sha1: ${SHA1sum}\n";
+        printMessage("write ${typeName}");
     }
 
 //{{{ begin code
@@ -157,7 +154,7 @@ bool ${typeName}FunctionObject::end()
 {
     if (${verbose:-false})
     {
-        Info<<"end ${typeName} sha1: ${SHA1sum}\n";
+        printMessage("end ${typeName}");
     }
 
 //{{{ begin code

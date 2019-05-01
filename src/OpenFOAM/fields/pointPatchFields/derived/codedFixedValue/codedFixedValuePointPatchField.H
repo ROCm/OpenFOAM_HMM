@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -92,9 +92,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class dynamicCode;
-class dynamicCodeContext;
+// Forward Declarations
 class IOdictionary;
 
 /*---------------------------------------------------------------------------*\
@@ -105,7 +103,7 @@ template<class Type>
 class codedFixedValuePointPatchField
 :
     public fixedValuePointPatchField<Type>,
-    public codedBase
+    protected codedBase
 {
     // Private data
 
@@ -120,9 +118,6 @@ class codedFixedValuePointPatchField
     // Private Member Functions
 
         const IOdictionary& dict() const;
-
-        //- Set the rewrite vars controlling the Type
-        static void setFieldTemplates(dynamicCode& dynCode);
 
         //- Get the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
@@ -142,13 +137,15 @@ class codedFixedValuePointPatchField
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Name of the C code template to be used
-        static const word codeTemplateC;
+        static constexpr const char* const codeTemplateC
+            = "fixedValuePointPatchFieldTemplate.C";
 
         //- Name of the H code template to be used
-        static const word codeTemplateH;
+        static constexpr const char* const codeTemplateH
+            = "fixedValuePointPatchFieldTemplate.H";
 
 
     //- Runtime type information

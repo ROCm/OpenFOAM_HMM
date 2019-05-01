@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -56,7 +56,6 @@ static inline void writeEntryIfPresent
     const word& key
 )
 {
-    // non-recursive like dictionary::found, but no pattern-match either
     const entry* eptr = dict.findEntry(key, keyType::LITERAL);
 
     if (eptr)
@@ -89,57 +88,58 @@ void* Foam::codedBase::loadLibrary
 (
     const fileName& libPath,
     const string& globalFuncName,
-    const dictionary& contextDict
+    const dynamicCodeContext& context
 ) const
 {
-    void* lib = 0;
+    // Avoid compilation by loading an existing library
 
-    // avoid compilation by loading an existing library
-    if (!libPath.empty())
+    void* lib =
+    (
+        !libPath.empty() && libs().open(libPath, false)
+      ? libs().findLibrary(libPath)
+      : nullptr
+    );
+
+    if (!lib)
     {
-        if (libs().open(libPath, false))
+        return lib;
+    }
+
+    // verify the loaded version and unload if needed
+
+    // provision for manual execution of code after loading
+    if (dlSymFound(lib, globalFuncName))
+    {
+        loaderFunctionType function =
+            reinterpret_cast<loaderFunctionType>
+            (
+                dlSym(lib, globalFuncName)
+            );
+
+        if (function)
         {
-            lib = libs().findLibrary(libPath);
+            (*function)(true);    // force load
+        }
+        else
+        {
+            FatalIOErrorInFunction(context.dict())
+                << "Failed looking up symbol " << globalFuncName
+                << nl << "from " << libPath << exit(FatalIOError);
+        }
+    }
+    else
+    {
+        FatalIOErrorInFunction(context.dict())
+            << "Failed looking up symbol " << globalFuncName << nl
+            << "from " << libPath << exit(FatalIOError);
 
-            // verify the loaded version and unload if needed
-            if (lib)
-            {
-                // provision for manual execution of code after loading
-                if (dlSymFound(lib, globalFuncName))
-                {
-                    loaderFunctionType function =
-                        reinterpret_cast<loaderFunctionType>
-                        (
-                            dlSym(lib, globalFuncName)
-                        );
-
-                    if (function)
-                    {
-                        (*function)(true);    // force load
-                    }
-                    else
-                    {
-                        FatalIOErrorInFunction(contextDict)
-                            << "Failed looking up symbol " << globalFuncName
-                            << nl << "from " << libPath << exit(FatalIOError);
-                    }
-                }
-                else
-                {
-                    FatalIOErrorInFunction(contextDict)
-                        << "Failed looking up symbol " << globalFuncName << nl
-                        << "from " << libPath << exit(FatalIOError);
-
-                    lib = 0;
-                    if (!libs().close(libPath, false))
-                    {
-                        FatalIOErrorInFunction(contextDict)
-                            << "Failed unloading library "
-                            << libPath
-                            << exit(FatalIOError);
-                    }
-                }
-            }
+        lib = nullptr;
+        if (!libs().close(libPath, false))
+        {
+            FatalIOErrorInFunction(context.dict())
+                << "Failed unloading library "
+                << libPath
+                << exit(FatalIOError);
         }
     }
 
@@ -151,17 +151,16 @@ void Foam::codedBase::unloadLibrary
 (
     const fileName& libPath,
     const string& globalFuncName,
-    const dictionary& contextDict
+    const dynamicCodeContext& context
 ) const
 {
-    void* lib = 0;
 
-    if (libPath.empty())
-    {
-        return;
-    }
-
-    lib = libs().findLibrary(libPath);
+    void* lib =
+    (
+        !libPath.empty() && libs().open(libPath, false)
+      ? libs().findLibrary(libPath)
+      : nullptr
+    );
 
     if (!lib)
     {
@@ -183,7 +182,7 @@ void Foam::codedBase::unloadLibrary
         }
         else
         {
-            FatalIOErrorInFunction(contextDict)
+            FatalIOErrorInFunction(context.dict())
                 << "Failed looking up symbol " << globalFuncName << nl
                 << "from " << libPath << exit(FatalIOError);
         }
@@ -191,7 +190,7 @@ void Foam::codedBase::unloadLibrary
 
     if (!libs().close(libPath, false))
     {
-        FatalIOErrorInFunction(contextDict)
+        FatalIOErrorInFunction(context.dict())
             << "Failed unloading library " << libPath
             << exit(FatalIOError);
     }
@@ -305,20 +304,29 @@ void Foam::codedBase::createLibrary
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+void Foam::codedBase::setCodeContext(const dictionary& dict)
+{
+    context_.setCodeContext(dict);
+}
+
+
+void Foam::codedBase::append(const std::string& str)
+{
+    context_.append(str);
+}
+
+
 void Foam::codedBase::updateLibrary
 (
-    const word& name
+    const word& name,
+    const dynamicCodeContext& context
 ) const
 {
-    const dictionary& dict = this->codeDict();
-
     dynamicCode::checkSecurity
     (
         "codedBase::updateLibrary()",
-        dict
+        context.dict()
     );
-
-    dynamicCodeContext context(dict);
 
     // codeName: name + _<sha1>
     // codeDir : name
@@ -327,10 +335,11 @@ void Foam::codedBase::updateLibrary
         name + context.sha1().str(true),
         name
     );
+
     const fileName libPath = dynCode.libPath();
 
 
-    // the correct library was already loaded => we are done
+    // The correct library was already loaded => we are done
     if (libs().findLibrary(libPath))
     {
         return;
@@ -338,44 +347,55 @@ void Foam::codedBase::updateLibrary
 
     DetailInfo
         << "Using dynamicCode for " << this->description().c_str()
-        << " at line " << dict.startLineNumber()
-        << " in " << dict.name() << endl;
+        << " at line " << context.dict().startLineNumber()
+        << " in " << context.dict().name() << endl;
 
 
-    // remove instantiation of fvPatchField provided by library
+    // Remove instantiation of fvPatchField provided by library
     this->clearRedirect();
 
-    // may need to unload old library
+    // May need to unload old library
     unloadLibrary
     (
         oldLibPath_,
         dynamicCode::libraryBaseName(oldLibPath_),
-        context.dict()
+        context
     );
 
-    // try loading an existing library (avoid compilation when possible)
-    if (!loadLibrary(libPath, dynCode.codeName(), context.dict()))
+    // Try loading an existing library (avoid compilation when possible)
+    if (!loadLibrary(libPath, dynCode.codeName(), context))
     {
         createLibrary(dynCode, context);
 
-        loadLibrary(libPath, dynCode.codeName(), context.dict());
+        loadLibrary(libPath, dynCode.codeName(), context);
     }
 
-    // retain for future reference
+    // Retain for future reference
     oldLibPath_ = libPath;
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+void Foam::codedBase::updateLibrary
+(
+    const word& name,
+    const dictionary& dict
+) const
+{
+    updateLibrary(name, dynamicCodeContext(dict));
+}
 
-Foam::codedBase::codedBase()
-{}
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::codedBase::~codedBase()
-{}
+void Foam::codedBase::updateLibrary(const word& name) const
+{
+    if (context_.valid())
+    {
+        updateLibrary(name, context_);
+    }
+    else
+    {
+        updateLibrary(name, dynamicCodeContext(this->codeDict()));
+    }
+}
 
 
 // ************************************************************************* //

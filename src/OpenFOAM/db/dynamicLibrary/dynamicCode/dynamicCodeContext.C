@@ -29,110 +29,135 @@ License
 #include "stringOps.H"
 #include "OSHA1stream.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::dynamicCodeContext::inplaceExpand
+(
+    string& code,
+    const dictionary& dict
+)
+{
+    stringOps::inplaceTrim(code);
+    stringOps::inplaceExpand(code, dict);
+}
+
+
+unsigned Foam::dynamicCodeContext::addLineDirective
+(
+    string& code,
+    label lineNum,
+    const fileName& file
+)
+{
+    ++lineNum;  // Change from 0-based to 1-based
+
+    const auto len = code.length();
+
+    if (lineNum > 0 && len && !file.empty())
+    {
+        code = "#line " + Foam::name(lineNum) + " \"" + file + "\"\n" + code;
+
+        return (code.length() - len);
+    }
+
+    return 0;
+}
+
+
+unsigned Foam::dynamicCodeContext::addLineDirective
+(
+    string& code,
+    label lineNum,
+    const dictionary& dict
+)
+{
+    return addLineDirective(code, lineNum, dict.name());
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dynamicCodeContext::dynamicCodeContext()
+:
+    dict_(std::cref<dictionary>(dictionary::null))
+{}
+
 
 Foam::dynamicCodeContext::dynamicCodeContext(const dictionary& dict)
 :
-    dict_(dict),
-    code_(),
-    localCode_(),
-    include_(),
-    options_(),
-    libs_()
+    dynamicCodeContext()
 {
-    // Expand dictionary entries
-
-    // Note: removes any leading/trailing whitespace
-    // - necessary for compilation options, convenient for includes
-    // and body.
-
-    const entry* codePtr = dict.findEntry("code", keyType::LITERAL);
-
-    if (codePtr)
-    {
-        codePtr->readEntry(code_);
-        stringOps::inplaceTrim(code_);
-        stringOps::inplaceExpand(code_, dict);
-    }
-
-    const entry* includePtr = dict.findEntry("codeInclude", keyType::LITERAL);
-
-    if (includePtr)
-    {
-        includePtr->readEntry(include_);
-        stringOps::inplaceTrim(include_);
-        stringOps::inplaceExpand(include_, dict);
-    }
-
-    const entry* optionsPtr = dict.findEntry("codeOptions", keyType::LITERAL);
-
-    if (optionsPtr)
-    {
-        optionsPtr->readEntry(options_);
-        stringOps::inplaceTrim(options_);
-        stringOps::inplaceExpand(options_, dict);
-    }
-
-    const entry* libsPtr = dict.findEntry("codeLibs", keyType::LITERAL);
-
-    if (libsPtr)
-    {
-        libsPtr->readEntry(libs_);
-        stringOps::inplaceTrim(libs_);
-        stringOps::inplaceExpand(libs_, dict);
-    }
-
-    const entry* localPtr = dict.findEntry("localCode", keyType::LITERAL);
-
-    if (localPtr)
-    {
-        localPtr->readEntry(localCode_);
-        stringOps::inplaceTrim(localCode_);
-        stringOps::inplaceExpand(localCode_, dict);
-    }
-
-    // Calculate SHA1 digest from include, options, localCode, code
-    OSHA1stream os;
-    os  << include_ << options_ << libs_ << localCode_ << code_;
-    sha1_ = os.digest();
-
-
-    // Add line number after calculating sha1 since includes processorDDD
-    // in path which differs between processors.
-
-    if (codePtr)
-    {
-        addLineDirective(code_, codePtr->startLineNumber(), dict.name());
-    }
-
-    if (includePtr)
-    {
-        addLineDirective(include_, includePtr->startLineNumber(), dict.name());
-    }
-
-    // Do not add line directive to options_ (Make/options) and libs since
-    // they are preprocessed as a single line at this point. Can be fixed.
-    if (localPtr)
-    {
-        addLineDirective(localCode_, localPtr->startLineNumber(), dict.name());
-    }
+    setCodeContext(dict);
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::dynamicCodeContext::addLineDirective
-(
-    string& code,
-    label lineNum,
-    const fileName& name
-)
+bool Foam::dynamicCodeContext::valid() const
 {
-    ++lineNum;  // Change from 0-based to 1-based
+    return &(dict_.get()) != &(dictionary::null);
+}
 
-    if (lineNum > 0 && !name.empty())
+
+void Foam::dynamicCodeContext::setCodeContext(const dictionary& dict)
+{
+    dict_ = std::cref<dictionary>(dict);
+    sha1_.clear();
+
+    // Expand dictionary entries.
+    // Removing any leading/trailing whitespace is necessary for compilation
+    // options, but is also convenient for includes and code body.
+
+    const entry* eptr;
+
+    options_.clear();
+    sha1_.append("<codeOptions>");
+    if ((eptr = dict.findEntry("codeOptions", keyType::LITERAL)) != nullptr)
     {
-        code = "#line " + Foam::name(lineNum) + " \"" + name + "\"\n" + code;
+        eptr->readEntry(options_);
+        dynamicCodeContext::inplaceExpand(options_, dict);
+        sha1_.append(options_);
+        // No #line for options (Make/options)
+    }
+
+    libs_.clear();
+    sha1_.append("<codeLibs>");
+    if ((eptr = dict.findEntry("codeLibs", keyType::LITERAL)) != nullptr)
+    {
+        eptr->readEntry(libs_);
+        dynamicCodeContext::inplaceExpand(libs_, dict);
+        sha1_.append(libs_);
+        // No #line for libs (LIB_LIBS)
+    }
+
+    include_.clear();
+    sha1_.append("<codeInclude>");
+    if ((eptr = dict.findEntry("codeInclude", keyType::LITERAL)) != nullptr)
+    {
+        eptr->readEntry(include_);
+        dynamicCodeContext::inplaceExpand(include_, dict);
+        sha1_.append(include_);
+        addLineDirective(include_, eptr->startLineNumber(), dict);
+    }
+
+    code_.clear();
+    sha1_.append("<code>");
+    if ((eptr = dict.findEntry("code", keyType::LITERAL)) != nullptr)
+    {
+        eptr->readEntry(code_);
+        dynamicCodeContext::inplaceExpand(code_, dict);
+        sha1_.append(code_);
+        addLineDirective(code_, eptr->startLineNumber(), dict);
+    }
+
+    localCode_.clear();
+    sha1_.append("<localCode>");
+    if ((eptr = dict.findEntry("localCode", keyType::LITERAL)) != nullptr)
+    {
+        eptr->readEntry(localCode_);
+        dynamicCodeContext::inplaceExpand(localCode_, dict);
+        sha1_.append(localCode_);
+        addLineDirective(localCode_, eptr->startLineNumber(), dict);
     }
 }
 

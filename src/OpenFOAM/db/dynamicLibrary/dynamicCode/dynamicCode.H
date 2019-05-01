@@ -219,21 +219,13 @@ public:
             return codeRoot_/codeDirName_;
         }
 
-        //- Library path for specified code name
-        //  Corresponds to codeRoot()/libSubDir()/lib\<codeName\>.so
-        fileName libPath() const
-        {
-            #ifdef __APPLE__
-            return codeRoot_/libSubDir_/"lib" + codeName_ + ".dylib";
-            #else
-            return codeRoot_/libSubDir_/"lib" + codeName_ + ".so";
-            #endif
-        }
-
         //- Path for specified code name relative to \<case\>
         //  Corresponds to topDirName/codeDirName()
         fileName codeRelPath() const;
 
+        //- Library path for specified code name
+        //  Corresponds to codeRoot()/libSubDir()/lib\<codeName\>.so
+        fileName libPath() const;
 
         //- Library path for specified code name relative to \<case\>
         //  Corresponds to
@@ -287,6 +279,23 @@ public:
         //- Compile a libso
         bool wmakeLibso() const;
 
+
+    // Convenience
+
+        //- Define a filter variables TemplateType and FieldType
+        template<class Type>
+        void setFieldTemplates()
+        {
+            std::string val(pTraits<Type>::typeName);
+
+            // Template type
+            setFilterVariable("TemplateType", val);
+
+            // Field type - eg, ScalarField, VectorField, ...
+            val[0] = toupper(val[0]);
+            val += "Field";
+            setFilterVariable("FieldType", val);
+        }
 };
 
 

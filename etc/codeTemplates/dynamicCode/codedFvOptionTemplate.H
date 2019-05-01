@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) YEAR AUTHOR,AFFILIATION
@@ -27,6 +27,7 @@ Description
     Template for use with dynamic code generation of a source.
     The hook functions take the following arguments:
 
+    \verbatim
     codeCorrect
     (
         GeometricField<Type, fvPatchField, volMesh>& fld
@@ -38,16 +39,18 @@ Description
         const label fieldi
     )
 
-    constrain
+    codeConstrain
     (
         fvMatrix<Type>& eqn,
         const label fieldi
     )
+    \endverbatim
 
     where :
         fieldi is the index in the fields entry
         eqn is the fvMatrix
 
+    \verbatim
     energySource
     {
         type            scalarCodedSource;
@@ -62,7 +65,6 @@ Description
 
             codeInclude
             #{
-
             #};
 
             codeCorrect
@@ -78,18 +80,9 @@ Description
                 heSource -= 0.1*sqr(time.value())*V;
             #};
 
-            codeSetValue
+            codeConstrain
             #{
-                Pout<< "**codeSetValue**" << endl;
-            #};
-
-            // Dummy entry. Make dependent on above to trigger recompilation
-            code
-            #{
-                $codeInclude
-                $codeCorrect
-                $codeAddSup
-                $codeSetValue
+                Pout<< "**codeConstrain**" << endl;
             #};
         }
 
@@ -98,6 +91,7 @@ Description
             // Dummy entry
         }
     }
+    \endverbatim
 
 SourceFiles
     codedFvOptionTemplate.C
@@ -113,7 +107,6 @@ SourceFiles
 
 namespace Foam
 {
-
 namespace fv
 {
 
@@ -125,10 +118,18 @@ class ${typeName}FvOption${SourceType}
 :
     public cellSetOption
 {
+    // Private Member Functions
+
+        //- Report a message with the SHA1sum
+        inline static void printMessage(const char* message)
+        {
+            Info<< message << " sha1: " << SHA1sum << '\n';
+        }
+
 public:
 
-    //- Information about the SHA1 of the code itself
-    static const char* const SHA1sum;
+    //- SHA1 representation of the code content
+    static constexpr const char* const SHA1sum = "${SHA1sum}";
 
     //- Runtime type information
     TypeName("${typeName}");
@@ -149,44 +150,42 @@ public:
     virtual ~${typeName}FvOption${SourceType}();
 
 
-    // Member functions
+    // Member Functions
 
-            //- Correct field
-            virtual void correct
-            (
-                GeometricField<${TemplateType}, fvPatchField, volMesh>&
-            );
+        //- Correct field
+        virtual void correct
+        (
+            GeometricField<${TemplateType}, fvPatchField, volMesh>& fld
+        );
 
-            //- Explicit and implicit matrix contributions
-            virtual void addSup
-            (
-                fvMatrix<${TemplateType}>& eqn,
-                const label fieldi
-            );
+        //- Explicit/implicit matrix contributions
+        virtual void addSup
+        (
+            fvMatrix<${TemplateType}>& eqn,
+            const label fieldi
+        );
 
-            //- Explicit and implicit matrix contributions for compressible
-            //  equations
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<${TemplateType}>& eqn,
-                const label fieldi
-            );
+        //- Explicit/implicit matrix contributions for compressible equations
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<${TemplateType}>& eqn,
+            const label fieldi
+        );
 
-            //- Set value
-            virtual void constrain
-            (
-                fvMatrix<${TemplateType}>& eqn,
-                const label fieldi
-            );
+        //- Set value
+        virtual void constrain
+        (
+            fvMatrix<${TemplateType}>& eqn,
+            const label fieldi
+        );
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
 } // End namespace fv
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

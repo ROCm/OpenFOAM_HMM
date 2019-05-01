@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) YEAR AUTHOR,AFFILIATION
@@ -31,6 +31,7 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "unitConversion.H"
+
 //{{{ begin codeInclude
 ${codeInclude}
 //}}} end codeInclude
@@ -50,23 +51,20 @@ ${localCode}
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-extern "C"
+// dynamicCode:
+// SHA1 = ${SHA1sum}
+//
+// unique function name that can be checked if the correct library version
+// has been loaded
+extern "C" void ${typeName}_${SHA1sum}(bool load)
 {
-    // dynamicCode:
-    // SHA1 = ${SHA1sum}
-    //
-    // unique function name that can be checked if the correct library version
-    // has been loaded
-    void ${typeName}_${SHA1sum}(bool load)
+    if (load)
     {
-        if (load)
-        {
-            // code that can be explicitly executed after loading
-        }
-        else
-        {
-            // code that can be explicitly executed before unloading
-        }
+        // Code that can be explicitly executed after loading
+    }
+    else
+    {
+        // Code that can be explicitly executed before unloading
     }
 }
 
@@ -77,10 +75,6 @@ makeRemovablePatchTypeField
     fvPatch${FieldType},
     ${typeName}FixedValueFvPatch${FieldType}
 );
-
-
-const char* const ${typeName}FixedValueFvPatch${FieldType}::SHA1sum =
-    "${SHA1sum}";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -96,8 +90,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 {
     if (${verbose:-false})
     {
-        Info<<"construct ${typeName} sha1: ${SHA1sum}"
-            " from patch/DimensionedField\n";
+        printMessage("Construct ${typeName} : patch/DimensionedField");
     }
 }
 
@@ -115,8 +108,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 {
     if (${verbose:-false})
     {
-        Info<<"construct ${typeName} sha1: ${SHA1sum}"
-            " from patch/DimensionedField/mapper\n";
+        printMessage("Construct ${typeName} : patch/DimensionedField/mapper");
     }
 }
 
@@ -133,8 +125,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 {
     if (${verbose:-false})
     {
-        Info<<"construct ${typeName} sha1: ${SHA1sum}"
-            " from patch/dictionary\n";
+        printMessage("Construct ${typeName} : patch/dictionary");
     }
 }
 
@@ -149,8 +140,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 {
     if (${verbose:-false})
     {
-        Info<<"construct ${typeName} sha1: ${SHA1sum}"
-            " as copy\n";
+        printMessage("Copy construct ${typeName}");
     }
 }
 
@@ -166,8 +156,7 @@ ${typeName}FixedValueFvPatch${FieldType}
 {
     if (${verbose:-false})
     {
-        Info<<"construct ${typeName} sha1: ${SHA1sum} "
-            "as copy/DimensionedField\n";
+        printMessage("Construct ${typeName} : copy/DimensionedField");
     }
 }
 
@@ -179,7 +168,7 @@ ${typeName}FixedValueFvPatch${FieldType}::
 {
     if (${verbose:-false})
     {
-        Info<<"destroy ${typeName} sha1: ${SHA1sum}\n";
+        printMessage("Destroy ${typeName}");
     }
 }
 
@@ -195,7 +184,7 @@ void ${typeName}FixedValueFvPatch${FieldType}::updateCoeffs()
 
     if (${verbose:-false})
     {
-        Info<<"updateCoeffs ${typeName} sha1: ${SHA1sum}\n";
+        printMessage("updateCoeffs ${typeName}");
     }
 
 //{{{ begin code

@@ -36,6 +36,16 @@ License
 #include "dictionary.H"
 #include "foamVersion.H"
 
+#undef EXT_SO
+#ifdef __APPLE__
+    #define EXT_SO  ".dylib"
+#elif defined _WIN32
+    #define EXT_SO  ".dll"
+#else
+    #define EXT_SO  ".so"
+#endif
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 int Foam::dynamicCode::allowSystemOperations
@@ -130,7 +140,7 @@ void Foam::dynamicCode::copyAndFilter
     {
         is.getLine(line);
 
-        // Expand according to mapping.
+        // Expand according to HashTable mapping, not the environment.
         // Expanding according to env variables might cause too many
         // surprises
         stringOps::inplaceExpand(line, mapping);
@@ -151,10 +161,8 @@ bool Foam::dynamicCode::resolveTemplates
     const fileName templateDir(Foam::getEnv(codeTemplateEnvName));
 
     bool allOkay = true;
-    forAll(templateNames, fileI)
+    for (const fileName& templateName : templateNames)
     {
-        const fileName& templateName = templateNames[fileI];
-
         fileName file;
         if (!templateDir.empty() && isDir(templateDir))
         {
@@ -188,15 +196,16 @@ bool Foam::dynamicCode::resolveTemplates
 
 bool Foam::dynamicCode::writeCommentSHA1(Ostream& os) const
 {
-    const bool hasSHA1 = filterVars_.found("SHA1sum");
+    const auto fnd = filterVars_.cfind("SHA1sum");
 
-    if (hasSHA1)
+    if (!fnd.found())
     {
-        os  << "/* dynamicCode:\n * SHA1 = ";
-        os.writeQuoted(filterVars_["SHA1sum"], false) << "\n */\n";
+        return false;
     }
 
-    return hasSHA1;
+    os  << "/* dynamicCode:\n * SHA1 = ";
+    os.writeQuoted(*fnd, false) << "\n */\n";
+    return true;
 }
 
 
@@ -214,7 +223,7 @@ bool Foam::dynamicCode::createMakeFiles() const
     mkDir(dstFile.path());
 
     OFstream os(dstFile);
-    //Debug: Info << "Writing to " << dstFile << endl;
+    //Debug: Info<< "Writing to " << dstFile << endl;
     if (!os.good())
     {
         FatalErrorInFunction
@@ -225,9 +234,9 @@ bool Foam::dynamicCode::createMakeFiles() const
     writeCommentSHA1(os);
 
     // Write compile files
-    forAll(compileFiles_, fileI)
+    for (const fileName& file : compileFiles_)
     {
-        os.writeQuoted(compileFiles_[fileI], false) << nl;
+        os.writeQuoted(file, false) << nl;
     }
 
     os  << nl
@@ -317,13 +326,15 @@ Foam::fileName Foam::dynamicCode::codeRelPath() const
 }
 
 
+Foam::fileName Foam::dynamicCode::libPath() const
+{
+    return codeRoot_/libSubDir_/"lib" + codeName_ + EXT_SO;
+}
+
+
 Foam::fileName Foam::dynamicCode::libRelPath() const
 {
-    #ifdef __APPLE__
-    return codeRelPath()/libSubDir_/"lib" + codeName_ + ".dylib";
-    #else
-    return codeRelPath()/libSubDir_/"lib" + codeName_ + ".so";
-    #endif
+    return codeRelPath()/libSubDir_/"lib" + codeName_ + EXT_SO;
 }
 
 
@@ -336,7 +347,7 @@ void Foam::dynamicCode::clear()
     filterVars_.set("typeName", codeName_);
     filterVars_.set("SHA1sum", SHA1Digest().str());
 
-    // Provide default Make/options
+    // Default Make/options
     makeOptions_ =
         "EXE_INC = -g\n"
         "\n\nLIB_LIBS = ";
@@ -423,10 +434,10 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
     if (!badFiles.empty())
     {
         FatalErrorInFunction
-            << "Could not find the code template(s): "
+            << "Could not find code template(s): "
             << badFiles << nl
             << "Under the $" << codeTemplateEnvName
-            << " directory or via via the <etc>/"
+            << " directory or via the <etc>/"
             << codeTemplateDirName << " expansion"
             << exit(FatalError);
     }
@@ -440,10 +451,9 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
     mkDir(outputDir);
 
     // Copy/filter files
-    forAll(resolvedFiles, fileI)
+    for (const fileName& srcFile : resolvedFiles)
     {
-        const fileName& srcFile = resolvedFiles[fileI];
-        const fileName  dstFile(outputDir/srcFile.name());
+        const fileName dstFile(outputDir/srcFile.name());
 
         IFstream is(srcFile);
         //Debug: Info<< "Reading from " << is.name() << endl;
@@ -469,23 +479,20 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 
     // Create files:
-    forAll(createFiles_, fileI)
+    for (const fileAndContent& content : createFiles_)
     {
-        const fileName dstFile
-        (
-            outputDir/stringOps::expand(createFiles_[fileI].first())
-        );
+        const fileName dstFile(outputDir/stringOps::expand(content.first()));
 
         mkDir(dstFile.path());
         OFstream os(dstFile);
-        //Debug: Info<< "Writing to " << createFiles_[fileI].first() << endl;
+        //Debug: Info<< "Writing to " << content.first() << endl;
         if (!os.good())
         {
             FatalErrorInFunction
                 << "Failed writing " << dstFile
                 << exit(FatalError);
         }
-        os.writeQuoted(createFiles_[fileI].second(), false) << nl;
+        os.writeQuoted(content.second(), false) << nl;
     }
 
 
@@ -515,8 +522,7 @@ bool Foam::dynamicCode::wmakeLibso() const
     else
     {
         // Even with details turned off, we want some feedback
-        Serr
-            << "Invoking wmake libso " << this->codePath().c_str() << endl;
+        Serr<< "Invoking wmake libso " << this->codePath().c_str() << endl;
     }
 
     if (Foam::system(cmd) == 0)
