@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -402,11 +402,13 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
         // Recv finished so assume sending finished as well.
         outstandingSendRequest_ = -1;
         outstandingRecvRequest_ = -1;
-
         // Consume straight from scalarReceiveBuf_
 
-        // Transform according to the transformation tensor
-        transformCoupleField(scalarReceiveBuf_, cmpt);
+        if (!std::is_arithmetic<Type>::value)
+        {
+            // Transform non-scalar data according to the transformation tensor
+            transformCoupleField(scalarReceiveBuf_, cmpt);
+        }
 
         // Multiply the field by coefficients and add into the result
         this->addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
@@ -418,8 +420,11 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
             procPatch_.compressedReceive<scalar>(commsType, this->size())()
         );
 
-        // Transform according to the transformation tensor
-        transformCoupleField(pnf, cmpt);
+        if (!std::is_arithmetic<Type>::value)
+        {
+            // Transform non-scalar data according to the transformation tensor
+            transformCoupleField(pnf, cmpt);
+        }
 
         // Multiply the field by coefficients and add into the result
         this->addToInternalField(result, !add, coeffs, pnf);
