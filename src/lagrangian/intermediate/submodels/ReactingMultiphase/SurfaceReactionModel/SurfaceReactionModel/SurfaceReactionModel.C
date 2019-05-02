@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -36,7 +36,7 @@ Foam::SurfaceReactionModel<CloudType>::SurfaceReactionModel
 )
 :
     CloudSubModelBase<CloudType>(owner),
-    dMass_(0.0)
+    dMass_(0)
 {}
 
 
@@ -49,7 +49,7 @@ Foam::SurfaceReactionModel<CloudType>::SurfaceReactionModel
 )
 :
     CloudSubModelBase<CloudType>(owner, dict, typeName, type),
-    dMass_(0.0)
+    dMass_(0)
 {}
 
 
@@ -61,13 +61,6 @@ Foam::SurfaceReactionModel<CloudType>::SurfaceReactionModel
 :
     CloudSubModelBase<CloudType>(srm),
     dMass_(srm.dMass_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::SurfaceReactionModel<CloudType>::~SurfaceReactionModel()
 {}
 
 

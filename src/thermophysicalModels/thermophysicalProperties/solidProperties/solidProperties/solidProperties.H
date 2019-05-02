@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -53,7 +53,7 @@ namespace Foam
 
 class solidProperties
 {
-    // Private data
+    // Private Data
 
         //- Density [kg/m3]
         scalar rho_;
@@ -69,6 +69,9 @@ class solidProperties
 
         //- Emissivity
         scalar emissivity_;
+
+        //- Molar weight [Kg/Kmol]
+        scalar W_;
 
 
 public:
@@ -107,7 +110,8 @@ public:
             scalar Cp,
             scalar kappa,
             scalar Hf,
-            scalar emissivity
+            scalar emissivity,
+            scalar W
         );
 
         //- Construct from dictionary
@@ -154,6 +158,9 @@ public:
 
             //- Emissivity []
             inline scalar emissivity() const;
+
+            //- Molar weight [Kg/Kmol]
+            inline scalar W() const;
 
 
     // I-O

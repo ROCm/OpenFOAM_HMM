@@ -299,9 +299,24 @@ Foam::KinematicCloud<CloudType>::linearMomentumOfSystem() const
 
 template<class CloudType>
 inline Foam::scalar
+Foam::KinematicCloud<CloudType>::totalParticlePerParcel() const
+{
+    scalar parPerParcel = 0;
+
+    for (const parcelType& p : *this)
+    {
+        parPerParcel += p.nParticle();
+    }
+
+    return parPerParcel;
+}
+
+
+template<class CloudType>
+inline Foam::scalar
 Foam::KinematicCloud<CloudType>::linearKineticEnergyOfSystem() const
 {
-    scalar linearKineticEnergy = 0.0;
+    scalar linearKineticEnergy = 0;
 
     for (const parcelType& p : *this)
     {

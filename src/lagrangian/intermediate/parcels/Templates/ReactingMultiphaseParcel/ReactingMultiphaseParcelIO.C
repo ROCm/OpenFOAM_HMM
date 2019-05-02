@@ -138,7 +138,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         label i = 0;
         for (ReactingMultiphaseParcel<ParcelType>& p : c)
         {
-            p.YGas_[j] = YGas[i++]/(p.Y()[GAS] + ROOTVSMALL);
+            p.YGas_[j] = YGas[i]/(p.Y()[GAS] + ROOTVSMALL);
+            ++i;
         }
     }
     // Populate YLiquid for each parcel
@@ -157,7 +158,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         label i = 0;
         for (ReactingMultiphaseParcel<ParcelType>& p : c)
         {
-            p.YLiquid_[j] = YLiquid[i++]/(p.Y()[LIQ] + ROOTVSMALL);
+            p.YLiquid_[j] = YLiquid[i]/(p.Y()[LIQ] + ROOTVSMALL);
+            ++i;
         }
     }
     // Populate YSolid for each parcel
@@ -176,7 +178,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         label i = 0;
         for (ReactingMultiphaseParcel<ParcelType>& p : c)
         {
-            p.YSolid_[j] = YSolid[i++]/(p.Y()[SLD] + ROOTVSMALL);
+            p.YSolid_[j] = YSolid[i]/(p.Y()[SLD] + ROOTVSMALL);
+            ++i;
         }
     }
 }
@@ -223,7 +226,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
             label i = 0;
             for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                YGas[i++] = p0.YGas()[j]*p0.Y()[GAS];
+                YGas[i] = p0.YGas()[j]*p0.Y()[GAS];
+                ++i;
             }
 
             YGas.write(np > 0);
@@ -246,7 +250,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
             label i = 0;
             for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                YLiquid[i++] = p0.YLiquid()[j]*p0.Y()[LIQ];
+                YLiquid[i] = p0.YLiquid()[j]*p0.Y()[LIQ];
+                ++i;
             }
 
             YLiquid.write(np > 0);
@@ -269,7 +274,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
             label i = 0;
             for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                YSolid[i++] = p0.YSolid()[j]*p0.Y()[SLD];
+                YSolid[i] = p0.YSolid()[j]*p0.Y()[SLD];
+                ++i;
             }
 
             YSolid.write(np > 0);
@@ -321,7 +327,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeObjects
             label i = 0;
             for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                YGas[i++] = p0.YGas()[j]*p0.Y()[GAS];
+                YGas[i] = p0.YGas()[j]*p0.Y()[GAS];
+                ++i;
             }
         }
 
@@ -338,7 +345,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeObjects
             label i = 0;
             for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                YLiquid[i++] = p0.YLiquid()[j]*p0.Y()[LIQ];
+                YLiquid[i] = p0.YLiquid()[j]*p0.Y()[LIQ];
+                ++i;
             }
         }
 
@@ -355,7 +363,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeObjects
             label i = 0;
             for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                YSolid[i++] = p0.YSolid()[j]*p0.Y()[SLD];
+                YSolid[i] = p0.YSolid()[j]*p0.Y()[SLD];
+                ++i;
             }
         }
     }

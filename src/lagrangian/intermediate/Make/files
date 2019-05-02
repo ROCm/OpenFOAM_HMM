@@ -12,6 +12,7 @@ $(BASECLOUDS)/kinematicCloud/kinematicCloud.C
 $(BASECLOUDS)/thermoCloud/thermoCloud.C
 $(BASECLOUDS)/reactingCloud/reactingCloud.C
 $(BASECLOUDS)/reactingMultiphaseCloud/reactingMultiphaseCloud.C
+$(BASECLOUDS)/reactingHeterogeneousCloud/reactingHeterogeneousCloud.C
 
 
 /* kinematic parcel sub-models */
@@ -42,6 +43,12 @@ $(REACTINGPARCEL)/makeBasicReactingParcelSubmodels.C
 REACTINGMPPARCEL=$(DERIVEDPARCELS)/basicReactingMultiphaseParcel
 $(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
 $(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSubmodels.C
+
+
+/* heterogeous reacting parcel sub-models */
+REACTINGHETERMPPARCEL=$(DERIVEDPARCELS)/basicHeterogeneousReactingParcel
+$(REACTINGHETERMPPARCEL)/defineBasicHeterogeneousReactingParcel.C
+$(REACTINGHETERMPPARCEL)/makeBasicHeterogeneousReactingParcelSubmodels.C
 
 
 /* kinematic MPPIC parcel sub-models */

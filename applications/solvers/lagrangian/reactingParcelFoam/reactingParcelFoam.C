@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -37,7 +37,7 @@ Description
 
 #include "fvCFD.H"
 #include "turbulentFluidThermoModel.H"
-#include "basicReactingMultiphaseCloud.H"
+
 #include "surfaceFilmModel.H"
 #include "rhoReactionThermo.H"
 #include "CombustionModel.H"
@@ -48,6 +48,15 @@ Description
 #include "pressureControl.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
+#include "cloudMacros.H"
+
+#ifndef CLOUD_BASE_TYPE
+    #define CLOUD_BASE_TYPE ReactingMultiphase
+    #define CLOUD_BASE_TYPE_NAME "reacting"
+#endif
+
+#include CLOUD_INCLUDE_FILE(CLOUD_BASE_TYPE)
+#define basicReactingTypeCloud CLOUD_TYPE(CLOUD_BASE_TYPE)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

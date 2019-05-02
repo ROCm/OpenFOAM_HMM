@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -50,13 +50,6 @@ Foam::NoSurfaceReaction<CloudType>::NoSurfaceReaction
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoSurfaceReaction<CloudType>::~NoSurfaceReaction()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -69,6 +62,8 @@ bool Foam::NoSurfaceReaction<CloudType>::active() const
 template<class CloudType>
 Foam::scalar Foam::NoSurfaceReaction<CloudType>::calculate
 (
+    const scalar,
+    const scalar,
     const scalar,
     const label,
     const scalar,

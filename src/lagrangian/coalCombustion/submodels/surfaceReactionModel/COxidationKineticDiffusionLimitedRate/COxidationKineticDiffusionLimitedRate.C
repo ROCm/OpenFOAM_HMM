@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -88,20 +88,14 @@ COxidationKineticDiffusionLimitedRate
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::COxidationKineticDiffusionLimitedRate<CloudType>::
-~COxidationKineticDiffusionLimitedRate()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
 Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
 (
     const scalar dt,
+    const scalar Re,
+    const scalar nu,
     const label celli,
     const scalar d,
     const scalar T,

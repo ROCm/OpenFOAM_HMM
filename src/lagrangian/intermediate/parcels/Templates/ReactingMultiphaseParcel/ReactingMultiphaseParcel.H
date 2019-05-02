@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -52,18 +52,13 @@ SourceFiles
 namespace Foam
 {
 
-template<class ParcelType>
-class ReactingMultiphaseParcel;
+template<class ParcelType> class ReactingMultiphaseParcel;
 
 template<class ParcelType>
-Ostream& operator<<
-(
-    Ostream&,
-    const ReactingMultiphaseParcel<ParcelType>&
-);
+Ostream& operator<<(Ostream&, const ReactingMultiphaseParcel<ParcelType>&);
 
 /*---------------------------------------------------------------------------*\
-                 Class ReactingMultiphaseParcel Declaration
+                  Class ReactingMultiphaseParcel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParcelType>
@@ -245,6 +240,8 @@ protected:
             trackingData& td,
             const scalar dt,           // timestep
             const scalar d,            // diameter
+            const scalar Re,           // Re
+            const scalar nu,           // nu
             const scalar T,            // temperature
             const scalar mass,         // mass
             const label canCombust,     // 'can combust' flag

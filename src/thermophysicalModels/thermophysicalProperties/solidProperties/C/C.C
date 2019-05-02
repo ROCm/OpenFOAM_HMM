@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -41,7 +41,7 @@ namespace Foam
 
 Foam::C::C()
 :
-    solidProperties(2010, 710, 0.04, 0.0, 1.0)
+    solidProperties(2010, 710, 0.04, 0.0, 1.0, 12.011)
 {
     if (debug)
     {
