@@ -57,7 +57,7 @@ namespace Foam
 template<class Type>
 class semiImplicitOversetFvPatchField
 :
-    public LduInterfaceField<Type>,
+    //public LduInterfaceField<Type>,
     public zeroGradientFvPatchField<Type>
 {
 protected:
@@ -158,29 +158,29 @@ public:
              //- Initialise the evaluation of the patch field
             virtual void initEvaluate(const Pstream::commsTypes commsType);
 
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                scalarField& result,
-                const bool add,
-                const scalarField& psiInternal,
-                const scalarField& coeffs,
-                const direction cmpt,
-                const Pstream::commsTypes commsType
-            ) const;
-
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                Field<Type>&,
-                const bool add,
-                const Field<Type>&,
-                const scalarField&,
-                const Pstream::commsTypes commsType
-            ) const
-            {
-                NotImplemented;
-            }
+//            //- Update result field based on interface functionality
+//            virtual void updateInterfaceMatrix
+//            (
+//                scalarField& result,
+//                const bool add,
+//                const scalarField& psiInternal,
+//                const scalarField& coeffs,
+//                const direction cmpt,
+//                const Pstream::commsTypes commsType
+//            ) const;
+//
+//            //- Update result field based on interface functionality
+//            virtual void updateInterfaceMatrix
+//            (
+//                Field<Type>&,
+//                const bool add,
+//                const Field<Type>&,
+//                const scalarField&,
+//                const Pstream::commsTypes commsType
+//            ) const
+//            {
+//                NotImplemented;
+//            }
 
 
         // I-O

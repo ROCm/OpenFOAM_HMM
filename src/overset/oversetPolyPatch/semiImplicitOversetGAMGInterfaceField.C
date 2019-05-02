@@ -73,6 +73,8 @@ void Foam::semiImplicitOversetGAMGInterfaceField::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
+DebugVar("Here");
+
     // Add remote values
     if (oversetInterface_.master())
     {

@@ -69,7 +69,7 @@ void printInfo(const sliceCoeffs& coeffs)
 
     const auto endIter = range.cend();
 
-    for (const label i : {-1, (range.size()/2), range.size()})
+    for (const label i : {label(-1), (range.size()/2), range.size()})
     {
         const auto iter = range.at(i);
 

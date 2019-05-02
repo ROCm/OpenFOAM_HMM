@@ -72,80 +72,80 @@ void Foam::oversetGAMGInterfaceField::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
-    //Pout<< "oversetGAMGInterfaceField::updateInterfaceMatrix: at:"
+    Pout<< "oversetGAMGInterfaceField::updateInterfaceMatrix: at:"
     //    << oversetInterface_.name()
-    //    << " nCells:" << result.size() << endl;
+        << " nCells:" << result.size() << endl;
     //
-    // Add remote values
-    if (oversetInterface_.master())
-    {
-        const labelListList& stencil = oversetInterface_.stencil();
-
-        if (stencil.size() != psiInternal.size())
-        {
-            FatalErrorInFunction << "psiInternal:" << psiInternal.size()
-                << " stencil:" << stencil.size() << exit(FatalError);
-        }
-
-        const mapDistribute& map = oversetInterface_.cellInterpolationMap();
-        const List<scalarList>& wghts =
-            oversetInterface_.cellInterpolationWeights();
-        const labelList& cellIDs = oversetInterface_.interpolationCells();
-        const scalarList& factor = oversetInterface_.cellInterpolationWeight();
-        const scalarField& normalisation = oversetInterface_.normalisation();
-
-        scalarField work(psiInternal);
-        map.mapDistributeBase::distribute(work, UPstream::msgType()+1);
-
-        forAll(cellIDs, i)
-        {
-            label celli = cellIDs[i];
-
-            const scalarList& w = wghts[celli];
-            const labelList& nbrs = stencil[celli];
-            const scalar f = factor[celli];
-
-            bool hasRemote = false;
-            forAll(nbrs, nbrI)
-            {
-                label slotI = nbrs[nbrI];
-                if (slotI >= psiInternal.size())
-                {
-                    hasRemote = true;
-                    break;
-                }
-            }
-
-            if (hasRemote)
-            {
-                //Pout<< "oversetGAMGInterfaceField : Interpolating " << celli
-                //    << " from remote values (if any):" << endl;
-                scalar s(0.0);
-                forAll(nbrs, nbrI)
-                {
-                    label slotI = nbrs[nbrI];
-                    if (slotI >= psiInternal.size())
-                    {
-                        //Pout<< "    remote value " << work[slotI]
-                        //    << " from slot " << slotI << " with w:" << w[nbrI]
-                        //    << endl;
-                        s += w[nbrI]*work[slotI];
-                    }
-                }
-                //Pout<< "oversetGAMGInterfaceField : Interpolated value:"
-                //    << s << endl;
-                //scalar oldPsi = result[celli];
-                if (add)
-                {
-                    s = -1.0*s;
-                }
-
-                result[celli] += normalisation[celli]*f*s;
-                //Pout<< "oversetGAMGInterfaceField : result was:" << oldPsi
-                //    << " now:" << result[celli] << endl;
-            }
-        }
-    }
+//    // Add remote values
+//    if (oversetInterface_.master())
+//    {
+//        const labelListList& stencil = oversetInterface_.stencil();
+//
+//        if (stencil.size() != psiInternal.size())
+//        {
+//            FatalErrorInFunction << "psiInternal:" << psiInternal.size()
+//                << " stencil:" << stencil.size() << exit(FatalError);
+//        }
+//
+//        const mapDistribute& map = oversetInterface_.cellInterpolationMap();
+//        const List<scalarList>& wghts =
+//            oversetInterface_.cellInterpolationWeights();
+//        const labelList& cellIDs = oversetInterface_.interpolationCells();
+//        const scalarList& factor = oversetInterface_.cellInterpolationWeight();
+//        const scalarField& normalisation = oversetInterface_.normalisation();
+//
+//        scalarField work(psiInternal);
+//        map.mapDistributeBase::distribute(work, UPstream::msgType()+1);
+//
+//        forAll(cellIDs, i)
+//        {
+//            label celli = cellIDs[i];
+//
+//            const scalarList& w = wghts[celli];
+//            const labelList& nbrs = stencil[celli];
+//            const scalar f = factor[celli];
+//
+//            bool hasRemote = false;
+//            forAll(nbrs, nbrI)
+//            {
+//                label slotI = nbrs[nbrI];
+//                if (slotI >= psiInternal.size())
+//                {
+//                    hasRemote = true;
+//                    break;
+//                }
+//            }
+//
+//            if (hasRemote)
+//            {
+//                //Pout<< "oversetGAMGInterfaceField : Interpolating " << celli
+//                //    << " from remote values (if any):" << endl;
+//                scalar s(0.0);
+//                forAll(nbrs, nbrI)
+//                {
+//                    label slotI = nbrs[nbrI];
+//                    if (slotI >= psiInternal.size())
+//                    {
+//                        //Pout<< "    remote value " << work[slotI]
+//                        //    << " from slot " << slotI << " with w:" << w[nbrI]
+//                        //    << endl;
+//                        s += w[nbrI]*work[slotI];
+//                    }
+//                }
+//                //Pout<< "oversetGAMGInterfaceField : Interpolated value:"
+//                //    << s << endl;
+//                //scalar oldPsi = result[celli];
+//                if (add)
+//                {
+//                    s = -1.0*s;
+//                }
+//
+//                result[celli] += normalisation[celli]*f*s;
+//                //Pout<< "oversetGAMGInterfaceField : result was:" << oldPsi
+//                //    << " now:" << result[celli] << endl;
+//            }
+//        }
+//    }
 }
 
 

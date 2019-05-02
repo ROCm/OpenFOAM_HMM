@@ -13,23 +13,27 @@ dynamicOversetFvMesh/dynamicOversetFvMesh.C
 fvMeshPrimitiveLduAddressing/fvMeshPrimitiveLduAddressing.C
 
 oversetPolyPatch/oversetPolyPatch.C
-oversetPolyPatch/oversetLduInterface.C
 oversetPolyPatch/oversetFvPatch.C
 oversetPolyPatch/oversetFvPatchFields.C
 oversetPolyPatch/oversetFvsPatchFields.C
-oversetPolyPatch/oversetGAMGInterface.C
-oversetPolyPatch/oversetGAMGInterfaceField.C
 oversetPolyPatch/oversetPointPatch.C
 oversetPolyPatch/oversetPointPatchFields.C
 
+/*
 oversetPolyPatch/semiImplicitOversetFvPatchFields.C
+oversetPolyPatch/oversetLduInterface.C
+oversetPolyPatch/oversetGAMGInterface.C
+oversetPolyPatch/oversetGAMGInterfaceField.C
 oversetPolyPatch/semiImplicitOversetGAMGInterfaceField.C
+*/
 
 oversetAdjustPhi/oversetAdjustPhi.C
 
 regionsToCell/regionsToCell.C
 
 lduPrimitiveProcessorInterface/lduPrimitiveProcessorInterface.C
-
+lduPrimitiveProcessorInterface/calculatedProcessorFvPatchFields.C
+lduPrimitiveProcessorInterface/GAMG/calculatedProcessorGAMGInterface.C
+lduPrimitiveProcessorInterface/GAMG/calculatedProcessorGAMGInterfaceField.C
 
 LIB = $(FOAM_LIBBIN)/liboverset

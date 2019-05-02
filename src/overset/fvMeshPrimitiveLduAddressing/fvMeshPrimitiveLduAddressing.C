@@ -192,7 +192,7 @@ Foam::labelList Foam::fvMeshPrimitiveLduAddressing::addAddressing
                 // Remote cell
                 faces[nbrI] = -1;
 
-                label globalNbr = globalCellIDs[nbrs[nbrI]];
+                label globalNbr = globalCellIDs[nbrCellI];
                 label procI = globalNumbering.whichProcID(globalNbr);
                 label remoteCellI = globalNumbering.toLocal(procI, globalNbr);
 

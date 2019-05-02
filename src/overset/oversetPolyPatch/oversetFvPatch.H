@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,8 +38,6 @@ SourceFiles
 #include "fvPatch.H"
 #include "oversetPolyPatch.H"
 #include "fvBoundaryMesh.H"
-#include "lduInterface.H"
-#include "oversetLduInterface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,17 +50,11 @@ namespace Foam
 
 class oversetFvPatch
 :
-    public lduInterface,
-    public oversetLduInterface,
     public fvPatch
 {
     // Private data
 
         const oversetPolyPatch& oversetPolyPatch_;
-
-        //- Temporary copy of the fine level restrict map. Cleared upon
-        //  calculating stencils below
-        mutable labelList restrictMap_;
 
 
 public:
@@ -100,61 +92,11 @@ public:
                 return oversetPolyPatch_.faceCells();
             }
 
-
-        // Interface transfer functions
-
-            //- Return the values of the given internal data adjacent to
-            //  the interface as a field
-            virtual tmp<labelField> interfaceInternalField
-            (
-                const labelUList& internalData
-            ) const;
-
-            //- Return neighbour field
-            virtual tmp<labelField> internalFieldTransfer
-            (
-                const Pstream::commsTypes commsType,
-                const labelUList& internalData
-            ) const;
-
-
-        //- Overset interface functions
-
-            //- Name of interface (for debugging)
-            virtual const word& name() const
-            {
-                return oversetPolyPatch_.name();
-            }
-
             //- Am I the master interface
             virtual bool master() const
             {
                 return oversetPolyPatch_.master();
             }
-
-            //- GAMG restriction (fine-to-coarse)
-            virtual const labelList& restrictMap() const
-            {
-                return restrictMap_;
-            }
-
-            //- Donor stencil
-            virtual const labelListList& stencil() const;
-
-            //- Map for obtaining data in stencil order
-            virtual const mapDistribute& cellInterpolationMap() const;
-
-            //- Weights in stencil order
-            virtual const List<scalarList>& cellInterpolationWeights() const;
-
-            //- Normalisation of matrix; for explicit contributions
-            virtual const scalarField& normalisation() const;
-
-            //- Acceptor cells
-            virtual const labelList& interpolationCells() const;
-
-            //- Underrelaxation for acceptor cells
-            virtual const scalarList& cellInterpolationWeight() const;
 };
 
 

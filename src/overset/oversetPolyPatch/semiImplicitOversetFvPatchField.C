@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "volFields.H"
+#include "cellCellStencilObject.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -34,7 +35,7 @@ Foam::semiImplicitOversetFvPatchField<Type>::semiImplicitOversetFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
+    //LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
     zeroGradientFvPatchField<Type>(p, iF),
     oversetPatch_(refCast<const oversetFvPatch>(p))
 {}
@@ -49,7 +50,7 @@ Foam::semiImplicitOversetFvPatchField<Type>::semiImplicitOversetFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
+    //LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
     zeroGradientFvPatchField<Type>(ptf, p, iF, mapper),
     oversetPatch_(refCast<const oversetFvPatch>(p))
 {
@@ -74,7 +75,7 @@ Foam::semiImplicitOversetFvPatchField<Type>::semiImplicitOversetFvPatchField
     const dictionary& dict
 )
 :
-    LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
+    //LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
     zeroGradientFvPatchField<Type>(p, iF, dict),
     oversetPatch_(refCast<const oversetFvPatch>(p))
 {
@@ -102,7 +103,7 @@ Foam::semiImplicitOversetFvPatchField<Type>::semiImplicitOversetFvPatchField
     const semiImplicitOversetFvPatchField<Type>& ptf
 )
 :
-    LduInterfaceField<Type>(ptf.oversetPatch_),
+    //LduInterfaceField<Type>(ptf.oversetPatch_),
     zeroGradientFvPatchField<Type>(ptf),
     oversetPatch_(ptf.oversetPatch_)
 {}
@@ -115,7 +116,7 @@ Foam::semiImplicitOversetFvPatchField<Type>::semiImplicitOversetFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    LduInterfaceField<Type>(ptf.oversetPatch_),
+    //LduInterfaceField<Type>(ptf.oversetPatch_),
     zeroGradientFvPatchField<Type>(ptf, iF),
     oversetPatch_(ptf.oversetPatch_)
 {}
@@ -198,66 +199,67 @@ void Foam::semiImplicitOversetFvPatchField<Type>::initEvaluate
 }
 
 
-template<class Type>
-void Foam::semiImplicitOversetFvPatchField<Type>::updateInterfaceMatrix
-(
-    scalarField& result,
-    const bool add,
-    const scalarField& psiInternal,
-    const scalarField& coeffs,
-    const direction cmpt,
-    const Pstream::commsTypes
-) const
-{
-    if (debug)
-    {
-        Pout<< FUNCTION_NAME << " field " <<  this->internalField().name()
-            << " patch " << this->patch().name() << endl;
-    }
-
-    const oversetFvPatch& ovp = this->oversetPatch();
-
-    // Set all interpolated cells
-    if (ovp.master())
-    {
-        const labelListList& stencil = ovp.stencil();
-
-        if (stencil.size() != psiInternal.size())
-        {
-            FatalErrorInFunction << "psiInternal:" << psiInternal.size()
-                << " stencil:" << stencil.size() << exit(FatalError);
-        }
-
-        const mapDistribute& map = ovp.cellInterpolationMap();
-        const List<scalarList>& wghts = ovp.cellInterpolationWeights();
-        const labelList& cellIDs = ovp.interpolationCells();
-        //const scalarList& factor = ovp.cellInterpolationWeight();
-
-        // Since we're inside initEvaluate/evaluate there might be processor
-        // comms underway. Change the tag we use.
-        scalarField work(psiInternal);
-        map.mapDistributeBase::distribute(work, UPstream::msgType()+1);
-
-        forAll(cellIDs, i)
-        {
-            label celli = cellIDs[i];
-
-            const scalarList& w = wghts[celli];
-            const labelList& nbrs = stencil[celli];
-
-            //scalar f = factor[celli];
-
-            scalar s(0.0);
-            forAll(nbrs, nbrI)
-            {
-                s += w[nbrI]*work[nbrs[nbrI]];
-            }
-
-            //Pout<< "cell:" << celli << " interpolated value:" << s << endl;
-            result[celli] = s;  //(1.0-f)*result[celli] + f*s;
-        }
-    }
-}
+//template<class Type>
+//void Foam::semiImplicitOversetFvPatchField<Type>::updateInterfaceMatrix
+//(
+//    scalarField& result,
+//    const bool add,
+//    const scalarField& psiInternal,
+//    const scalarField& coeffs,
+//    const direction cmpt,
+//    const Pstream::commsTypes
+//) const
+//{
+//    if (debug)
+//    {
+//        Pout<< FUNCTION_NAME << " field " <<  this->internalField().name()
+//            << " patch " << this->patch().name() << endl;
+//    }
+//
+//    const oversetFvPatch& ovp = this->oversetPatch();
+//
+//    // Set all interpolated cells
+//    if (ovp.master())
+//    {
+//        const cellCellStencilObject& overlap = Stencil::New(*this);
+//        const labelListList& cellStencil = overlap.cellStencil();
+//
+//        if (cellStencil.size() != psiInternal.size())
+//        {
+//            FatalErrorInFunction << "psiInternal:" << psiInternal.size()
+//                << " stencil:" << cellStencil.size() << exit(FatalError);
+//        }
+//
+//        const mapDistribute& map = overlap.cellInterpolationMap();
+//        const List<scalarList>& wghts = overlap.cellInterpolationWeights();
+//        const labelList& cellIDs = overlap.interpolationCells();
+//        //const scalarList& factor = overlap.cellInterpolationWeight();
+//
+//        // Since we're inside initEvaluate/evaluate there might be processor
+//        // comms underway. Change the tag we use.
+//        scalarField work(psiInternal);
+//        map.mapDistributeBase::distribute(work, UPstream::msgType()+1);
+//
+//        forAll(cellIDs, i)
+//        {
+//            label celli = cellIDs[i];
+//
+//            const scalarList& w = wghts[celli];
+//            const labelList& nbrs = cellStencil[celli];
+//
+//            //scalar f = factor[celli];
+//
+//            scalar s(0.0);
+//            forAll(nbrs, nbrI)
+//            {
+//                s += w[nbrI]*work[nbrs[nbrI]];
+//            }
+//
+//            //Pout<< "cell:" << celli << " interpolated value:" << s << endl;
+//            result[celli] = s;  //(1.0-f)*result[celli] + f*s;
+//        }
+//    }
+//}
 
 
 template<class Type>

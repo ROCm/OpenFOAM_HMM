@@ -48,6 +48,7 @@ namespace Foam
 
 class mapDistribute;
 class lduPrimitiveProcessorInterface;
+class GAMGAgglomeration;
 
 /*---------------------------------------------------------------------------*\
                    Class dynamicOversetFvMesh Declaration
@@ -80,6 +81,9 @@ protected:
         //- Corresponding faces (in above lduPtr) to the stencil
         mutable labelListList stencilFaces_;
 
+        //- Corresponding patches (in above lduPtr) to the stencil
+        mutable labelListList stencilPatches_;
+
         //- From old to new face labels
         mutable labelList reverseFaceMap_;
 
@@ -91,7 +95,13 @@ protected:
 
         //- Debug: print matrix
         template<class Type>
-        void write(Ostream&, const fvMatrix<Type>&, const lduAddressing&) const;
+        void write
+        (
+            Ostream&,
+            const fvMatrix<Type>&,
+            const lduAddressing&,
+            const lduInterfacePtrsList&
+        ) const;
 
         //- Explicit interpolation of acceptor cells from donor cells
         template<class T>
@@ -111,16 +121,31 @@ protected:
         void interpolate(const wordHashSet& suppressed);
 
         //- Freeze values at holes
-        template<class Type>
-        void freezeHoles(fvMatrix<Type>&) const;
+        //template<class Type>
+        //void freezeHoles(fvMatrix<Type>&) const;
 
         //- Get scalar interfaces of certain type
+        //template<class GeoField, class PatchType>
+        //lduInterfaceFieldPtrsList scalarInterfaces(const GeoField& psi) const;
+
+        //- Correct boundary conditions of certain type (typeOnly = true)
+        //  or explicitly not of the type (typeOnly = false)
         template<class GeoField, class PatchType>
-        lduInterfaceFieldPtrsList scalarInterfaces(const GeoField& psi) const;
+        static void correctBoundaryConditions
+        (
+            typename GeoField::Boundary& bfld,
+            const bool typeOnly
+        );
+
+        //- Determine normalisation for interpolation. This equals the
+        //  original diagonal except stabilised for zero diagonals (possible
+        //  in hole cells)
+        template<class Type>
+        tmp<scalarField> normalisation(const fvMatrix<Type>& m) const;
 
         //- Add interpolation to matrix (coefficients)
         template<class Type>
-        void addInterpolation(fvMatrix<Type>&) const;
+        void addInterpolation(fvMatrix<Type>&, const scalarField& norm) const;
 
         //- Solve given dictionary with settings
         template<class Type>
@@ -129,6 +154,12 @@ protected:
         //- Debug: correct coupled bc
         template<class GeoField>
         static void correctCoupledBoundaryConditions(GeoField& fld);
+
+        //- Debug: dump agglomeration
+        void writeAgglomeration
+        (
+            const GAMGAgglomeration& agglom
+        ) const;
 
 
 private:
@@ -169,6 +200,11 @@ public:
             //- Return ldu addressing. If active: is (extended)
             //  primitiveLduAddr
             virtual const lduAddressing& lduAddr() const;
+
+            //- Return a list of pointers for each patch
+            //  with only those pointing to interfaces being set. If active:
+            //  return additional remoteStencilInterfaces_
+            virtual lduInterfacePtrsList interfaces() const;
 
             //- Return old to new face addressing
             const labelList& reverseFaceMap() const

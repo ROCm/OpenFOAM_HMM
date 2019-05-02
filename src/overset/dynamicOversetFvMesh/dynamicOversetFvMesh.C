@@ -91,41 +91,168 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
             << " nExtraFaces:" << nExtraFaces << endl;
     }
 
-    // Extract relevant remote processors
-    labelList nbrProcs(localFaceCells.size());
+
+    // Now for the tricky bits. We want to hand out processor faces according
+    // to the localFaceCells/remoteFaceCells. Ultimately we need
+    // per entry in stencil:
+    // - the patch (or -1 for internal faces)
+    // - the face (is either an internal face index or a patch face index)
+
+    stencilPatches_.setSize(stencilFaces_.size());
+
+    // Per processor to owner (local)/neighbour (remote)
+    List<DynamicList<label>> procOwner(Pstream::nProcs());
+    List<DynamicList<label>> dynProcNeighbour(Pstream::nProcs());
+    forAll(stencil, celli)
     {
-        label nbrI = 0;
-        forAll(localFaceCells, procI)
+        const labelList& nbrs = stencil[celli];
+        stencilPatches_[celli].setSize(nbrs.size(), -1);
+
+        forAll(nbrs, nbri)
         {
-            if (localFaceCells[procI].size())
+            const label nbrCelli = nbrs[nbri];
+            if (stencilFaces_[celli][nbri] == -1)
             {
-                //Pout<< "   from proc:" << procI
-                //    << " want its local cells " << remoteFaceCells[procI]
-                //    << " to add to my local cells:" << localFaceCells[procI]
-                //    << endl;
-                nbrProcs[nbrI++] = procI;
+                label globalNbr = globalCellIDs[nbrCelli];
+                label proci = globalNumbering.whichProcID(globalNbr);
+                label remoteCelli = globalNumbering.toLocal(proci, globalNbr);
+
+                // Overwrite the face to be a patch face
+                stencilFaces_[celli][nbri] = procOwner[proci].size();
+                stencilPatches_[celli][nbri] = proci;
+                procOwner[proci].append(celli);
+                dynProcNeighbour[proci].append(remoteCelli);
+
+                //Pout<< "From neighbour proc:" << proci
+                //    << " allocating patchFace:" << stencilFaces_[celli][nbri]
+                //    << " to get remote cell " << remoteCelli
+                //    << " onto local cell " << celli << endl;
             }
         }
-        nbrProcs.setSize(nbrI);
+    }
+    labelListList procNeighbour(dynProcNeighbour.size());
+    forAll(procNeighbour, i)
+    {
+        procNeighbour[i] = std::move(dynProcNeighbour[i]);
+    }
+    labelListList mySendCells;
+    Pstream::exchange<labelList, label>(procNeighbour, mySendCells);
+
+    label nbri = 0;
+    forAll(procOwner, proci)
+    {
+        if (procOwner[proci].size())
+        {
+            nbri++;
+        }
+        if (mySendCells[proci].size())
+        {
+            nbri++;
+        }
+    }
+    remoteStencilInterfaces_.setSize(nbri);
+    nbri = 0;
+
+    // E.g. if proc1 needs some data from proc2 and proc2 needs some data from
+    //      proc1. We first want the pair : proc1 receive and proc2 send
+    //      and then the pair : proc1 send, proc2 receive
+
+
+    labelList procToInterface(Pstream::nProcs(), -1);
+
+    forAll(procOwner, proci)
+    {
+        if (proci < Pstream::myProcNo() && procOwner[proci].size())
+        {
+            //Pout<< "Adding interface " << nbri
+            //    << " to receive my " << procOwner[proci]
+            //    << " from " << proci << endl;
+
+            procToInterface[proci] = nbri;
+            remoteStencilInterfaces_.set
+            (
+                nbri++,
+                new lduPrimitiveProcessorInterface
+                (
+                    procOwner[proci],
+                    Pstream::myProcNo(),
+                    proci,
+                    tensorField(0),
+                    Pstream::msgType()+2
+                )
+            );
+        }
+        else if (proci > Pstream::myProcNo() && mySendCells[proci].size())
+        {
+            //Pout<< "Adding interface " << nbri
+            //    << " to send my " << mySendCells[proci]
+            //    << " to " << proci << endl;
+            remoteStencilInterfaces_.set
+            (
+                nbri++,
+                new lduPrimitiveProcessorInterface
+                (
+                    mySendCells[proci],
+                    Pstream::myProcNo(),
+                    proci,
+                    tensorField(0),
+                    Pstream::msgType()+2
+                )
+            );
+        }
+    }
+    forAll(procOwner, proci)
+    {
+        if (proci > Pstream::myProcNo() && procOwner[proci].size())
+        {
+            //Pout<< "Adding interface " << nbri
+            //    << " to receive my " << procOwner[proci]
+            //    << " from " << proci << endl;
+            procToInterface[proci] = nbri;
+            remoteStencilInterfaces_.set
+            (
+                nbri++,
+                new lduPrimitiveProcessorInterface
+                (
+                    procOwner[proci],
+                    Pstream::myProcNo(),
+                    proci,
+                    tensorField(0),
+                    Pstream::msgType()+2
+                )
+            );
+        }
+        else if (proci < Pstream::myProcNo() && mySendCells[proci].size())
+        {
+            //Pout<< "Adding interface " << nbri
+            //    << " to send my " << mySendCells[proci]
+            //    << " to " << proci << endl;
+            remoteStencilInterfaces_.set
+            (
+                nbri++,
+                new lduPrimitiveProcessorInterface
+                (
+                    mySendCells[proci],
+                    Pstream::myProcNo(),
+                    proci,
+                    tensorField(0),
+                    Pstream::msgType()+2
+                )
+            );
+        }
     }
 
-    // Construct interfaces
-    remoteStencilInterfaces_.setSize(nbrProcs.size());
-    forAll(nbrProcs, i)
+
+    // Rewrite stencilPatches now we know the actual interface (procToInterface)
+    for (auto& patches : stencilPatches_)
     {
-        label procI = nbrProcs[i];
-        remoteStencilInterfaces_.set
-        (
-            i,
-            new lduPrimitiveProcessorInterface
-            (
-                localFaceCells[procI],
-                Pstream::myProcNo(),
-                procI,
-                tensorField(0),
-                Pstream::msgType()
-            )
-        );
+        for (auto& interface : patches)
+        {
+            if (interface != -1)
+            {
+                interface = procToInterface[interface]+boundary().size();
+            }
+        }
     }
 
 
@@ -218,6 +345,104 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
 }
 
 
+void Foam::dynamicOversetFvMesh::writeAgglomeration
+(
+    const GAMGAgglomeration& agglom
+) const
+{
+    labelList cellToCoarse(identity(nCells()));
+    labelListList coarseToCell(invertOneToMany(nCells(), cellToCoarse));
+
+    // Write initial agglomeration
+    {
+        volScalarField scalarAgglomeration
+        (
+            IOobject
+            (
+                "agglomeration",
+                this->time().timeName(),
+                *this,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            *this,
+            dimensionedScalar(dimless, Zero)
+        );
+        scalarField& fld = scalarAgglomeration.primitiveFieldRef();
+        forAll(fld, celli)
+        {
+            fld[celli] = cellToCoarse[celli];
+        }
+        fld /= max(fld);
+        correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >(scalarAgglomeration.boundaryFieldRef(), false);
+        scalarAgglomeration.write();
+
+        Info<< "Writing initial cell distribution to "
+            << this->time().timeName() << endl;
+    }
+
+
+    for (label level = 0; level < agglom.size(); level++)
+    {
+        const labelList& addr = agglom.restrictAddressing(level);
+        label coarseSize = max(addr)+1;
+
+        Info<< "Level : " << level << endl
+            << returnReduce(addr.size(), sumOp<label>()) << endl
+            << "    current size      : "
+            << returnReduce(addr.size(), sumOp<label>()) << endl
+            << "    agglomerated size : "
+            << returnReduce(coarseSize, sumOp<label>()) << endl;
+
+        forAll(addr, fineI)
+        {
+            const labelList& cellLabels = coarseToCell[fineI];
+            forAll(cellLabels, i)
+            {
+                cellToCoarse[cellLabels[i]] = addr[fineI];
+            }
+        }
+        coarseToCell = invertOneToMany(coarseSize, cellToCoarse);
+
+        // Write agglomeration
+        {
+            volScalarField scalarAgglomeration
+            (
+                IOobject
+                (
+                    "agglomeration_" + Foam::name(level),
+                    this->time().timeName(),
+                    *this,
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                *this,
+                dimensionedScalar(dimless, Zero)
+            );
+            scalarField& fld = scalarAgglomeration.primitiveFieldRef();
+            forAll(fld, celli)
+            {
+                fld[celli] = cellToCoarse[celli];
+            }
+            //if (normalise)
+            //{
+            //    fld /= max(fld);
+            //}
+            correctBoundaryConditions
+            <
+                volScalarField,
+                oversetFvPatchField<scalar>
+            >(scalarAgglomeration.boundaryFieldRef(), false);
+            scalarAgglomeration.write();
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dynamicOversetFvMesh::dynamicOversetFvMesh(const IOobject& io)
@@ -250,6 +475,21 @@ const Foam::lduAddressing& Foam::dynamicOversetFvMesh::lduAddr() const
         updateAddressing();
     }
     return *lduPtr_;
+}
+
+
+Foam::lduInterfacePtrsList Foam::dynamicOversetFvMesh::interfaces() const
+{
+    if (!active_)
+    {
+        return dynamicMotionSolverFvMesh::interfaces();
+    }
+    if (lduPtr_.empty())
+    {
+        // Build extended addressing
+        updateAddressing();
+    }
+    return allInterfaces_;
 }
 
 

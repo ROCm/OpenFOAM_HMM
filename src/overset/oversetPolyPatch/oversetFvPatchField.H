@@ -29,8 +29,7 @@ Group
 
 Description
     Boundary condition for use on overset patches. To be run in combination
-    with special dynamicFvMesh type that inserts local contributions into
-    the matrix. This boundary condition adds the remote contributions.
+    with special dynamicFvMesh type that inserts interpolation into the matrix.
 
 SourceFiles
     oversetFvPatchField.C
@@ -40,7 +39,8 @@ SourceFiles
 #ifndef oversetFvPatchField_H
 #define oversetFvPatchField_H
 
-#include "semiImplicitOversetFvPatchField.H"
+#include "oversetFvPatch.H"
+#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,14 +54,20 @@ namespace Foam
 template<class Type>
 class oversetFvPatchField
 :
-    public semiImplicitOversetFvPatchField<Type>
+    public zeroGradientFvPatchField<Type>
 {
 protected:
 
     // Protected data
 
+        //- Local reference cast into the overset patch
+        const oversetFvPatch& oversetPatch_;
+
+        //- Master patch ID
+        mutable label masterPatchID_;
+
         //- Send/receive buffer
-        mutable autoPtr<PstreamBuffers> pBufs_;
+        //mutable autoPtr<PstreamBuffers> pBufs_;
 
 
 public:
@@ -135,30 +141,30 @@ public:
             //- Initialise the evaluation of the patch field
             virtual void initEvaluate(const Pstream::commsTypes commsType);
 
-            using LduInterfaceField<Type>::initInterfaceMatrixUpdate;
-
-            //- Initialise neighbour matrix update. Add
-            //- or subtract coupled contributions to matrix
-            virtual void initInterfaceMatrixUpdate
-            (
-                scalarField&,
-                const bool add,
-                const scalarField&,
-                const scalarField&,
-                const direction,
-                const Pstream::commsTypes commsType
-            ) const;
-
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                scalarField& result,
-                const bool add,
-                const scalarField& psiInternal,
-                const scalarField& coeffs,
-                const direction cmpt,
-                const Pstream::commsTypes commsType
-            ) const;
+//            using LduInterfaceField<Type>::initInterfaceMatrixUpdate;
+//
+//            //- Initialise neighbour matrix update. Add
+//            //- or subtract coupled contributions to matrix
+//            virtual void initInterfaceMatrixUpdate
+//            (
+//                scalarField&,
+//                const bool add,
+//                const scalarField&,
+//                const scalarField&,
+//                const direction,
+//                const Pstream::commsTypes commsType
+//            ) const;
+//
+//            //- Update result field based on interface functionality
+//            virtual void updateInterfaceMatrix
+//            (
+//                scalarField& result,
+//                const bool add,
+//                const scalarField& psiInternal,
+//                const scalarField& coeffs,
+//                const direction cmpt,
+//                const Pstream::commsTypes commsType
+//            ) const;
 };
 
 

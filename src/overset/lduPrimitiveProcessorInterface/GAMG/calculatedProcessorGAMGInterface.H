@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,19 +22,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::lduPrimitiveProcessorInterface
+    Foam::calculatedProcessorGAMGInterface
 
 Description
-    Concrete implementation of processor interface. Used to temporarily store
-    settings.
+    GAMG agglomerated processor interface.
 
 SourceFiles
-    lduPrimitiveProcessorInterface.C
+    calculatedProcessorGAMGInterface.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduPrimitiveProcessorInterface_H
-#define lduPrimitiveProcessorInterface_H
+#ifndef calculatedProcessorGAMGInterface_H
+#define calculatedProcessorGAMGInterface_H
 
 #include "GAMGInterface.H"
 #include "processorLduInterface.H"
@@ -47,17 +44,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-               Class lduPrimitiveProcessorInterface Declaration
+              Class calculatedProcessorGAMGInterface Declaration
 \*---------------------------------------------------------------------------*/
 
-class lduPrimitiveProcessorInterface
+class calculatedProcessorGAMGInterface
 :
-    public lduInterface,
+    public GAMGInterface,
     public processorLduInterface
 {
     // Private data
 
-        const labelList faceCells_;
+        //- Communicator to use for parallel communication
+        const label comm_;
 
         //- My processor rank in communicator
         label myProcNo_;
@@ -71,20 +69,17 @@ class lduPrimitiveProcessorInterface
         //- Message tag used for sending
         int tag_;
 
-        //- Communicator to use for parallel communication
-        const label comm_;
-
 
     // Private Member Functions
 
         //- No copy construct
-        lduPrimitiveProcessorInterface
+        calculatedProcessorGAMGInterface
         (
-            const lduPrimitiveProcessorInterface&
+            const calculatedProcessorGAMGInterface&
         ) = delete;
 
         //- No copy assignment
-        void operator=(const lduPrimitiveProcessorInterface&) = delete;
+        void operator=(const calculatedProcessorGAMGInterface&) = delete;
 
 
 public:
@@ -92,45 +87,51 @@ public:
     //- Runtime type information
     TypeName("calculatedProcessor");
 
-
     // Constructors
 
-        //- Construct from components
-        lduPrimitiveProcessorInterface
+        //- Construct from fine-level interface,
+        //  local and neighbour restrict addressing
+        calculatedProcessorGAMGInterface
         (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            const lduInterface& fineInterface,
+            const labelField& restrictAddressing,
+            const labelField& neighbourRestrictAddressing,
+            const label fineLevelIndex,
+            const label coarseComm
+        );
+
+        //- Construct from components
+        calculatedProcessorGAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
             const labelUList& faceCells,
+            const labelUList& faceRestrictAddresssing,
+            const label coarseComm,
             const label myProcNo,
             const label neighbProcNo,
             const tensorField& forwardT,
-            const int tag,
-            const label comm = UPstream::worldComm
+            const int tag
+        );
+
+        //- Construct from Istream
+        calculatedProcessorGAMGInterface
+        (
+            const label index,
+            const lduInterfacePtrsList& coarseInterfaces,
+            Istream& is
         );
 
 
     //- Destructor
-    virtual ~lduPrimitiveProcessorInterface()
-    {}
+    virtual ~calculatedProcessorGAMGInterface();
 
 
     // Member Functions
 
-        // Access
-
-            //- Return faceCell addressing
-            virtual const labelUList& faceCells() const
-            {
-                return faceCells_;
-            }
-
-
         // Interface transfer functions
-
-            //- Return the values of the given internal data adjacent to
-            //  the interface as a field
-            virtual tmp<labelField> interfaceInternalField
-            (
-                const labelUList& internalData
-            ) const;
 
             //- Initialise neighbour field transfer
             virtual void initInternalFieldTransfer
@@ -180,13 +181,10 @@ public:
             }
 
 
-        // Edit
+        // I/O
 
-            //- Return message tag used for sending
-            int& tag()
-            {
-                return tag_;
-            }
+            //- Write to stream
+            virtual void write(Ostream&) const;
 };
 
 

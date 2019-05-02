@@ -60,10 +60,10 @@ Foam::oversetGAMGInterface::oversetGAMGInterface
         refCast<const oversetLduInterface>(fineInterface)
     )
 {
-    //Pout<< "Constructing oversetGAMGInterface index:" << index
-    //    << " from:" << fineOversetInterface_.name()
-    //    << " size:" << localRestrictAddressing.size()
-    //    << endl;
+    Pout<< "Constructing oversetGAMGInterface index:" << index
+        << " from:" << fineOversetInterface_.name()
+        << " size:" << localRestrictAddressing.size()
+        << endl;
 
     // From coarse face to coarse cell
     DynamicList<label> dynFaceCells(localRestrictAddressing.size());

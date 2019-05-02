@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,22 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "oversetFvPatch.H"
+#include "calculatedProcessorFvPatchFields.H"
+#include "fvPatchFields.H"
+#include "volMesh.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvMesh.H"
-#include "transform.H"
-#include "cellCellStencilObject.H"
-#include "volFields.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(oversetFvPatch, 0);
-    addToRunTimeSelectionTable(fvPatch, oversetFvPatch, polyPatch);
-}
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+defineNamedTemplateTypeNameAndDebug(calculatedProcessorFvPatchScalarField, 0);
+defineNamedTemplateTypeNameAndDebug(calculatedProcessorFvPatchVectorField, 0);
+defineNamedTemplateTypeNameAndDebug
+(
+    calculatedProcessorFvPatchSphericalTensorField,
+    0
+);
+defineNamedTemplateTypeNameAndDebug(calculatedProcessorFvPatchSymmTensorField, 0);
+defineNamedTemplateTypeNameAndDebug(calculatedProcessorFvPatchTensorField, 0);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //
