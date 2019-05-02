@@ -75,7 +75,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
     }
 
     // Print a bit
-    if (processorAgglomerate() && debug)
+    if (debug)
     {
         Info<< "GAMGAgglomeration:" << nl
             << "    local agglomerator     : " << type() << nl;
