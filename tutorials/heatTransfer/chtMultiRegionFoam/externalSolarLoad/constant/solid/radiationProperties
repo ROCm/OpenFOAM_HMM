@@ -16,23 +16,16 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+radiation       off;
 
-radiationModel  opaqueSolid;
+radiationModel  none;//opaqueSolid;
 
-absorptionEmissionModel multiBandSolidAbsorptionEmission;
+absorptionEmissionModel none;//multiBandSolidAbsorptionEmission;
 
 multiBandSolidAbsorptionEmissionCoeffs
 {
-    absorptivity    (0.7 0.7);
-    emissivity      (0.7 0.7);
-}
-
-transmissivityModel     multiBandSolidTransmissivity;
-
-multiBandSolidTransmissivityCoeffs
-{
-    transmissivity    (0 0);
+    absorptivity    (0.1 0.1);
+    emissivity      (0.1 0.1);
 }
 
 scatterModel    none;

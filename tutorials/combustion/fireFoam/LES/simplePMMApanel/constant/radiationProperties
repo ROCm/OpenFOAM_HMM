@@ -30,6 +30,5 @@ P1Coeffs
 
 scatterModel    none;
 
-transmissivityModel  none;
 
 // ************************************************************************* //

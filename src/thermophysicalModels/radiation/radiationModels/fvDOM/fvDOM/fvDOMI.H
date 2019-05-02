@@ -67,6 +67,11 @@ inline Foam::label Foam::radiation::fvDOM::nLambda() const
 }
 
 
+inline Foam::label Foam::radiation::fvDOM::nBands() const
+{
+    return nLambda_;
+}
+
 inline const Foam::volScalarField& Foam::radiation::fvDOM::a() const
 {
     return a_;
@@ -123,5 +128,10 @@ inline Foam::vector Foam::radiation::fvDOM::meshOrientation() const
     return meshOrientation_;
 }
 
+
+inline bool Foam::radiation::fvDOM::useSolarLoad() const
+{
+    return useSolarLoad_;
+}
 
 // ************************************************************************* //

@@ -533,6 +533,11 @@ bool Foam::radiation::laserDTRM::read()
     return false;
 }
 
+Foam::label Foam::radiation::laserDTRM::nBands() const
+{
+    return 1;
+}
+
 
 void Foam::radiation::laserDTRM::calculate()
 {

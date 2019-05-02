@@ -2191,16 +2191,36 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 (
     const polyBoundaryMesh& bMesh,
     const labelHashSet& includePatches,
+    labelList& faceMap,
     const bool verbose
 )
 {
     const polyMesh& mesh = bMesh.mesh();
 
     // Storage for surfaceMesh. Size estimate.
-    DynamicList<labelledTri> triangles(mesh.nBoundaryFaces());
+    List<labelledTri> triangles;
 
+    // Calculate number of faces and triangles
+    label nFaces = 0;
+    label nTris = 0;
+
+    for (const label patchi : includePatches)
+    {
+        const polyPatch& patch = bMesh[patchi];
+        const pointField& points = patch.points();
+        nFaces += patch.size();
+        for (const face& f :  patch)
+        {
+            faceList triFaces(f.nTriangles(points));
+            nTris += triFaces.size();
+        }
+    }
+
+    triangles.setSize(nTris);
+    faceMap.setSize(nTris);
     label newPatchi = 0;
 
+    nTris = 0;
     for (const label patchi : includePatches)
     {
         const polyPatch& patch = bMesh[patchi];
@@ -2208,6 +2228,7 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 
         label nTriTotal = 0;
 
+        label faceI = 0;
         for (const face& f :  patch)
         {
             faceList triFaces(f.nTriangles(points));
@@ -2218,10 +2239,13 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 
             for (const face& f :  triFaces)
             {
-                triangles.append(labelledTri(f[0], f[1], f[2], newPatchi));
+                faceMap[nTris] = patch.start() + faceI;
+                triangles[nTris++] = labelledTri(f[0], f[1], f[2], newPatchi);
 
                 ++nTriTotal;
             }
+
+            faceI++;
         }
 
         if (verbose)
@@ -2233,7 +2257,7 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 
         newPatchi++;
     }
-    triangles.shrink();
+    //triangles.shrink();
 
     // Create globally numbered tri surface
     triSurface rawSurface(triangles, mesh.points());

@@ -17,25 +17,25 @@ FoamFile
 
 base
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
 }
 
 outlet
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
 }
 
 sides
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
 }
 
 inlet
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
 }
 

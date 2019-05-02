@@ -15,4 +15,6 @@ rm -f constant/air/globalFaceFaces
 rm -f constant/air/mapDist
 rm -f constant/air/visibleFaceFaces
 
+rm -rf constant/triSurface
+
 #------------------------------------------------------------------------------

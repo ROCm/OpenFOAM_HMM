@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,20 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::radiation::transmissivityModel
+    Foam::radiation::wallTransmissivityModel
 
 Description
-    Base class for radiation scattering
+    Base class for wall transmissivity models
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef transmissivityModel_H
-#define transmissivityModel_H
+#ifndef wallTransmissivityModel_H
+#define wallTransmissivityModel_H
 
-#include "IOdictionary.H"
+#include "dictionary.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "volFields.H"
+#include "polyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,69 +45,83 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class transmissivityModel Declaration
+                   Class wallTransmissivityModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class transmissivityModel
+class wallTransmissivityModel
 {
 
 protected:
 
     // Protected data
 
-        //- Reference to the fvMesh
-        const fvMesh& mesh_;
+        //- Reference to the polyPatch
+        const polyPatch& pp_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("transmissivityModel");
+    TypeName("wallTransmissivityModel");
 
     // Declare runtime constructor selection table
 
         declareRunTimeSelectionTable
         (
             autoPtr,
-            transmissivityModel,
+            wallTransmissivityModel,
             dictionary,
             (
                 const dictionary& dict,
-                const fvMesh& mesh
+                const polyPatch& pp
             ),
-            (dict, mesh)
+            (dict, pp)
         );
 
 
     // Constructors
 
         //- Construct from components
-        transmissivityModel(const dictionary& dict, const fvMesh& mesh);
+        wallTransmissivityModel(const dictionary& dict, const polyPatch& pp);
 
 
     // Selector
 
-        static autoPtr<transmissivityModel> New
+        static autoPtr<wallTransmissivityModel> New
         (
             const dictionary& dict,
-            const fvMesh& mesh
+            const polyPatch& pp
         );
 
 
     //- Destructor
-    virtual ~transmissivityModel();
+    virtual ~wallTransmissivityModel() = default;
 
 
     // Member Functions
 
-        //- Return scatter coefficient
-        virtual tmp<volScalarField> tauEff(const label bandI = 0) const = 0;
+        //- Return transmissivity
+        virtual tmp<scalarField> t
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const = 0;
+
+        //- Return transmissivity on face
+        virtual scalar t
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector dir = Zero,
+            const scalar T = 0
+        ) const = 0;
 
         //- Is Grey
         virtual bool isGrey() const = 0;
 
         //- Number of bands
         virtual label nBands() const = 0;
-
 };
 
 

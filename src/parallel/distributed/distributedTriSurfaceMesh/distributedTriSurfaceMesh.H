@@ -202,6 +202,7 @@ private:
 
         // Triangle index
 
+
             //- Helper: convert local triangle indices to global ones
             void convertTriIndices(List<pointIndexHit>& info) const;
 
@@ -558,6 +559,17 @@ public:
                 labelList& subPointMap,
                 labelList& subFaceMap
             );
+
+
+            //- Obtains global indices from pointIndexHit and swaps them back
+            //  to their original processor. Used to calculate local region
+            //  and normal.
+            virtual autoPtr<mapDistribute> localQueries
+            (
+                const List<pointIndexHit>&,
+                labelList& triangleIndex
+            ) const;
+
 
             //- Print some stats. Parallel aware version of
             //  triSurface::writeStats.

@@ -1,0 +1,195 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    Foam::radiation::lookup
+
+Description
+    Look up type of boundary radiation properties.
+
+Usage
+    \verbatim
+
+        wallAbsorptionEmissionModel
+        {
+            type            lookup;
+            absorptivity    0.1;
+            emissivity      0.1;
+        }
+
+    \endverbatim
+
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef lookup_H
+#define lookup_H
+
+#include "boundaryRadiationPropertiesPatch.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace radiation
+{
+
+/*---------------------------------------------------------------------------*\
+                            Class lookup Declaration
+\*---------------------------------------------------------------------------*/
+
+class lookup
+:
+    public boundaryRadiationPropertiesPatch
+{
+
+protected:
+
+    // Protected data
+
+        //- Reference to the polyPatch
+        const polyPatch& pp_;
+
+        //-Dictionary
+        const dictionary dict_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("lookup");
+
+    // Constructors
+
+        //- Construct from components
+        lookup(const dictionary& dict, const polyPatch& pp);
+
+
+    //- Destructor
+    virtual ~lookup() = default;
+
+    // Member Functions
+
+        //- Return emissivity
+        virtual tmp<scalarField> e
+        (
+            const label bandI,
+            vectorField* incomingDirection,
+            scalarField* T
+        ) const;
+
+        //- Return emissivity on face
+        virtual scalar e
+        (
+            const label faceI,
+            const label bandI,
+            const vector& dir,
+            const scalar T
+        ) const;
+
+        //- Return absorptivity on patch
+        virtual tmp<scalarField> a
+        (
+            const label bandI,
+            vectorField* incomingDirection,
+            scalarField* T
+        ) const;
+
+        //- Return absorptivity on face
+        virtual scalar a
+        (
+            const label faceI,
+            const label bandI,
+            const vector& dir,
+            const scalar T
+        ) const;
+
+        //- Return transmissivity on patch
+        virtual tmp<scalarField> t
+        (
+            const label bandI,
+            vectorField* incomingDirection,
+            scalarField* T
+        ) const;
+
+        //- Return transmissivity on face
+        virtual scalar t
+        (
+            const label faceI,
+            const label bandI,
+            const vector& dir,
+            const scalar T
+        ) const;
+
+        //- Return specular reflectivity on patch
+        virtual tmp<scalarField> rSpec
+        (
+            const label bandI,
+            vectorField* incomingDirection,
+            scalarField* T
+        ) const;
+
+        //- Return specular reflectivity on face
+        virtual scalar rSpec
+        (
+            const label faceI,
+            const label bandI,
+            const vector& dir,
+            const scalar T
+        ) const;
+
+        //- Return diffusive reflectivity on patch
+        virtual tmp<scalarField> rDiff
+        (
+            const label bandI,
+            vectorField* incomingDirection ,
+            scalarField* T
+        ) const;
+
+        //- Return diffusive reflectivity on face
+        virtual scalar rDiff
+        (
+            const label faceI,
+            const label bandI,
+            const vector& dir,
+            const scalar T
+        ) const;
+
+        //- Is Grey
+        virtual bool isGrey() const;
+
+        //- Number of bands
+        virtual label nBands() const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace radiation
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

@@ -244,6 +244,9 @@ public:
             //- Number of wavelengths
             inline label nLambda() const;
 
+            //- Number of bands
+            inline label nBands() const;
+
             //- Const access to total absorption coefficient
             inline const volScalarField& a() const;
 
@@ -270,6 +273,9 @@ public:
 
             //- Return meshOrientation
             inline vector meshOrientation() const;
+
+            //- Use solar load
+            inline bool useSolarLoad() const;
 };
 
 

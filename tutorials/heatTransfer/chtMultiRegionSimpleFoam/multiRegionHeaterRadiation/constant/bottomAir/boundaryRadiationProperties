@@ -18,15 +18,18 @@ FoamFile
 
 ".*"
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
     absorptivity    1.0;
 }
 
 "bottomAir_to_.*"
 {
-    type            boundaryRadiation;
-    mode            solidRadiation;
+    type            opaqueDiffusive;
+    wallAbsorptionEmissionModel
+    {
+        type    solidAbsorption;
+    }
 }
 
 

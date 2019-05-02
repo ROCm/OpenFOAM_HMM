@@ -48,12 +48,14 @@ boundaryField
     }
     air_to_floor
     {
-        type            calculated;
+        type            greyDiffusiveRadiationViewFactor;
+        qro             uniform 0;
         value           uniform 0;
     }
     air_to_solid
     {
-        type            calculated;
+        type            greyDiffusiveRadiationViewFactor;
+        qro             uniform 0;
         value           uniform 0;
     }
 }

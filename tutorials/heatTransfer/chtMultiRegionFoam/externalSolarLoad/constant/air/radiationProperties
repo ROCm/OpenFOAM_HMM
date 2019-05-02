@@ -17,21 +17,19 @@ FoamFile
 
 radiation       on;
 
-radiationModel  solarLoad;
+radiationModel  viewFactor;
 
 solarLoadCoeffs
 {
-    // Calculate reflected/secondary heat fluxes
-    useVFbeamToDiffuse  true;
 
     // Sun direction ray model. Give the sunDirection or calculated using the
     // (solar calculator)
-    sunDirectionModel   sunDirTracking;//sunDirConstant;
+    sunDirectionModel   sunDirTracking; //sunDirConstant
 
         // Time interval to update Sun position (sec)
         sunTrackingUpdateInterval 800;
 
-        //sunDirection        (-1 1 -1);
+        //sunDirection        (1 0 -1);
 
         localStandardMeridian   9;      // GMT offset (hours)
         startDay                204;    // day of the year
@@ -39,12 +37,13 @@ solarLoadCoeffs
         longitude               139.74; // longitude (degrees)
         latitude                35.658; // latitude (degrees)
 
+
         // Grid orientation
         gridUp                  (0 0 1);
         gridEast                (1 0 0);
 
     // Energy spectrum
-    spectralDistribution (1 1);
+    spectralDistribution (2 1);
 
     // Solar model:
 
@@ -52,14 +51,14 @@ solarLoadCoeffs
         sunLoadModel sunLoadFairWeatherConditions;
 
         // Sun load constant model
-        directSolarRad  500;    // [w/m2]
-        diffuseSolarRad 40;     // [w/m2]
+        //directSolarRad  500;    // [w/m2]
+        //diffuseSolarRad 40;     // [w/m2]
 
         // Fair Weather Conditions Model Constants.
         // Calculate beta from the Solar calculator or input
-        A       300;        // Apparent solar irradiation at air mass m = 0
+        A       500;        // Apparent solar irradiation at air mass m = 0
         B       0.142;      // Atmospheric extinction coefficient
-        //beta    45;       // Solar altitude (in degrees) above the horizontal
+        //beta    45;         // Solar altitude (in degrees) above the horizontal
 
         // Theoretical maximum model constants
         Setrn       10;
@@ -74,6 +73,19 @@ solarLoadCoeffs
     // Radiative flux coupling flags
     solidCoupled    true;  //Couple through qr the solid regions (default true)
     wallCoupled     false; //Couple through qr wall patches (default false)
+
+    // Reflecting rays
+        useReflectedRays true;
+        reflecting
+        {
+            nPhi        10;
+            nTheta      10;
+        }
+
+    absorptionEmissionModel none;
+    scatterModel            none;
+    sootModel               none;
+
 }
 
 
@@ -82,6 +94,10 @@ viewFactorCoeffs
     smoothing true; //Smooth view factor matrix (use when in a close surface
                     //to force Sum(Fij = 1)
     constantEmissivity true; //constant emissivity on surfaces.
+
+    nBands    2;
+
+    useSolarLoad       true;
 }
 
 // Number of flow iterations per radiation iteration
@@ -92,7 +108,5 @@ absorptionEmissionModel none;
 scatterModel    none;
 
 sootModel       none;
-
-transmissivityModel none;
 
 // ************************************************************************* //

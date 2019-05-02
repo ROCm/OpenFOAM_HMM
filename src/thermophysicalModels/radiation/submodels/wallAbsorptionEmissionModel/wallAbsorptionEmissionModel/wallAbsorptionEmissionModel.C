@@ -24,35 +24,36 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "transmissivityModel.H"
+#include "wallAbsorptionEmissionModel.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    namespace radiation
+    {
+        defineTypeNameAndDebug(wallAbsorptionEmissionModel, 0);
+        defineRunTimeSelectionTable(wallAbsorptionEmissionModel, dictionary);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::radiation::transmissivityModel> Foam::radiation::
-transmissivityModel::New
+Foam::radiation::wallAbsorptionEmissionModel::wallAbsorptionEmissionModel
 (
-    const dictionary& dict,
-    const fvMesh& mesh
+    const dictionary&,
+    const polyPatch& pp
 )
-{
-    const word modelType(dict.get<word>("transmissivityModel"));
+:
+    pp_(pp)
+{}
 
-    Info<< "Selecting transmissivityModel " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
 
-    if (!cstrIter.found())
-    {
-        FatalErrorInFunction
-            << "Unknown transmissivityModel type "
-            << modelType << nl << nl
-            << "Valid transmissivityModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<transmissivityModel>(cstrIter()(dict, mesh));
-}
+Foam::radiation::wallAbsorptionEmissionModel::~wallAbsorptionEmissionModel()
+{}
 
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,6 @@ Class
     Foam::boundaryRadiationPropertiesPatch
 
 Description
-    Common functions to emissivity. It gets supplied from lookup into a
-    dictionary or calculated by the solidThermo:
-
-    - 'lookup' : lookup volScalarField with name
-    - 'solidThermo' : use solidThermo
-    - 'model' : use a model
 
 SourceFiles
     boundaryRadiationPropertiesPatch.C
@@ -44,8 +38,9 @@ SourceFiles
 #include "Enum.H"
 #include "fvPatch.H"
 #include "calculatedFvPatchFields.H"
-#include "transmissivityModel.H"
-#include "absorptionEmissionModel.H"
+#include "runTimeSelectionTables.H"
+#include "wallTransmissivityModel.H"
+#include "wallAbsorptionEmissionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,39 +49,17 @@ namespace Foam
 namespace radiation
 {
 /*---------------------------------------------------------------------------*\
-             Class boundaryRadiationPropertiesPatch Declaration
+              Class boundaryRadiationPropertiesPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class boundaryRadiationPropertiesPatch
 {
-public:
-
-    // - Type of method
-    enum methodType
-    {
-        SOLIDRADIATION,
-        LOOKUP,
-        MODEL
-    };
-
-
 private:
 
     // Private data
 
-        static const Enum<methodType> methodTypeNames_;
-
-        //- How to get property
-        const methodType method_;
-
         //- Dictionary
         const dictionary dict_;
-
-        //- Absorption/emission model
-        autoPtr<absorptionEmissionModel> absorptionEmission_;
-
-        //- transmissivity model
-        autoPtr<transmissivityModel> transmissivity_;
 
         //- reference to fvPatch
         const polyPatch& patch_;
@@ -101,52 +74,159 @@ private:
         const fvMesh& nbrRegion() const;
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Absorption/emission model
+        autoPtr<wallAbsorptionEmissionModel> absorptionEmission_;
+
+        //- Transmissivity model
+        autoPtr<wallTransmissivityModel> transmissivity_;
+
+
 public:
+
+    //- Runtime type information
+    TypeName("boundaryRadiationPropertiesPatch");
+
+      // Declare runtime constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            boundaryRadiationPropertiesPatch,
+            dictionary,
+            (
+                const dictionary& dict,
+                const polyPatch& pp
+            ),
+            (dict, pp)
+        );
 
 
     // Constructors
 
-
         //- Construct from patch, internal field and dictionary
         boundaryRadiationPropertiesPatch
         (
-            const polyPatch&,
-            const dictionary&
+            const dictionary&,
+            const polyPatch&
         );
 
-         //- Destructor
-        virtual ~boundaryRadiationPropertiesPatch();
+
+        //- Selector
+        static autoPtr<boundaryRadiationPropertiesPatch> New
+        (
+            const dictionary& dict,
+            const polyPatch& pp
+        );
+
+        //- Destructor
+        virtual ~boundaryRadiationPropertiesPatch() = default;
 
 
     // Member functions
 
-        //- Method to obtain properties
-        word method() const
-        {
-            return methodTypeNames_[method_];
-        }
-
-
         //- Return absorptionEmissionModel
-        const absorptionEmissionModel& absorptionEmission() const;
+        const wallAbsorptionEmissionModel& absorptionEmission() const;
 
         //- Return transmissivityModel
-        const transmissivityModel& transmissiveModel() const;
+        const wallTransmissivityModel& transmissiveModel() const;
 
-        //- Calculate corresponding emissivity field for bandI
-        tmp<scalarField> emissivity(const label bandI = 0) const;
+        //- Return emissivity on patch
+        virtual tmp<scalarField> e
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const = 0;
 
-        //- Calculate corresponding absorptivity field for bandI
-        tmp<scalarField> absorptivity(const label bandI = 0) const;
+        //- Return emissivity on face
+        virtual scalar e
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector& dir = Zero,
+            const scalar T = 0
+        ) const = 0;
 
-        //- Calculate corresponding transmissivity field for bandI
-        tmp<scalarField> transmissivity(const label bandI = 0) const;
+        //- Return absorptivity on patch
+        virtual tmp<scalarField> a
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const = 0;
 
-        //- Calculate corresponding reflectivity field
-        tmp<scalarField> reflectivity(const label bandI = 0) const;
+        //- Return absorptivity on face
+        virtual scalar a
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector& dir = Zero,
+            const scalar T = 0
+        ) const = 0;
+
+        //- Return transmissivity on patch
+        virtual tmp<scalarField> t
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const = 0;
+
+        //- Return transmissivity on face
+        virtual scalar t
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector& dir = Zero,
+            const scalar T = 0
+        ) const = 0;
+
+        //- Return specular reflectivity on patch
+        virtual tmp<scalarField> rSpec
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const = 0;
+
+        //- Return specular reflectivity on face
+        virtual scalar rSpec
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector& dir = Zero,
+            const scalar T = 0
+        ) const = 0;
+
+        //- Return diffusive reflectivity on patch
+        virtual tmp<scalarField> rDiff
+        (
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const = 0;
+
+        //- Return diffusive reflectivity on face
+        virtual scalar rDiff
+        (
+            const label faceI,
+            const label bandI = 0,
+            const vector& dir = Zero,
+            const scalar T = 0
+        ) const = 0;
+
+        //- Is Grey
+        virtual bool isGrey() const = 0;
+
+        //- Number of bands
+        virtual label nBands() const = 0;
 
         //- Write
-        void write(Ostream&) const;
+        virtual void write(Ostream&) const;
 };
 
 

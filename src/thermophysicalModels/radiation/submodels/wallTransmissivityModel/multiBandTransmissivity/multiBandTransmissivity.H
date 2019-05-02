@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,23 +22,34 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::radiation::constantTransmissivity
+    Foam::radiation::multiBandTransmissivity
 
 Group
-    grpRadiationTransmissivitySubModels
+    grpwallTransmissivityModel
 
 Description
-    Constant radiation transmissivity coefficient
+    multiBandTransmissivity radiation transmissivity for solids.
+
+Usage
+    \verbatim
+
+        wallTransmissivityModel
+        {
+            type            multiBandTransmissivity;
+            transmissivity  (0.3 0.7);
+        };
+
+    \endverbatim
 
 SourceFiles
-    constantTransmissivity.C
+    multiBandTransmissivity.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiation_constantTransmissivity_H
-#define radiation_constantTransmissivity_H
+#ifndef multiBandTransmissivity_H
+#define multiBandTransmissivity_H
 
-#include "transmissivityModel.H"
+#include "wallTransmissivityModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,57 +59,87 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class constantTransmissivity Declaration
+                  Class multiBandTransmissivity Declaration
 \*---------------------------------------------------------------------------*/
 
-class constantTransmissivity
+class multiBandTransmissivity
 :
-    public transmissivityModel
+    public wallTransmissivityModel
 {
+public:
+
+    // Public data
+
+        //- Maximum number of bands
+        static const label maxBands_ = 5;
+
+
+private:
 
     // Private data
 
-        //- Coefficients dictionary
+        //- Absorption model dictionary
         dictionary coeffsDict_;
 
-        //- Transmissivity coefficient / []
-        scalar tau_;
+        //-  Absorption coefficients
+        scalarList tauCoeffs_;
+
+        //- Bands
+        label nBands_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("constantTransmissivity");
+    TypeName("multiBandTransmissivity");
 
 
     // Constructors
 
         //- Construct from components
-        constantTransmissivity(const dictionary& dict, const fvMesh& mesh);
+        multiBandTransmissivity
+        (
+            const dictionary& dict,
+            const polyPatch& p
+        );
 
 
     //- Destructor
-    virtual ~constantTransmissivity();
+    virtual ~multiBandTransmissivity() = default;
 
 
     // Member Functions
 
-        //- Return scatter coefficient
-        tmp<volScalarField> tauEff(const label bandI = 0) const;
+        // Access
 
+            //- Return transmissivity
+            tmp<scalarField> t
+            (
+                const label bandI = 0,
+                vectorField* incomingDirection = nullptr,
+                scalarField* T = nullptr
+            ) const;
 
-        //- Is Grey
-        inline bool isGrey() const
-        {
-            return true;
-        }
+            //- Return transmissivity on face
+            scalar t
+            (
+                const label faceI,
+                const label bandI = 0,
+                const vector dir = Zero,
+                const scalar T = 0
+            ) const;
 
+            //- Is Grey
+            inline bool isGrey() const
+            {
+                return false;
+            }
 
-        //- Number of bands
-        inline label nBands() const
-        {
-            return 1;
-        }
+            //- Number of bands
+            inline label nBands() const
+            {
+                return nBands_;
+            }
 };
 
 

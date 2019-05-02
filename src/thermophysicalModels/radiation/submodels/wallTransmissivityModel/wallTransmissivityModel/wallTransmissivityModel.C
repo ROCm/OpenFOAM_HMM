@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "transmissivityModel.H"
+#include "wallTransmissivityModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -32,27 +32,21 @@ namespace Foam
 {
     namespace radiation
     {
-        defineTypeNameAndDebug(transmissivityModel, 0);
-        defineRunTimeSelectionTable(transmissivityModel, dictionary);
+        defineTypeNameAndDebug(wallTransmissivityModel, 0);
+        defineRunTimeSelectionTable(wallTransmissivityModel, dictionary);
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radiation::transmissivityModel::transmissivityModel
+Foam::radiation::wallTransmissivityModel::wallTransmissivityModel
 (
     const dictionary&,
-    const fvMesh& mesh
+    const polyPatch& pp
 )
 :
-    mesh_(mesh)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
-
-Foam::radiation::transmissivityModel::~transmissivityModel()
+    pp_(pp)
 {}
 
 

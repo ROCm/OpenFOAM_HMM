@@ -40,7 +40,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-
 void Foam::faceShading::writeRays
 (
     const fileName& fName,
@@ -91,10 +90,8 @@ Foam::triSurface Foam::faceShading::triangulate
 
                 f.triangles(points, nTri, triFaces);
 
-                forAll(triFaces, triFaceI)
+                for (const face& f : triFaces)
                 {
-                    const face& f = triFaces[triFaceI];
-
                     triangles.append
                     (
                         labelledTri(f[0], f[1], f[2], newPatchI)
@@ -235,10 +232,7 @@ void Foam::faceShading::calculate()
             {
                 if (tau[faceI] == 0.0)
                 {
-                    includeAllFacesPerPatch[patchI].insert
-                    (
-                        faceI
-                    );
+                    includeAllFacesPerPatch[patchI].insert(faceI);
                 }
             }
         }
@@ -361,9 +355,8 @@ void Foam::faceShading::calculate()
         volScalarField::Boundary& hitFacesBf = hitFaces.boundaryFieldRef();
 
         hitFacesBf = 0.0;
-        forAll(rayStartFaces_, i)
+        for (const label faceI : rayStartFaces_)
         {
-            const label faceI = rayStartFaces_[i];
             label patchID = patches.whichPatch(faceI);
             const polyPatch& pp = patches[patchID];
             hitFacesBf[patchID][faceI - pp.start()] = 1.0;
@@ -394,7 +387,6 @@ Foam::faceShading::faceShading
 {}
 
 
-
 Foam::faceShading::faceShading
 (
     const fvMesh& mesh,
@@ -407,12 +399,6 @@ Foam::faceShading::faceShading
 {
     calculate();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceShading::~faceShading()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

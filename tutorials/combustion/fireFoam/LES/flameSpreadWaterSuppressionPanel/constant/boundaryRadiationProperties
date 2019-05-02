@@ -18,12 +18,16 @@ FoamFile
 
 region0_to_pyrolysisRegion_coupledWall
 {
-    mode            solidRadiation;
+    type            opaqueDiffusive;
+    wallAbsorptionEmissionModel
+    {
+        type    solidAbsorption;
+    }
 }
 
 ".*"
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
     absorptivity    1.0;
     transmissivity  0.0;

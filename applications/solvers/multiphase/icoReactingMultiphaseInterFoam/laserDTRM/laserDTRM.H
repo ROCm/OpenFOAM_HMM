@@ -250,6 +250,9 @@ public:
         //- Read radiation properties dictionary
         bool read();
 
+        //- Number of bands for this radiation model
+        virtual label nBands() const;
+
 
     // Access
 

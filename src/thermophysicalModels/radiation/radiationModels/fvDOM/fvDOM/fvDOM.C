@@ -193,10 +193,7 @@ void Foam::radiation::fvDOM::initialise()
     if (useSolarLoad_)
     {
         const dictionary& solarDict = this->subDict("solarLoarCoeffs");
-        solarLoad_.reset
-        (
-            new solarLoad(solarDict, T_, externalRadHeatFieldName_)
-        );
+        solarLoad_.reset(new solarLoad(solarDict, T_));
 
         if (solarLoad_->nBands() > 1)
         {

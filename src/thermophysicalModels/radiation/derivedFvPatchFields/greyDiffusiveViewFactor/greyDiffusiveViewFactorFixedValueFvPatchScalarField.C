@@ -30,6 +30,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "radiationModel.H"
+#include "viewFactor.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -41,8 +42,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    qro_(),
-    solarLoad_(false)
+    qro_()
 {}
 
 
@@ -56,8 +56,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    qro_(ptf.qro_, mapper),
-    solarLoad_(ptf.solarLoad_)
+    qro_(ptf.qro_, mapper)
 {}
 
 
@@ -70,8 +69,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict, false),
-    qro_("qro", dict, p.size()),
-    solarLoad_(dict.lookupOrDefault("solarLoad", false))
+    qro_("qro", dict, p.size())
 {
     if (dict.found("value"))
     {
@@ -95,8 +93,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf),
-    qro_(ptf.qro_),
-    solarLoad_(ptf.solarLoad_)
+    qro_(ptf.qro_)
 {}
 
 
@@ -108,8 +105,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, iF),
-    qro_(ptf.qro_),
-    solarLoad_(ptf.solarLoad_)
+    qro_(ptf.qro_)
 {}
 
 
@@ -167,19 +163,29 @@ updateCoeffs()
 
 
 Foam::tmp<Foam::scalarField> Foam::radiation::
-greyDiffusiveViewFactorFixedValueFvPatchScalarField::qro() const
+greyDiffusiveViewFactorFixedValueFvPatchScalarField::qro(label bandI) const
 {
     tmp<scalarField> tqrt(new scalarField(qro_));
 
-    if (solarLoad_)
-    {
-        const radiationModel& radiation =
-            db().lookupObject<radiationModel>("radiationProperties");
+    const viewFactor& radiation =
+        db().lookupObject<viewFactor>("radiationProperties");
 
+    if (radiation.useSolarLoad())
+    {
         tqrt.ref() += patch().lookupPatchField<volScalarField, scalar>
         (
-            radiation.externalRadHeatFieldName_
+            radiation.primaryFluxName_ + "_"  + name(bandI)
         );
+
+        word qSecName = radiation.relfectedFluxName_ + "_" + name(bandI);
+
+        if (this->db().foundObject<volScalarField>(qSecName))
+        {
+            const volScalarField& qSec =
+                this->db().lookupObject<volScalarField>(qSecName);
+
+            tqrt.ref() += qSec.boundaryField()[patch().index()];
+        }
     }
 
     return tqrt;
@@ -194,7 +200,6 @@ write
 {
     fixedValueFvPatchScalarField::write(os);
     qro_.writeEntry("qro", os);
-    os.writeEntry("solarLoad", solarLoad_);
 }
 
 

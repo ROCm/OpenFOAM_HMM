@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "noTransmissivity.H"
+#include "constantAbsorption.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -32,11 +32,12 @@ namespace Foam
 {
     namespace radiation
     {
-        defineTypeNameAndDebug(noTransmissivity, 0);
+        defineTypeNameAndDebug(constantAbsorption, 0);
+
         addToRunTimeSelectionTable
         (
-            transmissivityModel,
-            noTransmissivity,
+            wallAbsorptionEmissionModel,
+            constantAbsorption,
             dictionary
         );
     }
@@ -45,46 +46,64 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radiation::noTransmissivity::noTransmissivity
+Foam::radiation::constantAbsorption::constantAbsorption
 (
     const dictionary& dict,
-    const fvMesh& mesh
+     const polyPatch& pp
 )
 :
-    transmissivityModel(dict, mesh)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::noTransmissivity::~noTransmissivity()
+    wallAbsorptionEmissionModel(dict, pp),
+    coeffsDict_(dict),
+    a_(coeffsDict_.get<scalar>("absorptivity")),
+    e_(coeffsDict_.get<scalar>("emissivity"))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::radiation::noTransmissivity::tauEff
+Foam::tmp<Foam::scalarField> Foam::radiation::constantAbsorption::a
 (
-    const label bandI
+    const label bandI,
+    vectorField* incomingDirection,
+    scalarField* T
 ) const
 {
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "tau",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar(dimless, Zero)
-        )
-    );
+    return tmp<scalarField>(new scalarField(pp_.size(), a_));
+}
+
+
+Foam::scalar Foam::radiation::constantAbsorption::a
+(
+    const label faceI,
+    const label bandI,
+    const vector dir,
+    const scalar T
+) const
+{
+    return a_;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::radiation::constantAbsorption::e
+(
+    const label bandI,
+    vectorField* incomingDirection,
+    scalarField* T
+) const
+{
+    return tmp<scalarField>(new scalarField(pp_.size(), e_));
+}
+
+
+Foam::scalar Foam::radiation::constantAbsorption::e
+(
+    const label faceI,
+    const label bandI,
+    const vector dir,
+    const scalar T
+) const
+{
+    return e_;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "multiBandSolidTransmissivity.H"
+#include "constantTransmissivity.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -32,12 +32,12 @@ namespace Foam
 {
     namespace radiation
     {
-        defineTypeNameAndDebug(multiBandSolidTransmissivity, 0);
+        defineTypeNameAndDebug(constantTransmissivity, 0);
 
         addToRunTimeSelectionTable
         (
-            transmissivityModel,
-            multiBandSolidTransmissivity,
+            wallTransmissivityModel,
+            constantTransmissivity,
             dictionary
         );
     }
@@ -46,51 +46,42 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radiation::multiBandSolidTransmissivity::multiBandSolidTransmissivity
+Foam::radiation::constantTransmissivity::constantTransmissivity
 (
     const dictionary& dict,
-    const fvMesh& mesh
+    const polyPatch& pp
 )
 :
-    transmissivityModel(dict, mesh),
-    coeffsDict_(dict.subDict(typeName + "Coeffs")),
-    tauCoeffs_(),
-    nBands_(0)
-{
-    coeffsDict_.readEntry("transmissivity", tauCoeffs_);
-    nBands_ = tauCoeffs_.size();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::multiBandSolidTransmissivity::~multiBandSolidTransmissivity()
+    wallTransmissivityModel(dict, pp),
+    coeffsDict_(dict),
+    tau_(coeffsDict_.get<scalar>("transmissivity"))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField>
-Foam::radiation::multiBandSolidTransmissivity::tauEff(const label bandI) const
+Foam::tmp<Foam::scalarField>
+Foam::radiation::constantTransmissivity::t
+(
+    const label bandI,
+    vectorField* incomingDirection,
+    scalarField* T
+) const
 {
-    tmp<volScalarField> tt
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "t",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("t", dimless/dimLength, tauCoeffs_[bandI])
-        )
-    );
-
-    return tt;
+    return tmp<scalarField>::New(pp_.size(), tau_);
 }
+
+
+Foam::scalar Foam::radiation::constantTransmissivity::t
+(
+    const label faceI,
+    const label bandI,
+    const vector dir,
+    const scalar T
+) const
+{
+    return tau_;
+}
+
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,23 +22,35 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::radiation::multiBandSolidTransmissivity
+    Foam::radiation::multiBandAbsorption
 
 Group
-    grpRadiationTransmissivitySubModels
+    wallAbsorptionEmissionModel
 
 Description
-    multiBandSolidTransmissivity radiation transmissivity for solids.
+    multiBandAbsorption radiation transmissivity for solids.
+
+Usage
+    \verbatim
+
+        wallAbsorptionEmissionModel
+        {
+            type            multiBandAbsorption;
+            absorptivity    (0.3 0.7);
+            emissivity      (0.3 0.7);
+        };
+
+    \endverbatim
 
 SourceFiles
-    multiBandSolidTransmissivity.C
+    multiBandAbsorption.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef multiBandSolidTransmissivity_H
-#define multiBandSolidTransmissivity_H
+#ifndef multiBandAbsorption_H
+#define multiBandAbsorption_H
 
-#include "transmissivityModel.H"
+#include "wallAbsorptionEmissionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,12 +60,12 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class multiBandSolidTransmissivity Declaration
+                  Class multiBandAbsorption Declaration
 \*---------------------------------------------------------------------------*/
 
-class multiBandSolidTransmissivity
+class multiBandAbsorption
 :
-    public transmissivityModel
+    public wallAbsorptionEmissionModel
 {
 public:
 
@@ -71,7 +83,10 @@ private:
         dictionary coeffsDict_;
 
         //-  Absorption coefficients
-        scalarList tauCoeffs_;
+        scalarList aCoeffs_;
+
+        //-  Emission coefficients
+        scalarList eCoeffs_;
 
         //- Bands
         label nBands_;
@@ -80,37 +95,66 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("multiBandSolidTransmissivity");
+    TypeName("multiBandAbsorption");
 
 
     // Constructors
 
         //- Construct from components
-        multiBandSolidTransmissivity
+        multiBandAbsorption
         (
             const dictionary& dict,
-            const fvMesh& mesh
+            const polyPatch& pp
         );
 
 
     //- Destructor
-    virtual ~multiBandSolidTransmissivity();
+    virtual ~multiBandAbsorption();
 
 
     // Member Functions
 
         // Access
 
-            //- Transmissivity coefficient
-            tmp<volScalarField> tauEff(const label bandI) const;
+            //- absorptivity coefficient
+            tmp<scalarField> a
+            (
+                const label bandI = 0,
+                vectorField* incomingDirection = nullptr,
+                scalarField* T = nullptr
+            ) const;
 
+            //- Return absorptivity on face
+            scalar a
+            (
+                const label faceI,
+                const label bandI = 0,
+                const vector dir = Zero,
+                const scalar T = 0
+            ) const;
+
+            //- Return emission coefficient
+            tmp<scalarField> e
+            (
+                 const label bandI = 0,
+                vectorField* incomingDirection = nullptr,
+                scalarField* T = nullptr
+            ) const;
+
+            //- Return emission coefficient
+            scalar e
+            (
+                const label faceI,
+                const label bandI = 0,
+                const vector dir = Zero,
+                const scalar T = 0
+            ) const;
 
             //- Is Grey
             inline bool isGrey() const
             {
                 return false;
             }
-
 
             //- Number of bands
             inline label nBands() const
