@@ -66,7 +66,7 @@ Foam::solarCalculator::sunLoadModelTypeNames_
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::solarCalculator::calculateBetaTetha()
+void Foam::solarCalculator::calculateBetaTheta()
 {
     scalar runTime = 0.0;
     switch (sunDirectionModel_)
@@ -104,20 +104,20 @@ void Foam::solarCalculator::calculateBetaTetha()
 
     scalar deltaRad = degToRad(delta);
     beta_ = max(asin(cos(L)*cos(deltaRad)*cos(H) + sin(L)*sin(deltaRad)), 1e-3);
-    tetha_ = acos((sin(beta_)*sin(L) - sin(deltaRad))/(cos(beta_)*cos(L)));
+    theta_ = acos((sin(beta_)*sin(L) - sin(deltaRad))/(cos(beta_)*cos(L)));
 
     // theta is the angle between the SOUTH axis and the Sun
     // If the hour angle is lower than zero (morning) the Sun is positioned
     // on the East side.
     if (H < 0)
     {
-        tetha_ += 2*(constant::mathematical::pi - tetha_);
+        theta_ += 2*(constant::mathematical::pi - theta_);
     }
 
     if (debug)
     {
         Info << tab << "altitude : " << radToDeg(beta_) << endl;
-        Info << tab << "azimuth  : " << radToDeg(tetha_) << endl;
+        Info << tab << "azimuth  : " << radToDeg(theta_) << endl;
     }
 }
 
@@ -134,8 +134,8 @@ void Foam::solarCalculator::calculateSunDirection()
 
     // Assuming 'z' vertical, 'y' North and 'x' East
     direction_.z() = -sin(beta_);
-    direction_.y() =  cos(beta_)*cos(tetha_); // South axis
-    direction_.x() =  cos(beta_)*sin(tetha_); // West axis
+    direction_.y() =  cos(beta_)*cos(theta_); // South axis
+    direction_.x() =  cos(beta_)*sin(theta_); // West axis
 
     direction_.normalise();
 
@@ -166,7 +166,7 @@ void Foam::solarCalculator::init()
             }
             else
             {
-                calculateBetaTetha();
+                calculateBetaTheta();
                 calculateSunDirection();
             }
 
@@ -187,7 +187,7 @@ void Foam::solarCalculator::init()
                 sunTrackingUpdateInterval_
             );
 
-            calculateBetaTetha();
+            calculateBetaTheta();
             calculateSunDirection();
             break;
         }
@@ -214,7 +214,7 @@ void Foam::solarCalculator::init()
 
             if (!dict_.readIfPresent("beta", beta_))
             {
-                calculateBetaTetha();
+                calculateBetaTheta();
             }
 
             directSolarRad_ =
@@ -254,7 +254,7 @@ Foam::solarCalculator::solarCalculator
     A_(0.0),
     B_(0.0),
     beta_(0.0),
-    tetha_(0.0),
+    theta_(0.0),
     skyCloudCoverFraction_(0.0),
     Setrn_(0.0),
     SunPrime_(0.0),
@@ -270,12 +270,6 @@ Foam::solarCalculator::solarCalculator
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::solarCalculator::~solarCalculator()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::solarCalculator::correctSunDirection()
@@ -288,7 +282,7 @@ void Foam::solarCalculator::correctSunDirection()
         }
         case mSunDirTracking:
         {
-            calculateBetaTetha();
+            calculateBetaTheta();
             calculateSunDirection();
             directSolarRad_ = A_/exp(B_/sin(max(beta_, ROOTVSMALL)));
             break;

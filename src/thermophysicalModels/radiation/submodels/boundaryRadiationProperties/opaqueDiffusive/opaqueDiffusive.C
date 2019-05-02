@@ -61,14 +61,8 @@ Foam::radiation::opaqueDiffusive::opaqueDiffusive
     (
         wallAbsorptionEmissionModel::New(absorptionDict, pp).ptr()
     );
-
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
-
-Foam::radiation::opaqueDiffusive::~opaqueDiffusive()
-{}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -87,7 +81,7 @@ Foam::scalar Foam::radiation::opaqueDiffusive::e
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -111,7 +105,7 @@ Foam::scalar Foam::radiation::opaqueDiffusive::a
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -126,7 +120,7 @@ Foam::tmp<Foam::scalarField> Foam::radiation::opaqueDiffusive::t
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), 0.0));
+    return tmp<scalarField>::New(pp_.size(), 0.0);
 }
 
 
@@ -134,7 +128,7 @@ Foam::scalar Foam::radiation::opaqueDiffusive::t
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -150,7 +144,7 @@ Foam::radiation::opaqueDiffusive::rSpec
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), Zero));
+    return tmp<scalarField>::New(pp_.size(), Zero);
 }
 
 
@@ -158,7 +152,7 @@ Foam::scalar Foam::radiation::opaqueDiffusive::rSpec
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -173,7 +167,7 @@ Foam::tmp<Foam::scalarField> Foam::radiation::opaqueDiffusive::rDiff
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), Zero));
+    return tmp<scalarField>::New(pp_.size(), Zero);
 }
 
 
@@ -181,7 +175,7 @@ Foam::scalar Foam::radiation::opaqueDiffusive::rDiff
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -199,5 +193,6 @@ Foam::label Foam::radiation::opaqueDiffusive::nBands() const
 {
     return absorptionEmission_->nBands();
 }
+
 
 // ************************************************************************* //

@@ -57,7 +57,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class opaqueDiffusive Declaration
+                       Class opaqueDiffusive Declaration
 \*---------------------------------------------------------------------------*/
 
 class opaqueDiffusive
@@ -72,6 +72,7 @@ protected:
         //- Reference to the polyPatch
         const polyPatch& pp_;
 
+
 public:
 
     //- Runtime type information
@@ -84,113 +85,101 @@ public:
 
 
     //- Destructor
-    virtual ~opaqueDiffusive();
+    virtual ~opaqueDiffusive() = default;
 
 
     // Member Functions
 
-         //- Return emissivity
-        tmp<scalarField> e
+        //- Return emissivity
+        virtual tmp<scalarField> e
         (
             const label bandI,
             vectorField* incomingDirection,
             scalarField* T
         ) const;
-
 
         //- Return emissivity on face
-        scalar e
+        virtual scalar e
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
-
 
         //- Return absorptivity on patch
-        tmp<scalarField> a
+        virtual tmp<scalarField> a
         (
             const label bandI,
             vectorField* incomingDirection,
             scalarField* T
         ) const;
-
 
         //- Return absorptivity on face
-        scalar a
+        virtual scalar a
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
-
 
         //- Return transmissivity on patch
-        tmp<scalarField> t
+        virtual tmp<scalarField> t
         (
             const label bandI,
             vectorField* incomingDirection,
             scalarField* T
         ) const;
-
 
         //- Return transmissivity on face
-        scalar t
+        virtual scalar t
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
 
-
         //- Return specular reflectivity on patch
-        tmp<scalarField> rSpec
+        virtual tmp<scalarField> rSpec
         (
             const label bandI,
             vectorField* incomingDirection,
             scalarField* T
         ) const;
 
-
         //- Return specular reflectivity on face
-        scalar rSpec
+        virtual scalar rSpec
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
 
-
         //- Return diffusive reflectivity on patch
-        tmp<scalarField> rDiff
+        virtual tmp<scalarField> rDiff
         (
             const label bandI,
             vectorField* incomingDirection ,
             scalarField* T
         ) const;
 
-
         //- Return diffusive reflectivity on face
-        scalar rDiff
+        virtual scalar rDiff
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
-
 
         //- Is Grey
         virtual bool isGrey() const;
 
-
         //- Number of bands
         virtual label nBands() const;
-
 };
 
 

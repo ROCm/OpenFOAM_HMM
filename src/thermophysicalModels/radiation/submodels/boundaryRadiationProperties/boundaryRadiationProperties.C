@@ -97,8 +97,6 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
                         << abort(FatalError);
                 }
             }
-
-
         }
     }
 }
@@ -399,10 +397,6 @@ Foam::scalar Foam::radiation::boundaryRadiationProperties::faceSpecReflectivity
 
     return Zero;
 }
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-Foam::radiation::boundaryRadiationProperties::~boundaryRadiationProperties()
-{}
 
 
 // ************************************************************************* //

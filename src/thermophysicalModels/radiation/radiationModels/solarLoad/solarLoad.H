@@ -30,7 +30,6 @@ Group
     grpRadiationModels
 
 Description
-
     The solar load radiation model includes Sun primary hits, their
     reflective fluxes and diffusive sky radiative fluxes.
 
@@ -38,7 +37,8 @@ Description
     The first reflected fluxes can be optionally included. A view factors
     method is needed in order to include diffusive surface to surface fluxes.
 
-    The energy is included on "visible" walls by default. The sky diffusive radiation for horizontal and vertical walls is calculated following the
+    The energy is included on "visible" walls by default. The sky diffusive
+    radiation for horizontal and vertical walls is calculated following the
     Fair Weather Conditions Method from the ASHRAE Handbook.
 
     By default the energy is included in cells adjacent to the patches into
@@ -98,7 +98,7 @@ private:
         autoPtr<faceReflecting> reflectedFaces_;
 
         //- Source term for cells next to patches with flags solidCoupled
-        //  and wallCoupled false
+        //- and wallCoupled false
         DimensionedField<scalar, volMesh> Ru_;
 
         //- Solar calculator
@@ -116,7 +116,7 @@ private:
         //-Number of bands
         label nBands_;
 
-         //- Primary solar radiative heat flux per band [W/m2]
+        //- Primary solar radiative heat flux per band [W/m2]
         PtrList<volScalarField> qprimaryRad_;
 
         //- Couple solids through mapped boundary patch using qr (default:true)
@@ -139,7 +139,6 @@ private:
 
 
     // Private Member Functions
-
 
         //- Initialise
         void initialise(const dictionary&);
@@ -189,7 +188,7 @@ public:
 
 
     //- Destructor
-    virtual ~solarLoad();
+    virtual ~solarLoad() = default;
 
 
     // Member functions

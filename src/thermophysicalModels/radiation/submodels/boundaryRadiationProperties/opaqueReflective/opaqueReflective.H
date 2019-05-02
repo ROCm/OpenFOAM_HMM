@@ -28,8 +28,8 @@ Description
     Radiation boundary model for opaque reflective walls. It requires to
     specify a wallAbsorptionEmissionModel and the reflected fraction
     in boundaryRadiationProperties file
-    fd is the diffussive reflected fraction. 0 all the incoming flux is
-    specularly reflected and 1 all is diffussive reflected. fd is used
+    fd is the diffusive reflected fraction. 0 all the incoming flux is
+    specularly reflected and 1 all is diffusive reflected. fd is used
     in the calculation of the specular reflection (rSpec) and the
     diffusive reflection (rDiff). Absorptivity and emissivity are
     independent of fd.
@@ -65,7 +65,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class opaqueReflective Declaration
+                      Class opaqueReflective Declaration
 \*---------------------------------------------------------------------------*/
 
 class opaqueReflective
@@ -95,113 +95,101 @@ public:
 
 
     //- Destructor
-    virtual ~opaqueReflective();
+    virtual ~opaqueReflective() = default;
 
 
     // Member Functions
 
-         //- Return emissivity
-        tmp<scalarField> e
+        //- Return emissivity
+        virtual tmp<scalarField> e
         (
             const label bandI,
             vectorField* incomingDirection,
             scalarField* T
         ) const;
-
 
         //- Return emissivity on face
-        scalar e
+        virtual scalar e
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
-
 
         //- Return absorptivity on patch
-        tmp<scalarField> a
+        virtual tmp<scalarField> a
         (
             const label bandI,
             vectorField* incomingDirection,
             scalarField* T
         ) const;
-
 
         //- Return absorptivity on face
-        scalar a
+        virtual scalar a
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
-
 
         //- Return transmissivity on patch
-        tmp<scalarField> t
+        virtual tmp<scalarField> t
         (
             const label bandI,
             vectorField* incomingDirection,
             scalarField* T
         ) const;
-
 
         //- Return transmissivity on face
-        scalar t
+        virtual scalar t
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
 
-
         //- Return specular reflectivity on patch
-        tmp<scalarField> rSpec
+        virtual tmp<scalarField> rSpec
         (
             const label bandI,
             vectorField* incomingDirection,
             scalarField* T
         ) const;
 
-
         //- Return specular reflectivity on face
-        scalar rSpec
+        virtual scalar rSpec
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
 
-
         //- Return diffusive reflectivity on patch
-        tmp<scalarField> rDiff
+        virtual tmp<scalarField> rDiff
         (
             const label bandI,
             vectorField* incomingDirection ,
             scalarField* T
         ) const;
 
-
         //- Return diffusive reflectivity on face
-        scalar rDiff
+        virtual scalar rDiff
         (
             const label faceI,
             const label bandI,
-            const vector dir,
+            const vector& dir,
             const scalar T
         ) const;
-
 
         //- Is Grey
         virtual bool isGrey() const;
 
-
         //- Number of bands
         virtual label nBands() const;
-
 };
 
 

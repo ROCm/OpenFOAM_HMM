@@ -335,12 +335,6 @@ Foam::radiation::viewFactor::viewFactor
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::viewFactor::~viewFactor()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::radiation::viewFactor::read()
@@ -625,10 +619,10 @@ void Foam::radiation::viewFactor::calculate()
     Pstream::listCombineGather(q, maxEqOp<scalar>());
 
     label globCoarseId = 0;
-    forAll(selectedPatches_, i)
+    for (const label patchID : selectedPatches_)
     {
-        const label patchID = selectedPatches_[i];
         const polyPatch& pp = mesh_.boundaryMesh()[patchID];
+
         if (pp.size() > 0)
         {
             scalarField& qrp = qrBf[patchID];

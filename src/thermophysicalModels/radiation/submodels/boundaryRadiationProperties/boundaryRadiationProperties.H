@@ -101,7 +101,6 @@ public:
             scalar T = 0
         ) const;
 
-
         //- Access boundary absorptivity on patch
         tmp<scalarField> absorptivity
         (
@@ -110,7 +109,6 @@ public:
             vectorField* incomingDirection = nullptr,
             scalarField* T = nullptr
         ) const;
-
 
         //- Access boundary absorptivity on face
         scalar faceAbsorptivity
@@ -122,7 +120,6 @@ public:
             scalar T = 0
         ) const;
 
-
         //- Access boundary transmissivity on patch
         tmp<scalarField> transmissivity
         (
@@ -131,7 +128,6 @@ public:
             vectorField* incomingDirection = nullptr,
             scalarField* T = nullptr
         ) const;
-
 
         //- Access boundary transmissivity on face
         scalar faceTransmissivity
@@ -152,7 +148,6 @@ public:
             scalarField* T = nullptr
         ) const;
 
-
         //- Access boundary diffuse reflectivity on face
         scalar faceDiffReflectivity
         (
@@ -163,8 +158,7 @@ public:
             scalar T = 0
         ) const;
 
-
-         //- Access boundary specular reflectivity on patch
+        //- Access boundary specular reflectivity on patch
         tmp<scalarField> specReflectivity
         (
             const label patchI,
@@ -172,7 +166,6 @@ public:
             vectorField* incomingDirection = nullptr,
             scalarField* T = nullptr
         ) const;
-
 
         //- Access boundary specular reflectivity on face
         scalar faceSpecReflectivity
@@ -186,7 +179,7 @@ public:
 
 
     //- Destructor
-    ~boundaryRadiationProperties();
+    ~boundaryRadiationProperties() = default;
 };
 
 

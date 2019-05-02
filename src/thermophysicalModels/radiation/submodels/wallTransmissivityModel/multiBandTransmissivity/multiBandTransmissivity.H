@@ -105,14 +105,14 @@ public:
 
 
     //- Destructor
-    virtual ~multiBandTransmissivity();
+    virtual ~multiBandTransmissivity() = default;
 
 
     // Member Functions
 
         // Access
 
-            //- Return tranmissivity
+            //- Return transmissivity
             tmp<scalarField> t
             (
                 const label bandI = 0,
@@ -120,8 +120,7 @@ public:
                 scalarField* T = nullptr
             ) const;
 
-
-            //- Return tranmissivity on face
+            //- Return transmissivity on face
             scalar t
             (
                 const label faceI,
@@ -129,7 +128,6 @@ public:
                 const vector dir = Zero,
                 const scalar T = 0
             ) const;
-
 
             //- Is Grey
             inline bool isGrey() const
@@ -142,7 +140,6 @@ public:
             {
                 return nBands_;
             }
-
 };
 
 

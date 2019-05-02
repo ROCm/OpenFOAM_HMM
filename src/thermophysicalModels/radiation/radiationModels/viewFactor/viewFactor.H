@@ -74,12 +74,23 @@ class viewFactor
 :
     public radiationModel
 {
+private:
+
+    // Private Member Functions
+
+        //- No copy construct
+        viewFactor(const viewFactor&) = delete;
+
+        //- No copy assignment
+        void operator=(const viewFactor&) = delete;
+
+
 protected:
 
-// Static data
+    // Static data
 
-    //- Static name for view factor walls
-    static const word viewFactorWalls;
+        //- Static name for view factor walls
+        static const word viewFactorWalls;
 
 
     // Private data
@@ -145,12 +156,6 @@ protected:
             scalarSquareMatrix& matrix
         );
 
-        //- No copy construct
-        viewFactor(const viewFactor&) = delete;
-
-        //- No copy assignment
-        void operator=(const viewFactor&) = delete;
-
 
 public:
 
@@ -168,7 +173,7 @@ public:
 
 
     //- Destructor
-    virtual ~viewFactor();
+    virtual ~viewFactor() = default;
 
 
     // Member functions

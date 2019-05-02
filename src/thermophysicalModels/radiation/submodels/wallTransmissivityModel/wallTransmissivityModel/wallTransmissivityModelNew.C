@@ -37,7 +37,7 @@ wallTransmissivityModel::New
 {
     const word modelType(dict.get<word>("wallTransmissivityModel"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {

@@ -58,12 +58,6 @@ Foam::radiation::constantTransmissivity::constantTransmissivity
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::constantTransmissivity::~constantTransmissivity()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -74,7 +68,7 @@ Foam::radiation::constantTransmissivity::t
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), tau_));
+    return tmp<scalarField>::New(pp_.size(), tau_);
 }
 
 
@@ -88,5 +82,6 @@ Foam::scalar Foam::radiation::constantTransmissivity::t
 {
     return tau_;
 }
+
 
 // ************************************************************************* //

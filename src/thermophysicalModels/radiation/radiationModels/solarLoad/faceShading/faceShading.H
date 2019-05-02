@@ -125,7 +125,7 @@ public:
 
 
     //- Destructor
-    ~faceShading();
+    ~faceShading() = default;
 
 
     // Member Functions

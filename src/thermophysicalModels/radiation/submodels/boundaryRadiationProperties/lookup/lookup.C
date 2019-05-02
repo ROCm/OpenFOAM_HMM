@@ -57,11 +57,6 @@ Foam::radiation::lookup::lookup
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
-
-Foam::radiation::lookup::~lookup()
-{}
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField> Foam::radiation::lookup::e
@@ -83,7 +78,7 @@ Foam::scalar Foam::radiation::lookup::e
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -111,7 +106,7 @@ Foam::scalar Foam::radiation::lookup::a
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -138,7 +133,7 @@ Foam::scalar Foam::radiation::lookup::t
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -154,7 +149,7 @@ Foam::radiation::lookup::rSpec
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), Zero));
+    return tmp<scalarField>::New(pp_.size(), Zero);
 }
 
 
@@ -162,7 +157,7 @@ Foam::scalar Foam::radiation::lookup::rSpec
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -178,7 +173,7 @@ Foam::radiation::lookup::rDiff
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), Zero));
+    return tmp<scalarField>::New(pp_.size(), Zero);
 }
 
 
@@ -186,7 +181,7 @@ Foam::scalar Foam::radiation::lookup::rDiff
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -204,5 +199,6 @@ Foam::label Foam::radiation::lookup::nBands() const
 {
     return 1;
 }
+
 
 // ************************************************************************* //

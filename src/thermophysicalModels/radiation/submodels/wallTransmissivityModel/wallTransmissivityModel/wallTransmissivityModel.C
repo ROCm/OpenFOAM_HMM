@@ -50,10 +50,4 @@ Foam::radiation::wallTransmissivityModel::wallTransmissivityModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
-
-Foam::radiation::wallTransmissivityModel::~wallTransmissivityModel()
-{}
-
-
 // ************************************************************************* //

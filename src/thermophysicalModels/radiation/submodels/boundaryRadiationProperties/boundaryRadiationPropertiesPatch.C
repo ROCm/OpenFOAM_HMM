@@ -51,29 +51,26 @@ Foam::radiation::boundaryRadiationPropertiesPatch::New
     const polyPatch& pp
 )
 {
-    word modelType
-    (
-        dict.lookupCompat("type", {{"mode", 1812}})
-    );
+    word modelType(dict.lookupCompat("type", {{"mode", 1812}}));
 
     Info<< "Selecting boundary radiation Model: "
         << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown modelType type "
-            << modelType << endl << endl
-            << "Valid radiation types are : " << endl
+            << modelType << nl << nl
+            << "Valid radiation types are : " << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
     return cstrIter()(dict, pp);
 }
+
 
 // * * * * * * * * * * * * * * * * Private functions * * * * * * * * * * * * //
 
@@ -113,12 +110,6 @@ boundaryRadiationPropertiesPatch
     transmissivity_(nullptr)
 {}
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::boundaryRadiationPropertiesPatch::
-~boundaryRadiationPropertiesPatch()
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -134,5 +125,12 @@ Foam::radiation::boundaryRadiationPropertiesPatch::transmissiveModel() const
 {
     return *transmissivity_;
 }
+
+
+void Foam::radiation::boundaryRadiationPropertiesPatch::write(Ostream& os) const
+{
+    NotImplemented;
+}
+
 
 // ************************************************************************* //

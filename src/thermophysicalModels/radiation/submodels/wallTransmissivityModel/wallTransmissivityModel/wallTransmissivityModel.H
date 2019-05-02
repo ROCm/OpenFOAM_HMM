@@ -45,7 +45,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class wallTransmissivityModel Declaration
+                   Class wallTransmissivityModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class wallTransmissivityModel
@@ -57,6 +57,7 @@ protected:
 
         //- Reference to the polyPatch
         const polyPatch& pp_;
+
 
 public:
 
@@ -94,12 +95,12 @@ public:
 
 
     //- Destructor
-    virtual ~wallTransmissivityModel();
+    virtual ~wallTransmissivityModel() = default;
 
 
     // Member Functions
 
-        //- Return tranmissivity
+        //- Return transmissivity
         virtual tmp<scalarField> t
         (
             const label bandI = 0,
@@ -107,8 +108,7 @@ public:
             scalarField* T = nullptr
         ) const = 0;
 
-
-        //- Return tranmissivity on face
+        //- Return transmissivity on face
         virtual scalar t
         (
             const label faceI,
@@ -117,13 +117,11 @@ public:
             const scalar T = 0
         ) const = 0;
 
-
         //- Is Grey
         virtual bool isGrey() const = 0;
 
         //- Number of bands
         virtual label nBands() const = 0;
-
 };
 
 

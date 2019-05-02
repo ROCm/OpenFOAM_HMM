@@ -98,7 +98,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class solarCalculator Declaration
+                       Class solarCalculator Declaration
 \*---------------------------------------------------------------------------*/
 
 class solarCalculator
@@ -131,6 +131,7 @@ protected:
         //- Sun load models
         static const Enum<sunLModel> sunLoadModelTypeNames_;
 
+
 private:
 
     // Private data
@@ -158,7 +159,7 @@ private:
         scalar A_;
         scalar B_;
         scalar beta_;
-        scalar tetha_;
+        scalar theta_;
 
         //- Sky cloud cover fraction [0-1]
         scalar skyCloudCoverFraction_;
@@ -206,8 +207,8 @@ private:
         //- Init
         void init();
 
-        //- Calculate beta and tetha angles
-        void calculateBetaTetha();
+        //- Calculate beta and theta angles
+        void calculateBetaTheta();
 
         //- Calculate Sun direction
         void calculateSunDirection();
@@ -226,14 +227,14 @@ public:
 
 
     //- Destructor
-    ~solarCalculator();
+    ~solarCalculator() = default;
 
 
     // Member Functions
 
         // Access
 
-            //- const acess to direction
+            //- const access to direction
             const vector& direction() const
             {
                 return direction_;
@@ -275,10 +276,10 @@ public:
                 return beta_;
             }
 
-            //- Return tetha
-            scalar tetha()
+            //- Return theta
+            scalar theta()
             {
-                return tetha_;
+                return theta_;
             }
 
             //- Return Sun direction model

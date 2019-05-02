@@ -62,12 +62,6 @@ Foam::radiation::multiBandTransmissivity::multiBandTransmissivity
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::multiBandTransmissivity::~multiBandTransmissivity()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField>
@@ -78,7 +72,7 @@ Foam::radiation::multiBandTransmissivity::t
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), tauCoeffs_[bandI]));
+    return tmp<scalarField>::New(pp_.size(), tauCoeffs_[bandI]);
 }
 
 
@@ -92,7 +86,6 @@ Foam::scalar Foam::radiation::multiBandTransmissivity::t
 {
     return tauCoeffs_[bandI];
 }
-
 
 
 // ************************************************************************* //

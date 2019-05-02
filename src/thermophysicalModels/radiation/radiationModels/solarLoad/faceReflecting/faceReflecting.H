@@ -104,6 +104,7 @@ class faceReflecting
         //- Map from triSurface Index to global
         labelList mapTriToGlobal_;
 
+
     // Private members
 
         //- Calculate ray start faces
@@ -141,7 +142,7 @@ public:
 
 
     //- Destructor
-    ~faceReflecting();
+    ~faceReflecting() = default;
 
 
     // Member Functions

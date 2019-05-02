@@ -62,14 +62,8 @@ Foam::radiation::opaqueReflective::opaqueReflective
     (
         wallAbsorptionEmissionModel::New(absorptionDict, pp).ptr()
     );
-
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
-
-Foam::radiation::opaqueReflective::~opaqueReflective()
-{}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -88,7 +82,7 @@ Foam::scalar Foam::radiation::opaqueReflective::e
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -112,7 +106,7 @@ Foam::scalar Foam::radiation::opaqueReflective::a
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -127,7 +121,7 @@ Foam::tmp<Foam::scalarField> Foam::radiation::opaqueReflective::t
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), Zero));
+    return tmp<scalarField>::New(pp_.size(), Zero);
 }
 
 
@@ -135,7 +129,7 @@ Foam::scalar Foam::radiation::opaqueReflective::t
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -159,7 +153,7 @@ Foam::scalar Foam::radiation::opaqueReflective::rSpec
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -183,7 +177,7 @@ Foam::scalar Foam::radiation::opaqueReflective::rDiff
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -201,5 +195,6 @@ Foam::label Foam::radiation::opaqueReflective::nBands() const
 {
     return absorptionEmission_->nBands();
 }
+
 
 // ************************************************************************* //

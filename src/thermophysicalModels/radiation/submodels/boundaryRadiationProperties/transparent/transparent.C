@@ -65,11 +65,6 @@ Foam::radiation::transparent::transparent
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
-
-Foam::radiation::transparent::~transparent()
-{}
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField> Foam::radiation::transparent::e
@@ -87,7 +82,7 @@ Foam::scalar Foam::radiation::transparent::e
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -111,7 +106,7 @@ Foam::scalar Foam::radiation::transparent::a
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -126,7 +121,7 @@ Foam::tmp<Foam::scalarField> Foam::radiation::transparent::t
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), 1.0));
+    return tmp<scalarField>::New(pp_.size(), 1.0);
 }
 
 
@@ -134,7 +129,7 @@ Foam::scalar Foam::radiation::transparent::t
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -150,7 +145,7 @@ Foam::radiation::transparent::rSpec
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), Zero));
+    return tmp<scalarField>::New(pp_.size(), Zero);
 }
 
 
@@ -158,7 +153,7 @@ Foam::scalar Foam::radiation::transparent::rSpec
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -174,7 +169,7 @@ Foam::radiation::transparent::rDiff
     scalarField* T
 ) const
 {
-    return tmp<scalarField>(new scalarField(pp_.size(), Zero));
+    return tmp<scalarField>::New(pp_.size(), Zero);
 }
 
 
@@ -182,7 +177,7 @@ Foam::scalar Foam::radiation::transparent::rDiff
 (
     const label faceI,
     const label bandI,
-    const vector dir,
+    const vector& dir,
     const scalar T
 ) const
 {
@@ -200,5 +195,6 @@ Foam::label Foam::radiation::transparent::nBands() const
 {
     return absorptionEmission_->nBands();
 }
+
 
 // ************************************************************************* //

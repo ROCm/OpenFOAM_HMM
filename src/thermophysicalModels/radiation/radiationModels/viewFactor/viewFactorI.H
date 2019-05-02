@@ -30,10 +30,12 @@ inline const Foam::volScalarField& Foam::radiation::viewFactor::qr() const
     return qr_;
 }
 
+
 inline bool Foam::radiation::viewFactor::useSolarLoad() const
 {
     return useSolarLoad_;
 }
+
 
 inline label Foam::radiation::viewFactor::nBands() const
 {

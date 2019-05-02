@@ -78,7 +78,7 @@ void Foam::radiation::solarLoad::updateReflectedRays
     const scalarField& V = mesh_.V();
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    forAll (qrBf, patchID)
+    forAll(qrBf, patchID)
     {
         if (includePatches[patchID])
         {
@@ -91,17 +91,19 @@ void Foam::radiation::solarLoad::updateReflectedRays
         else
         {
             const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
-            const labelList cellIs = patches[patchID].faceCells();
+            const labelUList& cellIs = patches[patchID].faceCells();
 
             for (label bandI = 0; bandI < nBands_; bandI++)
             {
-                forAll (cellIs, i)
+                forAll(cellIs, i)
                 {
                     const label cellI = cellIs[i];
 
                     Ru_[cellI] +=
-                        (reflectedFaces_->qreflective(bandI).
-                            boundaryField()[patchID][i] * sf[i])/V[cellI];
+                        (
+                            reflectedFaces_->qreflective(bandI).
+                                boundaryField()[patchID][i] * sf[i]
+                        )/V[cellI];
                 }
             }
         }
@@ -143,8 +145,8 @@ bool Foam::radiation::solarLoad::updateHitFaces()
                     hitFaces_->direction() = solarCalc_.direction();
                     hitFaces_->correct();
                     return true;
-                    break;
                 }
+                break;
             }
         }
     }
@@ -220,13 +222,11 @@ void Foam::radiation::solarLoad::updateDirectHitRadiation
                 const vectorField& sf = mesh_.Sf().boundaryField()[patchID];
                 const label cellI = pp.faceCells()[localFaceI];
 
-                {
-                    Ru_[cellI] +=
-                        (qPrim & sf[localFaceI])
-                    * spectralDistribution_[bandI]
-                    * absorptivity_[patchID][bandI]()[localFaceI]
-                    / V[cellI];
-                }
+                Ru_[cellI] +=
+                    (qPrim & sf[localFaceI])
+                  * spectralDistribution_[bandI]
+                  * absorptivity_[patchID][bandI]()[localFaceI]
+                  / V[cellI];
             }
         }
     }
@@ -816,11 +816,6 @@ Foam::radiation::solarLoad::solarLoad
 {
     initialise(dict);
 }
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::solarLoad::~solarLoad()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

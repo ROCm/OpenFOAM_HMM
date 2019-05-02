@@ -59,12 +59,6 @@ Foam::radiation::constantAbsorption::constantAbsorption
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::constantAbsorption::~constantAbsorption()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField> Foam::radiation::constantAbsorption::a
@@ -88,6 +82,7 @@ Foam::scalar Foam::radiation::constantAbsorption::a
 {
     return a_;
 }
+
 
 Foam::tmp<Foam::scalarField> Foam::radiation::constantAbsorption::e
 (

@@ -49,7 +49,7 @@ namespace Foam
 namespace radiation
 {
 /*---------------------------------------------------------------------------*\
-             Class boundaryRadiationPropertiesPatch Declaration
+              Class boundaryRadiationPropertiesPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class boundaryRadiationPropertiesPatch
@@ -76,12 +76,13 @@ private:
 
 protected:
 
+    // Protected Member Functions
 
-    //- Absorption/emission model
-    autoPtr<wallAbsorptionEmissionModel> absorptionEmission_;
+        //- Absorption/emission model
+        autoPtr<wallAbsorptionEmissionModel> absorptionEmission_;
 
-    //- Transmissivity model
-    autoPtr<wallTransmissivityModel> transmissivity_;
+        //- Transmissivity model
+        autoPtr<wallTransmissivityModel> transmissivity_;
 
 
 public:
@@ -106,7 +107,6 @@ public:
 
     // Constructors
 
-
         //- Construct from patch, internal field and dictionary
         boundaryRadiationPropertiesPatch
         (
@@ -122,12 +122,11 @@ public:
             const polyPatch& pp
         );
 
-         //- Destructor
-        virtual ~boundaryRadiationPropertiesPatch();
+        //- Destructor
+        virtual ~boundaryRadiationPropertiesPatch() = default;
 
 
     // Member functions
-
 
         //- Return absorptionEmissionModel
         const wallAbsorptionEmissionModel& absorptionEmission() const;
@@ -143,16 +142,14 @@ public:
             scalarField* T = nullptr
         ) const = 0;
 
-
         //- Return emissivity on face
         virtual scalar e
         (
             const label faceI,
             const label bandI = 0,
-            const vector dir = Zero,
+            const vector& dir = Zero,
             const scalar T = 0
         ) const = 0;
-
 
         //- Return absorptivity on patch
         virtual tmp<scalarField> a
@@ -162,16 +159,14 @@ public:
             scalarField* T = nullptr
         ) const = 0;
 
-
         //- Return absorptivity on face
         virtual scalar a
         (
             const label faceI,
             const label bandI = 0,
-            const vector dir = Zero,
+            const vector& dir = Zero,
             const scalar T = 0
         ) const = 0;
-
 
         //- Return transmissivity on patch
         virtual tmp<scalarField> t
@@ -181,16 +176,14 @@ public:
             scalarField* T = nullptr
         ) const = 0;
 
-
         //- Return transmissivity on face
         virtual scalar t
         (
             const label faceI,
             const label bandI = 0,
-            const vector dir = Zero,
+            const vector& dir = Zero,
             const scalar T = 0
         ) const = 0;
-
 
         //- Return specular reflectivity on patch
         virtual tmp<scalarField> rSpec
@@ -200,16 +193,14 @@ public:
             scalarField* T = nullptr
         ) const = 0;
 
-
         //- Return specular reflectivity on face
         virtual scalar rSpec
         (
             const label faceI,
             const label bandI = 0,
-            const vector dir = Zero,
+            const vector& dir = Zero,
             const scalar T = 0
         ) const = 0;
-
 
         //- Return diffusive reflectivity on patch
         virtual tmp<scalarField> rDiff
@@ -219,13 +210,12 @@ public:
             scalarField* T = nullptr
         ) const = 0;
 
-
         //- Return diffusive reflectivity on face
         virtual scalar rDiff
         (
             const label faceI,
             const label bandI = 0,
-            const vector dir = Zero,
+            const vector& dir = Zero,
             const scalar T = 0
         ) const = 0;
 
@@ -235,10 +225,8 @@ public:
         //- Number of bands
         virtual label nBands() const = 0;
 
-
-
         //- Write
-        void write(Ostream&) const;
+        virtual void write(Ostream&) const;
 };
 
 

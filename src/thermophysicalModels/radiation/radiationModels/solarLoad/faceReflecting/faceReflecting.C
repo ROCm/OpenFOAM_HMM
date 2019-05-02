@@ -246,6 +246,7 @@ void Foam::faceReflecting::initialise(const dictionary& coeffs)
     }
 }
 
+
 void Foam::faceReflecting::calculate()
 {
     const radiation::boundaryRadiationProperties& boundaryRadiation =
@@ -355,11 +356,11 @@ void Foam::faceReflecting::calculate()
 
             const label myFaceId = shootFacesIds_()[i];
 
-            forAll (refDisDirsIndex, dirIndex)
+            forAll(refDisDirsIndex, dirIndex)
             {
                 if (refDisDirsIndex[dirIndex] > -1)
                 {
-                    if ( (nf & refDiscAngles_[dirIndex]) > 0)
+                    if ((nf & refDiscAngles_[dirIndex]) > 0)
                     {
                         const vector direction = -refDiscAngles_[dirIndex];
 
@@ -392,9 +393,9 @@ void Foam::faceReflecting::calculate()
     );
     const mapDistribute& map = mapPtr();
 
-    PtrList<List<scalarField> > patchr(patches.size());
-    PtrList<List<scalarField> > patcha(patches.size());
-    forAll (patchr, patchi)
+    PtrList<List<scalarField>> patchr(patches.size());
+    PtrList<List<scalarField>> patcha(patches.size());
+    forAll(patchr, patchi)
     {
         patchr.set
         (
@@ -410,7 +411,7 @@ void Foam::faceReflecting::calculate()
     }
 
     // Fill patchr
-    forAll (patchr, patchi)
+    forAll(patchr, patchi)
     {
         for (label bandI = 0; bandI < nBands; bandI++)
         {
@@ -433,7 +434,7 @@ void Foam::faceReflecting::calculate()
     }
 
     List<scalarField> r(nBands);
-     for (label bandI = 0; bandI < nBands; bandI++)
+    for (label bandI = 0; bandI < nBands; bandI++)
     {
         r[bandI].setSize(triangleIndex.size());
     }
@@ -483,7 +484,7 @@ void Foam::faceReflecting::calculate()
         {
             if
             (
-                dirStartIndex[rayI]==refDirIndex[rayI]
+                dirStartIndex[rayI] == refDirIndex[rayI]
              && refFacesDirIndex.found(refIndex[rayI])
             )
             {
@@ -509,8 +510,11 @@ void Foam::faceReflecting::calculate()
                     qrefBf[startPatchI][localStartFaceI] +=
                     (
                         (
-                            mag(qPrim)*r[bandI][rayI]*spectralDistribution_[bandI]
-                            *a*rayIn
+                            mag(qPrim)
+                           *r[bandI][rayI]
+                           *spectralDistribution_[bandI]
+                           *a
+                           *rayIn
                         )
                         & nStart[localStartFaceI]
                     );
@@ -523,7 +527,6 @@ void Foam::faceReflecting::calculate()
     startIndex.clear();
     end.clear();
     dirStartIndex.clear();
-
 }
 
 
@@ -556,11 +559,6 @@ Foam::faceReflecting::faceReflecting
 {
     initialise(dict);
 }
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::faceReflecting::~faceReflecting()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -81,7 +81,7 @@ public:
 
 
     //- Destructor
-    virtual ~constantAbsorption();
+    virtual ~constantAbsorption() = default;
 
 
     // Member Functions
@@ -120,13 +120,11 @@ public:
             const scalar T = 0
         ) const;
 
-
         //- Is Grey
         inline bool isGrey() const
         {
             return true;
         }
-
 
         //- Number of bands
         inline label nBands() const

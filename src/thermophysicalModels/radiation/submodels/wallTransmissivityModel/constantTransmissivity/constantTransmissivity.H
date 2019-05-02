@@ -78,7 +78,7 @@ public:
 
 
     //- Destructor
-    virtual ~constantTransmissivity();
+    virtual ~constantTransmissivity() = default;
 
 
     // Member Functions
@@ -91,8 +91,7 @@ public:
             scalarField* T = nullptr
         ) const;
 
-
-        //- Return tranmissivity on facw
+        //- Return transmissivity on facw
         scalar t
         (
             const label faceI,
@@ -101,13 +100,11 @@ public:
             const scalar T = 0
         ) const;
 
-
         //- Is Grey
         inline bool isGrey() const
         {
             return true;
         }
-
 
         //- Number of bands
         inline label nBands() const
