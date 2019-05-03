@@ -2353,7 +2353,9 @@ void Foam::fileOperations::masterUncollatedFileOperation::setTime
         return;
     }
 
-    const auto iter = times_.cfind(tm.path());
+    // Mutable access to instantList for modification and sorting
+    HashPtrTable<instantList>::iterator iter = times_.find(tm.path());
+
     if (iter.found())
     {
         instantList& times = *iter();
