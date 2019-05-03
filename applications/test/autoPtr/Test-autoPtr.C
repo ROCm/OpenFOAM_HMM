@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <memory>
 #include "autoPtr.H"
 #include "labelList.H"
 #include "ListOps.H"
@@ -80,10 +81,26 @@ int main(int argc, char *argv[])
     {
         auto list = autoPtr<labelList>::New(10, label(-1));
 
-        Info<<"create: " << list() << nl;
+        Info<<"create: " << *list << nl;
+
+        const labelList* plist = list;
+
+        Info<<"pointer: " << uintptr_t(plist) << nl
+            <<"content: " << *plist << nl;
 
         Info<<"create: " << autoPtr<labelList>::New(10, label(-1))()
             << nl << nl;
+
+        // Transfer to unique_ptr
+        std::unique_ptr<labelList> list2(list.release());
+
+        Info<<"move to unique_ptr: " << *list2 << nl;
+        Info<<"old is " << Switch(bool(list)) << nl;
+
+        autoPtr<labelList> list3(list2.release());
+
+        Info<<"move unique to autoPtr: " << *list3 << nl;
+        Info<<"old is " << Switch(bool(list2)) << nl;
     }
 
     // Confirm that forwarding with move construct actually works as expected

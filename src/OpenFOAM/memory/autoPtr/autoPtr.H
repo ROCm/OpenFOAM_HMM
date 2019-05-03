@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -121,17 +121,19 @@ public:
         inline explicit autoPtr(autoPtr<U>&& ap);
 
         //- A move construct disguised as a copy construct (transfers ownership)
-        //  \remark This is a non-standard definition, and should ideally be
-        //      marked as deleted - pending cleanup of code currently relying
-        //      on this behaviour.
+        //  \remark This should ideally be deleted - pending cleanup of code
+        //      currently relying on this behaviour.
         #ifdef Foam_autoPtr_copyConstruct
-        inline autoPtr(const autoPtr<T>& ap) noexcept;
+        autoPtr(const autoPtr<T>& ap) noexcept
+        :
+            ptr_(const_cast<autoPtr<T>&>(ap).release())
+        {}
         #else
         autoPtr(const autoPtr<T>& ap) = delete;
         #endif
 
 
-    //- Destructs the managed object if such is present
+    //- Deletes the managed object if such is present
     inline ~autoPtr() noexcept;
 
 
@@ -179,16 +181,8 @@ public:
         inline void reset(T* p = nullptr) noexcept;
 
         //- Delete managed object and set to new given pointer
-        //  \remark This is a non-standard definition, but may provide better
-        //      code documentation than a simple move assign would.
-        inline void reset(autoPtr<T>&& other) noexcept;
-
-        //- Delete managed object and set to new given pointer
-        //- Identical behaviour to reset().
-        //  \note Provided for backward compatibility - the older version
-        //      enforced a run-time check (Fatal if pointer was already set)
-        //      but this was rarely used.
-        inline void set(T* p) noexcept;
+        //  \remark Same as move assign, but better for code documentation
+        inline void reset(autoPtr<T>&& ap) noexcept;
 
         //- Swaps the managed object with other autoPtr.
         inline void swap(autoPtr<T>& other) noexcept;
@@ -239,6 +233,12 @@ public:
         operator const T&() const = delete;
         #endif
 
+        //- Cast to pointer type
+        operator const T*() const noexcept { return get(); }
+
+        //- Cast to pointer type
+        operator T*() noexcept { return get(); }
+
         //- True if the managed pointer is non-null
         explicit inline operator bool() const noexcept;
 
@@ -252,16 +252,26 @@ public:
         #ifdef Foam_autoPtr_copyAssign
         //- A move assignment disguised as a copy assignment
         //  \remark Non-standard definition - should just be movable
-        inline void operator=(const autoPtr<T>& ap) noexcept;
+        void operator=(const autoPtr<T>& ap) noexcept
+        {
+            operator=(std::move(const_cast<autoPtr<T>&>(ap)));
+        }
         #else
         void operator=(const autoPtr<T>& ap) = delete;
         #endif
 
-        //- Allow reset via assignment from literal nullptr
+        //- Clear via assignment from literal nullptr
         inline void operator=(std::nullptr_t) noexcept;
 
 
     // Housekeeping
+
+        //- Deprecated(2018-02) Identical to reset().
+        //  \note Provided for backward compatibility - the older version
+        //      enforced a run-time check (Fatal if pointer was already set)
+        //      but this was rarely used.
+        //  \deprecated(2018-02) Identical to reset().
+        void set(T* p) noexcept { reset(p); }
 
         //- Deprecated(2018-02) No copy assignment from plain pointer
         //  \deprecated(2018-02) Convenient, but uncontrolled access
