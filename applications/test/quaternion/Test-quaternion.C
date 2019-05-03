@@ -47,14 +47,24 @@ using namespace Foam::coordinateRotations;
 
 void printRotation(const tensor& rot)
 {
-    Info<< "rotation = " << rot << nl;
+    Info<< "[\n"
+        << "    " << rot.xx() << ' ' << rot.xy() << ' ' << rot.xz() << nl
+        << "    " << rot.yx() << ' ' << rot.yy() << ' ' << rot.yz() << nl
+        << "    " << rot.zx() << ' ' << rot.zy() << ' ' << rot.zz() << nl
+        << "]\n";
 }
 
 
 void printRotation(const quaternion& quat)
 {
-    printRotation(quat.R());
-    Info<< "quaternion " << quat << nl;
+    tensor rot(quat.R());
+
+    Info<< "quaternion " << quat << nl
+        << "rotation" << nl;
+
+    printRotation(rot);
+    Info<< "transpose" << nl;
+    printRotation(rot.T());
 }
 
 
@@ -139,6 +149,12 @@ int main(int argc, char *argv[])
             << "    psi   " << rotVector.z() << nl;
 
         printRotation(euler(rotVector, true).R());
+
+        rotVector *= degToRad();
+
+        const quaternion quat(quaternion::rotationSequence::ZXZ, rotVector);
+
+        printRotation(quat);
     }
     if (args.readIfPresent("xyz", rotVector))
     {

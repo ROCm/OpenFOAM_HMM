@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -66,26 +66,24 @@ Foam::tensor Foam::coordinateRotations::euler::rotation
     bool degrees
 )
 {
-    scalar phi   = angles.component(vector::X); // 1. Rotate about Z
-    scalar theta = angles.component(vector::Y); // 2. Rotate about X
-    scalar psi   = angles.component(vector::Z); // 3. Rotate about Z
+    scalar angle1(angles.component(vector::X)); // Rotation #1
+    scalar angle2(angles.component(vector::Y)); // Rotation #2
+    scalar angle3(angles.component(vector::Z)); // Rotation #3
 
     if (degrees)
     {
-        phi   *= degToRad();
-        theta *= degToRad();
-        psi   *= degToRad();
+        angle1 *= degToRad();
+        angle2 *= degToRad();
+        angle3 *= degToRad();
     }
 
-    const scalar c1 = cos(phi);   const scalar s1 = sin(phi);
-    const scalar c2 = cos(theta); const scalar s2 = sin(theta);
-    const scalar c3 = cos(psi);   const scalar s3 = sin(psi);
+    const scalar c1(cos(angle1)); const scalar s1(sin(angle1));
+    const scalar c2(cos(angle2)); const scalar s2(sin(angle2));
+    const scalar c3(cos(angle3)); const scalar s3(sin(angle3));
 
-    // Compare
     // https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
-    //
-    // Z1-X2-Z3 rotation
 
+    // Z1-X2-Z3 rotation
     return
         tensor
         (
@@ -116,26 +114,26 @@ Foam::coordinateRotations::euler::euler(const euler& crot)
 
 Foam::coordinateRotations::euler::euler
 (
-    const vector& phiThetaPsi,
+    const vector& angles,
     bool degrees
 )
 :
     coordinateRotation(),
-    angles_(phiThetaPsi),
+    angles_(angles),
     degrees_(degrees)
 {}
 
 
 Foam::coordinateRotations::euler::euler
 (
-    scalar phi,
-    scalar theta,
-    scalar psi,
+    scalar angle1,
+    scalar angle2,
+    scalar angle3,
     bool degrees
 )
 :
     coordinateRotation(),
-    angles_(phi, theta, psi),
+    angles_(angle1, angle2, angle3),
     degrees_(degrees)
 {}
 
