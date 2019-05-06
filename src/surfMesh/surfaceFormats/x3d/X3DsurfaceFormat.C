@@ -61,13 +61,8 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
     }
 
     writeHeader(os);
-
-    os  << "\n"
-        "<Group>\n"
-        " <Shape>\n";
-
+    beginGroup(os);
     writeAppearance(os);
-
 
     // NOTE: we could provide an optimized IndexedTriangleSet output for
     // triangulated surfaces too
@@ -108,21 +103,16 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
         }
     }
 
-    os <<
-        "' >\n"
-        "    <Coordinate point='\n";
+    os  <<
+        "' >\n";
 
-    for (const point& p : pointLst)
-    {
-        os  << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
-    }
+    writePoints(os, pointLst);
 
     os  <<
-        "' />\n"                       // end Coordinate
-        "   </IndexedFaceSet>\n"
-        "  </Shape>\n"
-        " </Group>\n"
-        "</X3D>\n";
+        "   </IndexedFaceSet>\n";
+
+    endGroup(os);
+    writeFooter(os);
 }
 
 

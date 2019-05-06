@@ -1,3 +1,7 @@
+colours/colourTable.C
+colours/colourTables.C
+colours/colourTools.C
+
 ensight/file/ensightCase.C
 ensight/file/ensightCaseOptions.C
 ensight/file/ensightFile.C

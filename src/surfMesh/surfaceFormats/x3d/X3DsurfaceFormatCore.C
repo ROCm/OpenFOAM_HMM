@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -26,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "X3DsurfaceFormatCore.H"
-#include "clock.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -49,6 +49,38 @@ void Foam::fileFormats::X3DsurfaceFormatCore::writeHeader
 }
 
 
+void Foam::fileFormats::X3DsurfaceFormatCore::writeFooter
+(
+    Ostream& os
+)
+{
+    os  <<
+        "</X3D>\n";
+}
+
+
+void Foam::fileFormats::X3DsurfaceFormatCore::beginGroup
+(
+    Ostream& os
+)
+{
+    os  <<
+        "<Group>\n"
+        " <Shape>\n";
+}
+
+
+void Foam::fileFormats::X3DsurfaceFormatCore::endGroup
+(
+    Ostream& os
+)
+{
+    os  <<
+        "  </Shape>\n"
+        " </Group>\n";
+}
+
+
 void Foam::fileFormats::X3DsurfaceFormatCore::writeAppearance
 (
     Ostream& os
@@ -57,12 +89,33 @@ void Foam::fileFormats::X3DsurfaceFormatCore::writeAppearance
     os  <<
         "  <Appearance>\n"
         "   <Material"
-        " diffuseColor='0.8 0.8 0.8'"
-        " specularColor='1.0 1.0 1.0'"
-        " shininess='0.5'"
-        " transparency='0.0'"
-        " />\n"           // end material
+        " ambientIntensity='0'"
+        " diffuseColor='1 1 1'" // Default: '0.8 0.8 0.8'
+        // Default: " emissiveColor='0 0 0'"
+        // Default: " specularColor='0 0 0'"
+        " shininess='0.8'"      // Default: 0.2
+        " transparency='0'"
+        " />\n"           // Material
         "  </Appearance>\n";
+}
+
+
+void Foam::fileFormats::X3DsurfaceFormatCore::writePoints
+(
+    Ostream& os,
+    const UList<point>& pts
+)
+{
+    os  <<
+        "    <Coordinate point='\n";
+
+    for (const point& p : pts)
+    {
+        os  << p.x() << ' ' << p.y() << ' ' << p.z() << ',' << nl;
+    }
+
+    os  <<
+        "' />\n";
 }
 
 
