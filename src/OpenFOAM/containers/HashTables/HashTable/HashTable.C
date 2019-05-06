@@ -300,11 +300,12 @@ Foam::label Foam::HashTable<T, Key, Hash>::countEntries
 
 
 template<class T, class Key, class Hash>
+template<class... Args>
 bool Foam::HashTable<T, Key, Hash>::setEntry
 (
+    const bool overwrite,
     const Key& key,
-    const T& obj,
-    const bool overwrite
+    Args&&... args
 )
 {
     if (!capacity_)
@@ -330,9 +331,10 @@ bool Foam::HashTable<T, Key, Hash>::setEntry
     if (!curr)
     {
         // Not found, insert it at the head
-        table_[index] = new node_type(key, obj, table_[index]);
-        ++size_;
+        table_[index] =
+            new node_type(table_[index], key, std::forward<Args>(args)...);
 
+        ++size_;
         if (double(size_)/capacity_ > 0.8 && capacity_ < maxTableSize)
         {
             #ifdef FULLDEBUG
@@ -360,7 +362,7 @@ bool Foam::HashTable<T, Key, Hash>::setEntry
         // or that it behaves the same as a copy construct.
 
         delete curr;
-        ep = new node_type(key, obj, ep);
+        ep = new node_type(ep, key, std::forward<Args>(args)...);
 
         // Replace current element - within list or insert at the head
         if (prev)
@@ -838,7 +840,7 @@ bool Foam::HashTable<T, Key, Hash>::operator==
     {
         const const_iterator other(this->cfind(iter.key()));
 
-        if (!other.found() || other.val() != iter.val())
+        if (!other.good() || other.val() != iter.val())
         {
             return false;
         }

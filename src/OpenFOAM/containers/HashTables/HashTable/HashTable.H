@@ -97,7 +97,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class T> class List;
 template<class T> class UList;
@@ -155,7 +155,8 @@ class HashTable
 
         //- Assign a new hash-entry to a possibly already existing key.
         //  \return True if the new entry was set.
-        bool setEntry(const Key& key, const T& obj, const bool overwrite);
+        template<class... Args>
+        bool setEntry(const bool overwrite, const Key& key, Args&&... args);
 
 
 public:
@@ -256,6 +257,12 @@ public:
 
         //- Return true if the hash table is empty
         inline bool empty() const;
+
+        //- Find and return a hashed entry. FatalError if it does not exist.
+        inline T& at(const Key& key);
+
+        //- Find and return a hashed entry. FatalError if it does not exist.
+        inline const T& at(const Key& key) const;
 
         //- Return true if hashed entry is found in table
         inline bool found(const Key& key) const;
@@ -361,15 +368,26 @@ public:
 
     // Edit
 
-        //- Insert a new entry, not overwriting existing entries.
-        //  \return True if the entry inserted, which means that it did
-        //  not previously exist in the table.
+        //- Emplace insert a new entry, not overwriting existing entries.
+        //  \return True if the entry did not previously exist in the table.
+        template<class... Args>
+        inline bool emplace(const Key& key, Args&&... args);
+
+        //- Copy insert a new entry, not overwriting existing entries.
+        //  \return True if the entry did not previously exist in the table.
         inline bool insert(const Key& key, const T& obj);
 
-        //- Assign a new entry, overwriting existing entries.
-        //
+        //- Move insert a new entry, not overwriting existing entries.
+        //  \return True if the entry did not previously exist in the table.
+        inline bool insert(const Key& key, T&& obj);
+
+        //- Copy assign a new entry, overwriting existing entries.
         //  \return True, since it always overwrites any entries.
         inline bool set(const Key& key, const T& obj);
+
+        //- Move assign a new entry, overwriting existing entries.
+        //  \return True, since it always overwrites any entries.
+        inline bool set(const Key& key, T&& obj);
 
         //- Erase an entry specified by given iterator
         //  This invalidates the iterator until the next ++ operation.
@@ -513,20 +531,20 @@ public:
         inline T& operator()(const Key& key, const T& deflt);
 
         //- Copy assign
-        void operator=(const HashTable<T, Key, Hash>& rhs);
+        void operator=(const this_type& rhs);
 
         //- Copy assign from an initializer list
         void operator=(std::initializer_list<std::pair<Key, T>> rhs);
 
         //- Move assign
-        void operator=(HashTable<T, Key, Hash>&& rhs);
+        void operator=(this_type&& rhs);
 
         //- Equality. Tables are equal if all keys and values are equal,
         //- independent of order or underlying storage size.
-        bool operator==(const HashTable<T, Key, Hash>& rhs) const;
+        bool operator==(const this_type& rhs) const;
 
         //- The opposite of the equality operation.
-        bool operator!=(const HashTable<T, Key, Hash>& rhs) const;
+        bool operator!=(const this_type& rhs) const;
 
         //- Add entries into this HashTable
         this_type& operator+=(const this_type& rhs);
@@ -584,8 +602,7 @@ protected:
             //  This can be used directly instead of comparing to end()
             inline bool good() const;
 
-            //- True if iterator points to an entry
-            //  This can be used directly instead of comparing to end()
+            //- True if iterator points to an entry - same as good()
             inline bool found() const;
 
             //- The key associated with the iterator
@@ -703,7 +720,7 @@ public:
             {}
 
 
-        // Member functions/operators
+        // Member Functions/Operators
 
             //- Non-const access to referenced object (value)
             using Iterator<false>::val;
@@ -719,7 +736,7 @@ public:
             template<class TypeT = T>
             typename std::enable_if
             <
-                std::is_pointer<TypeT>::value,
+                Detail::isPointer<TypeT>::value,
                 T
             >::type operator->() const { return this->val(); }
 
@@ -773,7 +790,7 @@ public:
             {}
 
 
-        // Member functions/operators
+        // Member Functions/Operators
 
             //- Const access to referenced value
             using Iterator<true>::val;
@@ -789,7 +806,7 @@ public:
             template<class TypeT = T>
             typename std::enable_if
             <
-                std::is_pointer<TypeT>::value,
+                Detail::isPointer<TypeT>::value,
                 const T
             >::type operator->() const { return this->val(); }
 

@@ -249,6 +249,28 @@ int main(int argc, char *argv[])
         Info<< nl << "Ending scope" << nl;
     }
 
+    {
+        Info<< nl << "Table<labelList> copy/move/emplace insertion" << nl;
+
+        HashTable<labelList> ltable1(0);
+        ltable1.insert("abc", identity(2));
+        ltable1.insert("def", identity(3));
+        ltable1.insert("ghi", identity(4));
+        ltable1.emplace("jkl", 10, -35);
+        ltable1.emplace("mno");
+
+        labelList list1(identity(4, -4));
+
+        Info<<"move insert " << list1 << nl;
+
+        ltable1.insert("pqr", std::move(list1));
+
+        Info<<"after insert " << list1 << nl;
+
+        Info<< nl << "HashTable<labelList>: "
+            << ltable1 << nl;
+    }
+
     Info<< "\nEnd\n" << endl;
 
     return 0;

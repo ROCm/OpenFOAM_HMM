@@ -422,28 +422,28 @@ public:
 
 //- Combine entries from HashSets
 template<class Key, class Hash>
-HashSet<Key,Hash> operator|
+HashSet<Key, Hash> operator|
 (
-    const HashSet<Key,Hash>& hash1,
-    const HashSet<Key,Hash>& hash2
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
 );
 
 
 //- Create a HashSet that only contains entries found in both HashSets
 template<class Key, class Hash>
-HashSet<Key,Hash> operator&
+HashSet<Key, Hash> operator&
 (
-    const HashSet<Key,Hash>& hash1,
-    const HashSet<Key,Hash>& hash2
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
 );
 
 
 //- Create a HashSet that only contains unique entries (xor)
 template<class Key, class Hash>
-HashSet<Key,Hash> operator^
+HashSet<Key, Hash> operator^
 (
-    const HashSet<Key,Hash>& hash1,
-    const HashSet<Key,Hash>& hash2
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
 );
 
 

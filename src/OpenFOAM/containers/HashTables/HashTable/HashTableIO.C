@@ -39,7 +39,7 @@ bool Foam::HashTable<T, Key, Hash>::addEntry(Istream& is, const bool overwrite)
 
     is >> key >> val;
 
-    const bool ok = this->setEntry(key, val, overwrite);
+    const bool ok = this->setEntry(overwrite, key, val);
 
     is.fatalCheck
     (

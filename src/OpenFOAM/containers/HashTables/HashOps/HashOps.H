@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class bitSet;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -143,7 +143,11 @@ struct plusEqOp
 
 //- List of values from HashTable, optionally sorted.
 template<class T, class Key, class Hash>
-List<T> values(const HashTable<T, Key, Hash>& tbl, const bool doSort=false)
+List<T> values
+(
+    const HashTable<T, Key, Hash>& tbl,
+    const bool doSort=false
+)
 {
     List<T> output(tbl.size());
 

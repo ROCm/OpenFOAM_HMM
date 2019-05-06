@@ -36,6 +36,7 @@ SourceFiles
 #define HashTableDetail_H
 
 #include "zero.H"
+#include <memory>
 #include <utility>
 #include <type_traits>
 
@@ -44,14 +45,32 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Ostream;
+template<class T> class autoPtr;
 
 namespace Detail
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class Detail::HashTablePair Declaration
+                          Class isPointer Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Test for pointer-like behaviour
+template<class T>
+struct isPointer : public std::is_pointer<T> {};
+
+//- An autoPtr is pointer-like
+template<class T>
+struct isPointer<autoPtr<T>> : public std::true_type {};
+
+//- A unique_ptr is pointer-like
+template<class T>
+struct isPointer<std::unique_ptr<T>> : public std::true_type {};
+
+
+/*---------------------------------------------------------------------------*\
+                        Class HashTablePair Declaration
 \*---------------------------------------------------------------------------*/
 
 //- Internal storage type for HashTable entries
@@ -97,16 +116,17 @@ struct HashTablePair
         void operator=(const HashTablePair&) = delete;
 
 
-        //- Construct from key, value, next pointer
+        //- Construct from next pointer, key, contents
+        template<class... Args>
         HashTablePair
         (
+            HashTablePair* next,
             const key_type& key,
-            const mapped_type& val,
-            HashTablePair* next
+            Args&&... args
         )
         :
             key_(key),
-            val_(val),
+            val_(std::forward<Args>(args)...),
             next_(next)
         {}
 
@@ -131,7 +151,7 @@ struct HashTablePair
 
         //- Write (key, val) pair - for pointer types
         template<class TypeT = T>
-        typename std::enable_if<std::is_pointer<TypeT>::value, void>::type
+        typename std::enable_if<Detail::isPointer<TypeT>::value, void>::type
         print(Ostream& os) const
         {
             os << key_;
@@ -144,7 +164,7 @@ struct HashTablePair
 
         //- Write (key, val) pair - for non-pointer types
         template<class TypeT = T>
-        typename std::enable_if<!std::is_pointer<TypeT>::value, void>::type
+        typename std::enable_if<!Detail::isPointer<TypeT>::value, void>::type
         print(Ostream& os) const
         {
             os << key_ << ' ' << val_;
@@ -153,7 +173,7 @@ struct HashTablePair
 
 
 /*---------------------------------------------------------------------------*\
-                   Class Detail::HashTableSingle Declaration
+                       Class HashTableSingle Declaration
 \*---------------------------------------------------------------------------*/
 
 //- Internal storage type for HashSet entries
@@ -196,12 +216,13 @@ struct HashTableSingle
         void operator=(const HashTableSingle&) = delete;
 
 
-        //- Construct from key, (ununsed) value, next pointer
+        //- Construct from next pointer, key, (ununsed) contents
+        template<class... Args>
         HashTableSingle
         (
+            HashTableSingle* next,
             const key_type& key,
-            const mapped_type&,
-            HashTableSingle* next
+            Args&&...
         )
         :
             key_(key),

@@ -48,17 +48,21 @@ using namespace Foam;
 template<class T, class Key, class Hash> class HashSorter;
 
 template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashSorter<T, Key, Hash>& sorter);
+Ostream& operator<<
+(
+    Ostream& os,
+    const HashSorter<T, Key, Hash>& sorter
+);
 
 
 template<class T, class Key, class Hash>
 class HashSorter
 {
-    const HashTable<T,Key,Hash>& table;
+    const HashTable<T, Key, Hash>& table;
 
 public:
 
-    HashSorter(const HashTable<T,Key,Hash>& ht)
+    HashSorter(const HashTable<T, Key, Hash>& ht)
     :
         table(ht)
     {}
