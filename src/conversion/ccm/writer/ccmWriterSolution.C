@@ -450,20 +450,13 @@ void Foam::ccm::writer::writeSolution
 
     forAllConstIters(objects, iter)
     {
-        word fieldName = (*iter()).name();
-        bool variableGood =
-        (
-            nameMapping.found(fieldName)
-         && (*iter()).typeHeaderOk<volScalarField>(false)
-        );
+        const word fieldName = (*iter()).name();
+        const word fieldType = (*iter()).headerClassName();
 
-        if (!variableGood)
+        if (!nameMapping.found(fieldName))
         {
-            // Only retain registered fields that are also readable
             continue;
         }
-
-        word fieldType = (*iter()).headerClassName();
 
         if (fieldType == volScalarField::typeName)
         {
