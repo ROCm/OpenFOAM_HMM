@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) YEAR AUTHOR,AFFILIATION
@@ -56,6 +56,12 @@ class ${typeName}Points0MotionSolver
 {
     // Private Member Functions
 
+        //- Report a message with the SHA1sum
+        inline static void printMessage(const char* message)
+        {
+            Info<< message << " sha1: " << SHA1sum << '\n';
+        }
+
         //- No copy construct
         ${typeName}Points0MotionSolver
         (
@@ -67,6 +73,9 @@ class ${typeName}Points0MotionSolver
 
 
 public:
+
+    //- SHA1 representation of the code content
+    static constexpr const char* const SHA1sum = "${SHA1sum}";
 
     //- Runtime type information
     TypeName("${typeName}");

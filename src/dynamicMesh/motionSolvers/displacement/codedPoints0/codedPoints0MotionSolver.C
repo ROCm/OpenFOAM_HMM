@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,10 +26,7 @@ License
 #include "codedPoints0MotionSolver.H"
 #include "dictionary.H"
 #include "Time.H"
-#include "SHA1Digest.H"
 #include "dynamicCode.H"
-#include "dynamicCodeContext.H"
-#include "stringOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -58,14 +55,15 @@ void Foam::codedPoints0MotionSolver::prepare
     dynCode.setFilterVariable("typeName", name_);
 
     // Compile filtered C template
-    dynCode.addCompileFile("codedPoints0MotionSolverTemplate.C");
+    dynCode.addCompileFile(codeTemplateC);
 
     // Copy filtered H template
-    dynCode.addCopyFile("codedPoints0MotionSolverTemplate.H");
+    dynCode.addCopyFile(codeTemplateH);
 
-    // Debugging: make BC verbose
+    // Debugging: make verbose
     // dynCode.setFilterVariable("verbose", "true");
-    // Info<<"compile " << name_ << " sha1: "
+    // DetailInfo
+    //     <<"compile " << name_ << " sha1: "
     //     << context.sha1() << endl;
 
     // Define Make/options
@@ -73,12 +71,15 @@ void Foam::codedPoints0MotionSolver::prepare
     (
         "EXE_INC = -g \\\n"
         "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
-        "-I$(LIB_SRC)/fvMotionSolvers/lnInclude \\\n"
-        "-I$(LIB_SRC)/dynamicMesh/lnInclude \\\n"
         "-I$(LIB_SRC)/meshTools/lnInclude \\\n"
+        "-I$(LIB_SRC)/dynamicMesh/lnInclude \\\n"
+        "-I$(LIB_SRC)/fvMotionSolvers/lnInclude \\\n"
       + context.options()
       + "\n\nLIB_LIBS = \\\n"
-      + "    -lfvMotionSolvers \\\n"
+        "    -lfiniteVolume \\\n"
+        "    -lmeshTools \\\n"
+        "    -ldynamicMesh \\\n"
+        "    -lfvMotionSolvers \\\n"
       + context.libs()
     );
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -34,6 +34,7 @@ Description
 
     The hook functions take the following arguments:
 
+    \verbatim
     codeCorrect
     (
         GeometricField<Type, fvPatchField, volMesh>& field
@@ -45,11 +46,12 @@ Description
         const label fieldi
     )
 
-    constrain
+    codeConstrain
     (
         fvMatrix<Type}>& eqn,
         const label fieldi
     )
+    \endverbatim
 
     where :
         field is the name of the field in the fields list
@@ -71,7 +73,6 @@ Usage
 
             codeInclude
             #{
-
             #};
 
             codeCorrect
@@ -87,18 +88,9 @@ Usage
                 heSource -= 0.1*sqr(time.value())*V;
             #};
 
-            codeSetValue
+            codeContrain
             #{
-                Pout<< "**codeSetValue**" << endl;
-            #};
-
-            // Dummy entry. Make dependent on above to trigger recompilation
-            code
-            #{
-                $codeInclude
-                $codeCorrect
-                $codeAddSup
-                $codeSetValue
+                Pout<< "**codeConstrain**" << endl;
             #};
         }
     }
@@ -131,18 +123,18 @@ template<class Type>
 class CodedSource
 :
     public cellSetOption,
-    public codedBase
+    protected codedBase
 {
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         word name_;
 
         string codeCorrect_;
         string codeAddSup_;
-        string codeSetValue_;
+        string codeConstrain_;
 
         //- Underlying functionObject
         mutable autoPtr<option> redirectFvOptionPtr_;
@@ -156,13 +148,13 @@ protected:
         //- Adapt the context for the current object
         virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
-        // Return a description (type + name) for the output
+        //- Return a description (type + name) for the output
         virtual string description() const;
 
-        // Clear any redirected objects
+        //- Clear any redirected objects
         virtual void clearRedirect() const;
 
-        // Get the dictionary to initialize the codeContext
+        //- Get the dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
 
 
@@ -189,42 +181,42 @@ public:
         //- Dynamically compiled fvOption
         option& redirectFvOption() const;
 
-        // Evaluation
 
-            //- Correct field
-            virtual void correct
-            (
-                GeometricField<Type, fvPatchField, volMesh>&
-            );
+    // Evaluation
 
-            //- Explicit and implicit matrix contributions
-            virtual void addSup
-            (
-                fvMatrix<Type>& eqn,
-                const label fieldi
-            );
+        //- Correct field
+        virtual void correct
+        (
+            GeometricField<Type, fvPatchField, volMesh>&
+        );
 
-            //- Explicit and implicit matrix contributions
-            //  to compressible equation
-            virtual void addSup
-            (
-                const volScalarField& rho,
-                fvMatrix<Type>& eqn,
-                const label fieldi
-            );
+        //- Explicit/implicit matrix contributions
+        virtual void addSup
+        (
+            fvMatrix<Type>& eqn,
+            const label fieldi
+        );
 
-            //- Set value
-            virtual void constrain
-            (
-                fvMatrix<Type>& eqn,
-                const label fieldi
-            );
+        //- Explicit/implicit matrix contributions to compressible equation
+        virtual void addSup
+        (
+            const volScalarField& rho,
+            fvMatrix<Type>& eqn,
+            const label fieldi
+        );
+
+        //- Set value
+        virtual void constrain
+        (
+            fvMatrix<Type>& eqn,
+            const label fieldi
+        );
 
 
-        // IO
+    // IO
 
-            //- Read source dictionary
-            virtual bool read(const dictionary& dict);
+        //- Read source dictionary
+        virtual bool read(const dictionary& dict);
 };
 
 

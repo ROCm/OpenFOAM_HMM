@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) YEAR AUTHOR,AFFILIATION
@@ -42,7 +42,6 @@ ${codeInclude}
 
 namespace Foam
 {
-
 namespace fv
 {
 
@@ -55,33 +54,26 @@ ${localCode}
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-extern "C"
+// dynamicCode:
+// SHA1 = ${SHA1sum}
+//
+// unique function name that can be checked if the correct library version
+// has been loaded
+extern "C" void ${typeName}_${SHA1sum}(bool load)
 {
-    // dynamicCode:
-    // SHA1 = ${SHA1sum}
-    //
-    // unique function name that can be checked if the correct library version
-    // has been loaded
-    void ${typeName}_${SHA1sum}(bool load)
+    if (load)
     {
-        if (load)
-        {
-            // code that can be explicitly executed after loading
-        }
-        else
-        {
-            // code that can be explicitly executed before unloading
-        }
+        // Code that can be explicitly executed after loading
+    }
+    else
+    {
+        // Code that can be explicitly executed before unloading
     }
 }
 
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//makeRemovablePatchTypeField
-//(
-//    fvPatch${FieldType},
-//    ${typeName}FvOption${SourceType}
-//);
 defineTypeNameAndDebug(${typeName}FvOption${SourceType}, 0);
 addRemovableToRunTimeSelectionTable
 (
@@ -89,10 +81,6 @@ addRemovableToRunTimeSelectionTable
     ${typeName}FvOption${SourceType},
     dictionary
 );
-
-
-const char* const ${typeName}FvOption${SourceType}::SHA1sum =
-    "${SHA1sum}";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -110,8 +98,7 @@ ${typeName}FvOption${SourceType}
 {
     if (${verbose:-false})
     {
-        Info<<"construct ${typeName} sha1: ${SHA1sum}"
-            " from components\n";
+        printMessage("Construct ${typeName} from components");
     }
 }
 
@@ -123,7 +110,7 @@ ${typeName}FvOption${SourceType}::
 {
     if (${verbose:-false})
     {
-        Info<<"destroy ${typeName} sha1: ${SHA1sum}\n";
+        printMessage("Destroy ${typeName}");
     }
 }
 
@@ -193,14 +180,14 @@ void ${typeName}FvOption${SourceType}::constrain
     }
 
 //{{{ begin code
-    ${codeSetValue}
+    ${codeConstrain}
 //}}} end code
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace fv
 } // End namespace Foam
 
-} // End namespace fv
 // ************************************************************************* //

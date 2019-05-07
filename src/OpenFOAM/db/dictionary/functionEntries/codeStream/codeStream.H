@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -100,12 +100,13 @@ SourceFiles
 
 namespace Foam
 {
+// Forward Declarations
 class dlLibraryTable;
 
 namespace functionEntries
 {
 
-// Forward declaration of friend classes
+// Forward Declarations
 class calcEntry;
 
 /*---------------------------------------------------------------------------*\
@@ -147,10 +148,12 @@ class codeStream
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Name of the C code template to be used
-        static const word codeTemplateC;
+        static constexpr const char* const codeTemplateC
+            = "codeStreamTemplate.C";
+
 
     // Related types
 

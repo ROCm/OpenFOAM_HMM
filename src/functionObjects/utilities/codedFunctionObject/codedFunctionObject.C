@@ -29,10 +29,7 @@ License
 #include "volFields.H"
 #include "dictionary.H"
 #include "Time.H"
-#include "SHA1Digest.H"
 #include "dynamicCode.H"
-#include "dynamicCodeContext.H"
-#include "stringOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -42,7 +39,6 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(codedFunctionObject, 0);
-
     addToRunTimeSelectionTable
     (
         functionObject,
@@ -70,14 +66,15 @@ void Foam::functionObjects::codedFunctionObject::prepare
     dynCode.setFilterVariable("codeEnd", codeEnd_);
 
     // Compile filtered C template
-    dynCode.addCompileFile("functionObjectTemplate.C");
+    dynCode.addCompileFile(codeTemplateC);
 
     // Copy filtered H template
-    dynCode.addCopyFile("functionObjectTemplate.H");
+    dynCode.addCopyFile(codeTemplateH);
 
-    // Debugging: make BC verbose
+    // Debugging: make verbose
     // dynCode.setFilterVariable("verbose", "true");
-    // Info<<"compile " << name_ << " sha1: "
+    // DetailInfo
+    //     <<"compile " << name_ << " sha1: "
     //     << context.sha1() << endl;
 
     // Define Make/options
@@ -88,9 +85,9 @@ void Foam::functionObjects::codedFunctionObject::prepare
         "-I$(LIB_SRC)/meshTools/lnInclude \\\n"
       + context.options()
       + "\n\nLIB_LIBS = \\\n"
-      + "    -lOpenFOAM \\\n"
-      + "    -lfiniteVolume \\\n"
-      + "    -lmeshTools \\\n"
+        "    -lOpenFOAM \\\n"
+        "    -lfiniteVolume \\\n"
+        "    -lmeshTools \\\n"
       + context.libs()
     );
 }
@@ -187,84 +184,110 @@ bool Foam::functionObjects::codedFunctionObject::read(const dictionary& dict)
 {
     timeFunctionObject::read(dict);
 
+    codedBase::setCodeContext(dict);
+
     dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
 
-    const entry* dataPtr = dict.findEntry("codeData", keyType::LITERAL);
+    label nKeywords = 0;
 
-    if (dataPtr)
+    const entry* eptr;
+
+    codeData_.clear();
+    codedBase::append("<codeData>");
+    if ((eptr = dict.findEntry("codeData", keyType::LITERAL)) != nullptr)
     {
-        dataPtr->readEntry(codeData_);
-        stringOps::inplaceExpand(codeData_, dict);
+        eptr->readEntry(codeData_);
+        dynamicCodeContext::inplaceExpand(codeData_, dict);
+        codedBase::append(codeData_);
+
         dynamicCodeContext::addLineDirective
         (
             codeData_,
-            dataPtr->startLineNumber(),
+            eptr->startLineNumber(),
             dict.name()
         );
+
+        ++nKeywords;
     }
 
-    const entry* readPtr = dict.findEntry("codeRead", keyType::LITERAL);
-
-    if (readPtr)
+    codeRead_.clear();
+    codedBase::append("<codeRead>");
+    if ((eptr = dict.findEntry("codeRead", keyType::LITERAL)) != nullptr)
     {
-        readPtr->readEntry(codeRead_);
-        stringOps::inplaceExpand(codeRead_, dict);
+        eptr->readEntry(codeRead_);
+        dynamicCodeContext::inplaceExpand(codeRead_, dict);
+        codedBase::append(codeRead_);
+
         dynamicCodeContext::addLineDirective
         (
             codeRead_,
-            readPtr->startLineNumber(),
+            eptr->startLineNumber(),
             dict.name()
         );
+
+        ++nKeywords;
     }
 
-    const entry* execPtr = dict.findEntry("codeExecute", keyType::LITERAL);
-
-    if (execPtr)
+    codeExecute_.clear();
+    codedBase::append("<codeExecute>");
+    if ((eptr = dict.findEntry("codeExecute", keyType::LITERAL)) != nullptr)
     {
-        execPtr->readEntry(codeExecute_);
-        stringOps::inplaceExpand(codeExecute_, dict);
+        eptr->readEntry(codeExecute_);
+        dynamicCodeContext::inplaceExpand(codeExecute_, dict);
+        codedBase::append(codeExecute_);
+
         dynamicCodeContext::addLineDirective
         (
             codeExecute_,
-            execPtr->startLineNumber(),
+            eptr->startLineNumber(),
             dict.name()
         );
+
+        ++nKeywords;
     }
 
-    const entry* writePtr = dict.findEntry("codeWrite", keyType::LITERAL);
-
-    if (writePtr)
+    codeWrite_.clear();
+    codedBase::append("<codeWrite>");
+    if ((eptr = dict.findEntry("codeWrite", keyType::LITERAL)) != nullptr)
     {
-        writePtr->readEntry(codeWrite_);
-        stringOps::inplaceExpand(codeWrite_, dict);
+        eptr->readEntry(codeWrite_);
+        dynamicCodeContext::inplaceExpand(codeWrite_, dict);
+        codedBase::append(codeWrite_);
+
         dynamicCodeContext::addLineDirective
         (
             codeWrite_,
-            writePtr->startLineNumber(),
+            eptr->startLineNumber(),
             dict.name()
         );
+
+        ++nKeywords;
     }
 
-    const entry* endPtr = dict.findEntry("codeEnd", keyType::LITERAL);
-
-    if (endPtr)
+    codeEnd_.clear();
+    codedBase::append("<codeEnd>");
+    if ((eptr = dict.findEntry("codeEnd", keyType::LITERAL)) != nullptr)
     {
-        endPtr->readEntry(codeEnd_);
-        stringOps::inplaceExpand(codeEnd_, dict);
+        eptr->readEntry(codeEnd_);
+        dynamicCodeContext::inplaceExpand(codeEnd_, dict);
+        codedBase::append(codeEnd_);
+
         dynamicCodeContext::addLineDirective
         (
             codeEnd_,
-            endPtr->startLineNumber(),
+            eptr->startLineNumber(),
             dict.name()
         );
+
+        ++nKeywords;
     }
 
-    if (!dataPtr && !readPtr && !execPtr && !writePtr && !endPtr)
+    if (!nKeywords)
     {
         IOWarningInFunction(dict)
-            << "No critical \"code\" prefixed keywords were found."
-            << " Please check the code documentation for more details."
-            << nl << endl;
+            << "No critical \"code\" prefixed keywords found." << nl
+            << "Please check the code documentation for more details." << nl
+            << endl;
     }
 
     updateLibrary(name_);

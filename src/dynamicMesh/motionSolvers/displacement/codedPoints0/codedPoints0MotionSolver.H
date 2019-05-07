@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,7 @@ class codedPoints0MotionSolver
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of redirected motion solver
         word name_;
@@ -107,17 +107,17 @@ protected:
         //- Adapt the context for the current object
         virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
-        // Return a description (type + name) for the output
+        //- Return a description (type + name) for the output
         virtual string description() const;
 
-        // Clear any redirected objects
+        //- Clear any redirected objects
         virtual void clearRedirect() const;
 
-        // Get the dictionary to initialize the codeContext
+        // The dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
 
 
-        //- No copy assignment construct
+        //- No copy construct
         codedPoints0MotionSolver(const codedPoints0MotionSolver&) = delete;
 
         //- No copy assignment
@@ -125,6 +125,17 @@ protected:
 
 
 public:
+
+    // Static Data Members
+
+        //- Name of the C code template to be used
+        static constexpr const char* const codeTemplateC
+            = "codedPoints0MotionSolverTemplate.C";
+
+        //- Name of the H code template to be used
+        static constexpr const char* const codeTemplateH
+            = "codedPoints0MotionSolverTemplate.H";
+
 
     //- Runtime type information
     TypeName("coded");
@@ -156,10 +167,10 @@ public:
         virtual void solve();
 
         //- Update local data for geometry changes
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(const pointField& fld);
 
         //-  Update local data for topology changes
-        virtual void updateMesh(const mapPolyMesh&);
+        virtual void updateMesh(const mapPolyMesh& mpm);
 };
 
 

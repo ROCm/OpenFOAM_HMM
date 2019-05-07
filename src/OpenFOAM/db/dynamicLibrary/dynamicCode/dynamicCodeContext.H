@@ -37,8 +37,9 @@ SourceFiles
 #ifndef dynamicCodeContext_H
 #define dynamicCodeContext_H
 
+#include <functional>
 #include "dictionary.H"
-#include "SHA1Digest.H"
+#include "SHA1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,19 +52,13 @@ namespace Foam
 
 class dynamicCodeContext
 {
-    // Private data
+    // Private Data
 
         //- The parent dictionary context
-        const dictionary& dict_;
+        std::reference_wrapper<const dictionary> dict_;
 
-        //- Optional "code" entry
-        string code_;
-
-        //- Optional "localCode" entry
-        string localCode_;
-
-        //- Optional "codeInclude" entry
-        string include_;
+        //- The SHA1 of the contents
+        SHA1 sha1_;
 
         //- Optional "codeOptions" entry
         string options_;
@@ -71,24 +66,68 @@ class dynamicCodeContext
         //- Optional "codeLibs" entry
         string libs_;
 
-        //- Calculated SHA1Digest
-        SHA1Digest sha1_;
+        //- Optional "codeInclude" entry
+        string include_;
+
+        //- Optional "code" entry
+        string code_;
+
+        //- Optional "localCode" entry
+        string localCode_;
 
 
 public:
 
     // Constructors
 
+        //- Construct null
+        dynamicCodeContext();
+
         //- Construct from a dictionary
-        dynamicCodeContext(const dictionary& dict);
+        explicit dynamicCodeContext(const dictionary& dict);
 
 
-    // Member functions
+    // Static Member Functions
+
+        //- Cleanup string and expand with dictionary parameters
+        static void inplaceExpand(string& code, const dictionary& dict);
+
+        //- Prefix a \#line directive to code.
+        //  The input lineNum is 0-based.
+        //  Is a no-op if any of the arguments are invalid
+        //  (lineNum is negative, code or file are empty)
+        //
+        //  \return The change in string length caused by the directive.
+        //  This can potentially be used to recover the substring portions.
+        static unsigned addLineDirective
+        (
+            string& code,
+            label lineNum,
+            const fileName& file
+        );
+
+        //- Prefix a \#line directive to code.
+        //  The name of the dictionary is used for the 'file' name.
+        static unsigned addLineDirective
+        (
+            string& code,
+            label lineNum,
+            const dictionary& dict
+        );
+
+
+    // Member Functions
+
+        //- Considered valid if not using dictionary::null as the context
+        bool valid() const;
+
+        //- Set code context from a dictionary
+        void setCodeContext(const dictionary& dict);
 
         //- Return the parent dictionary context
         const dictionary& dict() const
         {
-            return dict_;
+            return dict_.get();
         }
 
         //- Return the code-includes
@@ -121,20 +160,27 @@ public:
             return localCode_;
         }
 
-        //- Return SHA1 digest calculated from include, options, code
-        const SHA1Digest& sha1() const
+        //- Return SHA1 calculated from options, libs, include, code
+        const SHA1& sha1() const
         {
             return sha1_;
         }
 
-        //- Helper: add \#line directive
-        //  The lineNum is 0-based. No-op if the lineNum is negative.
-        static void addLineDirective
-        (
-            string& code,
-            label lineNum,
-            const fileName& name
-        );
+        //- Add content to SHA1 hashing
+        void append(const std::string& str)
+        {
+            sha1_.append(str);
+        }
+
+
+    // Member Operators
+
+        //- Cast to dictionary
+        operator const dictionary&() const
+        {
+            return dict_.get();
+        }
+
 };
 
 
