@@ -26,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "threePhaseInterfaceProperties.H"
-#include "alphaContactAngleFvPatchScalarField.H"
+#include "alphaContactAngleTwoPhaseFvPatchScalarField.H"
 #include "mathematicalConstants.H"
 #include "surfaceInterpolate.H"
 #include "fvcDiv.H"
@@ -55,14 +55,14 @@ void Foam::threePhaseInterfaceProperties::correctContactAngle
 
     forAll(boundary, patchi)
     {
-        if (isA<alphaContactAngleFvPatchScalarField>(alpha1[patchi]))
+        if (isA<alphaContactAngleTwoPhaseFvPatchScalarField>(alpha1[patchi]))
         {
-            const alphaContactAngleFvPatchScalarField& a2cap =
-                refCast<const alphaContactAngleFvPatchScalarField>
+            const alphaContactAngleTwoPhaseFvPatchScalarField& a2cap =
+                refCast<const alphaContactAngleTwoPhaseFvPatchScalarField>
                 (alpha2[patchi]);
 
-            const alphaContactAngleFvPatchScalarField& a3cap =
-                refCast<const alphaContactAngleFvPatchScalarField>
+            const alphaContactAngleTwoPhaseFvPatchScalarField& a3cap =
+                refCast<const alphaContactAngleTwoPhaseFvPatchScalarField>
                 (alpha3[patchi]);
 
             scalarField twoPhaseAlpha2(max(a2cap, scalar(0)));

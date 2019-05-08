@@ -16,6 +16,7 @@ LIB_LIBS = \
     -lfluidThermophysicalModels \
     -lspecie \
     -ltwoPhaseMixture \
+    -ltwoPhaseProperties \
     -linterfaceProperties \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \

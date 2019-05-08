@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -24,15 +24,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::alphaContactAngleFvPatchScalarField
+    Foam::alphaContactAngleTwoPhaseFvPatchScalarField
 
 Group
     grpWallBoundaryConditions grpGenericBoundaryConditions
 
 Description
-    Abstract base class for alphaContactAngle boundary conditions.
+    Abstract base class for two-phase alphaContactAngle boundary conditions.
 
-    Derived classes must implement the theta() fuction which returns the
+    Derived classes must implement the theta() function which returns the
     wall contact angle field.
 
     The essential entry "limit" controls the gradient of alpha1 on the wall:
@@ -56,12 +56,12 @@ Description
     \endverbatim
 
 SourceFiles
-    alphaContactAngleFvPatchScalarField.C
+    alphaContactAngleTwoPhaseFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef alphaContactAngleFvPatchScalarField_H
-#define alphaContactAngleFvPatchScalarField_H
+#ifndef alphaContactAngleTwoPhaseFvPatchScalarField_H
+#define alphaContactAngleTwoPhaseFvPatchScalarField_H
 
 #include "fixedGradientFvPatchFields.H"
 #include "fvsPatchFields.H"
@@ -72,18 +72,16 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class alphaContactAngleFvPatchScalarField Declaration
+         Class alphaContactAngleTwoPhaseFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class alphaContactAngleFvPatchScalarField
+class alphaContactAngleTwoPhaseFvPatchScalarField
 :
     public fixedGradientFvPatchScalarField
 {
-
 public:
 
-    //- Runtime type information
-    TypeName("alphaContactAngle");
+    // Abstract class, no runtime information
 
     //- Alpha limit options
     enum limitControls
@@ -100,40 +98,39 @@ public:
     // Constructors
 
         //- Construct from patch and internal field
-        alphaContactAngleFvPatchScalarField
+        alphaContactAngleTwoPhaseFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        alphaContactAngleFvPatchScalarField
+        alphaContactAngleTwoPhaseFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given alphaContactAngleFvPatchScalarField
-        //  onto a new patch
-        alphaContactAngleFvPatchScalarField
+        //- Construct by mapping onto a new patch
+        alphaContactAngleTwoPhaseFvPatchScalarField
         (
-            const alphaContactAngleFvPatchScalarField&,
+            const alphaContactAngleTwoPhaseFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        alphaContactAngleFvPatchScalarField
+        alphaContactAngleTwoPhaseFvPatchScalarField
         (
-            const alphaContactAngleFvPatchScalarField&
+            const alphaContactAngleTwoPhaseFvPatchScalarField&
         );
 
         //- Construct as copy setting internal field reference
-        alphaContactAngleFvPatchScalarField
+        alphaContactAngleTwoPhaseFvPatchScalarField
         (
-            const alphaContactAngleFvPatchScalarField&,
+            const alphaContactAngleTwoPhaseFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -154,7 +151,7 @@ public:
         );
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

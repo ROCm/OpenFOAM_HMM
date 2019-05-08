@@ -52,7 +52,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class interfaceProperties Declaration
+                     Class interfaceProperties Declaration
 \*---------------------------------------------------------------------------*/
 
 class interfaceProperties

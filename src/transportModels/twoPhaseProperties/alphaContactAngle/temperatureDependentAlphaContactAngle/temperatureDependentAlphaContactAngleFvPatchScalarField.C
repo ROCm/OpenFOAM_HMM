@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2016 OpenFOAM Foundation
@@ -39,7 +39,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    alphaContactAngleFvPatchScalarField(p, iF),
+    alphaContactAngleTwoPhaseFvPatchScalarField(p, iF),
     TName_("T"),
     theta0_()
 {}
@@ -53,7 +53,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
     const dictionary& dict
 )
 :
-    alphaContactAngleFvPatchScalarField(p, iF, dict),
+    alphaContactAngleTwoPhaseFvPatchScalarField(p, iF, dict),
     TName_(dict.lookupOrDefault<word>("T", "T")),
     theta0_(Function1<scalar>::New("theta0", dict))
 {
@@ -70,7 +70,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    alphaContactAngleFvPatchScalarField(psf, p, iF, mapper),
+    alphaContactAngleTwoPhaseFvPatchScalarField(psf, p, iF, mapper),
     TName_(psf.TName_),
     theta0_(psf.theta0_.clone())
 {}
@@ -82,7 +82,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
     const temperatureDependentAlphaContactAngleFvPatchScalarField& psf
 )
 :
-    alphaContactAngleFvPatchScalarField(psf),
+    alphaContactAngleTwoPhaseFvPatchScalarField(psf),
     TName_(psf.TName_),
     theta0_(psf.theta0_.clone())
 {}
@@ -95,7 +95,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    alphaContactAngleFvPatchScalarField(psf, iF),
+    alphaContactAngleTwoPhaseFvPatchScalarField(psf, iF),
     TName_(psf.TName_),
     theta0_(psf.theta0_.clone())
 {}
@@ -122,7 +122,7 @@ void Foam::temperatureDependentAlphaContactAngleFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    alphaContactAngleFvPatchScalarField::write(os);
+    alphaContactAngleTwoPhaseFvPatchScalarField::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
     theta0_->writeData(os);
     writeEntry("value", os);

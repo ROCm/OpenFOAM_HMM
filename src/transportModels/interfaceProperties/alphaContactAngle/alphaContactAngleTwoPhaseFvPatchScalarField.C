@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -25,23 +25,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "alphaContactAngleFvPatchScalarField.H"
+#include "alphaContactAngleTwoPhaseFvPatchScalarField.H"
 #include "fvPatchFieldMapper.H"
 #include "volMesh.H"
-#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(alphaContactAngleFvPatchScalarField, 0);
-}
-
 const Foam::Enum
 <
-    Foam::alphaContactAngleFvPatchScalarField::limitControls
+    Foam::alphaContactAngleTwoPhaseFvPatchScalarField::limitControls
 >
-Foam::alphaContactAngleFvPatchScalarField::limitControlNames_
+Foam::alphaContactAngleTwoPhaseFvPatchScalarField::limitControlNames_
 ({
     { limitControls::lcNone, "none" },
     { limitControls::lcGradient, "gradient" },
@@ -52,7 +46,8 @@ Foam::alphaContactAngleFvPatchScalarField::limitControlNames_
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
+Foam::alphaContactAngleTwoPhaseFvPatchScalarField::
+alphaContactAngleTwoPhaseFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -63,7 +58,8 @@ Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
 {}
 
 
-Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
+Foam::alphaContactAngleTwoPhaseFvPatchScalarField::
+alphaContactAngleTwoPhaseFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -87,9 +83,10 @@ Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
 }
 
 
-Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
+Foam::alphaContactAngleTwoPhaseFvPatchScalarField::
+alphaContactAngleTwoPhaseFvPatchScalarField
 (
-    const alphaContactAngleFvPatchScalarField& acpsf,
+    const alphaContactAngleTwoPhaseFvPatchScalarField& acpsf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -100,9 +97,10 @@ Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
 {}
 
 
-Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
+Foam::alphaContactAngleTwoPhaseFvPatchScalarField::
+alphaContactAngleTwoPhaseFvPatchScalarField
 (
-    const alphaContactAngleFvPatchScalarField& acpsf
+    const alphaContactAngleTwoPhaseFvPatchScalarField& acpsf
 )
 :
     fixedGradientFvPatchScalarField(acpsf),
@@ -110,9 +108,10 @@ Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
 {}
 
 
-Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
+Foam::alphaContactAngleTwoPhaseFvPatchScalarField::
+alphaContactAngleTwoPhaseFvPatchScalarField
 (
-    const alphaContactAngleFvPatchScalarField& acpsf,
+    const alphaContactAngleTwoPhaseFvPatchScalarField& acpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -123,7 +122,7 @@ Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::alphaContactAngleFvPatchScalarField::evaluate
+void Foam::alphaContactAngleTwoPhaseFvPatchScalarField::evaluate
 (
     const Pstream::commsTypes
 )
@@ -154,7 +153,7 @@ void Foam::alphaContactAngleFvPatchScalarField::evaluate
 }
 
 
-void Foam::alphaContactAngleFvPatchScalarField::write
+void Foam::alphaContactAngleTwoPhaseFvPatchScalarField::write
 (
     Ostream& os
 ) const

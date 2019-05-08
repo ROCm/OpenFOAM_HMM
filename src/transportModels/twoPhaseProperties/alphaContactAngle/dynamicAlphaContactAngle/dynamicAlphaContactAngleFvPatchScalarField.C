@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -39,7 +39,7 @@ dynamicAlphaContactAngleFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    alphaContactAngleFvPatchScalarField(p, iF),
+    alphaContactAngleTwoPhaseFvPatchScalarField(p, iF),
     theta0_(0.0),
     uTheta_(0.0),
     thetaA_(0.0),
@@ -56,7 +56,7 @@ dynamicAlphaContactAngleFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    alphaContactAngleFvPatchScalarField(gcpsf, p, iF, mapper),
+    alphaContactAngleTwoPhaseFvPatchScalarField(gcpsf, p, iF, mapper),
     theta0_(gcpsf.theta0_),
     uTheta_(gcpsf.uTheta_),
     thetaA_(gcpsf.thetaA_),
@@ -72,7 +72,7 @@ dynamicAlphaContactAngleFvPatchScalarField
     const dictionary& dict
 )
 :
-    alphaContactAngleFvPatchScalarField(p, iF, dict),
+    alphaContactAngleTwoPhaseFvPatchScalarField(p, iF, dict),
     theta0_(dict.get<scalar>("theta0")),
     uTheta_(dict.get<scalar>("uTheta")),
     thetaA_(dict.get<scalar>("thetaA")),
@@ -88,7 +88,7 @@ dynamicAlphaContactAngleFvPatchScalarField
     const dynamicAlphaContactAngleFvPatchScalarField& gcpsf
 )
 :
-    alphaContactAngleFvPatchScalarField(gcpsf),
+    alphaContactAngleTwoPhaseFvPatchScalarField(gcpsf),
     theta0_(gcpsf.theta0_),
     uTheta_(gcpsf.uTheta_),
     thetaA_(gcpsf.thetaA_),
@@ -103,7 +103,7 @@ dynamicAlphaContactAngleFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    alphaContactAngleFvPatchScalarField(gcpsf, iF),
+    alphaContactAngleTwoPhaseFvPatchScalarField(gcpsf, iF),
     theta0_(gcpsf.theta0_),
     uTheta_(gcpsf.uTheta_),
     thetaA_(gcpsf.thetaA_),
@@ -147,7 +147,7 @@ Foam::dynamicAlphaContactAngleFvPatchScalarField::theta
 
 void Foam::dynamicAlphaContactAngleFvPatchScalarField::write(Ostream& os) const
 {
-    alphaContactAngleFvPatchScalarField::write(os);
+    alphaContactAngleTwoPhaseFvPatchScalarField::write(os);
     os.writeEntry("theta0", theta0_);
     os.writeEntry("uTheta", uTheta_);
     os.writeEntry("thetaA", thetaA_);

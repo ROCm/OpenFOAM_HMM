@@ -29,5 +29,5 @@ EXE_LIBS = \
     -lmassTransferModels \
     -lsolidThermo \
     -lsolidSpecie \
-    -linterfaceProperties \
+    -ltwoPhaseProperties \
     -llaserDTRM
