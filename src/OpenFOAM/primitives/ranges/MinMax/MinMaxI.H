@@ -23,6 +23,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class T>
+inline Foam::MinMax<T> Foam::MinMax<T>::zero_one()
+{
+    return MinMax<T>(pTraits<T>::zero, pTraits<T>::one);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -115,9 +124,16 @@ inline T Foam::MinMax<T>::centre() const
 
 
 template<class T>
+inline T Foam::MinMax<T>::span() const
+{
+    return (empty() ? Zero : (max() - min()));
+}
+
+
+template<class T>
 inline Foam::scalar Foam::MinMax<T>::mag() const
 {
-    return (empty() ? Zero : ::Foam::mag(max() - min()));
+    return ::Foam::mag(span());
 }
 
 

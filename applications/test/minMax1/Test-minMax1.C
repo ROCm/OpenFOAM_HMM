@@ -42,7 +42,7 @@ using namespace Foam;
 template<class T>
 Ostream& printInfo(const MinMax<T>& range)
 {
-    Info<< range << " valid=" << range.valid();
+    Info<< range << " valid=" << range.valid() << " span=" << range.span();
 
     return Info;
 }
@@ -83,6 +83,12 @@ int main(int argc, char *argv[])
 
     Info<<"Construct range : ";
     printInfo(MinMax<scalar>(1, 20)) << nl;
+
+    Info<<"A 0-1 scalar range : ";
+    printInfo(scalarMinMax::zero_one()) << nl;
+
+    Info<<"A 0-1 vector range : ";
+    printInfo(MinMax<vector>::zero_one()) << nl;
 
 
     {

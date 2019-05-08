@@ -159,6 +159,12 @@ public:
         inline explicit MinMax(const UList<T>& vals);
 
 
+    // Static Member Functions
+
+        //- A 0-1 range corresponding to the pTraits zero, one
+        inline static MinMax<T> zero_one();
+
+
     // Member Functions
 
     // Access
@@ -178,6 +184,9 @@ public:
         //- The min/max average value
         inline T centre() const;
 
+        //- The min to max span. Zero if the range is invalid.
+        inline T span() const;
+
         //- The magnitude of the min to max span. Zero if the range is invalid.
         inline scalar mag() const;
 
@@ -195,10 +204,10 @@ public:
 
         //- Intersect (union) with the second range.
         //  \return True if the resulting intersection is non-empty.
-        bool intersect(const MinMax<T>& b);
+        inline bool intersect(const MinMax<T>& b);
 
         //- Test if the ranges overlap
-        bool overlaps(const MinMax<T>& b) const;
+        inline bool overlaps(const MinMax<T>& b) const;
 
         //- Compares the min/max range with the specified value.
         //  \return
