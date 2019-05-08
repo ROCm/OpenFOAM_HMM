@@ -321,6 +321,20 @@ INTELMPI*)
     _foamAddPath    "$MPI_ARCH_PATH/intel64/bin"
     _foamAddLib     "$MPI_ARCH_PATH/intel64/lib"
     ;;
+
+MSMPI)
+    export FOAM_MPI=msmpi
+    _foamEtc -config  mpi-msmpi                 # <- Adjustments (optional)
+
+    # Respect MPI_ARCH_PATH if set to a valid directory (eg, user adjustments)
+    if [ ! -d "$MPI_ARCH_PATH" ]
+    then
+        export MPI_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
+    fi
+
+    # _foamAddPath    "$MPI_ARCH_PATH/bin"
+    _foamAddLib     "$MPI_ARCH_PATH/lib/x64"
+    ;;
 esac
 
 

@@ -163,11 +163,19 @@ objects: $(OBJECTS) | silent
 .PHONY: libso
 libso: $(LIB)$(EXT_SO) | silent
 
+ifeq ("$(WM_OSTYPE)","MSwindows")
+$(LIB)$(EXT_SO): $(OBJECTS)
+	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
+	$(call QUIET_MESSAGE,ld,$(LIB)$(EXT_SO))
+	$E $(LINKLIBSO) $(OBJECTS) -L$(LIB_PLATFORMS) \
+	    $(PROJECT_LIBS) $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB)$(EXT_SO)
+else
 $(LIB)$(EXT_SO): $(OBJECTS)
 	@$(WM_SCRIPTS)/makeTargetDir $(LIB)
 	$(call QUIET_MESSAGE,ld,$(LIB)$(EXT_SO))
 	$E $(LINKLIBSO) $(OBJECTS) -L$(LIB_PLATFORMS) \
 	    $(LIB_LIBS) $(GLIB_LIBS) -o $(LIB)$(EXT_SO)
+endif
 
 .PHONY: lib
 lib: $(LIB).a | silent

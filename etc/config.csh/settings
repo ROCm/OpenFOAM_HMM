@@ -227,6 +227,13 @@ setenv FOAM_RUN "$WM_PROJECT_USER_DIR/run"
 # Default to system compiler
 if (! $?WM_COMPILER_TYPE ) setenv WM_COMPILER_TYPE system
 
+# Cross-compiling
+switch ("$WM_COMPILER")
+case Mingw*:
+    setenv WM_OSTYPE MSwindows
+    breaksw
+endsw
+
 # Adjustments for non-gcc compilers
 switch ("$WM_COMPILER")
 case Clang*:  # Clang compiler suite

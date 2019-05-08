@@ -20,11 +20,28 @@ wmakeLnInclude -u OSspecific/"${WM_OSTYPE:-POSIX}"
 
 OSspecific/"${WM_OSTYPE:-POSIX}"/Allwmake $targetType $*
 
-Pstream/Allwmake $targetType $*
+case "$WM_COMPILER" in
+Mingw*)
+    # Pstream/OpenFOAM cyclic dependency
+    # 1st pass: link as Pstream as single .o object
+    WM_MPLIB=dummy Pstream/Allwmake libo
+    FOAM_LINK_DUMMY_PSTREAM=libo wmake $targetType OpenFOAM
 
-# Trigger update of version info (as required)
-wmakeBuildInfo -check || wrmo OpenFOAM/global/global.o 2>/dev/null
-wmake $targetType OpenFOAM
+    # 2nd pass: link Pstream.dll against libOpenFOAM.dll
+    Pstream/Allwmake $targetType $*
+
+    # Relink libOpenFOAM.dll against libPstream.dll
+    wrmo OpenFOAM/global/global.o 2>/dev/null
+    wmake $targetType OpenFOAM
+    ;;
+*)
+    Pstream/Allwmake $targetType $*
+
+    # Trigger update of version info (as required)
+    wmakeBuildInfo -check || wrmo OpenFOAM/global/global.o 2>/dev/null
+    wmake $targetType OpenFOAM
+    ;;
+esac
 
 wmake $targetType fileFormats
 wmake $targetType surfMesh
