@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -57,7 +57,7 @@ Usage
     With -rotateFields (in combination with -rotate/yawPitchRoll/rollPitchYaw)
     it will also read & transform vector & tensor fields.
 
-    Note:
+Note
     roll (rotation about x)
     pitch (rotation about y)
     yaw (rotation about z)
@@ -73,9 +73,11 @@ Usage
 #include "pointFields.H"
 #include "transformField.H"
 #include "transformGeometricField.H"
-#include "unitConversion.H"
+#include "axisAngleRotation.H"
+#include "EulerCoordinateRotation.H"
 
 using namespace Foam;
+using namespace Foam::coordinateRotations;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -284,40 +286,38 @@ int main(int argc, char *argv[])
         n1n2[0].normalise();
         n1n2[1].normalise();
 
-        const tensor rotT = rotationTensor(n1n2[0], n1n2[1]);
+        const tensor rot(rotationTensor(n1n2[0], n1n2[1]));
 
-        Info<< "Rotating points by " << rotT << endl;
-
-        points = transform(rotT, points);
+        Info<< "Rotating points by " << rot << endl;
+        points = transform(rot, points);
 
         if (doRotateFields)
         {
-            rotateFields(args, runTime, rotT);
+            rotateFields(args, runTime, rot);
         }
     }
     else if (args.found("rotate-angle"))
     {
-        const Tuple2<vector, scalar> axisAngle
+        const Tuple2<vector, scalar> rotAxisAngle
         (
             args.lookup("rotate-angle")()
         );
 
+        const vector& axis  = rotAxisAngle.first();
+        const scalar& angle = rotAxisAngle.second();
+
         Info<< "Rotating points " << nl
-            << "    about " << axisAngle.first() << nl
-            << "    angle " << axisAngle.second() << nl;
+            << "    about " << axis << nl
+            << "    angle " << angle << nl;
 
-        const quaternion quat
-        (
-            axisAngle.first(),
-            degToRad(axisAngle.second())
-        );
+        const tensor rot(axisAngle::rotation(axis, angle, true));
 
-        Info<< "Rotating points by quaternion " << quat << endl;
-        points = transform(quat, points);
+        Info<< "Rotating points by " << rot << endl;
+        points = transform(rot, points);
 
         if (doRotateFields)
         {
-            rotateFields(args, runTime, quat.R());
+            rotateFields(args, runTime, rot);
         }
     }
     else if (args.readIfPresent("rollPitchYaw", v))
@@ -327,16 +327,14 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    yaw   " << v.z() << nl;
 
-        v *= degToRad();
+        const tensor rot(euler::rotation(euler::eulerOrder::XYZ, v, true));
 
-        const quaternion quat(quaternion::rotationSequence::XYZ, v);
-
-        Info<< "Rotating points by quaternion " << quat << endl;
-        points = transform(quat, points);
+        Info<< "Rotating points by " << rot << endl;
+        points = transform(rot, points);
 
         if (doRotateFields)
         {
-            rotateFields(args, runTime, quat.R());
+            rotateFields(args, runTime, rot);
         }
     }
     else if (args.readIfPresent("yawPitchRoll", v))
@@ -346,16 +344,14 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    roll  " << v.z() << nl;
 
-        v *= degToRad();
+        const tensor rot(euler::rotation(euler::eulerOrder::ZYX, v, true));
 
-        const quaternion quat(quaternion::rotationSequence::ZYX, v);
-
-        Info<< "Rotating points by quaternion " << quat << endl;
-        points = transform(quat, points);
+        Info<< "Rotating points by " << rot << endl;
+        points = transform(rot, points);
 
         if (doRotateFields)
         {
-            rotateFields(args, runTime, quat.R());
+            rotateFields(args, runTime, rot);
         }
     }
 

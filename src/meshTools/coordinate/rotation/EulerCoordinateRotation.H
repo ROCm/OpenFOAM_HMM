@@ -61,6 +61,7 @@ SourceFiles
 #define coordinateRotations_euler_H
 
 #include "coordinateRotation.H"
+#include "quaternion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,6 +78,16 @@ class euler
 :
     public coordinateRotation
 {
+public:
+
+    // Public Types
+
+    //- Euler-angle rotation order
+    using eulerOrder = quaternion::eulerOrder;
+
+
+private:
+
     // Private Data
 
         //- The rotation angles
@@ -84,6 +95,9 @@ class euler
 
         //- Angles measured in degrees
         bool degrees_;
+
+        //- The Euler-angle rotation order (default: zxz)
+        eulerOrder order_;
 
 
 public:
@@ -126,7 +140,15 @@ public:
 
         //- The rotation tensor calculated for the intrinsic Euler
         //- angles in z-x-z order
-        static tensor rotation(const vector& angles, bool degrees);
+        static tensor rotation(const vector& angles, bool degrees=false);
+
+        //- The rotation tensor calculated for given angles and order
+        static tensor rotation
+        (
+            const eulerOrder order,
+            const vector& angles,
+            bool degrees=false
+        );
 
 
     // Member Functions
