@@ -14,7 +14,12 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("libmeshTools.so" "liblumpedPointMotion.so");
+libs
+(
+    "libmeshTools.so"
+    "liblumpedPointMotion.so"
+    "libfvMotionSolvers.so"
+);
 
 application     simpleFoam;     // Change to pimpleFoam for transient
 

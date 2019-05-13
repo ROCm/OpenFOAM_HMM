@@ -68,6 +68,21 @@ void printRotation(const quaternion& quat)
 }
 
 
+bool equalTensors(const tensor& rot1, const tensor& rot2)
+{
+    for (direction cmpt=0; cmpt < tensor::nComponents; ++cmpt)
+    {
+        // Cannot be really picky, but SMALL is reasonable
+        if (mag(rot1[cmpt] - rot2[cmpt]) > SMALL)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -108,7 +123,16 @@ int main(int argc, char *argv[])
         "(vector angle)",
         "Rotate about the <vector> by <angle> degrees - eg, '((1 0 0) 45)'"
     );
+    argList::addBoolOption
+    (
+        "verbose",
+        "Additional verbosity"
+    );
+
     argList args(argc, argv);
+
+    const bool verbose = args.found("verbose");
+
 
     vector rotVector;
 
@@ -122,10 +146,18 @@ int main(int argc, char *argv[])
 
         rotVector *= degToRad();
 
-        const quaternion quat(quaternion::rotationSequence::XYZ, rotVector);
+        const quaternion quat(quaternion::eulerOrder::XYZ, rotVector);
 
         printRotation(quat);
+
+        // Euler
+        const tensor rot
+        (
+            euler::rotation(euler::eulerOrder::XYZ, rotVector, false)
+        );
+        printRotation(rot);
     }
+
     if (args.readIfPresent("yawPitchRoll", rotVector))
     {
         Info<< nl
@@ -136,9 +168,16 @@ int main(int argc, char *argv[])
 
         rotVector *= degToRad();
 
-        const quaternion quat(quaternion::rotationSequence::ZYX, rotVector);
+        const quaternion quat(quaternion::eulerOrder::ZYX, rotVector);
 
         printRotation(quat);
+
+        // Euler
+        const tensor rot
+        (
+            euler::rotation(euler::eulerOrder::ZYX, rotVector, false)
+        );
+        printRotation(rot);
     }
     if (args.readIfPresent("euler", rotVector))
     {
@@ -152,7 +191,7 @@ int main(int argc, char *argv[])
 
         rotVector *= degToRad();
 
-        const quaternion quat(quaternion::rotationSequence::ZXZ, rotVector);
+        const quaternion quat(quaternion::eulerOrder::ZXZ, rotVector);
 
         printRotation(quat);
     }
@@ -266,23 +305,44 @@ int main(int argc, char *argv[])
 
     Info<< "Test conversion from and to Euler-angles" << nl;
     vector angles(0.1, 0.2, 0.3);
-    for (int rs=quaternion::ZYX; rs<quaternion::XZX; ++rs)
+
+    for (int rs : quaternion::eulerOrderNames.values())
     {
+        const quaternion::eulerOrder order = quaternion::eulerOrder(rs);
+        const word& orderName = quaternion::eulerOrderNames[order];
+
         if
         (
-            mag
-            (
-                angles
-              - quaternion(quaternion::rotationSequence(rs), angles)
-               .eulerAngles(quaternion::rotationSequence(rs))
-            )
+            mag(angles - quaternion(order, angles).eulerAngles(order))
           > SMALL
         )
         {
             FatalErrorInFunction
-                << "Inconsistent conversion for rotation sequence "
-                << rs << exit(FatalError)
-                << nl;
+                << "Inconsistent conversion for euler rotation order "
+                << orderName << nl << exit(FatalError);
+        }
+
+
+        tensor rotQ(quaternion(order, angles).R());
+        tensor rotE(euler::rotation(order, angles, false));
+
+        if (verbose)
+        {
+            Info<< "euler " << orderName << angles << nl;
+            printRotation(rotE);
+        }
+
+        if (!equalTensors(rotQ, rotE))
+        {
+            WarningInFunction
+                << "Inconsistent quaternion/euler rotation matrices for "
+                << orderName << nl;
+
+            printRotation(rotQ);
+            printRotation(rotE);
+
+            FatalError
+                << nl << exit(FatalError);
         }
     }
 

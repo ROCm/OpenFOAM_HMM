@@ -43,6 +43,7 @@ SourceFiles
 #include "tensor.H"
 #include "word.H"
 #include "contiguous.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -90,14 +91,23 @@ class quaternion
 
 public:
 
-    //- Component type
-    typedef scalar cmptType;
+    // Public Types
 
-    //- Euler-angle rotation sequence
-    enum rotationSequence
-    {
-        ZYX, ZYZ, ZXY, ZXZ, YXZ, YXY, YZX, YZY, XYZ, XYX, XZY, XZX
-    };
+        //- Component type
+        typedef scalar cmptType;
+
+        //- Euler-angle rotation order
+        enum eulerOrder : unsigned char
+        {
+            // Proper Euler angles
+            XZX, XYX, YXY, YZY, ZYZ, ZXZ,
+
+            // Tait-Bryan angles
+            XZY, XYZ, YXZ, YZX, ZYX, ZXY
+        };
+
+        //- The names for Euler-angle rotation order
+        static const Enum<eulerOrder> eulerOrderNames;
 
 
     // Member Constants
@@ -108,7 +118,7 @@ public:
 
     // Static Data Members
 
-        static const char* const typeName;
+        static constexpr const char* const typeName = "quaternion";
 
         static const quaternion zero;
         static const quaternion I;
@@ -119,15 +129,17 @@ public:
         //- Construct null
         inline quaternion();
 
+        //- Construct zero initialized
+        inline quaternion(const Foam::zero);
+
         //- Construct given scalar and vector parts
         inline quaternion(const scalar w, const vector& v);
 
-        //- Construct a rotation quaternion given the direction d
-        //  and angle theta
+        //- Construct rotation quaternion given direction d and angle theta
         inline quaternion(const vector& d, const scalar theta);
 
-        //- Construct a rotation quaternion given the direction d
-        //- and cosine angle cosTheta and a if d is normalized
+        //- Construct a rotation quaternion given direction d
+        //- and cosine angle cosTheta and flag if d is normalized
         inline quaternion
         (
             const vector& d,
@@ -135,7 +147,8 @@ public:
             const bool normalized
         );
 
-        //- Construct a real from the given scalar part, the vector part = zero
+        //- Construct a real quaternion from the given scalar part,
+        //- the vector part = zero
         inline explicit quaternion(const scalar w);
 
         //- Construct a pure imaginary quaternion given the vector part,
@@ -146,8 +159,8 @@ public:
         //- (w = sqrt(1 - |sqr(v)|))
         static inline quaternion unit(const vector& v);
 
-        //- Construct from three Euler angles
-        inline quaternion(const rotationSequence rs, const vector& angles);
+        //- Construct from three Euler rotation angles
+        inline quaternion(const eulerOrder order, const vector& angles);
 
         //- Construct from a rotation tensor
         inline explicit quaternion(const tensor& rotationTensor);
@@ -169,9 +182,9 @@ public:
        //- The rotation tensor corresponding the quaternion
        inline tensor R() const;
 
-       //- Return a vector of euler angles corresponding to the
-       //- specified rotation sequence
-       inline vector eulerAngles(const rotationSequence rs) const;
+       //- Return the Euler rotation angles corresponding to the
+       //- specified rotation order
+       inline vector eulerAngles(const eulerOrder order) const;
 
        //- Return the quaternion normalized by its magnitude
        inline quaternion normalized() const;
@@ -238,7 +251,7 @@ inline quaternion normalize(const quaternion& q);
 inline quaternion inv(const quaternion& q);
 
 //- Return a string representation of a quaternion
-word name(const quaternion&);
+word name(const quaternion& q);
 
 //- Spherical linear interpolation of quaternions
 quaternion slerp

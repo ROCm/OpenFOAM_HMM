@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    surfaceMeshTriangulate
+    surfaceMeshExtract
 
 Group
     grpSurfaceUtilities
@@ -47,6 +47,7 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
 #include "ListListOps.H"
 #include "uindirectPrimitivePatch.H"
@@ -58,6 +59,57 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+labelList getSelectedPatches
+(
+    const polyBoundaryMesh& patches,
+    const wordRes& whitelist,
+    const wordRes& blacklist
+)
+{
+    DynamicList<label> patchIDs(patches.size());
+
+    for (const polyPatch& pp : patches)
+    {
+        if (isType<emptyPolyPatch>(pp))
+        {
+            continue;
+        }
+        else if (Pstream::parRun() && bool(isA<processorPolyPatch>(pp)))
+        {
+            break; // No processor patches for parallel output
+        }
+
+        const word& patchName = pp.name();
+
+        bool accept = false;
+
+        if (whitelist.size())
+        {
+            const auto matched = whitelist.matched(patchName);
+
+            accept =
+            (
+                matched == wordRe::LITERAL
+              ? true
+              : (matched == wordRe::REGEX && !blacklist.match(patchName))
+            );
+        }
+        else
+        {
+            accept = !blacklist.match(patchName);
+        }
+
+        if (accept)
+        {
+            patchIDs.append(pp.index());
+        }
+    }
+
+    return patchIDs.shrink();
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
@@ -69,6 +121,10 @@ int main(int argc, char *argv[])
     );
     timeSelector::addOptions();
 
+    // Less frequently used - reduce some clutter
+    argList::setAdvanced("decomposeParDict");
+    argList::setAdvanced("noFunctionObjects");
+
     argList::addArgument("output", "The output surface file");
 
     #include "addRegionOption.H"
@@ -79,17 +135,25 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "faceZones",
+        "wordRes",
+        "Specify single or multiple faceZones to extract\n"
+        "Eg, 'cells' or '( slice \"mfp-.*\" )'"
+    );
+    argList::addOption
+    (
         "patches",
-        "wordRes"
+        "wordRes",
         "Specify single patch or multiple patches to extract.\n"
         "Eg, 'top' or '( front \".*back\" )'"
     );
     argList::addOption
     (
-        "faceZones",
+        "excludePatches",
         "wordRes",
-        "Specify single or multiple faceZones to extract\n"
-        "Eg, 'cells' or '( slice \"mfp-.*\" )'"
+        "Specify single patch or multiple patches to exclude from writing."
+        " Eg, 'outlet' or '( inlet \".*Wall\" )'",
+        true  // mark as an advanced option
     );
 
     #include "setRootCase.H"
@@ -121,6 +185,25 @@ int main(int argc, char *argv[])
         Info<< "Excluding all processor patches." << nl << endl;
     }
 
+    wordRes includePatches, excludePatches;
+    if (args.readListIfPresent<wordRe>("patches", includePatches))
+    {
+        Info<< "Including patches " << flatOutput(includePatches)
+            << nl << endl;
+    }
+    if (args.readListIfPresent<wordRe>("excludePatches", excludePatches))
+    {
+        Info<< "Excluding patches " << flatOutput(excludePatches)
+            << nl << endl;
+    }
+
+    // Non-mandatory
+    const wordRes selectedFaceZones(args.getList<wordRe>("faceZones", false));
+    if (selectedFaceZones.size())
+    {
+        Info<< "Including faceZones " << flatOutput(selectedFaceZones)
+            << nl << endl;
+    }
 
     Info<< "Reading mesh from time " << runTime.value() << endl;
 
@@ -171,53 +254,25 @@ int main(int argc, char *argv[])
         // Construct table of patches to include.
         const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
 
-        labelList includePatches;
+        labelList patchIds =
+        (
+            (includePatches.size() || excludePatches.size())
+          ? getSelectedPatches(bMesh, includePatches, excludePatches)
+          : includeProcPatches
+          ? identity(bMesh.size())
+          : identity(bMesh.nNonProcessor())
+        );
 
-        if (args.found("patches"))
-        {
-            includePatches =
-                bMesh.patchSet(args.getList<wordRe>("patches")).sortedToc();
-        }
-        else if (includeProcPatches)
-        {
-            includePatches = identity(bMesh.size());
-        }
-        else
-        {
-            includePatches = identity(bMesh.nNonProcessor());
-        }
-
-
-        labelList includeFaceZones;
+        labelList faceZoneIds;
 
         const faceZoneMesh& fzm = mesh.faceZones();
 
-        if (args.found("faceZones"))
+        if (selectedFaceZones.size())
         {
-            const wordList allZoneNames(fzm.names());
-
-            const wordRes zoneNames(args.getList<wordRe>("faceZones"));
-
-            labelHashSet hashed(2*fzm.size());
-
-            for (const wordRe& zoneName : zoneNames)
-            {
-                labelList zoneIDs = findStrings(zoneName, allZoneNames);
-                hashed.insert(zoneIDs);
-
-                if (zoneIDs.empty())
-                {
-                    WarningInFunction
-                        << "Cannot find any faceZone name matching "
-                        << zoneName << endl;
-                }
-            }
-
-            includeFaceZones = hashed.sortedToc();
+            faceZoneIds = fzm.indices(selectedFaceZones);
 
             Info<< "Additionally extracting faceZones "
-                << UIndirectList<word>(allZoneNames, includeFaceZones)
-                << endl;
+                << fzm.names(selectedFaceZones) << nl;
         }
 
 
@@ -232,7 +287,7 @@ int main(int argc, char *argv[])
             //  processor patches)
             HashTable<label> patchSize(1024);
             label nFaces = 0;
-            for (const label patchi : includePatches)
+            for (const label patchi : patchIds)
             {
                 const polyPatch& pp = bMesh[patchi];
                 patchSize.insert(pp.name(), pp.size());
@@ -240,7 +295,7 @@ int main(int argc, char *argv[])
             }
 
             HashTable<label> zoneSize(1024);
-            for (const label zonei : includeFaceZones)
+            for (const label zonei : faceZoneIds)
             {
                 const faceZone& pp = fzm[zonei];
                 zoneSize.insert(pp.name(), pp.size());
@@ -289,7 +344,7 @@ int main(int argc, char *argv[])
             compactZones.setCapacity(nFaces);
 
             // Collect faces on patches
-            for (const label patchi : includePatches)
+            for (const label patchi : patchIds)
             {
                 const polyPatch& pp = bMesh[patchi];
                 forAll(pp, i)
@@ -299,7 +354,7 @@ int main(int argc, char *argv[])
                 }
             }
             // Collect faces on faceZones
-            for (const label zonei : includeFaceZones)
+            for (const label zonei : faceZoneIds)
             {
                 const faceZone& pp = fzm[zonei];
                 forAll(pp, i)

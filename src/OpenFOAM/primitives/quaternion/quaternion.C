@@ -31,9 +31,29 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* const Foam::quaternion::typeName = "quaternion";
 const Foam::quaternion Foam::quaternion::zero(0, vector(0, 0, 0));
 const Foam::quaternion Foam::quaternion::I(1, vector(0, 0, 0));
+
+const Foam::Enum<Foam::quaternion::eulerOrder>
+Foam::quaternion::eulerOrderNames
+({
+    // Proper Euler angles
+    { eulerOrder::XZX, "xzx" },
+    { eulerOrder::XYX, "xyx" },
+    { eulerOrder::YXY, "yxy" },
+    { eulerOrder::YZY, "yzy" },
+    { eulerOrder::ZYZ, "zyz" },
+    { eulerOrder::ZXZ, "zxz" },
+
+    // Tait-Bryan angles
+    { eulerOrder::XZY, "xzy" },
+    { eulerOrder::XYZ, "xyz" },
+    { eulerOrder::YXZ, "yxz" },
+    { eulerOrder::YZX, "yzx" },
+    { eulerOrder::ZYX, "zyx" },
+    { eulerOrder::ZXY, "zxy" },
+});
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

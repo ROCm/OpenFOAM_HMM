@@ -130,6 +130,17 @@ public:
     virtual ~axisAngle() = default;
 
 
+    // Static Member Functions
+
+        //- The rotation tensor for given axis/angle
+        static tensor rotation
+        (
+            const vector& axis,
+            const scalar angle,
+            bool degrees=false
+        );
+
+
     // Member Functions
 
         //- Reset specification
