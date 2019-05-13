@@ -27,13 +27,13 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         5;
+endTime         25;
 
 deltaT          0.01;
 
 writeControl    adjustableRunTime;
 
-writeInterval   0.5;
+writeInterval   1;
 
 purgeWrite      0;
 
@@ -56,26 +56,7 @@ maxCo           1;
 maxDeltaT       0.03;
 
 functions
-{
-//     surfaceFieldValue1
-//     {
-//         type            surfaceFieldValue;
-//         libs            ("libfieldFunctionObjects.so");
-//         enabled         yes;
-//         writeControl    writeTime;
-//         log             yes;
-//         writeFields     no;
-//         regionType      patch;
-//         name            outlet;
-//         operation       weightedAverage;
-//         weightField     phi;
-//         fields
-//         (
-//             H2O
-//             T
-//         );
-//     }
-}
+{}
 
 
 // ************************************************************************* //
