@@ -186,16 +186,18 @@ void Foam::functionObjects::parProfiling::report()
         scalar allToAllAvg = allToAllStats[2].second()/Pstream::nProcs();
 
         Info<< type() << ':' << nl
-            << "\treduce    : avg = " << reduceAvg << 's' << nl
-            << "\t            min = " << reduceStats[0].second()
+            << incrIndent
+            << indent << "reduce    : avg = " << reduceAvg << 's' << nl
+            << indent << "            min = " << reduceStats[0].second()
             << "s (processor " << reduceStats[0].first() << ')' << nl
-            << "\t            max = " << reduceStats[1].second()
+            << indent << "            max = " << reduceStats[1].second()
             << "s (processor " << reduceStats[1].first() << ')' << nl
-            << "\tall-all   : avg = " << allToAllAvg << 's' << nl
-            << "\t            min = " << allToAllStats[0].second()
+            << indent << "all-all   : avg = " << allToAllAvg << 's' << nl
+            << indent << "            min = " << allToAllStats[0].second()
             << "s (processor " << allToAllStats[0].first() << ')' << nl
-            << "\t            max = " << allToAllStats[1].second()
-            << "s (processor " << allToAllStats[1].first() << ')' << endl;
+            << indent << "            max = " << allToAllStats[1].second()
+            << "s (processor " << allToAllStats[1].first() << ')'
+            << decrIndent << endl;
     }
 }
 
