@@ -183,28 +183,19 @@ void Foam::functionObjects::parProfiling::report()
         const statData& allToAllStats = times[1];
 
         scalar reduceAvg = reduceStats[2].second()/Pstream::nProcs();
-        scalar reduceRelMin =
-            (reduceStats[0].second()-reduceAvg)/(reduceAvg + VSMALL);
-        scalar reduceRelMax =
-            (reduceStats[1].second()-reduceAvg)/(reduceAvg + VSMALL);
-
         scalar allToAllAvg = allToAllStats[2].second()/Pstream::nProcs();
-        scalar allToAllRelMin =
-            (allToAllStats[0].second()-allToAllAvg)/(allToAllAvg + VSMALL);
-        scalar allToAllRelMax =
-            (allToAllStats[1].second()-allToAllAvg)/(allToAllAvg + VSMALL);
 
         Info<< type() << ':' << nl
             << "\treduce    : avg = " << reduceAvg << 's' << nl
-            << "\t            min = " << reduceRelMin*100
-            << "% (processor " << reduceStats[0].first() << ')' << nl
-            << "\t            max = +" << reduceRelMax*100
-            << "% (processor " << reduceStats[1].first() << ')' << nl
+            << "\t            min = " << reduceStats[0].second()
+            << "s (processor " << reduceStats[0].first() << ')' << nl
+            << "\t            max = " << reduceStats[1].second()
+            << "s (processor " << reduceStats[1].first() << ')' << nl
             << "\tall-all   : avg = " << allToAllAvg << 's' << nl
-            << "\t            min = " << allToAllRelMin*100
-            << "% (processor " << allToAllStats[0].first() << ')' << nl
-            << "\t            max = +" << allToAllRelMax*100
-            << "% (processor " << allToAllStats[1].first() << ')' << endl;
+            << "\t            min = " << allToAllStats[0].second()
+            << "s (processor " << allToAllStats[0].first() << ')' << nl
+            << "\t            max = " << allToAllStats[1].second()
+            << "s (processor " << allToAllStats[1].first() << ')' << endl;
     }
 }
 
@@ -224,7 +215,6 @@ bool Foam::functionObjects::parProfiling::write()
 
 bool Foam::functionObjects::parProfiling::end()
 {
-    report();
     profilingPstream::disable();
     return true;
 }

@@ -12,8 +12,9 @@ profiling
 
     libs  ("libutilityFunctionObjects.so");
 
-    executeControl  none;
-    writeControl    writeTime;
+    // Report stats on exit only (instead of every time step)
+    executeControl  onEnd;
+    writeControl    none;
 }
 
 
