@@ -199,7 +199,7 @@ public:
         );
 
         //- Construct by mapping from the given tmp field. Supplied uniform
-        //  value for unmapped items
+        //- value for unmapped items
         Field
         (
             const tmp<Field<Type>>& tmapF,
@@ -209,7 +209,7 @@ public:
         );
 
         //- Construct by mapping from the given tmp field. Supplied values
-        //  for unmapped items
+        //- for unmapped items
         Field
         (
             const tmp<Field<Type>>& tmapF,
@@ -232,6 +232,12 @@ public:
 
         //- Clone
         inline tmp<Field<Type>> clone() const;
+
+        //- Return a pointer to a new Field created on freestore
+        static autoPtr<Field<Type>> New(Istream& is)
+        {
+            return autoPtr<Field<Type>>(new Field<Type>(is));
+        }
 
         //- Return a pointer to a new calculatedFvPatchFieldField created on
         //  freestore without setting patchField values
