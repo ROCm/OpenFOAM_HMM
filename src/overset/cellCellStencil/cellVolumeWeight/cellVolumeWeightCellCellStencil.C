@@ -35,6 +35,7 @@ License
 #include "oversetFvPatch.H"
 #include "zeroGradientFvPatchFields.H"
 #include "syncTools.H"
+#include "dynamicOversetFvMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1116,7 +1117,12 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         {
             patchTypes[cellI] = allPatchTypes[cellI];
         }
-        patchTypes.correctBoundaryConditions();
+        //patchTypes.correctBoundaryConditions();
+        dynamicOversetFvMesh::correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >(patchTypes.boundaryFieldRef(), false);
         patchTypes.write();
     }
     if (debug)
@@ -1141,7 +1147,12 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         {
             volTypes[cellI] = allCellTypes[cellI];
         }
-        volTypes.correctBoundaryConditions();
+        //volTypes.correctBoundaryConditions();
+        dynamicOversetFvMesh::correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >(volTypes.boundaryFieldRef(), false);
         volTypes.write();
     }
 
@@ -1185,7 +1196,12 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     cellStencil_.transfer(allStencil);
     cellInterpolationWeights_.transfer(allWeights);
     cellInterpolationWeight_.transfer(allWeight);
-    cellInterpolationWeight_.correctBoundaryConditions();
+    //cellInterpolationWeight_.correctBoundaryConditions();
+    dynamicOversetFvMesh::correctBoundaryConditions
+    <
+        volScalarField,
+        oversetFvPatchField<scalar>
+    >(cellInterpolationWeight_.boundaryFieldRef(), false);
 
     DynamicList<label> interpolationCells;
     forAll(cellStencil_, cellI)

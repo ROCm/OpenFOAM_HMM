@@ -155,11 +155,10 @@ Foam::tmp<Foam::scalarField> Foam::dynamicOversetFvMesh::normalisation
     tmp<scalarField> tnorm(tmp<scalarField>::New(m.diag()));
     scalarField& norm = tnorm.ref();
 
-    // Add boundary coeffs to duplicate behaviour of fvMatrix
+    // Add boundary coeffs to duplicate behaviour of fvMatrix::addBoundaryDiag
     const FieldField<Field, Type>& internalCoeffs = m.internalCoeffs();
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
-        //m.addBoundaryDiag(norm, cmpt);
         forAll(internalCoeffs, patchi)
         {
             const labelUList& fc = lduAddr().patchAddr(patchi);

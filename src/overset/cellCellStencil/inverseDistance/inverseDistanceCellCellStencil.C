@@ -37,6 +37,7 @@ License
 #include "waveMethod.H"
 
 #include "regionSplit.H"
+#include "dynamicOversetFvMesh.H"
 //#include "minData.H"
 //#include "FaceCellWave.H"
 
@@ -2152,7 +2153,11 @@ bool Foam::cellCellStencils::inverseDistance::update()
         new mapDistribute(globalCells, cellStencil_, compactMap)
     );
     cellInterpolationWeight_.transfer(allWeight);
-    cellInterpolationWeight_.correctBoundaryConditions();
+    dynamicOversetFvMesh::correctBoundaryConditions
+    <
+        volScalarField,
+        oversetFvPatchField<scalar>
+    >(cellInterpolationWeight_.boundaryFieldRef(), false);
 
 
     if (debug&2)
@@ -2226,7 +2231,11 @@ bool Foam::cellCellStencils::inverseDistance::update()
             (
                 createField(mesh_, "maxMagWeight", maxMagWeight)
             );
-            tfld.ref().correctBoundaryConditions();
+            dynamicOversetFvMesh::correctBoundaryConditions
+            <
+                volScalarField,
+                oversetFvPatchField<scalar>
+            >(tfld.ref().boundaryFieldRef(), false);
             tfld().write();
         }
 
@@ -2236,7 +2245,12 @@ bool Foam::cellCellStencils::inverseDistance::update()
             (
                 createField(mesh_, "cellTypes", cellTypes_)
             );
-            tfld.ref().correctBoundaryConditions();
+            //tfld.ref().correctBoundaryConditions();
+            dynamicOversetFvMesh::correctBoundaryConditions
+            <
+                volScalarField,
+                oversetFvPatchField<scalar>
+            >(tfld.ref().boundaryFieldRef(), false);
             tfld().write();
         }
 
