@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2015 OpenFOAM Foundation
@@ -33,9 +33,9 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(interpolationWeights, 0);
-defineRunTimeSelectionTable(interpolationWeights, word);
-}
+    defineTypeNameAndDebug(interpolationWeights, 0);
+    defineRunTimeSelectionTable(interpolationWeights, word);
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -75,12 +75,6 @@ Foam::autoPtr<Foam::interpolationWeights> Foam::interpolationWeights::New
 
     return autoPtr<interpolationWeights>(cstrIter()(samples));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::interpolationWeights::~interpolationWeights()
-{}
 
 
 // ************************************************************************* //

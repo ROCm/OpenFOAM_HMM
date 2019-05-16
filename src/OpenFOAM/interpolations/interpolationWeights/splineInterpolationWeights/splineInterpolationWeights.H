@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2015 OpenFOAM Foundation
@@ -52,24 +52,23 @@ class splineInterpolationWeights
 :
     public interpolationWeights
 {
-
-private:
-
-    // Private data
+    // Private Data
 
         //- Cached index in samples from previous invocation
         mutable label index_;
+
 
 public:
 
     //- Runtime type information
     TypeName("spline");
 
+
     // Constructors
 
         //- Construct from components. By default make sure samples are
         //  equidistant.
-        splineInterpolationWeights
+        explicit splineInterpolationWeights
         (
             const scalarField& samples,
             const bool checkEqualDistance = true
@@ -77,14 +76,13 @@ public:
 
 
     //- Destructor
-    virtual ~splineInterpolationWeights()
-    {}
+    virtual ~splineInterpolationWeights() = default;
 
 
     // Member Functions
 
         //- Calculate weights and indices to calculate t from samples.
-        //  Returns true if indices changed.
+        //  \return true if indices changed.
         virtual bool valueWeights
         (
             const scalar t,
@@ -93,7 +91,8 @@ public:
         ) const;
 
         //- Calculate weights and indices to calculate integrand of t1..t2
-        //  from samples. Returns true if indices changed.
+        //- from samples.
+        //  \return true if indices changed.
         virtual bool integrationWeights
         (
             const scalar t1,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2015 OpenFOAM Foundation
@@ -30,25 +30,23 @@ License
 #include "ListOps.H"
 #include "linearInterpolationWeights.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(splineInterpolationWeights, 0);
-addToRunTimeSelectionTable
-(
-    interpolationWeights,
-    splineInterpolationWeights,
-    word
-);
+    defineTypeNameAndDebug(splineInterpolationWeights, 0);
+    addToRunTimeSelectionTable
+    (
+        interpolationWeights,
+        splineInterpolationWeights,
+        word
+    );
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-splineInterpolationWeights::splineInterpolationWeights
+Foam::splineInterpolationWeights::splineInterpolationWeights
 (
     const scalarField& samples,
     const bool checkEqualDistance
@@ -80,7 +78,7 @@ splineInterpolationWeights::splineInterpolationWeights
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool splineInterpolationWeights::valueWeights
+bool Foam::splineInterpolationWeights::valueWeights
 (
     const scalar t,
     labelList& indices,
@@ -219,9 +217,5 @@ bool splineInterpolationWeights::valueWeights
     return indexChanged;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
