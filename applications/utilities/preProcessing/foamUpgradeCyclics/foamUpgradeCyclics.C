@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -313,7 +313,7 @@ void rewriteField
         if
         (
             boundaryField.found(patchName)
-        && !boundaryField.found(newName, false, false)
+        && !boundaryField.found(newName, keyType::LITERAL)
         )
         {
             Info<< "    Changing entry " << patchName << " to " << newName
