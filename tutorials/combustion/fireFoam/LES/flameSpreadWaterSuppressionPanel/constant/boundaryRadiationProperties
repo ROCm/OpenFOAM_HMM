@@ -15,6 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+".*"
+{
+    type            lookup;
+    emissivity      1.0;
+    absorptivity    1.0;
+    transmissivity  0.0;
+}
 
 region0_to_pyrolysisRegion_coupledWall
 {
@@ -24,14 +31,5 @@ region0_to_pyrolysisRegion_coupledWall
         type    solidAbsorption;
     }
 }
-
-".*"
-{
-    type            lookup;
-    emissivity      1.0;
-    absorptivity    1.0;
-    transmissivity  0.0;
-}
-
 
 // ************************************************************************* //

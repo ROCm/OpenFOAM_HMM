@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ Foam::radiation::boundaryRadiationPropertiesPatch::New
     const polyPatch& pp
 )
 {
-    word modelType(dict.lookupCompat("type", {{"mode", 1812}}));
+    const word modelType(dict.getCompat<word>("type", {{"mode", 1812}}));
 
     Info<< "Selecting boundary radiation Model: "
         << modelType << endl;

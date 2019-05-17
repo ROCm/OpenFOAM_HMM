@@ -48,7 +48,7 @@ Foam::autoPtr<Foam::waveModel> Foam::waveModel::New
         )
     );
 
-    word modelType = "none";
+    word modelType("none");
     dictionary patchDict;
     if (waveDict.found(patch.name()))
     {
