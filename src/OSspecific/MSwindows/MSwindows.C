@@ -350,12 +350,16 @@ Foam::string Foam::getEnv(const std::string& envName)
 {
     std::string env;
 
-    const auto len = ::GetEnvironmentVariable(envName.c_str(), nullptr, 0);
+    auto len = ::GetEnvironmentVariable(envName.c_str(), nullptr, 0);
 
+    // len [return] = size with trailing nul char, or zero on failure
     if (len)
     {
-        env.resize(len+1);
-        ::GetEnvironmentVariable(envName.c_str(), &(env[0]), len+1);
+        env.resize(len);
+
+        // len [in] = size with trailing nul char
+        // len [return] = size without trailing nul char
+        len = ::GetEnvironmentVariable(envName.c_str(), &(env[0]), len);
 
         env.resize(len);
         return fileName::validate(env);
@@ -442,16 +446,18 @@ Foam::fileName Foam::home(const std::string& userName)
 Foam::fileName Foam::cwd()
 {
     string path;
-    const DWORD len = ::GetCurrentDirectory(0, nullptr);
+    auto len = ::GetCurrentDirectory(0, nullptr);
 
+    // len [return] = size with trailing nul char, or zero on failure
     if (len)
     {
-        path.resize(len+1);
-
-        ::GetCurrentDirectory(len+1, &(path[0]));
-
         path.resize(len);
 
+        // len [in] = size with trailing nul char
+        // len [return] = size without trailing nul char
+        len = ::GetCurrentDirectory(len, &(path[0]));
+
+        path.resize(len);
         return fileName::validate(path);
     }
 
