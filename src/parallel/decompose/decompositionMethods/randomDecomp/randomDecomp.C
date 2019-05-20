@@ -24,8 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "randomDecomp.H"
-#include "addToRunTimeSelectionTable.H"
 #include "Random.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,14 +39,48 @@ namespace Foam
         randomDecomp,
         dictionary
     );
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        randomDecomp,
+        dictionaryRegion
+    );
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::labelList Foam::randomDecomp::decompose(const label nCells) const
+{
+    Random rndGen(0);
+
+    labelList finalDecomp(nCells);
+
+    for (label& val : finalDecomp)
+    {
+        val = rndGen.position<label>(0, nDomains_ - 1);
+    }
+
+    return finalDecomp;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::randomDecomp::randomDecomp(const dictionary& decompositionDict)
+Foam::randomDecomp::randomDecomp(const dictionary& decompDict)
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompDict)
+{}
+
+
+Foam::randomDecomp::randomDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionMethod(decompDict, regionName)
 {}
 
 
@@ -55,19 +89,11 @@ Foam::randomDecomp::randomDecomp(const dictionary& decompositionDict)
 Foam::labelList Foam::randomDecomp::decompose
 (
     const polyMesh& mesh,
-    const pointField& points,
-    const scalarField& pointWeights
+    const pointField&,
+    const scalarField&
 ) const
 {
-    Random rndGen(0);
-
-    labelList finalDecomp(mesh.nCells());
-    forAll(finalDecomp, celli)
-    {
-        finalDecomp[celli] = rndGen.position<label>(0, nDomains_ - 1);
-    }
-
-    return finalDecomp;
+    return decompose(mesh.nCells());  // or cc.size()
 }
 
 
@@ -78,15 +104,7 @@ Foam::labelList Foam::randomDecomp::decompose
     const scalarField&
 ) const
 {
-    Random rndGen(0);
-
-    labelList finalDecomp(globalCellCells.size());
-    forAll(finalDecomp, celli)
-    {
-        finalDecomp[celli] = rndGen.position<label>(0, nDomains_ - 1);
-    }
-
-    return finalDecomp;
+    return decompose(globalCellCells.size());  // or cc.size()
 }
 
 

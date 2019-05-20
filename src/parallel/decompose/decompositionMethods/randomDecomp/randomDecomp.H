@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class randomDecomp Declaration
+                        Class randomDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
 class randomDecomp
@@ -50,9 +50,14 @@ class randomDecomp
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
-        void operator=(const randomDecomp&);
-        randomDecomp(const randomDecomp&);
+        //- Random distribution on the 0-nCells interval
+        labelList decompose(const label nCells) const;
+
+        //- No copy construct
+        void operator=(const randomDecomp&) = delete;
+
+        //- No copy assignment
+        randomDecomp(const randomDecomp&) = delete;
 
 
 public:
@@ -64,24 +69,29 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        randomDecomp(const dictionary& decompositionDict);
+        randomDecomp(const dictionary& decompDict);
+
+        //- Construct for decomposition dictionary and region name
+        randomDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
+
 
     //- Destructor
-    virtual ~randomDecomp()
-    {}
+    virtual ~randomDecomp() = default;
 
 
     // Member Functions
 
-        //- Manual decompose does not care about proc boundaries - is all
-        //  up to the user.
+        //- Does not care about proc boundaries
         virtual bool parallelAware() const
         {
             return true;
         }
 
-        //- Return for every coordinate the wanted processor number. Use the
-        //  mesh connectivity (if needed)
+        //- Return for every coordinate the wanted processor number.
         virtual labelList decompose
         (
             const polyMesh& mesh,
@@ -89,13 +99,8 @@ public:
             const scalarField& cWeights
         ) const;
 
-        //- Return for every coordinate the wanted processor number. Explicitly
-        //  provided connectivity - does not use mesh_.
-        //  The connectivity is equal to mesh.cellCells() except for
-        //  - in parallel the cell numbers are global cell numbers (starting
-        //    from 0 at processor0 and then incrementing all through the
-        //    processors)
-        //  - the connections are across coupled patches
+        //- Return for every coordinate the wanted processor number.
+        //  Explicitly provided connectivity - does not use mesh_.
         virtual labelList decompose
         (
             const labelListList& globalCellCells,
