@@ -183,22 +183,8 @@ void pointNoise::processData
         // 1/3 octave data
         // ---------------
 
-        // PSD [Pa^2/Hz]
-        graph PSD13f(nfft.octaves(PSDf, octave13BandIDs, false));
-
         // Integrated PSD = P(rms)^2 [Pa^2]
-        graph Prms13f2(nfft.octaves(PSDf, octave13BandIDs, true));
-
-        graph PSD13g
-        (
-            "PSD13_dB_Hz(fm)",
-            "fm [Hz]",
-            "PSD(fm) [dB_Hz]",
-            octave13FreqCentre,
-            noiseFFT::PSD(PSD13f.y())
-        );
-        Info<< "    Creating graph for " << PSD13g.title() << endl;
-        PSD13g.write(outDir, graph::wordify(PSD13g.title()), graphFormat_);
+        graph Prms13f(nfft.octaves(PSDf, octave13BandIDs));
 
         graph SPL13g
         (
@@ -206,7 +192,7 @@ void pointNoise::processData
             "fm [Hz]",
             "SPL(fm) [dB]",
             octave13FreqCentre,
-            noiseFFT::SPL(Prms13f2.y())
+            noiseFFT::SPL(Prms13f.y())
         );
         Info<< "    Creating graph for " << SPL13g.title() << endl;
         SPL13g.write(outDir, graph::wordify(SPL13g.title()), graphFormat_);

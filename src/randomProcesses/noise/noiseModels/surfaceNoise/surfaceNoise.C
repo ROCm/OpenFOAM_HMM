@@ -536,12 +536,10 @@ void surfaceNoise::calculate()
             bandSize = octave13BandIDs.size() - 1;
         }
 
-        List<scalarField> surfPSD13f(bandSize);
-        List<scalarField> surfPrms13f2(bandSize);
-        forAll(surfPSD13f, freqI)
+        List<scalarField> surfPrms13f(bandSize);
+        forAll(surfPrms13f, freqI)
         {
-            surfPSD13f[freqI].setSize(nLocalFace);
-            surfPrms13f2[freqI].setSize(nLocalFace);
+            surfPrms13f[freqI].setSize(nLocalFace);
         }
 
         const windowModel& win = windowModelPtr_();
@@ -566,17 +564,13 @@ void surfaceNoise::calculate()
                     surfPSDf[i][faceI] = PSDf.y()[freqI];
                 }
 
-                // PSD [Pa^2/Hz]
-                graph PSD13f(nfft.octaves(PSDf, octave13BandIDs, false));
-
                 // Integrated PSD = P(rms)^2 [Pa^2]
-                graph Prms13f2(nfft.octaves(PSDf, octave13BandIDs, true));
+                graph Prms13f(nfft.octaves(PSDf, octave13BandIDs));
 
                 // Store the 1/3 octave results in slot for face of surface
-                forAll(surfPSD13f, freqI)
+                forAll(surfPrms13f, freqI)
                 {
-                    surfPSD13f[freqI][faceI] = PSD13f.y()[freqI];
-                    surfPrms13f2[freqI][faceI] = Prms13f2.y()[freqI];
+                    surfPrms13f[freqI][faceI] = Prms13f.y()[freqI];
                 }
             }
         }
@@ -739,70 +733,35 @@ void surfaceNoise::calculate()
         {
             fileName outDir(outDirBase/"oneThirdOctave");
 
-            scalarField PSDfAve(surfPSD13f.size(), Zero);
-            scalarField Prms13f2Ave(surfPSD13f.size(), Zero);
+            scalarField PSDfAve(surfPrms13f.size(), Zero);
+            scalarField Prms13fAve(surfPrms13f.size(), Zero);
 
-            forAll(surfPSD13f, i)
+            forAll(surfPrms13f, i)
             {
-                PSDfAve[i] = writeSurfaceData
-                (
-                    outDir,
-                    fNameBase,
-                    "PSD13f",
-                    octave13FreqCentre[i],
-                    surfPSD13f[i],
-                    procFaceOffset,
-                    writeOctaves_
-                );
-                writeSurfaceData
-                (
-                    outDir,
-                    fNameBase,
-                    "PSD13",
-                    octave13FreqCentre[i],
-                    noiseFFT::PSD(surfPSD13f[i]),
-                    procFaceOffset,
-                    writeOctaves_
-                );
                 writeSurfaceData
                 (
                     outDir,
                     fNameBase,
                     "SPL13",
                     octave13FreqCentre[i],
-                    noiseFFT::SPL(surfPrms13f2[i]),
+                    noiseFFT::SPL(surfPrms13f[i]),
                     procFaceOffset,
                     writeOctaves_
                 );
 
-                Prms13f2Ave[i] =
-                    surfaceAverage(surfPrms13f2[i], procFaceOffset);
+                Prms13fAve[i] =
+                    surfaceAverage(surfPrms13f[i], procFaceOffset);
             }
 
             if (Pstream::master())
             {
-                graph PSD13g
-                (
-                    "Average PSD13_dB_Hz(fm)",
-                    "fm [Hz]",
-                    "PSD(fm) [dB_Hz]",
-                    octave13FreqCentre,
-                    noiseFFT::PSD(PSDfAve)
-                );
-                PSD13g.write
-                (
-                    outDir,
-                    graph::wordify(PSD13g.title()),
-                    graphFormat_
-                );
-
                 graph SPL13g
                 (
                     "Average SPL13_dB(fm)",
                     "fm [Hz]",
                     "SPL(fm) [dB]",
                     octave13FreqCentre,
-                    noiseFFT::SPL(Prms13f2Ave)
+                    noiseFFT::SPL(Prms13fAve)
                 );
                 SPL13g.write
                 (
