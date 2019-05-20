@@ -403,6 +403,48 @@ void Foam::Matrix<Form, Type>::shallowResize(const label m, const label n)
 }
 
 
+template<class Form, class Type>
+inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::rightMultiply
+(
+    const UList<Type>& colVec
+) const
+{
+    return this->rightMultiplyImpl(colVec);
+}
+
+
+template<class Form, class Type>
+template<class Addr>
+inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::rightMultiply
+(
+    const IndirectListBase<Type, Addr>& colVec
+) const
+{
+    return this->rightMultiplyImpl(colVec);
+}
+
+
+template<class Form, class Type>
+inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::leftMultiply
+(
+    const UList<Type>& rowVec
+) const
+{
+    return this->leftMultiplyImpl(rowVec);
+}
+
+
+template<class Form, class Type>
+template<class Addr>
+inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::leftMultiply
+(
+    const IndirectListBase<Type, Addr>& rowVec
+) const
+{
+    return this->leftMultiplyImpl(rowVec);
+}
+
+
 // * * * * * * * * * * * * * * * * * Iterators * * * * * * * * * * * * * * * //
 
 template<class Form, class Type>
@@ -494,6 +536,50 @@ inline Type* Foam::Matrix<Form, Type>::operator[](const label irow)
 {
     checki(irow);
     return v_ + irow*nCols_;
+}
+
+
+template<class Form, class Type>
+inline Foam::tmp<Foam::Field<Type>> Foam::operator*
+(
+    const Matrix<Form, Type>& mat,
+    const UList<Type>& x
+)
+{
+    mat.rightMultiply(x);
+}
+
+
+template<class Form, class Type, class Addr>
+inline Foam::tmp<Foam::Field<Type>> Foam::operator*
+(
+    const Matrix<Form, Type>& mat,
+    const IndirectListBase<Type, Addr>& x
+)
+{
+    mat.rightMultiply(x);
+}
+
+
+template<class Form, class Type>
+inline Foam::tmp<Foam::Field<Type>> Foam::operator*
+(
+    const UList<Type>& x,
+    const Matrix<Form, Type>& mat
+)
+{
+    mat.leftMultiply(x);
+}
+
+
+template<class Form, class Type, class Addr>
+inline Foam::tmp<Foam::Field<Type>> Foam::operator*
+(
+    const IndirectListBase<Type, Addr>& x,
+    const Matrix<Form, Type>& mat
+)
+{
+    mat.leftMultiply(x);
 }
 
 

@@ -79,8 +79,19 @@ class Matrix
         //- Vector of values of type Type
         Type* __restrict__ v_;
 
+
+    // Private Member Functions
+
         //- Allocate storage for the contents
         inline void doAlloc();
+
+        //- Multiply matrix with a column vector on the right (A * x)
+        template<class ListType>
+        tmp<Field<Type>> rightMultiplyImpl(const ListType& colVec) const;
+
+        //- Multiply matrix with a row vector on the left (x * A)
+        template<class ListType>
+        tmp<Field<Type>> leftMultiplyImpl(const ListType& rowVec) const;
 
 
 public:
@@ -294,8 +305,36 @@ public:
         inline void shallowResize(const label m, const label n);
 
 
+    // Operations
+
         //- Return the transpose of the matrix
         Form T() const;
+
+        //- Multiply matrix with a column vector on the right (A * x)
+        inline tmp<Field<Type>> rightMultiply
+        (
+            const UList<Type>& colVec
+        ) const;
+
+        //- Multiply matrix with a column vector on the right (A * x)
+        template<class Addr>
+        inline tmp<Field<Type>> rightMultiply
+        (
+            const IndirectListBase<Type, Addr>& colVec
+        ) const;
+
+        //- Multiply matrix with a row vector on the left (x * A)
+        inline tmp<Field<Type>> leftMultiply
+        (
+            const UList<Type>& rowVec
+        ) const;
+
+        //- Multiply matrix with a row vector on the left (x * A)
+        template<class Addr>
+        inline tmp<Field<Type>> leftMultiply
+        (
+            const IndirectListBase<Type, Addr>& rowVec
+        ) const;
 
 
     // Member Operators
@@ -487,12 +526,37 @@ operator*
 );
 
 
-//- Matrix-vector multiplication
+//- Matrix-vector multiplication (A * x), where x is a column vector
 template<class Form, class Type>
-tmp<Field<Type>> operator*
+inline tmp<Field<Type>> operator*
 (
     const Matrix<Form, Type>& mat,
-    const Field<Type>& x
+    const UList<Type>& x
+);
+
+//- Matrix-vector multiplication (A * x), where x is a column vector
+template<class Form, class Type, class Addr>
+inline tmp<Field<Type>> operator*
+(
+    const Matrix<Form, Type>& mat,
+    const IndirectListBase<Type, Addr>& x
+);
+
+
+//- Vector-matrix multiplication (x * A), where x is a row vector
+template<class Form, class Type>
+inline tmp<Field<Type>> operator*
+(
+    const UList<Type>& x,
+    const Matrix<Form, Type>& mat
+);
+
+//- Vector-matrix multiplication (x * A), where x is a row vector
+template<class Form, class Type, class Addr>
+inline tmp<Field<Type>> operator*
+(
+    const IndirectListBase<Type, Addr>& x,
+    const Matrix<Form, Type>& mat
 );
 
 

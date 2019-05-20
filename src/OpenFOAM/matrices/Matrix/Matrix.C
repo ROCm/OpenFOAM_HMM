@@ -29,6 +29,81 @@ License
 #include <functional>
 #include <algorithm>
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Form, class Type>
+template<class ListType>
+Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::rightMultiplyImpl
+(
+    const ListType& colVec
+) const
+{
+    const Matrix<Form, Type>& mat = *this;
+
+    #ifdef FULLDEBUG
+    if (mat.n() != colVec.size())
+    {
+        FatalErrorInFunction
+            << "Attempt to multiply incompatible Matrix and Vector:" << nl
+            << "Matrix : (" << mat.m() << ", " << mat.n() << ')' << nl
+            << "Vector : " << colVec.size() << " rows" << nl
+            << "The number of Matrix columns must equal the Vector size" << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    auto tresult = tmp<Field<Type>>::New(mat.m(), Zero);
+    auto& result = tresult.ref();
+
+    for (label i = 0; i < mat.m(); ++i)
+    {
+        for (label j = 0; j < mat.n(); ++j)
+        {
+            result[i] += mat(i, j)*colVec[j];
+        }
+    }
+
+    return tresult;
+}
+
+
+template<class Form, class Type>
+template<class ListType>
+Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::leftMultiplyImpl
+(
+    const ListType& rowVec
+) const
+{
+    const Matrix<Form, Type>& mat = *this;
+
+    #ifdef FULLDEBUG
+    if (rowVec.size() != mat.m())
+    {
+        FatalErrorInFunction
+            << "Attempt to multiply incompatible Matrix and Vector:" << nl
+            << "Matrix : (" << mat.m() << ", " << mat.n() << ')' << nl
+            << "Vector : " << rowVec.size() << " columns" << nl
+            << "The number of Matrix rows must equal the Vector size" << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    auto tresult = tmp<Field<Type>>::New(mat.n(), Zero);
+    auto& result = tresult.ref();
+
+    for (label i = 0; i < mat.m(); ++i)
+    {
+        const Type& val = rowVec[i];
+        for (label j = 0; j < mat.n(); ++j)
+        {
+            result[j] += val*mat(i, j);
+        }
+    }
+
+    return tresult;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Form, class Type>
@@ -671,38 +746,6 @@ Foam::operator*
     }
 
     return AB;
-}
-
-
-template<class Form, class Type>
-inline Foam::tmp<Foam::Field<Type>> Foam::operator*
-(
-    const Matrix<Form, Type>& mat,
-    const Field<Type>& x
-)
-{
-    if (mat.n() != x.size())
-    {
-        FatalErrorInFunction
-            << "Attempt to multiply incompatible matrix and field:" << nl
-            << "Matrix : (" << mat.m() << ", " << mat.n() << ')' << nl
-            << "Field  : " << x.size() << " rows" << nl
-            << "The number of matrix columns must equal the field size" << nl
-            << abort(FatalError);
-    }
-
-    auto tresult = tmp<Field<Type>>::New(mat.m(), Zero);
-    Field<Type>& result = tresult.ref();
-
-    for (label i=0; i < mat.m(); ++i)
-    {
-        for (label j=0; j < mat.n(); ++j)
-        {
-            result[i] += mat(i, j) * x[j];
-        }
-    }
-
-    return tresult;
 }
 
 
