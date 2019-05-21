@@ -146,6 +146,17 @@ protected:
         template<class GeoField>
         static void correctCoupledBoundaryConditions(GeoField& fld);
 
+        //- Average norm of valid neighbours
+        scalar cellAverage
+        (
+            const labelList& types,
+            const labelList& nbrTypes,
+            const scalarField& norm,
+            const scalarField& nbrNorm,
+            const label celli,
+            bitSet& isFront
+        ) const;
+
         //- Debug: dump agglomeration
         void writeAgglomeration
         (

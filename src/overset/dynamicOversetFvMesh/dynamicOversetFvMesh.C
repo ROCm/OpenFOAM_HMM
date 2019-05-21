@@ -357,6 +357,71 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
 }
 
 
+Foam::scalar Foam::dynamicOversetFvMesh::cellAverage
+(
+    const labelList& types,
+    const labelList& nbrTypes,
+    const scalarField& norm,
+    const scalarField& nbrNorm,
+    const label celli,
+    bitSet& isFront
+) const
+{
+    const labelList& own = faceOwner();
+    const labelList& nei = faceNeighbour();
+    const cell& cFaces = cells()[celli];
+
+    scalar avg = 0.0;
+    label n = 0;
+    label nFront = 0;
+    for (const label facei : cFaces)
+    {
+        if (isInternalFace(facei))
+        {
+            label nbrCelli = (own[facei] == celli ? nei[facei] : own[facei]);
+            if (norm[nbrCelli] == -GREAT)
+            {
+                // Invalid neighbour. Add to front
+                if (isFront.set(facei))
+                {
+                    nFront++;
+                }
+            }
+            else
+            {
+                // Valid neighbour. Add to average
+                avg += norm[nbrCelli];
+                n++;
+            }
+        }
+        else
+        {
+            if (nbrNorm[facei-nInternalFaces()] == -GREAT)
+            {
+                if (isFront.set(facei))
+                {
+                    nFront++;
+                }
+            }
+            else
+            {
+                avg += nbrNorm[facei-nInternalFaces()];
+                n++;
+            }
+        }
+    }
+
+    if (n > 0)
+    {
+        return avg/n;
+    }
+    else
+    {
+        return norm[celli];
+    }
+}
+
+
 void Foam::dynamicOversetFvMesh::writeAgglomeration
 (
     const GAMGAgglomeration& agglom
@@ -375,7 +440,8 @@ void Foam::dynamicOversetFvMesh::writeAgglomeration
                 this->time().timeName(),
                 *this,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::NO_WRITE,
+                false
             ),
             *this,
             dimensionedScalar(dimless, Zero)
@@ -430,7 +496,8 @@ void Foam::dynamicOversetFvMesh::writeAgglomeration
                     this->time().timeName(),
                     *this,
                     IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 *this,
                 dimensionedScalar(dimless, Zero)
