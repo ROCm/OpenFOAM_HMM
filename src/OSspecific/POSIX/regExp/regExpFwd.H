@@ -39,7 +39,12 @@ namespace Foam
     class regExpCxx;
     class regExpPosix;
 
+    // Newer compilers support regex directly
+    #if (_GLIBCXX_RELEASE >= 7) || (__clang_major__ >= 7)
+    typedef regExpCxx regExp;
+    #else
     typedef regExpPosix regExp;
+    #endif
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

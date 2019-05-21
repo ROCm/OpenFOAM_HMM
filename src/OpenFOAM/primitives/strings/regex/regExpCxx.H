@@ -41,7 +41,7 @@ Description
 Note
     The C++11 regular expressions may be broken on some compilers.
     For example, gcc 4.8 is known to fail.
-    For these systems the POSIX implementation should be used.
+    For these systems the POSIX implementation or alternative must be used.
 
 SourceFiles
     regExpCxxI.H
@@ -66,7 +66,7 @@ namespace Foam
 
 class regExpCxx
 {
-    // Private data
+    // Private Data
 
         //- Regular expression (using char type)
         std::regex re_;
@@ -132,7 +132,7 @@ public:
     ~regExpCxx() = default;
 
 
-    // Member functions
+    // Member Functions
 
     // Access
 
