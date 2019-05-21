@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -64,6 +64,20 @@ T Foam::dictionary::get
 }
 
 
+template<class T, class Predicate>
+T Foam::dictionary::getCheck
+(
+    const word& keyword,
+    const Predicate& pred,
+    enum keyType::option matchOpt
+) const
+{
+    T val;
+    readCheck<T, Predicate>(keyword, val, pred, matchOpt);
+    return val;
+}
+
+
 template<class T>
 T Foam::dictionary::getCompat
 (
@@ -79,40 +93,7 @@ T Foam::dictionary::getCompat
 
 
 template<class T>
-bool Foam::dictionary::readCompat
-(
-    const word& keyword,
-    std::initializer_list<std::pair<const char*,int>> compat,
-    T& val,
-    enum keyType::option matchOpt,
-    bool mandatory
-) const
-{
-    const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
-
-    if (finder.found())
-    {
-        ITstream& is = finder.ptr()->stream();
-        is >> val;
-
-        checkITstream(is, keyword);
-
-        return true;
-    }
-    else if (mandatory)
-    {
-        FatalIOErrorInFunction(*this)
-            << "Entry '" << keyword << "' not found in dictionary "
-            << name()
-            << exit(FatalIOError);
-    }
-
-    return false;
-}
-
-
-template<class T>
-T Foam::dictionary::lookupOrDefault
+T Foam::dictionary::getOrDefault
 (
     const word& keyword,
     const T& deflt,
@@ -121,7 +102,7 @@ T Foam::dictionary::lookupOrDefault
 {
     const const_searcher finder(csearch(keyword, matchOpt));
 
-    if (finder.found())
+    if (finder.good())
     {
         T val;
 
@@ -134,10 +115,19 @@ T Foam::dictionary::lookupOrDefault
     }
     else if (writeOptionalEntries)
     {
-        IOInfoInFunction(*this)
-            << "Optional entry '" << keyword
-            << "' not found, using default value '" << deflt << "'"
-            << nl;
+        if (writeOptionalEntries > 1)
+        {
+            FatalIOErrorInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Default '" << deflt << "' ignored" << nl
+                << exit(FatalIOError);
+        }
+        else
+        {
+            IOInfoInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Using default '" << deflt << "'" << nl;
+        }
     }
 
     return deflt;
@@ -145,7 +135,7 @@ T Foam::dictionary::lookupOrDefault
 
 
 template<class T>
-T Foam::dictionary::lookupOrAddDefault
+T Foam::dictionary::getOrAdd
 (
     const word& keyword,
     const T& deflt,
@@ -154,7 +144,7 @@ T Foam::dictionary::lookupOrAddDefault
 {
     const const_searcher finder(csearch(keyword, matchOpt));
 
-    if (finder.found())
+    if (finder.good())
     {
         T val;
 
@@ -167,10 +157,134 @@ T Foam::dictionary::lookupOrAddDefault
     }
     else if (writeOptionalEntries)
     {
-        IOInfoInFunction(*this)
-            << "Optional entry '" << keyword
-            << "' not found, adding default value '" << deflt << "'"
-            << nl;
+        if (writeOptionalEntries > 1)
+        {
+            FatalIOErrorInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Default '" << deflt << "' ignored" << nl
+                << exit(FatalIOError);
+        }
+        else
+        {
+            IOInfoInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Adding default '" << deflt << "'" << nl;
+        }
+    }
+
+    add(new primitiveEntry(keyword, deflt));
+    return deflt;
+}
+
+
+template<class T, class Predicate>
+T Foam::dictionary::getCheckOrDefault
+(
+    const word& keyword,
+    const T& deflt,
+    const Predicate& pred,
+    enum keyType::option matchOpt
+) const
+{
+    if (!pred(deflt))
+    {
+        // Could be as FULLDEBUG instead?
+        FatalIOErrorInFunction(*this)
+            << "Entry '" << keyword << "' with invalid default in dictionary "
+            << name()
+            << exit(FatalIOError);
+    }
+
+    const const_searcher finder(csearch(keyword, matchOpt));
+
+    if (finder.good())
+    {
+        T val;
+
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        checkITstream(is, keyword);
+
+        if (!pred(val))
+        {
+            raiseBadInput(keyword);
+        }
+
+        return val;
+    }
+    else if (writeOptionalEntries)
+    {
+        if (writeOptionalEntries > 1)
+        {
+            FatalIOErrorInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Default '" << deflt << "' ignored" << nl
+                << exit(FatalIOError);
+        }
+        else
+        {
+            IOInfoInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Using default '" << deflt << "'" << nl;
+        }
+    }
+
+    return deflt;
+}
+
+
+template<class T, class Predicate>
+T Foam::dictionary::getCheckOrAdd
+(
+    const word& keyword,
+    const T& deflt,
+    const Predicate& pred,
+    enum keyType::option matchOpt
+)
+{
+    if (!pred(deflt))
+    {
+        // Could be as FULLDEBUG instead?
+        FatalIOErrorInFunction(*this)
+            << "Entry '" << keyword << "' with invalid default in dictionary "
+            << name()
+            << exit(FatalIOError);
+    }
+
+    const const_searcher finder(csearch(keyword, matchOpt));
+
+    if (finder.good())
+    {
+        T val;
+
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        checkITstream(is, keyword);
+
+        if (!pred(val))
+        {
+            raiseBadInput(keyword);
+        }
+
+        return val;
+    }
+    else if (writeOptionalEntries)
+    {
+        if (writeOptionalEntries > 1)
+        {
+            FatalIOErrorInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Default '" << deflt << "' ignored" << nl
+                << exit(FatalIOError);
+        }
+        else
+        {
+            IOInfoInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Adding default '" << deflt << "'" << nl;
+        }
     }
 
     add(new primitiveEntry(keyword, deflt));
@@ -189,7 +303,7 @@ bool Foam::dictionary::readEntry
 {
     const const_searcher finder(csearch(keyword, matchOpt));
 
-    if (finder.found())
+    if (finder.good())
     {
         ITstream& is = finder.ptr()->stream();
         is >> val;
@@ -202,7 +316,78 @@ bool Foam::dictionary::readEntry
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name()
+            << name() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
+template<class T, class Predicate>
+bool Foam::dictionary::readCheck
+(
+    const word& keyword,
+    T& val,
+    const Predicate& pred,
+    enum keyType::option matchOpt,
+    bool mandatory
+) const
+{
+    const const_searcher finder(csearch(keyword, matchOpt));
+
+    if (finder.good())
+    {
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        checkITstream(is, keyword);
+
+        if (!pred(val))
+        {
+            raiseBadInput(keyword);
+        }
+
+        return true;
+    }
+    else if (mandatory)
+    {
+        FatalIOErrorInFunction(*this)
+            << "Entry '" << keyword << "' not found in dictionary "
+            << name() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
+template<class T>
+bool Foam::dictionary::readCompat
+(
+    const word& keyword,
+    std::initializer_list<std::pair<const char*,int>> compat,
+    T& val,
+    enum keyType::option matchOpt,
+    bool mandatory
+) const
+{
+    const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
+
+    if (finder.good())
+    {
+        ITstream& is = finder.ptr()->stream();
+        is >> val;
+
+        checkITstream(is, keyword);
+
+        return true;
+    }
+    else if (mandatory)
+    {
+        FatalIOErrorInFunction(*this)
+            << "Entry '" << keyword << "' not found in dictionary "
+            << name() << nl
             << exit(FatalIOError);
     }
 
@@ -223,8 +408,22 @@ bool Foam::dictionary::readIfPresent
 }
 
 
+template<class T, class Predicate>
+bool Foam::dictionary::readCheckIfPresent
+(
+    const word& keyword,
+    T& val,
+    const Predicate& pred,
+    enum keyType::option matchOpt
+) const
+{
+    // Read is non-mandatory
+    return readCheck<T, Predicate>(keyword, val, pred, matchOpt, false);
+}
+
+
 template<class T>
-T Foam::dictionary::lookupOrDefaultCompat
+T Foam::dictionary::getOrDefaultCompat
 (
     const word& keyword,
     std::initializer_list<std::pair<const char*,int>> compat,
@@ -234,7 +433,7 @@ T Foam::dictionary::lookupOrDefaultCompat
 {
     const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
 
-    if (finder.found())
+    if (finder.good())
     {
         T val;
 
@@ -247,10 +446,19 @@ T Foam::dictionary::lookupOrDefaultCompat
     }
     else if (writeOptionalEntries)
     {
-        IOInfoInFunction(*this)
-            << "Optional entry '" << keyword << "' not found,"
-            << " using default value '" << deflt << "'"
-            << nl;
+        if (writeOptionalEntries > 1)
+        {
+            FatalIOErrorInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Default '" << deflt << "' ignored" << nl
+                << exit(FatalIOError);
+        }
+        else
+        {
+            IOInfoInFunction(*this)
+                << "Optional entry '" << keyword
+                << "' not found. Using default '" << deflt << "'" << nl;
+        }
     }
 
     return deflt;

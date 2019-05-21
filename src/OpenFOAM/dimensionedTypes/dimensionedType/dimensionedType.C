@@ -274,38 +274,38 @@ Foam::dimensioned<Type>::dimensioned
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
-Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrDefault
+Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrDefault
 (
     const word& name,
     const dictionary& dict,
     const dimensionSet& dims,
-    const Type& defaultValue
+    const Type& deflt
 )
 {
     // checkDims = true
-    return dimensioned<Type>(name, dims, defaultValue, dict);
+    return dimensioned<Type>(name, dims, deflt, dict);
 }
 
 
 template<class Type>
-Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrDefault
+Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrDefault
 (
     const word& name,
     const dictionary& dict,
-    const Type& defaultValue
+    const Type& deflt
 )
 {
-    return dimensioned<Type>(name, dimless, defaultValue, dict);
+    return dimensioned<Type>(name, dimless, deflt, dict);
 }
 
 
 template<class Type>
-Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrAddToDict
+Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrAddToDict
 (
     const word& name,
     dictionary& dict,
     const dimensionSet& dims,
-    const Type& defaultValue
+    const Type& deflt
 )
 {
     if (dict.found(name))
@@ -313,20 +313,20 @@ Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrAddToDict
         return dimensioned<Type>(name, dims, dict);
     }
 
-    (void) dict.add(name, defaultValue);
-    return dimensioned<Type>(name, dims, defaultValue);
+    (void) dict.add(name, deflt);
+    return dimensioned<Type>(name, dims, deflt);
 }
 
 
 template<class Type>
-Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrAddToDict
+Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrAddToDict
 (
     const word& name,
     dictionary& dict,
-    const Type& defaultValue
+    const Type& deflt
 )
 {
-    return lookupOrAddToDict(name, dict, dimless, defaultValue);
+    return getOrAddToDict(name, dict, dimless, deflt);
 }
 
 

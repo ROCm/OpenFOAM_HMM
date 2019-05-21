@@ -1168,7 +1168,7 @@ void Foam::argList::parse
 
                 decompDict.readEntry("numberOfSubdomains", dictNProcs);
 
-                if (decompDict.lookupOrDefault("distributed", false))
+                if (decompDict.getOrDefault("distributed", false))
                 {
                     parRunControl_.distributed(true);
                     decompDict.readEntry("roots", roots);

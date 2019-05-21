@@ -37,6 +37,8 @@ InfoSwitches
     writePrecision  6;
 
     writeDictionaries 0;
+
+    // Report optional dictionary entries. For value > 1, treat as fatal.
     writeOptionalEntries 0;
 
     // Write lagrangian "positions" file in v1706 format (and earlier)

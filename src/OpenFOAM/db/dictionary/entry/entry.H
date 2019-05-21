@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -108,6 +108,9 @@ private:
         //  end-of-block
         //  \return True if it is a valid keyType.
         static bool getKeyword(keyType& keyword, Istream& is);
+
+        //- Emit IOError about bad input for the entry
+        void raiseBadInput(const ITstream& is) const;
 
 
 public:
@@ -271,6 +274,37 @@ public:
 
             checkITstream(is);
         }
+
+        //- Get a T from the stream,
+        //- FatalIOError if the number of tokens is incorrect.
+        //
+        //  \param pred the value check predicate
+        template<class T, class Predicate>
+        T getCheck(const Predicate& pred) const
+        {
+            T val;
+            readCheck<T>(val, pred);
+            return val;
+        }
+
+        //- Assign to T val,
+        //- FatalIOError if the number of tokens is incorrect.
+        //
+        //  \param val the value to read into
+        //  \param pred the value check predicate
+        template<class T, class Predicate>
+        void readCheck(T& val, const Predicate& pred) const
+        {
+            ITstream& is = this->stream();
+            is >> val;
+
+            checkITstream(is);
+            if (!pred(val))
+            {
+                raiseBadInput(is);
+            }
+        }
+
 
     // Write
 

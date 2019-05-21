@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -72,6 +72,25 @@ Foam::autoPtr<Foam::entry> Foam::entry::clone() const
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::entry::raiseBadInput(const ITstream& is) const
+{
+    const word& keyword = keyword_;
+
+    // Can use FatalIOError instead of SafeFatalIOError
+    // since predicate checks are not used at the earliest stages
+    FatalIOError
+    (
+        "",                 // functionName
+        "",                 // sourceFileName
+        0,                  // sourceFileLineNumber
+        this->name(),       // ioFileName
+        is.lineNumber()     // ioStartLineNumber
+    )
+        << "Entry '" << keyword << "' with invalid input" << nl << nl
+        << exit(FatalIOError);
+}
+
 
 void Foam::entry::checkITstream(const ITstream& is) const
 {

@@ -110,14 +110,14 @@ Foam::Switch::switchType Foam::Switch::parse
 }
 
 
-Foam::Switch Foam::Switch::lookupOrAddToDict
+Foam::Switch Foam::Switch::getOrAddToDict
 (
     const word& name,
     dictionary& dict,
-    const Switch defaultValue
+    const Switch deflt
 )
 {
-    return dict.lookupOrAddDefault<Switch>(name, defaultValue);
+    return dict.getOrAdd<Switch>(name, deflt);
 }
 
 
@@ -146,10 +146,10 @@ Foam::Switch::Switch
 (
     const word& key,
     const dictionary& dict,
-    const Switch defaultValue
+    const Switch deflt
 )
 :
-    Switch(defaultValue)
+    Switch(deflt)
 {
     const entry* eptr = dict.findEntry(key, keyType::LITERAL);
 
