@@ -39,6 +39,7 @@ SourceFiles
 #define complex_H
 
 #include <complex>
+#include <type_traits>
 #include "scalar.H"
 #include "word.H"
 #include "zero.H"
@@ -91,7 +92,7 @@ public:
     // Static Data Members
 
         //- The type name is "complex"
-        static const char* const typeName;
+        static constexpr const char* const typeName = "complex";
 
         //- A complex zero (0,0)
         static const complex zero;
@@ -209,12 +210,17 @@ public:
         friend scalar magSqr(const complex& c);
         friend scalar mag(const complex& c);
         friend complex sqr(const complex& c);
-        friend const complex& min(const complex&, const complex&);
-        friend const complex& max(const complex&, const complex&);
 
-        friend complex limit(const complex&, const complex&);
+        //- sgn() https://en.wikipedia.org/wiki/Sign_function#Complex_signum
+        friend complex sign(const complex& c);
 
-        friend const complex& sum(const complex&);
+        //- csgn() https://en.wikipedia.org/wiki/Sign_function#Complex_signum
+        friend scalar csign(const complex& c);
+
+        friend const complex& min(const complex& c1, const complex& c2);
+        friend const complex& max(const complex& c1, const complex& c2);
+        friend complex limit(const complex& c1, const complex& c2);
+        friend const complex& sum(const complex& c);
 
 
     // Friend Operators
@@ -232,6 +238,10 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+                      Class pTraits<complex> Declaration
+\*---------------------------------------------------------------------------*/
+
 // Template specialisation for pTraits<complex>
 template<>
 class pTraits<complex>
@@ -247,7 +257,7 @@ public:
     typedef label labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Dimensionality of space
         static constexpr direction dim = 3;
@@ -294,6 +304,41 @@ public:
             return p_;
         }
 };
+
+
+/*---------------------------------------------------------------------------*\
+                               Namespace Detail
+\*---------------------------------------------------------------------------*/
+
+namespace Detail
+{
+    // Helper functions for complex, in Detail namespace to avoid possible
+    // name collisions (could change in the future)
+
+    //- The 'conjugate' of non-complex returns itself (pass-through)
+    //- it does not return a complex!
+    template<class T>
+    typename std::enable_if
+    <
+        !std::is_same<complex, T>::value,
+        const T&
+    >::type conj(const T& val)
+    {
+        return val;
+    }
+
+    //- The conjugate of a complex number
+    template<class T>
+    typename std::enable_if
+    <
+        std::is_same<complex, T>::value,
+        complex
+    >::type conj(const T& val)
+    {
+        return val.conjugate();
+    }
+
+} // End namespace Detail
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //

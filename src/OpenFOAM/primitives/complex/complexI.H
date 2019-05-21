@@ -221,13 +221,26 @@ inline scalar magSqr(const complex& c)
 
 inline scalar mag(const complex& c)
 {
-    return sqrt(magSqr(c)); // OR std::hypot(c.re, c.im);
+    return std::hypot(c.re, c.im);
 }
 
 
 inline complex sqr(const complex& c)
 {
-    return c * c;
+    return c*c;
+}
+
+
+inline complex sign(const complex& c)
+{
+    const scalar s(mag(c));
+    return s < ROOTVSMALL ? Zero : c/s;
+}
+
+
+inline scalar csign(const complex& c)
+{
+    return equal(c.Re(), 0) ? sign(c.Im()) : sign(c.Re());
 }
 
 

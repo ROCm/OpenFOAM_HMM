@@ -24,11 +24,12 @@ License
 Application
 
 Description
-    Some tests for complex numbers
+    Tests for complex numbers
 
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "complex.H"
 #include "complexFields.H"
 #include "ops.H"
 #include "ListOps.H"
@@ -41,8 +42,7 @@ void print1(const complex& z)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-//  Main program:
+// * * * * * * * * * * * * * * * Main Program  * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
@@ -113,11 +113,81 @@ int main(int argc, char *argv[])
 
     // Info<< "operator * : " << (fld1 * fld2) << nl;
     // Info<< "operator / : " << (fld1 / fld2) << nl;
-    Info<< "operator / : " << (fld1 / 2) << nl;
+    // Info<< "operator / : " << (fld1 / 2) << nl;
     // Info<< "operator / : " << (fld1 / fld2) << nl;
-    Info<< "sqrt   : " << sqrt(fld1) << nl;
+    // Info<< "sqrt   : " << sqrt(fld1) << nl;
     // Info<< "pow(2) : " << pow(fld1, 2) << nl;
 
+    Info<< nl << "Elementary complex arithmetic operations:" << nl;
+    {
+        complex a (6, 1);
+        complex b = a;
+
+        Info << "Compound assignment operations:" << nl;
+
+        // Multiplication
+        b *= a;
+        Info<< "b *= a:" << tab << "b=" << b << nl;
+
+        // Addition
+        b += a;
+        Info<< "b += a:" << tab << "b=" << b << nl;
+
+        // Subtraction
+        b -= a;
+        Info<< "b -= a:" << tab << "b=" << b << nl;
+
+        // Division
+        b /= a;
+        Info<< "b /= a:" << tab << "b=" << b << nl;
+
+        Info << "Operations with scalars:" << nl;
+
+        Info<< "b=" << b << nl;
+
+        // Scalar multiplication
+        b *= 2.0;
+        Info<< "b*2 (elementwise multiplication):" << tab << b << nl;
+
+        // Scalar addition
+        b += 1.0;
+        Info<< "b + 1 (only real part):" << tab << b << nl;
+
+        // Scalar subtraction
+        b -= 1.0;
+        Info<< "b - 1 (only real part):" << tab << b << nl;
+
+        // Scalar division
+        b = 1.0/b;
+        Info<< "1/b (elementwise division):" << tab << b << nl;
+
+   }
+
+    Info<< nl << "Other mathematical expressions:" << nl;
+    {
+        complex a (4.3, -3.14);
+        complex b (0, -4.3);
+
+        Info<< "a=" << a << tab << "b=" << b << nl;
+
+        // Square-root
+        //Info<< "sqrt(a)=" << sqrt(a) << tab << "sqrt(b)=" << sqrt(b) << nl;
+
+        // Square
+        Info<< "sqr(a)=" << sqr(a) << tab << "sqr(b)=" << sqr(b) << nl;
+
+        // n^th power
+        //Info<< "pow(a,-1)=" << pow(a,-1) << tab
+        //      << "pow(b,-1)=" << pow(b,-1) << nl;
+
+        // Exponential
+        //Info<< "exp(a)=" << exp(a) << tab << "exp(b)=" << exp(b) << nl;
+
+        // Natural logarithm
+        //Info<< "log(a)=" << log(a) << tab << "log(b)=" << log(b) << nl;
+    }
+
+    Info<< nl << "End" << nl;
 
     // Make some changes
     {
@@ -150,6 +220,7 @@ int main(int argc, char *argv[])
     // Info<< "min/max = " << MinMax<complex>(fld1) << nl;
 
     Info<< "\nEnd\n" << endl;
+
     return 0;
 }
 

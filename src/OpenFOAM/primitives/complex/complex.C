@@ -30,7 +30,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* const Foam::complex::typeName = "complex";
 const Foam::complex Foam::complex::zero(0, 0);
 const Foam::complex Foam::complex::one(1, 0);
 
@@ -69,7 +68,6 @@ Foam::pTraits<Foam::complex>::pTraits(Istream& is)
 }
 
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::complex::complex(Istream& is)
@@ -78,7 +76,7 @@ Foam::complex::complex(Istream& is)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 Foam::word Foam::name(const complex& c)
 {
