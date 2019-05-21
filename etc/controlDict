@@ -218,7 +218,7 @@ DebugSwitches
     FDIC                0;
     FaceCellWave        0;
     GAMG                0;
-    GAMGAgglomeration   1;
+    GAMGAgglomeration   0;
     GAMGInterface       0;
     GAMGInterfaceField  0;
     Gamma               0;
