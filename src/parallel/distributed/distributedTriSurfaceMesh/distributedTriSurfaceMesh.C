@@ -303,26 +303,25 @@ bool Foam::distributedTriSurfaceMesh::read()
     }
     else
     {
-        procBb_[Pstream::myProcNo()] =
-            List<treeBoundBox>(dict_.lookup("bounds"));
+        dict_.readEntry("bounds", procBb_[Pstream::myProcNo()]);
         Pstream::gatherList(procBb_);
         Pstream::scatterList(procBb_);
 
         // Wanted distribution type
-        distType_ = distributionTypeNames_.lookup("distributionType", dict_);
+        distType_ = distributionTypeNames_.get("distributionType", dict_);
 
         // Merge distance
-        mergeDist_ = readScalar(dict_.lookup("mergeDistance"));
+        dict_.readEntry("mergeDistance", mergeDist_);
 
         // Distribution type
-        surfaceClosed_ = dict_.lookupOrDefault<bool>("closed", false);
+        surfaceClosed_ = dict_.getOrDefault<bool>("closed", false);
 
-        outsideVolType_ = volumeType::UNKNOWN;
-        word volType;
-        if (dict_.readIfPresent<word>("outsideVolumeType", volType))
-        {
-            outsideVolType_ = volumeType::names[volType];
-        }
+        outsideVolType_ = volumeType::names.getOrDefault
+        (
+            "outsideVolumeType",
+            dict_,
+            volumeType::UNKNOWN
+        );
     }
 
     return true;
@@ -2669,7 +2668,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     // Optionally override settings from provided dictionary
     {
         // Wanted distribution type
-        distType_ = distributionTypeNames_.lookupOrDefault
+        distributionTypeNames_.readIfPresent
         (
             "distributionType",
             dict_,
@@ -2686,7 +2685,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
             surfaceClosed_ = closed;
         }
 
-        outsideVolType_ = volumeType::names.lookupOrDefault
+        outsideVolType_ = volumeType::names.getOrDefault
         (
             "outsideVolumeType",
             dict_,

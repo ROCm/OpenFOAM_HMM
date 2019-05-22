@@ -779,14 +779,13 @@ int main(int argc, char *argv[])
     const bool overwrite = args.found("overwrite");
     const bool checkGeometry = args.found("checkGeometry");
     const bool surfaceSimplify = args.found("surfaceSimplify");
-    const bool dryRun = args.optionFound("dry-run");
+    const bool dryRun = args.found("dry-run");
 
     if (dryRun)
     {
         Info<< "Operating in dry-run mode to detect set-up errors"
             << nl << endl;
     }
-
 
 
     #include "createNamedMesh.H"
