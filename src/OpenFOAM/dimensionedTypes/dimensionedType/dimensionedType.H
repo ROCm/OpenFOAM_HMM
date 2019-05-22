@@ -207,42 +207,42 @@ public:
 
         //- Construct dimensioned from dictionary, with default value.
         //- FatalIOError if there are excess tokens.
-        static dimensioned<Type> lookupOrDefault
+        static dimensioned<Type> getOrDefault
         (
             const word& name,
             const dictionary& dict,
             const dimensionSet& dims = dimless,
-            const Type& defaultValue = Type(Zero)
+            const Type& deflt = Type(Zero)
         );
 
         //- Construct dimensionless from dictionary, with default value.
         //  FatalIOError if it is found and there are excess tokens.
-        static dimensioned<Type> lookupOrDefault
+        static dimensioned<Type> getOrDefault
         (
             const word& name,
             const dictionary& dict,
-            const Type& defaultValue = Type(Zero)
+            const Type& deflt = Type(Zero)
         );
 
         //- Construct dimensioned from dictionary, with default value.
         //  If the value is not found, it is added into the dictionary.
         //  FatalIOError if it is found and there are excess tokens.
-        static dimensioned<Type> lookupOrAddToDict
+        static dimensioned<Type> getOrAddToDict
         (
             const word& name,
             dictionary& dict,
             const dimensionSet& dims = dimless,
-            const Type& defaultValue = Type(Zero)
+            const Type& deflt = Type(Zero)
         );
 
         //- Construct dimensionless from dictionary, with default value.
         //  If the value is not found, it is added into the dictionary.
         //  FatalIOError if it is found and there are excess tokens.
-        static dimensioned<Type> lookupOrAddToDict
+        static dimensioned<Type> getOrAddToDict
         (
             const word& name,
             dictionary& dict,
-            const Type& defaultValue = Type(Zero)
+            const Type& deflt = Type(Zero)
         );
 
 
@@ -361,6 +361,59 @@ public:
         //      dictionary instead (additional checks on the input stream).
         dimensioned(const word& name, const dimensionSet& dims, Istream& is)
         FOAM_DEPRECATED(2018-11);
+
+
+        //- Construct dimensioned from dictionary, with default value.
+        //- FatalIOError if there are excess tokens.
+        static dimensioned<Type> lookupOrDefault
+        (
+            const word& name,
+            const dictionary& dict,
+            const dimensionSet& dims = dimless,
+            const Type& deflt = Type(Zero)
+        )
+        {
+            return getOrDefault(name, dict, dims, deflt);
+        }
+
+        //- Construct dimensionless from dictionary, with default value.
+        //  FatalIOError if it is found and there are excess tokens.
+        static dimensioned<Type> lookupOrDefault
+        (
+            const word& name,
+            const dictionary& dict,
+            const Type& deflt = Type(Zero)
+        )
+        {
+            return getOrDefault(name, dict, deflt);
+        }
+
+        //- Construct dimensioned from dictionary, with default value.
+        //  If the value is not found, it is added into the dictionary.
+        //  FatalIOError if it is found and there are excess tokens.
+        static dimensioned<Type> lookupOrAddToDict
+        (
+            const word& name,
+            dictionary& dict,
+            const dimensionSet& dims = dimless,
+            const Type& deflt = Type(Zero)
+        )
+        {
+            return getOrAddToDict(name, dict, dims, deflt);
+        }
+
+        //- Construct dimensionless from dictionary, with default value.
+        //  If the value is not found, it is added into the dictionary.
+        //  FatalIOError if it is found and there are excess tokens.
+        static dimensioned<Type> lookupOrAddToDict
+        (
+            const word& name,
+            dictionary& dict,
+            const Type& deflt = Type(Zero)
+        )
+        {
+            return getOrAddToDict(name, dict, deflt);
+        }
 };
 
 

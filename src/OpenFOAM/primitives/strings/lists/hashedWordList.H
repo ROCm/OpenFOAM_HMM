@@ -182,10 +182,10 @@ public:
 
         //- Deprecated(2019-01) Is the specified name found in the list?
         //  \deprecated(2019-01) - use found() method
-        inline bool contains(const word& name) const
-        FOAM_DEPRECATED_FOR(2019-01, "found() method")
+        bool FOAM_DEPRECATED_FOR(2019-01, "found() method")
+        contains(const word& name) const
         {
-            return this-found(name);
+            return this->found(name);
         }
 };
 

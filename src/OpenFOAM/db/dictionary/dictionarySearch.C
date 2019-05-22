@@ -130,7 +130,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
     // a.b.c.d it would try
     // a.b, a.b.c, a.b.c.d
 
-    if (!finder.found())
+    if (!finder.good())
     {
         while (!finder.isDict())
         {
@@ -225,7 +225,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchSlashScoped
 
             auto finder = dictPtr->csearch(key, matchOpt);
 
-            if (finder.found())
+            if (finder.good())
             {
                 if (remaining)
                 {
@@ -269,7 +269,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearch
 
     auto iter = hashedEntries_.cfind(keyword);
 
-    if (iter.found())
+    if (iter.good())
     {
         finder.set(iter.val());
         return finder;
@@ -425,7 +425,7 @@ const Foam::dictionary* Foam::dictionary::cfindScopedDict
 
             auto iter = dictPtr->hashedEntries_.cfind(cmpt);
 
-            if (iter.found())
+            if (iter.good())
             {
                 const entry *eptr = iter.val();
 
@@ -532,7 +532,7 @@ Foam::dictionary* Foam::dictionary::makeScopedDict(const fileName& dictPath)
 
             auto iter = dictPtr->hashedEntries_.find(cmptName);
 
-            if (iter.found())
+            if (iter.good())
             {
                 entry *eptr = iter.val();
 
@@ -581,7 +581,7 @@ bool Foam::dictionary::remove(const word& keyword)
 {
     auto iter = hashedEntries_.find(keyword);
 
-    if (iter.found())
+    if (iter.good())
     {
         // Delete from patterns
         auto wcLink = patterns_.begin();
@@ -621,7 +621,7 @@ bool Foam::dictionary::changeKeyword
     // Check that oldKeyword exists and can be changed
     auto iter = hashedEntries_.find(oldKeyword);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         return false;
     }
@@ -638,7 +638,7 @@ bool Foam::dictionary::changeKeyword
     auto iter2 = hashedEntries_.find(newKeyword);
 
     // newKeyword already exists
-    if (iter2.found())
+    if (iter2.good())
     {
         if (overwrite)
         {

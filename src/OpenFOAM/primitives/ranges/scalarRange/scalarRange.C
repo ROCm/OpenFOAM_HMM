@@ -36,8 +36,8 @@ const Foam::scalarRange Foam::scalarRange::null;
 const Foam::scalarRange Foam::scalarRange::always
 (
     scalarRange::ALWAYS,
-    -Foam::GREAT,
-    Foam::GREAT
+    -GREAT,
+    GREAT
 );
 
 
@@ -158,21 +158,21 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const scalarRange& range)
     switch (range.type_)
     {
         case scalarRange::EQ:
-            os << range.min_;
+            os << range.min();
             break;
 
         case scalarRange::GE:
         case scalarRange::GT:
-            os << range.min_ << ":Inf";
+            os << range.min() << ":Inf";
             break;
 
         case scalarRange::LE:
         case scalarRange::LT:
-            os << "-Inf:" << range.max_;
+            os << "-Inf:" << range.max();
             break;
 
         case scalarRange::GE_LE:
-            os << range.min_ << ':' << range.max_;
+            os << range.min() << ':' << range.max();
             break;
 
         case scalarRange::ALWAYS:

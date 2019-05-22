@@ -32,6 +32,7 @@ Description
 #ifndef regExp_H
 #define regExp_H
 
+#include "regExpCxx.H"
 #include "regExpPosix.H"
 #include "regExpFwd.H"
 

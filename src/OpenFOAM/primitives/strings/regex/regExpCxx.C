@@ -108,7 +108,7 @@ static std::string error_string(const std::regex_error& err)
 
 bool Foam::regExpCxx::set(const char* pattern, bool ignoreCase)
 {
-    clear();
+    clear();  // Also sets ok_ = false
 
     size_t len = (pattern ? strlen(pattern) : 0);
 
@@ -139,7 +139,7 @@ bool Foam::regExpCxx::set(const char* pattern, bool ignoreCase)
         try
         {
             re_.assign(pat, flags);
-            return true;
+            ok_ = true;
         }
         catch (const std::regex_error& err)
         {
@@ -151,13 +151,13 @@ bool Foam::regExpCxx::set(const char* pattern, bool ignoreCase)
         }
     }
 
-    return false;
+    return ok_;
 }
 
 
 bool Foam::regExpCxx::set(const std::string& pattern, bool ignoreCase)
 {
-    clear();
+    clear();  // Also sets ok_ = false
 
     auto len = pattern.size();
 
@@ -188,7 +188,7 @@ bool Foam::regExpCxx::set(const std::string& pattern, bool ignoreCase)
         try
         {
             re_.assign(pat, pattern.end(), flags);
-            return true;
+            ok_ = true;
         }
         catch (const std::regex_error& err)
         {
@@ -200,7 +200,7 @@ bool Foam::regExpCxx::set(const std::string& pattern, bool ignoreCase)
         }
     }
 
-    return false;
+    return ok_;
 }
 
 

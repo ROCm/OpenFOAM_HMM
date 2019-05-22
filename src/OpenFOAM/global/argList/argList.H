@@ -124,7 +124,7 @@ namespace Foam
 
 class argList
 {
-    // Private data
+    // Private Data
 
         //- Track if command arguments are mandatory/optional
         static bool argsMandatory_;
@@ -383,7 +383,7 @@ public:
         inline T opt(const word& optName) const;
 
         //- Get a value from the named option if present, or return default.
-        //  Identical to lookupOrDefault().
+        //  Identical to getOrDefault().
         template<class T>
         inline T opt(const word& optName, const T& deflt) const;
 
@@ -405,7 +405,7 @@ public:
 
         //- Get a value from the named option if present, or return default.
         template<class T>
-        inline T lookupOrDefault
+        inline T getOrDefault
         (
             const word& optName,
             const T& deflt
@@ -590,6 +590,16 @@ public:
         inline const string& operator[](const word& optName) const;
 
 
+    // Housekeeping
+
+        //- Get a value from the named option if present, or return default.
+        template<class T>
+        T lookupOrDefault(const word& optName, const T& deflt) const
+        {
+            return getOrDefault<T>(optName, deflt);
+        }
+
+
     // Older style access (including 1712 release)
 
     #ifdef Foam_argList_1712
@@ -598,7 +608,8 @@ public:
         //  Index 1 is the first (non-option) argument.
         //  \deprecated(2018-08) - use get() method
         template<class T>
-        inline T read(const label index) const
+        T FOAM_DEPRECATED_FOR(2018-08, "get() method")
+        read(const label index) const
         {
             return this->get<T>(index);
         }
@@ -607,21 +618,24 @@ public:
         //  Index 1 is the first (non-option) argument.
         //  \deprecated(2018-01) - use get() method
         template<class T>
-        inline T argRead(const label index) const
+        T FOAM_DEPRECATED_FOR(2018-01, "get() method")
+        argRead(const label index) const
         {
             return this->get<T>(index);
         }
 
         //- Deprecated(2018-01) return true if the named option is found
         //  \deprecated(2018-01) - use found() method
-        inline bool optionFound(const word& optName) const
+        bool FOAM_DEPRECATED_FOR(2018-01, "found() method")
+        optionFound(const word& optName) const
         {
             return found(optName);
         }
 
         //- Deprecated(2018-01) return an input stream from the named option
         //  \deprecated(2018-01) - use lookup() method
-        inline ITstream optionLookup(const word& optName) const
+        ITstream FOAM_DEPRECATED_FOR(2018-01, "lookup() method")
+        optionLookup(const word& optName) const
         {
             return lookup(optName);
         }
@@ -629,7 +643,8 @@ public:
         //- Deprecated(2018-01) read a value from the named option
         //  \deprecated(2018-01) - use opt() method
         template<class T>
-        inline T optionRead(const word& optName) const
+        T FOAM_DEPRECATED_FOR(2018-01, "opt() method")
+        optionRead(const word& optName) const
         {
             return opt<T>(optName);
         }
@@ -638,7 +653,8 @@ public:
         //  Return true if the named option was found.
         //  \deprecated(2018-01) - use readIfPresent() method
         template<class T>
-        inline bool optionReadIfPresent
+        bool FOAM_DEPRECATED_FOR(2018-01, "readIfPresent() method")
+        optionReadIfPresent
         (
             const word& optName,
             T& val
@@ -652,7 +668,8 @@ public:
         //  use the supplied default and return false.
         //  \deprecated(2018-01) - use readIfPresent() method
         template<class T>
-        inline bool optionReadIfPresent
+        bool FOAM_DEPRECATED_FOR(2018-01, "readIfPresent() method")
+        optionReadIfPresent
         (
             const word& optName,
             T& val,
@@ -664,21 +681,23 @@ public:
 
         //- Deprecated(2018-01) read a value from the named option if present.
         //  Return supplied default otherwise.
-        //  \deprecated(2018-01) - use lookupOrDefault() method
+        //  \deprecated(2018-01) - use getOrDefault() method
         template<class T>
-        inline T optionLookupOrDefault
+        T FOAM_DEPRECATED_FOR(2018-01, "getOrDefault() method")
+        optionLookupOrDefault
         (
             const word& optName,
             const T& deflt
         ) const
         {
-            return lookupOrDefault<T>(optName, deflt);
+            return getOrDefault<T>(optName, deflt);
         }
 
         //- Deprecated(2018-01) read a List of values from the named option
         //  \deprecated(2018-01) - use getList() method
         template<class T>
-        inline List<T> optionReadList(const word& optName) const
+        List<T> FOAM_DEPRECATED_FOR(2018-01, "getList() method")
+        optionReadList(const word& optName) const
         {
             return this->getList<T>(optName);
         }

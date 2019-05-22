@@ -36,6 +36,8 @@ Description
 #include "FlatOutput.H"
 #include "Tuple2.H"
 #include "StringStream.H"
+#include "ops.H"
+#include "bitSet.H"
 
 using namespace Foam;
 
@@ -44,7 +46,7 @@ void doTest(const scalarList& values, const predicates::scalars& accept)
 {
     // Also tests that output is suppressed
     Info<<"Have: " << accept.size() << " predicates" << accept << endl;
-    Info<<"values: " << flatOutput(values)  << endl;
+    Info<<"values: " << flatOutput(values) << endl;
 
     for (const scalar& value : values)
     {
@@ -57,6 +59,30 @@ void doTest(const scalarList& values, const predicates::scalars& accept)
 
     labelList matches = accept.matching(values);
     Info<< "values matched at positions: " << flatOutput(matches) << nl;
+}
+
+
+template<class Predicate>
+void testPredicate(const scalarList& values, const Predicate& pred)
+{
+    bitSet matches;
+
+    label i=0;
+
+    for (const scalar& value : values)
+    {
+        if (pred(value))
+        {
+            matches.set(i);
+        }
+
+        ++i;
+    }
+
+    IndirectList<scalar> matched(values, matches.toc());
+
+    Info<< "matched: " << flatOutput(matched.addressing())
+        << " = " << flatOutput(matched) << nl;
 }
 
 
@@ -148,6 +174,16 @@ int main(int argc, char *argv[])
         doTest(values, accept);
     }
 
+
+    Info<< nl << "Test with ops" << nl;
+    Info<<"values: " << flatOutput(values) << endl;
+    {
+        testPredicate(values, lessOp1<scalar>(10));
+        testPredicate(values, greaterOp1<scalar>(100));
+
+        // Also with dissimilar type
+        testPredicate(values, lessEqOp1<label>(0));
+    }
 
     Info<< "\nEnd\n" << endl;
 

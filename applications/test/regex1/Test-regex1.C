@@ -27,12 +27,16 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "IOobject.H"
 #include "IOstreams.H"
 #include "IFstream.H"
 #include "Switch.H"
 
+#include "SubStrings.H"
 #include "regExpCxx.H"
+#ifndef _WIN32
 #include "regExpPosix.H"
+#endif
 
 using namespace Foam;
 
@@ -83,6 +87,7 @@ static Ostream& operator<<(Ostream& os, const regExpCxx::results_type& sm)
 
 
 // Simple output of match groups
+#ifndef _WIN32
 static Ostream& operator<<(Ostream& os, const regExpPosix::results_type& sm)
 {
     for (std::smatch::size_type i = 1; i < sm.size(); ++i)
@@ -92,6 +97,7 @@ static Ostream& operator<<(Ostream& os, const regExpPosix::results_type& sm)
 
     return os;
 }
+#endif
 
 
 template<class RegexType>
@@ -209,7 +215,6 @@ void generalTests()
 }
 
 
-
 template<class RegexType>
 void testExpressions(const UList<regexTest>& tests)
 {
@@ -293,11 +298,13 @@ int main(int argc, char *argv[])
         "Test C++11 regular expressions"
     );
 
+    #ifndef _WIN32
     argList::addBoolOption
     (
         "posix",
         "Test POSIX regular expressions"
     );
+    #endif
 
     argList::addArgument("file");
     argList::addArgument("...");
@@ -305,6 +312,17 @@ int main(int argc, char *argv[])
     argList::noMandatoryArgs();
 
     #include "setRootCase.H"
+
+    if (std::is_same<regExp, regExpCxx>::value)
+    {
+        Info<<"Foam::regExp uses C++11 regex" << nl << nl;
+    }
+    #ifndef _WIN32
+    if (std::is_same<regExp, regExpPosix>::value)
+    {
+        Info<<"Foam::regExp uses POSIX regex" << nl << nl;
+    }
+    #endif
 
     if (!args.count({"cxx", "posix"}))
     {
@@ -321,10 +339,12 @@ int main(int argc, char *argv[])
             generalTests<regExpCxx>();
         }
 
+        #ifndef _WIN32
         if (args.found("posix"))
         {
             generalTests<regExpPosix>();
         }
+        #endif
     }
 
     for (label argi = 1; argi < args.size(); ++argi)
@@ -339,10 +359,12 @@ int main(int argc, char *argv[])
             testExpressions<regExpCxx>(tests);
         }
 
+        #ifndef _WIN32
         if (args.found("posix"))
         {
             testExpressions<regExpPosix>(tests);
         }
+        #endif
     }
 
     Info<< "\nDone" << nl << endl;

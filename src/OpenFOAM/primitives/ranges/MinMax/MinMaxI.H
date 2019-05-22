@@ -26,6 +26,20 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class T>
+inline Foam::MinMax<T> Foam::MinMax<T>::ge(const T& minVal)
+{
+    return MinMax<T>(minVal, pTraits<T>::max);
+}
+
+
+template<class T>
+inline Foam::MinMax<T> Foam::MinMax<T>::le(const T& maxVal)
+{
+    return MinMax<T>(pTraits<T>::min, maxVal);
+}
+
+
+template<class T>
 inline Foam::MinMax<T> Foam::MinMax<T>::zero_one()
 {
     return MinMax<T>(pTraits<T>::zero, pTraits<T>::one);
