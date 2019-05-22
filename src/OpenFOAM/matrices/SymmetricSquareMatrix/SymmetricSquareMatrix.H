@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -70,12 +70,12 @@ public:
         //- Construct given number of rows/columns, initializing to zero
         inline SymmetricSquareMatrix(const label n, const zero);
 
+        //- Construct with given number of rows/columns
+        //- initializing all elements to the given value
+        inline SymmetricSquareMatrix(const label n, const Type& val);
+
         //- Construct given number of rows/columns,
         inline SymmetricSquareMatrix(const label n, const Identity<Type>);
-
-        //- Construct with given number of rows/columns
-        //  initializing all elements to the given value
-        inline SymmetricSquareMatrix(const label n, const Type&);
 
         //- Construct from Istream.
         inline SymmetricSquareMatrix(Istream&);
@@ -85,7 +85,7 @@ public:
 };
 
 
-// Global functions
+// Global Functions
 
 //- Return the LU decomposed SymmetricSquareMatrix inverse
 template<class Type>

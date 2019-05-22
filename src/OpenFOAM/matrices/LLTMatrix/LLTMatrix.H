@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -58,7 +58,6 @@ class LLTMatrix
 :
     public SquareMatrix<Type>
 {
-
 public:
 
     // Constructors
@@ -66,23 +65,23 @@ public:
         //- Construct null
         LLTMatrix();
 
-        //- Construct from a square matrix and perform the decomposition
-        LLTMatrix(const SquareMatrix<Type>& M);
+        //- Construct and perform the decomposition on input square matrix
+        LLTMatrix(const SquareMatrix<Type>& mat);
 
 
     // Member Functions
 
-        //- Perform the Cholesky decomposition of the matrix
-        void decompose(const SquareMatrix<Type>& M);
+        //- Copy matrix and perform Cholesky decomposition
+        void decompose(const SquareMatrix<Type>& mat);
 
         //- Solve the linear system with the given source
-        //  and returning the solution in the Field argument x.
+        //- and returning the solution in the Field argument x.
         //  This function may be called with the same field for x and source.
-        void solve(Field<Type>& x, const Field<Type>& source) const;
+        void solve(List<Type>& x, const UList<Type>& source) const;
 
         //- Solve the linear system with the given source
-        //  returning the solution
-        tmp<Field<Type>> solve(const Field<Type>& source) const;
+        //- returning the solution
+        tmp<Field<Type>> solve(const UList<Type>& source) const;
 };
 
 

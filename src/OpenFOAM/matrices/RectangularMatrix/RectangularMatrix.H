@@ -77,27 +77,30 @@ public:
         inline RectangularMatrix(const MatrixBlock<MatrixType>&);
 
         //- Construct with given number of rows and columns
-        //  initializing all elements to zero
+        //- initializing all elements to zero
         inline RectangularMatrix(const label m, const label n, const zero);
 
         //- Construct with given number of rows and columns
-        //  and value for all elements.
-        inline RectangularMatrix(const label m, const label n, const Type&);
+        //- and value for all elements.
+        inline RectangularMatrix(const label m, const label n, const Type& val);
 
         //- Construct as copy of a square matrix
-        inline RectangularMatrix(const SquareMatrix<Type>&);
+        inline RectangularMatrix(const SquareMatrix<Type>& mat);
 
         //- Construct from Istream.
-        inline RectangularMatrix(Istream&);
+        inline RectangularMatrix(Istream& is);
 
         //- Clone
         inline autoPtr<RectangularMatrix<Type>> clone() const;
 
 
-    // Member operators
+    // Member Operators
 
         //- Assignment of all elements to zero
         void operator=(const zero);
+
+        //- Assignment of all elements to the given value
+        void operator=(const Type& val);
 };
 
 

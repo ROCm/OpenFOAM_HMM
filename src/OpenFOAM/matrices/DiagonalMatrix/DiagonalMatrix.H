@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -27,8 +27,7 @@ Class
     Foam::DiagonalMatrix
 
 Description
-    DiagonalMatrix<Type> is a 2D diagonal matrix of objects
-    of type Type, size nxn
+    A 2D diagonal matrix of objects of type \<Type\>, size (N x N)
 
 SourceFiles
     DiagonalMatrix.C
@@ -45,12 +44,11 @@ SourceFiles
 namespace Foam
 {
 
-// * * * * * *  * * * * * * Class Forward declaration  * * * * * * * * * * * //
-
+// Forward Declarations
 template<class Form, class Type> class Matrix;
 
 /*---------------------------------------------------------------------------*\
-                           Class DiagonalMatrix Declaration
+                       Class DiagonalMatrix Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -62,24 +60,29 @@ public:
 
     // Constructors
 
-        //- Null constructor.
+        //- Construct null.
         DiagonalMatrix<Type>();
 
-        //- Construct from diagonal component of a Matrix
-        template<class Form>
-        DiagonalMatrix<Type>(const Matrix<Form, Type>&);
-
         //- Construct empty from size
-        DiagonalMatrix<Type>(const label size);
+        explicit DiagonalMatrix<Type>(const label n);
+
+        //- Construct from size
+        //- initializing all elements to the given value
+        DiagonalMatrix<Type>(const label n, const zero);
 
         //- Construct from size and a value
-        DiagonalMatrix<Type>(const label, const Type&);
+        DiagonalMatrix<Type>(const label n, const Type& val);
+
+        //- Construct from the diagonal of a Matrix
+        template<class Form>
+        DiagonalMatrix<Type>(const Matrix<Form, Type>& mat);
 
 
-    // Member functions
+    // Member Functions
 
         //- Invert the diagonal matrix and return itself
         DiagonalMatrix<Type>& invert();
+
 };
 
 
@@ -87,7 +90,7 @@ public:
 
 //- Return the diagonal Matrix inverse
 template<class Type>
-DiagonalMatrix<Type> inv(const DiagonalMatrix<Type>&);
+DiagonalMatrix<Type> inv(const DiagonalMatrix<Type>& mat);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

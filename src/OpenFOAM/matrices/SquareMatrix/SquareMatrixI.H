@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -98,6 +98,17 @@ template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix
 (
     const label n,
+    const Type& val
+)
+:
+    Matrix<SquareMatrix<Type>, Type>(n, n, val)
+{}
+
+
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const label n,
     const Identity<Type>
 )
 :
@@ -113,27 +124,16 @@ inline Foam::SquareMatrix<Type>::SquareMatrix
 template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix
 (
-    const label n,
-    const Type& t
+    const RectangularMatrix<Type>& mat
 )
 :
-    Matrix<SquareMatrix<Type>, Type>(n, n, t)
-{}
-
-
-template<class Type>
-inline Foam::SquareMatrix<Type>::SquareMatrix
-(
-    const RectangularMatrix<Type>& RM
-)
-:
-    Matrix<SquareMatrix<Type>, Type>(RM)
+    Matrix<SquareMatrix<Type>, Type>(mat)
 {
-    if (this->m() != this->n())
+    if (mat.m() != mat.n())
     {
         FatalErrorInFunction
             << "Attempt to construct a square matrix from a rectangular matrix "
-            << this->m() << " x " << this->n() << nl
+            << mat.m() << " x " << mat.n() << nl
             << abort(FatalError);
     }
 }
@@ -157,9 +157,16 @@ Foam::SquareMatrix<Type>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+inline void Foam::SquareMatrix<Type>::resize(const label m)
+{
+    Matrix<SquareMatrix<Type>, Type>::resize(m, m);
+}
+
+
+template<class Type>
 inline void Foam::SquareMatrix<Type>::setSize(const label m)
 {
-    Matrix<SquareMatrix<Type>, Type>::setSize(m, m);
+    Matrix<SquareMatrix<Type>, Type>::resize(m, m);
 }
 
 
@@ -180,9 +187,17 @@ void Foam::SquareMatrix<Type>::operator=(const zero)
 
 
 template<class Type>
+void Foam::SquareMatrix<Type>::operator=(const Type& val)
+{
+    Matrix<SquareMatrix<Type>, Type>::operator=(val);
+}
+
+
+template<class Type>
 void Foam::SquareMatrix<Type>::operator=(const Identity<Type>)
 {
     Matrix<SquareMatrix<Type>, Type>::operator=(Zero);
+
     for (label i=0; i<this->n(); i++)
     {
         this->operator()(i, i) = Type(I);

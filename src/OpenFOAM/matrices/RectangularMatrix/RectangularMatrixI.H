@@ -84,20 +84,20 @@ inline Foam::RectangularMatrix<Type>::RectangularMatrix
 (
     const label m,
     const label n,
-    const Type& t
+    const Type& val
 )
 :
-    Matrix<RectangularMatrix<Type>, Type>(m, n, t)
+    Matrix<RectangularMatrix<Type>, Type>(m, n, val)
 {}
 
 
 template<class Type>
 inline Foam::RectangularMatrix<Type>::RectangularMatrix
 (
-    const SquareMatrix<Type>& SM
+    const SquareMatrix<Type>& mat
 )
 :
-    Matrix<RectangularMatrix<Type>, Type>(SM)
+    Matrix<RectangularMatrix<Type>, Type>(mat)
 {}
 
 
@@ -122,6 +122,13 @@ template<class Type>
 void Foam::RectangularMatrix<Type>::operator=(const zero)
 {
     Matrix<RectangularMatrix<Type>, Type>::operator=(Zero);
+}
+
+
+template<class Type>
+void Foam::RectangularMatrix<Type>::operator=(const Type& val)
+{
+    Matrix<RectangularMatrix<Type>, Type>::operator=(val);
 }
 
 

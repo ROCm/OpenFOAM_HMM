@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -47,10 +47,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-template<class Type>
-class RectangularMatrix;
+// Forward Declarations
+template<class Type> class RectangularMatrix;
 
 
 /*---------------------------------------------------------------------------*\
@@ -82,23 +80,23 @@ public:
         inline SquareMatrix(const MatrixBlock<MatrixType>&);
 
         //- Construct given number of rows/columns
-        //  initializing all elements to zero
+        //- initializing all elements to zero
         inline SquareMatrix(const label n, const zero);
 
         //- Construct given number of rows and columns (checked to be equal)
-        //  initializing all elements to zero
+        //- initializing all elements to zero
         inline SquareMatrix(const label m, const label n, const zero);
 
         //- Construct given number of rows/columns
-        //  Initializing to the identity matrix
+        //- initializing to the identity matrix
         inline SquareMatrix(const label n, const Identity<Type>);
 
         //- Construct with given number of rows and rows
-        //  initializing all elements to the given value
-        inline SquareMatrix(const label n, const Type&);
+        //- initializing all elements to the given value
+        inline SquareMatrix(const label n, const Type& val);
 
         //- Construct as copy of a RectangularMatrix
-        //  which is checked to be square
+        //- which is checked to be square
         inline explicit SquareMatrix(const RectangularMatrix<Type>&);
 
         //- Construct from Istream.
@@ -110,13 +108,16 @@ public:
 
     // Member Functions
 
-        // Edit
+    // Edit
 
-            //- Resize the matrix preserving the elements
-            inline void setSize(const label m);
+        //- Resize the matrix preserving the elements
+        inline void resize(const label m);
 
-            //- Resize the matrix without reallocating storage (unsafe)
-            inline void shallowResize(const label m);
+        //- Resize the matrix preserving the elements
+        inline void setSize(const label m);
+
+        //- Resize the matrix without reallocating storage (unsafe)
+        inline void shallowResize(const label m);
 
 
     // Member operators
@@ -124,7 +125,10 @@ public:
         //- Assignment of all elements to zero
         void operator=(const zero);
 
-        //- Assignment elements to the
+        //- Assignment of all elements to the given value
+        void operator=(const Type& val);
+
+        //- Clear and assign diagonal to identity
         void operator=(const Identity<Type>);
 };
 

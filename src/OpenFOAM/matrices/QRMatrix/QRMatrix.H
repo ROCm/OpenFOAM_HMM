@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -53,16 +53,16 @@ namespace Foam
 template<class MatrixType>
 class QRMatrix
 {
-
 public:
 
     typedef typename MatrixType::cmptType cmptType;
     typedef SquareMatrix<cmptType> QMatrixType;
     typedef MatrixType RMatrixType;
 
+
 private:
 
-    // Private data
+    // Private Data
 
         //- The Q-matrix
         QMatrixType Q_;
@@ -71,12 +71,13 @@ private:
         RMatrixType R_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- Solve the linear system with the Field argument x initialized to
-        //  the appropriate transformed source (e.g. Q.T()*source)
-        //  and return the solution in x
-        void solvex(Field<cmptType>& x) const;
+        //- the appropriate transformed source (e.g. Q.T()*source)
+        //- and return the solution in x
+        template<template<typename> class ListContainer>
+        void solvex(ListContainer<cmptType>& x) const;
 
 
 public:
@@ -102,14 +103,14 @@ public:
         void decompose(const MatrixType& M);
 
         //- Solve the linear system with the given source
-        //  and returning the solution in the Field argument x
-        void solve(Field<cmptType>& x, const Field<cmptType>& source) const;
+        //- and return the solution in the Field argument x
+        void solve(List<cmptType>& x, const UList<cmptType>& source) const;
 
         //- Solve the linear system with the given source
-        //  returning the solution
-        tmp<Field<cmptType>> solve(const Field<cmptType>& source) const;
+        //- and return the solution
+        tmp<Field<cmptType>> solve(const UList<cmptType>& source) const;
 
-        //- Return the inverse of a square matrix
+        //- Return the inverse of (Q*R), so that solving x = (Q*R).inv()*source
         QMatrixType inv() const;
 };
 

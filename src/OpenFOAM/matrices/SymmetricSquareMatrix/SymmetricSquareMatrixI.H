@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -56,6 +56,17 @@ template<class Type>
 inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix
 (
     const label n,
+    const Type& val
+)
+:
+    Matrix<SymmetricSquareMatrix<Type>, Type>(n, n, val)
+{}
+
+
+template<class Type>
+inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix
+(
+    const label n,
     const Identity<Type>
 )
 :
@@ -66,17 +77,6 @@ inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix
         this->operator()(i, i) = pTraits<Type>::one;
     }
 }
-
-
-template<class Type>
-inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix
-(
-    const label n,
-    const Type& t
-)
-:
-    Matrix<SymmetricSquareMatrix<Type>, Type>(n, n, t)
-{}
 
 
 template<class Type>

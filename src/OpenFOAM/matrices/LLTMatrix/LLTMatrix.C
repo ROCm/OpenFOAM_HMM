@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -35,27 +35,27 @@ Foam::LLTMatrix<Type>::LLTMatrix()
 
 
 template<class Type>
-Foam::LLTMatrix<Type>::LLTMatrix(const SquareMatrix<Type>& M)
+Foam::LLTMatrix<Type>::LLTMatrix(const SquareMatrix<Type>& mat)
 {
-    decompose(M);
+    decompose(mat);
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::LLTMatrix<Type>::decompose(const SquareMatrix<Type>& M)
+void Foam::LLTMatrix<Type>::decompose(const SquareMatrix<Type>& mat)
 {
     SquareMatrix<Type>& LLT = *this;
 
     // Initialize the LLT decomposition matrix to M
-    LLT = M;
+    LLT = mat;
 
     const label m = LLT.m();
 
-    for (label i=0; i<m; i++)
+    for (label i=0; i<m; ++i)
     {
-        for (label j=0; j<m; j++)
+        for (label j=0; j<m; ++j)
         {
             if (j > i)
             {
@@ -65,7 +65,7 @@ void Foam::LLTMatrix<Type>::decompose(const SquareMatrix<Type>& M)
 
             Type sum = LLT(i, j);
 
-            for (label k=0; k<j; k++)
+            for (label k=0; k<j; ++k)
             {
                 sum -= LLT(i, k)*LLT(j, k);
             }
@@ -93,11 +93,11 @@ void Foam::LLTMatrix<Type>::decompose(const SquareMatrix<Type>& M)
 template<class Type>
 void Foam::LLTMatrix<Type>::solve
 (
-    Field<Type>& x,
-    const Field<Type>& source
+    List<Type>& x,
+    const UList<Type>& source
 ) const
 {
-    // If x and source are different initialize x = source
+    // If x and source are different, copy initialize x = source
     if (&x != &source)
     {
         x = source;
@@ -106,11 +106,11 @@ void Foam::LLTMatrix<Type>::solve
     const SquareMatrix<Type>& LLT = *this;
     const label m = LLT.m();
 
-    for (label i=0; i<m; i++)
+    for (label i=0; i<m; ++i)
     {
         Type sum = source[i];
 
-        for (label j=0; j<i; j++)
+        for (label j=0; j<i; ++j)
         {
             sum = sum - LLT(i, j)*x[j];
         }
@@ -118,33 +118,31 @@ void Foam::LLTMatrix<Type>::solve
         x[i] = sum/LLT(i, i);
     }
 
-    for (int i=m - 1; i >= 0; i--)
+    for (label i=m - 1; i >= 0; --i)
     {
         Type sum = x[i];
 
-        for (label j=i + 1; j<m; j++)
+        for (label j=i + 1; j<m; ++j)
         {
             sum = sum - LLT(j, i)*x[j];
         }
 
         x[i] = sum/LLT(i, i);
     }
-
 }
 
 
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::LLTMatrix<Type>::solve
 (
-    const Field<Type>& source
+    const UList<Type>& source
 ) const
 {
-    tmp<Field<Type>> tx(new Field<Type>(this->m()));
-    Field<Type>& x = tx.ref();
+    auto tresult(tmp<Field<Type>>::New(source.size()));
 
-    solve(x, source);
+    solve(tresult.ref(), source);
 
-    return tx;
+    return tresult;
 }
 
 

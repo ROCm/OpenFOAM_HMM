@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -30,22 +30,22 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class MatrixType>
-Foam::QRMatrix<MatrixType>::QRMatrix(const MatrixType& M)
+Foam::QRMatrix<MatrixType>::QRMatrix(const MatrixType& mat)
 {
-    decompose(M);
+    decompose(mat);
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class MatrixType>
-void Foam::QRMatrix<MatrixType>::decompose(const MatrixType& M)
+void Foam::QRMatrix<MatrixType>::decompose(const MatrixType& mat)
 {
-    const label m = M.m();
-    const label n = M.n();
+    const label m = mat.m();
+    const label n = mat.n();
 
     // Initialize the R-matrix to M
-    R_ = M;
+    R_ = mat;
 
     // Initialize the Q-matrix to I
     Q_.setSize(m);
@@ -158,9 +158,10 @@ void Foam::QRMatrix<MatrixType>::decompose(const MatrixType& M)
 
 
 template<class MatrixType>
+template<template<typename> class ListContainer>
 void Foam::QRMatrix<MatrixType>::solvex
 (
-    Field<cmptType>& x
+    ListContainer<cmptType>& x
 ) const
 {
     const label n = R_.n();
@@ -189,10 +190,11 @@ void Foam::QRMatrix<MatrixType>::solvex
 template<class MatrixType>
 void Foam::QRMatrix<MatrixType>::solve
 (
-    Field<cmptType>& x,
-    const Field<cmptType>& source
+    List<cmptType>& x,
+    const UList<cmptType>& source
 ) const
 {
+    // Assert (&x != &source) ?
     const label m = Q_.m();
 
     // x = Q_.T()*source;
@@ -213,15 +215,14 @@ template<class MatrixType>
 Foam::tmp<Foam::Field<typename MatrixType::cmptType>>
 Foam::QRMatrix<MatrixType>::solve
 (
-    const Field<cmptType>& source
+    const UList<cmptType>& source
 ) const
 {
-    tmp<Field<cmptType>> tx(new Field<cmptType>(Q_.m()));
-    Field<cmptType>& x = tx.ref();
+    auto tresult(tmp<Field<cmptType>>::New(Q_.m()));
 
-    solve(x, source);
+    solve(tresult.ref(), source);
 
-    return tx;
+    return tresult;
 }
 
 
