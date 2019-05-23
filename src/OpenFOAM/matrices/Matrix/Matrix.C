@@ -335,19 +335,117 @@ void Foam::Matrix<Form, Type>::resize(const label m, const label n)
 
 
 template<class Form, class Type>
+void Foam::Matrix<Form, Type>::round(const scalar tol)
+{
+    for (Type& val : *this)
+    {
+        if (mag(val) < tol)
+        {
+            val = Zero;
+        }
+    }
+}
+
+
+template<class Form, class Type>
 Form Foam::Matrix<Form, Type>::T() const
 {
-    Form At(n(), m());
+    Form At(labelPair{n(), m()});
 
     for (label i = 0; i < m(); ++i)
     {
         for (label j = 0; j < n(); ++j)
         {
-            At(j, i) = (*this)(i, j);
+            At(j, i) = Detail::conj((*this)(i, j));
         }
     }
 
     return At;
+}
+
+
+template<class Form, class Type>
+Foam::List<Type> Foam::Matrix<Form, Type>::diag() const
+{
+    const label len = Foam::min(mRows_, nCols_);
+
+    List<Type> result(len);
+
+    for (label i=0; i < len; ++i)
+    {
+        result[i] = (*this)(i, i);
+    }
+
+    return result;
+}
+
+
+template<class Form, class Type>
+void Foam::Matrix<Form, Type>::diag(const UList<Type>& list)
+{
+    const label len = Foam::min(mRows_, nCols_);
+
+    #ifdef FULLDEBUG
+    if (list.size() != len)
+    {
+        FatalErrorInFunction
+            << "List size (" << list.size()
+            << ") incompatible with Matrix diagonal" << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        (*this)(i, i) = list[i];
+    }
+}
+
+
+template<class Form, class Type>
+Type Foam::Matrix<Form, Type>::trace() const
+{
+    const label len = Foam::min(mRows_, nCols_);
+
+    Type val = Zero;
+
+    for (label i=0; i < len; ++i)
+    {
+        val += (*this)(i, i);
+    }
+
+    return val;
+}
+
+
+template<class Form, class Type>
+Foam::scalar Foam::Matrix<Form, Type>::columnNorm
+(
+    const label colIndex,
+    const bool noSqrt
+) const
+{
+    scalar result = Zero;
+
+    for (label i=0; i < mRows_; ++i)
+    {
+        result += magSqr((*this)(i, colIndex));
+    }
+
+    return noSqrt ? result : Foam::sqrt(result);
+}
+
+
+template<class Form, class Type>
+Foam::scalar Foam::Matrix<Form, Type>::norm(const bool noSqrt) const
+{
+    scalar result = Zero;
+
+    for (const Type& val : *this)
+    {
+        result += magSqr(val);
+    }
+
+    return noSqrt ? result : Foam::sqrt(result);
 }
 
 
@@ -416,9 +514,9 @@ void Foam::Matrix<Form, Type>::operator=
     const MatrixBlock<MatrixType>& Mb
 )
 {
-    for (label i=0; i < mRows_; ++i)
+    for (label i = 0; i < mRows_; ++i)
     {
-        for (label j=0; j < nCols_; ++j)
+        for (label j = 0; j < nCols_; ++j)
         {
             (*this)(i, j) = Mb(i, j);
         }
@@ -443,6 +541,7 @@ void Foam::Matrix<Form, Type>::operator=(const zero)
 template<class Form, class Type>
 void Foam::Matrix<Form, Type>::operator+=(const Matrix<Form, Type>& other)
 {
+    #ifdef FULLDEBUG
     if (this == &other)
     {
         FatalErrorInFunction
@@ -458,15 +557,13 @@ void Foam::Matrix<Form, Type>::operator+=(const Matrix<Form, Type>& other)
             << other.m() << ", " << other.n() << ')' << nl
             << abort(FatalError);
     }
+    #endif
 
-    Type* out = this->data();
-    const Type* in = other.cdata();
-
-    const label len = this->size();
-
-    for (label idx = 0; idx < len; ++idx)
+    auto iter2 = other.cbegin();
+    for (Type& val : *this)
     {
-        out[idx] += in[idx];
+        val += *iter2;
+        ++iter2;
     }
 }
 
@@ -474,6 +571,7 @@ void Foam::Matrix<Form, Type>::operator+=(const Matrix<Form, Type>& other)
 template<class Form, class Type>
 void Foam::Matrix<Form, Type>::operator-=(const Matrix<Form, Type>& other)
 {
+    #ifdef FULLDEBUG
     if (this == &other)
     {
         FatalErrorInFunction
@@ -489,21 +587,39 @@ void Foam::Matrix<Form, Type>::operator-=(const Matrix<Form, Type>& other)
             << other.m() << ", " << other.n() << ')' << nl
             << abort(FatalError);
     }
+    #endif
 
-    Type* out = this->data();
-    const Type* in = other.cdata();
-
-    const label len = this->size();
-
-    for (label idx=0; idx < len; ++idx)
+    auto iter2 = other.cbegin();
+    for (Type& val : *this)
     {
-        out[idx] -= in[idx];
+        val -= *iter2;
+        ++iter2;
     }
 }
 
 
 template<class Form, class Type>
-void Foam::Matrix<Form, Type>::operator*=(const scalar s)
+void Foam::Matrix<Form, Type>::operator+=(const Type& s)
+{
+    for (Type& val : *this)
+    {
+        val += s;
+    }
+}
+
+
+template<class Form, class Type>
+void Foam::Matrix<Form, Type>::operator-=(const Type& s)
+{
+    for (Type& val : *this)
+    {
+        val -= s;
+    }
+}
+
+
+template<class Form, class Type>
+void Foam::Matrix<Form, Type>::operator*=(const Type& s)
 {
     for (Type& val : *this)
     {
@@ -513,7 +629,7 @@ void Foam::Matrix<Form, Type>::operator*=(const scalar s)
 
 
 template<class Form, class Type>
-void Foam::Matrix<Form, Type>::operator/=(const scalar s)
+void Foam::Matrix<Form, Type>::operator/=(const Type& s)
 {
     for (Type& val : *this)
     {
@@ -522,7 +638,7 @@ void Foam::Matrix<Form, Type>::operator/=(const scalar s)
 }
 
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions * * * * * * * * * * * * * * //
 
 template<class Form, class Type>
 const Type& Foam::max(const Matrix<Form, Type>& mat)
@@ -569,7 +685,7 @@ Foam::MinMax<Type> Foam::minMax(const Matrix<Form, Type>& mat)
 template<class Form, class Type>
 Form Foam::operator-(const Matrix<Form, Type>& mat)
 {
-    Form result(mat.m(), mat.n());
+    Form result(mat.sizes());
 
     std::transform
     (
@@ -583,9 +699,14 @@ Form Foam::operator-(const Matrix<Form, Type>& mat)
 }
 
 
-template<class Form, class Type>
-Form Foam::operator+(const Matrix<Form, Type>& A, const Matrix<Form, Type>& B)
+template<class Form1, class Form2, class Type>
+Form1 Foam::operator+
+(
+    const Matrix<Form1, Type>& A,
+    const Matrix<Form2, Type>& B
+)
 {
+    #ifdef FULLDEBUG
     if (A.m() != B.m() || A.n() != B.n())
     {
         FatalErrorInFunction
@@ -594,27 +715,31 @@ Form Foam::operator+(const Matrix<Form, Type>& A, const Matrix<Form, Type>& B)
             << B.m() << ", " << B.n() << ')' << nl
             << abort(FatalError);
     }
+    #endif
 
-    Form AB(A.m(), A.n());
+    Form1 result(A.sizes());
 
-    Type* ABv = AB.data();
-    const Type* Av = A.cdata();
-    const Type* Bv = B.cdata();
+    std::transform
+    (
+        A.cbegin(),
+        A.cend(),
+        B.cbegin(),
+        result.begin(),
+        std::plus<Type>()
+    );
 
-    const label len = A.size();
-
-    for (label idx = 0; idx < len; ++idx)
-    {
-        ABv[idx] = Av[idx] + Bv[idx];
-    }
-
-    return AB;
+    return result;
 }
 
 
-template<class Form, class Type>
-Form Foam::operator-(const Matrix<Form, Type>& A, const Matrix<Form, Type>& B)
+template<class Form1, class Form2, class Type>
+Form1 Foam::operator-
+(
+    const Matrix<Form1, Type>& A,
+    const Matrix<Form2, Type>& B
+)
 {
+    #ifdef FULLDEBUG
     if (A.m() != B.m() || A.n() != B.n())
     {
         FatalErrorInFunction
@@ -623,85 +748,117 @@ Form Foam::operator-(const Matrix<Form, Type>& A, const Matrix<Form, Type>& B)
             << B.m() << ", " << B.n() << ')' << nl
             << abort(FatalError);
     }
+    #endif
 
-    Form AB(A.m(), A.n());
+    Form1 result(A.sizes());
 
-    Type* ABv = AB.data();
-    const Type* Av = A.cdata();
-    const Type* Bv = B.cdata();
-
-    const label len = A.size();
-
-    for (label idx=0; idx < len; ++idx)
-    {
-        ABv[idx] = Av[idx] - Bv[idx];
-    }
-
-    return AB;
-}
-
-
-template<class Form, class Type>
-Form Foam::operator*(const scalar s, const Matrix<Form, Type>& mat)
-{
-    Form result(mat.m(), mat.n());
-
-    const label len = mat.size();
-
-    if (len)
-    {
-        Type* out = result.data();
-        const Type* in = mat.cdata();
-
-        for (label idx = 0; idx < len; ++idx)
-        {
-            out[idx] = s * in[idx];
-        }
-    }
+    std::transform
+    (
+        A.cbegin(),
+        A.cend(),
+        B.cbegin(),
+        result.begin(),
+        std::minus<Type>()
+    );
 
     return result;
 }
 
 
 template<class Form, class Type>
-Form Foam::operator*(const Matrix<Form, Type>& mat, const scalar s)
+Form Foam::operator*(const Type& s, const Matrix<Form, Type>& mat)
 {
-    Form result(mat.m(), mat.n());
+    Form result(mat.sizes());
 
-    const label len = mat.size();
-
-    if (len)
-    {
-        Type* out = result.data();
-        const Type* in = mat.cdata();
-
-        for (label idx=0; idx < len; ++idx)
-        {
-            out[idx] = in[idx] * s;
-        }
-    }
+    std::transform
+    (
+        mat.cbegin(),
+        mat.cend(),
+        result.begin(),
+        [&](const Type& val) { return s * val; }
+    );
 
     return result;
 }
 
 
 template<class Form, class Type>
-Form Foam::operator/(const Matrix<Form, Type>& mat, const scalar s)
+Form Foam::operator+(const Type& s, const Matrix<Form, Type>& mat)
 {
-    Form result(mat.m(), mat.n());
+    Form result(mat.sizes());
 
-    const label len = mat.size();
+    std::transform
+    (
+        mat.cbegin(),
+        mat.cend(),
+        result.begin(),
+        [&](const Type& val) { return s + val; }
+    );
 
-    if (len)
-    {
-        Type* out = result.data();
-        const Type* in = mat.cdata();
+    return result;
+}
 
-        for (label idx=0; idx < len; ++idx)
-        {
-            out[idx] = in[idx] / s;
-        }
-    }
+
+template<class Form, class Type>
+Form Foam::operator-(const Type& s, const Matrix<Form, Type>& mat)
+{
+    Form result(mat.sizes());
+
+    std::transform
+    (
+        mat.cbegin(),
+        mat.end(),
+        result.begin(),
+        [&](const Type& val) { return s - val; }
+    );
+
+    return result;
+}
+
+
+template<class Form, class Type>
+Form Foam::operator*(const Matrix<Form, Type>& mat, const Type& s)
+{
+    return s*mat;
+}
+
+
+template<class Form, class Type>
+Form Foam::operator+(const Matrix<Form, Type>& mat, const Type& s)
+{
+    return s + mat;
+}
+
+
+template<class Form, class Type>
+Form Foam::operator-(const Matrix<Form, Type>& mat, const Type& s)
+{
+    Form result(mat.sizes());
+
+    std::transform
+    (
+        mat.cbegin(),
+        mat.end(),
+        result.begin(),
+        [&](const Type& val) { return val - s; }
+    );
+
+    return result;
+}
+
+
+template<class Form, class Type>
+Form Foam::operator/(const Matrix<Form, Type>& mat, const Type& s)
+{
+    Form result(mat.sizes());
+
+    std::transform
+    (
+        mat.cbegin(),
+        mat.end(),
+        result.begin(),
+        [&](const Type& val) { return val / s; }
+    );
 
     return result;
 }
@@ -715,6 +872,7 @@ Foam::operator*
     const Matrix<Form2, Type>& B
 )
 {
+    #ifdef FULLDEBUG
     if (A.n() != B.m())
     {
         FatalErrorInFunction
@@ -724,6 +882,7 @@ Foam::operator*
             << "The columns of A must equal rows of B"
             << abort(FatalError);
     }
+    #endif
 
     typename typeOfInnerProduct<Type, Form1, Form2>::type AB
     (
@@ -732,13 +891,97 @@ Foam::operator*
         Zero
     );
 
-    for (label i=0; i < AB.m(); ++i)
+    for (label i = 0; i < AB.m(); ++i)
     {
-        for (label j=0; j < AB.n(); ++j)
+        for (label k = 0; k < B.m(); ++k)
         {
-            for (label k=0; k < B.m(); ++k)
+            for (label j = 0; j < AB.n(); ++j)
             {
-                AB(i, j) += A(i, k) * B(k, j);
+                AB(i, j) += A(i, k)*B(k, j);
+            }
+        }
+    }
+
+    return AB;
+}
+
+
+template<class Form1, class Form2, class Type>
+typename Foam::typeOfInnerProduct<Type, Form1, Form2>::type
+Foam::operator&
+(
+    const Matrix<Form1, Type>& AT,
+    const Matrix<Form2, Type>& B
+)
+{
+    #ifdef FULLDEBUG
+    if (AT.m() != B.m())
+    {
+        FatalErrorInFunction
+            << "Attempt to multiply incompatible matrices:" << nl
+            << "Matrix A : (" << AT.m() << ", " << AT.n() << ')' << nl
+            << "Matrix B : (" << B.m() << ", " << B.n() << ')' << nl
+            << "The rows of A must equal rows of B"
+            << abort(FatalError);
+    }
+    #endif
+
+    typename typeOfInnerProduct<Type, Form1, Form2>::type AB
+    (
+        AT.n(),
+        B.n(),
+        Zero
+    );
+
+    for (label i = 0; i < AB.m(); ++i)
+    {
+        for (label k = 0; k < B.m(); ++k)
+        {
+            for (label j = 0; j < AB.n(); ++j)
+            {
+                AB(i, j) += Detail::conj(AT(k, i))*B(k, j);
+            }
+        }
+    }
+
+    return AB;
+}
+
+
+template<class Form1, class Form2, class Type>
+typename Foam::typeOfInnerProduct<Type, Form1, Form2>::type
+Foam::operator^
+(
+    const Matrix<Form1, Type>& A,
+    const Matrix<Form2, Type>& BT
+)
+{
+    #ifdef FULLDEBUG
+    if (A.n() != BT.n())
+    {
+        FatalErrorInFunction
+            << "Attempt to multiply incompatible matrices:" << nl
+            << "Matrix A : (" << A.m() << ", " << A.n() << ')' << nl
+            << "Matrix B : (" << BT.m() << ", " << BT.n() << ')' << nl
+            << "The columns of A must equal columns of B"
+            << abort(FatalError);
+    }
+    #endif
+
+    typename typeOfInnerProduct<Type, Form1, Form2>::type AB
+    (
+        A.m(),
+        BT.m(),
+        Zero
+    );
+
+    for (label i = 0; i < AB.m(); ++i)
+    {
+        for (label k = 0; k < BT.n(); ++k)
+        {
+            for (label j = 0; j < AB.n(); ++j)
+            {
+                AB(i, j) += A(i, k)*Detail::conj(BT(j, k));
             }
         }
     }

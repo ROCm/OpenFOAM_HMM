@@ -118,7 +118,7 @@ public:
 };
 
 
-// Global functions and operators
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 class typeOfInnerProduct<Type, RectangularMatrix<Type>, RectangularMatrix<Type>>
@@ -128,6 +128,7 @@ public:
     typedef RectangularMatrix<Type> type;
 };
 
+
 template<class Type>
 class typeOfInnerProduct<Type, RectangularMatrix<Type>, SquareMatrix<Type>>
 {
@@ -135,6 +136,7 @@ public:
 
     typedef RectangularMatrix<Type> type;
 };
+
 
 template<class Type>
 class typeOfInnerProduct<Type, SquareMatrix<Type>, RectangularMatrix<Type>>
@@ -144,6 +146,8 @@ public:
     typedef RectangularMatrix<Type> type;
 };
 
+
+// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 RectangularMatrix<Type> outer(const Field<Type>& f1, const Field<Type>& f2);

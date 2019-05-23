@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2004-2010, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SquareMatrix.H"
+#include "RectangularMatrix.H"
 #include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -39,7 +40,7 @@ Foam::scalar Foam::detDecomposed
 {
     Type diagProduct = pTraits<Type>::one;
 
-    for (label i=0; i<matrix.m(); i++)
+    for (label i = 0; i < matrix.m(); ++i)
     {
         diagProduct *= matrix(i, i);
     }

@@ -190,9 +190,9 @@ inline Foam::RectangularMatrix<Type> outer
 {
     RectangularMatrix<Type> f1f2T(f1.size(), f2.size());
 
-    for (label i=0; i<f1f2T.m(); i++)
+    for (label i = 0; i < f1f2T.m(); ++i)
     {
-        for (label j=0; j<f1f2T.n(); j++)
+        for (label j = 0; j < f1f2T.n(); ++j)
         {
             f1f2T(i, j) = f1[i]*f2[j];
         }

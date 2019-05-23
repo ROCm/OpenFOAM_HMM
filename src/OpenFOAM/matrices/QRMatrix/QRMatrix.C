@@ -282,7 +282,7 @@ Foam::QRMatrix<MatrixType>::inv() const
             x[j] = Q_(i, j);
         }
         solvex(x);
-        inv.block(m, 1, 0, i) = x;
+        inv.subColumn(i) = x;
     }
 
     return inv;

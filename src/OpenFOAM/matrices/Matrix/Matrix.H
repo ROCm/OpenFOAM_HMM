@@ -53,6 +53,7 @@ SourceFiles
 #include "Pair.H"
 #include "Field.H"
 #include "autoPtr.H"
+#include "complex.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,7 +75,7 @@ class Matrix
 {
     // Private Data
 
-        //- Number of rows and columns in Matrix.
+        //- Number of rows and columns in Matrix
         label mRows_, nCols_;
 
         //- Vector of values of type Type
@@ -86,11 +87,11 @@ class Matrix
         //- Allocate storage for the contents
         inline void doAlloc();
 
-        //- Multiply matrix with vector (A * x)
+        //- Right-multiply Matrix by a column vector (A * x)
         template<class ListType>
         tmp<Field<Type>> AmulImpl(const ListType& x) const;
 
-        //- Multiply matrix transpose with vector (AT * x, or x * A)
+        //- Left-multiply Matrix by a row vector (x * A)
         template<class ListType>
         tmp<Field<Type>> TmulImpl(const ListType& x) const;
 
@@ -138,7 +139,7 @@ public:
         //- Construct given number of rows/columns
         inline explicit Matrix(const labelPair& dims);
 
-        //- Construct given number of rows/columns.
+        //- Construct given number of rows/columns
         //- initializing all elements to zero
         inline Matrix(const labelPair& dims, const zero);
 
@@ -152,15 +153,15 @@ public:
         //- Move construct
         Matrix(Matrix<Form, Type>&& mat);
 
-        //- Copy constructor from matrix of a different form
+        //- Copy constructor from Matrix of a different form
         template<class Form2>
         explicit Matrix(const Matrix<Form2, Type>& mat);
 
-        //- Construct from a block of another matrix
+        //- Construct from a block of another Matrix
         template<class MatrixType>
         Matrix(const ConstMatrixBlock<MatrixType>& Mb);
 
-        //- Construct from a block of another matrix
+        //- Construct from a block of another Matrix
         template<class MatrixType>
         Matrix(const MatrixBlock<MatrixType>& Mb);
 
@@ -179,34 +180,34 @@ public:
 
     // Access
 
-        //- Return the number of rows.
+        //- Return the number of rows
         inline label m() const noexcept;
 
-        //- Return the number of columns.
+        //- Return the number of columns
         inline label n() const noexcept;
 
-        //- Return the number of elements in matrix (m*n)
+        //- Return the number of elements in Matrix (m*n)
         inline label size() const;
 
         //- Return row/column sizes
         inline labelPair sizes() const;
 
-        //- Return true if the matrix is empty (ie, size() is zero)
+        //- Return true if Matrix is empty (i.e., size() is zero)
         inline bool empty() const noexcept;
 
         //- Return const pointer to the first data element, which can also
-        //- be used to address into the matrix contents
+        //- be used to address into Matrix contents
         inline const Type* cdata() const noexcept;
 
         //- Return pointer to the first data element, which can also
-        //- be used to address into the matrix contents
+        //- be used to address into Matrix contents
         inline Type* data() noexcept;
 
-        //- Return const pointer to data in the specified row.
+        //- Return const pointer to data in the specified row
         //  Subscript checking only with FULLDEBUG
         inline const Type* rowData(const label irow) const;
 
-        //- Return pointer to data in the specified row.
+        //- Return pointer to data in the specified row
         //  Subscript checking only with FULLDEBUG
         inline Type* rowData(const label irow);
 
@@ -219,87 +220,108 @@ public:
         inline Type& at(const label idx);
 
 
+    // Block Access (const)
 
-    // Block Access
+        //- Return const column or column's subset of Matrix
+        //  Return entire column by its index: M.subColumn(a);
+        //  Return subset of a column starting from rowIndex: M.subColumn(a, b);
+        //  Return subset of a column starting from rowIndex with szRows elems:
+        //      M.subColumn(a, b, c);
+        inline ConstMatrixBlock<mType> subColumn
+        (
+            const label colIndex,
+            const label rowIndex = 0,
+            label len = -1
+        ) const;
 
-            inline ConstMatrixBlock<mType> block
-            (
-                const label m,
-                const label n,
-                const label mStart,
-                const label nStart
-            ) const;
+        //- Return const row or const row's subset of Matrix
+        //  Return entire row by its index: M.subRow(a);
+        //  Return subset of a row starting from columnIndex: M.subRow(a,b);
+        //  Return subset of a row starting from columnIndex with szCols elems:
+        //      M.subRow(a, b, c);
+        inline ConstMatrixBlock<mType> subRow
+        (
+            const label rowIndex,
+            const label colIndex = 0,
+            label len = -1
+        ) const;
 
-            template<class VectorSpace>
-            inline ConstMatrixBlock<mType> block
-            (
-                const label mStart,
-                const label nStart
-            ) const;
+        //- Return const sub-block of Matrix
+        //  Sub-block starting at columnIndex & rowIndex indices
+        inline ConstMatrixBlock<mType> subMatrix
+        (
+            const label rowIndex,
+            const label colIndex,
+            label szRows = -1,
+            label szCols = -1
+        ) const;
 
-            inline ConstMatrixBlock<mType> col
-            (
-                const label m,
-                const label rowStart
-            ) const;
-
-            inline ConstMatrixBlock<mType> col
-            (
-                const label m,
-                const label mStart,
-                const label nStart
-            ) const;
+        //- Access Field as a ConstMatrixBlock
+        template<class VectorSpace>
+        inline ConstMatrixBlock<mType> block
+        (
+            const label rowIndex,
+            const label colIndex
+        ) const;
 
 
-            inline MatrixBlock<mType> block
-            (
-                const label m,
-                const label n,
-                const label mStart,
-                const label nStart
-            );
+    // Block Access (non-const)
 
-            template<class VectorSpace>
-            inline MatrixBlock<mType> block
-            (
-                const label mStart,
-                const label nStart
-            );
+        //- Return column or column's subset of Matrix
+        inline MatrixBlock<mType> subColumn
+        (
+            const label colIndex,
+            const label rowIndex = 0,
+            label len = -1
+        );
 
-            inline MatrixBlock<mType> col
-            (
-                const label m,
-                const label rowStart
-            );
+        //- Return row or row's subset of Matrix
+        inline MatrixBlock<mType> subRow
+        (
+            const label rowIndex,
+            const label colIndex = 0,
+            label len = -1
+        );
 
-            inline MatrixBlock<mType> col
-            (
-                const label m,
-                const label mStart,
-                const label nStart
-            );
+        //- Return sub-block of Matrix
+        inline MatrixBlock<mType> subMatrix
+        (
+            const label rowIndex,
+            const label colIndex,
+            label szRows = -1,
+            label szCols = -1
+        );
+
+        //- Access Field as a MatrixBlock
+        template<class VectorSpace>
+        inline MatrixBlock<mType> block
+        (
+            const label rowIndex,
+            const label colIndex
+        );
+
 
     // Check
 
-        //- Check index i is within valid range (0 ... m-1).
+        //- Check index i is within valid range [0, m)
         inline void checki(const label irow) const;
 
-        //- Check index j is within valid range (0 ... n-1).
+        //- Check index j is within valid range [0, n)
         inline void checkj(const label jcol) const;
 
         //- Check that dimensions are positive, non-zero
         inline void checkSize() const;
 
-        //- True if all entries have identical values, and matrix is non-empty
+        //- True if all entries have identical values, and Matrix is non-empty
         inline bool uniform() const;
 
 
     // Edit
 
-        //- Clear the Matrix, i.e. set sizes to zero.
+        //- Clear Matrix, i.e. set sizes to zero
         void clear();
 
-        //- Release storage management of the Matrix contents by transferring
+        //- Release storage management of Matrix contents by transferring
         //- management to a List
         List<Type> release();
 
@@ -307,43 +329,64 @@ public:
         void swap(Matrix<Form, Type>& mat);
 
         //- Transfer the contents of the argument Matrix into this Matrix
-        //- and annul the argument Matrix.
+        //- and annul the argument Matrix
         void transfer(Matrix<Form, Type>& mat);
 
-        //- Change the matrix dimensions, preserving the elements
+        //- Change Matrix dimensions, preserving the elements
         void resize(const label m, const label n);
 
-        //- Change the matrix dimensions, preserving the elements
+        //- Change Matrix dimensions, preserving the elements
         inline void setSize(const label m, const label n);
 
-        //- Resize the matrix without reallocating storage (unsafe)
+        //- Resize Matrix without reallocating storage (unsafe)
         inline void shallowResize(const label m, const label n);
+
+        //- Round to zero elements with magnitude smaller than tol (SMALL)
+        void round(const scalar tol = SMALL);
 
 
     // Operations
 
-        //- Return the transpose of the matrix
+        //- Return (conjugate) transpose of Matrix
         Form T() const;
 
-        //- Multiply matrix with vector (A * x)
+        //- Right-multiply Matrix by a column vector (A * x)
         inline tmp<Field<Type>> Amul(const UList<Type>& x) const;
 
-        //- Multiply matrix with vector (A * x)
+        //- Right-multiply Matrix by a column vector (A * x)
         template<class Addr>
         inline tmp<Field<Type>> Amul
         (
             const IndirectListBase<Type, Addr>& x
         ) const;
 
-        //- Multiply matrix transpose with vector (AT * x, or x * A)
+        //- Left-multiply Matrix by a row vector (x * A)
         inline tmp<Field<Type>> Tmul(const UList<Type>& x) const;
 
-        //- Multiply matrix transpose with vector (AT * x, or x * A)
+        //- Left-multiply Matrix by a row vector (x * A)
         template<class Addr>
         inline tmp<Field<Type>> Tmul
         (
             const IndirectListBase<Type, Addr>& x
         ) const;
+
+        //- Extract the diagonal elements. Method may change in the future.
+        List<Type> diag() const;
+
+        //- Assign diagonal of Matrix
+        void diag(const UList<Type>& list);
+
+        //- Return the trace
+        Type trace() const;
+
+        //- Return L2-Norm of chosen column
+        //  Optional without sqrt for parallel usage.
+        scalar columnNorm(const label colIndex, const bool noSqrt=false) const;
+
+        //- Return Frobenius norm of Matrix
+        //  Optional without sqrt for parallel usage.
+        //  https://en.wikipedia.org/wiki/Matrix_norm#Frobenius_norm
+        scalar norm(const bool noSqrt=false) const;
 
 
     // Member Operators
@@ -370,11 +413,11 @@ public:
         //- Move assignment
         void operator=(Matrix<Form, Type>&& mat);
 
-        //- Assignment to a block of another matrix
+        //- Assignment to a block of another Matrix
         template<class MatrixType>
         void operator=(const ConstMatrixBlock<MatrixType>& Mb);
 
-        //- Assignment to a block of another matrix
+        //- Assignment to a block of another Matrix
         template<class MatrixType>
         void operator=(const MatrixBlock<MatrixType>& Mb);
 
@@ -390,14 +433,20 @@ public:
         //- Matrix subtraction
         void operator-=(const Matrix<Form, Type>& other);
 
+        //- Matrix scalar addition
+        void operator+=(const Type& s);
+
+        //- Matrix scalar subtraction
+        void operator-=(const Type& s);
+
         //- Matrix scalar multiplication
-        void operator*=(const scalar s);
+        void operator*=(const Type& s);
 
         //- Matrix scalar division
-        void operator/=(const scalar s);
+        void operator/=(const Type& s);
 
 
-    // Random access iterator (non-const)
+    // Random Access Iterator (non-const)
 
         //- Return an iterator to begin traversing a Matrix
         inline iterator begin();
@@ -406,7 +455,7 @@ public:
         inline iterator end();
 
 
-    // Random access iterator (const)
+    // Random Access Iterator (const)
 
         //- Return const_iterator to begin traversing a constant Matrix
         inline const_iterator cbegin() const;
@@ -447,10 +496,73 @@ public:
         {
             return v_;
         }
+
+        //- Deprecated(2019-04) - use subMatrix()
+        //  \deprecated(2019-04) - use subMatrix()
+        ConstMatrixBlock<mType>
+        FOAM_DEPRECATED_FOR(2019-04, "subMatrix() method") block
+        (
+            const label m,
+            const label n,
+            const label mStart,
+            const label nStart
+        ) const
+        {
+            return this->subMatrix(mStart, nStart, m, n);
+        }
+
+        //- Deprecated(2019-04) - use subMatrix()
+        //  \deprecated(2019-04) - use subMatrix()
+        MatrixBlock<mType>
+        FOAM_DEPRECATED_FOR(2019-04, "subMatrix() method") block
+        (
+            const label m,
+            const label n,
+            const label mStart,
+            const label nStart
+        )
+        {
+            return this->subMatrix(mStart, nStart, m, n);
+        }
+
+
+        //- Deprecated(2019-04) - use subColumn()
+        //  \deprecated(2019-04) - use subColumn()
+        ConstMatrixBlock<mType>
+        FOAM_DEPRECATED_FOR(2019-04, "subColumn() method") col
+        (
+            const label m,
+            const label mStart,
+            const label nStart
+        ) const
+        {
+            return this->subColumn(nStart, mStart, m);
+        }
+
+        //- Deprecated(2019-04) - use subColumn()
+        //  \deprecated(2019-04) - use subColumn()
+        MatrixBlock<mType>
+        FOAM_DEPRECATED_FOR(2019-04, "subColumn() method") col
+        (
+            const label m,
+            const label mStart,
+            const label nStart
+        )
+        {
+            return this->subColumn(nStart, mStart, m);
+        }
+
+        //- Deleted(2019-04) - use subColumn()
+        //  \deprecated(2019-04) - use subColumn()
+        void col(const label m, const label rowStart) const = delete;
+
+        //- Deleted(2019-04) - use subColumn()
+        //  \deprecated(2019-04) - use subColumn()
+        void col(const label m, const label rowStart) = delete;
 };
 
 
-// IOstream Operators
+// * * * * * * * * * * * * * * * IOstream Operator  * * * * * * * * * * * * * //
 
 //- Read Matrix from Istream, discarding contents of existing Matrix.
 template<class Form, class Type>
@@ -462,70 +574,100 @@ template<class Form, class Type>
 Ostream& operator<<(Ostream& os, const Matrix<Form, Type>& mat);
 
 
-// Global Functions, Operators
+// * * * * * * * * * * * * * * * Global Functions * * * * * * * * * * * * * * //
 
-//- Find max value in the matrix
+//- Find max value in Matrix
 template<class Form, class Type>
 const Type& max(const Matrix<Form, Type>& mat);
 
-//- Find min value in the matrix
+//- Find min value in Matrix
 template<class Form, class Type>
 const Type& min(const Matrix<Form, Type>& mat);
 
-//- Find the min/max values of the matrix
+//- Find the min/max values of Matrix
 template<class Form, class Type>
 MinMax<Type> minMax(const Matrix<Form, Type>& mat);
+
+
+// * * * * * * * * * * * * * * * Global Operators * * * * * * * * * * * * * * //
 
 //- Matrix negation
 template<class Form, class Type>
 Form operator-(const Matrix<Form, Type>& mat);
 
-//- Matrix addition
-template<class Form, class Type>
-Form operator+
+//- Matrix addition. Returns Matrix of the same form as the first parameter.
+template<class Form1, class Form2, class Type>
+Form1 operator+
 (
-    const Matrix<Form, Type>& A,
-    const Matrix<Form, Type>& B
+    const Matrix<Form1, Type>& A,
+    const Matrix<Form2, Type>& B
 );
 
-
-//- Matrix subtraction
-template<class Form, class Type>
-Form operator-
+//- Matrix subtraction. Returns Matrix of the same form as the first parameter.
+template<class Form1, class Form2, class Type>
+Form1 operator-
 (
-    const Matrix<Form, Type>& A,
-    const Matrix<Form, Type>& B
+    const Matrix<Form1, Type>& A,
+    const Matrix<Form2, Type>& B
 );
 
-
-//- Scalar multiplication of a matrix
+//- Scalar multiplication of Matrix
 template<class Form, class Type>
 Form operator*
 (
-    const scalar s,
+    const Type& s,
     const Matrix<Form, Type>& mat
 );
 
+//- Scalar addition of Matrix
+template<class Form, class Type>
+Form operator+
+(
+    const Type& s,
+    const Matrix<Form, Type>& mat
+);
 
-//- Scalar multiplication of a matrix
+//- Scalar subtraction of Matrix
+template<class Form, class Type>
+Form operator-
+(
+    const Type& s,
+    const Matrix<Form, Type>& mat
+);
+
+//- Scalar multiplication of Matrix
 template<class Form, class Type>
 Form operator*
 (
     const Matrix<Form, Type>& mat,
-    const scalar s
+    const Type& s
 );
 
+//- Scalar addition of Matrix
+template<class Form, class Type>
+Form operator+
+(
+    const Matrix<Form, Type>& mat,
+    const Type& s
+);
 
-//- Scalar division of a matrix
+//- Scalar subtraction of Matrix
+template<class Form, class Type>
+Form operator-
+(
+    const Matrix<Form, Type>& mat,
+    const Type& s
+);
+
+//- Scalar division of Matrix
 template<class Form, class Type>
 Form operator/
 (
     const Matrix<Form, Type>& mat,
-    const scalar s
+    const Type& s
 );
 
-
-//- Matrix-matrix multiplication
+//- Matrix-Matrix multiplication using ikj-algorithm
 template<class Form1, class Form2, class Type>
 typename typeOfInnerProduct<Type, Form1, Form2>::type
 operator*
@@ -533,7 +675,6 @@ operator*
     const Matrix<Form1, Type>& A,
     const Matrix<Form2, Type>& B
 );
-
 
 //- Matrix-vector multiplication (A * x), where x is a column vector
 template<class Form, class Type>
@@ -551,8 +692,7 @@ inline tmp<Field<Type>> operator*
     const IndirectListBase<Type, Addr>& x
 );
 
-
-//- Vector-matrix multiplication (x * A), where x is a row vector
+//- Vector-Matrix multiplication (x * A), where x is a row vector
 template<class Form, class Type>
 inline tmp<Field<Type>> operator*
 (
@@ -560,12 +700,30 @@ inline tmp<Field<Type>> operator*
     const Matrix<Form, Type>& mat
 );
 
-//- Vector-matrix multiplication (x * A), where x is a row vector
+//- Vector-Matrix multiplication (x * A), where x is a row vector
 template<class Form, class Type, class Addr>
 inline tmp<Field<Type>> operator*
 (
     const IndirectListBase<Type, Addr>& x,
     const Matrix<Form, Type>& mat
+);
+
+//- Implicit inner product of Matrix-Matrix, equivalent to A.T()*B
+template<class Form1, class Form2, class Type>
+typename typeOfInnerProduct<Type, Form1, Form2>::type
+operator&
+(
+    const Matrix<Form1, Type>& ATranspose,
+    const Matrix<Form2, Type>& B
+);
+
+//- Implicit outer product of Matrix-Matrix, equivalent to A*B.T()
+template<class Form1, class Form2, class Type>
+typename typeOfInnerProduct<Type, Form1, Form2>::type
+operator^
+(
+    const Matrix<Form1, Type>& A,
+    const Matrix<Form2, Type>& BTranspose
 );
 
 

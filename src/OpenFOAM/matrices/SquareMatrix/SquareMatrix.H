@@ -149,7 +149,7 @@ public:
 };
 
 
-// Global functions and operators
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Return the LU decomposed SquareMatrix det
 template<class Type>
@@ -170,7 +170,6 @@ public:
 
     typedef SquareMatrix<Type> type;
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
