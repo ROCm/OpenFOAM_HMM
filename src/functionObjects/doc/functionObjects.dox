@@ -41,6 +41,7 @@ The current range of features comprises of:
 - \ref grpFieldFunctionObjects
 - \ref grpForcesFunctionObjects
 - \ref grpGraphicsFunctionObjects
+- \ref grpInitialisationFunctionObjects
 - \ref grpLagrangianFunctionObjects
 - \ref grpSolversFunctionObjects
 - \ref grpUtilitiesFunctionObjects
