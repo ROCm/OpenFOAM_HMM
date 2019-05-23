@@ -227,7 +227,7 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
                     Pstream::myProcNo(),
                     proci,
                     tensorField(0),
-                    Pstream::msgType()+2
+                    Pstream::msgType()+3
                 )
             );
         }
@@ -248,7 +248,7 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
                     Pstream::myProcNo(),
                     proci,
                     tensorField(0),
-                    Pstream::msgType()+2
+                    Pstream::msgType()+3
                 )
             );
         }
