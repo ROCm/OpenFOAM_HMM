@@ -74,8 +74,7 @@ class writeDictionary
         bool tryDirectory
         (
             const label dicti,
-            const word& location,
-            bool& firstDict
+            const word& location
         );
 
 

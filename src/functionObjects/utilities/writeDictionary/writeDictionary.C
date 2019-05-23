@@ -54,8 +54,7 @@ namespace functionObjects
 bool Foam::functionObjects::writeDictionary::tryDirectory
 (
     const label dicti,
-    const word& location,
-    bool& firstDict
+    const word& location
 )
 {
     IOobject dictIO
@@ -74,18 +73,10 @@ bool Foam::functionObjects::writeDictionary::tryDirectory
 
         if (dict.digest() != digests_[dicti])
         {
-            if (firstDict)
-            {
-                Info<< type() << " " << name() << " write:" << nl << endl;
-
-                IOobject::writeDivider(Info);
-                Info<< endl;
-                firstDict = false;
-            }
-
             Info<< dict.dictName() << dict << nl;
 
             IOobject::writeDivider(Info);
+            Info<< endl;
 
             digests_[dicti] = dict.digest();
         }
@@ -159,11 +150,15 @@ bool Foam::functionObjects::writeDictionary::execute()
 
 bool Foam::functionObjects::writeDictionary::write()
 {
-    bool firstDict = true;
+    Info<< type() << " " << name() << " write:" << nl << endl;
+
+    IOobject::writeDivider(Info);
+    Info<< endl;
+
     forAll(dictNames_, i)
     {
-        const dictionary* dictptr =
-            obr_.findObject<dictionary>(dictNames_[i]);
+        const IOdictionary* dictptr =
+            obr_.lookupObjectPtr<IOdictionary>(dictNames_[i]);
 
         if (dictptr)
         {
@@ -171,43 +166,34 @@ bool Foam::functionObjects::writeDictionary::write()
 
             if (dict.digest() != digests_[i])
             {
-                if (firstDict)
-                {
-                    Info<< type() << " " << name() << " write:" << nl << endl;
-
-                    IOobject::writeDivider(Info);
-                    Info<< endl;
-                    firstDict = false;
-                }
-
                 digests_[i] = dict.digest();
 
                 Info<< dict.dictName() << dict << nl;
+
                 IOobject::writeDivider(Info);
                 Info<< endl;
             }
         }
         else
         {
-            bool processed = tryDirectory(i, obr_.time().timeName(), firstDict);
+            bool processed = tryDirectory(i, obr_.time().timeName());
 
             if (!processed)
             {
-                processed = tryDirectory(i, obr_.time().constant(), firstDict);
+                processed = tryDirectory(i, obr_.time().constant());
             }
 
             if (!processed)
             {
-                processed = tryDirectory(i, obr_.time().system(), firstDict);
+                processed = tryDirectory(i, obr_.time().system());
             }
 
             if (!processed)
             {
                 Info<< "    Unable to locate dictionary " << dictNames_[i]
                     << nl << endl;
-            }
-            else
-            {
+
+                IOobject::writeDivider(Info);
                 Info<< endl;
             }
         }
