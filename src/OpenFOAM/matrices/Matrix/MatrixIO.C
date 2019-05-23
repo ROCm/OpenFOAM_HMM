@@ -80,11 +80,11 @@ bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
                     label idx = 0;
 
                     // Loop over rows
-                    for (label i=0; i < mRows_; ++i)
+                    for (label i = 0; i < mRows_; ++i)
                     {
                         listDelimiter = is.readBeginList("MatrixRow");
 
-                        for (label j=0; j < nCols_; ++j)
+                        for (label j = 0; j < nCols_; ++j)
                         {
                             is >> v_[idx++];
 
@@ -167,12 +167,12 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
                 label idx = 0;
 
                 // Loop over rows
-                for (label i=0; i < mat.m(); ++i)
+                for (label i = 0; i < mat.m(); ++i)
                 {
                     os  << token::BEGIN_LIST;
 
                     // Write row
-                    for (label j=0; j < mat.n(); ++j)
+                    for (label j = 0; j < mat.n(); ++j)
                     {
                         if (j) os << token::SPACE;
                         os << v[idx++];

@@ -166,11 +166,11 @@ void Foam::QRMatrix<MatrixType>::solvex
 {
     const label n = R_.n();
 
-    for (int i=n-1; i>=0; i--)
+    for (label i = n - 1; i >= 0; --i)
     {
         cmptType sum = x[i];
 
-        for (label j=i+1; j<n; j++)
+        for (label j = i + 1; j < n; ++j)
         {
             sum -= x[j]*R_(i, j);
         }
@@ -197,11 +197,11 @@ void Foam::QRMatrix<MatrixType>::solve
     // Assert (&x != &source) ?
     const label m = Q_.m();
 
-    // x = Q_.T()*source;
-    for (label i=0; i<m; i++)
+    // x = Q_.T()*source;  ie, Q_.Tmul(source)
+    for (label i = 0; i < m; ++i)
     {
         x[i] = 0;
-        for (label j=0; j<m; j++)
+        for (label j = 0; j < m; ++j)
         {
             x[i] += Q_(j, i)*source[j];
         }
@@ -235,9 +235,9 @@ Foam::QRMatrix<MatrixType>::inv() const
     Field<cmptType> x(m);
     QMatrixType inv(m);
 
-    for (label i=0; i<m; i++)
+    for (label i = 0; i < m; ++i)
     {
-        for (label j=0; j<m; j++)
+        for (label j = 0; j < m; ++j)
         {
             x[j] = Q_(i, j);
         }

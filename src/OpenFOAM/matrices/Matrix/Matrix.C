@@ -205,9 +205,9 @@ inline Foam::Matrix<Form, Type>::Matrix
 {
     doAlloc();
 
-    for (label i=0; i < mRows_; ++i)
+    for (label i = 0; i < mRows_; ++i)
     {
-        for (label j=0; j < nCols_; ++j)
+        for (label j = 0; j < nCols_; ++j)
         {
             (*this)(i, j) = Mb(i,j);
         }
@@ -227,9 +227,9 @@ inline Foam::Matrix<Form, Type>::Matrix
 {
     doAlloc();
 
-    for (label i=0; i < mRows_; ++i)
+    for (label i = 0; i < mRows_; ++i)
     {
-        for (label j=0; j<nCols_; ++j)
+        for (label j = 0; j < nCols_; ++j)
         {
             (*this)(i, j) = Mb(i, j);
         }
@@ -322,9 +322,9 @@ void Foam::Matrix<Form, Type>::resize(const label m, const label n)
     const label mrow = min(m, mRows_);
     const label ncol = min(n, nCols_);
 
-    for (label i=0; i < mrow; ++i)
+    for (label i = 0; i < mrow; ++i)
     {
-        for (label j=0; j < ncol; ++j)
+        for (label j = 0; j < ncol; ++j)
         {
             newMatrix(i, j) = (*this)(i, j);
         }
@@ -339,9 +339,9 @@ Form Foam::Matrix<Form, Type>::T() const
 {
     Form At(n(), m());
 
-    for (label i=0; i < m(); ++i)
+    for (label i = 0; i < m(); ++i)
     {
-        for (label j=0; j < n(); ++j)
+        for (label j = 0; j < n(); ++j)
         {
             At(j, i) = (*this)(i, j);
         }
@@ -399,9 +399,9 @@ void Foam::Matrix<Form, Type>::operator=
     const ConstMatrixBlock<MatrixType>& Mb
 )
 {
-    for (label i=0; i < mRows_; ++i)
+    for (label i = 0; i < mRows_; ++i)
     {
-        for (label j=0; j < nCols_; ++j)
+        for (label j = 0; j < nCols_; ++j)
         {
             (*this)(i, j) = Mb(i, j);
         }
@@ -464,7 +464,7 @@ void Foam::Matrix<Form, Type>::operator+=(const Matrix<Form, Type>& other)
 
     const label len = this->size();
 
-    for (label idx=0; idx < len; ++idx)
+    for (label idx = 0; idx < len; ++idx)
     {
         out[idx] += in[idx];
     }
@@ -603,7 +603,7 @@ Form Foam::operator+(const Matrix<Form, Type>& A, const Matrix<Form, Type>& B)
 
     const label len = A.size();
 
-    for (label idx=0; idx < len; ++idx)
+    for (label idx = 0; idx < len; ++idx)
     {
         ABv[idx] = Av[idx] + Bv[idx];
     }
@@ -653,7 +653,7 @@ Form Foam::operator*(const scalar s, const Matrix<Form, Type>& mat)
         Type* out = result.data();
         const Type* in = mat.cdata();
 
-        for (label idx=0; idx < len; ++idx)
+        for (label idx = 0; idx < len; ++idx)
         {
             out[idx] = s * in[idx];
         }

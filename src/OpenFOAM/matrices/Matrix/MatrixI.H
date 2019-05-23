@@ -160,7 +160,7 @@ inline bool Foam::Matrix<Form, Type>::uniform() const
         return false;
     }
 
-    for (label idx=1; idx<len; ++idx)
+    for (label idx = 1; idx < len; ++idx)
     {
         if (v_[0] != v_[idx])
         {

@@ -89,9 +89,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (label i=0; i<mRows_; i++)
+    for (label i = 0; i < mRows_; ++i)
     {
-        for (label j=0; j<nCols_; j++)
+        for (label j = 0; j < nCols_; ++j)
         {
             (*this)(i, j) = Mb(i, j);
         }
@@ -116,9 +116,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
                 << abort(FatalError);
         }
 
-        for (label i=0; i<mRows_; i++)
+        for (label i = 0; i < mRows_; ++i)
         {
-            for (label j=0; j<nCols_; j++)
+            for (label j = 0; j < nCols_; ++j)
             {
                 (*this)(i, j) = Mb(i, j);
             }
@@ -144,9 +144,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
                 << abort(FatalError);
         }
 
-        for (label i=0; i<mRows_; i++)
+        for (label i = 0; i < mRows_; ++i)
         {
-            for (label j=0; j<nCols_; j++)
+            for (label j = 0; j < nCols_; ++j)
             {
                 (*this)(i, j) = Mb(i, j);
             }
@@ -173,9 +173,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
                 << abort(FatalError);
         }
 
-        for (label i=0; i<mRows_; i++)
+        for (label i = 0; i < mRows_; ++i)
         {
-            for (label j=0; j<nCols_; j++)
+            for (label j = 0; j < nCols_; ++j)
             {
                 (*this)(i, j) = Mb(i, j);
             }
@@ -202,9 +202,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
                 << abort(FatalError);
         }
 
-        for (label i=0; i<mRows_; i++)
+        for (label i = 0; i < mRows_; ++i)
         {
-            for (label j=0; j<nCols_; j++)
+            for (label j = 0; j < nCols_; ++j)
             {
                 (*this)(i, j) = Mb(i, j);
             }
@@ -235,9 +235,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (direction i=0; i<mRows_; ++i)
+    for (direction i = 0; i < mRows_; ++i)
     {
-        for (direction j=0; j<nCols_; ++j)
+        for (direction j = 0; j < nCols_; ++j)
         {
             operator()(i, j) = Mb(i, j);
         }
@@ -266,7 +266,7 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (direction i=0; i<mRows_; ++i)
+    for (direction i = 0; i < mRows_; ++i)
     {
         operator()(i, 0) = Mb[i];
     }
@@ -289,9 +289,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (label i=0; i<mRows_; i++)
+    for (label i = 0; i < mRows_; ++i)
     {
-        for (label j=0; j<nCols_; j++)
+        for (label j = 0; j < nCols_; ++j)
         {
             (*this)(i, j) = ms(i, j);
         }
@@ -315,7 +315,7 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (direction i=0; i<Ncmpts; ++i)
+    for (direction i = 0; i < Ncmpts; ++i)
     {
         operator()(i, 0) = ms[i];
     }
