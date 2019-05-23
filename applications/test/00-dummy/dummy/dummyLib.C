@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,9 @@ License
 #if defined WM_SP
 # define PRECISION    "SP"
 # define SCALAR_SIZE  (8*sizeof(float))
+#elif defined(WM_SPDP)
+# define PRECISION    "SPDP"
+# define SCALAR_SIZE  (8*sizeof(float))
 #elif defined WM_DP
 # define PRECISION    "DP"
 # define SCALAR_SIZE  (8*sizeof(double))
@@ -38,8 +41,22 @@ License
 # define SCALAR_SIZE  (8*sizeof(long double))
 #endif
 
+// Test additional exported symbols
+#ifdef _WIN32
+    #define defineWindowsLibEntryPoint(libName)                               \
+        extern "C" void lib_##libName##_entry_point() {}
+#else
+    #define defineWindowsLibEntryPoint(libName)  /* Nothing */
+#endif
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// The 'extern C' export is independent of namespace
+namespace Foam
+{
+    defineWindowsLibEntryPoint(dummyLib);
+}
 
 const std::string Foam::Detail::dummyLib::arch(WM_ARCH);
 

@@ -160,10 +160,10 @@ bool Foam::IOobject::fileNameComponents
         #endif
     )
     {
-        // Absolute path (starts with '/')
+        // Absolute path (starts with '/' or 'd:/')
         // => no local
 
-        instance = path.substr(first, last);
+        instance = path.substr(0, last);
 
         const std::string ending = path.substr(last+1);
         nameLen = ending.size();  // The raw length of name
