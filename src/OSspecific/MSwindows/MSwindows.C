@@ -47,6 +47,8 @@ License
 #include <io.h>     // For _close
 #include <windows.h>
 
+#define EXT_SO  "dll"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1190,14 +1192,21 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
             << " : dlopen of " << libName << std::endl;
     }
 
-    // Map "libXX.so" and "libXX" to "libXX.dll"
+    // Always remap "libXX.so" and "libXX" to "libXX.dll"
+    fileName libso(libName.lessExt().ext(EXT_SO));
 
-    fileName winLibName(libName.lessExt().ext("dll"));
-    void* handle = ::LoadLibrary(winLibName.c_str());
+    void* handle = ::LoadLibrary(libso.c_str());
+
+    if (!handle && !libso.startsWith("lib"))
+    {
+        // Try with 'lib' prefix
+        libso = "lib" + libso;
+        handle = ::LoadLibrary(libso.c_str());
+    }
 
     if (handle)
     {
-        libsLoaded[handle] = libName.lessExt();
+        libsLoaded[handle] = libso.lessExt();
     }
     else if (check)
     {
@@ -1215,6 +1224,26 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     }
 
     return handle;
+}
+
+
+Foam::label Foam::dlOpen
+(
+    std::initializer_list<fileName> libNames,
+    const bool check
+)
+{
+    label nLoaded = 0;
+
+    for (const fileName& libName : libNames)
+    {
+        if (Foam::dlOpen(libName, check))
+        {
+            ++nLoaded;
+        }
+    }
+
+    return nLoaded;
 }
 
 

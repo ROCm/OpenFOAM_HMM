@@ -253,8 +253,14 @@ int system(const UList<string>& command, const bool bg = false);
 int system(const CStringList& command, const bool bg = false);
 
 //- Open a shared library and return handle to library.
-//  Print error message if library cannot be loaded (suppress with check=true)
-void* dlOpen(const fileName& lib, const bool check = true);
+//  A leading "lib" and ".so" suffix are added silently as required.
+//  Prints warning if a library cannot be loaded (suppress with check=false)
+void* dlOpen(const fileName& libName, const bool check=true);
+
+//- Open shared libraries and return number of libraries loaded.
+//  A leading "lib" and ".so" suffix are added silently as required.
+//  Prints warning if a library cannot be loaded (suppress with check=false)
+label dlOpen(std::initializer_list<fileName> libNames, const bool check=true);
 
 //- Close a dlopened library using handle. Return true if successful
 bool dlClose(void* handle);

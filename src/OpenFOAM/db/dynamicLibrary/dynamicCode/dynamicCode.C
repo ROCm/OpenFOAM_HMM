@@ -36,7 +36,6 @@ License
 #include "dictionary.H"
 #include "foamVersion.H"
 
-#undef EXT_SO
 #ifdef __APPLE__
     #define EXT_SO  ".dylib"
 #elif defined _WIN32

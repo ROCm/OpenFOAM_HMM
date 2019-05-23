@@ -3,7 +3,7 @@
 system
 {
     type    systemCall;
-    libs    ("libutilityFunctionObjects.so");
+    libs    ("utilityFunctionObjects");
 
     // Execute on the master process only
     master  true;

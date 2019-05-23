@@ -61,8 +61,10 @@ Description
 #include <dlfcn.h>
 
 #ifdef __APPLE__
+    #define EXT_SO  "dylib"
     #include <mach-o/dyld.h>
 #else
+    #define EXT_SO  "so"
 
     // PGI does not have __int128_t
     #ifdef __PGIC__
@@ -1653,22 +1655,40 @@ int Foam::system(const Foam::UList<Foam::string>& command, const bool bg)
 
 void* Foam::dlOpen(const fileName& libName, const bool check)
 {
+    constexpr int ldflags = (RTLD_LAZY|RTLD_GLOBAL);
+
     if (POSIX::debug)
     {
         std::cout
             << "dlOpen(const fileName&)"
             << " : dlopen of " << libName << std::endl;
     }
-    void* handle = ::dlopen(libName.c_str(), RTLD_LAZY|RTLD_GLOBAL);
 
-    #ifdef __APPLE__
-    // Re-try "libXX.so" as "libXX.dylib"
-    if (!handle && libName.hasExt("so"))
+    void* handle = ::dlopen(libName.c_str(), ldflags);
+
+    if (!handle)
     {
-        const fileName dylibName(libName.lessExt().ext("dylib"));
-        handle = ::dlopen(dylibName.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+        fileName libso;
+
+        if (!libName.startsWith("lib"))
+        {
+            // Try with 'lib' prefix
+            libso = "lib" + libName;
+            handle = ::dlopen(libso.c_str(), ldflags);
+        }
+        else
+        {
+            libso = libName;
+        }
+
+        // With canonical library extension ("so" or "dylib"), which remaps
+        // "libXX" to "libXX.so" as well as "libXX.so" -> "libXX.dylib"
+        if (!handle && !libso.hasExt(EXT_SO))
+        {
+            libso = libso.lessExt().ext(EXT_SO);
+            handle = ::dlopen(libso.c_str(), ldflags);
+        }
     }
-    #endif
 
     if (!handle && check)
     {
@@ -1686,6 +1706,26 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     }
 
     return handle;
+}
+
+
+Foam::label Foam::dlOpen
+(
+    std::initializer_list<fileName> libNames,
+    const bool check
+)
+{
+    label nLoaded = 0;
+
+    for (const fileName& libName : libNames)
+    {
+        if (Foam::dlOpen(libName, check))
+        {
+            ++nLoaded;
+        }
+    }
+
+    return nLoaded;
 }
 
 
