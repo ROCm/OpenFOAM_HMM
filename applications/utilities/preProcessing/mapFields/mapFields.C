@@ -276,11 +276,11 @@ int main(int argc, char *argv[])
 
 
     argList args(argc, argv);
-
     if (!args.check())
     {
         FatalError.exit();
     }
+    #include "foamDlOpenLibs.H"
 
     fileName rootDirTarget(args.rootPath());
     fileName caseDirTarget(args.globalCaseName());

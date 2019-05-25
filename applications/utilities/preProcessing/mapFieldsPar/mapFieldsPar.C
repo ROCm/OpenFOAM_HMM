@@ -208,6 +208,7 @@ int main(int argc, char *argv[])
     );
 
     argList args(argc, argv);
+    #include "foamDlOpenLibs.H"
 
     fileName rootDirTarget(args.rootPath());
     fileName caseDirTarget(args.globalCaseName());
