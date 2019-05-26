@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -42,10 +42,35 @@ namespace Foam
 namespace functionObjects
 {
     defineTypeNameAndDebug(forceCoeffs, 0);
-
     addToRunTimeSelectionTable(functionObject, forceCoeffs, dictionary);
 }
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Read vector and normalise if present, or set default
+    inline vector readVectorOrDefault
+    (
+        const dictionary& dict,
+        const word& key,
+        const vector::components axis
+    )
+    {
+        vector vec(Zero);  // Zero initialise!
+
+        if (dict.readIfPresent(key, vec))
+        {
+            return normalised(vec);
+        }
+
+        vec[axis] = 1;
+        return vec;
+    }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -61,12 +86,18 @@ void Foam::functionObjects::forceCoeffs::createFiles()
 
         if (nBin_ > 1)
         {
-            CmBinFilePtr_ = createFile("CmBin");
-            writeBinHeader("Moment coefficient bins", CmBinFilePtr_());
             CdBinFilePtr_ = createFile("CdBin");
             writeBinHeader("Drag coefficient bins", CdBinFilePtr_());
+            CsBinFilePtr_ = createFile("CsBin");
+            writeBinHeader("Side coefficient bins", CsBinFilePtr_());
             ClBinFilePtr_ = createFile("ClBin");
             writeBinHeader("Lift coefficient bins", ClBinFilePtr_());
+            CmRollBinFilePtr_ = createFile("CmRollBin");
+            writeBinHeader("Roll moment coefficient bins", CmRollBinFilePtr_());
+            CmPitchBinFilePtr_ = createFile("CmPitchBin");
+            writeBinHeader("Moment coefficient bins", CmPitchBinFilePtr_());
+            CmYawBinFilePtr_ = createFile("CmYawBin");
+            writeBinHeader("Yaw moment coefficient bins", CmYawBinFilePtr_());
         }
     }
 }
@@ -79,18 +110,28 @@ void Foam::functionObjects::forceCoeffs::writeIntegratedHeader
 ) const
 {
     writeHeader(os, "Force coefficients");
-    writeHeaderValue(os, "liftDir", liftDir_);
     writeHeaderValue(os, "dragDir", dragDir_);
+    writeHeaderValue(os, "sideDir", sideDir_);
+    writeHeaderValue(os, "liftDir", liftDir_);
+    writeHeaderValue(os, "rollAxis", rollAxis_);
     writeHeaderValue(os, "pitchAxis", pitchAxis_);
+    writeHeaderValue(os, "yawAxis", yawAxis_);
     writeHeaderValue(os, "magUInf", magUInf_);
     writeHeaderValue(os, "lRef", lRef_);
     writeHeaderValue(os, "Aref", Aref_);
     writeHeaderValue(os, "CofR", coordSys_.origin());
     writeHeader(os, "");
     writeCommented(os, "Time");
-    writeTabbed(os, "Cm");
     writeTabbed(os, "Cd");
+    writeTabbed(os, "Cs");
     writeTabbed(os, "Cl");
+    writeTabbed(os, "CmRoll");
+    writeTabbed(os, "CmPitch");
+    writeTabbed(os, "CmYaw");
+    writeTabbed(os, "Cd(f)");
+    writeTabbed(os, "Cd(r)");
+    writeTabbed(os, "Cs(f)");
+    writeTabbed(os, "Cs(r)");
     writeTabbed(os, "Cl(f)");
     writeTabbed(os, "Cl(r)");
     os  << endl;
@@ -114,30 +155,30 @@ void Foam::functionObjects::forceCoeffs::writeBinHeader
     forAll(binPoints, pointi)
     {
         binPoints[pointi] = (binMin_ + (pointi + 1)*binDx_)*binDir_;
-        os << tab << binPoints[pointi].x();
+        os  << tab << binPoints[pointi].x();
     }
-    os << nl;
+    os  << nl;
 
     writeCommented(os, "y co-ords  :");
     forAll(binPoints, pointi)
     {
-        os << tab << binPoints[pointi].y();
+        os  << tab << binPoints[pointi].y();
     }
-    os << nl;
+    os  << nl;
 
     writeCommented(os, "z co-ords  :");
     forAll(binPoints, pointi)
     {
-        os << tab << binPoints[pointi].z();
+        os  << tab << binPoints[pointi].z();
     }
-    os << nl;
+    os  << nl;
 
     writeHeader(os, "");
     writeCommented(os, "Time");
 
-    for (label j = 0; j < nBin_; j++)
+    for (label j = 0; j < nBin_; ++j)
     {
-        word jn(Foam::name(j) + ':');
+        const word jn(Foam::name(j) + ':');
         writeTabbed(os, jn + "total");
         writeTabbed(os, jn + "pressure");
         writeTabbed(os, jn + "viscous");
@@ -163,13 +204,13 @@ void Foam::functionObjects::forceCoeffs::writeIntegratedData
         return;
     }
 
-    scalar pressure = sum(coeff[0]);
-    scalar viscous = sum(coeff[1]);
-    scalar porous = sum(coeff[2]);
-    scalar total = pressure + viscous + porous;
+    const scalar pressure = sum(coeff[0]);
+    const scalar viscous = sum(coeff[1]);
+    const scalar porous = sum(coeff[2]);
+    const scalar total = pressure + viscous + porous;
 
     Info<< "        " << title << "       : " << total << token::TAB
-        << "("
+        << '('
         << "pressure: " << pressure << token::TAB
         << "viscous: " << viscous;
 
@@ -178,7 +219,7 @@ void Foam::functionObjects::forceCoeffs::writeIntegratedData
         Info<< token::TAB << "porous: " << porous;
     }
 
-    Info<< ")" << endl;
+    Info<< ')' << endl;
 }
 
 
@@ -190,7 +231,7 @@ void Foam::functionObjects::forceCoeffs::writeBinData
 {
     writeTime(os);
 
-    for (label bini = 0; bini < nBin_; bini++)
+    for (label bini = 0; bini < nBin_; ++bini)
     {
         scalar total = coeffs[0][bini] + coeffs[1][bini] + coeffs[2][bini];
 
@@ -216,26 +257,26 @@ Foam::functionObjects::forceCoeffs::forceCoeffs
 )
 :
     forces(name, runTime, dict),
-    liftDir_(Zero),
     dragDir_(Zero),
+    sideDir_(Zero),
+    liftDir_(Zero),
+    rollAxis_(Zero),
     pitchAxis_(Zero),
-    magUInf_(0.0),
-    lRef_(0.0),
-    Aref_(0.0),
+    yawAxis_(Zero),
+    magUInf_(Zero),
+    lRef_(Zero),
+    Aref_(Zero),
     coeffFilePtr_(),
-    CmBinFilePtr_(),
     CdBinFilePtr_(),
-    ClBinFilePtr_()
+    CsBinFilePtr_(),
+    ClBinFilePtr_(),
+    CmRollBinFilePtr_(),
+    CmPitchBinFilePtr_(),
+    CmYawBinFilePtr_()
 {
     read(dict);
     Info<< endl;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::forceCoeffs::~forceCoeffs()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -244,17 +285,21 @@ bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
 {
     forces::read(dict);
 
-    // Directions for lift and drag forces, and pitch moment
-    dict.readEntry("liftDir", liftDir_);
-    dict.readEntry("dragDir", dragDir_);
-    dict.readEntry("pitchAxis", pitchAxis_);
+    // Standard (default) definitions
+    dragDir_ = readVectorOrDefault(dict, "dragDir", vector::X);
+    sideDir_ = readVectorOrDefault(dict, "sideDir", vector::Y);
+    liftDir_ = readVectorOrDefault(dict, "liftDir", vector::Z);
+    rollAxis_ = readVectorOrDefault(dict, "rollAxis", vector::X);
+    pitchAxis_ = readVectorOrDefault(dict, "pitchAxis", vector::Y);
+    yawAxis_ = readVectorOrDefault(dict, "yawAxis", vector::Z);
+
 
     // Free stream velocity magnitude
     dict.readEntry("magUInf", magUInf_);
 
     // If case is compressible we must read rhoInf (store in rhoRef_) to
     // calculate the reference dynamic pressure
-    // - note: for incompressible, rhoRef_ is already initialised
+    // Note: for incompressible, rhoRef_ is already initialised
     if (rhoName_ != "rhoInf")
     {
         dict.readEntry("rhoInf", rhoRef_);
@@ -315,55 +360,90 @@ bool Foam::functionObjects::forceCoeffs::execute()
 
     createFiles();
 
-    scalar pDyn = 0.5*rhoRef_*magUInf_*magUInf_;
-
     // Storage for pressure, viscous and porous contributions to coeffs
-    List<Field<scalar>> momentCoeffs(3);
     List<Field<scalar>> dragCoeffs(3);
+    List<Field<scalar>> sideCoeffs(3);
     List<Field<scalar>> liftCoeffs(3);
+    List<Field<scalar>> rollMomentCoeffs(3);
+    List<Field<scalar>> pitchMomentCoeffs(3);
+    List<Field<scalar>> yawMomentCoeffs(3);
+
     forAll(liftCoeffs, i)
     {
-        momentCoeffs[i].setSize(nBin_);
         dragCoeffs[i].setSize(nBin_);
+        sideCoeffs[i].setSize(nBin_);
         liftCoeffs[i].setSize(nBin_);
+        rollMomentCoeffs[i].setSize(nBin_);
+        pitchMomentCoeffs[i].setSize(nBin_);
+        yawMomentCoeffs[i].setSize(nBin_);
     }
 
     // Calculate coefficients
-    scalar CmTot = 0;
     scalar CdTot = 0;
+    scalar CsTot = 0;
     scalar ClTot = 0;
+    scalar CmRollTot = 0;
+    scalar CmPitchTot = 0;
+    scalar CmYawTot = 0;
+
+    const scalar pDyn = 0.5*rhoRef_*sqr(magUInf_);
+    // Avoid divide by zero in 2D cases
+    const scalar momentScaling = 1.0/(Aref_*pDyn*lRef_ + SMALL);
+    const scalar forceScaling = 1.0/(Aref_*pDyn + SMALL);
+
     forAll(liftCoeffs, i)
     {
-        momentCoeffs[i] = (moment_[i] & pitchAxis_)/(Aref_*pDyn*lRef_);
-        dragCoeffs[i] = (force_[i] & dragDir_)/(Aref_*pDyn);
-        liftCoeffs[i] = (force_[i] & liftDir_)/(Aref_*pDyn);
+        dragCoeffs[i] = forceScaling*(force_[i] & dragDir_);
+        sideCoeffs[i] = forceScaling*(force_[i] & sideDir_);
+        liftCoeffs[i] = forceScaling*(force_[i] & liftDir_);
+        rollMomentCoeffs[i] = momentScaling*(moment_[i] & rollAxis_);
+        pitchMomentCoeffs[i] = momentScaling*(moment_[i] & pitchAxis_);
+        yawMomentCoeffs[i] = momentScaling*(moment_[i] & yawAxis_);
 
-        CmTot += sum(momentCoeffs[i]);
         CdTot += sum(dragCoeffs[i]);
+        CsTot += sum(sideCoeffs[i]);
         ClTot += sum(liftCoeffs[i]);
+        CmRollTot += sum(rollMomentCoeffs[i]);
+        CmPitchTot += sum(pitchMomentCoeffs[i]);
+        CmYawTot += sum(yawMomentCoeffs[i]);
     }
 
-    scalar ClfTot = ClTot/2.0 + CmTot;
-    scalar ClrTot = ClTot/2.0 - CmTot;
+    // Single contributions to the front and rear axles
+    const scalar CdfTot = 0.5*CdTot + CmRollTot;
+    const scalar CdrTot = 0.5*CdTot - CmRollTot;
+    const scalar CsfTot = 0.5*CsTot + CmYawTot;
+    const scalar CsrTot = 0.5*CsTot - CmYawTot;
+    const scalar ClfTot = 0.5*ClTot + CmPitchTot;
+    const scalar ClrTot = 0.5*ClTot - CmPitchTot;
 
     Log << type() << " " << name() << " execute:" << nl
         << "    Coefficients" << nl;
 
-    writeIntegratedData("Cm", momentCoeffs);
     writeIntegratedData("Cd", dragCoeffs);
+    writeIntegratedData("Cs", sideCoeffs);
     writeIntegratedData("Cl", liftCoeffs);
+    writeIntegratedData("CmRoll", rollMomentCoeffs);
+    writeIntegratedData("CmPitch", pitchMomentCoeffs);
+    writeIntegratedData("CmYaw", yawMomentCoeffs);
+
+    Log << "        Cd(f)    : " << CdfTot << nl
+        << "        Cd(r)    : " << CdrTot << nl;
+
+    Log << "        Cs(f)    : " << CsfTot << nl
+        << "        Cs(r)    : " << CsrTot << nl;
 
     Log << "        Cl(f)    : " << ClfTot << nl
-        << "        Cl(r)    : " << ClrTot << nl
-        << endl;
+        << "        Cl(r)    : " << ClrTot << nl;
 
     if (writeToFile())
     {
         writeTime(coeffFilePtr_());
         coeffFilePtr_()
-            << tab << CmTot << tab  << CdTot
-            << tab << ClTot << tab << ClfTot << tab << ClrTot << endl;
-
+            << tab << CdTot << tab << CsTot << tab << ClTot
+            << tab << CmRollTot << tab << CmPitchTot << tab << CmYawTot
+            << tab << CdfTot << tab << CdrTot
+            << tab << CsfTot << tab << CsrTot
+            << tab << ClfTot << tab << ClrTot << endl;
 
         if (nBin_ > 1)
         {
@@ -371,26 +451,41 @@ bool Foam::functionObjects::forceCoeffs::execute()
             {
                 forAll(liftCoeffs, i)
                 {
-                    for (label bini = 1; bini < nBin_; bini++)
+                    for (label bini = 1; bini < nBin_; ++bini)
                     {
-                        liftCoeffs[i][bini] += liftCoeffs[i][bini-1];
                         dragCoeffs[i][bini] += dragCoeffs[i][bini-1];
-                        momentCoeffs[i][bini] += momentCoeffs[i][bini-1];
+                        sideCoeffs[i][bini] += sideCoeffs[i][bini-1];
+                        liftCoeffs[i][bini] += liftCoeffs[i][bini-1];
+                        rollMomentCoeffs[i][bini] +=
+                            rollMomentCoeffs[i][bini-1];
+                        pitchMomentCoeffs[i][bini] +=
+                            pitchMomentCoeffs[i][bini-1];
+                        yawMomentCoeffs[i][bini] += yawMomentCoeffs[i][bini-1];
                     }
                 }
             }
 
             writeBinData(dragCoeffs, CdBinFilePtr_());
+            writeBinData(sideCoeffs, CsBinFilePtr_());
             writeBinData(liftCoeffs, ClBinFilePtr_());
-            writeBinData(momentCoeffs, CmBinFilePtr_());
+            writeBinData(rollMomentCoeffs, CmRollBinFilePtr_());
+            writeBinData(pitchMomentCoeffs, CmPitchBinFilePtr_());
+            writeBinData(yawMomentCoeffs, CmYawBinFilePtr_());
         }
     }
 
     // Write state/results information
     {
-        setResult("Cm", CmTot);
         setResult("Cd", CdTot);
+        setResult("Cs", CsTot);
         setResult("Cl", ClTot);
+        setResult("CmRoll", CmRollTot);
+        setResult("CmPitch", CmPitchTot);
+        setResult("CmYaw", CmYawTot);
+        setResult("Cd(f)", CdfTot);
+        setResult("Cd(r)", CdrTot);
+        setResult("Cs(f)", CsfTot);
+        setResult("Cs(r)", CsrTot);
         setResult("Cl(f)", ClfTot);
         setResult("Cl(r)", ClrTot);
     }
