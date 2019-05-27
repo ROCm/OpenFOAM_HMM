@@ -30,12 +30,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::complex Foam::complex::zero(0, 0);
-const Foam::complex Foam::complex::one(1, 0);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 const char* const Foam::pTraits<Foam::complex>::typeName = "complex";
 const char* const Foam::pTraits<Foam::complex>::componentNames[] = {"re", "im"};
 

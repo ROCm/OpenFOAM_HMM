@@ -48,15 +48,14 @@ int main(int argc, char *argv[])
 {
     Info<< "complex()     : " << complex() << nl
         << "complex(zero) : " << complex(Zero) << nl
-        << "complex::zero : " << complex::zero << nl
-        << "complex::one  : " << complex::one << nl
+        << "pTraits<complex>::zero : " << pTraits<complex>::zero << nl
+        << "pTraits<complex>::one  : " << pTraits<complex>::one << nl
         << "complex(scalar) : " << complex(3.14519) << nl
         << nl;
 
     std::complex<scalar> c1(10, -3);
     Info<< "std::complex : " << c1 << nl;
     Info<< "sin: " << std::sin(c1) << nl;
-
 
     Info<< "complexVector::zero : " << complexVector::zero << nl
         << "complexVector::one  : " << complexVector::one << nl
@@ -120,7 +119,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Elementary complex arithmetic operations:" << nl;
     {
-        complex a (6, 1);
+        complex a(6, 1);
         complex b = a;
 
         Info << "Compound assignment operations:" << nl;
@@ -160,13 +159,12 @@ int main(int argc, char *argv[])
         // Scalar division
         b = 1.0/b;
         Info<< "1/b (elementwise division):" << tab << b << nl;
-
-   }
+    }
 
     Info<< nl << "Other mathematical expressions:" << nl;
     {
-        complex a (4.3, -3.14);
-        complex b (0, -4.3);
+        complex a(4.3, -3.14);
+        complex b(0, -4.3);
 
         Info<< "a=" << a << tab << "b=" << b << nl;
 

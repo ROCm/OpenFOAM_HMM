@@ -85,22 +85,6 @@ class complex
 
 public:
 
-    //- Component type
-    typedef complex cmptType;
-
-
-    // Static Data Members
-
-        //- The type name is "complex"
-        static constexpr const char* const typeName = "complex";
-
-        //- A complex zero (0,0)
-        static const complex zero;
-
-        //- A complex one (1,0)
-        static const complex one;
-
-
     // Constructors
 
         //- Construct null as zero-initialized
@@ -273,12 +257,13 @@ public:
 
         static const char* const typeName;
         static const char* const componentNames[];
-        static const complex zero;
-        static const complex one;
-        static const complex max;
-        static const complex min;
-        static const complex rootMax;
-        static const complex rootMin;
+
+        static const complex zero;      //!< complex (0,0)
+        static const complex one;       //!< complex (1,0)
+        static const complex min;       //!< complex (-VGREAT,-VGREAT)
+        static const complex max;       //!< complex (VGREAT,VGREAT)
+        static const complex rootMin;   //!< complex (-ROOTVGREAT, -ROOTVGREAT)
+        static const complex rootMax;   //!< complex (ROOTVGREAT, ROOTVGREAT)
 
 
     // Constructors
