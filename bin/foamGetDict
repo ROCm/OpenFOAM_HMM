@@ -45,6 +45,7 @@ options:
   -case <dir>       Alternative case directory, default is the cwd
   -ext  <ext>       File extension
   -cfg              Same as '-e cfg' for '.cfg' files
+  -f | -force       Force overwrite of existing files
   -no-ext           Files without extension
   -target <dir>     Target directory (default: system, or auto-detected)
   -with-api=NUM     Alternative api value for searching
@@ -86,7 +87,7 @@ projectApi="$FOAM_API"
 #-------------------------------------------------------------------------------
 
 searchExt="<any>"
-unset targetDir
+unset targetDir optForce
 
 while [ "$#" -gt 0 ]
 do
@@ -112,6 +113,9 @@ do
         ;;
     -cfg)
         searchExt="cfg"
+        ;;
+    -f | -force)
+        optForce=true
         ;;
     -target)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
@@ -221,12 +225,27 @@ findFiles()
 }
 
 
-# Slightly dressed up version of 'cp -v'
+# Slightly dressed up version of 'cp -v' that does not clobber existing files
 copyFile()
 {
+    local targetFile="$2"
+
+    [ -d "$2" ] && targetFile="$targetFile/${1##*/}"
+
     echo 1>&2
-    echo "Copying $1 to $2" 1>&2
-    \cp "$1" "$2"
+    if [ -f "$targetFile" ]
+    then
+        if [ "$optForce" = true ]
+        then
+            echo "Overwrite $1 to $2" 1>&2
+            \cp "$1" "$2"
+        else
+            echo "Skip copy $1 to $2" 1>&2
+        fi
+    else
+        echo "Copying $1 to $2" 1>&2
+        \cp "$1" "$2"
+    fi
     echo 1>&2
 }
 
