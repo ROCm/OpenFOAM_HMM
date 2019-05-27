@@ -85,13 +85,13 @@ class Matrix
         //- Allocate storage for the contents
         inline void doAlloc();
 
-        //- Multiply matrix with a column vector on the right (A * x)
+        //- Multiply matrix with vector (A * x)
         template<class ListType>
-        tmp<Field<Type>> rightMultiplyImpl(const ListType& colVec) const;
+        tmp<Field<Type>> AmulImpl(const ListType& x) const;
 
-        //- Multiply matrix with a row vector on the left (x * A)
+        //- Multiply matrix transpose with vector (AT * x, or x * A)
         template<class ListType>
-        tmp<Field<Type>> leftMultiplyImpl(const ListType& rowVec) const;
+        tmp<Field<Type>> TmulImpl(const ListType& x) const;
 
 
 public:
@@ -310,30 +310,27 @@ public:
         //- Return the transpose of the matrix
         Form T() const;
 
-        //- Multiply matrix with a column vector on the right (A * x)
-        inline tmp<Field<Type>> rightMultiply
+        //- Multiply matrix with vector (A * x)
+        inline tmp<Field<Type>> Amul
         (
-            const UList<Type>& colVec
+            const UList<Type>& x
         ) const;
 
-        //- Multiply matrix with a column vector on the right (A * x)
+        //- Multiply matrix with vector (A * x)
         template<class Addr>
-        inline tmp<Field<Type>> rightMultiply
+        inline tmp<Field<Type>> Amul
         (
-            const IndirectListBase<Type, Addr>& colVec
+            const IndirectListBase<Type, Addr>& x
         ) const;
 
-        //- Multiply matrix with a row vector on the left (x * A)
-        inline tmp<Field<Type>> leftMultiply
-        (
-            const UList<Type>& rowVec
-        ) const;
+        //- Multiply matrix transpose with vector (AT * x, or x * A)
+        inline tmp<Field<Type>> Tmul(const UList<Type>& x) const;
 
-        //- Multiply matrix with a row vector on the left (x * A)
+        //- Multiply matrix transpose with vector (AT * x, or x * A)
         template<class Addr>
-        inline tmp<Field<Type>> leftMultiply
+        inline tmp<Field<Type>> Tmul
         (
-            const IndirectListBase<Type, Addr>& rowVec
+            const IndirectListBase<Type, Addr>& x
         ) const;
 
 

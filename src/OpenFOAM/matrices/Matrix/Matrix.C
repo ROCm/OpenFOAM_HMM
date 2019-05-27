@@ -33,21 +33,20 @@ License
 
 template<class Form, class Type>
 template<class ListType>
-Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::rightMultiplyImpl
+Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::AmulImpl
 (
-    const ListType& colVec
+    const ListType& x
 ) const
 {
     const Matrix<Form, Type>& mat = *this;
 
     #ifdef FULLDEBUG
-    if (mat.n() != colVec.size())
+    if (mat.n() != x.size())
     {
         FatalErrorInFunction
             << "Attempt to multiply incompatible Matrix and Vector:" << nl
             << "Matrix : (" << mat.m() << ", " << mat.n() << ')' << nl
-            << "Vector : " << colVec.size() << " rows" << nl
-            << "The number of Matrix columns must equal the Vector size" << nl
+            << "Matrix columns != Vector size (" << x.size() << ')' << nl
             << abort(FatalError);
     }
     #endif
@@ -59,7 +58,7 @@ Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::rightMultiplyImpl
     {
         for (label j = 0; j < mat.n(); ++j)
         {
-            result[i] += mat(i, j)*colVec[j];
+            result[i] += mat(i, j)*x[j];
         }
     }
 
@@ -69,21 +68,20 @@ Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::rightMultiplyImpl
 
 template<class Form, class Type>
 template<class ListType>
-Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::leftMultiplyImpl
+Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::TmulImpl
 (
-    const ListType& rowVec
+    const ListType& x
 ) const
 {
     const Matrix<Form, Type>& mat = *this;
 
     #ifdef FULLDEBUG
-    if (rowVec.size() != mat.m())
+    if (mat.m() != x.size())
     {
         FatalErrorInFunction
             << "Attempt to multiply incompatible Matrix and Vector:" << nl
             << "Matrix : (" << mat.m() << ", " << mat.n() << ')' << nl
-            << "Vector : " << rowVec.size() << " columns" << nl
-            << "The number of Matrix rows must equal the Vector size" << nl
+            << "Matrix rows != Vector size (" << x.size() << ')' << nl
             << abort(FatalError);
     }
     #endif
@@ -93,7 +91,7 @@ Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::leftMultiplyImpl
 
     for (label i = 0; i < mat.m(); ++i)
     {
-        const Type& val = rowVec[i];
+        const Type& val = x[i];
         for (label j = 0; j < mat.n(); ++j)
         {
             result[j] += val*mat(i, j);

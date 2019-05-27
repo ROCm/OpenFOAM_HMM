@@ -404,44 +404,44 @@ void Foam::Matrix<Form, Type>::shallowResize(const label m, const label n)
 
 
 template<class Form, class Type>
-inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::rightMultiply
+inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::Amul
 (
-    const UList<Type>& colVec
+    const UList<Type>& x
 ) const
 {
-    return this->rightMultiplyImpl(colVec);
+    return this->AmulImpl(x);
 }
 
 
 template<class Form, class Type>
 template<class Addr>
-inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::rightMultiply
+inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::Amul
 (
-    const IndirectListBase<Type, Addr>& colVec
+    const IndirectListBase<Type, Addr>& x
 ) const
 {
-    return this->rightMultiplyImpl(colVec);
+    return this->AmulImpl(x);
 }
 
 
 template<class Form, class Type>
-inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::leftMultiply
+inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::Tmul
 (
-    const UList<Type>& rowVec
+    const UList<Type>& x
 ) const
 {
-    return this->leftMultiplyImpl(rowVec);
+    return this->TmulImpl(x);
 }
 
 
 template<class Form, class Type>
 template<class Addr>
-inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::leftMultiply
+inline Foam::tmp<Foam::Field<Type>> Foam::Matrix<Form, Type>::Tmul
 (
-    const IndirectListBase<Type, Addr>& rowVec
+    const IndirectListBase<Type, Addr>& x
 ) const
 {
-    return this->leftMultiplyImpl(rowVec);
+    return this->TmulImpl(x);
 }
 
 
@@ -546,7 +546,7 @@ inline Foam::tmp<Foam::Field<Type>> Foam::operator*
     const UList<Type>& x
 )
 {
-    mat.rightMultiply(x);
+    return mat.Amul(x);
 }
 
 
@@ -557,7 +557,7 @@ inline Foam::tmp<Foam::Field<Type>> Foam::operator*
     const IndirectListBase<Type, Addr>& x
 )
 {
-    mat.rightMultiply(x);
+    return mat.Amul(x);
 }
 
 
@@ -568,7 +568,7 @@ inline Foam::tmp<Foam::Field<Type>> Foam::operator*
     const Matrix<Form, Type>& mat
 )
 {
-    mat.leftMultiply(x);
+    return mat.Tmul(x);
 }
 
 
@@ -579,7 +579,7 @@ inline Foam::tmp<Foam::Field<Type>> Foam::operator*
     const Matrix<Form, Type>& mat
 )
 {
-    mat.leftMultiply(x);
+    return mat.Tmul(x);
 }
 
 
