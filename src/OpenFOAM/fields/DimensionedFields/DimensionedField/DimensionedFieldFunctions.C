@@ -324,11 +324,12 @@ dimensioned<returnType> func                                                   \
 UNARY_REDUCTION_FUNCTION(Type, max, gMax)
 UNARY_REDUCTION_FUNCTION(Type, min, gMin)
 UNARY_REDUCTION_FUNCTION(Type, sum, gSum)
-UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
 
 UNARY_REDUCTION_FUNCTION(MinMax<Type>, minMax, gMinMax)
 UNARY_REDUCTION_FUNCTION(scalarMinMax, minMaxMag, gMinMaxMag)
+
+UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 
 #undef UNARY_REDUCTION_FUNCTION
 

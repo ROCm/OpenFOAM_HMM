@@ -317,10 +317,8 @@ Type max(const UList<Type>& f)
         TFOR_ALL_S_OP_FUNC_F_S(Type, Max, =, max, Type, f, Type, Max)
         return Max;
     }
-    else
-    {
-        return pTraits<Type>::min;
-    }
+
+    return pTraits<Type>::min;
 }
 
 TMP_UNARY_FUNCTION(Type, max)
@@ -334,10 +332,8 @@ Type min(const UList<Type>& f)
         TFOR_ALL_S_OP_FUNC_F_S(Type, Min, =, min, Type, f, Type, Min)
         return Min;
     }
-    else
-    {
-        return pTraits<Type>::max;
-    }
+
+    return pTraits<Type>::max;
 }
 
 TMP_UNARY_FUNCTION(Type, min)
@@ -351,10 +347,8 @@ Type sum(const UList<Type>& f)
         TFOR_ALL_S_OP_F(Type, Sum, +=, Type, f)
         return Sum;
     }
-    else
-    {
-        return Zero;
-    }
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, sum)
@@ -387,10 +381,8 @@ Type maxMagSqr(const UList<Type>& f)
         )
         return Max;
     }
-    else
-    {
-        return Zero;
-    }
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, maxMagSqr)
@@ -414,10 +406,8 @@ Type minMagSqr(const UList<Type>& f)
         )
         return Min;
     }
-    else
-    {
-        return pTraits<Type>::rootMax;
-    }
+
+    return pTraits<Type>::rootMax;
 }
 
 TMP_UNARY_FUNCTION(Type, minMagSqr)
@@ -508,25 +498,24 @@ Type average(const UList<Type>& f)
 
         return avrg;
     }
-    else
-    {
-        WarningInFunction
-            << "empty field, returning zero" << endl;
 
-        return Zero;
-    }
+    WarningInFunction
+        << "empty field, returning zero" << endl;
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, average)
 
 
+// With reduction on ReturnType
 #define G_UNARY_FUNCTION(ReturnType, gFunc, Func, rFunc)                       \
                                                                                \
 template<class Type>                                                           \
 ReturnType gFunc(const UList<Type>& f, const label comm)                       \
 {                                                                              \
     ReturnType res = Func(f);                                                  \
-    reduce(res, rFunc##Op<Type>(), Pstream::msgType(), comm);                  \
+    reduce(res, rFunc##Op<ReturnType>(), Pstream::msgType(), comm);            \
     return res;                                                                \
 }                                                                              \
 TMP_UNARY_FUNCTION(ReturnType, gFunc)
@@ -536,12 +525,13 @@ G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
 G_UNARY_FUNCTION(Type, gMaxMagSqr, maxMagSqr, maxMagSqr)
 G_UNARY_FUNCTION(Type, gMinMagSqr, minMagSqr, minMagSqr)
-G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
 
-G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, minMax)
-G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
+
+G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
+G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
@@ -591,13 +581,11 @@ Type gAverage
 
         return avrg;
     }
-    else
-    {
-        WarningInFunction
-            << "empty field, returning zero." << endl;
 
-        return Zero;
-    }
+    WarningInFunction
+        << "empty field, returning zero." << endl;
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, gAverage)

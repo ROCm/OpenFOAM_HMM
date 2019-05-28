@@ -230,10 +230,8 @@ dimensioned<returnType> func                                                   \
 
 UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, max, maxOp)
 UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, min, minOp)
-
-// Same signature, but different implementation
-UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(MinMax<Type>, minMax, unused)
-UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(scalarMinMax, minMaxMag, unused)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(MinMax<Type>, minMax, minMaxOp)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(scalarMinMax, minMaxMag, minMaxMagOp)
 
 #undef UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY
 
@@ -253,8 +251,8 @@ dimensioned<returnType> func                                                   \
 );
 
 UNARY_REDUCTION_FUNCTION(Type, sum, gSum)
-UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
+UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 
 #undef UNARY_REDUCTION_FUNCTION
 
