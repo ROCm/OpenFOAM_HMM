@@ -24,12 +24,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::labelPair
-
-Description
-    A pair of labels.
-
-Typedef
     Foam::labelPairPair
 
 Description
@@ -66,7 +60,6 @@ Description
 
 namespace Foam
 {
-    typedef Pair<label> labelPair;
     typedef Pair<labelPair> labelPairPair;
     typedef List<labelPair> labelPairList;
     typedef UList<labelPair> labelPairUList;
