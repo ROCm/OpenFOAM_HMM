@@ -107,7 +107,7 @@ public:
         //- Construct from lduMatrix and perform LU decomposition
         LUscalarMatrix
         (
-            const lduMatrix&,
+            const lduMatrix& ldum,
             const FieldField<Field, scalar>& interfaceCoeffs,
             const lduInterfaceFieldPtrsList& interfaces
         );

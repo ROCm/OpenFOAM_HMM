@@ -323,6 +323,7 @@ void Foam::multiply
 }
 
 
+//- Pseudo-inverse algorithm for scalar matrices, using Moore-Penrose inverse
 Foam::scalarRectangularMatrix Foam::SVDinv
 (
     const scalarRectangularMatrix& A,

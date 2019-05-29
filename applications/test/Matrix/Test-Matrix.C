@@ -33,7 +33,62 @@ License
 #include "tensor.H"
 #include "IFstream.H"
 
+#include <algorithm>
+
 using namespace Foam;
+
+// Copy values into matrix
+template<class Form, class Type>
+void assignMatrix
+(
+    Matrix<Form, Type>& mat,
+    std::initializer_list<typename Matrix<Form, Type>::cmptType> list
+)
+{
+    const label nargs = list.size();
+
+    if (nargs != mat.size())
+    {
+        FatalErrorInFunction
+            << "Mismatch in matrix dimension ("
+            << mat.m() << ", "
+            << mat.n() << ") and number of args (" << nargs << ')' << nl
+            << exit(FatalError);
+     }
+
+    std::copy(list.begin(), list.end(), mat.begin());
+}
+
+// Create matrix with values
+template<class MatrixType>
+MatrixType makeMatrix
+(
+    const labelPair& dims,
+    std::initializer_list<typename MatrixType::cmptType> list
+)
+{
+    MatrixType mat(dims);
+
+    assignMatrix(mat, list);
+
+    return mat;
+}
+
+
+// Create matrix with values
+template<class MatrixType, Foam::label nRows, Foam::label nCols>
+MatrixType makeMatrix
+(
+    std::initializer_list<typename MatrixType::cmptType> list
+)
+{
+    MatrixType mat(labelPair(nRows, nCols));
+
+    assignMatrix(mat, list);
+
+    return mat;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -46,18 +101,48 @@ int main(int argc, char *argv[])
 
         SquareMatrix<scalar> square1(3);
 
-        square1(0, 0) = -3.0;
-        square1(0, 1) = 10.0;
-        square1(0, 2) = -4.0;
-        square1(1, 0) = 2.0;
-        square1(1, 1) = 3.0;
-        square1(1, 2) = 10.0;
-        square1(2, 0) = 2.0;
-        square1(2, 1) = 6.0;
-        square1(2, 2) = 1.0;
+        assignMatrix
+        (
+            square1,
+            {
+                -3.0, 10.0, -4.0,
+                2.0, 3.0, 10.0,
+                2.0, 6.0, 1.0
+            }
+        );
 
         Info<< "matrix: " << square1
-            << " begin: " << long(square1.cdata()) << nl;
+            << " begin: " << uintptr_t(square1.cdata()) << nl;
+
+        // Test makeMatrix
+        {
+            auto square1b
+            (
+                makeMatrix<scalarSquareMatrix>
+                (
+                    {3, 3},
+                    {
+                        -3.0, 10.0, -4.0,
+                        2.0, 3.0, 10.0,
+                        2.0, 6.0, 1.0
+                    }
+                )
+            );
+
+            Info<< "makeMatrix: " << square1b << nl;
+
+            auto square1c
+            (
+                makeMatrix<scalarSquareMatrix, 3, 3>
+                ({
+                    -3.0, 10.0, -4.0,
+                    2.0, 3.0, 10.0,
+                    2.0, 6.0, 1.0
+                })
+            );
+
+            Info<< "makeMatrix: " << square1c << nl;
+        }
 
         //Info<< square1 - 2.0*(-square1) << nl;
         Info<< "min:" << min(square1) << " max:" << max(square1) << nl;
@@ -68,7 +153,7 @@ int main(int argc, char *argv[])
         List<scalar> stole(square1.release());
 
         Info<< "matrix: " << square1
-            << " begin: " << long(square1.cdata()) << nl;
+            << " begin: " << uintptr_t(square1.cdata()) << nl;
 
         Info<< "List: " << stole << nl;
 
@@ -77,7 +162,7 @@ int main(int argc, char *argv[])
         square1 = 100;
 
         Info<< "matrix: " << square1
-            << " begin: " << long(square1.cdata()) << nl;
+            << " begin: " << uintptr_t(square1.cdata()) << nl;
 
 
         SquareMatrix<scalar> square2(3, I);
@@ -116,10 +201,13 @@ int main(int argc, char *argv[])
     {
         Info<< nl << "Test RectangularMatrix" << nl;
 
-        RectangularMatrix<scalar> rm1(5, 6, 3.1);
+        RectangularMatrix<scalar> rm1({5, 6}, 3.1);
         rm1(0, 1) = 4.5;
+
         RectangularMatrix<scalar> rm1b(rm1.block(2, 2, 0, 0));
-        Info<< "rm1b = " << rm1b << endl;
+
+        Info // << "Full matrix " << rm1 << nl
+            << "block = " << rm1b << endl;
     }
 
     {
@@ -143,7 +231,7 @@ int main(int argc, char *argv[])
         Info<< "Inverse = " << invDecomposed(symmMatrix2) << endl;
         Info<< "Determinant = " << detDecomposed(symmMatrix2) << endl;
 
-        scalarDiagonalMatrix rhs(3, 0);
+        scalarDiagonalMatrix rhs(3, Zero);
         rhs[0] = 1;
         rhs[1] = 2;
         rhs[2] = 3;

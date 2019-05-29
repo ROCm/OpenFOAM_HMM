@@ -586,7 +586,7 @@ Form Foam::operator-(const Matrix<Form, Type>& mat)
 template<class Form, class Type>
 Form Foam::operator+(const Matrix<Form, Type>& A, const Matrix<Form, Type>& B)
 {
-    if (A.m() != B.m())
+    if (A.m() != B.m() || A.n() != B.n())
     {
         FatalErrorInFunction
             << "Attempt to add matrices with different sizes: ("
@@ -615,7 +615,7 @@ Form Foam::operator+(const Matrix<Form, Type>& A, const Matrix<Form, Type>& B)
 template<class Form, class Type>
 Form Foam::operator-(const Matrix<Form, Type>& A, const Matrix<Form, Type>& B)
 {
-    if (A.m() != B.m())
+    if (A.m() != B.m() || A.n() != B.n())
     {
         FatalErrorInFunction
             << "Attempt to subtract matrices with different sizes: ("

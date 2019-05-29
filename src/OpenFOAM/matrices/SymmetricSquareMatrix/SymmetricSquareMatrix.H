@@ -40,7 +40,6 @@ SourceFiles
 #define SymmetricSquareMatrix_H
 
 #include "SquareMatrix.H"
-#include "Identity.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,27 +60,43 @@ public:
 
     // Constructors
 
-        //- Null constructor.
+        //- Construct null
         inline SymmetricSquareMatrix();
 
-        //- Construct given number of rows/columns.
-        inline SymmetricSquareMatrix(const label n);
+        //- Construct for given size (rows == cols)
+        inline explicit SymmetricSquareMatrix(const label n);
 
-        //- Construct given number of rows/columns, initializing to zero
+        //- Construct for given size (rows == cols)
+        //- initializing all elements to zero
         inline SymmetricSquareMatrix(const label n, const zero);
 
-        //- Construct with given number of rows/columns
+        //- Construct for given size (rows == cols)
         //- initializing all elements to the given value
         inline SymmetricSquareMatrix(const label n, const Type& val);
 
-        //- Construct given number of rows/columns,
-        inline SymmetricSquareMatrix(const label n, const Identity<Type>);
+        //- Construct for given size (rows == cols)
+        //- setting the diagonal to one and off-diagonals to zero
+        template<class AnyType>
+        inline SymmetricSquareMatrix(const label n, const Identity<AnyType>);
 
-        //- Construct from Istream.
-        inline SymmetricSquareMatrix(Istream&);
+        //- Construct from Istream
+        inline explicit SymmetricSquareMatrix(Istream& is);
 
         //- Clone
         inline autoPtr<SymmetricSquareMatrix<Type>> clone() const;
+
+
+    // Member Operators
+
+        //- Assign all elements to zero
+        inline void operator=(const zero);
+
+        //- Assign all elements to value
+        inline void operator=(const Type& val);
+
+        //- Set to identity matrix
+        template<class AnyType>
+        void operator=(const Identity<AnyType>);
 };
 
 

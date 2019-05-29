@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -60,7 +60,7 @@ namespace Foam
 template<class MatrixType>
 class ConstMatrixBlock
 {
-    // Private data
+    // Private Data
 
         //- Const reference to the parent matrix
         const MatrixType& matrix_;
@@ -98,6 +98,9 @@ public:
         //- Return the number of columns in the block
         inline label n() const;
 
+        //- Return row/column sizes
+        inline labelPair sizes() const;
+
         //- (i, j) const element access operator
         inline const cmptType& operator()
         (
@@ -117,7 +120,7 @@ public:
 template<class MatrixType>
 class MatrixBlock
 {
-    // Private data
+    // Private Data
 
         //- Reference to the parent matrix
         MatrixType& matrix_;
@@ -154,6 +157,9 @@ public:
 
         //- Return the number of columns in the block
         inline label n() const;
+
+        //- Return row/column sizes
+        inline labelPair sizes() const;
 
         //- (i, j) const element access operator
         inline const cmptType& operator()

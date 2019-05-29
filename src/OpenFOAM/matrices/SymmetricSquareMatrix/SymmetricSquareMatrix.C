@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -107,6 +107,21 @@ Type Foam::det(const SymmetricSquareMatrix<Type>& matrix)
     LUDecompose(matrixTmp);
 
     return detDecomposed(matrixTmp);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+template<class AnyType>
+void Foam::SymmetricSquareMatrix<Type>::operator=(const Identity<AnyType>)
+{
+    Matrix<SymmetricSquareMatrix<Type>, Type>::operator=(Zero);
+
+    for (label i=0; i < this->n(); ++i)
+    {
+        this->operator()(i, i) = pTraits<Type>::one;
+    }
 }
 
 

@@ -50,6 +50,7 @@ SourceFiles
 #define Matrix_H
 
 #include "uLabel.H"
+#include "Pair.H"
 #include "Field.H"
 #include "autoPtr.H"
 
@@ -120,19 +121,30 @@ public:
 
     // Constructors
 
-        //- Null constructor.
+        //- Construct null
         inline Matrix();
 
-        //- Construct given number of rows and columns.
+        //- Construct given number of rows/columns
         Matrix(const label m, const label n);
 
-        //- Construct with given number of rows and columns
+        //- Construct with given number of rows/columns
         //- initializing all elements to zero
         Matrix(const label m, const label n, const zero);
 
-        //- Construct with given number of rows and columns
+        //- Construct with given number of rows/columns
         //- initializing all elements to the given value
         Matrix(const label m, const label n, const Type& val);
+
+        //- Construct given number of rows/columns
+        inline explicit Matrix(const labelPair& dims);
+
+        //- Construct given number of rows/columns.
+        //- initializing all elements to zero
+        inline Matrix(const labelPair& dims, const zero);
+
+        //- Construct with given number of rows/columns
+        //- initializing all elements to the given value
+        inline Matrix(const labelPair& dims, const Type& val);
 
         //- Copy construct
         Matrix(const Matrix<Form, Type>& mat);
@@ -175,6 +187,9 @@ public:
 
         //- Return the number of elements in matrix (m*n)
         inline label size() const;
+
+        //- Return row/column sizes
+        inline labelPair sizes() const;
 
         //- Return true if the matrix is empty (ie, size() is zero)
         inline bool empty() const noexcept;

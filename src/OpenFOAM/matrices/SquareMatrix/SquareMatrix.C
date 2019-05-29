@@ -72,4 +72,19 @@ Foam::scalar Foam::det(SquareMatrix<Type>& matrix)
 }
 
 
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+template<class AnyType>
+void Foam::SquareMatrix<Type>::operator=(const Identity<AnyType>)
+{
+    Matrix<SquareMatrix<Type>, Type>::operator=(Zero);
+
+    for (label i=0; i < this->n(); ++i)
+    {
+        this->operator()(i, i) = pTraits<Type>::one;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

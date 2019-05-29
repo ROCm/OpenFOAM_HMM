@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Matrix Declaration
+                      Class RectangularMatrix Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -62,33 +62,47 @@ public:
 
     // Constructors
 
-        //- Null constructor.
+        //- Construct null
         inline RectangularMatrix();
 
-        //- Construct given number of rows and columns,
+        //- Construct a square matrix (rows == columns)
+        inline explicit RectangularMatrix(const label n);
+
+        //- Construct given number of rows/columns
         inline RectangularMatrix(const label m, const label n);
 
-        //- Construct from a block of another matrix
-        template<class MatrixType>
-        inline RectangularMatrix(const ConstMatrixBlock<MatrixType>&);
-
-        //- Construct from a block of another matrix
-        template<class MatrixType>
-        inline RectangularMatrix(const MatrixBlock<MatrixType>&);
-
-        //- Construct with given number of rows and columns
+        //- Construct given number of rows/columns
         //- initializing all elements to zero
         inline RectangularMatrix(const label m, const label n, const zero);
 
-        //- Construct with given number of rows and columns
-        //- and value for all elements.
+        //- Construct given number of rows/columns
+        //- initializing all elements to the given value
         inline RectangularMatrix(const label m, const label n, const Type& val);
+
+        //- Construct given number of rows/columns
+        inline explicit RectangularMatrix(const labelPair& dims);
+
+        //- Construct given number of rows/columns
+        //- initializing all elements to zero
+        inline RectangularMatrix(const labelPair& dims, const zero);
+
+        //- Construct given number of rows/columns
+        //- initializing all elements to the given value
+        inline RectangularMatrix(const labelPair& dims, const Type& val);
+
+        //- Construct from a block of another matrix
+        template<class MatrixType>
+        inline RectangularMatrix(const ConstMatrixBlock<MatrixType>& mat);
+
+        //- Construct from a block of another matrix
+        template<class MatrixType>
+        inline RectangularMatrix(const MatrixBlock<MatrixType>& mat);
 
         //- Construct as copy of a square matrix
         inline RectangularMatrix(const SquareMatrix<Type>& mat);
 
         //- Construct from Istream.
-        inline RectangularMatrix(Istream& is);
+        inline explicit RectangularMatrix(Istream& is);
 
         //- Clone
         inline autoPtr<RectangularMatrix<Type>> clone() const;
@@ -96,11 +110,11 @@ public:
 
     // Member Operators
 
-        //- Assignment of all elements to zero
-        void operator=(const zero);
+        //- Assign all elements to zero
+        inline void operator=(const zero);
 
-        //- Assignment of all elements to the given value
-        void operator=(const Type& val);
+        //- Assign all elements to value
+        inline void operator=(const Type& val);
 };
 
 

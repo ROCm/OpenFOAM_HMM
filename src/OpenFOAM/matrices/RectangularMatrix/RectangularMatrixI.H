@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -46,24 +46,12 @@ inline Foam::RectangularMatrix<Type>::RectangularMatrix
 
 
 template<class Type>
-template<class MatrixType>
 inline Foam::RectangularMatrix<Type>::RectangularMatrix
 (
-    const ConstMatrixBlock<MatrixType>& block
+    const label n
 )
 :
-    Matrix<RectangularMatrix<Type>, Type>(block)
-{}
-
-
-template<class Type>
-template<class MatrixType>
-inline Foam::RectangularMatrix<Type>::RectangularMatrix
-(
-    const MatrixBlock<MatrixType>& block
-)
-:
-    Matrix<RectangularMatrix<Type>, Type>(block)
+    Matrix<RectangularMatrix<Type>, Type>(n, n)
 {}
 
 
@@ -88,6 +76,60 @@ inline Foam::RectangularMatrix<Type>::RectangularMatrix
 )
 :
     Matrix<RectangularMatrix<Type>, Type>(m, n, val)
+{}
+
+
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const labelPair& dims
+)
+:
+    RectangularMatrix<Type>(dims.first(), dims.second())
+{}
+
+
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const labelPair& dims,
+    const zero
+)
+:
+    RectangularMatrix<Type>(dims.first(), dims.second(), Zero)
+{}
+
+
+template<class Type>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const labelPair& dims,
+    const Type& val
+)
+:
+    RectangularMatrix<Type>(dims.first(), dims.second(), val)
+{}
+
+
+template<class Type>
+template<class MatrixType>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const ConstMatrixBlock<MatrixType>& mat
+)
+:
+    Matrix<RectangularMatrix<Type>, Type>(mat)
+{}
+
+
+template<class Type>
+template<class MatrixType>
+inline Foam::RectangularMatrix<Type>::RectangularMatrix
+(
+    const MatrixBlock<MatrixType>& mat
+)
+:
+    Matrix<RectangularMatrix<Type>, Type>(mat)
 {}
 
 
@@ -119,14 +161,14 @@ Foam::RectangularMatrix<Type>::clone() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::RectangularMatrix<Type>::operator=(const zero)
+inline void Foam::RectangularMatrix<Type>::operator=(const zero)
 {
     Matrix<RectangularMatrix<Type>, Type>::operator=(Zero);
 }
 
 
 template<class Type>
-void Foam::RectangularMatrix<Type>::operator=(const Type& val)
+inline void Foam::RectangularMatrix<Type>::operator=(const Type& val)
 {
     Matrix<RectangularMatrix<Type>, Type>::operator=(val);
 }
@@ -163,5 +205,6 @@ inline Foam::RectangularMatrix<Type> outer
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
 
 // ************************************************************************* //

@@ -52,7 +52,7 @@ template<class Type> class RectangularMatrix;
 
 
 /*---------------------------------------------------------------------------*\
-                           Class Matrix Declaration
+                        Class SquareMatrix Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -65,42 +65,57 @@ public:
 
     // Constructors
 
-        //- Null constructor.
+        //- Construct null
         inline SquareMatrix();
 
-        //- Construct given number of rows/columns.
-        inline SquareMatrix(const label n);
+        //- Construct for given size (rows == cols)
+        inline explicit SquareMatrix(const label n);
 
-        //- Construct from a block of another matrix
-        template<class MatrixType>
-        inline SquareMatrix(const ConstMatrixBlock<MatrixType>&);
-
-        //- Construct from a block of another matrix
-        template<class MatrixType>
-        inline SquareMatrix(const MatrixBlock<MatrixType>&);
-
-        //- Construct given number of rows/columns
+        //- Construct for given size (rows == cols)
         //- initializing all elements to zero
         inline SquareMatrix(const label n, const zero);
 
-        //- Construct given number of rows and columns (checked to be equal)
-        //- initializing all elements to zero
-        inline SquareMatrix(const label m, const label n, const zero);
-
-        //- Construct given number of rows/columns
-        //- initializing to the identity matrix
-        inline SquareMatrix(const label n, const Identity<Type>);
-
-        //- Construct with given number of rows and rows
+        //- Construct for given size (rows == cols)
         //- initializing all elements to the given value
         inline SquareMatrix(const label n, const Type& val);
 
+        //- Construct for given size (rows == cols)
+        //- initializing to the identity matrix
+        template<class AnyType>
+        inline SquareMatrix(const label n, const Identity<AnyType>);
+
+        //- Construct given number of rows/columns (checked to be equal)
+        //  For constructor consistency in rectangular matrices
+        inline explicit SquareMatrix(const labelPair& dims);
+
+        //- Construct given number of rows/columns (checked to be equal)
+        //- initializing all elements to zero
+        //  For constructor consistency with rectangular matrices
+        inline SquareMatrix(const labelPair& dims, const zero);
+
+        //- Construct given number of rows/columns (checked to be equal)
+        //- initializing all elements to the given value
+        //  For constructor consistency with rectangular matrices
+        inline SquareMatrix(const labelPair& dims, const Type& val);
+
+        //- Construct given number of rows/columns (checked to be equal)
+        //- initializing all elements to zero
+        inline SquareMatrix(const label m, const label n, const zero);
+
+        //- Construct from sub-matrix block
+        template<class MatrixType>
+        inline SquareMatrix(const ConstMatrixBlock<MatrixType>& mat);
+
+        //- Construct from sub-matrix block
+        template<class MatrixType>
+        inline SquareMatrix(const MatrixBlock<MatrixType>& mat);
+
         //- Construct as copy of a RectangularMatrix
         //- which is checked to be square
-        inline explicit SquareMatrix(const RectangularMatrix<Type>&);
+        inline explicit SquareMatrix(const RectangularMatrix<Type>& mat);
 
-        //- Construct from Istream.
-        inline SquareMatrix(Istream&);
+        //- Construct from Istream
+        inline explicit SquareMatrix(Istream& is);
 
         //- Clone
         inline autoPtr<SquareMatrix<Type>> clone() const;
@@ -120,16 +135,17 @@ public:
         inline void shallowResize(const label m);
 
 
-    // Member operators
+    // Member Operators
 
-        //- Assignment of all elements to zero
-        void operator=(const zero);
+        //- Assign all elements to zero
+        inline void operator=(const zero);
 
-        //- Assignment of all elements to the given value
-        void operator=(const Type& val);
+        //- Assign all elements to value
+        inline void operator=(const Type& val);
 
-        //- Clear and assign diagonal to identity
-        void operator=(const Identity<Type>);
+        //- Set to identity matrix
+        template<class AnyType>
+        void operator=(const Identity<AnyType>);
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -116,6 +116,20 @@ template<class MatrixType>
 inline Foam::label Foam::MatrixBlock<MatrixType>::n() const
 {
     return nCols_;
+}
+
+
+template<class MatrixType>
+inline Foam::labelPair Foam::ConstMatrixBlock<MatrixType>::sizes() const
+{
+    return labelPair(mRows_, nCols_);
+}
+
+
+template<class MatrixType>
+inline Foam::labelPair Foam::MatrixBlock<MatrixType>::sizes() const
+{
+    return labelPair(mRows_, nCols_);
 }
 
 

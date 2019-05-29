@@ -25,6 +25,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#define CHECK_MATRIX_IS_SQUARE(a, b)                                           \
+    if (a != b)                                                                \
+    {                                                                          \
+        FatalErrorInFunction                                                   \
+            << "Attempt to create a non-square matrix ("                       \
+            << a << ", " << b << ')' << nl << abort(FatalError);               \
+    }
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -42,28 +51,6 @@ inline Foam::SquareMatrix<Type>::SquareMatrix(const label n)
 
 
 template<class Type>
-template<class MatrixType>
-inline Foam::SquareMatrix<Type>::SquareMatrix
-(
-    const ConstMatrixBlock<MatrixType>& block
-)
-:
-    Matrix<SquareMatrix<Type>, Type>(block)
-{}
-
-
-template<class Type>
-template<class MatrixType>
-inline Foam::SquareMatrix<Type>::SquareMatrix
-(
-    const MatrixBlock<MatrixType>& block
-)
-:
-    Matrix<SquareMatrix<Type>, Type>(block)
-{}
-
-
-template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix
 (
     const label n,
@@ -72,26 +59,6 @@ inline Foam::SquareMatrix<Type>::SquareMatrix
 :
     Matrix<SquareMatrix<Type>, Type>(n, n, Zero)
 {}
-
-
-template<class Type>
-inline Foam::SquareMatrix<Type>::SquareMatrix
-(
-    const label m,
-    const label n,
-    const zero
-)
-:
-    Matrix<SquareMatrix<Type>, Type>(m, n, Zero)
-{
-    if (m != n)
-    {
-        FatalErrorInFunction
-            << "Attempt to construct a square matrix "
-            << m << " x " << n << nl
-            << abort(FatalError);
-    }
-}
 
 
 template<class Type>
@@ -106,18 +73,97 @@ inline Foam::SquareMatrix<Type>::SquareMatrix
 
 
 template<class Type>
+template<class AnyType>
 inline Foam::SquareMatrix<Type>::SquareMatrix
 (
     const label n,
-    const Identity<Type>
+    const Identity<AnyType>
 )
 :
     Matrix<SquareMatrix<Type>, Type>(n, n, Zero)
 {
-    for (label i=0; i<n; i++)
+    for (label i=0; i < n; ++i)
     {
-        this->operator()(i, i) = Type(I);
+        this->operator()(i, i) = pTraits<Type>::one;
     }
+}
+
+
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const labelPair& dims
+)
+:
+    Matrix<SquareMatrix<Type>, Type>(dims)
+{
+    CHECK_MATRIX_IS_SQUARE(dims.first(), dims.second());
+}
+
+
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const labelPair& dims,
+    const zero
+)
+:
+    Matrix<SquareMatrix<Type>, Type>(dims, Zero)
+{
+    CHECK_MATRIX_IS_SQUARE(dims.first(), dims.second());
+}
+
+
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const labelPair& dims,
+    const Type& val
+)
+:
+    Matrix<SquareMatrix<Type>, Type>(dims, val)
+{
+    CHECK_MATRIX_IS_SQUARE(dims.first(), dims.second());
+}
+
+
+template<class Type>
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const label m,
+    const label n,
+    const zero
+)
+:
+    Matrix<SquareMatrix<Type>, Type>(m, n, Zero)
+{
+    CHECK_MATRIX_IS_SQUARE(m, n);
+}
+
+
+template<class Type>
+template<class MatrixType>
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const ConstMatrixBlock<MatrixType>& mat
+)
+:
+    Matrix<SquareMatrix<Type>, Type>(mat)
+{
+    // Check is square?
+}
+
+
+template<class Type>
+template<class MatrixType>
+inline Foam::SquareMatrix<Type>::SquareMatrix
+(
+    const MatrixBlock<MatrixType>& mat
+)
+:
+    Matrix<SquareMatrix<Type>, Type>(mat)
+{
+    // Check is square?
 }
 
 
@@ -129,13 +175,7 @@ inline Foam::SquareMatrix<Type>::SquareMatrix
 :
     Matrix<SquareMatrix<Type>, Type>(mat)
 {
-    if (mat.m() != mat.n())
-    {
-        FatalErrorInFunction
-            << "Attempt to construct a square matrix from a rectangular matrix "
-            << mat.m() << " x " << mat.n() << nl
-            << abort(FatalError);
-    }
+    CHECK_MATRIX_IS_SQUARE(mat.m(), mat.n());
 }
 
 
@@ -143,7 +183,9 @@ template<class Type>
 inline Foam::SquareMatrix<Type>::SquareMatrix(Istream& is)
 :
     Matrix<SquareMatrix<Type>, Type>(is)
-{}
+{
+    CHECK_MATRIX_IS_SQUARE(this->m(), this->n());
+}
 
 
 template<class Type>
@@ -180,28 +222,16 @@ inline void Foam::SquareMatrix<Type>::shallowResize(const label m)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::SquareMatrix<Type>::operator=(const zero)
+inline void Foam::SquareMatrix<Type>::operator=(const zero)
 {
     Matrix<SquareMatrix<Type>, Type>::operator=(Zero);
 }
 
 
 template<class Type>
-void Foam::SquareMatrix<Type>::operator=(const Type& val)
+inline void Foam::SquareMatrix<Type>::operator=(const Type& val)
 {
     Matrix<SquareMatrix<Type>, Type>::operator=(val);
-}
-
-
-template<class Type>
-void Foam::SquareMatrix<Type>::operator=(const Identity<Type>)
-{
-    Matrix<SquareMatrix<Type>, Type>::operator=(Zero);
-
-    for (label i=0; i<this->n(); i++)
-    {
-        this->operator()(i, i) = Type(I);
-    }
 }
 
 
@@ -236,5 +266,10 @@ inline Foam::SquareMatrix<Type> symmOuter
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#undef CHECK_MATRIX_IS_SQUARE
 
 // ************************************************************************* //

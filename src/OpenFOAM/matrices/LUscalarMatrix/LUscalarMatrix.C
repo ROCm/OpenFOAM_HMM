@@ -145,7 +145,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
     else
     {
         label nCells = ldum.lduAddr().size();
-        scalarSquareMatrix m(nCells, 0.0);
+        scalarSquareMatrix m(nCells, Zero);
         transfer(m);
         convert(ldum, interfaceCoeffs, interfaces);
     }
