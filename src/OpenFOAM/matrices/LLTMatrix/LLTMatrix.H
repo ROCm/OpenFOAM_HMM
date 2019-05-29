@@ -58,6 +58,20 @@ class LLTMatrix
 :
     public SquareMatrix<Type>
 {
+
+    // Private Member Functions
+
+        //- Solve the linear system with the given source
+        //- and return the solution in x
+        //  This function may be called with the same field for x and source.
+        template<template<typename> class ListContainer>
+        void solveImpl
+        (
+            List<Type>& x,
+            const ListContainer<Type>& source
+        ) const;
+
+
 public:
 
     // Constructors
@@ -75,13 +89,38 @@ public:
         void decompose(const SquareMatrix<Type>& mat);
 
         //- Solve the linear system with the given source
-        //- and returning the solution in the Field argument x.
+        //- and return the solution in the argument x.
         //  This function may be called with the same field for x and source.
-        void solve(List<Type>& x, const UList<Type>& source) const;
+        void solve
+        (
+            List<Type>& x,
+            const UList<Type>& source
+        ) const;
 
         //- Solve the linear system with the given source
-        //- returning the solution
-        tmp<Field<Type>> solve(const UList<Type>& source) const;
+        //- and return the solution in the argument x.
+        //  This function may be called with the same field for x and source.
+        template<class Addr>
+        void solve
+        (
+            List<Type>& x,
+            const IndirectListBase<Type, Addr>& source
+        ) const;
+
+        //- Solve the linear system with the given source
+        //- return the solution
+        tmp<Field<Type>> solve
+        (
+            const UList<Type>& source
+        ) const;
+
+        //- Solve the linear system with the given source
+        //- return the solution
+        template<class Addr>
+        tmp<Field<Type>> solve
+        (
+            const IndirectListBase<Type, Addr>& source
+        ) const;
 };
 
 

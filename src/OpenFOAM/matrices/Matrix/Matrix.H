@@ -326,10 +326,7 @@ public:
         Form T() const;
 
         //- Multiply matrix with vector (A * x)
-        inline tmp<Field<Type>> Amul
-        (
-            const UList<Type>& x
-        ) const;
+        inline tmp<Field<Type>> Amul(const UList<Type>& x) const;
 
         //- Multiply matrix with vector (A * x)
         template<class Addr>

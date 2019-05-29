@@ -188,10 +188,11 @@ void Foam::QRMatrix<MatrixType>::solvex
 
 
 template<class MatrixType>
-void Foam::QRMatrix<MatrixType>::solve
+template<template<typename> class ListContainer>
+void Foam::QRMatrix<MatrixType>::solveImpl
 (
     List<cmptType>& x,
-    const UList<cmptType>& source
+    const ListContainer<cmptType>& source
 ) const
 {
     // Assert (&x != &source) ?
@@ -212,15 +213,54 @@ void Foam::QRMatrix<MatrixType>::solve
 
 
 template<class MatrixType>
+void Foam::QRMatrix<MatrixType>::solve
+(
+    List<cmptType>& x,
+    const UList<cmptType>& source
+) const
+{
+    solveImpl(x, source);
+}
+
+
+template<class MatrixType>
+template<class Addr>
+void Foam::QRMatrix<MatrixType>::solve
+(
+    List<cmptType>& x,
+    const IndirectListBase<cmptType, Addr>& source
+) const
+{
+    solveImpl(x, source);
+}
+
+
+template<class MatrixType>
 Foam::tmp<Foam::Field<typename MatrixType::cmptType>>
 Foam::QRMatrix<MatrixType>::solve
 (
     const UList<cmptType>& source
 ) const
 {
-    auto tresult(tmp<Field<cmptType>>::New(Q_.m()));
+    auto tresult(Q_.Tmul(source));
 
-    solve(tresult.ref(), source);
+    solvex(tresult.ref());
+
+    return tresult;
+}
+
+
+template<class MatrixType>
+template<class Addr>
+Foam::tmp<Foam::Field<typename MatrixType::cmptType>>
+Foam::QRMatrix<MatrixType>::solve
+(
+    const IndirectListBase<cmptType, Addr>& source
+) const
+{
+    auto tresult(Q_.Tmul(source));
+
+    solvex(tresult.ref());
 
     return tresult;
 }

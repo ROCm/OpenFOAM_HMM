@@ -91,10 +91,11 @@ void Foam::LLTMatrix<Type>::decompose(const SquareMatrix<Type>& mat)
 
 
 template<class Type>
-void Foam::LLTMatrix<Type>::solve
+template<template<typename> class ListContainer>
+void Foam::LLTMatrix<Type>::solveImpl
 (
     List<Type>& x,
-    const UList<Type>& source
+    const ListContainer<Type>& source
 ) const
 {
     // If x and source are different, copy initialize x = source
@@ -133,9 +134,46 @@ void Foam::LLTMatrix<Type>::solve
 
 
 template<class Type>
+void Foam::LLTMatrix<Type>::solve
+(
+    List<Type>& x,
+    const UList<Type>& source
+) const
+{
+    solveImpl(x, source);
+}
+
+
+template<class Type>
+template<class Addr>
+void Foam::LLTMatrix<Type>::solve
+(
+    List<Type>& x,
+    const IndirectListBase<Type, Addr>& source
+) const
+{
+    solveImpl(x, source);
+}
+
+template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::LLTMatrix<Type>::solve
 (
     const UList<Type>& source
+) const
+{
+    auto tresult(tmp<Field<Type>>::New(source.size()));
+
+    solve(tresult.ref(), source);
+
+    return tresult;
+}
+
+
+template<class Type>
+template<class Addr>
+Foam::tmp<Foam::Field<Type>> Foam::LLTMatrix<Type>::solve
+(
+    const IndirectListBase<Type, Addr>& source
 ) const
 {
     auto tresult(tmp<Field<Type>>::New(source.size()));

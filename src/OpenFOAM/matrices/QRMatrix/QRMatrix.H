@@ -79,6 +79,15 @@ private:
         template<template<typename> class ListContainer>
         void solvex(ListContainer<cmptType>& x) const;
 
+        //- Solve the linear system with the given source
+        //- and return the solution in x
+        template<template<typename> class ListContainer>
+        void solveImpl
+        (
+            List<cmptType>& x,
+            const ListContainer<cmptType>& source
+        ) const;
+
 
 public:
 
@@ -103,12 +112,36 @@ public:
         void decompose(const MatrixType& M);
 
         //- Solve the linear system with the given source
-        //- and return the solution in the Field argument x
-        void solve(List<cmptType>& x, const UList<cmptType>& source) const;
+        //- and return the solution in the argument x
+        void solve
+        (
+            List<cmptType>& x,
+            const UList<cmptType>& source
+        ) const;
+
+        //- Solve the linear system with the given source
+        //- and return the solution in the argument x
+        template<class Addr>
+        void solve
+        (
+            List<cmptType>& x,
+            const IndirectListBase<cmptType, Addr>& source
+        ) const;
 
         //- Solve the linear system with the given source
         //- and return the solution
-        tmp<Field<cmptType>> solve(const UList<cmptType>& source) const;
+        tmp<Field<cmptType>> solve
+        (
+            const UList<cmptType>& source
+        ) const;
+
+        //- Solve the linear system with the given source
+        //- and return the solution
+        template<class Addr>
+        tmp<Field<cmptType>> solve
+        (
+            const IndirectListBase<cmptType, Addr>& source
+        ) const;
 
         //- Return the inverse of (Q*R), so that solving x = (Q*R).inv()*source
         QMatrixType inv() const;
