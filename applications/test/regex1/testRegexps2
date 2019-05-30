@@ -14,6 +14,10 @@
     ( false "(U|k|epsilon)"  "alpha" )
     ( true  "ab.*"  "abc" )
     ( true  ".*"  "abc" )
+
+    ( true "div\(phi,alpha.*)"   "div(phi,alpha.gas)" )   // quoting error
+    ( true "div\(phi,alpha.*\)"   "div(phi,alpha.gas)" )
+    ( true "div\(phi,alpha\..*\)" "div(phi,alpha.gas)" )
 )
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

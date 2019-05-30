@@ -27,12 +27,12 @@ gradSchemes
 
 divSchemes
 {
-    div(rhoPhi,U)            Gauss linearUpwind grad(U);
-    "div\(phi,alpha.*\)"      Gauss vanLeer;
-    "div\(phir,alpha.*\)"     Gauss linear;
+    div(rhoPhi,U)           Gauss linearUpwind grad(U);
+    "div\(phi,alpha.*\)"    Gauss vanLeer;
+    "div\(phir,alpha.*\)"   Gauss linear;
 
-    "div\(Yiphir,alpha.*)"   Gauss linear;
-    "div\(phi,.*.gas*\)"     Gauss vanLeer;
+    "div\(Yiphir,alpha.*\)" Gauss linear;
+    "div\(phi,.*\.gas.*\)"  Gauss vanLeer;
 
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 
