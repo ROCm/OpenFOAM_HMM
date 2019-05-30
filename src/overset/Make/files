@@ -19,14 +19,6 @@ oversetPolyPatch/oversetFvsPatchFields.C
 oversetPolyPatch/oversetPointPatch.C
 oversetPolyPatch/oversetPointPatchFields.C
 
-/*
-oversetPolyPatch/semiImplicitOversetFvPatchFields.C
-oversetPolyPatch/oversetLduInterface.C
-oversetPolyPatch/oversetGAMGInterface.C
-oversetPolyPatch/oversetGAMGInterfaceField.C
-oversetPolyPatch/semiImplicitOversetGAMGInterfaceField.C
-*/
-
 oversetAdjustPhi/oversetAdjustPhi.C
 
 regionsToCell/regionsToCell.C
