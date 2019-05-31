@@ -51,7 +51,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcNut() const
         )
     );
     const scalarField& y = turbModel.y()[patchi];
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
@@ -314,7 +314,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::yPlus() const
             internalField().group()
         )
     );
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     tmp<scalarField> magUp = mag(Uw.patchInternalField() - Uw);
 
     return calcYPlus(magUp());
