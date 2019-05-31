@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -67,20 +67,21 @@ class writeDictionary
         //- List of changed dictionaries (only those registered to database)
         List<SHA1Digest> digests_;
 
+        //- Flag to indicate the first time that a dictionary is been changed
+        //- (per call to execute)
+        bool firstChange_;
+
 
     // Private Member Functions
 
-        //- Helper function to write the dictionary if found at location
-        bool tryDirectory
-        (
-            const label dicti,
-            const word& location
-        );
+        //- Write the output header
+        void writeHeader();
 
+        //- Helper to check and write the dictionary if its sha1 has changed
+        void checkDictionary(const dictionary& dict, const label dicti);
 
-private:
-
-    // Private member functions
+        //- Helper to write the dictionary if found at location
+        bool tryDirectory(const word& location, const label dicti);
 
         //- No copy construct
         writeDictionary(const writeDictionary&) = delete;
@@ -107,7 +108,7 @@ public:
 
 
     //- Destructor
-    virtual ~writeDictionary();
+    virtual ~writeDictionary() = default;
 
 
     // Member Functions
