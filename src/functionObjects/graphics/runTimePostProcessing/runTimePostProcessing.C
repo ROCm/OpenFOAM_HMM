@@ -303,7 +303,7 @@ bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
 
     #ifdef FOAM_USING_VTK_MPI
-    parallel_ = (Pstream::parRun() && dict.lookupOrDefault("parallel", true));
+    parallel_ = (Pstream::parRun() && dict.getOrDefault("parallel", true));
     #else
     parallel_ = false;
     #endif
@@ -311,7 +311,7 @@ bool Foam::functionObjects::runTimePostProcessing::read(const dictionary& dict)
     Info<< type() << " " << name() << ": reading post-processing data ("
         << (parallel_ ? "parallel" : "serial") << " rendering)" << endl;
 
-    if (dict.lookupOrDefault("debug", false))
+    if (dict.getOrDefault("debug", false))
     {
         runTimePostPro::geometryBase::debug = 1;
         Info<< "    debugging on" << endl;

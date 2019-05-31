@@ -742,7 +742,7 @@ fieldVisualisationBase
 :
     colours_(colours),
     fieldName_(dict.get<word>("field")),
-    smooth_(dict.lookupOrDefault("smooth", false)),
+    smooth_(dict.getOrDefault("smooth", false)),
     colourBy_(cbColour),
     colourMap_(cmRainbow),
     range_(),

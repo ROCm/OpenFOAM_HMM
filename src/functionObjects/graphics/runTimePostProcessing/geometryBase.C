@@ -99,10 +99,10 @@ Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
 :
     parent_(parent),
     name_(dict.dictName()),
-    visible_(dict.lookupOrDefault("visible", true)),
+    visible_(dict.getOrDefault("visible", true)),
     renderMode_
     (
-        renderModeTypeNames.lookupOrDefault("renderMode", dict, rmGouraud)
+        renderModeTypeNames.getOrDefault("renderMode", dict, rmGouraud)
     ),
     opacity_(nullptr),
     colours_(colours)

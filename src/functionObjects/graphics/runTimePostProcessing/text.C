@@ -67,12 +67,12 @@ Foam::functionObjects::runTimePostPro::text::text
     colour_(nullptr),
     halign_
     (
-        halignTypeNames.lookupOrDefault("halign", dict, halignType::LEFT)
+        halignTypeNames.getOrDefault("halign", dict, halignType::LEFT)
     ),
     bold_(dict.get<bool>("bold")),
-    italic_(dict.lookupOrDefault("italic", false)),
-    shadow_(dict.lookupOrDefault("shadow", false)),
-    timeStamp_(dict.lookupOrDefault("timeStamp", false))
+    italic_(dict.getOrDefault("italic", false)),
+    shadow_(dict.getOrDefault("shadow", false)),
+    timeStamp_(dict.getOrDefault("timeStamp", false))
 {
     if (!dict.readIfPresent("positions", positions_))
     {

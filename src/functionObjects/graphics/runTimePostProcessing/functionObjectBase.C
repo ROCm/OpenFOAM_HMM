@@ -76,8 +76,8 @@ Foam::functionObjects::runTimePostPro::functionObjectBase::functionObjectBase
     fieldVisualisationBase(dict, colours),
     state_(state),
     functionObjectName_(dict.get<word>("functionObject")),
-    liveObject_(dict.lookupOrDefault("liveObject", true)),
-    clearObjects_(dict.lookupOrDefault("clearObjects", false))
+    liveObject_(dict.getOrDefault("liveObject", true)),
+    clearObjects_(dict.getOrDefault("clearObjects", false))
 {}
 
 

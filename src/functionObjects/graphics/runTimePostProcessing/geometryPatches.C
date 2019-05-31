@@ -77,7 +77,7 @@ Foam::functionObjects::runTimePostPro::geometryPatches::geometryPatches
     geometrySurface(parent, dict, colours, List<fileName>()),
     fieldVisualisationBase(dict, colours),
     selectPatches_(),
-    nearCellValue_(dict.lookupOrDefault("nearCellValue", false))
+    nearCellValue_(dict.getOrDefault("nearCellValue", false))
 {
     dict.readEntry("patches", selectPatches_);
 }
