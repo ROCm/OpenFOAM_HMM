@@ -100,6 +100,7 @@ Description
         Property    | Description                          | Required | Default
         type        | Type-name: runTimePostProcessing     | yes |
         debug       | Additional debug information         | no  | false
+        parallel    | Enable/disable VTK parallel          | no  | true
     \endtable
 
 SourceFiles
