@@ -33,7 +33,7 @@ const Foam::Enum
     Foam::vtk::fileWriter::outputState
 >
 Foam::vtk::fileWriter::stateNames
-{
+({
     { outputState::CLOSED, "closed" },
     { outputState::OPENED, "opened" },
     { outputState::DECLARED, "declared" },
@@ -41,7 +41,7 @@ Foam::vtk::fileWriter::stateNames
     { outputState::PIECE, "Piece" },
     { outputState::CELL_DATA, "CellData" },
     { outputState::POINT_DATA, "PointData" },
-};
+});
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

@@ -35,7 +35,7 @@ Foam::PtrList<Foam::cellModel> Foam::cellModel::models_;
 Foam::List<const Foam::cellModel*> Foam::cellModel::modelPtrs_;
 
 const Foam::Enum<Foam::cellModel::modelType> Foam::cellModel::modelNames
-{
+({
     { modelType::UNKNOWN, "unknown" },
     { modelType::HEX, "hex" },
     { modelType::WEDGE, "wedge" },
@@ -44,7 +44,7 @@ const Foam::Enum<Foam::cellModel::modelType> Foam::cellModel::modelNames
     { modelType::TET, "tet" },
     { modelType::TETWEDGE, "tetWedge" },
     { modelType::SPLITHEX, "splitHex" },
-};
+});
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

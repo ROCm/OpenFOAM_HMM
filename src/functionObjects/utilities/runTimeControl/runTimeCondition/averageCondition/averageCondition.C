@@ -48,11 +48,11 @@ const Foam::Enum
     Foam::functionObjects::runTimeControls::averageCondition::windowType
 >
 Foam::functionObjects::runTimeControls::averageCondition::windowTypeNames
-{
+({
     { windowType::NONE, "none" },
     { windowType::APPROXIMATE, "approximate" },
     { windowType::EXACT, "exact" }
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

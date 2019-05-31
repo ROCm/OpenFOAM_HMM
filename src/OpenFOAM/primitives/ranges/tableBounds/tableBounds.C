@@ -29,21 +29,21 @@ License
 
 const Foam::Enum<Foam::bounds::normalBounding>
 Foam::bounds::normalBoundingNames
-{
+({
     { normalBounding::ERROR, "error" },
     { normalBounding::WARN,  "warn" },
     { normalBounding::CLAMP, "clamp" },
-};
+});
 
 
 const Foam::Enum<Foam::bounds::repeatableBounding>
 Foam::bounds::repeatableBoundingNames
-{
+({
     { repeatableBounding::ERROR, "error" },
     { repeatableBounding::WARN,  "warn" },
     { repeatableBounding::CLAMP, "clamp" },
     { repeatableBounding::REPEAT, "repeat" },
-};
+});
 
 
 // ************************************************************************* //
