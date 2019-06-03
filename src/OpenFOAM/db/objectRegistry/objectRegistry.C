@@ -334,6 +334,14 @@ bool Foam::objectRegistry::checkOut(const word& key) const
 void Foam::objectRegistry::clear()
 {
     // Free anything owned by the registry
+    // This needs to be done in two stages:
+    // - collect objects-to-be-removed
+    // - actually delete objects
+    // since the destructor of the regIOobject will actually delete its
+    // entry from the objectRegistry which messes up the iterator.
+
+    DynamicList<regIOobject*> owned;
+
     for (iterator iter = begin(); iter != end(); ++iter)
     {
         regIOobject* ptr = iter.val();
@@ -341,15 +349,23 @@ void Foam::objectRegistry::clear()
         if (ptr && ptr->ownedByRegistry())
         {
             // TBD: may wish to have ptr->clearWatches();
-
             if (objectRegistry::debug)
             {
                 Pout<< "objectRegistry::clear : " << ptr->name()
                     <<  " watches :" << flatOutput(ptr->watchIndices()) << nl;
 
             }
-            delete ptr;
+
+            owned.append(ptr);
         }
+    }
+
+    for (regIOobject* objectPtr : owned)
+    {
+        // Make sure that the destructor of the regIOobject does a checkout
+        objectPtr->release();
+
+        delete objectPtr;
     }
 
     HashTable<regIOobject*>::clear();
