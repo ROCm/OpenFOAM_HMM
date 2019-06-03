@@ -19,15 +19,15 @@ FoamFile
 type            runTimePostProcessing;
 
 // Where to load it from
-libs            ("librunTimePostProcessing.so");
+libs            ("runTimePostProcessing");
 
 // Function object enabled flag
 enabled         true;
 
-// When to output the average fields
+// When to output the images
 writeControl    writeTime;
 
-//- Optionally disable parallel VTK rendering, default = true
+//- Allow parallel rendering (default: true)
 // parallel        true;
 
 //- The output characteristics
@@ -45,23 +45,24 @@ output
 //- The camera settings
 camera
 {
-    // If camera is moving, optionally provide start and end times
+    // If camera is moving, provide start and end times
     // startPosition    0.2;
     // endPosition      0.75;
 
-    // Total number of frames to generate
+    //- Total number of frames to generate (default: 1)
     nFrameTotal     1;
 
-    // Parallel projection flag
-    parallelProjection  yes;
-
-    // clipBox is optional
+    //- Parallel projection flag (default: true)
+    // parallelProjection  yes;
 
     position        (385 -560 650);
     focalPoint      (160 90 60);
     up              (0.06 0.7 0.7);
 
     zoom    1.5;
+
+    // clipBox is optional
+
     // clipBox (-10 18 0)(280 160 76);
     clipBox (-30 0 0)(300 200 80);
 }
@@ -142,6 +143,9 @@ surfaces
         {
             visible     no;
         }
+
+        //- Allow parallel rendering (default: true)
+        // parallel        true;
     }
 
     patches
@@ -179,8 +183,10 @@ surfaces
             italic      yes;
             shadow      yes;
         }
-    }
 
+        //- Allow parallel rendering (default: true)
+        // parallel        true;
+    }
 
     cutting
     {
@@ -233,15 +239,6 @@ surfaces
         maxGlyphLength  0;
         visible         yes;
         featureEdges    none;
-
-        colourBy        field;
-        colourField     U;
-        field           U;
-        range           (0 20);
-
-        colourField     k;
-        field           k;
-        range           (0 20);
 
         colourBy        field;
         colourField     U;

@@ -85,7 +85,14 @@ static void addGeometryToScene
 {
     for (Type& obj : objects)
     {
-        obj.addGeometryToScene(position, renderer);
+        if (Pstream::master() || obj.parallel())
+        {
+            obj.addGeometryToScene(position, renderer);
+        }
+        else
+        {
+            obj.addGeometryToScene(position, nullptr);
+        }
     }
 }
 

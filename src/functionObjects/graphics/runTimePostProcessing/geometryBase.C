@@ -39,7 +39,6 @@ namespace functionObjects
 {
 namespace runTimePostPro
 {
-
     defineDebugSwitchWithName(geometryBase, "runTimePostPro::geometryBase", 0);
 }
 }
@@ -100,6 +99,16 @@ Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
     parent_(parent),
     name_(dict.dictName()),
     visible_(dict.getOrDefault("visible", true)),
+    parallel_
+    (
+        // User input can only disable parallel here
+        #ifdef FOAM_USING_VTK_MPI
+        Pstream::parRun() && parent.parallel()
+     && dict.getOrDefault("parallel", parent.parallel())
+        #else
+        false
+        #endif
+    ),
     renderMode_
     (
         renderModeTypeNames.getOrDefault("renderMode", dict, rmGouraud)
@@ -136,7 +145,7 @@ Foam::functionObjects::runTimePostPro::geometryBase::parent() const
 bool Foam::functionObjects::runTimePostPro::geometryBase::
 needsCollective() const
 {
-    return parent_.needsCollective();
+    return Pstream::parRun() && (!parent_.parallel() || !parallel_);
 }
 
 
@@ -144,12 +153,6 @@ const Foam::word&
 Foam::functionObjects::runTimePostPro::geometryBase::name() const
 {
     return name_;
-}
-
-
-bool Foam::functionObjects::runTimePostPro::geometryBase::visible() const
-{
-    return visible_;
 }
 
 

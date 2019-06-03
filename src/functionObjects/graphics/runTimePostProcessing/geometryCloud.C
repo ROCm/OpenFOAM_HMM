@@ -183,6 +183,9 @@ addGeometry
         return true;
     }
 
+    DebugInfo
+        << "    Render cloud " << cloudName_ << endl;
+
 
     // Rendering
 

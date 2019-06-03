@@ -204,6 +204,8 @@ void Foam::functionObjects::runTimePostPro::geometryPatches::addGeometryToScene
     fieldSummary fieldInfo = queryFieldSummary(fieldName_, multiPiece);
     fieldInfo.reduce();
 
+    DebugInfo
+        << "    Field " << fieldName_ << ' ' << fieldInfo.info() << endl;
 
     // Not rendering on this processor?
     // This is where we stop, but could also have a MPI barrier

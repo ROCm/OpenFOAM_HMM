@@ -97,10 +97,10 @@ Description
 
     Dictionary controls
     \table
-        Property    | Description                          | Required | Default
-        type        | Type-name: runTimePostProcessing     | yes |
-        debug       | Additional debug information         | no  | false
-        parallel    | Enable/disable VTK parallel          | no  | true
+        Property    | Description                           | Required | Default
+        type        | Type-name: runTimePostProcessing      | yes |
+        debug       | Additional debug information          | no  | false
+        parallel    | Allow parallel rendering              | no  | true
     \endtable
 
 SourceFiles
@@ -163,7 +163,7 @@ class runTimePostProcessing
         //- Output instance
         outputType output_;
 
-        //- Parallel rendering
+        //- Allow parallel rendering
         bool parallel_;
 
         //- Scene manager
@@ -221,7 +221,7 @@ public:
 
     // Member Functions
 
-        //- Parallel rendering
+        //- Allow parallel rendering
         bool parallel() const
         {
             return parallel_;
