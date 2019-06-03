@@ -47,6 +47,12 @@ int main(int argc, char *argv[])
 {
     printTest();
 
+    #ifdef FULLDEBUG
+    Info<< nl << "Compiled with FULLDEBUG" << nl;
+    #else
+    Info<< nl << "Regular compilation" << nl;
+    #endif
+
     Info<< "\nEnd\n" << nl;
 
     return 0;

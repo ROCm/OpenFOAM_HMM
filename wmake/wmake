@@ -71,6 +71,7 @@ options:
   -a | -all         wmake all sub-directories, running Allwmake if present
   -q | -queue       wmakeCollect all sub-directories, running Allwmake if present
   -k | -keep-going  Keep going even when errors occur (-non-stop)
+  -debug            Define c++DBUG='-DFULLDEBUG -g -O0' as override
   -j                Compile using all local cores/hyperthreads
   -jN | -j N        Compile using N cores/hyperthreads
   -no-scheduler     Disable scheduled parallel compilation
@@ -131,7 +132,7 @@ allCores()
 #------------------------------------------------------------------------------
 
 # Default to compiling the local target only
-unset all optShow update optPrintRootDir
+unset all update optDebug optShow optPrintRootDir
 
 while [ "$#" -gt 0 ]
 do
@@ -142,6 +143,9 @@ do
             ;;
         -s | -silent)
             export WM_QUIET=true
+            ;;
+        -debug)
+            optDebug="-DFULLDEBUG -g -O0"
             ;;
         -show-api | -show-ext-so | \
         -show-compile-c | -show-c | -show-cflags | -show-cflags-arch | \
@@ -348,7 +352,7 @@ if [ "$all" = all ]
 then
     if [ -e Allwmake ]
     then
-        ./Allwmake -fromWmake $targetType
+        ./Allwmake -fromWmake ${optDebug:+-debug} $targetType
         exit $?
     fi
 
@@ -364,6 +368,7 @@ then
         # Compile all applications in sub-directories
         $make ${WM_CONTINUE_ON_ERROR:+-k} \
               -f $WM_DIR/makefiles/apps \
+              ${optDebug:+c++DBUG="$optDebug"} \
               TARGET="$targetType" FOAM_APPS="$FOAM_APPS"
         makeExitCode=$?
     else
@@ -394,7 +399,7 @@ then
         "$WM_SCHEDULER" -clean \
      && wmake -all objects   \
      && "$WM_SCHEDULER"
-    ) && wmake -all
+    ) && wmake -all ${optDebug:+-debug}
     exit $?
 fi
 
@@ -449,11 +454,11 @@ esac
 
     # Pre-build the $WM_OPTIONS/options file
     # which is included when building the $WM_OPTIONS/files file
-    $make -s -f $WM_DIR/makefiles/files MAKE_DIR=$MakeDir \
-          OBJECTS_DIR=$objectsDir $objectsDir/options
+    $make -s -f $WM_DIR/makefiles/files \
+        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir $objectsDir/options
 
-    $make -s -f $WM_DIR/makefiles/files MAKE_DIR=$MakeDir \
-          OBJECTS_DIR=$objectsDir
+    $make -s -f $WM_DIR/makefiles/files \
+        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir
 )
 
 
@@ -477,8 +482,8 @@ case "$targetType" in
 (lib | libo | libso | dep)
     if grep -qe '^ *LIB *=' "$MakeDir/files" 2>/dev/null
     then
-        $make -s -f $WM_DIR/makefiles/general MAKE_DIR=$MakeDir \
-              OBJECTS_DIR=$objectsDir lnInclude
+        $make -s -f $WM_DIR/makefiles/general \
+            MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir lnInclude
     fi
     ;;
 esac
@@ -491,8 +496,8 @@ esac
 if [ -n "$WM_UPDATE_DEPENDENCIES" ]
 then
 
-    $make -f $WM_DIR/makefiles/general MAKE_DIR=$MakeDir \
-        OBJECTS_DIR=$objectsDir updatedep
+    $make -f $WM_DIR/makefiles/general \
+        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir updatedep
     makeExitCode=$?
 
     [ $makeExitCode -eq 0 ] || exit $makeExitCode
@@ -503,8 +508,9 @@ fi
 # Make the dependency files or object files and link
 #------------------------------------------------------------------------------
 
-exec $make -f $WM_DIR/makefiles/general MAKE_DIR=$MakeDir \
-     OBJECTS_DIR=$objectsDir $targetType
+exec $make -f $WM_DIR/makefiles/general \
+     ${optDebug:+c++DBUG="$optDebug"} \
+     MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir $targetType
 
 exit 0 # clean exit
 
