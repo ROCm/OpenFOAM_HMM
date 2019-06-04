@@ -9,6 +9,7 @@ areaWrite
 
     writeControl    writeTime;
     writeInterval   1;
+    // verbose         true;
 
     // Fields to output (words or regex)
     fields  (".*");
