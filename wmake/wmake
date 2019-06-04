@@ -84,7 +84,6 @@ options:
   -show-c           Print C compiler value
   -show-cflags      Print C compiler flags
   -show-cxx         Print C++ compiler value
-  -show-cxx-arch    Print C compiler flags
   -show-cxxflags    Print C++ compiler flags
   -show-cflags-arch     The C compiler arch flag (eg, -m64 etc)
   -show-cxxflags-arch   The C++ compiler arch flag (eg, -m64 etc)
@@ -148,7 +147,7 @@ do
             optDebug="-DFULLDEBUG -g -O0"
             ;;
         -show-api | -show-ext-so | \
-        -show-compile-c | -show-c | -show-cflags | -show-cflags-arch | \
+        -show-compile-c   | -show-c   | -show-cflags   | -show-cflags-arch | \
         -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch )
             $make -f $WM_DIR/makefiles/info "${1#-show-}"
             optShow=true
