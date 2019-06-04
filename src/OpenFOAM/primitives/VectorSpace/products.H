@@ -103,6 +103,16 @@ public:
 };
 
 
+//- Outer-product of identical types
+template<class arg1>
+class outerProduct1
+:
+    public outerProduct<arg1, arg1>
+{
+public:
+};
+
+
 template<class arg1, class arg2>
 class crossProduct
 {

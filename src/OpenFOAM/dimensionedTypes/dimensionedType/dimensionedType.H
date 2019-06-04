@@ -437,10 +437,12 @@ dimensioned<typename outerProduct<Type, Type>::type>
 sqr(const dimensioned<Type>&);
 
 template<class Type>
-dimensioned<scalar> magSqr(const dimensioned<Type>&);
+dimensioned<typename typeOfMag<Type>::type>
+magSqr(const dimensioned<Type>& dt);
 
 template<class Type>
-dimensioned<scalar> mag(const dimensioned<Type>&);
+dimensioned<typename typeOfMag<Type>::type>
+mag(const dimensioned<Type>& dt);
 
 template<class Type>
 dimensioned<Type> cmptMultiply

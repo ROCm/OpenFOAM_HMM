@@ -62,34 +62,29 @@ tmp<DimensionedField<typename outerProduct<Type, Type>::type, GeoMesh>>
 sqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> magSqr
-(
-    const DimensionedField<Type, GeoMesh>& df
-);
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+magSqr(const DimensionedField<Type, GeoMesh>& df);
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> magSqr
-(
-    const tmp<DimensionedField<Type, GeoMesh>>& tdf
-);
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+magSqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> mag
-(
-    const DimensionedField<Type, GeoMesh>& df
-);
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+mag(const DimensionedField<Type, GeoMesh>& df);
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> mag
-(
-    const tmp<DimensionedField<Type, GeoMesh>>& tdf
-);
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+mag(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
 template<class Type, class GeoMesh>
 tmp
 <
     DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+    <
+        typename DimensionedField<Type, GeoMesh>::cmptType,
+        GeoMesh
+    >
 >
 cmptAv(const DimensionedField<Type, GeoMesh>& df);
 
@@ -97,7 +92,10 @@ template<class Type, class GeoMesh>
 tmp
 <
     DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+    <
+        typename DimensionedField<Type, GeoMesh>::cmptType,
+        GeoMesh
+    >
 >
 cmptAv(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
@@ -123,7 +121,7 @@ UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
 UNARY_REDUCTION_FUNCTION(MinMax<Type>, minMax, gMinMax)
 UNARY_REDUCTION_FUNCTION(scalarMinMax, minMaxMag, gMinMaxMag)
 
-UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
+UNARY_REDUCTION_FUNCTION(typename typeOfMag<Type>::type, sumMag, gSumMag)
 
 #undef UNARY_REDUCTION_FUNCTION
 

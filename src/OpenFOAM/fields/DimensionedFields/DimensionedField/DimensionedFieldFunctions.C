@@ -141,13 +141,13 @@ sqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
 
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> magSqr
-(
-    const DimensionedField<Type, GeoMesh>& df
-)
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+magSqr(const DimensionedField<Type, GeoMesh>& df)
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     auto tres =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        tmp<DimensionedField<magType, GeoMesh>>::New
         (
             IOobject
             (
@@ -165,15 +165,15 @@ tmp<DimensionedField<scalar, GeoMesh>> magSqr
 }
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> magSqr
-(
-    const tmp<DimensionedField<Type, GeoMesh>>& tdf
-)
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+magSqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
     auto tres =
-        reuseTmpDimensionedField<scalar, Type, GeoMesh>::New
+        reuseTmpDimensionedField<magType, Type, GeoMesh>::New
         (
             tdf,
             "magSqr(" + df.name() + ')',
@@ -188,13 +188,13 @@ tmp<DimensionedField<scalar, GeoMesh>> magSqr
 
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> mag
-(
-    const DimensionedField<Type, GeoMesh>& df
-)
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+mag(const DimensionedField<Type, GeoMesh>& df)
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     auto tres =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        tmp<DimensionedField<magType, GeoMesh>>::New
         (
             IOobject
             (
@@ -212,15 +212,15 @@ tmp<DimensionedField<scalar, GeoMesh>> mag
 }
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> mag
-(
-    const tmp<DimensionedField<Type, GeoMesh>>& tdf
-)
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+mag(const tmp<DimensionedField<Type, GeoMesh>>& tdf)
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     const DimensionedField<Type, GeoMesh>& df = tdf();
 
     auto tres =
-        reuseTmpDimensionedField<scalar, Type, GeoMesh>::New
+        reuseTmpDimensionedField<magType, Type, GeoMesh>::New
         (
             tdf,
             "mag(" + df.name() + ')',
@@ -325,11 +325,10 @@ UNARY_REDUCTION_FUNCTION(Type, max, gMax)
 UNARY_REDUCTION_FUNCTION(Type, min, gMin)
 UNARY_REDUCTION_FUNCTION(Type, sum, gSum)
 UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
-
 UNARY_REDUCTION_FUNCTION(MinMax<Type>, minMax, gMinMax)
 UNARY_REDUCTION_FUNCTION(scalarMinMax, minMaxMag, gMinMaxMag)
 
-UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
+UNARY_REDUCTION_FUNCTION(typename typeOfMag<Type>::type, sumMag, gSumMag)
 
 #undef UNARY_REDUCTION_FUNCTION
 

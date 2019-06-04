@@ -146,23 +146,35 @@ sqr(const tmp<Field<Type>>& tf)
 
 
 template<class Type>
-void magSqr(Field<scalar>& res, const UList<Type>& f)
+void magSqr
+(
+    Field<typename typeOfMag<Type>::type>& res,
+    const UList<Type>& f
+)
 {
-    TFOR_ALL_F_OP_FUNC_F(scalar, res, =, magSqr, Type, f)
+    typedef typename typeOfMag<Type>::type magType;
+
+    TFOR_ALL_F_OP_FUNC_F(magType, res, =, magSqr, Type, f)
 }
 
 template<class Type>
-tmp<Field<scalar>> magSqr(const UList<Type>& f)
+tmp<Field<typename typeOfMag<Type>::type>>
+magSqr(const UList<Type>& f)
 {
-    auto tres = tmp<Field<scalar>>::New(f.size());
+    typedef typename typeOfMag<Type>::type magType;
+
+    auto tres = tmp<Field<magType>>::New(f.size());
     magSqr(tres.ref(), f);
     return tres;
 }
 
 template<class Type>
-tmp<Field<scalar>> magSqr(const tmp<Field<Type>>& tf)
+tmp<Field<typename typeOfMag<Type>::type>>
+magSqr(const tmp<Field<Type>>& tf)
 {
-    auto tres = reuseTmp<scalar, Type>::New(tf);
+    typedef typename typeOfMag<Type>::type magType;
+
+    auto tres = reuseTmp<magType, Type>::New(tf);
     magSqr(tres.ref(), tf());
     tf.clear();
     return tres;
@@ -170,23 +182,35 @@ tmp<Field<scalar>> magSqr(const tmp<Field<Type>>& tf)
 
 
 template<class Type>
-void mag(Field<scalar>& res, const UList<Type>& f)
+void mag
+(
+    Field<typename typeOfMag<Type>::type>& res,
+    const UList<Type>& f
+)
 {
-    TFOR_ALL_F_OP_FUNC_F(scalar, res, =, mag, Type, f)
+    typedef typename typeOfMag<Type>::type magType;
+
+    TFOR_ALL_F_OP_FUNC_F(magType, res, =, mag, Type, f)
 }
 
 template<class Type>
-tmp<Field<scalar>> mag(const UList<Type>& f)
+tmp<Field<typename typeOfMag<Type>::type>>
+mag(const UList<Type>& f)
 {
-    auto tres = tmp<Field<scalar>>::New(f.size());
+    typedef typename typeOfMag<Type>::type magType;
+
+    auto tres = tmp<Field<magType>>::New(f.size());
     mag(tres.ref(), f);
     return tres;
 }
 
 template<class Type>
-tmp<Field<scalar>> mag(const tmp<Field<Type>>& tf)
+tmp<Field<typename typeOfMag<Type>::type>>
+mag(const tmp<Field<Type>>& tf)
 {
-    auto tres = reuseTmp<scalar, Type>::New(tf);
+    typedef typename typeOfMag<Type>::type magType;
+
+    auto tres = reuseTmp<magType, Type>::New(tf);
     mag(tres.ref(), tf());
     tf.clear();
     return tres;
@@ -341,14 +365,14 @@ TMP_UNARY_FUNCTION(Type, min)
 template<class Type>
 Type sum(const UList<Type>& f)
 {
+    Type Sum = Zero;
+
     if (f.size())
     {
-        Type Sum = Zero;
         TFOR_ALL_S_OP_F(Type, Sum, +=, Type, f)
-        return Sum;
     }
 
-    return Zero;
+    return Sum;
 }
 
 TMP_UNARY_FUNCTION(Type, sum)
@@ -413,15 +437,15 @@ Type minMagSqr(const UList<Type>& f)
 TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 template<class Type>
-typename pTraits<Type>::cmptType
+typename scalarProduct<Type, Type>::type
 sumProd(const UList<Type>& f1, const UList<Type>& f2)
 {
-    typedef typename pTraits<Type>::cmptType outType;
+    typedef typename scalarProduct<Type, Type>::type prodType;
 
-    outType result = Zero;
+    prodType result = Zero;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        TFOR_ALL_S_OP_F_OP_F(outType, result, +=, Type, f1, &&, Type, f2)
+        TFOR_ALL_S_OP_F_OP_F(prodType, result, +=, Type, f1, &&, Type, f2)
     }
     return result;
 }
@@ -450,41 +474,54 @@ Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
 
 
 template<class Type>
-scalar sumSqr(const UList<Type>& f)
+typename outerProduct1<Type>::type
+sumSqr(const UList<Type>& f)
 {
-    scalar SumSqr = 0;
+    typedef typename outerProduct1<Type>::type prodType;
+    prodType result = Zero;
     if (f.size())
     {
-        TFOR_ALL_S_OP_FUNC_F(scalar, SumSqr, +=, sqr, Type, f)
+        TFOR_ALL_S_OP_FUNC_F(prodType, result, +=, sqr, Type, f)
     }
-    return SumSqr;
+    return result;
 }
-
-TMP_UNARY_FUNCTION(scalar, sumSqr)
 
 template<class Type>
-scalar sumMag(const UList<Type>& f)
+typename outerProduct1<Type>::type
+sumSqr(const tmp<Field<Type>>& tf)
 {
-    scalar SumMag = 0;
-    if (f.size())
-    {
-        TFOR_ALL_S_OP_FUNC_F(scalar, SumMag, +=, mag, Type, f)
-    }
-    return SumMag;
+    typedef typename outerProduct1<Type>::type prodType;
+    prodType result = sumSqr(tf());
+    tf.clear();
+    return result;
 }
 
-TMP_UNARY_FUNCTION(scalar, sumMag)
+
+template<class Type>
+typename typeOfMag<Type>::type
+sumMag(const UList<Type>& f)
+{
+    typedef typename typeOfMag<Type>::type magType;
+    magType result = Zero;
+    if (f.size())
+    {
+        TFOR_ALL_S_OP_FUNC_F(magType, result, +=, mag, Type, f)
+    }
+    return result;
+}
+
+TMP_UNARY_FUNCTION(typename typeOfMag<Type>::type, sumMag)
 
 
 template<class Type>
 Type sumCmptMag(const UList<Type>& f)
 {
-    Type SumMag = Zero;
+    Type result = Zero;
     if (f.size())
     {
-        TFOR_ALL_S_OP_FUNC_F(scalar, SumMag, +=, cmptMag, Type, f)
+        TFOR_ALL_S_OP_FUNC_F(Type, result, +=, cmptMag, Type, f)
     }
-    return SumMag;
+    return result;
 }
 
 TMP_UNARY_FUNCTION(Type, sumCmptMag)
@@ -530,24 +567,24 @@ G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
 G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
 G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
 
-G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
+G_UNARY_FUNCTION(typename outerProduct1<Type>::type, gSumSqr, sumSqr, sum)
+G_UNARY_FUNCTION(typename typeOfMag<Type>::type, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
 
 template<class Type>
-typename pTraits<Type>::cmptType gSumProd
+typename scalarProduct<Type, Type>::type gSumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2,
     const label comm
 )
 {
-    typedef typename pTraits<Type>::cmptType outType;
+    typedef typename scalarProduct<Type, Type>::type prodType;
 
-    outType result = sumProd(f1, f2);
-    reduce(result, sumOp<outType>(), Pstream::msgType(), comm);
+    prodType result = sumProd(f1, f2);
+    reduce(result, sumOp<prodType>(), Pstream::msgType(), comm);
     return result;
 }
 

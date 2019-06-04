@@ -94,23 +94,35 @@ sqr(const tmp<Field<Type>>& tf);
 
 
 template<class Type>
-void magSqr(Field<scalar>& res, const UList<Type>& f);
+void magSqr
+(
+    Field<typename typeOfMag<Type>::type>& res,
+    const UList<Type>& f
+);
 
 template<class Type>
-tmp<Field<scalar>> magSqr(const UList<Type>& f);
+tmp<Field<typename typeOfMag<Type>::type>>
+magSqr(const UList<Type>& f);
 
 template<class Type>
-tmp<Field<scalar>> magSqr(const tmp<Field<Type>>& tf);
+tmp<Field<typename typeOfMag<Type>::type>>
+magSqr(const tmp<Field<Type>>& tf);
 
 
 template<class Type>
-void mag(Field<scalar>& res, const UList<Type>& f);
+void mag
+(
+    Field<typename typeOfMag<Type>::type>& res,
+    const UList<Type>& f
+);
 
 template<class Type>
-tmp<Field<scalar>> mag(const UList<Type>& f);
+tmp<Field<typename typeOfMag<Type>::type>>
+mag(const UList<Type>& f);
 
 template<class Type>
-tmp<Field<scalar>> mag(const tmp<Field<Type>>& tf);
+tmp<Field<typename typeOfMag<Type>::type>>
+mag(const tmp<Field<Type>>& tf);
 
 
 template<class Type>
@@ -197,7 +209,8 @@ TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 
 template<class Type>
-typename pTraits<Type>::cmptType sumProd
+typename scalarProduct<Type, Type>::type
+sumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2
@@ -207,14 +220,15 @@ template<class Type>
 Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2);
 
 template<class Type>
-scalar sumSqr(const UList<Type>& f);
-
-TMP_UNARY_FUNCTION(scalar, sumSqr)
+typename outerProduct1<Type>::type sumSqr(const UList<Type>& f);
 
 template<class Type>
-scalar sumMag(const UList<Type>& f);
+typename outerProduct1<Type>::type sumSqr(const tmp<Field<Type>>& tf);
 
-TMP_UNARY_FUNCTION(scalar, sumMag)
+template<class Type>
+typename typeOfMag<Type>::type sumMag(const UList<Type>& f);
+
+TMP_UNARY_FUNCTION(typename typeOfMag<Type>::type, sumMag)
 
 template<class Type>
 Type sumCmptMag(const UList<Type>& f);
@@ -244,13 +258,14 @@ G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
 G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
 G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
 
-G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
+G_UNARY_FUNCTION(typename outerProduct1<Type>::type, gSumSqr, sumSqr, sum)
+G_UNARY_FUNCTION(typename typeOfMag<Type>::type, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
+
 template<class Type>
-typename pTraits<Type>::cmptType gSumProd
+typename scalarProduct<Type, Type>::type gSumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2,

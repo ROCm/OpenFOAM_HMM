@@ -158,7 +158,11 @@ sqr(const tmp<FieldField<Field, Type>>& tf)
 
 
 template<template<class> class Field, class Type>
-void magSqr(FieldField<Field, scalar>& sf, const FieldField<Field, Type>& f)
+void magSqr
+(
+    FieldField<Field, typename typeOfMag<Type>::type>& sf,
+    const FieldField<Field, Type>& f
+)
 {
     forAll(sf, i)
     {
@@ -167,11 +171,14 @@ void magSqr(FieldField<Field, scalar>& sf, const FieldField<Field, Type>& f)
 }
 
 template<template<class> class Field, class Type>
-tmp<FieldField<Field, scalar>> magSqr(const FieldField<Field, Type>& f)
+tmp<FieldField<Field, typename typeOfMag<Type>::type>>
+magSqr(const FieldField<Field, Type>& f)
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     auto tres
     (
-        FieldField<Field, scalar>::NewCalculatedType(f)
+        FieldField<Field, magType>::NewCalculatedType(f)
     );
 
     magSqr(tres.ref(), f);
@@ -179,11 +186,14 @@ tmp<FieldField<Field, scalar>> magSqr(const FieldField<Field, Type>& f)
 }
 
 template<template<class> class Field, class Type>
-tmp<FieldField<Field, scalar>> magSqr(const tmp<FieldField<Field, Type>>& tf)
+tmp<FieldField<Field, typename typeOfMag<Type>::type>>
+magSqr(const tmp<FieldField<Field, Type>>& tf)
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     auto tres
     (
-        reuseTmpFieldField<Field, scalar, Type>::New(tf)
+        reuseTmpFieldField<Field, magType, Type>::New(tf)
     );
 
     magSqr(tres.ref(), tf());
@@ -193,7 +203,11 @@ tmp<FieldField<Field, scalar>> magSqr(const tmp<FieldField<Field, Type>>& tf)
 
 
 template<template<class> class Field, class Type>
-void mag(FieldField<Field, scalar>& sf, const FieldField<Field, Type>& f)
+void mag
+(
+    FieldField<Field, typename typeOfMag<Type>::type>& sf,
+    const FieldField<Field, Type>& f
+)
 {
     forAll(sf, i)
     {
@@ -202,11 +216,14 @@ void mag(FieldField<Field, scalar>& sf, const FieldField<Field, Type>& f)
 }
 
 template<template<class> class Field, class Type>
-tmp<FieldField<Field, scalar>> mag(const FieldField<Field, Type>& f)
+tmp<FieldField<Field, typename typeOfMag<Type>::type>>
+mag(const FieldField<Field, Type>& f)
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     auto tres
     (
-        FieldField<Field, scalar>::NewCalculatedType(f)
+        FieldField<Field, magType>::NewCalculatedType(f)
     );
 
     mag(tres.ref(), f);
@@ -214,11 +231,14 @@ tmp<FieldField<Field, scalar>> mag(const FieldField<Field, Type>& f)
 }
 
 template<template<class> class Field, class Type>
-tmp<FieldField<Field, scalar>> mag(const tmp<FieldField<Field, Type>>& tf)
+tmp<FieldField<Field, typename typeOfMag<Type>::type>>
+mag(const tmp<FieldField<Field, Type>>& tf)
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     auto tres
     (
-        reuseTmpFieldField<Field, scalar, Type>::New(tf)
+        reuseTmpFieldField<Field, magType, Type>::New(tf)
     );
 
     mag(tres.ref(), tf());
@@ -480,19 +500,21 @@ Type sum(const FieldField<Field, Type>& f)
 TMP_UNARY_FUNCTION(Type, sum)
 
 template<template<class> class Field, class Type>
-scalar sumMag(const FieldField<Field, Type>& f)
+typename typeOfMag<Type>::type sumMag(const FieldField<Field, Type>& f)
 {
-    scalar SumMag = 0.0;
+    typedef typename typeOfMag<Type>::type magType;
+
+    magType result = Zero;
 
     forAll(f, i)
     {
-        SumMag += sumMag(f[i]);
+        result += sumMag(f[i]);
     }
 
-    return SumMag;
+    return result;
 }
 
-TMP_UNARY_FUNCTION(scalar, sumMag)
+TMP_UNARY_FUNCTION(typename typeOfMag<Type>::type, sumMag)
 
 template<template<class> class Field, class Type>
 Type average(const FieldField<Field, Type>& f)
@@ -555,25 +577,24 @@ TMP_UNARY_FUNCTION(scalarMinMax, minMaxMag)
 
 
 // With reduction on ReturnType
-#define G_UNARY_FUNCTION(returnType, gFunc, func, rFunc)                       \
+#define G_UNARY_FUNCTION(ReturnType, gFunc, func, rFunc)                       \
                                                                                \
 template<template<class> class Field, class Type>                              \
-returnType gFunc(const FieldField<Field, Type>& f)                             \
+ReturnType gFunc(const FieldField<Field, Type>& f)                             \
 {                                                                              \
-    returnType res = func(f);                                                  \
-    reduce(res, rFunc##Op<returnType>());                                      \
+    ReturnType res = func(f);                                                  \
+    reduce(res, rFunc##Op<ReturnType>());                                      \
     return res;                                                                \
 }                                                                              \
-TMP_UNARY_FUNCTION(returnType, gFunc)
+TMP_UNARY_FUNCTION(ReturnType, gFunc)
 
 G_UNARY_FUNCTION(Type, gMax, max, max)
 G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
-
 G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
 G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
 
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
+G_UNARY_FUNCTION(typename typeOfMag<Type>::type, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
