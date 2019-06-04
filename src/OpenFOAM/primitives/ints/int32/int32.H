@@ -138,6 +138,9 @@ public:
     //- Component type
     typedef int32_t cmptType;
 
+    //- Magnitude type
+    typedef int32_t magType;
+
 
     // Member constants
 

@@ -88,6 +88,9 @@ public:
     //- Component type
     typedef Cmpt cmptType;
 
+    //- Magnitude type
+    typedef Cmpt magType;
+
 
     // Static Constants
 

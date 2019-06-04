@@ -252,6 +252,9 @@ public:
     //- Component type
     typedef complex cmptType;
 
+    //- Magnitude type
+    typedef scalar magType;
+
     //- Equivalent type of labels used for valid component indexing
     typedef label labelType;
 

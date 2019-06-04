@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -44,13 +44,13 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Abstract template class to provide the form resulting from
-//  the inner-product of two forms
+//- the inner-product of two forms
 template<class Cmpt, class Form1, class Form2>
 class typeOfInnerProduct
 {};
 
 //- Abstract template class to provide the form resulting from
-//  the outer-product of two forms
+//- the outer-product of two forms
 template<class Cmpt, class Form1, class Form2>
 class typeOfOuterProduct
 {};
@@ -69,6 +69,16 @@ class typeOfRank
 template<class Cmpt, direction rank>
 class symmTypeOfRank
 {};
+
+
+//- The magnitude type for given argument.
+template<class arg1>
+class typeOfMag
+{
+public:
+
+    typedef typename pTraits<typename pTraits<arg1>::cmptType>::magType type;
+};
 
 
 template<class arg1, class arg2>
