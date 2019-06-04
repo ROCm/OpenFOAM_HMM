@@ -118,75 +118,135 @@ int main(int argc, char *argv[])
     // Info<< "sqrt   : " << sqrt(fld1) << nl;
     // Info<< "pow(2) : " << pow(fld1, 2) << nl;
 
-    Info<< nl << "Elementary complex arithmetic operations:" << nl;
+    #if 1
+    Info<< nl << "## Elementary complex-complex arithmetic operations:" << nl;
     {
-        complex a(6, 1);
+        const complex a(6, 1);
         complex b = a;
 
-        Info << "Compound assignment operations:" << nl;
+        Info << "# Compound assignment operations:" << nl;
 
-        // Multiplication
-        b *= a;
-        Info<< "b *= a:" << tab << "b=" << b << nl;
+        Info<< "a = " << a << ", b = " << b << nl;
 
         // Addition
         b += a;
-        Info<< "b += a:" << tab << "b=" << b << nl;
+        Info<< "b += a:" << tab << "b =" << b << nl;
 
         // Subtraction
         b -= a;
-        Info<< "b -= a:" << tab << "b=" << b << nl;
+        Info<< "b -= a:" << tab << "b =" << b << nl;
+
+        // Multiplication
+        b *= a;
+        Info<< "b *= a:" << tab << "b =" << b << nl;
 
         // Division
         b /= a;
-        Info<< "b /= a:" << tab << "b=" << b << nl;
-
-        Info << "Operations with scalars:" << nl;
-
-        Info<< "b=" << b << nl;
-
-        // Scalar multiplication
-        b *= 2.0;
-        Info<< "b*2 (elementwise multiplication):" << tab << b << nl;
-
-        // Scalar addition
-        b += 1.0;
-        Info<< "b + 1 (only real part):" << tab << b << nl;
-
-        // Scalar subtraction
-        b -= 1.0;
-        Info<< "b - 1 (only real part):" << tab << b << nl;
-
-        // Scalar division
-        b = 1.0/b;
-        Info<< "1/b (elementwise division):" << tab << b << nl;
+        Info<< "b /= a:" << tab << "b =" << b << nl;
     }
+    #endif
 
-    Info<< nl << "Other mathematical expressions:" << nl;
+
+    #if 1
+    Info<< nl << "## Elementary complex-scalar arithmetic operations:" << nl;
     {
-        complex a(4.3, -3.14);
-        complex b(0, -4.3);
+        const scalar a = 5;
+        complex b(6, 1);
 
-        Info<< "a=" << a << tab << "b=" << b << nl;
+        Info << "# Non-assignment operations:" << nl;
+
+        Info<< "(scalar) a = " << a << ", b = " << b << nl;
+
+        // Addition
+        b = a + b;
+        Info<< "b = a + b: " << tab << b << nl;
+
+        b = b + a;
+        Info<< "b = b + a: " << tab << b << nl;
+
+        // Subtraction
+        b = a - b;
+        Info<< "b = a - b: " << tab << b << nl;
+
+        b = b - a;
+        Info<< "b = b - a: " << tab << b << nl;
+
+        // Multiplication
+        b = a*b;
+        Info<< "b = a*b: " << tab << b << nl;
+
+        b = b*a;
+        Info<< "b = b*a: " << tab << b << nl;
+
+        // Division
+        b = a/b;
+        Info<< "b = a/b = scalar(a)/b = complex(a)/b:" << tab << b << nl;
+
+        b = b/a;
+        Info<< "b = b/a: " << tab << b << nl;
+
+
+        Info << "# Compound assignment operations:" << nl;
+
+        Info<< "(scalar) a = " << a << ", b = " << b << nl;
+
+        // Addition: complex+scalar
+        b += a;
+        Info<< "b += a (only real part):" << tab << b << nl;
+
+        // Subtraction: complex-scalar
+        b -= a;
+        Info<< "b -= a (only real part):" << tab << b << nl;
+
+        // Multiplication: complex*scalar
+        b *= a;
+        Info<< "b *= a (real and imag parts):" << tab << b << nl;
+
+        // Division: complex/scalar
+        b /= a;
+        Info<< "b /= a (real and imag parts):" << tab << b << nl;
+
+    }
+    #endif
+
+
+    #if 1
+    Info<< nl << "## Other mathematical expressions:" << nl;
+    {
+        const complex a(4.3, -3.14);
+        const complex b(0, -4.3);
+        const complex c(-4.3, 0);
+
+        Info<< "a = " << a << ", b = " << b << ", c = " << c << nl;
 
         // Square-root
-        //Info<< "sqrt(a)=" << sqrt(a) << tab << "sqrt(b)=" << sqrt(b) << nl;
+        Info<< "sqrt(a) = " << Foam::sqrt(a) << ", "
+            << "sqrt(b) = " << Foam::sqrt(b) << ", "
+            << "sqrt(c) = " << Foam::sqrt(c) << nl;
 
         // Square
-        Info<< "sqr(a)=" << sqr(a) << tab << "sqr(b)=" << sqr(b) << nl;
+        Info<< "sqr(a) = " << sqr(a) << ", "
+            << "sqr(b) = " << sqr(b) << ", "
+            << "sqr(c) = " << sqr(c) << nl;
 
         // n^th power
-        //Info<< "pow(a,-1)=" << pow(a,-1) << tab
-        //      << "pow(b,-1)=" << pow(b,-1) << nl;
+        Info<< "pow(a, -1) = " << pow(a, -1) << ", "
+            << "pow(b, -1) = " << pow(b, -1) << ", "
+            << "pow(c, -1) = " << pow(c, -1) << nl;
 
         // Exponential
-        //Info<< "exp(a)=" << exp(a) << tab << "exp(b)=" << exp(b) << nl;
+        Info<< "exp(a) = " << exp(a) << ", "
+            << "exp(b) = " << exp(b) << ", "
+            << "exp(c) = " << exp(c) << nl;
 
         // Natural logarithm
-        //Info<< "log(a)=" << log(a) << tab << "log(b)=" << log(b) << nl;
-    }
+        Info<< "log(a) = " << log(a) << ", "
+            << "log(b) = " << log(b) << ", "
+            << "log(c) = " << log(c) << nl;
 
-    Info<< nl << "End" << nl;
+    }
+    #endif
+
 
     // Make some changes
     {

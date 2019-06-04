@@ -60,13 +60,17 @@ inline const complex& min(const complex&, const complex&);
 inline const complex& max(const complex&, const complex&);
 inline complex limit(const complex&, const complex&);
 inline const complex& sum(const complex&);
-inline complex operator+(const complex&, const complex&);
 inline complex operator-(const complex&);
+inline complex operator+(const complex&, const complex&);
+inline complex operator+(const complex&, const scalar);
+inline complex operator+(const scalar, const complex&);
 inline complex operator-(const complex&, const complex&);
+inline complex operator-(const complex&, const scalar);
+inline complex operator-(const scalar, const complex&);
 inline complex operator*(const complex&, const complex&);
-inline complex operator/(const complex&, const complex&);
-inline complex operator*(const scalar, const complex&);
 inline complex operator*(const complex&, const scalar);
+inline complex operator*(const scalar, const complex&);
+inline complex operator/(const complex&, const complex&);
 inline complex operator/(const complex&, const scalar);
 inline complex operator/(const scalar, const complex&);
 
@@ -174,15 +178,19 @@ public:
         //- Assign zero
         inline void operator=(const Foam::zero);
 
-        inline void operator+=(const complex& c);
-        inline void operator-=(const complex& c);
-        inline void operator*=(const complex& c);
-        inline void operator/=(const complex& c);
-
+        //- Assign scalar (imag = zero)
         inline void operator=(const scalar s);
+
+        inline void operator+=(const complex& c);
         inline void operator+=(const scalar s);
+
+        inline void operator-=(const complex& c);
         inline void operator-=(const scalar s);
+
+        inline void operator*=(const complex& c);
         inline void operator*=(const scalar s);
+
+        inline void operator/=(const complex& c);
         inline void operator/=(const scalar s);
 
         inline bool operator==(const complex& c) const;
@@ -209,14 +217,21 @@ public:
 
     // Friend Operators
 
-        friend complex operator+(const complex& c1, const complex& c2);
         friend complex operator-(const complex& c);
-        friend complex operator-(const complex& c1, const complex& c2);
-        friend complex operator*(const complex& c1, const complex& c2);
-        friend complex operator/(const complex& c1, const complex& c2);
 
-        friend complex operator*(const scalar s, const complex& c);
+        friend complex operator+(const complex& c1, const complex& c2);
+        friend complex operator+(const complex& c, const scalar s);
+        friend complex operator+(const scalar s, const complex& c);
+
+        friend complex operator-(const complex& c1, const complex& c2);
+        friend complex operator-(const complex& c, const scalar s);
+        friend complex operator-(const scalar s, const complex& c);
+
+        friend complex operator*(const complex& c1, const complex& c2);
         friend complex operator*(const complex& c, const scalar s);
+        friend complex operator*(const scalar s, const complex& c);
+
+        friend complex operator/(const complex& c1, const complex& c2);
         friend complex operator/(const complex& c, const scalar s);
         friend complex operator/(const scalar s, const complex& c);
 };
