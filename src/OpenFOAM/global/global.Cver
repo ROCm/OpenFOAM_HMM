@@ -98,7 +98,9 @@ const std::string Foam::foamVersion::buildArch
 #endif
     ";label="  + std::to_string(8*sizeof(Foam::label))
   + ";scalar=" + std::to_string(8*sizeof(Foam::scalar))
-  + ";solve=" + std::to_string(8*sizeof(Foam::solveScalar))
+#ifdef WM_SPDP
+  + ";solveScalar=" + std::to_string(8*sizeof(Foam::solveScalar))
+#endif
 );
 
 
