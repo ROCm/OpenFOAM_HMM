@@ -49,13 +49,15 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::zeroGradient::checkFormatName(const word& str)
+bool Foam::functionObjects::zeroGradient::checkFormatName
+(
+    const std::string& str
+)
 {
-    if (str.find("@@") == string::npos)
+    if (std::string::npos == str.find("@@"))
     {
         WarningInFunction
-            << "Bad result naming "
-            << "(no '@@' token found), deactivating."
+            << "Bad result naming (no '@@' token found)."
             << nl << endl;
 
         return false;
@@ -63,10 +65,8 @@ bool Foam::functionObjects::zeroGradient::checkFormatName(const word& str)
     else if (str == "@@")
     {
         WarningInFunction
-            << "Bad result naming "
-            << "(only a '@@' token found), deactivating."
-            << nl
-            << endl;
+            << "Bad result naming (only a '@@' token found)."
+            << nl << endl;
 
         return false;
     }
@@ -118,7 +118,13 @@ bool Foam::functionObjects::zeroGradient::read(const dictionary& dict)
     Info<< type() << " fields: " << selectFields_ << nl;
 
     resultName_ = dict.lookupOrDefault<word>("result", type() + "(@@)");
-    return checkFormatName(resultName_);
+
+    // Require '@@' token for result, unless a single (non-regex) source field
+    return
+    (
+        (selectFields_.size() == 1 && selectFields_.first().isLiteral())
+     || checkFormatName(resultName_)
+    );
 }
 
 

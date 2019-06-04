@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,8 @@ Usage
 
     A list of fields can contain exact names or regular expressions.
     The token '\@\@' in the result name is replaced by the name of the source
-    field.
+    field. In the special case of a single source field (specified as
+    a non-regex), the '\@\@' token checking is suppressed.
 
     The function object will skip over fields that would not benefit
     - ie, only processor, empty, zeroGradient, symmetry patches.
@@ -95,20 +96,20 @@ class zeroGradient
 {
     // Private data
 
-        //- Name of fields to process
+        //- Name of fields to process.
         wordRes selectFields_;
 
         //- Formatting for the result fields.
         word resultName_;
 
-        //- Hashed names of result fields, and their type
+        //- Hashed names of result fields, and their type.
         HashTable<word> results_;
 
 
     // Private Member Functions
 
-        //- Check that the word contains the appropriate substitution token(s).
-        static bool checkFormatName(const word& str);
+        //- Check that string contains the appropriate substitution token(s).
+        static bool checkFormatName(const std::string& str);
 
 
         //- Accept unless field only has constraint patches
