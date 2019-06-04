@@ -65,7 +65,7 @@ bool Foam::functionEntries::removeEntry::execute
             // Remove scoped keyword, or keyword in the local scope
             auto finder(parentDict.searchScoped(key, keyType::LITERAL));
 
-            if (finder.found())
+            if (finder.good())
             {
                 finder.context().remove(finder.ptr()->keyword());
             }

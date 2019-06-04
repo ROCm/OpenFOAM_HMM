@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2004-2010, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -38,24 +38,21 @@ Foam::ConstMatrixBlock<MatrixType>::ConstMatrixBlock
 )
 :
     matrix_(matrix),
-    mRows_(m),
-    nCols_(n),
-    rowStart_(mStart),
-    colStart_(nStart)
-{
-    #ifdef FULLDEBUG
-    if
+    mRows_(0 < m ? m : disallow("row dim")),
+    nCols_(0 < n ? n : disallow("col dim")),
+    rowStart_
     (
-        rowStart_ + mRows_ > matrix.m()
-     || colStart_ + nCols_ > matrix.n()
+        0 <= mStart
+     || mStart + mRows_ <= matrix.m()
+     ?  mStart : disallow("row start")
+    ),
+    colStart_
+    (
+        0 <= nStart
+     || nStart + nCols_ <= matrix.n()
+     ?  nStart : disallow("col start")
     )
-    {
-        FatalErrorInFunction
-            << "Block addresses outside matrix"
-            << abort(FatalError);
-    }
-    #endif
-}
+{}
 
 
 template<class MatrixType>
@@ -69,24 +66,21 @@ Foam::MatrixBlock<MatrixType>::MatrixBlock
 )
 :
     matrix_(matrix),
-    mRows_(m),
-    nCols_(n),
-    rowStart_(mStart),
-    colStart_(nStart)
-{
-    #ifdef FULLDEBUG
-    if
+    mRows_(0 < m ? m : disallow("row dim")),
+    nCols_(0 < n ? n : disallow("col dim")),
+    rowStart_
     (
-        rowStart_ + mRows_ > matrix.m()
-     || colStart_ + nCols_ > matrix.n()
+        0 <= mStart
+     || mStart + mRows_ <= matrix.m()
+     ?  mStart : disallow("row start")
+    ),
+    colStart_
+    (
+        0 <= nStart
+     || nStart + nCols_ <= matrix.n()
+     ?  nStart : disallow("col start")
     )
-    {
-        FatalErrorInFunction
-            << "Block addresses outside matrix"
-            << abort(FatalError);
-    }
-    #endif
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -119,6 +113,20 @@ inline Foam::label Foam::MatrixBlock<MatrixType>::n() const
 }
 
 
+template<class MatrixType>
+inline Foam::labelPair Foam::ConstMatrixBlock<MatrixType>::sizes() const
+{
+    return labelPair(mRows_, nCols_);
+}
+
+
+template<class MatrixType>
+inline Foam::labelPair Foam::MatrixBlock<MatrixType>::sizes() const
+{
+    return labelPair(mRows_, nCols_);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class MatrixType>
@@ -130,18 +138,7 @@ Foam::ConstMatrixBlock<MatrixType>::operator()
 ) const
 {
     #ifdef FULLDEBUG
-    if (i<0 || i>=mRows_)
-    {
-        FatalErrorInFunction
-            << "Index " << i << " out of range 0 ... " << mRows_-1
-            << abort(FatalError);
-    }
-    if (j<0 || j>=nCols_)
-    {
-        FatalErrorInFunction
-            << "Index " << j << " out of range 0 ... " << nCols_-1
-            << abort(FatalError);
-    }
+    checkIndex(i, j);
     #endif
 
     return matrix_(i + rowStart_, j + colStart_);
@@ -157,18 +154,7 @@ Foam::MatrixBlock<MatrixType>::operator()
 ) const
 {
     #ifdef FULLDEBUG
-    if (i<0 || i>=mRows_)
-    {
-        FatalErrorInFunction
-            << "Index " << i << " out of range 0 ... " << mRows_-1
-            << abort(FatalError);
-    }
-    if (j<0 || j>=nCols_)
-    {
-        FatalErrorInFunction
-            << "Index " << j << " out of range 0 ... " << nCols_-1
-            << abort(FatalError);
-    }
+    checkIndex(i, j);
     #endif
 
     return matrix_(i + rowStart_, j + colStart_);
@@ -184,18 +170,7 @@ Foam::MatrixBlock<MatrixType>::operator()
 )
 {
     #ifdef FULLDEBUG
-    if (i<0 || i>=mRows_)
-    {
-        FatalErrorInFunction
-            << "Index " << i << " out of range 0 ... " << mRows_-1
-            << abort(FatalError);
-    }
-    if (j<0 || j>=nCols_)
-    {
-        FatalErrorInFunction
-            << "Index " << j << " out of range 0 ... " << nCols_-1
-            << abort(FatalError);
-    }
+    checkIndex(i, j);
     #endif
 
     return matrix_(i + rowStart_, j + colStart_);

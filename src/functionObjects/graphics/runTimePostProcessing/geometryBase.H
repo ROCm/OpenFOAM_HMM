@@ -29,10 +29,11 @@ Description
 
     Dictionary controls
     \table
-        Property    | Description                          | Required | Default
-        visible     | Display the object                   | no  | yes
-        renderMode  | Shading (flat/gouraud/phong)         | no  | gouraud
-        opacity     | Object opacity                       | no  | 1.0
+        Property    | Description                           | Required | Default
+        visible     | Display the object                    | no  | yes
+        renderMode  | Shading (flat/gouraud/phong)          | no  | gouraud
+        opacity     | Object opacity                        | no  | 1.0
+        parallel    | Allow parallel rendering              | no  | true
     \endtable
 
 SourceFiles
@@ -102,6 +103,9 @@ protected:
         //- Visible flag
         bool visible_;
 
+        //- Allow parallel rendering
+        bool parallel_;
+
         //- Render mode
         renderModeType renderMode_;
 
@@ -146,8 +150,6 @@ public:
 
     // Member Functions
 
-    // Access
-
         //- Return the reference to the parent function object
         const runTimePostProcessing& parent() const;
 
@@ -159,7 +161,16 @@ public:
         const word& name() const;
 
         //- Return the visible flag
-        bool visible() const;
+        bool visible() const
+        {
+            return visible_;
+        }
+
+        //- Allow parallel rendering
+        bool parallel() const
+        {
+            return parallel_;
+        }
 
         //- Return the opacity
         scalar opacity(const scalar position) const;

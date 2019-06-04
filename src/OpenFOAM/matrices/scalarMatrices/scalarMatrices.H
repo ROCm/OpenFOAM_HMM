@@ -60,12 +60,12 @@ typedef SymmetricSquareMatrix<scalar> scalarSymmetricSquareMatrix;
 typedef DiagonalMatrix<scalar> scalarDiagonalMatrix;
 
 //- Solve the matrix using Gaussian elimination with pivoting,
-//  returning the solution in the source
+//- returning the solution in the source
 template<class Type>
 void solve(scalarSquareMatrix& matrix, List<Type>& source);
 
 //- Solve the matrix using Gaussian elimination with pivoting
-//  and return the solution
+//- and return the solution
 template<class Type>
 void solve
 (
@@ -82,7 +82,7 @@ void LUDecompose
 );
 
 //- LU decompose the matrix with pivoting.
-//  sign is -1 for odd number of row interchanges and 1 for even number.
+//- sign is -1 for odd number of row interchanges and 1 for even number.
 void LUDecompose
 (
     scalarSquareMatrix& matrix,
@@ -94,7 +94,7 @@ void LUDecompose
 void LUDecompose(scalarSymmetricSquareMatrix& matrix);
 
 //- LU back-substitution with given source, returning the solution
-//  in the source
+//- in the source
 template<class Type>
 void LUBacksubstitute
 (
@@ -104,8 +104,8 @@ void LUBacksubstitute
 );
 
 //- LU back-substitution with given source, returning the solution
-//  in the source. Specialised for symmetric square matrices that have been
-//  decomposed into LU where U = L.T() as pivoting is not required
+//- in the source. Specialised for symmetric square matrices that have been
+//- decomposed into LU where U = L.T() as pivoting is not required
 template<class Type>
 void LUBacksubstitute
 (
@@ -114,12 +114,12 @@ void LUBacksubstitute
 );
 
 //- Solve the matrix using LU decomposition with pivoting
-//  returning the LU form of the matrix and the solution in the source
+//- returning the LU form of the matrix and the solution in the source
 template<class Type>
 void LUsolve(scalarSquareMatrix& matrix, List<Type>& source);
 
 //- Solve the matrix using LU decomposition returning the LU form of the matrix
-//  and the solution in the source, where U = L.T()
+//- and the solution in the source, where U = L.T()
 template<class Type>
 void LUsolve(scalarSymmetricSquareMatrix& matrix, List<Type>& source);
 

@@ -120,7 +120,7 @@ public:
     inline ~regExpPosix();
 
 
-    // Member functions
+    // Member Functions
 
     // Access
 

@@ -129,10 +129,23 @@ inline void Foam::complex::operator=(const Foam::zero)
 }
 
 
+inline void Foam::complex::operator=(const scalar s)
+{
+    re = s;
+    im = 0;
+}
+
+
 inline void Foam::complex::operator+=(const complex& c)
 {
     re += c.re;
     im += c.im;
+}
+
+
+inline void Foam::complex::operator+=(const scalar s)
+{
+    re += s;
 }
 
 
@@ -143,34 +156,15 @@ inline void Foam::complex::operator-=(const complex& c)
 }
 
 
-inline void Foam::complex::operator*=(const complex& c)
-{
-    *this = (*this)*c;
-}
-
-
-inline void Foam::complex::operator/=(const complex& c)
-{
-    *this = *this/c;
-}
-
-
-inline void Foam::complex::operator=(const scalar s)
-{
-    re = s;
-    im = 0;
-}
-
-
-inline void Foam::complex::operator+=(const scalar s)
-{
-    re += s;
-}
-
-
 inline void Foam::complex::operator-=(const scalar s)
 {
     re -= s;
+}
+
+
+inline void Foam::complex::operator*=(const complex& c)
+{
+    *this = (*this)*c;
 }
 
 
@@ -178,6 +172,12 @@ inline void Foam::complex::operator*=(const scalar s)
 {
     re *= s;
     im *= s;
+}
+
+
+inline void Foam::complex::operator/=(const complex& c)
+{
+    *this = *this/c;
 }
 
 
@@ -221,13 +221,26 @@ inline scalar magSqr(const complex& c)
 
 inline scalar mag(const complex& c)
 {
-    return sqrt(magSqr(c)); // OR std::hypot(c.re, c.im);
+    return std::hypot(c.re, c.im);
 }
 
 
 inline complex sqr(const complex& c)
 {
-    return c * c;
+    return c*c;
+}
+
+
+inline complex sign(const complex& c)
+{
+    const scalar s(mag(c));
+    return s < ROOTVSMALL ? Zero : c/s;
+}
+
+
+inline scalar csign(const complex& c)
+{
+    return equal(c.Re(), 0) ? sign(c.Im()) : sign(c.Re());
 }
 
 
@@ -275,6 +288,12 @@ inline complex transform(const Tensor<scalar>&, const complex c)
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
+inline complex operator-(const complex& c)
+{
+    return complex(-c.re, -c.im);
+}
+
+
 inline complex operator+(const complex& c1, const complex& c2)
 {
     return complex
@@ -285,13 +304,15 @@ inline complex operator+(const complex& c1, const complex& c2)
 }
 
 
-inline complex operator-(const complex& c)
+inline complex operator+(const complex& c, const scalar s)
 {
-    return complex
-    (
-        -c.re,
-        -c.im
-    );
+    return complex(c.re + s, c.im);
+}
+
+
+inline complex operator+(const scalar s, const complex& c)
+{
+    return complex(c.re + s, c.im);
 }
 
 
@@ -305,6 +326,18 @@ inline complex operator-(const complex& c1, const complex& c2)
 }
 
 
+inline complex operator-(const complex& c, const scalar s)
+{
+    return complex(c.re - s, c.im);
+}
+
+
+inline complex operator-(const scalar s, const complex& c)
+{
+    return complex(s - c.re, -c.im);
+}
+
+
 inline complex operator*(const complex& c1, const complex& c2)
 {
     return complex
@@ -312,6 +345,18 @@ inline complex operator*(const complex& c1, const complex& c2)
         c1.re*c2.re - c1.im*c2.im,
         c1.im*c2.re + c1.re*c2.im
     );
+}
+
+
+inline complex operator*(const complex& c, const scalar s)
+{
+    return complex(s*c.re, s*c.im);
+}
+
+
+inline complex operator*(const scalar s, const complex& c)
+{
+    return complex(s*c.re, s*c.im);
 }
 
 
@@ -327,18 +372,6 @@ inline complex operator/(const complex& c1, const complex& c2)
 }
 
 
-inline complex operator*(const scalar s, const complex& c)
-{
-    return complex(s*c.re, s*c.im);
-}
-
-
-inline complex operator*(const complex& c, const scalar s)
-{
-    return complex(s*c.re, s*c.im);
-}
-
-
 inline complex operator/(const complex& c, const scalar s)
 {
     return complex(c.re/s, c.im/s);
@@ -347,7 +380,7 @@ inline complex operator/(const complex& c, const scalar s)
 
 inline complex operator/(const scalar s, const complex& c)
 {
-    return complex(s/c.re, s/c.im);
+    return complex(s)/c;
 }
 
 

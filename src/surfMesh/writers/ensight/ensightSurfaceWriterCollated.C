@@ -25,7 +25,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Compare time values with tolerance
+static const equalOp<scalar> equalTimes(ROOTSMALL);
+
+// Use ListOps findLower (with tolerance), to find the location of the next
+// time-related index.
+static label findTimeIndex(const UList<scalar>& list, const scalar val)
+{
+    label idx =
+        findLower
+        (
+            list,
+            val,
+            0,
+            [](const scalar a, const scalar b)
+            {
+                return (a < b) && (Foam::mag(b - a) > ROOTSMALL);
+            }
+        );
+
+    if (idx < 0 || !equalTimes(list[idx], val))
+    {
+        ++idx;
+    }
+
+    return idx;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated()
 {
@@ -119,21 +154,17 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
                     dict.readIfPresent("meshes", meshes);
                     dict.readIfPresent("times", times);
 
-                    timeIndex = 1+findLower(times, timeValue);
+                    timeIndex = findTimeIndex(times, timeValue);
 
                     if (meshChanged)
                     {
                         meshValue = timeValue;
-                        meshIndex = 1+findLower(meshes, meshValue);
+                        meshIndex = findTimeIndex(meshes, meshValue);
                     }
                     else if (meshes.size())
                     {
                         meshIndex = meshes.size()-1;
                         meshValue = meshes.last();
-                    }
-                    else
-                    {
-                        meshIndex = 0;
                     }
                 }
             }
@@ -142,11 +173,11 @@ Foam::fileName Foam::surfaceWriters::ensightWriter::writeCollated
             meshes.resize(meshIndex+1, -1);
             times.resize(timeIndex+1, -1);
 
-            if (meshes[meshIndex] != meshValue)
-            {
-                stateChanged = true;
-            }
-            if (times[timeIndex] != timeValue)
+            if
+            (
+                !equalTimes(meshes[meshIndex], meshValue)
+             || !equalTimes(times[timeIndex], timeValue)
+            )
             {
                 stateChanged = true;
             }

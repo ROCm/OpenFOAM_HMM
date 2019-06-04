@@ -2307,7 +2307,9 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~
     // (replacement for setRootCase that does not abort)
 
-    Foam::argList args(argc, argv);
+    argList args(argc, argv);
+    #include "foamDlOpenLibs.H"
+
     const bool reconstruct = args.found("reconstruct");
     const bool writeCellDist = args.found("cellDist");
     const bool dryrun = args.found("dry-run");

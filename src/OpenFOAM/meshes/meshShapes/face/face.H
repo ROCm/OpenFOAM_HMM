@@ -202,8 +202,8 @@ public:
 
         //- Legacy name for areaNormal()
         //  \deprecated(2018-06) Deprecated for new use
-        inline vector normal(const UList<point>& p) const
-        FOAM_DEPRECATED_FOR(2018-12, "areaNormal() or unitNormal()")
+        vector FOAM_DEPRECATED_FOR(2018-12, "areaNormal() or unitNormal()")
+        normal(const UList<point>& p) const
         {
             return areaNormal(p); // Legacy definition
         }

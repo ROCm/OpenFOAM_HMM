@@ -183,6 +183,12 @@ addGeometry
     colourFieldInfo.reduce();
 
 
+    DebugInfo
+        << "    Field " << fieldName_ << ' ' << fieldInfo.info() << nl
+        << "    Field " << colourFieldName_ << ' ' << colourFieldInfo.info()
+        << endl;
+
+
     // Not rendered on this processor?
     // This is where we stop, but could also have an MPI barrier
     if (!renderer)

@@ -42,12 +42,12 @@ namespace functionObjects
 
 const Foam::Enum<Foam::functionObjects::timeControl::controlMode>
 Foam::functionObjects::timeControl::controlModeNames_
-{
+({
     { controlMode::TIME, "time" },
     { controlMode::TRIGGER, "trigger" },
     { controlMode::TIME_OR_TRIGGER, "timeOrTrigger" },
     { controlMode::TIME_AND_TRIGGER, "timeAndTrigger" }
-};
+});
 
 
 // * * * * * * * * * * * * * * * Private Members * * * * * * * * * * * * * * //

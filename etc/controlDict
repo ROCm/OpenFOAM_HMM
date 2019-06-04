@@ -37,6 +37,8 @@ InfoSwitches
     writePrecision  6;
 
     writeDictionaries 0;
+
+    // Report optional dictionary entries. For value > 1, treat as fatal.
     writeOptionalEntries 0;
 
     // Write lagrangian "positions" file in v1706 format (and earlier)
@@ -218,7 +220,7 @@ DebugSwitches
     FDIC                0;
     FaceCellWave        0;
     GAMG                0;
-    GAMGAgglomeration   1;
+    GAMGAgglomeration   0;
     GAMGInterface       0;
     GAMGInterfaceField  0;
     Gamma               0;

@@ -107,7 +107,7 @@ public:
         //- Construct from lduMatrix and perform LU decomposition
         LUscalarMatrix
         (
-            const lduMatrix&,
+            const lduMatrix& ldum,
             const FieldField<Field, scalar>& interfaceCoeffs,
             const lduInterfaceFieldPtrsList& interfaces
         );
@@ -122,12 +122,12 @@ public:
         //  and returning the solution in the Field argument x.
         //  This function may be called with the same field for x and source.
         template<class Type>
-        void solve(Field<Type>& x, const Field<Type>& source) const;
+        void solve(List<Type>& x, const UList<Type>& source) const;
 
         //- Solve the linear system with the given source
         //  returning the solution
         template<class Type>
-        tmp<Field<Type>> solve(const Field<Type>& source) const;
+        tmp<Field<Type>> solve(const UList<Type>& source) const;
 
         //- Set M to the inverse of this square matrix
         void inv(scalarSquareMatrix& M) const;

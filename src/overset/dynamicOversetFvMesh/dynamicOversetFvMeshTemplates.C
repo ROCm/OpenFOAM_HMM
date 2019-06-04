@@ -30,6 +30,7 @@ License
 #include "calculatedProcessorFvPatchField.H"
 #include "lduInterfaceFieldPtrsList.H"
 #include "processorFvPatch.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 
@@ -155,11 +156,10 @@ Foam::tmp<Foam::scalarField> Foam::dynamicOversetFvMesh::normalisation
     tmp<scalarField> tnorm(tmp<scalarField>::New(m.diag()));
     scalarField& norm = tnorm.ref();
 
-    // Add boundary coeffs to duplicate behaviour of fvMatrix
+    // Add boundary coeffs to duplicate behaviour of fvMatrix::addBoundaryDiag
     const FieldField<Field, Type>& internalCoeffs = m.internalCoeffs();
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
-        //m.addBoundaryDiag(norm, cmpt);
         forAll(internalCoeffs, patchi)
         {
             const labelUList& fc = lduAddr().patchAddr(patchi);
@@ -172,18 +172,151 @@ Foam::tmp<Foam::scalarField> Foam::dynamicOversetFvMesh::normalisation
         }
     }
 
-    forAll(norm, celli)
+    // Count number of problematic cells
+    label nZeroDiag = 0;
+    for (const scalar n : norm)
     {
-        scalar& n = norm[celli];
-        if (mag(n) < SMALL)
+        if (magSqr(n) < sqr(SMALL))
         {
-            n = 1.0; //?
+            nZeroDiag++;
         }
-        else
+    }
+
+    reduce(nZeroDiag, sumOp<label>());
+
+    if (debug)
+    {
+        Pout<< "For field " << m.psi().name() << " have zero diagonals for "
+            << nZeroDiag << " cells" << endl;
+    }
+
+    if (nZeroDiag > 0)
+    {
+        // Walk out the norm across hole cells
+
+        const labelList& own = faceOwner();
+        const labelList& nei = faceNeighbour();
+        const cellCellStencilObject& overlap = Stencil::New(*this);
+        const labelUList& types = overlap.cellTypes();
+
+        label nHoles = 0;
+        scalarField extrapolatedNorm(norm);
+        forAll(types, celli)
         {
-            // Restore original diagonal
-            n = m.diag()[celli];
+            if (types[celli] == cellCellStencil::HOLE)
+            {
+                extrapolatedNorm[celli] = -GREAT;
+                nHoles++;
+            }
         }
+
+        bitSet isFront(nFaces());
+        for (label facei = 0; facei < nInternalFaces(); facei++)
+        {
+            label ownType = types[own[facei]];
+            label neiType = types[nei[facei]];
+            if
+            (
+                (ownType == cellCellStencil::HOLE)
+             != (neiType == cellCellStencil::HOLE)
+            )
+            {
+                isFront.set(facei);
+            }
+        }
+        labelList nbrTypes;
+        syncTools::swapBoundaryCellList(*this, types, nbrTypes);
+        for (label facei = nInternalFaces(); facei < nFaces(); facei++)
+        {
+            label ownType = types[own[facei]];
+            label neiType = nbrTypes[facei-nInternalFaces()];
+            if
+            (
+                (ownType == cellCellStencil::HOLE)
+             != (neiType == cellCellStencil::HOLE)
+            )
+            {
+                isFront.set(facei);
+            }
+        }
+
+
+        while (true)
+        {
+            scalarField nbrNorm;
+            syncTools::swapBoundaryCellList(*this, extrapolatedNorm, nbrNorm);
+
+            bitSet newIsFront(nFaces());
+            scalarField newNorm(extrapolatedNorm);
+
+            label nChanged = 0;
+            for (const label facei : isFront)
+            {
+                if (extrapolatedNorm[own[facei]] == -GREAT)
+                {
+                    // Average owner cell, add faces to newFront
+                    newNorm[own[facei]] = cellAverage
+                    (
+                        types,
+                        nbrTypes,
+                        extrapolatedNorm,
+                        nbrNorm,
+                        own[facei],
+                        newIsFront
+                    );
+                    nChanged++;
+                }
+                if
+                (
+                    isInternalFace(facei)
+                 && extrapolatedNorm[nei[facei]] == -GREAT
+                )
+                {
+                    // Average nei cell, add faces to newFront
+                    newNorm[nei[facei]] = cellAverage
+                    (
+                        types,
+                        nbrTypes,
+                        extrapolatedNorm,
+                        nbrNorm,
+                        nei[facei],
+                        newIsFront
+                    );
+                    nChanged++;
+                }
+            }
+
+            reduce(nChanged, sumOp<label>());
+            if (nChanged == 0)
+            {
+                break;
+            }
+
+            // Transfer new front
+            extrapolatedNorm.transfer(newNorm);
+            isFront.transfer(newIsFront);
+            syncTools::syncFaceList(*this, isFront, maxEqOp<unsigned int>());
+        }
+
+
+        forAll(norm, celli)
+        {
+            scalar& n = norm[celli];
+            if (mag(n) < SMALL)
+            {
+                n = extrapolatedNorm[celli];
+            }
+            else
+            {
+                // Use original diagonal
+                n = m.diag()[celli];
+            }
+        }
+    }
+    else
+    {
+        // Use original diagonal
+        norm = m.diag();
     }
     return tnorm;
 }
@@ -545,6 +678,38 @@ Foam::SolverPerformance<Type> Foam::dynamicOversetFvMesh::solve
 
     // Calculate stabilised diagonal as normalisation for interpolation
     const scalarField norm(normalisation(m));
+
+    if (debug)
+    {
+        volScalarField scale
+        (
+            IOobject
+            (
+                m.psi().name() + "_normalisation",
+                this->time().timeName(),
+                *this,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            *this,
+            dimensionedScalar(dimless, Zero)
+        );
+        scale.ref().field() = norm;
+        correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >(scale.boundaryFieldRef(), false);
+        scale.write();
+
+        if (debug)
+        {
+            Pout<< "dynamicOversetFvMesh::solve() :"
+                << " writing matrix normalisation for field " << m.psi().name()
+                << " to " << scale.name() << endl;
+        }
+    }
 
 
     // Switch to extended addressing (requires mesh::update() having been

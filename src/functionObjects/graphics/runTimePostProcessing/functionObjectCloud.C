@@ -153,8 +153,7 @@ addGeometryFromFile
             else
             {
                 DebugInfo
-                    << "    Resolved cloud file "
-                    << inputFileName_ << endl;
+                    << "    Resolved cloud file " << inputFileName_ << endl;
             }
         }
         else
@@ -197,6 +196,12 @@ addGeometryFromFile
 
         fieldSummary colourFieldInfo =
             queryFieldSummary(colourFieldName_, polyData);
+
+        DebugInfo
+            << "    Field " << fieldName_ << ' ' << scaleFieldInfo.info() << nl
+            << "    Field " << colourFieldName_ << ' ' << colourFieldInfo.info()
+            << endl;
+
 
         // No reduction
 

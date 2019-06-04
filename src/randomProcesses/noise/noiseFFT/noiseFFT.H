@@ -177,8 +177,7 @@ public:
         graph octaves
         (
             const graph& g,
-            const labelUList& freqBandIDs,
-            bool integrate
+            const labelUList& freqBandIDs
         ) const;
 
         //- Convert the db into Pa

@@ -161,6 +161,12 @@ public:
 
     // Static Member Functions
 
+        //- A semi-infinite range from minVal to the type max
+        inline static MinMax<T> ge(const T& minVal);
+
+        //- A semi-infinite range from type min to maxVal
+        inline static MinMax<T> le(const T& maxVal);
+
         //- A 0-1 range corresponding to the pTraits zero, one
         inline static MinMax<T> zero_one();
 

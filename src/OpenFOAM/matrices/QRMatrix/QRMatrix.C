@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -30,22 +30,22 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class MatrixType>
-Foam::QRMatrix<MatrixType>::QRMatrix(const MatrixType& M)
+Foam::QRMatrix<MatrixType>::QRMatrix(const MatrixType& mat)
 {
-    decompose(M);
+    decompose(mat);
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class MatrixType>
-void Foam::QRMatrix<MatrixType>::decompose(const MatrixType& M)
+void Foam::QRMatrix<MatrixType>::decompose(const MatrixType& mat)
 {
-    const label m = M.m();
-    const label n = M.n();
+    const label m = mat.m();
+    const label n = mat.n();
 
     // Initialize the R-matrix to M
-    R_ = M;
+    R_ = mat;
 
     // Initialize the Q-matrix to I
     Q_.setSize(m);
@@ -158,18 +158,19 @@ void Foam::QRMatrix<MatrixType>::decompose(const MatrixType& M)
 
 
 template<class MatrixType>
+template<template<typename> class ListContainer>
 void Foam::QRMatrix<MatrixType>::solvex
 (
-    Field<cmptType>& x
+    ListContainer<cmptType>& x
 ) const
 {
     const label n = R_.n();
 
-    for (int i=n-1; i>=0; i--)
+    for (label i = n - 1; i >= 0; --i)
     {
         cmptType sum = x[i];
 
-        for (label j=i+1; j<n; j++)
+        for (label j = i + 1; j < n; ++j)
         {
             sum -= x[j]*R_(i, j);
         }
@@ -187,19 +188,21 @@ void Foam::QRMatrix<MatrixType>::solvex
 
 
 template<class MatrixType>
-void Foam::QRMatrix<MatrixType>::solve
+template<template<typename> class ListContainer>
+void Foam::QRMatrix<MatrixType>::solveImpl
 (
-    Field<cmptType>& x,
-    const Field<cmptType>& source
+    List<cmptType>& x,
+    const ListContainer<cmptType>& source
 ) const
 {
+    // Assert (&x != &source) ?
     const label m = Q_.m();
 
-    // x = Q_.T()*source;
-    for (label i=0; i<m; i++)
+    // x = Q_.T()*source;  ie, Q_.Tmul(source)
+    for (label i = 0; i < m; ++i)
     {
         x[i] = 0;
-        for (label j=0; j<m; j++)
+        for (label j = 0; j < m; ++j)
         {
             x[i] += Q_(j, i)*source[j];
         }
@@ -210,18 +213,56 @@ void Foam::QRMatrix<MatrixType>::solve
 
 
 template<class MatrixType>
+void Foam::QRMatrix<MatrixType>::solve
+(
+    List<cmptType>& x,
+    const UList<cmptType>& source
+) const
+{
+    solveImpl(x, source);
+}
+
+
+template<class MatrixType>
+template<class Addr>
+void Foam::QRMatrix<MatrixType>::solve
+(
+    List<cmptType>& x,
+    const IndirectListBase<cmptType, Addr>& source
+) const
+{
+    solveImpl(x, source);
+}
+
+
+template<class MatrixType>
 Foam::tmp<Foam::Field<typename MatrixType::cmptType>>
 Foam::QRMatrix<MatrixType>::solve
 (
-    const Field<cmptType>& source
+    const UList<cmptType>& source
 ) const
 {
-    tmp<Field<cmptType>> tx(new Field<cmptType>(Q_.m()));
-    Field<cmptType>& x = tx.ref();
+    auto tresult(Q_.Tmul(source));
 
-    solve(x, source);
+    solvex(tresult.ref());
 
-    return tx;
+    return tresult;
+}
+
+
+template<class MatrixType>
+template<class Addr>
+Foam::tmp<Foam::Field<typename MatrixType::cmptType>>
+Foam::QRMatrix<MatrixType>::solve
+(
+    const IndirectListBase<cmptType, Addr>& source
+) const
+{
+    auto tresult(Q_.Tmul(source));
+
+    solvex(tresult.ref());
+
+    return tresult;
 }
 
 
@@ -234,14 +275,14 @@ Foam::QRMatrix<MatrixType>::inv() const
     Field<cmptType> x(m);
     QMatrixType inv(m);
 
-    for (label i=0; i<m; i++)
+    for (label i = 0; i < m; ++i)
     {
-        for (label j=0; j<m; j++)
+        for (label j = 0; j < m; ++j)
         {
             x[j] = Q_(i, j);
         }
         solvex(x);
-        inv.block(m, 1, 0, i) = x;
+        inv.subColumn(i) = x;
     }
 
     return inv;

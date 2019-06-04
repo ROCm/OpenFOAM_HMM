@@ -45,39 +45,35 @@ void Foam::functionObjects::runTimePostPro::scene::readCamera
     const dictionary& dict
 )
 {
-    if (dict.readIfPresent("nFrameTotal", nFrameTotal_))
-    {
-        if (nFrameTotal_ < 1)
-        {
-            FatalIOErrorInFunction(dict)
-                << "nFrameTotal must be 1 or greater"
-                << exit(FatalIOError);
-        }
-    }
+    nFrameTotal_ = dict.getCheckOrDefault<label>
+    (
+        "nFrameTotal",
+        1,
+        labelMinMax::ge(1)
+    );
 
-    if (dict.readIfPresent("startPosition", startPosition_))
+    if
+    (
+        dict.readCheckIfPresent
+        (
+            "startPosition",
+            startPosition_,
+            scalarMinMax::zero_one()
+        )
+    )
     {
-        if ((startPosition_ < 0) || (startPosition_ > 1))
-        {
-            FatalIOErrorInFunction(dict)
-                << "startPosition must be in the range 0-1"
-                << exit(FatalIOError);
-        }
-        else
-        {
-            position_ = startPosition_;
-        }
+        position_ = startPosition_;
     }
 
     if (nFrameTotal_ > 1)
     {
-        scalar endPosition = dict.lookupOrDefault<scalar>("endPosition", 1);
-        if ((endPosition < 0) || (endPosition > 1))
-        {
-            FatalIOErrorInFunction(dict)
-                << "endPosition must be in the range 0-1"
-                << exit(FatalIOError);
-        }
+        scalar endPosition = dict.getCheckOrDefault<scalar>
+        (
+            "endPosition",
+            1,
+            scalarMinMax::zero_one()
+        );
+
         dPosition_ = (endPosition - startPosition_)/scalar(nFrameTotal_ - 1);
     }
 
@@ -86,7 +82,7 @@ void Foam::functionObjects::runTimePostPro::scene::readCamera
     cameraUp_ = Function1<vector>::New("up", dict);
 
     dict.readIfPresent("clipBox", clipBox_);
-    dict.readEntry("parallelProjection", parallelProjection_);
+    parallelProjection_ = dict.getOrDefault("parallelProjection", true);
     if (!parallelProjection_)
     {
         if (dict.found("viewAngle"))

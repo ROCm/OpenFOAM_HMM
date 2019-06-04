@@ -157,7 +157,8 @@ inline void Foam::regExpCxx::swap(regExpCxx& rgx)
 }
 
 
-inline std::string::size_type Foam::regExpCxx::find(const std::string& text) const
+inline std::string::size_type
+Foam::regExpCxx::find(const std::string& text) const
 {
     std::smatch mat;
     if (!text.empty() && std::regex_search(text, mat, re_))

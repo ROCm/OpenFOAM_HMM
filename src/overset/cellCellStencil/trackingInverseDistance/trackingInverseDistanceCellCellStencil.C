@@ -34,6 +34,7 @@ License
 #include "syncTools.H"
 #include "treeBoundBoxList.H"
 #include "voxelMeshSearch.H"
+#include "dynamicOversetFvMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -961,7 +962,12 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
         )
     );
     cellInterpolationWeight_.transfer(allWeight);
-    cellInterpolationWeight_.correctBoundaryConditions();
+    //cellInterpolationWeight_.correctBoundaryConditions();
+    dynamicOversetFvMesh::correctBoundaryConditions
+    <
+        volScalarField,
+        oversetFvPatchField<scalar>
+    >(cellInterpolationWeight_.boundaryFieldRef(), false);
 
 
     if (debug & 2)
@@ -1024,7 +1030,12 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
         {
             volTypes[celli] = cellTypes_[celli];
         }
-        volTypes.correctBoundaryConditions();
+        //volTypes.correctBoundaryConditions();
+        dynamicOversetFvMesh::correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >(volTypes.boundaryFieldRef(), false);
         volTypes.write();
 
         // Dump stencil

@@ -443,8 +443,7 @@ Foam::graph Foam::noiseFFT::PSD(const graph& gPSDf) const
 Foam::graph Foam::noiseFFT::octaves
 (
     const graph& g,
-    const labelUList& freqBandIDs,
-    bool integrate
+    const labelUList& freqBandIDs
 ) const
 {
     if (freqBandIDs.size() < 2)
@@ -478,22 +477,12 @@ Foam::graph Foam::noiseFFT::octaves
 
         if (fb0 == fb1) continue;
 
-        if (integrate)
+        for (label freqI = fb0; freqI < fb1; ++freqI)
         {
-            for (label freqI = fb0; freqI < fb1; ++freqI)
-            {
-                label f0 = f[freqI];
-                label f1 = f[freqI + 1];
-                scalar dataAve = 0.5*(data[freqI] + data[freqI + 1]);
-                octData[bandI] += dataAve*(f1 - f0);
-            }
-        }
-        else
-        {
-            for (label freqI = fb0; freqI < fb1; ++freqI)
-            {
-                octData[bandI] += data[freqI];
-            }
+            label f0 = f[freqI];
+            label f1 = f[freqI + 1];
+            scalar dataAve = 0.5*(data[freqI] + data[freqI + 1]);
+            octData[bandI] += dataAve*(f1 - f0);
         }
     }
 

@@ -25,8 +25,9 @@
 alias wmSet='. $WM_PROJECT_DIR/etc/bashrc'
 alias wmInt32='wmSet WM_LABEL_SIZE=32'
 alias wmInt64='wmSet WM_LABEL_SIZE=64'
-alias wmSP='wmSet WM_PRECISION_OPTION=SP'
 alias wmDP='wmSet WM_PRECISION_OPTION=DP'
+alias wmSP='wmSet WM_PRECISION_OPTION=SP'
+alias wmSPDP='wmSet WM_PRECISION_OPTION=SPDP'
 
 # Clear env
 alias wmUnset='. $WM_PROJECT_DIR/etc/config.sh/unset'

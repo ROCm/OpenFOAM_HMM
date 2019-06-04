@@ -114,6 +114,9 @@ void Foam::attachDetach::attachInterface
 
     const boolList& mfFlip = mesh.faceZones()[faceZoneID_.index()].flipMap();
 
+    // Keep track of which faces have been modified
+    bitSet faceModified(mesh.nFaces());
+
     forAll(masterFaceCells, facei)
     {
         // If slave neighbour is greater than master, face does not need
@@ -155,6 +158,7 @@ void Foam::attachDetach::attachInterface
                 )
             );
         }
+        faceModified[masterPatchStart + facei] = true;
     }
 
     // Renumber faces affected by point removal
@@ -175,7 +179,11 @@ void Foam::attachDetach::attachInterface
 
         forAll(curFaces, facei)
         {
-            if (!ref.faceRemoved(curFaces[facei]))
+            if
+            (
+               !ref.faceRemoved(curFaces[facei])
+            && !faceModified[curFaces[facei]]
+            )
             {
                 facesToModifyMap.insert(curFaces[facei]);
             }

@@ -15,10 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
 ".*"
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
     absorptivity    0.0;
 }

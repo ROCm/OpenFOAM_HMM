@@ -28,7 +28,7 @@ Typedef
 
 Description
     A floating-point number identical to float or double depending on
-    whether WM_SP or WM_DP is defined.
+    whether WM_SP, WM_SPDP or WM_DP is defined.
 
 SourceFiles
     scalar.C
@@ -43,13 +43,18 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#if defined(WM_SP)
+#if defined(WM_SP) || defined(WM_SPDP)
 
 // Define scalar as a float
 
 namespace Foam
 {
     typedef floatScalar scalar;
+    #if defined(WM_SPDP)
+    typedef doubleScalar solveScalar;
+    #else
+    typedef floatScalar solveScalar;
+    #endif
 
     constexpr scalar GREAT = floatScalarGREAT;
     constexpr scalar VGREAT = floatScalarVGREAT;
@@ -89,6 +94,7 @@ namespace Foam
 namespace Foam
 {
     typedef doubleScalar scalar;
+    typedef doubleScalar solveScalar;
 
     constexpr scalar GREAT = doubleScalarGREAT;
     constexpr scalar VGREAT = doubleScalarVGREAT;

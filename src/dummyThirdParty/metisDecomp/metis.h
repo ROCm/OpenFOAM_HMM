@@ -27,14 +27,14 @@
 
 
 // Float type: OpenFOAM uses WM_SP, WM_DP, metis.h uses REALTYPEWIDTH
-#if defined(WM_SP)
+#if defined(WM_SP) || defined(WM_SPDP)
   typedef float real_t;
   #define REALTYPEWIDTH 32
 #elif defined(WM_DP)
   typedef double real_t;
   #define REALTYPEWIDTH 64
 #else
-  #error "Incorrect user-supplied value for WM_SP / WM_DP  (metis REALTYPEWIDTH)"
+  #error "Incorrect user-supplied value for WM_SP (WM_SPDP) / WM_DP  (metis REALTYPEWIDTH)"
 #endif
 
 

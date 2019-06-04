@@ -24,11 +24,12 @@ License
 Application
 
 Description
-    Some tests for complex numbers
+    Tests for complex numbers
 
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "complex.H"
 #include "complexFields.H"
 #include "ops.H"
 #include "ListOps.H"
@@ -41,22 +42,20 @@ void print1(const complex& z)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-//  Main program:
+// * * * * * * * * * * * * * * * Main Program  * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
     Info<< "complex()     : " << complex() << nl
         << "complex(zero) : " << complex(Zero) << nl
-        << "complex::zero : " << complex::zero << nl
-        << "complex::one  : " << complex::one << nl
+        << "pTraits<complex>::zero : " << pTraits<complex>::zero << nl
+        << "pTraits<complex>::one  : " << pTraits<complex>::one << nl
         << "complex(scalar) : " << complex(3.14519) << nl
         << nl;
 
     std::complex<scalar> c1(10, -3);
     Info<< "std::complex : " << c1 << nl;
     Info<< "sin: " << std::sin(c1) << nl;
-
 
     Info<< "complexVector::zero : " << complexVector::zero << nl
         << "complexVector::one  : " << complexVector::one << nl
@@ -98,6 +97,7 @@ int main(int argc, char *argv[])
         c.Im() *= 5;
     }
 
+    Info<< "sumProd: " << sumProd(fld1, fld2) << nl;
 
     fld1 *= 10;
     Info<< "scalar multiply: " << flatOutput(fld1) << nl;
@@ -113,10 +113,139 @@ int main(int argc, char *argv[])
 
     // Info<< "operator * : " << (fld1 * fld2) << nl;
     // Info<< "operator / : " << (fld1 / fld2) << nl;
-    Info<< "operator / : " << (fld1 / 2) << nl;
+    // Info<< "operator / : " << (fld1 / 2) << nl;
     // Info<< "operator / : " << (fld1 / fld2) << nl;
-    Info<< "sqrt   : " << sqrt(fld1) << nl;
+    // Info<< "sqrt   : " << sqrt(fld1) << nl;
     // Info<< "pow(2) : " << pow(fld1, 2) << nl;
+
+    #if 1
+    Info<< nl << "## Elementary complex-complex arithmetic operations:" << nl;
+    {
+        const complex a(6, 1);
+        complex b = a;
+
+        Info << "# Compound assignment operations:" << nl;
+
+        Info<< "a = " << a << ", b = " << b << nl;
+
+        // Addition
+        b += a;
+        Info<< "b += a:" << tab << "b =" << b << nl;
+
+        // Subtraction
+        b -= a;
+        Info<< "b -= a:" << tab << "b =" << b << nl;
+
+        // Multiplication
+        b *= a;
+        Info<< "b *= a:" << tab << "b =" << b << nl;
+
+        // Division
+        b /= a;
+        Info<< "b /= a:" << tab << "b =" << b << nl;
+    }
+    #endif
+
+
+    #if 1
+    Info<< nl << "## Elementary complex-scalar arithmetic operations:" << nl;
+    {
+        const scalar a = 5;
+        complex b(6, 1);
+
+        Info << "# Non-assignment operations:" << nl;
+
+        Info<< "(scalar) a = " << a << ", b = " << b << nl;
+
+        // Addition
+        b = a + b;
+        Info<< "b = a + b: " << tab << b << nl;
+
+        b = b + a;
+        Info<< "b = b + a: " << tab << b << nl;
+
+        // Subtraction
+        b = a - b;
+        Info<< "b = a - b: " << tab << b << nl;
+
+        b = b - a;
+        Info<< "b = b - a: " << tab << b << nl;
+
+        // Multiplication
+        b = a*b;
+        Info<< "b = a*b: " << tab << b << nl;
+
+        b = b*a;
+        Info<< "b = b*a: " << tab << b << nl;
+
+        // Division
+        b = a/b;
+        Info<< "b = a/b = scalar(a)/b = complex(a)/b:" << tab << b << nl;
+
+        b = b/a;
+        Info<< "b = b/a: " << tab << b << nl;
+
+
+        Info << "# Compound assignment operations:" << nl;
+
+        Info<< "(scalar) a = " << a << ", b = " << b << nl;
+
+        // Addition: complex+scalar
+        b += a;
+        Info<< "b += a (only real part):" << tab << b << nl;
+
+        // Subtraction: complex-scalar
+        b -= a;
+        Info<< "b -= a (only real part):" << tab << b << nl;
+
+        // Multiplication: complex*scalar
+        b *= a;
+        Info<< "b *= a (real and imag parts):" << tab << b << nl;
+
+        // Division: complex/scalar
+        b /= a;
+        Info<< "b /= a (real and imag parts):" << tab << b << nl;
+
+    }
+    #endif
+
+
+    #if 1
+    Info<< nl << "## Other mathematical expressions:" << nl;
+    {
+        const complex a(4.3, -3.14);
+        const complex b(0, -4.3);
+        const complex c(-4.3, 0);
+
+        Info<< "a = " << a << ", b = " << b << ", c = " << c << nl;
+
+        // Square-root
+        Info<< "sqrt(a) = " << Foam::sqrt(a) << ", "
+            << "sqrt(b) = " << Foam::sqrt(b) << ", "
+            << "sqrt(c) = " << Foam::sqrt(c) << nl;
+
+        // Square
+        Info<< "sqr(a) = " << sqr(a) << ", "
+            << "sqr(b) = " << sqr(b) << ", "
+            << "sqr(c) = " << sqr(c) << nl;
+
+        // n^th power
+        Info<< "pow(a, -1) = " << pow(a, -1) << ", "
+            << "pow(b, -1) = " << pow(b, -1) << ", "
+            << "pow(c, -1) = " << pow(c, -1) << nl;
+
+        // Exponential
+        Info<< "exp(a) = " << exp(a) << ", "
+            << "exp(b) = " << exp(b) << ", "
+            << "exp(c) = " << exp(c) << nl;
+
+        // Natural logarithm
+        Info<< "log(a) = " << log(a) << ", "
+            << "log(b) = " << log(b) << ", "
+            << "log(c) = " << log(c) << nl;
+
+    }
+    #endif
 
 
     // Make some changes
@@ -150,6 +279,7 @@ int main(int argc, char *argv[])
     // Info<< "min/max = " << MinMax<complex>(fld1) << nl;
 
     Info<< "\nEnd\n" << endl;
+
     return 0;
 }
 

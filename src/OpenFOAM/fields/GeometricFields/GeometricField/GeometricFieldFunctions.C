@@ -506,7 +506,7 @@ dimensioned<returnType> func                                                   \
                 Foam::func(gf.primitiveField()),                               \
                 Foam::func(gf.boundaryField())                                 \
             ),                                                                 \
-            binaryOp<Type>()                                                   \
+            binaryOp<returnType>()                                             \
         )                                                                      \
     );                                                                         \
 }                                                                              \
@@ -558,8 +558,8 @@ dimensioned<returnType> func                                                   \
 }
 
 UNARY_REDUCTION_FUNCTION(Type, sum, gSum)
-UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
+UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 
 #undef UNARY_REDUCTION_FUNCTION
 

@@ -114,7 +114,7 @@ tmp<scalarField> nutLowReWallFunctionFvPatchScalarField::yPlus() const
     const scalarField& y = turbModel.y()[patchi];
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
 
     return y*sqrt(nuw*mag(Uw.snGrad()))/nuw;
 }

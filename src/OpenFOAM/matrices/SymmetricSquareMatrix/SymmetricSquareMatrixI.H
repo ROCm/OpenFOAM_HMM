@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -24,6 +24,15 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+#define CHECK_MATRIX_IS_SQUARE(a, b)                                           \
+    if (a != b)                                                                \
+    {                                                                          \
+        FatalErrorInFunction                                                   \
+            << "Attempt to create a non-square matrix ("                       \
+            << a << ", " << b << ')' << nl << abort(FatalError);               \
+    }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -56,12 +65,24 @@ template<class Type>
 inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix
 (
     const label n,
-    const Identity<Type>
+    const Type& val
+)
+:
+    Matrix<SymmetricSquareMatrix<Type>, Type>(n, n, val)
+{}
+
+
+template<class Type>
+template<class AnyType>
+inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix
+(
+    const label n,
+    const Identity<AnyType>
 )
 :
     Matrix<SymmetricSquareMatrix<Type>, Type>(n, n, Zero)
 {
-    for (label i=0; i<n; i++)
+    for (label i=0; i < n; ++i)
     {
         this->operator()(i, i) = pTraits<Type>::one;
     }
@@ -69,21 +90,12 @@ inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix
 
 
 template<class Type>
-inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix
-(
-    const label n,
-    const Type& t
-)
-:
-    Matrix<SymmetricSquareMatrix<Type>, Type>(n, n, t)
-{}
-
-
-template<class Type>
 inline Foam::SymmetricSquareMatrix<Type>::SymmetricSquareMatrix(Istream& is)
 :
     Matrix<SymmetricSquareMatrix<Type>, Type>(is)
-{}
+{
+    CHECK_MATRIX_IS_SQUARE(this->m(), this->n());
+}
 
 
 template<class Type>
@@ -93,5 +105,25 @@ Foam::SymmetricSquareMatrix<Type>::clone() const
     return autoPtr<SymmetricSquareMatrix<Type>>::New(*this);
 }
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+inline void Foam::SymmetricSquareMatrix<Type>::operator=(const zero)
+{
+    Matrix<SymmetricSquareMatrix<Type>, Type>::operator=(Zero);
+}
+
+
+template<class Type>
+inline void Foam::SymmetricSquareMatrix<Type>::operator=(const Type& val)
+{
+    Matrix<SymmetricSquareMatrix<Type>, Type>::operator=(val);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#undef CHECK_MATRIX_IS_SQUARE
 
 // ************************************************************************* //

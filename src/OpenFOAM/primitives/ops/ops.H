@@ -27,9 +27,9 @@ InNamespace
     Foam
 
 Description
-    Various function objects for unary and binary operations.
+    Various functors for unary and binary operations.
     Can be used for parallel combine-reduce operations or other places
-    requiring a function object.
+    requiring a functor.
 
 \*---------------------------------------------------------------------------*/
 
@@ -159,6 +159,25 @@ EqOp(nopEq, (void)x)
     };
 
 
+// Operations taking one parameter, returning bool.
+// The comparison value is defined during construction
+
+#define Bool1Op(opName, op)                                                    \
+                                                                               \
+    template<class T>                                                          \
+    struct opName##Op1                                                         \
+    {                                                                          \
+        const T& value;                                                        \
+                                                                               \
+        opName##Op1(const T& v) : value(v) {}                                  \
+                                                                               \
+        bool operator()(const T& x) const WARNRETURN                           \
+        {                                                                      \
+            return op;                                                         \
+        }                                                                      \
+    };
+
+
 // Weighting operations
 
 #define WeightedOp(opName, op)                                                 \
@@ -216,10 +235,18 @@ BoolOp(lessEq, x <= y)
 BoolOp(greater, x > y)
 BoolOp(greaterEq, x >= y)
 
+Bool1Op(equal, x == value)
+Bool1Op(notEqual, x != value)
+Bool1Op(less, x < value)
+Bool1Op(lessEq, x <= value)
+Bool1Op(greater, x > value)
+Bool1Op(greaterEq, x >= value)
+
 WeightedOp(multiply, (weight*y))
 
 #undef Op
 #undef BoolOp
+#undef Bool1Op
 #undef WeightedOp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

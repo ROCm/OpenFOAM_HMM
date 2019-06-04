@@ -83,7 +83,7 @@ setenv WM_COMPILER Gcc
 setenv WM_ARCH_OPTION 64
 
 # [WM_PRECISION_OPTION] - Floating-point precision:
-# = DP | SP
+# = DP | SP | SPDP
 setenv WM_PRECISION_OPTION DP
 
 # [WM_LABEL_SIZE] - Label size in bits:

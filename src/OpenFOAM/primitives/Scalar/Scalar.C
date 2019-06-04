@@ -39,6 +39,7 @@ const Scalar pTraits<Scalar>::min = -ScalarVGREAT;
 const Scalar pTraits<Scalar>::max = ScalarVGREAT;
 const Scalar pTraits<Scalar>::rootMin = -ScalarROOTVGREAT;
 const Scalar pTraits<Scalar>::rootMax = ScalarROOTVGREAT;
+const Scalar pTraits<Scalar>::vsmall = ScalarVSMALL;
 
 const char* const pTraits<Scalar>::componentNames[] = { "" };
 

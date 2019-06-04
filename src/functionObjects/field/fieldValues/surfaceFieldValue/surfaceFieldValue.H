@@ -556,6 +556,12 @@ public:
 
         //- Calculate and write
         virtual bool write();
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh& mpm);
+
+        //- Update for changes of mesh
+        virtual void movePoints(const polyMesh& mesh);
 };
 
 

@@ -317,10 +317,8 @@ Type max(const UList<Type>& f)
         TFOR_ALL_S_OP_FUNC_F_S(Type, Max, =, max, Type, f, Type, Max)
         return Max;
     }
-    else
-    {
-        return pTraits<Type>::min;
-    }
+
+    return pTraits<Type>::min;
 }
 
 TMP_UNARY_FUNCTION(Type, max)
@@ -334,10 +332,8 @@ Type min(const UList<Type>& f)
         TFOR_ALL_S_OP_FUNC_F_S(Type, Min, =, min, Type, f, Type, Min)
         return Min;
     }
-    else
-    {
-        return pTraits<Type>::max;
-    }
+
+    return pTraits<Type>::max;
 }
 
 TMP_UNARY_FUNCTION(Type, min)
@@ -351,10 +347,8 @@ Type sum(const UList<Type>& f)
         TFOR_ALL_S_OP_F(Type, Sum, +=, Type, f)
         return Sum;
     }
-    else
-    {
-        return Zero;
-    }
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, sum)
@@ -387,10 +381,8 @@ Type maxMagSqr(const UList<Type>& f)
         )
         return Max;
     }
-    else
-    {
-        return Zero;
-    }
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, maxMagSqr)
@@ -414,23 +406,24 @@ Type minMagSqr(const UList<Type>& f)
         )
         return Min;
     }
-    else
-    {
-        return pTraits<Type>::rootMax;
-    }
+
+    return pTraits<Type>::rootMax;
 }
 
 TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 template<class Type>
-scalar sumProd(const UList<Type>& f1, const UList<Type>& f2)
+typename pTraits<Type>::cmptType
+sumProd(const UList<Type>& f1, const UList<Type>& f2)
 {
-    scalar SumProd = 0;
+    typedef typename pTraits<Type>::cmptType outType;
+
+    outType result = Zero;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, Type, f1, &&, Type, f2)
+        TFOR_ALL_S_OP_F_OP_F(outType, result, +=, Type, f1, &&, Type, f2)
     }
-    return SumProd;
+    return result;
 }
 
 
@@ -505,25 +498,24 @@ Type average(const UList<Type>& f)
 
         return avrg;
     }
-    else
-    {
-        WarningInFunction
-            << "empty field, returning zero" << endl;
 
-        return Zero;
-    }
+    WarningInFunction
+        << "empty field, returning zero" << endl;
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, average)
 
 
+// With reduction on ReturnType
 #define G_UNARY_FUNCTION(ReturnType, gFunc, Func, rFunc)                       \
                                                                                \
 template<class Type>                                                           \
 ReturnType gFunc(const UList<Type>& f, const label comm)                       \
 {                                                                              \
     ReturnType res = Func(f);                                                  \
-    reduce(res, rFunc##Op<Type>(), Pstream::msgType(), comm);                  \
+    reduce(res, rFunc##Op<ReturnType>(), Pstream::msgType(), comm);            \
     return res;                                                                \
 }                                                                              \
 TMP_UNARY_FUNCTION(ReturnType, gFunc)
@@ -533,27 +525,30 @@ G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
 G_UNARY_FUNCTION(Type, gMaxMagSqr, maxMagSqr, maxMagSqr)
 G_UNARY_FUNCTION(Type, gMinMagSqr, minMagSqr, minMagSqr)
-G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
 
-G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, minMax)
-G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
+
+G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
+G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
 
 template<class Type>
-scalar gSumProd
+typename pTraits<Type>::cmptType gSumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2,
     const label comm
 )
 {
-    scalar SumProd = sumProd(f1, f2);
-    reduce(SumProd, sumOp<scalar>(), Pstream::msgType(), comm);
-    return SumProd;
+    typedef typename pTraits<Type>::cmptType outType;
+
+    outType result = sumProd(f1, f2);
+    reduce(result, sumOp<outType>(), Pstream::msgType(), comm);
+    return result;
 }
 
 template<class Type>
@@ -586,13 +581,11 @@ Type gAverage
 
         return avrg;
     }
-    else
-    {
-        WarningInFunction
-            << "empty field, returning zero." << endl;
 
-        return Zero;
-    }
+    WarningInFunction
+        << "empty field, returning zero." << endl;
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, gAverage)
@@ -658,7 +651,7 @@ tmp<Field<typename product<Type1, Type2>::type>>                               \
 operator Op(const UList<Type1>& f1, const tmp<Field<Type2>>& tf2)              \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    auto tres = reuseTmp<productType, Type2>::New(tf2);     \
+    auto tres = reuseTmp<productType, Type2>::New(tf2);                        \
     OpFunc(tres.ref(), f1, tf2());                                             \
     tf2.clear();                                                               \
     return tres;                                                               \
@@ -669,7 +662,7 @@ tmp<Field<typename product<Type1, Type2>::type>>                               \
 operator Op(const tmp<Field<Type1>>& tf1, const UList<Type2>& f2)              \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    auto tres = reuseTmp<productType, Type1>::New(tf1);     \
+    auto tres = reuseTmp<productType, Type1>::New(tf1);                        \
     OpFunc(tres.ref(), tf1(), f2);                                             \
     tf1.clear();                                                               \
     return tres;                                                               \

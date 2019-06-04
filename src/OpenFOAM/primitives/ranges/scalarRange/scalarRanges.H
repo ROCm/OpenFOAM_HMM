@@ -67,7 +67,11 @@ public:
         //- Construct by parsing string for scalar ranges
         //  The individual items are space, comma or semicolon delimited.
         //  Optionally report when any range failed to parse
-        inline scalarRanges(const std::string& str, bool verbose = true);
+        inline explicit scalarRanges
+        (
+            const std::string& str,
+            bool verbose = true
+        );
 
 
     // Static Constructors

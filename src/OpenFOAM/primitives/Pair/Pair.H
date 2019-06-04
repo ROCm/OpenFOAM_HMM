@@ -50,6 +50,13 @@ See also
 namespace Foam
 {
 
+// Forward declarations
+template<class T> class Pair;
+
+// Common pair types
+typedef Pair<label> labelPair;      //!< A pair of labels
+
+
 /*---------------------------------------------------------------------------*\
                             Class Pair Declaration
 \*---------------------------------------------------------------------------*/
@@ -163,7 +170,6 @@ public:
                 return seed;
             }
         };
-
 };
 
 

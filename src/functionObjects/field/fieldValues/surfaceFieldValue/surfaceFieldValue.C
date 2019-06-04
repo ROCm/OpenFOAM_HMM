@@ -1091,4 +1091,22 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
 }
 
 
+void Foam::functionObjects::fieldValues::surfaceFieldValue::updateMesh
+(
+    const mapPolyMesh& mpm
+)
+{
+    needsUpdate_ = true;
+}
+
+
+void Foam::functionObjects::fieldValues::surfaceFieldValue::movePoints
+(
+    const polyMesh& mesh
+)
+{
+    needsUpdate_ = true;
+}
+
+
 // ************************************************************************* //

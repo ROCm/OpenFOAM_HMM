@@ -129,7 +129,8 @@ addGeometry
         return false;
     }
 
-    DebugInfo << "    Resolve surface " << functionObjectName_ << endl;
+    DebugInfo
+        << "    Find surface " << functionObjectName_ << endl;
 
     const polySurface* surf =
     (
@@ -181,12 +182,11 @@ addGeometry
             << functionObjectName_
             << endl;
 
-        if (debug)
-        {
-            Info<< "    Available surfaces:" << nl
-                << geometryBase::parent_.storedObjects()
-                    .sortedNames<polySurface>() << endl;
-        }
+        DebugInfo
+            << "    Available surfaces:" << nl
+            << geometryBase::parent_.storedObjects()
+                .sortedNames<polySurface>() << endl;
+
         return false;
     }
 
@@ -251,6 +251,9 @@ addGeometry
 
     fieldSummary fieldInfo = queryFieldSummary(fieldName_, multiPiece);
     fieldInfo.reduce();
+
+    DebugInfo
+        << "    Field " << fieldName_ << ' ' << fieldInfo.info() << endl;
 
 
     // Not rendered on this processor?
@@ -370,7 +373,8 @@ addGeometryFromFile
             }
             else
             {
-                DebugInfo << "    Resolved surface " << fName << endl;
+                DebugInfo
+                    << "    Resolved surface " << fName << endl;
             }
         }
         else
@@ -400,6 +404,9 @@ addGeometryFromFile
 
     fieldSummary fieldInfo = queryFieldSummary(fieldName_, polyData);
     // No reduction (serial)
+
+    DebugInfo
+        << "    Field " << fieldName_ << ' ' << fieldInfo.info() << endl;
 
 
     // Render
@@ -472,7 +479,8 @@ addGeometryToScene
     }
     else
     {
-        DebugInfo << "Using file source only" << nl;
+        DebugInfo
+            << "Using file source only" << nl;
     }
 
     // File source

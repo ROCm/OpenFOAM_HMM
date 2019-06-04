@@ -15,6 +15,7 @@ removeRegisteredObject/removeRegisteredObject.C
 parProfiling/parProfiling.C
 
 solverInfo/solverInfo.C
+timeInfo/timeInfo.C
 
 runTimeControl/runTimeControl.C
 runTimeControl/runTimeCondition/runTimeCondition/runTimeCondition.C

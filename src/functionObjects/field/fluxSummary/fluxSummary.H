@@ -64,6 +64,8 @@ Usage
         log         | Write flux data to standard output    | no  | yes
         mode        | Mode to generate faces to test        | yes |
         scaleFactor | Optional factor to scale result       | no  | 1
+        tolerance   | Tolerance for the reference direction | no  | 0.8
+        phi         | Surface flux field                    | no  | phi
     \endtable
 
     The mode is one of:
@@ -74,6 +76,9 @@ Usage
     - surfaceAndDirection
 
     Output data is written to files of the form \<timeDir\>/\<faceZoneName\>.dat
+
+Note
+    For surface and direction, can use phi = 'U' for determining the fluxes.
 
 See also
     Foam::functionObjects::fvMeshFunctionObject

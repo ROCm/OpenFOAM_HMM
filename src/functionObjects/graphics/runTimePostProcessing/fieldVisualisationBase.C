@@ -515,6 +515,7 @@ setField
             auto lut = vtkSmartPointer<vtkLookupTable>::New();
             setColourMap(lut);
             lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
+            lut->SetTableRange(range_.first(), range_.second());
 
             // Configure the mapper
             const char* fieldName = colourFieldName.c_str();
@@ -741,7 +742,7 @@ fieldVisualisationBase
 :
     colours_(colours),
     fieldName_(dict.get<word>("field")),
-    smooth_(dict.lookupOrDefault("smooth", false)),
+    smooth_(dict.getOrDefault("smooth", false)),
     colourBy_(cbColour),
     colourMap_(cmRainbow),
     range_(),

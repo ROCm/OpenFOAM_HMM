@@ -204,7 +204,7 @@ Foam::functionObjects::runTimePostPro::surface::surface
     (
         representationTypeNames.get("representation", dict)
     ),
-    featureEdges_(dict.lookupOrDefault("featureEdges", false)),
+    featureEdges_(dict.getOrDefault("featureEdges", false)),
     surfaceColour_(nullptr),
     edgeColour_(nullptr),
     surfaceActor_(),

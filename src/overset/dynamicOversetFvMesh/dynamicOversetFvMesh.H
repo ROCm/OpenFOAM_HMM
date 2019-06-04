@@ -128,15 +128,6 @@ protected:
         //template<class GeoField, class PatchType>
         //lduInterfaceFieldPtrsList scalarInterfaces(const GeoField& psi) const;
 
-        //- Correct boundary conditions of certain type (typeOnly = true)
-        //  or explicitly not of the type (typeOnly = false)
-        template<class GeoField, class PatchType>
-        static void correctBoundaryConditions
-        (
-            typename GeoField::Boundary& bfld,
-            const bool typeOnly
-        );
-
         //- Determine normalisation for interpolation. This equals the
         //  original diagonal except stabilised for zero diagonals (possible
         //  in hole cells)
@@ -154,6 +145,17 @@ protected:
         //- Debug: correct coupled bc
         template<class GeoField>
         static void correctCoupledBoundaryConditions(GeoField& fld);
+
+        //- Average norm of valid neighbours
+        scalar cellAverage
+        (
+            const labelList& types,
+            const labelList& nbrTypes,
+            const scalarField& norm,
+            const scalarField& nbrNorm,
+            const label celli,
+            bitSet& isFront
+        ) const;
 
         //- Debug: dump agglomeration
         void writeAgglomeration
@@ -358,6 +360,15 @@ public:
         //- Debug: check halo swap is ok
         template<class GeoField>
         static void checkCoupledBC(const GeoField& fld);
+
+        //- Correct boundary conditions of certain type (typeOnly = true)
+        //  or explicitly not of the type (typeOnly = false)
+        template<class GeoField, class PatchType>
+        static void correctBoundaryConditions
+        (
+            typename GeoField::Boundary& bfld,
+            const bool typeOnly
+        );
 };
 
 

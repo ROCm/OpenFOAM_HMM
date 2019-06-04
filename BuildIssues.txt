@@ -118,34 +118,4 @@ your `~/.spack/packages.yaml` file:
 It appears that spack will otherwise ignore any paraview+qt version
 and attempt to install a paraview~qt version instead.
 
----------------------------
-Building on Darwin (Mac-OS)
----------------------------
-
-Support for Darwin is incomplete, but has been provisioned for.
-
-The following are typical (as of yet) unresolved issues.
-
-* Scotch, ptscotch:
-  - The librt linkage is required for Linux, but not for Darwin.
-
-  Current resolution:
-  Edit or patch
-      src/parallel/decompose/ptscotchDecomp/Make/options
-      src/parallel/decompose/scotchDecomp/Make/options
-
-  to remove the '-lrt' library
-
-* CGAL:
-  - ThirdParty CGAL will normally need to be compiled without mpfr/gmp.
-    This should be done manually prior to building OpenFOAM or other
-    ThirdParty. Eg,
-
-        cd $WM_THIRD_PARTY_DIR
-        ./makeCGAL gmp-none mpfr-none
-
-  The erroneous references to gmp/mpfr library can be directly removed
-  from the wmake/rules/General/CGAL, but it is more advisable to
-  override them instead in the wmake/rules/darwin64Clang/CGAL file.
-
 --

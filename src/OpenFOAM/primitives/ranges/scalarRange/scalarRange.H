@@ -34,6 +34,7 @@ Description
     used to define an empty (inverse) range.
 
 SeeAlso
+    Foam::MinMax
     Foam::predicates::scalars
 
 SourceFiles
@@ -154,17 +155,26 @@ public:
         static scalarRange parse(const std::string& str);
 
 
-        //- Construct a greater-than-equals bound
+        //- Construct a greater-equals bound
         inline static scalarRange ge(const scalar minVal) noexcept;
 
         //- Construct a greater-than bound
         inline static scalarRange gt(const scalar minVal) noexcept;
 
-        //- Construct a less-than-equals bound
+        //- Construct a greater-equals zero bound
+        inline static scalarRange ge0() noexcept;
+
+        //- Construct a greater-than zero bound
+        inline static scalarRange gt0() noexcept;
+
+        //- Construct a less-equals bound
         inline static scalarRange le(const scalar maxVal) noexcept;
 
         //- Construct a less-than bound
         inline static scalarRange lt(const scalar maxVal) noexcept;
+
+        //- Construct a greater-equals 0, less-equals 1 bound
+        inline static scalarRange zero_one() noexcept;
 
 
     // Member Functions
@@ -192,13 +202,13 @@ public:
         inline scalar value() const;
 
         //- True if the value matches the condition.
-        inline bool match(const scalar& value) const;
+        inline bool match(const scalar& val) const;
 
 
     // Member Operators
 
         //- Identical to match(), for use as a predicate.
-        inline bool operator()(const scalar& value) const;
+        inline bool operator()(const scalar& val) const;
 
         inline bool operator==(const scalarRange& rhs) const noexcept;
         inline bool operator!=(const scalarRange& rhs) const noexcept;

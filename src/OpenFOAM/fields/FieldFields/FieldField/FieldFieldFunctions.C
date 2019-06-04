@@ -554,13 +554,14 @@ scalarMinMax minMaxMag(const FieldField<Field, Type>& f)
 TMP_UNARY_FUNCTION(scalarMinMax, minMaxMag)
 
 
+// With reduction on ReturnType
 #define G_UNARY_FUNCTION(returnType, gFunc, func, rFunc)                       \
                                                                                \
 template<template<class> class Field, class Type>                              \
 returnType gFunc(const FieldField<Field, Type>& f)                             \
 {                                                                              \
     returnType res = func(f);                                                  \
-    reduce(res, rFunc##Op<Type>());                                            \
+    reduce(res, rFunc##Op<returnType>());                                      \
     return res;                                                                \
 }                                                                              \
 TMP_UNARY_FUNCTION(returnType, gFunc)
@@ -568,10 +569,11 @@ TMP_UNARY_FUNCTION(returnType, gFunc)
 G_UNARY_FUNCTION(Type, gMax, max, max)
 G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 
-G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, minMax)
-G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
+
+G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 

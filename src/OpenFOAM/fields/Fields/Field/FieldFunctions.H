@@ -197,7 +197,11 @@ TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 
 template<class Type>
-scalar sumProd(const UList<Type>& f1, const UList<Type>& f2);
+typename pTraits<Type>::cmptType sumProd
+(
+    const UList<Type>& f1,
+    const UList<Type>& f2
+);
 
 template<class Type>
 Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2);
@@ -223,6 +227,7 @@ Type average(const UList<Type>& f);
 TMP_UNARY_FUNCTION(Type, average)
 
 
+// With reduction on ReturnType
 #define G_UNARY_FUNCTION(ReturnType, gFunc, Func, rFunc)                       \
                                                                                \
 template<class Type>                                                           \
@@ -234,17 +239,18 @@ G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
 G_UNARY_FUNCTION(Type, gMaxMagSqr, maxMagSqr, maxMagSqr)
 G_UNARY_FUNCTION(Type, gMinMagSqr, minMagSqr, minMagSqr)
-G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
 
-G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, minMax)
-G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, minMaxMag)
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
+
+G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
+G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
 template<class Type>
-scalar gSumProd
+typename pTraits<Type>::cmptType gSumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2,

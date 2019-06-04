@@ -47,6 +47,8 @@ License
 #include <io.h>     // For _close
 #include <windows.h>
 
+#define EXT_SO  "dll"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -350,12 +352,16 @@ Foam::string Foam::getEnv(const std::string& envName)
 {
     std::string env;
 
-    const auto len = ::GetEnvironmentVariable(envName.c_str(), nullptr, 0);
+    auto len = ::GetEnvironmentVariable(envName.c_str(), nullptr, 0);
 
+    // len [return] = size with trailing nul char, or zero on failure
     if (len)
     {
-        env.resize(len+1);
-        ::GetEnvironmentVariable(envName.c_str(), &(env[0]), len+1);
+        env.resize(len);
+
+        // len [in] = size with trailing nul char
+        // len [return] = size without trailing nul char
+        len = ::GetEnvironmentVariable(envName.c_str(), &(env[0]), len);
 
         env.resize(len);
         return fileName::validate(env);
@@ -442,16 +448,18 @@ Foam::fileName Foam::home(const std::string& userName)
 Foam::fileName Foam::cwd()
 {
     string path;
-    const DWORD len = ::GetCurrentDirectory(0, nullptr);
+    auto len = ::GetCurrentDirectory(0, nullptr);
 
+    // len [return] = size with trailing nul char, or zero on failure
     if (len)
     {
-        path.resize(len+1);
-
-        ::GetCurrentDirectory(len+1, &(path[0]));
-
         path.resize(len);
 
+        // len [in] = size with trailing nul char
+        // len [return] = size without trailing nul char
+        len = ::GetCurrentDirectory(len, &(path[0]));
+
+        path.resize(len);
         return fileName::validate(path);
     }
 
@@ -1184,14 +1192,21 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
             << " : dlopen of " << libName << std::endl;
     }
 
-    // Map "libXX.so" and "libXX" to "libXX.dll"
+    // Always remap "libXX.so" and "libXX" to "libXX.dll"
+    fileName libso(libName.lessExt().ext(EXT_SO));
 
-    fileName winLibName(libName.lessExt().ext("dll"));
-    void* handle = ::LoadLibrary(winLibName.c_str());
+    void* handle = ::LoadLibrary(libso.c_str());
+
+    if (!handle && !libso.startsWith("lib"))
+    {
+        // Try with 'lib' prefix
+        libso = "lib" + libso;
+        handle = ::LoadLibrary(libso.c_str());
+    }
 
     if (handle)
     {
-        libsLoaded[handle] = libName.lessExt();
+        libsLoaded[handle] = libso.lessExt();
     }
     else if (check)
     {
@@ -1209,6 +1224,26 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     }
 
     return handle;
+}
+
+
+Foam::label Foam::dlOpen
+(
+    std::initializer_list<fileName> libNames,
+    const bool check
+)
+{
+    label nLoaded = 0;
+
+    for (const fileName& libName : libNames)
+    {
+        if (Foam::dlOpen(libName, check))
+        {
+            ++nLoaded;
+        }
+    }
+
+    return nLoaded;
 }
 
 

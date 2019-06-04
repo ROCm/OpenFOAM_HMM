@@ -40,10 +40,10 @@ Foam::word Foam::cloud::defaultName("defaultCloud");
 
 const Foam::Enum<Foam::cloud::geometryType>
 Foam::cloud::geometryTypeNames
-{
+({
     { geometryType::COORDINATES, "coordinates" },
     { geometryType::POSITIONS, "positions" }
-};
+});
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

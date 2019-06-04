@@ -169,7 +169,7 @@ public:
         (
             const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict, //!< dictionary
-            const Switch defaultValue //!< fallback if not found
+            const Switch deflt      //!< fallback if not found
         );
 
         //- Construct from Istream
@@ -180,11 +180,11 @@ public:
 
         //- Construct from dictionary, supplying default value so that if the
         //- value is not found, it is added into the dictionary.
-        static Switch lookupOrAddToDict
+        static Switch getOrAddToDict
         (
             const word& name,           //!< Lookup key. Uses REGEX!
             dictionary& dict,           //!< dictionary
-            const Switch defaultValue = switchType::FALSE //!< default to add
+            const Switch deflt = switchType::FALSE //!< default to add
         );
 
 
@@ -234,6 +234,18 @@ public:
 
 
     // Housekeeping
+
+        //- Construct from dictionary, supplying default value so that if the
+        //- value is not found, it is added into the dictionary.
+        static Switch lookupOrAddToDict
+        (
+            const word& name,           //!< Lookup key. Uses REGEX!
+            dictionary& dict,           //!< dictionary
+            const Switch deflt = switchType::FALSE //!< default to add
+        )
+        {
+            return getOrAddToDict(name, dict, deflt);
+        }
 
         //- Deprecated(2018-03) text representation of the Switch value
         //  \deprecated(2018-03) - use c_str() method

@@ -241,6 +241,12 @@ runParallel()
     # Any additional parsed arguments (eg, decomposeParDict)
     local appArgs="-parallel"
 
+    local mpirun="mpirun"
+    if [ "$FOAM_MPI" = msmpi ]
+    then
+        mpirun="mpiexec"
+    fi
+
     # Parse options until executable is encountered
     while [ $# -gt 0 -a -z "$appRun" ]
     do
@@ -287,11 +293,11 @@ runParallel()
         if [ "$logMode" = append ]
         then
         (
-            mpirun -np $nProcs $appRun $appArgs "$@" </dev/null >> $logFile 2>&1
+            $mpirun -np $nProcs $appRun $appArgs "$@" </dev/null >> $logFile 2>&1
         )
         else
         (
-            mpirun -np $nProcs $appRun $appArgs "$@" </dev/null > $logFile 2>&1
+            $mpirun -np $nProcs $appRun $appArgs "$@" </dev/null > $logFile 2>&1
         )
         fi
     fi

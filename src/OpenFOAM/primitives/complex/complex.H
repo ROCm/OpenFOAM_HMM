@@ -39,6 +39,7 @@ SourceFiles
 #define complex_H
 
 #include <complex>
+#include <type_traits>
 #include "scalar.H"
 #include "word.H"
 #include "zero.H"
@@ -59,13 +60,17 @@ inline const complex& min(const complex&, const complex&);
 inline const complex& max(const complex&, const complex&);
 inline complex limit(const complex&, const complex&);
 inline const complex& sum(const complex&);
-inline complex operator+(const complex&, const complex&);
 inline complex operator-(const complex&);
+inline complex operator+(const complex&, const complex&);
+inline complex operator+(const complex&, const scalar);
+inline complex operator+(const scalar, const complex&);
 inline complex operator-(const complex&, const complex&);
+inline complex operator-(const complex&, const scalar);
+inline complex operator-(const scalar, const complex&);
 inline complex operator*(const complex&, const complex&);
-inline complex operator/(const complex&, const complex&);
-inline complex operator*(const scalar, const complex&);
 inline complex operator*(const complex&, const scalar);
+inline complex operator*(const scalar, const complex&);
+inline complex operator/(const complex&, const complex&);
 inline complex operator/(const complex&, const scalar);
 inline complex operator/(const scalar, const complex&);
 
@@ -83,22 +88,6 @@ class complex
 
 
 public:
-
-    //- Component type
-    typedef complex cmptType;
-
-
-    // Static Data Members
-
-        //- The type name is "complex"
-        static const char* const typeName;
-
-        //- A complex zero (0,0)
-        static const complex zero;
-
-        //- A complex one (1,0)
-        static const complex one;
-
 
     // Constructors
 
@@ -189,15 +178,19 @@ public:
         //- Assign zero
         inline void operator=(const Foam::zero);
 
-        inline void operator+=(const complex& c);
-        inline void operator-=(const complex& c);
-        inline void operator*=(const complex& c);
-        inline void operator/=(const complex& c);
-
+        //- Assign scalar (imag = zero)
         inline void operator=(const scalar s);
+
+        inline void operator+=(const complex& c);
         inline void operator+=(const scalar s);
+
+        inline void operator-=(const complex& c);
         inline void operator-=(const scalar s);
+
+        inline void operator*=(const complex& c);
         inline void operator*=(const scalar s);
+
+        inline void operator/=(const complex& c);
         inline void operator/=(const scalar s);
 
         inline bool operator==(const complex& c) const;
@@ -209,28 +202,44 @@ public:
         friend scalar magSqr(const complex& c);
         friend scalar mag(const complex& c);
         friend complex sqr(const complex& c);
-        friend const complex& min(const complex&, const complex&);
-        friend const complex& max(const complex&, const complex&);
 
-        friend complex limit(const complex&, const complex&);
+        //- sgn() https://en.wikipedia.org/wiki/Sign_function#Complex_signum
+        friend complex sign(const complex& c);
 
-        friend const complex& sum(const complex&);
+        //- csgn() https://en.wikipedia.org/wiki/Sign_function#Complex_signum
+        friend scalar csign(const complex& c);
+
+        friend const complex& min(const complex& c1, const complex& c2);
+        friend const complex& max(const complex& c1, const complex& c2);
+        friend complex limit(const complex& c1, const complex& c2);
+        friend const complex& sum(const complex& c);
 
 
     // Friend Operators
 
-        friend complex operator+(const complex& c1, const complex& c2);
         friend complex operator-(const complex& c);
-        friend complex operator-(const complex& c1, const complex& c2);
-        friend complex operator*(const complex& c1, const complex& c2);
-        friend complex operator/(const complex& c1, const complex& c2);
 
-        friend complex operator*(const scalar s, const complex& c);
+        friend complex operator+(const complex& c1, const complex& c2);
+        friend complex operator+(const complex& c, const scalar s);
+        friend complex operator+(const scalar s, const complex& c);
+
+        friend complex operator-(const complex& c1, const complex& c2);
+        friend complex operator-(const complex& c, const scalar s);
+        friend complex operator-(const scalar s, const complex& c);
+
+        friend complex operator*(const complex& c1, const complex& c2);
         friend complex operator*(const complex& c, const scalar s);
+        friend complex operator*(const scalar s, const complex& c);
+
+        friend complex operator/(const complex& c1, const complex& c2);
         friend complex operator/(const complex& c, const scalar s);
         friend complex operator/(const scalar s, const complex& c);
 };
 
+
+/*---------------------------------------------------------------------------*\
+                      Class pTraits<complex> Declaration
+\*---------------------------------------------------------------------------*/
 
 // Template specialisation for pTraits<complex>
 template<>
@@ -247,7 +256,7 @@ public:
     typedef label labelType;
 
 
-    // Member constants
+    // Member Constants
 
         //- Dimensionality of space
         static constexpr direction dim = 3;
@@ -263,12 +272,13 @@ public:
 
         static const char* const typeName;
         static const char* const componentNames[];
-        static const complex zero;
-        static const complex one;
-        static const complex max;
-        static const complex min;
-        static const complex rootMax;
-        static const complex rootMin;
+
+        static const complex zero;      //!< complex (0,0)
+        static const complex one;       //!< complex (1,0)
+        static const complex min;       //!< complex (-VGREAT,-VGREAT)
+        static const complex max;       //!< complex (VGREAT,VGREAT)
+        static const complex rootMin;   //!< complex (-ROOTVGREAT, -ROOTVGREAT)
+        static const complex rootMax;   //!< complex (ROOTVGREAT, ROOTVGREAT)
 
 
     // Constructors
@@ -294,6 +304,41 @@ public:
             return p_;
         }
 };
+
+
+/*---------------------------------------------------------------------------*\
+                               Namespace Detail
+\*---------------------------------------------------------------------------*/
+
+namespace Detail
+{
+    // Helper functions for complex, in Detail namespace to avoid possible
+    // name collisions (could change in the future)
+
+    //- The 'conjugate' of non-complex returns itself (pass-through)
+    //- it does not return a complex!
+    template<class T>
+    typename std::enable_if
+    <
+        !std::is_same<complex, T>::value,
+        const T&
+    >::type conj(const T& val)
+    {
+        return val;
+    }
+
+    //- The conjugate of a complex number
+    template<class T>
+    typename std::enable_if
+    <
+        std::is_same<complex, T>::value,
+        complex
+    >::type conj(const T& val)
+    {
+        return val.conjugate();
+    }
+
+} // End namespace Detail
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //

@@ -44,7 +44,7 @@ autoPtr<filmThermoModel> filmThermoModel::New
     const dictionary& dict
 )
 {
-    word modelType(dict.get<word>("filmThermoModel"));
+    const word modelType(dict.get<word>("filmThermoModel"));
 
     Info<< "    Selecting filmThermoModel " << modelType << endl;
 

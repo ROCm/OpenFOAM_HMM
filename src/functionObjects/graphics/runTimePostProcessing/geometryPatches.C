@@ -77,7 +77,7 @@ Foam::functionObjects::runTimePostPro::geometryPatches::geometryPatches
     geometrySurface(parent, dict, colours, List<fileName>()),
     fieldVisualisationBase(dict, colours),
     selectPatches_(),
-    nearCellValue_(dict.lookupOrDefault("nearCellValue", false))
+    nearCellValue_(dict.getOrDefault("nearCellValue", false))
 {
     dict.readEntry("patches", selectPatches_);
 }
@@ -204,6 +204,8 @@ void Foam::functionObjects::runTimePostPro::geometryPatches::addGeometryToScene
     fieldSummary fieldInfo = queryFieldSummary(fieldName_, multiPiece);
     fieldInfo.reduce();
 
+    DebugInfo
+        << "    Field " << fieldName_ << ' ' << fieldInfo.info() << endl;
 
     // Not rendering on this processor?
     // This is where we stop, but could also have a MPI barrier

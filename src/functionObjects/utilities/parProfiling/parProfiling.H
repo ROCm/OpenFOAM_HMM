@@ -30,6 +30,20 @@ Group
 Description
     Simple (simplistic) mpi-profiling.
 
+Usage
+    Example of function object specification:
+    \verbatim
+    profiling
+    {
+        type  parProfiling;
+        libs  ("libutilityFunctionObjects.so");
+
+        // Report stats on exit only (instead of every time step)
+        executeControl  onEnd;
+        writeControl    none;
+    }
+    \endverbatim
+
 SourceFiles
     parProfiling.C
 

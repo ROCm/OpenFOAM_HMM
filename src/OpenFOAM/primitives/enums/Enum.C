@@ -81,14 +81,14 @@ template<class EnumType>
 EnumType Foam::Enum<EnumType>::get
 (
     const word& enumName,
-    const EnumType defaultValue
+    const EnumType deflt
 ) const
 {
     const label idx = find(enumName);
 
     if (idx < 0)
     {
-        return defaultValue;
+        return deflt;
     }
 
     return EnumType(vals_[idx]);
@@ -136,11 +136,11 @@ EnumType Foam::Enum<EnumType>::get
 
 
 template<class EnumType>
-EnumType Foam::Enum<EnumType>::lookupOrDefault
+EnumType Foam::Enum<EnumType>::getOrDefault
 (
     const word& key,
     const dictionary& dict,
-    const EnumType defaultValue,
+    const EnumType deflt,
     const bool failsafe
 ) const
 {
@@ -163,8 +163,8 @@ EnumType Foam::Enum<EnumType>::lookupOrDefault
         {
             IOWarningInFunction(dict)
                 << enumName << " is not in enumeration: " << *this << nl
-                << "using failsafe " << get(defaultValue)
-                << " (value " << int(defaultValue) << ")" << endl;
+                << "using failsafe " << get(deflt)
+                << " (value " << int(deflt) << ")" << endl;
         }
         else
         {
@@ -174,7 +174,7 @@ EnumType Foam::Enum<EnumType>::lookupOrDefault
         }
     }
 
-    return defaultValue;
+    return deflt;
 }
 
 

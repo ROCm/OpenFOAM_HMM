@@ -39,7 +39,7 @@ cleanTimeDirectories()
 
 cleanDynamicCode()
 {
-    if [ -d system -a -d dynamicCode ]
+    if [ -d dynamicCode ] && [ -d system ]
     then
         rm -rf dynamicCode > /dev/null 2>&1
     fi
@@ -73,22 +73,28 @@ cleanSnappyFiles()
 }
 
 
+cleanPostProcessing()
+{
+    rm -rf Ensight EnSight ensightWrite insitu VTK > /dev/null 2>&1
+    rm -rf postProcessing > /dev/null 2>&1
+    rm -rf cuttingPlane > /dev/null 2>&1
+    rm -rf surfaceSampling > /dev/null 2>&1
+}
+
+
 cleanCase()
 {
     cleanTimeDirectories
+    cleanPostProcessing
     cleanDynamicCode
 
     rm -rf processor* > /dev/null 2>&1
-    rm -rf postProcessing > /dev/null 2>&1
     rm -rf TDAC > /dev/null 2>&1
     rm -rf probes* > /dev/null 2>&1
     rm -rf forces* > /dev/null 2>&1
     rm -rf graphs* > /dev/null 2>&1
     rm -rf sets > /dev/null 2>&1
-    rm -rf surfaceSampling > /dev/null 2>&1
-    rm -rf cuttingPlane > /dev/null 2>&1
     rm -rf system/machines > /dev/null 2>&1
-    rm -rf Ensight EnSight ensightWrite insitu VTK > /dev/null 2>&1
 
     # From mpirunDebug
     rm -f gdbCommands  mpirun.schema
@@ -149,7 +155,7 @@ removeCase()
 
 cleanSamples()
 {
-    rm -rf ./sets ./samples ./sampleSurfaces > /dev/null 2>&1
+    rm -rf sets samples sampleSurfaces > /dev/null 2>&1
 }
 
 
