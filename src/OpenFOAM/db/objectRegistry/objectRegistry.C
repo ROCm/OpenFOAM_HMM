@@ -333,14 +333,9 @@ bool Foam::objectRegistry::checkOut(const word& key) const
 
 void Foam::objectRegistry::clear()
 {
-    // Free anything owned by the registry
-    // This needs to be done in two stages:
-    // - collect objects-to-be-removed
-    // - actually delete objects
-    // since the destructor of the regIOobject will actually delete its
-    // entry from the objectRegistry which messes up the iterator.
-
-    DynamicList<regIOobject*> owned;
+    // Free anything owned by the registry, but first unset both
+    // 'ownedByRegistry' and 'registered' flags to ensure that the
+    // regIOobject destructor will not affect the registry
 
     for (iterator iter = begin(); iter != end(); ++iter)
     {
@@ -348,24 +343,14 @@ void Foam::objectRegistry::clear()
 
         if (ptr && ptr->ownedByRegistry())
         {
-            // TBD: may wish to have ptr->clearWatches();
             if (objectRegistry::debug)
             {
-                Pout<< "objectRegistry::clear : " << ptr->name()
-                    <<  " watches :" << flatOutput(ptr->watchIndices()) << nl;
-
+                Pout<< "objectRegistry::clear : " << ptr->name() << nl;
             }
 
-            owned.append(ptr);
+            ptr->release(true);     // Relinquish ownership and registration
+            delete ptr;             // Delete also clears fileHandler watches
         }
-    }
-
-    for (regIOobject* objectPtr : owned)
-    {
-        // Make sure that the destructor of the regIOobject does a checkout
-        objectPtr->release();
-
-        delete objectPtr;
     }
 
     HashTable<regIOobject*>::clear();
@@ -381,18 +366,18 @@ void Foam::objectRegistry::clearStorage()
 
 bool Foam::objectRegistry::erase(const iterator& iter)
 {
-    // Free anything owned by the registry
+    // Remove from registry - see notes in objectRegistry::clear()
 
     if (iter.found())
     {
         regIOobject* ptr = iter.val();
 
-        bool ok = HashTable<regIOobject*>::erase(iter);
+        const bool ok = HashTable<regIOobject*>::erase(iter);
 
         if (ptr && ptr->ownedByRegistry())
         {
-            // TBD: may wish to have ptr->clearWatches();
-            delete ptr;
+            ptr->release(true);     // Relinquish ownership and registration
+            delete ptr;             // Delete also clears fileHandler watches
         }
 
         return ok;
