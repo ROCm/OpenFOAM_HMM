@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2014 OpenFOAM Foundation
@@ -27,6 +27,7 @@ License
 
 #include "smoothSolver.H"
 #include "profiling.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -79,11 +80,14 @@ void Foam::smoothSolver::readControls()
 
 Foam::solverPerformance Foam::smoothSolver::solve
 (
-    scalarField& psi,
+    scalarField& psi_s,
     const scalarField& source,
     const direction cmpt
 ) const
 {
+    PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
+    solveScalarField& psi = tpsi.constCast();
+
     // Setup class containing solver performance data
     solverPerformance solverPerf(typeName, fieldName_);
 
@@ -114,22 +118,29 @@ Foam::solverPerformance Foam::smoothSolver::solve
     }
     else
     {
-        scalar normFactor = 0;
-        scalarField residual;
+        solveScalar normFactor = 0;
+        solveScalarField residual;
+
+        ConstPrecisionAdaptor<solveScalar, scalar> tsource(source);
 
         {
-            scalarField Apsi(psi.size());
-            scalarField temp(psi.size());
+            solveScalarField Apsi(psi.size());
+            solveScalarField temp(psi.size());
 
             // Calculate A.psi
             matrix_.Amul(Apsi, psi, interfaceBouCoeffs_, interfaces_, cmpt);
 
             // Calculate normalisation factor
-            normFactor = this->normFactor(psi, source, Apsi, temp);
+            normFactor = this->normFactor(psi, tsource(), Apsi, temp);
 
-            residual = source - Apsi;
+            residual = tsource() - Apsi;
 
-            matrix().setResidualField(residual, fieldName_, true);
+            matrix().setResidualField
+            (
+                ConstPrecisionAdaptor<scalar, solveScalar>(residual)(),
+                fieldName_,
+                false
+            );
 
             // Calculate residual magnitude
             solverPerf.initialResidual() =
@@ -197,7 +208,12 @@ Foam::solverPerformance Foam::smoothSolver::solve
             );
         }
 
-        matrix().setResidualField(residual, fieldName_, false);
+        matrix().setResidualField
+        (
+            ConstPrecisionAdaptor<scalar, solveScalar>(residual)(),
+            fieldName_,
+            false
+        );
     }
 
     return solverPerf;

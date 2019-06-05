@@ -96,6 +96,9 @@ public:
         //- Component type
         typedef scalar cmptType;
 
+        //- Magnitude type
+        typedef scalar magType;
+
         //- Euler-angle rotation order
         enum eulerOrder : unsigned char
         {

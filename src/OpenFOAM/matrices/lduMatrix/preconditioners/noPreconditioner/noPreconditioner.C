@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -59,15 +59,15 @@ Foam::noPreconditioner::noPreconditioner
 
 void Foam::noPreconditioner::precondition
 (
-    scalarField& wA,
-    const scalarField& rA,
+    solveScalarField& wA,
+    const solveScalarField& rA,
     const direction
 ) const
 {
-    scalar* __restrict__ wAPtr = wA.begin();
-    const scalar* __restrict__ rAPtr = rA.begin();
+    solveScalar* __restrict__ wAPtr = wA.begin();
+    const solveScalar* __restrict__ rAPtr = rA.begin();
 
-    label nCells = wA.size();
+    const label nCells = wA.size();
 
     for (label cell=0; cell<nCells; cell++)
     {

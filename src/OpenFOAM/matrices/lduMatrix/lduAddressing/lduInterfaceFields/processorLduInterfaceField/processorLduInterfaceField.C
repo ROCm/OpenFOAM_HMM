@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2012 OpenFOAM Foundation
@@ -46,7 +46,7 @@ Foam::processorLduInterfaceField::~processorLduInterfaceField()
 
 void Foam::processorLduInterfaceField::transformCoupleField
 (
-    scalarField& f,
+    solveScalarField& f,
     const direction cmpt
 ) const
 {

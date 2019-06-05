@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -29,6 +29,7 @@ License
 #include "energyRegionCoupledFvPatchScalarField.H"
 #include "Time.H"
 #include "turbulentFluidThermoModel.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
@@ -392,9 +393,9 @@ patchInternalTemperatureField() const
 
 void Foam::energyRegionCoupledFvPatchScalarField::updateInterfaceMatrix
 (
-    Field<scalar>& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes
@@ -404,7 +405,11 @@ void Foam::energyRegionCoupledFvPatchScalarField::updateInterfaceMatrix
 
     scalarField myHE(this->size());
 
-    if (&psiInternal == &primitiveField())
+    if
+    (
+        reinterpret_cast<const void*>(&psiInternal)
+     == reinterpret_cast<const void*>(&primitiveField())
+    )
     {
         label patchi = this->patch().index();
         const scalarField& pp =  thermoPtr_->p().boundaryField()[patchi];
@@ -422,8 +427,10 @@ void Foam::energyRegionCoupledFvPatchScalarField::updateInterfaceMatrix
         }
     }
 
+    ConstPrecisionAdaptor<solveScalar, scalar> tHE(myHE);
+
     // Multiply the field by coefficients and add into the result
-    this->addToInternalField(result, !add, coeffs, myHE);
+    this->addToInternalField(result, !add, coeffs, tHE());
 }
 
 

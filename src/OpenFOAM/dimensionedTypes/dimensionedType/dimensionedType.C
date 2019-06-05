@@ -614,9 +614,12 @@ Foam::sqr(const dimensioned<Type>& dt)
 }
 
 template<class Type>
-Foam::dimensioned<Foam::scalar> Foam::magSqr(const dimensioned<Type>& dt)
+Foam::dimensioned<typename Foam::typeOfMag<Type>::type>
+Foam::magSqr(const dimensioned<Type>& dt)
 {
-    return dimensioned<scalar>
+    typedef typename typeOfMag<Type>::type magType;
+
+    return dimensioned<magType>
     (
         "magSqr(" + dt.name() + ')',
         magSqr(dt.dimensions()),
@@ -625,9 +628,12 @@ Foam::dimensioned<Foam::scalar> Foam::magSqr(const dimensioned<Type>& dt)
 }
 
 template<class Type>
-Foam::dimensioned<Foam::scalar> Foam::mag(const dimensioned<Type>& dt)
+Foam::dimensioned<typename Foam::typeOfMag<Type>::type>
+Foam::mag(const dimensioned<Type>& dt)
 {
-    return dimensioned<scalar>
+    typedef typename typeOfMag<Type>::type magType;
+
+    return dimensioned<magType>
     (
         "mag(" + dt.name() + ')',
         dt.dimensions(),

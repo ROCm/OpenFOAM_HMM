@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DILUGaussSeidelSmoother.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -79,16 +80,34 @@ Foam::DILUGaussSeidelSmoother::DILUGaussSeidelSmoother
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::DILUGaussSeidelSmoother::scalarSmooth
+(
+    solveScalarField& psi,
+    const solveScalarField& source,
+    const direction cmpt,
+    const label nSweeps
+) const
+{
+    diluSmoother_.scalarSmooth(psi, source, cmpt, nSweeps);
+    gsSmoother_.scalarSmooth(psi, source, cmpt, nSweeps);
+}
+
+
 void Foam::DILUGaussSeidelSmoother::smooth
 (
-    scalarField& psi,
+    solveScalarField& psi,
     const scalarField& source,
     const direction cmpt,
     const label nSweeps
 ) const
 {
-    diluSmoother_.smooth(psi, source, cmpt, nSweeps);
-    gsSmoother_.smooth(psi, source, cmpt, nSweeps);
+    scalarSmooth
+    (
+        psi,
+        ConstPrecisionAdaptor<solveScalar, scalar>(source),
+        cmpt,
+        nSweeps
+    );
 }
 
 

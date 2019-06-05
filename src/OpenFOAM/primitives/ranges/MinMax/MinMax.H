@@ -132,6 +132,7 @@ public:
         //- The value type the MinMax represents
         typedef T value_type;
 
+        //- Component type
         typedef typename pTraits<T>::cmptType cmptType;
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PBiCG.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -66,11 +67,14 @@ Foam::PBiCG::PBiCG
 
 Foam::solverPerformance Foam::PBiCG::solve
 (
-    scalarField& psi,
+    scalarField& psi_s,
     const scalarField& source,
     const direction cmpt
 ) const
 {
+    PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
+    solveScalarField& psi = tpsi.constCast();
+
     // --- Setup class containing solver performance data
     solverPerformance solverPerf
     (
@@ -80,25 +84,31 @@ Foam::solverPerformance Foam::PBiCG::solve
 
     const label nCells = psi.size();
 
-    scalar* __restrict__ psiPtr = psi.begin();
+    solveScalar* __restrict__ psiPtr = psi.begin();
 
-    scalarField pA(nCells);
-    scalar* __restrict__ pAPtr = pA.begin();
+    solveScalarField pA(nCells);
+    solveScalar* __restrict__ pAPtr = pA.begin();
 
-    scalarField wA(nCells);
-    scalar* __restrict__ wAPtr = wA.begin();
+    solveScalarField wA(nCells);
+    solveScalar* __restrict__ wAPtr = wA.begin();
 
     // --- Calculate A.psi
     matrix_.Amul(wA, psi, interfaceBouCoeffs_, interfaces_, cmpt);
 
     // --- Calculate initial residual field
-    scalarField rA(source - wA);
-    scalar* __restrict__ rAPtr = rA.begin();
+    ConstPrecisionAdaptor<solveScalar, scalar> tsource(source);
+    solveScalarField rA(tsource() - wA);
+    solveScalar* __restrict__ rAPtr = rA.begin();
 
-    matrix().setResidualField(rA, fieldName_, true);
+    matrix().setResidualField
+    (
+        ConstPrecisionAdaptor<scalar, solveScalar>(rA)(),
+        fieldName_,
+        false
+    );
 
     // --- Calculate normalisation factor
-    const scalar normFactor = this->normFactor(psi, source, wA, pA);
+    const solveScalar normFactor = this->normFactor(psi, tsource(), wA, pA);
 
     if (lduMatrix::debug >= 2)
     {
@@ -118,21 +128,21 @@ Foam::solverPerformance Foam::PBiCG::solve
      || !solverPerf.checkConvergence(tolerance_, relTol_)
     )
     {
-        scalarField pT(nCells, 0);
-        scalar* __restrict__ pTPtr = pT.begin();
+        solveScalarField pT(nCells, 0);
+        solveScalar* __restrict__ pTPtr = pT.begin();
 
-        scalarField wT(nCells);
-        scalar* __restrict__ wTPtr = wT.begin();
+        solveScalarField wT(nCells);
+        solveScalar* __restrict__ wTPtr = wT.begin();
 
         // --- Calculate T.psi
         matrix_.Tmul(wT, psi, interfaceIntCoeffs_, interfaces_, cmpt);
 
         // --- Calculate initial transpose residual field
-        scalarField rT(source - wT);
-        scalar* __restrict__ rTPtr = rT.begin();
+        solveScalarField rT(tsource() - wT);
+        solveScalar* __restrict__ rTPtr = rT.begin();
 
         // --- Initial value not used
-        scalar wArT = 0;
+        solveScalar wArT = 0;
 
         // --- Select and construct the preconditioner
         autoPtr<lduMatrix::preconditioner> preconPtr =
@@ -146,7 +156,7 @@ Foam::solverPerformance Foam::PBiCG::solve
         do
         {
             // --- Store previous wArT
-            const scalar wArTold = wArT;
+            const solveScalar wArTold = wArT;
 
             // --- Precondition residuals
             preconPtr->precondition(wA, rA, cmpt);
@@ -165,7 +175,7 @@ Foam::solverPerformance Foam::PBiCG::solve
             }
             else
             {
-                const scalar beta = wArT/wArTold;
+                const solveScalar beta = wArT/wArTold;
 
                 for (label cell=0; cell<nCells; cell++)
                 {
@@ -179,7 +189,7 @@ Foam::solverPerformance Foam::PBiCG::solve
             matrix_.Amul(wA, pA, interfaceBouCoeffs_, interfaces_, cmpt);
             matrix_.Tmul(wT, pT, interfaceIntCoeffs_, interfaces_, cmpt);
 
-            const scalar wApT = gSumProd(wA, pT, matrix().mesh().comm());
+            const solveScalar wApT = gSumProd(wA, pT, matrix().mesh().comm());
 
             // --- Test for singularity
             if (solverPerf.checkSingularity(mag(wApT)/normFactor))
@@ -190,7 +200,7 @@ Foam::solverPerformance Foam::PBiCG::solve
 
             // --- Update solution and residual:
 
-            const scalar alpha = wArT/wApT;
+            const solveScalar alpha = wArT/wApT;
 
             for (label cell=0; cell<nCells; cell++)
             {
@@ -222,7 +232,12 @@ Foam::solverPerformance Foam::PBiCG::solve
             << exit(FatalError);
     }
 
-    matrix().setResidualField(rA, fieldName_, false);
+    matrix().setResidualField
+    (
+        ConstPrecisionAdaptor<scalar, solveScalar>(rA)(),
+        fieldName_,
+        false
+    );
 
     return solverPerf;
 }

@@ -310,9 +310,9 @@ Foam::processorFvPatchField<Type>::snGrad
 template<class Type>
 void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 (
-    scalarField&,
+    solveScalarField&,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField&,
     const direction,
     const Pstream::commsTypes commsType
@@ -371,9 +371,9 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 template<class Type>
 void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField&,
+    const solveScalarField&,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes commsType
@@ -415,9 +415,13 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
     }
     else
     {
-        scalarField pnf
+        solveScalarField pnf
         (
-            procPatch_.compressedReceive<scalar>(commsType, this->size())()
+            procPatch_.compressedReceive<solveScalar>
+            (
+                commsType,
+                this->size()
+            )()
         );
 
         if (!std::is_arithmetic<Type>::value)
