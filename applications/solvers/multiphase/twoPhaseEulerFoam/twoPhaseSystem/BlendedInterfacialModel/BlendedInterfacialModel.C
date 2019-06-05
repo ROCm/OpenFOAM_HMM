@@ -270,22 +270,19 @@ Foam::BlendedInterfacialModel<modelType>::F() const
         f2 = blending_.f2(pair1In2_.dispersed(), pair2In1_.dispersed());
     }
 
-    tmp<GeometricField<Type, fvPatchField, volMesh>> x
+    auto x = tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                modelType::typeName + ":F",
-                pair_.phase1().mesh().time().timeName(),
-                pair_.phase1().mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            modelType::typeName + ":F",
+            pair_.phase1().mesh().time().timeName(),
             pair_.phase1().mesh(),
-            dimensioned<Type>(modelType::dimF, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        pair_.phase1().mesh(),
+        dimensioned<Type>(modelType::dimF, Zero)
     );
 
     if (model_.valid())
@@ -338,23 +335,22 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
         );
     }
 
-    tmp<surfaceScalarField> x
+    auto x = tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                modelType::typeName + ":Ff",
-                pair_.phase1().mesh().time().timeName(),
-                pair_.phase1().mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            modelType::typeName + ":Ff",
+            pair_.phase1().mesh().time().timeName(),
             pair_.phase1().mesh(),
-            dimensionedScalar(modelType::dimF*dimArea, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        pair_.phase1().mesh(),
+        dimensionedScalar(modelType::dimF*dimArea, Zero)
     );
+
+    x.ref().setOriented();
 
     if (model_.valid())
     {
