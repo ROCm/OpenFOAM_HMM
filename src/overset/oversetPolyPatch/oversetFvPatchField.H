@@ -165,6 +165,12 @@ public:
 //                const direction cmpt,
 //                const Pstream::commsTypes commsType
 //            ) const;
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

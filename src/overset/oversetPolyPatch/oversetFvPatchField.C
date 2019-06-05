@@ -350,4 +350,13 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
 //}
 
 
+template<class Type>
+void Foam::oversetFvPatchField<Type>::write(Ostream& os) const
+{
+    zeroGradientFvPatchField<Type>::write(os);
+    // Make sure to write the value for ease of postprocessing.
+    this->writeEntry("value", os);
+}
+
+
 // ************************************************************************* //
