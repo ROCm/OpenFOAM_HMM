@@ -289,7 +289,7 @@ void Foam::PDRblock::readGridControl
 
         const scalar dist = (subPoint.last() - subPoint.first());
 
-        if (equal(expRatio, 1.0))
+        if (equal(expRatio, 1))
         {
             for (label i=1; i < nDiv; ++i)
             {

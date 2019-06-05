@@ -426,7 +426,7 @@ void Foam::colourTools::interpolateDiverging
         // adjusting the scalar value.
 
         scalar Mmid = std::max(msh1[0], msh2[0]);
-        Mmid = std::max(88.0, Mmid);
+        Mmid = std::max(scalar(88.0), Mmid);
         if (s < 0.5)
         {
             msh2[0] = Mmid; msh2[1] = 0; msh2[2] = 0;
