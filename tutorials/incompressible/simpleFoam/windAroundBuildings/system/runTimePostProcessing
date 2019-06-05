@@ -112,11 +112,11 @@ postPro1
         visible         yes;
         vertical        false;
         titleHack       false;
-        position        (0.8 0);
-        size            (0.2 0.1);
+        position        (0.75 0);
+        size            (0.22 0.1);
 
-        fontSize        8;
-        titleSize       24;
+        // fontSize        0;
+        // titleSize       0;
         title           "velocity [m/s]";
         labelFormat     "%.0f";
         numberOfLabels  5;

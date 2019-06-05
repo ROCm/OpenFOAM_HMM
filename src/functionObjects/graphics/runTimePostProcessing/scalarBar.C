@@ -57,8 +57,8 @@ void Foam::functionObjects::runTimePostPro::scalarBar::clear()
     position_ = {0.8, 0.1};
     size_ = {0.1, 0.5};
     title_ = "";
-    fontSize_ = 12;
-    titleSize_ = 0;   // 0 == Auto-sizing (factor 3)
+    fontSize_ = 0;    // 0 == Auto-sizing (defaultFontSize)
+    titleSize_ = 0;   // 0 == Auto-sizing (defaultTitleSizeFactor)
     nLabels_ = 5;
     labelFormat_ = "%f";
 }
@@ -121,6 +121,8 @@ bool Foam::functionObjects::runTimePostPro::scalarBar::add
         return false;
     }
 
+    const label fontSizeValue = (fontSize_ ? fontSize_ : defaultFontSize);
+
     auto sbar = vtkSmartPointer<vtkScalarBarActor>::New();
     sbar->SetLookupTable(lut);
     sbar->SetNumberOfLabels(nLabels_);
@@ -139,6 +141,8 @@ bool Foam::functionObjects::runTimePostPro::scalarBar::add
     if (titleHack_)
     {
         // Place the scalar bar title ourselves
+        sbar->SetUnconstrainedFontSize(true);
+
         titleActor = vtkSmartPointer<vtkTextActor>::New();
         titleActor->SetInput(title_.c_str());
 
@@ -148,6 +152,7 @@ bool Foam::functionObjects::runTimePostPro::scalarBar::add
     else
     {
         // Use the standard scalar bar title
+        sbar->SetUnconstrainedFontSize(fontSize_ != 0);
         sbar->SetTitle(title_.c_str());
         titleProp = sbar->GetTitleTextProperty();
     }
@@ -163,11 +168,11 @@ bool Foam::functionObjects::runTimePostPro::scalarBar::add
     }
     else
     {
-        // Auto = Factor 3 of fontSize
-        titleProp->SetFontSize(3*fontSize_);
+        // Auto
+        titleProp->SetFontSize(defaultTitleSizeFactor*fontSizeValue);
 
         // Or this??
-        // if (!titleHack_) titleProp->SetFontSize(fontSize_);
+        // if (!titleHack_) titleProp->SetFontSize(fontSizeValue);
     }
 
     titleProp->SetJustificationToCentered();
@@ -178,14 +183,16 @@ bool Foam::functionObjects::runTimePostPro::scalarBar::add
 
     titleProp->SetColor(textColour[0], textColour[1], textColour[2]);
 
-
     auto labProp = sbar->GetLabelTextProperty();
 
     labProp->SetColor(textColour[0], textColour[1], textColour[2]);
 
-    labProp->SetFontSize(fontSize_);
+    if (titleHack_ || fontSize_)
+    {
+        labProp->SetFontSize(fontSizeValue);
+    }
     labProp->ShadowOff();
-    labProp->BoldOff();
+    labProp->BoldOff();     // or: labProp->SetBold(bold_);
     labProp->ItalicOff();
 
     // Positioning
