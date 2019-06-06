@@ -53,6 +53,7 @@ functions
     #include "sampling"
     // #include "samplingDebug"
     // #include "sampleCellCentres"
+    #include  "isentropicTotalPressure"
 }
 
 
