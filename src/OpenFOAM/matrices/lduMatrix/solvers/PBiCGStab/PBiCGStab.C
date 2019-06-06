@@ -282,11 +282,9 @@ Foam::solverPerformance Foam::PBiCGStab::solve
 ) const
 {
     PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
-    solveScalarField& psi = tpsi.constCast();
-
     return scalarSolve
     (
-        psi,
+        tpsi.ref(),
         ConstPrecisionAdaptor<solveScalar, scalar>(source)(),
         cmpt
     );

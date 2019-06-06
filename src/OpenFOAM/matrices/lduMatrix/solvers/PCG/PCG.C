@@ -220,7 +220,7 @@ Foam::solverPerformance Foam::PCG::solve
     PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
     return scalarSolve
     (
-        tpsi.constCast(),
+        tpsi.ref(),
         ConstPrecisionAdaptor<solveScalar, scalar>(source)(),
         cmpt
     );

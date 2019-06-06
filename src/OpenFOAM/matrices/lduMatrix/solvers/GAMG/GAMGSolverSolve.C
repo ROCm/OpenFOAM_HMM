@@ -41,7 +41,7 @@ Foam::solverPerformance Foam::GAMGSolver::solve
 ) const
 {
     PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
-    solveScalarField& psi = tpsi.constCast();
+    solveScalarField& psi = tpsi.ref();
 
     ConstPrecisionAdaptor<solveScalar, scalar> tsource(source);
 
@@ -581,21 +581,16 @@ void Foam::GAMGSolver::solveCoarsestLevel
 {
     const label coarsestLevel = matrixLevels_.size() - 1;
 
-    label coarseComm = matrixLevels_[coarsestLevel].mesh().comm();
+    const label coarseComm = matrixLevels_[coarsestLevel].mesh().comm();
 
     if (directSolveCoarsest_)
     {
-        PrecisionAdaptor<scalar, solveScalar> tcorrField
-        (
-            coarsestCorrField
-        );
+        PrecisionAdaptor<scalar, solveScalar> tcorrField(coarsestCorrField);
+
         coarsestLUMatrixPtr_->solve
         (
-            tcorrField.constCast(),
-            ConstPrecisionAdaptor<scalar, solveScalar>
-            (
-                coarsestSource
-            )()
+            tcorrField.ref(),
+            ConstPrecisionAdaptor<scalar, solveScalar>(coarsestSource)()
         );
     }
     //else if

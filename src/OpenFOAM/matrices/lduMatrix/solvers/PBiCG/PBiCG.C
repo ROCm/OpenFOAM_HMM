@@ -73,7 +73,7 @@ Foam::solverPerformance Foam::PBiCG::solve
 ) const
 {
     PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
-    solveScalarField& psi = tpsi.constCast();
+    solveScalarField& psi = tpsi.ref();
 
     // --- Setup class containing solver performance data
     solverPerformance solverPerf

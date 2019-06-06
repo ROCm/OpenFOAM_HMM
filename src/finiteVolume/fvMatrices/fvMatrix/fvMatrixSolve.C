@@ -184,7 +184,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
                 bouCoeffsCmpt,
                 interfaces,
                 psiCmpt_ss(),
-                sourceCmpt_ss.constCast(),
+                sourceCmpt_ss.ref(),
                 cmpt
             );
 
@@ -194,7 +194,7 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
                 bouCoeffsCmpt,
                 interfaces,
                 psiCmpt_ss(),
-                sourceCmpt_ss.constCast(),
+                sourceCmpt_ss.ref(),
                 cmpt
             );
         }

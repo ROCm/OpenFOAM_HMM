@@ -215,8 +215,10 @@ Foam::tmp<Foam::scalarField> Foam::fvMatrix<Foam::scalar>::residual() const
             0
         )
     );
+
     ConstPrecisionAdaptor<scalar, solveScalar> tres_s(tres);
-    addBoundarySource(tres_s.constCast());
+    addBoundarySource(tres_s.ref());
+
     return tres_s;
 }
 
