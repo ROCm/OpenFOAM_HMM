@@ -263,6 +263,7 @@ unalias wmDP        2>/dev/null
 unalias wmInt32     2>/dev/null
 unalias wmInt64     2>/dev/null
 unalias wmSP        2>/dev/null
+unalias wmSPDP      2>/dev/null
 unalias wmSchedOff  2>/dev/null
 unalias wmSchedOn   2>/dev/null
 unalias wmSet       2>/dev/null

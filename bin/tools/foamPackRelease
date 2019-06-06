@@ -23,17 +23,17 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#     foamTarRelease [OPTION]
+#     foamPackRelease [OPTION]
 #
 # Description
 #     Simple script generator for packing OpenFOAM sources and submodules
 #
-#       $ foamTarRelease -output some/path origin/master > create-tar
+#       $ foamPackRelease -output some/path origin/master > create-tar
 #       $ bash ./create-tar
 #
 #     Or directly:
 #
-#       $ foamTarRelease -output some/path origin/master | bash
+#       $ foamPackRelease -tgz origin/master | bash
 #
 #     Done as two-step process to allow further manual adjustments as required
 #------------------------------------------------------------------------------
@@ -47,8 +47,9 @@ cat <<USAGE
 Usage: ${0##*/} [OPTION] commit-ish
 options:
    -output DIR      Specify alternative output directory
-   -no-modules      Do not include submodules
+   -no-modules      Exclude submodules
    -compress=TYPE   Compress with specified type
+   -tgz             Alias for -compress=tgz
    -help            Print help
 
 Simple script generator for packing OpenFOAM and submodules.
@@ -56,6 +57,8 @@ Eg,
 
     $Script -output some-directory origin/master > create-tar
     sh ./create-tar
+
+    $Script -tgz origin/master | bash
 
 USAGE
     exit 1
@@ -96,6 +99,9 @@ do
     -compress=*)
         compress="${1#*=}"
         ;;
+    -tgz)
+        compress="${1#*-}"
+        ;;
     -*)
         usage "unknown option: '$*'"
         ;;
@@ -127,7 +133,7 @@ echo "Using outputDir=$outputDir" 1>&2
 findGitDir()
 {
     (
-        if  cd "$1" 2>/dev/null && \
+        if cd "$1" 2>/dev/null && \
             git rev-parse --is-inside-work-tree > /dev/null 2>&1
         then
             git rev-parse --show-toplevel 2>/dev/null
