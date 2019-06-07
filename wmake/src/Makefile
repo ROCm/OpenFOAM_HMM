@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           |
+#   \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #                           | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -62,8 +62,6 @@ include $(GENERAL_RULES)/general
 .PHONY: all clean
 
 all: \
-    $(WMAKE_BIN)/dirToString$(EXT_EXE) \
-    $(WMAKE_BIN)/wmkdep$(EXT_EXE) \
     $(WMAKE_BIN)/wmkdepend$(EXT_EXE)
 	@echo "built wmake-bin for $(WM_ARCH)$(WM_COMPILER)"
 
@@ -71,11 +69,6 @@ clean:
 	@echo "clean wmake-bin for $(WM_ARCH)$(WM_COMPILER)"
 	@rm -rf $(WMAKE_BIN) 2>/dev/null
 	@rmdir $(shell dirname $(WMAKE_BIN)) 2>/dev/null || true
-
-$(WMAKE_BIN)/dirToString$(EXT_EXE): dirToString.c
-	@mkdir -p $(WMAKE_BIN)
-	$(call QUIET_MESSAGE,compile,$(<F))
-	$E $(cc) $(cFLAGS) $(<F) -o $@
 
 $(WMAKE_BIN)/wmkdep$(EXT_EXE): wmkdep.l
 	@mkdir -p $(WMAKE_BIN)
