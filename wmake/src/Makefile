@@ -54,19 +54,27 @@ WM_COMPILE_OPTION = Opt
 GENERAL_RULES   = $(WM_DIR)/rules/General
 include $(GENERAL_RULES)/general
 
+archHost    := $(WM_ARCH)$(WM_COMPILER)
+archTarget  := $(shell basename $(WMAKE_BIN))
+
 
 #------------------------------------------------------------------------------
 # Targets
 #------------------------------------------------------------------------------
 
-.PHONY: all clean
+.PHONY: all clean message
 
-all: \
-    $(WMAKE_BIN)/wmkdepend$(EXT_EXE)
-	@echo "built wmake-bin for $(WM_ARCH)$(WM_COMPILER)"
+all: $(WMAKE_BIN)/wmkdepend$(EXT_EXE) message
+
+message:
+ifneq ($(archHost),$(archTarget))
+	@echo "built wmake-bin ($(archTarget)) for $(archHost) host"
+else
+	@echo "built wmake-bin ($(archTarget))"
+endif
 
 clean:
-	@echo "clean wmake-bin for $(WM_ARCH)$(WM_COMPILER)"
+	@echo "clean wmake-bin ($(archTarget))"
 	@rm -rf $(WMAKE_BIN) 2>/dev/null
 	@rmdir $(shell dirname $(WMAKE_BIN)) 2>/dev/null || true
 

@@ -7,6 +7,16 @@ then
     export WM_DIR
 fi
 
-make                                    # Compile tools for wmake
+# Compile wmake toolchain
+make
+
+case "$WM_COMPILER" in
+Mingw*)
+    # Host wmake toolchain with system gcc (when cross-compiling)
+    make \
+        WM_COMPILER=Gcc WM_COMPILER_TYPE=system \
+        WMAKE_BIN="${WM_DIR}/platforms/${WM_ARCH}${WM_COMPILER}"
+    ;;
+esac
 
 #------------------------------------------------------------------------------
