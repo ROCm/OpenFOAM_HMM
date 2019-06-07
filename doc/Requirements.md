@@ -145,7 +145,7 @@ export LD_PRELOAD="libmpi.so"
 
 When compiled ParaView from source additional dependencies will be
 required.
-A partial list is given in the [ThirdParty requirements][third-require].
+A partial list is given in the [ThirdParty requirements][link third-require].
 **Please help us with keeping that information up-to-date and accurate.**
 
 <!-- Links -->
