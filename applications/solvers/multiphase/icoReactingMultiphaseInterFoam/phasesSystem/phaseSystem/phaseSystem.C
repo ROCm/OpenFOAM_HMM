@@ -649,6 +649,48 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::kappa(const label patchI) const
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::phaseSystem::alphahe() const
+{
+    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+
+    tmp<volScalarField> talphaEff
+    (
+        phaseModelIter()()*phaseModelIter()->alphahe()
+    );
+
+    for (; phaseModelIter != phaseModels_.end(); ++phaseModelIter)
+    {
+        talphaEff.ref() += phaseModelIter()()*phaseModelIter()->alphahe();
+    }
+
+    return talphaEff;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::phaseSystem::alphahe
+(
+    const label patchi
+) const
+{
+    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+
+    tmp<scalarField> talphaEff
+    (
+        phaseModelIter()().boundaryField()[patchi]
+       *phaseModelIter()->alphahe(patchi)
+    );
+
+    for (; phaseModelIter != phaseModels_.end(); ++phaseModelIter)
+    {
+        talphaEff.ref() +=
+            phaseModelIter()().boundaryField()[patchi]
+           *phaseModelIter()->alphahe(patchi);
+    }
+
+    return talphaEff;
+}
+
+
 Foam::tmp<Foam::volScalarField>Foam::phaseSystem::kappaEff
 (
     const volScalarField& kappat

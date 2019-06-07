@@ -38,12 +38,12 @@ const Foam::Enum
     Foam::temperatureCoupledBase::KMethodType
 >
 Foam::temperatureCoupledBase::KMethodTypeNames_
-({
+{
     { KMethodType::mtFluidThermo, "fluidThermo" },
     { KMethodType::mtSolidThermo, "solidThermo" },
     { KMethodType::mtDirectionalSolidThermo, "directionalSolidThermo" },
-    { KMethodType::mtLookup, "lookup" },
-});
+    { KMethodType::mtLookup, "lookup" }
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -70,7 +70,7 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
 )
 :
     patch_(patch),
-    method_(KMethodTypeNames_.get("kappaMethod", dict)),
+    method_(KMethodTypeNames_.lookup("kappaMethod", dict)),
     kappaName_(dict.lookupOrDefault<word>("kappa", "none")),
     alphaAniName_(dict.lookupOrDefault<word>("alphaAni","none"))
 {
@@ -127,6 +127,11 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
 {}
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::temperatureCoupledBase::~temperatureCoupledBase()
+{}
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
@@ -169,13 +174,6 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
 
                 return thermo.kappa(patchi);
             }
-            else if (mesh.foundObject<basicThermo>("phaseProperties"))
-            {
-                const basicThermo& thermo =
-                    mesh.lookupObject<basicThermo>("phaseProperties");
-
-                return thermo.kappa(patchi);
-            }
             else
             {
                 FatalErrorInFunction
@@ -192,26 +190,6 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
         {
             const solidThermo& thermo =
                 mesh.lookupObject<solidThermo>(basicThermo::dictName);
-
-            if (!thermo.isotropic())
-            {
-                word regionName = "";
-                if (mesh.name() != polyMesh::defaultRegion)
-                {
-                    regionName = " for region " + mesh.name();
-                }
-
-                const word& patchName = mesh.boundaryMesh()[patchi].name();
-
-                WarningInFunction
-                    << "Applying isotropic thermal conductivity assumption to "
-                    << "anisotropic model" << regionName << " at patch "
-                    << patchName << nl
-                    << "Consider using an isotropic conductivity model or "
-                    << "set 'kappaMethod' to "
-                    << KMethodTypeNames_[mtDirectionalSolidThermo]
-                    << nl << endl;
-            }
 
             return thermo.kappa(patchi);
             break;
@@ -268,6 +246,8 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                     << " or volSymmTensorField."
                     << exit(FatalError);
             }
+
+
 
             break;
         }

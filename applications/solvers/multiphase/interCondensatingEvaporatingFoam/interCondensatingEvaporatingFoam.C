@@ -118,9 +118,8 @@ int main(int argc, char *argv[])
             #include "alphaEqnSubCycle.H"
 
             solve(fvm::ddt(rho) + fvc::div(rhoPhi));
-
             #include "UEqn.H"
-            #include "eEqn.H"
+            #include "TEqn.H"
 
             // --- Pressure corrector loop
             while (pimple.correct())

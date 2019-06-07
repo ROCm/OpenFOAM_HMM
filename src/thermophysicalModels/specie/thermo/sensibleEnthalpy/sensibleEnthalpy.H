@@ -69,7 +69,7 @@ public:
 
         // Fundamental properties
 
-            static word name()
+            static word energyName()
             {
                 return "h";
             }

@@ -42,6 +42,25 @@ public:
     typedef arg2 type;
 };
 
+inline scalar operator+(const scalar& t, const one&) noexcept
+{
+    return t + 1;
+}
+
+inline scalar operator+(const one&, const scalar& t) noexcept
+{
+    return 1 + t;
+}
+
+inline scalar operator-(const scalar& t, const one&) noexcept
+{
+    return t - 1;
+}
+
+inline scalar operator-(const one&, const scalar& t) noexcept
+{
+    return 1 - t;
+}
 
 inline constexpr const one& operator*(const one& o, const one&) noexcept
 {
@@ -83,6 +102,39 @@ inline constexpr const Type& operator/(const Type& val, const one&) noexcept
     return val;
 }
 
+inline constexpr const one& min(const one& o, const one&) noexcept
+{
+    return o;
+}
+
+template<class Type>
+inline Type min(const one&, const Type& t) noexcept
+{
+    return min(scalar(1), t);
+}
+
+template<class Type>
+inline Type min(const Type& t, const one&) noexcept
+{
+    return min(t, scalar(1));
+}
+
+inline constexpr const one& max(const one& o, const one&) noexcept
+{
+    return o;
+}
+
+template<class Type>
+inline Type max(const one&, const Type& t) noexcept
+{
+    return max(scalar(1), t);
+}
+
+template<class Type>
+inline Type max(const Type& t, const one&) noexcept
+{
+    return max(t, scalar(1));
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

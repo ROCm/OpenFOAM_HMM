@@ -25,6 +25,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "zero.H"
+#include "scalar.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -89,6 +92,39 @@ inline constexpr zero operator/(const zero&, const Type& val) noexcept
     return Zero;
 }
 
+inline zero min(const zero&, const zero&)
+{
+    return Zero;
+}
+
+template<class Type>
+inline Type min(const zero&, const Type& t)
+{
+    return min(scalar(0), t);
+}
+
+template<class Type>
+inline Type min(const Type& t, const zero&)
+{
+    return min(t, scalar(0));
+}
+
+inline zero max(const zero&, const zero&)
+{
+    return Zero;
+}
+
+template<class Type>
+inline Type max(const zero&, const Type& t)
+{
+    return max(scalar(0), t);
+}
+
+template<class Type>
+inline Type max(const Type& t, const zero&)
+{
+    return max(t, scalar(0));
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

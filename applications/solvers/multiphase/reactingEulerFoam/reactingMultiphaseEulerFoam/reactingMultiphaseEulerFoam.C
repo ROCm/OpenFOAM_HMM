@@ -5,7 +5,7 @@
     \\  /    A nd           |
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +26,6 @@ License
 Application
     reactingMultiphaseEulerFoam
 
-Group
-    grpMultiphaseSolvers
-
 Description
     Solver for a system of any number of compressible fluid phases with a
     common pressure, but otherwise separate properties. The type of phase model
@@ -40,6 +37,7 @@ Description
 
 #include "fvCFD.H"
 #include "multiphaseSystem.H"
+#include "phaseCompressibleTurbulenceModel.H"
 #include "pimpleControl.H"
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
@@ -48,16 +46,10 @@ Description
 
 int main(int argc, char *argv[])
 {
-    argList::addNote
-    (
-        "Solver for a system of any number of compressible fluid phases with a"
-        " common pressure, but otherwise separate properties."
-    );
-
     #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
-    #include "setRootCaseLists.H"
+    #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
@@ -71,20 +63,14 @@ int main(int argc, char *argv[])
         #include "setInitialDeltaT.H"
     }
 
-    // bool faceMomentum
-    // (
-    //     pimple.dict().lookupOrDefault("faceMomentum", false)
-    // );
-
-    // bool implicitPhasePressure
-    // (
-    //     mesh.solverDict(alpha1.name()).lookupOrDefault
-    //     (
-    //         "implicitPhasePressure", false
-    //     )
-    // );
-
-    //#include "pUf/createDDtU.H"
+    Switch faceMomentum
+    (
+        pimple.dict().lookupOrDefault<Switch>("faceMomentum", false)
+    );
+    Switch partialElimination
+    (
+        pimple.dict().lookupOrDefault<Switch>("partialElimination", false)
+    );
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -109,7 +95,7 @@ int main(int argc, char *argv[])
             #include "setDeltaT.H"
         }
 
-        ++runTime;
+        runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
@@ -120,14 +106,13 @@ int main(int argc, char *argv[])
 
             #include "YEqns.H"
 
-            // if (faceMomentum)
-            // {
-            //     #include "pUf/UEqns.H"
-            //     #include "EEqns.H"
-            //     #include "pUf/pEqn.H"
-            //     #include "pUf/DDtU.H"
-            // }
-            // else
+            if (faceMomentum)
+            {
+                #include "pUf/UEqns.H"
+                #include "EEqns.H"
+                #include "pUf/pEqn.H"
+            }
+            else
             {
                 #include "pU/UEqns.H"
                 #include "EEqns.H"
@@ -144,7 +129,9 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        runTime.printExecutionTime(Info);
+        Info<< "ExecutionTime = "
+            << runTime.elapsedCpuTime()
+            << " s\n\n" << endl;
     }
 
     Info<< "End\n" << endl;

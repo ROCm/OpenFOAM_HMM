@@ -136,6 +136,18 @@ namespace Foam
 {
     //- Inverse normalized incomplete gamma function
     scalar invIncGamma(const scalar a, const scalar P);
+
+    //- Normalized upper incomplete gamma function
+    scalar incGammaRatio_Q(const scalar a, const scalar x);
+
+    //- Normalized lower incomplete gamma function
+    scalar incGammaRatio_P(const scalar a, const scalar x);
+
+    //- Upper incomplete gamma function
+    scalar incGamma_Q(const scalar a, const scalar x);
+
+    //- Lower incomplete gamma function
+    scalar incGamma_P(const scalar a, const scalar x);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

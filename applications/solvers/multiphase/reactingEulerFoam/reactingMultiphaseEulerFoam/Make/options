@@ -1,15 +1,17 @@
 EXE_INC = \
-    -ImultiphaseSystem/lnInclude \
-    -I../phaseSystems/lnInclude \
-    -I../interfacialModels/lnInclude \
-    -I../interfacialCompositionModels/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/reactingMultiphaseEulerFoam/multiphaseSystem/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/phaseSystems/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/interfacialModels/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/interfacialCompositionModels/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/reactingMultiphaseEulerFoam/multiphaseCompressibleTurbulenceModels/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/compressible/turbulentFluidThermoModels/turbulentFluidFvPatchFields/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/phaseCompressible/lnInclude
 
 EXE_LIBS = \

@@ -17,9 +17,9 @@ FoamFile
 
 application     reactingMultiphaseEulerFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
-startTime       0;
+startTime       0.6;
 
 stopAt          endTime;
 
@@ -47,7 +47,7 @@ runTimeModifiable yes;
 
 adjustTimeStep  yes;
 
-maxCo           0.5;
+maxCo           0.2;
 
 maxDeltaT       1;
 

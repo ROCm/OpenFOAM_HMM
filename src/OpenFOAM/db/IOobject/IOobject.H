@@ -229,6 +229,13 @@ public:
         template<class StringType>
         static inline word groupName(StringType name, const word& group);
 
+
+         //- Return group (extension part of name)
+        static word group(const word& name);
+
+        //- Return member (name without the extension)
+        static word member(const word& name);
+
         //- Return the IOobject, but also consider an alternative file name.
         //
         //  \param io The expected IOobject to use

@@ -210,6 +210,18 @@ public:
             return thermo_->kappa();
         }
 
+         //- Thermal diffusivity for energy of mixture [kg/m/s]
+        tmp<volScalarField> alphahe() const
+        {
+            return thermo_->alphahe();
+        }
+
+        //- Thermal diffusivity for energy of mixture for patch [kg/m/s]
+        tmp<scalarField> alphahe(const label patchi) const
+        {
+            return thermo_->alphahe(patchi);
+        }
+
         //- Return the laminar thermal conductivity
         tmp<volScalarField> kappaEff
         (
