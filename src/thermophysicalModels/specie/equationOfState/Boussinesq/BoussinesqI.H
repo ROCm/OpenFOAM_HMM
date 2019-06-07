@@ -102,6 +102,19 @@ inline Foam::scalar Foam::Boussinesq<Specie>::Cp(scalar p, scalar T) const
     return 0;
 }
 
+template<class Specie>
+inline Foam::scalar Foam::Boussinesq<Specie>::E(scalar p, scalar T) const
+{
+    return 0;
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::Boussinesq<Specie>::Cv(scalar p, scalar T) const
+{
+    return 0;
+}
+
 
 template<class Specie>
 inline Foam::scalar Foam::Boussinesq<Specie>::S
@@ -143,7 +156,7 @@ inline Foam::scalar Foam::Boussinesq<Specie>::CpMCv
     scalar T
 ) const
 {
-    return this->R();
+    return 0;
 }
 
 

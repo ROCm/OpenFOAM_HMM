@@ -18,12 +18,12 @@ FoamFile
 thermoType
 {
     type            heRhoThermo;
-    mixture         multiComponentMixture;
+    mixture         pureMixture;
     transport       const;
-    thermo          hRefConst;
+    thermo          eRefConst;
     equationOfState rhoConst;
     specie          specie;
-    energy          sensibleEnthalpy;
+    energy          sensibleInternalEnergy;
 }
 
 dpdt no;
@@ -35,7 +35,7 @@ species
 
 inertSpecie water;
 
-"(mixture|H2O|water)"
+mixture
 {
     specie
     {
@@ -50,9 +50,9 @@ inertSpecie water;
     thermodynamics
     {
         Hf          0;
-        Cp          4195;
+        Cv          4195;
         Tref        373.55;
-        Href        417500;
+        Eref        417500;
     }
     transport
     {

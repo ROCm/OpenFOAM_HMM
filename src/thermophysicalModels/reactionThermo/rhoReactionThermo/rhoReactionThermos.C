@@ -44,6 +44,7 @@ License
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"
+#include "WLFTransport.H"
 
 #include "homogeneousMixture.H"
 #include "inhomogeneousMixture.H"
@@ -352,6 +353,33 @@ makeThermoPhysicsReactionThermos
     icoPoly8EThermoPhysics
 );
 
+makeThermoPhysicsReactionThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    reactingMixture,
+    constFluidEThermoPhysics
+);
+
+makeThermoPhysicsReactionThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    reactingMixture,
+    constAdiabaticFluidEThermoPhysics
+);
+
+makeThermoPhysicsReactionThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    reactingMixture,
+    constEThermoPhysics
+);
+
 
 // Single-step reaction thermo for internal energy
 
@@ -455,6 +483,17 @@ makeReactionThermo
     specie
 );
 
+makeReactionThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    WLFTransport,
+    sensibleInternalEnergy,
+    eConstThermo,
+    rhoConst,
+    specie
+);
 
 
 // Multi-component thermo for sensible enthalpy
@@ -587,6 +626,32 @@ makeThermoPhysicsReactionThermos
     icoPoly8HThermoPhysics
 );
 
+makeThermoPhysicsReactionThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    reactingMixture,
+    constFluidHThermoPhysics
+);
+
+makeThermoPhysicsReactionThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    reactingMixture,
+    constAdiabaticFluidHThermoPhysics
+);
+
+makeThermoPhysicsReactionThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    reactingMixture,
+    constHThermoPhysics
+);
 
 // Single-step reaction thermo for sensible enthalpy
 

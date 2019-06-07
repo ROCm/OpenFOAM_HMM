@@ -165,14 +165,21 @@ public:
             // Absolute Enthalpy [J/kg]
             // inline scalar Ha(const scalar p, const scalar T) const;
 
+            // Heat capacity at constant volume [J/(kg K)]
+            // inline scalar Cv(const scalar p, const scalar T) const;
+
+            // Sensible internal energy [J/kg]
+            // inline scalar Es(const scalar p, const scalar T) const;
+
+            // Absolute internal energy [J/kg]
+            // inline scalar Ea(const scalar p, const scalar T) const;
+
             // Entropy [J/(kg K)]
             // inline scalar S(const scalar p, const scalar T) const;
 
 
         // Mass specific derived properties
 
-            //- Heat capacity at constant volume [J/(kg K)]
-            inline scalar Cv(const scalar p, const scalar T) const;
 
             //- Heat capacity at constant pressure/volume [J/(kg K)]
             inline scalar Cpv(const scalar p, const scalar T) const;
@@ -186,12 +193,6 @@ public:
 
             //- Enthalpy/Internal energy [J/kg]
             inline scalar HE(const scalar p, const scalar T) const;
-
-            //- Sensible internal energy [J/kg]
-            inline scalar Es(const scalar p, const scalar T) const;
-
-            //- Absolute internal energy [J/kg]
-            inline scalar Ea(const scalar p, const scalar T) const;
 
             //- Gibbs free energy [J/kg]
             inline scalar G(const scalar p, const scalar T) const;
@@ -318,6 +319,15 @@ public:
                 const scalar p,
                 const scalar T0
             ) const;
+
+
+        // Derivative term used for Jacobian
+
+            //- Derivative of B (acooding to Niemeyer et al.) w.r.t. temperature
+            inline scalar dKcdTbyKc(const scalar p, const scalar T) const;
+
+            //- Derivative of cp w.r.t. temperature
+            inline scalar dcpdT(const scalar p, const scalar T) const;
 
 
         // I-O

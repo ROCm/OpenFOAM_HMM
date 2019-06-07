@@ -26,6 +26,8 @@ thermoType
     energy          sensibleInternalEnergy;
 }
 
+pressureWorkAlphaLimit 0.99;
+
 mixture
 {
     specie

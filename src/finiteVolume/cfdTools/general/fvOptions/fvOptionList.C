@@ -139,6 +139,24 @@ void Foam::fv::optionList::reset(const dictionary& dict)
 }
 
 
+bool Foam::fv::optionList::appliesToField(const word& fieldName) const
+{
+    forAll(*this, i)
+    {
+        const option& source = this->operator[](i);
+
+        label fieldi = source.applyToField(fieldName);
+
+        if (fieldi != -1)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 bool Foam::fv::optionList::read(const dictionary& dict)
 {
     return readOptions(optionsDict(dict));

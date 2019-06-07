@@ -461,6 +461,53 @@ public:
         //- Clone
         tmp<GeometricField<Type, PatchField, GeoMesh>> clone() const;
 
+        //- Return a temporary field constructed from name, mesh, dimensionSet
+        //  and patch type.
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh&,
+            const dimensionSet&,
+            const word& patchFieldType=PatchField<Type>::calculatedType()
+        );
+
+        //- Return a temporary field constructed from mesh, dimensioned<Type>
+        //  and patch type.
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh&,
+            const dimensioned<Type>&,
+            const word& patchFieldType=PatchField<Type>::calculatedType()
+        );
+
+        //- Return a temporary field constructed from mesh, dimensioned<Type>
+        //  and patch types.
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh&,
+            const dimensioned<Type>&,
+            const wordList& patchFieldTypes,
+            const wordList& actualPatchTypes = wordList()
+        );
+
+        //- Rename temporary field and return
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& newName,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>&
+        );
+
+        //- Rename and reset patch fields types of temporary field and return
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& newName,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>&,
+            const wordList& patchFieldTypes,
+            const wordList& actualPatchTypes = wordList()
+        );
+
 
     //- Destructor
     virtual ~GeometricField();

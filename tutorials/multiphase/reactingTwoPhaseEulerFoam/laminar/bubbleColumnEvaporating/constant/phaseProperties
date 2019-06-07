@@ -28,7 +28,7 @@ gas
         d0              3e-3;
         p0              1e5;
     }
-    Sc              0.7;
+    Sct              0.7;
 
     residualAlpha   1e-6;
 }
@@ -56,7 +56,7 @@ blending
         minFullyContinuousAlpha.liquid 0.7;
     }
 
-    heatTransferModel
+    heatTransfer
     {
         type            linear;
         minPartlyContinuousAlpha.gas 0;
@@ -65,7 +65,7 @@ blending
         minFullyContinuousAlpha.liquid 1;
     }
 
-    massTransferModel
+    massTransfer
     {
         type            linear;
         minPartlyContinuousAlpha.gas 0;
@@ -141,7 +141,7 @@ interfaceComposition
 (
     (gas in liquid)
     {
-        type Saturated;
+        type saturated;
         species ( H2O );
         Le 1.0;
         saturationPressure
@@ -209,6 +209,10 @@ massTransfer.liquid
         type spherical;
         Le 1.0;
     }
+);
+
+phaseTransfer
+(
 );
 
 lift

@@ -56,10 +56,12 @@ class linear
     // Private data
 
         //- Maximum fraction of phases which can be considered fully dispersed
-        HashTable<dimensionedScalar> maxFullyDispersedAlpha_;
+        HashTable<dimensionedScalar, word, word::hash>
+            maxFullyDispersedAlpha_;
 
         //- Maximum fraction of phases which can be considered partly dispersed
-        HashTable<dimensionedScalar> maxPartlyDispersedAlpha_;
+        HashTable<dimensionedScalar, word, word::hash>
+            maxPartlyDispersedAlpha_;
 
 
 public:

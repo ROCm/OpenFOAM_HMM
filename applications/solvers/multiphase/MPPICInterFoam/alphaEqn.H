@@ -137,7 +137,8 @@
                 alphaPhi10,
                 talphaPhi1Corr0.ref(),
                 zeroField(), zeroField(),
-                1, 0
+                oneField(),
+                zeroField()
             );
 
             alphaPhi10 += talphaPhi1Corr0();
@@ -187,8 +188,8 @@
                 talphaPhi1Corr.ref(),
                 Sp,
                 (-Sp*alpha1)(),
-                1,
-                0
+                oneField(),
+                zeroField()
             );
 
             // Under-relax the correction for all but the 1st corrector
@@ -214,8 +215,8 @@
                 alphaPhi10,
                 Sp,
                 (Su + divU*min(alpha1(), scalar(1)))(),
-                1,
-                0
+                oneField(),
+                zeroField()
             );
         }
 

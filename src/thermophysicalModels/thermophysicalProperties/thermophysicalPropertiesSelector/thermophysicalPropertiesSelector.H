@@ -133,6 +133,15 @@ public:
             //- Chemical enthalpy [J/kg]
             inline scalar Hc() const;
 
+             //- Heat capacity at constant volume [J/(kg K)]
+            inline scalar Cv(const scalar p, const scalar T) const;
+
+            //- Sensible internal energy [J/kg]
+            inline scalar Es(const scalar p, const scalar T) const;
+
+            //- Absolute internal energy [J/kg]
+            inline scalar Ea(const scalar p, const scalar T) const;
+
             // Entropy [J/(kg K)]
             inline scalar S(const scalar p, const scalar T) const;
 

@@ -87,8 +87,8 @@
                 alphaPhi1,
                 zeroField(),
                 zeroField(),
-                1,
-                0
+                oneField(),
+                zeroField()
             );
         }
         else
@@ -103,8 +103,8 @@
                 alphaPhi1,
                 zeroField(),
                 zeroField(),
-                1,
-                0
+                oneField(),
+                zeroField()
             );
         }
 
@@ -155,8 +155,8 @@
                 alphaPhi2,
                 zeroField(),
                 zeroField(),
-                1,
-                0
+                oneField(),
+                zeroField()
             );
         }
         else
@@ -171,8 +171,8 @@
                 alphaPhi2,
                 zeroField(),
                 zeroField(),
-                1,
-                0
+                oneField(),
+                zeroField()
             );
         }
 

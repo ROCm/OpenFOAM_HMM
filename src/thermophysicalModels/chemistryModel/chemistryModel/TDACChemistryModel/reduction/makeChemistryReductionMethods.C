@@ -50,6 +50,14 @@ namespace Foam
         incompressibleGasHThermoPhysics
     );
     makeChemistryReductionMethods(psiReactionThermo, icoPoly8HThermoPhysics);
+    makeChemistryReductionMethods(psiReactionThermo, constFluidHThermoPhysics);
+    makeChemistryReductionMethods
+    (
+        psiReactionThermo,
+        constAdiabaticFluidHThermoPhysics
+    );
+    makeChemistryReductionMethods(psiReactionThermo, constHThermoPhysics);
+
 
     makeChemistryReductionMethods(rhoReactionThermo, constGasHThermoPhysics);
     makeChemistryReductionMethods(rhoReactionThermo, gasHThermoPhysics);
@@ -64,6 +72,14 @@ namespace Foam
         incompressibleGasHThermoPhysics
     );
     makeChemistryReductionMethods(rhoReactionThermo, icoPoly8HThermoPhysics);
+    makeChemistryReductionMethods(rhoReactionThermo, constFluidHThermoPhysics);
+    makeChemistryReductionMethods
+    (
+        rhoReactionThermo,
+        constAdiabaticFluidHThermoPhysics
+    );
+    makeChemistryReductionMethods(rhoReactionThermo, constHThermoPhysics);
+
 
 
     // Chemistry solvers based on sensibleInternalEnergy
@@ -80,6 +96,14 @@ namespace Foam
         incompressibleGasEThermoPhysics
     );
     makeChemistryReductionMethods(psiReactionThermo, icoPoly8EThermoPhysics);
+    makeChemistryReductionMethods(psiReactionThermo, constFluidEThermoPhysics);
+    makeChemistryReductionMethods
+    (
+        psiReactionThermo,
+        constAdiabaticFluidEThermoPhysics
+    );
+    makeChemistryReductionMethods(psiReactionThermo, constEThermoPhysics);
+
 
     makeChemistryReductionMethods(rhoReactionThermo, constGasEThermoPhysics);
     makeChemistryReductionMethods(rhoReactionThermo, gasEThermoPhysics);
@@ -94,6 +118,13 @@ namespace Foam
         incompressibleGasEThermoPhysics
     );
     makeChemistryReductionMethods(rhoReactionThermo, icoPoly8EThermoPhysics);
+    makeChemistryReductionMethods(rhoReactionThermo, constFluidEThermoPhysics);
+    makeChemistryReductionMethods
+    (
+        rhoReactionThermo,
+        constAdiabaticFluidEThermoPhysics
+    );
+    makeChemistryReductionMethods(rhoReactionThermo, constEThermoPhysics);
 }
 
 

@@ -108,6 +108,28 @@ inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::Cp
 
 
 template<class Specie>
+inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::E
+(
+    scalar p,
+    scalar T
+) const
+{
+    return 0;
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::Cv
+(
+    scalar p,
+    scalar T
+) const
+{
+    return 0;
+}
+
+
+template<class Specie>
 inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::S
 (
     scalar p,
@@ -147,7 +169,7 @@ inline Foam::scalar Foam::incompressiblePerfectGas<Specie>::CpMCv
     scalar T
 ) const
 {
-    return this->R();
+    return 0;
 }
 
 

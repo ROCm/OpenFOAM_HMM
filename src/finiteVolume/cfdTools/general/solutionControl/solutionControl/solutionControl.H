@@ -48,7 +48,7 @@ namespace Foam
 
 class solutionControl
 :
-    public IOobject
+    public regIOobject
 {
 public:
 
@@ -122,10 +122,10 @@ protected:
     // Protected Member Functions
 
         //- Read controls from fvSolution dictionary
-        virtual void read(const bool absTolOnly);
+        virtual bool read(const bool absTolOnly);
 
         //- Read controls from fvSolution dictionary
-        virtual void read();
+        virtual bool read();
 
         //- Return index of field in residualControl_ if present
         virtual label applyToField
@@ -170,6 +170,9 @@ protected:
             const bool check = true,
             const bool force = false
         );
+
+        //- Dummy write for regIOobject
+        virtual bool writeData(Ostream&) const;
 
 
 private:

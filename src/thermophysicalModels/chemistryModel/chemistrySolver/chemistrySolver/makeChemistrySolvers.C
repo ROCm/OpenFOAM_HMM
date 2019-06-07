@@ -46,9 +46,19 @@ namespace Foam
     makeChemistrySolverTypes
     (
         psiReactionThermo,
-        incompressibleGasHThermoPhysics)
+        incompressibleGasHThermoPhysics
+    )
     ;
     makeChemistrySolverTypes(psiReactionThermo, icoPoly8HThermoPhysics);
+    makeChemistrySolverTypes(psiReactionThermo, constFluidHThermoPhysics);
+    makeChemistrySolverTypes
+    (
+        psiReactionThermo,
+        constAdiabaticFluidHThermoPhysics
+    );
+    makeChemistrySolverTypes(psiReactionThermo, constHThermoPhysics);
+
+
     makeChemistrySolverTypes(rhoReactionThermo, constGasHThermoPhysics);
     makeChemistrySolverTypes(rhoReactionThermo, gasHThermoPhysics);
     makeChemistrySolverTypes
@@ -62,6 +72,14 @@ namespace Foam
         incompressibleGasHThermoPhysics
     );
     makeChemistrySolverTypes(rhoReactionThermo, icoPoly8HThermoPhysics);
+    makeChemistrySolverTypes(rhoReactionThermo, constFluidHThermoPhysics);
+    makeChemistrySolverTypes
+    (
+        rhoReactionThermo,
+        constAdiabaticFluidHThermoPhysics
+    );
+    makeChemistrySolverTypes(rhoReactionThermo, constHThermoPhysics);
+
 
     // Chemistry solvers based on sensibleInternalEnergy
     makeChemistrySolverTypes(psiReactionThermo, constGasEThermoPhysics);
@@ -77,6 +95,14 @@ namespace Foam
         incompressibleGasEThermoPhysics
     );
     makeChemistrySolverTypes(psiReactionThermo, icoPoly8EThermoPhysics);
+    makeChemistrySolverTypes(psiReactionThermo, constFluidEThermoPhysics);
+    makeChemistrySolverTypes
+    (
+        psiReactionThermo,
+        constAdiabaticFluidEThermoPhysics
+    );
+    makeChemistrySolverTypes(psiReactionThermo, constEThermoPhysics);
+
     makeChemistrySolverTypes(rhoReactionThermo, constGasEThermoPhysics);
     makeChemistrySolverTypes(rhoReactionThermo, gasEThermoPhysics);
     makeChemistrySolverTypes
@@ -90,6 +116,14 @@ namespace Foam
         incompressibleGasEThermoPhysics
     );
     makeChemistrySolverTypes(rhoReactionThermo, icoPoly8EThermoPhysics);
+
+    makeChemistrySolverTypes(rhoReactionThermo, constFluidEThermoPhysics);
+    makeChemistrySolverTypes
+    (
+        rhoReactionThermo,
+        constAdiabaticFluidEThermoPhysics
+    );
+    makeChemistrySolverTypes(rhoReactionThermo, constEThermoPhysics);
 }
 
 

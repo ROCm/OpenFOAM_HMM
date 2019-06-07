@@ -29,6 +29,7 @@ License
 #include "fvOptions.H"
 #include "twoPhaseSystem.H"
 #include "virtualMassModel.H"
+#include "dragModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -122,8 +123,11 @@ void continuousGasKEpsilon<BasicTurbulenceModel>::correctNut()
     const twoPhaseSystem& fluid = refCast<const twoPhaseSystem>(gas.fluid());
     const transportModel& liquid = fluid.otherPhase(gas);
 
+     const virtualMassModel& virtualMass =
+        fluid.lookupSubModel<virtualMassModel>(gas, liquid);
+
     volScalarField thetal(liquidTurbulence.k()/liquidTurbulence.epsilon());
-    volScalarField rhodv(gas.rho() + fluid.virtualMass(gas).Cvm()*liquid.rho());
+    volScalarField rhodv(gas.rho() + virtualMass.Cvm()*liquid.rho());
     volScalarField thetag((rhodv/(18*liquid.rho()*liquid.nu()))*sqr(gas.d()));
     volScalarField expThetar
     (
@@ -206,12 +210,15 @@ continuousGasKEpsilon<BasicTurbulenceModel>::rhoEff() const
     const twoPhaseSystem& fluid = refCast<const twoPhaseSystem>(gas.fluid());
     const transportModel& liquid = fluid.otherPhase(gas);
 
+    const virtualMassModel& virtualMass =
+        fluid.lookupSubModel<virtualMassModel>(gas, liquid);
+
     return tmp<volScalarField>
     (
         new volScalarField
         (
             IOobject::groupName("rhoEff", this->alphaRhoPhi_.group()),
-            gas.rho() + (fluid.virtualMass(gas).Cvm() + 3.0/20.0)*liquid.rho()
+            gas.rho() + (virtualMass.Cvm() + 3.0/20.0)*liquid.rho()
         )
     );
 }

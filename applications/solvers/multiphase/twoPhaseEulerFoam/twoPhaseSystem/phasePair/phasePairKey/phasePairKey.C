@@ -29,6 +29,15 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+
+Foam::phasePairKey::hash::hash()
+{}
+
+
+Foam::phasePairKey::phasePairKey()
+{}
+
+
 Foam::phasePairKey::phasePairKey
 (
     const word& name1,
@@ -41,12 +50,10 @@ Foam::phasePairKey::phasePairKey
 {}
 
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-bool Foam::phasePairKey::ordered() const
-{
-    return ordered_;
-}
+Foam::phasePairKey::~phasePairKey()
+{}
 
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
@@ -65,8 +72,12 @@ Foam::label Foam::phasePairKey::hash::operator()
                 word::hash()(key.second())
             );
     }
-
-    return word::hash()(key.first()) + word::hash()(key.second());
+    else
+    {
+        return
+            word::hash()(key.first())
+          + word::hash()(key.second());
+    }
 }
 
 
@@ -78,13 +89,14 @@ bool Foam::operator==
     const phasePairKey& b
 )
 {
-    const auto cmp = Pair<word>::compare(a,b);
+    const auto c = Pair<word>::compare(a,b);
 
     return
-    (
         (a.ordered_ == b.ordered_)
-     && (a.ordered_ ? (cmp == 1) : cmp)
-    );
+      && (
+            (a.ordered_ && (c == 1))
+         || (!a.ordered_ && (c != 0))
+        );
 }
 
 
@@ -116,11 +128,11 @@ Foam::Istream& Foam::operator>>(Istream& is, phasePairKey& key)
     }
     else
     {
-        FatalErrorInFunction
+         FatalErrorInFunction
             << "Phase pair type is not recognised. "
             << temp
-            << "Use (phaseDispersed in phaseContinuous) for an ordered pair, "
-            << "or (phase1 and phase2) for an unordered pair."
+            << "Use (phaseDispersed in phaseContinuous) for an ordered"
+            << "pair, or (phase1 and pase2) for an unordered pair."
             << exit(FatalError);
     }
 

@@ -245,6 +245,36 @@ Foam::IOobject Foam::IOobject::selectIO
 }
 
 
+Foam::word Foam::IOobject::group(const word& name)
+{
+    word::size_type i = name.find_last_of('.');
+
+    if (i == word::npos || i == 0)
+    {
+        return word::null;
+    }
+    else
+    {
+        return name.substr(i+1, word::npos);
+    }
+}
+
+
+Foam::word Foam::IOobject::member(const word& name)
+{
+    word::size_type i = name.find_last_of('.');
+
+    if (i == word::npos || i == 0)
+    {
+        return name;
+    }
+    else
+    {
+        return name.substr(0, i);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IOobject::IOobject

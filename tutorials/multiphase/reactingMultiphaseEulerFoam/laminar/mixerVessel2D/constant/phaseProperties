@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type heatAndMomentumTransferMultiphaseSystem;
+type basicMultiphaseSystem;
 
 phases (water oil mercury air);
 
@@ -82,6 +82,19 @@ blending
         minFullyContinuousAlpha.air 0.7;
         minPartlyContinuousAlpha.air 0.5;
     }
+/*
+    drag
+    {
+        type            linear;
+        minFullyContinuousAlpha.water 0.7;
+        minPartlyContinuousAlpha.water 0.3;
+        minFullyContinuousAlpha.oil 0.7;
+        minPartlyContinuousAlpha.oil 0.3;
+        minFullyContinuousAlpha.mercury 0.7;
+        minPartlyContinuousAlpha.mercury 0.3;
+        minFullyContinuousAlpha.air 0.7;
+        minPartlyContinuousAlpha.air 0.3;
+    }*/
 }
 
 surfaceTension
@@ -444,6 +457,9 @@ heatTransfer
 );
 
 lift
+();
+
+phaseTransfer
 ();
 
 wallLubrication

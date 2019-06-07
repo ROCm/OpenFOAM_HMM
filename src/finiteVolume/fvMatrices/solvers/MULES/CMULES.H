@@ -40,7 +40,6 @@ Description
     flux used in the bounded-solution.
 
 SourceFiles
-    CMULES.C
     CMULESTemplates.C
 
 \*---------------------------------------------------------------------------*/
@@ -68,13 +67,48 @@ void correct
     const RdeltaTType& rDeltaT,
     const RhoType& rho,
     volScalarField& psi,
-    const surfaceScalarField& phi,
     const surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su
 );
 
+template<class RhoType>
+void correct
+(
+    const RhoType& rho,
+    volScalarField& psi,
+    const surfaceScalarField& phiCorr
+);
+
 template<class RhoType, class SpType, class SuType>
+void correct
+(
+    const RhoType& rho,
+    volScalarField& psi,
+    const surfaceScalarField& phiCorr,
+    const SpType& Sp,
+    const SuType& Su
+);
+
+template<class RhoType, class PsiMaxType, class PsiMinType>
+void correct
+(
+    const RhoType& rho,
+    volScalarField& psi,
+    const surfaceScalarField& phi,
+    surfaceScalarField& phiCorr,
+    const PsiMaxType& psiMax,
+    const PsiMinType& psiMin
+);
+
+template
+<
+    class RhoType,
+    class SpType,
+    class SuType,
+    class PsiMaxType,
+    class PsiMinType
+>
 void correct
 (
     const RhoType& rho,
@@ -83,20 +117,19 @@ void correct
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin
+    const PsiMaxType& psiMax,
+    const PsiMinType& psiMin
 );
 
-void correct
-(
-    volScalarField& psi,
-    const surfaceScalarField& phi,
-    surfaceScalarField& phiCorr,
-    const scalar psiMax,
-    const scalar psiMin
-);
-
-template<class RdeltaTType, class RhoType, class SpType, class SuType>
+template
+<
+    class RdeltaTType,
+    class RhoType,
+    class SpType,
+    class SuType,
+    class PsiMaxType,
+    class PsiMinType
+>
 void limiterCorr
 (
     scalarField& allLambda,
@@ -107,11 +140,20 @@ void limiterCorr
     const surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin
+    const PsiMaxType& psiMax,
+    const PsiMinType& psiMin
 );
 
-template<class RdeltaTType, class RhoType, class SpType, class SuType>
+
+template
+<
+    class RdeltaTType,
+    class RhoType,
+    class SpType,
+    class SuType,
+    class PsiMaxType,
+    class PsiMinType
+>
 void limitCorr
 (
     const RdeltaTType& rDeltaT,
@@ -121,8 +163,8 @@ void limitCorr
     surfaceScalarField& phiCorr,
     const SpType& Sp,
     const SuType& Su,
-    const scalar psiMax,
-    const scalar psiMin
+    const PsiMaxType& psiMax,
+    const PsiMinType& psiMin
 );
 
 

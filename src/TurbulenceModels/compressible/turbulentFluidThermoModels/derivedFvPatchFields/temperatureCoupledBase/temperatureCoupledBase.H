@@ -38,6 +38,7 @@ Description
       - 'directionalSolidThermo': uses look up for volSymmTensorField for
         transformed kappa vector. Field name definable in 'alphaAni',
         named 'Anialpha' in solid solver by default
+      - 'phaseSystem' : used for multiphase thermos
 
     \par Keywords provided by this class:
       \table
@@ -143,6 +144,9 @@ public:
         );
 
 
+    //- Destructor
+    virtual ~temperatureCoupledBase();
+
     // Member functions
 
         //- Method to obtain K
@@ -158,7 +162,7 @@ public:
         }
 
         //- Given patch temperature calculate corresponding K field
-        tmp<scalarField> kappa(const scalarField& Tp) const;
+        virtual tmp<scalarField> kappa(const scalarField& Tp) const;
 
         //- Write
         void write(Ostream&) const;
