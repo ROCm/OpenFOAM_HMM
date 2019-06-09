@@ -9,7 +9,7 @@ source /installation/path/OpenFOAM-v1906/etc/bashrc
 
 ## Preliminaries
 
-The [third-party][link third-party] directory includes a
+The [third-party][repo third] directory includes a
 [readme][link third-readme] and additional information about
 [requirements][link third-require] and a more detailed
 [build guide][link third-build].
@@ -120,15 +120,16 @@ More details in the [ThirdParty build guide][link third-build].
 
 <!-- OpenFOAM -->
 
+[repo openfoam]: https://develop.openfoam.com/Development/OpenFOAM-plus/
+[repo third]: https://develop.openfoam.com/Development/ThirdParty-plus/
+
 [link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/BuildIssues.txt
-[link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/BUILD.md
 [link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/etc/README.md
+[link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
+[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/BUILD.md
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/Requirements.md
-[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
-
-[link third-party]: https://develop.openfoam.com/Development/ThirdParty-plus/
 
 ---
 Copyright 2019 OpenCFD Ltd

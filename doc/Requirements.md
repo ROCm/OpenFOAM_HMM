@@ -156,12 +156,13 @@ A partial list is given in the [ThirdParty requirements][link third-require].
 
 <!-- OpenFOAM -->
 
-[link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/BUILD.md
+[link openfoam-readme]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/README.md
 [link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/etc/README.md
+[link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
+[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/BUILD.md
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/Requirements.md
-[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
 
 ---
 Copyright 2019 OpenCFD Ltd

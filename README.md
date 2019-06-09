@@ -33,16 +33,14 @@ Please see the relevant guides:
 [repo openfoam]: https://develop.openfoam.com/Development/OpenFOAM-plus/
 [repo third]: https://develop.openfoam.com/Development/ThirdParty-plus/
 
-[link openfoam-readme]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/README.md
 [link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/BuildIssues.txt
-[link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/BUILD.md
+[link openfoam-readme]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/README.md
 [link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/etc/README.md
+[link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
+[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/BUILD.md
 [link third-require]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/Requirements.md
-[link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
-
-[link third-party]: https://develop.openfoam.com/Development/ThirdParty-plus/
 
 
 # Useful Links
