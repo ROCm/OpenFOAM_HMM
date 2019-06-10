@@ -51,7 +51,9 @@ boundaryField
 
     outlet
     {
-        type            zeroGradient;
+         type            inletOutlet;
+        inletValue      uniform 300;
+        value           uniform 300;
     }
 
     frontAndBack_pos

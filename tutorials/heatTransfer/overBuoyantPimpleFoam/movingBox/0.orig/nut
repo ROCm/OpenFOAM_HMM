@@ -11,41 +11,38 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      k;
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [0 2 -1 0 0 0 0];
 
 
-internalField   uniform 0.01;
+internalField   uniform 0;
 
 boundaryField
 {
-    overset1
-    {
-        type            overset;
-        value           uniform 0.01;
-    }
+    #includeEtc "caseDicts/setConstraintTypes"
+
     walls
     {
-        type            kqRWallFunction;
-        value           uniform 0.01;
+        type            nutkWallFunction;
+        value           uniform 0;
     }
     inlet
     {
-        type            kqRWallFunction;
-        value           uniform 0.01;
+        type            nutkWallFunction;
+        value           uniform 0;
     }
     outlet
     {
-        type            kqRWallFunction;
-        value           uniform 0.01;
+        type            nutkWallFunction;
+        value           uniform 0;
     }
     hole
     {
-        type            kqRWallFunction;
-        value           uniform 0.01;
+        type            nutkWallFunction;
+        value           uniform 0;
     }
     frontAndBack
     {

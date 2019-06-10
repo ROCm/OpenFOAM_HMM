@@ -11,37 +11,38 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      zoneID;
+    object      p_rgh;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 0 0 0 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
 
-internalField   uniform 0; 
+internalField   uniform 100000;
 
 boundaryField
 {
-    overset1
-    {
-        type            overset;
-        value           uniform 1;
-    }
+    #includeEtc "caseDicts/setConstraintTypes"
+
     walls
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        value           uniform 100000;
     }
     inlet
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        value           uniform 100000;
     }
     outlet
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        value           uniform 100000;
     }
     hole
     {
-        type            zeroGradient;
+        type            fixedFluxPressure;
+        value           uniform 100000;
     }
     frontAndBack
     {

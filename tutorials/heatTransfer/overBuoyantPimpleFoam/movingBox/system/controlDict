@@ -9,52 +9,52 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
-    location    "0";
-    object      U;
+    class       dictionary;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 1 -1 0 0 0 0];
+libs            ("liboverset.so" "libfvMotionSolvers.so");
 
-
-internalField   uniform (0 0 0);
-
-boundaryField
+DebugSwitches
 {
-    overset1
-    {
-        type            overset;
-    }
-    walls
-    {
-        type            uniformFixedValue;
-        uniformValue    uniform (0 0 0);
-    }
-    inlet
-    {
-        type            uniformFixedValue;
-        uniformValue    uniform (0 0 0);
-    }
-    outlet
-    {
-        type            uniformFixedValue;
-        uniformValue    uniform (0 0 0);
-    }
-    hole
-    {
-        type            movingWallVelocity;
-        value           uniform (0 0 0);
-    }
-    frontAndBack
-    {
-        type            empty;
-    }
-    frontAndBack1
-    {
-        type            empty;
-    }
+    overset                 0;
+    dynamicOversetFvMesh    0;
+    cellVolumeWeight        0;
 }
 
+application     overBuoyantPimpleDyMFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         1.5;
+
+deltaT          0.001;
+
+writeControl    adjustableRunTime;
+
+writeInterval   0.02;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  10;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+adjustTimeStep  yes;
+
+maxCo          0.5;
 
 // ************************************************************************* //

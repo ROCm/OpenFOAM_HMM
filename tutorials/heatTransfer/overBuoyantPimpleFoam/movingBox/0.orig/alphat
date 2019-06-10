@@ -22,11 +22,8 @@ internalField   uniform 0;
 
 boundaryField
 {
-    overset1
-    {
-        type            overset;
-        value           uniform 0;
-    }
+    #includeEtc "caseDicts/setConstraintTypes"
+
     walls
     {
         type            compressible::alphatWallFunction;
