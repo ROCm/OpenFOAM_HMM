@@ -95,7 +95,7 @@ Foam::wallBoilingModels::CHFModels::Zuber::CHF
     return
         Cn_*rhoVapor*L*pow
         (
-            sigma*mag(g.value())*(max(rhoLiq - rhoVapor, 0.0)/sqr(rhoVapor)),
+            sigma*mag(g.value())*(max(rhoLiq - rhoVapor, Zero)/sqr(rhoVapor)),
             0.25
         );
 }
