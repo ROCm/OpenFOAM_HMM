@@ -98,7 +98,7 @@ export WM_COMPILE_OPTION=Opt
 # = SYSTEMOPENMPI | OPENMPI | SYSTEMMPI | MPI | MPICH | MPICH-GM |
 #   HPMPI | CRAY-MPICH | FJMPI | QSMPI | SGIMPI | INTELMPI | USERMPI
 # Also possible to use INTELMPI-xyz etc and define your own wmake rule
-export WM_MPLIB=OPENMPI
+export WM_MPLIB=SYSTEMOPENMPI
 
 
 #------------------------------------------------------------------------------
