@@ -137,6 +137,42 @@ Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::Hc() const
 
 template<class ThermophysicalProperties>
 inline Foam::scalar
+Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::Cv
+(
+    scalar p,
+    scalar T
+) const
+{
+    return propertiesPtr_->Cp(p, T) - CpMCv(p, T);
+}
+
+
+template<class ThermophysicalProperties>
+inline Foam::scalar
+Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::Es
+(
+    scalar p,
+    scalar T
+) const
+{
+    return propertiesPtr_->Hs(p, T) - p/propertiesPtr_->rho(p, T);
+}
+
+
+template<class ThermophysicalProperties>
+inline Foam::scalar
+Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::Ea
+(
+    scalar p,
+    scalar T
+) const
+{
+    return propertiesPtr_->Ha(p, T) - p/propertiesPtr_->rho(p, T);
+}
+
+
+template<class ThermophysicalProperties>
+inline Foam::scalar
 Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::S
 (
     scalar p,

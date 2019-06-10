@@ -235,7 +235,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
 {
     Info<< "    processing " << title << " for frequency " << freq << endl;
 
-    const fileName outDir(outDirBase/Foam::name(freq));
+    const instant freqInst(freq, Foam::name(freq));
 
     if (Pstream::parRun())
     {
@@ -277,16 +277,20 @@ Foam::scalar surfaceNoise::writeSurfaceData
 
             if (writeSurface)
             {
+                // Time-aware, with time spliced into the output path
+                writerPtr_->beginTime(freqInst);
+
                 writerPtr_->open
                 (
                     surf.points(),
                     surf.surfFaces(),
-                    (outDir / fName),
+                    (outDirBase / fName),
                     false  // serial - already merged
                 );
 
                 writerPtr_->write(title, allData);
 
+                writerPtr_->endTime();
                 writerPtr_->clear();
             }
 
@@ -304,16 +308,20 @@ Foam::scalar surfaceNoise::writeSurfaceData
 
         if (writeSurface)
         {
+            // Time-aware, with time spliced into the output path
+            writerPtr_->beginTime(freqInst);
+
             writerPtr_->open
             (
                 surf.points(),
                 surf.surfFaces(),
-                (outDir / fName),
+                (outDirBase / fName),
                 false  // serial - already merged
             );
 
             writerPtr_->write(title, data);
 
+            writerPtr_->endTime();
             writerPtr_->clear();
         }
 
@@ -441,6 +449,9 @@ bool surfaceNoise::read(const dictionary& dict)
             writerType,
             dict.subOrEmptyDict("writeOptions").subOrEmptyDict(writerType)
         );
+
+        // Use outputDir/TIME/surface-name
+        writerPtr_->useTimeDir() = true;
 
         return true;
     }

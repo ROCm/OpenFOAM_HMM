@@ -490,6 +490,22 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::kappa
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::alphahe() const
+{
+    NotImplemented;
+    return nullptr;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::alphahe
+(
+    const label patchi
+) const
+{
+    NotImplemented;
+    return nullptr;
+}
+
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::kappaEff
 (
     const volScalarField& kappat

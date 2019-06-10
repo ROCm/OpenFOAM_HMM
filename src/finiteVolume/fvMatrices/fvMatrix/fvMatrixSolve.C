@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -28,6 +28,7 @@ License
 #include "LduMatrix.H"
 #include "diagTensorField.H"
 #include "profiling.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -173,25 +174,30 @@ Foam::SolverPerformance<Type> Foam::fvMatrix<Type>::solveSegregated
         // Use the initMatrixInterfaces and updateMatrixInterfaces to correct
         // bouCoeffsCmpt for the explicit part of the coupled boundary
         // conditions
-        initMatrixInterfaces
-        (
-            true,
-            bouCoeffsCmpt,
-            interfaces,
-            psiCmpt,
-            sourceCmpt,
-            cmpt
-        );
+        {
+            PrecisionAdaptor<solveScalar, scalar> sourceCmpt_ss(sourceCmpt);
+            ConstPrecisionAdaptor<solveScalar, scalar> psiCmpt_ss(psiCmpt);
 
-        updateMatrixInterfaces
-        (
-            true,
-            bouCoeffsCmpt,
-            interfaces,
-            psiCmpt,
-            sourceCmpt,
-            cmpt
-        );
+            initMatrixInterfaces
+            (
+                true,
+                bouCoeffsCmpt,
+                interfaces,
+                psiCmpt_ss(),
+                sourceCmpt_ss.ref(),
+                cmpt
+            );
+
+            updateMatrixInterfaces
+            (
+                true,
+                bouCoeffsCmpt,
+                interfaces,
+                psiCmpt_ss(),
+                sourceCmpt_ss.ref(),
+                cmpt
+            );
+        }
 
         solverPerformance solverPerf;
 

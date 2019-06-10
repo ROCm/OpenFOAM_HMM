@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -27,6 +27,8 @@ License
 
 #include "DICSmoother.H"
 #include "DICPreconditioner.H"
+#include "PrecisionAdaptor.H"
+#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -58,8 +60,11 @@ Foam::DICSmoother::DICSmoother
         interfaceIntCoeffs,
         interfaces
     ),
-    rD_(matrix_.diag())
+    rD_(matrix_.diag().size())
 {
+    const scalarField& diag = matrix_.diag();
+    std::copy(diag.begin(), diag.end(), rD_.begin());
+
     DICPreconditioner::calcReciprocalD(rD_, matrix_);
 }
 
@@ -68,13 +73,13 @@ Foam::DICSmoother::DICSmoother
 
 void Foam::DICSmoother::smooth
 (
-    scalarField& psi,
+    solveScalarField& psi,
     const scalarField& source,
     const direction cmpt,
     const label nSweeps
 ) const
 {
-    const scalar* const __restrict__ rDPtr = rD_.begin();
+    const solveScalar* const __restrict__ rDPtr = rD_.begin();
     const scalar* const __restrict__ upperPtr = matrix_.upper().begin();
     const label* const __restrict__ uPtr =
         matrix_.lduAddr().upperAddr().begin();
@@ -82,8 +87,8 @@ void Foam::DICSmoother::smooth
         matrix_.lduAddr().lowerAddr().begin();
 
     // Temporary storage for the residual
-    scalarField rA(rD_.size());
-    scalar* __restrict__ rAPtr = rA.begin();
+    solveScalarField rA(rD_.size());
+    solveScalar* __restrict__ rAPtr = rA.begin();
 
     for (label sweep=0; sweep<nSweeps; sweep++)
     {
@@ -97,24 +102,45 @@ void Foam::DICSmoother::smooth
             cmpt
         );
 
-        rA *= rD_;
+        forAll(rA, i)
+        {
+            rA[i] *= rD_[i];
+        }
 
-        label nFaces = matrix_.upper().size();
+        const label nFaces = matrix_.upper().size();
         for (label facei=0; facei<nFaces; facei++)
         {
-            label u = uPtr[facei];
+            const label u = uPtr[facei];
             rAPtr[u] -= rDPtr[u]*upperPtr[facei]*rAPtr[lPtr[facei]];
         }
 
-        label nFacesM1 = nFaces - 1;
+        const label nFacesM1 = nFaces - 1;
         for (label facei=nFacesM1; facei>=0; facei--)
         {
-            label l = lPtr[facei];
+            const label l = lPtr[facei];
             rAPtr[l] -= rDPtr[l]*upperPtr[facei]*rAPtr[uPtr[facei]];
         }
 
         psi += rA;
     }
+}
+
+
+void Foam::DICSmoother::scalarSmooth
+(
+    solveScalarField& psi,
+    const solveScalarField& source,
+    const direction cmpt,
+    const label nSweeps
+) const
+{
+    smooth
+    (
+        psi,
+        ConstPrecisionAdaptor<scalar, solveScalar>(source),
+        cmpt,
+        nSweeps
+    );
 }
 
 

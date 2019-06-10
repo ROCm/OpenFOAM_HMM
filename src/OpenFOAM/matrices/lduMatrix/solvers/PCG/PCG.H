@@ -93,6 +93,14 @@ public:
     // Member Functions
 
         //- Solve the matrix with this solver
+        virtual solverPerformance scalarSolve
+        (
+            solveScalarField& psi,
+            const solveScalarField& source,
+            const direction cmpt=0
+        ) const;
+
+        //- Solve the matrix with this solver
         virtual solverPerformance solve
         (
             scalarField& psi,

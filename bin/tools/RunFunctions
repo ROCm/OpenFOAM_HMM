@@ -179,13 +179,13 @@ getApplication()
 #
 runApplication()
 {
-    local appRun logFile logMode
+    local appName appRun logFile logMode
 
     # Any additional parsed arguments (eg, decomposeParDict)
     local appArgs
 
     # Parse options until executable is encountered
-    while [ $# -gt 0 -a -z "$appRun" ]
+    while [ "$#" -gt 0 ] && [ -z "$appRun" ]
     do
         case "$1" in
             -a | -append)
@@ -211,10 +211,10 @@ runApplication()
         shift
     done
 
-    local appName="${appRun##*/}"
+    appName="${appRun##*/}"
     logFile="log.$appName$logFile"
 
-    if [ -f "$logFile" -a -z "$logMode" ]
+    if [ -f "$logFile" ] && [ -z "$logMode" ]
     then
         echo "$appName already run on $PWD:" \
              "remove log file '$logFile' to re-run"
@@ -236,7 +236,7 @@ runApplication()
 #
 runParallel()
 {
-    local appRun logFile logMode nProcs
+    local appName appRun logFile logMode nProcs
 
     # Any additional parsed arguments (eg, decomposeParDict)
     local appArgs="-parallel"
@@ -248,7 +248,7 @@ runParallel()
     fi
 
     # Parse options until executable is encountered
-    while [ $# -gt 0 -a -z "$appRun" ]
+    while [ "$#" -gt 0 ] && [ -z "$appRun" ]
     do
         case "$1" in
             -a | -append)
@@ -281,23 +281,24 @@ runParallel()
 
     [ -n "$nProcs" ] || nProcs=$(getNumberOfProcessors system/decomposeParDict)
 
-    local appName="${appRun##*/}"
+    appName="${appRun##*/}"
     logFile="log.$appName$logFile"
 
-    if [ -f "$logFile" -a -z "$logMode" ]
+    if [ -f "$logFile" ] && [ -z "$logMode" ]
     then
         echo "$appName already run on $PWD:" \
              "remove log file '$logFile' to re-run"
     else
         echo "Running $appRun ($nProcs processes) on $PWD "
+        # Options '-n' and '-np' are synonymous, but msmpi only supports '-n'
         if [ "$logMode" = append ]
         then
         (
-            $mpirun -np $nProcs $appRun $appArgs "$@" </dev/null >> $logFile 2>&1
+            $mpirun -n $nProcs $appRun $appArgs "$@" </dev/null >> $logFile 2>&1
         )
         else
         (
-            $mpirun -np $nProcs $appRun $appArgs "$@" </dev/null > $logFile 2>&1
+            $mpirun -n $nProcs $appRun $appArgs "$@" </dev/null > $logFile 2>&1
         )
         fi
     fi

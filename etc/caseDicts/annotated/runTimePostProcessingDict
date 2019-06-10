@@ -173,8 +173,8 @@ surfaces
             visible         no;
             position        (0.8 0.1);
             vertical        yes;
-            fontSize        16;
-            titleSize       18;
+            // fontSize        0;  // automatic sizing
+            // titleSize       0;  // automatic sizing
             title           "velocity [m/s]";
             labelFormat     "%6.2f";
             numberOfLabels  5;

@@ -16,6 +16,5 @@ FoamFile
 
 TSat             TSat       [0 0 0 1 0]    366;   // saturation temperature
 
-pDivU            false;
 
 // ************************************************************************* //

@@ -1,0 +1,15 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+wclean libso reactingEulerFoam/phaseSystems
+wclean libso reactingEulerFoam/interfacialModels
+wclean libso reactingEulerFoam/interfacialCompositionModels
+wclean libso reactingEulerFoam/derivedFvPatchFields
+
+wclean libso reactingEulerFoam/reactingMultiphaseEulerFoam/multiphaseSystem
+wclean libso reactingEulerFoam/reactingMultiphaseEulerFoam/multiphaseCompressibleTurbulenceModels
+
+wclean libso reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseSystem
+wclean libso reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseCompressibleTurbulenceModels
+
+#------------------------------------------------------------------------------

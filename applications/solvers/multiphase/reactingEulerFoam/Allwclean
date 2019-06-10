@@ -1,10 +1,8 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
 
-wclean libso phaseSystems
-wclean libso interfacialModels
-wclean libso interfacialCompositionModels
-reactingTwoPhaseEulerFoam/Allwclean
-reactingMultiphaseEulerFoam/Allwclean
+wclean reactingTwoPhaseEulerFoam
+wclean reactingMultiphaseEulerFoam
+wclean libso functionObjects
 
 #------------------------------------------------------------------------------

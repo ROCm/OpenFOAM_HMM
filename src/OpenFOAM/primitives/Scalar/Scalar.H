@@ -52,8 +52,12 @@ public:
     //- Component type
     typedef Scalar cmptType;
 
+    //- Magnitude type
+    typedef Scalar magType;
+
     //- Equivalent type of labels used for valid component indexing
     typedef label labelType;
+
 
 
     // Member constants

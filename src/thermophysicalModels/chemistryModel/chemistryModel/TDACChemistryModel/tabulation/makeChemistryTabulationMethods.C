@@ -50,6 +50,14 @@ namespace Foam
         incompressibleGasHThermoPhysics
     );
     makeChemistryTabulationMethods(psiReactionThermo, icoPoly8HThermoPhysics);
+    makeChemistryTabulationMethods(psiReactionThermo, constFluidHThermoPhysics);
+    makeChemistryTabulationMethods
+    (
+        psiReactionThermo,
+        constAdiabaticFluidHThermoPhysics
+    );
+    makeChemistryTabulationMethods(psiReactionThermo, constHThermoPhysics);
+
 
     makeChemistryTabulationMethods(rhoReactionThermo, constGasHThermoPhysics);
 
@@ -65,6 +73,14 @@ namespace Foam
         incompressibleGasHThermoPhysics
     );
     makeChemistryTabulationMethods(rhoReactionThermo, icoPoly8HThermoPhysics);
+    makeChemistryTabulationMethods(rhoReactionThermo, constFluidHThermoPhysics);
+    makeChemistryTabulationMethods
+    (
+        rhoReactionThermo,
+        constAdiabaticFluidHThermoPhysics
+    );
+    makeChemistryTabulationMethods(rhoReactionThermo, constHThermoPhysics);
+
 
     // Chemistry solvers based on sensibleInternalEnergy
 
@@ -82,6 +98,14 @@ namespace Foam
         incompressibleGasEThermoPhysics
     );
     makeChemistryTabulationMethods(psiReactionThermo, icoPoly8EThermoPhysics);
+    makeChemistryTabulationMethods(psiReactionThermo, constFluidEThermoPhysics);
+    makeChemistryTabulationMethods
+    (
+        psiReactionThermo,
+        constAdiabaticFluidEThermoPhysics
+    );
+    makeChemistryTabulationMethods(psiReactionThermo, constEThermoPhysics);
+
 
     makeChemistryTabulationMethods(rhoReactionThermo, constGasEThermoPhysics);
 
@@ -97,6 +121,14 @@ namespace Foam
         incompressibleGasEThermoPhysics
     );
     makeChemistryTabulationMethods(rhoReactionThermo, icoPoly8EThermoPhysics);
+    makeChemistryTabulationMethods(rhoReactionThermo, constFluidEThermoPhysics);
+    makeChemistryTabulationMethods
+    (
+        rhoReactionThermo,
+        constAdiabaticFluidEThermoPhysics
+    );
+    makeChemistryTabulationMethods(rhoReactionThermo, constEThermoPhysics);
+
 }
 
 

@@ -1,0 +1,41 @@
+EXE_INC = \
+    -I.  \
+    -I.. \
+    -I$(FOAM_SOLVERS)/multiphase/reactingEulerFoam/reactingTwoPhaseEulerFoam \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseSystem/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseCompressibleTurbulenceModels/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/phaseSystems/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/interfacialModels/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/interfacialCompositionModels/lnInclude \
+    -I./fluid \
+    -I../solid \
+    -I../fluid \
+    -I../include \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/solidThermo/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/phaseCompressible/lnInclude \
+    -I$(LIB_SRC)/regionModels/regionModel/lnInclude
+
+
+EXE_LIBS = \
+    -lcompressibleTransportModels \
+    -lfluidThermophysicalModels \
+    -lspecie \
+    -lsolidThermo \
+    -ltwoPhaseReactingTurbulenceModels \
+    -lmeshTools \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lradiationModels \
+    -lregionModels \
+    -lsampling \
+    -lreactingTwoPhaseSystem \
+

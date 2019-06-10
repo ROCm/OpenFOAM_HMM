@@ -257,7 +257,7 @@ sqr(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
 template<class Type, template<class> class PatchField, class GeoMesh>
 void magSqr
 (
-    GeometricField<scalar, PatchField, GeoMesh>& gsf,
+    GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>& gsf,
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
@@ -268,13 +268,16 @@ void magSqr
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
+tmp<GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>>
+magSqr
 (
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     auto tres =
-        tmp<GeometricField<scalar, PatchField, GeoMesh>>::New
+        tmp<GeometricField<magType, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -294,30 +297,13 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
+tmp<GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>>
+magSqr
 (
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 )
 {
-    const GeometricField<Type, PatchField, GeoMesh>& gf = tgf();
-
-    auto tres =
-        tmp<GeometricField<scalar, PatchField, GeoMesh>>::New
-        (
-            IOobject
-            (
-                "magSqr(" + gf.name() + ')',
-                gf.instance(),
-                gf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gf.mesh(),
-            sqr(gf.dimensions())
-        );
-
-    magSqr(tres.ref(), gf);
-
+    auto tres = magSqr(tgf.cref());
     tgf.clear();
 
     return tres;
@@ -327,7 +313,7 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
 template<class Type, template<class> class PatchField, class GeoMesh>
 void mag
 (
-    GeometricField<scalar, PatchField, GeoMesh>& gsf,
+    GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>& gsf,
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
@@ -338,13 +324,16 @@ void mag
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
+tmp<GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>>
+mag
 (
     const GeometricField<Type, PatchField, GeoMesh>& gf
 )
 {
+    typedef typename typeOfMag<Type>::type magType;
+
     auto tres =
-        tmp<GeometricField<scalar, PatchField, GeoMesh>>::New
+        tmp<GeometricField<magType, PatchField, GeoMesh>>::New
         (
             IOobject
             (
@@ -364,30 +353,13 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
 }
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
+tmp<GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>>
+mag
 (
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 )
 {
-    const GeometricField<Type, PatchField, GeoMesh>& gf = tgf();
-
-    auto tres =
-        tmp<GeometricField<scalar, PatchField, GeoMesh>>::New
-        (
-            IOobject
-            (
-                "mag(" + gf.name() + ')',
-                gf.instance(),
-                gf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gf.mesh(),
-            gf.dimensions()
-        );
-
-    mag(tres.ref(), gf);
-
+    auto tres = mag(tgf.cref());
     tgf.clear();
 
     return tres;
@@ -559,7 +531,7 @@ dimensioned<returnType> func                                                   \
 
 UNARY_REDUCTION_FUNCTION(Type, sum, gSum)
 UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
-UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
+UNARY_REDUCTION_FUNCTION(typename typeOfMag<Type>::type, sumMag, gSumMag)
 
 #undef UNARY_REDUCTION_FUNCTION
 

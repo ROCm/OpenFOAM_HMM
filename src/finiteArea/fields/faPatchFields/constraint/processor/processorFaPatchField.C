@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -189,9 +189,9 @@ Foam::tmp<Foam::Field<Type>> Foam::processorFaPatchField<Type>::snGrad() const
 template<class Type>
 void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction,
     const Pstream::commsTypes commsType
@@ -208,17 +208,17 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
 template<class Type>
 void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField&,
+    const solveScalarField&,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes commsType
 ) const
 {
-    scalarField pnf
+    solveScalarField pnf
     (
-        procPatch_.receive<scalar>(commsType, this->size())()
+        procPatch_.receive<solveScalar>(commsType, this->size())()
     );
 
     // Transform according to the transformation tensor

@@ -131,6 +131,9 @@ public:
         //- Reset the source list
         void reset(const dictionary& dict);
 
+        //- Return whether there is something to apply to the field
+        bool appliesToField(const word& fieldName) const;
+
 
         // Sources
 

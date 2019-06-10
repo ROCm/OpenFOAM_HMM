@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -29,7 +29,7 @@ License
 #include "IOstreams.H"
 #include "Switch.H"
 #include "objectRegistry.H"
-#include "IOField.H"
+#include "scalarIOField.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -319,7 +319,7 @@ const Foam::scalarField& Foam::lduMatrix::upper() const
 
 void Foam::lduMatrix::setResidualField
 (
-    const Field<scalar>& residual,
+    const scalarField& residual,
     const word& fieldName,
     const bool initial
 ) const
@@ -339,8 +339,8 @@ void Foam::lduMatrix::setResidualField
         lookupName = word("residual:" + fieldName);
     }
 
-    IOField<scalar>* residualPtr =
-        lduMesh_.thisDb().getObjectPtr<IOField<scalar>>(lookupName);
+    scalarIOField* residualPtr =
+        lduMesh_.thisDb().getObjectPtr<scalarIOField>(lookupName);
 
     if (residualPtr)
     {

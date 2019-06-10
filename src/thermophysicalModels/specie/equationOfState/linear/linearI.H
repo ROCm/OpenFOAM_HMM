@@ -99,6 +99,19 @@ inline Foam::scalar Foam::linear<Specie>::Cp(scalar p, scalar T) const
     return 0;
 }
 
+template<class Specie>
+inline Foam::scalar Foam::linear<Specie>::E(scalar p, scalar T) const
+{
+    return 0;
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::linear<Specie>::Cv(scalar p, scalar T) const
+{
+    return 0;
+}
+
 
 template<class Specie>
 inline Foam::scalar Foam::linear<Specie>::S(scalar p, scalar T) const

@@ -38,9 +38,10 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::simpleControl::read()
+bool Foam::simpleControl::read()
 {
     solutionControl::read(true);
+    return true;
 }
 
 

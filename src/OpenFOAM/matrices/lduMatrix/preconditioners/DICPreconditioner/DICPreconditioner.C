@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DICPreconditioner.H"
+#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -48,8 +49,11 @@ Foam::DICPreconditioner::DICPreconditioner
 )
 :
     lduMatrix::preconditioner(sol),
-    rD_(sol.matrix().diag())
+    rD_(sol.matrix().diag().size())
 {
+    const scalarField& diag = sol.matrix().diag();
+    std::copy(diag.begin(), diag.end(), rD_.begin());
+
     calcReciprocalD(rD_, sol.matrix());
 }
 
@@ -58,11 +62,11 @@ Foam::DICPreconditioner::DICPreconditioner
 
 void Foam::DICPreconditioner::calcReciprocalD
 (
-    scalarField& rD,
+    solveScalarField& rD,
     const lduMatrix& matrix
 )
 {
-    scalar* __restrict__ rDPtr = rD.begin();
+    solveScalar* __restrict__ rDPtr = rD.begin();
 
     const label* const __restrict__ uPtr = matrix.lduAddr().upperAddr().begin();
     const label* const __restrict__ lPtr = matrix.lduAddr().lowerAddr().begin();
@@ -88,14 +92,14 @@ void Foam::DICPreconditioner::calcReciprocalD
 
 void Foam::DICPreconditioner::precondition
 (
-    scalarField& wA,
-    const scalarField& rA,
+    solveScalarField& wA,
+    const solveScalarField& rA,
     const direction
 ) const
 {
-    scalar* __restrict__ wAPtr = wA.begin();
-    const scalar* __restrict__ rAPtr = rA.begin();
-    const scalar* __restrict__ rDPtr = rD_.begin();
+    solveScalar* __restrict__ wAPtr = wA.begin();
+    const solveScalar* __restrict__ rAPtr = rA.begin();
+    const solveScalar* __restrict__ rDPtr = rD_.begin();
 
     const label* const __restrict__ uPtr =
         solver_.matrix().lduAddr().upperAddr().begin();
@@ -104,9 +108,9 @@ void Foam::DICPreconditioner::precondition
     const scalar* const __restrict__ upperPtr =
         solver_.matrix().upper().begin();
 
-    label nCells = wA.size();
-    label nFaces = solver_.matrix().upper().size();
-    label nFacesM1 = nFaces - 1;
+    const label nCells = wA.size();
+    const label nFaces = solver_.matrix().upper().size();
+    const label nFacesM1 = nFaces - 1;
 
     for (label cell=0; cell<nCells; cell++)
     {

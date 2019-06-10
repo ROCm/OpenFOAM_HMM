@@ -59,7 +59,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
     }
     else
     {
-        ITstream& is = dict.lookup(entryName, false);
+        ITstream& is = dict.lookup(entryName, keyType::LITERAL);
 
         token firstToken(is);
 

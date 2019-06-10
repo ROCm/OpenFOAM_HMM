@@ -19,7 +19,8 @@ solvers
 {
     "alpha.*"
     {
-        nAlphaSubCycles 2;
+        nAlphaCorr       1;
+        nAlphaSubCycles  2;
     }
 
     p_rgh
@@ -32,6 +33,7 @@ solvers
 
     p_rghFinal
     {
+        $p_rgh;
         solver          PCG;
         preconditioner
         {
@@ -76,8 +78,9 @@ solvers
 PIMPLE
 {
     nOuterCorrectors     1;
-    nCorrectors     3;
+    nCorrectors          3;
     nNonOrthogonalCorrectors 0;
+    faceMomentum         false;
 
     pRefCell        0;
     pRefValue       0;

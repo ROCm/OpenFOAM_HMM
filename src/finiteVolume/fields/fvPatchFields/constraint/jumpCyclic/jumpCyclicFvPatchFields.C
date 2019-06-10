@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -41,21 +41,25 @@ namespace Foam
 template<>
 void Foam::jumpCyclicFvPatchField<Foam::scalar>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes
 ) const
 {
-    scalarField pnf(this->size());
+    solveScalarField pnf(this->size());
 
     const labelUList& nbrFaceCells =
         this->cyclicPatch().neighbFvPatch().faceCells();
 
     // only apply jump to original field
-    if (&psiInternal == &this->primitiveField())
+    if
+    (
+        reinterpret_cast<const void*>(&psiInternal)
+     == reinterpret_cast<const void*>(&this->primitiveField())
+    )
     {
         Field<scalar> jf(this->jump());
 
@@ -88,15 +92,15 @@ void Foam::jumpCyclicFvPatchField<Foam::scalar>::updateInterfaceMatrix
 template<>
 void Foam::jumpCyclicFvPatchField<Foam::vector>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes
 ) const
 {
-    scalarField pnf(this->size());
+    solveScalarField pnf(this->size());
 
     const labelUList& nbrFaceCells =
         this->cyclicPatch().neighbFvPatch().faceCells();
@@ -104,7 +108,11 @@ void Foam::jumpCyclicFvPatchField<Foam::vector>::updateInterfaceMatrix
     const Field<vector>& iField = this->primitiveField();
 
     // only apply jump to original field
-    if (&psiInternal == &(iField.component(cmpt).ref()))
+    if
+    (
+        reinterpret_cast<const void*>(&psiInternal)
+     == reinterpret_cast<const void*>(&(iField.component(cmpt).ref()))
+    )
     {
         Field<vector> jf(this->jump());
 

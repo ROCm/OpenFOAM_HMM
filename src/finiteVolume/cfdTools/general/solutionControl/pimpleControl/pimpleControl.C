@@ -37,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::pimpleControl::read()
+bool Foam::pimpleControl::read()
 {
     solutionControl::read(false);
 
@@ -49,6 +49,8 @@ void Foam::pimpleControl::read()
     SIMPLErho_ = pimpleDict.lookupOrDefault("SIMPLErho", false);
     turbOnFinalIterOnly_ =
         pimpleDict.lookupOrDefault("turbOnFinalIterOnly", true);
+
+    return true;
 }
 
 

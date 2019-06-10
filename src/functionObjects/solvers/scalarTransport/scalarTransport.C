@@ -303,7 +303,15 @@ bool Foam::functionObjects::scalarTransport::execute()
 
         if (bounded01_)
         {
-            MULES::explicitSolve(s, phi, tTPhiUD.ref(), 1, 0);
+            MULES::explicitSolve
+            (
+                geometricOneField(),
+                s,
+                phi,
+                tTPhiUD.ref(),
+                oneField(),
+                zeroField()
+            );
         }
     }
     else if (phi.dimensions() == dimMass/dimTime)

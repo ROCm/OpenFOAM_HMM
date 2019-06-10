@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -27,6 +27,7 @@ License
 
 #include "FDICSmoother.H"
 #include "FDICPreconditioner.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -73,8 +74,8 @@ Foam::FDICSmoother::FDICSmoother
     const scalar* const __restrict__ upperPtr =
         matrix_.upper().begin();
 
-    label nCells = rD_.size();
-    label nFaces = matrix_.upper().size();
+    const label nCells = rD_.size();
+    const label nFaces = matrix_.upper().size();
 
     for (label face=0; face<nFaces; face++)
     {
@@ -99,7 +100,7 @@ Foam::FDICSmoother::FDICSmoother
 
 void Foam::FDICSmoother::smooth
 (
-    scalarField& psi,
+    solveScalarField& psi,
     const scalarField& source,
     const direction cmpt,
     const label nSweeps
@@ -114,8 +115,8 @@ void Foam::FDICSmoother::smooth
         matrix_.lduAddr().lowerAddr().begin();
 
     // Temporary storage for the residual
-    scalarField rA(rD_.size());
-    scalar* __restrict__ rAPtr = rA.begin();
+    solveScalarField rA(rD_.size());
+    solveScalar* __restrict__ rAPtr = rA.begin();
 
     for (label sweep=0; sweep<nSweeps; sweep++)
     {
@@ -131,13 +132,13 @@ void Foam::FDICSmoother::smooth
 
         rA *= rD_;
 
-        label nFaces = matrix_.upper().size();
+        const label nFaces = matrix_.upper().size();
         for (label face=0; face<nFaces; face++)
         {
             rAPtr[uPtr[face]] -= rDuUpperPtr[face]*rAPtr[lPtr[face]];
         }
 
-        label nFacesM1 = nFaces - 1;
+        const label nFacesM1 = nFaces - 1;
         for (label face=nFacesM1; face>=0; face--)
         {
             rAPtr[lPtr[face]] -= rDlUpperPtr[face]*rAPtr[uPtr[face]];
@@ -145,6 +146,24 @@ void Foam::FDICSmoother::smooth
 
         psi += rA;
     }
+}
+
+
+void Foam::FDICSmoother::scalarSmooth
+(
+    solveScalarField& psi,
+    const solveScalarField& source,
+    const direction cmpt,
+    const label nSweeps
+) const
+{
+    smooth
+    (
+        psi,
+        ConstPrecisionAdaptor<scalar, solveScalar>(source),
+        cmpt,
+        nSweeps
+    );
 }
 
 

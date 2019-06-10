@@ -504,7 +504,12 @@ Foam::tmp<Foam::Field<Type>> Foam::surfaceWriter::mergeFieldTemplate
         globalIndex::gatherOp(fld, allFld);
 
         // Renumber (point data) to correspond to merged points
-        if (Pstream::master() && this->isPointData())
+        if
+        (
+            Pstream::master()
+         && this->isPointData()
+         && merged_.pointsMap().size()
+        )
         {
             inplaceReorder(merged_.pointsMap(), allFld);
             allFld.resize(merged_.points().size());

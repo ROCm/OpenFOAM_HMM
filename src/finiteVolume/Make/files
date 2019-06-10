@@ -254,7 +254,6 @@ fields/surfaceFields/surfaceFields.C
 fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
 fvMatrices/solvers/MULES/MULES.C
-fvMatrices/solvers/MULES/CMULES.C
 fvMatrices/solvers/isoAdvection/isoCutCell/isoCutCell.C
 fvMatrices/solvers/isoAdvection/isoCutFace/isoCutFace.C
 fvMatrices/solvers/isoAdvection/isoAdvection/isoAdvection.C

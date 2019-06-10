@@ -70,8 +70,6 @@ totalMass
         const volScalarField& rhoLiquid =
             mesh().lookupObject<volScalarField>("thermo:rho.liquid");
 
-        const volScalarField& dmdt =
-            mesh().lookupObject<volScalarField>("dmdt.gasAndLiquid");
 
         const scalarField& v = mesh().V();
 
@@ -79,10 +77,7 @@ totalMass
             << "    volIntegrate(all) for alpha.gas*rho.gas = "
             << gSum(alphaGas*rhoGas*v) << endl
             << "    volIntegrate(all) for alpha.liquid*rho.liquid = "
-            << gSum(alphaLiquid*rhoLiquid*v) << endl
-            << "    volIntegrate(all) for dmdt = "
-            << gSum(dmdt*v) << endl
-            << endl;
+            << gSum(alphaLiquid*rhoLiquid*v) << endl;
     #};
 }
 

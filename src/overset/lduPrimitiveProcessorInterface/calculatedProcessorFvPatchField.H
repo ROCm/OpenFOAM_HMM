@@ -46,8 +46,6 @@ SourceFiles
 #define calculatedProcessorFvPatchField_H
 
 #include "lduPrimitiveProcessorInterface.H"
-//#include "lduInterfaceField.H"
-//#include "fvPatchField.H"
 #include "coupledFvPatchField.H"
 #include "processorLduInterfaceField.H"
 
@@ -82,10 +80,10 @@ protected:
             mutable Field<Type> receiveBuf_;
 
             //- Scalar send buffer
-            mutable Field<scalar> scalarSendBuf_;
+            mutable solveScalarField scalarSendBuf_;
 
             //- Scalar receive buffer
-            mutable Field<scalar> scalarReceiveBuf_;
+            mutable solveScalarField scalarReceiveBuf_;
 
             //- Outstanding request
             mutable label outstandingSendRequest_;
@@ -99,10 +97,10 @@ protected:
 
         void addToInternalField
         (
-            scalarField& result,
+            solveScalarField& result,
             const bool add,
             const scalarField& coeffs,
-            const scalarField& vals
+            const solveScalarField& vals
         ) const;
 
 
@@ -201,24 +199,17 @@ public:
             {
                 return pTraits<Type>::rank;
             }
- 
+
 
         // Access
 
-            //- Return true if this patch field is coupled. Our field supplies
-            //  coefficients to the fvMatrix so should behave as a
-            //  processorFvPatchField (in addBoundarySource it should not add
-            //  to the source)
+            //- Return true if this patch field is coupled.
+            //  Our field supplies coefficients to the fvMatrix so
+            //  should behave as a processorFvPatchField (in
+            //  addBoundarySource it should not add to the source)
             virtual bool coupled() const
             {
-                if (Pstream::parRun())
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return Pstream::parRun();
             }
 
             //- Return neighbour field of internal field
@@ -239,9 +230,9 @@ public:
             //- Initialise neighbour matrix update
             virtual void initInterfaceMatrixUpdate
             (
-                scalarField& result,
+                solveScalarField& result,
                 const bool add,
-                const scalarField& psiInternal,
+                const solveScalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction cmpt,
                 const Pstream::commsTypes commsType
@@ -250,9 +241,9 @@ public:
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
             (
-                scalarField& result,
+                solveScalarField& result,
                 const bool add,
-                const scalarField& psiInternal,
+                const solveScalarField& psiInternal,
                 const scalarField& coeffs,
                 const direction cmpt,
                 const Pstream::commsTypes commsType

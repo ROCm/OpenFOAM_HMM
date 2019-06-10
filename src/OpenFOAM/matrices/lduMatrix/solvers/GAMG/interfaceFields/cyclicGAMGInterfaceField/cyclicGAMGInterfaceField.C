@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -110,16 +110,16 @@ Foam::cyclicGAMGInterfaceField::~cyclicGAMGInterfaceField()
 
 void Foam::cyclicGAMGInterfaceField::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes
 ) const
 {
     // Get neighbouring field
-    scalarField pnf
+    solveScalarField pnf
     (
         cyclicInterface_.neighbPatch().interfaceInternalField(psiInternal)
     );

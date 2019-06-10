@@ -109,7 +109,6 @@ structuredCoeffs
     method      scotch;
 }
 
-
 /*
 constraints
 {
@@ -139,6 +138,7 @@ constraints
     }
 }
 */
+
 
 //// Is the case distributed? Note: command-line argument -roots takes
 //// precedence

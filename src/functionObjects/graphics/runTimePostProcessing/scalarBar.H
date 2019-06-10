@@ -35,7 +35,7 @@ Description
         position    | Viewport position (x y) of scalar bar | yes |
         vertical    | Vertical scalar bar                   | no  | true
         size        | Viewport size (x y) of scalar bar     | no  | auto
-        fontSize    | Label size                            | no  | 12
+        fontSize    | Label size                            | no  | 0 == auto
         titleSize   | Title font size                       | no  | 0 == auto
         labelFormat | Label format string (eg, "%f")        | no  | "%f"
         numberOfLabels | Total number of labels             | no  | 5
@@ -44,6 +44,19 @@ Description
         shadow      | Title with shadowont                  | no  | no
         titleHack   | Alternative placement strategy        | no  | yes
     \endtable
+
+Note
+    The \c titleHack option is a leftover from much older VTK versions
+    that had poor handling of the scalar bar text. When this is active,
+    the normal scalar bar title is suppressed and placed manually
+    (with a predefined ratio of the base font-size).
+
+    When the titleHack is off, the label and title font sizes are
+    automatically defined by the scalar bar size but can be overridden with
+    provided values.
+
+    The effect of fontSize and titleSize is unfortunately not consistent
+    between titleHack on/off.
 
 SourceFiles
     scalarBar.C
@@ -77,6 +90,12 @@ namespace runTimePostPro
 
 class scalarBar
 {
+    //- The default font size when titleHack is on
+    static constexpr const label defaultFontSize = 18;
+
+    //- The auto title/label ratio when titleHack is on
+    static constexpr const float defaultTitleSizeFactor = 1.5;
+
     bool visible_;
     bool vertical_;
     bool bold_;

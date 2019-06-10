@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-type heatAndMomentumTransferTwoPhaseSystem;
+type basicTwoPhaseSystem;
 
 phases (air water);
 
@@ -145,6 +145,10 @@ heatTransfer
 );
 
 lift
+(
+);
+
+phaseTransfer
 (
 );
 

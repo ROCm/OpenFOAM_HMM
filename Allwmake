@@ -24,7 +24,7 @@ command -v mpirun 2>/dev/null || true
 
 echo "========================================"
 date "+%Y-%m-%d %H:%M:%S %z" 2>/dev/null || echo "date is unknown"
-echo "Starting compile ${WM_PROJECT_DIR##*/} ${0##*}"
+echo "Starting compile ${WM_PROJECT_DIR##*/} ${0##*/}"
 echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
 echo "========================================"

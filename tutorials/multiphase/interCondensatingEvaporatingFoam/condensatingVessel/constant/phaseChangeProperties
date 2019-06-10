@@ -18,8 +18,8 @@ phaseChangeTwoPhaseModel constant;
 
 constantCoeffs
 {
-    coeffC          coeffC [0 0 -1 -1 0 0 0] 50;
-    coeffE          coeffE [0 0 -1 -1 0 0 0] 50;
+    coeffC          150;
+    coeffE          150;
 }
 
 

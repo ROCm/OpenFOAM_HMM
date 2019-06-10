@@ -49,25 +49,82 @@ class ConstPrecisionAdaptor
 :
     public tmp<Field<Type>>
 {
+    // Private Member Functions
+
+        //- Copy in field
+        void copyInput(const Field<InputType>& input)
+        {
+            this->clear();
+
+            Field<Type>* p = new Field<Type>(input.size());
+            this->reset(p);
+            std::copy(input.cbegin(), input.cend(), p->begin());
+        }
+
+        //- Construct from tmp Field, copy/move as required
+        void moveInput(tmp<Field<InputType>>& input)
+        {
+            if (std::is_same<Type, InputType>::value)
+            {
+                auto& tinput = reinterpret_cast<tmp<FieldType>&>(input);
+
+                if (tinput.isTmp())
+                {
+                    this->clear();
+                    this->swap(tinput);
+                }
+                else
+                {
+                    this->cref(tinput.cref());
+                }
+            }
+            else
+            {
+                this->copyInput(input());
+            }
+            input.clear();
+        }
+
+
 public:
+
+    //- The adapted field type
+    typedef Field<Type> FieldType;
+
 
     // Constructors
 
-        //- Construct from InputType
+        //- Construct from Field<InputType>, copying on input as required
         ConstPrecisionAdaptor(const Field<InputType>& input)
         :
             tmp<Field<Type>>()
         {
             if (std::is_same<Type, InputType>::value)
             {
-                // Set reference - cast for compiler to handle different types
-                this->cref(reinterpret_cast<const Field<Type>&>(input));
+                this->cref(reinterpret_cast<const FieldType&>(input));
             }
             else
             {
-                this->reset(new Field<Type>(input.size()));
-                std::copy(input.cbegin(), input.cend(), this->ref().begin());
+                this->copyInput(input);
             }
+        }
+
+
+        //- Construct from tmp Field, copy/move as required
+        ConstPrecisionAdaptor(tmp<Field<InputType>>&& input)
+        :
+            tmp<Field<Type>>()
+        {
+            this->moveInput(input);
+        }
+
+
+        //- Construct from tmp Field, copy/move as required
+        ConstPrecisionAdaptor(const tmp<Field<InputType>>& input)
+        :
+            tmp<Field<Type>>()
+        {
+            this->moveInput(const_cast<tmp<Field<InputType>>&>(input));
         }
 
 
@@ -82,7 +139,7 @@ public:
         {
             if (std::is_same<Type, InputType>::value)
             {
-                return reinterpret_cast<const Field<Type>&>(input);
+                return reinterpret_cast<const FieldType&>(input);
             }
             else
             {
@@ -106,7 +163,24 @@ class PrecisionAdaptor
         Field<InputType>& ref_;
 
 
+    // Private Member Functions
+
+        //- Copy in field
+        void copyInput(const Field<InputType>& input)
+        {
+            this->clear();
+
+            Field<Type>* p = new Field<Type>(input.size());
+            this->reset(p);
+            std::copy(input.cbegin(), input.cend(), p->begin());
+        }
+
+
 public:
+
+    //- The adapted field type
+    typedef Field<Type> FieldType;
+
 
     // Constructors
 
@@ -118,13 +192,11 @@ public:
         {
             if (std::is_same<Type, InputType>::value)
             {
-                // Set reference - cast for compiler to handle different types
-                this->cref(reinterpret_cast<const Field<Type>&>(input));
+                this->cref(reinterpret_cast<const FieldType&>(input));
             }
             else
             {
-                this->reset(new Field<Type>(input.size()));
-                std::copy(input.cbegin(), input.cend(), this->ref().begin());
+                this->copyInput(input);
             }
         }
 
@@ -134,11 +206,20 @@ public:
     {
         if (this->isTmp())
         {
-            const Field<Type>& store = this->cref();
+            const FieldType& store = this->cref();
             ref_.resize(store.size());
             std::copy(store.cbegin(), store.cend(), ref_.begin());
         }
     }
+
+
+    // Member Functions
+
+        //- Allow modification without const-ref check
+        FieldType& ref()
+        {
+            return this->constCast();
+        }
 };
 
 

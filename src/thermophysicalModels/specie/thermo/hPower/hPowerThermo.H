@@ -174,6 +174,19 @@ public:
             inline scalar S(const scalar p, const scalar T) const;
 
 
+            #include "HtoEthermo.H"
+
+
+        // Derivative term used for Jacobian
+
+            //- Derivative of Gibbs free energy w.r.t. temperature
+            inline scalar dGdT(const scalar p, const scalar T) const;
+
+            //- Temperature derivative of heat capacity at constant pressure
+            inline scalar dCpdT(const scalar p, const scalar T) const;
+
+
+
     // Member operators
 
         inline void operator+=(const hPowerThermo&);

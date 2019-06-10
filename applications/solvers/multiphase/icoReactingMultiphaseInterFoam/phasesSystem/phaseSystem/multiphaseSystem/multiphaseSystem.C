@@ -414,8 +414,8 @@ void Foam::multiphaseSystem::solve()
                 phiAlphaCorr,
                 Sp,
                 Su,
-                1,
-                0,
+                oneField(),
+                zeroField(),
                 true
             );
             ++phasei;
@@ -485,8 +485,8 @@ void Foam::multiphaseSystem::solve()
                         phiAlpha,
                         (alphaSubCycle.index()*Sp)(),
                         (Su - (alphaSubCycle.index() - 1)*Sp*alpha1)(),
-                        1,
-                        0
+                        oneField(),
+                        zeroField()
                     );
 
                     if (alphaSubCycle.index() == 1)
@@ -511,8 +511,8 @@ void Foam::multiphaseSystem::solve()
                     phiAlpha,
                     Sp,
                     Su,
-                    1,
-                    0
+                    oneField(),
+                    zeroField()
                 );
 
                 phase.alphaPhi() = phiAlpha;
