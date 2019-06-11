@@ -3,9 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
-     \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2018 IH-Cantabria
+     \\/     M anipulation  | Copyright (C) 2018 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +36,8 @@ const Foam::Enum<Foam::waveMakerPointPatchVectorField::motionTypes>
 Foam::waveMakerPointPatchVectorField::motionTypeNames
 ({
     { motionTypes::piston, "piston" },
-    { motionTypes::flap, "flap" }
+    { motionTypes::flap, "flap" },
+    { motionTypes::solitary, "solitary" }
 });
 
 
@@ -60,9 +59,9 @@ const Foam::vector& Foam::waveMakerPointPatchVectorField::g()
 }
 
 
-Foam::scalar Foam::waveMakerPointPatchVectorField::waveLength 
+Foam::scalar Foam::waveMakerPointPatchVectorField::waveLength
 (
-    const scalar h, 
+    const scalar h,
     const scalar T
 )
 {
@@ -104,7 +103,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(0),
     wavePhase_(0),
     waveLength_(0),
-    rampTime_(0),
+    rampTime_(1),
     secondOrder_(false)
 {}
 
@@ -117,7 +116,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict, false),
-    motionType_(motionTypeNames.get("motionType", dict)),
+    motionType_(motionTypeNames.lookup("motionType", dict)),
     n_(dict.get<vector>("n")),
     gHat_(Zero),
     initialDepth_(dict.get<scalar>("initialDepth")),
@@ -216,7 +215,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
 
             if (secondOrder_)
             {
-                motionX += 
+                motionX +=
                     sqr(waveHeight_)/(16*initialDepth_)
                    *(3*cosh(kh)/pow3(sinh(kh)) - 2/m1)
                    *sin(2*sigma*t);
@@ -240,13 +239,61 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
 
             if (secondOrder_)
             {
-                motionX += 
+                motionX +=
                     sqr(waveHeight_)
                    /(32*initialDepth_)*(3*cosh(kh)
                    /pow3(sinh(kh)) - 2/m1);
             }
 
             Field<vector>::operator=(n_*timeCoeff(t)*motionX);
+
+            break;
+        }
+        case motionTypes::solitary:
+        {
+        const scalar kappa_ = sqrt(3.0/4.0*waveHeight_/(pow(initialDepth_,3)));
+            const scalar waveCelerity_ = sqrt(mag(g())*(initialDepth_+waveHeight_));
+            const scalar stroke_ = sqrt(16.0*waveHeight_*initialDepth_/3.0);
+            wavePeriod_ = (2.0 / ( kappa_*waveCelerity_ ))*(3.8 + waveHeight_/
+                    initialDepth_);
+
+            scalar motionX = 0;
+            const scalar error=0.001;
+
+       if (onlyFirst==0)
+       {
+               tAux =  -wavePeriod_/2.0 + (t-tOld);
+       }
+       else
+           {
+           tAux =  tAuxOld + (t-tOld);
+       }
+
+        //Newton-Rapshon
+            scalar theta1OF=0;
+            scalar theta2OF=0;
+            scalar er=10000;
+            while (er>error)
+        {
+                    theta2OF = theta1OF - (theta1OF - kappa_*waveCelerity_*tAux
+            + (waveHeight_/initialDepth_)*tanh(theta1OF) )
+                        / ( 1.0 + (waveHeight_/initialDepth_)*(1.0/cosh(theta1OF))*(1.0/cosh(theta1OF)));
+
+                    er=fabs(theta1OF-theta2OF);
+                    theta1OF=theta2OF;
+            }
+
+            motionX = waveHeight_ / (kappa_*initialDepth_)*tanh(theta1OF) + stroke_/2.0;
+
+            if (tAux != 0)
+            {
+                onlyFirst = 1;
+            }
+
+            tOld =  t;
+            tAuxOld = tAux;
+
+            Field<vector>::operator=(n_*motionX);
 
             break;
         }
@@ -257,7 +304,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
                 << abort(FatalError);
         }
     }
-        
+
 
     fixedValuePointPatchField<vector>::updateCoeffs();
 }
