@@ -153,7 +153,7 @@ public:
 
 
     //- Destructor
-    virtual ~multiphaseSystem() = default;
+    virtual ~multiphaseSystem();
 
 
     // Selectors
