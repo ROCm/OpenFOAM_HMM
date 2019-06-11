@@ -47,32 +47,6 @@ namespace functionObjects
 }
 
 
-// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    // Read vector and normalise if present, or set default
-    inline vector readVectorOrDefault
-    (
-        const dictionary& dict,
-        const word& key,
-        const vector::components axis
-    )
-    {
-        vector vec(Zero);  // Zero initialise!
-
-        if (dict.readIfPresent(key, vec))
-        {
-            return normalised(vec);
-        }
-
-        vec[axis] = 1;
-        return vec;
-    }
-
-} // End namespace Foam
-
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::forceCoeffs::createFiles()
@@ -88,14 +62,19 @@ void Foam::functionObjects::forceCoeffs::createFiles()
         {
             CdBinFilePtr_ = createFile("CdBin");
             writeBinHeader("Drag coefficient bins", CdBinFilePtr_());
+
             CsBinFilePtr_ = createFile("CsBin");
             writeBinHeader("Side coefficient bins", CsBinFilePtr_());
+
             ClBinFilePtr_ = createFile("ClBin");
             writeBinHeader("Lift coefficient bins", ClBinFilePtr_());
+
             CmRollBinFilePtr_ = createFile("CmRollBin");
             writeBinHeader("Roll moment coefficient bins", CmRollBinFilePtr_());
+
             CmPitchBinFilePtr_ = createFile("CmPitchBin");
             writeBinHeader("Moment coefficient bins", CmPitchBinFilePtr_());
+
             CmYawBinFilePtr_ = createFile("CmYawBin");
             writeBinHeader("Yaw moment coefficient bins", CmYawBinFilePtr_());
         }
@@ -110,12 +89,12 @@ void Foam::functionObjects::forceCoeffs::writeIntegratedHeader
 ) const
 {
     writeHeader(os, "Force coefficients");
-    writeHeaderValue(os, "dragDir", dragDir_);
-    writeHeaderValue(os, "sideDir", sideDir_);
-    writeHeaderValue(os, "liftDir", liftDir_);
-    writeHeaderValue(os, "rollAxis", rollAxis_);
-    writeHeaderValue(os, "pitchAxis", pitchAxis_);
-    writeHeaderValue(os, "yawAxis", yawAxis_);
+    writeHeaderValue(os, "dragDir", coordSys_.e1());
+    writeHeaderValue(os, "sideDir", coordSys_.e2());
+    writeHeaderValue(os, "liftDir", coordSys_.e3());
+    writeHeaderValue(os, "rollAxis", coordSys_.e1());
+    writeHeaderValue(os, "pitchAxis", coordSys_.e2());
+    writeHeaderValue(os, "yawAxis", coordSys_.e3());
     writeHeaderValue(os, "magUInf", magUInf_);
     writeHeaderValue(os, "lRef", lRef_);
     writeHeaderValue(os, "Aref", Aref_);
@@ -257,12 +236,6 @@ Foam::functionObjects::forceCoeffs::forceCoeffs
 )
 :
     forces(name, runTime, dict),
-    dragDir_(Zero),
-    sideDir_(Zero),
-    liftDir_(Zero),
-    rollAxis_(Zero),
-    pitchAxis_(Zero),
-    yawAxis_(Zero),
     magUInf_(Zero),
     lRef_(Zero),
     Aref_(Zero),
@@ -275,6 +248,7 @@ Foam::functionObjects::forceCoeffs::forceCoeffs
     CmYawBinFilePtr_()
 {
     read(dict);
+    setCoordinateSystem(dict, "liftDir", "dragDir");
     Info<< endl;
 }
 
@@ -284,15 +258,6 @@ Foam::functionObjects::forceCoeffs::forceCoeffs
 bool Foam::functionObjects::forceCoeffs::read(const dictionary& dict)
 {
     forces::read(dict);
-
-    // Standard (default) definitions
-    dragDir_ = readVectorOrDefault(dict, "dragDir", vector::X);
-    sideDir_ = readVectorOrDefault(dict, "sideDir", vector::Y);
-    liftDir_ = readVectorOrDefault(dict, "liftDir", vector::Z);
-    rollAxis_ = readVectorOrDefault(dict, "rollAxis", vector::X);
-    pitchAxis_ = readVectorOrDefault(dict, "pitchAxis", vector::Y);
-    yawAxis_ = readVectorOrDefault(dict, "yawAxis", vector::Z);
-
 
     // Free stream velocity magnitude
     dict.readEntry("magUInf", magUInf_);
@@ -387,18 +352,22 @@ bool Foam::functionObjects::forceCoeffs::execute()
     scalar CmYawTot = 0;
 
     const scalar pDyn = 0.5*rhoRef_*sqr(magUInf_);
+
     // Avoid divide by zero in 2D cases
     const scalar momentScaling = 1.0/(Aref_*pDyn*lRef_ + SMALL);
     const scalar forceScaling = 1.0/(Aref_*pDyn + SMALL);
 
     forAll(liftCoeffs, i)
     {
-        dragCoeffs[i] = forceScaling*(force_[i] & dragDir_);
-        sideCoeffs[i] = forceScaling*(force_[i] & sideDir_);
-        liftCoeffs[i] = forceScaling*(force_[i] & liftDir_);
-        rollMomentCoeffs[i] = momentScaling*(moment_[i] & rollAxis_);
-        pitchMomentCoeffs[i] = momentScaling*(moment_[i] & pitchAxis_);
-        yawMomentCoeffs[i] = momentScaling*(moment_[i] & yawAxis_);
+        const Field<vector> localForce(coordSys_.localVector(force_[i]));
+        const Field<vector> localMoment(coordSys_.localVector(moment_[i]));
+
+        dragCoeffs[i] = forceScaling*(localForce.component(0));
+        sideCoeffs[i] = forceScaling*(localForce.component(1));
+        liftCoeffs[i] = forceScaling*(localForce.component(2));
+        rollMomentCoeffs[i] = momentScaling*(localMoment.component(0));
+        pitchMomentCoeffs[i] = momentScaling*(localMoment.component(1));
+        yawMomentCoeffs[i] = momentScaling*(localMoment.component(2));
 
         CdTot += sum(dragCoeffs[i]);
         CsTot += sum(sideCoeffs[i]);
@@ -408,7 +377,7 @@ bool Foam::functionObjects::forceCoeffs::execute()
         CmYawTot += sum(yawMomentCoeffs[i]);
     }
 
-    // Single contributions to the front and rear axles
+    // Single contributions to the front and rear
     const scalar CdfTot = 0.5*CdTot + CmRollTot;
     const scalar CdrTot = 0.5*CdTot - CmRollTot;
     const scalar CsfTot = 0.5*CsTot + CmYawTot;

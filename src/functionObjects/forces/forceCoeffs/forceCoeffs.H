@@ -62,12 +62,14 @@ Usage
         log         yes;
         writeFields yes;
         patches     (walls);
-        dragDir     (1 0 0);
-        sideDir     (0 1 0);
-        liftDir     (0 0 1);
-        rollAxis    (1 0 0);
-        pitchAxis   (0 1 0);
-        yawAxis     (0 0 1);
+
+        coordinateSystem
+        {
+            type        xxx;
+            dragDir     (1 0 0);
+            liftDir     (0 0 1);
+        }
+
         magUInf     100;
         lRef        3.5;
         Aref        2.2;
@@ -139,27 +141,6 @@ class forceCoeffs
     public forces
 {
     // Private data
-
-        // Force coefficient geometry in global Cartesian coordinate system
-
-            //- Drag force direction
-            vector dragDir_;
-
-            //- Side force direction
-            vector sideDir_;
-
-            //- Lift force direction
-            vector liftDir_;
-
-            //- Roll axis direction
-            vector rollAxis_;
-
-            //- Pitch axis direction
-            vector pitchAxis_;
-
-            //- Yaw axis direction
-            vector yawAxis_;
-
 
         // Free-stream conditions
 
