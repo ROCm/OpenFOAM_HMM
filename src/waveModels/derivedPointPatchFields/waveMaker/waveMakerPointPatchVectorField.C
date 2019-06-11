@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2018 IH-Cantabria
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018-2019 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +118,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict, false),
-    motionType_(motionTypeNames.lookup("motionType", dict)),
+    motionType_(motionTypeNames.get("motionType", dict)),
     n_(dict.get<vector>("n")),
     gHat_(Zero),
     initialDepth_(dict.get<scalar>("initialDepth")),
@@ -251,47 +253,34 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
         }
         case motionTypes::solitary:
         {
-        const scalar kappa_ = sqrt(3.0/4.0*waveHeight_/(pow(initialDepth_,3)));
-            const scalar waveCelerity_ = sqrt(mag(g())*(initialDepth_+waveHeight_));
-            const scalar stroke_ = sqrt(16.0*waveHeight_*initialDepth_/3.0);
-            wavePeriod_ = (2.0 / ( kappa_*waveCelerity_ ))*(3.8 + waveHeight_/
-                    initialDepth_);
+            const scalar kappa = sqrt(0.75*waveHeight_/(pow3(initialDepth_)));
+            const scalar waveCelerity =
+                sqrt(mag(g())*(initialDepth_ + waveHeight_));
+            const scalar stroke = sqrt(16.0*waveHeight_*initialDepth_/3.0);
+            const scalar hr = waveHeight_/initialDepth_;
+            wavePeriod_ = (2.0/(kappa*waveCelerity))*(3.8 + hr);
 
-            scalar motionX = 0;
-            const scalar error=0.001;
+            const scalar tSolitary =
+                -0.5*wavePeriod_ + t - db().time().startTime().value();
 
-       if (onlyFirst==0)
-       {
-               tAux =  -wavePeriod_/2.0 + (t-tOld);
-       }
-       else
-           {
-           tAux =  tAuxOld + (t-tOld);
-       }
-
-        //Newton-Rapshon
-            scalar theta1OF=0;
-            scalar theta2OF=0;
-            scalar er=10000;
-            while (er>error)
-        {
-                    theta2OF = theta1OF - (theta1OF - kappa_*waveCelerity_*tAux
-            + (waveHeight_/initialDepth_)*tanh(theta1OF) )
-                        / ( 1.0 + (waveHeight_/initialDepth_)*(1.0/cosh(theta1OF))*(1.0/cosh(theta1OF)));
-
-                    er=fabs(theta1OF-theta2OF);
-                    theta1OF=theta2OF;
-            }
-
-            motionX = waveHeight_ / (kappa_*initialDepth_)*tanh(theta1OF) + stroke_/2.0;
-
-            if (tAux != 0)
+            // Newton-Rapshon
+            scalar theta1 = 0;
+            scalar theta2 = 0;
+            scalar er = 10000;
+            const scalar error = 0.001;
+            while (er > error)
             {
-                onlyFirst = 1;
+                theta2 =
+                    theta1
+                  - (theta1 - kappa*waveCelerity*tSolitary + hr*tanh(theta1))
+                   /(1.0 + hr*(1.0/cosh(theta1))*(1.0/cosh(theta1)));
+
+                    er = mag(theta1 - theta2);
+                    theta1 = theta2;
             }
 
-            tOld =  t;
-            tAuxOld = tAux;
+            scalar motionX =
+                waveHeight_/(kappa*initialDepth_)*tanh(theta1) + 0.5*stroke;
 
             Field<vector>::operator=(n_*motionX);
 

@@ -3,7 +3,9 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2018 IH-Cantabria
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018-2019 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,6 +70,7 @@ Usage
     Available motion types include:
     - piston
     - flap
+    - solitary
 
 SourceFiles
     waveMakerPointPatchVectorField.C
@@ -99,7 +102,7 @@ class waveMakerPointPatchVectorField
         {
             piston,
             flap,
-        solitary
+            solitary
         };
 
         //- Names for motion types
@@ -139,13 +142,6 @@ class waveMakerPointPatchVectorField
 
         //- On/off second order calculation switch
         scalar secondOrder_;
-
-        //- Solitary time [-T/2, T/2]
-    scalar tOld = 0;
-    scalar tAux = 0;
-    scalar tAuxOld = 0;
-
-    scalar onlyFirst = 0;
 
 
     // Protected Member Functions
