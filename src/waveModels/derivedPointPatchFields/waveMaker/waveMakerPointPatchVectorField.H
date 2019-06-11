@@ -5,7 +5,7 @@
     \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2018 IH-Cantabria
+                            | Copyright (C) 2018-2019 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,7 @@ Usage
     \verbatim
     leftwall
     {
-        type            waveMaker; 
+        type            waveMaker;
         motionType      flap;
         n               (1 0 0);
         initialDepth    0.25;
@@ -70,6 +70,7 @@ Usage
     Available motion types include:
     - piston
     - flap
+    - solitary
 
 SourceFiles
     waveMakerPointPatchVectorField.C
@@ -100,7 +101,8 @@ class waveMakerPointPatchVectorField
         enum motionTypes
         {
             piston,
-            flap
+            flap,
+            solitary
         };
 
         //- Names for motion types

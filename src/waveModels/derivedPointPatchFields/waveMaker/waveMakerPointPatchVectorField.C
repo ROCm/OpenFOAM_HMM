@@ -2,10 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2018 IH-Cantabria
+                            | Copyright (C) 2018-2019 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,8 @@ const Foam::Enum<Foam::waveMakerPointPatchVectorField::motionTypes>
 Foam::waveMakerPointPatchVectorField::motionTypeNames
 ({
     { motionTypes::piston, "piston" },
-    { motionTypes::flap, "flap" }
+    { motionTypes::flap, "flap" },
+    { motionTypes::solitary, "solitary" }
 });
 
 
@@ -60,9 +61,9 @@ const Foam::vector& Foam::waveMakerPointPatchVectorField::g()
 }
 
 
-Foam::scalar Foam::waveMakerPointPatchVectorField::waveLength 
+Foam::scalar Foam::waveMakerPointPatchVectorField::waveLength
 (
-    const scalar h, 
+    const scalar h,
     const scalar T
 )
 {
@@ -104,7 +105,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(0),
     wavePhase_(0),
     waveLength_(0),
-    rampTime_(0),
+    rampTime_(1),
     secondOrder_(false)
 {}
 
@@ -216,7 +217,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
 
             if (secondOrder_)
             {
-                motionX += 
+                motionX +=
                     sqr(waveHeight_)/(16*initialDepth_)
                    *(3*cosh(kh)/pow3(sinh(kh)) - 2/m1)
                    *sin(2*sigma*t);
@@ -240,13 +241,48 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
 
             if (secondOrder_)
             {
-                motionX += 
+                motionX +=
                     sqr(waveHeight_)
                    /(32*initialDepth_)*(3*cosh(kh)
                    /pow3(sinh(kh)) - 2/m1);
             }
 
             Field<vector>::operator=(n_*timeCoeff(t)*motionX);
+
+            break;
+        }
+        case motionTypes::solitary:
+        {
+            const scalar kappa = sqrt(0.75*waveHeight_/(pow3(initialDepth_)));
+            const scalar waveCelerity =
+                sqrt(mag(g())*(initialDepth_ + waveHeight_));
+            const scalar stroke = sqrt(16.0*waveHeight_*initialDepth_/3.0);
+            const scalar hr = waveHeight_/initialDepth_;
+            wavePeriod_ = (2.0/(kappa*waveCelerity))*(3.8 + hr);
+
+            const scalar tSolitary =
+                -0.5*wavePeriod_ + t - db().time().startTime().value();
+
+            // Newton-Rapshon
+            scalar theta1 = 0;
+            scalar theta2 = 0;
+            scalar er = 10000;
+            const scalar error = 0.001;
+            while (er > error)
+            {
+                theta2 =
+                    theta1
+                  - (theta1 - kappa*waveCelerity*tSolitary + hr*tanh(theta1))
+                   /(1.0 + hr*(1.0/cosh(theta1))*(1.0/cosh(theta1)));
+
+                    er = mag(theta1 - theta2);
+                    theta1 = theta2;
+            }
+
+            scalar motionX =
+                waveHeight_/(kappa*initialDepth_)*tanh(theta1) + 0.5*stroke;
+
+            Field<vector>::operator=(n_*motionX);
 
             break;
         }
@@ -257,7 +293,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
                 << abort(FatalError);
         }
     }
-        
+
 
     fixedValuePointPatchField<vector>::updateCoeffs();
 }
