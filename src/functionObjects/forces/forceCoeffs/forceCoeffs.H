@@ -30,9 +30,17 @@ Group
     grpForcesFunctionObjects
 
 Description
-    Extends the forces functionObject by providing coefficients for:
-    - drag, side and lift forces
-    - roll, pitch and yaw moments
+    Extends the \c forces functionObject by providing coefficients for:
+    - drag, side and lift forces (Cd, Cs, and Cl)
+    - roll, pitch and yaw moments (CmRoll, CmPitch, and CmYaw)
+    - front and rear axle force contributions (C(f) and C(r)) wherein
+
+    \verbatim
+        Cd(f/r) = 0.5*Cd \pm CmRoll
+        Cs(f/r) = 0.5*Cs \pm CmYaw
+        Cl(f/r) = 0.5*Cl \pm CmPitch
+    \endverbatim
+
     The data can optionally be output into bins, defined in a given direction.
 
     The binned data provides the total and consitituent components per bin:
@@ -63,16 +71,13 @@ Usage
         writeFields yes;
         patches     (walls);
 
-        coordinateSystem
-        {
-            type        xxx;
-            dragDir     (1 0 0);
-            liftDir     (0 0 1);
-        }
+        // input keywords for directions of force/moment coefficients
+        // refer below for options, and relations
 
         magUInf     100;
         lRef        3.5;
         Aref        2.2;
+        porosity    no;
 
         binData
         {
@@ -90,12 +95,6 @@ Usage
         log          | Write force data to standard output  | no  | no
         writeFields  | Write force,moment coefficient fields | no | no
         patches      | Patches included in the forces calculation | yes |
-        dragDir      | Drag direction                       | no  | (1 0 0)
-        sideDir      | Side force direction                 | no  | (0 1 0)
-        liftDir      | Lift direction                       | no  | (0 0 1)
-        rollAxis     | Roll axis                            | no  | (1 0 0)
-        pitchAxis    | Pitch axis                           | no  | (0 1 0)
-        yawAxis      | Yaw axis                             | no  | (0 0 1)
         magUInf      | Free stream velocity magnitude       | yes |
         lRef         | Reference length scale for moment calculations | yes |
         Aref         | Reference area                       | yes |
@@ -108,6 +107,48 @@ Usage
         nBin         | Number of data bins                    | yes |
         direction    | Direction along which bins are defined | yes |
         cumulative   | Bin data accumulated with incresing distance | yes |
+    \endtable
+
+    Input of force/moment coefficient directions:
+    - require an origin, and two orthogonal directions; the remaining orthogonal
+    direction is determined accordingly.
+    - can be added by the three options below.
+
+    \verbatim
+        CofR        (0 0 0); // Centre of rotation
+        dragDir     (1 0 0);
+        liftDir     (0 0 1);
+    \endverbatim
+
+    \verbatim
+        origin (0 0 0);
+        e1     (1 0 0);
+        e3     (0 0 1); // combinations: (e1, e2) or (e2, e3) or (e3, e1)
+    \endverbatim
+
+    \verbatim
+        coordinateSystem
+        {
+            origin  (0 0 0);
+            rotation
+            {
+                type axes;
+                e1 (1 0 0);
+                e3 (0 0 1); // combinations: (e1, e2) or (e2, e3) or (e3, e1)
+            }
+        }
+    \endverbatim
+
+    The default direction relations are shown below:
+
+    \table
+        Property     | Description           | Alias | Direction
+        dragDir      | Drag direction        | e1    | (1 0 0)
+        sideDir      | Side force direction  | e2    | (0 1 0)
+        liftDir      | Lift direction        | e3    | (0 0 1)
+        rollAxis     | Roll axis             | e1    | (1 0 0)
+        pitchAxis    | Pitch axis            | e2    | (0 1 0)
+        yawAxis      | Yaw axis              | e3    | (0 0 1)
     \endtable
 
 See also
