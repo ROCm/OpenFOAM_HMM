@@ -450,14 +450,16 @@ Foam::fileMonitor::~fileMonitor()
 // regIOobject)
 Foam::label Foam::fileMonitor::addWatch(const fileName& fName)
 {
+    if (debug)
+    {
+        Pout<< "fileMonitor : adding watch on file " << fName << endl;
+    }
+
     label watchFd;
 
-    label sz = freeWatchFds_.size();
-
-    if (sz)
+    if (freeWatchFds_.size())
     {
-        watchFd = freeWatchFds_[sz-1];
-        freeWatchFds_.setSize(sz-1);
+        watchFd = freeWatchFds_.remove();
     }
     else
     {
@@ -495,7 +497,10 @@ bool Foam::fileMonitor::removeWatch(const label watchFd)
             << watchFile_[watchFd] << endl;
     }
 
-    freeWatchFds_.append(watchFd);
+    if (!freeWatchFds_.found(watchFd))
+    {
+        freeWatchFds_.append(watchFd);
+    }
     return watcher_->removeWatch(watchFd);
 }
 
