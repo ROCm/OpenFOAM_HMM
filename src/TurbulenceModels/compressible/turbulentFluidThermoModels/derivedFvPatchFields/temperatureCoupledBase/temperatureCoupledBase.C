@@ -174,6 +174,13 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
 
                 return thermo.kappa(patchi);
             }
+            else if (mesh.foundObject<basicThermo>("phaseProperties"))
+            {
+                const basicThermo& thermo =
+                    mesh.lookupObject<basicThermo>("phaseProperties");
+
+                return thermo.kappa(patchi);
+            }
             else
             {
                 FatalErrorInFunction

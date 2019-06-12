@@ -36,6 +36,7 @@ Description
 
 #include "specie.H"
 #include "rhoConst.H"
+#include "icoPolynomial.H"
 #include "hConstThermo.H"
 #include "hPolynomialThermo.H"
 #include "hPowerThermo.H"
@@ -105,6 +106,21 @@ namespace Foam
                 sensibleEnthalpy
             >
         > hExpKappaConstSolidThermoPhysics;
+
+    typedef
+        polynomialSolidTransport
+        <
+            species::thermo
+            <
+                hPolynomialThermo
+                <
+                    icoPolynomial<specie, 8>,
+                    8
+                >,
+                sensibleEnthalpy
+            >,
+            8
+        > hPolyTranspPolyIcoSolidThermoPhysics;
 }
 
 

@@ -31,6 +31,7 @@ License
 
 #include "specie.H"
 #include "rhoConst.H"
+#include "icoPolynomial.H"
 #include "hConstThermo.H"
 #include "hPowerThermo.H"
 #include "hPolynomialThermo.H"
@@ -87,6 +88,19 @@ makeSolidThermo
     rhoConst,
     specie
 );
+
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureMixture,
+    polynomialSolidTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    icoPolynomial,
+    specie
+);
+
 
 makeSolidThermoPhysicsType
 (

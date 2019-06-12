@@ -79,7 +79,6 @@ namespace Foam
                 sensibleEnthalpy
             >
         > BoussinesqFluidEThermoPhysics;
-
 };
 
 
@@ -240,6 +239,20 @@ namespace Foam
             constRhoHThermoPhysics
         );
 
+        // From pure phase (solidThermo) to phase (rho const)
+        makeInterfacePureType
+        (
+            Lee,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hPolyTranspPolyIcoSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics
+        );
+
 
         // From pure phase (const rho) to multi phase (incomp ideal gas)
         makeInterfaceContSpecieMixtureType
@@ -283,6 +296,8 @@ namespace Foam
             pureMixture,
             hConstSolidThermoPhysics
         );
+
+
 }
 
 
