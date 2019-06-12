@@ -109,7 +109,6 @@ wmake $targetType semiPermeableBaffle
 wmake $targetType atmosphericModels
 
 phaseSystemModels/Allwmake $targetType $*
-wmake $targetType TurbulenceModels/compressible/turbulentFluidThermoModels/
 
 # Needs access to Turbulence
 
