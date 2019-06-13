@@ -239,7 +239,7 @@ namespace Foam
             constRhoHThermoPhysics
         );
 
-        // From pure phase (solidThermo) to phase (rho const)
+        // From pure phase (all-poly solidThermo) to phase (ico-rho)
         makeInterfacePureType
         (
             Lee,
@@ -247,6 +247,20 @@ namespace Foam
             solidThermo,
             pureMixture,
             hPolyTranspPolyIcoSolidThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics
+        );
+
+        // From pure phase (exp-Transp, hPower solidThermo) to phase (ico-rho)
+        makeInterfacePureType
+        (
+            Lee,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            hPowerSolidThermoPhysics,
             heRhoThermo,
             rhoThermo,
             pureMixture,
