@@ -34,15 +34,6 @@ solvers
     p_rghFinal
     {
         $p_rgh;
-        solver          PCG;
-        preconditioner
-        {
-            preconditioner  GAMG;
-            tolerance       1e-7;
-            relTol          0;
-            nVcycles        2;
-            smoother        GaussSeidel;
-        }
         tolerance       1e-7;
         relTol          0;
         maxIter         30;
