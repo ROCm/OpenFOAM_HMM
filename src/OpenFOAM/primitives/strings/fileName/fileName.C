@@ -36,11 +36,18 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::fileName::typeName = "fileName";
+
 int Foam::fileName::debug(Foam::debug::debugSwitch(fileName::typeName, 0));
+
 int Foam::fileName::allowSpaceInFileName
 (
+    #ifdef _WIN32
+    Foam::debug::infoSwitch("allowSpaceInFileName", 1)
+    #else
     Foam::debug::infoSwitch("allowSpaceInFileName", 0)
+    #endif
 );
+
 const Foam::fileName Foam::fileName::null;
 
 
