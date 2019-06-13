@@ -109,12 +109,13 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         if (!residualPtr)
         {
              WarningInFunction
-                << "Could not find residual file : " << residualName_
-                << ".The residual mode won't be " << nl
+                << "Could not find residual field : " << residualName_
+                << ". The residual mode won't be " << nl
                 << "    considered for the blended field in the stability "
                 << "blending factor. " << nl
-                << "    Add the corresponding residual function object. " << nl
-                << "    If the residual function object is already set "
+                << "    Please add the corresponding 'solverInfo'"
+                << " function object with 'writeResidualFields true'." << nl
+                << "    If the solverInfo function object is already enabled "
                 << "you might need to wait " << nl
                 << "    for the first iteration."
                 << nl << endl;
