@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -30,9 +30,18 @@ Group
     grpForcesFunctionObjects
 
 Description
-    Extends the forces functionObject by providing lift, drag and moment
-    coefficients.  The data can optionally be output into bins, defined in a
-    given direction.
+    Extends the \c forces functionObject by providing coefficients for:
+    - drag, side and lift forces (Cd, Cs, and Cl)
+    - roll, pitch and yaw moments (CmRoll, CmPitch, and CmYaw)
+    - front and rear axle force contributions (C(f) and C(r)) wherein
+
+    \verbatim
+        Cd(f/r) = 0.5*Cd \pm CmRoll
+        Cs(f/r) = 0.5*Cs \pm CmYaw
+        Cl(f/r) = 0.5*Cl \pm CmPitch
+    \endverbatim
+
+    The data can optionally be output into bins, defined in a given direction.
 
     The binned data provides the total and consitituent components per bin:
     - total coefficient
@@ -43,9 +52,12 @@ Description
     Data is written into multiple files in the
     postProcessing/\<functionObjectName\> directory:
     - coefficient.dat   : integrated coefficients over all geometries
-    - CmBin.dat         : moment coefficient bins
     - CdBin.dat         : drag coefficient bins
+    - CsBin.dat         : side coefficient bins
     - ClBin.dat         : lift coefficient bins
+    - CmRollBin.dat     : roll moment coefficient bins
+    - CmPitchBin.dat    : pitch moment coefficient bins
+    - CmYawBin.dat      : yaw moment coefficient bins
 
 Usage
     Example of function object specification:
@@ -58,12 +70,14 @@ Usage
         log         yes;
         writeFields yes;
         patches     (walls);
-        liftDir     (0 1 0);
-        dragDir     (-1 0 0);
-        pitchAxis   (0 0 1);
+
+        // input keywords for directions of force/moment coefficients
+        // refer below for options, and relations
+
         magUInf     100;
         lRef        3.5;
         Aref        2.2;
+        porosity    no;
 
         binData
         {
@@ -76,26 +90,65 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description             | Required    | Default value
-        type         | Type name: forceCoeffs  | yes         |
-        log          | Write force data to standard output | no | no
-        writeFields  | Write the force and moment coefficient fields | no | no
+        Property     | Description                          | Required | Default
+        type         | Type name: forceCoeffs               | yes |
+        log          | Write force data to standard output  | no  | no
+        writeFields  | Write force,moment coefficient fields | no | no
         patches      | Patches included in the forces calculation | yes |
-        liftDir      | Lift direction          | yes         |
-        dragDir      | Drag direction          | yes         |
-        pitchAxis    | Picth axis              | yes         |
-        magUInf      | Free stream velocity magnitude | yes  |
+        magUInf      | Free stream velocity magnitude       | yes |
         lRef         | Reference length scale for moment calculations | yes |
-        Aref         | Reference area          | yes |
-        porosity     | Flag to include porosity contributions | no | no
+        Aref         | Reference area                       | yes |
+        porosity     | Include porosity contributions       | no  | false
     \endtable
 
     Bin data is optional, but if the dictionary is present, the entries must
-    be defined according o
+    be defined according to following:
     \table
-        nBin         | number of data bins     | yes         |
-        direction    | direction along which bins are defined | yes |
-        cumulative   | bin data accumulated with incresing distance | yes |
+        nBin         | Number of data bins                    | yes |
+        direction    | Direction along which bins are defined | yes |
+        cumulative   | Bin data accumulated with incresing distance | yes |
+    \endtable
+
+    Input of force/moment coefficient directions:
+    - require an origin, and two orthogonal directions; the remaining orthogonal
+    direction is determined accordingly.
+    - can be added by the three options below.
+
+    \verbatim
+        CofR        (0 0 0); // Centre of rotation
+        dragDir     (1 0 0);
+        liftDir     (0 0 1);
+    \endverbatim
+
+    \verbatim
+        origin (0 0 0);
+        e1     (1 0 0);
+        e3     (0 0 1); // combinations: (e1, e2) or (e2, e3) or (e3, e1)
+    \endverbatim
+
+    \verbatim
+        coordinateSystem
+        {
+            origin  (0 0 0);
+            rotation
+            {
+                type axes;
+                e1 (1 0 0);
+                e3 (0 0 1); // combinations: (e1, e2) or (e2, e3) or (e3, e1)
+            }
+        }
+    \endverbatim
+
+    The default direction relations are shown below:
+
+    \table
+        Property     | Description           | Alias | Direction
+        dragDir      | Drag direction        | e1    | (1 0 0)
+        sideDir      | Side force direction  | e2    | (0 1 0)
+        liftDir      | Lift direction        | e3    | (0 0 1)
+        rollAxis     | Roll axis             | e1    | (1 0 0)
+        pitchAxis    | Pitch axis            | e2    | (0 1 0)
+        yawAxis      | Yaw axis              | e3    | (0 0 1)
     \endtable
 
 See also
@@ -130,30 +183,18 @@ class forceCoeffs
 {
     // Private data
 
-        // Force coefficient geometry
-
-            //- Lift
-            vector liftDir_;
-
-            //- Drag
-            vector  dragDir_;
-
-            //- Pitch
-            vector pitchAxis_;
-
-
         // Free-stream conditions
 
-            //- Velocity magnitude
+            //- Free-stream velocity magnitude
             scalar magUInf_;
 
 
         // Reference scales
 
-            //- Length
+            //- Reference length [m]
             scalar lRef_;
 
-            //- Area
+            //- Reference area [m^2]
             scalar Aref_;
 
 
@@ -162,14 +203,23 @@ class forceCoeffs
             //- Integrated coefficients
             autoPtr<OFstream> coeffFilePtr_;
 
-            //- Moment coefficient
-            autoPtr<OFstream> CmBinFilePtr_;
-
             //- Drag coefficient
             autoPtr<OFstream> CdBinFilePtr_;
 
+            //- Side coefficient
+            autoPtr<OFstream> CsBinFilePtr_;
+
             //- Lift coefficient
             autoPtr<OFstream> ClBinFilePtr_;
+
+            //- Roll moment coefficient
+            autoPtr<OFstream> CmRollBinFilePtr_;
+
+            //- Pitch moment coefficient
+            autoPtr<OFstream> CmPitchBinFilePtr_;
+
+            //- Yaw moment coefficient
+            autoPtr<OFstream> CmYawBinFilePtr_;
 
 
     // Private Member Functions
@@ -223,7 +273,7 @@ public:
 
 
     //- Destructor
-    virtual ~forceCoeffs();
+    virtual ~forceCoeffs() = default;
 
 
     // Member Functions
@@ -231,7 +281,7 @@ public:
         //- Read the forces data
         virtual bool read(const dictionary&);
 
-        //- Execute, currently does nothing
+        //- Execute
         virtual bool execute();
 
         //- Write the forces
@@ -249,3 +299,4 @@ public:
 #endif
 
 // ************************************************************************* //
+

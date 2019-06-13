@@ -192,18 +192,6 @@ protected:
             //- Moment bins
             autoPtr<OFstream> momentBinFilePtr_;
 
-            //- Local force
-            autoPtr<OFstream> localForceFilePtr_;
-
-            //- Local moment
-            autoPtr<OFstream> localMomentFilePtr_;
-
-            //- Local force bins
-            autoPtr<OFstream> localForceBinFilePtr_;
-
-            //- Local moment bins
-            autoPtr<OFstream> localMomentBinFilePtr_;
-
 
         // Read from dictionary
 
@@ -233,9 +221,6 @@ protected:
 
             //- Coordinate system used when evaluting forces/moments
             coordSystem::cartesian coordSys_;
-
-            //- Flag to indicate whether we are using a local coordinates
-            bool localSystem_;
 
             //- Flag to include porosity effects
             bool porosity_;
@@ -282,6 +267,14 @@ protected:
 
         //- Write header for binned data
         void writeBinHeader(const word& header, Ostream& os) const;
+
+        //- Set the co-ordinate system from dictionary and axes names
+        void setCoordinateSystem
+        (
+            const dictionary& dict,
+            const word& e3Name = word::null,
+            const word& e1Name = word::null
+        );
 
         //- Initialise the fields
         void initialise();
