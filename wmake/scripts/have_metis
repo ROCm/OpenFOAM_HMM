@@ -107,7 +107,7 @@ have_metis()
 
     # ----------------------------------
 
-    local good label
+    local label
 
     # Ensure consistent sizes between OpenFOAM and metis header
     # Extract IDXTYPEWIDTH from metis.h: regex as per ThirdParty Allwmake
@@ -115,18 +115,6 @@ have_metis()
         's/^.*#define  *IDXTYPEWIDTH  *\([1-9][0-9]\).*/\1/p' \
         "$header")
     : "${label:=unknown}"
-
-    if [ "$WM_LABEL_SIZE" = "$label" ]
-    then
-        good=true
-    else
-        if [ -n "$warn" ]
-        then
-            echo "$warn (label=$WM_LABEL_SIZE, ${header##*/} has '$label')"
-        fi
-        no_metis
-        return 1
-    fi
 
     # OK
     echo "metis (label=$label) - $prefix"
