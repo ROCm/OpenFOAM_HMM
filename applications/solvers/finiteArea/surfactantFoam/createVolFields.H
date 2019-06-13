@@ -16,7 +16,7 @@
     );
 
     vsm.mapToVolume(Cs, Cvf.boundaryFieldRef());
-    Cvf.write();
+    //Cvf.write();
 
     volVectorField U
     (
@@ -33,4 +33,4 @@
     );
 
     vsm.mapToVolume(Us, U.boundaryFieldRef());
-    U.write();
+    //U.write();
