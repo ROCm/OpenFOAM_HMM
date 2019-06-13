@@ -36,6 +36,7 @@ Description
 #ifndef PrecisionAdaptor_H
 #define PrecisionAdaptor_H
 
+#include "tmpNrc.H"
 #include "Field.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,34 +45,34 @@ namespace Foam
 {
 
 //- A const Field wrapper with possible data conversion
-template<class Type, class InputType>
+template<class Type, class InputType, template<class> class Container = Field>
 class ConstPrecisionAdaptor
 :
-    public tmp<Field<Type>>
+    public tmpNrc<Container<Type>>
 {
     // Private Member Functions
 
         //- Copy in field
-        void copyInput(const Field<InputType>& input)
+        void copyInput(const Container<InputType>& input)
         {
             this->clear();
 
-            Field<Type>* p = new Field<Type>(input.size());
+            Container<Type>* p = new Container<Type>(input.size());
             this->reset(p);
             std::copy(input.cbegin(), input.cend(), p->begin());
         }
 
         //- Construct from tmp Field, copy/move as required
-        void moveInput(tmp<Field<InputType>>& input)
+        void moveInput(tmp<Container<InputType>>& input)
         {
             if (std::is_same<Type, InputType>::value)
             {
-                auto& tinput = reinterpret_cast<tmp<FieldType>&>(input);
+                auto& tinput = reinterpret_cast<tmp<Container<Type>>&>(input);
 
                 if (tinput.isTmp())
                 {
-                    this->clear();
-                    this->swap(tinput);
+                    // Reset to tmp
+                    this->reset(tinput.ptr());
                 }
                 else
                 {
@@ -89,15 +90,15 @@ class ConstPrecisionAdaptor
 public:
 
     //- The adapted field type
-    typedef Field<Type> FieldType;
+    typedef Container<Type> FieldType;
 
 
     // Constructors
 
-        //- Construct from Field<InputType>, copying on input as required
-        ConstPrecisionAdaptor(const Field<InputType>& input)
+        //- Construct from Container<InputType>, copying on input as required
+        ConstPrecisionAdaptor(const Container<InputType>& input)
         :
-            tmp<Field<Type>>()
+            tmpNrc<Container<Type>>()
         {
             if (std::is_same<Type, InputType>::value)
             {
@@ -110,31 +111,31 @@ public:
         }
 
 
-        //- Construct from tmp Field, copy/move as required
-        ConstPrecisionAdaptor(tmp<Field<InputType>>&& input)
+        //- Construct from tmp Container, copy/move as required
+        ConstPrecisionAdaptor(tmp<Container<InputType>>&& input)
         :
-            tmp<Field<Type>>()
+            tmpNrc<Container<Type>>()
         {
             this->moveInput(input);
         }
 
 
-        //- Construct from tmp Field, copy/move as required
-        ConstPrecisionAdaptor(const tmp<Field<InputType>>& input)
+        //- Construct from tmp Container, copy/move as required
+        ConstPrecisionAdaptor(const tmp<Container<InputType>>& input)
         :
-            tmp<Field<Type>>()
+            tmpNrc<Container<Type>>()
         {
-            this->moveInput(const_cast<tmp<Field<InputType>>&>(input));
+            this->moveInput(const_cast<tmp<Container<InputType>>&>(input));
         }
 
 
     // Member Functions
 
         //- Return the field
-        static const Field<Type>& get
+        static const Container<Type>& get
         (
-            const Field<InputType>& input,
-            Field<Type>& dst
+            const Container<InputType>& input,
+            Container<Type>& dst
         )
         {
             if (std::is_same<Type, InputType>::value)
@@ -152,25 +153,23 @@ public:
 
 
 //- A Field wrapper with possible data conversion
-template<class Type, class InputType>
+template<class Type, class InputType, template<class> class Container = Field>
 class PrecisionAdaptor
 :
-    public tmp<Field<Type>>
+    public tmpNrc<Container<Type>>
 {
     // Private Data
 
         //- Reference to underlying field
-        Field<InputType>& ref_;
+        Container<InputType>& ref_;
 
 
     // Private Member Functions
 
         //- Copy in field
-        void copyInput(const Field<InputType>& input)
+        void copyInput(const Container<InputType>& input)
         {
-            this->clear();
-
-            Field<Type>* p = new Field<Type>(input.size());
+            Container<Type>* p = new Container<Type>(input.size());
             this->reset(p);
             std::copy(input.cbegin(), input.cend(), p->begin());
         }
@@ -179,15 +178,15 @@ class PrecisionAdaptor
 public:
 
     //- The adapted field type
-    typedef Field<Type> FieldType;
+    typedef Container<Type> FieldType;
 
 
     // Constructors
 
-        //- Construct from Field<InputType>, copying on input as required
-        PrecisionAdaptor(Field<InputType>& input)
+        //- Construct from Container<InputType>, copying on input as required
+        PrecisionAdaptor(Container<InputType>& input)
         :
-            tmp<Field<Type>>(),
+            tmpNrc<Container<Type>>(),
             ref_(input)
         {
             if (std::is_same<Type, InputType>::value)

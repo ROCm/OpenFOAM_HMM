@@ -427,4 +427,18 @@ inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
 }
 
 
+template<class T>
+inline Foam::tmpNrc<T>::operator tmp<T>()
+{
+    if (isTmp())
+    {
+        return tmp<T>(ptr());
+    }
+    else
+    {
+        return tmp<T>(cref());
+    }
+}
+
+
 // ************************************************************************* //

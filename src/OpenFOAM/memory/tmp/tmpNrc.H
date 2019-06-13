@@ -42,6 +42,7 @@ See also
 
 #include "refCount.H"
 #include "word.H"
+#include "tmp.H"
 #include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -229,6 +230,9 @@ public:
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
         inline void operator=(const tmpNrc<T>& t);
+
+        //- Conversion to tmp
+        inline operator tmp<T>();
 };
 
 
