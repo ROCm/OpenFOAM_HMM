@@ -33,6 +33,12 @@ License
 namespace Foam
 {
 
+// Convert api number (YYMM) -> 20YY. Eg, 1906 -> 2019
+static inline int apiYear()
+{
+    return 2000 + (foamVersion::api / 100);
+}
+
 // manpage Footer
 static inline void printManFooter()
 {
@@ -40,7 +46,7 @@ static inline void printManFooter()
         << "Online documentation "
         << "https://www.openfoam.com/documentation/" << nl
         << ".SH COPYRIGHT" << nl
-        << "Copyright \\(co 2018 OpenCFD Ltd." << nl;
+        << "Copyright \\(co 2018-" << apiYear() << " OpenCFD Ltd." << nl;
 }
 
 

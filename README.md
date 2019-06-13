@@ -33,9 +33,9 @@ Please see the relevant guides:
 [repo openfoam]: https://develop.openfoam.com/Development/OpenFOAM-plus/
 [repo third]: https://develop.openfoam.com/Development/ThirdParty-plus/
 
-[link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/BuildIssues.txt
 [link openfoam-readme]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/README.md
-[link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/etc/README.md
+[link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/BuildIssues.md
+[link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md

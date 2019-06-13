@@ -26,7 +26,7 @@
 #
 # It is recommended to use VTK sources from ParaView (5.0.1 or later)
 #
-# See BuildIssues.txt about problems that can be encountered when using
+# See doc/BuildIssues.md about problems that can be encountered when using
 # the 'plain' VTK sources.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade

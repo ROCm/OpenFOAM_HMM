@@ -71,22 +71,6 @@ void Foam::functionObjects::forces::createFiles()
             momentBinFilePtr_ = createFile("momentBin");
             writeBinHeader("Moment", momentBinFilePtr_());
         }
-
-        if (localSystem_)
-        {
-            localForceFilePtr_ = createFile("localForce");
-            writeIntegratedHeader("Force", localForceFilePtr_());
-            localMomentFilePtr_ = createFile("localMoment");
-            writeIntegratedHeader("Moment", localMomentFilePtr_());
-
-            if (nBin_ > 1)
-            {
-                localForceBinFilePtr_ = createFile("localForceBin");
-                writeBinHeader("Force", localForceBinFilePtr_());
-                localMomentBinFilePtr_ = createFile("localMomentBin");
-                writeBinHeader("Moment", localMomentBinFilePtr_());
-            }
-        }
     }
 }
 
@@ -168,6 +152,49 @@ void Foam::functionObjects::forces::writeBinHeader
     os << endl;
 }
 
+
+void Foam::functionObjects::forces::setCoordinateSystem
+(
+    const dictionary& dict,
+    const word& e3Name,
+    const word& e1Name
+)
+{
+    coordSys_.clear();
+
+    if (dict.readIfPresent<point>("CofR", coordSys_.origin()))
+    {
+        const vector e3 = e3Name == word::null ?
+            vector(0, 0, 1) : dict.get<vector>(e3Name);
+        const vector e1 = e1Name == word::null ?
+            vector(1, 0, 0) : dict.get<vector>(e1Name);
+
+        coordSys_ =
+            coordSystem::cartesian(coordSys_.origin(), e3, e1);
+    }
+    else
+    {
+        // The 'coordinateSystem' sub-dictionary is optional,
+        // but enforce use of a cartesian system if not found.
+
+        if (dict.found(coordinateSystem::typeName_()))
+        {
+            // New() for access to indirect (global) coordinate system
+            coordSys_ =
+                coordinateSystem::New
+                (
+                    obr_,
+                    dict,
+                    coordinateSystem::typeName_()
+                );
+        }
+        else
+        {
+            coordSys_ = coordSystem::cartesian(dict);
+        }
+    }
+
+}
 
 
 void Foam::functionObjects::forces::initialise()
@@ -586,41 +613,20 @@ void Foam::functionObjects::forces::writeForces()
     writeIntegratedForceMoment
     (
         "forces",
-        force_[0],
-        force_[1],
-        force_[2],
+        coordSys_.localVector(force_[0]),
+        coordSys_.localVector(force_[1]),
+        coordSys_.localVector(force_[2]),
         forceFilePtr_
     );
 
     writeIntegratedForceMoment
     (
         "moments",
-        moment_[0],
-        moment_[1],
-        moment_[2],
+        coordSys_.localVector(moment_[0]),
+        coordSys_.localVector(moment_[1]),
+        coordSys_.localVector(moment_[2]),
         momentFilePtr_
     );
-
-    if (localSystem_)
-    {
-        writeIntegratedForceMoment
-        (
-            "local forces",
-            coordSys_.localVector(force_[0]),
-            coordSys_.localVector(force_[1]),
-            coordSys_.localVector(force_[2]),
-            localForceFilePtr_
-        );
-
-        writeIntegratedForceMoment
-        (
-            "local moments",
-            coordSys_.localVector(moment_[0]),
-            coordSys_.localVector(moment_[1]),
-            coordSys_.localVector(moment_[2]),
-            localMomentFilePtr_
-        );
-    }
 
     Log << endl;
 }
@@ -673,23 +679,17 @@ void Foam::functionObjects::forces::writeBinnedForceMoment
 
 void Foam::functionObjects::forces::writeBins()
 {
-    writeBinnedForceMoment(force_, forceBinFilePtr_);
-    writeBinnedForceMoment(moment_, momentBinFilePtr_);
+    List<Field<vector>> lf(3);
+    List<Field<vector>> lm(3);
+    lf[0] = coordSys_.localVector(force_[0]);
+    lf[1] = coordSys_.localVector(force_[1]);
+    lf[2] = coordSys_.localVector(force_[2]);
+    lm[0] = coordSys_.localVector(moment_[0]);
+    lm[1] = coordSys_.localVector(moment_[1]);
+    lm[2] = coordSys_.localVector(moment_[2]);
 
-    if (localSystem_)
-    {
-        List<Field<vector>> lf(3);
-        List<Field<vector>> lm(3);
-        lf[0] = coordSys_.localVector(force_[0]);
-        lf[1] = coordSys_.localVector(force_[1]);
-        lf[2] = coordSys_.localVector(force_[2]);
-        lm[0] = coordSys_.localVector(moment_[0]);
-        lm[1] = coordSys_.localVector(moment_[1]);
-        lm[2] = coordSys_.localVector(moment_[2]);
-
-        writeBinnedForceMoment(lf, localForceBinFilePtr_);
-        writeBinnedForceMoment(lm, localMomentBinFilePtr_);
-    }
+    writeBinnedForceMoment(lf, forceBinFilePtr_);
+    writeBinnedForceMoment(lm, momentBinFilePtr_);
 }
 
 
@@ -711,10 +711,6 @@ Foam::functionObjects::forces::forces
     momentFilePtr_(),
     forceBinFilePtr_(),
     momentBinFilePtr_(),
-    localForceFilePtr_(),
-    localMomentFilePtr_(),
-    localForceBinFilePtr_(),
-    localMomentBinFilePtr_(),
     patchSet_(),
     pName_(word::null),
     UName_(word::null),
@@ -724,7 +720,6 @@ Foam::functionObjects::forces::forces
     rhoRef_(VGREAT),
     pRef_(0),
     coordSys_(),
-    localSystem_(false),
     porosity_(false),
     nBin_(1),
     binDir_(Zero),
@@ -738,6 +733,7 @@ Foam::functionObjects::forces::forces
     if (readFields)
     {
         read(dict);
+        setCoordinateSystem(dict);
         Log << endl;
     }
 }
@@ -759,10 +755,6 @@ Foam::functionObjects::forces::forces
     momentFilePtr_(),
     forceBinFilePtr_(),
     momentBinFilePtr_(),
-    localForceFilePtr_(),
-    localMomentFilePtr_(),
-    localForceBinFilePtr_(),
-    localMomentBinFilePtr_(),
     patchSet_(),
     pName_(word::null),
     UName_(word::null),
@@ -772,7 +764,6 @@ Foam::functionObjects::forces::forces
     rhoRef_(VGREAT),
     pRef_(0),
     coordSys_(),
-    localSystem_(false),
     porosity_(false),
     nBin_(1),
     binDir_(Zero),
@@ -786,6 +777,7 @@ Foam::functionObjects::forces::forces
     if (readFields)
     {
         read(dict);
+        setCoordinateSystem(dict);
         Log << endl;
     }
 
@@ -843,32 +835,6 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         Info<< "    Reference pressure (pRef) set to " << pRef_ << endl;
     }
 
-    coordSys_.clear();
-    localSystem_ = false;
-
-    // Centre of rotation for moment calculations
-    // specified directly, from coordinate system, or implicitly (0 0 0)
-    if (!dict.readIfPresent<point>("CofR", coordSys_.origin()))
-    {
-        // The 'coordinateSystem' sub-dictionary is optional,
-        // but enforce use of a cartesian system.
-
-        if (dict.found(coordinateSystem::typeName_()))
-        {
-            // New() for access to indirect (global) coordinate system
-            coordSys_ =
-                coordinateSystem::New
-                (
-                    obr_, dict, coordinateSystem::typeName_()
-                );
-        }
-        else
-        {
-            coordSys_ = coordSystem::cartesian(dict);
-        }
-
-        localSystem_ = true;
-    }
 
     dict.readIfPresent("porosity", porosity_);
     if (porosity_)

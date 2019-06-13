@@ -10,13 +10,19 @@ OpenFOAM requires a functioning C++11 compiler and `make` build toolchain.
 - fftw: 3.3.7 (recommended - required for FFT-related functionality)
 - paraview: 5.5.2 (for visualization)
 
+If using the Intel&reg; compiler, `17.0.1 20161005` is the minimum
+usable version.
+
+
 To check the installed versions
 
 | Program       | To check the version  |
 |---------------|-----------------------|
 | gcc           | gcc --version         |
+| icc           | icc --version         |
 | cmake         | cmake --version       |
 | openmpi       | orterun --version     |
+
 
 
 ### Additional utilities
@@ -80,7 +86,6 @@ sudo zypper install cmake boost-devel mpfr-devel gmp-devel openmpi-devel gnuplot
 ```
 
 This installs
-
 
 | Program   | openSUSE  | Program version |
 |-----------|-----------|-----------------|
@@ -157,7 +162,7 @@ A partial list is given in the [ThirdParty requirements][link third-require].
 <!-- OpenFOAM -->
 
 [link openfoam-readme]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/README.md
-[link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/etc/README.md
+[link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md

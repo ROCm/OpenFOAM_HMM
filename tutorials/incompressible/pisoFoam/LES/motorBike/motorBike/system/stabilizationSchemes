@@ -8,11 +8,11 @@
 
 residuals
 {
-    type            solverInfo;
-    libs            ("libutilityFunctionObjects.so");
-    writeFields     true;
-    writeControl    outputTime;
-    fields          (p);
+    type                solverInfo;
+    libs                ("libutilityFunctionObjects.so");
+    writeResidualFields true;
+    writeControl        outputTime;
+    fields              (p);
 }
 
 blendingFactor

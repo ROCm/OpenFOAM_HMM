@@ -15,7 +15,8 @@ The [third-party][repo third] directory includes a
 [build guide][link third-build].
 
 Some known build issues related to specific compiler and VTK library versions
-can be found in the [$WM_PROJECT_DIR/BuildIssues.txt][link openfoam-issues] file.
+can be found in the [$WM_PROJECT_DIR/doc/BuildIssues.md][link openfoam-issues]
+file.
 
 If you need to change the default versions for third-party libraries,
 or use system libraries for some components, please some additional
@@ -94,10 +95,10 @@ simpleFoam
 OpenFOAM ships with ParaView sources for post-processing OpenFOAM
 field results. However, the paraview version distributed with
 the operating system or a [binary package][download ParaView]
-will be sufficient, and avoids additional compilation complexity.
+will often be sufficient, and avoids additional compilation complexity.
 
-If do you wish to compile ParaView from sources, it is recommended
-that you do so *after* completing an initial compilation of OpenFOAM.
+If you do wish to compile ParaView from source, it is recommended
+that you do so ***after*** completing an initial compilation of OpenFOAM.
 This gets the process started much more quickly. At a later stage,
 OpenFOAM can be updated to compile with paraview. Only the affected
 applications will be compiled (eg, the blockMesh reader module) and the
@@ -123,8 +124,9 @@ More details in the [ThirdParty build guide][link third-build].
 [repo openfoam]: https://develop.openfoam.com/Development/OpenFOAM-plus/
 [repo third]: https://develop.openfoam.com/Development/ThirdParty-plus/
 
-[link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/BuildIssues.txt
-[link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/etc/README.md
+[link openfoam-readme]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/README.md
+[link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/BuildIssues.md
+[link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
 [link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
