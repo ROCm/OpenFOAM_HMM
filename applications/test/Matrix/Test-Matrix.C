@@ -30,6 +30,7 @@ License
 #include "LLTMatrix.H"
 #include "Random.H"
 #include "SortList.H"
+#include "Switch.H"
 #include <algorithm>
 
 using namespace Foam;
@@ -237,22 +238,14 @@ int main(int argc, char *argv[])
         Info<< "# SquareMatrix<scalar> example:" << nl;
         printMatrix(Info, S) << nl;
 
-        const label mRows = S.m();
-        const label nCols = S.n();
-        const label size = S.size();
-        const labelPair sizes = S.sizes();
-        const bool isEmpty = S.empty();
-        const long constPointer = long(S.cdata());
-        long pointer = long(S.data());
-
         Info
-            << "Number of rows =" << tab << mRows << nl
-            << "Number of columns = " << tab << nCols << nl
-            << "Number of elements = " << tab << size << nl
-            << "Number of rows/columns = " << tab << sizes << nl
-            << "Matrix is empty = " << tab << isEmpty << nl
-            << "Constant pointer = " << tab << constPointer << nl
-            << "Pointer = " << tab << pointer << nl
+            << "Number of rows =" << tab << S.m() << nl
+            << "Number of columns = " << tab << S.n() << nl
+            << "Number of elements = " << tab << S.size() << nl
+            << "Number of rows/columns = " << tab << S.sizes() << nl
+            << "Matrix is empty = " << tab << Switch(S.empty()) << nl
+            << "Constant pointer = " << tab << uintptr_t(S.cdata()) << nl
+            << "Pointer = " << tab << uintptr_t(S.data()) << nl
             << nl;
 
         horizontalLine();
