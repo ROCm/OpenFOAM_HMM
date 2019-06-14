@@ -422,6 +422,9 @@ public:
             //- Return the stop control information
             virtual stopAtControls stopAt() const;
 
+            //- Return true if adjustTimeStep is true
+            virtual bool isAdjustTimeStep() const;
+
             //- Return the list of function objects
             const functionObjectList& functionObjects() const
             {
