@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2016 OpenFOAM Foundation
@@ -45,6 +45,7 @@ SourceFiles
 #include "word.H"
 #include "pTraits.H"
 #include "direction.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -119,9 +120,11 @@ inline bool read(const std::string& str, int32_t& val)
 Istream& operator>>(Istream& is, int32_t& val);
 Ostream& operator<<(Ostream& os, const int32_t val);
 
-// 32bit OS: long is not unambiguously (int32_t | int64_t)
+// 32bit compilation with long as int32_t
 // - resolve explicitly for input and output
-#if WM_ARCH_OPTION == 32
+//
+// Test works for gcc, icc, llvm.
+#if (__SIZEOF_LONG__ == 4)
     Istream& operator>>(Istream& is, long& val);
     Ostream& operator<<(Ostream& os, const long val);
 #endif

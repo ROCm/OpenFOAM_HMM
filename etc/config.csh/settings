@@ -22,6 +22,12 @@
 setenv WM_ARCH `uname -s`                   # System name
 ## if (! $?WM_OSTYPE ) setenv WM_OSTYPE POSIX  # System type (POSIX is default)
 
+set archOption=64
+if ($?WM_ARCH_OPTION) then
+    set archOption="$WM_ARCH_OPTION"
+endif
+
+unsetenv WM_ARCH_OPTION     # Compiling 32-bit on 64-bit system
 setenv WM_COMPILER_ARCH     # Host compiler type (when different than target)
 setenv WM_COMPILER_LIB_ARCH # Additional ending for lib directories
 
@@ -32,23 +38,22 @@ case Linux:
 
     switch (`uname -m`)
     case i686:
-        setenv WM_ARCH_OPTION 32
         breaksw
 
     case x86_64:
-        if (! $?WM_ARCH_OPTION ) setenv WM_ARCH_OPTION 64  # Default to 64-bit
-        switch ($WM_ARCH_OPTION)
+        switch ("$archOption")
         case 32:
-            setenv WM_COMPILER_ARCH 64 # 64-bit compiler, 32-bit target
+            setenv WM_ARCH_OPTION 32        # Need to propagate the value
+            setenv WM_COMPILER_ARCH 64      # 64-bit compiler, 32-bit target
             breaksw
 
         case 64:
             setenv WM_ARCH linux64
-            setenv WM_COMPILER_LIB_ARCH 64  # target with lib64
+            setenv WM_COMPILER_LIB_ARCH 64  # Target with lib64
             breaksw
 
         default:
-            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32|64"
+            echo "Unknown WM_ARCH_OPTION '$archOption', should be 32|64"
             breaksw
 
         endsw
@@ -60,13 +65,11 @@ case Linux:
 
     case armv7l:
         setenv WM_ARCH linuxARM7
-        setenv WM_ARCH_OPTION 32
         setenv WM_COMPILER_LIB_ARCH 32
         breaksw
 
     case aarch64:
         setenv WM_ARCH linuxARM64
-        setenv WM_ARCH_OPTION 64
         setenv WM_COMPILER_LIB_ARCH 64
         breaksw
 
@@ -88,14 +91,8 @@ case Linux:
     breaksw
 
 case Darwin:    # Presumably x86_64
-    if (! $?WM_ARCH_OPTION ) setenv WM_ARCH_OPTION 64  # Default to 64-bit
     setenv WM_ARCH darwin64
-    /bin/cat << INCOMPLETE
-===============================================================================
-Darwin support (clang only) is incomplete or untested in this OpenFOAM release.
-For further assistance, please contact www.OpenFOAM.com
-===============================================================================
-INCOMPLETE
+    echo "Darwin support is clang/llvm only"
     breaksw
 
 case SunOS*:
@@ -320,7 +317,7 @@ endsw
 
 # Cleanup
 # ~~~~~~~
-unset archDir siteDir foundDir
+unset archDir siteDir foundDir archOption
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir
