@@ -42,7 +42,7 @@ Description
         bold        | Title in bold                         | no  | yes
         italic      | Title in italic font                  | no  | no
         shadow      | Title with shadowont                  | no  | no
-        titleHack   | Alternative placement strategy        | no  | yes
+        titleHack   | Alternative placement strategy        | no  | no
     \endtable
 
 Note
