@@ -58,6 +58,10 @@ Foam::functionObjects::hydrostaticPressure::pRef() const
 {
     if (pRefName_ == "none")
     {
+        return dimensionedScalar(dimPressure, Zero);
+    }
+    else if (pRefName_ == "pInf")
+    {
         return dimensionedScalar("pRef", dimPressure, pRefValue_);
     }
     else
@@ -217,10 +221,12 @@ bool Foam::functionObjects::hydrostaticPressure::read(const dictionary& dict)
         dict.readIfPresent("ghf", ghfName_);
         dict.readIfPresent("nCorrectors", nCorrectors_);
 
-        if (pRefName_ == "none")
+        pRefValue_ = 0;
+        if (pRefName_ == "pInf")
         {
             pRefValue_ = dict.get<scalar>("pRefValue");
         }
+
         return true;
     }
 
