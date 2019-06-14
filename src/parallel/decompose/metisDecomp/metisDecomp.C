@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -36,15 +36,16 @@ License
 
 #include "metis.h"
 
-// Provide a clear error message if we have a size mismatch
+// Provide a clear error message if we have a severe size mismatch
+// Allow widening, but not narrowing
 //
 // Metis has an 'idx_t' type, but the IDXTYPEWIDTH define is perhaps
 // more future-proof?
 //#ifdef IDXTYPEWIDTH
 //static_assert
 //(
-//    sizeof(Foam::label) == (IDXTYPEWIDTH/8),
-//    "sizeof(Foam::label) == (IDXTYPEWIDTH/8), check your metis headers"
+//    sizeof(Foam::label) > (IDXTYPEWIDTH/8),
+//    "sizeof(Foam::label) > (IDXTYPEWIDTH/8), check your metis headers"
 //);
 //#endif
 
@@ -91,7 +92,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
     // Decomposition options
     List<idx_t> options(METIS_NOPTIONS);
-    METIS_SetDefaultOptions(options.begin());
+    METIS_SetDefaultOptions(options.data());
 
     // Processor weights initialised with no size, only used if specified in
     // a file
@@ -128,7 +129,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
         cellWeights.setSize(cWeights.size());
         forAll(cellWeights, i)
         {
-            cellWeights[i] = int(cWeights[i]/minWeights);
+            cellWeights[i] = idx_t(cWeights[i]/minWeights);
         }
     }
 
@@ -205,17 +206,17 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,                  // num vertices in graph
             &ncon,                      // num balancing constraints
-            xadj_metis.ref().begin(),   // indexing into adjncy
-            adjncy_metis.ref().begin(), // neighbour info
-            cellWeights.begin(),        // vertex wts
+            xadj_metis.ref().data(),    // indexing into adjncy
+            adjncy_metis.ref().data(),  // neighbour info
+            cellWeights.data(),         // vertex wts
             nullptr,                    // vsize: total communication vol
-            faceWeights.begin(),        // edge wts
+            faceWeights.data(),         // edge wts
             &nProcs,                    // nParts
-            processorWeights.begin(),   // tpwgts
+            processorWeights.data(),    // tpwgts
             nullptr,                    // ubvec: processor imbalance (default)
-            options.begin(),
+            options.data(),
             &edgeCut,
-            decomp_metis.ref().begin()
+            decomp_metis.ref().data()
         );
     }
     else
@@ -224,17 +225,17 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,                  // num vertices in graph
             &ncon,                      // num balancing constraints
-            xadj_metis.ref().begin(),   // indexing into adjncy
-            adjncy_metis.ref().begin(), // neighbour info
-            cellWeights.begin(),        // vertex wts
+            xadj_metis.ref().data(),    // indexing into adjncy
+            adjncy_metis.ref().data(),  // neighbour info
+            cellWeights.data(),         // vertex wts
             nullptr,                    // vsize: total communication vol
-            faceWeights.begin(),        // edge wts
+            faceWeights.data(),         // edge wts
             &nProcs,                    // nParts
-            processorWeights.begin(),   // tpwgts
+            processorWeights.data(),    // tpwgts
             nullptr,                    // ubvec: processor imbalance (default)
-            options.begin(),
+            options.data(),
             &edgeCut,
-            decomp_metis.ref().begin()
+            decomp_metis.ref().data()
         );
     }
 
