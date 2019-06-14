@@ -63,6 +63,7 @@ Usage
         wavePeriod   | wave period                  | yes      |
         waveHeight   | Wave height                  | yes      |
         wavePhase    | wave phase                   | yes      |
+        startTime    | Start time                   | no       | case start time
         rampTime     | Time to reach maximum motion | yes      |
         secondOrder  | Second order calculation     | no       | no
     \endtable
@@ -136,6 +137,9 @@ class waveMakerPointPatchVectorField
 
         //- Wave length
         scalar waveLength_;
+
+        //- Start time
+        scalar startTime_;
 
         //- Ramp time
         scalar rampTime_;
