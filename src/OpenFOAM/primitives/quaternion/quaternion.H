@@ -182,7 +182,7 @@ public:
        //- Vector part of the quaternion ( = axis of rotation)
        inline const vector& v() const;
 
-       //- The rotation tensor corresponding the quaternion
+       //- The rotation tensor corresponding to the quaternion
        inline tensor R() const;
 
        //- Return the Euler rotation angles corresponding to the

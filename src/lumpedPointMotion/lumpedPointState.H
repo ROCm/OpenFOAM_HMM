@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,7 @@ Description
         Property    | Description                           | Required | Default
         points      | List of points                        | yes |
         angles      | List of Euler rotation angles         | yes |
+        order       | The Euler-angle rotation order        | no  | zxz
         degrees     | Rotation angles in degrees            | no  | false
     \endtable
 
@@ -49,10 +50,11 @@ Description
     \endverbatim
 
 SeeAlso
-    EulerCoordinateRotation
+    Foam::coordinateRotations::euler, Foam::quaternion
 
 SourceFiles
     lumpedPointState.C
+    lumpedPointStateI.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -65,6 +67,7 @@ SourceFiles
 #include "scalarField.H"
 #include "vectorField.H"
 #include "tensorField.H"
+#include "quaternion.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -98,7 +101,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Positions of lumped points
         pointField  points_;
@@ -106,7 +109,10 @@ private:
         //- Orientation of lumped points (as Euler angles)
         vectorField angles_;
 
-        //- Euler angles in degrees instead radians
+        //- The Euler-angle rotation order (default: zxz)
+        quaternion::eulerOrder order_;
+
+        //- Euler angles measured in degrees
         bool degrees_;
 
         //- Tensor rotation of lumped points
