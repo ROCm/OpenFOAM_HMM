@@ -7,5 +7,5 @@ EXE_INC = \
     -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/phaseSystems/lnInclude
 
 LIB_LIBS = \
-    -lfieldFunctionObjects \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -lfieldFunctionObjects

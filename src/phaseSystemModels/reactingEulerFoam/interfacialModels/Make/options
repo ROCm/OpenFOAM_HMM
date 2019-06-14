@@ -11,7 +11,10 @@ EXE_INC = \
 
 LIB_LIBS = \
     -lfiniteVolume \
+    -lmeshTools \
     -lfluidThermophysicalModels \
     -lcompressibleTransportModels \
     -lspecie \
-    -lreactingPhaseSystem
+    -lreactingPhaseSystem \
+    -lturbulenceModels \
+    -lcompressibleTurbulenceModels
