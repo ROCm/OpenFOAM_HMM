@@ -34,21 +34,17 @@ Description
     skin-friction forces over a given list of patches, and the resistance
     from porous zones.
 
-    Forces and moments are calculated, with optional coordinate system and
-    writing of binned data, where force and moment contributions are collected
-    into a user-defined number of bins that span the input geometries for a
-    user-defined direction vector.
+    Forces and moments are calculated in a global Cartesian coordinate system
+    by default, or using a user-defined system.  Contributions can be 'binned'
+    according to a user-defined number of uniform-width collection zones (bins)
+    that span the input geometries, oriented by a user-defined direction vector.
 
-    Data is written into multiple files in the
+    Results are written to multiple files as a function of time in the
     postProcessing/\<functionObjectName\> directory:
-    - force.dat          : forces in global Cartesian coordinate system
-    - moment.dat         : moments in global Cartesian coordinate system
-    - forceBin.dat       : force bins in global Cartesian coordinate system
-    - momentBin.dat      : moment bins in global Cartesian coordinate system
-    - localForce.dat     : forces in local Cartesian coordinate system
-    - localMoment.dat    : moments in local Cartesian coordinate system
-    - localForceBin.dat  : force bins in local Cartesian coordinate system
-    - localMomentBin.dat : moment bins in local Cartesian coordinate system
+    - force.dat          : forces
+    - moment.dat         : moments
+    - forceBin.dat       : force bins
+    - momentBin.dat      : moment bins
 
 Usage
     Example of function object specification:
