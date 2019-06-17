@@ -135,6 +135,9 @@ class GAMGSolver
         //- LU decomposed coarsest matrix
         autoPtr<LUscalarMatrix> coarsestLUMatrixPtr_;
 
+        //- Sparse coarsest matrix solver
+        autoPtr<lduMatrix::solver> coarsestSolverPtr_;
+
 
     // Private Member Functions
 

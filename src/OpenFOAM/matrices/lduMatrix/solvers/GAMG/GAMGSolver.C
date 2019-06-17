@@ -27,6 +27,8 @@ License
 
 #include "GAMGSolver.H"
 #include "GAMGInterface.H"
+#include "PCG.H"
+#include "PBiCGStab.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -249,11 +251,11 @@ Foam::GAMGSolver::GAMGSolver
 
     if (matrixLevels_.size())
     {
-        if (directSolveCoarsest_)
-        {
-            const label coarsestLevel = matrixLevels_.size() - 1;
+        const label coarsestLevel = matrixLevels_.size() - 1;
 
-            if (matrixLevels_.set(coarsestLevel))
+        if (matrixLevels_.set(coarsestLevel))
+        {
+            if (directSolveCoarsest_)
             {
                 coarsestLUMatrixPtr_.reset
                 (
@@ -264,6 +266,56 @@ Foam::GAMGSolver::GAMGSolver
                         interfaceLevels_[coarsestLevel]
                     )
                 );
+            }
+            else
+            {
+                entry* coarseEntry = controlDict_.findEntry
+                (
+                    "coarsestLevelCorr",
+                    keyType::LITERAL_RECURSIVE
+                );
+                if (coarseEntry && coarseEntry->isDict())
+                {
+                    coarsestSolverPtr_ = lduMatrix::solver::New
+                    (
+                        "coarsestLevelCorr",
+                        matrixLevels_[coarsestLevel],
+                        interfaceLevelsBouCoeffs_[coarsestLevel],
+                        interfaceLevelsIntCoeffs_[coarsestLevel],
+                        interfaceLevels_[coarsestLevel],
+                        coarseEntry->dict()
+                    );
+                }
+                else if (matrixLevels_[coarsestLevel].asymmetric())
+                {
+                    coarsestSolverPtr_.set
+                    (
+                        new PBiCGStab
+                        (
+                            "coarsestLevelCorr",
+                            matrixLevels_[coarsestLevel],
+                            interfaceLevelsBouCoeffs_[coarsestLevel],
+                            interfaceLevelsIntCoeffs_[coarsestLevel],
+                            interfaceLevels_[coarsestLevel],
+                            PBiCGStabSolverDict(tolerance_, relTol_)
+                        )
+                    );
+                }
+                else
+                {
+                    coarsestSolverPtr_.set
+                    (
+                        new PCG
+                        (
+                            "coarsestLevelCorr",
+                            matrixLevels_[coarsestLevel],
+                            interfaceLevelsBouCoeffs_[coarsestLevel],
+                            interfaceLevelsIntCoeffs_[coarsestLevel],
+                            interfaceLevels_[coarsestLevel],
+                            PCGsolverDict(tolerance_, relTol_)
+                        )
+                    );
+                }
             }
         }
     }
