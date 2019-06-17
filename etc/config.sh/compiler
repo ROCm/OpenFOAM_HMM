@@ -104,6 +104,9 @@ ThirdParty)
     Clang70*)
         clang_version=llvm-7.0.1
         ;;
+    Clang80*)
+        clang_version=llvm-8.0.0
+        ;;
     *)
         /bin/cat << UNKNOWN_COMPILER 1>&2
 ===============================================================================
