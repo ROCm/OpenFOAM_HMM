@@ -83,13 +83,8 @@ Foam::token Foam::functionEntries::ifeqEntry::expand
     {
         const word varName(keyword.substr(1, keyword.size()-1));
 
-        // lookup the variable name in the given dictionary
-        const entry* ePtr = dict.lookupScopedEntryPtr
-        (
-            varName,
-            true,
-            true
-        );
+        // Lookup the variable name in the given dictionary
+        const entry* ePtr = dict.findScoped(varName, keyType::REGEX_RECURSIVE);
         if (ePtr)
         {
             return token(ePtr->stream());

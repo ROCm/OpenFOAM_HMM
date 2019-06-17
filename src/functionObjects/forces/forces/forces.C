@@ -107,6 +107,7 @@ void Foam::functionObjects::forces::writeBinHeader
     writeHeader(os, header + " bins");
     writeHeaderValue(os, "bins", nBin_);
     writeHeaderValue(os, "start", binMin_);
+    writeHeaderValue(os, "end", binMax_);
     writeHeaderValue(os, "delta", binDx_);
     writeHeaderValue(os, "direction", binDir_);
 
@@ -249,14 +250,14 @@ void Foam::functionObjects::forces::initialiseBins()
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
         // Determine extents of patches
-        binMin_ = GREAT;
-        scalar binMax = -GREAT;
+        scalar geomMin = GREAT;
+        scalar geomMax = -GREAT;
         for (const label patchi : patchSet_)
         {
             const polyPatch& pp = pbm[patchi];
             scalarField d(pp.faceCentres() & binDir_);
-            binMin_ = min(min(d), binMin_);
-            binMax = max(max(d), binMax);
+            geomMin = min(min(d), geomMin);
+            geomMax = max(max(d), geomMax);
         }
 
         // Include porosity
@@ -276,22 +277,31 @@ void Foam::functionObjects::forces::initialiseBins()
                 {
                     const cellZone& cZone = mesh_.cellZones()[zonei];
                     const scalarField d(dd, cZone);
-                    binMin_ = min(min(d), binMin_);
-                    binMax = max(max(d), binMax);
+                    geomMin = min(min(d), geomMin);
+                    geomMax = max(max(d), geomMax);
                 }
             }
         }
 
-        reduce(binMin_, minOp<scalar>());
-        reduce(binMax, maxOp<scalar>());
+        reduce(geomMin, minOp<scalar>());
+        reduce(geomMax, maxOp<scalar>());
 
-        // Slightly boost binMax so that region of interest is fully
-        // within bounds
-        binMax = 1.0001*(binMax - binMin_) + binMin_;
+        // Slightly boost max so that region of interest is fully within bounds
+        geomMax = 1.0001*(geomMax - geomMin) + geomMin;
 
-        binDx_ = (binMax - binMin_)/scalar(nBin_);
+        // Use geometry limits if not specified by the user
+        if (binMin_ == GREAT)
+        {
+            binMin_ = geomMin;
+        }
+        if (binMax_ == GREAT)
+        {
+            binMax_ = geomMax;
+        }
 
-        // Create the bin points used for writing
+        binDx_ = (binMax_ - binMin_)/scalar(nBin_);
+
+        // Create the bin mid-points used for writing
         binPoints_.setSize(nBin_);
         forAll(binPoints_, i)
         {
@@ -712,19 +722,20 @@ Foam::functionObjects::forces::forces
     forceBinFilePtr_(),
     momentBinFilePtr_(),
     patchSet_(),
-    pName_(word::null),
-    UName_(word::null),
-    rhoName_(word::null),
+    pName_("p"),
+    UName_("U"),
+    rhoName_("rho"),
     directForceDensity_(false),
-    fDName_(""),
+    fDName_("fD"),
     rhoRef_(VGREAT),
     pRef_(0),
     coordSys_(),
     porosity_(false),
     nBin_(1),
     binDir_(Zero),
-    binDx_(0.0),
+    binDx_(0),
     binMin_(GREAT),
+    binMax_(GREAT),
     binPoints_(),
     binCumulative_(true),
     writeFields_(false),
@@ -756,19 +767,20 @@ Foam::functionObjects::forces::forces
     forceBinFilePtr_(),
     momentBinFilePtr_(),
     patchSet_(),
-    pName_(word::null),
-    UName_(word::null),
-    rhoName_(word::null),
+    pName_("p"),
+    UName_("U"),
+    rhoName_("rho"),
     directForceDensity_(false),
-    fDName_(""),
+    fDName_("fD"),
     rhoRef_(VGREAT),
     pRef_(0),
     coordSys_(),
     porosity_(false),
     nBin_(1),
     binDir_(Zero),
-    binDx_(0.0),
+    binDx_(0),
     binMin_(GREAT),
+    binMax_(GREAT),
     binPoints_(),
     binCumulative_(true),
     writeFields_(false),
@@ -814,14 +826,26 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
     if (directForceDensity_)
     {
         // Optional entry for fDName
-        fDName_ = dict.lookupOrDefault<word>("fD", "fD");
+        if (dict.readIfPresent<word>("fD", fDName_))
+        {
+            Info<< "    fD: " << fDName_ << endl;
+        }
     }
     else
     {
-        // Optional entries U and p
-        pName_ = dict.lookupOrDefault<word>("p", "p");
-        UName_ = dict.lookupOrDefault<word>("U", "U");
-        rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
+        // Optional field name entries
+        if (dict.readIfPresent<word>("p", pName_))
+        {
+            Info<< "    p: " << pName_ << endl;
+        }
+        if (dict.readIfPresent<word>("U", UName_))
+        {
+            Info<< "    U: " << UName_ << endl;
+        }
+        if (dict.readIfPresent<word>("rho", rhoName_))
+        {
+            Info<< "    rho: " << rhoName_ << endl;
+        }
 
         // Reference density needed for incompressible calculations
         if (rhoName_ == "rhoInf")
@@ -831,10 +855,11 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         }
 
         // Reference pressure, 0 by default
-        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
-        Info<< "    Reference pressure (pRef) set to " << pRef_ << endl;
+        if (dict.readIfPresent<scalar>("pRef", pRef_))
+        {
+            Info<< "    Reference pressure (pRef) set to " << pRef_ << endl;
+        }
     }
-
 
     dict.readIfPresent("porosity", porosity_);
     if (porosity_)
@@ -848,8 +873,9 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
 
     if (dict.found("binData"))
     {
+        Info<< "    Activated data bins" << endl;
         const dictionary& binDict(dict.subDict("binData"));
-        binDict.readEntry("nBin", nBin_);
+        nBin_ = binDict.get<label>("nBin");
 
         if (nBin_ < 0)
         {
@@ -865,9 +891,21 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         else
         {
             Info<< "    Employing " << nBin_ << " bins" << endl;
-            binDict.readEntry("cumulative", binCumulative_);
-            binDict.readEntry("direction", binDir_);
+            if (binDict.readIfPresent("min", binMin_))
+            {
+                Info<< "    - min         : " << binMin_ << endl;
+            }
+            if (binDict.readIfPresent("max", binMax_))
+            {
+                Info<< "    - max         : " << binMax_ << endl;
+            }
+
+            binCumulative_ = binDict.get<bool>("cumulative");
+            Info<< "    - cumuluative : " << binCumulative_ << endl;
+
+            binDir_ = binDict.get<vector>("direction");
             binDir_.normalise();
+            Info<< "    - direction   : " << binDir_ << endl;
         }
     }
 

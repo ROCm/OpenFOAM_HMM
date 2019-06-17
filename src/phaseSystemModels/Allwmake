@@ -1,12 +1,22 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Parse arguments for library compilation
+cd ${0%/*} || exit 1                        # Run from this directory
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
+
+#------------------------------------------------------------------------------
 
 wmakeLnInclude reactingEulerFoam/interfacialCompositionModels
 wmakeLnInclude reactingEulerFoam/interfacialModels
 wmakeLnInclude reactingEulerFoam/derivedFvPatchFields
+
+case "$WM_COMPILER" in
+Mingw*)
+    echo "Skipping $WM_COMPILER compilation of $PWD"
+    echo "... needs further resolution of cyclic dependencies"
+    exit 0
+    ;;
+esac
+
+#------------------------------------------------------------------------------
 
 wmake $targetType  reactingEulerFoam/phaseSystems
 wmake $targetType  reactingEulerFoam/interfacialModels
@@ -18,6 +28,5 @@ wmake $targetType  reactingEulerFoam/reactingMultiphaseEulerFoam/multiphaseCompr
 
 wmake $targetType  reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseSystem
 wmake $targetType  reactingEulerFoam/reactingTwoPhaseEulerFoam/twoPhaseCompressibleTurbulenceModels
-
 
 #------------------------------------------------------------------------------

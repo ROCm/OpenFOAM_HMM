@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,6 +48,7 @@ Usage
         p_rgh        | Name of p_rgh field     | no          | p_rgh
         ph_rgh       | Name of ph_rgh field    | no          | ph_rgh
         pRef         | Name of pressure ref field | no       | pRef
+        pRefValue    | Value of pressure ref when pRef set to pInf | no | 0
         rho          | Name of density field   | no          | rho
         U            | Name of velocity field  | no          | U
         gh           | Name of gravity*height volume field  | no | gh
@@ -97,10 +98,10 @@ protected:
         word ph_rghName_;
 
         //- Name of uniform pressure reference field, default is "pRef"
-        //  Set to "none" to set to zero
+        //  Set to "none" to set to zero or pInf to set according to pRefValue
         word pRefName_;
 
-        //- Reference pressure if pRef is set to "none"
+        //- Reference pressure if pRefName is set to "pInf"
         scalar pRefValue_;
 
         //- Name of density field, default is "rho"

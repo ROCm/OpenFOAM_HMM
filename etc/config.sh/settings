@@ -22,6 +22,8 @@
 export WM_ARCH="$(uname -s)"                # System name
 ## : ${WM_OSTYPE:=POSIX}; export WM_OSTYPE     # System type (POSIX is default)
 
+archOption="${WM_ARCH_OPTION:-64}"
+unset WM_ARCH_OPTION        # Compiling 32-bit on 64-bit system
 unset WM_COMPILER_ARCH      # Host compiler type (when different than target)
 unset WM_COMPILER_LIB_ARCH  # Additional ending for lib directories
 
@@ -33,21 +35,20 @@ Linux)
 
     case "$(uname -m)" in
     i686)
-        export WM_ARCH_OPTION=32
         ;;
 
     x86_64)
-        : "${WM_ARCH_OPTION:=64}"; export WM_ARCH_OPTION  # Default to 64-bit
-        case "$WM_ARCH_OPTION" in
+        case "$archOption" in
         32)
-            export WM_COMPILER_ARCH=64 # 64-bit compiler, 32-bit target
+            export WM_ARCH_OPTION=32        # Need to propagate the value
+            export WM_COMPILER_ARCH=64      # 64-bit compiler, 32-bit target
             ;;
         64)
             WM_ARCH=linux64
-            export WM_COMPILER_LIB_ARCH=64
+            export WM_COMPILER_LIB_ARCH=64  # Target with lib64
             ;;
         *)
-            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32|64" 1>&2
+            echo "Unknown WM_ARCH_OPTION '$archOption', should be 32|64" 1>&2
             ;;
         esac
         ;;
@@ -58,13 +59,11 @@ Linux)
 
     armv7l)
         WM_ARCH=linuxARM7
-        export WM_ARCH_OPTION=32
         export WM_COMPILER_LIB_ARCH=32
         ;;
 
     aarch64)
         WM_ARCH=linuxARM64
-        export WM_ARCH_OPTION=64
         export WM_COMPILER_LIB_ARCH=64
         ;;
 
@@ -85,14 +84,8 @@ Linux)
     ;;
 
 Darwin)     # Presumably x86_64
-    : ${WM_ARCH_OPTION:=64}; export WM_ARCH_OPTION  # Default to 64-bit
     WM_ARCH=darwin64
-    /bin/cat << INCOMPLETE 1>&2
-===============================================================================
-Darwin support (clang only) is incomplete or untested in this OpenFOAM release.
-For further assistance, please contact www.OpenFOAM.com
-===============================================================================
-INCOMPLETE
+    echo "Darwin support is clang/llvm only" 1>&2
     ;;
 
 SunOS*)
@@ -314,7 +307,7 @@ esac
 
 # Cleanup
 # ~~~~~~~
-unset archDir siteDir foundDir
+unset archDir siteDir foundDir archOption
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

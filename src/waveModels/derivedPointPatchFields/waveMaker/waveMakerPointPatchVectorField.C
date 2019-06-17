@@ -105,6 +105,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(0),
     wavePhase_(0),
     waveLength_(0),
+    startTime_(0),
     rampTime_(1),
     secondOrder_(false)
 {}
@@ -126,6 +127,14 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(dict.get<scalar>("waveHeight")),
     wavePhase_(dict.get<scalar>("wavePhase")),
     waveLength_(this->waveLength(initialDepth_, wavePeriod_)),
+    startTime_
+    (
+        dict.lookupOrDefault<scalar>
+        (
+            "startTime",
+            db().time().startTime().value()
+        )
+    ),
     rampTime_(dict.get<scalar>("rampTime")),
     secondOrder_(dict.lookupOrDefault<bool>("secondOrder", false))
 {
@@ -165,6 +174,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(ptf.waveHeight_),
     wavePhase_(ptf.wavePhase_),
     waveLength_(ptf.waveLength_),
+    startTime_(ptf.startTime_),
     rampTime_(ptf.rampTime_),
     secondOrder_(ptf.secondOrder_)
 {}
@@ -185,6 +195,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(ptf.waveHeight_),
     wavePhase_(ptf.wavePhase_),
     waveLength_(ptf.waveLength_),
+    startTime_(ptf.startTime_),
     rampTime_(ptf.rampTime_),
     secondOrder_(ptf.secondOrder_)
 {}
@@ -199,7 +210,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
         return;
     }
 
-    const scalar t = db().time().value();
+    const scalar t = db().time().value() - startTime_;
 
     const scalar waveK = constant::mathematical::twoPi/waveLength_;
     const scalar sigma = constant::mathematical::twoPi/wavePeriod_;
@@ -259,9 +270,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
             const scalar stroke = sqrt(16.0*waveHeight_*initialDepth_/3.0);
             const scalar hr = waveHeight_/initialDepth_;
             wavePeriod_ = (2.0/(kappa*waveCelerity))*(3.8 + hr);
-
-            const scalar tSolitary =
-                -0.5*wavePeriod_ + t - db().time().startTime().value();
+            const scalar tSolitary = -0.5*wavePeriod_ + t;
 
             // Newton-Rapshon
             scalar theta1 = 0;
@@ -308,6 +317,7 @@ void Foam::waveMakerPointPatchVectorField::write(Ostream& os) const
     os.writeEntry("wavePeriod", wavePeriod_);
     os.writeEntry("waveHeight", waveHeight_);
     os.writeEntry("wavePhase", wavePhase_);
+    os.writeEntry("startTime", startTime_);
     os.writeEntry("rampTime", rampTime_);
     os.writeEntry("secondOrder", secondOrder_);
     writeEntry("value", os);

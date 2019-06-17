@@ -51,7 +51,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::labelList Foam::randomDecomp::decompose(const label nCells) const
+Foam::labelList Foam::randomDecomp::randomMap(const label nCells) const
 {
     Random rndGen(0);
 
@@ -93,7 +93,7 @@ Foam::labelList Foam::randomDecomp::decompose
     const scalarField&
 ) const
 {
-    return decompose(mesh.nCells());  // or cc.size()
+    return randomMap(mesh.nCells());  // or cc.size()
 }
 
 
@@ -104,7 +104,7 @@ Foam::labelList Foam::randomDecomp::decompose
     const scalarField&
 ) const
 {
-    return decompose(globalCellCells.size());  // or cc.size()
+    return randomMap(globalCellCells.size());  // or cc.size()
 }
 
 

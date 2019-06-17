@@ -1281,7 +1281,7 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         entry*
-        FOAM_DEPRECATED_FOR(2018-10, "lookupEntryPtr(keyType::option)")
+        FOAM_DEPRECATED_FOR(2018-10, "findEntry(keyType::option)")
         lookupEntryPtr
         (
             const word& keyword,
@@ -1295,7 +1295,7 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         const entry*
-        FOAM_DEPRECATED_FOR(2018-10, "lookupEntryPtr(keyType::option)")
+        FOAM_DEPRECATED_FOR(2018-10, "findEntry(keyType::option)")
         lookupEntryPtr
         (
             const word& keyword,
@@ -1309,7 +1309,7 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         const entry*
-        FOAM_DEPRECATED_FOR(2018-10, "lookupScopedEntryPtr(keyType::option)")
+        FOAM_DEPRECATED_FOR(2018-10, "findScoped(keyType::option)")
         lookupScopedEntryPtr
         (
             const word& keyword,

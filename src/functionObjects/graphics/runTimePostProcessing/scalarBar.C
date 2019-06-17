@@ -53,7 +53,7 @@ void Foam::functionObjects::runTimePostPro::scalarBar::clear()
     bold_ = true;
     shadow_ = false;
     italic_ = false;
-    titleHack_ = true;
+    titleHack_ = false;
     position_ = {0.8, 0.1};
     size_ = {0.1, 0.5};
     title_ = "";

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2016 OpenFOAM Foundation
@@ -125,7 +125,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const int32_t val)
 }
 
 
-#if WM_ARCH_OPTION == 32
+#if (__SIZEOF_LONG__ == 4)
 Foam::Istream& Foam::operator>>(Istream& is, long& val)
 {
     return operator>>(is, reinterpret_cast<int32_t&>(val));
@@ -133,8 +133,7 @@ Foam::Istream& Foam::operator>>(Istream& is, long& val)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const long val)
 {
-    os << int32_t(val);
-    return os;
+    return (os << int32_t(val));
 }
 #endif
 

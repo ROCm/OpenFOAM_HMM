@@ -51,7 +51,7 @@ class randomDecomp
     // Private Member Functions
 
         //- Random distribution on the 0-nCells interval
-        labelList decompose(const label nCells) const;
+        labelList randomMap(const label nCells) const;
 
         //- No copy construct
         void operator=(const randomDecomp&) = delete;

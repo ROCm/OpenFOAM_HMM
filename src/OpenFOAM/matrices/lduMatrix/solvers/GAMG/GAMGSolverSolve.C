@@ -26,8 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GAMGSolver.H"
-#include "PCG.H"
-#include "PBiCGStab.H"
 #include "SubField.H"
 #include "PrecisionAdaptor.H"
 
@@ -695,42 +693,16 @@ void Foam::GAMGSolver::solveCoarsestLevel
     else
     {
         coarsestCorrField = 0;
-        solverPerformance coarseSolverPerf;
-
-        if (matrixLevels_[coarsestLevel].asymmetric())
-        {
-            coarseSolverPerf = PBiCGStab
-            (
-                "coarsestLevelCorr",
-                matrixLevels_[coarsestLevel],
-                interfaceLevelsBouCoeffs_[coarsestLevel],
-                interfaceLevelsIntCoeffs_[coarsestLevel],
-                interfaceLevels_[coarsestLevel],
-                PBiCGStabSolverDict(tolerance_, relTol_)
-            ).scalarSolve
+        const solverPerformance coarseSolverPerf
+        (
+            coarsestSolverPtr_->solve
             (
                 coarsestCorrField,
                 coarsestSource
-            );
-        }
-        else
-        {
-            coarseSolverPerf = PCG
-            (
-                "coarsestLevelCorr",
-                matrixLevels_[coarsestLevel],
-                interfaceLevelsBouCoeffs_[coarsestLevel],
-                interfaceLevelsIntCoeffs_[coarsestLevel],
-                interfaceLevels_[coarsestLevel],
-                PCGsolverDict(tolerance_, relTol_)
-            ).scalarSolve
-            (
-                coarsestCorrField,
-                coarsestSource
-            );
-        }
+            )
+        );
 
-        if (debug >= 2)
+        if (debug)
         {
             coarseSolverPerf.print(Info.masterStream(coarseComm));
         }

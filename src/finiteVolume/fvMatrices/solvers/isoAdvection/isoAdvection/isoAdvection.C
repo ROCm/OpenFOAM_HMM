@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                 isoAdvector | Copyright (C) 2016-2017 DHI
-              Modified work | Copyright (C) 2018 Johan Roenby
+              Modified work | Copyright (C) 2019 Johan Roenby
 -------------------------------------------------------------------------------
 
 License
@@ -851,6 +851,12 @@ void Foam::isoAdvection::advect()
 
     // Do the isoAdvection on surface cells
     timeIntegratedFlux();
+
+    // Adjust alpha for mesh motion
+    if (mesh_.moving())
+    {
+        alpha1In_ *= (mesh_.Vsc0()/mesh_.Vsc());
+    }
 
     // Adjust dVf for unbounded cells
     limitFluxes();
