@@ -1,0 +1,11 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+resourcesDir=$FOAM_TUTORIALS/incompressible/adjointOptimisationFoam/resources
+
+\cp -r $resourcesDir/meshes/naca0012/polyMesh constant
+runApplication decomposePar
+runParallel $(getApplication)
+
+#------------------------------------------------------------------------------

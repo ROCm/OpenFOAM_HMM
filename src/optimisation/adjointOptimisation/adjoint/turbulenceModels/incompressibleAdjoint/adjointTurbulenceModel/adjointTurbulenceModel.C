@@ -1,0 +1,141 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2007-2019 PCOpt/NTUA
+                            | Copyright (C) 2013-2019 FOSS GP
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "adjointTurbulenceModel.H"
+#include "volFields.H"
+#include "surfaceFields.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace incompressibleAdjoint
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(adjointTurbulenceModel, 0);
+defineRunTimeSelectionTable(adjointTurbulenceModel, adjointTurbulenceModel);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+adjointTurbulenceModel::adjointTurbulenceModel
+(
+    incompressibleVars& primalVars,
+    incompressibleAdjointMeanFlowVars& adjointVars,
+    objectiveManager& objManager,
+    const word& adjointTurbulenceModelName
+)
+:
+    regIOobject
+    (
+        IOobject
+        (
+            adjointTurbulenceModelName,
+            primalVars.U().time().constant(),
+            primalVars.U().db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    primalVars_(primalVars),
+    adjointVars_(adjointVars),
+    runTime_(primalVars.U().time()),
+    mesh_(primalVars.U().mesh())
+{}
+
+
+// * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
+
+autoPtr<adjointTurbulenceModel> adjointTurbulenceModel::New
+(
+    incompressibleVars& primalVars,
+    incompressibleAdjointMeanFlowVars& adjointVars,
+    objectiveManager& objManager,
+    const word& adjointTurbulenceModelName
+)
+{
+    // Get model name, but do not register the dictionary
+    // otherwise it is registered in the database twice
+    const word modelType
+    (
+        IOdictionary
+        (
+            IOobject
+            (
+                "turbulenceProperties",
+                primalVars.U().time().constant(),
+                primalVars.U().db(),
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE,
+                false
+            )
+        ).get<word>("simulationType")
+    );
+
+    Info<< "Selecting turbulence model type " << modelType << endl;
+
+    auto cstrIter =
+        adjointTurbulenceModelConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalErrorInFunction
+            << modelType << nl << nl
+            << "Valid adjointTurbulenceModel types:" << endl
+            << adjointTurbulenceModelConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<adjointTurbulenceModel>
+    (
+        cstrIter()
+        (
+            primalVars,
+            adjointVars,
+            objManager,
+            adjointTurbulenceModelName
+        )
+    );
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void adjointTurbulenceModel::correct()
+{
+    primalVars_.laminarTransport().correct();
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace incompressibleAdjoint
+} // End namespace Foam
+
+// ************************************************************************* //
