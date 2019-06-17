@@ -253,12 +253,22 @@ public:
             //- Read and reset the solver parameters from the given stream
             virtual void read(const dictionary&);
 
+            //- Solve with given field and rhs
             virtual solverPerformance solve
             (
                 scalarField& psi,
                 const scalarField& source,
                 const direction cmpt=0
             ) const = 0;
+
+            //- Solve with given field and rhs (in solveScalar precision).
+            //  Default is to call solve routine
+            virtual solverPerformance scalarSolve
+            (
+                solveScalarField& psi,
+                const solveScalarField& source,
+                const direction cmpt=0
+            ) const;
 
             //- Return the matrix norm used to normalise the residual for the
             //- stopping criterion

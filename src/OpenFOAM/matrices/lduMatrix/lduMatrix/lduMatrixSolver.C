@@ -27,6 +27,7 @@ License
 
 #include "lduMatrix.H"
 #include "diagonalSolver.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -167,6 +168,23 @@ void Foam::lduMatrix::solver::read(const dictionary& solverControls)
 {
     controlDict_ = solverControls;
     readControls();
+}
+
+
+Foam::solverPerformance Foam::lduMatrix::solver::scalarSolve
+(
+    solveScalarField& psi,
+    const solveScalarField& source,
+    const direction cmpt
+) const
+{
+    PrecisionAdaptor<scalar, solveScalar> tpsi_s(psi);
+    return solve
+    (
+        tpsi_s.ref(),
+        ConstPrecisionAdaptor<scalar, solveScalar>(source)(),
+        cmpt
+    );
 }
 
 
