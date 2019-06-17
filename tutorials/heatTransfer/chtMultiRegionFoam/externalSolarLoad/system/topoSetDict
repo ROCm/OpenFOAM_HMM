@@ -77,7 +77,7 @@ actions
 
     //- Define again solid
     {
-        name    solid;
+        name    solidCells;
         type    cellSet;
         action  new;
         source  boxToCell;
@@ -85,7 +85,7 @@ actions
     }
 
     {
-        name    solid;
+        name    solidCells;
         type    cellSet;
         action  subtract;
         source  cellToCell;
@@ -97,7 +97,7 @@ actions
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        set     solid;           // cellSet
+        set     solidCells;     // cellSet
     }
 );
 
