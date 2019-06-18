@@ -264,9 +264,6 @@ bool Foam::functionObjects::wallBoundedStreamLine::read(const dictionary& dict)
 {
     if (streamLineBase::read(dict))
     {
-        Info<< type() << " " << name() << ":" << nl;
-
-
         // Make sure that the mesh is trackable
         if (debug)
         {

@@ -268,7 +268,8 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary&
+            const dictionary&,
+            const bool readFields = true
         );
 
 

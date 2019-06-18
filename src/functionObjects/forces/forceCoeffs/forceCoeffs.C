@@ -232,10 +232,11 @@ Foam::functionObjects::forceCoeffs::forceCoeffs
 (
     const word& name,
     const Time& runTime,
-    const dictionary& dict
+    const dictionary& dict,
+    const bool readFields
 )
 :
-    forces(name, runTime, dict),
+    forces(name, runTime, dict, false),
     magUInf_(Zero),
     lRef_(Zero),
     Aref_(Zero),
@@ -247,9 +248,12 @@ Foam::functionObjects::forceCoeffs::forceCoeffs
     CmPitchBinFilePtr_(),
     CmYawBinFilePtr_()
 {
-    read(dict);
-    setCoordinateSystem(dict, "liftDir", "dragDir");
-    Info<< endl;
+    if (readFields)
+    {
+        read(dict);
+        setCoordinateSystem(dict, "liftDir", "dragDir");
+        Info<< endl;
+    }
 }
 
 
