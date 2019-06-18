@@ -93,7 +93,12 @@ public:
     // Constructors
 
         //- Construct from mesh and the name of control sub-dictionary
-        simpleControl(fvMesh& mesh, const word& dictName="SIMPLE");
+        simpleControl
+        (
+            fvMesh& mesh,
+            const word& dictName = "SIMPLE",
+            const bool verbose = true
+        );
 
 
     //- Destructor

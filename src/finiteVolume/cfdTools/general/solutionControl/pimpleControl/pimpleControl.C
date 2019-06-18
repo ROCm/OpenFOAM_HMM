@@ -138,7 +138,12 @@ void Foam::pimpleControl::setFirstIterFlag(const bool check, const bool force)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pimpleControl::pimpleControl(fvMesh& mesh, const word& dictName)
+Foam::pimpleControl::pimpleControl
+(
+    fvMesh& mesh,
+    const word& dictName,
+    const bool verbose
+)
 :
     solutionControl(mesh, dictName),
     solveFlow_(true),
@@ -151,36 +156,38 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh, const word& dictName)
 {
     read();
 
-    Info<< nl
-        << algorithmName_;
-
-    if (nCorrPIMPLE_ > 1)
+    if (verbose)
     {
-        if (residualControl_.empty())
+        Info<< nl << algorithmName_;
+
+        if (nCorrPIMPLE_ > 1)
         {
-            Info<< ": no residual control data found. "
-                << "Calculations will employ " << nCorrPIMPLE_
-                << " corrector loops" << nl;
+            if (residualControl_.empty())
+            {
+                Info<< ": no residual control data found. "
+                    << "Calculations will employ " << nCorrPIMPLE_
+                    << " corrector loops" << nl;
+            }
+            else
+            {
+                Info<< ": max iterations = " << nCorrPIMPLE_ << nl;
+
+                for (const fieldData& ctrl : residualControl_)
+                {
+                    Info<< "    field " << ctrl.name << token::TAB
+                        << ": relTol " << ctrl.relTol
+                        << ", tolerance " << ctrl.absTol
+                        << nl;
+                }
+            }
         }
         else
         {
-            Info<< ": max iterations = " << nCorrPIMPLE_ << nl;
-
-            for (const fieldData& ctrl : residualControl_)
-            {
-                Info<< "    field " << ctrl.name << token::TAB
-                    << ": relTol " << ctrl.relTol
-                    << ", tolerance " << ctrl.absTol
-                    << nl;
-            }
+            Info<< ": Operating solver in PISO mode" << nl;
         }
-    }
-    else
-    {
-        Info<< ": Operating solver in PISO mode" << nl;
-    }
 
-    Info<< endl;
+        Info<< endl;
+    }
 }
 
 

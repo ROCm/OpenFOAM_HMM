@@ -91,33 +91,44 @@ bool Foam::simpleControl::criteriaSatisfied()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::simpleControl::simpleControl(fvMesh& mesh, const word& dictName)
+Foam::simpleControl::simpleControl
+(
+    fvMesh& mesh,
+    const word& dictName,
+    const bool verbose
+)
 :
     solutionControl(mesh, dictName),
     initialised_(false)
 {
     read();
 
-    Info<< nl
-        << algorithmName_;
+    if (verbose)
+    {
+        Info<< nl << algorithmName_;
 
-    if (residualControl_.empty())
-    {
-        Info<< ": no convergence criteria found. Calculations will run for "
-            << mesh_.time().endTime().value() - mesh_.time().startTime().value()
-            << " steps." << nl;
-    }
-    else
-    {
-        Info<< ": convergence criteria" << nl;
-        for (const fieldData& ctrl : residualControl_)
+        if (residualControl_.empty())
         {
-            Info<< "    field " << ctrl.name << token::TAB
-                << " tolerance " << ctrl.absTol
+            const scalar duration =
+                mesh_.time().endTime().value()
+              - mesh_.time().startTime().value();
+
+            Info<< ": no convergence criteria found. "
+                << "Calculations will run for " << duration << " steps."
                 << nl;
         }
+        else
+        {
+            Info<< ": convergence criteria" << nl;
+            for (const fieldData& ctrl : residualControl_)
+            {
+                Info<< "    field " << ctrl.name << token::TAB
+                    << " tolerance " << ctrl.absTol
+                    << nl;
+            }
+        }
+        Info<< endl;
     }
-    Info<< endl;
 }
 
 

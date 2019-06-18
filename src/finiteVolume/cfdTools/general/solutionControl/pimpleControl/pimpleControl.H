@@ -121,7 +121,12 @@ public:
     // Constructors
 
         //- Construct from mesh and the name of control sub-dictionary
-        pimpleControl(fvMesh& mesh, const word& dictName="PIMPLE");
+        pimpleControl
+        (
+            fvMesh& mesh,
+            const word& dictName = "PIMPLE",
+            const bool verbose = true
+        );
 
 
     //- Destructor
