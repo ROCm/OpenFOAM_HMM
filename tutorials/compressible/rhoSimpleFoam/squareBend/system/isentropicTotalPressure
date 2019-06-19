@@ -4,8 +4,6 @@ isentropicPressure
     libs            ("libfieldFunctionObjects.so");
     enabled         yes;
     writeControl    writeTime;
-    calcIsen        yes;
-    calcTotal       no;
-    calcCoeff       no;
-    result          isenTropicP;
+    mode            isentropic;
+    result          isentropicP;
 }

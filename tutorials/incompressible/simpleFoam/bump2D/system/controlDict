@@ -53,8 +53,7 @@ functions
         libs            ("libfieldFunctionObjects.so");
         writeControl    writeTime;
         result          Cp;
-        calcTotal       no;
-        calcCoeff       yes;
+        mode            staticCoeff;
         rho             rhoInf;
         rhoInf          1;
         U               UInf;

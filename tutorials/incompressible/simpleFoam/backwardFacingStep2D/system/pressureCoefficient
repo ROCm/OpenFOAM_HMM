@@ -3,8 +3,7 @@ libs            ("libfieldFunctionObjects.so");
 
 writeControl    writeTime;
 
-calcCoeff       yes;
-calcTotal       no;
+mode            staticCoeff;
 
 result          cp;
 

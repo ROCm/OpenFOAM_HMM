@@ -35,7 +35,7 @@ Description
     These currently include:
     - static pressure
         \f[
-            p = \rho p_k
+            p_s = p_{ref} + \rho p_k
         \f]
     - total pressure
         \f[
@@ -43,11 +43,11 @@ Description
         \f]
     - isentropic pressure
         \f[
-            p_iso = p*(1 + ((gamma-1)*M^2)/2)^(gamma/(gamma - 1))
+            p_i = p*(1 + ((gamma-1)*M^2)/2)^(gamma/(gamma - 1))
         \f]
     - static pressure coefficient
         \f[
-            Cp = \frac{p - p_{\inf}}{0.5 \rho_{\inf} |U_{\inf}|^2}
+            Cp = \frac{p_s - p_{\inf}}{0.5 \rho_{\inf} |U_{\inf}|^2}
         \f]
     - total pressure coefficient
         \f[
@@ -62,10 +62,10 @@ Description
         p_{\inf}    | Freestream pressure [Pa]
         U_{\inf}    | Freestream velocity [m/s]
         p_k         | Kinematic pressure (p/rho)[m2/s2]
-        p           | Pressure [Pa]
+        p_s         | Statoc pressure [Pa]
         p_0         | Total pressure [Pa]
         p_{ref}     | Reference pressure level [Pa]
-        p_iso       | Total isentropic pressure
+        p_i         | Total isentropic pressure
         Cp          | Pressure coefficient
         Cp_0        | Total pressure coefficient
     \endvartable
@@ -73,16 +73,6 @@ Description
     The function object will operate on both kinematic (\f$ p_k \f$) and static
     pressure (\f$ p \f$) fields, and the result is written as a
     volScalarField.
-
-    The modes of operation are:
-    \table
-        Mode                        | calcTotal | calcCoeff | calcIsen
-        Static pressure             | no        | no        | no
-        Total pressure              | yes       | no        | no
-        Pressure coefficient        | no        | yes       | no
-        Total pressure coefficient  | yes       | yes       | no
-        Total isentropic pressure   | no        | no        | yes
-    \endtable
 
 Usage
     Example of function object specification to calculate pressure coefficient:
@@ -105,14 +95,20 @@ Usage
         U            | Name of the velocity field  | no         | U
         rho          | Name of the density field   | no         | rho
         result       | Name of the resulting field | no         | derived from p
-        calcTotal    | Calculate total coefficient | yes        |
-        calcIsen     | Calculate total isentropic  | no         | no
+        mode         | Calculation mode (see below) | yes       |
         pRef         | Reference pressure for total pressure | no | 0
-        calcCoeff    | Calculate pressure coefficient | yes     |
         pInf         | Freestream pressure for coefficient calculation | no |
         UInf         | Freestream velocity for coefficient calculation | no |
         rhoInf       | Freestream density for coefficient calculation  | no |
     \endtable
+
+    The \c mode entry is used to select the type of pressure that is calculated.
+    Selections include:
+    - static
+    - total
+    - isentropic
+    - staticCoeff
+    - totalCoeff
 
 See also
     Foam::functionObjects::fieldExpression
@@ -145,7 +141,30 @@ class pressure
 :
     public fieldExpression
 {
+public:
+
+    // Public Data Types
+
+        //- Enumeration for pressure calculation mode
+        enum mode : unsigned
+        {
+            STATIC = 0x1,           //!< Static pressure
+            TOTAL = 0x2,            //!< Total pressure
+            ISENTROPIC = 0x4,       //!< Isentropic pressure
+            COEFF = 0x8,            //!< Coefficient manipulator
+            STATIC_COEFF = (STATIC | COEFF),
+            TOTAL_COEFF = (TOTAL | COEFF)
+        };
+
+        static const Enum<mode> modeNames;
+
+
+private:
+
     // Private data
+
+        //- Calculation mode
+        mode mode_;
 
         //- Name of velocity field, default is "U"
         word UName_;
@@ -156,20 +175,11 @@ class pressure
 
         // Total pressure calculation
 
-            //- Flag to calculate total pressure
-            bool calcTotal_;
-
-            //- Flag to calculate identropic total pressure
-            bool calcIsen_;
-
             //- Reference pressure level
             scalar pRef_;
 
 
         // Pressure coefficient calculation
-
-            //- Flag to calculate pressure coefficient
-            bool calcCoeff_;
 
             //- Freestream pressure
             scalar pInf_;
@@ -202,8 +212,8 @@ class pressure
         //- Return the reference pressure
         tmp<volScalarField> pRef(const tmp<volScalarField>& tp) const;
 
-        //- Calculate and return the dynamic pressure
-        tmp<volScalarField> pDyn
+        //- Calculate and return the pressure
+        tmp<volScalarField> calcPressure
         (
             const volScalarField& p,
             const tmp<volScalarField>& tp
@@ -234,7 +244,7 @@ public:
 
 
     //- Destructor
-    virtual ~pressure();
+    virtual ~pressure() = default;
 
 
     // Member Functions

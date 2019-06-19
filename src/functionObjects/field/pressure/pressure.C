@@ -27,7 +27,7 @@ License
 
 #include "pressure.H"
 #include "volFields.H"
-#include "fluidThermo.H"
+#include "basicThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -41,6 +41,18 @@ namespace functionObjects
 }
 }
 
+const Foam::Enum
+<
+    Foam::functionObjects::pressure::mode
+>
+Foam::functionObjects::pressure::modeNames
+({
+    { STATIC, "static" },
+    { TOTAL, "total" },
+    { ISENTROPIC, "isentropic" },
+    { STATIC_COEFF, "staticCoeff" },
+    { TOTAL_COEFF, "totalCoeff" },
+});
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -48,20 +60,26 @@ Foam::word Foam::functionObjects::pressure::resultName() const
 {
     word rName;
 
-    if (calcTotal_)
-    {
-        rName = "total(" + fieldName_ + ")";
-    }
-    else if (calcIsen_)
-    {
-        rName = "totalIsen(" + fieldName_ + ")";
-    }
-    else
+    if (mode_ & STATIC)
     {
         rName = "static(" + fieldName_ + ")";
     }
+    else if (mode_ & TOTAL)
+    {
+        rName = "total(" + fieldName_ + ")";
+    }
+    else if (mode_ & ISENTROPIC)
+    {
+        rName = "isentropic(" + fieldName_ + ")";
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Unhandled calculation mode " << modeNames[mode_]
+            << abort(FatalError);
+    }
 
-    if (calcCoeff_)
+    if (mode_ & COEFF)
     {
         rName += "_coeff";
     }
@@ -122,52 +140,50 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::pRef
-(
-    const tmp<volScalarField>& tp
-) const
-{
-    if (calcTotal_)
-    {
-        return tp + dimensionedScalar("pRef", dimPressure, pRef_);
-    }
-    else
-    {
-        return std::move(tp);
-    }
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::pDyn
+Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
 (
     const volScalarField& p,
     const tmp<volScalarField>& tp
 ) const
 {
-    if (calcTotal_)
+    switch (mode_)
     {
-        return
-            tp
-          + rhoScale(p, 0.5*magSqr(lookupObject<volVectorField>(UName_)));
-    }
-    else if (calcIsen_)
-    {
-        const fluidThermo* thermoPtr =
-            p.mesh().lookupObjectPtr<fluidThermo>(basicThermo::dictName);
+        case TOTAL:
+        {
+            return
+                tp
+              + dimensionedScalar("pRef", dimPressure, pRef_)
+              + rhoScale(p, 0.5*magSqr(lookupObject<volVectorField>(UName_)));
+        }
+        case ISENTROPIC:
+        {
+            const basicThermo* thermoPtr =
+                p.mesh().lookupObjectPtr<basicThermo>(basicThermo::dictName);
 
-        const volScalarField gamma(thermoPtr->gamma());
+            if (!thermoPtr)
+            {
+                FatalErrorInFunction
+                    << "Isentropic pressure calculation requires a "
+                    << "thermodynamics package"
+                    << exit(FatalError);
+            }
 
-        const volScalarField Mb
-        (
-            mag(lookupObject<volVectorField>(UName_))
-           /sqrt(gamma*tp.ref()/thermoPtr->rho())
-        );
+            const volScalarField gamma(thermoPtr->gamma());
 
-        return tp.ref()*(pow(1 + (gamma-1)/2*sqr(Mb), gamma/(gamma-1)));
-    }
-    else
-    {
-        return std::move(tp);
+            const volScalarField Mb
+            (
+                mag(lookupObject<volVectorField>(UName_))
+               /sqrt(gamma*tp.ref()/thermoPtr->rho())
+            );
+
+            return tp()*(pow(1 + (gamma - 1)/2*sqr(Mb), gamma/(gamma - 1)));
+        }
+        default:
+        {
+            return
+                tp
+              + dimensionedScalar("pRef", dimPressure, pRef_);
+        }
     }
 }
 
@@ -177,7 +193,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::coeff
     const tmp<volScalarField>& tp
 ) const
 {
-    if (calcCoeff_)
+    if (mode_ & COEFF)
     {
         tmp<volScalarField> tpCoeff(tp.ptr());
         volScalarField& pCoeff = tpCoeff.ref();
@@ -217,7 +233,7 @@ bool Foam::functionObjects::pressure::calc()
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            coeff(pRef(pDyn(p, rhoScale(p))))
+            coeff(calcPressure(p, rhoScale(p)))
         );
 
         return store(resultName_, tp);
@@ -237,12 +253,10 @@ Foam::functionObjects::pressure::pressure
 )
 :
     fieldExpression(name, runTime, dict, "p"),
+    mode_(STATIC),
     UName_("U"),
     rhoName_("rho"),
-    calcTotal_(false),
-    calcIsen_(false),
     pRef_(0),
-    calcCoeff_(false),
     pInf_(0),
     UInf_(Zero),
     rhoInf_(1),
@@ -250,12 +264,6 @@ Foam::functionObjects::pressure::pressure
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::pressure::~pressure()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -273,16 +281,31 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
         rhoInfInitialised_ = true;
     }
 
-    calcIsen_ = dict.lookupOrDefault<bool>("calcIsen", false);
-
-    dict.readEntry("calcTotal", calcTotal_);
-    if (calcTotal_)
+    if (dict.found("calcTotal"))
     {
-        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
+        // Backwards compatibility - check for the presence of 'calcTotal'
+        if (dict.getCompat<bool>("mode", {{"calcTotal", 1812}}))
+        {
+            mode_ = TOTAL;
+        }
+        else
+        {
+            mode_ = STATIC;
+        }
+
+        if (dict.getCompat<bool>("mode", {{"calcCoeff", 1812}}))
+        {
+            mode_ = static_cast<mode>(COEFF | mode_);
+        }
+    }
+    else
+    {
+        mode_ = modeNames.get("mode", dict);
     }
 
-    dict.readEntry("calcCoeff", calcCoeff_);
-    if (calcCoeff_)
+    pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
+
+    if (mode_ & COEFF)
     {
         dict.readEntry("pInf", pInf_);
         dict.readEntry("UInf", UInf_);
