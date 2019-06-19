@@ -209,7 +209,7 @@ Foam::GAMGSolver::GAMGSolver
     }
 
 
-    if (debug)
+    if (debug & 2)
     {
         for
         (
@@ -370,7 +370,7 @@ void Foam::GAMGSolver::readControls()
 
     if (debug)
     {
-        Pout<< "GAMGSolver settings :"
+        Info<< "GAMGSolver settings :"
             << " cacheAgglomeration:" << cacheAgglomeration_
             << " nPreSweeps:" << nPreSweeps_
             << " preSweepsLevelMultiplier:" << preSweepsLevelMultiplier_
