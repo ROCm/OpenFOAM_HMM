@@ -96,6 +96,7 @@ Usage
         writeFields  | Write force,moment coefficient fields | no | no
         patches      | Patches included in the forces calculation | yes |
         magUInf      | Free stream velocity magnitude       | yes |
+        rhoInf       | Free stream density | for compressible cases |
         lRef         | Reference length scale for moment calculations | yes |
         Aref         | Reference area                       | yes |
         porosity     | Include porosity contributions       | no  | false

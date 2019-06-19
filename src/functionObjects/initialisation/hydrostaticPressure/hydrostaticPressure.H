@@ -48,7 +48,7 @@ Usage
         p_rgh        | Name of p_rgh field     | no          | p_rgh
         ph_rgh       | Name of ph_rgh field    | no          | ph_rgh
         pRef         | Name of pressure ref field | no       | pRef
-        pRefValue    | Value of pressure ref when pRef set to pInf | no | 0
+        pRefValue    | Value of pressure ref | when pRef set to pInf | 0
         rho          | Name of density field   | no          | rho
         U            | Name of velocity field  | no          | U
         gh           | Name of gravity*height volume field  | no | gh
