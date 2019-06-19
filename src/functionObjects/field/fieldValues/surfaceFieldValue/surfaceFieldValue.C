@@ -527,9 +527,9 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::update()
 
     totalArea_ = totalArea();
 
-    Log
-        << "    total faces   = " << nFaces_ << nl
-        << "    total area    = " << totalArea_ << nl;
+    Log << "    total faces   = " << nFaces_ << nl
+        << "    total area    = " << totalArea_ << nl
+        << endl;
 
     writeFileHeader(file());
 
@@ -982,16 +982,16 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::read
 
 bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
 {
+    if (needsUpdate_ || operation_ != opNone)
+    {
+        fieldValue::write();
+    }
+
     update();
 
     if (operation_ != opNone)
     {
-        fieldValue::write();
-
-        if (Pstream::master())
-        {
-            writeTime(file());
-        }
+        writeTime(file());
     }
 
     if (writeArea_)
@@ -1080,12 +1080,12 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
         writeAll(Sf, weightField, points, faces);
     }
 
-    if (operation_ != opNone && Pstream::master())
+    if (operation_ != opNone)
     {
         file() << endl;
+        Log << endl;
     }
 
-    Log << endl;
 
     return true;
 }

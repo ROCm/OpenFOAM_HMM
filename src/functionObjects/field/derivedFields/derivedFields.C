@@ -281,7 +281,7 @@ bool Foam::functionObjects::derivedFields::execute()
         }
     }
 
-    Log << nl;
+    Log << nl << endl;
 
     return true;
 }
