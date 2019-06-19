@@ -549,6 +549,10 @@ Foam::label Foam::ptscotchDecomp::decompose
         }
     }
 
+
+    // Make repeatable
+    SCOTCH_randomReset();
+
     // Strategy
     // ~~~~~~~~
 

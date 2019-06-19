@@ -236,6 +236,9 @@ Foam::label Foam::scotchDecomp::decomposeSerial
         }
     }
 
+    // Make repeatable
+    SCOTCH_randomReset();
+
     // Strategy
     // ~~~~~~~~
 
