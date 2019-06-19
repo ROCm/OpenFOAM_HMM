@@ -107,6 +107,7 @@ wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
 wmake $targetType semiPermeableBaffle
 wmake $targetType atmosphericModels
+wmake $targetType optimisation/adjointOptimisation/adjoint
 
 phaseSystemModels/Allwmake $targetType $*
 

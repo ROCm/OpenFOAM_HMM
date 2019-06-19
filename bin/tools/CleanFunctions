@@ -73,6 +73,13 @@ cleanSnappyFiles()
 }
 
 
+cleanOptimisation()
+{
+    rm -rf optimisation
+    rm -rf constant/controlPoints
+}
+
+
 cleanPostProcessing()
 {
     rm -rf Ensight EnSight ensightWrite insitu VTK > /dev/null 2>&1
@@ -87,6 +94,7 @@ cleanCase()
     cleanTimeDirectories
     cleanPostProcessing
     cleanDynamicCode
+    cleanOptimisation
 
     rm -rf processor* > /dev/null 2>&1
     rm -rf TDAC > /dev/null 2>&1
