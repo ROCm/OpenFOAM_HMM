@@ -62,7 +62,7 @@ protected:
     // Protected data
 
         //- Minimum time step value to compare
-        const scalar minValue_;
+        scalar minValue_;
 
 
 public:
