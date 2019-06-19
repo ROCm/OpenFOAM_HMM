@@ -82,8 +82,7 @@ Usage
         type        pressure;
         libs        ("libfieldFunctionObjects.so");
         ...
-        calcTotal   no;
-        calcCoeff   yes;
+        mode        staticCoeff;
     }
     \endverbatim
 

@@ -281,10 +281,17 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
         rhoInfInitialised_ = true;
     }
 
-    if (dict.found("calcTotal"))
+    if (!modeNames.readIfPresent("mode", dict, mode_))
     {
-        // Backwards compatibility - check for the presence of 'calcTotal'
-        if (dict.getCompat<bool>("mode", {{"calcTotal", 1812}}))
+        // Backwards compatibility
+        // - check for the presence of 'calcTotal' and 'calcCoeff'
+
+        bool calcTotal =
+            dict.getOrDefaultCompat<bool>("mode", {{"calcTotal", 1812}}, false);
+        bool calcCoeff =
+            dict.getOrDefaultCompat<bool>("mode", {{"calcCoeff", 1812}}, false);
+
+        if (calcTotal)
         {
             mode_ = TOTAL;
         }
@@ -293,14 +300,10 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
             mode_ = STATIC;
         }
 
-        if (dict.getCompat<bool>("mode", {{"calcCoeff", 1812}}))
+        if (calcCoeff)
         {
             mode_ = static_cast<mode>(COEFF | mode_);
         }
-    }
-    else
-    {
-        mode_ = modeNames.get("mode", dict);
     }
 
     pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
