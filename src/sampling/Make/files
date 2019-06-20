@@ -11,6 +11,7 @@ sampledSet/face/faceOnlySet.C
 sampledSet/midPoint/midPointSet.C
 sampledSet/midPointAndFace/midPointAndFaceSet.C
 sampledSet/patchSeed/patchSeedSet.C
+sampledSet/patchEdge/patchEdgeSet.C
 sampledSet/sampledSet/sampledSet.C
 sampledSet/sampledSets/sampledSets.C
 sampledSet/sampledSets/sampledSetsGrouping.C
