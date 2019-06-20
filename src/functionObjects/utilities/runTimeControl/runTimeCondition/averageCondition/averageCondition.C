@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -118,7 +118,7 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
         return true;
     }
 
-    bool satisfied = iter_ > nIterStartUp_ ? true : false;
+    bool satisfied = iter_ > nIterStartUp_;
 
     ++iter_;
 
@@ -154,6 +154,11 @@ bool Foam::functionObjects::runTimeControls::averageCondition::apply()
         for (const label fieldi : unprocessedFields)
         {
             Info<< "        " << fieldNames_[fieldi] << nl;
+        }
+
+        if (unprocessedFields.size() == fieldNames_.size())
+        {
+            satisfied = false;
         }
     }
 
