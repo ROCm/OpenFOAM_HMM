@@ -89,6 +89,7 @@ static bool calc_rhoU
             IOobject
             (
                 derivedName,
+                mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
@@ -142,6 +143,7 @@ static bool calc_pTotal
             IOobject
             (
                 derivedName,
+                mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
