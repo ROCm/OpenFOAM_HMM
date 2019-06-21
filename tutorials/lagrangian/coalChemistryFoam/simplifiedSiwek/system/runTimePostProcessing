@@ -44,7 +44,7 @@ postPro1
     {
         cloud1
         {
-            type            cloud;
+            type            geometryCloud;
             cloud           coalCloud1;
             colourMap       coolToWarm;
             representation  sphere;
