@@ -1,0 +1,34 @@
+Synthetic turbulence inflow tests
+======================
+
+The following three synthetic turbulence inflow boundary conditions are
+examined through a single-cell-domain smooth-wall plane channel flow setup:
+
+- turbulentDFSEMInlet
+- turbulentDigitalFilterInlet variant=digitalFilter
+- turbulentDigitalFilterInlet variant=reducedDigitalFilter
+
+The input statistics are obtained from:
+
+    Moser, Kim & Mansour
+    "DNS of Turbulent Channel Flow up to Re_tau=590",
+    Physics of Fluids (1999) vol 11, 943-945.
+    doi.org/10.1063/1.869966
+
+from which the input first-/second-order turbulence statistics data for the 
+smooth-wall plane channel flow at Re=395 were used.
+
+The data is available online from (Retrieved: 21-06-2019):
+
+    http://turbulence.ices.utexas.edu/MKM_1999.html
+
+Serial executing:
+
+./Allrun
+
+Parallel (decompositionMethod=scotch) executing:
+
+./Allrunparallel
+
+Both scripts run the test case, and collect the OpenFOAM samples, and plots into
+the 'results' directory. 

@@ -950,6 +950,12 @@ bool Foam::Time::stopAt(const stopAtControls stopCtrl) const
 }
 
 
+bool Foam::Time::isAdjustTimeStep() const
+{
+    return controlDict_.lookupOrDefault("adjustTimeStep", false) ? true : false;
+}
+
+
 void Foam::Time::setTime(const Time& t)
 {
     value() = t.value();
