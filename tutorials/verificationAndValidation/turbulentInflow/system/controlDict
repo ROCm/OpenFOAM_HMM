@@ -45,59 +45,14 @@ timePrecision   8;
 
 runTimeModifiable false;
 
-adjustTimeStep false;
+adjustTimeStep  false;
+
+// Allow 10% run-up before calculating mean
+timeStart       #calc #{ 0.1 * ${/endTime} #};
 
 functions
 {
-    fieldAverage1
-    {
-        type                fieldAverage;
-        libs                ("libfieldFunctionObjects.so");
-        enabled             true;
-        writeControl        writeTime;
-        timeStart           8.5;
-        restartOnRestart    false;
-        fields
-        (
-            U
-            {
-                mean        on;
-                prime2Mean  on;
-                base        time;
-            }
-        );
-    }
-
-    inletSampling
-    {
-        type                sets;
-        libs                ("libsampling.so");
-        enabled             true;
-        writeControl        writeTime;
-        timeStart           8.5;
-        restartOnRestart    false;
-        interpolationScheme cellPoint;
-        setFormat           raw;
-        fields              (UPrime2Mean);
-
-        sets
-        (
-            inletPatch
-            {
-                type        face;
-                axis        y;
-                start       (0.0 0 1.57);
-                end         (0.0 2 1.57);
-            }
-            inletCell
-            {
-                type        face;
-                axis        y;
-                start       (0.062832 0 1.57);
-                end         (0.062832 2 1.57);
-            }
-        );
-    }
+    #include "sampling"
 }
 
 // ************************************************************************* //

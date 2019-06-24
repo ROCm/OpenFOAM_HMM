@@ -1,0 +1,67 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+
+# Require gnuplot
+command -v gnuplot >/dev/null 2>&1 || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
+    exit 1
+}
+
+
+# The latestTime in postProcessing/inletSampling
+timeDir=$(foamListTimes -case postProcessing/inletSampling -latestTime 2>/dev/null)
+
+[ -n "$timeDir" ] || {
+    echo "No postProcessing/inletSampling found - skipping graph creation" 1>&2
+    exit 2
+}
+
+timeDir="postProcessing/inletSampling/$timeDir"
+
+echo "Creating graphs"
+
+gnuplot<<GNUPLOT
+
+set terminal png size 1000,800 enhanced font "Helvetica,24"
+
+set xrange [0:1]
+set yrange [-1:8]
+set xlabel "Channel height"
+set ylabel "<u_i u_i>"
+
+set offset .05, .05
+set style data linespoints
+
+set grid
+set linetype 1 lc rgb 'black' lw 2
+set linetype 2 lc rgb 'red' lw 2
+set linetype 3 lc rgb 'blue' lw 2
+set linetype 4 lc rgb 'green' lw 2
+set linetype 5 lc rgb 'black' pi -8 pt 4 ps 1.5
+set linetype 6 lc rgb 'red' pi -8 pt 4 ps 1.5
+set linetype 7 lc rgb 'blue' pi -8 pt 4 ps 1.5
+set linetype 8 lc rgb 'green' pi -8 pt 4 ps 1.5
+
+
+set title "Stress in cell"
+input = "$timeDir/inletCell_UPrime2Mean.xy"
+set output 'stress-cell.png'
+plot \
+    input u 1:2 w lines t "<uu>" lt 1, \
+    input u 1:5 w lines t "<vv>" lt 2, \
+    input u 1:7 w lines t "<ww>" lt 3, \
+    input u 1:3 w lines t "<uv>" lt 4
+
+
+set title "Stress on patch"
+input = "$timeDir/inletPatch_UPrime2Mean.xy"
+set output 'stress-patch.png'
+plot \
+    input u 1:2 w lines t "<uu>" lt 1, \
+    input u 1:5 w lines t "<vv>" lt 2, \
+    input u 1:7 w lines t "<ww>" lt 3, \
+    input u 1:3 w lines t "<uv>" lt 4
+
+GNUPLOT
+
+#------------------------------------------------------------------------------
