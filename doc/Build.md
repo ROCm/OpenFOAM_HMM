@@ -1,8 +1,9 @@
 ## OpenFOAM&reg; Quick Build Guide
 
-Ensure that the [system requirements][link openfoam-require] are satisfied as described here,
-and make sure to source the correct OpenFOAM environment. For example,
-for the OpenFOAM-v1906 version:
+Prior to building, ensure that the [system requirements][link openfoam-require]
+are satisfied (including any special [cross-compiling][link openfoam-cross]
+considerations), and source the correct OpenFOAM environment.
+For example, for the OpenFOAM-v1906 version:
 ```
 source /installation/path/OpenFOAM-v1906/etc/bashrc
 ```
@@ -27,7 +28,7 @@ information about the [config structure][link openfoam-config].
 The compilation process is self-contained and will compile and install
 all OpenFOAM code and dependencies.
 
-- Test the system readiness (optional)
+- Test the system readiness (optional, not supported for cross-compilation)
 ```
 foamSystemCheck
 ```
@@ -73,7 +74,7 @@ you haven't missed any error messages.
 
 - Open a new shell and source the OpenFOAM environment to see all
   changes (refer to top of page).
-- Validate the build by running
+- Validate the build (not supported for cross-compilation) by running
 ```
 foamInstallationTest
 ```
@@ -128,6 +129,7 @@ More details in the [ThirdParty build guide][link third-build].
 [link openfoam-issues]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/BuildIssues.md
 [link openfoam-config]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Config.md
 [link openfoam-build]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Build.md
+[link openfoam-cross]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Cross-Compile-mingw.md
 [link openfoam-require]: https://develop.openfoam.com/Development/OpenFOAM-plus/blob/develop/doc/Requirements.md
 [link third-readme]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/README.md
 [link third-build]: https://develop.openfoam.com/Development/ThirdParty-plus/blob/develop/BUILD.md
