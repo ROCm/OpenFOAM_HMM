@@ -20,9 +20,9 @@ runApplication blockMesh
 # Compute parallel and collect data
 for val in ${Models[@]}; do
   echo "Running the case with the model: $val"
-  \rm 0/U*
+  \rm -f 0/U*
   \cp 0.orig/U.$val 0/U
-  \rm -r constant/boundaryData/inlet
+  \rm -rf constant/boundaryData/inlet
   \cp -r constant/boundaryData/inlet.$val constant/boundaryData/inlet
   runApplication decomposePar
   runParallel pimpleFoam
@@ -34,4 +34,3 @@ for val in ${Models[@]}; do
   cleanTimeDirectories
   \rm -rf processor* > /dev/null 2>&1
 done
-

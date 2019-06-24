@@ -21,7 +21,7 @@ runApplication blockMesh
 for val in ${Models[@]}; do
   echo "Running the case with the model: $val"
   \cp 0/U.$val 0/U
-  \rm -r constant/boundaryData/inlet
+  \rm -rf constant/boundaryData/inlet
   \cp -r constant/boundaryData/inlet.$val constant/boundaryData/inlet
   runApplication pimpleFoam
   gnuplot plot.patch
