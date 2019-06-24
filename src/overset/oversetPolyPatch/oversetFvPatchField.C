@@ -173,7 +173,7 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
         {
             const dictionary* dictPtr
             (
-                fvSchemes.subDictPtr("oversetInterpolationSuppressed")
+                fvSchemes.findDict("oversetInterpolationSuppressed")
             );
 
             const wordHashSet& suppress =

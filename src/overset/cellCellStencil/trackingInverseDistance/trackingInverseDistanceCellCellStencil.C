@@ -575,7 +575,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     DebugInfo<< FUNCTION_NAME << " : Moved zone sub-meshes" << endl;
 
     // Calculate fast search structure for each zone
-    List<labelVector> searchBoxDivisions(dict_["searchBoxDivisions"]);
+    List<labelVector> searchBoxDivisions(dict_.lookup("searchBoxDivisions"));
     if (searchBoxDivisions.size() != nZones)
     {
         FatalIOErrorInFunction(dict_) << "Number of searchBoxDivisions "
