@@ -157,8 +157,10 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
         }
         case ISENTROPIC:
         {
+DebugVar("getting thermo");
             const basicThermo* thermoPtr =
                 p.mesh().lookupObjectPtr<basicThermo>(basicThermo::dictName);
+DebugVar("got thermo");
 
             if (!thermoPtr)
             {
@@ -167,14 +169,16 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
                     << "thermodynamics package"
                     << exit(FatalError);
             }
+DebugVar("calc gamma");
 
             const volScalarField gamma(thermoPtr->gamma());
-
+DebugVar(gamma);
             const volScalarField Mb
             (
                 mag(lookupObject<volVectorField>(UName_))
                /sqrt(gamma*tp.ref()/thermoPtr->rho())
             );
+DebugVar(Mb);
 
             return tp()*(pow(1 + (gamma - 1)/2*sqr(Mb), gamma/(gamma - 1)));
         }
@@ -270,6 +274,8 @@ Foam::functionObjects::pressure::pressure
 
 bool Foam::functionObjects::pressure::read(const dictionary& dict)
 {
+    Info<< type() << " " << name() << ":" << nl;
+
     fieldExpression::read(dict);
 
     UName_   = dict.lookupOrDefault<word>("U", "U");
@@ -306,6 +312,8 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
         }
     }
 
+    Info<< "    operating mode: " << modeNames[mode_] << nl;
+
     pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
 
     if (mode_ & COEFF)
@@ -329,6 +337,8 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
     }
 
     resultName_ = dict.lookupOrDefault<word>("result", resultName());
+
+    Info<< endl;
 
     return true;
 }
