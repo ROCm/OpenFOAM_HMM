@@ -75,8 +75,8 @@ echo "  ${WM_PROJECT_DIR##*/}"
 echo "  $WM_COMPILER $WM_COMPILER_TYPE compiler"
 echo "  ${WM_OPTIONS}, with ${WM_MPLIB} ${FOAM_MPI}"
 echo
-echo "  api   = $(wmakeBuildInfo -show-api 2>/dev/null)"
-echo "  patch = $(wmakeBuildInfo -show-patch 2>/dev/null)"
+echo "  api   = $(foamEtcFile -show-api 2>/dev/null)"
+echo "  patch = $(foamEtcFile -show-patch 2>/dev/null)"
 echo "  bin   = $(_foamCountDirEntries $FOAM_APPBIN) entries"
 echo "  lib   = $(_foamCountDirEntries $FOAM_LIBBIN) entries"
 echo
