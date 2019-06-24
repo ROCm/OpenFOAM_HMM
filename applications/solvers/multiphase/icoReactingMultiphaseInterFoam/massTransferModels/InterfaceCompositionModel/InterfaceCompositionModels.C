@@ -311,6 +311,20 @@ namespace Foam
             hConstSolidThermoPhysics
         );
 
+        //From pure liquid phase (ico-rho) to pure phase (exp-Transp, hPower solidThermo)
+        makeInterfacePureType
+        (
+            Lee,
+            heSolidThermo,
+            solidThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            hPowerSolidThermoPhysics
+        );
+
 
 }
 
