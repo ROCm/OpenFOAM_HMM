@@ -48,6 +48,7 @@ Usage: ${0##*/} [OPTION] commit-ish
 options:
    -output DIR      Specify alternative output directory
    -no-modules      Exclude submodules
+   -no-patch        Ignore _patch number for the output tar-file
    -compress=TYPE   Compress with specified type
    -tgz             Alias for -compress=tgz
    -help            Print help
@@ -79,7 +80,7 @@ die()
 
 #-------------------------------------------------------------------------------
 outputDir="."
-withModules=true
+unset skipModules skipPatchNum
 unset gitbase head commit compress
 
 while [ "$#" -gt 0 ]
@@ -94,7 +95,10 @@ do
         shift
         ;;
     -no-modules)
-        unset withModules
+        skipModules=true
+        ;;
+    -no-patch)
+        skipPatchNum=true
         ;;
     -compress=*)
         compress="${1#*=}"
@@ -187,9 +191,12 @@ echo "Detected api, patch as '$api' and '$patch'" 1>&2
 dirPrefix="OpenFOAM-v${api}"
 tarName="OpenFOAM-v${api}"
 
-if [ "${patch:-0}" -gt 0 ]
+if [ "$skipPatchNum" = true ]
 then
-    tarName="${tarName}_$patch"
+    echo "Ignoring patch number for output name" 1>&2
+elif [ "${patch:-0}" -gt 0 ]
+then
+    tarName="${tarName}_${patch}"
 fi
 
 echo 1>&2
@@ -224,7 +231,7 @@ echo 'git ls-tree -r "$head" >> "$outputDir/$manifest"'
 
 #------------------------------------------------------------------------------
 # Add in mpdules
-if [ "$withModules" = true ]
+if [ "$skipModules" != true ]
 then
     git --git-dir="$gitbase/.git" ls-tree "$head" modules/ | \
         while read mode gittype sha1 module
@@ -249,7 +256,7 @@ then
 
         echo 'tar -Af "$outputDir/$tarName.tar" "$outputDir/$tarModule.tar"'
         echo 'rm -f "$outputDir/$tarModule.tar"'
-        echo "popd"
+        echo 'popd'
         echo
     done
 fi
@@ -263,7 +270,7 @@ echo "echo 'Adding manifest'"
 echo 'pushd "$outputDir"'
 echo "tar --append --transform='s|@|/|g' -v -f \"\$tarName.tar\" \"\$manifest\""
 echo 'rm -f "$manifest"'
-echo "popd"
+echo 'popd'
 
 echo
 echo "# End of creating archive"
