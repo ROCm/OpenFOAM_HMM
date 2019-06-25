@@ -315,12 +315,12 @@ namespace Foam
         makeInterfacePureType
         (
             Lee,
-            heSolidThermo,
-            solidThermo,
-            pureMixture,
-            icoPoly8HThermoPhysics,
             heRhoThermo,
             rhoThermo,
+            pureMixture,
+            icoPoly8HThermoPhysics,
+            heSolidThermo,
+            solidThermo,
             pureMixture,
             hPowerSolidThermoPhysics
         );
