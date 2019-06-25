@@ -211,8 +211,9 @@ echo "tarName=\""$tarName"\""
 # Note - directory separator '/' encoded as '@' for manifest name
 echo "manifest=\""${dirPrefix}"@META-INFO@"manifest.txt"\""
 echo
-echo "set -x"
-echo 'git archive --format=tar --prefix="$dirPrefix/" -o "$outputDir/$tarName.tar" "$head"'
+echo 'set -x'
+echo 'umask 0022'
+echo 'git -c tar.umask=user archive --format=tar --prefix="$dirPrefix/" -o "$outputDir/$tarName.tar" "$head"'
 
 echo 'echo "api=$api" > "$outputDir/$manifest"'
 echo 'echo "patch=$patch" >> "$outputDir/$manifest"'
@@ -237,7 +238,7 @@ then
 
         echo
         echo 'pushd "$module"'
-        echo 'git archive --format=tar --prefix="$dirPrefix/$module/" -o "$outputDir/$tarModule.tar" "$commit"'
+        echo 'git -c tar.umask=user archive --format=tar --prefix="$dirPrefix/$module/" -o "$outputDir/$tarModule.tar" "$commit"'
         echo 'git ls-tree -r "$commit" >> "$outputDir/$manifest"'
 
         echo 'echo >> "$outputDir/$manifest"'
