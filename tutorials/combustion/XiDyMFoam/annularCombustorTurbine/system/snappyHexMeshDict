@@ -135,14 +135,6 @@ castellatedMeshControls
             level (1 1);
             faceType baffle;
         }
-        cooling
-        {
-            level (1 1);
-            patchInfo
-            {
-                type patch;
-            }
-        }
         inlet
         {
             level (1 1);
