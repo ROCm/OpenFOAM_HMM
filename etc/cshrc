@@ -43,7 +43,7 @@
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
-setenv WM_PROJECT_VERSION plus
+setenv WM_PROJECT_VERSION v1906
 
 # [projectDir] - parent directory containing the OpenFOAM installation.
 # \- When this file is located as $WM_PROJECT_DIR/etc/cshrc, the next lines

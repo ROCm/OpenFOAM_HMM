@@ -43,7 +43,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-export WM_PROJECT_VERSION=plus
+export WM_PROJECT_VERSION=v1906
 
 # [projectDir] - directory containing this OpenFOAM version.
 # \- When this file is located as $WM_PROJECT_DIR/etc/bashrc, the next lines

@@ -1,7 +1,7 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     | Website:  https://openfoam.org
+   \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2017-2019 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ void Foam::diameterModels::velocityGroup::renormalize()
 Foam::tmp<Foam::fv::convectionScheme<Foam::scalar>>
 Foam::diameterModels::velocityGroup::mvconvection() const
 {
-    tmp<fv::convectionScheme<Foam::scalar> > mvConvection
+    tmp<fv::convectionScheme<Foam::scalar>> mvConvection
     (
         fv::convectionScheme<Foam::scalar>::New
         (

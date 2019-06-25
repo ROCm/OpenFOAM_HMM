@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1806                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -16,7 +16,7 @@ FoamFile
 
 castellatedMesh true;
 snap            true;
-addLayers	    false;
+addLayers       false;
 
 
 geometry
@@ -24,32 +24,32 @@ geometry
     simpleCar.stl
     {
         type triSurfaceMesh;
-        name	simpleCar ;
+        name    simpleCar ;
         regions
         {
             body_bottom
             {
-                name	body_bottom;
+                name    body_bottom;
             }
             solarpanel_body_left
             {
-                name	solarpanel_body_left;
+                name    solarpanel_body_left;
             }
             solarpanel_body_right
             {
-                name	solarpanel_body_right;
+                name    solarpanel_body_right;
             }
             solarpanel_body_top
             {
-                name	solarpanel_body_top;
+                name    solarpanel_body_top;
             }
             solarpanel_body_back
             {
-                name	solarpanel_body_back;
+                name    solarpanel_body_back;
             }
             ref_wall
             {
-                name	ref_wall;
+                name    ref_wall;
             }
         }
     }
@@ -63,7 +63,7 @@ castellatedMeshControls
     nCellsBetweenLevels 2;
     maxLoadUnbalance    0.2;
     allowFreeStandingZoneFaces true;
-    resolveFeatureAngle	 30;
+    resolveFeatureAngle 30;
     features
     (
         {
