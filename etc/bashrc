@@ -124,7 +124,7 @@ export WM_MPLIB=SYSTEMOPENMPI
 # = 32 | 64
 #   * on a 64-bit OS this can be 32 or 64
 #   * on a 32-bit OS this option is ignored (always 32-bit)
-export WM_ARCH_OPTION=64
+#export WM_ARCH_OPTION=64
 
 ################################################################################
 
