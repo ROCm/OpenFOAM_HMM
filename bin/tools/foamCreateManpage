@@ -26,11 +26,11 @@ usage() {
 
 Usage: ${0##*/} [OPTION] [appName .. [appNameN]]
 options:
-  -dir DIR          Directory to process
-  -output DIR       Write to alternative output directory
+  -dir=DIR          Input directory to process
+  -output=DIR       Write to alternative output directory
   -pdf              Process as nroff man content and pass to ps2pdf
   -gz | -gzip       Compress manpage output
-  -version VER      Specify an alternative version
+  -version=VER      Specify an alternative version
   -h | -help        Print the usage
 
 Query OpenFOAM applications with -help-man for their manpage content
@@ -58,6 +58,15 @@ die()
     exit 1
 }
 
+# Get the option's value (argument), or die on missing or empty argument
+# $1 option
+# $2 value
+getOptionValue()
+{
+   [ -n "$2" ] || die "'$1' option requires an argument"
+   echo "$2"
+}
+
 #-------------------------------------------------------------------------------
 searchDirs="$FOAM_APPBIN"
 unset sedFilter outputDir outputType
@@ -68,9 +77,12 @@ do
     -h | -help*)
         usage
         ;;
+    -dir=*)
+        searchDirs="${1#*=}"
+        [ -d "$searchDirs" ] || die "directory not found '$searchDirs'"
+        ;;
     -dir)
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        searchDirs="$2"
+        searchDirs=$(getOptionValue "$@")
         [ -d "$searchDirs" ] || die "directory not found '$searchDirs'"
         shift
         ;;
@@ -80,15 +92,20 @@ do
     -pdf)
         outputType="pdf"
         ;;
+    -version=*)
+        version="${1#*=}"
+        sedFilter='s/OpenFOAM-[^\"]*/OpenFOAM-'"$version/"
+        ;;
     -version)
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        version="$2"
+        version=$(getOptionValue "$@")
         sedFilter='s/OpenFOAM-[^\"]*/OpenFOAM-'"$version/"
         shift
         ;;
+    -output=*)
+        outputDir="${1#*=}"
+        ;;
     -output)
-        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        outputDir="$2"
+        outputDir=$(getOptionValue "$@")
         shift
         ;;
     -*)
@@ -101,7 +118,7 @@ do
     shift
 done
 
-: ${outputDir:=$defaultOutputDir}
+: "${outputDir:=$defaultOutputDir}"
 
 # Verify that output is writeable
 if [ -e "$outputDir" ]

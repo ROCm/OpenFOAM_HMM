@@ -209,8 +209,7 @@ replaceCsh()
     done
 }
 
-# Get the option's value (argument).
-# Die if the argument doesn't exist or is empty
+# Get the option's value (argument), or die on missing or empty argument
 # $1 option
 # $2 value
 getOptionValue()

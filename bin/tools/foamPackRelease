@@ -28,7 +28,7 @@
 # Description
 #     Simple script generator for packing OpenFOAM sources and submodules
 #
-#       $ foamPackRelease -output some/path origin/master > create-tar
+#       $ foamPackRelease -output=some/path origin/master > create-tar
 #       $ bash ./create-tar
 #
 #     Or directly:
@@ -46,7 +46,7 @@ cat <<USAGE
 
 Usage: ${0##*/} [OPTION] commit-ish
 options:
-   -output DIR      Specify alternative output directory
+   -output=dir      Write to alternative output directory
    -no-modules      Exclude submodules
    -no-patch        Ignore _patch number for the output tar-file
    -compress=TYPE   Compress with specified type
@@ -78,6 +78,7 @@ die()
     exit 1
 }
 
+
 #-------------------------------------------------------------------------------
 outputDir="."
 unset skipModules skipPatchNum
@@ -93,6 +94,9 @@ do
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
         outputDir="$2"
         shift
+        ;;
+    -output=*)
+        outputDir="${1#*=}"
         ;;
     -no-modules)
         skipModules=true
@@ -291,7 +295,7 @@ case "$compress" in
 
     (tgz)
     echo "Using gzip compression with tgz ending" 1>&2
-    echo 'gzip -c9 "$outputDir/$tarName.tar" > "$outputDir/$tarName.tgz"'
+    echo 'gzip -c -9 "$outputDir/$tarName.tar" > "$outputDir/$tarName.tgz"'
     ;;
 
     (bz | bzip | bzip2)
