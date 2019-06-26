@@ -157,10 +157,8 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
         }
         case ISENTROPIC:
         {
-DebugVar("getting thermo");
             const basicThermo* thermoPtr =
                 p.mesh().lookupObjectPtr<basicThermo>(basicThermo::dictName);
-DebugVar("got thermo");
 
             if (!thermoPtr)
             {
@@ -169,16 +167,13 @@ DebugVar("got thermo");
                     << "thermodynamics package"
                     << exit(FatalError);
             }
-DebugVar("calc gamma");
 
             const volScalarField gamma(thermoPtr->gamma());
-DebugVar(gamma);
             const volScalarField Mb
             (
                 mag(lookupObject<volVectorField>(UName_))
                /sqrt(gamma*tp.ref()/thermoPtr->rho())
             );
-DebugVar(Mb);
 
             return tp()*(pow(1 + (gamma - 1)/2*sqr(Mb), gamma/(gamma - 1)));
         }
