@@ -14,8 +14,8 @@ for modelType in $modelTypes
 do
     echo
     echo "Running with model: $modelType"
-    (cd 0 && ln -sf "inlet.$modelType" inlet)
-    (cd constant/boundaryData && ln -sf "inlet.$modelType" inlet)
+    (cd 0 && ln -snf "inlet.$modelType" inlet)
+    (cd constant/boundaryData && ln -snf "inlet.$modelType" inlet)
 
     runApplication -s "$modelType" decomposePar
     runParallel -s "$modelType" pimpleFoam
