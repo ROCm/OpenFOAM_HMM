@@ -1,6 +1,21 @@
 ## Known Build Issues (OpenFOAM-v1906)
 
-### Intel MPI with Gcc/Clang)
+### Thermo problems with Clang
+
+Clang builds required updates to the thermophysical libraries to prevent
+optimised builds from generating sigFpe's.  The changes are wrapped in `#ifdef`
+`__clang__` statements to not affect other compilers.
+
+The following tutorials experience known failures:
+
+- combustion/XiFoam/RAS/moriyoshiHomogeneous
+- multiphase/reactingTwoPhaseEulerFoam/laminar/bubbleColumnEvaporatingDissolving
+
+
+This will be further investigated to identify the root cause.
+
+
+### Intel MPI with Gcc/Clang
 
 Either `I_MPI_ROOT` (preferred) or `MPI_ROOT` can be used to specify
 the Intel-MPI installation directory path.
@@ -86,7 +101,7 @@ packages:
 It appears that spack will otherwise ignore any `paraview+qt` version
 and attempt to install a `paraview~qt` version instead.
 
---
+
 <!-- Links -->
 
 [page ParaView]:  http://www.paraview.org/

@@ -118,7 +118,12 @@ template<class Thermo, template<class> class Type>
 inline Foam::scalar
 Foam::species::thermo<Thermo, Type>::gamma(const scalar p, const scalar T) const
 {
+    #ifdef __clang__
+    volatile const scalar Cp = this->Cp(p, T);
+    #else
     const scalar Cp = this->Cp(p, T);
+    #endif
+
     return Cp/(Cp - this->CpMCv(p, T));
 }
 

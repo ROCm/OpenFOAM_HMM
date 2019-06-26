@@ -82,7 +82,14 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar cp = thermo.Cp(p, T);
+                return cp;
+                #else
                 return thermo.Cp(p, T);
+                #endif
             }
 
             //- Cp/Cp []
@@ -104,7 +111,14 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar ha = thermo.Ha(p, T);
+                return ha;
+                #else
                 return thermo.Ha(p, T);
+                #endif
             }
 
             //- Temperature from absolute enthalpy
@@ -117,7 +131,14 @@ public:
                 const scalar T0
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar tha = thermo.THa(h, p, T0);
+                return tha;
+                #else
                 return thermo.THa(h, p, T0);
+                #endif
             }
 };
 

@@ -83,7 +83,14 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar cv = thermo.Cv(p, T);
+                return cv;
+                #else
                 return thermo.Cv(p, T);
+                #endif
             }
 
             //- Cp/Cv []
@@ -94,7 +101,14 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar gamma = thermo.gamma(p, T);
+                return gamma;
+                #else
                 return thermo.gamma(p, T);
+                #endif
             }
 
             // Absolute internal energy [J/kg]
@@ -105,7 +119,14 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar ea = thermo.Ea(p, T);
+                return ea;
+                #else
                 return thermo.Ea(p, T);
+                #endif
             }
 
             //- Temperature from absolute internal energy
@@ -118,7 +139,14 @@ public:
                 const scalar T0
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar tea = thermo.TEa(e, p, T0);
+                return tea;
+                #else
                 return thermo.TEa(e, p, T0);
+                #endif
             }
 };
 
