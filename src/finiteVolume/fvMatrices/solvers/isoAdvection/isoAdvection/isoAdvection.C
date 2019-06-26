@@ -307,8 +307,8 @@ void Foam::isoAdvection::timeIntegratedFlux()
                 // Note: We will like all point neighbours to interface cells to
                 // be checked. Especially if the interface leaves a cell during
                 // a time step, it may enter a point neighbour which should also
-                // be treated like a surface cell. Its interface normal should 
-                // somehow be inherrited from its upwind cells from which it 
+                // be treated like a surface cell. Its interface normal should
+                // somehow be inherrited from its upwind cells from which it
                 // receives the interface.
                 const labelList& nNeighbourCells = cellCells[otherCell];
                 forAll(nNeighbourCells, ni)

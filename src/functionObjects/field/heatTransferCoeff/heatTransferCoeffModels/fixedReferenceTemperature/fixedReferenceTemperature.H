@@ -29,7 +29,7 @@ Description
     temperature
 
     The heat transfer coefficient is specified by:
-    
+
     \f[
         h = \frac{q}{T_{ref} - T_w}
     \f]

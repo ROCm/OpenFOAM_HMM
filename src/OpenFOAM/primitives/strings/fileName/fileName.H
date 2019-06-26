@@ -145,7 +145,7 @@ public:
         inline static bool valid(char c);
 
         //- Construct fileName with no invalid characters, possibly applying
-        //- other transformations such as changing the path separator, 
+        //- other transformations such as changing the path separator,
         //- removing duplicate or trailing slashes, etc.
         static fileName validate(const std::string& s, const bool doClean=true);
 

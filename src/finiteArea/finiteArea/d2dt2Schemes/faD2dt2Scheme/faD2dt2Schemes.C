@@ -42,19 +42,19 @@ namespace fa
 
 defineTemplateRunTimeSelectionTable
 (
-    faD2dt2Scheme<scalar>, 
+    faD2dt2Scheme<scalar>,
     Istream
 );
 
 defineTemplateRunTimeSelectionTable
 (
-    faD2dt2Scheme<vector>, 
+    faD2dt2Scheme<vector>,
     Istream
 );
 
 defineTemplateRunTimeSelectionTable
 (
-    faD2dt2Scheme<tensor>, 
+    faD2dt2Scheme<tensor>,
     Istream
 );
 

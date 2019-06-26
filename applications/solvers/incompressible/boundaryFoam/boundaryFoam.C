@@ -30,7 +30,7 @@ Group
     grpIncompressibleSolvers
 
 Description
-    Steady-state solver for incompressible, 1D turbulent flow, 
+    Steady-state solver for incompressible, 1D turbulent flow,
     typically to generate boundary layer conditions at an inlet.
 
     Boundary layer code to calculate the U, k and epsilon distributions.

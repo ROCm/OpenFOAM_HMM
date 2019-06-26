@@ -300,7 +300,7 @@ Type Foam::motionSmootherAlgo::get
 )
 {
     Type val(defaultValue);
-    
+
     if
     (
        !dict.readEntry

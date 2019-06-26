@@ -73,7 +73,7 @@ forAll(boundaryDicts, patchi)
     }
     else
     {
-        nbrPatchName = "patch" + Foam::name(patchi - 1); 
+        nbrPatchName = "patch" + Foam::name(patchi - 1);
     }
 
     patchDict.add("type", cyclicPolyPatch::typeName);

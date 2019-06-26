@@ -111,7 +111,7 @@ const Foam::word Foam::functionObjects::columnAverage::averageName
     const word& fieldName
 ) const
 {
-    return name() + ":columnAverage(" + fieldName + ")"; 
+    return name() + ":columnAverage(" + fieldName + ")";
 }
 
 

@@ -37,7 +37,7 @@ Description
 
     \verbatim
     Klein, M., Sadiki, A., and Janicka, J.
-        A digital filter based generation of inflow data for spatially 
+        A digital filter based generation of inflow data for spatially
         developing direct numerical or large eddy simulations,
         Journal of Computational Physics (2003) 186(2):652-665.
         doi:10.1016/S0021-9991(03)00090-1
@@ -47,7 +47,7 @@ Description
 
     \verbatim
     Xie, Z.-T., and Castro, I.
-        Efficient generation of inflow conditions for large eddy simulation of 
+        Efficient generation of inflow conditions for large eddy simulation of
         street-scale flows, Flow, Turbulence and Combustion (2008) 81(3):449-470
         doi:10.1007/s10494-008-9151-5
     \endverbatim
@@ -130,7 +130,7 @@ Usage
         const1FSM           -0.7854         //-0.25*PI;
         const2FSM           -1.5707;        //-0.5*PI;
     }
-    \endverbatim 
+    \endverbatim
 
     Among the dictionary entries, two entries can be input as patch profiles:
 
@@ -308,7 +308,7 @@ class turbulentDigitalFilterInletFvPatchVectorField
         //- Mean inlet velocity profile in global coordinates [m/s]
         vectorField UMean_;
 
-        //- Integral length-scale set per turbulence plane section in local 
+        //- Integral length-scale set per turbulence plane section in local
         //- coordinates (e1u, e1v, e1w, e2u, e2v, e2w, e3u, e3v, e3w) [m]
         //  First three entries should always correspond to the length scales
         //  in association with the convective mean flow direction

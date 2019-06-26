@@ -344,7 +344,7 @@ initLenRandomBox() const
 
         // Refer to 'computeFilterCoeffs()'
         const label n = ceil(L_[i]);
-        const label twiceN = 4*n;       
+        const label twiceN = 4*n;
 
         // Initialise: Random-number set sizes
         lenRandomBox[i] = lenGrid[sliceI] + twiceN;
@@ -575,7 +575,7 @@ void Foam::turbulentDigitalFilterInletFvPatchVectorField::embedTwoPointCorrs()
         const List<scalar>& filter1 = filterCoeffs_[dir];
         const List<scalar>& filter2 = filterCoeffs_[3 + dir];
         const List<scalar>& filter3 = filterCoeffs_[6 + dir];
-        
+
         const label sz1 = lenRandomBox_[dir];
         const label sz2 = lenRandomBox_[3 + dir];
         const label sz3 = lenRandomBox_[6 + dir];

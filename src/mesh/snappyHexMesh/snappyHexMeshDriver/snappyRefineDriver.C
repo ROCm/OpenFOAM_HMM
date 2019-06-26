@@ -2008,7 +2008,7 @@ void Foam::snappyRefineDriver::mergeAndSmoothRatio
             {
                 if (debug)
                 {
-                    Pout<< "Converged with iteration " << iter 
+                    Pout<< "Converged with iteration " << iter
                         << " initResidual: " << initResidual
                         << " final residual : " << res << endl;
                 }
@@ -2055,7 +2055,7 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
 
     forAll(shells.nSmoothExpansion(), shellI)
     {
-        if 
+        if
         (
             shells.nSmoothExpansion()[shellI] > 0
          || shells.nSmoothPosition()[shellI] > 0
@@ -2117,20 +2117,20 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
                 }
             }
 
-            // Get the extreme of smoothing region and 
+            // Get the extreme of smoothing region and
             // normalize all points within
-            const scalar totalLength = 
+            const scalar totalLength =
                 geometry[surfi].bounds().span()
               & userDirection;
-            const scalar startPosition = 
-                geometry[surfi].bounds().min() 
+            const scalar startPosition =
+                geometry[surfi].bounds().min()
               & userDirection;
 
             scalarField normalizedPosition(pointLabels.size(), Zero);
             forAll(pointLabels, i)
             {
                 label pointi = pointLabels[i];
-                normalizedPosition[i] = 
+                normalizedPosition[i] =
                   (
                     ((baseMesh.points()[pointi]&userDirection) - startPosition)
                   / totalLength
@@ -3011,7 +3011,7 @@ void Foam::snappyRefineDriver::doRefine
         100    // maxIter
     );
 
-    if 
+    if
     (
         max(meshRefiner_.shells().nSmoothExpansion()) > 0
      || max(meshRefiner_.shells().nSmoothPosition()) > 0

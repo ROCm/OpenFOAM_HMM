@@ -82,7 +82,7 @@ void Foam::transform
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>> 
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
 Foam::transform
 (
     const GeometricField<tensor, PatchField, GeoMesh>& rot,

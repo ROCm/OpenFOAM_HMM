@@ -160,7 +160,7 @@ public:
         const DynamicList<point>& surfacePoints() const;
 
         void clearStorage();
-        
+
         //- Calculate volumetric face transport during dt given the isoFace
         //  data provided as input for face facei
         scalar timeIntegratedFaceFlux
@@ -174,7 +174,7 @@ public:
             const scalar phi,
             const scalar magSf
         );
-        
+
         //- Calculate time integrated area for a face
         scalar timeIntegratedArea
         (
