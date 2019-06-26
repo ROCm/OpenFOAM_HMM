@@ -13,6 +13,7 @@ _of_complete_cache_=()
 
 #------------------------------------------------------------------------------
 _of_complete_cache_[adiabaticFlameT]="-case -fileHandler | -doc -doc-source -help"
+_of_complete_cache_[adjointOptimisationFoam]="-case -decomposeParDict -fileHandler | -noFunctionObjects -parallel -doc -doc-source -help"
 _of_complete_cache_[adjointShapeOptimizationFoam]="-case -decomposeParDict -fileHandler | -dry-run -dry-run-write -listFunctionObjects -listFvOptions -listRegisteredSwitches -listScalarBCs -listSwitches -listTurbulenceModels -listUnsetSwitches -listVectorBCs -noFunctionObjects -parallel -postProcess -doc -doc-source -help"
 _of_complete_cache_[ansysToFoam]="-case -fileHandler -scale | -noFunctionObjects -doc -doc-source -help"
 _of_complete_cache_[applyBoundaryLayer]="-Cbl -case -decomposeParDict -fileHandler -region -ybl | -noFunctionObjects -parallel -write-nut -doc -doc-source -help"
@@ -47,6 +48,7 @@ _of_complete_cache_[compressibleInterDyMFoam]="-case -decomposeParDict -fileHand
 _of_complete_cache_[compressibleInterFilmFoam]="-case -decomposeParDict -fileHandler | -dry-run -dry-run-write -listFunctionObjects -listFvOptions -listRegisteredSwitches -listScalarBCs -listSwitches -listTurbulenceModels -listUnsetSwitches -listVectorBCs -noFunctionObjects -parallel -postProcess -doc -doc-source -help"
 _of_complete_cache_[compressibleInterFoam]="-case -decomposeParDict -fileHandler | -dry-run -dry-run-write -listFunctionObjects -listFvOptions -listRegisteredSwitches -listScalarBCs -listSwitches -listTurbulenceModels -listUnsetSwitches -listVectorBCs -noFunctionObjects -parallel -postProcess -doc -doc-source -help"
 _of_complete_cache_[compressibleMultiphaseInterFoam]="-case -decomposeParDict -fileHandler | -dry-run -dry-run-write -listFunctionObjects -listRegisteredSwitches -listScalarBCs -listSwitches -listTurbulenceModels -listUnsetSwitches -listVectorBCs -noFunctionObjects -parallel -postProcess -doc -doc-source -help"
+_of_complete_cache_[computeSensitivities]="-case -decomposeParDict -fileHandler | -noFunctionObjects -parallel -doc -doc-source -help"
 _of_complete_cache_[copySurfaceParts]="-case -fileHandler | -noFunctionObjects -doc -doc-source -help"
 _of_complete_cache_[createBaffles]="-case -decomposeParDict -dict -fileHandler -region | -overwrite -parallel -doc -doc-source -help"
 _of_complete_cache_[createBoxTurb]="-case -decomposeParDict -fileHandler | -createBlockMesh -noFunctionObjects -parallel -doc -doc-source -help"
