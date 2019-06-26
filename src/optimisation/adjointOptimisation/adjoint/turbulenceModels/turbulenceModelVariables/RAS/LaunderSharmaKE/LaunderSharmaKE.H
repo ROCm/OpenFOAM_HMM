@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LaunderSharmaKE_H
-#define LaunderSharmaKE_H
+#ifndef incompressible_RASVariables_LaunderSharmaKE_H
+#define incompressible_RASVariables_LaunderSharmaKE_H
 
 #include "RASModelVariables.H"
 

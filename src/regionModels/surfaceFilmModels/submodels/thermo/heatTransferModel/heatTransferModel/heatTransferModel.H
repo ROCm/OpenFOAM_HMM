@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef heatTransferModel_H
-#define heatTransferModel_H
+#ifndef regionModels_surfaceFilmModels_heatTransferModel_H
+#define regionModels_surfaceFilmModels_heatTransferModel_H
 
 #include "filmSubModelBase.H"
 #include "runTimeSelectionTables.H"

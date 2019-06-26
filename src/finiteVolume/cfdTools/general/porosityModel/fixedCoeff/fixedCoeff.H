@@ -41,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedCoeff_H
-#define fixedCoeff_H
+#ifndef porosityModels_fixedCoeff_H
+#define porosityModels_fixedCoeff_H
 
 #include "porosityModel.H"
 #include "dimensionedTensor.H"

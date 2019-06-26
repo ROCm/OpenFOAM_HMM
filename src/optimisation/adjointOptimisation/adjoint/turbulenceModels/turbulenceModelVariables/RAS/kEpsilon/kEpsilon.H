@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kEpsilon_H
-#define kEpsilon_H
+#ifndef incompressible_RASVariables_kEpsilon_H
+#define incompressible_RASVariables_kEpsilon_H
 
 #include "RASModelVariables.H"
 

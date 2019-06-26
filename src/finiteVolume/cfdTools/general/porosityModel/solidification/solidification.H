@@ -78,8 +78,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidification_H
-#define solidification_H
+#ifndef porosityModels_solidification_H
+#define porosityModels_solidification_H
 
 #include "porosityModel.H"
 #include "Function1.H"

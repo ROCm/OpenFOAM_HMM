@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cut_H
-#define cut_H
+#ifndef searchableSurfaceModifiers_cut_H
+#define searchableSurfaceModifiers_cut_H
 
 #include "searchableSurfaceModifier.H"
 #include "wordRes.H"

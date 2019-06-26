@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpalartAllmaras_H
-#define SpalartAllmaras_H
+#ifndef incompressible_RASVariables_SpalartAllmaras_H
+#define incompressible_RASVariables_SpalartAllmaras_H
 
 #include "RASModelVariables.H"
 

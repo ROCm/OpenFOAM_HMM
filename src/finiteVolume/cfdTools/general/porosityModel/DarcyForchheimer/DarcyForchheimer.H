@@ -51,8 +51,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DarcyForchheimer_H
-#define DarcyForchheimer_H
+#ifndef porosityModels_DarcyForchheimer_H
+#define porosityModels_DarcyForchheimer_H
 
 #include "porosityModel.H"
 #include "dimensionedTensor.H"

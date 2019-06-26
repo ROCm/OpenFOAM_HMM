@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef powerLaw_H
-#define powerLaw_H
+#ifndef viscosityModels_powerLaw_H
+#define viscosityModels_powerLaw_H
 
 #include "viscosityModel.H"
 #include "dimensionedScalar.H"

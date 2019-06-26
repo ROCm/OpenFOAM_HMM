@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef laminar_H
-#define laminar_H
+#ifndef incompressible_RASVariables_laminar_H
+#define incompressible_RASVariables_laminar_H
 
 #include "RASModelVariables.H"
 

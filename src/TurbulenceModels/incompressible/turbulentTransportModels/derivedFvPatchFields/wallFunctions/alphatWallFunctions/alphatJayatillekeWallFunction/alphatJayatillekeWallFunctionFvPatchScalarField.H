@@ -60,8 +60,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef alphatJayatillekeWallFunctionFvPatchScalarField_H
-#define alphatJayatillekeWallFunctionFvPatchScalarField_H
+#ifndef incompressible_alphatJayatillekeWallFunctionFvPatchScalarField_H
+#define incompressible_alphatJayatillekeWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "turbulenceModel.H"

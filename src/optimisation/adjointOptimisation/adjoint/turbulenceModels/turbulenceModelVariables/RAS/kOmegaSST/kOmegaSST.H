@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kOmegaSST_H
-#define kOmegaSST_H
+#ifndef incompressible_RASVariables_kOmegaSST_H
+#define incompressible_RASVariables_kOmegaSST_H
 
 #include "RASModelVariables.H"
 

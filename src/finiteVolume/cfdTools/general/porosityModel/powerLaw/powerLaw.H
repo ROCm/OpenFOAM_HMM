@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef powerLaw_H
-#define powerLaw_H
+#ifndef porosityModels_powerLaw_H
+#define porosityModels_powerLaw_H
 
 #include "porosityModel.H"
 

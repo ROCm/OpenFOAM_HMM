@@ -61,8 +61,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef alphatJayatillekeWallFunctionFvPatchScalarField_H
-#define alphatJayatillekeWallFunctionFvPatchScalarField_H
+#ifndef compressible_alphatJayatillekeWallFunctionFvPatchScalarField_H
+#define compressible_alphatJayatillekeWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "turbulentFluidThermoModel.H"
