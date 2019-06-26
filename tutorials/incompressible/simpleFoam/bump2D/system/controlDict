@@ -103,7 +103,7 @@ functions
 
     residuals
     {
-        type            residuals;
+        type            solverInfo;
         libs            ("libutilityFunctionObjects.so");
         fields          (".*");
     }
