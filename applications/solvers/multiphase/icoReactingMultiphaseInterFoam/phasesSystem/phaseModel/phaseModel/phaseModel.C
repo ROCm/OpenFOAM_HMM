@@ -213,6 +213,18 @@ Foam::tmp<Foam::scalarField> Foam::phaseModel::kappa(const label patchI) const
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::phaseModel::alphahe() const
+{
+    return thermo().alphahe();
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::phaseModel::alphahe(const label patchI) const
+{
+    return thermo().alphahe(patchI);
+}
+
+
 Foam::tmp<Foam::volScalarField>Foam::phaseModel::kappaEff
 (
     const volScalarField& kappat

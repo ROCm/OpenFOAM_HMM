@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,6 +90,12 @@ Usage
 
       - \par -no-point-data
         Suppress conversion of pointFields. No interpolated PointData.
+
+      - \par -with-ids
+        Additional mesh id fields (cellID, procID, patchID)
+
+      - \par -with-point-ids
+        Additional pointID field for internal mesh
 
       - \par -poly-decomp
         Decompose polyhedral cells into tets/pyramids
@@ -266,7 +274,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "legacy",
-        "Write legacy format instead of xml"
+        "Write legacy format instead of xml",
+        true  // mark as an advanced option
     );
     argList::addBoolOption
     (
@@ -318,7 +327,8 @@ int main(int argc, char *argv[])
         "faceZones",
         "wordRes",
         "Specify single or multiple faceZones to write\n"
-        "Eg, 'cells' or '( slice \"mfp-.*\" )'."
+        "Eg, 'cells' or '( slice \"mfp-.*\" )'.",
+        true  // mark as an advanced option
     );
 
     argList::addOption
@@ -329,6 +339,12 @@ int main(int argc, char *argv[])
         "Eg, 'T' or '(p T U \"alpha.*\")'"
     );
 
+    argList::addBoolOption
+    (
+        "processor-fields",
+        "Write field values on processor boundaries only",
+        true  // mark as an advanced option
+    );
     argList::addBoolOption
     (
         "surfaceFields",
@@ -370,6 +386,20 @@ int main(int argc, char *argv[])
         "Suppress conversion of pointFields. No interpolated PointData."
     );
     argList::addOptionCompat("no-point-data", {"noPointValues", 1806});
+
+    argList::addBoolOption
+    (
+        "with-ids",
+        "Additional mesh id fields (cellID, procID, patchID)",
+        true  // mark as an advanced option
+    );
+
+    argList::addBoolOption
+    (
+        "with-point-ids",
+        "Additional pointID field for internal mesh",
+        true  // mark as an advanced option
+    );
 
     argList::addBoolOption
     (
@@ -450,6 +480,29 @@ int main(int argc, char *argv[])
 
     const vtk::outputOptions writeOpts = getOutputOptions(args);
 
+    bool processorFieldsOnly = false;
+
+    if (args.found("processor-fields"))
+    {
+        if (!Pstream::parRun())
+        {
+            Info<< "Ignoring processor patch writing in serial"
+                << nl << endl;
+        }
+        else if (writeOpts.legacy())
+        {
+            Info<< "Ignoring processor patch writing in legacy format"
+                << nl << endl;
+        }
+        else
+        {
+            processorFieldsOnly = true;
+
+            Info<< "Writing processor patch fields only"
+                << nl << endl;
+        }
+    }
+
     if (nearCellValue)
     {
         Info<< "Using neighbouring cell value instead of patch value"
@@ -462,6 +515,25 @@ int main(int argc, char *argv[])
         Info<< "Point fields and interpolated point data"
             << " disabled with the '-no-point-data' option"
             << nl;
+    }
+
+    const bool withPointIds = args.found("with-point-ids");
+    if (withPointIds)
+    {
+        Info<< "Write point ids requested";
+
+        if (noPointValues)
+        {
+            Info<< ", but ignored due to the '-no-point-data' option";
+        }
+
+        Info<< nl;
+    }
+
+    const bool withMeshIds = args.found("with-ids");
+    if (withMeshIds)
+    {
+        Info<< "Writing mesh ids (cell, patch, proc) requested" << nl;
     }
 
     wordRes includePatches, excludePatches;
@@ -739,6 +811,13 @@ int main(int argc, char *argv[])
                     },
                     true // prune
                 );
+            }
+
+            if (processorFieldsOnly)
+            {
+                // Processor-patches only and continue
+                #include "convertProcessorPatches.H"
+                continue;
             }
 
             // Volume, internal, point fields

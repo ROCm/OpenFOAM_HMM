@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +27,9 @@ InNamespace
     Foam
 
 Description
-    Various function objects for unary and binary operations.
+    Various functors for unary and binary operations.
     Can be used for parallel combine-reduce operations or other places
-    requiring a function object.
+    requiring a functor.
 
 \*---------------------------------------------------------------------------*/
 
@@ -78,8 +80,11 @@ EqOp(maxEq, x = max(x, y))
 EqOp(minEq, x = min(x, y))
 EqOp(minMagSqrEq, x = (magSqr(x) <= magSqr(y) ? x : y))
 EqOp(maxMagSqrEq, x = (magSqr(x) >= magSqr(y) ? x : y))
+
 EqOp(andEq, x = (x && y))
 EqOp(orEq,  x = (x || y))
+EqOp(bitAndEq, x = (x & y))
+EqOp(bitOrEq,  x = (x | y))
 
 EqOp(eqMinus, x = -y)
 
@@ -154,6 +159,25 @@ EqOp(nopEq, (void)x)
     };
 
 
+// Operations taking one parameter, returning bool.
+// The comparison value is defined during construction
+
+#define Bool1Op(opName, op)                                                    \
+                                                                               \
+    template<class T>                                                          \
+    struct opName##Op1                                                         \
+    {                                                                          \
+        const T& value;                                                        \
+                                                                               \
+        opName##Op1(const T& v) : value(v) {}                                  \
+                                                                               \
+        bool operator()(const T& x) const WARNRETURN                           \
+        {                                                                      \
+            return op;                                                         \
+        }                                                                      \
+    };
+
+
 // Weighting operations
 
 #define WeightedOp(opName, op)                                                 \
@@ -199,6 +223,9 @@ Op(minMagSqr, (magSqr(x)<=magSqr(y) ? x : y))
 Op(maxMagSqr, (magSqr(x)>=magSqr(y) ? x : y))
 Op(minMod, minMod(x, y))
 
+Op(bitOr, (x | y))
+Op(bitAnd, (x & y))
+
 BoolOp(and, x && y)
 BoolOp(or, x || y)
 BoolOp(equal, x == y)
@@ -208,10 +235,18 @@ BoolOp(lessEq, x <= y)
 BoolOp(greater, x > y)
 BoolOp(greaterEq, x >= y)
 
+Bool1Op(equal, x == value)
+Bool1Op(notEqual, x != value)
+Bool1Op(less, x < value)
+Bool1Op(lessEq, x <= value)
+Bool1Op(greater, x > value)
+Bool1Op(greaterEq, x >= value)
+
 WeightedOp(multiply, (weight*y))
 
 #undef Op
 #undef BoolOp
+#undef Bool1Op
 #undef WeightedOp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -58,12 +58,8 @@ Description
 namespace Foam
 {
 
-// Forward declarations
-class Ostream;
-class CStringList;
+// Forward Declarations
 template<class String> class SubStrings;
-
-Ostream& operator<<(Ostream& os, const CStringList& list);
 
 /*---------------------------------------------------------------------------*\
                          Class CStringList Declaration
@@ -71,7 +67,7 @@ Ostream& operator<<(Ostream& os, const CStringList& list);
 
 class CStringList
 {
-    // Private data
+    // Private Data
 
         //- Number of strings
         int argc_;
@@ -127,7 +123,7 @@ public:
         inline explicit CStringList(const SubStrings<StringType>& input);
 
 
-    //- Destructor
+    //- Destructor. Invokes clear() to free memory.
     inline ~CStringList();
 
 
@@ -196,13 +192,13 @@ public:
 
         //- Return element at the given index. No bounds checking.
         inline const char* operator[](int i) const;
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream& os, const CStringList& list);
-
 };
+
+
+// IOstream Operators
+
+//- Output space-separated list
+Ostream& operator<<(Ostream& os, const CStringList& list);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

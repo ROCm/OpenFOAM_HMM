@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,12 @@ License
 
 // OpenFOAM includes
 #include "text.H"
+#include "stringOps.H"
 #include "fvMesh.H"
 #include "runTimePostProcessing.H"
 
 // VTK includes
+#include "vtkCoordinate.h"
 #include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
 #include "vtkTextActor.h"
@@ -60,19 +62,32 @@ Foam::functionObjects::runTimePostPro::text::text
 :
     geometryBase(parent, dict, colours),
     string_(dict.get<string>("string")),
-    position_(),
+    positions_(),
     size_(dict.get<scalar>("size")),
     colour_(nullptr),
     halign_
     (
-        halignTypeNames.lookupOrDefault("halign", dict, halignType::LEFT)
+        halignTypeNames.getOrDefault("halign", dict, halignType::LEFT)
     ),
     bold_(dict.get<bool>("bold")),
-    italic_(dict.lookupOrDefault("italic", false)),
-    shadow_(dict.lookupOrDefault("shadow", false)),
-    timeStamp_(dict.lookupOrDefault("timeStamp", false))
+    italic_(dict.getOrDefault("italic", false)),
+    shadow_(dict.getOrDefault("shadow", false)),
+    timeStamp_(dict.getOrDefault("timeStamp", false))
 {
-    dict.readEntry("position", position_);
+    if (!dict.readIfPresent("positions", positions_))
+    {
+        positions_.resize(1);
+        dict.readEntry("position", positions_.first());
+    }
+
+    // Additional safety
+    if (positions_.empty())
+    {
+        positions_.resize(1);
+        positions_.first() = {0, 0};
+    }
+
+    stringOps::inplaceExpand(string_, dict, true, true);
 
     if (dict.found("colour"))
     {
@@ -99,12 +114,13 @@ void Foam::functionObjects::runTimePostPro::text::addGeometryToScene
     vtkRenderer* renderer
 )
 {
-    if (!visible_)
+    if (!visible_ || !renderer || !Pstream::master())
     {
+        // Add text on master only!
         return;
     }
 
-    auto actor = vtkSmartPointer<vtkTextActor>::New();
+    DebugInfo << "    Add text: " << string_ << nl;
 
     // Concatenate string with timeStamp if true
     string str = string_;
@@ -112,31 +128,40 @@ void Foam::functionObjects::runTimePostPro::text::addGeometryToScene
     {
         str += " " + geometryBase::parent_.mesh().time().timeName();
     }
-    actor->SetInput(str.c_str());
 
-    vtkTextProperty* prop = actor->GetTextProperty();
+    const vector textColour = colour_->value(position);
 
-    prop->SetFontFamilyToArial();
-    prop->SetFontSize(size_);
-    prop->SetJustification(int(halign_));
-    prop->SetVerticalJustificationToBottom();
-    prop->SetBold(bold_);
-    prop->SetItalic(italic_);
-    prop->SetShadow(shadow_);
+    const scalar textOpacity = opacity(position);
 
-    const vector colour = colour_->value(position);
+    for (const auto& textPosition : positions_)
+    {
+        auto actor = vtkSmartPointer<vtkTextActor>::New();
 
-    prop->SetColor(colour[0], colour[1], colour[2]);
-    prop->SetOpacity(opacity(position));
+        actor->SetInput(str.c_str());
 
-    actor->GetPositionCoordinate()->SetCoordinateSystemToNormalizedViewport();
-    actor->GetPositionCoordinate()->SetValue
-    (
-        position_.first(),
-        position_.second()
-    );
+        vtkTextProperty* prop = actor->GetTextProperty();
 
-    renderer->AddActor2D(actor);
+        prop->SetFontFamilyToArial();
+        prop->SetFontSize(size_);
+        prop->SetJustification(int(halign_));
+        prop->SetVerticalJustificationToBottom();
+        prop->SetBold(bold_);
+        prop->SetItalic(italic_);
+        prop->SetShadow(shadow_);
+
+        prop->SetColor(textColour[0], textColour[1], textColour[2]);
+        prop->SetOpacity(textOpacity);
+
+        // Positioning
+        {
+            vtkCoordinate* coord = actor->GetPositionCoordinate();
+
+            coord->SetCoordinateSystemToNormalizedViewport();
+            coord->SetValue(textPosition.first(), textPosition.second());
+        }
+
+        renderer->AddActor2D(actor);
+    }
 }
 
 

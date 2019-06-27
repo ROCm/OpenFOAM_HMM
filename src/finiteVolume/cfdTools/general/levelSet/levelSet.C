@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -110,14 +112,15 @@ Foam::tmp<Foam::scalarField> Foam::levelSetFraction
     const bool above
 )
 {
-    tmp<scalarField> tResult(new scalarField(patch.size(), 0));
+    tmp<scalarField> tResult(new scalarField(patch.size(), Zero));
     scalarField& result = tResult.ref();
 
     forAll(result, fI)
     {
         const face& f = patch.patch().localFaces()[fI];
 
-        vector a = vector::zero, r = vector::zero;
+        vector a(Zero);
+        vector r(Zero);
 
         for (label eI = 0; eI < f.size(); ++eI)
         {

@@ -2,8 +2,10 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2012-2016 OpenFOAM Foundation
+   \\  /     A nd            |
     \\/      M anipulation   |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -199,7 +201,7 @@ public:
 
 
             ////- Surface intersects bb (but not using intersection test)
-            //scalar ccDist = signedDistance(bb.midpoint());
+            //scalar ccDist = signedDistance(bb.centre());
             //scalar ccVal = ccDist - _iso_val;
             //if (mag(ccVal) < SMALL)
             //{

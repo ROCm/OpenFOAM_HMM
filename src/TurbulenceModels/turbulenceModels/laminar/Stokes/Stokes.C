@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +114,7 @@ Stokes<BasicTurbulenceModel>::nut
 {
     return tmp<scalarField>
     (
-        new scalarField(this->mesh_.boundary()[patchi].size(), 0.0)
+        new scalarField(this->mesh_.boundary()[patchi].size(), Zero)
     );
 }
 

@@ -4,10 +4,9 @@
 sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
 sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
 
-# Obtain prefix and library information via adios2-config
-ADIOS_PREFIX := $(shell $(ADIOS2_ARCH_PATH)/bin/adios2-config --prefix)
-ADIOS_LIBS   := $(shell $(ADIOS2_ARCH_PATH)/bin/adios2-config --libs)
+# May need to strip off rpath ...
 
-ADIOS_INC    = -I${ADIOS_PREFIX}/include
+ADIOS_FLAGS := $(shell $(ADIOS2_ARCH_PATH)/bin/adios2-config --cxx-flags)
+ADIOS_LIBS  := $(shell $(ADIOS2_ARCH_PATH)/bin/adios2-config --cxx-libs)
 
 #------------------------------------------------------------------------------

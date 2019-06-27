@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -460,40 +462,31 @@ void Foam::ParticleCollector<CloudType>::write()
         << endl;
 
 
-    if (surfaceFormat_ != "none")
+    if (surfaceFormat_ != "none" && Pstream::master())
     {
-        if (Pstream::master())
+        auto writer = surfaceWriter::New
+        (
+            surfaceFormat_,
+            this->coeffDict().subOrEmptyDict("formatOptions")
+                .subOrEmptyDict(surfaceFormat_)
+        );
+
+        if (debug)
         {
-            autoPtr<surfaceWriter> writer
-            (
-                surfaceWriter::New
-                (
-                    surfaceFormat_,
-                    this->coeffDict().subOrEmptyDict("formatOptions").
-                        subOrEmptyDict(surfaceFormat_)
-                )
-            );
-
-            writer->write
-            (
-                this->writeTimeDir(),
-                "collector",
-                meshedSurfRef(points_, faces_),
-                "massTotal",
-                faceMassTotal,
-                false
-            );
-
-            writer->write
-            (
-                this->writeTimeDir(),
-                "collector",
-                meshedSurfRef(points_, faces_),
-                "massFlowRate",
-                faceMassFlowRate,
-                false
-            );
+            writer->verbose() = true;
         }
+
+        writer->open
+        (
+            points_,
+            faces_,
+            (this->writeTimeDir() / "collector"),
+            false  // serial - already merged
+        );
+
+        writer->write("massFlowRate", faceMassFlowRate);
+
+        writer->write("massTotal", faceMassTotal);
     }
 
 
@@ -534,7 +527,9 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
     mode_(mtUnknown),
     parcelType_(this->coeffDict().lookupOrDefault("parcelType", -1)),
-    removeCollected_(this->coeffDict().lookup("removeCollected")),
+    removeCollected_(this->coeffDict().getBool("removeCollected")),
+    resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
+    log_(this->coeffDict().getBool("log")),
     points_(),
     faces_(),
     faceTris_(),
@@ -547,12 +542,10 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
         this->coeffDict().getBool("negateParcelsOppositeNormal")
     ),
     surfaceFormat_(this->coeffDict().lookup("surfaceFormat")),
-    resetOnWrite_(this->coeffDict().lookup("resetOnWrite")),
     totalTime_(0.0),
     mass_(),
     massTotal_(),
     massFlowRate_(),
-    log_(this->coeffDict().lookup("log")),
     outputFilePtr_(),
     timeOld_(owner.mesh().time().value()),
     hitFaceIDs_()
@@ -620,6 +613,8 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     mode_(pc.mode_),
     parcelType_(pc.parcelType_),
     removeCollected_(pc.removeCollected_),
+    resetOnWrite_(pc.resetOnWrite_),
+    log_(pc.log_),
     points_(pc.points_),
     faces_(pc.faces_),
     faceTris_(pc.faceTris_),
@@ -630,12 +625,10 @@ Foam::ParticleCollector<CloudType>::ParticleCollector
     normal_(pc.normal_),
     negateParcelsOppositeNormal_(pc.negateParcelsOppositeNormal_),
     surfaceFormat_(pc.surfaceFormat_),
-    resetOnWrite_(pc.resetOnWrite_),
     totalTime_(pc.totalTime_),
     mass_(pc.mass_),
     massTotal_(pc.massTotal_),
     massFlowRate_(pc.massFlowRate_),
-    log_(pc.log_),
     outputFilePtr_(),
     timeOld_(0.0),
     hitFaceIDs_()

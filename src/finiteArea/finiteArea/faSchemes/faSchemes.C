@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -334,10 +334,8 @@ bool Foam::faSchemes::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -347,10 +345,8 @@ const Foam::dictionary& Foam::faSchemes::schemesDict() const
     {
         return subDict(word(lookup("select")));
     }
-    else
-    {
-        return *this;
-    }
+
+    return *this;
 }
 
 
@@ -398,7 +394,7 @@ Foam::ITstream& Foam::faSchemes::interpolationScheme(const word& name) const
     {
         Info<< "Lookup interpolationScheme for " << name << endl;
     }
-     
+
     if
     (
         interpolationSchemes_.found(name)

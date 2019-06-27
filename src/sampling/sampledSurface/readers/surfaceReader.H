@@ -128,7 +128,7 @@ public:
         (
             const label timeIndex,
             const label fieldIndex,
-            const sphericalTensor& reValue = pTraits<sphericalTensor>::zero
+            const sphericalTensor& refValue = pTraits<sphericalTensor>::zero
         ) const = 0;
 
         //- Return a symmTensor field at a given time
@@ -136,7 +136,7 @@ public:
         (
             const label timeIndex,
             const label fieldIndex,
-            const symmTensor& reValue = pTraits<symmTensor>::zero
+            const symmTensor& refValue = pTraits<symmTensor>::zero
         ) const = 0;
 
         //- Return a tensor field at a given time
@@ -144,7 +144,7 @@ public:
         (
             const label timeIndex,
             const label fieldIndex,
-            const tensor& reValue = pTraits<tensor>::zero
+            const tensor& refValue = pTraits<tensor>::zero
         ) const = 0;
 };
 

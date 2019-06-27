@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -130,6 +130,10 @@ public:
         //  FatalError if not found.
         EnumType get(const word& enumName) const;
 
+        //- The enumeration corresponding to the given name.
+        //  \return The enumeration or default if not found.
+        EnumType get(const word& enumName, const EnumType deflt) const;
+
         //- The name corresponding to the given enumeration.
         //  Return an empty word if not found.
         inline const word& get(const EnumType e) const;
@@ -151,11 +155,11 @@ public:
         //
         //  \return The value found or default if not found in dictionary.
         //  FatalError (or Warning) if the enumerated name was incorrect.
-        EnumType lookupOrDefault
+        EnumType getOrDefault
         (
             const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict, //!< dictionary
-            const EnumType defaultValue, //!< fallback if not found
+            const EnumType deflt,   //!< fallback if not found
             const bool failsafe = false  //!< Warn only on bad enumeration
         ) const;
 
@@ -212,33 +216,51 @@ public:
         inline const word& operator[](const EnumType e) const;
 
         //- Return the enumeration corresponding to the given name or
-        //- defaultValue if the name is not found.
+        //- deflt if the name is not found.
         inline EnumType operator()
         (
             const word& enumName,
-            const EnumType defaultValue
+            const EnumType deflt
         ) const;
 
 
     // Housekeeping
 
+        //- Find the key in the dictionary and return the corresponding
+        //- enumeration element based on its name.
+        //
+        //  \return The value found or default if not found in dictionary.
+        //  FatalError (or Warning) if the enumerated name was incorrect.
+        EnumType lookupOrDefault
+        (
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict, //!< dictionary
+            const EnumType deflt,   //!< fallback if not found
+            const bool failsafe = false //!< Warn only on bad enumeration
+        ) const
+        {
+            return getOrDefault(key, dict, deflt, failsafe);
+        }
+
         //- Deprecated(2018-10) same as two-parameter get()
         //  \deprecated(2018-10) - use two-parameter get() method
-        inline EnumType lookup(const word& key, const dictionary& dict) const
+        EnumType FOAM_DEPRECATED_FOR(2018-10, "get() method")
+        lookup(const word& key, const dictionary& dict) const
         {
             return get(key, dict);
         }
 
         //- Deprecated(2018-10) lookupOrDefault with warnings instead of error.
-        //  \deprecated(2018-10) - use lookupOrDefault() with failsafe option
-        EnumType lookupOrFailsafe
+        //  \deprecated(2018-10) - use getOrDefault() with failsafe option
+        EnumType FOAM_DEPRECATED_FOR(2018-10, "getOrDefault() method")
+        lookupOrFailsafe
         (
             const word& key,
             const dictionary& dict,
-            const EnumType defaultValue
+            const EnumType deflt
         ) const
         {
-            return lookupOrDefault(key, dict, defaultValue, true);
+            return getOrDefault(key, dict, deflt, true);
         }
 };
 

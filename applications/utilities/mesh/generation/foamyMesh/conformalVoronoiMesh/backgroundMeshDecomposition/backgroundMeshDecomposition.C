@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +53,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
     // ~~~~~~~~~~~~~~~~~~
 
     // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
 
     forAll(toProc, i)
     {
@@ -177,7 +179,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     {
                         volumeStatus[celli] = volumeType::MIXED;
                     }
-                    else if (geometry.inside(cellBb.midpoint()))
+                    else if (geometry.inside(cellBb.centre()))
                     {
                         volumeStatus[celli] = volumeType::INSIDE;
                     }
@@ -296,7 +298,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                     {
                         volumeStatus[celli] = volumeType::MIXED;
                     }
-                    else if (geometry.inside(cellBb.midpoint()))
+                    else if (geometry.inside(cellBb.centre()))
                     {
                         volumeStatus[celli] = volumeType::INSIDE;
                     }
@@ -337,7 +339,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 (
                     cellsToRemove,
                     exposedFaces,
-                    labelList(exposedFaces.size(), 0),  // patchID dummy
+                    labelList(exposedFaces.size(), Zero),  // patchID dummy
                     meshMod
                 );
 
@@ -578,7 +580,7 @@ bool Foam::backgroundMeshDecomposition::refineCell
 //                hitInfo[i].hitPoint()
 //            );
 //
-//            // Info<< "cellBb.midpoint() " << cellBb.midpoint() << nl
+//            // Info<< "cellBb.centre() " << cellBb.centre() << nl
 //            //     << samplePoints[i] << nl
 //            //     << hitInfo[i] << nl
 //            //     << "cellBb.span() " << cellBb.span() << nl
@@ -603,10 +605,9 @@ bool Foam::backgroundMeshDecomposition::refineCell
     else if (volType == volumeType::INSIDE)
     {
         // scalar s =
-        //    foamyHexMesh_.cellShapeControl_.cellSize(cellBb.midpoint());
+        //    foamyHexMesh_.cellShapeControl_.cellSize(cellBb.centre());
 
-        // Estimate the number of points in the cell by the size at the cell
-        // midpoint
+        // Estimate number of points in cell by the size at the cell centre
         // weightEstimate = cellBb.volume()/pow3(s);
 
         return false;
@@ -793,8 +794,8 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
     meshCutter_
     (
         mesh_,
-        labelList(mesh_.nCells(), 0),
-        labelList(mesh_.nPoints(), 0)
+        labelList(mesh_.nCells(), Zero),
+        labelList(mesh_.nPoints(), Zero)
     ),
     boundaryFacesPtr_(),
     bFTreePtr_(),

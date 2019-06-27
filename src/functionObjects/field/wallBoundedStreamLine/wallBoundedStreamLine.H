@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +57,7 @@ Usage
         lifeTime        10000;
         trackLength     1e-3;
         bounds          (0.2 -10 -10)(0.22 10 10);
-        cloudName       particleTracks;
+        cloud           particleTracks;
 
         seedSampleSet
         {
@@ -77,7 +79,7 @@ Usage
         lifetime     | Maximum number of particle tracking steps | yes |
         trackLength  | Tracking segment length | no          |
         nSubCycle    | Number of tracking steps per cell | no|
-        cloudName    | Cloud name to use       | yes         |
+        cloud        | Cloud name to use       | yes         |
         bounds       | Bounding box to trim tracks | no | invertedBox
         seedSampleSet| Seeding method (see below)| yes       |
     \endtable

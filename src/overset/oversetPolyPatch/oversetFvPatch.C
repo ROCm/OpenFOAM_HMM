@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,79 +36,6 @@ namespace Foam
 {
     defineTypeNameAndDebug(oversetFvPatch, 0);
     addToRunTimeSelectionTable(fvPatch, oversetFvPatch, polyPatch);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::tmp<Foam::labelField> Foam::oversetFvPatch::interfaceInternalField
-(
-    const labelUList& internalData
-) const
-{
-    return patchInternalField(internalData);
-}
-
-
-Foam::tmp<Foam::labelField> Foam::oversetFvPatch::internalFieldTransfer
-(
-    const Pstream::commsTypes commsType,
-    const labelUList& restrictMap
-) const
-{
-    // Store the restrictMap. This routine gets used for
-    // - GAMGAgglomeration      : this is the use we want to intercept.
-    // - GAMGProcAgglomeration  : to find out the cell number on the other side
-    // - MGridGenGAMGAgglomeration: same
-    if (master())
-    {
-        restrictMap_ = restrictMap;
-    }
-
-    return patchInternalField(restrictMap);
-}
-
-
-const Foam::labelListList& Foam::oversetFvPatch::stencil() const
-{
-    const cellCellStencilObject& overlap = Stencil::New(boundaryMesh().mesh());
-
-    return overlap.cellStencil();
-}
-
-
-const Foam::mapDistribute& Foam::oversetFvPatch::cellInterpolationMap() const
-{
-    const cellCellStencilObject& overlap = Stencil::New(boundaryMesh().mesh());
-    return overlap.cellInterpolationMap();
-}
-
-
-const Foam::List<Foam::scalarList>&
-Foam::oversetFvPatch::cellInterpolationWeights() const
-{
-    const cellCellStencilObject& overlap = Stencil::New(boundaryMesh().mesh());
-    return overlap.cellInterpolationWeights();
-}
-
-
-const Foam::scalarField& Foam::oversetFvPatch::normalisation() const
-{
-    return boundaryMesh().mesh().V().field();
-}
-
-
-const Foam::labelList& Foam::oversetFvPatch::interpolationCells() const
-{
-    const cellCellStencilObject& overlap = Stencil::New(boundaryMesh().mesh());
-    return overlap.interpolationCells();
-}
-
-
-const Foam::scalarList& Foam::oversetFvPatch::cellInterpolationWeight() const
-{
-    const cellCellStencilObject& overlap = Stencil::New(boundaryMesh().mesh());
-    return overlap.cellInterpolationWeight();
 }
 
 

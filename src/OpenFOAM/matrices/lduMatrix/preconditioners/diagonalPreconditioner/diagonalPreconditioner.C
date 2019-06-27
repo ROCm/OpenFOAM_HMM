@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2004-2010-2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,10 +54,10 @@ Foam::diagonalPreconditioner::diagonalPreconditioner
     lduMatrix::preconditioner(sol),
     rD(sol.matrix().diag().size())
 {
-    scalar* __restrict__ rDPtr = rD.begin();
+    solveScalar* __restrict__ rDPtr = rD.begin();
     const scalar* __restrict__ DPtr = solver_.matrix().diag().begin();
 
-    label nCells = rD.size();
+    const label nCells = rD.size();
 
     // Generate reciprocal diagonal
     for (label cell=0; cell<nCells; cell++)
@@ -69,16 +71,16 @@ Foam::diagonalPreconditioner::diagonalPreconditioner
 
 void Foam::diagonalPreconditioner::precondition
 (
-    scalarField& wA,
-    const scalarField& rA,
+    solveScalarField& wA,
+    const solveScalarField& rA,
     const direction
 ) const
 {
-    scalar* __restrict__ wAPtr = wA.begin();
-    const scalar* __restrict__ rAPtr = rA.begin();
-    const scalar* __restrict__ rDPtr = rD.begin();
+    solveScalar* __restrict__ wAPtr = wA.begin();
+    const solveScalar* __restrict__ rAPtr = rA.begin();
+    const solveScalar* __restrict__ rDPtr = rD.begin();
 
-    label nCells = wA.size();
+    const label nCells = wA.size();
 
     for (label cell=0; cell<nCells; cell++)
     {

@@ -69,7 +69,7 @@ void reportDetail(const IOobjectList& objects)
         }
 
         Info<< key << " (" << io->headerClassName()
-            << ") = addr " << long(io) << nl;
+            << ") = addr " << uintptr_t(io) << nl;
 
         if (count != 1)
         {

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -253,7 +255,7 @@ void Foam::GAMGSolver::agglomerateInterfaceCoefficients
             coarseInterfaceBouCoeffs.set
             (
                 inti,
-                new scalarField(nPatchFaces[inti], 0.0)
+                new scalarField(nPatchFaces[inti], Zero)
             );
             agglomeration_.restrictField
             (
@@ -265,7 +267,7 @@ void Foam::GAMGSolver::agglomerateInterfaceCoefficients
             coarseInterfaceIntCoeffs.set
             (
                 inti,
-                new scalarField(nPatchFaces[inti], 0.0)
+                new scalarField(nPatchFaces[inti], Zero)
             );
             agglomeration_.restrictField
             (

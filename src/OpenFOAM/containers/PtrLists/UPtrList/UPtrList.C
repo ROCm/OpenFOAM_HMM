@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +41,35 @@ Foam::UPtrList<T>::UPtrList(PtrList<T>& list)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
+Foam::label Foam::UPtrList<T>::squeezeNull()
+{
+    const label len = this->size();
+    label newLen = 0;
+
+    for (label i=0; i < len; ++i)
+    {
+        T* ptr = ptrs_[i];
+        if (ptr)
+        {
+            if (i != newLen)
+            {
+                ptrs_[newLen] = ptr;
+                ptrs_[i] = nullptr;
+            }
+            ++newLen;
+        }
+    }
+
+    return newLen;
+}
+
+
+template<class T>
+void Foam::UPtrList<T>::reorder
+(
+    const labelUList& oldToNew,
+    const bool testNull
+)
 {
     const label len = this->size();
 
@@ -71,19 +101,82 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
         {
             FatalErrorInFunction
                 << "reorder map is not unique; element " << idx
-                << " already set for type " << typeid(T).name()
+                << " already used for type " << typeid(T).name()
                 << abort(FatalError);
         }
         newList[idx] = ptrs_[i];
     }
 
     // Verify that all pointers were indeed set
-    for (label i=0; i<len; ++i)
+    if (testNull)
     {
-        if (!newList[i])
+        const label idx = newList.findNull();
+        if (idx >= 0)
         {
             FatalErrorInFunction
-                << "Element " << i << " not set after reordering." << nl
+                << "Element " << idx << " not set after reordering." << nl
+                << abort(FatalError);
+        }
+    }
+
+    ptrs_.transfer(newList);
+}
+
+
+template<class T>
+void Foam::UPtrList<T>::sortOrder
+(
+    const labelUList& order,
+    const bool testNull
+)
+{
+    const label len = this->size();
+
+    if (order.size() != len)
+    {
+        FatalErrorInFunction
+            << "Size of map (" << order.size()
+            << ") not equal to list size (" << len
+            << ") for type " << typeid(T).name() << nl
+            << abort(FatalError);
+    }
+
+    Detail::PtrListDetail<T> newList(len);
+    Detail::PtrListDetail<T> guard(len);
+
+    for (label i=0; i<len; ++i)
+    {
+        const label idx = order[i];
+
+        if (idx < 0 || idx >= len)
+        {
+            FatalErrorInFunction
+                << "Illegal index " << idx << nl
+                << "Valid indices are [0," << len << ") for type "
+                << typeid(T).name() << nl
+                << abort(FatalError);
+        }
+
+        if (guard[idx])
+        {
+            FatalErrorInFunction
+                << "order map is not unique; element " << idx
+                << " already used for type " << typeid(T).name()
+                << abort(FatalError);
+        }
+
+        guard[idx] = ptrs_[idx];
+        newList[i] = ptrs_[idx];
+    }
+
+    // Verify that all pointers were indeed set
+    if (testNull)
+    {
+        const label idx = newList.findNull();
+        if (idx >= 0)
+        {
+            FatalErrorInFunction
+                << "Element " << idx << " not set after reordering." << nl
                 << abort(FatalError);
         }
     }

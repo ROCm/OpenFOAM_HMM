@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -358,7 +360,7 @@ int main(int argc, char *argv[])
 
         forAllConstIters(objects, iter)
         {
-            const word& headerClassName = iter()->headerClassName();
+            const word& headerClassName = iter->headerClassName();
 
             if
             (
@@ -388,11 +390,11 @@ int main(int argc, char *argv[])
             )
             {
                 Info<< "        Reading " << headerClassName
-                    << " : " << iter()->name() << endl;
+                    << " : " << iter->name() << endl;
 
                 fieldDictionary fDict(*iter(), headerClassName);
 
-                Info<< "        Writing " << iter()->name() << endl;
+                Info<< "        Writing " << iter->name() << endl;
                 fDict.regIOobject::write();
             }
         }

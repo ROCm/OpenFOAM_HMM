@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -347,7 +349,6 @@ Foam::fvMatrix<Type>::fvMatrix(const fvMatrix<Type>& fvm)
 }
 
 
-#ifndef NoConstructFromTmp
 template<class Type>
 Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type>>& tfvm)
 :
@@ -400,7 +401,6 @@ Foam::fvMatrix<Type>::fvMatrix(const tmp<fvMatrix<Type>>& tfvm)
 
     tfvm.clear();
 }
-#endif
 
 
 template<class Type>
@@ -590,7 +590,7 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
     scalarField D0(D);
 
     // Calculate the sum-mag off-diagonal from the interior faces
-    scalarField sumOff(D.size(), 0.0);
+    scalarField sumOff(D.size(), Zero);
     sumMagOffDiag(sumOff);
 
     // Handle the boundary contributions to the diagonal
@@ -839,7 +839,7 @@ Foam::fvMatrix<Type>::H() const
     {
         scalarField psiCmpt(psi_.primitiveField().component(cmpt));
 
-        scalarField boundaryDiagCmpt(psi_.size(), 0.0);
+        scalarField boundaryDiagCmpt(psi_.size(), Zero);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
         boundaryDiagCmpt.negate();
         addCmptAvBoundaryDiag(boundaryDiagCmpt);

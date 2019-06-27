@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +67,11 @@ inline Foam::label Foam::radiation::fvDOM::nLambda() const
 }
 
 
+inline Foam::label Foam::radiation::fvDOM::nBands() const
+{
+    return nLambda_;
+}
+
 inline const Foam::volScalarField& Foam::radiation::fvDOM::a() const
 {
     return a_;
@@ -121,5 +128,10 @@ inline Foam::vector Foam::radiation::fvDOM::meshOrientation() const
     return meshOrientation_;
 }
 
+
+inline bool Foam::radiation::fvDOM::useSolarLoad() const
+{
+    return useSolarLoad_;
+}
 
 // ************************************************************************* //

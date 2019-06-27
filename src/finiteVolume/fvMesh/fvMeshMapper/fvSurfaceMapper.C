@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,8 +96,8 @@ void Foam::fvSurfaceMapper::calcAddressing() const
         {
             if (max(addr[facei]) >= oldNInternal)
             {
-                addr[facei] = labelList(1, label(0));
-                w[facei] = scalarList(1, 1.0);
+                addr[facei] = labelList(1, Zero);
+                w[facei] = scalarList(1, scalar(1));
             }
         }
     }

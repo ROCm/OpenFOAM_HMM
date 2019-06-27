@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +39,8 @@ Foam::wallHeatTransferFvPatchScalarField::wallHeatTransferFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    Tinf_(p.size(), 0.0),
-    alphaWall_(p.size(), 0.0)
+    Tinf_(p.size(), Zero),
+    alphaWall_(p.size(), Zero)
 {
     refValue() = 0.0;
     refGrad() = 0.0;

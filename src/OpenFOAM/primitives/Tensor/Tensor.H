@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +53,9 @@ See also
 namespace Foam
 {
 
-template<class Cmpt>
-class SymmTensor;
+// Forward Declarations
+template<class Cmpt> class SymmTensor;
+
 
 /*---------------------------------------------------------------------------*\
                            Class Tensor Declaration
@@ -73,7 +76,7 @@ public:
     // Member constants
 
         //- Rank of Tensor is 2
-        static const direction rank = 2;
+        static constexpr direction rank = 2;
 
 
     // Static data members

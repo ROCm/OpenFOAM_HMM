@@ -3,13 +3,13 @@
 List<scalarField> allSpeciesN_RU
 (
     molecules.potential().nIds(),
-    scalarField(mesh.nCells(), 0.0)
+    scalarField(mesh.nCells(), Zero)
 );
 
 List<scalarField> allSpeciesM_RU
 (
     molecules.potential().nIds(),
-    scalarField(mesh.nCells(), 0.0)
+    scalarField(mesh.nCells(), Zero)
 );
 
 List<vectorField> allSpeciesVelocitySum_RU
@@ -21,7 +21,7 @@ List<vectorField> allSpeciesVelocitySum_RU
 List<scalarField> allSpeciesVelocityMagSquaredSum_RU
 (
     molecules.potential().nIds(),
-    scalarField(mesh.nCells(), 0.0)
+    scalarField(mesh.nCells(), Zero)
 );
 
 // Geometric Fields for IO

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -252,7 +254,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
 )
 {
     scalarField& completeC(this->chemistry_.completeC());
-    scalarField c1(this->chemistry_.nEqns(), 0.0);
+    scalarField c1(this->chemistry_.nEqns(), Zero);
     for (label i=0; i<this->nSpecie_; i++)
     {
         c1[i] = c[i];
@@ -263,12 +265,12 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
     c1[this->nSpecie_+1] = p;
 
     // Compute the rAB matrix
-    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_, 0.0);
-    scalarField PA(this->nSpecie_, 0.0);
-    scalarField CA(this->nSpecie_, 0.0);
+    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_, Zero);
+    scalarField PA(this->nSpecie_, Zero);
+    scalarField CA(this->nSpecie_, Zero);
 
     // Number of initialized rAB for each lines
-    Field<label> NbrABInit(this->nSpecie_,0);
+    Field<label> NbrABInit(this->nSpecie_, Zero);
     // Position of the initialized rAB, -1 when not initialized
     RectangularMatrix<label> rABPos(this->nSpecie_, this->nSpecie_, -1);
     // Index of the other species involved in the rABNum
@@ -464,8 +466,8 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
         label nElements = 4; // 4 main elements (C, H, O, N)
 
         // Total number of C, H and O (in this order)
-        scalarList Na(nElements, 0.0);
-        scalarList Nal(nElements, 0.0); // for large hydrocarbons
+        scalarList Na(nElements, Zero);
+        scalarList Nal(nElements, Zero); // for large hydrocarbons
 
         for (label i=0; i<this->nSpecie_; i++)
         {
@@ -505,7 +507,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
 
     // Using the rAB matrix (numerator and denominator separated)
     // compute the R value according to the search initiating set
-    scalarField Rvalue(this->nSpecie_, 0.0);
+    scalarField Rvalue(this->nSpecie_, Zero);
     label speciesNumber = 0;
 
     // Set all species to inactive and activate them according

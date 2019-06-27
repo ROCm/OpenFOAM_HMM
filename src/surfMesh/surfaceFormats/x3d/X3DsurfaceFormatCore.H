@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +37,7 @@ SourceFiles
 #ifndef X3DsurfaceFormatCore_H
 #define X3DsurfaceFormatCore_H
 
-#include "Ostream.H"
+#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,9 +59,20 @@ protected:
     //- Write file header
     static void writeHeader(Ostream& os);
 
+    //- Write file header
+    static void writeFooter(Ostream& os);
+
+    //- Begin Group/Shape node
+    static void beginGroup(Ostream& os);
+
+    //- End Group/Shape node
+    static void endGroup(Ostream& os);
+
     //- Write appearance node
     static void writeAppearance(Ostream& os);
 
+    //- Write points (Coordinate)
+    static void writePoints(Ostream& os, const UList<point>& pts);
 };
 
 

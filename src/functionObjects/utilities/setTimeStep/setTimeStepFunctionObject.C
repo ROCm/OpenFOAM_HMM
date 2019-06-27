@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,27 +55,13 @@ Foam::functionObjects::setTimeStepFunctionObject::setTimeStepFunctionObject
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(runTime)
+    timeFunctionObject(name, runTime)
 {
     read(dict);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::setTimeStepFunctionObject::~setTimeStepFunctionObject()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-const Foam::Time&
-Foam::functionObjects::setTimeStepFunctionObject::time() const
-{
-    return time_;
-}
-
 
 bool Foam::functionObjects::setTimeStepFunctionObject::adjustTimeStep()
 {
@@ -101,22 +89,16 @@ bool Foam::functionObjects::setTimeStepFunctionObject::read
     const dictionary& dict
 )
 {
-    functionObject::read(dict);
+    timeFunctionObject::read(dict);
 
     timeStepPtr_ = Function1<scalar>::New("deltaT", dict);
 
-    // Check that adjustTimeStep is active
-    const dictionary& controlDict = time_.controlDict();
-
-    Switch adjust;
-    if
-    (
-       !controlDict.readIfPresent<Switch>("adjustTimeStep", adjust)
-    || !adjust
-    )
+    // Ensure that adjustTimeStep is active
+    if (!time_.controlDict().lookupOrDefault<bool>("adjustTimeStep", false))
     {
         FatalIOErrorInFunction(dict)
             << "Need to set 'adjustTimeStep' true to allow timestep control"
+            << nl
             << exit(FatalIOError);
     }
 

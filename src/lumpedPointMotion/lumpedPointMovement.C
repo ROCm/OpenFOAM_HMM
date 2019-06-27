@@ -351,7 +351,7 @@ void Foam::lumpedPointMovement::setBoundBox
 
     if (autoCentre_)
     {
-        centre_ = boundBox_.midpoint();
+        centre_ = boundBox_.centre();
         centre_ -= (centre_ & axis_) * axis_;
         if (lumpedPointIOMovement::debug)
         {
@@ -387,7 +387,7 @@ void Foam::lumpedPointMovement::setMapping
     labelList faceToZoneID(mesh.nFaces() - firstFace, -1);
 
     // Number of faces per zone
-    labelList nFaces(thresholds().size(), 0);
+    labelList nFaces(thresholds().size(), Zero);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,10 +79,7 @@ Foam::autoPtr<Foam::blockFace> Foam::blockFace::New
     Istream& is
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing blockFace" << endl;
-    }
+    DebugInFunction << "Constructing blockFace" << endl;
 
     const word faceType(is);
 
@@ -110,7 +109,7 @@ void Foam::blockFace::write(Ostream& os, const dictionary& d) const
     // Write contents
     forAll(vertices_, i)
     {
-        if (i > 0) os << token::SPACE;
+        if (i) os << token::SPACE;
         blockVertex::write(os, vertices_[i], d);
     }
 

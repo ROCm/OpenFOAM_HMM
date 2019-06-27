@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +75,7 @@ Foam::tmp<Foam::volScalarField> Foam::diameterModels::isothermal::d() const
         "p"
     );
 
-    return d0_*pow(p0_/p, 1.0/3.0);
+    return d0_*cbrt(p0_/p);
 }
 
 

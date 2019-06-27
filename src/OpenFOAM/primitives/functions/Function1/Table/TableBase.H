@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +62,7 @@ class TableBase
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Table name
         const word name_;
@@ -90,9 +92,6 @@ protected:
 
         //- Return (demand driven) interpolator
         const interpolationWeights& interpolator() const;
-
-
-private:
 
         //- No copy assignment
         void operator=(const TableBase<Type>&) = delete;

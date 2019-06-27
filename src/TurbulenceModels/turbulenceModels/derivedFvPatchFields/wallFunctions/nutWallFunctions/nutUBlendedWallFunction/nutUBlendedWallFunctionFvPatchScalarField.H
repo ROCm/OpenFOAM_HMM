@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,6 +66,10 @@ Usage
 Note
     The full 'automatic wall treatment' description also requires use of the
     Foam::omegaWallFunction with the \c blended flag set to 'on'
+
+    Suffers from non-exact restart since correctNut() (called through
+    turbulence->validate) returns a slightly different value every time
+    it is called. See nutUSpaldingWallFunctionFvPatchScalarField.C
 
 SeeAlso
     Foam::nutWallFunctionFvPatchScalarField

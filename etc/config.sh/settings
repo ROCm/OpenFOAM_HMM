@@ -2,8 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -17,44 +19,36 @@
 #     Settings for OpenFOAM.
 #
 #------------------------------------------------------------------------------
-export WM_ARCH=$(uname -s)                  # System name
+export WM_ARCH="$(uname -s)"                # System name
 ## : ${WM_OSTYPE:=POSIX}; export WM_OSTYPE     # System type (POSIX is default)
 
-# Default compiler = gcc/g++ and C++11
-export WM_CC="gcc"
-export WM_CXX="g++"
-export WM_CFLAGS="-fPIC"
-export WM_CXXFLAGS="-fPIC -std=c++11"
-unset WM_COMPILER_ARCH WM_COMPILER_LIB_ARCH WM_LDFLAGS
+archOption="${WM_ARCH_OPTION:-64}"
+unset WM_ARCH_OPTION        # Compiling 32-bit on 64-bit system
+unset WM_COMPILER_ARCH      # Host compiler type (when different than target)
+unset WM_COMPILER_LIB_ARCH  # Additional ending for lib directories
+
 
 # Adjust according to system and architecture
 case "$WM_ARCH" in
 Linux)
     WM_ARCH=linux
 
-    case $(uname -m) in
+    case "$(uname -m)" in
     i686)
-        export WM_ARCH_OPTION=32
         ;;
 
     x86_64)
-        : ${WM_ARCH_OPTION:=64}; export WM_ARCH_OPTION  # Default to 64-bit
-        case "$WM_ARCH_OPTION" in
+        case "$archOption" in
         32)
-            export WM_COMPILER_ARCH=64
-            export WM_CFLAGS="$WM_CFLAGS -m32"
-            export WM_CXXFLAGS="$WM_CXXFLAGS -m32"
-            export WM_LDFLAGS="-m32"
+            export WM_ARCH_OPTION=32        # Need to propagate the value
+            export WM_COMPILER_ARCH=64      # 64-bit compiler, 32-bit target
             ;;
         64)
             WM_ARCH=linux64
-            export WM_COMPILER_LIB_ARCH=64
-            export WM_CFLAGS="$WM_CFLAGS -m64"
-            export WM_CXXFLAGS="$WM_CXXFLAGS -m64"
-            export WM_LDFLAGS="-m64"
+            export WM_COMPILER_LIB_ARCH=64  # Target with lib64
             ;;
         *)
-            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32|64" 1>&2
+            echo "Unknown WM_ARCH_OPTION '$archOption', should be 32|64" 1>&2
             ;;
         esac
         ;;
@@ -65,58 +59,38 @@ Linux)
 
     armv7l)
         WM_ARCH=linuxARM7
-        export WM_ARCH_OPTION=32
         export WM_COMPILER_LIB_ARCH=32
         ;;
 
     aarch64)
         WM_ARCH=linuxARM64
-        export WM_ARCH_OPTION=64
         export WM_COMPILER_LIB_ARCH=64
         ;;
 
     ppc64)
         WM_ARCH=linuxPPC64
         export WM_COMPILER_LIB_ARCH=64
-        export WM_CFLAGS="$WM_CFLAGS -m64"
-        export WM_CXXFLAGS="$WM_CXXFLAGS -m64"
-        export WM_LDFLAGS="-m64"
         ;;
 
     ppc64le)
         WM_ARCH=linuxPPC64le
         export WM_COMPILER_LIB_ARCH=64
-        export WM_CFLAGS="$WM_CFLAGS -m64"
-        export WM_CXXFLAGS="$WM_CXXFLAGS -m64"
-        export WM_LDFLAGS="-m64"
         ;;
 
     *)
-        echo Unknown processor type $(uname -m) for Linux 1>&2
+        echo Unknown processor type "$(uname -m)" for Linux 1>&2
         ;;
     esac
     ;;
 
 Darwin)     # Presumably x86_64
-    : ${WM_ARCH_OPTION:=64}; export WM_ARCH_OPTION  # Default to 64-bit
     WM_ARCH=darwin64
-    export WM_CFLAGS="$WM_CFLAGS -m64 -Ddarwin"
-    export WM_CXXFLAGS="$WM_CXXFLAGS -m64 -Ddarwin"
-    /bin/cat << INCOMPLETE 1>&2
-===============================================================================
-Darwin support (clang only) is incomplete or untested in this OpenFOAM release.
-For further assistance, please contact www.OpenFOAM.com
-===============================================================================
-INCOMPLETE
+    echo "Darwin support is clang/llvm only" 1>&2
     ;;
 
-SunOS)
-    WM_ARCH=SunOS64
-    WM_MPLIB=FJMPI
+SunOS*)
+    WM_ARCH=solaris64
     export WM_COMPILER_LIB_ARCH=64
-    export WM_CFLAGS="$WM_CFLAGS -mabi=64"
-    export WM_CXXFLAGS="$WM_CXXFLAGS -mabi=64"
-    export WM_LDFLAGS="-mabi=64 -G0"
     ;;
 
 *)  # An unsupported operating system
@@ -229,23 +203,10 @@ export FOAM_RUN="$WM_PROJECT_USER_DIR/run"
 # Default to system compiler
 : ${WM_COMPILER_TYPE:=system}; export WM_COMPILER_TYPE
 
-# Adjust for non-gcc compilers
+# Non-POSIX systems and cross-compiling
 case "$WM_COMPILER" in
-Clang*)    # Clang compiler suite
-    export WM_CC='clang'
-    export WM_CXX='clang++'
-    ;;
-Cray*)     # Cray system compilers
-    export WM_CC='cc'
-    export WM_CXX='CC'
-    ;;
-Icc*)      # Intel compilers
-    export WM_CC='icc'
-    export WM_CXX='icpc'
-    ;;
-Arm*)     # Arm system compilers
-    export WM_CC='armclang'
-    export WM_CXX='armclang++'
+(Mingw*)
+    export WM_OSTYPE=MSwindows
     ;;
 esac
 
@@ -346,7 +307,7 @@ esac
 
 # Cleanup
 # ~~~~~~~
-unset archDir siteDir foundDir
+unset archDir siteDir foundDir archOption
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

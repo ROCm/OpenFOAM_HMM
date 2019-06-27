@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -211,12 +213,10 @@ public:
         DimensionedField(DimensionedField<Type, GeoMesh>& df, bool reuse);
 
         //- Construct from tmp\<DimensionedField\> deleting argument
-        #ifndef NoConstructFromTmp
         DimensionedField
         (
             const tmp<DimensionedField<Type, GeoMesh>>& tdf
         );
-        #endif
 
         //- Copy construct, resetting IO parameters
         DimensionedField
@@ -242,13 +242,11 @@ public:
 
         //- Construct from tmp\<DimensionedField\> deleting argument,
         //- resetting IO parameters.
-        #ifndef NoConstructFromTmp
         DimensionedField
         (
             const IOobject& io,
             const tmp<DimensionedField<Type, GeoMesh>>& tdf
         );
-        #endif
 
         //- Copy construct with a new name
         DimensionedField
@@ -273,13 +271,11 @@ public:
         );
 
         //- Construct with a new name from tmp\<DimensionedField\>
-        #ifndef NoConstructFromTmp
         DimensionedField
         (
             const word& newName,
             const tmp<DimensionedField<Type, GeoMesh>>& tdf
         );
-        #endif
 
         //- Clone
         tmp<DimensionedField<Type, GeoMesh>> clone() const;

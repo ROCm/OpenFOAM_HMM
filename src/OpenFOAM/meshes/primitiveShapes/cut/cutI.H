@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,10 +131,10 @@ inline const cut::uniformOp<Type>& tetCutPrism23
 
 
 //- Modify a fixed list for reordering a tri (does nothing)
-template<class Type, unsigned Size>
+template<class Type, unsigned N>
 inline FixedList<Type, 3> triReorder
 (
-    const FixedList<Type, Size>& x,
+    const FixedList<Type, N>& x,
     const FixedList<label, 3>& indices
 )
 {
@@ -182,10 +184,10 @@ inline FixedList<Type, 4> triCutQuad
 
 
 //- Modify a fixed list for reordering a tet (does nothing)
-template<class Type, unsigned Size>
+template<class Type, unsigned N>
 inline FixedList<Type, 4> tetReorder
 (
-    const FixedList<Type, Size>& x,
+    const FixedList<Type, N>& x,
     const FixedList<label, 4>& indices
 )
 {

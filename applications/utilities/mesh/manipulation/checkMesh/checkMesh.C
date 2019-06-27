@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,8 +67,8 @@ Usage
 #include "Time.H"
 #include "fvMesh.H"
 #include "globalMeshData.H"
-#include "surfaceWriter.H"
 #include "vtkSetWriter.H"
+#include "vtkSurfaceWriter.H"
 #include "IOdictionary.H"
 
 #include "checkTools.H"
@@ -147,16 +149,19 @@ int main(int argc, char *argv[])
     );
     if (!writeFields && args.found("writeAllFields"))
     {
-        selectedFields.insert("nonOrthoAngle");
-        selectedFields.insert("faceWeight");
-        selectedFields.insert("skewness");
-        selectedFields.insert("cellDeterminant");
-        selectedFields.insert("aspectRatio");
-        selectedFields.insert("cellShapes");
-        selectedFields.insert("cellVolume");
-        selectedFields.insert("cellVolumeRatio");
-        selectedFields.insert("minTetVolume");
-        selectedFields.insert("cellRegion");
+        selectedFields.insert
+        ({
+            "nonOrthoAngle",
+            "faceWeight",
+            "skewness",
+            "cellDeterminant",
+            "aspectRatio",
+            "cellShapes",
+            "cellVolume",
+            "cellVolumeRatio",
+            "minTetVolume",
+            "cellRegion"
+        });
     }
 
 

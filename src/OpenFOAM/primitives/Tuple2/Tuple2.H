@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,58 +40,68 @@ See also
 #define Tuple2_H
 
 #include "Istream.H"
+#include "Ostream.H"
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
-
-template<class Type1, class Type2>
-class Tuple2;
-
-template<class Type1, class Type2>
-inline Istream& operator>>(Istream& is, Tuple2<Type1, Type2>& t2);
-
-template<class Type1, class Type2>
-inline Ostream& operator<<(Ostream& os, const Tuple2<Type1, Type2>& t2);
-
-
 /*---------------------------------------------------------------------------*\
-                           class Tuple2 Declaration
+                           Class Tuple2 Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type1, class Type2>
+template<class T1, class T2>
 class Tuple2
 {
-    // Private data
+    // Private Data
 
-        Type1 f_;
-        Type2 s_;
+        T1 f_;
+        T2 s_;
 
 public:
 
     // Typedefs (cf. std::pair)
 
-        //- Type of member first, the first template parameter (Type1)
-        typedef Type1 first_type;
+        //- Type of member first, the first template parameter (T1)
+        typedef T1 first_type;
 
-        //- Type of member second, the second template parameter (Type2)
-        typedef Type2 second_type;
+        //- Type of member second, the second template parameter (T2)
+        typedef T2 second_type;
 
 
     // Constructors
 
-        //- Null constructor for lists and hashes
-        inline Tuple2()
-        {}
+        //- Construct null
+        inline Tuple2() = default;
 
-        //- Construct from components
-        inline Tuple2(const Type1& f, const Type2& s)
+        //- Copy construct from components
+        inline Tuple2(const T1& f, const T2& s)
         :
             f_(f),
             s_(s)
+        {}
+
+        //- Move construct from components
+        inline Tuple2(T1&& f, T2&& s)
+        :
+            f_(std::move(f)),
+            s_(std::move(s))
+        {}
+
+        //- Copy construct from std::pair
+        inline Tuple2(const std::pair<T1,T2>& vals)
+        :
+            f_(vals.first),
+            s_(vals.second)
+        {}
+
+        //- Move construct from std::pair
+        inline Tuple2(std::pair<T1,T2>&& vals)
+        :
+            f_(std::move(vals.first)),
+            s_(std::move(vals.second))
         {}
 
         //- Construct from Istream
@@ -102,136 +114,94 @@ public:
     // Member Functions
 
         //- Return first
-        inline const Type1& first() const
+        inline const T1& first() const noexcept
         {
             return f_;
         }
 
         //- Return first
-        inline Type1& first()
+        inline T1& first() noexcept
         {
             return f_;
         }
 
         //- Return second
-        inline const Type2& second() const
+        inline const T2& second() const noexcept
         {
             return s_;
         }
 
         //- Return second
-        inline Type2& second()
+        inline T2& second() noexcept
         {
             return s_;
         }
-
-
-    // IOstream operators
-
-        //- Read Tuple2 from Istream, discarding contents of existing Tuple2.
-        friend Istream& operator>> <Type1, Type2>
-        (
-            Istream& is,
-            Tuple2<Type1, Type2>& t2
-        );
-
-        // Write Tuple2 to Ostream.
-        friend Ostream& operator<< <Type1, Type2>
-        (
-            Ostream& os,
-            const Tuple2<Type1, Type2>& t2
-        );
 };
 
 
 //- Return reverse of a Tuple2
-template<class Type1, class Type2>
-inline Tuple2<Type2, Type1> reverse(const Tuple2<Type1, Type2>& t)
+template<class T1, class T2>
+inline Tuple2<T2, T1> reverse(const Tuple2<T1,T2>& t)
 {
-    return Tuple2<Type2, Type1>(t.second(), t.first());
+    return Tuple2<T2, T1>(t.second(), t.first());
 }
 
 
-template<class Type1, class Type2>
-inline bool operator==
-(
-    const Tuple2<Type1, Type2>& a,
-    const Tuple2<Type1, Type2>& b
-)
+template<class T1, class T2>
+inline bool operator==(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 {
     return (a.first() == b.first() && a.second() == b.second());
 }
 
 
-template<class Type1, class Type2>
-inline bool operator!=
-(
-    const Tuple2<Type1, Type2>& a,
-    const Tuple2<Type1, Type2>& b
-)
+template<class T1, class T2>
+inline bool operator!=(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 {
     return !(a == b);
 }
 
 
-template<class Type1, class Type2>
-inline bool operator<
-(
-    const Tuple2<Type1, Type2>& a,
-    const Tuple2<Type1, Type2>& b
-)
+template<class T1, class T2>
+inline bool operator<(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 {
     return
     (
         a.first() < b.first()
-     ||
-        (
-            !(b.first() < a.first())
-         && a.second() < b.second()
-        )
+     || (!(b.first() < a.first()) && a.second() < b.second())
     );
 }
 
 
 
-template<class Type1, class Type2>
-inline bool operator<=
-(
-    const Tuple2<Type1, Type2>& a,
-    const Tuple2<Type1, Type2>& b
-)
+template<class T1, class T2>
+inline bool operator<=(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 {
     return !(b < a);
 }
 
 
-template<class Type1, class Type2>
-inline bool operator>
-(
-    const Tuple2<Type1, Type2>& a,
-    const Tuple2<Type1, Type2>& b
-)
+template<class T1, class T2>
+inline bool operator>(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 {
     return (b < a);
 }
 
 
-template<class Type1, class Type2>
-inline bool operator>=
-(
-    const Tuple2<Type1, Type2>& a,
-    const Tuple2<Type1, Type2>& b
-)
+template<class T1, class T2>
+inline bool operator>=(const Tuple2<T1,T2>& a, const Tuple2<T1,T2>& b)
 {
     return !(a < b);
 }
 
 
-template<class Type1, class Type2>
-inline Istream& operator>>(Istream& is, Tuple2<Type1, Type2>& t2)
+// IOstream Operators
+
+//- Read Tuple2 from Istream, discarding contents of existing Tuple2.
+template<class T1, class T2>
+inline Istream& operator>>(Istream& is, Tuple2<T1,T2>& t)
 {
     is.readBegin("Tuple2");
-    is >> t2.f_ >> t2.s_;
+    is >> t.first() >> t.second();
     is.readEnd("Tuple2");
 
     is.check(FUNCTION_NAME);
@@ -239,11 +209,37 @@ inline Istream& operator>>(Istream& is, Tuple2<Type1, Type2>& t2)
 }
 
 
-template<class Type1, class Type2>
-inline Ostream& operator<<(Ostream& os, const Tuple2<Type1, Type2>& t2)
+//- Read std::pair from Istream
+template<class T1, class T2>
+inline Istream& operator>>(Istream& is, std::pair<T1,T2>& t)
+{
+    is.readBegin("std::pair");
+    is >> t.first >> t.second;
+    is.readEnd("std::pair");
+
+    is.check(FUNCTION_NAME);
+    return is;
+}
+
+
+//- Write Tuple2 to Ostream.
+template<class T1, class T2>
+inline Ostream& operator<<(Ostream& os, const Tuple2<T1,T2>& t)
 {
     os  << token::BEGIN_LIST
-        << t2.f_ << token::SPACE << t2.s_
+        << t.first() << token::SPACE << t.second()
+        << token::END_LIST;
+
+    return os;
+}
+
+
+//- Write std::pair to Ostream.
+template<class T1, class T2>
+inline Ostream& operator<<(Ostream& os, const std::pair<T1,T2>& t)
+{
+    os  << token::BEGIN_LIST
+        << t.first << token::SPACE << t.second
         << token::END_LIST;
 
     return os;

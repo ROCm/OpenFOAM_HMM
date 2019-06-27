@@ -1,0 +1,6 @@
+EXE_INC = \
+    -DFULLDEBUG \
+    -I$(LIB_SRC)/mesh/blockMesh/lnInclude
+
+EXE_LIBS = \
+    -lblockMesh

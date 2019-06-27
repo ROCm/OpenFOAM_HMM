@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -276,7 +278,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
 
 Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc() const
 {
-    if (moving() && time().subCycling())
+    if (!steady() && moving() && time().subCycling())
     {
         const TimeState& ts = time();
         const TimeState& ts0 = time().prevTimeState();
@@ -304,7 +306,7 @@ Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc() const
 
 Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc0() const
 {
-    if (moving() && time().subCycling())
+    if (!steady() && moving() && time().subCycling())
     {
         const TimeState& ts = time();
         const TimeState& ts0 = time().prevTimeState();

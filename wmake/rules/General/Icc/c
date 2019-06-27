@@ -1,0 +1,8 @@
+SUFFIXES += .c
+
+cc          = icc
+
+cARCH       =
+cDBUG       =
+cOPT        = -O2
+cWARN       =

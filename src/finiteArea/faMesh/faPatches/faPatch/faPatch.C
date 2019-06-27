@@ -341,7 +341,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchPointNormals() const
 
     const labelListList& pntEdges = pointEdges();
 
-    tmp<vectorField> tpN(new vectorField(pntEdges.size(), vector::zero));
+    tmp<vectorField> tpN(new vectorField(pntEdges.size(), Zero));
     vectorField& pN = tpN.ref();
 
     const vectorField faceNormals(ngbPolyPatchFaceNormals());
@@ -467,13 +467,13 @@ void Foam::faPatch::resetEdges(const labelList& newEdges)
 
 void Foam::faPatch::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
+
     patchIdentifier::write(os);
 
     const labelList& edgeLabels = *this;
     edgeLabels.writeEntry("edgeLabels", os);
-    os.writeKeyword("ngbPolyPatchIndex") << ngbPolyPatchIndex_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("ngbPolyPatchIndex", ngbPolyPatchIndex_);
 }
 
 

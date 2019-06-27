@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -100,7 +102,7 @@ thermalBaffle1DFvPatchScalarField
     qs_(p.size(), 0),
     solidDict_(dict),
     solidPtr_(),
-    qrPrevious_(p.size(), 0.0),
+    qrPrevious_(p.size(), Zero),
     qrRelaxation_
     (
         dict.lookupOrDefaultCompat("qrRelaxation", {{"relaxation", 1712}}, 1)
@@ -365,7 +367,7 @@ void thermalBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
             patch().template lookupPatchField<volScalarField, scalar>(TName_);
 
 
-        scalarField qr(Tp.size(), 0.0);
+        scalarField qr(Tp.size(), Zero);
 
         if (qrName_ != "none")
         {
@@ -386,7 +388,7 @@ void thermalBaffle1DFvPatchScalarField<solidType>::updateCoeffs()
         mapDist.distribute(nbrTp);
 
         // solid properties
-        scalarField kappas(patch().size(), 0.0);
+        scalarField kappas(patch().size(), Zero);
         forAll(kappas, i)
         {
             kappas[i] = solid().kappa(0.0, (Tp[i] + nbrTp[i])/2.0);

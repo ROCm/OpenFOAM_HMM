@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,45 +37,54 @@ inline Foam::DiagonalMatrix<Type>::DiagonalMatrix()
 
 
 template<class Type>
-template<class Form>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const Matrix<Form, Type>& a)
+Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label n)
 :
-    List<Type>(min(a.m(), a.n()))
+    List<Type>(n)
+{}
+
+
+template<class Type>
+Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label n, const zero)
+:
+    List<Type>(n, Zero)
+{}
+
+
+template<class Type>
+Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label n, const Type& val)
+:
+    List<Type>(n, val)
+{}
+
+
+template<class Type>
+template<class Form>
+Foam::DiagonalMatrix<Type>::DiagonalMatrix(const Matrix<Form, Type>& mat)
+:
+    List<Type>(min(mat.m(), mat.n()))
 {
-    forAll(*this, i)
+    label i = 0;
+
+    for (Type& val : *this)
     {
-        this->operator[](i) = a(i, i);
+        val = mat(i, i);
+        ++i;
     }
 }
 
 
 template<class Type>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label size)
-:
-    List<Type>(size)
-{}
-
-
-template<class Type>
-Foam::DiagonalMatrix<Type>::DiagonalMatrix(const label size, const Type& val)
-:
-    List<Type>(size, val)
-{}
-
-
-template<class Type>
 Foam::DiagonalMatrix<Type>& Foam::DiagonalMatrix<Type>::invert()
 {
-    forAll(*this, i)
+    for (Type& val : *this)
     {
-        Type x = this->operator[](i);
-        if (mag(x) < VSMALL)
+        if (mag(val) < VSMALL)
         {
-            this->operator[](i) = Type(0);
+            val = Zero;
         }
         else
         {
-            this->operator[](i) = Type(1)/x;
+            val = Type(1)/val;
         }
     }
 
@@ -82,21 +93,24 @@ Foam::DiagonalMatrix<Type>& Foam::DiagonalMatrix<Type>::invert()
 
 
 template<class Type>
-Foam::DiagonalMatrix<Type> Foam::inv(const DiagonalMatrix<Type>& A)
+Foam::DiagonalMatrix<Type> Foam::inv(const DiagonalMatrix<Type>& mat)
 {
-    DiagonalMatrix<Type> Ainv = A;
+    DiagonalMatrix<Type> Ainv(mat.size());
 
-    forAll(A, i)
+    Type* iter = Ainv.begin();
+
+    for (const Type& val : mat)
     {
-        Type x = A[i];
-        if (mag(x) < VSMALL)
+        if (mag(val) < VSMALL)
         {
-            Ainv[i] = Type(0);
+            *iter = Zero;
         }
         else
         {
-            Ainv[i] = Type(1)/x;
+            *iter = Type(1)/val;
         }
+
+        ++iter;
     }
 
     return Ainv;

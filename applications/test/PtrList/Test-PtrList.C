@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +36,7 @@ Description
 #include "SLPtrList.H"
 #include "plane.H"
 #include "DynamicList.H"
+#include "PtrListOps.H"
 
 using namespace Foam;
 
@@ -104,7 +107,7 @@ Ostream& printAddr
 
     for (label i=0; i < len; ++i)
     {
-        os << "addr=" << long(list(i)) << nl;
+        os << "addr=" << uintptr_t(list(i)) << nl;
     }
 
     // End delimiter
@@ -190,10 +193,43 @@ Ostream& print
         {
             const T* ptr = list(i);
 
-            os << "unused " << long(ptr) << nl;
+            os << "unused " << uintptr_t(ptr) << nl;
         }
     }
 
+
+    // End delimiter
+    os << decrIndent << indent << token::END_LIST << nl;
+    return os;
+}
+
+
+template<class T>
+Ostream& print
+(
+    Ostream& os,
+    const UList<T*>& list
+)
+{
+    const label len = list.size();
+
+    // Size and start delimiter
+    os  << nl << indent << len << nl
+        << indent << token::BEGIN_LIST << incrIndent << nl;
+
+    for (label i=0; i < len; ++i)
+    {
+        const T* ptr = list[i];
+
+        if (ptr)
+        {
+            os << *ptr << nl;
+        }
+        else
+        {
+            os << "nullptr" << nl;
+        }
+    }
 
     // End delimiter
     os << decrIndent << indent << token::END_LIST << nl;
@@ -302,11 +338,59 @@ int main(int argc, char *argv[])
         <<"list2: " << list2 << nl
         <<"list-appended: " << listApp << endl;
 
-    Info<<"indirectly delete some items via set(.., 0) :" << endl;
-    for (label i = 0; i < 3; i++)
+
+    // Release values
+    {
+        DynamicList<Scalar*> ptrs;
+
+        forAll(listApp, i)
+        {
+            auto old = listApp.release(i);
+
+            if (old)
+            {
+                ptrs.append(old.release());
+            }
+        }
+
+        Info<<"Released pointers from";
+        print(Info, listApp) << nl;
+
+        Info<<"Into plain list of pointers";
+        print(Info, ptrs) << nl;
+
+        PtrDynList<Scalar> newlist1(ptrs);
+
+        Info<<"Constructed from plain list of pointers";
+        print(Info, ptrs) << nl;
+        print(Info, newlist1) << nl;
+    }
+
+
+    Info<<"indirectly delete some items via set(.., nullptr) :" << endl;
+    for (label i = 2; i < 5; i++)
     {
         list1.set(i, nullptr);
     }
+
+    Info<<"release some items:" << endl;
+
+    for (label i = -2; i < 5; i++)
+    {
+        auto old = list1.release(i);
+
+        if (!old)
+        {
+            Info<< i << " was already released" << nl;
+        }
+    }
+
+    Info<<"list1: ";
+    print(Info, list1) << nl;
+
+    list1.resize(list1.squeezeNull());
+    Info<<"squeezed null: ";
+    print(Info, list1) << nl;
 
     Info<<"transfer list2 -> list1:" << endl;
     list1.transfer(list2);
@@ -487,6 +571,66 @@ int main(int argc, char *argv[])
     }
 
     report(Info, dynPlanes, true);
+
+    {
+        // No clone for plane - do manual copy
+        PtrList<plane> stdPlanes(dynPlanes.size());
+
+        forAll(dynPlanes, i)
+        {
+            const plane* pln = dynPlanes.set(i);
+            if (pln)
+            {
+                stdPlanes.set(i, new plane(*pln));
+            }
+        }
+
+        report(Info, stdPlanes);
+        printAddr(Info, stdPlanes);
+
+        stdPlanes.resize(stdPlanes.squeezeNull());
+
+        Info<<"After pruning nullptr entries" << endl;
+        printAddr(Info, stdPlanes);
+    }
+
+    dynPlanes.resize(dynPlanes.squeezeNull());
+
+    Info<<"After pruning nullptr entries" << endl;
+    report(Info, dynPlanes, true);
+
+
+    {
+        PtrDynList<plane> dynPlanes2;
+
+        dynPlanes2.append(new plane(vector::one, vector::one));
+        dynPlanes2.append(new plane(vector(1,2,3), vector::one));
+        dynPlanes2.append(nullptr);
+
+        dynPlanes2.set(6, new plane(vector(2,2,1), vector::one));
+        dynPlanes2.set(10, new plane(Zero, vector::one));
+
+        labelList order;
+        sortedOrder(dynPlanes2, order);
+        Info<< "sorted order: " << flatOutput(order) << nl;
+
+        sortedOrder(dynPlanes2, order, PtrListOps::greater<plane>(dynPlanes2));
+        Info<< "sorted order: " << flatOutput(order) << nl;
+
+        sort(dynPlanes2);
+        // dynPlanes2.squeezeNull();
+
+        Info<<"Append" << endl;
+        report(Info, dynPlanes2, false);
+
+        dynPlanes.append(std::move(dynPlanes2));
+
+        Info<<"Result" << endl;
+        report(Info, dynPlanes, false);
+
+        Info<<"From" << endl;
+        report(Info, dynPlanes2, false);
+    }
 
     Info<<"free()" << endl;
 

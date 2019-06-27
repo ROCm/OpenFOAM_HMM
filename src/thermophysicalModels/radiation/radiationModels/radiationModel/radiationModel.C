@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +46,12 @@ namespace Foam
 
 const Foam::word Foam::radiation::radiationModel::externalRadHeatFieldName_ =
     "qrExt";
+
+const Foam::word Foam::radiation::radiationModel::primaryFluxName_ =
+    "qprimaryRad";
+
+ const Foam::word Foam::radiation::radiationModel::relfectedFluxName_ =
+    "qreflective";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -88,8 +96,6 @@ void Foam::radiation::radiationModel::initialise()
         scatter_.reset(scatterModel::New(*this, mesh_).ptr());
 
         soot_.reset(sootModel::New(*this, mesh_).ptr());
-
-        transmissivity_.reset(transmissivityModel::New(*this, mesh_).ptr());
     }
 }
 
@@ -118,8 +124,7 @@ Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
     firstIter_(true),
     absorptionEmission_(nullptr),
     scatter_(nullptr),
-    soot_(nullptr),
-    transmissivity_(nullptr)
+    soot_(nullptr)
 {}
 
 
@@ -139,8 +144,7 @@ Foam::radiation::radiationModel::radiationModel
     firstIter_(true),
     absorptionEmission_(nullptr),
     scatter_(nullptr),
-    soot_(nullptr),
-    transmissivity_(nullptr)
+    soot_(nullptr)
 {
     if (readOpt() == IOobject::NO_READ)
     {
@@ -179,8 +183,7 @@ Foam::radiation::radiationModel::radiationModel
     firstIter_(true),
     absorptionEmission_(nullptr),
     scatter_(nullptr),
-    soot_(nullptr),
-    transmissivity_(nullptr)
+    soot_(nullptr)
 {
     initialise();
 }
@@ -317,7 +320,7 @@ Foam::radiation::radiationModel::soot() const
     return *soot_;
 }
 
-
+/*
 const Foam::radiation::transmissivityModel&
 Foam::radiation::radiationModel::transmissivity() const
 {
@@ -330,6 +333,6 @@ Foam::radiation::radiationModel::transmissivity() const
 
     return *transmissivity_;
 }
-
+*/
 
 // ************************************************************************* //

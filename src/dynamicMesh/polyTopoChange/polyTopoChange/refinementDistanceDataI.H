@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,10 +114,8 @@ inline bool Foam::refinementDistanceData::update
             return true;
         }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -269,14 +269,7 @@ inline bool Foam::refinementDistanceData::equal
 {
     if (!valid(td))
     {
-        if (!rhs.valid(td))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return (!rhs.valid(td));
     }
     else
     {
@@ -290,8 +283,7 @@ inline bool Foam::refinementDistanceData::equal
 inline bool Foam::refinementDistanceData::operator==
 (
     const Foam::refinementDistanceData& rhs
-)
- const
+) const
 {
     return
         level0Size_ == rhs.level0Size_
@@ -303,8 +295,7 @@ inline bool Foam::refinementDistanceData::operator==
 inline bool Foam::refinementDistanceData::operator!=
 (
     const Foam::refinementDistanceData& rhs
-)
- const
+) const
 {
     return !(*this == rhs);
 }

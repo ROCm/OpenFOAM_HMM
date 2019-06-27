@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,9 +72,9 @@ Foam::phaseModel::phaseModel
     (
         "residualAlpha",
         dimless,
-        fluid.subDict(phaseName).lookup("residualAlpha")
+        fluid.subDict(phaseName)
     ),
-    alphaMax_(phaseDict_.lookupOrDefault("alphaMax", 1.0)),
+    alphaMax_(phaseDict_.lookupOrDefault<scalar>("alphaMax", 1)),
     thermo_(rhoThermo::New(fluid.mesh(), name_)),
     U_
     (

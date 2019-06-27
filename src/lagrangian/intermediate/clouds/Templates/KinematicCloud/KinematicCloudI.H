@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -271,10 +273,9 @@ template<class CloudType>
 inline Foam::scalar Foam::KinematicCloud<CloudType>::massInSystem() const
 {
     scalar sysMass = 0.0;
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-         const parcelType& p = iter();
-         sysMass += p.nParticle()*p.mass();
+        sysMass += p.nParticle()*p.mass();
     }
 
     return sysMass;
@@ -287,10 +288,8 @@ Foam::KinematicCloud<CloudType>::linearMomentumOfSystem() const
 {
     vector linearMomentum(Zero);
 
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
-
         linearMomentum += p.nParticle()*p.mass()*p.U();
     }
 
@@ -300,14 +299,27 @@ Foam::KinematicCloud<CloudType>::linearMomentumOfSystem() const
 
 template<class CloudType>
 inline Foam::scalar
+Foam::KinematicCloud<CloudType>::totalParticlePerParcel() const
+{
+    scalar parPerParcel = 0;
+
+    for (const parcelType& p : *this)
+    {
+        parPerParcel += p.nParticle();
+    }
+
+    return parPerParcel;
+}
+
+
+template<class CloudType>
+inline Foam::scalar
 Foam::KinematicCloud<CloudType>::linearKineticEnergyOfSystem() const
 {
-    scalar linearKineticEnergy = 0.0;
+    scalar linearKineticEnergy = 0;
 
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
-
         linearKineticEnergy += p.nParticle()*0.5*p.mass()*(p.U() & p.U());
     }
 
@@ -324,9 +336,8 @@ inline Foam::scalar Foam::KinematicCloud<CloudType>::Dij
 {
     scalar si = 0.0;
     scalar sj = 0.0;
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
         si += p.nParticle()*pow(p.d(), i);
         sj += p.nParticle()*pow(p.d(), j);
     }
@@ -343,9 +354,8 @@ template<class CloudType>
 inline Foam::scalar Foam::KinematicCloud<CloudType>::Dmax() const
 {
     scalar d = -GREAT;
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
         d = max(d, p.d());
     }
 
@@ -475,9 +485,8 @@ Foam::KinematicCloud<CloudType>::vDotSweep() const
     );
 
     volScalarField& vDotSweep = tvDotSweep.ref();
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
         const label celli = p.cell();
 
         vDotSweep[celli] += p.nParticle()*p.areaP()*mag(p.U() - U_[celli]);
@@ -514,9 +523,8 @@ Foam::KinematicCloud<CloudType>::theta() const
     );
 
     volScalarField& theta = ttheta.ref();
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
         const label celli = p.cell();
 
         theta[celli] += p.nParticle()*p.volume();
@@ -552,9 +560,8 @@ Foam::KinematicCloud<CloudType>::alpha() const
     );
 
     scalarField& alpha = talpha.ref().primitiveFieldRef();
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
         const label celli = p.cell();
 
         alpha[celli] += p.nParticle()*p.mass();
@@ -589,9 +596,8 @@ Foam::KinematicCloud<CloudType>::rhoEff() const
     );
 
     scalarField& rhoEff = trhoEff.ref().primitiveFieldRef();
-    forAllConstIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
         const label celli = p.cell();
 
         rhoEff[celli] += p.nParticle()*p.mass();

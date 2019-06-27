@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +43,8 @@ Foam::motionSmoother::motionSmoother
     pointMesh& pMesh,
     indirectPrimitivePatch& pp,
     const labelList& adaptPatchIDs,
-    const dictionary& paramDict
+    const dictionary& paramDict,
+    const bool dryRun
 )
 :
     motionSmootherData(pMesh),
@@ -54,7 +57,8 @@ Foam::motionSmoother::motionSmoother
         motionSmootherData::scale_,
         motionSmootherData::oldPoints_,
         adaptPatchIDs,
-        paramDict
+        paramDict,
+        dryRun
     )
 {}
 
@@ -65,7 +69,8 @@ Foam::motionSmoother::motionSmoother
     indirectPrimitivePatch& pp,
     const labelList& adaptPatchIDs,
     const pointVectorField& displacement,
-    const dictionary& paramDict
+    const dictionary& paramDict,
+    const bool dryRun
 )
 :
     motionSmootherData(displacement),
@@ -78,7 +83,8 @@ Foam::motionSmoother::motionSmoother
         motionSmootherData::scale_,
         motionSmootherData::oldPoints_,
         adaptPatchIDs,
-        paramDict
+        paramDict,
+        dryRun
     )
 {}
 

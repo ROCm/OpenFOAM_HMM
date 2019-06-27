@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,10 +62,8 @@ bool thermo::read()
         readControls();
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -76,10 +74,8 @@ bool thermo::read(const dictionary& dict)
         readControls();
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

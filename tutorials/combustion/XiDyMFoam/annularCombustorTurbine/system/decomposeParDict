@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -23,7 +23,15 @@ coeffs
     n           (6 1 1);
 }
 
-preservePatches (cyclic0 cyclic1 ami0 ami1);
+// Optional decomposition constraints
+constraints
+{
+    preservePatches
+    {
+        type            preservePatches;
+        patches         (cyclic0 cyclic1 ami0 ami1);
+    }
+}
 
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -237,17 +237,7 @@ void Foam::functionObjects::AMIWeights::writeWeightField
 
     // Collect field
     scalarField mergedWeights;
-    globalFaces().gather
-    (
-        UPstream::worldComm,
-        ListOps::create<label>
-        (
-            UPstream::procID(UPstream::worldComm),
-            labelOp<int>()  // int -> label
-        ),
-        weightSum,
-        mergedWeights
-    );
+    globalFaces().gather(weightSum, mergedWeights);
 
     const bool isACMI = isA<cyclicACMIPolyPatch>(cpp);
 
@@ -256,17 +246,7 @@ void Foam::functionObjects::AMIWeights::writeWeightField
     {
         const cyclicACMIPolyPatch& pp = refCast<const cyclicACMIPolyPatch>(cpp);
 
-        globalFaces().gather
-        (
-            UPstream::worldComm,
-            ListOps::create<label>
-            (
-                UPstream::procID(UPstream::worldComm),
-                labelOp<int>()  // int -> label
-            ),
-            pp.mask(),
-            mergedMask
-        );
+        globalFaces().gather(pp.mask(), mergedMask);
     }
 
     if (Pstream::master())

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,6 +137,10 @@ private:
 
         //- Stabilisation for normalisation of the interface normal
         const dimensionedScalar deltaN_;
+
+        //- Conversion factor for degrees into radians
+        static const scalar convertToRad;
+
 
 
     // Private member functions
@@ -385,6 +391,13 @@ public:
             (
                 const label patchi
             ) const;
+
+
+             //- Thermal diffusivity for energy of mixture [kg/m/s]
+            virtual tmp<volScalarField> alphahe() const;
+
+            //- Thermal diffusivity for energy of mixture for patch [kg/m/s]
+            virtual tmp<scalarField> alphahe(const label patchi) const;
 
             //- Effective thermal diffusivity of mixture [J/m/s/K]
             virtual tmp<volScalarField> kappaEff

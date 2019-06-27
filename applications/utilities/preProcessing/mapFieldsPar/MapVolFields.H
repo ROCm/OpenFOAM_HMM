@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,7 +143,7 @@ void MapVolFields
 
     for (const word& fieldName : fieldNames)
     {
-        const fieldType fieldSource(*(objects[fieldName]), meshSource);
+        const fieldType fieldSource(*(objects[fieldName]), meshSource, false);
 
         IOobject targetIO
         (
@@ -156,7 +158,7 @@ void MapVolFields
             Info<< "    interpolating onto existing field "
                 << fieldName << endl;
 
-            fieldType fieldTarget(targetIO, meshTarget);
+            fieldType fieldTarget(targetIO, meshTarget, false);
 
             interp.mapSrcToTgt(fieldSource, cop, fieldTarget);
 

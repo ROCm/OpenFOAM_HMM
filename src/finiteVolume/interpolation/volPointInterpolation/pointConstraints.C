@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,21 +109,21 @@ void Foam::pointConstraints::makePatchPatchAddressing()
 
             forAll(bp, pointi)
             {
-                label ppp = meshPoints[bp[pointi]];
+                const label ppp = meshPoints[bp[pointi]];
 
-                Map<label>::iterator iter = patchPatchPointSet.find(ppp);
+                const auto iter = patchPatchPointSet.cfind(ppp);
 
                 label constraintI = -1;
 
-                if (iter == patchPatchPointSet.end())
+                if (iter.found())
+                {
+                    constraintI = iter.val();
+                }
+                else
                 {
                     patchPatchPointSet.insert(ppp, pppi);
                     patchPatchPoints[pppi] = ppp;
                     constraintI = pppi++;
-                }
-                else
-                {
-                    constraintI = iter();
                 }
 
                 // Apply to patch constraints
@@ -167,14 +169,15 @@ void Foam::pointConstraints::makePatchPatchAddressing()
 
                 forAll(bp, pointi)
                 {
-                    label ppp = meshPoints[bp[pointi]];
+                    const label ppp = meshPoints[bp[pointi]];
 
-                    Map<label>::const_iterator fnd = cpPointMap.find(ppp);
-                    if (fnd != cpPointMap.end())
+                    const auto iter = cpPointMap.cfind(ppp);
+
+                    if (iter.found())
                     {
                         // Can just copy (instead of apply) constraint
                         // will already be consistent across multiple patches.
-                        constraints[fnd()] = patchPatchPointConstraints_
+                        constraints[iter.val()] = patchPatchPointConstraints_
                         [
                             patchPatchPointSet[ppp]
                         ];
@@ -217,11 +220,22 @@ void Foam::pointConstraints::makePatchPatchAddressing()
             {
                 label meshPointi = cpMeshPoints[coupledPointi];
 
-                Map<label>::iterator iter = patchPatchPointSet.find(meshPointi);
+                const auto iter = patchPatchPointSet.cfind(meshPointi);
 
                 label constraintI = -1;
 
-                if (iter == patchPatchPointSet.end())
+                if (iter.found())
+                {
+                    //Pout<< indent << "on meshpoint:" << meshPointi
+                    //    << " coupled:" << coupledPointi
+                    //    << " at:" << mesh.points()[meshPointi]
+                    //    << " have possibly extended constraint:"
+                    //    << constraints[coupledPointi]
+                    //    << endl;
+
+                    constraintI = iter.val();
+                }
+                else
                 {
                     //Pout<< indent << "on meshpoint:" << meshPointi
                     //    << " coupled:" << coupledPointi
@@ -247,17 +261,6 @@ void Foam::pointConstraints::makePatchPatchAddressing()
                     patchPatchPointSet.insert(meshPointi, pppi);
                     patchPatchPoints[pppi] = meshPointi;
                     constraintI = pppi++;
-                }
-                else
-                {
-                    //Pout<< indent << "on meshpoint:" << meshPointi
-                    //    << " coupled:" << coupledPointi
-                    //    << " at:" << mesh.points()[meshPointi]
-                    //    << " have possibly extended constraint:"
-                    //    << constraints[coupledPointi]
-                    //    << endl;
-
-                    constraintI = iter();
                 }
 
                 // Combine (new or existing) constraint with one

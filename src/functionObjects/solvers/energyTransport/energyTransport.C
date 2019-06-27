@@ -208,32 +208,16 @@ Foam::functionObjects::energyTransport::energyTransport
     schemesField_("unknown-schemesField"),
     fvOptions_(mesh_),
     multiphaseThermo_(dict.subOrEmptyDict("phaseThermos")),
-    Cp_
-    (
-        dict.lookupOrDefault
-        (
-            "Cp",
-            dimensionedScalar("Cp", dimEnergy/dimMass/dimTemperature, 0)
-        )
-    ),
+    Cp_("Cp", dimEnergy/dimMass/dimTemperature, 0, dict),
     kappa_
     (
-        dict.lookupOrDefault
-        (
-            "kappa",
-            dimensionedScalar
-            (
-                "kappa",
-                dimEnergy/dimTime/dimLength/dimTemperature,
-                0
-            )
-        )
+        "kappa",
+        dimEnergy/dimTime/dimLength/dimTemperature,
+        0,
+        dict
     ),
-    rho_
-    (
-        dict.lookupOrDefault("rhoInf", dimensionedScalar("rho", dimDensity, 0))
-    ),
-    Prt_(dict.lookupOrDefault("Prt", dimensionedScalar("Prt", dimless, 1))),
+    rho_("rhoInf", dimDensity, 0, dict),
+    Prt_("Prt", dimless, 1, dict),
     rhoCp_
     (
         IOobject
@@ -281,7 +265,7 @@ Foam::functionObjects::energyTransport::energyTransport
                 (
                     "Cp",
                     dimEnergy/dimMass/dimTemperature,
-                    dict.lookup("Cp")
+                    dict
                 )
             );
 
@@ -292,7 +276,7 @@ Foam::functionObjects::energyTransport::energyTransport
                 (
                     "kappa",
                     dimEnergy/dimTime/dimLength/dimTemperature,
-                    dict.lookup("kappa")
+                    dict
                 )
             );
 

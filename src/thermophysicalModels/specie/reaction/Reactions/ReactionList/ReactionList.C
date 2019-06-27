@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,13 +72,6 @@ Foam::ReactionList<ThermoType>::ReactionList(const ReactionList& reactions)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class ThermoType>
-Foam::ReactionList<ThermoType>::~ReactionList()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ThermoType>
@@ -104,10 +99,8 @@ void Foam::ReactionList<ThermoType>::write(Ostream& os) const
 {
     os.beginBlock("reactions");
 
-    forAllConstIter(typename SLPtrList<Reaction<ThermoType>>, *this, iter)
+    for (const Reaction<ThermoType>& r : *this)
     {
-        const Reaction<ThermoType>& r = iter();
-
         os.beginBlock(r.name());
 
         os.writeEntry("type", r.type());

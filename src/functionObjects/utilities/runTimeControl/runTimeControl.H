@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +34,7 @@ Description
     user-specified conditions.
 
     Optionally specify a number of write steps before the calculation is
-    terminated.  Here, a write is performed each time that all conditons are
+    terminated.  Here, a write is performed each time that all conditions are
     satisfied.
 
 SourceFiles
@@ -45,6 +47,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "Map.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,6 +69,21 @@ class runTimeControl
 :
     public fvMeshFunctionObject
 {
+public:
+
+    // Public enumerations
+
+        enum class satisfiedAction
+        {
+            END,
+            SET_TRIGGER
+        };
+
+        static Enum<satisfiedAction> satisfiedActionNames;
+
+
+private:
+
     // Private data
 
         //- List of conditions to satisfy
@@ -79,6 +97,17 @@ class runTimeControl
 
         //- Current number of steps written
         label writeStepI_;
+
+        //- Action to take when conditions are satisfied
+        satisfiedAction satisfiedAction_;
+
+        //- Trigger index if satisfiedAction is setTrigger
+        label triggerIndex_;
+
+        //- Active flag
+        //  Used in the trigger case to bypass any evaluations after the
+        //  trigger has been set
+        bool active_;
 
 
     // Private Member Functions
@@ -98,8 +127,7 @@ public:
 
     // Constructors
 
-        //- Construct for given objectRegistry and dictionary.
-        //  Allow the possibility to load fields from files
+        //- Construct for given objectRegistry and dictionary
         runTimeControl
         (
             const word& name,
@@ -109,7 +137,7 @@ public:
 
 
     //- Destructor
-    virtual ~runTimeControl();
+    virtual ~runTimeControl() = default;
 
 
     // Member Functions

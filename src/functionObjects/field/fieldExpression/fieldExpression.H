@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +63,7 @@ class fieldExpression
 {
 protected:
 
-    // Protected member data
+    // Protected Member Data
 
         //- Name of field to process
         word fieldName_;
@@ -70,7 +72,7 @@ protected:
         word resultName_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         virtual bool calc() = 0;
 
@@ -78,11 +80,6 @@ protected:
 
         template<class Type>
         bool foundObject(const word& name, const bool verbose = true) const;
-
-
-private:
-
-    // Private Member Functions
 
         //- No copy construct
         fieldExpression(const fieldExpression&) = delete;
@@ -111,13 +108,13 @@ public:
 
 
     //- Destructor
-    virtual ~fieldExpression();
+    virtual ~fieldExpression() = default;
 
 
     // Member Functions
 
         //- Read the fieldExpression data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Calculate the result field
         virtual bool execute();

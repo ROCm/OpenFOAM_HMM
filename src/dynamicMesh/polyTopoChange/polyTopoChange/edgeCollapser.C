@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,11 +57,11 @@ Foam::labelHashSet Foam::edgeCollapser::checkBadFaces
 
     scalar faceAreaLimit = SMALL;
 
-    forAll(fAreas, fI)
+    forAll(fAreas, facei)
     {
-        if (mag(fAreas[fI]) > faceAreaLimit)
+        if (mag(fAreas[facei]) > faceAreaLimit)
         {
-            checkFaces.append(fI);
+            checkFaces.append(facei);
         }
     }
 
@@ -470,8 +472,8 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
         const scalar cellOwnerVol = max(0.0, V[cellOwner[intFacei]]);
         const scalar cellNeighbourVol = max(0.0, V[cellNeighbour[intFacei]]);
 
-        scalar targetFaceSizeA = Foam::pow(cellOwnerVol, 1.0/3.0);
-        scalar targetFaceSizeB = Foam::pow(cellNeighbourVol, 1.0/3.0);
+        scalar targetFaceSizeA = Foam::cbrt(cellOwnerVol);
+        scalar targetFaceSizeB = Foam::cbrt(cellNeighbourVol);
 
         targetFaceSizes[intFacei] = 0.5*(targetFaceSizeA + targetFaceSizeB);
     }
@@ -505,7 +507,7 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
                 const label extFacei = patchFacei + patch.start();
                 const scalar cellOwnerVol = max(0.0, V[cellOwner[extFacei]]);
 
-                targetFaceSizes[extFacei] = Foam::pow(cellOwnerVol, 1.0/3.0);
+                targetFaceSizes[extFacei] = Foam::cbrt(cellOwnerVol);
             }
         }
     }
@@ -526,8 +528,8 @@ Foam::scalarField Foam::edgeCollapser::calcTargetFaceSizes() const
                 const scalar cellOwnerVol = max(0.0, V[cellOwner[localFacei]]);
                 const scalar cellNeighbourVol = neiCellVolumes[bFacei++];
 
-                scalar targetFaceSizeA = Foam::pow(cellOwnerVol, 1.0/3.0);
-                scalar targetFaceSizeB = Foam::pow(cellNeighbourVol, 1.0/3.0);
+                scalar targetFaceSizeA = Foam::cbrt(cellOwnerVol);
+                scalar targetFaceSizeB = Foam::cbrt(cellNeighbourVol);
 
                 targetFaceSizes[localFacei]
                     = 0.5*(targetFaceSizeA + targetFaceSizeB);
@@ -1308,23 +1310,15 @@ bool Foam::edgeCollapser::setRefinement
 
             if (collapseIndex != -1 && collapseIndex != -2)
             {
-                Map<label>::iterator fnd = nPerIndex.find(collapseIndex);
-                if (fnd != nPerIndex.end())
-                {
-                    fnd()++;
-                }
-                else
-                {
-                    nPerIndex.insert(collapseIndex, 1);
-                }
+                ++(nPerIndex(collapseIndex, 0));
             }
         }
 
         // 2. Size
         collapseStrings.resize(2*nPerIndex.size());
-        forAllConstIter(Map<label>, nPerIndex, iter)
+        forAllConstIters(nPerIndex, iter)
         {
-            collapseStrings.insert(iter.key(), DynamicList<label>(iter()));
+            collapseStrings.insert(iter.key(), DynamicList<label>(iter.val()));
         }
 
         // 3. Fill
@@ -1344,7 +1338,7 @@ bool Foam::edgeCollapser::setRefinement
 
 //    OFstream str2("collapseStrings_" + name(count) + ".obj");
 //    // Dump point collapses
-//    forAllConstIter(Map<DynamicList<label>>, collapseStrings, iter)
+//    forAllConstIters(collapseStrings, iter)
 //    {
 //        const label masterPoint = iter.key();
 //        const DynamicList<label>& edgeCollapses = iter();

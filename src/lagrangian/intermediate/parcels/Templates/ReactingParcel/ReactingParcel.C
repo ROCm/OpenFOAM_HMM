@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -429,7 +431,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     // ~~~~~~~~~~~~
 
     // Mass transfer due to phase change
-    scalarField dMassPC(Y_.size(), 0.0);
+    scalarField dMassPC(Y_.size(), Zero);
 
     // Molar flux of species emitted from the particle (kmol/m^2/s)
     scalar Ne = 0.0;
@@ -438,7 +440,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     scalar NCpW = 0.0;
 
     // Surface concentrations of emitted species
-    scalarField Cs(composition.carrier().species().size(), 0.0);
+    scalarField Cs(composition.carrier().species().size(), Zero);
 
     // Calc mass and enthalpy transfer due to phase change
     calcPhaseChange

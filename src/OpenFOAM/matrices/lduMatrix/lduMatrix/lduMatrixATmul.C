@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,17 +35,17 @@ Description
 
 void Foam::lduMatrix::Amul
 (
-    scalarField& Apsi,
-    const tmp<scalarField>& tpsi,
+    solveScalarField& Apsi,
+    const tmp<solveScalarField>& tpsi,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
     const direction cmpt
 ) const
 {
-    scalar* __restrict__ ApsiPtr = Apsi.begin();
+    solveScalar* __restrict__ ApsiPtr = Apsi.begin();
 
-    const scalarField& psi = tpsi();
-    const scalar* const __restrict__ psiPtr = psi.begin();
+    const solveScalarField& psi = tpsi();
+    const solveScalar* const __restrict__ psiPtr = psi.begin();
 
     const scalar* const __restrict__ diagPtr = diag().begin();
 
@@ -96,17 +98,17 @@ void Foam::lduMatrix::Amul
 
 void Foam::lduMatrix::Tmul
 (
-    scalarField& Tpsi,
-    const tmp<scalarField>& tpsi,
+    solveScalarField& Tpsi,
+    const tmp<solveScalarField>& tpsi,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
     const direction cmpt
 ) const
 {
-    scalar* __restrict__ TpsiPtr = Tpsi.begin();
+    solveScalar* __restrict__ TpsiPtr = Tpsi.begin();
 
-    const scalarField& psi = tpsi();
-    const scalar* const __restrict__ psiPtr = psi.begin();
+    const solveScalarField& psi = tpsi();
+    const solveScalar* const __restrict__ psiPtr = psi.begin();
 
     const scalar* const __restrict__ diagPtr = diag().begin();
 
@@ -157,12 +159,12 @@ void Foam::lduMatrix::Tmul
 
 void Foam::lduMatrix::sumA
 (
-    scalarField& sumA,
+    solveScalarField& sumA,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaces
 ) const
 {
-    scalar* __restrict__ sumAPtr = sumA.begin();
+    solveScalar* __restrict__ sumAPtr = sumA.begin();
 
     const scalar* __restrict__ diagPtr = diag().begin();
 
@@ -206,17 +208,17 @@ void Foam::lduMatrix::sumA
 
 void Foam::lduMatrix::residual
 (
-    scalarField& rA,
-    const scalarField& psi,
+    solveScalarField& rA,
+    const solveScalarField& psi,
     const scalarField& source,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
     const direction cmpt
 ) const
 {
-    scalar* __restrict__ rAPtr = rA.begin();
+    solveScalar* __restrict__ rAPtr = rA.begin();
 
-    const scalar* const __restrict__ psiPtr = psi.begin();
+    const solveScalar* const __restrict__ psiPtr = psi.begin();
     const scalar* const __restrict__ diagPtr = diag().begin();
     const scalar* const __restrict__ sourcePtr = source.begin();
 
@@ -276,16 +278,16 @@ void Foam::lduMatrix::residual
 }
 
 
-Foam::tmp<Foam::scalarField> Foam::lduMatrix::residual
+Foam::tmp<Foam::Field<Foam::solveScalar>> Foam::lduMatrix::residual
 (
-    const scalarField& psi,
+    const solveScalarField& psi,
     const scalarField& source,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
     const direction cmpt
 ) const
 {
-    tmp<scalarField> trA(new scalarField(psi.size()));
+    tmp<solveScalarField> trA(new solveScalarField(psi.size()));
     residual(trA.ref(), psi, source, interfaceBouCoeffs, interfaces, cmpt);
     return trA;
 }
@@ -295,7 +297,7 @@ Foam::tmp<Foam::scalarField > Foam::lduMatrix::H1() const
 {
     tmp<scalarField > tH1
     (
-        new scalarField(lduAddr().size(), 0.0)
+        new scalarField(lduAddr().size(), Zero)
     );
 
     if (lowerPtr_ || upperPtr_)

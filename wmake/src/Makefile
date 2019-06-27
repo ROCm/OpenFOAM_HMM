@@ -2,8 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -30,13 +32,13 @@
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
-# The Makefile use a POSIX shell
+# Use POSIX shell
 #------------------------------------------------------------------------------
 
-SHELL      = /bin/sh
+SHELL   = /bin/sh
 
 #------------------------------------------------------------------------------
-# Unset suffices list (suffix rules are not used)
+# No default suffix rules used
 #------------------------------------------------------------------------------
 
 .SUFFIXES:
@@ -52,38 +54,42 @@ WM_COMPILE_OPTION = Opt
 GENERAL_RULES   = $(WM_DIR)/rules/General
 include $(GENERAL_RULES)/general
 
+archHost    := $(WM_ARCH)$(WM_COMPILER)
+archTarget  := $(shell basename $(WMAKE_BIN))
+
 
 #------------------------------------------------------------------------------
 # Targets
 #------------------------------------------------------------------------------
 
-.PHONY: all clean
+.PHONY: all clean message
 
-all:  $(WMAKE_BIN)/dirToString $(WMAKE_BIN)/wmkdep $(WMAKE_BIN)/wmkdepend
-	@echo built wmake-bin for $(WM_ARCH)$(WM_COMPILER)
+all: $(WMAKE_BIN)/wmkdepend$(EXT_EXE) message
+
+message:
+ifneq ($(archHost),$(archTarget))
+	@echo "built wmake-bin ($(archTarget)) for $(archHost) host"
+else
+	@echo "built wmake-bin ($(archTarget))"
+endif
 
 clean:
-	@echo clean wmake-bin for $(WM_ARCH)$(WM_COMPILER)
+	@echo "clean wmake-bin ($(archTarget))"
 	@rm -rf $(WMAKE_BIN) 2>/dev/null
 	@rmdir $(shell dirname $(WMAKE_BIN)) 2>/dev/null || true
 
-$(WMAKE_BIN)/dirToString: dirToString.c
-	@mkdir -p $(WMAKE_BIN)
-	$(call QUIET_MESSAGE,compile,$(<F))
-	$E $(cc) $(cFLAGS) $(<F) -o $@
-
-$(WMAKE_BIN)/wmkdep: wmkdep.l
+$(WMAKE_BIN)/wmkdep$(EXT_EXE): wmkdep.l
 	@mkdir -p $(WMAKE_BIN)
 	$(call QUIET_MESSAGE,flex,$(<F))
 	$E flex -o $@.c $(<F) && $(cc) $(cFLAGS) $@.c -o $@
 	@rm -f $@.c 2>/dev/null
 
-$(WMAKE_BIN)/wmkdepend: wmkdepend.cpp
+$(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.cpp
 	@mkdir -p $(WMAKE_BIN)
 	$(call QUIET_MESSAGE,wmkdepend,$(<F))
 	$E $(CC) $(c++FLAGS) $(c++LESSWARN) $(<F) -o $@
 
-# $(WMAKE_BIN)/wmkdepend: wmkdepend.rl
+# $(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.rl
 # 	@mkdir -p $(WMAKE_BIN)
 # 	$(call QUIET_MESSAGE,ragel,$(<F))
 # 	$E ragel -G2 -o $@.cpp $(<F) && $(CC) $(c++FLAGS) $(c++LESSWARN) $@.cpp -o $@

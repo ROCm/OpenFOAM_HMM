@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,7 +147,7 @@ Foam::dictionary& Foam::debug::switchSet
                 << controlDict().name().c_str()
                 << std::endl << std::endl;
 
-            ::exit(1);
+            std::exit(1);
         }
 
         subDictPtr = &(eptr->dict());

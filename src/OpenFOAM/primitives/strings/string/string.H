@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,13 +63,8 @@ namespace Foam
 // Forward Declarations
 class word;
 class wordRe;
-class string;
 class Istream;
 class Ostream;
-Istream& operator>>(Istream& is, string& s);
-Ostream& operator<<(Ostream& os, const string& s);
-Ostream& operator<<(Ostream& os, const std::string& s);
-
 
 /*---------------------------------------------------------------------------*\
                            Class string Declaration
@@ -292,18 +289,30 @@ public:
         bool endsWith(const std::string& text) const;
 
 
+    // Editing
+
+        //- Swap contents. Self-swapping is a no-op.
+        inline void swap(std::string& str);
+
+
     // Member Operators
 
         //- Test for equality. Allows use as a predicate.
         //  \return True when strings match literally.
         inline bool operator()(const std::string& text) const;
-
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream& is, string& s);
-        friend Ostream& operator<<(Ostream& os, const string& s);
 };
+
+
+// IOstream Operators
+
+//- Read operator
+Istream& operator>>(Istream& is, string& val);
+
+//- Write operator
+Ostream& operator<<(Ostream& os, const string& val);
+
+//- Write operator
+Ostream& operator<<(Ostream& os, const std::string& val);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

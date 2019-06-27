@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,11 +189,6 @@ void writeRays
         }
     }
     str.flush();
-
-    Pout<< "cmd: objToVTK " << fName.c_str() << endl;
-
-    stringList cmd({"objToVTK", fName, fName.lessExt().ext("vtk")});
-    Foam::system(cmd);
 }
 
 
@@ -485,7 +482,7 @@ int main(int argc, char *argv[])
     #include "shootRays.H"
 
     // Calculate number of visible faces from local index
-    labelList nVisibleFaceFaces(nCoarseFaces, 0);
+    labelList nVisibleFaceFaces(nCoarseFaces, Zero);
 
     forAll(rayStartFace, i)
     {
@@ -628,7 +625,7 @@ int main(int argc, char *argv[])
         0.0
     );
 
-    scalarList patchArea(totalPatches, 0.0);
+    scalarList patchArea(totalPatches, Zero);
 
     if (Pstream::master())
     {

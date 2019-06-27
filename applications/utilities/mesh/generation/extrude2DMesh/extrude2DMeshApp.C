@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -285,7 +287,7 @@ int main(int argc, char *argv[])
 
         List<pointEdgeCollapse> allPointInfo;
         const globalIndex globalPoints(mesh().nPoints());
-        labelList pointPriority(mesh().nPoints(), 0);
+        labelList pointPriority(mesh().nPoints(), Zero);
 
         collapser.consistentCollapse
         (

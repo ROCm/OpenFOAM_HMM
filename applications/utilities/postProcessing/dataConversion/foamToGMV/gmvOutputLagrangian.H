@@ -1,19 +1,19 @@
 gmvFile << "tracers " << particles.size() << nl;
-forAllConstIter(Cloud<passiveParticle>, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().position().x() << ' ';
+    gmvFile << p.position().x() << ' ';
 }
 gmvFile << nl;
 
-forAllConstIter(Cloud<passiveParticle>, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().position().y() << ' ';
+    gmvFile << p.position().y() << ' ';
 }
 gmvFile << nl;
 
-forAllConstIter(Cloud<passiveParticle>, particles, iter)
+for (const passiveParticle& p : particles)
 {
-    gmvFile << iter().position().z() << ' ';
+    gmvFile << p.position().z() << ' ';
 }
 gmvFile << nl;
 
@@ -36,9 +36,9 @@ for (const word& name : lagrangianScalarNames)
     {
         gmvFile << name  << nl;
 
-        forAll(fld, n)
+        for (const scalar& val : fld)
         {
-            gmvFile << fld[n] << token::SPACE;
+            gmvFile << val << token::SPACE;
         }
         gmvFile << nl;
     }

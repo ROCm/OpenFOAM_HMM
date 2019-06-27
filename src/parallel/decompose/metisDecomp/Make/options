@@ -3,4 +3,5 @@ EXE_INC = \
     -I../decompositionMethods/lnInclude
 
 LIB_LIBS = \
+    -ldecompositionMethods \
     -L$(METIS_LIB_DIR) -lmetis

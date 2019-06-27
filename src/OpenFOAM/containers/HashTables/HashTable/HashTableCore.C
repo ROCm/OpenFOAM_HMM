@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2012 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,13 +32,11 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(HashTableCore, 0);
+    defineTypeNameAndDebug(HashTableCore, 0);
 }
 
 // Approximately labelMax/4
 const Foam::label Foam::HashTableCore::maxTableSize(1L << (sizeof(label)*8-3));
-
-Foam::zero::null Foam::HashTableCore::zeroNullElement;
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,9 +100,9 @@ Foam::argList::initValidTables::initValidTables()
     argList::addOption
     (
         "hostRoots",
-        "(((host1 dir1) .. (hostN dirN))",
-        "slave root directories (per host) for distributed running. "
-        "The host specification can use a regex.",
+        "((host1 dir1) .. (hostN dirN))",
+        "Per-host slave root directories for distributed running."
+        " The host specification can be a regex.",
         true  // advanced option
     );
     validParOptions.set
@@ -646,7 +648,7 @@ void Foam::argList::setCasePaths()
 
     if (optIter.found())
     {
-        caseDir = optIter.object();
+        caseDir = fileName::validate(optIter.val());
         caseDir.clean();
 
         if (caseDir.empty() || caseDir == ".")
@@ -878,6 +880,12 @@ void Foam::argList::parse
             printUsage(true);
             quickExit = true;
         }
+        else if (options_.found("help-notes"))
+        {
+            printNotes();
+            Info<< nl;
+            quickExit = true;
+        }
         else if (options_.found("help"))
         {
             printUsage(false);
@@ -898,7 +906,7 @@ void Foam::argList::parse
 
         if (quickExit)
         {
-            ::exit(0);
+            std::exit(0);
         }
     }
 
@@ -1160,7 +1168,7 @@ void Foam::argList::parse
 
                 decompDict.readEntry("numberOfSubdomains", dictNProcs);
 
-                if (decompDict.lookupOrDefault("distributed", false))
+                if (decompDict.getOrDefault("distributed", false))
                 {
                     parRunControl_.distributed(true);
                     decompDict.readEntry("roots", roots);

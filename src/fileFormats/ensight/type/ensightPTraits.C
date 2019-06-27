@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +31,15 @@ License
 
 template<>
 const char* const
+Foam::ensightPTraits<Foam::label>::typeName = "scalar";
+
+template<>
+const Foam::direction
+Foam::ensightPTraits<Foam::label>::componentOrder[] = {0};
+
+
+template<>
+const char* const
 Foam::ensightPTraits<Foam::scalar>::typeName = "scalar";
 
 template<>
@@ -45,7 +56,7 @@ const Foam::direction
 Foam::ensightPTraits<Foam::vector>::componentOrder[] = {0, 1, 2};
 
 
-// use mag(sphericalTensor) instead
+// Use mag(sphericalTensor) instead
 template<>
 const char* const
 Foam::ensightPTraits<Foam::sphericalTensor>::typeName = "scalar";

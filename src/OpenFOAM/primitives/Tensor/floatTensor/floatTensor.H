@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +50,7 @@ namespace Foam
 typedef Tensor<float> floatTensor;
 
 //- Data associated with floatTensor type are contiguous
-#if !defined(WM_SP)
+#if !defined(WM_SP) && !defined(WM_SPDP)
 template<>
 inline bool contiguous<floatTensor>() {return true;}
 #endif

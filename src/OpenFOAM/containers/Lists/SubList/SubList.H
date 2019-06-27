@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +53,9 @@ namespace Foam
 template<class T> class SubList;
 
 // Common list types
-typedef SubList<label> labelSubList;
+typedef SubList<bool> boolSubList;      //!< A SubList of bools
+typedef SubList<char> charSubList;      //!< A SubList of chars
+typedef SubList<label> labelSubList;    //!< A SubList of labels
 
 
 /*---------------------------------------------------------------------------*\

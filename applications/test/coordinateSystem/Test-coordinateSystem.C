@@ -108,11 +108,11 @@ void doTest(const dictionary& dict)
 
         basicTests(cs1);
     }
-    catch (Foam::IOerror& err)
+    catch (const Foam::IOerror& err)
     {
         Info<< "Caught FatalIOError " << err << nl << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }
@@ -136,11 +136,11 @@ void doTest(const objectRegistry& obr, const dictionary& dict)
 
         basicTests(cs1);
     }
-    catch (Foam::IOerror& err)
+    catch (const Foam::IOerror& err)
     {
         Info<< "Caught FatalIOError " << err << nl << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }

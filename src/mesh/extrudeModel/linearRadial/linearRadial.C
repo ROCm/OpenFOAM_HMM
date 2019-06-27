@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,12 +50,6 @@ linearRadial::linearRadial(const dictionary& dict)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-linearRadial::~linearRadial()
-{}
-
-
 // * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
 
 point linearRadial::operator()
@@ -66,6 +62,7 @@ point linearRadial::operator()
     // radius of the surface
     scalar rs = mag(surfacePoint);
     vector rsHat = surfacePoint/rs;
+
     if (Rsurface_ >= 0) rs = Rsurface_;
 
     scalar r = rs + (R_ - rs)*sumThickness(layer);

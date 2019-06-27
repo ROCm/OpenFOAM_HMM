@@ -35,6 +35,7 @@ volVectorField U
 
 #include "compressibleCreatePhi.H"
 
+pressureControl pressureControl(p, rho, pimple.dict(), false);
 
 Info<< "Creating turbulence model\n" << endl;
 autoPtr<compressible::turbulenceModel> turbulence
@@ -104,3 +105,7 @@ dimensionedScalar initialMass("initialMass", fvc::domainIntegrate(rho));
 #include "createMRF.H"
 #include "createRadiationModel.H"
 #include "createFvOptions.H"
+
+
+const dimensionedScalar rhoMax("rhoMax", dimDensity, GREAT, pimple.dict());
+const dimensionedScalar rhoMin("rhoMin", dimDensity, Zero, pimple.dict());

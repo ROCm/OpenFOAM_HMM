@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,10 +153,8 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
         labelList destProc(lpi.size());
 
         label particleI = 0;
-        forAllIter(passivePositionParticleCloud, lpi, iter)
+        for (passivePositionParticle& ppi : lpi)
         {
-            passivePositionParticle& ppi = iter();
-
             const label destProcI = destinationProcID_[ppi.cell()];
             const label destCellI = destinationCell_[ppi.cell()];
 
@@ -222,14 +222,8 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
                     passivePositionParticle::iNew(tgtMesh_)
                 );
 
-                forAllIter
-                (
-                    IDLList<passivePositionParticle>,
-                    newParticles,
-                    newpIter
-                )
+                for (passivePositionParticle& newp : newParticles)
                 {
-                    passivePositionParticle& newp = newpIter();
                     lagrangianPositions.addParticle(newParticles.remove(&newp));
                 }
             }

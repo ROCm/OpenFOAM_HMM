@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +72,7 @@ class refinementParameters
         scalar curvature_;
 
         //- Planarity criterion
-        scalar planarAngle_;
+        const scalar planarAngle_;
 
         //- Number of layers between different refinement levels
         const label nBufferLayers_;
@@ -88,25 +90,29 @@ class refinementParameters
             wordList zonesInMesh_;
 
             //- Information on how to handle faces on faceZones
-            dictionary faceZoneControls_;
+            const dictionary faceZoneControls_;
 
 
         //- FaceZone faces allowed which have owner and neighbour in same
         //  cellZone?
-        Switch allowFreeStandingZoneFaces_;
+        const Switch allowFreeStandingZoneFaces_;
 
         //- Use old topology based problem-cell removal (cells with 8 points
         //  on surface)
-        Switch useTopologicalSnapDetection_;
+        const Switch useTopologicalSnapDetection_;
 
         //- Allowed load unbalance
-        scalar maxLoadUnbalance_;
+        const scalar maxLoadUnbalance_;
 
-        Switch handleSnapProblems_;
+        const Switch handleSnapProblems_;
 
-        Switch interfaceRefine_;
+        const Switch interfaceRefine_;
 
-        label nErodeCellZone_;
+        const label nErodeCellZone_;
+
+        const label nFilterIter_;
+
+        const bool dryRun_;
 
 
     // Private Member Functions
@@ -123,7 +129,7 @@ public:
     // Constructors
 
         //- Construct from dictionary - new syntax
-        refinementParameters(const dictionary& dict);
+        refinementParameters(const dictionary& dict, const bool dryRun = false);
 
 
     // Member Functions
@@ -215,9 +221,17 @@ public:
                 return interfaceRefine_;
             }
 
+            //- Number of iterations of erosion to get a consistent cellZone
             label nErodeCellZone() const
             {
                 return nErodeCellZone_;
+            }
+
+            //- Number of iterations of infill/erosion to get a smoother
+            //  blockage
+            label nFilterIter() const
+            {
+                return nFilterIter_;
             }
 
 

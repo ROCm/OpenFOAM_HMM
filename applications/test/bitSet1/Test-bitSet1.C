@@ -76,6 +76,9 @@ int main(int argc, char *argv[])
     bitSet set2b(set2, labelRange(15, 30));
     Info<<"bitSet slice(15,30) :"; report(set2b, true);
 
+    Info<< "set1 == set2: " << (set2 == set2b) << nl;
+    Info<< "set1 != set2: " << (set2 != set2b) << nl;
+
     {
         FixedList<label, 4> locs({ -1, 3, 4, 12});
 

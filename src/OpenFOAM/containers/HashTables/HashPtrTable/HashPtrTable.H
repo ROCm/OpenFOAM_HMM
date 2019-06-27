@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,9 +55,6 @@ template<class T, class Key, class Hash> class HashPtrTable;
 
 template<class T, class Key, class Hash>
 Istream& operator>>(Istream& is, HashPtrTable<T, Key, Hash>& tbl);
-
-template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashPtrTable<T, Key, Hash>& tbl);
 
 
 /*---------------------------------------------------------------------------*\
@@ -169,12 +168,6 @@ public:
         (
             Istream& is,
             HashPtrTable<T, Key, Hash>& tbl
-        );
-
-        friend Ostream& operator<< <T, Key, Hash>
-        (
-            Ostream& os,
-            const HashPtrTable<T, Key, Hash>& tbl
         );
 
 

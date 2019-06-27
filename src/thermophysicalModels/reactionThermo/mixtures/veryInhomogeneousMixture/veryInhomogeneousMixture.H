@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +30,7 @@ Group
     grpReactionThermophysicalMixtures
 
 Description
-    Foam::veryInhomogeneousMixture
+    The very inhomogeneous mixture contains species ("ft", "fu", "b").
 
 SourceFiles
     veryInhomogeneousMixture.C
@@ -54,10 +56,7 @@ class veryInhomogeneousMixture
 :
     public basicCombustionMixture
 {
-    // Private data
-
-        static const int nSpecies_ = 3;
-        static const char* specieNames_[3];
+    // Private Data
 
         dimensionedScalar stoicRatio_;
 
@@ -76,8 +75,11 @@ class veryInhomogeneousMixture
         //- Regress variable
         volScalarField& b_;
 
-        //- Construct as copy (not implemented)
-        veryInhomogeneousMixture(const veryInhomogeneousMixture<ThermoType>&);
+        //- No copy construct
+        veryInhomogeneousMixture
+        (
+            const veryInhomogeneousMixture<ThermoType>&
+        ) = delete;
 
 
 public:
@@ -91,9 +93,9 @@ public:
         //- Construct from dictionary, mesh and phase name
         veryInhomogeneousMixture
         (
-            const dictionary&,
-            const fvMesh&,
-            const word&
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
         );
 
 
@@ -180,7 +182,7 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
     #include "veryInhomogeneousMixture.C"

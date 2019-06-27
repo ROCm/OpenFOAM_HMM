@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,10 +128,8 @@ void Foam::molecule::readFields(Cloud<molecule>& mC)
     mC.checkFieldIOobject(mC, id);
 
     label i = 0;
-    forAllIter(moleculeCloud, mC, iter)
+    for (molecule& mol : mC)
     {
-        molecule& mol = iter();
-
         mol.Q_ = Q[i];
         mol.v_ = v[i];
         mol.a_ = a[i];
@@ -138,7 +138,8 @@ void Foam::molecule::readFields(Cloud<molecule>& mC)
         mol.specialPosition_ = specialPosition[i];
         mol.special_ = special[i];
         mol.id_ = id[i];
-        i++;
+
+        ++i;
     }
 }
 
@@ -195,10 +196,8 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
     );
 
     label i = 0;
-    forAllConstIter(moleculeCloud, mC, iter)
+    for (const molecule& mol : mC)
     {
-        const molecule& mol = iter();
-
         Q[i] = mol.Q_;
         v[i] = mol.v_;
         a[i] = mol.a_;
@@ -215,7 +214,7 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
         orientation2[i] = mol.Q_ & vector(0,1,0);
         orientation3[i] = mol.Q_ & vector(0,0,1);
 
-        i++;
+        ++i;
     }
 
     const bool valid = np > 0;

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +56,7 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
 )
 :
     IOobject(io),
-    List<scalar>(2, 0.0),
+    List<scalar>(2, Zero),
     x0_(0.0),
     dx_(1.0),
     log10_(false),
@@ -93,7 +95,7 @@ Foam::uniformInterpolationTable<Type>::uniformInterpolationTable
         IOobject::NO_WRITE,
         false // if used in BCs, could be used by multiple patches
     ),
-    List<scalar>(2, 0.0),
+    List<scalar>(2, Zero),
     x0_(dict.get<scalar>("x0")),
     dx_(dict.get<scalar>("dx")),
     log10_(dict.lookupOrDefault<Switch>("log10", false)),

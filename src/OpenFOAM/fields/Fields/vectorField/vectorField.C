@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,11 +36,13 @@ Foam::tmp<Foam::vectorField> Foam::zip
     const tmp<scalarField>& z
 )
 {
-    tmp<vectorField> txyz(new vectorField(x->size()));
-    vectorField& xyz = txyz.ref();
+    auto txyz = tmp<vectorField>::New(x->size());
+    auto& xyz = txyz.ref();
+
     xyz.replace(0, x);
     xyz.replace(1, y);
     xyz.replace(2, z);
+
     return txyz;
 }
 

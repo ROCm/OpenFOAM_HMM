@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -242,6 +244,9 @@ public:
             //- Number of wavelengths
             inline label nLambda() const;
 
+            //- Number of bands
+            inline label nBands() const;
+
             //- Const access to total absorption coefficient
             inline const volScalarField& a() const;
 
@@ -268,6 +273,9 @@ public:
 
             //- Return meshOrientation
             inline vector meshOrientation() const;
+
+            //- Use solar load
+            inline bool useSolarLoad() const;
 };
 
 

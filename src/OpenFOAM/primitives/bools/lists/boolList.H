@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -20,18 +22,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Typedef
-    Foam::boolList
-
-Description
-    A List of bools.
-
-Typedef
-    Foam::boolUList
-
-Description
-    A UList of bools.
 
 Typedef
     Foam::boolListList
@@ -51,9 +41,10 @@ Description
 
 namespace Foam
 {
-    typedef UList<bool> boolUList;
+    // boolUlist   = defined in UList.H
+    // boolList    = defined in List.H
+    // boolSubList = defined in SubList.H
 
-    typedef List<bool> boolList;
     typedef List<List<bool>> boolListList;
 }
 

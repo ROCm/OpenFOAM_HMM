@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,9 +43,9 @@ makePatchFieldTypeNames(jumpCyclicAMI);
 template<>
 void Foam::jumpCyclicAMIFvPatchField<scalar>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes
@@ -52,12 +54,16 @@ void Foam::jumpCyclicAMIFvPatchField<scalar>::updateInterfaceMatrix
     const labelUList& nbrFaceCells =
         this->cyclicAMIPatch().cyclicAMIPatch().neighbPatch().faceCells();
 
-    scalarField pnf(psiInternal, nbrFaceCells);
+    solveScalarField pnf(psiInternal, nbrFaceCells);
 
     pnf = this->cyclicAMIPatch().interpolate(pnf);
 
     // only apply jump to original field
-    if (&psiInternal == &this->primitiveField())
+    if
+    (
+        reinterpret_cast<const void*>(&psiInternal)
+     == reinterpret_cast<const void*>(&this->primitiveField())
+    )
     {
         Field<scalar> jf(this->jump());
 
@@ -66,7 +72,11 @@ void Foam::jumpCyclicAMIFvPatchField<scalar>::updateInterfaceMatrix
             jf *= -1.0;
         }
 
-        pnf -= jf;
+        //pnf -= jf;
+        forAll(pnf, i)
+        {
+            pnf[i] -= jf[i];
+        }
     }
 
     // Transform according to the transformation tensors

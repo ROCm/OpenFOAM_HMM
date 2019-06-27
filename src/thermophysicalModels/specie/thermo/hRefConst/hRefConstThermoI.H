@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +107,7 @@ inline Foam::scalar Foam::hRefConstThermo<EquationOfState>::Ha
     const scalar p, const scalar T
 ) const
 {
-    return Cp_*(T-Tref_) + Href_ + Hf_ + EquationOfState::H(p, T);
+    return Hs(p, T) + Hc();
 }
 
 
@@ -133,6 +135,26 @@ inline Foam::scalar Foam::hRefConstThermo<EquationOfState>::S
 ) const
 {
     return Cp_*log(T/Tstd) + EquationOfState::S(p, T);
+}
+
+
+template<class EquationOfState>
+inline Foam::scalar Foam::hRefConstThermo<EquationOfState>::dGdT
+(
+    const scalar p, const scalar T
+) const
+{
+    return 0;
+}
+
+
+template<class EquationOfState>
+inline Foam::scalar Foam::hRefConstThermo<EquationOfState>::dCpdT
+(
+    const scalar p, const scalar T
+) const
+{
+    return 0;
 }
 
 

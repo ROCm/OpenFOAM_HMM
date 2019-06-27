@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faFieldReconstructor
+    Foam::faFieldReconstructor
 
 Description
-    FA area and edge field reconstructor.
+    Finite Area area and edge fields reconstruction.
 
 Author
     Zeljko Tukovic, FSB Zagreb
@@ -52,7 +52,6 @@ SourceFiles
 
 namespace Foam
 {
-
 
 /*---------------------------------------------------------------------------*\
                      Class faFieldReconstructor Declaration

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2010, 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,9 +105,6 @@ protected:
             bool& isOwner
         );
 
-        //- Lookup and check out field
-        void lookupAndCheckout(const char* name) const;
-
         //- Return the enthalpy/internal energy field boundary types
         //  by interrogating the temperature field boundary types
         wordList heBoundaryTypes();
@@ -178,8 +177,7 @@ public:
         (
             const dictionary& thermoTypeDict,
             Table* tablePtr,
-            const int nCmpt,
-            const char* cmptNames[],
+            std::initializer_list<const char*> cmptNames,
             const word& thermoTypeName
         );
 
@@ -480,6 +478,12 @@ public:
             (
                 const label patchi
             ) const = 0;
+
+             //- Thermal diffusivity for energy of mixture [kg/m/s]
+            virtual tmp<volScalarField> alphahe() const = 0;
+
+            //- Thermal diffusivity for energy of mixture for patch [kg/m/s]
+            virtual tmp<scalarField> alphahe(const label patchi) const = 0;
 
             //- Effective thermal diffusivity for temperature
             //  of mixture [J/m/s/K]

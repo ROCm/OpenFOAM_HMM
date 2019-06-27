@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ Typedef
     Foam::complexVector
 
 Description
-    complexVector obtained from generic Vector.
+    A Vector of complex values with 'scalar' precision.
 
 SourceFiles
     complexVectorI.H
@@ -46,6 +48,7 @@ namespace Foam
     typedef Vector<complex> complexVector;
 }
 
+// Functions
 #include "complexVectorI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

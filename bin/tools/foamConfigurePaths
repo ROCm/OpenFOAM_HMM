@@ -3,8 +3,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -14,7 +16,8 @@
 #     foamConfigurePaths
 #
 # Description
-#     Adjust hardcoded installation versions and paths in bashrc and config.sh/
+#     Adjust hardcoded installation versions and paths
+#     in etc/{bashrc,cshrc} and etc/config.{sh,csh}/
 #
 #------------------------------------------------------------------------------
 usage() {
@@ -27,10 +30,10 @@ usage: ${0##*/} options
 Basic
   -project-path DIR   specify 'WM_PROJECT_DIR' (eg, /opt/openfoam1806-patch1)
   -version VER        specify project version (eg, v1806)
-  -archOption 32|64   specify 'WM_ARCH_OPTION' architecture option
-  -SP | -float32      specify 'WM_PRECISION_OPTION' for single precision
-  -DP | -float64      specify 'WM_PRECISION_OPTION' for double precision
-  -int32 | -int64     specify 'WM_LABEL_SIZE'
+  -SP | -float32      single precision (WM_PRECISION_OPTION)
+  -DP | -float64      double precision (WM_PRECISION_OPTION)
+  -SPDP               mixed single/double precision
+  -int32 | -int64     the 'WM_LABEL_SIZE'
 
 Compiler
   -system NAME        specify 'system' compiler to use (eg, Gcc, Icc,...)
@@ -73,9 +76,10 @@ Misc
   -foamInstall DIR    [obsolete]
   -projectName NAME   [obsolete]
   -sigfpe|-no-sigfpe  [obsolete - now under etc/controlDict]
+  -archOption 32|64   [obsolete setting of 'WM_ARCH_OPTION' - edit manually]
 
 
-Adjusts hardcoded versions and installation paths (for bash, POSIX shell).
+Adjusts hardcoded versions and installation paths (POSIX and C-shell).
 
 
 Equivalent options:
@@ -205,8 +209,7 @@ replaceCsh()
     done
 }
 
-# Get the option's value (argument).
-# Die if the argument doesn't exist or is empty
+# Get the option's value (argument), or die on missing or empty argument
 # $1 option
 # $2 value
 getOptionValue()
@@ -303,18 +306,7 @@ do
     -archOption | --archOption)
         # Replace WM_ARCH_OPTION=...
         optionValue=$(getOptionValue "$@")
-        _matches "$optionValue" 32 64 || \
-            die "'$1' has bad value: '$optionValue'"
-
-        if [ "$optionValue" = "$(sed -ne '/^[^#]/s/^.* WM_ARCH_OPTION=//p' etc/bashrc)" ]
-        then
-            echo "WM_ARCH_OPTION already set to $optionValue"
-            : ${adjusted:=false}
-        else
-            replace    etc/bashrc  WM_ARCH_OPTION "$optionValue"
-            replaceCsh etc/cshrc   WM_ARCH_OPTION "$optionValue"
-            adjusted=true
-        fi
+        echo "Ignoring $1 option: no longer supported" 1>&2
         shift
         ;;
 
@@ -329,6 +321,13 @@ do
         # Replace WM_PRECISION_OPTION=...
         replace    etc/bashrc  WM_PRECISION_OPTION "DP"
         replaceCsh etc/cshrc   WM_PRECISION_OPTION "DP"
+        adjusted=true
+        ;;
+
+    -SPDP)
+        # Replace WM_PRECISION_OPTION=...
+        replace    etc/bashrc  WM_PRECISION_OPTION "SPDP"
+        replaceCsh etc/cshrc   WM_PRECISION_OPTION "SPDP"
         adjusted=true
         ;;
 

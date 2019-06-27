@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ Description
 #define meshedSurfRef_H
 
 #include "meshedSurf.H"
+#include <functional>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,34 +48,35 @@ class meshedSurfRef
 :
     public meshedSurf
 {
-    const pointField& points_;
-    const faceList&   faces_;
-    const labelList&  zoneIds_;
+    std::reference_wrapper<const pointField> points_;
+    std::reference_wrapper<const faceList> faces_;
+    std::reference_wrapper<const labelList> ids_;
 
-
-    // Private Member Functions
-
-        //- No copy construct
-        meshedSurfRef(const meshedSurfRef&) = delete;
-
-        //- No copy assignment
-        void operator=(const meshedSurfRef&) = delete;
 
 public:
 
     // Constructors
 
+        //- Construct null
+        meshedSurfRef()
+        :
+            points_(std::cref<pointField>(pointField::null())),
+            faces_(std::cref<faceList>(faceList::null())),
+            ids_(std::cref<labelList>(labelList::null()))
+        {}
+
+
         //- Construct from components
         meshedSurfRef
         (
             const pointField& pts,
-            const faceList& faces,
-            const labelList& ids = labelList()
+            const faceList& fcs,
+            const labelList& ids = labelList::null()
         )
         :
-            points_(pts),
-            faces_(faces),
-            zoneIds_(ids)
+            points_(std::cref<pointField>(pts)),
+            faces_(std::cref<faceList>(fcs)),
+            ids_(std::cref<labelList>(ids))
         {}
 
 
@@ -82,27 +84,48 @@ public:
     virtual ~meshedSurfRef() = default;
 
 
-    // Access Member Functions
+    // Member Functions
 
-        //- Const access to (global) points used for the surface
+        //- The points used for the surface
         virtual const pointField& points() const
         {
-            return points_;
+            return points_.get();
         }
 
-        //- Const access to the surface faces
+        //- The faces used for the surface
         virtual const faceList& faces() const
         {
-            return faces_;
+            return faces_.get();
         }
 
-        //- Const access to per-face zone/region information
+        //- Per-face zone/region information.
         virtual const labelList& zoneIds() const
         {
-            return zoneIds_;
+            return ids_.get();
         }
 
+        //- Remove all references by redirecting to null objects
+        void clear()
+        {
+            points_ = std::cref<pointField>(pointField::null());
+            faces_ = std::cref<faceList>(faceList::null());
+            ids_ = std::cref<labelList>(labelList::null());
+        }
+
+        //- Reset components
+        void reset
+        (
+            const pointField& pts,
+            const faceList& fcs,
+            const labelList& ids = labelList::null()
+        )
+        {
+            points_ = std::cref<pointField>(pts);
+            faces_ = std::cref<faceList>(fcs);
+            ids_ = std::cref<labelList>(ids);
+        }
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

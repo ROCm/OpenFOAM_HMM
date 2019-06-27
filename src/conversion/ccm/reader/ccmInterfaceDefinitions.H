@@ -224,7 +224,7 @@ public:
         {
             forAllConstIters(map(), iter)
             {
-                if (iter.object().inInterface(bndId))
+                if (iter.val().inInterface(bndId))
                 {
                     return true;
                 }
@@ -240,7 +240,7 @@ public:
             word ifname;
             forAllConstIters(map(), iter)
             {
-                ifname = iter.object().canonicalName(bndId);
+                ifname = iter.val().canonicalName(bndId);
                 if (!ifname.empty())
                 {
                     break;

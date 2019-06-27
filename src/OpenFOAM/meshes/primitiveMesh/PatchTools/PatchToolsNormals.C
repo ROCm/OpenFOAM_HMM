@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,8 +55,6 @@ Foam::PatchTools::pointNormals
         globalData.globalTransforms();
 
 
-
-
     // Combine normals. Note: do on all master points. Cannot just use
     // patch points since the master point does not have to be on the
     // patch!
@@ -66,11 +66,12 @@ Foam::PatchTools::pointNormals
         List<List<point>> pointFaceNormals(map.constructSize());
         forAll(p.meshPoints(), patchPointi)
         {
-            label meshPointi = p.meshPoints()[patchPointi];
-            Map<label>::const_iterator fnd = coupledPatchMP.find(meshPointi);
-            if (fnd != coupledPatchMP.end())
+            const label meshPointi = p.meshPoints()[patchPointi];
+
+            const auto fnd = coupledPatchMP.cfind(meshPointi);
+            if (fnd.found())
             {
-                label coupledPointi = fnd();
+                const label coupledPointi = fnd.val();
 
                 List<point>& pNormals = pointFaceNormals[coupledPointi];
                 const labelList& pFaces = p.pointFaces()[patchPointi];
@@ -180,11 +181,12 @@ Foam::PatchTools::pointNormals
     // 2. Override patch normals on coupled points
     forAll(p.meshPoints(), patchPointi)
     {
-        label meshPointi = p.meshPoints()[patchPointi];
-        Map<label>::const_iterator fnd = coupledPatchMP.find(meshPointi);
-        if (fnd != coupledPatchMP.end())
+        const label meshPointi = p.meshPoints()[patchPointi];
+
+        const auto fnd = coupledPatchMP.cfind(meshPointi);
+        if (fnd.found())
         {
-            label coupledPointi = fnd();
+            const label coupledPointi = fnd.val();
             extrudeN[patchPointi] = coupledPointNormals[coupledPointi];
         }
     }
@@ -218,12 +220,12 @@ Foam::PatchTools::edgeNormals
         const labelListList& edgeFaces = p.edgeFaces();
         const vectorField& faceNormals = p.faceNormals();
 
-        forAll(edgeFaces, edgeI)
+        forAll(edgeFaces, edgei)
         {
-            const labelList& eFaces = edgeFaces[edgeI];
-            forAll(eFaces, i)
+            const labelList& eFaces = edgeFaces[edgei];
+            for (const label facei : eFaces)
             {
-                edgeNormals[edgeI] += faceNormals[eFaces[i]];
+                edgeNormals[edgei] += faceNormals[facei];
             }
         }
         edgeNormals /= mag(edgeNormals)+VSMALL;

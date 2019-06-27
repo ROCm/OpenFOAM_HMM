@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ namespace functionObjects
 {
 namespace runTimePostPro
 {
-    defineTypeNameAndDebug(functionObjectLine, 0);
+    defineTypeName(functionObjectLine);
     addToRunTimeSelectionTable(pathline, functionObjectLine, dictionary);
 }
 }
@@ -65,7 +65,7 @@ static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
     // Not extremely elegant...
     vtkSmartPointer<vtkPolyData> dataset;
 
-    if (fName.ext() == "vtk")
+    if ("vtk" == fName.ext())
     {
         auto reader = vtkSmartPointer<vtkPolyDataReader>::New();
 
@@ -76,7 +76,7 @@ static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
         return dataset;
     }
 
-    if (fName.ext() == "vtp")
+    if ("vtp" == fName.ext())
     {
         auto reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
 
@@ -125,7 +125,8 @@ addGeometryToScene
     vtkRenderer* renderer
 )
 {
-    if (!visible_)
+    // Currently master-only
+    if (!visible_ || !renderer || !Pstream::master())
     {
         return;
     }
@@ -153,10 +154,19 @@ addGeometryToScene
         return;
     }
 
+    DebugInfo << "    Resolved lines " << fName << endl;
+
 
     auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 
-    setField(position, fieldName_, mapper, renderer, polyData);
+    setField
+    (
+        position,
+        fieldName_,
+        queryFieldAssociation(fieldName_, polyData),
+        mapper,
+        renderer
+    );
 
     actor_->SetMapper(mapper);
 

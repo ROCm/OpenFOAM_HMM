@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,20 +28,18 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifdef solarisGcc
+#if defined(__sun__) && defined(__GNUC__)
+    // Not certain if this is still required
     #define _SYS_VNODE_H
 #endif
 
 #include "OSspecific.H"
 #include "POSIX.H"
-#include "foamVersion.H"
 #include "fileName.H"
 #include "fileStat.H"
 #include "timer.H"
-#include "IFstream.H"
 #include "DynamicList.H"
 #include "CStringList.H"
-#include "SubList.H"
 #include "IOstreams.H"
 #include "Pstream.H"
 
@@ -47,7 +47,7 @@ Description
 #include <cstdlib>
 #include <cctype>
 
-#include <stdio.h>
+#include <cstdio>
 #include <unistd.h>
 #include <dirent.h>
 #include <pwd.h>
@@ -60,9 +60,17 @@ Description
 #include <netinet/in.h>
 #include <dlfcn.h>
 
-#ifdef darwin
+#ifdef __APPLE__
+    #define EXT_SO  "dylib"
     #include <mach-o/dyld.h>
 #else
+    #define EXT_SO  "so"
+
+    // PGI does not have __int128_t
+    #ifdef __PGIC__
+        #define __ILP32__
+    #endif
+
     #include <link.h>
 #endif
 
@@ -78,36 +86,6 @@ static bool cwdPreference_(Foam::debug::optimisationSwitch("cwd", 0));
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
-
-// Like fileName "/" global operator, but retain any invalid characters
-static inline Foam::fileName fileNameConcat
-(
-    const std::string& a,
-    const std::string& b
-)
-{
-    if (a.size())
-    {
-        if (b.size())
-        {
-            // Two non-empty strings: can concatenate
-            return Foam::fileName((a + '/' + b), false);
-        }
-
-        return Foam::fileName(a, false);
-    }
-
-    // Or, if the first string is empty
-
-    if (b.size())
-    {
-        return Foam::fileName(b, false);
-    }
-
-    // Both strings are empty
-    return Foam::fileName();
-}
-
 
 // After a fork in system(), before the exec() do the following
 // - close stdin when executing in background (daemon-like)
@@ -127,6 +105,141 @@ static inline void redirects(const bool bg)
         (void) ::dup2(STDERR_FILENO, STDOUT_FILENO);
     }
 }
+
+
+// * * * * * * * * * * * * * * * * Local Classes * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace POSIX
+{
+
+//- A simple directory contents iterator
+class directoryIterator
+{
+    DIR* dirptr_;
+
+    bool exists_;
+
+    bool hidden_;
+
+    std::string item_;
+
+    //- Accept file/dir name
+    inline bool accept() const
+    {
+        return
+        (
+            item_.size() && item_ != "." && item_ != ".."
+         && (hidden_ || item_[0] != '.')
+        );
+    }
+
+
+public:
+
+    // Constructors
+
+        //- Construct for dirName, optionally allowing hidden files/dirs
+        directoryIterator(const fileName& dirName, bool allowHidden = false)
+        :
+            dirptr_(nullptr),
+            exists_(false),
+            hidden_(allowHidden),
+            item_()
+        {
+            if (!dirName.empty())
+            {
+                dirptr_ = ::opendir(dirName.c_str());
+                exists_ = (dirptr_ != nullptr);
+                next(); // Move to first element
+            }
+        }
+
+
+    //- Destructor
+    ~directoryIterator()
+    {
+        close();
+    }
+
+
+    // Member Functions
+
+        //- Directory open succeeded
+        bool exists() const
+        {
+            return exists_;
+        }
+
+        //- Directory pointer is valid
+        bool good() const
+        {
+            return dirptr_;
+        }
+
+        //- Close directory
+        void close()
+        {
+            if (dirptr_)
+            {
+                ::closedir(dirptr_);
+                dirptr_ = nullptr;
+            }
+        }
+
+        //- The current item
+        const std::string& val() const
+        {
+            return item_;
+        }
+
+        //- Read next item, always ignoring "." and ".." entries.
+        //  Normally also ignore hidden files/dirs (beginning with '.')
+        //  Automatically close when there are no more items
+        bool next()
+        {
+            struct dirent *list;
+
+            while (dirptr_ && (list = ::readdir(dirptr_)) != nullptr)
+            {
+                item_ = list->d_name;
+
+                if (accept())
+                {
+                    return true;
+                }
+            }
+            close(); // No more items
+
+            return false;
+        }
+
+
+    // Member Operators
+
+        //- Same as good()
+        operator bool() const
+        {
+            return good();
+        }
+
+        //- Same as val()
+        const std::string& operator*() const
+        {
+            return val();
+        }
+
+        //- Same as next()
+        directoryIterator& operator++()
+        {
+            next();
+            return *this;
+        }
+};
+
+} // End namespace POSIX
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -439,135 +552,122 @@ bool Foam::mkDir(const fileName& pathName, mode_t mode)
         // Directory made OK so return true
         return true;
     }
-    else
+
+    switch (errno)
     {
-        switch (errno)
+        case EPERM:
         {
-            case EPERM:
-            {
-                FatalErrorInFunction
-                    << "The filesystem containing " << pathName
-                    << " does not support the creation of directories."
-                    << exit(FatalError);
+            FatalErrorInFunction
+                << "The filesystem containing " << pathName
+                << " does not support the creation of directories."
+                << exit(FatalError);
+            break;
+        }
 
-                return false;
+        case EEXIST:
+        {
+            // Directory already exists so simply return true
+            return true;
+        }
+
+        case EFAULT:
+        {
+            FatalErrorInFunction
+                << "" << pathName
+                << " points outside your accessible address space."
+                << exit(FatalError);
+            break;
+        }
+
+        case EACCES:
+        {
+            FatalErrorInFunction
+                << "The parent directory does not allow write "
+                   "permission to the process,"<< nl
+                << " or one of the directories in " << pathName
+                << " did not allow search (execute) permission."
+                << exit(FatalError);
+            break;
+        }
+
+        case ENAMETOOLONG:
+        {
+            FatalErrorInFunction
+                << "" << pathName << " is too long."
+                << exit(FatalError);
+            break;
+        }
+
+        case ENOENT:
+        {
+            // Part of the path does not exist so try to create it
+            if (pathName.path().size() && mkDir(pathName.path(), mode))
+            {
+                return mkDir(pathName, mode);
             }
 
-            case EEXIST:
-            {
-                // Directory already exists so simply return true
-                return true;
-            }
+            FatalErrorInFunction
+                << "Couldn't create directory " << pathName
+                << exit(FatalError);
+            break;
+        }
 
-            case EFAULT:
-            {
-                FatalErrorInFunction
-                    << "" << pathName
-                    << " points outside your accessible address space."
-                    << exit(FatalError);
+        case ENOTDIR:
+        {
+            FatalErrorInFunction
+                << "A component used as a directory in " << pathName
+                << " is not, in fact, a directory."
+                << exit(FatalError);
+            break;
+        }
 
-                return false;
-            }
+        case ENOMEM:
+        {
+            FatalErrorInFunction
+                << "Insufficient kernel memory was available to make directory "
+                << pathName << '.'
+                << exit(FatalError);
+            break;
+        }
 
-            case EACCES:
-            {
-                FatalErrorInFunction
-                    << "The parent directory does not allow write "
-                       "permission to the process,"<< nl
-                    << "or one of the directories in " << pathName
-                    << " did not allow search (execute) permission."
-                    << exit(FatalError);
+        case EROFS:
+        {
+            FatalErrorInFunction
+                << "" << pathName
+                << " refers to a file on a read-only filesystem."
+                << exit(FatalError);
+            break;
+        }
 
-                return false;
-            }
+        case ELOOP:
+        {
+            FatalErrorInFunction
+                << "Too many symbolic links were encountered in resolving "
+                << pathName << '.'
+                << exit(FatalError);
+            break;
+        }
 
-            case ENAMETOOLONG:
-            {
-                FatalErrorInFunction
-                    << "" << pathName << " is too long."
-                    << exit(FatalError);
+        case ENOSPC:
+        {
+            FatalErrorInFunction
+                << "The device containing " << pathName
+                << " has no room for the new directory or "
+                << "the user's disk quota is exhausted."
+                << exit(FatalError);
+            break;
+        }
 
-                return false;
-            }
-
-            case ENOENT:
-            {
-                // Part of the path does not exist so try to create it
-                if (pathName.path().size() && mkDir(pathName.path(), mode))
-                {
-                    return mkDir(pathName, mode);
-                }
-                else
-                {
-                    FatalErrorInFunction
-                        << "Couldn't create directory " << pathName
-                        << exit(FatalError);
-
-                    return false;
-                }
-            }
-
-            case ENOTDIR:
-            {
-                FatalErrorInFunction
-                    << "A component used as a directory in " << pathName
-                    << " is not, in fact, a directory."
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            case ENOMEM:
-            {
-                FatalErrorInFunction
-                    << "Insufficient kernel memory was available to make "
-                       "directory " << pathName << '.'
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            case EROFS:
-            {
-                FatalErrorInFunction
-                    << "" << pathName
-                    << " refers to a file on a read-only filesystem."
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            case ELOOP:
-            {
-                FatalErrorInFunction
-                    << "Too many symbolic links were encountered in resolving "
-                    << pathName << '.'
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            case ENOSPC:
-            {
-                FatalErrorInFunction
-                    << "The device containing " << pathName
-                    << " has no room for the new directory or "
-                    << "the user's disk quota is exhausted."
-                    << exit(FatalError);
-
-                return false;
-            }
-
-            default:
-            {
-                FatalErrorInFunction
-                    << "Couldn't create directory " << pathName
-                    << exit(FatalError);
-
-                return false;
-            }
+        default:
+        {
+            FatalErrorInFunction
+                << "Couldn't create directory " << pathName
+                << exit(FatalError);
+            break;
         }
     }
+
+    return false;
 }
 
 
@@ -781,7 +881,7 @@ Foam::fileNameList Foam::readDir
 )
 {
     // Initial filename list size and the increment when resizing the list
-    static const int maxNnames = 100;
+    constexpr int maxNnames = 100;
 
     // Basic sanity: cannot strip '.gz' from directory names
     const bool stripgz = filtergz && (type != fileName::DIRECTORY);
@@ -789,14 +889,10 @@ Foam::fileNameList Foam::readDir
 
     fileNameList dirEntries;
 
-    // Open directory and set the structure pointer
-    // Do not attempt to open an empty directory name
-    DIR *source;
-    if
-    (
-        directory.empty()
-     || (source = ::opendir(directory.c_str())) == nullptr
-    )
+    // Iterate contents (ignores an empty directory name)
+
+    POSIX::directoryIterator dirIter(directory);
+    if (!dirIter.exists())
     {
         if (POSIX::debug)
         {
@@ -819,19 +915,12 @@ Foam::fileNameList Foam::readDir
 
     label nFailed = 0;     // Entries with invalid characters
     label nEntries = 0;    // Number of selected entries
-    dirEntries.setSize(maxNnames);
+    dirEntries.resize(maxNnames);
 
-    // Read and parse all the entries in the directory
-    for (struct dirent *list; (list = ::readdir(source)) != nullptr; /*nil*/)
+    // Process the directory entries
+    for (/*nil*/; dirIter; ++dirIter)
     {
-        const std::string item(list->d_name);
-
-        // Ignore files/directories beginning with "."
-        // These are the ".", ".." directories and any hidden files/dirs
-        if (item.empty() || item[0] == '.')
-        {
-            continue;
-        }
+        const std::string& item = *dirIter;
 
         // Validate filename without spaces, quotes, etc in the name.
         // No duplicate slashes to strip - dirent will not have them anyhow.
@@ -851,7 +940,7 @@ Foam::fileNameList Foam::readDir
             {
                 if (nEntries >= dirEntries.size())
                 {
-                    dirEntries.setSize(dirEntries.size() + maxNnames);
+                    dirEntries.resize(dirEntries.size() + maxNnames);
                 }
 
                 if (stripgz && name.hasExt(extgz))
@@ -865,10 +954,9 @@ Foam::fileNameList Foam::readDir
             }
         }
     }
-    ::closedir(source);
 
     // Finalize the length of the entries list
-    dirEntries.setSize(nEntries);
+    dirEntries.resize(nEntries);
 
     if (nFailed && POSIX::debug)
     {
@@ -918,14 +1006,14 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
             return false;
         }
 
-        // Open and check streams.
-        std::ifstream srcStream(src);
+        // Open and check streams. Enforce binary for extra safety
+        std::ifstream srcStream(src, ios_base::in | ios_base::binary);
         if (!srcStream)
         {
             return false;
         }
 
-        std::ofstream destStream(destFile);
+        std::ofstream destStream(destFile, ios_base::out | ios_base::binary);
         if (!destStream)
         {
             return false;
@@ -1125,12 +1213,10 @@ bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
     {
         const fileName dstName(dst/src.name());
 
-        return ::rename(src.c_str(), dstName.c_str()) == 0;
+        return (0 == ::rename(src.c_str(), dstName.c_str()));
     }
-    else
-    {
-        return ::rename(src.c_str(), dst.c_str()) == 0;
-    }
+
+    return (0 == ::rename(src.c_str(), dst.c_str()));
 }
 
 
@@ -1171,7 +1257,7 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
             // possible index where we have no choice
             if (!exists(dstName, false) || n == maxIndex)
             {
-                return ::rename(src.c_str(), dstName.c_str()) == 0;
+                return (0 == ::rename(src.c_str(), dstName.c_str()));
             }
         }
     }
@@ -1199,28 +1285,23 @@ bool Foam::rm(const fileName& file)
         return false;
     }
 
-    // Try returning plain file name; if not there, try with .gz
-    if (::remove(file.c_str()) == 0)
-    {
-        return true;
-    }
-    else
-    {
-        return ::remove(string(file + ".gz").c_str()) == 0;
-    }
+    // If removal of plain file name fails, try with .gz
+
+    return
+    (
+        0 == ::remove(file.c_str())
+     || 0 == ::remove((file + ".gz").c_str())
+    );
 }
 
 
 bool Foam::rmDir(const fileName& directory, const bool silent)
 {
-    // Open directory and set the structure pointer
-    // Do not attempt to open an empty directory name
-    DIR *source;
-    if
-    (
-        directory.empty()
-     || (source = ::opendir(directory.c_str())) == nullptr
-    )
+    // Iterate contents (ignores an empty directory name)
+    // Also retain hidden files/dirs for removal
+
+    POSIX::directoryIterator dirIter(directory, true);
+    if (!dirIter.exists())
     {
         if (!silent)
         {
@@ -1243,21 +1324,16 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
 
     // Process each directory entry, counting any errors encountered
     label nErrors = 0;
-    for (struct dirent *list; (list = ::readdir(source)) != nullptr; /*nil*/)
-    {
-        const std::string item(list->d_name);
 
-        // Ignore "." and ".." directories
-        if (item.empty() || item == "." || item == "..")
-        {
-            continue;
-        }
+    for (/*nil*/; dirIter; ++dirIter)
+    {
+        const std::string& item = *dirIter;
 
         // Allow invalid characters (spaces, quotes, etc),
-        // otherwise we cannot subdirs with these types of names.
+        // otherwise we cannot remove subdirs with these types of names.
         // -> const fileName path = directory/name; <-
 
-        const fileName path(fileNameConcat(directory, item));
+        const fileName path(fileName::concat(directory, item));
 
         if (path.type(false) == fileName::DIRECTORY)
         {
@@ -1298,7 +1374,6 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
     }
 
     // clean up
-    ::closedir(source);
     return !nErrors;
 }
 
@@ -1578,23 +1653,42 @@ int Foam::system(const Foam::UList<Foam::string>& command, const bool bg)
 }
 
 
-void* Foam::dlOpen(const fileName& lib, const bool check)
+void* Foam::dlOpen(const fileName& libName, const bool check)
 {
+    constexpr int ldflags = (RTLD_LAZY|RTLD_GLOBAL);
+
     if (POSIX::debug)
     {
-        std::cout<< "dlOpen(const fileName&)"
-            << " : dlopen of " << lib << std::endl;
+        std::cout
+            << "dlOpen(const fileName&)"
+            << " : dlopen of " << libName << std::endl;
     }
-    void* handle = ::dlopen(lib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
 
-    #ifdef darwin
-    // Re-try "libXX.so" as "libXX.dylib"
-    if (!handle && lib.hasExt("so"))
+    void* handle = ::dlopen(libName.c_str(), ldflags);
+
+    if (!handle)
     {
-        const fileName dylib(lib.lessExt().ext("dylib"));
-        handle = ::dlopen(dylib.c_str(), RTLD_LAZY|RTLD_GLOBAL);
+        fileName libso;
+
+        if (!libName.startsWith("lib"))
+        {
+            // Try with 'lib' prefix
+            libso = "lib" + libName;
+            handle = ::dlopen(libso.c_str(), ldflags);
+        }
+        else
+        {
+            libso = libName;
+        }
+
+        // With canonical library extension ("so" or "dylib"), which remaps
+        // "libXX" to "libXX.so" as well as "libXX.so" -> "libXX.dylib"
+        if (!handle && !libso.hasExt(EXT_SO))
+        {
+            libso = libso.lessExt().ext(EXT_SO);
+            handle = ::dlopen(libso.c_str(), ldflags);
+        }
     }
-    #endif
 
     if (!handle && check)
     {
@@ -1607,11 +1701,31 @@ void* Foam::dlOpen(const fileName& lib, const bool check)
     {
         std::cout
             << "dlOpen(const fileName&)"
-            << " : dlopen of " << lib
+            << " : dlopen of " << libName
             << " handle " << handle << std::endl;
     }
 
     return handle;
+}
+
+
+Foam::label Foam::dlOpen
+(
+    std::initializer_list<fileName> libNames,
+    const bool check
+)
+{
+    label nLoaded = 0;
+
+    for (const fileName& libName : libNames)
+    {
+        if (Foam::dlOpen(libName, check))
+        {
+            ++nLoaded;
+        }
+    }
+
+    return nLoaded;
 }
 
 
@@ -1627,27 +1741,38 @@ bool Foam::dlClose(void* handle)
 }
 
 
-void* Foam::dlSym(void* handle, const std::string& symbol)
+void* Foam::dlSymFind(void* handle, const std::string& symbol, bool required)
 {
+    if (!required && (!handle || symbol.empty()))
+    {
+        return nullptr;
+    }
+
     if (POSIX::debug)
     {
         std::cout
-            << "dlSym(void*, const std::string&)"
+            << "dlSymFind(void*, const std::string&, bool)"
             << " : dlsym of " << symbol << std::endl;
     }
-    // clear any old errors - see manpage dlopen
+
+    // Clear any old errors - see manpage dlopen
     (void) ::dlerror();
 
-    // get address of symbol
+    // Get address of symbol
     void* fun = ::dlsym(handle, symbol.c_str());
 
-    // find error (if any)
-    char *error = ::dlerror();
+    // Any error?
+    char *err = ::dlerror();
 
-    if (error)
+    if (err)
     {
+        if (!required)
+        {
+            return nullptr;
+        }
+
         WarningInFunction
-            << "Cannot lookup symbol " << symbol << " : " << error
+            << "Cannot lookup symbol " << symbol << " : " << err
             << endl;
     }
 
@@ -1655,32 +1780,7 @@ void* Foam::dlSym(void* handle, const std::string& symbol)
 }
 
 
-bool Foam::dlSymFound(void* handle, const std::string& symbol)
-{
-    if (handle && !symbol.empty())
-    {
-        if (POSIX::debug)
-        {
-            std::cout
-                << "dlSymFound(void*, const std::string&)"
-                << " : dlsym of " << symbol << std::endl;
-        }
-
-        // clear any old errors - see manpage dlopen
-        (void) ::dlerror();
-
-        // get address of symbol
-        (void) ::dlsym(handle, symbol.c_str());
-
-        // symbol can be found if there was no error
-        return !::dlerror();
-    }
-
-    return false;
-}
-
-
-#ifndef darwin
+#ifndef __APPLE__
 static int collectLibsCallback
 (
     struct dl_phdr_info *info,
@@ -1699,7 +1799,7 @@ static int collectLibsCallback
 Foam::fileNameList Foam::dlLoaded()
 {
     DynamicList<fileName> libs;
-    #ifdef darwin
+    #ifdef __APPLE__
     for (uint32_t i=0; i < _dyld_image_count(); ++i)
     {
        libs.append(_dyld_get_image_name(i));

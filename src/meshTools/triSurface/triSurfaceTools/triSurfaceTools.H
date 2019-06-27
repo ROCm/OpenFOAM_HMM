@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -477,10 +479,12 @@ public:
         //- Simple triangulation of (selected patches of) boundaryMesh. Needs
         //  polyMesh (or polyBoundaryMesh) since only at this level are the
         //  triangles on neighbouring patches connected.
+        //  Return faceMap from triI to faceI
         static triSurface triangulate
         (
             const polyBoundaryMesh& mBesh,
             const labelHashSet& includePatches,
+            labelList& faceMap,
             const bool verbose = false
         );
 

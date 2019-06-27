@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +46,7 @@ Foam::DistributedDelaunayMesh<Triangulation>::buildMap
     // ~~~~~~~~~~~~~~~~~~
 
     // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
 
     forAll(toProc, i)
     {
@@ -409,18 +411,15 @@ void Foam::DistributedDelaunayMesh<Triangulation>::markVerticesToRefer
              continue;
         }
 
-        Map<labelList>::const_iterator iter =
-            circumsphereOverlaps.find(cit->cellIndex());
+        const auto iter = circumsphereOverlaps.cfind(cit->cellIndex());
 
         // Pre-tested circumsphere potential influence
-        if (iter != circumsphereOverlaps.cend())
+        if (iter.found())
         {
             const labelList& citOverlaps = iter();
 
-            forAll(citOverlaps, cOI)
+            for (const label proci : citOverlaps)
             {
-                label proci = citOverlaps[cOI];
-
                 for (int i = 0; i < 4; i++)
                 {
                     Vertex_handle v = cit->vertex(i);
@@ -1023,15 +1022,6 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
 
     return uninserted;
 }
-
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

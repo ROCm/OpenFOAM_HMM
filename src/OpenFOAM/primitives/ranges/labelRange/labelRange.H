@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +31,7 @@ Description
 
 SourceFiles
     labelRange.C
+    labelRangeI.H
 
 \*---------------------------------------------------------------------------*/
 #ifndef labelRange_H
@@ -42,14 +45,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class labelRange;
+// Forward Declarations
 class Istream;
 class Ostream;
 template<class T> class List;
-
-Istream& operator>>(Istream& is, labelRange& range);
-Ostream& operator<<(Ostream& os, const labelRange& range);
+template<class T> class MinMax;
 
 /*---------------------------------------------------------------------------*\
                          Class labelRange Declaration
@@ -64,6 +64,7 @@ class labelRange
 
         //- The length of the interval
         label size_;
+
 
 public:
 
@@ -81,6 +82,7 @@ public:
 
     // Static Data Members
 
+        //- Debugging
         static int debug;
 
         //- An empty range with start=0, size=0.
@@ -104,14 +106,25 @@ public:
             const bool adjustStart
         ) noexcept;
 
+        //- Construct from a min/max range, enforcing non-negative size.
+        //- Does not adjust the start.
+        //  Passing an invalid min/max range results in an empty labelRange
+        explicit labelRange(const MinMax<label>& range) noexcept;
+
         //- Construct from Istream.
-        labelRange(Istream& is);
+        explicit labelRange(Istream& is);
 
 
     // Static Member Functions
 
-        //- An identity range with range[i] == i.
-        inline static labelRange identity(const label len) noexcept;
+        //- An identity range corresponding to (map[i] == i), or with
+        //- an optional start index, so that (map[i] == i+start)
+        //  The parameter order as per the Foam::identity() function.
+        inline static labelRange identity
+        (
+            const label len,
+            const label start=0
+        ) noexcept;
 
 
     // Member Functions
@@ -119,32 +132,17 @@ public:
         //- Change the start position
         inline void setStart(const label i) noexcept;
 
-        //- Change the size
+        //- Change the size, enforcing non-negative size.
         inline void resize(const label n) noexcept;
 
         //- Change the size - alias for resize()
         inline void setSize(const label n) noexcept;
-
-        //- Decrease the size by 1, but never below 0.
-        inline void decrement() noexcept;
-
-        //- Increase the size by 1.
-        inline void increment() noexcept;
 
         //- Reset to zero start and zero size
         inline void clear() noexcept;
 
         //- Is the range empty?
         inline bool empty() const noexcept;
-
-        //- Return the range as a list of labels
-        List<label> labels() const;
-
-        //- Adjust the start to avoid negative indices.
-        //  The size is decreased accordingly, but will never become negative.
-        //  Eg, adjusting (-10, 15) becomes (0,5).
-        //  adjusting (-20, 15) becomes (0,0)
-        void adjust() noexcept;
 
         //- Is the range non-empty?
         inline bool valid() const noexcept;
@@ -155,17 +153,30 @@ public:
         //- The effective size of the range
         inline label size() const noexcept;
 
-        //- The (inclusive) lower value of the range - same as start
-        inline label first() const noexcept;
-
-        //- The (inclusive) upper value of the range
-        inline label last() const noexcept;
-
         //- The value before the start of the range
         inline label before() const noexcept;
 
+        //- The (inclusive) lower value of the range - same as start()
+        inline label first() const noexcept;
+
+        //- The (inclusive) lower value of the range - same as start(), first()
+        inline label min() const noexcept;
+
+        //- The (inclusive) upper value of the range - same as max()
+        inline label last() const noexcept;
+
+        //- The (inclusive) upper value of the range - same as last()
+        inline label max() const noexcept;
+
         //- The value after the last element in the range
+        //  This is identical to the value of cend()
         inline label after() const noexcept;
+
+        //- Adjust the start to avoid negative indices.
+        //  The size is decreased accordingly, but will never become negative.
+        //  Eg, adjusting (-10, 15) becomes (0,5).
+        //  adjusting (-20, 15) becomes (0,0)
+        void adjust() noexcept;
 
         //- Reset start and size, enforcing non-negative size.
         //  \return true if the updated range is valid (non-empty).
@@ -183,6 +194,9 @@ public:
 
         //- Return true if the (global) value is located within the range
         inline bool found(const label value) const noexcept;
+
+        //- Return the range as a list of labels
+        List<label> labels() const;
 
         //- Return true if the ranges overlap.
         //  Optional test for ranges that also just touch each other
@@ -208,19 +222,12 @@ public:
         labelRange subset0(const label size) const;
 
 
-        //- Return const_iterator to element in the range,
-        //- with bounds checking.
-        //  \return iterator at the requested position, or end() if it is
-        //      out of bounds
-        inline const_iterator at(const label localIndex) const;
-
-
     // Member Operators
 
         //- Return element in the range, without bounds checking
-        inline label operator[](const label localIndex) const noexcept;
+        inline label operator[](const label i) const noexcept;
 
-        //- Return true if the (global) value is located within the range.
+        //- Return true if the global value is located within the range.
         //  Behaviour identical to found() - usable as a predicate
         inline bool operator()(const label value) const noexcept;
 
@@ -228,9 +235,15 @@ public:
         inline label operator++() noexcept;
         inline label operator++(int) noexcept;
 
+        //- Increase the size by n.
+        inline label operator+=(const label n) noexcept;
+
         //- Decrease the size by 1, but never below 0.
         inline label operator--() noexcept;
         inline label operator--(int) noexcept;
+
+        //- Decrease the size by n, but never below 0.
+        inline label operator-=(const label n) noexcept;
 
 
     // STL iterator
@@ -247,7 +260,7 @@ public:
                 const label&
             >
         {
-            //- The current (global) index value
+            //- The global value
             label value_;
 
         public:
@@ -255,20 +268,31 @@ public:
         // Constructors
 
             //- Construct from range at given local index.
-            //  If the local index is out of range (eg, negative),
-            //  this creates the 'end' iterator
+            //  An out-of-range index (eg, negative) creates an 'end' iterator
             inline const_iterator(const labelRange* range, const label i=0);
 
         // Member Operators
 
-            //- Return the current (global) value
-            inline label operator*() const;
+            //- Return the (global) value
+            inline label operator*() const noexcept;
 
-            inline const_iterator& operator++();
+            //- Prefix increment, no range checking
+            inline const_iterator& operator++() noexcept;
+
+            //- Postfix increment, no range checking
             inline const_iterator operator++(int);
 
-            inline bool operator==(const const_iterator& iter) const;
-            inline bool operator!=(const const_iterator& iter) const;
+            //- Arbitrary increment, no range checking
+            inline const_iterator& operator+=(const label n) noexcept;
+
+            //- Arbitrary decrement, no range checking
+            inline const_iterator& operator-=(const label n) noexcept;
+
+            //- Test for equality of values
+            inline bool operator==(const const_iterator& iter) const noexcept;
+
+            //- Test for inequality of values
+            inline bool operator!=(const const_iterator& iter) const noexcept;
         };
 
 
@@ -280,18 +304,19 @@ public:
         //  The value returned is guaranteed to be the same as start()
         inline const_iterator cbegin() const;
 
-        //- A const_iterator set to beyond the end of the range
+        //- A const_iterator set to 1 beyond the end of the range.
+        //  The value returned is the same as after()
         inline const const_iterator cend() const;
 
-        //- A const_iterator set to beyond the end of the range
+        //- A const_iterator set to 1 beyond the end of the range.
+        //  The value returned is the same as after()
         inline const const_iterator end() const;
 
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream& is, labelRange& range);
-        friend Ostream& operator<<(Ostream& os, const labelRange& range);
-
+        //- Return const_iterator to a position within the range,
+        //- with bounds checking.
+        //  \return iterator at the requested position, or end() for
+        //      out of bounds
+        inline const_iterator at(const label i) const;
 };
 
 
@@ -313,6 +338,15 @@ public:
 template<class> struct labelRangeOp;
 
 
+// IOstream Operators
+
+//- Read labelRange from Istream as (start size) pair, enforce no negative size
+Istream& operator>>(Istream& is, labelRange& range);
+
+//- Write labelRange to Ostream as (start size) pair
+Ostream& operator<<(Ostream& os, const labelRange& range);
+
+
 // Global Operators
 
 inline bool operator==(const labelRange& a, const labelRange& b) noexcept
@@ -322,7 +356,7 @@ inline bool operator==(const labelRange& a, const labelRange& b) noexcept
 
 inline bool operator!=(const labelRange& a, const labelRange& b) noexcept
 {
-    return (a.first() != b.first() || a.size() != b.size());
+    return !(a == b);
 }
 
 

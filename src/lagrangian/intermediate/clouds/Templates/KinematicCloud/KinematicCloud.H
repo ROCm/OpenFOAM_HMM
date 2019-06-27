@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -499,6 +501,9 @@ public:
 
             //- Total linear momentum of the system
             inline vector linearMomentumOfSystem() const;
+
+            //- Average particle per parcel
+            inline scalar totalParticlePerParcel() const;
 
             //- Total linear kinetic energy in the system
             inline scalar linearKineticEnergyOfSystem() const;

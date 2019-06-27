@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -480,7 +480,7 @@ void Foam::ccm::reader::readCells
         auto dictIter = boundaryRegion_.find(info.ccmIndex);
         if (dictIter.found())
         {
-            dictionary& dict = dictIter.object();
+            dictionary& dict = dictIter.val();
 
             const word patchName(dict.get<word>("Label"));
             const word patchType(dict.get<word>("BoundaryType"));
@@ -555,7 +555,7 @@ void Foam::ccm::reader::readCells
             }
         }
 
-        ccmLookupOrder.resetAddressing(std::move(addr));
+        ccmLookupOrder.addressing() = std::move(addr);
     }
 
 
@@ -1263,7 +1263,7 @@ void Foam::ccm::reader::removeUnwanted()
             forAllConstIters(removeMap, iter)
             {
                 Info<< "    zone "
-                    << iter.key() << " : " << iter.object() << nl;
+                    << iter.key() << " : " << iter.val() << nl;
             }
 
             Info<<"retain "<< (nCells_ - nRemove) << " cells in "
@@ -1272,7 +1272,7 @@ void Foam::ccm::reader::removeUnwanted()
             forAllConstIters(keepMap, iter)
             {
                 Info<< "    zone "
-                    << iter.key() << " : " << iter.object() << nl;
+                    << iter.key() << " : " << iter.val() << nl;
             }
         }
     }
@@ -1285,7 +1285,7 @@ void Foam::ccm::reader::removeUnwanted()
     // Remove all faces where the owner corresponds to a removed cell
     // Adjust the nInternalFaces and patch sizes accordingly
     label adjustInternal = 0;
-    labelList adjustPatchSize(patchSizes_.size(), 0);
+    labelList adjustPatchSize(patchSizes_.size(), Zero);
 
     label newFaceI = 0;
     label oldFaceI = nFaces_ - 1;
@@ -1515,8 +1515,8 @@ void Foam::ccm::reader::cleanupInterfaces()
 
     // The patch sizes (and the start) will definitely change
     const labelList origPatchStarts(patchStartList(nInternalFaces_));
-    labelList adjustPatchSize(patchSizes_.size(), 0);
-    labelList bafflePatchCount(patchSizes_.size(), 0);
+    labelList adjustPatchSize(patchSizes_.size(), Zero);
+    labelList bafflePatchCount(patchSizes_.size(), Zero);
 
     // The new dimensions after merging the domain interfaces:
     nInternalFaces_ += domInterfaces_.size();
@@ -1826,7 +1826,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
 
     forAllConstIters(interfaceDefinitions_, iter)
     {
-        const interfaceEntry& ifentry = iter.object();
+        const interfaceEntry& ifentry = iter.val();
 
         labelPair patchPair
         (
@@ -2018,7 +2018,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
     Info<< "interface merge faces:" << endl;
 
     nMergedTotal = 0;
-    labelList adjustPatchSize(patchSizes_.size(), 0);
+    labelList adjustPatchSize(patchSizes_.size(), Zero);
     forAll(interfacesToMerge, mergeI)
     {
         const label patch0 = interfacePatches[interfacesToMerge[mergeI]][0];
@@ -2366,7 +2366,7 @@ void Foam::ccm::reader::reorderMesh()
 
     forAllIters(monitoringSets_, iter)
     {
-        labelList& lst = iter.object();
+        labelList& lst = iter.val();
         inplaceRenumber(oldToNew, lst);
 
         // disallow monitoring on boundaries
@@ -2607,7 +2607,9 @@ Foam::autoPtr<Foam::polyMesh> Foam::ccm::reader::mesh
         (
             polyMesh::defaultRegion,
             "constant",
-            registry
+            registry,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         std::move(points_),
         std::move(faces_),

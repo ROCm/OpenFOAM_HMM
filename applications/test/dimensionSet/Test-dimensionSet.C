@@ -27,7 +27,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "dimensionSet.H"
+#include "dimensionedScalar.H"
 #include "IOmanip.H"
+#include <tuple>
 
 using namespace Foam;
 
@@ -37,6 +39,96 @@ using namespace Foam;
 
 #define PRINT_DIMSET(arg)       \
     Info<< STRING_QUOTE(arg) << "  " << arg << nl
+
+
+bool hadDimensionError
+(
+    const std::tuple<bool, dimensionSet, dimensionSet>& input,
+    bool dimsOk,
+    std::string errMsg
+)
+{
+    if (dimsOk)
+    {
+        if (std::get<0>(input))
+        {
+            Info<< "(pass) dimension check ok ";
+        }
+        else
+        {
+            Info<< "(fail) unexpected success for dimension check ";
+        }
+        Info<< std::get<1>(input) << " == " << std::get<2>(input) << nl;
+    }
+    else
+    {
+        if (std::get<0>(input))
+        {
+            Info<< "(fail) unexpected";
+        }
+        else
+        {
+            Info<< "(pass) expected";
+        }
+
+        Info<< " failure" << nl << errMsg.c_str() << nl;
+    }
+
+    return (std::get<0>(input) != dimsOk);
+}
+
+
+unsigned checkDimensions
+(
+    std::initializer_list
+    <
+        std::tuple<bool, dimensionSet, dimensionSet>
+    > tests
+)
+{
+    Info<< nl << "Verify dimension checks" << nl << nl;
+
+    unsigned nFail = 0;
+    std::string errMsg;
+
+    // Expect some failures
+    const bool prev = FatalError.throwExceptions();
+
+    for
+    (
+        const std::tuple<bool, dimensionSet, dimensionSet>& test
+      : tests
+    )
+    {
+        const bool expected = std::get<0>(test);
+        const dimensionSet& a = std::get<1>(test);
+        const dimensionSet& b = std::get<2>(test);
+
+        bool dimsOk = false;
+
+        try
+        {
+            // min(a, b);
+            clip(a, b);
+            dimsOk = true;
+        }
+        catch (const Foam::error& err)
+        {
+            errMsg = err.message();
+        }
+
+        if (expected != dimsOk)
+        {
+            ++nFail;
+        }
+
+        hadDimensionError(test, dimsOk, errMsg);
+    }
+
+    FatalError.throwExceptions(prev);
+
+    return nFail;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,6 +183,21 @@ int main(int argc, char *argv[])
         Info<< "sqrt(sqrt(dimVelocity)) " << sqrt(sqrt(dimVelocity)) << nl;
     }
 
+
+    unsigned nFail = 0;
+
+    nFail += checkDimensions
+    ({
+        { true, dimless, dimless },
+        { false, dimless, dimPressure }
+    });
+
+
+    if (nFail)
+    {
+        Info<< nl << "failed " << nFail << " tests" << nl;
+        return 1;
+    }
 
     Info<< nl << "End\n" << endl;
 

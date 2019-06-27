@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -478,7 +480,8 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
                 "newTgt." + Foam::name(Pstream::myProcNo()),
                 tgtRegion_.time().timeName(),
                 tgtRegion_.time(),
-                IOobject::NO_READ
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
             ),
             std::move(newTgtPoints),
             std::move(newTgtFaces),
@@ -799,7 +802,7 @@ void Foam::meshToMesh::constructFromCuttingPatches
     forAllConstIters(patchMap, iter)
     {
         const word& tgtPatchName = iter.key();
-        const word& srcPatchName = iter.object();
+        const word& srcPatchName = iter.val();
 
         const polyPatch& srcPatch = srcBm[srcPatchName];
 

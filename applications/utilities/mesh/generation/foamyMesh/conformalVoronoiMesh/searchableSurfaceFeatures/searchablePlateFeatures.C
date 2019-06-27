@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,7 +133,7 @@ Foam::searchablePlateFeatures::features() const
             surface().points()()[edges[eI].end()]
           - surface().points()()[edges[eI].start()];
 
-        normalDirections[eI] = labelList(2, label(0));
+        normalDirections[eI] = labelList(2, Zero);
         for (label j = 0; j < 2; ++j)
         {
             const vector cross =

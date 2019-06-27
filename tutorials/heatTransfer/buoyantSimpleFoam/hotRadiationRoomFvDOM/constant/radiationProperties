@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -21,10 +21,10 @@ radiationModel  fvDOM;
 
 fvDOMCoeffs
 {
-    nPhi        3;      // azimuthal angles in PI/2 on X-Y.(from Y to X)
-    nTheta      5;      // polar angles in PI (from Z to X-Y plane)
-    maxIter     10;     // maximum number of iterations
-    tolerance   1e-3;   // convergence criteria for radiation iteration
+    nPhi        3;
+    nTheta      5;
+    tolerance   1e-3;
+    maxIter     10;
 }
 
 // Number of flow iterations per radiation iteration
@@ -43,6 +43,5 @@ scatterModel    none;
 
 sootModel       none;
 
-transmissivityModel none;
 
 // ************************************************************************* //

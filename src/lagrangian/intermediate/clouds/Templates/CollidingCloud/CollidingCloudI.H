@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,10 +65,8 @@ Foam::CollidingCloud<CloudType>::rotationalKineticEnergyOfSystem() const
 {
     scalar rotationalKineticEnergy = 0.0;
 
-    forAllConstIter(typename CollidingCloud<CloudType>, *this, iter)
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
-
         rotationalKineticEnergy +=
             p.nParticle()*0.5*p.momentOfInertia()*(p.omega() & p.omega());
     }

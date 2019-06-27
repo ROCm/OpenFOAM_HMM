@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,7 +88,7 @@ SourceFiles
 #ifndef functionObjects_abort_H
 #define functionObjects_abort_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -102,12 +104,9 @@ namespace functionObjects
 
 class abort
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
     // Private Data
-
-        //- Reference to the Time
-        const Time& time_;
 
         //- The fully-qualified name of the trigger file
         fileName file_;
@@ -137,12 +136,7 @@ public:
     // Constructors
 
         //- Construct from Time and dictionary
-        abort
-        (
-            const word& name,
-            const Time& runTime,
-            const dictionary& dict
-        );
+        abort(const word& name, const Time& runTime, const dictionary& dict);
 
 
     //- Destructor

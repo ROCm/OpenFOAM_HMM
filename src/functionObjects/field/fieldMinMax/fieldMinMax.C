@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,9 +92,8 @@ void Foam::functionObjects::fieldMinMax::writeFileHeader(Ostream& os)
     }
     else
     {
-        forAllConstIters(fieldSet_.selection(), iter)
+        for (const word& fieldName : fieldSet_.selectionNames())
         {
-            const word& fieldName = iter();
             writeTabbed(os, "min(" + fieldName + ')');
             writeTabbed(os, "max(" + fieldName + ')');
         }
@@ -153,7 +154,7 @@ bool Foam::functionObjects::fieldMinMax::write()
     if (!location_) writeTime(file());
     Log << type() << " " << name() <<  " write:" << nl;
 
-    for (const word& fieldName : fieldSet_.selection())
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
         calcMinMaxFields<scalar>(fieldName, mdCmpt);
         calcMinMaxFields<vector>(fieldName, mode_);

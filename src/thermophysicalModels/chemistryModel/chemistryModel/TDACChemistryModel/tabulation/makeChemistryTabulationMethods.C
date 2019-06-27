@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +50,14 @@ namespace Foam
         incompressibleGasHThermoPhysics
     );
     makeChemistryTabulationMethods(psiReactionThermo, icoPoly8HThermoPhysics);
+    makeChemistryTabulationMethods(psiReactionThermo, constFluidHThermoPhysics);
+    makeChemistryTabulationMethods
+    (
+        psiReactionThermo,
+        constAdiabaticFluidHThermoPhysics
+    );
+    makeChemistryTabulationMethods(psiReactionThermo, constHThermoPhysics);
+
 
     makeChemistryTabulationMethods(rhoReactionThermo, constGasHThermoPhysics);
 
@@ -63,6 +73,14 @@ namespace Foam
         incompressibleGasHThermoPhysics
     );
     makeChemistryTabulationMethods(rhoReactionThermo, icoPoly8HThermoPhysics);
+    makeChemistryTabulationMethods(rhoReactionThermo, constFluidHThermoPhysics);
+    makeChemistryTabulationMethods
+    (
+        rhoReactionThermo,
+        constAdiabaticFluidHThermoPhysics
+    );
+    makeChemistryTabulationMethods(rhoReactionThermo, constHThermoPhysics);
+
 
     // Chemistry solvers based on sensibleInternalEnergy
 
@@ -80,6 +98,14 @@ namespace Foam
         incompressibleGasEThermoPhysics
     );
     makeChemistryTabulationMethods(psiReactionThermo, icoPoly8EThermoPhysics);
+    makeChemistryTabulationMethods(psiReactionThermo, constFluidEThermoPhysics);
+    makeChemistryTabulationMethods
+    (
+        psiReactionThermo,
+        constAdiabaticFluidEThermoPhysics
+    );
+    makeChemistryTabulationMethods(psiReactionThermo, constEThermoPhysics);
+
 
     makeChemistryTabulationMethods(rhoReactionThermo, constGasEThermoPhysics);
 
@@ -95,6 +121,14 @@ namespace Foam
         incompressibleGasEThermoPhysics
     );
     makeChemistryTabulationMethods(rhoReactionThermo, icoPoly8EThermoPhysics);
+    makeChemistryTabulationMethods(rhoReactionThermo, constFluidEThermoPhysics);
+    makeChemistryTabulationMethods
+    (
+        rhoReactionThermo,
+        constAdiabaticFluidEThermoPhysics
+    );
+    makeChemistryTabulationMethods(rhoReactionThermo, constEThermoPhysics);
+
 }
 
 

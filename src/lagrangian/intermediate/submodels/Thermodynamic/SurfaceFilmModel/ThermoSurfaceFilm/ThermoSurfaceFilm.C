@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ License
 
 #include "ThermoSurfaceFilm.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "Pstream.H"
 
 using namespace Foam::constant::mathematical;
@@ -112,7 +114,7 @@ Foam::vector Foam::ThermoSurfaceFilm<CloudType>::splashDirection
     const scalar phiSi = twoPi*rndGen_.sample01<scalar>();
 
     // Ejection angle [rad]
-    const scalar thetaSi = pi/180.0*(rndGen_.sample01<scalar>()*(50 - 5) + 5);
+    const scalar thetaSi = degToRad(rndGen_.sample01<scalar>()*(50 - 5) + 5);
 
     // Direction vector of new parcel
     const scalar alpha = sin(thetaSi);
@@ -309,7 +311,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
     else if ((We >= 2) && (We < 20)) // Bounce
     {
         // Incident angle of impingement
-        const scalar theta = pi/2 - acos(U/mag(U) & nf);
+        const scalar theta = piByTwo - acos(U/mag(U) & nf);
 
         // Restitution coefficient
         const scalar epsilon = 0.993 - theta*(1.76 - theta*(1.56 - theta*0.49));

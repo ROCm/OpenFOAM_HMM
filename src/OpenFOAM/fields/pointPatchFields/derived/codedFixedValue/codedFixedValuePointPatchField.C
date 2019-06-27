@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,38 +30,6 @@ License
 #include "pointPatchFieldMapper.H"
 #include "pointFields.H"
 #include "dynamicCode.H"
-#include "dynamicCodeContext.H"
-#include "stringOps.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word Foam::codedFixedValuePointPatchField<Type>::codeTemplateC
-    = "fixedValuePointPatchFieldTemplate.C";
-
-template<class Type>
-const Foam::word Foam::codedFixedValuePointPatchField<Type>::codeTemplateH
-    = "fixedValuePointPatchFieldTemplate.H";
-
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-template<class Type>
-void Foam::codedFixedValuePointPatchField<Type>::setFieldTemplates
-(
-    dynamicCode& dynCode
-)
-{
-    word fieldType(pTraits<Type>::typeName);
-
-    // Template type for pointPatchField
-    dynCode.setFilterVariable("TemplateType", fieldType);
-
-    // Name for pointPatchField - eg, ScalarField, VectorField, ...
-    fieldType[0] = toupper(fieldType[0]);
-    dynCode.setFilterVariable("FieldType", fieldType + "Field");
-}
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -69,27 +39,26 @@ const
 {
     const objectRegistry& obr = this->db();
 
-    if (obr.foundObject<IOdictionary>("codeDict"))
+    const IOdictionary* dictptr = obr.cfindObject<IOdictionary>("codeDict");
+    if (dictptr)
     {
-        return obr.lookupObject<IOdictionary>("codeDict");
+        return *dictptr;
     }
-    else
-    {
-        return obr.store
+
+    return obr.store
+    (
+        new IOdictionary
         (
-            new IOdictionary
+            IOobject
             (
-                IOobject
-                (
-                    "codeDict",
-                    this->db().time().system(),
-                    this->db(),
-                    IOobject::MUST_READ_IF_MODIFIED,
-                    IOobject::NO_WRITE
-                )
+                "codeDict",
+                this->db().time().system(),
+                this->db(),
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE
             )
-        );
-    }
+        )
+    );
 }
 
 
@@ -111,8 +80,7 @@ void Foam::codedFixedValuePointPatchField<Type>::prepare
     dynCode.setFilterVariable("typeName", name_);
 
     // Set TemplateType and FieldType filter variables
-    // (for pointPatchField)
-    setFieldTemplates(dynCode);
+    dynCode.setFieldTemplates<Type>();
 
     // Compile filtered C template
     dynCode.addCompileFile(codeTemplateC);
@@ -120,23 +88,23 @@ void Foam::codedFixedValuePointPatchField<Type>::prepare
     // Copy filtered H template
     dynCode.addCopyFile(codeTemplateH);
 
-
-    // Debugging: make BC verbose
-    //   dynCode.setFilterVariable("verbose", "true");
-    //   Info<<"compile " << name_ << " sha1: "
-    //       << context.sha1() << endl;
+    // Debugging: make verbose
+    // dynCode.setFilterVariable("verbose", "true");
+    // DetailInfo
+    //     <<"compile " << name_ << " sha1: "
+    //     << context.sha1() << endl;
 
     // Define Make/options
     dynCode.setMakeOptions
-        (
-            "EXE_INC = -g \\\n"
-            "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
-            + context.options()
-            + "\n\nLIB_LIBS = \\\n"
-            + "    -lOpenFOAM \\\n"
-            + "    -lfiniteVolume \\\n"
-            + context.libs()
-        );
+    (
+        "EXE_INC = -g \\\n"
+        "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
+      + context.options()
+      + "\n\nLIB_LIBS = \\\n"
+        "    -lOpenFOAM \\\n"
+        "    -lfiniteVolume \\\n"
+      + context.libs()
+    );
 }
 
 

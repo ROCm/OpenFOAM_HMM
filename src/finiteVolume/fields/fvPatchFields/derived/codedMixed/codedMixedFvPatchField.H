@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,9 +132,6 @@ class codedMixedFvPatchField
 
         const IOdictionary& dict() const;
 
-        //- Set the rewrite vars controlling the Type
-        static void setFieldTemplates(dynamicCode& dynCode);
-
         //- Get the loaded dynamic libraries
         virtual dlLibraryTable& libs() const;
 
@@ -151,13 +150,15 @@ class codedMixedFvPatchField
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Name of the C code template to be used
-        static const word codeTemplateC;
+        static constexpr const char* const codeTemplateC
+            = "mixedFvPatchFieldTemplate.C";
 
         //- Name of the H code template to be used
-        static const word codeTemplateH;
+        static constexpr const char* const codeTemplateH
+            = "mixedFvPatchFieldTemplate.H";
 
 
     //- Runtime type information

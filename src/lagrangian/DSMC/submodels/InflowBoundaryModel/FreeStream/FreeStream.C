@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -241,7 +243,7 @@ void Foam::FreeStream<CloudType>::inflow()
             );
 
             // Cumulative triangle area fractions
-            List<scalar> cTriAFracs(faceTets.size(), 0.0);
+            List<scalar> cTriAFracs(faceTets.size(), Zero);
 
             scalar previousCummulativeSum = 0.0;
 

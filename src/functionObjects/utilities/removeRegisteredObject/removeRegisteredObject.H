@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016, 2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +80,7 @@ class removeRegisteredObject
 :
     public regionFunctionObject
 {
-    // Private data
+    // Private Data
 
         //- Names of objects to control
         wordList objectNames_;
@@ -111,13 +113,13 @@ public:
 
 
     //- Destructor
-    virtual ~removeRegisteredObject();
+    virtual ~removeRegisteredObject() = default;
 
 
     // Member Functions
 
         //- Read the removeRegisteredObject data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Remove the registered objects
         virtual bool execute();

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,12 +76,13 @@ Foam::Istream& Foam::operator>>(Istream& is, keyType& val)
     if (t.isWord())
     {
         val = t.wordToken();
+        val.uncompile();  // Non-regex
     }
     else if (t.isString())
     {
         // Assign from string, treat as regular expression
         val = t.stringToken();
-        val.isPattern_ = true;
+        val.compile();   // As regex
 
         // Flag empty strings as an error
         if (val.empty())
@@ -106,9 +109,9 @@ Foam::Istream& Foam::operator>>(Istream& is, keyType& val)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const keyType& kw)
+Foam::Ostream& Foam::operator<<(Ostream& os, const keyType& val)
 {
-    os.write(kw);
+    os.writeQuoted(val, val.isPattern());
     os.check(FUNCTION_NAME);
     return os;
 }

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +42,10 @@ void Foam::ORourkeCollision<CloudType>::collide
 )
 {
     // Create the occupancy list for the cells
-    labelList occupancy(this->owner().mesh().nCells(), 0);
-    forAllIter(typename CloudType, this->owner(), iter)
+    labelList occupancy(this->owner().mesh().nCells(), Zero);
+    for (const parcelType& p : this->owner())
     {
-        occupancy[iter().cell()]++;
+        occupancy[p.cell()]++;
     }
 
     // Initialize the sizes of the lists of parcels in each cell
@@ -53,9 +55,9 @@ void Foam::ORourkeCollision<CloudType>::collide
     occupancy = 0;
 
     // Set the parcel pointer lists for each cell
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (parcelType& p : this->owner())
     {
-        pInCell(iter().cell(), occupancy[iter().cell()]++) = &iter();
+        pInCell(p.cell(), occupancy[p.cell()]++) = &p;
     }
 
     for (label celli=0; celli<this->owner().mesh().nCells(); celli++)
@@ -106,9 +108,8 @@ void Foam::ORourkeCollision<CloudType>::collide
     }
 
     // Remove coalesced parcels that fall below minimum mass threshold
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (parcelType& p : this->owner())
     {
-        parcelType& p = iter();
         scalar mass = p.nParticle()*p.mass();
 
         if (mass < this->owner().constProps().minParcelMass())
@@ -159,10 +160,8 @@ bool Foam::ORourkeCollision<CloudType>::collideParcels
             return collideSorted(dt, p2, p1, m2, m1);
         }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

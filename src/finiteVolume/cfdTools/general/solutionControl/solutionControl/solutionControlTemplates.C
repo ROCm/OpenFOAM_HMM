@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,24 +36,23 @@ void Foam::solutionControl::storePrevIter() const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
 
-    HashTable<GeoField*>
-        flds(mesh_.objectRegistry::lookupClass<GeoField>());
+    HashTable<GeoField*> flds(mesh_.objectRegistry::lookupClass<GeoField>());
 
-    forAllIter(typename HashTable<GeoField*>, flds, iter)
+    forAllIters(flds, iter)
     {
         GeoField& fld = *iter();
 
-        const word& fName = fld.name();
+        const word& fldName = fld.name();
 
-        size_t prevIterField = fName.find("PrevIter");
-
-        if ((prevIterField == word::npos) && mesh_.relaxField(fName))
+        if
+        (
+            (fldName.find("PrevIter") == std::string::npos)
+         && mesh_.relaxField(fldName)
+        )
         {
-            if (debug)
-            {
-                Info<< algorithmName_ << ": storing previous iter for "
-                    << fName << endl;
-            }
+            DebugInfo
+                << algorithmName_ << ": storing previous iter for "
+                << fldName << endl;
 
             fld.storePrevIter();
         }

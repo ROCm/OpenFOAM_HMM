@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +37,18 @@ Description
       with extreme aspect ratio and internal faces wrong way around in
       checkMesh
 
+    The sectorCoeffs dictionary entries
+    \table
+        Property  | Description                             | Required | Default
+        point     | A point on the axis                     | yes |
+        axis      | Axis direction, normalized on input     | yes |
+        angle     | Sector angle (degrees)                  | yes |
+    \endtable
+
+Note
+    For compatibility, accepts the entry \c axisPt (1812 and earlier)
+    as equivalent to \c point.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef sector_H
@@ -50,7 +64,7 @@ namespace extrudeModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class sector Declaration
+                    Class extrudeModels::sector Declaration
 \*---------------------------------------------------------------------------*/
 
 class sector
@@ -60,12 +74,12 @@ class sector
     // Private data
 
         //- Point on axis
-        const point axisPt_;
+        const point refPoint_;
 
-        //- Normalized direction of axis
+        //- Normalized axis direction
         const vector axis_;
 
-        //- Overall angle (radians)
+        //- Overall angle (radians), converted from degrees on input
         const scalar angle_;
 
 
@@ -77,15 +91,16 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        sector(const dictionary& dict);
+        explicit sector(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~sector();
+    virtual ~sector() = default;
 
 
     // Member Operators
 
+        //- Return corresponding point
         point operator()
         (
             const point& surfacePoint,

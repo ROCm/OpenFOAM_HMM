@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2278,11 +2280,11 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
         Vb& v = surfaceConformationVertices_[vI];
         label& vIndex = v.index();
 
-        Map<label>::const_iterator iter = oldToNewIndices.find(vIndex);
+        const auto iter = oldToNewIndices.cfind(vIndex);
 
-        if (iter != oldToNewIndices.end())
+        if (iter.found())
         {
-            const label newIndex = iter();
+            const label newIndex = *iter;
 
             if (newIndex != -1)
             {

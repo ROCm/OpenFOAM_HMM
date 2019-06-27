@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,13 +61,8 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
     }
 
     writeHeader(os);
-
-    os  << "\n"
-        "<Group>\n"
-        " <Shape>\n";
-
+    beginGroup(os);
     writeAppearance(os);
-
 
     // NOTE: we could provide an optimized IndexedTriangleSet output for
     // triangulated surfaces too
@@ -106,21 +103,16 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
         }
     }
 
-    os <<
-        "' >\n"
-        "    <Coordinate point='\n";
+    os  <<
+        "' >\n";
 
-    for (const point& p : pointLst)
-    {
-        os  << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
-    }
+    writePoints(os, pointLst);
 
     os  <<
-        "' />\n"                       // end Coordinate
-        "   </IndexedFaceSet>\n"
-        "  </Shape>\n"
-        " </Group>\n"
-        "</X3D>\n";
+        "   </IndexedFaceSet>\n";
+
+    endGroup(os);
+    writeFooter(os);
 }
 
 

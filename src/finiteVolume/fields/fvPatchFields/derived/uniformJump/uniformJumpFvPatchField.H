@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,9 +36,9 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        patchType    | underlying patch type should be \c cyclic| yes |
-        jumpTable    | jump value              | yes         |
+        Property    | Description                           | Required | Default
+        patchType   | underlying patch type should be \c cyclic | yes |
+        jumpTable   | jump value                            | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -92,7 +94,7 @@ protected:
 
     // Protected data
 
-        //- "jump" table
+        //- The "jump" table
         autoPtr<Function1<Type>> jumpTable_;
 
 
@@ -169,7 +171,7 @@ public:
         virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

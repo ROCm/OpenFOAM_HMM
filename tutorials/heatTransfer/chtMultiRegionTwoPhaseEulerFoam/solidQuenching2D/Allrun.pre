@@ -1,0 +1,20 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+runApplication blockMesh
+runApplication topoSet
+
+# Restore initial fields
+restore0Dir
+
+runApplication splitMeshRegions -cellZonesOnly -overwrite
+
+runApplication setFields -region water
+
+echo
+echo "Use paraFoam -touch-all to create files for paraview post-processing"
+echo
+echo "End"
+
+#------------------------------------------------------------------------------

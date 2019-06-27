@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,11 +119,13 @@ Foam::externalDisplacementMeshMover::externalDisplacementMeshMover
 (
     const dictionary& dict,
     const List<labelPair>& baffles,
-    pointVectorField& pointDisplacement
+    pointVectorField& pointDisplacement,
+    const bool dryRun
 )
 :
     baffles_(baffles),
-    pointDisplacement_(pointDisplacement)
+    pointDisplacement_(pointDisplacement),
+    dryRun_(dryRun)
 {}
 
 
@@ -133,7 +137,8 @@ Foam::externalDisplacementMeshMover::New
     const word& type,
     const dictionary& dict,
     const List<labelPair>& baffles,
-    pointVectorField& pointDisplacement
+    pointVectorField& pointDisplacement,
+    const bool dryRun
 )
 {
     Info<< "Selecting externalDisplacementMeshMover " << type << endl;
@@ -152,7 +157,7 @@ Foam::externalDisplacementMeshMover::New
 
     return autoPtr<externalDisplacementMeshMover>
     (
-        cstrIter()(dict, baffles, pointDisplacement)
+        cstrIter()(dict, baffles, pointDisplacement, dryRun)
     );
 }
 

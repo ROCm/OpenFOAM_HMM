@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +40,7 @@ timeVaryingAlphaContactAngleFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    alphaContactAngleFvPatchScalarField(p, iF),
+    alphaContactAngleTwoPhaseFvPatchScalarField(p, iF),
     t0_(0.0),
     thetaT0_(0.0),
     te_(0.0),
@@ -55,7 +57,7 @@ timeVaryingAlphaContactAngleFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    alphaContactAngleFvPatchScalarField(gcpsf, p, iF, mapper),
+    alphaContactAngleTwoPhaseFvPatchScalarField(gcpsf, p, iF, mapper),
     t0_(gcpsf.t0_),
     thetaT0_(gcpsf.thetaT0_),
     te_(gcpsf.te_),
@@ -71,7 +73,7 @@ timeVaryingAlphaContactAngleFvPatchScalarField
     const dictionary& dict
 )
 :
-    alphaContactAngleFvPatchScalarField(p, iF, dict),
+    alphaContactAngleTwoPhaseFvPatchScalarField(p, iF, dict),
     t0_(dict.get<scalar>("t0")),
     thetaT0_(dict.get<scalar>("thetaT0")),
     te_(dict.get<scalar>("te")),
@@ -88,7 +90,7 @@ timeVaryingAlphaContactAngleFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    alphaContactAngleFvPatchScalarField(gcpsf, iF),
+    alphaContactAngleTwoPhaseFvPatchScalarField(gcpsf, iF),
     t0_(gcpsf.t0_),
     thetaT0_(gcpsf.thetaT0_),
     te_(gcpsf.te_),
@@ -130,7 +132,7 @@ void Foam::timeVaryingAlphaContactAngleFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    alphaContactAngleFvPatchScalarField::write(os);
+    alphaContactAngleTwoPhaseFvPatchScalarField::write(os);
     os.writeEntry("t0", t0_);
     os.writeEntry("thetaT0", thetaT0_);
     os.writeEntry("te", te_);

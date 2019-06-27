@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,16 +36,7 @@ bool Foam::functionObjects::reference::calcType()
     {
         const VolFieldType& vf = *vfPtr;
 
-        dimensioned<Type> offset
-        (
-            dimensioned<Type>::lookupOrDefault
-            (
-                "offset",
-                localDict_,
-                vf.dimensions(),
-                Zero
-            )
-        );
+        dimensioned<Type> offset("offset", vf.dimensions(), Zero, localDict_);
 
         dimensioned<Type> cellValue("value", vf.dimensions(), Zero);
 

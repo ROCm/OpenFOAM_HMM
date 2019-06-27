@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -284,6 +286,37 @@ void Foam::motionSmootherAlgo::testSyncField
                 << abort(FatalError);
         }
     }
+}
+
+
+template<class Type>
+Type Foam::motionSmootherAlgo::get
+(
+    const dictionary& dict,
+    const word& keyword,
+    const bool noExit,
+    enum keyType::option matchOpt,
+    const Type& defaultValue
+)
+{
+    Type val(defaultValue);
+
+    if
+    (
+       !dict.readEntry
+        (
+            keyword,
+            val,
+            matchOpt,
+            !noExit
+        )
+    )
+    {
+        FatalIOError
+            << "Entry '" << keyword << "' not found in dictionary "
+            << dict.name() << endl;
+    }
+    return val;
 }
 
 

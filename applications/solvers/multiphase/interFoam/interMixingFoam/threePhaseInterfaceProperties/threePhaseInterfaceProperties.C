@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "threePhaseInterfaceProperties.H"
-#include "alphaContactAngleFvPatchScalarField.H"
+#include "alphaContactAngleTwoPhaseFvPatchScalarField.H"
 #include "mathematicalConstants.H"
 #include "surfaceInterpolate.H"
 #include "fvcDiv.H"
@@ -53,14 +55,14 @@ void Foam::threePhaseInterfaceProperties::correctContactAngle
 
     forAll(boundary, patchi)
     {
-        if (isA<alphaContactAngleFvPatchScalarField>(alpha1[patchi]))
+        if (isA<alphaContactAngleTwoPhaseFvPatchScalarField>(alpha1[patchi]))
         {
-            const alphaContactAngleFvPatchScalarField& a2cap =
-                refCast<const alphaContactAngleFvPatchScalarField>
+            const alphaContactAngleTwoPhaseFvPatchScalarField& a2cap =
+                refCast<const alphaContactAngleTwoPhaseFvPatchScalarField>
                 (alpha2[patchi]);
 
-            const alphaContactAngleFvPatchScalarField& a3cap =
-                refCast<const alphaContactAngleFvPatchScalarField>
+            const alphaContactAngleTwoPhaseFvPatchScalarField& a3cap =
+                refCast<const alphaContactAngleTwoPhaseFvPatchScalarField>
                 (alpha3[patchi]);
 
             scalarField twoPhaseAlpha2(max(a2cap, scalar(0)));
@@ -166,7 +168,7 @@ Foam::threePhaseInterfaceProperties::threePhaseInterfaceProperties
     deltaN_
     (
         "deltaN",
-        1e-8/pow(average(mixture.U().mesh().V()), 1.0/3.0)
+        1e-8/cbrt(average(mixture.U().mesh().V()))
     ),
 
     nHatf_

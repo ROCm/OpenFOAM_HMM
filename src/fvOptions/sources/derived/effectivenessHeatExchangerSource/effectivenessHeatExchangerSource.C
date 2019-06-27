@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,7 +258,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
 
     const scalarField TCells(T, cells_);
     scalar Tref = 0;
-    scalarField deltaTCells(cells_.size(), 0);
+    scalarField deltaTCells(cells_.size(), Zero);
     if (Qt > 0)
     {
         Tref = gMax(TCells);

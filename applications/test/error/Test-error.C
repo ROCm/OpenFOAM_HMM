@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +57,7 @@ int main(int argc, char *argv[])
             << "Error 2"
             << exit(FatalError);
     }
-    catch (Foam::error& fErr)
+    catch (const Foam::error& fErr)
     {
         Serr<< "Caught Foam error " << fErr << nl << endl;
     }
@@ -66,7 +68,7 @@ int main(int argc, char *argv[])
             << "Error# 3"
             << exit(FatalError);
     }
-    catch (Foam::error& fErr)
+    catch (const Foam::error& fErr)
     {
         Serr<< "Caught Foam error " << fErr << nl << endl;
     }

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,20 +27,19 @@ License
 
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
-#include "OSspecific.H"
 #include "PstreamGlobals.H"
+#include "profilingPstream.H"
 #include "SubList.H"
 #include "allReduce.H"
 #include "int.H"
 #include "collatedFileOperation.H"
 
 #include <mpi.h>
-
 #include <cstring>
 #include <cstdlib>
 #include <csignal>
 
-#if defined(WM_SP)
+#if defined(WM_SP) || defined(WM_SPDP)
     #define MPI_SCALAR MPI_FLOAT
 #elif defined(WM_DP)
     #define MPI_SCALAR MPI_DOUBLE
@@ -46,8 +47,81 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// file-scope: min value and default for mpiBufferSize
-static const int minBufferSize = 20000000;
+// The min value and default for MPI buffers length
+constexpr int minBufLen = 20000000;
+
+// Track if we have attached MPI buffers
+static bool ourBuffers = false;
+
+// Track if we initialized MPI
+static bool ourMpi = false;
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+static void attachOurBuffers()
+{
+    if (ourBuffers)
+    {
+        return;  // Already attached
+    }
+    ourBuffers = true;
+
+    // Use UPstream::mpiBufferSize (optimisationSwitch),
+    // but allow override with MPI_BUFFER_SIZE env variable (int value)
+
+#ifndef SGIMPI
+    int len = 0;
+
+    const std::string str(Foam::getEnv("MPI_BUFFER_SIZE"));
+    if (str.empty() || !Foam::read(str, len) || len <= 0)
+    {
+        len = Foam::UPstream::mpiBufferSize;
+    }
+
+    if (len < minBufLen)
+    {
+        len = minBufLen;
+    }
+
+    if (Foam::UPstream::debug)
+    {
+        Foam::Pout<< "UPstream::init : buffer-size " << len << '\n';
+    }
+
+    char* buf = new char[len];
+
+    if (MPI_SUCCESS != MPI_Buffer_attach(buf, len))
+    {
+        delete[] buf;
+        Foam::Pout<< "UPstream::init : could not attach buffer\n";
+    }
+#endif
+}
+
+
+static void detachOurBuffers()
+{
+    if (!ourBuffers)
+    {
+        return;  // Nothing to detach
+    }
+    ourBuffers = false;
+
+    // Some MPI notes suggest that the return code is MPI_SUCCESS when
+    // no buffer is attached.
+    // Be extra careful and require a non-zero size as well.
+
+#ifndef SGIMPI
+    int len = 0;
+    char* buf = nullptr;
+
+    if (MPI_SUCCESS == MPI_Buffer_detach(&buf, &len) && len)
+    {
+        delete[] buf;
+    }
+#endif
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -76,7 +150,7 @@ bool Foam::UPstream::initNull()
     {
         // Already finalized - this is an error
         FatalErrorInFunction
-            << "MPI was already finalized - cannot perform MPI_Init" << endl
+            << "MPI was already finalized - cannot perform MPI_Init\n"
             << Foam::abort(FatalError);
 
         return false;
@@ -85,17 +159,27 @@ bool Foam::UPstream::initNull()
     MPI_Initialized(&flag);
     if (flag)
     {
-        // Already initialized - nothing to do
-        return true;
+        if (debug)
+        {
+            Pout<< "UPstream::initNull : was already initialized\n";
+        }
+    }
+    else
+    {
+        // Not already initialized
+
+        MPI_Init_thread
+        (
+            nullptr,    // argc
+            nullptr,    // argv
+            MPI_THREAD_SINGLE,
+            &flag       // provided_thread_support
+        );
+
+        ourMpi = true;
     }
 
-    MPI_Init_thread
-    (
-        nullptr,    // argc
-        nullptr,    // argv
-        MPI_THREAD_SINGLE,
-        &flag       // provided_thread_support
-    );
+    // Could also attach buffers etc.
 
     return true;
 }
@@ -103,6 +187,8 @@ bool Foam::UPstream::initNull()
 
 bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 {
+    int numprocs = 0, myRank = 0;
+    int provided_thread_support = 0;
     int flag = 0;
 
     MPI_Finalized(&flag);
@@ -119,38 +205,47 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
     MPI_Initialized(&flag);
     if (flag)
     {
-        // Already initialized - issue warning and skip the rest
-        WarningInFunction
-            << "MPI was already initialized - cannot perform MPI_Init" << nl
-            << "This could indicate an application programming error!" << endl;
+        // Already initialized.
+        // Warn if we've called twice, but skip if initialized externally
 
-        return true;
+        if (ourMpi)
+        {
+            WarningInFunction
+                << "MPI was already initialized - cannot perform MPI_Init" << nl
+                << "This could indicate an application programming error!"
+                << endl;
+
+            return true;
+        }
+        else if (debug)
+        {
+            Pout<< "UPstream::init : was already initialized\n";
+        }
+    }
+    else
+    {
+        MPI_Init_thread
+        (
+            &argc,
+            &argv,
+            (
+                needsThread
+              ? MPI_THREAD_MULTIPLE
+              : MPI_THREAD_SINGLE
+            ),
+            &provided_thread_support
+        );
+
+        ourMpi = true;
     }
 
-
-    //MPI_Init(&argc, &argv);
-    int provided_thread_support;
-    MPI_Init_thread
-    (
-        &argc,
-        &argv,
-        (
-            needsThread
-          ? MPI_THREAD_MULTIPLE
-          : MPI_THREAD_SINGLE
-        ),
-        &provided_thread_support
-    );
-
-    int numprocs;
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-    int myRank;
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
     if (debug)
     {
-        Pout<< "UPstream::init : initialised with numProcs:" << numprocs
-            << " myRank:" << myRank << endl;
+        Pout<< "UPstream::init : procs=" << numprocs
+            << " rank:" << myRank << endl;
     }
 
     if (numprocs <= 1)
@@ -160,39 +255,10 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
             << Foam::abort(FatalError);
     }
 
-
     // Initialise parallel structure
     setParRun(numprocs, provided_thread_support == MPI_THREAD_MULTIPLE);
 
-    #ifndef SGIMPI
-    {
-        // Normally use UPstream::mpiBufferSize (optimisationSwitch),
-        // but allow override with the MPI_BUFFER_SIZE env variable
-        // which has an int value
-        int bufSize = 0;
-
-        const std::string str = Foam::getEnv("MPI_BUFFER_SIZE");
-        if (str.empty() || !Foam::read(str, bufSize) || bufSize <= 0)
-        {
-            bufSize = mpiBufferSize;
-        }
-
-        if (bufSize < minBufferSize)
-        {
-            bufSize = minBufferSize;
-        }
-
-        if (debug)
-        {
-            Pout<< "UPstream::init : mpi-buffer-size " << bufSize << endl;
-        }
-
-        // TBD: could add error handling here.
-        // Delete allocated and leave if we fail to attach the buffer?
-
-        MPI_Buffer_attach(new char[bufSize], bufSize);
-    }
-    #endif
+    attachOurBuffers();
 
     return true;
 }
@@ -202,7 +268,7 @@ void Foam::UPstream::exit(int errnum)
 {
     if (debug)
     {
-        Pout<< "UPstream::exit." << endl;
+        Pout<< "UPstream::exit\n";
     }
 
     int flag = 0;
@@ -211,50 +277,42 @@ void Foam::UPstream::exit(int errnum)
     if (!flag)
     {
         // Not initialized - just exit
-        ::exit(errnum);
+        std::exit(errnum);
         return;
     }
 
     MPI_Finalized(&flag);
     if (flag)
     {
-        // Already finalized - warn and exit
-        WarningInFunction
-            << "MPI was already finalized (perhaps by a connected program)"
-            << endl;
-        ::exit(1);
-        return;
-    }
-
-    #ifndef SGIMPI
-    {
-        // Some MPI notes suggest that the return code is MPI_SUCCESS when
-        // no buffer is attached.
-        // Be extra careful and require a non-zero size as well.
-
-        int bufSize = 0;
-        char* buf = nullptr;
-
-        flag = MPI_Buffer_detach(&buf, &bufSize);
-
-        if (MPI_SUCCESS == flag && bufSize)
+        // Already finalized elsewhere?
+        if (ourMpi)
         {
-            delete[] buf;
+            WarningInFunction
+                << "MPI was already finalized (by a connected program?)\n";
+        }
+        else if (debug)
+        {
+            Pout<< "UPstream::exit : was already finalized\n";
         }
     }
-    #endif
-
-    if (PstreamGlobals::outstandingRequests_.size())
+    else
     {
-        label n = PstreamGlobals::outstandingRequests_.size();
+        detachOurBuffers();
+    }
+
+
+    const label nOutstanding = PstreamGlobals::outstandingRequests_.size();
+    if (nOutstanding)
+    {
         PstreamGlobals::outstandingRequests_.clear();
 
         WarningInFunction
-            << "There are still " << n << " outstanding MPI_Requests." << endl
-            << "This means that your code exited before doing a"
-            << " UPstream::waitRequests()." << endl
+            << "There were still " << nOutstanding
+            << " outstanding MPI_Requests." << nl
+            << "Which means your code exited before doing a "
+            << " UPstream::waitRequests()." << nl
             << "This should not happen for a normal code exit."
-            << endl;
+            << nl;
     }
 
     // Clean mpi communicators
@@ -266,15 +324,27 @@ void Foam::UPstream::exit(int errnum)
         }
     }
 
-    if (errnum == 0)
+    if (!flag)
     {
-        MPI_Finalize();
-        ::exit(errnum);
+        // MPI not already finalized
+
+        if (!ourMpi)
+        {
+            WarningInFunction
+                << "Finalizing MPI, but was initialized elsewhere\n";
+        }
+
+        if (errnum == 0)
+        {
+            MPI_Finalize();
+        }
+        else
+        {
+            MPI_Abort(MPI_COMM_WORLD, errnum);
+        }
     }
-    else
-    {
-        MPI_Abort(MPI_COMM_WORLD, errnum);
-    }
+
+    std::exit(errnum);
 }
 
 
@@ -432,6 +502,8 @@ void Foam::UPstream::allToAll
     }
     else
     {
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Alltoall
@@ -453,6 +525,8 @@ void Foam::UPstream::allToAll
                 << " on communicator " << communicator
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addAllToAllTime();
     }
 }
 
@@ -503,6 +577,8 @@ void Foam::UPstream::allToAll
     }
     else
     {
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Alltoallv
@@ -525,6 +601,8 @@ void Foam::UPstream::allToAll
                 << " communicator " << communicator
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addAllToAllTime();
     }
 }
 
@@ -565,6 +643,8 @@ void Foam::UPstream::gather
     }
     else
     {
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Gatherv
@@ -587,6 +667,8 @@ void Foam::UPstream::gather
                 << " communicator " << communicator
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addGatherTime();
     }
 }
 
@@ -624,6 +706,8 @@ void Foam::UPstream::scatter
     }
     else
     {
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Scatterv
@@ -646,6 +730,8 @@ void Foam::UPstream::scatter
                 << " communicator " << communicator
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addScatterTime();
     }
 }
 
@@ -784,7 +870,7 @@ void Foam::UPstream::resetRequests(const label i)
 
 void Foam::UPstream::waitRequests(const label start)
 {
-    if (debug)
+    if (UPstream::debug)
     {
         Pout<< "UPstream::waitRequests : starting wait for "
             << PstreamGlobals::outstandingRequests_.size()-start
@@ -800,6 +886,8 @@ void Foam::UPstream::waitRequests(const label start)
             start
         );
 
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Waitall
@@ -813,6 +901,8 @@ void Foam::UPstream::waitRequests(const label start)
             FatalErrorInFunction
                 << "MPI_Waitall returned with error" << Foam::endl;
         }
+
+        profilingPstream::addWaitTime();
 
         resetRequests(start);
     }
@@ -842,6 +932,8 @@ void Foam::UPstream::waitRequest(const label i)
             << Foam::abort(FatalError);
     }
 
+    profilingPstream::beginTiming();
+
     if
     (
         MPI_Wait
@@ -854,6 +946,8 @@ void Foam::UPstream::waitRequest(const label i)
         FatalErrorInFunction
             << "MPI_Wait returned with error" << Foam::endl;
     }
+
+    profilingPstream::addWaitTime();
 
     if (debug)
     {

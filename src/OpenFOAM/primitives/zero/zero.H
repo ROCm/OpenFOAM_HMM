@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +31,7 @@ Description
     manipulating objects that are known to be 'zero' at compile-time.
 
 SourceFiles
+    zero.C
     zeroI.H
 
 \*---------------------------------------------------------------------------*/
@@ -104,6 +107,9 @@ class zero::null
 {
 public:
     typedef null value_type;
+
+    //- A static zero::null for dereferencing as a dummy element
+    static null dummy;
 
     //- Null constructible
     constexpr null() noexcept{}

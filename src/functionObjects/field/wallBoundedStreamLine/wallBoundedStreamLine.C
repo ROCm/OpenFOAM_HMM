@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -262,9 +264,6 @@ bool Foam::functionObjects::wallBoundedStreamLine::read(const dictionary& dict)
 {
     if (streamLineBase::read(dict))
     {
-        Info<< type() << " " << name() << ":" << nl;
-
-
         // Make sure that the mesh is trackable
         if (debug)
         {
@@ -303,16 +302,8 @@ bool Foam::functionObjects::wallBoundedStreamLine::read(const dictionary& dict)
                     forAll(f, fp)
                     {
                         const edge e(f[fp], f.nextLabel(fp));
-                        EdgeMap<label>::iterator eFnd = numFacesPerEdge.find(e);
 
-                        if (eFnd != numFacesPerEdge.end())
-                        {
-                            eFnd()++;
-                        }
-                        else
-                        {
-                            numFacesPerEdge.insert(e, 1);
-                        }
+                        ++(numFacesPerEdge(e, 0));
                     }
                 }
 

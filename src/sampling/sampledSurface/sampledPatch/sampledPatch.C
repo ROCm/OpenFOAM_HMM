@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,8 +193,8 @@ bool Foam::sampledPatch::update()
 // remap action on triangulation
 void Foam::sampledPatch::remapFaces(const labelUList& faceMap)
 {
-    // recalculate the cells cut
-    if (notNull(faceMap) && faceMap.size())
+    // Recalculate the cells cut
+    if (!faceMap.empty())
     {
         MeshStorage::remapFaces(faceMap);
         patchFaceLabels_ = labelList
@@ -262,6 +264,12 @@ Foam::tmp<Foam::tensorField> Foam::sampledPatch::sample
 ) const
 {
     return sampleOnFaces(sampler);
+}
+
+
+bool Foam::sampledPatch::withSurfaceFields() const
+{
+    return true;
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,6 +78,11 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
     }
 
     const word schemeName(schemeData);
+
+    if (fv::debug)
+    {
+        InfoInFunction << "schemeName:" << schemeName << endl;
+    }
 
     auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 

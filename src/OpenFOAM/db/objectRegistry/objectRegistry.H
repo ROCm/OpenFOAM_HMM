@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,6 +137,20 @@ class objectRegistry
         void operator=(const objectRegistry&) = delete;
 
 
+    // Protected Member Functions
+
+        //- Return const pointer to the regIOobject.
+        //
+        //  \param recursive search parent registries
+        //
+        //  \return nullptr if the object was not found.
+        const regIOobject* cfindIOobject
+        (
+            const word& name,
+            const bool recursive = false
+        ) const;
+
+
 public:
 
     //- Declare type name for this IOobject
@@ -152,8 +168,7 @@ public:
         explicit objectRegistry(const IOobject& io, const label nObjects=128);
 
 
-    //- Destructor, performs a checkOut() for all objects that are
-    //- ownedByRegistry
+    //- Destructor, with checkOut() for all objects that are ownedByRegistry
     virtual ~objectRegistry();
 
 
@@ -339,6 +354,13 @@ public:
         template<class Type>
         HashTable<Type*> lookupClass(const bool strict = false);
 
+
+        //- Can the regIOobject object be found (by name).
+        //
+        //  \param recursive search parent registries
+        bool found(const word& name, const bool recursive = false) const;
+
+
         //- Is the named Type found?
         //
         //  \param recursive search parent registries
@@ -430,14 +452,53 @@ public:
 
     // Edit
 
-        //- Rename
-        virtual void rename(const word& newName);
+        //- Add a regIOobject to registry. A nullptr is ignored.
+        bool checkIn(regIOobject* io) const;
 
         //- Add a regIOobject to registry
         bool checkIn(regIOobject& io) const;
 
-        //- Remove a regIOobject from registry
+        //- Remove a regIOobject from registry and free memory if the
+        //- object is ownedByRegistry. A nullptr is ignored.
+        bool checkOut(regIOobject* io) const;
+
+        //- Remove a regIOobject from registry and free memory if the
+        //- object is ownedByRegistry.
         bool checkOut(regIOobject& io) const;
+
+        //- Remove a regIOobject by name from registry and free memory if the
+        //- object is ownedByRegistry
+        bool checkOut(const word& key) const;
+
+        //- Clear all entries from the registry
+        //  Performs a checkOut() for all objects that are ownedByRegistry
+        void clear();
+
+        //- Clear all entries from the registry and the table itself.
+        void clearStorage();
+
+        //- Erase an entry specified by the given iterator.
+        //  Performs a checkOut() if the object was ownedByRegistry.
+        //  \return True if the entry existed and was removed
+        bool erase(const iterator& iter);
+
+        //- Erase an entry specified by the given key
+        //  Performs a checkOut() if the object was ownedByRegistry.
+        //  \return True if the entry existed and was removed
+        bool erase(const word& key);
+
+        //- Remove entries given by the listed keys
+        //  Performs a checkOut() for all objects that are ownedByRegistry.
+        //  \return The number of items removed
+        label erase(std::initializer_list<word> keys);
+
+        //- Remove entries given by the listed keys
+        //  Performs a checkOut() for all objects that are ownedByRegistry.
+        //  \return The number of items removed
+        label erase(const UList<word>& keys);
+
+        //- Rename
+        virtual void rename(const word& newName);
 
 
     // Reading

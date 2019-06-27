@@ -1,0 +1,30 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+// Demonstrate runTimePostProcessing
+
+// Timing
+_visualization
+{
+    writeControl    writeTime;
+
+    // enabled         true;
+
+    // Debug: writeControl    timeStep;
+    // Debug: writeInterval   10;
+}
+
+
+#include "streamLines"
+#include "samples"
+#include "runTimePostProcessing"
+
+#remove _visualization
+
+
+// ************************************************************************* //

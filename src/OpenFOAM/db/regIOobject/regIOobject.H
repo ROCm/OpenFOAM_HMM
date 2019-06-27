@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,19 +133,19 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject. Optional flag for if IOobject is the
-        //  top level regIOobject.
+        //- Construct from IOobject with optional flag if IOobject is the
+        //- top-level regIOobject.
         regIOobject(const IOobject&, const bool isTime = false);
 
-        //- Construct as copy
+        //- Copy construct
         regIOobject(const regIOobject&);
 
-        //- Construct as copy, transferring registry registration to copy
-        //  if registerCopy is true
+        //- Copy construct, transferring registry registration to the copy
+        //- if registerCopy is true
         regIOobject(const regIOobject&, bool registerCopy);
 
-        //- Construct as copy with new name, transferring registry registration
-        //  to copy as specified
+        //- Copy construct with new name, transferring registry registration
+        //- to the copy f registerCopy is true
         regIOobject(const word& newName, const regIOobject&, bool registerCopy);
 
         //- Construct as copy with new IO parameters
@@ -161,7 +163,8 @@ public:
             //- Add object to registry
             bool checkIn();
 
-            //- Remove object from registry
+            //- Remove all file watches and remove object from registry
+            //  \return true if object was registered and was removed
             bool checkOut();
 
             //- Add file watch on object (if registered and READ_IF_MODIFIED)
@@ -189,7 +192,8 @@ public:
             inline static Type& store(autoPtr<Type>&& aptr);
 
             //- Release ownership of this object from its registry
-            inline void release();
+            //  \param unregister optionally set as non-registered
+            inline void release(const bool unregister = false);
 
 
         // Dependency checking

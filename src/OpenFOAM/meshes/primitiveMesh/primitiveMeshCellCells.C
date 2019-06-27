@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +60,7 @@ void Foam::primitiveMesh::calcCellCells() const
     {
         // 1. Count number of internal faces per cell
 
-        labelList ncc(nCells(), 0);
+        labelList ncc(nCells(), Zero);
 
         const labelList& own = faceOwner();
         const labelList& nei = faceNeighbour();

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +30,11 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<unsigned Size>
+template<unsigned N>
 Foam::treeBoundBox::treeBoundBox
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices
+    const FixedList<label, N>& indices
 )
 :
     boundBox(points, indices, false)
@@ -41,10 +43,7 @@ Foam::treeBoundBox::treeBoundBox
     if (points.empty())
     {
         WarningInFunction
-            << "cannot find bounding box for zero-sized pointField, "
-            << "returning zero" << endl;
-
-        return;
+            << "No bounding box for zero-sized pointField" << nl;
     }
 }
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +32,6 @@ Description
 #include "SLList.H"
 #include "ListOps.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template
@@ -44,10 +45,8 @@ void
 Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
 calcPointEdges() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating pointEdges" << endl;
-    }
+    DebugInFunction
+        << "Calculating pointEdges" << endl;
 
     if (pointEdgesPtr_)
     {
@@ -63,10 +62,8 @@ calcPointEdges() const
 
     invertManyToMany(pe.size(), edges(), pe);
 
-    if (debug)
-    {
-        Info<< "    Finished." << endl;
-    }
+    DebugInfo
+        << "    Finished." << endl;
 }
 
 
@@ -81,10 +78,8 @@ void
 Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
 calcPointFaces() const
 {
-    if (debug)
-    {
-        InfoInFunction << "Calculating pointFaces" << endl;
-    }
+    DebugInFunction
+        << "Calculating pointFaces" << endl;
 
     if (pointFacesPtr_)
     {
@@ -103,9 +98,9 @@ calcPointFaces() const
     {
         const Face& curPoints = f[facei];
 
-        forAll(curPoints, pointi)
+        for (const label pointi : curPoints)
         {
-            pointFcs[curPoints[pointi]].append(facei);
+            pointFcs[pointi].append(facei);
         }
     }
 
@@ -119,16 +114,14 @@ calcPointFaces() const
         pf[pointi].setSize(pointFcs[pointi].size());
 
         label i = 0;
-        forAllIter(SLList<label>, pointFcs[pointi], curFacesIter)
+        for (const label facei : pointFcs[pointi])
         {
-            pf[pointi][i++] = curFacesIter();
+            pf[pointi][i++] = facei;
         }
     }
 
-    if (debug)
-    {
-        Info<< "    Finished." << endl;
-    }
+    DebugInfo
+        << "    Finished." << endl;
 }
 
 

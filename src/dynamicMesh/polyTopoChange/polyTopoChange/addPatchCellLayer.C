@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -677,7 +679,7 @@ Foam::labelListList Foam::addPatchCellLayer::globalEdgeFaces
     (
         mesh,
         globalEdgeFaces,
-        uniqueEqOp(),
+        ListOps::uniqueEqOp<label>(),
         labelList()             // null value
     );
 
@@ -1132,7 +1134,7 @@ void Foam::addPatchCellLayer::setRefinement
         // ~~~~~~~~~~~~~~~~~~~~~
 
         {
-            labelList n(mesh_.nPoints(), 0);
+            labelList n(mesh_.nPoints(), Zero);
             labelUIndList(n, meshPoints) = nPointLayers;
             syncTools::syncPointList(mesh_, n, maxEqOp<label>(), label(0));
 
@@ -1156,7 +1158,7 @@ void Foam::addPatchCellLayer::setRefinement
 
             // Check that nPointLayers equals the max layers of connected faces
             // (or 0). Anything else makes no sense.
-            labelList nFromFace(mesh_.nPoints(), 0);
+            labelList nFromFace(mesh_.nPoints(), Zero);
             forAll(nFaceLayers, i)
             {
                 const face& f = pp[i];

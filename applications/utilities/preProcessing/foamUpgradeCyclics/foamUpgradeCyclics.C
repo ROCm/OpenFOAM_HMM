@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -301,7 +303,7 @@ void rewriteField
     forAllConstIters(thisNames, iter)
     {
         const word& patchName = iter.key();
-        const word& newName = iter.object();
+        const word& newName = iter.val();
 
         Info<< "Looking for entry for patch " << patchName << endl;
 
@@ -311,7 +313,7 @@ void rewriteField
         if
         (
             boundaryField.found(patchName)
-        && !boundaryField.found(newName, false, false)
+        && !boundaryField.found(newName, keyType::LITERAL)
         )
         {
             Info<< "    Changing entry " << patchName << " to " << newName

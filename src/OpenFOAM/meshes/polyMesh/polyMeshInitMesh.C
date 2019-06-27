@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,11 +95,13 @@ void Foam::polyMesh::initMesh()
         nCells
     );
 
-    string meshInfo =
+    const string meshInfo
+    (
         "nPoints:" + Foam::name(nPoints())
       + "  nCells:" + Foam::name(this->nCells())
       + "  nFaces:" + Foam::name(nFaces())
-      + "  nInternalFaces:" + Foam::name(nInternalFaces());
+      + "  nInternalFaces:" + Foam::name(nInternalFaces())
+    );
 
     owner_.note() = meshInfo;
     neighbour_.note() = meshInfo;
@@ -163,11 +167,13 @@ void Foam::polyMesh::initMesh(cellList& c)
         c
     );
 
-    string meshInfo =
-        "nPoints: " + Foam::name(nPoints())
-      + " nCells: " + Foam::name(nCells())
-      + " nFaces: " + Foam::name(nFaces())
-      + " nInternalFaces: " + Foam::name(this->nInternalFaces());
+    const string meshInfo
+    (
+        "nPoints:" + Foam::name(nPoints())
+      + "  nCells:" + Foam::name(nCells())
+      + "  nFaces:" + Foam::name(nFaces())
+      + "  nInternalFaces:" + Foam::name(this->nInternalFaces())
+    );
 
     owner_.note() = meshInfo;
     neighbour_.note() = meshInfo;

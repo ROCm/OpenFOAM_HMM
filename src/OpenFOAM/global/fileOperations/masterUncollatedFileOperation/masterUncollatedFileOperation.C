@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +38,7 @@ License
 #include "SubList.H"
 #include "unthreadedInitialise.H"
 #include "bitSet.H"
+#include "IListStream.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -251,14 +254,9 @@ Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
 
         // Check for approximately same time. E.g. if time = 1e-2 and
         // directory is 0.01 (due to different time formats)
-        HashPtrTable<instantList>::const_iterator pathFnd
-        (
-            times_.find
-            (
-                io.time().path()
-            )
-        );
-        if (search && (pathFnd != times_.end()))
+        const auto pathFnd = times_.cfind(io.time().path());
+
+        if (search && pathFnd.found())
         {
             newInstancePath = findInstancePath
             (
@@ -613,6 +611,13 @@ Foam::fileOperations::masterUncollatedFileOperation::read
         {
             if (procValid[0])
             {
+                if (filePaths[0].empty())
+                {
+                    FatalIOErrorInFunction(filePaths[0])
+                        << "cannot find file " << io.objectPath()
+                        << exit(FatalIOError);
+                }
+
                 DynamicList<label> validProcs(Pstream::nProcs(comm));
                 for
                 (
@@ -705,10 +710,11 @@ Foam::fileOperations::masterUncollatedFileOperation::read
         if (!isPtr.valid())
         {
             UIPstream is(Pstream::masterNo(), pBufs);
-            string buf(recvSizes[Pstream::masterNo()], '\0');
+
+            List<char> buf(recvSizes[Pstream::masterNo()]);
             if (recvSizes[Pstream::masterNo()] > 0)
             {
-                is.read(&buf[0], recvSizes[Pstream::masterNo()]);
+                is.read(buf.begin(), recvSizes[Pstream::masterNo()]);
             }
 
             if (debug)
@@ -719,10 +725,10 @@ Foam::fileOperations::masterUncollatedFileOperation::read
             const fileName& fName = filePaths[Pstream::myProcNo(comm)];
             isPtr.reset
             (
-                new IStringStream
+                new IListStream
                 (
-                    buf,
-                    IOstream::ASCII,
+                    std::move(buf),
+                    IOstream::BINARY,
                     IOstream::currentVersion,
                     fName
                 )
@@ -2296,8 +2302,8 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
     const word& constantName
 ) const
 {
-    HashPtrTable<instantList>::const_iterator iter = times_.find(directory);
-    if (iter != times_.end())
+    const auto iter = times_.cfind(directory);
+    if (iter.found())
     {
         if (debug)
         {
@@ -2347,8 +2353,10 @@ void Foam::fileOperations::masterUncollatedFileOperation::setTime
         return;
     }
 
-    HashPtrTable<instantList>::const_iterator iter = times_.find(tm.path());
-    if (iter != times_.end())
+    // Mutable access to instantList for modification and sorting
+    HashPtrTable<instantList>::iterator iter = times_.find(tm.path());
+
+    if (iter.found())
     {
         instantList& times = *iter();
 
@@ -2503,8 +2511,9 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
             }
 
             UIPstream is(Pstream::masterNo(), pBufs);
-            string buf(recvSizes[Pstream::masterNo()], '\0');
-            is.read(&buf[0], recvSizes[Pstream::masterNo()]);
+
+            List<char> buf(recvSizes[Pstream::masterNo()]);
+            is.read(buf.begin(), buf.size());
 
             if (debug)
             {
@@ -2517,10 +2526,10 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
             //       so it holds a copy of the buffer.
             return autoPtr<ISstream>
             (
-                new IStringStream
+                new IListStream
                 (
-                    buf,
-                    IOstream::ASCII,
+                    std::move(buf),
+                    IOstream::BINARY,
                     IOstream::currentVersion,
                     filePath
                 )
@@ -2572,7 +2581,7 @@ Foam::label Foam::fileOperations::masterUncollatedFileOperation::addWatch
     const fileName& fName
 ) const
 {
-    label watchFd;
+    label watchFd = -1;
     if (Pstream::master())      // comm_))
     {
         watchFd = monitor().addWatch(fName);
@@ -2587,7 +2596,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::removeWatch
     const label watchIndex
 ) const
 {
-    bool ok;
+    bool ok = false;
     if (Pstream::master())  // comm_))
     {
         ok = monitor().removeWatch(watchIndex);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,6 +85,9 @@ public:
 
         //- Return the count of non-nullptr entries
         label count() const;
+
+        //- Locate the first null entry, -1 if there are not any
+        label findNull() const;
 
         //- Delete the allocated entries, but retain the list size.
         void free();

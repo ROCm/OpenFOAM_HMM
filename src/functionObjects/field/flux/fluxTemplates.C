@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,10 +39,8 @@ bool Foam::functionObjects::flux::calcVolFlux(const RhoFieldType& rho)
             fvc::flux(rho*lookupObject<FieldType>(fieldName_))
         );
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -60,10 +58,8 @@ bool Foam::functionObjects::flux::calcSurFlux(const RhoFieldType& rho)
             ) & mesh_.Sf()
         );
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

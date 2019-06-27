@@ -35,6 +35,7 @@ EXE_LIBS = \
     -lspecie \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
+    -lthermophysicalProperties \
     -lreactionThermophysicalModels \
     -lSLGThermo \
     -lchemistryModel \
@@ -46,6 +47,7 @@ EXE_LIBS = \
     -lsurfaceFilmDerivedFvPatchFields \
     -lpyrolysisModels \
     -lregionCoupling \
+    -llagrangian \
     -llagrangianIntermediate \
     -llagrangianTurbulence \
     -lODE

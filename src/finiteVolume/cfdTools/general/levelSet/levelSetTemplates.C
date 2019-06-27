@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,10 +138,10 @@ Foam::tmp<Foam::Field<Type>> Foam::levelSetAverage
     {
         const face& f = patch.patch().localFaces()[fI];
 
-        vector a = vector::zero;
+        vector a(Zero);
         sumType r = Zero;
 
-        for(label eI = 0; eI < f.size(); ++ eI)
+        for (label eI = 0; eI < f.size(); ++eI)
         {
             const edge e = f.faceEdge(eI);
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +62,7 @@ semiPermeableBaffleMassFractionFvPatchScalarField
 :
     mappedPatchBase(p.patch(), NEARESTPATCHFACE, dict),
     mixedFvPatchScalarField(p, iF),
-    c_(dict.lookupOrDefault<scalar>("c", scalar(0))),
+    c_(dict.lookupOrDefault<scalar>("c", 0)),
     phiName_(dict.lookupOrDefault<word>("phi", "phi"))
 {
     fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
@@ -121,7 +123,7 @@ Foam::semiPermeableBaffleMassFractionFvPatchScalarField::phiY() const
 {
     if (c_ == scalar(0))
     {
-        return tmp<scalarField>(new scalarField(patch().size(), Zero));
+        return tmp<scalarField>::New(patch().size(), Zero);
     }
 
     const word& YName = internalField().name();
@@ -170,7 +172,7 @@ void Foam::semiPermeableBaffleMassFractionFvPatchScalarField::write
 {
     fvPatchScalarField::write(os);
     mappedPatchBase::write(os);
-    os.writeEntryIfDifferent<scalar>("c", scalar(0), c_);
+    os.writeEntryIfDifferent<scalar>("c", 0, c_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     writeEntry("value", os);
 }

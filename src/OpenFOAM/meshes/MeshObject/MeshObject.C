@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,6 +104,9 @@ bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
 template<class Mesh, template<class> class MeshObjectType, class Type>
 Foam::MeshObject<Mesh, MeshObjectType, Type>::~MeshObject()
 {
+    // We should not do a 'release' at this point since that will upset
+    // the destructor of regIOobject itself (which gets called after this).
+    // However this is only a problem for Time-based MeshObject.
     MeshObjectType<Mesh>::release();
 }
 
@@ -131,7 +136,7 @@ void Foam::meshObject::movePoints(objectRegistry& obr)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Moving " << iter()->name() << endl;
+                Pout<< "    Moving " << iter->name() << endl;
             }
             objectPtr->movePoints();
         }
@@ -139,7 +144,7 @@ void Foam::meshObject::movePoints(objectRegistry& obr)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Destroying " << iter()->name() << endl;
+                Pout<< "    Destroying " << iter->name() << endl;
             }
             obr.checkOut(*iter());
         }
@@ -172,7 +177,7 @@ void Foam::meshObject::updateMesh(objectRegistry& obr, const mapPolyMesh& mpm)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Updating " << iter()->name() << endl;
+                Pout<< "    Updating " << iter->name() << endl;
             }
             objectPtr->updateMesh(mpm);
         }
@@ -180,7 +185,7 @@ void Foam::meshObject::updateMesh(objectRegistry& obr, const mapPolyMesh& mpm)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Destroying " << iter()->name() << endl;
+                Pout<< "    Destroying " << iter->name() << endl;
             }
             obr.checkOut(*iter());
         }
@@ -207,7 +212,7 @@ void Foam::meshObject::clear(objectRegistry& obr)
     {
         if (meshObject::debug)
         {
-            Pout<< "    Destroying " << iter()->name() << endl;
+            Pout<< "    Destroying " << iter->name() << endl;
         }
         obr.checkOut(*iter());
     }
@@ -240,7 +245,7 @@ void Foam::meshObject::clearUpto(objectRegistry& obr)
         {
             if (meshObject::debug)
             {
-                Pout<< "    Destroying " << iter()->name() << endl;
+                Pout<< "    Destroying " << iter->name() << endl;
             }
             obr.checkOut(*iter());
         }

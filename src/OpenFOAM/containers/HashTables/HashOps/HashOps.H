@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,13 +21,13 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namspace
+Namespace
     Foam::HashSetOps
 
 Description
     Various operations for HashSet.
 
-Namspace
+Namespace
     Foam::HashTableOps
 
 Description
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class bitSet;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -143,7 +143,11 @@ struct plusEqOp
 
 //- List of values from HashTable, optionally sorted.
 template<class T, class Key, class Hash>
-List<T> values(const HashTable<T, Key, Hash>& tbl, const bool doSort=false)
+List<T> values
+(
+    const HashTable<T, Key, Hash>& tbl,
+    const bool doSort=false
+)
 {
     List<T> output(tbl.size());
 
@@ -151,7 +155,7 @@ List<T> values(const HashTable<T, Key, Hash>& tbl, const bool doSort=false)
 
     forAllConstIters(tbl, iter)
     {
-        output[i] = iter.object();
+        output[i] = iter.val();
         ++i;
     }
 

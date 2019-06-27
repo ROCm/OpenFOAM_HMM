@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +28,8 @@ License
 #include "sampledSets.H"
 #include "volFields.H"
 #include "IOobjectList.H"
-#include "stringListOps.H"
 #include "UIndirectList.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -69,7 +71,7 @@ Foam::label Foam::sampledSets::classifyFields()
     // Detect missing fields
     forAll(fieldSelection_, i)
     {
-        if (findStrings(fieldSelection_[i], allFields).empty())
+        if (!ListOps::found(allFields, fieldSelection_[i]))
         {
             missed.append(i);
         }
@@ -88,7 +90,7 @@ Foam::label Foam::sampledSets::classifyFields()
     forAllConstIters(available, iter)
     {
         const word& fieldType = iter.key();
-        const wordList fieldNames = iter.object().sortedToc();
+        const wordList fieldNames = iter.val().sortedToc();
 
         const label count = fieldNames.size(); // pre-filtered, so non-empty
 

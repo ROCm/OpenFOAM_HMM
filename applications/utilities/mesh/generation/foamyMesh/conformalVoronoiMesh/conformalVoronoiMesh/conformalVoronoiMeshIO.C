@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -210,7 +212,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //
 //        // From all Delaunay vertices to cell (positive index)
 //        // or patch face (negative index)
-//        labelList vertexToDualAddressing(number_of_vertices(), 0);
+//        labelList vertexToDualAddressing(number_of_vertices(), Zero);
 //
 //        forAll(cellToDelaunayVertex, celli)
 //        {
@@ -525,7 +527,7 @@ void Foam::conformalVoronoiMesh::reorderPoints
     Info<< incrIndent << indent << "Reordering points into internal/external"
         << endl;
 
-    labelList oldToNew(points.size(), label(0));
+    labelList oldToNew(points.size(), Zero);
 
     // Find points that are internal
     for (label fI = nInternalFaces; fI < faces.size(); ++fI)
@@ -611,7 +613,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
     const fvMesh& sortMesh = sortMeshPtr();
 
     // Rotation on new faces.
-    labelList rotation(faces.size(), label(0));
+    labelList rotation(faces.size(), Zero);
     labelList faceMap(faces.size(), label(-1));
 
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
@@ -660,7 +662,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
                 patchDicts[patchi].get<label>("startFace");
 
             labelList patchFaceMap(nPatchFaces, label(-1));
-            labelList patchFaceRotation(nPatchFaces, label(0));
+            labelList patchFaceRotation(nPatchFaces, Zero);
 
             bool changed = refCast<const processorPolyPatch>(pp).order
             (
@@ -1355,11 +1357,10 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findRemainingProtrusionSet
         protrudingCells.insert(pCells);
     }
 
-    label protrudingCellsSize = protrudingCells.size();
+    const label protrudingCellsSize =
+        returnReduce(protrudingCells.size(), sumOp<label>());
 
-    reduce(protrudingCellsSize, sumOp<label>());
-
-    if (foamyHexMeshControls().objOutput() && protrudingCellsSize > 0)
+    if (foamyHexMeshControls().objOutput() && protrudingCellsSize)
     {
         Info<< nl << "Found " << protrudingCellsSize
             << " cells protruding from the surface, writing cellSet "
@@ -1369,7 +1370,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findRemainingProtrusionSet
         protrudingCells.write();
     }
 
-    return protrudingCells;
+    return std::move(protrudingCells);
 }
 
 

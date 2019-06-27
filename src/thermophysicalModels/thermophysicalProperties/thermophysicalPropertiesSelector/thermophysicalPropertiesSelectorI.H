@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,6 +132,42 @@ inline Foam::scalar
 Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::Hc() const
 {
     return propertiesPtr_->Hc();
+}
+
+
+template<class ThermophysicalProperties>
+inline Foam::scalar
+Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::Cv
+(
+    scalar p,
+    scalar T
+) const
+{
+    return propertiesPtr_->Cp(p, T) - CpMCv(p, T);
+}
+
+
+template<class ThermophysicalProperties>
+inline Foam::scalar
+Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::Es
+(
+    scalar p,
+    scalar T
+) const
+{
+    return propertiesPtr_->Hs(p, T) - p/propertiesPtr_->rho(p, T);
+}
+
+
+template<class ThermophysicalProperties>
+inline Foam::scalar
+Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>::Ea
+(
+    scalar p,
+    scalar T
+) const
+{
+    return propertiesPtr_->Ha(p, T) - p/propertiesPtr_->rho(p, T);
 }
 
 

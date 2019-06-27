@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -592,7 +594,7 @@ int main(int argc, char *argv[])
                         const word cloudName = word::validate(iter.key());
 
                         // Objects (on arbitrary processor)
-                        const IOobjectList& cloudObjs = iter.object();
+                        const IOobjectList& cloudObjs = iter.val();
 
                         Info<< "Reconstructing lagrangian fields for cloud "
                             << cloudName << nl << endl;
@@ -831,15 +833,15 @@ int main(int argc, char *argv[])
                             cellSet& cSet = cellSets[setI];
                             cSet.instance() = runTime.timeName();
 
-                            forAllConstIter(cellSet, procSet, iter)
+                            for (const label celli : procSet)
                             {
-                                cSet.insert(cellMap[iter.key()]);
+                                cSet.insert(cellMap[celli]);
                             }
                         }
 
                         // faceSets
                         const labelList& faceMap =
-                        procMeshes.faceProcAddressing()[proci];
+                            procMeshes.faceProcAddressing()[proci];
 
                         IOobjectList fSets
                         (
@@ -867,9 +869,9 @@ int main(int argc, char *argv[])
                             faceSet& fSet = faceSets[setI];
                             fSet.instance() = runTime.timeName();
 
-                            forAllConstIter(faceSet, procSet, iter)
+                            for (const label facei : procSet)
                             {
-                                fSet.insert(mag(faceMap[iter.key()])-1);
+                                fSet.insert(mag(faceMap[facei])-1);
                             }
                         }
                         // pointSets
@@ -901,25 +903,26 @@ int main(int argc, char *argv[])
                             pointSet& pSet = pointSets[setI];
                             pSet.instance() = runTime.timeName();
 
-                            forAllConstIter(pointSet, propSet, iter)
+                            for (const label pointi : propSet)
                             {
-                                pSet.insert(pointMap[iter.key()]);
+                                pSet.insert(pointMap[pointi]);
                             }
                         }
                     }
 
                     // Write sets
-                    forAll(cellSets, i)
+
+                    for (const auto& set : cellSets)
                     {
-                        cellSets[i].write();
+                        set.write();
                     }
-                    forAll(faceSets, i)
+                    for (const auto& set : faceSets)
                     {
-                        faceSets[i].write();
+                        set.write();
                     }
-                    forAll(pointSets, i)
+                    for (const auto& set : pointSets)
                     {
-                        pointSets[i].write();
+                        set.write();
                     }
                 }
 

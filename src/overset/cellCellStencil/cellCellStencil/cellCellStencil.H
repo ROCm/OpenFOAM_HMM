@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,7 +97,12 @@ protected:
 
         //- Helper: create volScalarField for postprocessing.
         template<class Type>
-        tmp<volScalarField> createField(const word& name, UList<Type>&) const;
+        static tmp<volScalarField> createField
+        (
+            const fvMesh& mesh,
+            const word& name,
+            const UList<Type>&
+        );
 
 
 private:

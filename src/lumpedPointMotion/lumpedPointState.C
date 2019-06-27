@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,10 +25,8 @@ License
 
 #include "lumpedPointState.H"
 #include "demandDrivenData.H"
-#include "EulerCoordinateRotation.H"
 #include "unitConversion.H"
-
-#include "ISstream.H"
+#include "EulerCoordinateRotation.H"
 #include "IFstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -70,13 +68,15 @@ static Foam::string getLineNoComment
 void Foam::lumpedPointState::calcRotations() const
 {
     rotationPtr_ = new tensorField(angles_.size());
-    forAll(angles_, itemi)
+
+    auto rotIter = rotationPtr_->begin();
+
+    for (const vector& angles : angles_)
     {
-        rotationPtr_->operator[](itemi) = EulerCoordinateRotation
-        (
-            angles_[itemi],
-            degrees_  // true=degrees, false=radians
-        ).R();
+        *rotIter =
+            coordinateRotations::euler::rotation(order_, angles, degrees_);
+
+        ++rotIter;
     }
 }
 
@@ -85,7 +85,15 @@ void Foam::lumpedPointState::readDict(const dictionary& dict)
 {
     dict.readEntry("points", points_);
     dict.readEntry("angles", angles_);
+    order_ =
+        quaternion::eulerOrderNames.getOrDefault
+        (
+            "order",
+            dict,
+            quaternion::eulerOrder::ZXZ
+        );
     degrees_ = dict.lookupOrDefault("degrees", false);
+
     deleteDemandDrivenData(rotationPtr_);
 }
 
@@ -96,6 +104,7 @@ Foam::lumpedPointState::lumpedPointState()
 :
     points_(),
     angles_(),
+    order_(quaternion::eulerOrder::ZXZ),
     degrees_(false),
     rotationPtr_(nullptr)
 {}
@@ -105,6 +114,7 @@ Foam::lumpedPointState::lumpedPointState(const lumpedPointState& rhs)
 :
     points_(rhs.points_),
     angles_(rhs.angles_),
+    order_(rhs.order_),
     degrees_(rhs.degrees_),
     rotationPtr_(nullptr)
 {}
@@ -114,6 +124,7 @@ Foam::lumpedPointState::lumpedPointState(const pointField& pts)
 :
     points_(pts),
     angles_(points_.size(), Zero),
+    order_(quaternion::eulerOrder::ZXZ),
     degrees_(false),
     rotationPtr_(nullptr)
 {}
@@ -123,6 +134,7 @@ Foam::lumpedPointState::lumpedPointState(tmp<pointField>& pts)
 :
     points_(pts),
     angles_(points_.size(), Zero),
+    order_(quaternion::eulerOrder::ZXZ),
     degrees_(false),
     rotationPtr_(nullptr)
 {}
@@ -132,6 +144,7 @@ Foam::lumpedPointState::lumpedPointState(const dictionary& dict)
 :
     points_(),
     angles_(),
+    order_(quaternion::eulerOrder::ZXZ),
     degrees_(false),
     rotationPtr_(nullptr)
 {
@@ -153,6 +166,7 @@ void Foam::lumpedPointState::operator=(const lumpedPointState& rhs)
 {
     points_  = rhs.points_;
     angles_  = rhs.angles_;
+    order_   = rhs.order_;
     degrees_ = rhs.degrees_;
 
     deleteDemandDrivenData(rotationPtr_);
@@ -228,6 +242,7 @@ bool Foam::lumpedPointState::readPlain(Istream& is)
 
     points_.setSize(count);
     angles_.setSize(count);
+    order_ = quaternion::eulerOrder::ZXZ;
     degrees_ = false;
 
     deleteDemandDrivenData(rotationPtr_);
@@ -256,9 +271,13 @@ void Foam::lumpedPointState::writeDict(Ostream& os) const
 {
     os.writeEntry("points", points_);
     os.writeEntry("angles", angles_);
+    if (order_ != quaternion::eulerOrder::ZXZ)
+    {
+        os.writeEntry("order", quaternion::eulerOrderNames[order_]);
+    }
     if (degrees_)
     {
-        os.writeEntry("degrees", word("true"));
+        os.writeEntry("degrees", "true");
     }
 }
 

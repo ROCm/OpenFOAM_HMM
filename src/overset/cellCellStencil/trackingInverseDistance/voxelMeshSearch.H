@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,6 +46,8 @@ namespace Foam
 // Forward declaration of friend functions and operators
 class polyMesh;
 class OBJstream;
+class IOobject;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
                         Class voxelMeshSearch Declaration
@@ -60,11 +62,14 @@ class voxelMeshSearch
         //- Local mesh bounding box
         boundBox localBb_;
 
-        //- Number of points in all directions (for local mesh only)
+        //- Number of voxels in all directions (for local mesh only)
         labelVector nDivs_;
 
         //- Voxel to seed cell
         labelList seedCell_;
+
+        //- Cells visited
+        mutable DynamicList<label> track_;
 
 
    // Private Member Functions
@@ -91,7 +96,8 @@ public:
         voxelMeshSearch
         (
             const polyMesh&,
-            const labelVector&,
+            const boundBox& bb,
+            const labelVector& nDivs,
             const bool doUpdate = true
         );
 
@@ -116,12 +122,40 @@ public:
 
         //Voxel helper functions
 
+            //- Voxel indices to combined voxel index
+            static label index
+            (
+                const labelVector& nDivs,
+                const labelVector& voxel
+            );
+
+            //- Change in combined voxel index for change in components
+            static labelVector offset
+            (
+                const labelVector& nDivs
+            );
+
+            //- Combined voxel index to individual indices
+            static labelVector index3
+            (
+                const labelVector& nDivs,
+                const label voxeli
+            );
+
             //- Coordinate to voxel indices
             static labelVector index3
             (
                 const boundBox& bb,
                 const labelVector& nDivs,
                 const point& p
+            );
+
+            //- Voxel index to voxel centre
+            static point centre
+            (
+                const boundBox& bb,
+                const labelVector& nDivs,
+                const labelVector& voxel
             );
 
             //- Coordinate to combined voxel index. If clip makes sure
@@ -134,14 +168,6 @@ public:
                 const bool clip
             );
 
-            //- Voxel index to voxel centre
-            static point centre
-            (
-                const boundBox& bb,
-                const labelVector& nDivs,
-                const labelVector& voxel
-            );
-
             //- Fill voxels indicated by bounding box
             template<class Container, class Type>
             static void fill
@@ -151,6 +177,18 @@ public:
                 const labelVector& nDivs,
                 const boundBox& subBb,
                 const Type val
+            );
+
+            //- Fill voxels indicated by bounding box
+            template<class Container, class Type, class CombineOp>
+            static void fill
+            (
+                Container& elems,
+                const boundBox& bb,
+                const labelVector& nDivs,
+                const boundBox& subBb,
+                const Type val,
+                const CombineOp& cop = eqOp<Type>()
             );
 
             //- Check if any voxel inside bounding box is set to val or
@@ -185,6 +223,10 @@ public:
                 const boundBox&,
                 const labelVector&
             );
+
+            //- Debug: construct fvMesh. Note: writes a dummy mesh to
+            //  io.timeName()! TBD.
+            autoPtr<fvMesh> makeMesh(const IOobject&) const;
 };
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,17 +57,20 @@ template<class ThermoType>
 class reactingMixture
 :
     public speciesTable,
-    public autoPtr<chemistryReader<ThermoType>>,
+    private autoPtr<chemistryReader<ThermoType>>,
     public multiComponentMixture<ThermoType>,
     public PtrList<Reaction<ThermoType>>
 {
-    // Private member data
+    // Private Member Data
 
         //- Table of species composition
         speciesCompositionTable speciesComposition_;
 
 
     // Private Member Functions
+
+        //- The chemistry reader
+        autoPtr<chemistryReader<ThermoType>>& reader();
 
         //- No copy construct
         reactingMixture(const reactingMixture&) = delete;
@@ -83,12 +88,16 @@ public:
     // Constructors
 
         //- Construct from dictionary, mesh and phase name
-        reactingMixture(const dictionary&, const fvMesh&, const word&);
+        reactingMixture
+        (
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
 
 
     //- Destructor
-    virtual ~reactingMixture()
-    {}
+    virtual ~reactingMixture() = default;
 
 
     // Member functions
@@ -102,20 +111,8 @@ public:
         //- Read dictionary
         void read(const dictionary&);
 
-        label size() const
-        {
-            return PtrList<Reaction<ThermoType>>::size();
-        }
-
-        Reaction<ThermoType>& operator[](const label i)
-        {
-            return PtrList<Reaction<ThermoType>>::operator[](i);
-        }
-
-        const Reaction<ThermoType>& operator[](const label i) const
-        {
-            return PtrList<Reaction<ThermoType>>::operator[](i);
-        }
+        using PtrList<Reaction<ThermoType>>::size;
+        using PtrList<Reaction<ThermoType>>::operator[];
 
         //- Table of species composition
         const speciesCompositionTable& specieComposition() const

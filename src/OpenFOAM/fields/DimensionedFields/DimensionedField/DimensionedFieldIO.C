@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +37,7 @@ void Foam::DimensionedField<Type, GeoMesh>::readField
     const word& fieldDictEntry
 )
 {
-    dimensions_.reset(dimensionSet(fieldDict.lookup("dimensions")));
+    dimensions_.reset(dimensionSet(fieldDict, "dimensions"));
 
     // Note: oriented state may have already been set on construction
     // - if so - do not reset by re-reading

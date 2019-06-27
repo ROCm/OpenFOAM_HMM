@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,8 +72,8 @@ Foam::BreakupModel<CloudType>::BreakupModel
 :
     CloudSubModelBase<CloudType>(owner, dict, typeName, type),
     solveOscillationEq_(solveOscillationEq),
-    y0_(this->coeffDict().template lookupOrDefault<scalar>("y0", 0.0)),
-    yDot0_(this->coeffDict().template lookupOrDefault<scalar>("yDot0", 0.0)),
+    y0_(this->coeffDict().template lookupOrDefault<scalar>("y0", 0)),
+    yDot0_(this->coeffDict().template lookupOrDefault<scalar>("yDot0", 0)),
     TABComega_(8),
     TABCmu_(5),
     TABtwoWeCrit_(12)

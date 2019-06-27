@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,7 +100,6 @@ Foam::labelList Foam::manualDecomp::decompose
     );
 
     // Check if the final decomposition is OK
-
     if (finalDecomp.size() != points.size())
     {
         FatalErrorInFunction
@@ -111,18 +112,21 @@ Foam::labelList Foam::manualDecomp::decompose
             << exit(FatalError);
     }
 
-    if (min(finalDecomp) < 0 || max(finalDecomp) > nDomains_ - 1)
+    const label minVal = min(finalDecomp);
+    const label maxVal = max(finalDecomp);
+
+    if (minVal < 0 || maxVal >= nDomains_)
     {
         FatalErrorInFunction
             << "According to the decomposition, cells assigned to "
             << "impossible processor numbers.  Min processor = "
-            << min(finalDecomp) << " Max processor = " << max(finalDecomp)
+            << minVal << " Max processor = " << maxVal
             << ".\n" << "Manual decomposition data read from file "
             << dataFile_ << "." << endl
             << exit(FatalError);
     }
 
-    return finalDecomp;
+    return std::move(finalDecomp);
 }
 
 

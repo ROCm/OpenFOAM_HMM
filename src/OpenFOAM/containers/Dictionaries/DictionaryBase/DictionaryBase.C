@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,12 +32,7 @@ License
 template<class IDLListType, class T>
 void Foam::DictionaryBase<IDLListType, T>::addEntries()
 {
-    for
-    (
-        typename IDLListType::iterator iter = this->begin();
-        iter != this->end();
-        ++iter
-    )
+    for (auto iter = this->begin(); iter != this->end(); ++iter)
     {
         this->hashedTs_.insert((*iter).keyword(), &(*iter));
     }
@@ -101,41 +98,37 @@ const T* Foam::DictionaryBase<IDLListType, T>::lookupPtr
     const word& keyword
 ) const
 {
-    typename HashTable<T*>::const_iterator iter = hashedTs_.find(keyword);
+    const auto iter = hashedTs_.cfind(keyword);
 
-    if (iter != hashedTs_.end())
+    if (iter.found())
     {
         return *iter;
     }
-    else
-    {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 
 template<class IDLListType, class T>
 T* Foam::DictionaryBase<IDLListType, T>::lookupPtr(const word& keyword)
 {
-    typename HashTable<T*>::iterator iter = hashedTs_.find(keyword);
+    auto iter = hashedTs_.find(keyword);
 
-    if (iter != hashedTs_.end())
+    if (iter.found())
     {
         return *iter;
     }
-    else
-    {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 
 template<class IDLListType, class T>
 const T* Foam::DictionaryBase<IDLListType, T>::lookup(const word& keyword) const
 {
-    typename HashTable<T*>::const_iterator iter = hashedTs_.find(keyword);
+    const auto iter = hashedTs_.cfind(keyword);
 
-    if (iter == hashedTs_.end())
+    if (!iter.found())
     {
         FatalErrorInFunction
             << "'" << keyword << "' not found"
@@ -149,9 +142,9 @@ const T* Foam::DictionaryBase<IDLListType, T>::lookup(const word& keyword) const
 template<class IDLListType, class T>
 T* Foam::DictionaryBase<IDLListType, T>::lookup(const word& keyword)
 {
-    typename HashTable<T*>::iterator iter = hashedTs_.find(keyword);
+    auto iter = hashedTs_.find(keyword);
 
-    if (iter == hashedTs_.end())
+    if (!iter.found())
     {
         FatalErrorInFunction
             << "'" << keyword << "' not found"
@@ -168,12 +161,7 @@ Foam::wordList Foam::DictionaryBase<IDLListType, T>::toc() const
     wordList keywords(this->size());
 
     label i = 0;
-    for
-    (
-        typename IDLListType::const_iterator iter = this->begin();
-        iter != this->end();
-        ++iter
-    )
+    for (auto iter = this->cbegin(); iter != this->cend(); ++iter)
     {
         keywords[i++] = iter().keyword();
     }
@@ -221,18 +209,16 @@ void Foam::DictionaryBase<IDLListType, T>::append(const word& keyword, T* tPtr)
 template<class IDLListType, class T>
 T* Foam::DictionaryBase<IDLListType, T>::remove(const word& keyword)
 {
-    typename HashTable<T*>::iterator iter = hashedTs_.find(keyword);
+    auto iter = hashedTs_.find(keyword);
 
-    if (iter != hashedTs_.end())
+    if (iter.found())
     {
-        T* tPtr = IDLListType::remove(iter());
+        T* ptr = IDLListType::remove(iter());
         hashedTs_.erase(iter);
-        return tPtr;
+        return ptr;
     }
-    else
-    {
-        return nullptr;
-    }
+
+    return nullptr;
 }
 
 
@@ -263,7 +249,6 @@ void Foam::DictionaryBase<IDLListType, T>::operator=
     const DictionaryBase<IDLListType, T>& dict
 )
 {
-    // Check for assignment to self
     if (this == &dict)
     {
         FatalErrorInFunction

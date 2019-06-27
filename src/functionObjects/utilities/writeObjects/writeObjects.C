@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +28,7 @@ License
 #include "writeObjects.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "ListOps.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -127,25 +130,33 @@ bool Foam::functionObjects::writeObjects::write()
         obr_.time().writeTimeDict();
     }
 
-    DynamicList<word> allNames(obr_.toc().size());
-    for (const wordRe& objName : objectNames_)
-    {
-        wordList names(obr_.names<regIOobject>(objName));
+    // Get selection
+    const wordList selectedNames(obr_.sortedNames<regIOobject>(objectNames_));
 
-        if (names.size())
+    // Warning if anything was missed
+    bitSet missed(objectNames_.size());
+
+    label index = 0;
+    for (const wordRe& select : objectNames_)
+    {
+        if (!ListOps::found(selectedNames, select))
         {
-            allNames.append(std::move(names));
+            missed.set(index);
         }
-        else
-        {
-            WarningInFunction
-                << "Object " << objName << " not found in "
-                << "database. Available objects:" << nl << obr_.sortedToc()
-                << endl;
-        }
+        ++index;
     }
 
-    for (const word& objName : allNames)
+    if (missed.any())
+    {
+        WarningInFunction
+            << "No corresponding selection for "
+            << flatOutput(subset(missed, objectNames_)) << nl
+            << "Available objects in database:"
+            << nl << obr_.sortedToc()
+            << endl;
+    }
+
+    for (const word& objName : selectedNames)
     {
         regIOobject& obj = obr_.lookupObjectRef<regIOobject>(objName);
 
@@ -181,6 +192,9 @@ bool Foam::functionObjects::writeObjects::write()
                     << ". Valid writeOption types are "
                     << writeOptionNames_
                     << exit(FatalError);
+
+                continue;
+                break;
             }
         }
 

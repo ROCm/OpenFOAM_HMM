@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -28,7 +28,7 @@ gas
         d0              3e-3;
         p0              1e5;
     }
-    Sc              0.7;
+    Sct              0.7;
 
     residualAlpha   1e-6;
 }
@@ -41,7 +41,7 @@ liquid
     {
         d               1e-4;
     }
-    Sc              0.7;
+    Sct              0.7;
 
     residualAlpha   1e-6;
 }
@@ -57,7 +57,7 @@ blending
         minPartlyContinuousAlpha.liquid 0.5;
     }
 
-    heatTransferModel
+    heatTransfer
     {
         type            linear;
         minFullyContinuousAlpha.gas 1;
@@ -66,7 +66,7 @@ blending
         minPartlyContinuousAlpha.liquid 0;
     }
 
-    massTransferModel
+    massTransfer
     {
         type            linear;
         minFullyContinuousAlpha.gas 1;
@@ -142,7 +142,7 @@ interfaceComposition
 (
     (gas in liquid)
     {
-        type Saturated;
+        type saturated;
         species ( water );
         Le 1.0;
         saturationPressure
@@ -218,6 +218,10 @@ massTransfer.liquid
         type spherical;
         Le 1.0;
     }
+);
+
+phaseTransfer
+(
 );
 
 lift

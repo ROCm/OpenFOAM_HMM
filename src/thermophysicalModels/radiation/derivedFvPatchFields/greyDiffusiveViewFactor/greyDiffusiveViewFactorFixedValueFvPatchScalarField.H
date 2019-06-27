@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +37,6 @@ Usage
     \table
         Property     | Description             | Required    | Default value
         qro          | external radiative heat flux | yes    |
-        emissivityMode | emissivity mode: solidRadiation or lookup | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -44,8 +45,6 @@ Usage
     {
         type            greyDiffusiveRadiationViewFactor;
         qro             uniform 0;
-        emissivityMode  solidRadiation;
-        value           uniform 0;
     }
     \endverbatim
 
@@ -84,9 +83,6 @@ class greyDiffusiveViewFactorFixedValueFvPatchScalarField
 
         //- External radiative heat flux
         scalarField qro_;
-
-        //- Activate solar load
-        bool solarLoad_;
 
 
 public:
@@ -166,7 +162,7 @@ public:
         // Access
 
             //- Return external + solar load radiative heat flux
-            tmp<scalarField> qro() const;
+            tmp<scalarField> qro(label bandI = 0) const;
 
 
         // Evaluation functions

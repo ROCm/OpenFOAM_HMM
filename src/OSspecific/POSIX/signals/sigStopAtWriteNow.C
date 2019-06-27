@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,11 +25,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "sigWriteNow.H"
 #include "sigStopAtWriteNow.H"
 #include "error.H"
 #include "JobInfo.H"
 #include "IOstreams.H"
 #include "Time.H"
+
+// File-local functions
+#include "signalMacros.C"
+
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -37,10 +44,11 @@ int Foam::sigStopAtWriteNow::signal_
     Foam::debug::optimisationSwitch("stopAtWriteNowSignal", -1)
 );
 
-Foam::Time const* Foam::sigStopAtWriteNow::runTimePtr_ = nullptr;
+// Pointer to Time (file-local variable)
+static Foam::Time const* runTimePtr_ = nullptr;
 
-struct sigaction Foam::sigStopAtWriteNow::oldAction_;
 
+// * * * * * * * * * * * * * * * Local Classes * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -49,7 +57,6 @@ class addstopAtWriteNowSignalToOpt
 :
     public ::Foam::simpleRegIOobject
 {
-
 public:
 
     addstopAtWriteNowSignalToOpt(const char* name)
@@ -83,15 +90,9 @@ addstopAtWriteNowSignalToOpt addstopAtWriteNowSignalToOpt_
 
 void Foam::sigStopAtWriteNow::sigHandler(int)
 {
-    // Reset old handling
-    if (sigaction(signal_, &oldAction_, nullptr) < 0)
-    {
-        FatalErrorInFunction
-            << "Cannot reset " << signal_ << " trapping"
-            << abort(FatalError);
-    }
+    resetHandler("stopAtWriteNow", signal_);
 
-    jobInfo.signalEnd();        // Update jobInfo file
+    jobInfo.signalEnd(); // Update jobInfo file
 
     if (runTimePtr_)
     {
@@ -111,7 +112,7 @@ Foam::sigStopAtWriteNow::sigStopAtWriteNow()
 
 Foam::sigStopAtWriteNow::sigStopAtWriteNow(const Time& runTime, bool verbose)
 {
-    runTimePtr_ = &runTime;      // Store runTime
+    runTimePtr_ = &runTime; // Store runTime
     set(verbose);
 }
 
@@ -120,60 +121,54 @@ Foam::sigStopAtWriteNow::sigStopAtWriteNow(const Time& runTime, bool verbose)
 
 Foam::sigStopAtWriteNow::~sigStopAtWriteNow()
 {
-    // Reset old handling
-    if (signal_ > 0)
+    if (!active())
     {
-        if (sigaction(signal_, &oldAction_, nullptr) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot reset " << signal_ << " trapping"
-                << abort(FatalError);
-        }
+        return;
     }
+
+    resetHandler("stopAtWriteNow", signal_);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigStopAtWriteNow::set(bool verbose)
+bool Foam::sigStopAtWriteNow::active()
 {
-    if (signal_ > 0)
-    {
-        // Check that the signal is different from the writeNowSignal
-        if (sigWriteNow::signal_ == signal_)
-        {
-            FatalErrorInFunction
-                << "stopAtWriteNowSignal : " << signal_
-                << " cannot be the same as the writeNowSignal."
-                << " Please change this in the etc/controlDict."
-                << exit(FatalError);
-        }
-
-
-        struct sigaction newAction;
-        newAction.sa_handler = sigHandler;
-        newAction.sa_flags = SA_NODEFER;
-        sigemptyset(&newAction.sa_mask);
-        if (sigaction(signal_, &newAction, &oldAction_) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot set " << signal_ << " trapping"
-                << abort(FatalError);
-        }
-
-        if (verbose)
-        {
-            Info<< "sigStopAtWriteNow :"
-                << " Enabling writing and stopping upon signal " << signal_
-                << endl;
-        }
-    }
+    return signal_ > 0;
 }
 
 
-bool Foam::sigStopAtWriteNow::active() const
+int Foam::sigStopAtWriteNow::signalNumber()
 {
-    return signal_ > 0;
+    return signal_;
+}
+
+
+void Foam::sigStopAtWriteNow::set(bool verbose)
+{
+    if (!active())
+    {
+        return;
+    }
+
+    // Check that the signal is different from the writeNowSignal
+    if (sigWriteNow::signalNumber() == signal_)
+    {
+        FatalErrorInFunction
+            << "stopAtWriteNowSignal : " << signal_
+            << " cannot be the same as the writeNowSignal."
+            << " Please change this in the etc/controlDict."
+            << exit(FatalError);
+    }
+
+    if (verbose)
+    {
+        Info<< "sigStopAtWriteNow :"
+            << " Enabling writing and stopping upon signal " << signal_
+            << endl;
+    }
+
+    setHandler("stopAtWriteNow", signal_, sigHandler);
 }
 
 

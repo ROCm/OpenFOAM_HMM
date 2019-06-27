@@ -2,6 +2,7 @@ snappyHexMeshDriver/snappyLayerDriver.C
 snappyHexMeshDriver/snappySnapDriver.C
 snappyHexMeshDriver/snappySnapDriverFeature.C
 snappyHexMeshDriver/snappyRefineDriver.C
+snappyHexMeshDriver/snappyVoxelMeshDriver.C
 
 snappyHexMeshDriver/layerParameters/layerParameters.C
 snappyHexMeshDriver/refinementParameters/refinementParameters.C
@@ -13,6 +14,7 @@ meshRefinement/meshRefinementMerge.C
 meshRefinement/meshRefinementProblemCells.C
 meshRefinement/meshRefinementRefine.C
 meshRefinement/meshRefinementGapRefine.C
+meshRefinement/meshRefinementBlock.C
 meshRefinement/patchFaceOrientation.C
 
 refinementFeatures/refinementFeatures.C

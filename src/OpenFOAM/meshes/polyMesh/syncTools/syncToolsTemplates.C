@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -189,7 +191,7 @@ void Foam::syncTools::syncPointMap
                         pointValues,
                         cop,
                         meshPts[nbrIter.key()],
-                        nbrIter.object()
+                        nbrIter.val()
                     );
                 }
             }
@@ -307,7 +309,7 @@ void Foam::syncTools::syncPointMap
                             sharedPointValues,
                             cop,
                             iter.key(),     // edge
-                            iter.object()   // value
+                            iter.val()      // value
                         );
                     }
                 }
@@ -465,7 +467,7 @@ void Foam::syncTools::syncEdgeMap
                         edgeValues,
                         cop,
                         meshEdge,           // edge
-                        nbrIter.object()    // value
+                        nbrIter.val()       // value
                     );
                 }
             }
@@ -672,7 +674,7 @@ void Foam::syncTools::syncEdgeMap
                         sharedEdgeValues,
                         cop,
                         iter.key(),     // edge
-                        iter.object()   // value
+                        iter.val()      // value
                     );
                 }
             }
@@ -721,7 +723,7 @@ void Foam::syncTools::syncEdgeMap
     forAllConstIters(potentialSharedEdge, iter)
     {
         const edge& sharedEdge = iter.key();
-        const edge& meshEdge = iter.object();
+        const edge& meshEdge = iter.val();
 
         // Do I have a value for the shared edge?
         const auto sharedFnd = sharedEdgeValues.cfind(sharedEdge);

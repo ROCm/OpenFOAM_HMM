@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,8 @@ Description
 #include "NASCore.H"
 #include "parsing.H"
 #include "Tuple2.H"
+#include "Switch.H"
+#include "dictionary.H"
 
 using namespace Foam;
 
@@ -45,72 +47,104 @@ inline scalar readNasScalar(const std::string& str)
 }
 
 
+// As a function
+inline Switch readSwitch(const std::string& str)
+{
+    Switch sw(str);
+
+    if (sw.type() == Switch::ON)
+    {
+        Info<< "Was 'on'" << nl;
+    }
+
+    return sw;
+}
+
+
+void printInfo(const Switch& sw)
+{
+    Info<<"Switch " << sw.c_str() << " (enum=" << label(sw.type()) << ")\n";
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class TYPE>
+template<class T>
+bool hadParsingError
+(
+    const std::pair<bool, std::string>& input,
+    const std::pair<bool, T>& result,
+    std::string errMsg
+)
+{
+    if (result.first)
+    {
+        if (input.first)
+        {
+            Info<< "(pass) parsed "
+                << input.second << " = " << result.second << nl;
+        }
+        else
+        {
+            Info<< "(fail) unexpected success for " << input.second << nl;
+        }
+    }
+    else
+    {
+        if (input.first)
+        {
+            Info<< "(fail) unexpected";
+        }
+        else
+        {
+            Info<< "(pass) expected";
+        }
+
+        Info<< " failure " << input.second << "  >> " << errMsg.c_str() << nl;
+    }
+
+    return (input.first != result.first);
+}
+
+
+template<class T>
 unsigned testParsing
 (
-    TYPE (*function)(const std::string&),
-    std::initializer_list
-    <
-        Tuple2<bool, std::string>
-    > tests
+    T (*function)(const std::string&),
+    std::initializer_list<std::pair<bool, std::string>> tests
 )
 {
     unsigned nFail = 0;
     string errMsg;
 
     // Expect some failures
-    const bool prev = FatalIOError.throwExceptions();
+    const bool prev1 = FatalError.throwExceptions();
+    const bool prev2 = FatalIOError.throwExceptions();
 
-    for (const Tuple2<bool, std::string>& test : tests)
+    for (const std::pair<bool, std::string>& test : tests)
     {
-        const bool expected = test.first();
-        const std::string& str = test.second();
+        std::pair<bool, T> result(false, T());
 
-        bool parsed = true;
-
-        TYPE val;
         try
         {
-            val = function (str);
+            result.second = function (test.second);
+            result.first = true;
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
-            parsed = false;
             errMsg = err.message();
         }
 
-        if (parsed)
+        if (test.first != result.first)
         {
-            if (expected)
-            {
-                Info<< "(pass) parsed " << str << " = " << val << nl;
-            }
-            else
-            {
-                ++nFail;
-                Info<< "(fail) unexpected success for " << str << nl;
-            }
+            ++nFail;
         }
-        else
-        {
-            if (expected)
-            {
-                ++nFail;
-                Info<< "(fail) unexpected";
-            }
-            else
-            {
-                Info<< "(pass) expected";
-            }
 
-            Info<< " failure " << str
-                << "  >> " << errMsg.c_str() << nl;
-        }
+        hadParsingError(test, result, errMsg);
     }
 
-    FatalIOError.throwExceptions(prev);
+    FatalError.throwExceptions(prev1);
+    FatalIOError.throwExceptions(prev2);
 
     return nFail;
 }
@@ -119,6 +153,39 @@ unsigned testParsing
 int main(int argc, char *argv[])
 {
     unsigned nFail = 0;
+
+    {
+        Info<< nl << "Test Switch parsing:" << nl;
+        nFail += testParsing
+        (
+            &readSwitch,
+            {
+                { false, "True" },
+                { true,  "false" },
+                { true,  "on" },
+                { false, "None" },
+                { false, "default" },
+            }
+        );
+
+        Info<< nl << "Test Switch defaults:" << nl;
+
+        dictionary dict;
+        dict.add("key1" , "true");
+        dict.add("key2" , "off");
+
+        for (const word& k : { "key", "key1", "key2" })
+        {
+            Switch sw1(k, dict, Switch::YES);
+            Switch sw2(k, dict, Switch::NO);
+
+            bool sw3(Switch(k, dict, Switch::YES));
+
+            printInfo(sw1);
+            printInfo(sw2);
+            Info<<"bool " << sw3 << nl;
+        }
+    }
 
     {
         Info<< nl << "Test readDouble: (small=" << doubleScalarVSMALL

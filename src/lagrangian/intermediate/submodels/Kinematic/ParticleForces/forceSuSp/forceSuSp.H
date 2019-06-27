@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,14 +43,14 @@ SourceFiles
 #define forceSuSp_H
 
 #include "Tuple2.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions
-
+// Forward declarations
 class forceSuSp;
 
 inline forceSuSp operator+(const forceSuSp& susp1, const forceSuSp& susp2);
@@ -71,6 +73,9 @@ public:
         //- Construct null
         inline forceSuSp();
 
+        //- Construct zero-initialized content
+        inline forceSuSp(const zero);
+
         //- Construct given Tuple2
         inline forceSuSp(const Tuple2<vector, scalar>& susp);
 
@@ -78,7 +83,7 @@ public:
         inline forceSuSp(const vector& Su, const scalar Sp);
 
         //- Construct from Istream
-        inline forceSuSp(Istream&);
+        inline forceSuSp(Istream& is);
 
 
     // Member Functions

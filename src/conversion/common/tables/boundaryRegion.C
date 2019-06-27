@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +55,7 @@ Foam::boundaryRegion::boundaryRegion
 Foam::label Foam::boundaryRegion::append(const dictionary& dict)
 {
     label maxId = -1;
-    forAllConstIter(Map<dictionary>, *this, iter)
+    forAllConstIters(*this, iter)
     {
         if (maxId < iter.key())
         {
@@ -70,7 +72,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names() const
 {
     Map<word> lookup;
 
-    forAllConstIter(Map<dictionary>, *this, iter)
+    forAllConstIters(*this, iter)
     {
         lookup.insert
         (
@@ -94,7 +96,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names
 {
     Map<word> lookup;
 
-    forAllConstIter(Map<dictionary>, *this, iter)
+    forAllConstIters(*this, iter)
     {
         const word lookupName = iter().lookupOrDefault<word>
         (
@@ -116,7 +118,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::boundaryTypes() const
 {
     Map<word> lookup;
 
-    forAllConstIter(Map<dictionary>, *this, iter)
+    forAllConstIters(*this, iter)
     {
         lookup.insert
         (
@@ -136,7 +138,7 @@ Foam::label Foam::boundaryRegion::findIndex(const word& name) const
         return -1;
     }
 
-    forAllConstIter(Map<dictionary>, *this, iter)
+    forAllConstIters(*this, iter)
     {
         if (iter().lookupOrDefault<word>("Label", word::null) == name)
         {
@@ -256,18 +258,18 @@ void Foam::boundaryRegion::rename(const dictionary& mapDict)
     // This avoid re-matching any renamed regions
 
     Map<word> mapping;
-    forAllConstIter(dictionary, mapDict, iter)
+    for (const entry& dEntry : mapDict)
     {
-        word oldName(iter().stream());
+        const word oldName(dEntry.stream());
 
-        label id = this->findIndex(oldName);
+        const label id = this->findIndex(oldName);
         if (id >= 0)
         {
-            mapping.insert(id, iter().keyword());
+            mapping.insert(id, dEntry.keyword());
         }
     }
 
-    forAllConstIter(Map<word>, mapping, iter)
+    forAllConstIters(mapping, iter)
     {
         dictionary& dict = operator[](iter.key());
 

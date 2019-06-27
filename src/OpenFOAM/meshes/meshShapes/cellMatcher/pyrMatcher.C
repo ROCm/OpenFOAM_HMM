@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -268,10 +270,10 @@ bool Foam::pyrMatcher::isA(const faceList& faces)
     return matchShape
     (
         true,
-        faces,                      // all faces in mesh
-        labelList(faces.size(), 0), // cell 0 is owner of all faces
-        0,                          // cell label
-        identity(faces.size())      // faces of cell 0
+        faces,                          // all faces in mesh
+        labelList(faces.size(), Zero),  // cell 0 is owner of all faces
+        0,                              // cell label
+        identity(faces.size())          // faces of cell 0
     );
 }
 

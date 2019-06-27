@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,7 +185,7 @@ public:
 
             //- Write begin block group with the given name
             //  Increments indentation, adds newline.
-            virtual Ostream& beginBlock(const keyType& keyword);
+            virtual Ostream& beginBlock(const keyType& kw);
 
             //- Write begin block group without a name
             //  Increments indentation, adds newline.

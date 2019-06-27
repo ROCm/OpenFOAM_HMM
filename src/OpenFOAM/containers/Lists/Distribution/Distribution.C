@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,7 +121,7 @@ Foam::label Foam::Distribution<Type>::index
         // Underflow of this List, storage increase and remapping
         // required
 
-        List<scalar> newCmptDistribution(2*cmptDistribution.size(), 0.0);
+        List<scalar> newCmptDistribution(2*cmptDistribution.size(), Zero);
 
         label sOld = cmptDistribution.size();
 

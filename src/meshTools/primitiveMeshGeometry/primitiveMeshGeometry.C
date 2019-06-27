@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -383,15 +385,13 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Non-orthogonality check OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Non-orthogonality check OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -495,15 +495,13 @@ bool Foam::primitiveMeshGeometry::checkFacePyramids
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Face pyramids OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Face pyramids OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -633,16 +631,14 @@ bool Foam::primitiveMeshGeometry::checkFaceSkewness
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Max skewness = " << 100*maxSkew
-                << " percent.  Face skewness OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Max skewness = " << 100*maxSkew
+            << " percent.  Face skewness OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -715,16 +711,14 @@ bool Foam::primitiveMeshGeometry::checkFaceWeights
 
         return true;
     }
-    else
-    {
-        if (report)
-        {
-            Info<< "Min weight = " << minWeight
-                << " percent.  Weights OK.\n" << endl;
-        }
 
-        return false;
+    if (report)
+    {
+        Info<< "Min weight = " << minWeight
+            << " percent.  Weights OK.\n" << endl;
     }
+
+    return false;
 }
 
 
@@ -855,10 +849,8 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -984,10 +976,8 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
 //
 //        return true;
 //    }
-//    else
-//    {
-//        return false;
-//    }
+//
+//    return false;
 //}
 
 
@@ -1093,10 +1083,8 @@ bool Foam::primitiveMeshGeometry::checkFaceTwist
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1154,10 +1142,8 @@ bool Foam::primitiveMeshGeometry::checkFaceArea
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1255,10 +1241,8 @@ bool Foam::primitiveMeshGeometry::checkCellDeterminant
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -209,7 +209,7 @@ public:
             {
                 const_cast<cellVolumeWeight&>(*this).update();
             }
-            return cellInterpolationMap_;
+            return *cellInterpolationMap_;
         }
 
         //- Per interpolated cell the neighbour cells (in terms of slots as

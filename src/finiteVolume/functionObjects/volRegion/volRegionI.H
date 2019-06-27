@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +30,47 @@ License
 inline const Foam::functionObjects::volRegion::regionTypes&
 Foam::functionObjects::volRegion::regionType() const
 {
+    #ifdef FULLDEBUG
+    if (requireUpdate_)
+    {
+        FatalErrorInFunction
+            << "Retrieving cached values that are not up-to-date" << nl
+            << exit(FatalError);
+    }
+    #endif
+
     return regionType_;
 }
+
+
+inline Foam::label Foam::functionObjects::volRegion::nCells() const
+{
+    #ifdef FULLDEBUG
+    if (requireUpdate_)
+    {
+        FatalErrorInFunction
+            << "Retrieving cached values that are not up-to-date" << nl
+            << exit(FatalError);
+    }
+    #endif
+
+    return nCells_;
+}
+
+
+inline Foam::scalar Foam::functionObjects::volRegion::V() const
+{
+    #ifdef FULLDEBUG
+    if (requireUpdate_)
+    {
+        FatalErrorInFunction
+            << "Retrieving cached values that are not up-to-date" << nl
+            << exit(FatalError);
+    }
+    #endif
+
+    return V_;
+}
+
 
 // ************************************************************************* //

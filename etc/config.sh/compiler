@@ -2,8 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -27,71 +29,83 @@ ThirdParty)
     mpc_version=mpc-system
 
     case "$WM_COMPILER" in
-    Gcc | Gcc48)
+    Gcc | Gcc48*)
         gcc_version=gcc-4.8.5
         ;;
-    Gcc49)
+    Gcc49*)
         gcc_version=gcc-4.9.4
         ;;
-    Gcc51)
+    Gcc51*)
         gcc_version=gcc-5.1.0
         ;;
-    Gcc52)
+    Gcc52*)
         gcc_version=gcc-5.2.0
         ;;
-    Gcc53)
+    Gcc53*)
         gcc_version=gcc-5.3.0
         ;;
-    Gcc54)
+    Gcc54*)
         gcc_version=gcc-5.4.0
         ;;
-    Gcc55)
+    Gcc55*)
         gcc_version=gcc-5.5.0
         ;;
-    Gcc61)
+    Gcc61*)
         gcc_version=gcc-6.1.0
         ;;
-    Gcc62)
+    Gcc62*)
         gcc_version=gcc-6.2.0
         ;;
-    Gcc63)
+    Gcc63*)
         gcc_version=gcc-6.3.0
         ;;
-    Gcc64)
+    Gcc64*)
         gcc_version=gcc-6.4.0
         ;;
-    Gcc71)
+    Gcc65*)
+        gcc_version=gcc-6.5.0
+        ;;
+    Gcc71*)
         gcc_version=gcc-7.1.0
         ;;
-    Gcc72)
+    Gcc72*)
         gcc_version=gcc-7.2.0
         ;;
-    Gcc73)
+    Gcc73*)
         gcc_version=gcc-7.3.0
         ;;
-    Gcc81)
+    Gcc74*)
+        gcc_version=gcc-7.4.0
+        ;;
+    Gcc81*)
         gcc_version=gcc-8.1.0
         ;;
-    Gcc82)
+    Gcc82*)
         gcc_version=gcc-8.2.0
         ;;
-    Clang | Clang37)
+    Clang | Clang37*)
         clang_version=llvm-3.7.1
         ;;
-    Clang38)
+    Clang38*)
         clang_version=llvm-3.8.1
         ;;
-    Clang39)
+    Clang39*)
         clang_version=llvm-3.9.1
         ;;
-    Clang40)
+    Clang40*)
         clang_version=llvm-4.0.1
         ;;
-    Clang50)
+    Clang50*)
         clang_version=llvm-5.0.2
         ;;
-    Clang60)
+    Clang60*)
         clang_version=llvm-6.0.1
+        ;;
+    Clang70*)
+        clang_version=llvm-7.0.1
+        ;;
+    Clang80*)
+        clang_version=llvm-8.0.0
         ;;
     *)
         /bin/cat << UNKNOWN_COMPILER 1>&2

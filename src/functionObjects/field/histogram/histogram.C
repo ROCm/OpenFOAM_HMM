@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -193,8 +195,8 @@ bool Foam::functionObjects::histogram::write()
         x += delta;
     }
 
-    scalarField dataNormalized(nBins_, 0);
-    labelField dataCount(nBins_, 0);
+    scalarField dataNormalized(nBins_, Zero);
+    labelField dataCount(nBins_, Zero);
     const scalarField& V = mesh_.V();
 
     forAll(field, celli)

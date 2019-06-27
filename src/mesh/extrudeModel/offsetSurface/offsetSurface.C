@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,24 +53,16 @@ offsetSurface::offsetSurface(const dictionary& dict)
     project_(coeffDict_.lookupOrDefault("project", false))
 {
     // Read surface
-    fileName baseName(coeffDict_.lookup("baseSurface"));
-    baseName.expand();
+    fileName baseName(coeffDict_.get<fileName>("baseSurface").expand());
     baseSurfPtr_.reset(new triSurface(baseName));
 
-    // Construct search engine
-    baseSearchPtr_.reset(new triSurfaceSearch(baseSurfPtr_()));
-
     // Read offsetted surface
-    fileName offsetName(coeffDict_.lookup("offsetSurface"));
-    offsetName.expand();
+    fileName offsetName(coeffDict_.get<fileName>("offsetSurface").expand());
     offsetSurfPtr_.reset(new triSurface(offsetName));
 
-    // Construct search engine
-    offsetSearchPtr_.reset(new triSurfaceSearch(offsetSurfPtr_()));
 
-
-    const triSurface& b = baseSurfPtr_();
-    const triSurface& o = offsetSurfPtr_();
+    const triSurface& b = *baseSurfPtr_;
+    const triSurface& o = *offsetSurfPtr_;
 
     if
     (
@@ -78,10 +72,17 @@ offsetSurface::offsetSurface(const dictionary& dict)
     )
     {
         FatalIOErrorInFunction(dict)
-            << "offsetSurface " << offsetName
-            << " should have exactly the same topology as the baseSurface "
-            << baseName << exit(FatalIOError);
+            << "offsetSurface:\n    " << offsetName
+            << " has different topology than the baseSurface:\n    "
+            << baseName << endl
+            << exit(FatalIOError);
     }
+
+    // Construct search engine
+    baseSearchPtr_.reset(new triSurfaceSearch(b));
+
+    // Construct search engine
+    offsetSearchPtr_.reset(new triSurfaceSearch(o));
 }
 
 

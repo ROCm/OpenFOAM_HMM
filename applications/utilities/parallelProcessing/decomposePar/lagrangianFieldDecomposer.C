@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +64,7 @@ Foam::lagrangianFieldDecomposer::lagrangianFieldDecomposer
         {
             SLList<indexedParticle*>& particlePtrs = *cellParticles[celli];
 
-            forAllConstIter(SLList<indexedParticle*>, particlePtrs, iter)
+            forAllConstIters(particlePtrs, iter)
             {
                 const indexedParticle& ppi = *iter();
                 particleIndices_[pi++] = ppi.index();

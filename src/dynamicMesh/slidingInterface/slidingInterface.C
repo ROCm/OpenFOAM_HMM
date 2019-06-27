@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -443,12 +445,12 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
         const pointField& slaveLocalPoints = slavePatch.localPoints();
         const vectorField& slavePointNormals = slavePatch.pointNormals();
 
-        forAll(cutPoints, pointi)
+        for (const label pointi : cutPoints)
         {
             // Try to find the cut point in retired points
-            Map<label>::const_iterator rpmIter = rpm.find(cutPoints[pointi]);
+            const auto rpmIter = rpm.cfind(pointi);
 
-            if (rpmIter != rpm.end())
+            if (rpmIter.found())
             {
                 if (debug)
                 {
@@ -464,10 +466,9 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                 // A cut point is not a projected slave point.  Therefore, it
                 // must be an edge-to-edge intersection.
 
-                Map<Pair<edge>>::const_iterator cpepmIter =
-                    cpepm.find(cutPoints[pointi]);
+                const auto cpepmIter = cpepm.cfind(pointi);
 
-                if (cpepmIter != cpepm.end())
+                if (cpepmIter.found())
                 {
                     // Pout<< "Need to re-create hit for point "
                     //     << cutPoints[pointi]
@@ -590,8 +591,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
                             )
                             {
                                 // Cut both master and slave.
-                                motionPoints[cutPoints[pointi]] =
-                                    masterCutPoint;
+                                motionPoints[pointi] = masterCutPoint;
                             }
                         }
                         else

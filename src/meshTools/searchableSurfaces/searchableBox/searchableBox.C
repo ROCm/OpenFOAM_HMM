@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,11 +185,12 @@ Foam::searchableBox::searchableBox
     searchableSurface(io),
     treeBoundBox(bb)
 {
-    if (!contains(midpoint()))
+    if (!treeBoundBox::valid())
     {
         FatalErrorInFunction
             << "Illegal bounding box specification : "
-            << static_cast<const treeBoundBox>(*this) << exit(FatalError);
+            << static_cast<const treeBoundBox>(*this) << nl
+            << exit(FatalError);
     }
 
     bounds() = static_cast<boundBox>(*this);
@@ -203,11 +206,12 @@ Foam::searchableBox::searchableBox
     searchableSurface(io),
     treeBoundBox(dict.get<point>("min"), dict.get<point>("max"))
 {
-    if (!contains(midpoint()))
+    if (!treeBoundBox::valid())
     {
         FatalErrorInFunction
             << "Illegal bounding box specification : "
-            << static_cast<const treeBoundBox>(*this) << exit(FatalError);
+            << static_cast<const treeBoundBox>(*this) << nl
+            << exit(FatalError);
     }
 
     bounds() = static_cast<boundBox>(*this);
@@ -291,7 +295,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
     const scalar nearestDistSqr
 ) const
 {
-    return findNearest(midpoint(), sample, nearestDistSqr);
+    return findNearest(centre(), sample, nearestDistSqr);
 }
 
 
@@ -301,7 +305,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearestOnEdge
     const scalar nearestDistSqr
 ) const
 {
-    const point bbMid(midpoint());
+    const point bbMid(centre());
 
     // Outside point projected onto cube. Assume faces 0..5.
     pointIndexHit info(true, sample, -1);
@@ -459,7 +463,7 @@ void Foam::searchableBox::findNearest
 {
     info.setSize(samples.size());
 
-    const point bbMid(midpoint());
+    const point bbMid(centre());
 
     forAll(samples, i)
     {

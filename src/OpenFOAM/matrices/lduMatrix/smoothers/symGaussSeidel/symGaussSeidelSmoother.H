@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,9 +81,9 @@ public:
         static void smooth
         (
             const word& fieldName,
-            scalarField& psi,
+            solveScalarField& psi,
             const lduMatrix& matrix,
-            const scalarField& source,
+            const solveScalarField& source,
             const FieldField<Field, scalar>& interfaceBouCoeffs,
             const lduInterfaceFieldPtrsList& interfaces,
             const direction cmpt,
@@ -92,8 +94,17 @@ public:
         //- Smooth the solution for a given number of sweeps
         virtual void smooth
         (
-            scalarField& psi,
+            solveScalarField& psi,
             const scalarField& Source,
+            const direction cmpt,
+            const label nSweeps
+        ) const;
+
+        //- Smooth the solution for a given number of sweeps
+        virtual void scalarSmooth
+        (
+            solveScalarField& psi,
+            const solveScalarField& source,
             const direction cmpt,
             const label nSweeps
         ) const;

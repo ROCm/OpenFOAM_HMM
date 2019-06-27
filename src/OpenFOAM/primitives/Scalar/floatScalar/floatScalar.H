@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,50 +86,65 @@ inline Scalar atan2(const Scalar y, const Scalar x)
 }
 
 // Single-precision transcendental functions (with 'f' appended to the name)
-#define transFunc(func)            \
-inline Scalar func(const Scalar s) \
-{                                  \
-    return ::func##f(s);           \
+#define transFunc(func)                                         \
+inline Scalar func(const Scalar s)                              \
+{                                                               \
+    return ::func##f(s);                                        \
 }
 
 
-#ifdef darwin
-// Single-precision bessel functions. (No float version for darwin).
-#define besselFunc(func)           \
-inline Scalar func(const Scalar s) \
-{                                  \
-    return ::func(s);              \
-}
-
-inline Scalar jn(const int n, const Scalar s)
-{
-    return Scalar(::jn(n, double(s)));
-}
-
-inline Scalar yn(const int n, const Scalar s)
-{
-    return Scalar(::yn(n, double(s)));
-}
-
+// Single-precision bessel functions.
+// May not be available on all systems
+#ifdef Foam_no_besselFunc
+    // Not available
+    #define besselFunc(func)                                    \
+    inline Scalar func(const Scalar s)                          \
+    {                                                           \
+        std::cerr<< "No '" << #func << "' function\n";          \
+        return 0;                                               \
+    }
+    #define besselFunc2(func)                                   \
+    inline Scalar func(const int n, const Scalar s)             \
+    {                                                           \
+        std::cerr<< "No '" << #func << "' function\n";          \
+        return 0;                                               \
+    }
+#elif defined(__APPLE__)
+    // Darwin: no float version (use a cast)
+    #define besselFunc(func)                                    \
+    inline Scalar func(const Scalar s)                          \
+    {                                                           \
+        return ::func(s);                                       \
+    }
+    #define besselFunc2(func)                                   \
+    inline Scalar func(const int n, const Scalar s)             \
+    {                                                           \
+        return Scalar(::func(n, double(s)));                    \
+    }
+#elif defined(__MINGW32__)
+    // Mingw: with '_' prefix, no float version (use a cast)
+    #define besselFunc(func)                                    \
+    inline Scalar func(const Scalar s)                          \
+    {                                                           \
+        return _##func(s);                                      \
+    }
+    #define besselFunc2(func)                                   \
+    inline Scalar func(const int n, const Scalar s)             \
+    {                                                           \
+        return Scalar(_##func(n, double(s)));                   \
+    }
 #else
-
-// Single-precision bessel functions (with 'f' appended to the name)
-#define besselFunc(func)           \
-inline Scalar func(const Scalar s) \
-{                                  \
-    return ::func##f(s);           \
-}
-
-inline Scalar jn(const int n, const Scalar s)
-{
-    return ::jnf(n, s);
-}
-
-inline Scalar yn(const int n, const Scalar s)
-{
-    return ::ynf(n, s);
-}
-
+    // With 'f' (float) appended to the name
+    #define besselFunc(func)                                    \
+    inline Scalar func(const Scalar s)                          \
+    {                                                           \
+        return ::func##f(s);                                    \
+    }
+    #define besselFunc2(func)                                   \
+    inline Scalar func(const int n, const Scalar s)             \
+    {                                                           \
+        return ::func##f(n, s);                                 \
+    }
 #endif
 
 
@@ -147,6 +164,7 @@ inline Scalar yn(const int n, const Scalar s)
 #undef ScalarRead
 #undef transFunc
 #undef besselFunc
+#undef besselFunc2
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

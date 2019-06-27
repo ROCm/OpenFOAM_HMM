@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +28,7 @@ License
 #include "fvScalarMatrix.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
 #include "profiling.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -194,24 +197,29 @@ Foam::solverPerformance Foam::fvMatrix<Foam::scalar>::solveSegregated
 template<>
 Foam::tmp<Foam::scalarField> Foam::fvMatrix<Foam::scalar>::residual() const
 {
-    scalarField boundaryDiag(psi_.size(), 0.0);
+    scalarField boundaryDiag(psi_.size(), Zero);
     addBoundaryDiag(boundaryDiag, 0);
 
-    tmp<scalarField> tres
+    const scalarField& psif = psi_.primitiveField();
+    ConstPrecisionAdaptor<solveScalar, scalar> tpsi(psif);
+    const solveScalarField& psi = tpsi();
+
+    tmp<solveScalarField> tres
     (
         lduMatrix::residual
         (
-            psi_.primitiveField(),
-            source_ - boundaryDiag*psi_.primitiveField(),
+            psi,
+            source_ - boundaryDiag*psif,
             boundaryCoeffs_,
             psi_.boundaryField().scalarInterfaces(),
             0
         )
     );
 
-    addBoundarySource(tres.ref());
+    ConstPrecisionAdaptor<scalar, solveScalar> tres_s(tres);
+    addBoundarySource(tres_s.ref());
 
-    return tres;
+    return tres_s;
 }
 
 

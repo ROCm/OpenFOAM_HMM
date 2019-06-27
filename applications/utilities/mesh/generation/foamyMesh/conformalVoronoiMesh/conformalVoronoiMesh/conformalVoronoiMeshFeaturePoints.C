@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,14 +149,10 @@ bool Foam::conformalVoronoiMesh::regionIsInside
     {
         return meshableRegionA;
     }
-    else
-    {
-        WarningInFunction
-            << ""
-            << endl;
 
-        return false;
-    }
+    WarningInFunction << endl;
+
+    return false;
 }
 
 
@@ -411,7 +409,7 @@ void Foam::conformalVoronoiMesh::createEdgePointGroupByCirculating
     );
 
 
-    forAllConstIter(Map<Foam::point>, masterPoints, iter)
+    forAllConstIters(masterPoints, iter)
     {
         const Foam::point& pt = masterPoints[iter.key()];
         const vertexType ptType = masterPointsTypes[iter.key()];
@@ -902,7 +900,7 @@ void Foam::conformalVoronoiMesh::createMultipleEdgePointGroup
     const List<extendedFeatureEdgeMesh::sideVolumeType>& normalVolumeTypes =
         feMesh.normalVolumeTypes();
 
-    labelList nNormalTypes(4, label(0));
+    labelList nNormalTypes(4, Zero);
 
     forAll(edNormalIs, edgeNormalI)
     {

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,12 +78,7 @@ JohnsonJacksonParticleSlipFvPatchVectorField
 )
 :
     partialSlipFvPatchVectorField(p, iF),
-    specularityCoefficient_
-    (
-        "specularityCoefficient",
-        dimless,
-        dict.lookup("specularityCoefficient")
-    )
+    specularityCoefficient_("specularityCoefficient", dimless, dict)
 {
     if
     (
@@ -219,7 +216,6 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::updateCoeffs()
         )
        .subDict("RAS")
        .subDict("kineticTheoryCoeffs")
-       .lookup("alphaMax")
     );
 
     // calculate the slip value fraction

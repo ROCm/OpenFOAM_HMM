@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,9 +73,9 @@ class COxidationHurtMitchell
 :
     public SurfaceReactionModel<CloudType>
 {
-    // Private data
+    // Private Data
 
-        // Model constants
+        // Model Constants
 
             //- Stoichiometry of reaction
             const scalar Sb_;
@@ -141,7 +143,7 @@ public:
 
 
     //- Destructor
-    virtual ~COxidationHurtMitchell();
+    virtual ~COxidationHurtMitchell() = default;
 
 
     // Member Functions
@@ -150,6 +152,8 @@ public:
         virtual scalar calculate
         (
             const scalar dt,
+            const scalar Re,
+            const scalar nu,
             const label celli,
             const scalar d,
             const scalar T,

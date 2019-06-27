@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -375,7 +377,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             io.readOpt(),
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         std::move(points)
     ),
@@ -388,7 +390,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             io.readOpt(),
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         std::move(faces)
     ),
@@ -401,7 +403,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             io.readOpt(),
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         std::move(owner)
     ),
@@ -414,7 +416,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             io.readOpt(),
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         std::move(neighbour)
     ),
@@ -428,7 +430,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             io.readOpt(),
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         *this,
         polyPatchList()
@@ -526,7 +528,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         std::move(points)
     ),
@@ -539,7 +541,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         std::move(faces)
     ),
@@ -552,7 +554,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         0
     ),
@@ -565,7 +567,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         0
     ),
@@ -579,7 +581,7 @@ Foam::polyMesh::polyMesh
             meshSubDir,
             *this,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            io.writeOpt()
         ),
         *this,
         0
@@ -798,10 +800,8 @@ const Foam::fileName& Foam::polyMesh::dbDir() const
     {
         return parent().dbDir();
     }
-    else
-    {
-        return objectRegistry::dbDir();
-    }
+
+    return objectRegistry::dbDir();
 }
 
 
@@ -927,7 +927,7 @@ Foam::polyMesh::cellTree() const
 
 void Foam::polyMesh::addPatches
 (
-    const List<polyPatch*>& p,
+    PtrList<polyPatch>& plist,
     const bool validBoundary
 )
 {
@@ -942,13 +942,7 @@ void Foam::polyMesh::addPatches
     geometricD_ = Zero;
     solutionD_ = Zero;
 
-    boundary_.setSize(p.size());
-
-    // Copy the patch pointers
-    forAll(p, pI)
-    {
-        boundary_.set(pI, p[pI]);
-    }
+    boundary_.transfer(plist);
 
     // parallelData depends on the processorPatch ordering so force
     // recalculation. Problem: should really be done in removeBoundary but
@@ -1024,6 +1018,19 @@ void Foam::polyMesh::addZones
 
         cellZones_.writeOpt() = IOobject::AUTO_WRITE;
     }
+}
+
+
+void Foam::polyMesh::addPatches
+(
+    const List<polyPatch*>& p,
+    const bool validBoundary
+)
+{
+    // Acquire ownership of the pointers
+    PtrList<polyPatch> plist(const_cast<List<polyPatch*>&>(p));
+
+    addPatches(plist, validBoundary);
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +59,7 @@ Foam::kineticTheoryModels::viscosityModels::HrenyaSinclair::HrenyaSinclair
 :
     viscosityModel(dict),
     coeffDict_(dict.optionalSubDict(typeName + "Coeffs")),
-    L_("L", dimensionSet(0, 1, 0, 0, 0), coeffDict_)
+    L_("L", dimLength, coeffDict_)
 {}
 
 

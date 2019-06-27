@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -301,7 +303,15 @@ bool Foam::functionObjects::scalarTransport::execute()
 
         if (bounded01_)
         {
-            MULES::explicitSolve(s, phi, tTPhiUD.ref(), 1, 0);
+            MULES::explicitSolve
+            (
+                geometricOneField(),
+                s,
+                phi,
+                tTPhiUD.ref(),
+                oneField(),
+                zeroField()
+            );
         }
     }
     else if (phi.dimensions() == dimMass/dimTime)

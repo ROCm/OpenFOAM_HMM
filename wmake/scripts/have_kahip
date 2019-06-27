@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -55,81 +55,64 @@ echo_kahip()
 # -> HAVE_KAHIP, KAHIP_ARCH_PATH, KAHIP_INC_DIR, KAHIP_LIB_DIR
 have_kahip()
 {
-    local header library static label settings warn
+    local prefix header library incName libName settings warn
     warn="==> skip kahip"
 
-    # Basic setup/checks
-    settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/kahip) || {
+    #  Setup
+    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/kahip)
+    then
+        . "$settings"
+    else
         [ -n "$warn" ] && echo "$warn (no config.sh/kahip settings)"
         return 1
-    }
-    . $settings
-    if isNone "$KAHIP_ARCH_PATH"
+    fi
+
+    # Expected location, include/library names
+    prefix="$KAHIP_ARCH_PATH"
+    incName="kaHIP_interface.h"
+    libName="libkahip"
+
+    # ----------------------------------
+    if isNone "$prefix"
     then
-        [ -n "$warn" ] && echo "$warn (not available)"
+        [ -n "$warn" ] && echo "$warn (disabled)"
         return 1
-    fi
-
-
-    # Header/library names
-    header="kaHIP_interface.h"
-    library="libkahip$extLibso"
-    static="libkahip$extLiba"
-
-    if hasAbsdir "$KAHIP_ARCH_PATH"
+    elif hasAbsdir "$prefix"
     then
-        header=$(findFirstFile $KAHIP_ARCH_PATH/include/$header)
-
-        library=$(findFirstFile \
-            "$(thirdExtLib $library)" \
-            $KAHIP_ARCH_PATH/lib/$static \
-            $KAHIP_ARCH_PATH/lib/$library \
-            $KAHIP_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$static \
-            $KAHIP_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$library \
-        )
-    elif isSystem "$KAHIP_ARCH_PATH"
+        header=$(findFirstFile "$prefix/include/$incName")
+        library="$(findExtLib $libName)"
+    elif isSystem "$prefix"
     then
-        header=$(findFirstFile /usr/local/include/$header /usr/include/$header)
-
-        case "$header" in
-        /usr/local/*)
-            library=$(findFirstFile \
-                /usr/local/lib/$library \
-                /usr/local/lib$WM_COMPILER_LIB_ARCH/$library \
-            )
-            ;;
-
-        *)
-            library=$(findFirstFile \
-                /usr/lib/$library \
-                /usr/lib$WM_COMPILER_LIB_ARCH/$library \
-            )
-            ;;
-        esac
+        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        prefix=$(sysPrefix "$header")
     else
-        unset header library
+        unset prefix
     fi
+    # ----------------------------------
 
-
-    # Header found?
+    # Header
     [ -n "$header" ] || {
         [ -n "$warn" ] && echo "$warn (no header)"
         return 2
     }
 
-    # Library found?
-    [ -n "$library" ] || {
-        [ -n "$warn" ] && echo "$warn (missing library)"
+    # Library
+    [ -n "$library" ] || library=$(findLibrary \
+        "$prefix/lib/$libName" \
+        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
+    ) || {
+        [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
 
+    # ----------------------------------
 
     # kahip itself is 32-bit int, but our interface itself handles some
     # 64-bit conversion (mesh size).
 
-    echo "kahip (label=32) - $KAHIP_ARCH_PATH"
+    echo "kahip (label=32) - $prefix"
     export HAVE_KAHIP=true
-    export KAHIP_ARCH_PATH
+    export KAHIP_ARCH_PATH="$prefix"
     export KAHIP_INC_DIR="${header%/*}"     # Basename
     export KAHIP_LIB_DIR="${library%/*}"    # Basename
 }

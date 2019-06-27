@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,6 +78,24 @@ EnumType Foam::Enum<EnumType>::get(const word& enumName) const
 
 
 template<class EnumType>
+EnumType Foam::Enum<EnumType>::get
+(
+    const word& enumName,
+    const EnumType deflt
+) const
+{
+    const label idx = find(enumName);
+
+    if (idx < 0)
+    {
+        return deflt;
+    }
+
+    return EnumType(vals_[idx]);
+}
+
+
+template<class EnumType>
 EnumType Foam::Enum<EnumType>::read(Istream& is) const
 {
     const word enumName(is);
@@ -118,11 +136,11 @@ EnumType Foam::Enum<EnumType>::get
 
 
 template<class EnumType>
-EnumType Foam::Enum<EnumType>::lookupOrDefault
+EnumType Foam::Enum<EnumType>::getOrDefault
 (
     const word& key,
     const dictionary& dict,
-    const EnumType defaultValue,
+    const EnumType deflt,
     const bool failsafe
 ) const
 {
@@ -145,8 +163,8 @@ EnumType Foam::Enum<EnumType>::lookupOrDefault
         {
             IOWarningInFunction(dict)
                 << enumName << " is not in enumeration: " << *this << nl
-                << "using failsafe " << get(defaultValue)
-                << " (value " << int(defaultValue) << ")" << endl;
+                << "using failsafe " << get(deflt)
+                << " (value " << int(deflt) << ")" << endl;
         }
         else
         {
@@ -156,7 +174,7 @@ EnumType Foam::Enum<EnumType>::lookupOrDefault
         }
     }
 
-    return defaultValue;
+    return deflt;
 }
 
 

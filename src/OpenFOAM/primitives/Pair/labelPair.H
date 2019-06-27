@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -20,12 +22,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Typedef
-    Foam::labelPair
-
-Description
-    A pair of labels.
 
 Typedef
     Foam::labelPairPair
@@ -64,7 +60,6 @@ Description
 
 namespace Foam
 {
-    typedef Pair<label> labelPair;
     typedef Pair<labelPair> labelPairPair;
     typedef List<labelPair> labelPairList;
     typedef UList<labelPair> labelPairUList;

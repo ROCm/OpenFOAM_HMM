@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -316,7 +318,7 @@ Type Foam::Function1Types::TableBase<Type>::integrate
 template<class Type>
 Foam::tmp<Foam::scalarField> Foam::Function1Types::TableBase<Type>::x() const
 {
-    tmp<scalarField> tfld(new scalarField(table_.size(), 0.0));
+    tmp<scalarField> tfld(new scalarField(table_.size(), Zero));
     scalarField& fld = tfld.ref();
 
     forAll(table_, i)

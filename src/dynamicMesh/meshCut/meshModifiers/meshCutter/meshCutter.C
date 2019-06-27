@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -431,7 +433,7 @@ Foam::face Foam::meshCutter::addEdgeCutsToFace(const label facei) const
         if (fnd.found())
         {
             // edge has been cut. Introduce new vertex.
-            newFace[newFp++] = fnd.object();
+            newFace[newFp++] = fnd.val();
         }
     }
 
@@ -489,7 +491,7 @@ Foam::face Foam::meshCutter::loopToFace
 
                     if (fnd.found())
                     {
-                        newFace[newFacei++] = fnd.object();
+                        newFace[newFacei++] = fnd.val();
                     }
                 }
             }
@@ -734,16 +736,16 @@ void Foam::meshCutter::setRefinement
 
     const Map<edge>& faceSplitCuts = cuts.faceSplitCut();
 
-    forAllConstIter(Map<edge>, faceSplitCuts, iter)
+    forAllConstIters(faceSplitCuts, iter)
     {
-        label facei = iter.key();
+        const label facei = iter.key();
+
+        const edge& splitEdge = iter.val();
 
         // Renumber face to include split edges.
         face newFace(addEdgeCutsToFace(facei));
 
         // Edge splitting the face. Convert cuts to new vertex numbering.
-        const edge& splitEdge = iter();
-
         label cut0 = splitEdge[0];
 
         label v0;
@@ -1004,14 +1006,13 @@ void Foam::meshCutter::updateMesh(const mapPolyMesh& morphMap)
         // key.
         Map<label> newAddedCells(addedCells_.size());
 
-        forAllConstIter(Map<label>, addedCells_, iter)
+        forAllConstIters(addedCells_, iter)
         {
-            label celli = iter.key();
-            label newCelli = morphMap.reverseCellMap()[celli];
+            const label celli = iter.key();
+            const label addedCelli = iter.val();
 
-            label addedCelli = iter();
-
-            label newAddedCelli = morphMap.reverseCellMap()[addedCelli];
+            const label newCelli = morphMap.reverseCellMap()[celli];
+            const label newAddedCelli = morphMap.reverseCellMap()[addedCelli];
 
             if (newCelli >= 0 && newAddedCelli >= 0)
             {
@@ -1037,14 +1038,13 @@ void Foam::meshCutter::updateMesh(const mapPolyMesh& morphMap)
     {
         Map<label> newAddedFaces(addedFaces_.size());
 
-        forAllConstIter(Map<label>, addedFaces_, iter)
+        forAllConstIters(addedFaces_, iter)
         {
-            label celli = iter.key();
-            label newCelli = morphMap.reverseCellMap()[celli];
+            const label celli = iter.key();
+            const label addedFacei = iter.val();
 
-            label addedFacei = iter();
-
-            label newAddedFacei = morphMap.reverseFaceMap()[addedFacei];
+            const label newCelli = morphMap.reverseCellMap()[celli];
+            const label newAddedFacei = morphMap.reverseFaceMap()[addedFacei];
 
             if ((newCelli >= 0) && (newAddedFacei >= 0))
             {
@@ -1074,7 +1074,7 @@ void Foam::meshCutter::updateMesh(const mapPolyMesh& morphMap)
         forAllConstIters(addedPoints_, iter)
         {
             const edge& e = iter.key();
-            const label addedPointi = iter.object();
+            const label addedPointi = iter.val();
 
             label newStart = morphMap.reversePointMap()[e.start()];
 

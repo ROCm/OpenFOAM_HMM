@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +58,8 @@ License
 #include "fvMeshTools.H"
 #include "motionSmoother.H"
 #include "faceSet.H"
+#include "topoDistanceData.H"
+#include "FaceCellWave.H"
 
 // Leak path
 #include "shortestPathSet.H"
@@ -285,10 +289,13 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
         }
         reduce(nChangedFaces, sumOp<label>());
 
-        Info<< "Edge intersection testing:" << nl
-            << "    Number of edges             : " << nMasterFaces << nl
-            << "    Number of edges to retest   : " << nChangedFaces
-            << endl;
+        if (!dryRun_)
+        {
+            Info<< "Edge intersection testing:" << nl
+                << "    Number of edges             : " << nMasterFaces << nl
+                << "    Number of edges to retest   : " << nChangedFaces
+                << endl;
+        }
     }
 
 
@@ -342,10 +349,226 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     label nHits = countHits();
     label nTotHits = returnReduce(nHits, sumOp<label>());
 
-    Info<< "    Number of intersected edges : " << nTotHits << endl;
+
+    if (!dryRun_)
+    {
+        Info<< "    Number of intersected edges : " << nTotHits << endl;
+    }
 
     // Set files to same time as mesh
     setInstance(mesh_.facesInstance());
+}
+
+
+Foam::labelList Foam::meshRefinement::nearestPatch
+(
+    const labelList& adaptPatchIDs
+) const
+{
+    // Determine nearest patch for all mesh faces. Used when removing cells
+    // to give some reasonable patch to exposed faces.
+
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    labelList nearestAdaptPatch;
+
+    if (adaptPatchIDs.size())
+    {
+        nearestAdaptPatch.setSize(mesh_.nFaces(), adaptPatchIDs[0]);
+
+
+        // Count number of faces in adaptPatchIDs
+        label nFaces = 0;
+        forAll(adaptPatchIDs, i)
+        {
+            const polyPatch& pp = patches[adaptPatchIDs[i]];
+            nFaces += pp.size();
+        }
+
+        // Field on cells and faces.
+        List<topoDistanceData> cellData(mesh_.nCells());
+        List<topoDistanceData> faceData(mesh_.nFaces());
+
+        // Start of changes
+        labelList patchFaces(nFaces);
+        List<topoDistanceData> patchData(nFaces);
+        nFaces = 0;
+        forAll(adaptPatchIDs, i)
+        {
+            label patchi = adaptPatchIDs[i];
+            const polyPatch& pp = patches[patchi];
+
+            forAll(pp, i)
+            {
+                patchFaces[nFaces] = pp.start()+i;
+                patchData[nFaces] = topoDistanceData(patchi, 0);
+                nFaces++;
+            }
+        }
+
+        // Propagate information inwards
+        FaceCellWave<topoDistanceData> deltaCalc
+        (
+            mesh_,
+            patchFaces,
+            patchData,
+            faceData,
+            cellData,
+            mesh_.globalData().nTotalCells()+1
+        );
+
+        // And extract
+
+        bool haveWarned = false;
+        forAll(faceData, facei)
+        {
+            if (!faceData[facei].valid(deltaCalc.data()))
+            {
+                if (!haveWarned)
+                {
+                    WarningInFunction
+                        << "Did not visit some faces, e.g. face " << facei
+                        << " at " << mesh_.faceCentres()[facei] << endl
+                        << "Assigning these faces to patch "
+                        << adaptPatchIDs[0]
+                        << endl;
+                    haveWarned = true;
+                }
+            }
+            else
+            {
+                nearestAdaptPatch[facei] = faceData[facei].data();
+            }
+        }
+    }
+    else
+    {
+        // Use patch 0
+        nearestAdaptPatch.setSize(mesh_.nFaces(), 0);
+    }
+
+    return nearestAdaptPatch;
+}
+
+
+Foam::labelList Foam::meshRefinement::nearestIntersection
+(
+    const labelList& surfacesToTest,
+    const label defaultRegion
+) const
+{
+    // Determine nearest intersection for all mesh faces. Used when removing
+    // cells to give some reasonable patch to exposed faces. Use this
+    // function instead of nearestPatch if you don't have patches yet.
+
+
+    // Swap neighbouring cell centres and cell level
+    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    calcNeighbourData(neiLevel, neiCc);
+
+
+    // Collect segments
+    // ~~~~~~~~~~~~~~~~
+
+    const labelList testFaces(intersectedFaces());
+
+    pointField start(testFaces.size());
+    pointField end(testFaces.size());
+    labelList minLevel(testFaces.size());
+
+    calcCellCellRays
+    (
+        neiCc,
+        neiLevel,
+        testFaces,
+        start,
+        end,
+        minLevel
+    );
+
+    // Do tests in one go
+    labelList surface1;
+    List<pointIndexHit> hit1;
+    labelList region1;
+    labelList surface2;
+    List<pointIndexHit> hit2;
+    labelList region2;
+    surfaces_.findNearestIntersection
+    (
+        surfacesToTest,
+        start,
+        end,
+
+        surface1,
+        hit1,
+        region1,
+        surface2,
+        hit2,
+        region2
+    );
+
+    labelList nearestRegion(mesh_.nFaces(), defaultRegion);
+
+    // Field on cells and faces.
+    List<topoDistanceData> cellData(mesh_.nCells());
+    List<topoDistanceData> faceData(mesh_.nFaces());
+
+    // Start walking from all intersected faces
+    DynamicList<label> patchFaces(start.size());
+    DynamicList<topoDistanceData> patchData(start.size());
+    forAll(start, i)
+    {
+        label facei = testFaces[i];
+        if (surface1[i] != -1)
+        {
+            patchFaces.append(facei);
+            label regioni = surfaces_.globalRegion(surface1[i], region1[i]);
+            patchData.append(topoDistanceData(regioni, 0));
+        }
+        else if (surface2[i] != -1)
+        {
+            patchFaces.append(facei);
+            label regioni = surfaces_.globalRegion(surface2[i], region2[i]);
+            patchData.append(topoDistanceData(regioni, 0));
+        }
+    }
+
+    // Propagate information inwards
+    FaceCellWave<topoDistanceData> deltaCalc
+    (
+        mesh_,
+        patchFaces,
+        patchData,
+        faceData,
+        cellData,
+        mesh_.globalData().nTotalCells()+1
+    );
+
+    // And extract
+
+    bool haveWarned = false;
+    forAll(faceData, facei)
+    {
+        if (!faceData[facei].valid(deltaCalc.data()))
+        {
+            if (!haveWarned)
+            {
+                WarningInFunction
+                    << "Did not visit some faces, e.g. face " << facei
+                    << " at " << mesh_.faceCentres()[facei] << endl
+                    << "Assigning these faces to global region "
+                    << defaultRegion << endl;
+                haveWarned = true;
+            }
+        }
+        else
+        {
+            nearestRegion[facei] = faceData[facei].data();
+        }
+    }
+
+    return nearestRegion;
 }
 
 
@@ -487,7 +710,11 @@ void Foam::meshRefinement::checkData()
             neiBoundaryFc
         );
     }
+
     // Check meshRefinement
+    const labelList& surfIndex = surfaceIndex();
+
+
     {
         // Get boundary face centre and level. Coupled aware.
         labelList neiLevel(nBnd);
@@ -549,14 +776,14 @@ void Foam::meshRefinement::checkData()
         // Check
         forAll(surfaceHit, facei)
         {
-            if (surfaceIndex_[facei] != surfaceHit[facei])
+            if (surfIndex[facei] != surfaceHit[facei])
             {
                 if (mesh_.isInternalFace(facei))
                 {
                     WarningInFunction
                         << "Internal face:" << facei
                         << " fc:" << mesh_.faceCentres()[facei]
-                        << " cached surfaceIndex_:" << surfaceIndex_[facei]
+                        << " cached surfaceIndex_:" << surfIndex[facei]
                         << " current:" << surfaceHit[facei]
                         << " ownCc:"
                         << mesh_.cellCentres()[mesh_.faceOwner()[facei]]
@@ -566,14 +793,14 @@ void Foam::meshRefinement::checkData()
                 }
                 else if
                 (
-                    surfaceIndex_[facei]
+                    surfIndex[facei]
                  != neiHit[facei-mesh_.nInternalFaces()]
                 )
                 {
                     WarningInFunction
                         << "Boundary face:" << facei
                         << " fc:" << mesh_.faceCentres()[facei]
-                        << " cached surfaceIndex_:" << surfaceIndex_[facei]
+                        << " cached surfaceIndex_:" << surfIndex[facei]
                         << " current:" << surfaceHit[facei]
                         << " ownCc:"
                         << mesh_.cellCentres()[mesh_.faceOwner()[facei]]
@@ -900,13 +1127,12 @@ Foam::label Foam::meshRefinement::splitFacesUndo
             forAll(map.faceMap(), facei)
             {
                 label oldFacei = map.faceMap()[facei];
-                Map<label>::iterator oldFaceFnd = splitFaceToIndex.find
-                (
-                    oldFacei
-                );
-                if (oldFaceFnd != splitFaceToIndex.end())
+
+                const auto oldFaceFnd = splitFaceToIndex.cfind(oldFacei);
+
+                if (oldFaceFnd.found())
                 {
-                    labelPair& twoFaces = facePairs[oldFaceFnd()];
+                    labelPair& twoFaces = facePairs[oldFaceFnd.val()];
                     if (twoFaces[0] == -1)
                     {
                         twoFaces[0] = facei;
@@ -996,7 +1222,8 @@ Foam::label Foam::meshRefinement::splitFacesUndo
             false,  // report
             mesh_,
             motionDict,
-            errorFaces
+            errorFaces,
+            dryRun_
         );
         if (!hasErrors)
         {
@@ -1208,7 +1435,9 @@ Foam::meshRefinement::meshRefinement
     const refinementSurfaces& surfaces,
     const refinementFeatures& features,
     const shellSurfaces& shells,
-    const shellSurfaces& limitShells
+    const shellSurfaces& limitShells,
+    const labelUList& checkFaces,
+    const bool dryRun
 )
 :
     mesh_(mesh),
@@ -1219,6 +1448,7 @@ Foam::meshRefinement::meshRefinement
     features_(features),
     shells_(shells),
     limitShells_(limitShells),
+    dryRun_(dryRun),
     meshCutter_
     (
         mesh,
@@ -1241,11 +1471,34 @@ Foam::meshRefinement::meshRefinement
     userFaceData_(0)
 {
     // recalculate intersections for all faces
-    updateIntersections(identity(mesh_.nFaces()));
+    updateIntersections(checkFaces);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::labelList& Foam::meshRefinement::surfaceIndex() const
+{
+    if (surfaceIndex_.size() != mesh_.nFaces())
+    {
+        const_cast<meshRefinement&>(*this).updateIntersections
+        (
+            identity(mesh_.nFaces())
+        );
+    }
+    return surfaceIndex_;
+}
+
+
+Foam::labelList& Foam::meshRefinement::surfaceIndex()
+{
+    if (surfaceIndex_.size() != mesh_.nFaces())
+    {
+        updateIntersections(identity(mesh_.nFaces()));
+    }
+    return surfaceIndex_;
+}
+
 
 Foam::label Foam::meshRefinement::countHits() const
 {
@@ -1254,9 +1507,11 @@ Foam::label Foam::meshRefinement::countHits() const
 
     label nHits = 0;
 
-    forAll(surfaceIndex_, facei)
+    const labelList& surfIndex = surfaceIndex();
+
+    forAll(surfIndex, facei)
     {
-        if (surfaceIndex_[facei] >= 0 && isMasterFace.test(facei))
+        if (surfIndex[facei] >= 0 && isMasterFace.test(facei))
         {
             ++nHits;
         }
@@ -1520,9 +1775,11 @@ Foam::labelList Foam::meshRefinement::intersectedFaces() const
 {
     label nBoundaryFaces = 0;
 
-    forAll(surfaceIndex_, facei)
+    const labelList& surfIndex = surfaceIndex();
+
+    forAll(surfIndex, facei)
     {
-        if (surfaceIndex_[facei] != -1)
+        if (surfIndex[facei] != -1)
         {
             nBoundaryFaces++;
         }
@@ -1531,9 +1788,9 @@ Foam::labelList Foam::meshRefinement::intersectedFaces() const
     labelList surfaceFaces(nBoundaryFaces);
     nBoundaryFaces = 0;
 
-    forAll(surfaceIndex_, facei)
+    forAll(surfIndex, facei)
     {
-        if (surfaceIndex_[facei] != -1)
+        if (surfIndex[facei] != -1)
         {
             surfaceFaces[nBoundaryFaces++] = facei;
         }
@@ -1550,9 +1807,11 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     bitSet isBoundaryPoint(mesh_.nPoints());
     label nBoundaryPoints = 0;
 
-    forAll(surfaceIndex_, facei)
+    const labelList& surfIndex = surfaceIndex();
+
+    forAll(surfIndex, facei)
     {
-        if (surfaceIndex_[facei] != -1)
+        if (surfIndex[facei] != -1)
         {
             const face& f = faces[facei];
 
@@ -2322,7 +2581,7 @@ Foam::label Foam::meshRefinement::findRegions
                     }
                     reduce(nSegments, maxOp<label>());
 
-                    labelList nElemsPerSegment(nSegments, 0);
+                    labelList nElemsPerSegment(nSegments, Zero);
                     for (label segmenti : leakPath.segments())
                     {
                         nElemsPerSegment[segmenti]++;
@@ -2696,7 +2955,7 @@ void Foam::meshRefinement::updateMesh
 
             if (newFacei >= 0)
             {
-                newFaceToPatch.insert(newFacei, iter.object());
+                newFaceToPatch.insert(newFacei, iter.val());
             }
         }
         faceToCoupledPatch_.transfer(newFaceToPatch);
@@ -2915,7 +3174,7 @@ const
     {
         const labelList& cellLevel = meshCutter_.cellLevel();
 
-        labelList nCells(gMax(cellLevel)+1, 0);
+        labelList nCells(gMax(cellLevel)+1, Zero);
 
         forAll(cellLevel, celli)
         {
@@ -2935,17 +3194,14 @@ const
 }
 
 
-//- Return either time().constant() or oldInstance
 Foam::word Foam::meshRefinement::timeName() const
 {
     if (overwrite_ && mesh_.time().timeIndex() == 0)
     {
         return oldInstance_;
     }
-    else
-    {
-        return mesh_.time().timeName();
-    }
+
+    return mesh_.time().timeName();
 }
 
 
@@ -3094,6 +3350,9 @@ void Foam::meshRefinement::write
     if (writeFlags && !(writeFlags & NOWRITEREFINEMENT))
     {
         meshCutter_.write();
+
+        // Force calculation before writing
+        (void)surfaceIndex();
         surfaceIndex_.write();
     }
 
@@ -3102,7 +3361,7 @@ void Foam::meshRefinement::write
         dumpRefinementLevel();
     }
 
-    if (debugFlags & OBJINTERSECTIONS && prefix.size())
+    if ((debugFlags & OBJINTERSECTIONS) && prefix.size())
     {
         dumpIntersections(prefix);
     }
@@ -3155,6 +3414,74 @@ void Foam::meshRefinement::writeLevel(const writeType flags)
 //{
 //    outputLevel_ = flags;
 //}
+
+
+const Foam::dictionary& Foam::meshRefinement::subDict
+(
+    const dictionary& dict,
+    const word& keyword,
+    const bool noExit
+)
+{
+    if (noExit)
+    {
+        // Find non-recursive with patterns
+        const dictionary::const_searcher finder
+        (
+            dict.csearch
+            (
+                keyword,
+                keyType::REGEX
+            )
+        );
+
+        if (!finder.found())
+        {
+            FatalIOErrorInFunction(dict)
+                << "Entry '" << keyword << "' not found in dictionary "
+                << dict.name();
+            return dictionary::null;
+        }
+        else
+        {
+            return finder.dict();
+        }
+    }
+
+    return dict.subDict(keyword);
+}
+
+
+Foam::ITstream& Foam::meshRefinement::lookup
+(
+    const dictionary& dict,
+    const word& keyword,
+    const bool noExit
+)
+{
+    if (noExit)
+    {
+        const dictionary::const_searcher finder
+        (
+            dict.csearch(keyword, keyType::REGEX)
+        );
+
+        if (!finder.found())
+        {
+            FatalIOErrorInFunction(dict)
+                << "Entry '" << keyword << "' not found in dictionary "
+                << dict.name();
+            // Fake entry
+            return dict.first()->stream();
+        }
+        else
+        {
+            return finder.ref().stream();
+        }
+    }
+
+    return dict.lookup(keyword);
+}
 
 
 // ************************************************************************* //

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +56,7 @@ class namedVertex
 {
 protected:
 
-    // Protected member data
+    // Protected Member Data
 
         //- The dictionary variable name for the vertex number
         word name_;
@@ -74,16 +76,15 @@ public:
         //- Construct from Istream setting pointsList
         namedVertex
         (
-            const dictionary&,
+            const dictionary& dict,
             const label index,
             const searchableSurfaces& geometry,
-            Istream&
+            Istream& is
         );
 
 
     //- Destructor
-    virtual ~namedVertex()
-    {}
+    virtual ~namedVertex() = default;
 
 
     // Member Functions

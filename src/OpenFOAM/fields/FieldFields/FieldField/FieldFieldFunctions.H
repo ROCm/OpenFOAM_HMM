@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,23 +88,37 @@ template<template<class> class Field, class Type>
 tmp<FieldField<Field, typename outerProduct<Type, Type>::type>>
 sqr(const tmp<FieldField<Field, Type>>& tf);
 
-template<template<class> class Field, class Type>
-void magSqr(FieldField<Field, scalar>& sf, const FieldField<Field, Type>& f);
 
 template<template<class> class Field, class Type>
-tmp<FieldField<Field, scalar>> magSqr(const FieldField<Field, Type>& f);
+void magSqr
+(
+    FieldField<Field, typename typeOfMag<Type>::type>& sf,
+    const FieldField<Field, Type>& f
+);
 
 template<template<class> class Field, class Type>
-tmp<FieldField<Field, scalar>> magSqr(const tmp<FieldField<Field, Type>>& tf);
+tmp<FieldField<Field, typename typeOfMag<Type>::type>>
+magSqr(const FieldField<Field, Type>& f);
 
 template<template<class> class Field, class Type>
-void mag(FieldField<Field, scalar>& sf, const FieldField<Field, Type>& f);
+tmp<FieldField<Field, typename typeOfMag<Type>::type>>
+magSqr(const tmp<FieldField<Field, Type>>& tf);
+
 
 template<template<class> class Field, class Type>
-tmp<FieldField<Field, scalar>> mag(const FieldField<Field, Type>& f);
+void mag
+(
+    FieldField<Field, typename typeOfMag<Type>::type>& res,
+    const FieldField<Field, Type>& f
+);
 
 template<template<class> class Field, class Type>
-tmp<FieldField<Field, scalar>> mag(const tmp<FieldField<Field, Type>>& tf);
+tmp<FieldField<Field, typename typeOfMag<Type>::type>>
+mag(const FieldField<Field, Type>& f);
+
+template<template<class> class Field, class Type>
+tmp<FieldField<Field, typename typeOfMag<Type>::type>>
+mag(const tmp<FieldField<Field, Type>>& tf);
 
 
 template<template<class> class Field, class Type>
@@ -190,25 +206,30 @@ tmp<FieldField<Field, Type>> cmptMag
 template<template<class> class Field, class Type>                              \
 returnType func(const tmp<FieldField<Field, Type>>& tf1);
 
+
 template<template<class> class Field, class Type>
 Type max(const FieldField<Field, Type>& f);
 
 TMP_UNARY_FUNCTION(Type, max)
+
 
 template<template<class> class Field, class Type>
 Type min(const FieldField<Field, Type>& f);
 
 TMP_UNARY_FUNCTION(Type, min)
 
+
 template<template<class> class Field, class Type>
 Type sum(const FieldField<Field, Type>& f);
 
 TMP_UNARY_FUNCTION(Type, sum)
 
-template<template<class> class Field, class Type>
-scalar sumMag(const FieldField<Field, Type>& f);
 
-TMP_UNARY_FUNCTION(scalar, sumMag)
+template<template<class> class Field, class Type>
+typename typeOfMag<Type>::type sumMag(const FieldField<Field, Type>& f);
+
+TMP_UNARY_FUNCTION(typename typeOfMag<Type>::type, sumMag)
+
 
 template<template<class> class Field, class Type>
 Type average(const FieldField<Field, Type>& f);
@@ -216,16 +237,33 @@ Type average(const FieldField<Field, Type>& f);
 TMP_UNARY_FUNCTION(Type, average)
 
 
-#define G_UNARY_FUNCTION(returnType, gFunc, func, rFunc)                       \
+//- Return min/max for a field of fields
+template<template<class> class Field, class Type>
+MinMax<Type> minMax(const FieldField<Field, Type>& f);
+
+TMP_UNARY_FUNCTION(MinMax<Type>, minMax)
+
+//- Return mag min/max for a field of fields
+template<template<class> class Field, class Type>
+scalarMinMax minMaxMag(const FieldField<Field, Type>& f);
+
+TMP_UNARY_FUNCTION(scalarMinMax, minMaxMag)
+
+
+// With reduction on ReturnType
+#define G_UNARY_FUNCTION(ReturnType, gFunc, func, rFunc)                       \
                                                                                \
 template<template<class> class Field, class Type>                              \
-returnType gFunc(const FieldField<Field, Type>& f);                            \
-TMP_UNARY_FUNCTION(returnType, gFunc)
+ReturnType gFunc(const FieldField<Field, Type>& f);                            \
+TMP_UNARY_FUNCTION(ReturnType, gFunc)
 
 G_UNARY_FUNCTION(Type, gMax, max, max)
 G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
+
+G_UNARY_FUNCTION(typename typeOfMag<Type>::type, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
@@ -247,6 +285,8 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
 
 
 /* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */

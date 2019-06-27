@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,15 @@ Class
     Foam::extrudeModels::linearDirection
 
 Description
-    Extrudes by transforming points in a specified direction by a given distance
+    Extrudes by transforming points in a specified direction by the given
+    distance.
+
+    The linearDirectionCoeffs dictionary entries
+    \table
+        Property  | Description                             | Required | Default
+        direction | The extrusion direction, normalized on input | yes |
+        thickness | The extrusion thickness                 | yes |
+    \endtable
 
 \*---------------------------------------------------------------------------*/
 
@@ -67,11 +77,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        linearDirection(const dictionary& dict);
+        explicit linearDirection(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~linearDirection();
+    virtual ~linearDirection() = default;
 
 
     // Member Operators

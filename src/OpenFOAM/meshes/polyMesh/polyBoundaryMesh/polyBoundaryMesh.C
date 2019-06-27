@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -371,7 +373,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
                 // Edge in mesh points.
                 edge meshEdge(pp.meshPoints()[e[0]], pp.meshPoints()[e[1]]);
 
-                EdgeMap<labelPair>::iterator fnd = pointsToEdge.find(meshEdge);
+                auto fnd = pointsToEdge.find(meshEdge);
 
                 if (!fnd.found())
                 {
@@ -390,7 +392,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
                 else
                 {
                     // Second occurrence. Store.
-                    const labelPair& edgeInfo = fnd.object();
+                    const labelPair& edgeInfo = fnd.val();
 
                     neighbourEdges[patchi][edgei - pp.nInternalEdges()] =
                         edgeInfo;
@@ -704,7 +706,7 @@ Foam::labelList Foam::polyBoundaryMesh::indices
             if (iter.found())
             {
                 // Hash the patch ids for the group
-                labelHashSet groupIndices(iter.object());
+                labelHashSet groupIndices(iter.val());
 
                 groupIndices.erase(patchIndices);  // Skip existing
                 patchIndices.append(groupIndices.sortedToc());

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,6 +76,8 @@ SourceFiles
 namespace Foam
 {
 
+class turbulenceModel;
+
 /*---------------------------------------------------------------------------*\
              Class nutWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
@@ -85,6 +89,11 @@ class nutWallFunctionFvPatchScalarField
 protected:
 
     // Protected data
+
+        //- Name of velocity field
+        //  Defult is null (not specified) in which case the velocity is
+        //  retrieved from the turbulence model
+        word UName_;
 
         //- Cmu coefficient
         scalar Cmu_;
@@ -100,6 +109,10 @@ protected:
 
 
     // Protected Member Functions
+
+        //- Helper to return the velocity field either from the turbulence
+        //- model (default) or the mesh database
+        virtual const volVectorField& U(const turbulenceModel& turb) const;
 
         //- Check the type of the patch
         virtual void checkType();

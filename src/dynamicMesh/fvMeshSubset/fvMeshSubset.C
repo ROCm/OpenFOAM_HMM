@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -357,7 +359,7 @@ void Foam::fvMeshSubset::subsetZones()
         // +1 : part of faceZone, flipped
         // -1 :    ,,           , unflipped
         //  0 : not part of faceZone
-        labelList zone(baseMesh().nFaces(), 0);
+        labelList zone(baseMesh().nFaces(), Zero);
         forAll(fz, j)
         {
             if (fz.flipMap()[j])
@@ -619,7 +621,7 @@ void Foam::fvMeshSubset::setCellSubset
     // Note that this is not really necessary - but means we can size things
     // correctly. Also makes handling coupled faces much easier.
 
-    labelList nCellsUsingFace(oldFaces.size(), 0);
+    labelList nCellsUsingFace(oldFaces.size(), Zero);
 
     label nFacesInSet = 0;
     forAll(oldFaces, oldFacei)
@@ -707,7 +709,7 @@ void Foam::fvMeshSubset::setCellSubset
         globalPatchMap = identity(oldPatches.size());
     }
 
-    labelList boundaryPatchSizes(nbSize, 0);
+    labelList boundaryPatchSizes(nbSize, Zero);
 
 
     // Make a global-to-local point map

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +58,7 @@ SourceFiles
 #ifndef functionObjects_timeControl_H
 #define functionObjects_timeControl_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "dictionary.H"
 #include "timeControl.H"
 
@@ -68,17 +70,33 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class timeControl Declaration
+                Class functionObjects::timeControl Declaration
 \*---------------------------------------------------------------------------*/
 
 class timeControl
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
-    // Private data
+public:
 
-        //- Reference to the time database
-        const Time& time_;
+
+    // Public enumerations
+
+        //- Control mode
+        enum class controlMode
+        {
+            TIME,
+            TRIGGER,
+            TIME_OR_TRIGGER,
+            TIME_AND_TRIGGER
+        };
+
+        static const Enum<controlMode> controlModeNames_;
+
+
+private:
+
+    // Private data
 
         //- Input dictionary
         dictionary dict_;
@@ -86,11 +104,20 @@ class timeControl
 
         // Optional user inputs
 
+            //- Control mode (combination of time/trigger behaviour)
+            controlMode controlMode_;
+
             //- Activation time - defaults to -VGREAT
             scalar timeStart_;
 
             //- De-activation time - defaults to VGREAT
             scalar timeEnd_;
+
+            //- Activation trigger index - defaults to labelMin
+            label triggerStart_;
+
+            //- De-activation trigger index - defaults to labelMax
+            label triggerEnd_;
 
             //- Max time step change
             scalar deltaTCoeff_;
@@ -170,17 +197,14 @@ public:
         timeControl
         (
             const word& name,
-            const Time&,
-            const dictionary&
+            const Time& runTime,
+            const dictionary& dict
         );
 
 
     // Member Functions
 
         // Access
-
-            //- Return time database
-            inline const Time& time() const;
 
             //- Return the input dictionary
             inline const dictionary& dict() const;

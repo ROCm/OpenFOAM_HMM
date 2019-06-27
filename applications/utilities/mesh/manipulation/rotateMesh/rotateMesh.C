@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +58,7 @@ void RotateFields
 
     forAllConstIters(fields, fieldIter)
     {
-        Info<< "    Rotating " << fieldIter()->name() << endl;
+        Info<< "    Rotating " << fieldIter->name() << endl;
 
         GeometricField fld(*fieldIter(), mesh);
         transform(fld, dimensionedTensor(rotT), fld);

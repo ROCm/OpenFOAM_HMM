@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,13 +78,6 @@ equationMaxIterCondition
 }
 
 
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::equationMaxIterCondition::
-~equationMaxIterCondition()
-{}
-
-
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //
 
 bool Foam::functionObjects::runTimeControls::equationMaxIterCondition::apply()
@@ -148,24 +143,18 @@ bool Foam::functionObjects::runTimeControls::equationMaxIterCondition::apply()
 
     if (satisfied && valid)
     {
-        if (log_)
-        {
-            Info<< type() << ": " << name_
-                << ": satisfied using threshold value: " << threshold_ << nl;
-        }
+        Log << type() << ": " << name_
+            << ": satisfied using threshold value: " << threshold_ << nl;
 
         forAll(result, resulti)
         {
             if (result[resulti] != -1)
             {
-                if (log_)
-                {
-                    Info<< "    field: " << fieldNames_[resulti]
-                        << ", iterations: " << result[resulti] << nl;
-                }
+                Log << "    field: " << fieldNames_[resulti]
+                    << ", iterations: " << result[resulti] << nl;
             }
         }
-        if (log_) Info<< endl;
+        Log << endl;
     }
 
     return satisfied;

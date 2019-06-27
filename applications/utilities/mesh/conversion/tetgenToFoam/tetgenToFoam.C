@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -329,7 +331,9 @@ int main(int argc, char *argv[])
         (
             polyMesh::defaultRegion,
             runTime.constant(),
-            runTime
+            runTime,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         pointField(points),  // Copy of points
         cells,
@@ -436,22 +440,21 @@ int main(int argc, char *argv[])
                         // Get Foam patchID and update region->patch table.
                         label patchi = 0;
 
-                        Map<label>::iterator patchFind =
-                            regionToPatch.find(region);
+                        const auto patchFind = regionToPatch.cfind(region);
 
-                        if (patchFind == regionToPatch.end())
+                        if (patchFind.found())
+                        {
+                            patchi = *patchFind;
+                        }
+                        else
                         {
                             patchi = nPatches;
 
                             Info<< "Mapping tetgen region " << region
-                                << " to Foam patch "
+                                << " to patch "
                                 << patchi << endl;
 
                             regionToPatch.insert(region, nPatches++);
-                        }
-                        else
-                        {
-                            patchi = patchFind();
                         }
 
                         boundaryPatch[facei] = patchi;
@@ -477,7 +480,7 @@ int main(int argc, char *argv[])
         // Print region to patch mapping
         Info<< "Regions:" << endl;
 
-        forAllConstIter(Map<label>, regionToPatch, iter)
+        forAllConstIters(regionToPatch, iter)
         {
             Info<< "    region:" << iter.key() << '\t' << "patch:"
                 << iter() << endl;
@@ -491,7 +494,7 @@ int main(int argc, char *argv[])
 
         forAll(patchNames, patchi)
         {
-            patchNames[patchi] = word("patch") + name(patchi);
+            patchNames[patchi] = "patch" + Foam::name(patchi);
         }
 
         wordList patchTypes(nPatches, polyPatch::typeName);

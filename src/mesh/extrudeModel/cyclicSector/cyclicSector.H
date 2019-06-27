@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +28,8 @@ Class
 
 Description
     Extrudes a sector.
+
+    Uses the sectorCoeffs dictionary.
 
 See also
     Foam::extrudeModels::sector
@@ -52,7 +56,6 @@ class cyclicSector
 :
     public sector
 {
-
 public:
 
     //- Runtime type information
@@ -61,11 +64,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        cyclicSector(const dictionary& dict);
+        explicit cyclicSector(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~cyclicSector();
+    virtual ~cyclicSector() = default;
 };
 
 

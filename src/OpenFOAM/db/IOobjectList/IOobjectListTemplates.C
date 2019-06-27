@@ -42,7 +42,7 @@ Foam::HashTable<Foam::wordHashSet> Foam::IOobjectList::classesImpl
     forAllConstIters(list, iter)
     {
         const word& key = iter.key();
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (matchName(key))
         {
@@ -68,7 +68,7 @@ Foam::label Foam::IOobjectList::countImpl
 
     forAllConstIters(list, iter)
     {
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (matchClass(io->headerClassName()) && matchName(io->name()))
         {
@@ -92,7 +92,7 @@ Foam::label Foam::IOobjectList::countTypeImpl
 
     forAllConstIters(list, iter)
     {
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (io->isHeaderClassName<Type>() && matchName(io->name()))
         {
@@ -120,7 +120,7 @@ Foam::wordList Foam::IOobjectList::namesImpl
     forAllConstIters(list, iter)
     {
         const word& key = iter.key();
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (matchClass(io->headerClassName()) && matchName(key))
         {
@@ -155,7 +155,7 @@ Foam::wordList Foam::IOobjectList::namesTypeImpl
     forAllConstIters(list, iter)
     {
         const word& key = iter.key();
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (io->isHeaderClassName<Type>() && matchName(key))
         {
@@ -188,7 +188,7 @@ Foam::IOobjectList Foam::IOobjectList::lookupImpl
     forAllConstIters(list, iter)
     {
         const word& key = iter.key();
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (matchName(key))
         {
@@ -219,7 +219,7 @@ Foam::IOobjectList Foam::IOobjectList::lookupClassImpl
     forAllConstIters(list, iter)
     {
         const word& key = iter.key();
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (matchClass(io->headerClassName()) && matchName(key))
         {
@@ -249,7 +249,7 @@ Foam::IOobjectList Foam::IOobjectList::lookupClassTypeImpl
     forAllConstIters(list, iter)
     {
         const word& key = iter.key();
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (io->isHeaderClassName<Type>() && matchName(key))
         {
@@ -278,7 +278,7 @@ const Foam::IOobject* Foam::IOobjectList::cfindObject
 
     if (iter.found())
     {
-        const IOobject* io = iter.object();
+        const IOobject* io = iter.val();
 
         if (io->isHeaderClassName<Type>())
         {
@@ -640,7 +640,7 @@ Foam::label Foam::IOobjectList::filterClasses
         // Matches? either prune (pruning) or keep (!pruning)
         if
         (
-            (pred(iter.object()->headerClassName()) ? pruning : !pruning)
+            (pred(iter->headerClassName()) ? pruning : !pruning)
          && erase(iter)
         )
         {

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,21 +34,17 @@ Description
     skin-friction forces over a given list of patches, and the resistance
     from porous zones.
 
-    Forces and moments are calculated, with optional coordinate system and
-    writing of binned data, where force and moment contributions are collected
-    into a user-defined number of bins that span the input geometries for a
-    user-defined direction vector.
+    Forces and moments are calculated in a global Cartesian coordinate system
+    by default, or using a user-defined system.  Contributions can be 'binned'
+    according to a user-defined number of uniform-width collection zones (bins)
+    that span the input geometries, oriented by a user-defined direction vector.
 
-    Data is written into multiple files in the
+    Results are written to multiple files as a function of time in the
     postProcessing/\<functionObjectName\> directory:
-    - force.dat          : forces in global Cartesian coordinate system
-    - moment.dat         : moments in global Cartesian coordinate system
-    - forceBin.dat       : force bins in global Cartesian coordinate system
-    - momentBin.dat      : moment bins in global Cartesian coordinate system
-    - localForce.dat     : forces in local Cartesian coordinate system
-    - localMoment.dat    : moments in local Cartesian coordinate system
-    - localForceBin.dat  : force bins in local Cartesian coordinate system
-    - localMomentBin.dat : moment bins in local Cartesian coordinate system
+    - force.dat          : forces
+    - moment.dat         : moments
+    - forceBin.dat       : force bins
+    - momentBin.dat      : moment bins
 
 Usage
     Example of function object specification:
@@ -190,18 +188,6 @@ protected:
             //- Moment bins
             autoPtr<OFstream> momentBinFilePtr_;
 
-            //- Local force
-            autoPtr<OFstream> localForceFilePtr_;
-
-            //- Local moment
-            autoPtr<OFstream> localMomentFilePtr_;
-
-            //- Local force bins
-            autoPtr<OFstream> localForceBinFilePtr_;
-
-            //- Local moment bins
-            autoPtr<OFstream> localMomentBinFilePtr_;
-
 
         // Read from dictionary
 
@@ -232,9 +218,6 @@ protected:
             //- Coordinate system used when evaluting forces/moments
             coordSystem::cartesian coordSys_;
 
-            //- Flag to indicate whether we are using a local coordinates
-            bool localSystem_;
-
             //- Flag to include porosity effects
             bool porosity_;
 
@@ -252,6 +235,9 @@ protected:
 
                 //- Minimum bin bounds
                 scalar binMin_;
+
+                //- Maximum bin bounds
+                scalar binMax_;
 
                 //- Bin positions along binDir
                 List<point> binPoints_;
@@ -280,6 +266,14 @@ protected:
 
         //- Write header for binned data
         void writeBinHeader(const word& header, Ostream& os) const;
+
+        //- Set the co-ordinate system from dictionary and axes names
+        void setCoordinateSystem
+        (
+            const dictionary& dict,
+            const word& e3Name = word::null,
+            const word& e1Name = word::null
+        );
 
         //- Initialise the fields
         void initialise();
@@ -391,7 +385,7 @@ public:
 
 
     //- Destructor
-    virtual ~forces();
+    virtual ~forces() = default;
 
 
     // Member Functions

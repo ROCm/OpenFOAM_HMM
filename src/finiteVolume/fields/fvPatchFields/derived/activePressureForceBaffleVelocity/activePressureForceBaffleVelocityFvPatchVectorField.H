@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | OpenCFD Ltd 2016
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,16 +64,15 @@ Description
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        p            | pressure field name     | no          | p
-        cyclicPatch  | cyclic patch name       | yes         |
-        openFraction | current open fraction [0-1] | yes |
-        openingTime  | time taken to open or close the baffle | yes |
+        Property     | Description                          | Required | Default
+        p            | Pressure field name                  | no  | p
+        cyclicPatch  | Cyclic patch name                    | yes |
+        openFraction | Current open fraction [0-1]          | yes |
+        openingTime  | Time taken to open or close the baffle | yes |
         maxOpenFractionDelta | max fraction change per timestep | yes |
-        minThresholdValue | minimum absolute pressure or
-                            force difference for activation | yes |
-        forceBased   | force (true) or pressure-based (false) activation | yes |
-        opening      | Baffle is opening or closing (1 opening, 0 closing) | yes
+        minThresholdValue | Min absolute pressure or force difference for activation | yes |
+        forceBased   | Force (true) or pressure-based (false) activation | yes |
+        opening      | Baffle is opening (true) or closing (false) | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -107,7 +108,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-    Class activePressureForceBaffleVelocityFvPatchVectorField Declaration
+     Class activePressureForceBaffleVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
 class activePressureForceBaffleVelocityFvPatchVectorField
@@ -117,7 +118,7 @@ class activePressureForceBaffleVelocityFvPatchVectorField
     // Private data
 
         //- Name of the pressure field used to calculate the force
-        //  on the active baffle
+        //- on the active baffle
         word pName_;
 
         //- Name of the cyclic patch used when the active baffle is open
@@ -142,7 +143,7 @@ class activePressureForceBaffleVelocityFvPatchVectorField
         scalar openingTime_;
 
         //- Maximum fractional change to the active baffle openness
-        //  per time-step
+        //- per time-step
         scalar maxOpenFractionDelta_;
 
         label curTimeIndex_;

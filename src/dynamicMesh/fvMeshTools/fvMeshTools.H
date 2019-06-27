@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,6 +138,14 @@ public:
     (
         const IOobject& io,
         const bool masterOnlyReading
+    );
+
+    //- Create additional fv* files
+    static void createDummyFvMeshFiles
+    (
+        const objectRegistry& parent,
+        const word& regionName,
+        const bool verbose = false
     );
 };
 

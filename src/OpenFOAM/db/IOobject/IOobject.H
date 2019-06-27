@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,14 +101,14 @@ public:
     // Public data types
 
         //- Enumeration defining the valid states of an IOobject
-        enum objectState
+        enum objectState : char
         {
             GOOD,
             BAD
         };
 
         //- Enumeration defining the read options
-        enum readOption
+        enum readOption : char
         {
             MUST_READ,
             MUST_READ_IF_MODIFIED,
@@ -115,14 +117,14 @@ public:
         };
 
         //- Enumeration defining the write options
-        enum writeOption
+        enum writeOption : char
         {
             AUTO_WRITE = 0,
             NO_WRITE = 1
         };
 
         //- Enumeration defining the file checking options
-        enum fileCheckTypes
+        enum fileCheckTypes : char
         {
             timeStamp,
             timeStampMaster,
@@ -130,12 +132,13 @@ public:
             inotifyMaster
         };
 
+        //- Names for the fileCheckTypes
         static const Enum<fileCheckTypes> fileCheckTypesNames;
 
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Name
         word name_;
@@ -169,6 +172,12 @@ private:
 
         //- IOobject state
         objectState objState_;
+
+        //- The label byte-size (could also be stored as byte)
+        unsigned short labelByteSize_;
+
+        //- The scalar byte-size (could also be stored as byte)
+        unsigned short scalarByteSize_;
 
 
 protected:
@@ -219,6 +228,13 @@ public:
         //- Create dot-delimited name.group
         template<class StringType>
         static inline word groupName(StringType name, const word& group);
+
+
+         //- Return group (extension part of name)
+        static word group(const word& name);
+
+        //- Return member (name without the extension)
+        static word member(const word& name);
 
         //- Return the IOobject, but also consider an alternative file name.
         //
@@ -357,6 +373,12 @@ public:
 
         //- Is object same for all processors
         inline bool& globalObject();
+
+        //- The label byte-size, possibly read from the header
+        inline unsigned labelByteSize() const;
+
+        //- The scalar byte-size, possibly read from the header
+        inline unsigned scalarByteSize() const;
 
 
     // Checks

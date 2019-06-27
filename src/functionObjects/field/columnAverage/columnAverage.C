@@ -111,7 +111,7 @@ const Foam::word Foam::functionObjects::columnAverage::averageName
     const word& fieldName
 ) const
 {
-    return name() + ":columnAverage(" + fieldName + ")"; 
+    return name() + ":columnAverage(" + fieldName + ")";
 }
 
 
@@ -151,7 +151,7 @@ bool Foam::functionObjects::columnAverage::execute()
     // Make fields up to date with current selection
     fieldSet_.updateSelection();
 
-    for (const word& fieldName : fieldSet_.selection())
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
         columnAverageField<scalar>(fieldName);
         columnAverageField<vector>(fieldName);
@@ -166,7 +166,7 @@ bool Foam::functionObjects::columnAverage::execute()
 
 bool Foam::functionObjects::columnAverage::write()
 {
-    for (const word& fieldName : fieldSet_.selection())
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
         const word resultName("columnAverage(" + fieldName + ")");
         const regIOobject* obj =

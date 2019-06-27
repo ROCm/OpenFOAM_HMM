@@ -1,0 +1,79 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+}
+
+divSchemes
+{
+    default         none;
+    div(phi,U)      Gauss upwind;
+
+    div(phi,epsilon) Gauss limitedLinear 1;
+    div(phi,k)       Gauss limitedLinear 1;
+    div(phi,h)       Gauss limitedLinear 1;
+    div(phi,K)       Gauss linear;
+
+    div(((rho*nuEff)*dev2(T(grad(U)))))  Gauss linear;
+    div(meshPhi,p)  Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+    laplacian(diffusivity,cellDisplacement)  Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+oversetInterpolation
+{
+    //method          cellVolumeWeight;
+    method            inverseDistance;
+
+    searchBox           (-0.002 0 0)(0.107 0.05 0.01);
+    searchBoxDivisions  (300 200 1);
+}
+
+fluxRequired
+{
+    default         no;
+    pcorr           ;
+    p               ;
+}
+
+oversetInterpolationSuppressed
+{
+    grad(p_rgh);
+    surfaceIntegrate(phiHbyA);
+}
+
+// ************************************************************************* //

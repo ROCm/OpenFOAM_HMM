@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -275,11 +277,11 @@ inline bool Foam::edge::insert(const label index)
 }
 
 
-template<class InputIter>
+template<class InputIterator>
 inline Foam::label Foam::edge::insert
 (
-    InputIter begIter,
-    InputIter endIter
+    InputIterator begIter,
+    InputIterator endIter
 )
 {
     // Available slots.
@@ -305,8 +307,8 @@ inline Foam::label Foam::edge::insert(std::initializer_list<label> list)
 }
 
 
-template<unsigned Size>
-inline Foam::label Foam::edge::insert(const FixedList<label, Size>& list)
+template<unsigned N>
+inline Foam::label Foam::edge::insert(const FixedList<label, N>& list)
 {
     return insert(list.begin(), list.end());
 }
@@ -344,11 +346,11 @@ inline Foam::label Foam::edge::erase(const label index)
 }
 
 
-template<class InputIter>
+template<class InputIterator>
 inline Foam::label Foam::edge::erase
 (
-    InputIter begIter,
-    InputIter endIter
+    InputIterator begIter,
+    InputIterator endIter
 )
 {
     // Occupied slots.
@@ -371,8 +373,8 @@ inline Foam::label Foam::edge::erase(std::initializer_list<label> list)
 }
 
 
-template<unsigned Size>
-inline Foam::label Foam::edge::erase(const FixedList<label, Size>& list)
+template<unsigned N>
+inline Foam::label Foam::edge::erase(const FixedList<label, N>& list)
 {
     return erase(list.begin(), list.end());
 }
@@ -452,6 +454,34 @@ inline Foam::linePointRef Foam::edge::line(const UList<point>& pts) const
     #endif
 
     return linePointRef(pts[first()], pts[second()]);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline Foam::label& Foam::edge::operator[](const label i)
+{
+    #ifdef FULLDEBUG
+    if (i < 0 || i > 1)
+    {
+        FatalErrorInFunction
+            << "Index " << i << " out of range [0,1]" << abort(FatalError);
+    }
+    #endif
+    return (i ? second() : first());
+}
+
+
+inline const Foam::label& Foam::edge::operator[](const label i) const
+{
+    #ifdef FULLDEBUG
+    if (i < 0 || i > 1)
+    {
+        FatalErrorInFunction
+            << "Index " << i << " out of range [0,1]" << abort(FatalError);
+    }
+    #endif
+    return (i ? second() : first());
 }
 
 

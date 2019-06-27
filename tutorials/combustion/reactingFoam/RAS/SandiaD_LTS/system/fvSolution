@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -26,7 +26,7 @@ solvers
     {
         solver          PCG;
         preconditioner  DIC;
-        tolerance       1e-6;
+        tolerance       1e-7;
         relTol          0.01;
     }
 
@@ -40,8 +40,8 @@ solvers
     {
         solver          PBiCGStab;
         preconditioner  DILU;
-        tolerance       1e-6;
-        relTol          0.1;
+        tolerance       1e-7;
+        relTol          0.05;
     }
 
     "(U|h|k|epsilon)Final"
@@ -54,7 +54,7 @@ solvers
         solver          PBiCGStab;
         preconditioner  DILU;
         tolerance       1e-8;
-        relTol          0.1;
+        relTol          0.05;
     }
 
     G
@@ -76,11 +76,11 @@ PIMPLE
 {
     momentumPredictor   yes;
     nOuterCorrectors    1;
-    nCorrectors         2;
+    nCorrectors         3;
     nNonOrthogonalCorrectors 0;
 
     maxDeltaT           1e-4;
-    maxCo               0.25;
+    maxCo               0.15;
     alphaTemp           0.05;
     alphaY              0.05;
     Yref

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,20 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "functionObjectBase.H"
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace functionObjects
-{
-namespace runTimePostPro
-{
-    defineTypeNameAndDebug(functionObjectBase, 0);
-}
-}
-}
-
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -69,7 +55,12 @@ bool Foam::functionObjects::runTimePostPro::functionObjectBase::removeFile
 {
     // Foam::rm() ignores empty names etc.
 
-    return Foam::rm(getFileName(keyword, subDictName));
+    if (Pstream::master())
+    {
+        return Foam::rm(getFileName(keyword, subDictName));
+    }
+
+    return false;
 }
 
 
@@ -85,7 +76,8 @@ Foam::functionObjects::runTimePostPro::functionObjectBase::functionObjectBase
     fieldVisualisationBase(dict, colours),
     state_(state),
     functionObjectName_(dict.get<word>("functionObject")),
-    clearObjects_(dict.lookupOrDefault("clearObjects", false))
+    liveObject_(dict.getOrDefault("liveObject", true)),
+    clearObjects_(dict.getOrDefault("clearObjects", false))
 {}
 
 

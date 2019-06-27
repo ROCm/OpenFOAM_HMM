@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +59,7 @@ Foam::tabulatedWallFunctions::general::interpolationTypeNames_
 
 void Foam::tabulatedWallFunctions::general::invertTable()
 {
-    scalarList Rey(uPlus_.size(), 0.0);
+    scalarList Rey(uPlus_.size(), Zero);
 
     // Calculate Reynolds number
     forAll(uPlus_, i)

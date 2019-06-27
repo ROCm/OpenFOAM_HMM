@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +52,7 @@ void Foam::MRFZone::setMRFFaces()
     //  0:not in zone
     //  1:moving with frame
     //  2:other
-    labelList faceType(mesh_.nFaces(), 0);
+    labelList faceType(mesh_.nFaces(), Zero);
 
     // Determine faces in cell zone
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,8 +142,8 @@ void Foam::MRFZone::setMRFFaces()
     }
     internalFaces_.setSize(nInternal);
 
-    labelList nIncludedFaces(patches.size(), 0);
-    labelList nExcludedFaces(patches.size(), 0);
+    labelList nIncludedFaces(patches.size(), Zero);
+    labelList nExcludedFaces(patches.size(), Zero);
 
     forAll(patches, patchi)
     {

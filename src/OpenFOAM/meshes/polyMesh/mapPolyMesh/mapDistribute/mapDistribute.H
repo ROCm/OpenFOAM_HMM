@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -278,6 +280,7 @@ public:
                     fld = vt.invTransformPosition(pfld);
                 }
             }
+
             void operator()
             (
                 const vectorTensorTransform& vt,
@@ -285,31 +288,33 @@ public:
                 List<List<point>>& flds
             ) const
             {
-                forAll(flds, i)
+                for (List<point>& fld : flds)
                 {
-                    operator()(vt, forward, flds[i]);
+                    operator()(vt, forward, fld);
                 }
             }
+
             //- Transform patch-based field
             void operator()(const coupledPolyPatch& cpp, pointField& fld) const
             {
                 cpp.transformPosition(fld);
             }
+
             template<template<class> class Container>
             void operator()(const coupledPolyPatch& cpp, Container<point>& map)
             const
             {
                 Field<point> fld(map.size());
                 label i = 0;
-                forAllConstIter(typename Container<point>, map, iter)
+                forAllConstIters(map, iter)
                 {
-                    fld[i++] = iter();
+                    fld[i++] = *iter;
                 }
                 cpp.transformPosition(fld);
                 i = 0;
-                forAllIter(typename Container<point>, map, iter)
+                forAllIters(map, iter)
                 {
-                    iter() = fld[i++];
+                    *iter = fld[i++];
                 }
             }
         };
@@ -325,10 +330,10 @@ public:
         mapDistribute();
 
         //- Copy construct
-        mapDistribute(const mapDistribute& map);
+        explicit mapDistribute(const mapDistribute& map);
 
         //- Move construct
-        mapDistribute(mapDistribute&& map);
+        explicit mapDistribute(mapDistribute&& map);
 
         //- Move construct from components
         mapDistribute

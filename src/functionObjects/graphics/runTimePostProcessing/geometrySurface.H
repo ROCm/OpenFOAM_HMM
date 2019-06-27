@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,18 @@ Class
     Foam::functionObjects::runTimePostPro::geometrySurface
 
 Description
-    Visualisation of surface geometry data
+    Read and visualize surface geometry files.
+
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        type        | The type: geometry                    | yes |
+        files       | The files to read                     | yes |
+    \endtable
+
+    Standard file types (vtk, vtp, obj, stl, stlb) are read with the
+    VTK-native readers. Other file types use the OpenFOAM surfMesh
+    readers and convert to VTK.
 
 SourceFiles
     geometrySurface.C
@@ -39,7 +50,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward declarations
+// Forward Declarations
 class vtkPolyData;
 
 namespace Foam
@@ -59,7 +70,7 @@ class geometrySurface
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- File names
         List<fileName> fileNames_;
@@ -124,7 +135,7 @@ public:
         //- Update actors
         virtual void updateActors(const scalar position);
 
-        //- Clear files used to create the object(s)
+        //- Clear files used to create the object(s) - no-op
         virtual bool clear();
 };
 

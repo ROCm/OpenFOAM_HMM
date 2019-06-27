@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -376,7 +378,7 @@ Foam::volumeType Foam::indexedOctree<Type>::calcVolumeType
             // of its bounding box.
             const treeBoundBox subBb = nod.bb_.subBbox(octant);
 
-            subType = shapes_.getVolumeType(*this, subBb.midpoint());
+            subType = shapes_.getVolumeType(*this, subBb.centre());
         }
 
         // Store octant type
@@ -439,30 +441,26 @@ Foam::volumeType Foam::indexedOctree<Type>::getVolumeType
             // Content. Defer to shapes.
             return volumeType(shapes_.getVolumeType(*this, sample));
         }
-        else
-        {
-            // Empty node. Cannot have 'mixed' as its type since not divided
-            // up and has no items inside it.
-            FatalErrorInFunction
-                << "Sample:" << sample << " node:" << nodeI
-                << " with bb:" << nodes_[nodeI].bb_ << nl
-                << "Empty subnode has invalid volume type MIXED."
-                << abort(FatalError);
 
-            return volumeType::UNKNOWN;
-        }
-    }
-    else
-    {
+        // Empty node. Cannot have 'mixed' as its type since not divided
+        // up and has no items inside it.
         FatalErrorInFunction
-            << "Sample:" << sample << " at node:" << nodeI
-            << " octant:" << octant
-            << " with bb:" << nod.bb_.subBbox(octant) << nl
-            << "Node has invalid volume type " << octantType
+            << "Sample:" << sample << " node:" << nodeI
+            << " with bb:" << nodes_[nodeI].bb_ << nl
+            << "Empty subnode has invalid volume type MIXED."
             << abort(FatalError);
 
         return volumeType::UNKNOWN;
     }
+
+    FatalErrorInFunction
+        << "Sample:" << sample << " at node:" << nodeI
+        << " octant:" << octant
+        << " with bb:" << nod.bb_.subBbox(octant) << nl
+        << "Node has invalid volume type " << octantType
+        << abort(FatalError);
+
+    return volumeType::UNKNOWN;
 }
 
 
@@ -2660,7 +2658,7 @@ const Foam::labelList& Foam::indexedOctree<Type>::findIndices
 {
     if (nodes_.empty())
     {
-        return Foam::emptyLabelList;
+        return labelList::null();
     }
 
     labelBits index = findNode(0, sample);
@@ -2675,7 +2673,7 @@ const Foam::labelList& Foam::indexedOctree<Type>::findIndices
         return contents_[getContent(contentIndex)];
     }
 
-    return Foam::emptyLabelList;
+    return labelList::null();
 }
 
 

@@ -46,7 +46,7 @@ void Foam::faPatchMapper::calcAddressing() const
     // Compatibility change  HJ, 12/Aug/2017
     hasUnmapped_ = false;
 
-    directAddrPtr_ = new labelList(patch_.size(), 0);
+    directAddrPtr_ = new labelList(patch_.size(), Zero);
     labelList& addr = *directAddrPtr_;
 
     // Make a map of old edgeFaces, giving edge index in patch given the new

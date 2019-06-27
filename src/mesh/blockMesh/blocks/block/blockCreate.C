@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +66,7 @@ void Foam::block::createPoints()
     scalarList w[12];
     label nCurvedEdges = edgesPointsWeights(p, w);
 
-    points_.setSize(nPoints());
+    points_.resize(nPoints());
 
     points_[pointLabel(0,  0,  0)] = p000;
     points_[pointLabel(ni, 0,  0)] = p100;
@@ -188,11 +190,11 @@ void Foam::block::createPoints()
     FixedList<pointField, 6> facePoints(this->facePoints(points_));
     correctFacePoints(facePoints);
 
-    // Loop over points and apply the correction from the from the i-faces
+    // Loop over points and apply the correction from the i-faces
     for (label ii=0; ii<=ni; ii++)
     {
         // Process the points on the curved faces last
-        label i = (ii + 1)%(ni + 1);
+        const label i = (ii + 1)%(ni + 1);
 
         for (label j=0; j<=nj; j++)
         {
@@ -240,11 +242,11 @@ void Foam::block::createPoints()
         }
     }
 
-    // Loop over points and apply the correction from the from the j-faces
+    // Loop over points and apply the correction from the j-faces
     for (label jj=0; jj<=nj; jj++)
     {
         // Process the points on the curved faces last
-        label j = (jj + 1)%(nj + 1);
+        const label j = (jj + 1)%(nj + 1);
 
         for (label i=0; i<=ni; i++)
         {
@@ -292,11 +294,11 @@ void Foam::block::createPoints()
         }
     }
 
-    // Loop over points and apply the correction from the from the k-faces
+    // Loop over points and apply the correction from the k-faces
     for (label kk=0; kk<=nk; kk++)
     {
         // Process the points on the curved faces last
-        label k = (kk + 1)%(nk + 1);
+        const label k = (kk + 1)%(nk + 1);
 
         for (label i=0; i<=ni; i++)
         {
@@ -346,163 +348,213 @@ void Foam::block::createPoints()
 }
 
 
-Foam::List<Foam::FixedList<Foam::label, 8>> Foam::block::cells() const
+void Foam::block::createCells()
 {
     const label ni = density().x();
     const label nj = density().y();
     const label nk = density().z();
 
-    List<FixedList<label, 8>> cells(nCells());
+    blockCells_.resize(nCells());  // (ni*nj*nk)
 
     label celli = 0;
 
-    for (label k=0; k<nk; k++)
+    for (label k=0; k<nk; ++k)
     {
-        for (label j=0; j<nj; j++)
+        for (label j=0; j<nj; ++j)
         {
-            for (label i=0; i<ni; i++)
+            for (label i=0; i<ni; ++i)
             {
-                cells[celli][0] = pointLabel(i,   j,   k);
-                cells[celli][1] = pointLabel(i+1, j,   k);
-                cells[celli][2] = pointLabel(i+1, j+1, k);
-                cells[celli][3] = pointLabel(i,   j+1, k);
-                cells[celli][4] = pointLabel(i,   j,   k+1);
-                cells[celli][5] = pointLabel(i+1, j,   k+1);
-                cells[celli][6] = pointLabel(i+1, j+1, k+1);
-                cells[celli][7] = pointLabel(i,   j+1, k+1);
+                blockCells_[celli][0] = pointLabel(i,   j,   k);
+                blockCells_[celli][1] = pointLabel(i+1, j,   k);
+                blockCells_[celli][2] = pointLabel(i+1, j+1, k);
+                blockCells_[celli][3] = pointLabel(i,   j+1, k);
+                blockCells_[celli][4] = pointLabel(i,   j,   k+1);
+                blockCells_[celli][5] = pointLabel(i+1, j,   k+1);
+                blockCells_[celli][6] = pointLabel(i+1, j+1, k+1);
+                blockCells_[celli][7] = pointLabel(i,   j+1, k+1);
 
-                celli++;
+                ++celli;
             }
         }
     }
+}
 
-    return cells;
+
+template<class OutputIterator>
+OutputIterator Foam::block::addBoundaryFaces
+(
+    const direction shapeFacei,
+    OutputIterator iter
+) const
+{
+    const label ni = density().x();
+    const label nj = density().y();
+    const label nk = density().z();
+
+    switch (shapeFacei)
+    {
+        // Face 0 == x-min
+        case 0:
+        {
+            for (label k=0; k<nk; ++k)
+            {
+                for (label j=0; j<nj; ++j)
+                {
+                    auto& f = *iter;
+                    ++iter;
+                    f.resize(4);
+
+                    f[0] = pointLabel(0, j,   k);
+                    f[1] = pointLabel(0, j,   k+1);
+                    f[2] = pointLabel(0, j+1, k+1);
+                    f[3] = pointLabel(0, j+1, k);
+                }
+            }
+        }
+        break;
+
+        // Face 1 == x-max
+        case 1:
+        {
+            for (label k=0; k<nk; ++k)
+            {
+                for (label j=0; j<nj; ++j)
+                {
+                    auto& f = *iter;
+                    ++iter;
+                    f.resize(4);
+
+                    f[0] = pointLabel(ni, j,   k);
+                    f[1] = pointLabel(ni, j+1, k);
+                    f[2] = pointLabel(ni, j+1, k+1);
+                    f[3] = pointLabel(ni, j,   k+1);
+                }
+            }
+        }
+        break;
+
+        // Face 2 == y-min
+        case 2:
+        {
+            for (label i=0; i<ni; ++i)
+            {
+                for (label k=0; k<nk; ++k)
+                {
+                    auto& f = *iter;
+                    ++iter;
+                    f.resize(4);
+
+                    f[0] = pointLabel(i,   0, k);
+                    f[1] = pointLabel(i+1, 0, k);
+                    f[2] = pointLabel(i+1, 0, k+1);
+                    f[3] = pointLabel(i,   0, k+1);
+                }
+            }
+        }
+        break;
+
+        // Face 3 == y-max
+        case 3:
+        {
+            for (label i=0; i<ni; ++i)
+            {
+                for (label k=0; k<nk; ++k)
+                {
+                    auto& f = *iter;
+                    ++iter;
+                    f.resize(4);
+
+                    f[0] = pointLabel(i,   nj, k);
+                    f[1] = pointLabel(i,   nj, k+1);
+                    f[2] = pointLabel(i+1, nj, k+1);
+                    f[3] = pointLabel(i+1, nj, k);
+                }
+            }
+        }
+        break;
+
+        // Face 4 == z-min
+        case 4:
+        {
+            for (label i=0; i<ni; ++i)
+            {
+                for (label j=0; j<nj; ++j)
+                {
+                    auto& f = *iter;
+                    ++iter;
+                    f.resize(4);
+
+                    f[0] = pointLabel(i,   j,   0);
+                    f[1] = pointLabel(i,   j+1, 0);
+                    f[2] = pointLabel(i+1, j+1, 0);
+                    f[3] = pointLabel(i+1, j,   0);
+                }
+            }
+        }
+        break;
+
+        // Face 5 == z-max
+        case 5:
+        {
+            for (label i=0; i<ni; ++i)
+            {
+                for (label j=0; j<nj; ++j)
+                {
+                    auto& f = *iter;
+                    ++iter;
+                    f.resize(4);
+
+                    f[0] = pointLabel(i,   j,   nk);
+                    f[1] = pointLabel(i+1, j,   nk);
+                    f[2] = pointLabel(i+1, j+1, nk);
+                    f[3] = pointLabel(i,   j+1, nk);
+                }
+            }
+        }
+        break;
+    }
+
+    return iter;
 }
 
 
 void Foam::block::createBoundary()
 {
-    const label ni = density().x();
-    const label nj = density().y();
-    const label nk = density().z();
+    const label countx = (density().y() * density().z());
+    const label county = (density().z() * density().x());
+    const label countz = (density().x() * density().y());
 
-    label patchi = 0;
-    label facei = 0;
+    direction patchi = 0;
 
-    // x-direction
+    // 0 == x-min
+    blockPatches_[patchi].resize(countx);
+    addBoundaryFaces(patchi, blockPatches_[patchi].begin());
+    ++patchi;
 
-    // x-min
-    boundaryPatches_[patchi].setSize(nj*nk);
-    for (label k=0; k<nk; k++)
-    {
-        for (label j=0; j<nj; j++)
-        {
-            boundaryPatches_[patchi][facei][0] = pointLabel(0, j,   k);
-            boundaryPatches_[patchi][facei][1] = pointLabel(0, j,   k+1);
-            boundaryPatches_[patchi][facei][2] = pointLabel(0, j+1, k+1);
-            boundaryPatches_[patchi][facei][3] = pointLabel(0, j+1, k);
+    // 1 == x-max
+    blockPatches_[patchi].resize(countx);
+    addBoundaryFaces(patchi, blockPatches_[patchi].begin());
+    ++patchi;
 
-            facei++;
-        }
-    }
+    // 2 == y-min
+    blockPatches_[patchi].resize(county);
+    addBoundaryFaces(patchi, blockPatches_[patchi].begin());
+    ++patchi;
 
-    // x-max
-    patchi++;
-    facei = 0;
+    // 3 == y-max
+    blockPatches_[patchi].resize(county);
+    addBoundaryFaces(patchi, blockPatches_[patchi].begin());
+    ++patchi;
 
-    boundaryPatches_[patchi].setSize(nj*nk);
+    // 4 == z-min
+    blockPatches_[patchi].resize(countz);
+    addBoundaryFaces(patchi, blockPatches_[patchi].begin());
+    ++patchi;
 
-    for (label k=0; k<nk; k++)
-    {
-        for (label j=0; j<nj; j++)
-        {
-            boundaryPatches_[patchi][facei][0] = pointLabel(ni, j,   k);
-            boundaryPatches_[patchi][facei][1] = pointLabel(ni, j+1, k);
-            boundaryPatches_[patchi][facei][2] = pointLabel(ni, j+1, k+1);
-            boundaryPatches_[patchi][facei][3] = pointLabel(ni, j,   k+1);
-
-            facei++;
-        }
-    }
-
-    // y-direction
-
-    // y-min
-    patchi++;
-    facei = 0;
-
-    boundaryPatches_[patchi].setSize(ni*nk);
-    for (label i=0; i<ni; i++)
-    {
-        for (label k=0; k<nk; k++)
-        {
-            boundaryPatches_[patchi][facei][0] = pointLabel(i,   0, k);
-            boundaryPatches_[patchi][facei][1] = pointLabel(i+1, 0, k);
-            boundaryPatches_[patchi][facei][2] = pointLabel(i+1, 0, k+1);
-            boundaryPatches_[patchi][facei][3] = pointLabel(i,   0, k+1);
-
-            facei++;
-        }
-    }
-
-    // y-max
-    patchi++;
-    facei = 0;
-
-    boundaryPatches_[patchi].setSize(ni*nk);
-
-    for (label i=0; i<ni; i++)
-    {
-        for (label k=0; k<nk; k++)
-        {
-            boundaryPatches_[patchi][facei][0] = pointLabel(i,   nj, k);
-            boundaryPatches_[patchi][facei][1] = pointLabel(i,   nj, k+1);
-            boundaryPatches_[patchi][facei][2] = pointLabel(i+1, nj, k+1);
-            boundaryPatches_[patchi][facei][3] = pointLabel(i+1, nj, k);
-
-            facei++;
-        }
-    }
-
-    // z-direction
-
-    // z-min
-    patchi++;
-    facei = 0;
-
-    boundaryPatches_[patchi].setSize(ni*nj);
-
-    for (label i=0; i<ni; i++)
-    {
-        for (label j=0; j<nj; j++)
-        {
-            boundaryPatches_[patchi][facei][0] = pointLabel(i,   j,   0);
-            boundaryPatches_[patchi][facei][1] = pointLabel(i,   j+1, 0);
-            boundaryPatches_[patchi][facei][2] = pointLabel(i+1, j+1, 0);
-            boundaryPatches_[patchi][facei][3] = pointLabel(i+1, j,   0);
-
-            facei++;
-        }
-    }
-
-    // z-max
-    patchi++;
-    facei = 0;
-
-    boundaryPatches_[patchi].setSize(ni*nj);
-
-    for (label i=0; i<ni; i++)
-    {
-        for (label j=0; j<nj; j++)
-        {
-            boundaryPatches_[patchi][facei][0] = pointLabel(i,   j,   nk);
-            boundaryPatches_[patchi][facei][1] = pointLabel(i+1, j,   nk);
-            boundaryPatches_[patchi][facei][2] = pointLabel(i+1, j+1, nk);
-            boundaryPatches_[patchi][facei][3] = pointLabel(i,   j+1, nk);
-
-            facei++;
-        }
-    }
+    // 5 == z-max
+    blockPatches_[patchi].resize(countz);
+    addBoundaryFaces(patchi, blockPatches_[patchi].begin());
+    ++patchi;
 }
 
 

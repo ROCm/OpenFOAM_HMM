@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +28,7 @@ License
 #define TEMPLATE template<class Type>
 #include "FieldFunctionsM.H"
 #include "UPstream.H"
+#include "MinMax.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,23 +94,35 @@ sqr(const tmp<Field<Type>>& tf);
 
 
 template<class Type>
-void magSqr(Field<scalar>& res, const UList<Type>& f);
+void magSqr
+(
+    Field<typename typeOfMag<Type>::type>& res,
+    const UList<Type>& f
+);
 
 template<class Type>
-tmp<Field<scalar>> magSqr(const UList<Type>& f);
+tmp<Field<typename typeOfMag<Type>::type>>
+magSqr(const UList<Type>& f);
 
 template<class Type>
-tmp<Field<scalar>> magSqr(const tmp<Field<Type>>& tf);
+tmp<Field<typename typeOfMag<Type>::type>>
+magSqr(const tmp<Field<Type>>& tf);
 
 
 template<class Type>
-void mag(Field<scalar>& res, const UList<Type>& f);
+void mag
+(
+    Field<typename typeOfMag<Type>::type>& res,
+    const UList<Type>& f
+);
 
 template<class Type>
-tmp<Field<scalar>> mag(const UList<Type>& f);
+tmp<Field<typename typeOfMag<Type>::type>>
+mag(const UList<Type>& f);
 
 template<class Type>
-tmp<Field<scalar>> mag(const tmp<Field<Type>>& tf);
+tmp<Field<typename typeOfMag<Type>::type>>
+mag(const tmp<Field<Type>>& tf);
 
 
 template<class Type>
@@ -151,8 +166,10 @@ tmp<Field<Type>> cmptMag(const UList<Type>& f);
 template<class Type>
 tmp<Field<Type>> cmptMag(const tmp<Field<Type>>& tf);
 
+
 #define TMP_UNARY_FUNCTION(ReturnType, Func)                                   \
                                                                                \
+/** \brief  Apply the \c Func() function on the tmp field */                   \
 template<class Type>                                                           \
 ReturnType Func(const tmp<Field<Type>>& tf1);
 
@@ -171,6 +188,15 @@ Type sum(const UList<Type>& f);
 
 TMP_UNARY_FUNCTION(Type, sum)
 
+
+// From MinMaxOps.H:
+//   - Foam::minMax(const UList<Type>&)
+//   - Foam::minMaxMag(const UList<Type>&)
+
+TMP_UNARY_FUNCTION(MinMax<Type>, minMax)
+TMP_UNARY_FUNCTION(scalarMinMax, minMaxMag)
+
+
 template<class Type>
 Type maxMagSqr(const UList<Type>& f);
 
@@ -183,20 +209,26 @@ TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 
 template<class Type>
-scalar sumProd(const UList<Type>& f1, const UList<Type>& f2);
+typename scalarProduct<Type, Type>::type
+sumProd
+(
+    const UList<Type>& f1,
+    const UList<Type>& f2
+);
 
 template<class Type>
 Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2);
 
 template<class Type>
-scalar sumSqr(const UList<Type>& f);
-
-TMP_UNARY_FUNCTION(scalar, sumSqr)
+typename outerProduct1<Type>::type sumSqr(const UList<Type>& f);
 
 template<class Type>
-scalar sumMag(const UList<Type>& f);
+typename outerProduct1<Type>::type sumSqr(const tmp<Field<Type>>& tf);
 
-TMP_UNARY_FUNCTION(scalar, sumMag)
+template<class Type>
+typename typeOfMag<Type>::type sumMag(const UList<Type>& f);
+
+TMP_UNARY_FUNCTION(typename typeOfMag<Type>::type, sumMag)
 
 template<class Type>
 Type sumCmptMag(const UList<Type>& f);
@@ -209,6 +241,7 @@ Type average(const UList<Type>& f);
 TMP_UNARY_FUNCTION(Type, average)
 
 
+// With reduction on ReturnType
 #define G_UNARY_FUNCTION(ReturnType, gFunc, Func, rFunc)                       \
                                                                                \
 template<class Type>                                                           \
@@ -220,14 +253,19 @@ G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
 G_UNARY_FUNCTION(Type, gMaxMagSqr, maxMagSqr, maxMagSqr)
 G_UNARY_FUNCTION(Type, gMinMagSqr, minMagSqr, minMagSqr)
-G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
+
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
+
+G_UNARY_FUNCTION(typename outerProduct1<Type>::type, gSumSqr, sumSqr, sum)
+G_UNARY_FUNCTION(typename typeOfMag<Type>::type, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
+
 template<class Type>
-scalar gSumProd
+typename scalarProduct<Type, Type>::type gSumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2,
@@ -263,6 +301,8 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
 
 
 // * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //

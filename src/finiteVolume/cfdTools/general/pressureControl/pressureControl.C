@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,8 +123,8 @@ Foam::pressureControl::pressureControl
             IOWarningInFunction(dict)
                  << "'rhoMax' specified rather than 'pMax' or 'pMaxFactor'"
                  << nl
-                 << "    This is supported for backward-compatibility but "
-                    "'pMax' or 'pMaxFactor' are more reliable." << endl;
+                 << "    This is supported for backward-compatibility but"
+                    " 'pMax' or 'pMaxFactor' are more reliable." << endl;
 
             if (!pLimits)
             {
@@ -176,7 +178,7 @@ Foam::pressureControl::pressureControl
             IOWarningInFunction(dict)
                 << "'rhoMin' specified rather than 'pMin' or 'pMinFactor'" << nl
                 << "    This is supported for backward-compatibility but"
-                   "'pMin' or 'pMinFactor' are more reliable." << endl;
+                   " 'pMin' or 'pMinFactor' are more reliable." << endl;
 
             if (!pLimits)
             {

@@ -43,7 +43,6 @@ SourceFiles
 #define foamVtkMeshMaps_H
 
 #include "DynamicList.H"
-#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +55,7 @@ namespace Foam
 
 class foamVtkMeshMaps
 {
-    // Private data
+    // Private Data
 
         //- Original cell ids for all cells (regular and decomposed)
         DynamicList<label> cellMap_;
@@ -68,21 +67,22 @@ class foamVtkMeshMaps
         //  Eg, cell-centre labels for additional points of decomposed cells
         DynamicList<label> additionalIds_;
 
+
 public:
 
     // Constructors
 
         //- Construct null
-        inline foamVtkMeshMaps(const label size = 0);
+        inline explicit foamVtkMeshMaps(const label size = 0);
 
 
     //- Destructor
-    inline ~foamVtkMeshMaps();
+    ~foamVtkMeshMaps() = default;
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Original cell ids for all cells (regular and decomposed).
         //  A regular mesh comprising only primitive cell types, this will just
@@ -98,7 +98,7 @@ public:
         inline const labelList& additionalIds() const;
 
 
-      // Edit
+    // Edit
 
         //- Clear
         inline void clear();

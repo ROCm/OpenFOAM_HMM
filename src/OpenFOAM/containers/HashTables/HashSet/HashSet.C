@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +59,8 @@ inline Foam::label Foam::HashSet<Key, Hash>::assignMany
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-template<unsigned Size>
-Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& list)
+template<unsigned N>
+Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, N>& list)
 :
     parent_type(2*list.size())
 {
@@ -82,7 +84,8 @@ Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& list)
 
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>::HashSet(const UIndirectList<Key>& list)
+template<class Addr>
+Foam::HashSet<Key, Hash>::HashSet(const IndirectListBase<Key, Addr>& list)
 :
     parent_type(2*list.size())
 {
@@ -154,10 +157,10 @@ inline Foam::label Foam::HashSet<Key, Hash>::insert
 
 
 template<class Key, class Hash>
-template<unsigned Size>
+template<unsigned N>
 inline Foam::label Foam::HashSet<Key, Hash>::insert
 (
-    const FixedList<Key, Size>& list
+    const FixedList<Key, N>& list
 )
 {
     return insert(list.begin(), list.end());
@@ -175,9 +178,10 @@ inline Foam::label Foam::HashSet<Key, Hash>::insert
 
 
 template<class Key, class Hash>
+template<class Addr>
 inline  Foam::label Foam::HashSet<Key, Hash>::insert
 (
-    const UIndirectList<Key>& list
+    const IndirectListBase<Key, Addr>& list
 )
 {
     return insert(list.begin(), list.end());
@@ -207,10 +211,10 @@ inline Foam::label Foam::HashSet<Key, Hash>::unset
 
 
 template<class Key, class Hash>
-template<unsigned Size>
+template<unsigned N>
 inline Foam::label Foam::HashSet<Key, Hash>::unset
 (
-    const FixedList<Key, Size>& list
+    const FixedList<Key, N>& list
 )
 {
     return unset(list.begin(), list.end());
@@ -228,9 +232,10 @@ inline Foam::label Foam::HashSet<Key, Hash>::unset
 
 
 template<class Key, class Hash>
+template<class Addr>
 inline Foam::label Foam::HashSet<Key, Hash>::unset
 (
-    const UIndirectList<Key>& list
+    const IndirectListBase<Key, Addr>& list
 )
 {
     return unset(list.begin(), list.end());
@@ -254,8 +259,8 @@ inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
 
 
 template<class Key, class Hash>
-template<unsigned Size>
-void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& rhs)
+template<unsigned N>
+void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, N>& rhs)
 {
     assignMany(rhs.size(), rhs.begin(), rhs.end());
 }
@@ -362,7 +367,7 @@ Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 template<class Key, class Hash>
 Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& tbl)
 {
-    return tbl.writeList(os, 10);  // 10=consistent with UList
+    return tbl.writeKeys(os, Detail::ListPolicy::short_length<Key>::value);
 }
 
 

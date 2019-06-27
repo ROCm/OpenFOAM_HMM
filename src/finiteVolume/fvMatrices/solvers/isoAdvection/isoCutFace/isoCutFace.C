@@ -47,8 +47,8 @@ Foam::isoCutFace::isoCutFace
     lastEdgeCut_(-1),
     firstFullySubmergedPoint_(-1),
     nFullySubmergedPoints_(0),
-    subFaceCentre_(vector::zero),
-    subFaceArea_(vector::zero),
+    subFaceCentre_(Zero),
+    subFaceArea_(Zero),
     subFacePoints_(10),
     surfacePoints_(4),
     subFaceCentreAndAreaIsCalculated_(false)
@@ -77,9 +77,9 @@ void Foam::isoCutFace::calcSubFaceCentreAndArea()
     }
     else if (nPoints > 0)
     {
-        vector sumN = vector::zero;
-        scalar sumA = 0.0;
-        vector sumAc = vector::zero;
+        vector sumN(Zero);
+        scalar sumA(0.0);
+        vector sumAc(Zero);
         const point fCentre = sum(subFacePoints_)/scalar(nPoints);
 
         for (label pi = 0; pi < nPoints; pi++)
@@ -128,8 +128,7 @@ Foam::label Foam::isoCutFace::calcSubFace
     //  +1: face is fully above the isosurface
     label faceStatus;
 
-    label pl1 = pLabels[0];
-    scalar f1 = f[pl1];
+    scalar f1 = f[pLabels[0]];
 
     // If vertex values are very close to isoValue lift them slightly to avoid
     // dealing with the many special cases of a face being touched either at a
@@ -186,7 +185,6 @@ Foam::label Foam::isoCutFace::calcSubFace
                 }
             }
         }
-        pl1 = pl2;
         f1 = f2;
     }
 
@@ -731,7 +729,7 @@ void Foam::isoCutFace::quadAreaCoeffs
 
         const scalar Bx = mag(B - A);
 
-        vector xhat(vector::zero);
+        vector xhat(Zero);
         if (Bx > 10*SMALL)
         {
             // If |AB| > 0 ABCD we use AB to define xhat

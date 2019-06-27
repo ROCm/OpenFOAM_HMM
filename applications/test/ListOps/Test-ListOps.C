@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +34,8 @@ Description
 #include "List.H"
 #include "SubList.H"
 #include "ListOps.H"
+#include "labelField.H"
+#include "MinMax.H"
 #include "face.H"
 
 using namespace Foam;
@@ -113,22 +117,40 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Test lambda predicates:" << nl << endl;
 
-    List<label> test6(identity(11));
-    // shift range for general testing
-    std::for_each(test6.begin(), test6.end(), [](label& x){ x -= 4; });
+    List<label> test6(identity(11, -4));
 
-    Info<< "Subset of non-zero, even values: "
-        << subsetList
-           (
-               test6,
-               [](const label& x){ return x && !(x % 2); }
-           ) << nl
-        << endl;
-
-    test6.append(identity(13));
+    // Add multiplier for mpore interesting testing
+    std::for_each(test6.begin(), test6.end(), [](label& x){ x *= 3; });
 
     // Randomize the list
     std::random_shuffle(test6.begin(), test6.end());
+
+    Info<< "randomized input list: " << flatOutput(test6) << nl;
+
+    const auto evenNonZero = [](const label& x){ return x && !(x % 2); };
+
+    Info<< "location of first even/non-zero: "
+        << ListOps::find(test6, evenNonZero) << nl;
+
+    Info<< "find > 12 && divisible by 5 : "
+        << ListOps::find
+           (
+               test6,
+               [](const label& x) { return x > 12 && !(x % 5); }
+           ) << nl;
+
+    Info<< "Found >= 8 : "
+        << ListOps::found(test6, labelMinMax(8, labelMax)) << nl;
+
+    Info<< "Found >= 25 : "
+        << ListOps::found(test6, labelMinMax(25, labelMax)) << nl;
+
+
+    Info<< "Subset of non-zero, even values: "
+        << subsetList(test6, evenNonZero) << nl
+        << endl;
+
+    test6.append(identity(13, 12));
 
     Info<< "Randomized: " << flatOutput(test6) << endl;
     inplaceUniqueSort(test6);

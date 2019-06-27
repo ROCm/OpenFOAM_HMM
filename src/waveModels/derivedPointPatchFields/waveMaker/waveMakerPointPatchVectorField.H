@@ -3,7 +3,9 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2018 IH-Cantabria
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018-2019 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +42,7 @@ Usage
     \verbatim
     leftwall
     {
-        type            waveMaker; 
+        type            waveMaker;
         motionType      flap;
         n               (1 0 0);
         initialDepth    0.25;
@@ -61,6 +63,7 @@ Usage
         wavePeriod   | wave period                  | yes      |
         waveHeight   | Wave height                  | yes      |
         wavePhase    | wave phase                   | yes      |
+        startTime    | Start time                   | no       | case start time
         rampTime     | Time to reach maximum motion | yes      |
         secondOrder  | Second order calculation     | no       | no
     \endtable
@@ -68,6 +71,7 @@ Usage
     Available motion types include:
     - piston
     - flap
+    - solitary
 
 SourceFiles
     waveMakerPointPatchVectorField.C
@@ -98,7 +102,8 @@ class waveMakerPointPatchVectorField
         enum motionTypes
         {
             piston,
-            flap
+            flap,
+            solitary
         };
 
         //- Names for motion types
@@ -132,6 +137,9 @@ class waveMakerPointPatchVectorField
 
         //- Wave length
         scalar waveLength_;
+
+        //- Start time
+        scalar startTime_;
 
         //- Ramp time
         scalar rampTime_;

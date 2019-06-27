@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -17,10 +17,12 @@
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions  # Require some wmake functions
 
-# Ensure CMake gets the correct C/C++ compilers
-[ -n "$WM_CC" ]  && export CC="$WM_CC"
-[ -n "$WM_CXX" ] && export CXX="$WM_CXX"
+# Export compiler information for cmake
+export CC="$(wmake -show-c)"
+export CXX="$(wmake -show-cxx)"
 
+export CFLAGS="$(wmake -show-cflags)"
+export CXXFLAGS="$(wmake -show-cxxflags)"
 
 #------------------------------------------------------------------------------
 

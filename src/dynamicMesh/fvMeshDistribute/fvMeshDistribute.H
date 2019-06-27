@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,9 +99,6 @@ class fvMeshDistribute
             const labelList& values,
             const label value
         );
-
-        //- Check all procs have same names and in exactly same order.
-        static void checkEqualWordList(const string&, const wordList&);
 
         //- Merge wordlists over all processors
         static wordList mergeWordList(const wordList&);
@@ -291,14 +290,25 @@ class fvMeshDistribute
                 const labelList& sourcePointMaster,
                 Ostream& toDomain
             );
+
+            //- Get sorted names of GeoField, optionally test
+            //- that all procs have the same names.
+            template<class GeoField>
+            static void getFieldNames
+            (
+                const fvMesh& mesh,
+                HashTable<wordList>& allFieldNames,
+                const bool syncPar = true
+            );
+
             //- Send subset of fields
             template<class GeoField>
             static void sendFields
             (
                 const label domain,
-                const wordList& fieldNames,
-                const fvMeshSubset&,
-                Ostream& toNbr
+                const HashTable<wordList>& allFieldNames,
+                const fvMeshSubset& subsetter,
+                Ostream&
             );
 
             //- Receive mesh. Opposite of sendMesh
@@ -322,10 +332,10 @@ class fvMeshDistribute
             static void receiveFields
             (
                 const label domain,
-                const wordList& fieldNames,
-                fvMesh&,
-                PtrList<GeoField>&,
-                const dictionary& fieldDicts
+                const HashTable<wordList>& allFieldNames,
+                fvMesh& mesh,
+                PtrList<GeoField>& fields,
+                const dictionary& allFieldsDict
             );
 
             //- No copy construct

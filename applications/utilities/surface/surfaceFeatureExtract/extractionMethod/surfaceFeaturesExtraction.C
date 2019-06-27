@@ -81,7 +81,7 @@ Foam::surfaceFeaturesExtraction::method::New
             << exit(FatalIOError);
     }
 
-    return autoPtr<method>(cstrIter.object()(dict));
+    return autoPtr<method>(cstrIter.val()(dict));
 }
 
 

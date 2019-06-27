@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +29,7 @@ License
 #include "IOstreams.H"
 #include "Switch.H"
 #include "objectRegistry.H"
-#include "IOField.H"
+#include "scalarIOField.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -178,7 +180,7 @@ Foam::scalarField& Foam::lduMatrix::lower()
         }
         else
         {
-            lowerPtr_ = new scalarField(lduAddr().lowerAddr().size(), 0.0);
+            lowerPtr_ = new scalarField(lduAddr().lowerAddr().size(), Zero);
         }
     }
 
@@ -190,7 +192,7 @@ Foam::scalarField& Foam::lduMatrix::diag()
 {
     if (!diagPtr_)
     {
-        diagPtr_ = new scalarField(lduAddr().size(), 0.0);
+        diagPtr_ = new scalarField(lduAddr().size(), Zero);
     }
 
     return *diagPtr_;
@@ -207,7 +209,7 @@ Foam::scalarField& Foam::lduMatrix::upper()
         }
         else
         {
-            upperPtr_ = new scalarField(lduAddr().lowerAddr().size(), 0.0);
+            upperPtr_ = new scalarField(lduAddr().lowerAddr().size(), Zero);
         }
     }
 
@@ -225,7 +227,7 @@ Foam::scalarField& Foam::lduMatrix::lower(const label nCoeffs)
         }
         else
         {
-            lowerPtr_ = new scalarField(nCoeffs, 0.0);
+            lowerPtr_ = new scalarField(nCoeffs, Zero);
         }
     }
 
@@ -237,7 +239,7 @@ Foam::scalarField& Foam::lduMatrix::diag(const label size)
 {
     if (!diagPtr_)
     {
-        diagPtr_ = new scalarField(size, 0.0);
+        diagPtr_ = new scalarField(size, Zero);
     }
 
     return *diagPtr_;
@@ -254,7 +256,7 @@ Foam::scalarField& Foam::lduMatrix::upper(const label nCoeffs)
         }
         else
         {
-            upperPtr_ = new scalarField(nCoeffs, 0.0);
+            upperPtr_ = new scalarField(nCoeffs, Zero);
         }
     }
 
@@ -317,7 +319,7 @@ const Foam::scalarField& Foam::lduMatrix::upper() const
 
 void Foam::lduMatrix::setResidualField
 (
-    const Field<scalar>& residual,
+    const scalarField& residual,
     const word& fieldName,
     const bool initial
 ) const
@@ -337,8 +339,8 @@ void Foam::lduMatrix::setResidualField
         lookupName = word("residual:" + fieldName);
     }
 
-    IOField<scalar>* residualPtr =
-        lduMesh_.thisDb().getObjectPtr<IOField<scalar>>(lookupName);
+    scalarIOField* residualPtr =
+        lduMesh_.thisDb().getObjectPtr<scalarIOField>(lookupName);
 
     if (residualPtr)
     {

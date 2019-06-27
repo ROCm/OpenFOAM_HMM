@@ -2,13 +2,13 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
-    OpenFOAM is free software: you can redistribute it and/or modify i
+    OpenFOAM is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
@@ -54,6 +54,7 @@ Description
         waitInterval    1;
         timeOut         100;
         initByExternal  no;
+        statusDone      done;
     }
     \endverbatim
 
@@ -106,7 +107,7 @@ class externalFileCoupler
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- The run state (ie, who is currently in charge)
         enum runState
@@ -117,16 +118,18 @@ public:
             DONE        //!< Finished
         };
 
-
 private:
 
-    // Private data
+    // Private Data
 
         //- The current run (and initialization) state
         mutable runState runState_;
 
         //- Local path to communications directory
         fileName commsDir_;
+
+        //- Value for "status=..." on termination
+        word statusDone_;
 
         //- Interval time between checking for return data [s]
         unsigned waitInterval_;
@@ -280,6 +283,7 @@ public:
 
 
         //- Generate \c status=done in lock (only when run-state = master)
+        //  The exact text can be specified via the statusDone keyword
         void shutdown() const;
 
         //- Remove files written by OpenFOAM

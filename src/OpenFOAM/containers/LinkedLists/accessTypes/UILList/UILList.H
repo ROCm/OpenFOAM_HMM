@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -178,13 +180,12 @@ public:
 
     // IOstream operators
 
-        //- Write UILList with line-breaks when its length exceeds
-        //- shortListLen.
+        //- Write UILList with line-breaks when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
         //- Write UILList to Ostream with line breaks,
-        //- as per writeList() with shortListLen=-1
+        //- as per writeList() with shortLen=-1
         friend Ostream& operator<< <LListBase, T>
         (
             Ostream& os,

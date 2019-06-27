@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +56,7 @@ void Foam::meshReader::calcPointCells() const
 
     // Initialize the list of labels which will hold the count of the
     // actual number of cells per point during the analysis
-    labelList cellCount(nPoints, 0);
+    labelList cellCount(nPoints, Zero);
 
     // Note. Unlike the standard point-cell algorithm, which asks the cell for
     // the supporting point labels, we need to work based on the cell faces.

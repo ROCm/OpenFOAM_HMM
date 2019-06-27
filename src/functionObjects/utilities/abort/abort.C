@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,8 +140,7 @@ Foam::functionObjects::abort::abort
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(runTime),
+    timeFunctionObject(name, runTime),
     file_(),
     defaultAction_(Time::stopAtControls::saUnknown),
     triggered_(false)
@@ -158,7 +159,7 @@ Foam::functionObjects::abort::abort
 
 bool Foam::functionObjects::abort::read(const dictionary& dict)
 {
-    functionObject::read(dict);
+    timeFunctionObject::read(dict);
 
     file_.clear();
 

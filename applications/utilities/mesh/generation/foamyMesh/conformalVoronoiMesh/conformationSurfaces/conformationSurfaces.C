@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -509,7 +511,7 @@ Foam::conformationSurfaces::conformationSurfaces
             }
         }
 
-        forAllConstIter(Map<sideVolumeType>, regionVolumeTypes[surfI], iter)
+        forAllConstIters(regionVolumeTypes[surfI], iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
 
@@ -518,7 +520,7 @@ Foam::conformationSurfaces::conformationSurfaces
         }
 
         const Map<autoPtr<dictionary>>& localInfo = regionPatchInfo[surfI];
-        forAllConstIter(Map<autoPtr<dictionary>>, localInfo, iter)
+        forAllConstIters(localInfo, iter)
         {
             label globalRegionI = regionOffset_[surfI] + iter.key();
 
@@ -613,7 +615,7 @@ Foam::Field<bool> Foam::conformationSurfaces::inside
     const pointField& samplePts
 ) const
 {
-    return wellInside(samplePts, scalarField(samplePts.size(), 0.0));
+    return wellInside(samplePts, scalarField(samplePts.size(), Zero));
 }
 
 
@@ -622,7 +624,7 @@ bool Foam::conformationSurfaces::inside
     const point& samplePt
 ) const
 {
-    return wellInside(pointField(1, samplePt), scalarField(1, 0))[0];
+    return wellInside(pointField(1, samplePt), scalarField(1, Zero))[0];
 }
 
 
@@ -631,7 +633,7 @@ Foam::Field<bool> Foam::conformationSurfaces::outside
     const pointField& samplePts
 ) const
 {
-    return wellOutside(samplePts, scalarField(samplePts.size(), 0.0));
+    return wellOutside(samplePts, scalarField(samplePts.size(), Zero));
 }
 
 
@@ -640,7 +642,7 @@ bool Foam::conformationSurfaces::outside
     const point& samplePt
 ) const
 {
-    return wellOutside(pointField(1, samplePt), scalarField(1, 0))[0];
+    return wellOutside(pointField(1, samplePt), scalarField(1, Zero))[0];
     //return !inside(samplePt);
 }
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +29,7 @@ License
 #include "fvMesh.H"
 #include "globalMeshData.H"
 #include "PstreamCombineReduceOps.H"
+#include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
 #include "mapDistribute.H"
 #include "stringListOps.H"
@@ -209,16 +212,19 @@ void Foam::ensightMesh::correct()
     if (option().useFaceZones())
     {
         // Mark boundary faces to be excluded from export
-        bitSet excludeFace(mesh_.nFaces());     // all false
+        bitSet excludeFace(mesh_.nFaces());
 
         for (const polyPatch& pp : mesh_.boundaryMesh())
         {
-            if
-            (
-                isA<processorPolyPatch>(pp)
-             && !refCast<const processorPolyPatch>(pp).owner()
-            )
+            const auto* procPatch = isA<processorPolyPatch>(pp);
+
+            if (isA<emptyPolyPatch>(pp))
             {
+                excludeFace.set(pp.range());
+            }
+            else if (procPatch && !procPatch->owner())
+            {
+                // Exclude neighbour-side, retain owner-side only
                 excludeFace.set(pp.range());
             }
         }

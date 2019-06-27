@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -109,12 +109,13 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         if (!residualPtr)
         {
              WarningInFunction
-                << "Could not find residual file : " << residualName_
-                << ".The residual mode won't be " << nl
+                << "Could not find residual field : " << residualName_
+                << ". The residual mode won't be " << nl
                 << "    considered for the blended field in the stability "
                 << "blending factor. " << nl
-                << "    Add the corresponding residual function object. " << nl
-                << "    If the residual function object is already set "
+                << "    Please add the corresponding 'solverInfo'"
+                << " function object with 'writeResidualFields true'." << nl
+                << "    If the solverInfo function object is already enabled "
                 << "you might need to wait " << nl
                 << "    for the first iteration."
                 << nl << endl;
@@ -123,11 +124,8 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         {
             scalar meanRes = gAverage(mag(*residualPtr)) + VSMALL;
 
-            if (log)
-            {
-                Log << nl << name() << " : " << nl;
-                Log << "    Average(mag(residuals)) :  " << meanRes << endl;
-            }
+            Log << nl << name() << " : " << nl
+                << "    Average(mag(residuals)) :  " << meanRes << endl;
 
             oldError_ = error_;
             oldErrorIntegral_ = errorIntegral_;
@@ -370,7 +368,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
         auto& Co = CoPtr.ref();
 
         Co.primitiveFieldRef() =
-            mesh_.time().deltaT()*mag(*UNamePtr)/pow(mesh_.V(), 1.0/3.0);
+            mesh_.time().deltaT()*mag(*UNamePtr)/cbrt(mesh_.V());
 
         indicator_ =
             max
@@ -492,10 +490,10 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
     ),
 
     tolerance_(0.001),
-    error_(mesh_.nCells(), 0.0),
-    errorIntegral_(mesh_.nCells(), 0.0),
-    oldError_(mesh_.nCells(), 0.0),
-    oldErrorIntegral_(mesh_.nCells(), 0.0),
+    error_(mesh_.nCells(), Zero),
+    errorIntegral_(mesh_.nCells(), Zero),
+    oldError_(mesh_.nCells(), Zero),
+    oldErrorIntegral_(mesh_.nCells(), Zero),
     P_(dict.lookupOrDefault<scalar>("P", 3)),
     I_(dict.lookupOrDefault<scalar>("I", 0.0)),
     D_(dict.lookupOrDefault<scalar>("D", 0.25))
@@ -713,10 +711,8 @@ bool Foam::functionObjects::stabilityBlendingFactor::read
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,39 +32,33 @@ License
 Foam::Detail::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 (
     const IOobject& ioPoints,
-    const IOobject& ioFaces,
-    const IOobject& ioZones
+    const IOobject& ioFaces
 )
 :
     points_(ioPoints),
-    faces_(ioFaces),
-    zones_(ioZones)
+    faces_(ioFaces)
 {}
 
 
 Foam::Detail::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 (
     const IOobject& ioPoints, const pointField& points,
-    const IOobject& ioFaces,  const faceList& faces,
-    const IOobject& ioZones,  const surfZoneList& zones
+    const IOobject& ioFaces,  const faceList& faces
 )
 :
     points_(ioPoints, points),
-    faces_(ioFaces, faces),
-    zones_(ioZones, zones)
+    faces_(ioFaces, faces)
 {}
 
 
 Foam::Detail::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 (
     const IOobject& ioPoints, pointField&& points,
-    const IOobject& ioFaces,  faceList&& faces,
-    const IOobject& ioZones,  surfZoneList&& zones
+    const IOobject& ioFaces,  faceList&& faces
 )
 :
     points_(ioPoints, std::move(points)),
-    faces_(ioFaces, std::move(faces)),
-    zones_(ioZones, std::move(zones))
+    faces_(ioFaces, std::move(faces))
 {}
 
 
@@ -83,7 +79,6 @@ void Foam::Detail::MeshedSurfaceIOAllocator::setInstance
 {
     points_.instance() = inst;
     faces_.instance()  = inst;
-    zones_.instance()  = inst;
 }
 
 
@@ -94,7 +89,6 @@ void Foam::Detail::MeshedSurfaceIOAllocator::setWriteOption
 {
     points_.writeOpt() = wOpt;
     faces_.writeOpt()  = wOpt;
-    zones_.writeOpt()  = wOpt;
 }
 
 
@@ -102,7 +96,6 @@ void Foam::Detail::MeshedSurfaceIOAllocator::clear()
 {
     points_.clear();
     faces_.clear();
-    zones_.clear();
 }
 
 
@@ -118,7 +111,6 @@ bool Foam::Detail::MeshedSurfaceIOAllocator::writeObject
     (
         points_.writeObject(fmt, ver, cmp, valid)
      && faces_.writeObject(fmt, ver, cmp, valid)
-     && zones_.writeObject(fmt, ver, cmp, valid)
     );
 }
 

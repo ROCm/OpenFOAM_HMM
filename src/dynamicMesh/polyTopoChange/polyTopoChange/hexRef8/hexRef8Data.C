@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,7 +263,10 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         IOobject rio(io);
         rio.rename("cellLevel");
         rio.readOpt() = IOobject::NO_READ;
-        cellLevelPtr_.reset(new labelIOList(rio, labelList(mesh.nCells(), 0)));
+        cellLevelPtr_.reset
+        (
+            new labelIOList(rio, labelList(mesh.nCells(), Zero))
+        );
     }
 
     bool hasPointLevel = returnReduce(pointLevelPtr_.valid(), orOp<bool>());
@@ -272,7 +277,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         rio.readOpt() = IOobject::NO_READ;
         pointLevelPtr_.reset
         (
-            new labelIOList(rio, labelList(mesh.nPoints(), 0))
+            new labelIOList(rio, labelList(mesh.nPoints(), Zero))
         );
     }
 

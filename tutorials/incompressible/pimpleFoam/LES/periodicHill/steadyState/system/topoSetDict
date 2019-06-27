@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,41 +22,29 @@ actions
         type    faceSet;
         action  new;
         source  patchToFace;
-        sourceInfo
-        {
-            name    inlet;
-        }
+        patch   inlet;
     }
     {
         name    inletCellSet;
         type    cellSet;
         action  new;
         source  faceToCell;
-        sourceInfo
-        {
-            set     inletFaceSet;
-            option  any;
-        }
+        set     inletFaceSet;
+        option  any;
     }
     {
         name    inletCellSet;
         type    cellSet;
         action  subset;
         source  boxToCell;
-        sourceInfo
-        {
-            box     (-100 -100 -100)(0.1 100 100);
-        }
+        box     (-100 -100 -100)(0.1 100 100);
     }
     {
         name    inletCellZone;
         type    cellZoneSet;
         action  new;
         source  setToCellZone;
-        sourceInfo
-        {
-            set     inletCellSet;
-        }
+        set     inletCellSet;
     }
 );
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,8 +124,9 @@ public:
         //  Also constructs from DynamicField with different sizing parameters.
         inline explicit DynamicField(const UList<T>& list);
 
-        //- Copy construct from UIndirectList
-        inline explicit DynamicField(const UIndirectList<T>& list);
+        //- Copy construct from IndirectList
+        template<class Addr>
+        inline explicit DynamicField(const IndirectListBase<T, Addr>& list);
 
         //- Move construct from List contents
         inline explicit DynamicField(List<T>&& content);

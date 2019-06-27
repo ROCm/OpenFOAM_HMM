@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -618,12 +620,11 @@ void Foam::featurePointConformer::reIndexPointPairs
     {
         const label currentIndex = featurePointVertices_[vI].index();
 
-        Map<label>::const_iterator newIndexIter =
-            oldToNewIndices.find(currentIndex);
+        const auto newIndexIter = oldToNewIndices.cfind(currentIndex);
 
-        if (newIndexIter != oldToNewIndices.end())
+        if (newIndexIter.found())
         {
-            featurePointVertices_[vI].index() = newIndexIter();
+            featurePointVertices_[vI].index() = *newIndexIter;
         }
     }
 

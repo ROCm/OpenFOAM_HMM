@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,14 +221,8 @@ Foam::Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
             specieName.resize(i);
         }
 
-        if (species.contains(specieName))
-        {
-            index = species[specieName];
-        }
-        else
-        {
-            index = -1;
-        }
+        // -1 if not found
+        index = species[specieName];
     }
     else
     {

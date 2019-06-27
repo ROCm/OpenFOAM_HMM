@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2018 IH-Cantabria
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018-2019 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +38,8 @@ const Foam::Enum<Foam::waveMakerPointPatchVectorField::motionTypes>
 Foam::waveMakerPointPatchVectorField::motionTypeNames
 ({
     { motionTypes::piston, "piston" },
-    { motionTypes::flap, "flap" }
+    { motionTypes::flap, "flap" },
+    { motionTypes::solitary, "solitary" }
 });
 
 
@@ -58,9 +61,9 @@ const Foam::vector& Foam::waveMakerPointPatchVectorField::g()
 }
 
 
-Foam::scalar Foam::waveMakerPointPatchVectorField::waveLength 
+Foam::scalar Foam::waveMakerPointPatchVectorField::waveLength
 (
-    const scalar h, 
+    const scalar h,
     const scalar T
 )
 {
@@ -102,7 +105,8 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(0),
     wavePhase_(0),
     waveLength_(0),
-    rampTime_(0),
+    startTime_(0),
+    rampTime_(1),
     secondOrder_(false)
 {}
 
@@ -115,7 +119,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict, false),
-    motionType_(motionTypeNames.lookup("motionType", dict)),
+    motionType_(motionTypeNames.get("motionType", dict)),
     n_(dict.get<vector>("n")),
     gHat_(Zero),
     initialDepth_(dict.get<scalar>("initialDepth")),
@@ -123,6 +127,14 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(dict.get<scalar>("waveHeight")),
     wavePhase_(dict.get<scalar>("wavePhase")),
     waveLength_(this->waveLength(initialDepth_, wavePeriod_)),
+    startTime_
+    (
+        dict.lookupOrDefault<scalar>
+        (
+            "startTime",
+            db().time().startTime().value()
+        )
+    ),
     rampTime_(dict.get<scalar>("rampTime")),
     secondOrder_(dict.lookupOrDefault<bool>("secondOrder", false))
 {
@@ -162,6 +174,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(ptf.waveHeight_),
     wavePhase_(ptf.wavePhase_),
     waveLength_(ptf.waveLength_),
+    startTime_(ptf.startTime_),
     rampTime_(ptf.rampTime_),
     secondOrder_(ptf.secondOrder_)
 {}
@@ -182,6 +195,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     waveHeight_(ptf.waveHeight_),
     wavePhase_(ptf.wavePhase_),
     waveLength_(ptf.waveLength_),
+    startTime_(ptf.startTime_),
     rampTime_(ptf.rampTime_),
     secondOrder_(ptf.secondOrder_)
 {}
@@ -196,7 +210,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
         return;
     }
 
-    const scalar t = db().time().value();
+    const scalar t = db().time().value() - startTime_;
 
     const scalar waveK = constant::mathematical::twoPi/waveLength_;
     const scalar sigma = constant::mathematical::twoPi/wavePeriod_;
@@ -214,7 +228,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
 
             if (secondOrder_)
             {
-                motionX += 
+                motionX +=
                     sqr(waveHeight_)/(16*initialDepth_)
                    *(3*cosh(kh)/pow3(sinh(kh)) - 2/m1)
                    *sin(2*sigma*t);
@@ -238,13 +252,46 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
 
             if (secondOrder_)
             {
-                motionX += 
+                motionX +=
                     sqr(waveHeight_)
                    /(32*initialDepth_)*(3*cosh(kh)
                    /pow3(sinh(kh)) - 2/m1);
             }
 
             Field<vector>::operator=(n_*timeCoeff(t)*motionX);
+
+            break;
+        }
+        case motionTypes::solitary:
+        {
+            const scalar kappa = sqrt(0.75*waveHeight_/(pow3(initialDepth_)));
+            const scalar waveCelerity =
+                sqrt(mag(g())*(initialDepth_ + waveHeight_));
+            const scalar stroke = sqrt(16.0*waveHeight_*initialDepth_/3.0);
+            const scalar hr = waveHeight_/initialDepth_;
+            wavePeriod_ = (2.0/(kappa*waveCelerity))*(3.8 + hr);
+            const scalar tSolitary = -0.5*wavePeriod_ + t;
+
+            // Newton-Rapshon
+            scalar theta1 = 0;
+            scalar theta2 = 0;
+            scalar er = 10000;
+            const scalar error = 0.001;
+            while (er > error)
+            {
+                theta2 =
+                    theta1
+                  - (theta1 - kappa*waveCelerity*tSolitary + hr*tanh(theta1))
+                   /(1.0 + hr*(1.0/cosh(theta1))*(1.0/cosh(theta1)));
+
+                    er = mag(theta1 - theta2);
+                    theta1 = theta2;
+            }
+
+            scalar motionX =
+                waveHeight_/(kappa*initialDepth_)*tanh(theta1) + 0.5*stroke;
+
+            Field<vector>::operator=(n_*motionX);
 
             break;
         }
@@ -255,7 +302,7 @@ void Foam::waveMakerPointPatchVectorField::updateCoeffs()
                 << abort(FatalError);
         }
     }
-        
+
 
     fixedValuePointPatchField<vector>::updateCoeffs();
 }
@@ -270,6 +317,7 @@ void Foam::waveMakerPointPatchVectorField::write(Ostream& os) const
     os.writeEntry("wavePeriod", wavePeriod_);
     os.writeEntry("waveHeight", waveHeight_);
     os.writeEntry("wavePhase", wavePhase_);
+    os.writeEntry("startTime", startTime_);
     os.writeEntry("rampTime", rampTime_);
     os.writeEntry("secondOrder", secondOrder_);
     writeEntry("value", os);

@@ -103,13 +103,13 @@ void Foam::functionObjects::thermoCoupleProbes::derivatives
     scalarField& dydx
 ) const
 {
-    scalarField G(y.size(), 0.0);
-    scalarField Tc(y.size(), 0.0);
-    scalarField Uc(y.size(), 0.0);
-    scalarField rhoc(y.size(), 0.0);
-    scalarField muc(y.size(), 0.0);
-    scalarField Cpc(y.size(), 0.0);
-    scalarField kappac(y.size(), 0.0);
+    scalarField G(y.size(), Zero);
+    scalarField Tc(y.size(), Zero);
+    scalarField Uc(y.size(), Zero);
+    scalarField rhoc(y.size(), Zero);
+    scalarField muc(y.size(), Zero);
+    scalarField Cpc(y.size(), Zero);
+    scalarField kappac(y.size(), Zero);
 
     if (radiationFieldName_ != "none")
     {

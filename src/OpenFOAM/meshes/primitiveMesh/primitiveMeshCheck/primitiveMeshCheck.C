@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,16 +88,14 @@ bool Foam::primitiveMesh::checkClosedBoundary
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Boundary openness " << openness << " OK."
-                << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Boundary openness " << openness << " OK."
+            << endl;
     }
+
+    return false;
 }
 
 
@@ -295,17 +295,15 @@ bool Foam::primitiveMesh::checkFaceAreas
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Minimum face area = " << minArea
-                << ". Maximum face area = " << maxArea
-                << ".  Face area magnitudes OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Minimum face area = " << minArea
+            << ". Maximum face area = " << maxArea
+            << ".  Face area magnitudes OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -364,18 +362,16 @@ bool Foam::primitiveMesh::checkCellVolumes
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Min volume = " << minVolume
-                << ". Max volume = " << maxVolume
-                << ".  Total volume = " << gSum(vols)
-                << ".  Cell volumes OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Min volume = " << minVolume
+            << ". Max volume = " << maxVolume
+            << ".  Total volume = " << gSum(vols)
+            << ".  Cell volumes OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -477,15 +473,13 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Non-orthogonality check OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Non-orthogonality check OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -579,15 +573,13 @@ bool Foam::primitiveMesh::checkFacePyramids
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Face pyramids OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Face pyramids OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -652,15 +644,13 @@ bool Foam::primitiveMesh::checkFaceSkewness
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Max skewness = " << maxSkew << " OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Max skewness = " << maxSkew << " OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -732,15 +722,13 @@ bool Foam::primitiveMesh::checkFaceAngles
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    All angles in faces OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    All angles in faces OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -823,7 +811,7 @@ bool Foam::primitiveMesh::checkFaceFlatness
     }
 
 
-    if (nWarped> 0)
+    if (nWarped > 0)
     {
         if (debug || report)
         {
@@ -837,15 +825,13 @@ bool Foam::primitiveMesh::checkFaceFlatness
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    All face flatness OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    All face flatness OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -948,14 +934,10 @@ bool Foam::primitiveMesh::checkConcaveCells
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Concave cell check OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Concave cell check OK." << endl;
     }
 
     return false;
@@ -1113,15 +1095,13 @@ bool Foam::primitiveMesh::checkUpperTriangular
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Upper triangular ordering OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Upper triangular ordering OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -1147,7 +1127,7 @@ bool Foam::primitiveMesh::checkCellsZipUp
 
         const edgeList cellEdges = c[celli].edges(f);
 
-        labelList edgeUsage(cellEdges.size(), 0);
+        labelList edgeUsage(cellEdges.size(), Zero);
 
         forAll(curFaces, facei)
         {
@@ -1211,15 +1191,13 @@ bool Foam::primitiveMesh::checkCellsZipUp
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Topological cell zip-up check OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Topological cell zip-up check OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -1284,15 +1262,13 @@ bool Foam::primitiveMesh::checkFaceVertices
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Face vertices OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Face vertices OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -1356,15 +1332,13 @@ bool Foam::primitiveMesh::checkPoints
 
         return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Point usage OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Point usage OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -1378,7 +1352,7 @@ bool Foam::primitiveMesh::checkDuplicateFaces
 {
     bool error = false;
 
-    forAllConstIter(Map<label>, nCommonPoints, iter)
+    forAllConstIters(nCommonPoints, iter)
     {
         label nbFacei = iter.key();
         label nCommon = iter();
@@ -1418,7 +1392,7 @@ bool Foam::primitiveMesh::checkCommonOrder
 {
     bool error = false;
 
-    forAllConstIter(Map<label>, nCommonPoints, iter)
+    forAllConstIters(nCommonPoints, iter)
     {
         label nbFacei = iter.key();
         label nCommon = iter();
@@ -1609,18 +1583,7 @@ bool Foam::primitiveMesh::checkFaceFaces
                 if (facei < nbFacei)
                 {
                     // Only check once for each combination of two faces.
-
-                    Map<label>::iterator fnd = nCommonPoints.find(nbFacei);
-
-                    if (fnd == nCommonPoints.end())
-                    {
-                        // First common vertex found.
-                        nCommonPoints.insert(nbFacei, 1);
-                    }
-                    else
-                    {
-                        fnd()++;
-                    }
+                    ++(nCommonPoints(nbFacei, 0));
                 }
             }
         }
@@ -1668,15 +1631,13 @@ bool Foam::primitiveMesh::checkFaceFaces
 
         return false;   //return true;
     }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Face-face connectivity OK." << endl;
-        }
 
-        return false;
+    if (debug || report)
+    {
+        Info<< "    Face-face connectivity OK." << endl;
     }
+
+    return false;
 }
 
 
@@ -1848,66 +1809,63 @@ bool Foam::primitiveMesh::checkConcaveCells
 
 bool Foam::primitiveMesh::checkTopology(const bool report) const
 {
-    label noFailedChecks = 0;
+    label nFailedChecks = 0;
 
-    if (checkPoints(report)) noFailedChecks++;
-    if (checkUpperTriangular(report)) noFailedChecks++;
-    if (checkCellsZipUp(report)) noFailedChecks++;
-    if (checkFaceVertices(report)) noFailedChecks++;
-    if (checkFaceFaces(report)) noFailedChecks++;
+    if (checkPoints(report)) ++nFailedChecks;
+    if (checkUpperTriangular(report)) ++nFailedChecks;
+    if (checkCellsZipUp(report)) ++nFailedChecks;
+    if (checkFaceVertices(report)) ++nFailedChecks;
+    if (checkFaceFaces(report)) ++nFailedChecks;
 
-    if (noFailedChecks == 0)
+    if (nFailedChecks)
     {
         if (debug || report)
         {
-            Info<< "    Mesh topology OK." << endl;
-        }
-
-        return false;
-    }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Failed " << noFailedChecks
+            Info<< "    Failed " << nFailedChecks
                 << " mesh topology checks." << endl;
         }
 
         return true;
     }
+
+    if (debug || report)
+    {
+        Info<< "    Mesh topology OK." << endl;
+    }
+
+    return false;
 }
 
 
 bool Foam::primitiveMesh::checkGeometry(const bool report) const
 {
-    label noFailedChecks = 0;
+    label nFailedChecks = 0;
 
-    if (checkClosedBoundary(report)) noFailedChecks++;
-    if (checkClosedCells(report)) noFailedChecks++;
-    if (checkFaceAreas(report)) noFailedChecks++;
-    if (checkCellVolumes(report)) noFailedChecks++;
-    if (checkFaceOrthogonality(report)) noFailedChecks++;
-    if (checkFacePyramids(report)) noFailedChecks++;
-    if (checkFaceSkewness(report)) noFailedChecks++;
+    if (checkClosedBoundary(report)) ++nFailedChecks;
+    if (checkClosedCells(report)) ++nFailedChecks;
+    if (checkFaceAreas(report)) ++nFailedChecks;
+    if (checkCellVolumes(report)) ++nFailedChecks;
+    if (checkFaceOrthogonality(report)) ++nFailedChecks;
+    if (checkFacePyramids(report)) ++nFailedChecks;
+    if (checkFaceSkewness(report)) ++nFailedChecks;
 
-    if (noFailedChecks == 0)
+    if (nFailedChecks)
     {
         if (debug || report)
         {
-            Info<< "    Mesh geometry OK." << endl;
-        }
-        return false;
-    }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Failed " << noFailedChecks
+            Info<< "    Failed " << nFailedChecks
                 << " mesh geometry checks." << endl;
         }
 
         return true;
     }
+
+    if (debug || report)
+    {
+        Info<< "    Mesh geometry OK." << endl;
+    }
+
+    return false;
 }
 
 
@@ -1918,27 +1876,25 @@ bool Foam::primitiveMesh::checkMesh(const bool report) const
         InfoInFunction << "Checking primitiveMesh" << endl;
     }
 
-    label noFailedChecks = checkTopology(report) + checkGeometry(report);
+    label nFailedChecks = checkTopology(report) + checkGeometry(report);
 
-    if (noFailedChecks == 0)
+    if (nFailedChecks)
     {
         if (debug || report)
         {
-            Info<< "Mesh OK." << endl;
-        }
-
-        return false;
-    }
-    else
-    {
-        if (debug || report)
-        {
-            Info<< "    Failed " << noFailedChecks
+            Info<< "    Failed " << nFailedChecks
                 << " mesh checks." << endl;
         }
 
         return true;
     }
+
+    if (debug || report)
+    {
+        Info<< "Mesh OK." << endl;
+    }
+
+    return false;
 }
 
 

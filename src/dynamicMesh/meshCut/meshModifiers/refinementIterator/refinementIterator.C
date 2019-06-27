@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +40,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(refinementIterator, 0);
+    defineTypeNameAndDebug(refinementIterator, 0);
 }
 
 
@@ -210,14 +212,14 @@ Foam::Map<Foam::label> Foam::refinementIterator::setRefinement
         // from meshRefiner.updateMesh call) and add to global list of added
         const Map<label>& addedNow = meshRefiner_.addedCells();
 
-        forAllConstIter(Map<label>, addedNow, iter)
+        forAllConstIters(addedNow, iter)
         {
-            if (!addedCells.insert(iter.key(), iter()))
+            if (!addedCells.insert(iter.key(), iter.val()))
             {
                 FatalErrorInFunction
                     << "Master cell " << iter.key()
                     << " already has been refined" << endl
-                    << "Added cell:" << iter() << abort(FatalError);
+                    << "Added cell:" << iter.val() << abort(FatalError);
             }
         }
 

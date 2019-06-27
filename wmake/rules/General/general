@@ -1,5 +1,5 @@
 #-------------------------------*- makefile -*---------------------------------
-WM_VERSION = OPENFOAM=1812
+WM_VERSION = OPENFOAM=1906
 
 AR         = ar
 ARFLAGS    = cr
@@ -7,14 +7,14 @@ RANLIB     = ranlib
 CPP        = cpp
 LD         = ld
 
-GFLAGS     = -D$(WM_VERSION) -D$(WM_ARCH) -DWM_ARCH_OPTION=$(WM_ARCH_OPTION) \
+GFLAGS     = -D$(WM_VERSION) \
              -DWM_$(WM_PRECISION_OPTION) -DWM_LABEL_SIZE=$(WM_LABEL_SIZE)
 GINC       =
 GLIBS      = -lm
 GLIB_LIBS  =
 
 
-COMPILER_TYPE   = $(shell echo $(WM_COMPILER) | tr -d [:digit:])
+COMPILER_TYPE   = $(shell echo "$(WM_COMPILER)" | sed -e 's/[0-9].*//')
 DEFAULT_RULES   = $(WM_DIR)/rules/$(WM_ARCH)$(COMPILER_TYPE)
 RULES           = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
 WMAKE_BIN       = $(WM_DIR)/platforms/$(WM_ARCH)$(WM_COMPILER)
@@ -30,6 +30,5 @@ include $(DEFAULT_RULES)/c++
 sinclude $(RULES)/general
 sinclude $(RULES)/c++
 include $(GENERAL_RULES)/transform
-
 
 #------------------------------------------------------------------------------

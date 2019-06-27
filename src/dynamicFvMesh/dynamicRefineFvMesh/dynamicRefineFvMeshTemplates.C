@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
     typedef GeometricField<T, fvsPatchField, surfaceMesh> GeoField;
 
     //- Make flat field for ease of looping
-    Field<T> tsFld(this->nFaces(), pTraits<T>::zero);
+    Field<T> tsFld(this->nFaces(), Zero);
     SubField<T>(tsFld, this->nInternalFaces()) = sFld.internalField();
 
     const typename GeoField::Boundary& bFld = sFld.boundaryField();
@@ -64,7 +64,7 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
         {
             // Loop over all owner/neighbour cell faces
             // and find already mapped ones (master-faces):
-            T tmpValue = pTraits<T>::zero;
+            T tmpValue(pTraits<T>::zero);
             label counter = 0;
 
             const cell& ownFaces = cells[owner[facei]];
@@ -105,16 +105,14 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
     typedef GeometricField<T, fvsPatchField, surfaceMesh> GeoField;
     HashTable<GeoField*> sFlds(this->objectRegistry::lookupClass<GeoField>());
 
-    forAllIter(typename HashTable<GeoField*>, sFlds, iter)
+    forAllIters(sFlds, iter)
     {
         //if (mapSurfaceFields_.found(iter.key()))
         {
-            if (debug)
-            {
-                Info<< "dynamicRefineFvMesh::mapNewInternalFaces():"
-                    << " Mapping new internal faces by interpolation on "
-                    << iter.key()<< endl;
-            }
+            DebugInfo
+                << "dynamicRefineFvMesh::mapNewInternalFaces():"
+                << " Mapping new internal faces by interpolation on "
+                << iter.key()<< endl;
 
             GeoField& sFld = *iter();
 
@@ -143,27 +141,23 @@ void Foam::dynamicRefineFvMesh::mapNewInternalFaces
     typedef GeometricField<T, fvsPatchField, surfaceMesh> GeoField;
     HashTable<GeoField*> sFlds(this->objectRegistry::lookupClass<GeoField>());
 
-    forAllIter(typename HashTable<GeoField*>, sFlds, iter)
+    forAllIters(sFlds, iter)
     {
         //if (mapSurfaceFields_.found(iter.key()))
         {
-            if (debug)
-            {
-                Info<< "dynamicRefineFvMesh::mapNewInternalFaces():"
-                    << " Mapping new internal faces by interpolation on "
-                    << iter.key()<< endl;
-            }
+            DebugInfo
+                << "dynamicRefineFvMesh::mapNewInternalFaces():"
+                << " Mapping new internal faces by interpolation on "
+                << iter.key() << endl;
 
             GeoField& sFld = *iter();
 
             if (sFld.oriented()())
             {
-                if (debug)
-                {
-                    Info<< "dynamicRefineFvMesh::mapNewInternalFaces(): "
-                        << "Converting oriented field " << iter.key()
-                        << " to intensive field and mapping" << endl;
-                }
+                DebugInfo
+                    << "dynamicRefineFvMesh::mapNewInternalFaces(): "
+                    << "Converting oriented field " << iter.key()
+                    << " to intensive field and mapping" << endl;
 
                 // Assume any oriented field is face area weighted (i.e. a flux)
                 // Convert to intensive (& oriented) before mapping. Untested.

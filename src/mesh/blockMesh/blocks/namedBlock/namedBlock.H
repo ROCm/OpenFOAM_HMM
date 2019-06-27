@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,12 +58,12 @@ class namedBlock
 public:
 
     //- Runtime type information
-    TypeName("name");
+    TypeNameNoDebug("name");
 
 
     // Constructors
 
-        //- Construct from Istream setting pointsList
+        //- Construct from Istream setting points list
         namedBlock
         (
             const dictionary& dict,
@@ -74,8 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~namedBlock()
-    {}
+    virtual ~namedBlock() = default;
 };
 
 

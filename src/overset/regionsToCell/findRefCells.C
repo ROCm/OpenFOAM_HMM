@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +94,7 @@ void Foam::setRefCells
 
 
     // (per region!) does region have reference cell?
-    labelList hasRef(regionNeedReference.size(), 0);
+    labelList hasRef(regionNeedReference.size(), Zero);
 
 
     const labelList refValues(dict.lookup(refValueName));
@@ -158,7 +160,7 @@ void Foam::setRefCells
                 << exit(FatalIOError);
         }
 
-        labelList hasRef(refPoints.size(), 0);
+        labelList hasRef(refPoints.size(), Zero);
 
         forAll(refPoints, i)
         {

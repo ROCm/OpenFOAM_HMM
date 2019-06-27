@@ -1,0 +1,316 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Script
+#     foamPackRelease [OPTION]
+#
+# Description
+#     Simple script generator for packing OpenFOAM sources and submodules
+#
+#       $ foamPackRelease -output=some/path origin/master > create-tar
+#       $ bash ./create-tar
+#
+#     Or directly:
+#
+#       $ foamPackRelease -tgz origin/master | bash
+#
+#     Done as two-step process to allow further manual adjustments as required
+#------------------------------------------------------------------------------
+Script="${0##*/}"
+
+usage() {
+    exec 1>&2
+    while [ "$#" -gt 0 ]; do echo "$1"; shift; done
+cat <<USAGE
+
+Usage: ${0##*/} [OPTION] commit-ish
+options:
+   -output=dir      Write to alternative output directory
+   -no-modules      Exclude submodules
+   -no-patch        Ignore _patch number for the output tar-file
+   -compress=TYPE   Compress with specified type
+   -tgz             Alias for -compress=tgz
+   -help            Print help
+
+Simple script generator for packing OpenFOAM and submodules.
+Eg,
+
+    $Script -output some-directory origin/master > create-tar
+    sh ./create-tar
+
+    $Script -tgz origin/master | bash
+
+USAGE
+    exit 1
+}
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+
+#-------------------------------------------------------------------------------
+outputDir="."
+unset skipModules skipPatchNum
+unset gitbase head commit compress
+
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help*)
+        usage
+        ;;
+    -output)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        outputDir="$2"
+        shift
+        ;;
+    -output=*)
+        outputDir="${1#*=}"
+        ;;
+    -no-modules)
+        skipModules=true
+        ;;
+    -no-patch)
+        skipPatchNum=true
+        ;;
+    -compress=*)
+        compress="${1#*=}"
+        ;;
+    -tgz)
+        compress="${1#*-}"
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+    shift
+done
+
+commit="$1"
+[ "$#" -eq 1 ] && [ -n "$commit" ] || usage "Requires one argument"
+
+
+#-------------------------------------------------------------------------------
+# Resolve the output directory
+outputDir="$(cd $outputDir 2>/dev/null && pwd -L)" || \
+    die "Cannot resolve output directory"
+
+[ -w "$outputDir" ] || \
+    die "Output directory non-writable: $outputDir"
+
+echo "Using outputDir=$outputDir" 1>&2
+
+#-------------------------------------------------------------------------------
+# Locate the git repository
+
+# Locate git-dir via rev-parse
+findGitDir()
+{
+    (
+        if cd "$1" 2>/dev/null && \
+            git rev-parse --is-inside-work-tree > /dev/null 2>&1
+        then
+            git rev-parse --show-toplevel 2>/dev/null
+        fi
+    )
+}
+
+echo "Find git repository ... from script location" 1>&2
+gitbase=$(findGitDir "${0%/*}")
+
+##DEBUG unset gitbase
+if [ -z "$gitbase" ]
+then
+    echo "Find git repository ... from current directory" 1>&2
+    gitbase=$(findGitDir "$PWD")
+fi
+
+[ -d "$gitbase" ] || die "Could not locate a git directory"
+echo "Detected git repository at $gitbase" 1>&2
+
+
+# Resolve the given commit-ish to a real commit number.
+# Eg, origin/master on input, SHA1 on output
+head="$(git --git-dir="$gitbase/.git" rev-parse "$commit")"
+
+[ -n "$head" ] || die "Could resolve requested start point $commit"
+echo "Resolved $commit as $head" 1>&2
+
+#-------------------------------------------------------------------------------
+# Determine the API and PATCH numbers.
+# Extract from META-INFO/api-info
+
+unset api patch sha1
+
+# Grab the sha1 for the file
+sha1=$(git --git-dir="$gitbase/.git" ls-tree "$head" META-INFO/api-info | \
+    awk '{ if ($2 == "blob") { print $3 }}')
+
+
+[ -n "$sha1" ] || die "Could locate git content for META-INFO/api-info"
+
+# The api and patch
+api="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/api=//p)"
+patch="$(git --git-dir="$gitbase/.git" show "$sha1" | sed -ne s/patch=//p)"
+
+[ -n "$api" ] || die "Could resolve api value"
+
+echo "Detected api, patch as '$api' and '$patch'" 1>&2
+
+# Define the output names
+dirPrefix="OpenFOAM-v${api}"
+tarName="OpenFOAM-v${api}"
+
+if [ "$skipPatchNum" = true ]
+then
+    echo "Ignoring patch number for output name" 1>&2
+elif [ "${patch:-0}" -gt 0 ]
+then
+    tarName="${tarName}_${patch}"
+fi
+
+echo 1>&2
+echo "Tar-file name:   $tarName.tar" 1>&2
+echo "Directory name:  $dirPrefix/" 1>&2
+echo 1>&2
+
+#-------------------------------------------------------------------------------
+
+# Create main tar
+echo "#!/bin/bash"
+echo "cd \""$gitbase/"\" || exit 1"
+echo "api=\""$api"\""
+echo "patch=\""${patch:-0}"\""
+echo "head=\""$head"\""
+echo "outputDir=\""$outputDir"\""
+echo "dirPrefix=\""$dirPrefix"\""
+echo "tarName=\""$tarName"\""
+# Note - directory separator '/' encoded as '@' for manifest name
+echo "manifest=\""${dirPrefix}"@META-INFO@"manifest.txt"\""
+echo
+echo 'set -x'
+echo 'umask 0022'
+echo 'git -c tar.umask=user archive --format=tar --prefix="$dirPrefix/" -o "$outputDir/$tarName.tar" "$head"'
+
+echo 'echo "api=$api" > "$outputDir/$manifest"'
+echo 'echo "patch=$patch" >> "$outputDir/$manifest"'
+echo 'echo "head=$head"  >> "$outputDir/$manifest"'
+echo 'echo >> "$outputDir/$manifest"'
+echo 'git ls-tree -r "$head" >> "$outputDir/$manifest"'
+
+
+#------------------------------------------------------------------------------
+# Add in mpdules
+if [ "$skipModules" != true ]
+then
+    git --git-dir="$gitbase/.git" ls-tree "$head" modules/ | \
+        while read mode gittype sha1 module
+    do
+        [ "$gittype" == commit ] || continue
+
+        echo
+        echo "module=\""$module"\""
+        echo "commit=\""$sha1"\""
+        echo "tarModule=\""$tarName-${module##*/}"\""
+
+        echo
+        echo 'pushd "$module"'
+        echo 'git -c tar.umask=user archive --format=tar --prefix="$dirPrefix/$module/" -o "$outputDir/$tarModule.tar" "$commit"'
+        echo 'git ls-tree -r "$commit" >> "$outputDir/$manifest"'
+
+        echo 'echo >> "$outputDir/$manifest"'
+        echo 'echo "$module" >> "$outputDir/$manifest"'
+        echo 'echo "commit=$commit" >> "$outputDir/$manifest"'
+        echo 'echo >> "$outputDir/$manifest"'
+        echo 'git ls-tree -r "$commit" >> "$outputDir/$manifest"'
+
+        echo 'tar -Af "$outputDir/$tarName.tar" "$outputDir/$tarModule.tar"'
+        echo 'rm -f "$outputDir/$tarModule.tar"'
+        echo 'popd'
+        echo
+    done
+fi
+
+#------------------------------------------------------------------------------
+# Add in manifest
+# Decode '@' in manifest as '/' directory separator
+
+echo
+echo "echo 'Adding manifest'"
+echo 'pushd "$outputDir"'
+echo "tar --append --transform='s|@|/|g' -v -f \"\$tarName.tar\" \"\$manifest\""
+echo 'rm -f "$manifest"'
+echo 'popd'
+
+echo
+echo "# End of creating archive"
+echo
+
+#------------------------------------------------------------------------------
+# Compression
+
+case "$compress" in
+    ('')
+    echo "No compression requested" 1>&2
+    ;;
+
+    (gz | gzip)
+    echo "Using gzip compression" 1>&2
+    echo 'gzip -9 "$outputDir/$tarName.tar"'
+    ;;
+
+    (tgz)
+    echo "Using gzip compression with tgz ending" 1>&2
+    echo 'gzip -c -9 "$outputDir/$tarName.tar" > "$outputDir/$tarName.tgz"'
+    ;;
+
+    (bz | bzip | bzip2)
+    echo "Using bzip2 compression" 1>&2
+    echo 'bzip2 -9 "$outputDir/$tarName.tar"'
+    ;;
+
+    (xz)
+    echo "Using xz compression" 1>&2
+    echo 'xz -9 "$outputDir/$tarName.tar"'
+    ;;
+
+    (*)
+    echo "Unknown compression scheme: $compress" 1>&2
+    ;;
+esac
+
+#------------------------------------------------------------------------------

@@ -61,7 +61,7 @@ Description
             action  subset;
             source  field;
             field   d;
-            accept  (greater 1e-3) and (less 1e-3);
+            accept  (greater 1e-5) and (less 1e-3);
         }
     }
     \endverbatim

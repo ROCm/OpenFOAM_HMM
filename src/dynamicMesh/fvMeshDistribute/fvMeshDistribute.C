@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,34 +193,6 @@ Foam::labelList Foam::fvMeshDistribute::select
 }
 
 
-void Foam::fvMeshDistribute::checkEqualWordList
-(
-    const string& msg,
-    const wordList& lst
-)
-{
-    // Check all procs have same names and in exactly same order.
-
-    List<wordList> allNames(Pstream::nProcs());
-    allNames[Pstream::myProcNo()] = lst;
-    Pstream::gatherList(allNames);
-    Pstream::scatterList(allNames);
-
-    for (label proci = 1; proci < Pstream::nProcs(); proci++)
-    {
-        if (allNames[proci] != allNames[0])
-        {
-            FatalErrorInFunction
-                << "When checking for equal " << msg.c_str() << " :" << endl
-                << "processor0 has:" << allNames[0] << endl
-                << "processor" << proci << " has:" << allNames[proci] << endl
-                << msg.c_str() << " need to be synchronised on all processors."
-                << exit(FatalError);
-        }
-    }
-}
-
-
 Foam::wordList Foam::fvMeshDistribute::mergeWordList(const wordList& procNames)
 {
     List<wordList> allNames(Pstream::nProcs());
@@ -231,7 +205,7 @@ Foam::wordList Foam::fvMeshDistribute::mergeWordList(const wordList& procNames)
     {
         mergedNames.insert(allNames[proci]);
     }
-    return mergedNames.toc();
+    return mergedNames.sortedToc();
 }
 
 
@@ -711,20 +685,17 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         label globali = pointToGlobalMaster[pointi];
         if (globali != -1)
         {
-            Map<label>::const_iterator iter = globalMasterToLocalMaster.find
-            (
-                globali
-            );
+            const auto iter = globalMasterToLocalMaster.cfind(globali);
 
-            if (iter == globalMasterToLocalMaster.end())
+            if (iter.found())
+            {
+                pointToMaster.insert(pointi, *iter);
+            }
+            else
             {
                 // Found first point. Designate as master
                 globalMasterToLocalMaster.insert(globali, pointi);
                 pointToMaster.insert(pointi, pointi);
-            }
-            else
-            {
-                pointToMaster.insert(pointi, iter());
             }
         }
     }
@@ -1095,11 +1066,11 @@ void Foam::fvMeshDistribute::findCouples
         {
             labelPair myData(sourceFace[bFacei], sourceProc[bFacei]);
 
-            labelPairLookup::const_iterator iter = map.find(myData);
+            const auto iter = map.cfind(myData);
 
-            if (iter != map.end())
+            if (iter.found())
             {
-                label nbrBFacei = iter();
+                label nbrBFacei = *iter;
 
                 masterCoupledFaces[coupledI] = mesh.nInternalFaces() + bFacei;
                 slaveCoupledFaces[coupledI] =
@@ -1437,7 +1408,7 @@ void Foam::fvMeshDistribute::sendMesh
     {
         const pointZoneMesh& pointZones = mesh.pointZones();
 
-        labelList rowSizes(pointZoneNames.size(), 0);
+        labelList rowSizes(pointZoneNames.size(), Zero);
 
         forAll(pointZoneNames, nameI)
         {
@@ -1467,7 +1438,7 @@ void Foam::fvMeshDistribute::sendMesh
     {
         const faceZoneMesh& faceZones = mesh.faceZones();
 
-        labelList rowSizes(faceZoneNames.size(), 0);
+        labelList rowSizes(faceZoneNames.size(), Zero);
 
         forAll(faceZoneNames, nameI)
         {
@@ -1499,7 +1470,7 @@ void Foam::fvMeshDistribute::sendMesh
     {
         const cellZoneMesh& cellZones = mesh.cellZones();
 
-        labelList rowSizes(cellZoneNames.size(), 0);
+        labelList rowSizes(cellZoneNames.size(), Zero);
 
         forAll(cellZoneNames, nameI)
         {
@@ -1693,7 +1664,7 @@ Foam::labelList Foam::fvMeshDistribute::countCells
     const labelList& distribution
 )
 {
-    labelList nCells(Pstream::nProcs(), 0);
+    labelList nCells(Pstream::nProcs(), Zero);
     forAll(distribution, celli)
     {
         label newProc = distribution[celli];
@@ -1852,69 +1823,30 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     mesh_.resetMotion();
 
     // Get data to send. Make sure is synchronised
-    const wordList volScalars(mesh_.names(volScalarField::typeName));
-    checkEqualWordList("volScalarFields", volScalars);
-    const wordList volVectors(mesh_.names(volVectorField::typeName));
-    checkEqualWordList("volVectorFields", volVectors);
-    const wordList volSphereTensors
-    (
-        mesh_.names(volSphericalTensorField::typeName)
-    );
-    checkEqualWordList("volSphericalTensorFields", volSphereTensors);
-    const wordList volSymmTensors(mesh_.names(volSymmTensorField::typeName));
-    checkEqualWordList("volSymmTensorFields", volSymmTensors);
-    const wordList volTensors(mesh_.names(volTensorField::typeName));
-    checkEqualWordList("volTensorField", volTensors);
 
-    const wordList surfScalars(mesh_.names(surfaceScalarField::typeName));
-    checkEqualWordList("surfaceScalarFields", surfScalars);
-    const wordList surfVectors(mesh_.names(surfaceVectorField::typeName));
-    checkEqualWordList("surfaceVectorFields", surfVectors);
-    const wordList surfSphereTensors
-    (
-        mesh_.names(surfaceSphericalTensorField::typeName)
-    );
-    checkEqualWordList("surfaceSphericalTensorFields", surfSphereTensors);
-    const wordList surfSymmTensors
-    (
-        mesh_.names(surfaceSymmTensorField::typeName)
-    );
-    checkEqualWordList("surfaceSymmTensorFields", surfSymmTensors);
-    const wordList surfTensors(mesh_.names(surfaceTensorField::typeName));
-    checkEqualWordList("surfaceTensorFields", surfTensors);
+    HashTable<wordList> allFieldNames;
 
-    typedef volScalarField::Internal dimScalType;
-    const wordList dimScalars(mesh_.names(dimScalType::typeName));
-    checkEqualWordList("volScalarField::Internal", dimScalars);
+    getFieldNames<volScalarField>(mesh_, allFieldNames);
+    getFieldNames<volVectorField>(mesh_, allFieldNames);
+    getFieldNames<volSphericalTensorField>(mesh_, allFieldNames);
+    getFieldNames<volSymmTensorField>(mesh_, allFieldNames);
+    getFieldNames<volTensorField>(mesh_, allFieldNames);
 
-    typedef volVectorField::Internal dimVecType;
-    const wordList dimVectors(mesh_.names(dimVecType::typeName));
-    checkEqualWordList("volVectorField::Internal", dimVectors);
+    getFieldNames<surfaceScalarField>(mesh_, allFieldNames);
+    getFieldNames<surfaceVectorField>(mesh_, allFieldNames);
+    getFieldNames<surfaceSphericalTensorField>(mesh_, allFieldNames);
+    getFieldNames<surfaceSymmTensorField>(mesh_, allFieldNames);
+    getFieldNames<surfaceTensorField>(mesh_, allFieldNames);
 
-    typedef volSphericalTensorField::Internal dimSphereType;
-    const wordList dimSphereTensors(mesh_.names(dimSphereType::typeName));
-    checkEqualWordList
-    (
-        "volSphericalTensorField::Internal",
-        dimSphereTensors
-    );
-
-    typedef volSymmTensorField::Internal dimSymmTensorType;
-    const wordList dimSymmTensors(mesh_.names(dimSymmTensorType::typeName));
-    checkEqualWordList
-    (
-        "volSymmTensorField::Internal",
-        dimSymmTensors
-    );
-
-    typedef volTensorField::Internal dimTensorType;
-    const wordList dimTensors(mesh_.names(dimTensorType::typeName));
-    checkEqualWordList("volTensorField::Internal", dimTensors);
+    getFieldNames<volScalarField::Internal>(mesh_, allFieldNames);
+    getFieldNames<volVectorField::Internal>(mesh_, allFieldNames);
+    getFieldNames<volSphericalTensorField::Internal>(mesh_, allFieldNames);
+    getFieldNames<volSymmTensorField::Internal>(mesh_, allFieldNames);
+    getFieldNames<volTensorField::Internal>(mesh_, allFieldNames);
 
 
     // Find patch to temporarily put exposed and processor faces into.
     label oldInternalPatchi = findNonEmptyPatch();
-
 
 
     // Delete processor patches, starting from the back. Move all faces into
@@ -1981,11 +1913,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // Find out schedule
     // ~~~~~~~~~~~~~~~~~
 
-    labelListList nSendCells(Pstream::nProcs());
-    nSendCells[Pstream::myProcNo()] = countCells(distribution);
-    Pstream::gatherList(nSendCells);
-    Pstream::scatterList(nSendCells);
-
+    labelList nSendCells(countCells(distribution));
+    labelList nRevcCells(Pstream::nProcs());
+    Pstream::allToAll(nSendCells, nRevcCells);
 
     // Allocate buffers
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
@@ -1997,13 +1927,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     bool oldParRun = UPstream::parRun();
     UPstream::parRun() = false;
 
-    forAll(nSendCells[Pstream::myProcNo()], recvProc)
+    forAll(nSendCells, recvProc)
     {
-        if
-        (
-            recvProc != Pstream::myProcNo()
-         && nSendCells[Pstream::myProcNo()][recvProc] > 0
-        )
+        if (recvProc != Pstream::myProcNo() && nSendCells[recvProc] > 0)
         {
             // Send to recvProc
 
@@ -2012,7 +1938,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 Pout<< nl
                     << "SUBSETTING FOR DOMAIN " << recvProc
                     << " cells to send:"
-                    << nSendCells[Pstream::myProcNo()][recvProc]
+                    << nSendCells[recvProc]
                     << nl << endl;
             }
 
@@ -2096,57 +2022,75 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             );
 
             // volFields
-            sendFields<volScalarField>(recvProc, volScalars, subsetter, str);
-            sendFields<volVectorField>(recvProc, volVectors, subsetter, str);
+            sendFields<volScalarField>
+            (
+                recvProc,
+                allFieldNames,
+                subsetter,
+                str
+            );
+            sendFields<volVectorField>
+            (
+                recvProc,
+                allFieldNames,
+                subsetter,
+                str
+            );
             sendFields<volSphericalTensorField>
             (
                 recvProc,
-                volSphereTensors,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<volSymmTensorField>
             (
                 recvProc,
-                volSymmTensors,
+                allFieldNames,
                 subsetter,
                 str
             );
-            sendFields<volTensorField>(recvProc, volTensors, subsetter, str);
+            sendFields<volTensorField>
+            (
+                recvProc,
+                allFieldNames,
+                subsetter,
+                str
+            );
 
             // surfaceFields
             sendFields<surfaceScalarField>
             (
                 recvProc,
-                surfScalars,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<surfaceVectorField>
             (
                 recvProc,
-                surfVectors,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<surfaceSphericalTensorField>
             (
                 recvProc,
-                surfSphereTensors,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<surfaceSymmTensorField>
             (
                 recvProc,
-                surfSymmTensors,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<surfaceTensorField>
             (
                 recvProc,
-                surfTensors,
+                allFieldNames,
                 subsetter,
                 str
             );
@@ -2155,35 +2099,35 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             sendFields<volScalarField::Internal>
             (
                 recvProc,
-                dimScalars,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<volVectorField::Internal>
             (
                 recvProc,
-                dimVectors,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<volSphericalTensorField::Internal>
             (
                 recvProc,
-                dimSphereTensors,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<volSymmTensorField::Internal>
             (
                 recvProc,
-                dimSymmTensors,
+                allFieldNames,
                 subsetter,
                 str
             );
             sendFields<volTensorField::Internal>
             (
                 recvProc,
-                dimTensors,
+                allFieldNames,
                 subsetter,
                 str
             );
@@ -2311,21 +2255,17 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     oldParRun = UPstream::parRun();
     UPstream::parRun() = false;
 
-    forAll(nSendCells, sendProc)
+    forAll(nRevcCells, sendProc)
     {
         // Did processor sendProc send anything to me?
-        if
-        (
-            sendProc != Pstream::myProcNo()
-         && nSendCells[sendProc][Pstream::myProcNo()] > 0
-        )
+        if (sendProc != Pstream::myProcNo() && nRevcCells[sendProc] > 0)
         {
             if (debug)
             {
                 Pout<< nl
                     << "RECEIVING FROM DOMAIN " << sendProc
                     << " cells to receive:"
-                    << nSendCells[sendProc][Pstream::myProcNo()]
+                    << nRevcCells[sendProc]
                     << nl << endl;
             }
 
@@ -2392,142 +2332,126 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 receiveFields<volScalarField>
                 (
                     sendProc,
-                    volScalars,
+                    allFieldNames,
                     domainMesh,
                     vsf,
-                    fieldDicts.subDict(volScalarField::typeName)
+                    fieldDicts
                 );
                 receiveFields<volVectorField>
                 (
                     sendProc,
-                    volVectors,
+                    allFieldNames,
                     domainMesh,
                     vvf,
-                    fieldDicts.subDict(volVectorField::typeName)
+                    fieldDicts
                 );
                 receiveFields<volSphericalTensorField>
                 (
                     sendProc,
-                    volSphereTensors,
+                    allFieldNames,
                     domainMesh,
                     vsptf,
-                    fieldDicts.subDict(volSphericalTensorField::typeName)
+                    fieldDicts
                 );
                 receiveFields<volSymmTensorField>
                 (
                     sendProc,
-                    volSymmTensors,
+                    allFieldNames,
                     domainMesh,
                     vsytf,
-                    fieldDicts.subDict(volSymmTensorField::typeName)
+                    fieldDicts
                 );
                 receiveFields<volTensorField>
                 (
                     sendProc,
-                    volTensors,
+                    allFieldNames,
                     domainMesh,
                     vtf,
-                    fieldDicts.subDict(volTensorField::typeName)
+                    fieldDicts
                 );
 
                 // Surface fields
                 receiveFields<surfaceScalarField>
                 (
                     sendProc,
-                    surfScalars,
+                    allFieldNames,
                     domainMesh,
                     ssf,
-                    fieldDicts.subDict(surfaceScalarField::typeName)
+                    fieldDicts
                 );
                 receiveFields<surfaceVectorField>
                 (
                     sendProc,
-                    surfVectors,
+                    allFieldNames,
                     domainMesh,
                     svf,
-                    fieldDicts.subDict(surfaceVectorField::typeName)
+                    fieldDicts
                 );
                 receiveFields<surfaceSphericalTensorField>
                 (
                     sendProc,
-                    surfSphereTensors,
+                    allFieldNames,
                     domainMesh,
                     ssptf,
-                    fieldDicts.subDict(surfaceSphericalTensorField::typeName)
+                    fieldDicts
                 );
                 receiveFields<surfaceSymmTensorField>
                 (
                     sendProc,
-                    surfSymmTensors,
+                    allFieldNames,
                     domainMesh,
                     ssytf,
-                    fieldDicts.subDict(surfaceSymmTensorField::typeName)
+                    fieldDicts
                 );
                 receiveFields<surfaceTensorField>
                 (
                     sendProc,
-                    surfTensors,
+                    allFieldNames,
                     domainMesh,
                     stf,
-                    fieldDicts.subDict(surfaceTensorField::typeName)
+                    fieldDicts
                 );
 
                 // Dimensioned fields
                 receiveFields<volScalarField::Internal>
                 (
                     sendProc,
-                    dimScalars,
+                    allFieldNames,
                     domainMesh,
                     dsf,
-                    fieldDicts.subDict
-                    (
-                        volScalarField::Internal::typeName
-                    )
+                    fieldDicts
                 );
                 receiveFields<volVectorField::Internal>
                 (
                     sendProc,
-                    dimVectors,
+                    allFieldNames,
                     domainMesh,
                     dvf,
-                    fieldDicts.subDict
-                    (
-                        volVectorField::Internal::typeName
-                    )
+                    fieldDicts
                 );
                 receiveFields<volSphericalTensorField::Internal>
                 (
                     sendProc,
-                    dimSphereTensors,
+                    allFieldNames,
                     domainMesh,
                     dstf,
-                    fieldDicts.subDict
-                    (
-                        volSphericalTensorField::Internal::
-                        typeName
-                    )
+                    fieldDicts
                 );
                 receiveFields<volSymmTensorField::Internal>
                 (
                     sendProc,
-                    dimSymmTensors,
+                    allFieldNames,
                     domainMesh,
                     dsytf,
-                    fieldDicts.subDict
-                    (
-                        volSymmTensorField::Internal::typeName
-                    )
+                    fieldDicts
                 );
                 receiveFields<volTensorField::Internal>
                 (
                     sendProc,
-                    dimTensors,
+                    allFieldNames,
                     domainMesh,
                     dtf,
-                    fieldDicts.subDict
-                    (
-                        volTensorField::Internal::typeName
-                    )
+                    fieldDicts
                 );
             }
             const fvMesh& domainMesh = domainMeshPtr();

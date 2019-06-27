@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -70,12 +70,7 @@ functions
             }
             reduce(ULeft, maxOp<scalar>());
 
-            dimensionedScalar uInfX
-            (
-                "uInfx",
-                dimensionSet(0, 1, -1, 0, 0),
-                ULeft
-            );
+            dimensionedScalar uInfX("uInfx", dimVelocity, ULeft);
 
             Info << "U at inlet = " << uInfX.value() << " m/s" << endl;
 
@@ -89,12 +84,7 @@ functions
             }
             reduce(magCylinder, maxOp<scalar>());
 
-            dimensionedScalar radius
-            (
-                "radius",
-                dimensionSet(0, 1, 0, 0, 0),
-                magCylinder
-            );
+            dimensionedScalar radius("radius", dimLength, magCylinder);
 
             Info << "Cylinder radius = " << radius.value() << " m" << endl;
 

@@ -375,7 +375,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
 
     // Accumulate 'upstream' velocity into cells
     vectorField UfCells(cells_.size(), Zero);
-    scalarField UfCellWeights(cells_.size(), 0.0);
+    scalarField UfCellWeights(cells_.size(), Zero);
 
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 

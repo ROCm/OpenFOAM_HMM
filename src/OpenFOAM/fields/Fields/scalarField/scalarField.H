@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,8 +76,13 @@ tmp<scalarField> stabilise(const tmp<scalarField>&, const scalar s);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//- Sum product for float
 template<>
-scalar sumProd(const UList<scalar>& f1, const UList<scalar>& f2);
+float sumProd(const UList<float>& f1, const UList<float>& f2);
+
+//- Sum product for double
+template<>
+double sumProd(const UList<double>& f1, const UList<double>& f2);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -137,7 +144,9 @@ UNARY_FUNCTION(scalar, scalar, y1)
 UNARY_FUNCTION(scalar, scalar, degToRad)
 UNARY_FUNCTION(scalar, scalar, radToDeg)
 UNARY_FUNCTION(scalar, scalar, atmToPa)
+UNARY_FUNCTION(scalar, scalar, barToPa)
 UNARY_FUNCTION(scalar, scalar, paToAtm)
+UNARY_FUNCTION(scalar, scalar, paToBar)
 
 #define BesselFunc(func)                                            \
 void func(scalarField& Res, const int n, const UList<scalar>& sf);  \

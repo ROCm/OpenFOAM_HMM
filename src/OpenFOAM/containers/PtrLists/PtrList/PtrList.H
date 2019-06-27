@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class T> class autoPtr;
 template<class T> class tmp;
@@ -96,6 +98,9 @@ public:
         //- Move construct
         inline PtrList(PtrList<T>&& list);
 
+        //- Take ownerskip of pointers in the list, set old pointers to null.
+        inline explicit PtrList(UList<T*>& list);
+
         //- Copy construct using 'clone()' method on each element
         template<class CloneArg>
         inline PtrList(const PtrList<T>& list, const CloneArg& cloneArgs);
@@ -131,8 +136,7 @@ public:
         //  New entries are initialized to nullptr, removed entries are deleted
         void resize(const label newLen);
 
-        //- Adjust size of PtrList.
-        //  New entries are initialized to nullptr, removed entries are deleted
+        //- Same as resize()
         inline void setSize(const label newLen);
 
         //- Append an element to the end of the list
@@ -150,21 +154,26 @@ public:
         //- Transfer into this list and annul the argument list
         inline void transfer(PtrList<T>& list);
 
-        //- Return true if element is set (ie, not a nullptr)
-        inline bool set(const label i) const;
+        //- Return const pointer to element (if set) or nullptr.
+        //  The return value can be tested as a bool.
+        inline const T* set(const label i) const;
 
         //- Set element to given pointer and return old element (can be null)
         //  No-op if the new pointer value is identical to the current content.
-        inline autoPtr<T> set(label i, T* ptr);
+        inline autoPtr<T> set(const label i, T* ptr);
 
         //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(label i, autoPtr<T>& aptr);
+        inline autoPtr<T> set(const label i, autoPtr<T>& aptr);
 
         //- Set element to given autoPtr and return old element
-        inline autoPtr<T> set(label i, autoPtr<T>&& aptr);
+        inline autoPtr<T> set(const label i, autoPtr<T>&& aptr);
 
         //- Set element to given tmp and return old element
-        inline autoPtr<T> set(label i, const tmp<T>& tptr);
+        inline autoPtr<T> set(const label i, const tmp<T>& tptr);
+
+        //- Release ownership of the pointer at the given position.
+        //  Out of bounds addressing is a no-op and returns nullptr.
+        inline autoPtr<T> release(const label i);
 
 
     // Member Operators

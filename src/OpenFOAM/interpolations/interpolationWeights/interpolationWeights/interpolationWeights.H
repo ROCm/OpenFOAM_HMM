@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,10 +57,14 @@ class objectRegistry;
 
 class interpolationWeights
 {
+protected:
 
-private:
+    // Protected Data
 
-    // Private Member Functions
+        const scalarField& samples_;
+
+
+    // Protected Member Functions
 
         //- No copy construct
         interpolationWeights(const interpolationWeights&) = delete;
@@ -66,9 +72,6 @@ private:
         //- No copy assignment
         void operator=(const interpolationWeights&) = delete;
 
-protected:
-
-        const scalarField& samples_;
 
 public:
 
@@ -93,7 +96,7 @@ public:
     // Constructors
 
         //- Construct from components
-        interpolationWeights(const scalarField& samples);
+        explicit interpolationWeights(const scalarField& samples);
 
 
     // Selectors
@@ -107,7 +110,7 @@ public:
 
 
     //- Destructor
-    virtual ~interpolationWeights();
+    virtual ~interpolationWeights() = default;
 
 
     // Member Functions

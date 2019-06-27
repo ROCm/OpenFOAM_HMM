@@ -1,0 +1,67 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      sampling;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+fieldAverage1
+{
+    type                fieldAverage;
+    libs                ("libfieldFunctionObjects.so");
+    writeControl        writeTime;
+    timeStart           ${/timeStart};
+
+    fields
+    (
+        U
+        {
+            mean        on;
+            prime2Mean  on;
+            base        time;
+        }
+    );
+}
+
+
+inletSampling
+{
+    type                sets;
+    libs                ("libsampling.so");
+    writeControl        writeTime;
+    timeStart           ${/timeStart};
+
+    interpolationScheme cellPoint;
+    setFormat           raw;
+    fields              (UPrime2Mean);
+
+    sets
+    (
+        inletPatch
+        {
+            type        face;
+            axis        y;
+            start       (0.0 0 1.57);
+            end         (0.0 2 1.57);
+        }
+        inletCell
+        {
+            type        face;
+            axis        y;
+            start       (0.062832 0 1.57);
+            end         (0.062832 2 1.57);
+        }
+    );
+}
+
+// ************************************************************************* //

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,20 +124,20 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
             );
         }
 
-        labelPairLookup::const_iterator fnd = cellsToCoarseFace.find(cellPair);
+        const auto fnd = cellsToCoarseFace.cfind(cellPair);
 
-        if (fnd == cellsToCoarseFace.end())
+        if (fnd.found())
+        {
+            // Already have coarse face
+            dynFaceRestrictAddressing.append(fnd.val());
+        }
+        else
         {
             // New coarse face
             label coarseI = dynFaceCells.size();
             dynFaceRestrictAddressing.append(coarseI);
             dynFaceCells.append(localRestrictAddressing[ffi]);
             cellsToCoarseFace.insert(cellPair, coarseI);
-        }
-        else
-        {
-            // Already have coarse face
-            dynFaceRestrictAddressing.append(fnd());
         }
     }
 

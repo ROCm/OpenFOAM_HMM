@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,10 +67,8 @@ bool kinematicSingleLayer::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -794,7 +794,7 @@ kinematicSingleLayer::kinematicSingleLayer
 
     filmThermo_(filmThermoModel::New(*this, coeffs_)),
 
-    availableMass_(regionMesh().nCells(), 0.0),
+    availableMass_(regionMesh().nCells(), Zero),
 
     injection_(*this, coeffs_),
 

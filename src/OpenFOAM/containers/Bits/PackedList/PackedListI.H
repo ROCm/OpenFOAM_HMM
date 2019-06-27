@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -240,7 +242,11 @@ inline Foam::PackedList<Width>::PackedList(const labelUList& values)
 
 
 template<unsigned Width>
-inline Foam::PackedList<Width>::PackedList(const labelUIndList& values)
+template<class Addr>
+inline Foam::PackedList<Width>::PackedList
+(
+    const IndirectListBase<label, Addr>& values
+)
 :
     blocks_(num_blocks(values.size()), 0u),
     size_(values.size())
@@ -714,10 +720,9 @@ template<unsigned Width>
 inline typename Foam::PackedList<Width>::reference
 Foam::PackedList<Width>::operator[](const label i)
 {
-    // Leave enabled during testing period (MAR-2018)
-    // #ifdef FULLDEBUG
+    #ifdef FULLDEBUG
     checkIndex(i);
-    // #endif
+    #endif
     return reference(this, i);
 }
 
@@ -740,6 +745,30 @@ template<unsigned Width>
 inline void Foam::PackedList<Width>::operator=(PackedList<Width>&& rhs)
 {
     transfer(rhs);
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+template<unsigned Width>
+inline bool Foam::operator==
+(
+    const PackedList<Width>& a,
+    const PackedList<Width>& b
+)
+{
+    return a.equal(b);
+}
+
+
+template<unsigned Width>
+inline bool Foam::operator!=
+(
+    const PackedList<Width>& a,
+    const PackedList<Width>& b
+)
+{
+    return !a.equal(b);
 }
 
 

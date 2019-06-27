@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +97,7 @@ public:
         );
 
         //- Construct from Istream
-        inline line(Istream&);
+        inline explicit line(Istream& is);
 
 
     // Member Functions
@@ -147,7 +149,7 @@ public:
         ) const;
 
 
-    // Ostream operator
+    // IOstream operators
 
         friend Istream& operator>> <Point, PointRef>
         (

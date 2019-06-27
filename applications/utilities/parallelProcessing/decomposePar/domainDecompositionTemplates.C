@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +117,7 @@ void Foam::domainDecomposition::processInterCyclics
             {
                 label nIntfcs = interPatchFaces[proci].size();
                 subPatchIDs[proci].setSize(nIntfcs, labelList(1, patchi));
-                subPatchStarts[proci].setSize(nIntfcs, labelList(1, label(0)));
+                subPatchStarts[proci].setSize(nIntfcs, labelList(1, Zero));
             }
         }
     }

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,14 +86,8 @@ Foam::functionObjects::runTimeControls::runTimeCondition::runTimeCondition
     state_(state),
     active_(dict.lookupOrDefault("active", true)),
     conditionDict_(setConditionDict()),
-    log_(dict.lookupOrDefault("log", true)),
-    groupID_(dict.lookupOrDefault("groupID", -1))
-{}
-
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::runTimeCondition::~runTimeCondition()
+    groupID_(dict.lookupOrDefault("groupID", -1)),
+    log(dict.lookupOrDefault("log", true))
 {}
 
 

@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -16,16 +16,14 @@
 #     General system helper functions
 #
 # Functions provided
-#     isDarwin
-#     isNone
-#     isSystem
-#     isAbsdir, hasAbsdir
+#     isNone, isSystem, isAbsdir, hasAbsdir
+#     isDarwin, isWindows
 #     findFirstFile
-#     thirdExtLib
+#     findLibrary
+#     findExtLib
 #
-# Variables provided
-#     extLiba
-#     extLibso
+# Internal variables used
+#     extLibraries
 #
 #------------------------------------------------------------------------------
 
@@ -34,27 +32,29 @@ then
     # Load once, but do not rely on this variable elsewhere
     WMAKE_SCRIPTS_SYSFUNCTIONS=loaded
 
-    # Static library extension. Default=.a
-    extLiba=".a"
-
-    # Shared library extension. Default=.so
-    case "$(uname -s 2>/dev/null)" in
-    Darwin)
-        extLibso=".dylib"
-        ;;
-    *)
-        extLibso=".so"
-        ;;
-    esac
-
-
     # True if OS is Darwin.
-    # Uses libso extension to cache the value
-    # (instead of calling 'uname -s' each time)
     isDarwin()
     {
-        test "$extLibso" = ".dylib"
+        test Darwin = "$(uname -s 2>/dev/null)"
     }
+
+    # True if target OS is Windows
+    # Uses cached value from libso extension
+    isWindows()
+    {
+        test MSwindows = "$WM_OSTYPE"
+    }
+
+    # Static, dynamic library extensions
+    extLibraries=".a .so"
+
+    if isDarwin
+    then
+        extLibraries=".a .dylib"
+    elif isWindows
+    then
+        extLibraries=".a .dll .dll.a"  # including cross-compiling
+    fi
 
 
     # True if '$1' begins with '/'
@@ -71,16 +71,16 @@ then
     }
 
 
-    # True if '$1' is an empty string or matches "*-none".
+    # True if '$1' is an empty string, "none" or ends in "-none"
     # Eg,
-    #    if isNone "$KAHIP_ARCH_PATH" ...
+    #    if isNone "$BOOST_ARCH_PATH" ...
     isNone()
     {
         test -z "$1" -o "${1##*-}" = none
     }
 
 
-    # True if '$1' matches "*-system"
+    # True if '$1' is "system" or ends in "-system"
     # Eg,
     #    if isSystem "$BOOST_ARCH_PATH"
     isSystem()
@@ -89,41 +89,89 @@ then
     }
 
 
-    # Check for the existence of any of the files
+    # Return system prefix (/usr, /usr/local, ...) based on hint provided
+    # Eg,
+    #    sysPrefix "/usr/local/include/fftw3.h"  -> "/usr/local"
+    #
+    # Without a hint, echoes "/usr"
+    sysPrefix()
+    {
+        case "$1" in
+        /usr/local/*)
+            echo "/usr/local"
+            ;;
+        *)
+            echo "/usr"
+            ;;
+        esac
+    }
+
+
+    # Check existence of any of the files
     # On success, echoes the file found and returns 0, otherwise returns 2
     findFirstFile()
     {
         local file
+
         for file
         do
-            if [ -f "$file" -a -r "$file" ]
+            if [ -f "$file" ] && [ -r "$file" ]
             then
-                echo "$file"
+                echo "$file"  # Found
                 return 0
             fi
         done
         return 2
     }
 
-    # Check for existence of file in FOAM_EXT_LIBBIN,
-    # but not if either file or FOAM_EXT_LIBBIN are empty or
-    # if the FOAM_EXT_LIBBIN is not located in the ThirdParty directory
+
+    # Check existence of library with ending '.a', '.so' ...
     #
     # On success, echoes the resolved file and returns 0, otherwise returns 2
-    thirdExtLib()
+    findLibrary()
     {
-        local file="$FOAM_EXT_LIBBIN/$1"
+        local file ext
 
-        if  [ -n "$1" ] && \
-            [ -n "$FOAM_EXT_LIBBIN" ] && \
-            [ -n "$WM_THIRD_PARTY_DIR" ] && \
-            [ -f "$file" -a -r "$file" ] && \
-            [ "${FOAM_EXT_LIBBIN#$WM_THIRD_PARTY_DIR}" != "$FOAM_EXT_LIBBIN" ]
+        for file
+        do
+            [ -n "$file" ] || continue
+            for ext in '' $extLibraries
+            do
+                if [ -f "$file$ext" ] && [ -r "$file$ext" ]
+                then
+                    echo "$file$ext"  # Found
+                    return 0
+                fi
+            done
+        done
+
+        return 2
+    }
+
+
+    # Check existence of library in FOAM_EXT_LIBBIN, but conditional
+    # on FOAM_EXT_LIBBIN being located in the ThirdParty directory
+    #
+    # On success, echoes the resolved file and returns 0, otherwise returns 2
+    findExtLib()
+    {
+        local file
+
+        if [ -n "$FOAM_EXT_LIBBIN" ] && \
+           [ -n "$WM_THIRD_PARTY_DIR" ] && \
+           [ "${FOAM_EXT_LIBBIN#$WM_THIRD_PARTY_DIR}" != "$FOAM_EXT_LIBBIN" ]
         then
-            echo "$file"
-        else
-            return 2
+            for file
+            do
+                if file="$(findLibrary "$FOAM_EXT_LIBBIN/$file")"
+                then
+                    echo "$file"
+                    return 0
+                fi
+            done
         fi
+
+        return 2
     }
 fi
 

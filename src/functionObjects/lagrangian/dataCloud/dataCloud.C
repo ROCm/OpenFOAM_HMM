@@ -89,7 +89,7 @@ bool Foam::functionObjects::dataCloud::writeCloud
     // Total number of parcels on all processes
     const label nTotParcels = returnReduce(nParcels, sumOp<label>());
 
-    if (applyFilter_ && log)
+    if (applyFilter_)
     {
         // Report filtered/unfiltered count
         Log << "After filtering using " << nTotParcels << '/'

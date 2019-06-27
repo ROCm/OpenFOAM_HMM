@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +46,15 @@ namespace runTimeControls
 }
 }
 
+Foam::Enum
+<
+    Foam::functionObjects::runTimeControls::runTimeControl::satisfiedAction
+>
+Foam::functionObjects::runTimeControls::runTimeControl::satisfiedActionNames
+{
+    { satisfiedAction::END, "end"},
+    { satisfiedAction::SET_TRIGGER, "setTrigger"},
+};
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -58,16 +69,13 @@ Foam::functionObjects::runTimeControls::runTimeControl::runTimeControl
     conditions_(),
     groupMap_(),
     nWriteStep_(0),
-    writeStepI_(0)
+    writeStepI_(0),
+    satisfiedAction_(satisfiedAction::END),
+    triggerIndex_(labelMin),
+    active_(getObjectProperty(name, "active", true))
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::runTimeControl::~runTimeControl()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -77,68 +85,101 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::read
     const dictionary& dict
 )
 {
-    fvMeshFunctionObject::read(dict);
-
-    const dictionary& conditionsDict = dict.subDict("conditions");
-    const wordList conditionNames(conditionsDict.toc());
-    conditions_.setSize(conditionNames.size());
-
-    label uniqueGroupi = 0;
-    forAll(conditionNames, conditioni)
+    if (functionObject::postProcess)
     {
-        const word& conditionName = conditionNames[conditioni];
-        const dictionary& dict = conditionsDict.subDict(conditionName);
-
-        conditions_.set
-        (
-            conditioni,
-            runTimeCondition::New(conditionName, obr_, dict, *this)
-        );
-
-        label groupi = conditions_[conditioni].groupID();
-
-        if (groupMap_.insert(groupi, uniqueGroupi))
-        {
-            uniqueGroupi++;
-        }
-    }
-
-    dict.readIfPresent("nWriteStep", nWriteStep_);
-
-    // Check that some conditions are set
-    if (conditions_.empty())
-    {
-        Info<< type() << " " << name() << " output:" << nl
-            << "    No conditions present" << nl
+        Info<< "Deactivated " << name()
+            << " function object for post-processing"
             << endl;
+
+        return false;
     }
-    else
+
+
+    if (fvMeshFunctionObject::read(dict))
     {
-        // Check that at least one condition is active
-        bool active = false;
-        forAll(conditions_, conditioni)
+        const dictionary& conditionsDict = dict.subDict("conditions");
+        const wordList conditionNames(conditionsDict.toc());
+        conditions_.setSize(conditionNames.size());
+
+        label uniqueGroupi = 0;
+        forAll(conditionNames, conditioni)
         {
-            if (conditions_[conditioni].active())
+            const word& conditionName = conditionNames[conditioni];
+            const dictionary& dict = conditionsDict.subDict(conditionName);
+
+            conditions_.set
+            (
+                conditioni,
+                runTimeCondition::New(conditionName, obr_, dict, *this)
+            );
+
+            label groupi = conditions_[conditioni].groupID();
+
+            if (groupMap_.insert(groupi, uniqueGroupi))
             {
-                active = true;
-                break;
+                ++uniqueGroupi;
             }
         }
 
-        if (!active)
+        dict.readIfPresent("nWriteStep", nWriteStep_);
+
+        // Check that some conditions are set
+        if (conditions_.empty())
         {
             Info<< type() << " " << name() << " output:" << nl
-                << "    All conditions are inactive" << nl
+                << "    No conditions present" << nl
                 << endl;
         }
+        else
+        {
+            // Check that at least one condition is active
+            bool check = false;
+            for (const auto& condition : conditions_)
+            {
+                if (condition.active())
+                {
+                    check = true;
+                    break;
+                }
+            }
+
+            if (!check)
+            {
+                Info<< type() << " " << name() << " output:" << nl
+                    << "    All conditions are inactive" << nl
+                    << endl;
+            }
+        }
+
+        // Set the action to perform when all conditions are satisfied
+        // - set to end for backwards compatibility with v1806
+        satisfiedAction_ =
+            satisfiedActionNames.lookupOrDefault
+            (
+                "satisfiedAction",
+                dict,
+                satisfiedAction::END
+            );
+
+        if (satisfiedAction_ == satisfiedAction::SET_TRIGGER)
+        {
+            triggerIndex_ = dict.get<label>("trigger");
+        }
+
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 
 bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 {
+    if (!active_)
+    {
+        return true;
+    }
+
     Info<< type() << " " << name() << " output:" << nl;
 
     // IDs of satisfied conditions
@@ -200,33 +241,66 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
     if (done)
     {
-        forAll(IDs, conditioni)
+        for (label conditioni : IDs)
         {
             Info<< "    " << conditions_[conditioni].type() << ": "
-                <<  conditions_[conditioni].name()
+                << conditions_[conditioni].name()
                 << " condition satisfied" << nl;
         }
 
-
-        // Set to write a data dump or finalise the calculation
-        Time& time = const_cast<Time&>(time_);
-
-        if (writeStepI_ < nWriteStep_ - 1)
+        switch (satisfiedAction_)
         {
-            writeStepI_++;
-            Info<< "    Writing fields - step " << writeStepI_ << nl;
-            time.writeNow();
-        }
-        else
-        {
-            Info<< "    Stopping calculation" << nl
-                << "    Writing fields - final step" << nl;
-            time.writeAndEnd();
+            case satisfiedAction::END:
+            {
+                // Set to write a data dump or finalise the calculation
+                Time& time = const_cast<Time&>(time_);
+
+                if (writeStepI_ < nWriteStep_ - 1)
+                {
+                    ++writeStepI_;
+                    Info<< "    Writing fields - step " << writeStepI_ << nl;
+                    time.writeNow();
+                }
+                else
+                {
+                    Info<< "    Stopping calculation" << nl
+                        << "    Writing fields";
+
+                    if (nWriteStep_ != 0)
+                    {
+                        Info<< " - final step" << nl;
+                    }
+                    else
+                    {
+                        Info<< nl;
+                    }
+
+                    Info<< endl;
+                    active_ = false;
+
+                    // Write any registered objects and set the end-time
+                    time.writeAndEnd();
+
+                    // Trigger any function objects
+                    time.run();
+                }
+                break;
+            }
+            case satisfiedAction::SET_TRIGGER:
+            {
+                Info<< "    Setting trigger " << triggerIndex_ << nl;
+                setTrigger(triggerIndex_);
+
+                // Deactivate the model
+                active_ = false;
+                setProperty("active", active_);
+                break;
+            }
         }
     }
     else
     {
-        Info<< "    Conditions not met - calculations proceeding" << nl;
+        Info<< "    Conditions not met" << nl;
     }
 
     Info<< endl;
@@ -237,9 +311,9 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
 bool Foam::functionObjects::runTimeControls::runTimeControl::write()
 {
-    forAll(conditions_, conditioni)
+    for (auto& condition : conditions_)
     {
-        conditions_[conditioni].write();
+        condition.write();
     }
 
     return true;

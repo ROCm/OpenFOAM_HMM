@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,18 +63,14 @@ class word
 :
     public string
 {
-    // Private Member Functions
-
-        //- Strip invalid characters from this word
-        //  Trips an abort on invalid characters for debug 2 or greater
-        inline void stripInvalid();
-
-
 public:
 
-    // Static data members
+    // Static Data Members
 
+        //- The typeName
         static const char* const typeName;
+
+        //- Debugging
         static int debug;
 
         //- An empty word
@@ -134,7 +132,6 @@ public:
             const PrimitiveType& val
         );
 
-
         //- Is this character valid for a word?
         inline static bool valid(char c);
 
@@ -152,6 +149,10 @@ public:
             const char* last,
             const bool prefix=false
         );
+
+        //- Strip invalid characters from this word
+        //  Trips an abort on invalid characters for debug 2 or greater
+        inline void stripInvalid();
 
 
     // File-like Functions
@@ -180,15 +181,17 @@ public:
         inline bool removeExt();
 
 
-    // Member operators
+    // Member Operators
 
     // Assignment
 
-        //- Copy assignment, no character validation required
-        word& operator=(const word&) = default;
+        //- Copy assignment, no character validation required.
+        //  Self-assignment is a no-op
+        inline word& operator=(const word& s);
 
         //- Move assignment, no character validation required
-        word& operator=(word&& w) = default;
+        //  Self-assignment is a no-op
+        inline word& operator=(word&& s);
 
         //- Copy assignment from Foam::string, stripping invalid characters
         inline word& operator=(const string& s);
@@ -204,13 +207,16 @@ public:
 
         //- Copy, stripping invalid characters
         inline word& operator=(const char* s);
-
-
-    // IOstream operators
-
-        friend Istream& operator>>(Istream& is, word& w);
-        friend Ostream& operator<<(Ostream& os, const word& w);
 };
+
+
+// IOstream Operators
+
+//- Read operator
+Istream& operator>>(Istream& is, word& val);
+
+//- Write operator
+Ostream& operator<<(Ostream& os, const word& val);
 
 
 // * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //

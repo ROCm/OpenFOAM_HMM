@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,14 @@ Class
 
 Description
     Visualisation of line data (eg, streamlines)
+
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        representation| none/line/tube/vector               | yes |
+        lineColour    | Override line colour                | no  |
+        tubeRadius    | Radius for tube representation      | yes |
+    \endtable
 
 SourceFiles
     pathline.C
@@ -63,16 +71,18 @@ class pathline
 {
 public:
 
-    // Public enumerations
+    // Public Enumerations
 
+        //- Line representations
         enum representationType
         {
-            rtNone,
-            rtLine,
-            rtTube,
-            rtVector
+            rtNone,     //!< "none"
+            rtLine,     //!< "line"
+            rtTube,     //!< "tube"
+            rtVector    //!< "vector"
         };
 
+        //- Names for line representations
         static const Enum<representationType> representationTypeNames;
 
 
@@ -110,7 +120,7 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("pathline");
+    TypeNameNoDebug("pathline");
 
 
     // Declare run-time constructor selection table
@@ -142,7 +152,7 @@ public:
 
     // Selectors
 
-        //- Return a reference to the selected RAS model
+        //- Return selected pathline
         static autoPtr<pathline> New
         (
             const runTimePostProcessing& parent,

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,12 +37,11 @@ Foam::chemistryReader<ThermoType>::New
     speciesTable& species
 )
 {
-    // Let the chemistry reader type default to CHEMKIN
-    // for backward compatibility
-    word readerName("chemkinReader");
-
-    // otherwise use the specified reader
-    thermoDict.readIfPresent("chemistryReader", readerName);
+    // Use specified reader or default to CHEMKIN for backward compatibility
+    const word readerName
+    (
+        thermoDict.lookupOrDefault<word>("chemistryReader", "chemkinReader")
+    );
 
     Info<< "Selecting chemistryReader " << readerName << endl;
 

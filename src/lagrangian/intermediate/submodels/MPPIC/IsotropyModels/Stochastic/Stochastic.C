@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,9 +165,8 @@ void Foam::IsotropyModels::Stochastic<CloudType>::calculate()
         )();
 
     // random sampling
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (typename CloudType::parcelType& p : this->owner())
     {
-        typename CloudType::parcelType& p = iter();
         const tetIndices tetIs(p.currentTetIndices());
 
         const scalar x = exponentAverage.interpolate(p.coordinates(), tetIs);
@@ -198,9 +199,8 @@ void Foam::IsotropyModels::Stochastic<CloudType>::calculate()
         )
     );
     AveragingMethod<vector>& uTildeAverage = uTildeAveragePtr();
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (typename CloudType::parcelType& p : this->owner())
     {
-        typename CloudType::parcelType& p = iter();
         const tetIndices tetIs(p.currentTetIndices());
         uTildeAverage.add(p.coordinates(), tetIs, p.nParticle()*p.mass()*p.U());
     }
@@ -221,9 +221,8 @@ void Foam::IsotropyModels::Stochastic<CloudType>::calculate()
         )
     );
     AveragingMethod<scalar>& uTildeSqrAverage = uTildeSqrAveragePtr();
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (typename CloudType::parcelType& p : this->owner())
     {
-        typename CloudType::parcelType& p = iter();
         const tetIndices tetIs(p.currentTetIndices());
         const vector uTilde = uTildeAverage.interpolate(p.coordinates(), tetIs);
         uTildeSqrAverage.add
@@ -236,9 +235,8 @@ void Foam::IsotropyModels::Stochastic<CloudType>::calculate()
     uTildeSqrAverage.average(massAverage);
 
     // conservation correction
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (typename CloudType::parcelType& p : this->owner())
     {
-        typename CloudType::parcelType& p = iter();
         const tetIndices tetIs(p.currentTetIndices());
 
         const vector u = uAverage.interpolate(p.coordinates(), tetIs);

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,13 +57,11 @@ class ParticleTracks
 :
     public CloudFunctionObject<CloudType>
 {
-    // Private data
+        //- Convenience typedef for parcel type
+        typedef typename CloudType::parcelType parcelType;
 
-        // Typedefs
 
-            //- Convenience typedef for parcel type
-            typedef typename CloudType::parcelType parcelType;
-
+    // Private Data
 
         //- Number of face-hit intervals between storing parcel data
         label trackInterval_;
@@ -69,8 +69,8 @@ class ParticleTracks
         //- Maximum number of particles to store per track
         label maxSamples_;
 
-        //- Flag to indicate whether data should be reset/cleared on writing
-        Switch resetOnWrite_;
+        //- Should data should be reset/cleared on writing?
+        bool resetOnWrite_;
 
         //- Table of number of times a particle has hit a face
         labelPairLookup faceHitCounter_;
@@ -81,7 +81,7 @@ class ParticleTracks
 
 protected:
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Write post-processing info
         void write();
@@ -122,31 +122,31 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return const access to the track interval
-            inline label trackInterval() const;
+        //- Return const access to the track interval
+        inline label trackInterval() const;
 
-            //- Return const access to the max samples
-            inline label maxSamples() const;
+        //- Return const access to the max samples
+        inline label maxSamples() const;
 
-            //- Return const access to the reset on write flag
-            inline const Switch& resetOnWrite() const;
+        //- Should data be reset on write?
+        inline bool resetOnWrite() const;
 
-            //- Return the table of number of times a particle has hit a face
-            inline const labelPairLookup& faceHitCounter() const;
+        //- Return the table of number of times a particle has hit a face
+        inline const labelPairLookup& faceHitCounter() const;
 
-            //- Return const access to the cloud
-            inline const Cloud<parcelType>& cloud() const;
+        //- Return const access to the cloud
+        inline const Cloud<parcelType>& cloud() const;
 
 
-        // Evaluation
+    // Evaluation
 
-            //- Pre-evolve hook
-            virtual void preEvolve();
+        //- Pre-evolve hook
+        virtual void preEvolve();
 
-            //- Post-face hook
-            virtual void postFace(const parcelType& p, bool& keepParticle);
+        //- Post-face hook
+        virtual void postFace(const parcelType& p, bool& keepParticle);
 };
 
 

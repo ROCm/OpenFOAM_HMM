@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,19 +80,10 @@ void writeWeights
         mergedFaces,
         mergedPoints
     );
+
     // Collect field
     scalarField mergedWeights;
-    globalFaces().gather
-    (
-        UPstream::worldComm,
-        ListOps::create<label>
-        (
-            UPstream::procID(UPstream::worldComm),
-            labelOp<int>()  // int -> label
-        ),
-        wghtSum,
-        mergedWeights
-    );
+    globalFaces().gather(wghtSum, mergedWeights);
 
     instant inst(runTime.value(), runTime.timeName());
 
@@ -169,6 +162,7 @@ int main(int argc, char *argv[])
         "Mesh motion and topological mesh changes utility"
     );
 
+    #include "addOverwriteOption.H"
     #include "addRegionOption.H"
     argList::addBoolOption
     (
@@ -186,6 +180,10 @@ int main(int argc, char *argv[])
     {
         Info<< "Writing VTK files with weights of AMI patches." << nl << endl;
     }
+
+    const bool overwrite = args.found("overwrite");
+    const word oldInstance = mesh.pointsInstance();
+
 
     pimpleControl pimple(mesh);
 
@@ -205,6 +203,15 @@ int main(int argc, char *argv[])
                 mesh.update();
             }
         }
+
+        if (overwrite)
+        {
+            mesh.setInstance(oldInstance);
+            runTime.write();
+            runTime.printExecutionTime(Info);
+            break;
+        }
+
 
         mesh.checkMesh(true);
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,8 +140,8 @@ public:
         inline explicit DynamicList(const UList<T>& lst);
 
         //- Construct from a FixedList
-        template<unsigned FixedSize>
-        inline DynamicList(const FixedList<T, FixedSize>& lst);
+        template<unsigned N>
+        inline DynamicList(const FixedList<T, N>& lst);
 
         //- Construct given begin/end iterators.
         //  Uses std::distance to determine the size.
@@ -149,8 +151,9 @@ public:
         //- Construct from an initializer list. Size set to list size.
         inline explicit DynamicList(std::initializer_list<T> lst);
 
-        //- Construct from UIndirectList. Size set to UIndirectList size.
-        inline explicit DynamicList(const UIndirectList<T>& lst);
+        //- Construct from IndirectList. Size set to addressing size.
+        template<class Addr>
+        inline explicit DynamicList(const IndirectListBase<T, Addr>& lst);
 
         //- Move construct.
         inline DynamicList(DynamicList<T, SizeMin>&& lst);
@@ -249,17 +252,18 @@ public:
             inline DynamicList<T, SizeMin>& append(const UList<T>& lst);
 
             //- Append a FixedList to the end of this list.
-            template<unsigned FixedSize>
+            template<unsigned N>
             inline DynamicList<T, SizeMin>&
-            append(const FixedList<T, FixedSize>& lst);
+            append(const FixedList<T, N>& lst);
 
             //- Append an initializer list at the end of this list.
             inline DynamicList<T, SizeMin>&
             append(std::initializer_list<T> lst);
 
-            //- Append a UIndirectList at the end of this list
+            //- Append a IndirectList at the end of this list
+            template<class Addr>
             inline DynamicList<T, SizeMin>&
-            append(const UIndirectList<T>& lst);
+            append(const IndirectListBase<T, Addr>& lst);
 
             //- Move append list
             inline DynamicList<T, SizeMin>& append(List<T>&& lst);
@@ -323,8 +327,8 @@ public:
             inline void operator=(const UList<T>& lst);
 
             //- Assignment to FixedList
-            template<unsigned FixedSize>
-            inline void operator=(const FixedList<T, FixedSize>& lst);
+            template<unsigned N>
+            inline void operator=(const FixedList<T, N>& lst);
 
             //- Assignment to DynamicList
             inline void operator=(const DynamicList<T, SizeMin>& lst);
@@ -336,8 +340,9 @@ public:
             //- Assignment from initializer list
             inline void operator=(std::initializer_list<T> lst);
 
-            //- Assignment to UIndirectList
-            inline void operator=(const UIndirectList<T>& lst);
+            //- Assignment from IndirectList
+            template<class Addr>
+            inline void operator=(const IndirectListBase<T, Addr>& lst);
 
             //- Move assignment
             inline void operator=(List<T>&& lst);

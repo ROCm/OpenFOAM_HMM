@@ -81,17 +81,9 @@ constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
 
     p = p_rgh + rho*gh;
 
-    // Thermodynamic density update
-    //thermo.correctRho(psi*p - psip0);
 }
 
-
-
-// Solve continuity
-#include "rhoEqn.H"
-
-// Update continuity errors
-#include "compressibleContinuityErrors.H"
+pressureControl.limit(p);
 
 // For closed-volume cases adjust the pressure and density levels
 // to obey overall mass continuity
@@ -110,15 +102,19 @@ if (closedVolume)
     {
         p += (initialMass - fvc::domainIntegrate(psi*p))
             /compressibility;
-        thermo.correctRho(psi*p - psip0);
+        thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
         rho = thermo.rho();
         p_rgh = p - rho*gh;
+        p_rgh.correctBoundaryConditions();
     }
 }
 else
 {
-    thermo.correctRho(psi*p - psip0);
+    thermo.correctRho(psi*p - psip0,  rhoMin, rhoMax);
 }
+
+#include "rhoEqn.H"
+#include "compressibleContinuityErrors.H"
 
 rho = thermo.rho();
 

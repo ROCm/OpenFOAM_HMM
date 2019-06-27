@@ -1,0 +1,100 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSchemes;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default Euler;
+}
+
+gradSchemes
+{
+    default             Gauss linear;
+    /*
+    grad((1-alpha.gas)) leastSquares;//Gauss linear;
+    grad(alpha.gas)     leastSquares;//Gauss linear;
+    grad(U.gas)         leastSquares;//Gauss linear;
+    grad(U.liquid)      leastSquares;//   Gauss linear;
+
+    grad(h.gas)         leastSquares;
+    grad(h.liquid)      leastSquares;
+
+    grad(alpha.liquid) leastSquares;
+    grad(alpha.gas) leastSquares;
+
+    grad(rho) leastSquares;
+
+    grad(p_rgh) leastSquares;
+
+    grad(epsilon.liquid) leastSquares;
+    grad(k.liquid) leastSquares;
+    */
+
+}
+
+divSchemes
+{
+    default                         none;//Gauss upwind;
+
+    "div\(phi,alpha.*\)"            Gauss vanLeer;
+    "div\(phir,alpha.*\)"           Gauss vanLeer;
+
+    "div\(alphaRhoPhi.*,U.*\)"      Gauss upwind;//limitedLinearV 1;
+    "div\(phi.*,U.*\)"              Gauss upwind;//limitedLinearV 1;
+
+    "div\(alphaRhoPhi.*,Yi\)"       Gauss upwind;//limitedLinear 1;
+    "div\(alphaRhoPhi.*,(h|e|f).*\)"  Gauss upwind;//limitedLinear 1;
+    "div\(alphaRhoPhi.*,K.*\)"      Gauss upwind;//limitedLinear 1;
+    "div\(alphaPhi.*,p\)"           Gauss upwind;//limitedLinear 1;
+
+    "div\(alphaRhoPhi.*,(k|epsilon).*\)"  Gauss upwind;
+    "div\(phim,(k|epsilon)m\)"      Gauss upwind;
+
+    "div\(\(\(\(alpha.*\*thermo:rho.*\)\*nuEff.*\)\*dev2\(T\(grad\(U.*\)\)\)\)\)" Gauss linear;
+
+/*
+    div(phi,U)      Gauss upwind;
+    div(phi,K)      Gauss linear;
+    div(phi,h)      Gauss upwind;
+    div(phi,k)      Gauss upwind;
+    div(phi,epsilon) Gauss upwind;
+    div(phi,R)      Gauss upwind;
+    div(R)          Gauss linear;
+    div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
+*/
+}
+
+laplacianSchemes
+{
+    default        Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default         linear;
+}
+
+snGradSchemes
+{
+    default         corrected;
+}
+
+wallDist
+{
+    method          meshWave;
+    nRequired       yes;
+}
+
+// ************************************************************************* //

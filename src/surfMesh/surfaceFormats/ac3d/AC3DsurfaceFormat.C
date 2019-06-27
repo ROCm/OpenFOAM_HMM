@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +97,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     DynamicList<point> dynPoints;
     DynamicList<Face>  dynFaces;
     List<word>         names(nZones);
-    List<label>        sizes(nZones, 0);
+    List<label>        sizes(nZones, Zero);
 
     for (label zoneI = 0; zoneI < nZones; ++zoneI)
     {

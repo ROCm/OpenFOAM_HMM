@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +50,7 @@ Description
 #include "MeshedSurfaces.H"
 #include "globalIndex.H"
 #include "cellSet.H"
+#include "fvMeshTools.H"
 
 #include "extrudedMesh.H"
 #include "extrudeModel.H"
@@ -76,59 +79,6 @@ static const Enum<ExtrudeMode> ExtrudeModeNames
     { ExtrudeMode::PATCH, "patch" },
     { ExtrudeMode::SURFACE, "surface" },
 };
-
-
-void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
-{
-    // Create dummy system/fv*
-    {
-        IOobject io
-        (
-            "fvSchemes",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        Info<< "Testing:" << io.objectPath() << endl;
-
-        if (!io.typeHeaderOk<IOdictionary>(false))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            dictionary divDict;
-            dummyDict.add("divSchemes", divDict);
-            dictionary gradDict;
-            dummyDict.add("gradSchemes", gradDict);
-            dictionary laplDict;
-            dummyDict.add("laplacianSchemes", laplDict);
-
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-    {
-        IOobject io
-        (
-            "fvSolution",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if (!io.typeHeaderOk<IOdictionary>(false))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-}
 
 
 label findPatchID(const polyBoundaryMesh& patches, const word& name)
@@ -267,6 +217,7 @@ int main(int argc, char *argv[])
     );
 
     #include "addRegionOption.H"
+    argList::addOption("dict", "file", "Use alternative extrudeMeshDict");
     #include "setRootCase.H"
     #include "createTimeExtruded.H"
 
@@ -286,15 +237,19 @@ int main(int argc, char *argv[])
             << runTimeExtruded.timeName() << nl << endl;
     }
 
-
-    IOdictionary dict
+    const IOdictionary dict
     (
-        IOobject
+        IOobject::selectIO
         (
-            "extrudeMeshDict",
-            runTimeExtruded.system(),
-            runTimeExtruded,
-            IOobject::MUST_READ_IF_MODIFIED
+            IOobject
+            (
+                "extrudeMeshDict",
+                runTimeExtruded.system(),
+                runTimeExtruded,
+                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::NO_WRITE
+            ),
+            args.opt<fileName>("dict", "")
         )
     );
 
@@ -738,7 +693,7 @@ int main(int argc, char *argv[])
 
 
         // Create dummy fvSchemes, fvSolution
-        createDummyFvMeshFiles(mesh, regionDir);
+        fvMeshTools::createDummyFvMeshFiles(mesh, regionDir, true);
 
         // Create actual mesh from polyTopoChange container
         autoPtr<mapPolyMesh> map = meshMod().makeMesh
@@ -911,7 +866,7 @@ int main(int argc, char *argv[])
 
         List<pointEdgeCollapse> allPointInfo;
         const globalIndex globalPoints(mesh.nPoints());
-        labelList pointPriority(mesh.nPoints(), 0);
+        labelList pointPriority(mesh.nPoints(), Zero);
 
         collapser.consistentCollapse
         (

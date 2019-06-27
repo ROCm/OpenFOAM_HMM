@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,13 +24,13 @@ boundaryField
     inlet
     {
         type            calculated;
-	value		$internalField;
+        value           $internalField;
     }
 
     outlet
     {
         type            calculated;
-	value		$internalField;
+        value           $internalField;
     }
 
     sides
@@ -41,7 +41,7 @@ boundaryField
     "(cube|topAndBottom)"
     {
         type            nutUSpaldingWallFunction;
-	value		$internalField;
+        value           $internalField;
     }
 }
 

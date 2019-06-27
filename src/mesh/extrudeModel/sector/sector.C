@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,18 +48,9 @@ addToRunTimeSelectionTable(extrudeModel, sector, dictionary);
 sector::sector(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
-    axisPt_(coeffDict_.lookup("axisPt")),
-    axis_(coeffDict_.lookup("axis")),
-    angle_
-    (
-        degToRad(coeffDict_.get<scalar>("angle"))
-    )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-sector::~sector()
+    refPoint_(coeffDict_.getCompat<point>("point", {{"axisPt", -1812}})),
+    axis_(coeffDict_.get<vector>("axis").normalise()),
+    angle_(degToRad(coeffDict_.get<scalar>("angle")))
 {}
 
 
@@ -93,7 +86,7 @@ point sector::operator()
     // Find projection onto axis (or rather decompose surfacePoint
     // into vector along edge (proj), vector normal to edge in plane
     // of surface point and surface normal.
-    point d = surfacePoint - axisPt_;
+    point d = surfacePoint - refPoint_;
 
     d -= (axis_ & d)*axis_;
 

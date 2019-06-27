@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeDimFields_H
-#define writeDimFields_H
+#ifndef ensightParts_writeDimFields_H
+#define ensightParts_writeDimFields_H
 
 #include "writeVolFields.H"
 

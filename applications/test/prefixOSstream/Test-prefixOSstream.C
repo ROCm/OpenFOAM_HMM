@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
     };
     Pout<< list2 << endl;
 
-    Info<< findIndex(list2, vector(3, 4, 5)) << endl;
+    Info<< list2.find(vector(3, 4, 5)) << endl;
 
     return 0;
 }

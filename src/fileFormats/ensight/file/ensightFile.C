@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -324,10 +326,17 @@ void Foam::ensightFile::beginParticleCoordinates(const label nparticles)
 }
 
 
-void Foam::ensightFile::writeList
-(
-    const UList<scalar>& field
-)
+void Foam::ensightFile::writeList(const UList<label>& field)
+{
+    for (const label val : field)
+    {
+        write(scalar(val));
+        newline();
+    }
+}
+
+
+void Foam::ensightFile::writeList(const UList<scalar>& field)
 {
     for (const scalar& val : field)
     {
@@ -345,33 +354,27 @@ void Foam::ensightFile::writeList
 }
 
 
+
 void Foam::ensightFile::writeList
 (
     const UList<scalar>& field,
-    const labelUList& idList
+    const labelUList& addr
 )
 {
-    if (notNull(idList))
+    for (const label id : addr)
     {
-        for (const label idx : idList)
+        if (id < 0 || id >= field.size() || std::isnan(field[id]))
         {
-            if (idx >= field.size() || std::isnan(field[idx]))
-            {
-                writeUndef();
-            }
-            else
-            {
-                write(field[idx]);
-            }
-
-            newline();
+            writeUndef();
         }
-    }
-    else
-    {
-        // No idList => perNode
-        writeList(field);
+        else
+        {
+            write(field[id]);
+        }
+
+        newline();
     }
 }
+
 
 // ************************************************************************* //

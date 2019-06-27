@@ -39,4 +39,8 @@ blockMesh/blockMeshMergeFast.C
 
 blockMeshTools/blockMeshTools.C
 
+PDRblockMesh/PDRblock.C
+PDRblockMesh/PDRblockCreate.C
+PDRblockMesh/PDRblockLocation.C
+
 LIB = $(FOAM_LIBBIN)/libblockMesh

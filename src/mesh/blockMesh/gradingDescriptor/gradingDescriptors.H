@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,12 +46,11 @@ SourceFiles
 namespace Foam
 {
 
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
+// Forward declarations
 class gradingDescriptors;
-Istream& operator>>(Istream&, gradingDescriptors&);
+
+class Istream;
+Istream& operator>>(Istream& is, gradingDescriptors& gd);
 
 /*---------------------------------------------------------------------------*\
                      Class gradingDescriptors Declaration
@@ -59,7 +60,6 @@ class gradingDescriptors
 :
     public List<gradingDescriptor>
 {
-
 public:
 
     // Constructors
@@ -71,7 +71,7 @@ public:
         gradingDescriptors(const gradingDescriptor& gd);
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the inverse gradingDescriptors with 1/expansionRatio
         gradingDescriptors inv() const;

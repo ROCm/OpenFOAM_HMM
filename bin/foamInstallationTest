@@ -3,9 +3,11 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2015 OpenFOAM Foundation
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -234,10 +236,13 @@ reportExecutable()
             | sed -ne 's/^.*Version: *\([^ ][^ ]*\).*/\1/p')
         ;;
     flex)
-        VERSION=$($APP_NAME --version /dev/null 2>&1 \
+        VERSION=$(flex --version /dev/null 2>&1 \
             | sed -ne 's/flex \([0-9][0-9.]*\).*/\1/p')
         ;;
-    gcc* | g++*)
+    wmake)
+        VERSION="$(wmake -show-api 2> /dev/null)"
+        ;;
+    *gcc* | *g++*)
         VERSION=$($APP_NAME -v 2>&1 \
             | sed -ne 's/^gcc version \([0-9][0-9.]*\).*/\1/p')
 
@@ -422,8 +427,9 @@ hline
 echo "$(fixlen Software 9) $(fixlen Version 10) $(fixlen Location 10)"
 hline
 reportExecutable flex
-reportExecutable "$WM_CC"
-reportExecutable "$WM_CXX"
+reportExecutable wmake
+reportExecutable "$(wmake -show-c)"
+reportExecutable "$(wmake -show-cxx)"
 reportExecutable gzip
 if [ "$OSTYPE" = Linux ]
 then

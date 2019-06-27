@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,10 +53,12 @@ SourceFiles
 #include "stdFoam.H"
 #include "Swap.H"
 #include "HashFwd.H"
+#include "ListPolicy.H"
 
 #include <initializer_list>
 #include <iterator>
 #include <type_traits>
+#include <vector>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,12 +70,13 @@ class labelRange;
 template<class T> class List;
 template<class T> class SubList;
 template<class T> class UList;
-template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 template<class T> Istream& operator>>(Istream&, UList<T>&);
+template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 
 // Common list types
-typedef UList<char> charUList;
-typedef UList<label> labelUList;
+typedef UList<bool> boolUList;      //!< A UList of bools
+typedef UList<char> charUList;      //!< A UList of chars
+typedef UList<label> labelUList;    //!< A UList of labels
 
 
 /*---------------------------------------------------------------------------*\
@@ -111,10 +116,6 @@ protected:
         //  Use with care
         inline void size(const label n);
 
-        //- True if there are two or more entries and all entries have
-        //  identical values.
-        inline bool uniform() const;
-
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
 
@@ -122,12 +123,6 @@ protected:
         //- always addresses a valid section of the list.
         labelRange validateRange(const labelRange& range) const;
 
-        //- Return a validated (start,size) subset range, which means that it
-        //- always addresses a valid section of the list.
-        labelRange validateRange
-        (
-            std::initializer_list<label> start_size_pair
-        ) const;
 
 public:
 
@@ -280,19 +275,22 @@ public:
             inline const T& last() const;
 
 
-        // Check
+    // Check
 
-            //- Check start is within valid range [0,size)
-            inline void checkStart(const label start) const;
+        //- Check start is within valid range [0,size)
+        inline void checkStart(const label start) const;
 
-            //- Check size is within valid range [0,size]
-            inline void checkSize(const label size) const;
+        //- Check size is within valid range [0,size]
+        inline void checkSize(const label size) const;
 
-            //- Check index is within valid range [0,size)
-            inline void checkIndex(const label i) const;
+        //- Check index is within valid range [0,size)
+        inline void checkIndex(const label i) const;
+
+        //- True if all entries have identical values, and list is non-empty
+        inline bool uniform() const;
 
 
-      // Search
+    // Search
 
         //- Find index of the first occurrence of the value.
         //  When start is specified, any occurrences before start are ignored.
@@ -313,7 +311,7 @@ public:
         inline bool found(const T& val, const label start=0) const;
 
 
-      // Edit
+    // Edit
 
         //- Move element to the first position.
         void moveFirst(const label i);
@@ -328,7 +326,7 @@ public:
         void swapLast(const label i);
 
 
-      // Copy
+    // Copy
 
         //- Copy the pointer held by the given UList
         inline void shallowCopy(const UList<T>& list);
@@ -356,19 +354,6 @@ public:
         //  The range is subsetted with the list size itself to ensure that the
         //  result always addresses a valid section of the list.
         const UList<T> operator[](const labelRange& range) const;
-
-        //- Return (start,size) subset from UList with non-const access.
-        //  The range is subsetted with the list size itself to ensure that the
-        //  result always addresses a valid section of the list.
-        UList<T> operator[](std::initializer_list<label> start_size);
-
-        //- Return (start,size) subset from UList with const access.
-        //  The range is subsetted with the list size itself to ensure that the
-        //  result always addresses a valid section of the list.
-        const UList<T> operator[]
-        (
-            std::initializer_list<label> start_size
-        ) const;
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
@@ -471,20 +456,12 @@ public:
         //- Write the List as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
 
-        //- Write the List, with line-breaks in ASCII if the list length
-        //- exceeds shortListLen.
+        //- Write List, with line-breaks in ASCII when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
 
-    // IOstream operators
-
-        //- Write List to Ostream, as per writeList() with shortListLen=10
-        friend Ostream& operator<< <T>
-        (
-            Ostream& os,
-            const UList<T>& list
-        );
+    // IOstream Operators
 
         //- Read List contents from Istream.
         //  Requires size to have been set before
@@ -501,7 +478,7 @@ public:
         //
         //  \return The element value, or false for out-of-range access
         template<class TypeT = T>
-        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline test(const label i) const
         {
             return (i >= 0 && i < size() && v_[i]);
@@ -511,7 +488,7 @@ public:
         //
         //  \return The element value, or false for out-of-range access
         template<class TypeT = T>
-        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline get(const label i) const
         {
             return (i >= 0 && i < size_ && v_[i]);
@@ -521,7 +498,7 @@ public:
         //
         //  \return True if value changed and was not out-of-range
         template<class TypeT = T>
-        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline unset(const label i)
         {
             if (i >= 0 && i < size_ && v_[i])
@@ -560,6 +537,21 @@ public:
             }
         };
 };
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Write List to Ostream, as per UList::writeList() with default length.
+//  The default short-length is given by Detail::ListPolicy::short_length
+template<class T>
+Ostream& operator<<(Ostream& os, const UList<T>& list)
+{
+    return list.writeList(os, Detail::ListPolicy::short_length<T>::value);
+}
+
+//- Write std::vector to Ostream
+template<class T>
+Ostream& operator<<(Ostream& os, const std::vector<T>& list);
 
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
@@ -612,6 +604,31 @@ struct Hash<UList<T>>
 };
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Object access operator or list access operator.
+//- \sa ListListOps::combine()
+template<class T>
+struct accessOp
+{
+    const T& operator()(const T& obj) const
+    {
+        return obj;
+    }
+};
+
+
+//- Test if object is empty, typically using its empty() method.
+template<class T>
+struct emptyOp
+{
+    inline bool operator()(const T& obj) const
+    {
+        return obj.empty();
+    }
+};
+
+
 //- Extract size (as label) from an object, typically using its size() method.
 template<class T>
 struct sizeOp
@@ -635,6 +652,7 @@ struct sizeOp
 
 #ifdef NoRepository
     #include "UList.C"
+    #include "stdVectorIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

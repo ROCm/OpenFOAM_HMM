@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -19,7 +19,8 @@ solvers
 {
     "alpha.*"
     {
-        nAlphaSubCycles 2;
+        nAlphaCorr       1;
+        nAlphaSubCycles  2;
     }
 
     p_rgh
@@ -32,15 +33,7 @@ solvers
 
     p_rghFinal
     {
-        solver          PCG;
-        preconditioner
-        {
-            preconditioner  GAMG;
-            tolerance       1e-7;
-            relTol          0;
-            nVcycles        2;
-            smoother        GaussSeidel;
-        }
+        $p_rgh;
         tolerance       1e-7;
         relTol          0;
         maxIter         30;
@@ -76,8 +69,9 @@ solvers
 PIMPLE
 {
     nOuterCorrectors     1;
-    nCorrectors     3;
+    nCorrectors          3;
     nNonOrthogonalCorrectors 0;
+    faceMomentum         false;
 
     pRefCell        0;
     pRefValue       0;

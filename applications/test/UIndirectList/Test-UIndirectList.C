@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +52,7 @@ void testFind(const T& val, const ListType& lst)
         <<" find() = " << lst.find(val)
         <<" rfind() = " << lst.rfind(val)
         <<" find(2) = " << lst.find(val, 2)
-        <<" rfind(2) = " << lst.rfind(val, 2)
-        <<" findIndex = " << findIndex(lst, val) << nl
+        <<" rfind(2) = " << lst.rfind(val, 2) << nl
         << nl;
 }
 

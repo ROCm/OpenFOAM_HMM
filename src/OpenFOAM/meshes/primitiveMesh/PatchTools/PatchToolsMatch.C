@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,17 +56,14 @@ void Foam::PatchTools::matchPoints
 
     forAll(p1.meshPoints(), pointi)
     {
-        label meshPointi = p1.meshPoints()[pointi];
+        const label meshPointi = p1.meshPoints()[pointi];
 
-        Map<label>::const_iterator iter = p2.meshPointMap().find
-        (
-            meshPointi
-        );
+        const auto iter = p2.meshPointMap().cfind(meshPointi);
 
-        if (iter != p2.meshPointMap().end())
+        if (iter.found())
         {
             p1PointLabels[nMatches] = pointi;
-            p2PointLabels[nMatches] = iter();
+            p2PointLabels[nMatches] = iter.val();
             nMatches++;
         }
     }
@@ -118,11 +117,11 @@ void Foam::PatchTools::matchEdges
         const edge& e = p2.edges()[edgeI];
         const edge meshE(p2.meshPoints()[e[0]], p2.meshPoints()[e[1]]);
 
-        EdgeMap<label>::const_iterator iter = edgeToIndex.find(meshE);
+        const auto iter = edgeToIndex.cfind(meshE);
 
-        if (iter != edgeToIndex.end())
+        if (iter.found())
         {
-            p1EdgeLabels[nMatches] = iter();
+            p1EdgeLabels[nMatches] = iter.val();
             p2EdgeLabels[nMatches] = edgeI;
             sameOrientation.set(nMatches, (meshE[0] == iter.key()[0]));
             ++nMatches;

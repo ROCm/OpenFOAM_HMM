@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,6 +95,19 @@ inline Foam::scalar Foam::linear<Specie>::H(scalar p, scalar T) const
 
 template<class Specie>
 inline Foam::scalar Foam::linear<Specie>::Cp(scalar p, scalar T) const
+{
+    return 0;
+}
+
+template<class Specie>
+inline Foam::scalar Foam::linear<Specie>::E(scalar p, scalar T) const
+{
+    return 0;
+}
+
+
+template<class Specie>
+inline Foam::scalar Foam::linear<Specie>::Cv(scalar p, scalar T) const
 {
     return 0;
 }

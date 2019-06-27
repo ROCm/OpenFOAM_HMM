@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,12 +65,7 @@ Foam::RASModels::phasePressureModel::phasePressureModel
     alphaMax_(coeffDict_.get<scalar>("alphaMax")),
     preAlphaExp_(coeffDict_.get<scalar>("preAlphaExp")),
     expMax_(coeffDict_.get<scalar>("expMax")),
-    g0_
-    (
-        "g0",
-        dimensionSet(1, -1, -2, 0, 0),
-        coeffDict_.lookup("g0")
-    )
+    g0_("g0", dimPressure, coeffDict_)
 {
     nut_ == dimensionedScalar(nut_.dimensions(), Zero);
 
@@ -77,12 +74,6 @@ Foam::RASModels::phasePressureModel::phasePressureModel
         printCoeffs(type);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::RASModels::phasePressureModel::~phasePressureModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -107,10 +98,8 @@ bool Foam::RASModels::phasePressureModel::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

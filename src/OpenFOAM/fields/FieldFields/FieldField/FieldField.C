@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -166,7 +168,6 @@ FieldField<Field, Type>::FieldField(PtrList<Field<Type>>&& list)
 {}
 
 
-#ifndef NoConstructFromTmp
 template<template<class> class Field, class Type>
 FieldField<Field, Type>::FieldField(const tmp<FieldField<Field, Type>>& tf)
 :
@@ -174,7 +175,6 @@ FieldField<Field, Type>::FieldField(const tmp<FieldField<Field, Type>>& tf)
 {
     tf.clear();
 }
-#endif
 
 
 template<template<class> class Field, class Type>
@@ -231,15 +231,15 @@ FieldField<Field, Type>::component
     const direction d
 ) const
 {
-    tmp<FieldField<Field, cmptType>> Component
-    (
-        FieldField<Field, typename FieldField<Field, Type>::cmptType>::
-            NewCalculatedType(*this)
-    );
+    auto tres =
+        FieldField
+        <
+            Field, typename FieldField<Field, Type>::cmptType
+        >::NewCalculatedType(*this);
 
-    ::Foam::component(Component.ref(), *this, d);
+    ::Foam::component(tres.ref(), *this, d);
 
-    return Component;
+    return tres;
 }
 
 
@@ -274,22 +274,22 @@ void FieldField<Field, Type>::replace
 template<template<class> class Field, class Type>
 tmp<FieldField<Field, Type>> FieldField<Field, Type>::T() const
 {
-    auto tresult
+    auto tres
     (
         FieldField<Field, Type>::NewCalculatedType(*this)
     );
 
-    ::Foam::T(tresult.ref(), *this);
-    return tresult;
+    ::Foam::T(tres.ref(), *this);
+    return tres;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<template<class> class Field, class Type>
-void FieldField<Field, Type>::operator=(const FieldField<Field, Type>& f)
+void FieldField<Field, Type>::operator=(const FieldField<Field, Type>& ff)
 {
-    if (this == &f)
+    if (this == &ff)
     {
         FatalErrorInFunction
             << "attempted assignment to self"
@@ -299,7 +299,7 @@ void FieldField<Field, Type>::operator=(const FieldField<Field, Type>& f)
 
     forAll(*this, i)
     {
-        this->operator[](i) = f[i];
+        this->operator[](i) = ff[i];
     }
 }
 
@@ -341,11 +341,11 @@ void FieldField<Field, Type>::operator=(const tmp<FieldField>& tf)
 
 
 template<template<class> class Field, class Type>
-void FieldField<Field, Type>::operator=(const Type& t)
+void FieldField<Field, Type>::operator=(const Type& val)
 {
     forAll(*this, i)
     {
-        this->operator[](i) = t;
+        this->operator[](i) = val;
     }
 }
 

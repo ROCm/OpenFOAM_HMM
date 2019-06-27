@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ License
 
 #include "surfaceFieldValue.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
+#include "polySurfaceFields.H"
 #include "volFields.H"
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
@@ -56,13 +58,13 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::validField
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
     typedef GeometricField<Type, fvPatchField, volMesh> vf;
-    typedef DimensionedField<Type, surfGeoMesh> smt;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> smt;
 
     return
     (
         foundObject<smt>(fieldName)
      || foundObject<vf>(fieldName)
-     || (regionType_ != stSampledSurface && foundObject<sf>(fieldName))
+     || (withSurfaceFields() && foundObject<sf>(fieldName))
     );
 }
 
@@ -72,18 +74,18 @@ Foam::tmp<Foam::Field<Type>>
 Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
 (
     const word& fieldName,
-    const bool mustGet
+    const bool mandatory
 ) const
 {
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> sf;
     typedef GeometricField<Type, fvPatchField, volMesh> vf;
-    typedef DimensionedField<Type, surfGeoMesh> smt;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> smt;
 
     if (foundObject<smt>(fieldName))
     {
         return lookupObject<smt>(fieldName);
     }
-    else if (regionType_ != stSampledSurface && foundObject<sf>(fieldName))
+    else if (withSurfaceFields() && foundObject<sf>(fieldName))
     {
         return filterField(lookupObject<sf>(fieldName));
     }
@@ -91,36 +93,19 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
     {
         const vf& fld = lookupObject<vf>(fieldName);
 
-        if (surfacePtr_.valid())
+        if (sampledPtr_.valid())
         {
-            if (surfacePtr_().interpolate())
+            if (sampledPtr_().interpolate())
             {
                 const interpolationCellPoint<Type> interp(fld);
-                tmp<Field<Type>> tintFld(surfacePtr_().interpolate(interp));
-                const Field<Type>& intFld = tintFld();
 
-                // Average
-                const faceList& faces = surfacePtr_().faces();
-                auto tavg = tmp<Field<Type>>::New(faces.size(), Zero);
-                auto& avg = tavg.ref();
-
-                forAll(faces, facei)
-                {
-                    const face& f = faces[facei];
-                    for (const label labi : f)
-                    {
-                        avg[facei] += intFld[labi];
-                    }
-                    avg[facei] /= f.size();
-                }
-
-                return tavg;
+                return sampledPtr_().sample(interp);
             }
             else
             {
                 const interpolationCell<Type> interp(fld);
 
-                return surfacePtr_().sample(interp);
+                return sampledPtr_().sample(interp);
             }
         }
         else
@@ -129,7 +114,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
         }
     }
 
-    if (mustGet)
+    if (mandatory)
     {
         FatalErrorInFunction
             << "Field " << fieldName << " not found in database"
@@ -332,7 +317,8 @@ Foam::label Foam::functionObjects::fieldValues::surfaceFieldValue::writeAll
 (
     const vectorField& Sf,
     const Field<WeightType>& weightField,
-    const meshedSurf& surfToWrite
+    const pointField& points,
+    const faceList& faces
 )
 {
     label nProcessed = 0;
@@ -341,14 +327,14 @@ Foam::label Foam::functionObjects::fieldValues::surfaceFieldValue::writeAll
     {
         if
         (
-            writeValues<scalar>(fieldName, Sf, weightField, surfToWrite)
-         || writeValues<vector>(fieldName, Sf, weightField, surfToWrite)
+            writeValues<scalar>(fieldName, Sf, weightField, points, faces)
+         || writeValues<vector>(fieldName, Sf, weightField, points, faces)
          || writeValues<sphericalTensor>
             (
-                fieldName, Sf, weightField, surfToWrite
+                fieldName, Sf, weightField, points, faces
             )
-         || writeValues<symmTensor>(fieldName, Sf, weightField, surfToWrite)
-         || writeValues<tensor>(fieldName, Sf, weightField, surfToWrite)
+         || writeValues<symmTensor>(fieldName, Sf, weightField, points, faces)
+         || writeValues<tensor>(fieldName, Sf, weightField, points, faces)
         )
         {
             ++nProcessed;
@@ -372,7 +358,8 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
     const word& fieldName,
     const vectorField& Sf,
     const Field<WeightType>& weightField,
-    const meshedSurf& surfToWrite
+    const pointField& points,
+    const faceList& faces
 )
 {
     const bool ok = validField<Type>(fieldName);
@@ -382,22 +369,27 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
         Field<Type> values(getFieldValues<Type>(fieldName, true));
 
         // Write raw values on surface if specified
-        if (surfaceWriterPtr_.valid())
+        if (surfaceWriterPtr_.valid() && surfaceWriterPtr_->enabled())
         {
             Field<Type> allValues(values);
             combineFields(allValues);
 
             if (Pstream::master())
             {
-                surfaceWriterPtr_->write
+                surfaceWriterPtr_->open
                 (
-                    outputDir(),
-                    regionTypeNames_[regionType_] + ("_" + regionName_),
-                    surfToWrite,
-                    fieldName,
-                    allValues,
-                    false
+                    points,
+                    faces,
+                    (
+                        outputDir()
+                      / regionTypeNames_[regionType_] + ("_" + regionName_)
+                    ),
+                    false  // serial - already merged
                 );
+
+                surfaceWriterPtr_->write(fieldName, allValues);
+
+                surfaceWriterPtr_->clear();
             }
         }
 

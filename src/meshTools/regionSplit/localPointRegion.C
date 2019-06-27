@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -122,9 +124,9 @@ void Foam::localPointRegion::countPointRegions
     // From faces with any duplicated point on it to local face
     meshFaceMap_.resize(meshPointMap_.size());
 
-    forAllConstIter(Map<label>, candidateFace, iter)
+    forAllConstIters(candidateFace, iter)
     {
-        label facei = iter.key();
+        const label facei = iter.key();
 
         if (!mesh.isInternalFace(facei))
         {
@@ -140,14 +142,14 @@ void Foam::localPointRegion::countPointRegions
 
             forAll(f, fp)
             {
-                label pointi = f[fp];
+                const label pointi = f[fp];
 
                 // Even points which were not candidates for splitting might
                 // be on multiple baffles that are being split so check.
 
                 if (candidatePoint[pointi])
                 {
-                    label region = minRegion[facei][fp];
+                    const label region = minRegion[facei][fp];
 
                     if (minPointRegion[pointi] == -1)
                     {
@@ -156,10 +158,10 @@ void Foam::localPointRegion::countPointRegions
                     else if (minPointRegion[pointi] != region)
                     {
                         // Multiple regions for this point. Add.
-                        Map<label>::iterator iter = meshPointMap_.find(pointi);
-                        if (iter != meshPointMap_.end())
+                        const auto iter = meshPointMap_.cfind(pointi);
+                        if (iter.found())
                         {
-                            labelList& regions = pointRegions[iter()];
+                            labelList& regions = pointRegions[iter.val()];
                             if (!regions.found(region))
                             {
                                 label sz = regions.size();
@@ -188,9 +190,9 @@ void Foam::localPointRegion::countPointRegions
 
     // Add internal faces that use any duplicated point. Can only have one
     // region!
-    forAllConstIter(Map<label>, candidateFace, iter)
+    forAllConstIters(candidateFace, iter)
     {
-        label facei = iter.key();
+        const label facei = iter.key();
 
         if (mesh.isInternalFace(facei))
         {
@@ -202,7 +204,7 @@ void Foam::localPointRegion::countPointRegions
                 // speeds up rejection.
                 if (candidatePoint[f[fp]] && meshPointMap_.found(f[fp]))
                 {
-                    label meshFaceMapI = meshFaceMap_.size();
+                    const label meshFaceMapI = meshFaceMap_.size();
                     meshFaceMap_.insert(facei, meshFaceMapI);
                 }
             }
@@ -220,7 +222,7 @@ void Foam::localPointRegion::countPointRegions
 
     // Compact minRegion
     faceRegions_.setSize(meshFaceMap_.size());
-    forAllConstIter(Map<label>, meshFaceMap_, iter)
+    forAllConstIters(meshFaceMap_, iter)
     {
         faceRegions_[iter()].labelList::transfer(minRegion[iter.key()]);
 
@@ -319,7 +321,7 @@ void Foam::localPointRegion::calcPointRegions
     // only ones using a
     // candidate point so the only ones that can be affected)
     faceList minRegion(mesh.nFaces());
-    forAllConstIter(Map<label>, candidateFace, iter)
+    forAllConstIters(candidateFace, iter)
     {
         label facei = iter.key();
         const face& f = mesh.faces()[facei];
@@ -348,7 +350,7 @@ void Foam::localPointRegion::calcPointRegions
 
         Map<label> minPointValue(128);
         label nChanged = 0;
-        forAllConstIter(Map<label>, candidateCell, iter)
+        forAllConstIters(candidateCell, iter)
         {
             minPointValue.clear();
 
@@ -366,8 +368,8 @@ void Foam::localPointRegion::calcPointRegions
 
                     forAll(f, fp)
                     {
-                        label pointi = f[fp];
-                        Map<label>::iterator iter = minPointValue.find(pointi);
+                        const label pointi = f[fp];
+                        auto iter = minPointValue.find(pointi);
 
                         if (iter == minPointValue.end())
                         {
@@ -445,11 +447,11 @@ void Foam::localPointRegion::calcPointRegions
 
 
     //// Print points with multiple regions. These points need to be duplicated.
-    //forAllConstIter(Map<label>, meshPointMap_, iter)
+    //forAllConstIters(meshPointMap_, iter)
     //{
     //    Pout<< "point:" << iter.key()
     //        << " coord:" << mesh.points()[iter.key()]
-    //        << " regions:" << pointRegions_[iter()] << endl;
+    //        << " regions:" << pointRegions_[iter.val()] << endl;
     //}
 }
 
@@ -683,13 +685,13 @@ void Foam::localPointRegion::updateMesh(const mapPolyMesh& map)
     {
         Map<label> newMap(meshFaceMap_.size());
 
-        forAllConstIter(Map<label>, meshFaceMap_, iter)
+        forAllConstIters(meshFaceMap_, iter)
         {
-            label newFacei = map.reverseFaceMap()[iter.key()];
+            const label newFacei = map.reverseFaceMap()[iter.key()];
 
             if (newFacei >= 0)
             {
-                newMap.insert(newFacei, iter());
+                newMap.insert(newFacei, iter.val());
             }
         }
         meshFaceMap_.transfer(newMap);
@@ -697,13 +699,13 @@ void Foam::localPointRegion::updateMesh(const mapPolyMesh& map)
     {
         Map<label> newMap(meshPointMap_.size());
 
-        forAllConstIter(Map<label>, meshPointMap_, iter)
+        forAllConstIters(meshPointMap_, iter)
         {
-            label newPointi = map.reversePointMap()[iter.key()];
+            const label newPointi = map.reversePointMap()[iter.key()];
 
             if (newPointi >= 0)
             {
-                newMap.insert(newPointi, iter());
+                newMap.insert(newPointi, iter.val());
             }
         }
 

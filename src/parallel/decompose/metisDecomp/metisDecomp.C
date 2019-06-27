@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +28,7 @@ License
 #include "metisDecomp.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
+#include "PrecisionAdaptor.H"
 
 // Probably not needed...
 #define MPICH_SKIP_MPICXX
@@ -33,17 +36,18 @@ License
 
 #include "metis.h"
 
-// Provide a clear error message if we have a size mismatch
+// Provide a clear error message if we have a severe size mismatch
+// Allow widening, but not narrowing
 //
 // Metis has an 'idx_t' type, but the IDXTYPEWIDTH define is perhaps
 // more future-proof?
-#ifdef IDXTYPEWIDTH
-static_assert
-(
-    sizeof(Foam::label) == (IDXTYPEWIDTH/8),
-    "sizeof(Foam::label) == (IDXTYPEWIDTH/8), check your metis headers"
-);
-#endif
+//#ifdef IDXTYPEWIDTH
+//static_assert
+//(
+//    sizeof(Foam::label) > (IDXTYPEWIDTH/8),
+//    "sizeof(Foam::label) > (IDXTYPEWIDTH/8), check your metis headers"
+//);
+//#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,21 +88,21 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
     const dictionary* coeffsDictPtr = decompDict_.findDict("metisCoeffs");
 
-    label numCells = xadj.size()-1;
+    idx_t numCells = xadj.size()-1;
 
     // Decomposition options
-    List<label> options(METIS_NOPTIONS);
-    METIS_SetDefaultOptions(options.begin());
+    List<idx_t> options(METIS_NOPTIONS);
+    METIS_SetDefaultOptions(options.data());
 
     // Processor weights initialised with no size, only used if specified in
     // a file
     Field<real_t> processorWeights;
 
     // Cell weights (so on the vertices of the dual)
-    List<label> cellWeights;
+    List<idx_t> cellWeights;
 
     // Face weights (so on the edges of the dual)
-    List<label> faceWeights;
+    List<idx_t> faceWeights;
 
     // Check for externally provided cellweights and if so initialise weights
     // Note: min, not gMin since routine runs on master only.
@@ -125,7 +129,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
         cellWeights.setSize(cWeights.size());
         forAll(cellWeights, i)
         {
-            cellWeights[i] = int(cWeights[i]/minWeights);
+            cellWeights[i] = idx_t(cWeights[i]/minWeights);
         }
     }
 
@@ -182,51 +186,56 @@ Foam::label Foam::metisDecomp::decomposeSerial
         }
     }
 
-    label ncon = 1;
-    label nProcs = nDomains_;
+    idx_t ncon = 1;
+    idx_t nProcs = nDomains_;
+
+    // Addressing
+    ConstPrecisionAdaptor<idx_t, label, List> xadj_metis(xadj);
+    ConstPrecisionAdaptor<idx_t, label, List> adjncy_metis(adjncy);
 
     // Output: cell -> processor addressing
-    decomp.setSize(numCells);
+    PrecisionAdaptor<idx_t, label, List> decomp_metis(decomp);
+    decomp_metis.ref().setSize(numCells);
 
     // Output: number of cut edges
-    label edgeCut = 0;
+    idx_t edgeCut = 0;
 
     if (method == "recursive")
     {
         METIS_PartGraphRecursive
         (
-            &numCells,          // num vertices in graph
-            &ncon,              // num balancing constraints
-            const_cast<labelUList&>(xadj).begin(),   // indexing into adjncy
-            const_cast<labelUList&>(adjncy).begin(), // neighbour info
-            cellWeights.begin(),// vertex wts
-            nullptr,               // vsize: total communication vol
-            faceWeights.begin(),// edge wts
-            &nProcs,            // nParts
-            processorWeights.begin(),   // tpwgts
-            nullptr,               // ubvec: processor imbalance (default)
-            options.begin(),
+            &numCells,                  // num vertices in graph
+            &ncon,                      // num balancing constraints
+            xadj_metis.ref().data(),    // indexing into adjncy
+            adjncy_metis.ref().data(),  // neighbour info
+            cellWeights.data(),         // vertex wts
+            nullptr,                    // vsize: total communication vol
+            faceWeights.data(),         // edge wts
+            &nProcs,                    // nParts
+            processorWeights.data(),    // tpwgts
+            nullptr,                    // ubvec: processor imbalance (default)
+            options.data(),
             &edgeCut,
-            decomp.begin()
+            decomp_metis.ref().data()
         );
     }
     else
     {
         METIS_PartGraphKway
         (
-            &numCells,          // num vertices in graph
-            &ncon,              // num balancing constraints
-            const_cast<labelUList&>(xadj).begin(),   // indexing into adjncy
-            const_cast<labelUList&>(adjncy).begin(), // neighbour info
-            cellWeights.begin(),// vertex wts
-            nullptr,               // vsize: total communication vol
-            faceWeights.begin(),// edge wts
-            &nProcs,            // nParts
-            processorWeights.begin(),   // tpwgts
-            nullptr,               // ubvec: processor imbalance (default)
-            options.begin(),
+            &numCells,                  // num vertices in graph
+            &ncon,                      // num balancing constraints
+            xadj_metis.ref().data(),    // indexing into adjncy
+            adjncy_metis.ref().data(),  // neighbour info
+            cellWeights.data(),         // vertex wts
+            nullptr,                    // vsize: total communication vol
+            faceWeights.data(),         // edge wts
+            &nProcs,                    // nParts
+            processorWeights.data(),    // tpwgts
+            nullptr,                    // ubvec: processor imbalance (default)
+            options.data(),
             &edgeCut,
-            decomp.begin()
+            decomp_metis.ref().data()
         );
     }
 

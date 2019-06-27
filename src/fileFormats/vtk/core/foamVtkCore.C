@@ -32,12 +32,12 @@ const Foam::Enum
     Foam::vtk::fileTag
 >
 Foam::vtk::fileExtension
-{
+({
     { fileTag::POLY_DATA, "vtp" },
     { fileTag::UNSTRUCTURED_GRID, "vtu" },
     { fileTag::MULTI_BLOCK, "vtm" },
     // { fileTag::COLLECTION, "pvd" },
-};
+});
 
 
 const Foam::Enum
@@ -45,12 +45,12 @@ const Foam::Enum
     Foam::vtk::fileTag
 >
 Foam::vtk::fileContentVersions
-{
+({
     { fileTag::POLY_DATA, "0.1" },
     { fileTag::UNSTRUCTURED_GRID, "0.1" },
     { fileTag::MULTI_BLOCK, "1.0" },
     // { fileTag::COLLECTION, "0.1" },
-};
+});
 
 
 const Foam::Enum

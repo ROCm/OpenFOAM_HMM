@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,6 +129,16 @@ public:
             REMOVE = 4      //!< set value to -1 any face that was refined
         };
 
+        //- Enumeration for what to do with co-planar patch faces on a single
+        //  cell
+        enum FaceMergeType
+        {
+            NONE,           // no merging
+            GEOMETRIC,      // use feature angle
+            IGNOREPATCH     // use feature angle, allow merging of different
+                            // patches
+        };
+
 
 private:
 
@@ -164,6 +176,9 @@ private:
 
         //- All limit-refinement interaction
         const shellSurfaces& limitShells_;
+
+        //- Are we operating in test mode?
+        const bool dryRun_;
 
         //- Refinement engine
         hexRef8 meshCutter_;
@@ -308,7 +323,7 @@ private:
             ) const;
 
             //- Collect faces that are intersected and whose neighbours aren't
-            //  yet marked  for refinement.
+            //  yet marked for refinement.
             labelList getRefineCandidateFaces
             (
                 const labelList& refineCell
@@ -323,6 +338,43 @@ private:
                 labelList& refineCell,
                 label& nRefine
             ) const;
+
+            //- Collect cells intersected by the surface that are candidates
+            //  for gap checking. Used inside markSurfaceGapRefinement
+            void collectGapCandidates
+            (
+                const shellSurfaces& shells,
+                const labelList& testFaces,
+                const labelList& neiLevel,
+                const pointField& neiCc,
+                labelList& cellToCompact,
+                labelList& bFaceToCompact,
+                List<FixedList<label, 3>>& shellGapInfo,
+                List<volumeType>& shellGapMode
+            ) const;
+            void collectGapCells
+            (
+                const scalar planarCos,
+
+                const List<FixedList<label, 3>>& extendedGapLevel,
+                const List<volumeType>& extendedGapMode,
+                const labelList& testFaces,
+                const pointField& start,
+                const pointField& end,
+
+                const labelList& cellToCompact,
+                const labelList& bFaceToCompact,
+                const List<FixedList<label, 3>>& shellGapInfo,
+                const List<volumeType>& shellGapMode,
+
+                const label nAllowRefine,
+                const labelList& neiLevel,
+                const pointField& neiCc,
+
+                labelList& refineCell,
+                label& nRefine
+            ) const;
+
 
             //- Mark cells intersected by the surface if they are inside
             //  close gaps
@@ -467,6 +519,11 @@ private:
             label markProximityRefinement
             (
                 const scalar curvature,
+
+                // Per region the min and max cell level
+                const labelList& surfaceMinLevel,
+                const labelList& surfaceMaxLevel,
+
                 const label nAllowRefine,
                 const labelList& neiLevel,
                 const pointField& neiCc,
@@ -602,6 +659,15 @@ private:
             //  patch. Any unreached face (disconnected mesh?) becomes
             //  adaptPatchIDs[0]
             labelList nearestPatch(const labelList& adaptPatchIDs) const;
+
+            //- Returns list with for every face the label of the nearest
+            //  (global) region. Any unreached face (disconnected mesh?) becomes
+            //  defaultRegion
+            labelList nearestIntersection
+            (
+                const labelList& surfacesToTest,
+                const label defaultRegion
+            ) const;
 
             //- Returns list with for every internal face -1 or the patch
             //  they should be baffled into.
@@ -819,7 +885,9 @@ public:
             const refinementSurfaces&,
             const refinementFeatures&,
             const shellSurfaces&,   // omnidirectional refinement
-            const shellSurfaces&    // limit refinement
+            const shellSurfaces&,   // limit refinement
+            const labelUList& checkFaces,   // initial faces to check
+            const bool dryRun
         );
 
 
@@ -885,15 +953,9 @@ public:
             }
 
             //- Per start-end edge the index of the surface hit
-            const labelList& surfaceIndex() const
-            {
-                return surfaceIndex_;
-            }
+            const labelList& surfaceIndex() const;
 
-            labelList& surfaceIndex()
-            {
-                return surfaceIndex_;
-            }
+            labelList& surfaceIndex();
 
             //- For faces originating from processor faces store the original
             //  patch
@@ -1004,11 +1066,13 @@ public:
             //- Is local topology a small gap normal to the test vector
             bool isNormalGap
             (
-                const scalar,
-                const vector&,
-                const vector&,
-                const vector&,
-                const vector&
+                const scalar planarCos,
+                const label level0,
+                const vector& point0,
+                const vector& normal0,
+                const label level1,
+                const vector& point1,
+                const vector& normal1
             ) const;
 
             //- Calculate list of cells to refine.
@@ -1030,6 +1094,44 @@ public:
                 const label maxGlobalCells,
                 const label maxLocalCells
             ) const;
+
+
+            // Blocking cells
+
+                //- Mark faces on interface between set and rest
+                //  (and same cell level)
+                void markOutsideFaces
+                (
+                    const labelList& cellLevel,
+                    const labelList& neiLevel,
+                    const labelList& refineCell,
+                    bitSet& isOutsideFace
+                ) const;
+
+                //- Count number of faces on cell that are in set
+                label countFaceDirs
+                (
+                    const bitSet& isOutsideFace,
+                    const label celli
+                ) const;
+
+                //- Add one layer of cells to set
+                void growSet
+                (
+                    const labelList& neiLevel,
+                    const bitSet& isOutsideFace,
+                    labelList& refineCell,
+                    label& nRefine
+                ) const;
+
+                //- Detect gapRefinement cells and remove them
+                autoPtr<mapPolyMesh> removeGapCells
+                (
+                    const scalar planarAngle,
+                    const labelList& minSurfaceLevel,
+                    const labelList& globalToMasterPatch,
+                    const label growIter
+                );
 
             //- Refine some cells
             autoPtr<mapPolyMesh> refine(const labelList& cellsToRefine);
@@ -1371,7 +1473,8 @@ public:
                     const scalar minCos,
                     const scalar concaveCos,
                     const label mergeSize,
-                    const labelList& patchIDs
+                    const labelList& patchIDs,
+                    const meshRefinement::FaceMergeType mergeType
                 );
 
                 //- Merge coplanar faces. preserveFaces is != -1 for faces
@@ -1382,7 +1485,8 @@ public:
                     const scalar concaveCos,
                     const labelList& patchIDs,
                     const dictionary& motionDict,
-                    const labelList& preserveFaces
+                    const labelList& preserveFaces,
+                    const meshRefinement::FaceMergeType mergeType
                 );
 
                 autoPtr<mapPolyMesh> doRemovePoints
@@ -1480,8 +1584,8 @@ public:
             //- Print some mesh stats.
             void printMeshInfo(const bool, const string&) const;
 
-            //- Replacement for Time::timeName() : return oldInstance (if
-            //  overwrite_)
+            //- Replacement for Time::timeName() that returns oldInstance
+            //- (if overwrite_)
             word timeName() const;
 
             //- Set instance of all local IOobjects
@@ -1531,7 +1635,37 @@ public:
                 const EnumContainer& namedEnum,
                 const wordList& words
             );
+
+            //- Wrapper around dictionary::get which does not exit
+            template<class Type>
+            static Type get
+            (
+                const dictionary& dict,
+                const word& keyword,
+                const bool noExit,
+                enum keyType::option matchOpt = keyType::REGEX,
+                const Type& defaultValue = Zero
+            );
+
+            //- Wrapper around dictionary::subDict which does not exit
+            static const dictionary& subDict
+            (
+                const dictionary& dict,
+                const word& keyword,
+                const bool noExit
+            );
+
+            //- Wrapper around dictionary::lookup which does not exit
+            static ITstream& lookup
+            (
+                const dictionary& dict,
+                const word& keyword,
+                const bool noExit
+            );
 };
+
+template<>
+inline bool contiguous<FixedList<label, 3>>()               {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

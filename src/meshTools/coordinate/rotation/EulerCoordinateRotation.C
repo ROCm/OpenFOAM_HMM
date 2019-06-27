@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,37 +62,185 @@ namespace Foam
 
 Foam::tensor Foam::coordinateRotations::euler::rotation
 (
+    const eulerOrder order,
     const vector& angles,
     bool degrees
 )
 {
-    scalar phi   = angles.component(vector::X); // 1. Rotate about Z
-    scalar theta = angles.component(vector::Y); // 2. Rotate about X
-    scalar psi   = angles.component(vector::Z); // 3. Rotate about Z
+    scalar angle1(angles.component(vector::X)); // Rotation #1
+    scalar angle2(angles.component(vector::Y)); // Rotation #2
+    scalar angle3(angles.component(vector::Z)); // Rotation #3
 
     if (degrees)
     {
-        phi   *= degToRad();
-        theta *= degToRad();
-        psi   *= degToRad();
+        angle1 *= degToRad();
+        angle2 *= degToRad();
+        angle3 *= degToRad();
     }
 
-    const scalar c1 = cos(phi);   const scalar s1 = sin(phi);
-    const scalar c2 = cos(theta); const scalar s2 = sin(theta);
-    const scalar c3 = cos(psi);   const scalar s3 = sin(psi);
+    const scalar c1(cos(angle1)); const scalar s1(sin(angle1));
+    const scalar c2(cos(angle2)); const scalar s2(sin(angle2));
+    const scalar c3(cos(angle3)); const scalar s3(sin(angle3));
 
-    // Compare
     // https://en.wikipedia.org/wiki/Euler_angles#Rotation_matrix
-    //
-    // Z1-X2-Z3 rotation
 
-    return
-        tensor
-        (
-            c1*c3 - c2*s1*s3, -c1*s3 - c2*c3*s1,  s1*s2,
-            c3*s1 + c1*c2*s3,  c1*c2*c3 - s1*s3, -c1*s2,
-            s2*s3,             c3*s2,             c2
-        );
+    switch (order)
+    {
+        // Proper Euler angles
+
+        case eulerOrder::XZX:  // X1-Z2-X3 rotation
+        {
+            return tensor
+            (
+                (   c2  ), (      -c3*s2      ), (      s2*s3        ),
+                ( c1*s2 ), ( c1*c2*c3 - s1*s3 ), ( -c3*s1 - c1*c2*s3 ),
+                ( s1*s2 ), ( c1*s3 + c2*c3*s1 ), (  c1*c3 - c2*s1*s3 )
+            );
+            break;
+        }
+
+        case eulerOrder::XYX:  // X1-Y2-X3 rotation
+        {
+            return tensor
+            (
+                (    c2  ), (      s2*s3       ), (      c3*s2 ),
+                (  s1*s2 ), ( c1*c3 - c2*s1*s3 ), ( -c1*s3 - c2*c3*s1 ),
+                ( -c1*s2 ), ( c3*s1 + c1*c2*s3 ), (  c1*c2*c3 - s1*s3 )
+            );
+            break;
+        }
+
+        case eulerOrder::YXY:  // Y1-X2-Y3 rotation
+        {
+            return tensor
+            (
+                ( c1*c3 - c2*s1*s3 ), ( s1*s2 ), ( c1*s3 + c2*c3*s1 ),
+                (     s2*s3        ), (   c2  ), (    -c3*s2        ),
+                ( -c3*s1 -c1*c2*s3 ), ( c1*s2 ), ( c1*c2*c3 - s1*s3 )
+            );
+            break;
+        }
+
+        case eulerOrder::YZY:  // Y1-Z2-Y3 rotation
+        {
+            return tensor
+            (
+                ( c1*c2*c3 - s1*s3 ), ( -c1*s2 ), ( c3*s1 + c1*c2*s3 ),
+                (        c3*s2     ), (   c2   ), (     s2*s3        ),
+                (-c1*s3 - c2*c3*s1 ), (  s1*s2 ), ( c1*c3 - c2*s1*s3 )
+            );
+            break;
+        }
+
+        case eulerOrder::ZYZ:  // Z1-Y2-Z3 rotation
+        {
+            return tensor
+            (
+                ( c1*c2*c3 - s1*s3 ), ( -c3*s1 - c1*c2*s3 ), ( c1*s2 ),
+                ( c1*s3 + c2*c3*s1 ), (  c1*c3 - c2*s1*s3 ), ( s1*s2 ),
+                (     -c3*s2       ), (      s2*s3 ),        (   c2  )
+            );
+            break;
+        }
+
+        case eulerOrder::ZXZ:  // Z1-X2-Z3 rotation
+        {
+            return tensor
+            (
+                ( c1*c3 - c2*s1*s3 ), ( -c1*s3 - c2*c3*s1 ), (  s1*s2 ),
+                ( c3*s1 + c1*c2*s3 ), ( c1*c2*c3 - s1*s3  ), ( -c1*s2 ),
+                (     s2*s3        ), (      c3*s2        ), (    c2  )
+            );
+            break;
+        }
+
+
+            // Tait-Bryan angles
+
+        case eulerOrder::XZY:  // X1-Z2-Y3 rotation
+        {
+            return tensor
+            (
+                (      c2*c3       ), (  -s2  ), (       c2*s3      ),
+                ( s1*s3 + c1*c3*s2 ), ( c1*c2 ), ( c1*s2*s3 - c3*s1 ),
+                ( c3*s1*s2 - c1*s3 ), ( c2*s1 ), ( c1*c3 + s1*s2*s3 )
+            );
+            break;
+        }
+
+        case eulerOrder::XYZ:  // X1-Y2-Z3 rotation
+        {
+            return tensor
+            (
+                (      c2*c3       ), (    -c2*s3        ), (    s2  ),
+                ( c1*s3 + c3*s1*s2 ), ( c1*c3 - s1*s2*s3 ), ( -c2*s1 ),
+                ( s1*s3 - c1*c3*s2 ), ( c3*s1 + c1*s2*s3 ), (  c1*c2 )
+            );
+            break;
+        }
+
+        case eulerOrder::YXZ:  // Y1-X2-Z3 rotation
+        {
+            return tensor
+            (
+                ( c1*c3 + s1*s2*s3 ), ( c3*s1*s2 - c1*s3 ), ( c2*s1 ),
+                (     c2*s3        ), (        c2*c3     ), (  -s2  ),
+                ( c1*s2*s3 - c3*s1 ), ( c1*c3*s2 + s1*s3 ), ( c1*c2 )
+            );
+            break;
+        }
+
+        case eulerOrder::YZX:  // Y1-Z2-X3 rotation
+        {
+            return tensor
+            (
+                (  c1*c2 ), ( s1*s3 - c1*c3*s2 ), ( c3*s1 + c1*s2*s3 ),
+                (  s2    ), ( c2*c3            ), ( -c2*s3           ),
+                ( -c2*s1 ), ( c1*s3 + c3*s1*s2 ), ( c1*c3 - s1*s2*s3 )
+            );
+            break;
+        }
+
+        case eulerOrder::ZYX:  // Z1-Y2-X3 rotation
+        {
+            return tensor
+            (
+                ( c1*c2 ), ( c1*s2*s3 - c3*s1 ), ( s1*s3 + c1*c3*s2 ),
+                ( c2*s1 ), ( c1*c3 + s1*s2*s3 ), ( c3*s1*s2 - c1*s3 ),
+                (  -s2  ), (      c2*s3       ), (        c2*c3     )
+            );
+            break;
+        }
+
+        case eulerOrder::ZXY:  // Z1-X2-Y3 rotation
+        {
+            return tensor
+            (
+                ( c1*c3 - s1*s2*s3 ), ( -c2*s1 ), ( c1*s3 + c3*s1*s2 ),
+                ( c3*s1 + c1*s2*s3 ), (  c1*c2 ), ( s1*s3 - c1*c3*s2 ),
+                (    -c2*s3 ),        (   s2   ), (     c2*c3        )
+            );
+            break;
+        }
+
+        default:
+            FatalErrorInFunction
+                << "Unknown euler rotation order "
+                << int(order) << abort(FatalError);
+            break;
+    }
+
+    return tensor::I;
+}
+
+
+Foam::tensor Foam::coordinateRotations::euler::rotation
+(
+    const vector& angles,
+    bool degrees
+)
+{
+    return rotation(eulerOrder::ZXZ, angles, degrees);
 }
 
 
@@ -100,7 +250,8 @@ Foam::coordinateRotations::euler::euler()
 :
     coordinateRotation(),
     angles_(Zero),
-    degrees_(true)
+    degrees_(true),
+    order_(eulerOrder::ZXZ)
 {}
 
 
@@ -108,33 +259,36 @@ Foam::coordinateRotations::euler::euler(const euler& crot)
 :
     coordinateRotation(crot),
     angles_(crot.angles_),
-    degrees_(crot.degrees_)
+    degrees_(crot.degrees_),
+    order_(crot.order_)
 {}
 
 
 Foam::coordinateRotations::euler::euler
 (
-    const vector& phiThetaPsi,
+    const vector& angles,
     bool degrees
 )
 :
     coordinateRotation(),
-    angles_(phiThetaPsi),
-    degrees_(degrees)
+    angles_(angles),
+    degrees_(degrees),
+    order_(eulerOrder::ZXZ)
 {}
 
 
 Foam::coordinateRotations::euler::euler
 (
-    scalar phi,
-    scalar theta,
-    scalar psi,
+    scalar angle1,
+    scalar angle2,
+    scalar angle3,
     bool degrees
 )
 :
     coordinateRotation(),
-    angles_(phi, theta, psi),
-    degrees_(degrees)
+    angles_(angle1, angle2, angle3),
+    degrees_(degrees),
+    order_(eulerOrder::ZXZ)
 {}
 
 
@@ -142,7 +296,16 @@ Foam::coordinateRotations::euler::euler(const dictionary& dict)
 :
     coordinateRotation(),
     angles_(dict.getCompat<vector>("angles", {{"rotation", 1806}})),
-    degrees_(dict.lookupOrDefault("degrees", true))
+    degrees_(dict.lookupOrDefault("degrees", true)),
+    order_
+    (
+        quaternion::eulerOrderNames.lookupOrDefault
+        (
+            "order",
+            dict,
+            quaternion::eulerOrder::ZXZ
+        )
+    )
 {}
 
 
@@ -180,6 +343,12 @@ void Foam::coordinateRotations::euler::writeEntry
     if (!degrees_)
     {
         os.writeEntry("degrees", "false");
+    }
+
+    // writeEntryIfDifferent, but with enumerated name
+    if (order_ != eulerOrder::ZXZ)
+    {
+        os.writeEntry("order", quaternion::eulerOrderNames[order_]);
     }
 
     os.endBlock();

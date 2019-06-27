@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +48,10 @@ linearNormal::linearNormal(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
     thickness_(coeffDict_.get<scalar>("thickness")),
-    firstCellThickness_(0),
+    firstCellThickness_
+    (
+        coeffDict_.lookupOrDefault<scalar>("firstCellThickness", 0)
+    ),
     layerPoints_(nLayers_)
 {
     if (thickness_ <= 0)
@@ -56,40 +61,32 @@ linearNormal::linearNormal(const dictionary& dict)
             << exit(FatalError);
     }
 
-    coeffDict_.readIfPresent("firstCellThickness", firstCellThickness_);
-
-    if (firstCellThickness_ >= thickness_)
+    if (nLayers_ > 1 && firstCellThickness_ > 0)
     {
-        FatalErrorInFunction
-            << "firstCellThickness is larger than thickness"
-            << exit(FatalError);
-    }
+        if (thickness_ <= firstCellThickness_)
+        {
+            FatalErrorInFunction
+                << "firstCellThickness leave no room for further layers"
+                << exit(FatalError);
+        }
 
-    if (firstCellThickness_ > 0)
-    {
         layerPoints_[0] = firstCellThickness_;
 
-        for (label layerI = 1; layerI < nLayers_; layerI++)
+        for (label layer = 1; layer < nLayers_; ++layer)
         {
-            layerPoints_[layerI] =
+            layerPoints_[layer] =
                 (thickness_ - layerPoints_[0])
-                *sumThickness(layerI) + layerPoints_[0];
+                *sumThickness(layer) + layerPoints_[0];
         }
     }
     else
     {
-        for (label layerI = 0; layerI < nLayers_; layerI++)
+        for (label layer = 0; layer < nLayers_; ++layer)
         {
-            layerPoints_[layerI] = thickness_*sumThickness(layerI + 1);
+            layerPoints_[layer] = thickness_*sumThickness(layer + 1);
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-linearNormal::~linearNormal()
-{}
 
 
 // * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
@@ -101,14 +98,12 @@ point linearNormal::operator()
     const label layer
 ) const
 {
-    if (layer == 0)
+    if (layer <= 0)
     {
         return surfacePoint;
     }
-    else
-    {
-        return surfacePoint + layerPoints_[layer - 1]*surfaceNormal;
-    }
+
+    return surfacePoint + layerPoints_[layer - 1]*surfaceNormal;
 }
 
 

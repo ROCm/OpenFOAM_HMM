@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,9 +25,9 @@ License
 
 Description
 
-
 \*---------------------------------------------------------------------------*/
 
+#include <memory>
 #include <iostream>
 #include "autoPtr.H"
 #include "HashPtrTable.H"
@@ -39,11 +41,11 @@ void printTable(const HashPtrTable<T>& table)
 
     forAllConstIters(table, iter)
     {
-        const T* ptr = iter.object();
+        const T* ptr = iter.val();
         Info<< iter.key() << " = ";
         if (ptr)
         {
-            Info<< *ptr << " (" << long(ptr) << ")";
+            Info<< *ptr << " (" << uintptr_t(ptr) << ")";
         }
         else
         {
@@ -54,14 +56,14 @@ void printTable(const HashPtrTable<T>& table)
 
     Info<< ")" << endl;
 
-    // Values only, with for-range
+    // Iterate across values, with for-range
     Info<< "values (";
-    for (auto val : table)
+    for (const auto& ptr : table)
     {
         Info<< ' ';
-        if (val)
+        if (ptr)
         {
-            Info<< *val;
+            Info<< *ptr;
         }
         else
         {
@@ -84,8 +86,27 @@ int main()
     myTable.set("natlog", new double(2.718282));
     myTable.insert("sqrt2", autoPtr<double>::New(1.414214));
 
+    HashTable<std::unique_ptr<double>, word, string::hash> myTable1;
+
+    myTable1.set("abc", std::unique_ptr<double>(new double(42.1)));
+    myTable1.set("pi", std::unique_ptr<double>(new double(3.14159)));
+    myTable1.set("natlog", std::unique_ptr<double>(new double(2.718282)));
+
+    HashTable<autoPtr<double>, word, string::hash> myTable2;
+
+    myTable2.set("abc", autoPtr<double>(new double(42.1)));
+    myTable2.set("pi", autoPtr<double>(new double(3.14159)));
+    myTable2.set("natlog", autoPtr<double>(new double(2.718282)));
+    myTable2.insert("sqrt2", autoPtr<double>::New(1.414214));
+
     // Info<< myTable << endl;
     printTable(myTable);
+    Info<< myTable2 << nl;
+
+    auto iter2 = myTable2.find("pi");
+
+    Info<<"PI: " << **iter2 << nl;
+
 
     HashPtrTable<double> copy(myTable);
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015,2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,15 +74,20 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
 {
     if (treeByRegion_.empty())
     {
-        Map<label> regionSizes;
+        label maxRegion = -1;
         forAll(surface(), fI)
         {
             const label regionI = surface()[fI].region();
-
-            regionSizes(regionI)++;
+            maxRegion = max(maxRegion, regionI);
         }
+        const label nRegions = maxRegion+1;
 
-        label nRegions = regionSizes.size();
+        labelList nFacesInRegions(nRegions, 0);
+        forAll(surface(), fI)
+        {
+            const label regionI = surface()[fI].region();
+            nFacesInRegions[regionI]++;
+        }
 
         indirectRegionPatches_.setSize(nRegions);
         treeByRegion_.setSize(nRegions);
@@ -89,15 +96,12 @@ Foam::triSurfaceRegionSearch::treeByRegion() const
 
         forAll(regionsAddressing, regionI)
         {
-            regionsAddressing[regionI] = labelList(regionSizes[regionI], -1);
+            regionsAddressing[regionI].setSize(nFacesInRegions[regionI]);
         }
-
-        labelList nFacesInRegions(nRegions, 0);
-
+        nFacesInRegions = Zero;
         forAll(surface(), fI)
         {
             const label regionI = surface()[fI].region();
-
             regionsAddressing[regionI][nFacesInRegions[regionI]++] = fI;
         }
 

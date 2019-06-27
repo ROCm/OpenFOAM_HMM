@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,12 +58,14 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description             | Required    | Default value
-        type         | type name: fluxSummary  | yes         |
-        write        | write flux data to file |  no  | yes
-        log          | write flux data to standard output | no | yes
-        mode         | mode to generate faces to test | yes |
-        scaleFactor  | optional factor to scale result | no | 1
+        Property    | Description                           | Required | Default
+        type        | Type name: fluxSummary                | yes |
+        write       | Write flux data to file               | no  | yes
+        log         | Write flux data to standard output    | no  | yes
+        mode        | Mode to generate faces to test        | yes |
+        scaleFactor | Optional factor to scale result       | no  | 1
+        tolerance   | Tolerance for the reference direction | no  | 0.8
+        phi         | Surface flux field                    | no  | phi
     \endtable
 
     The mode is one of:
@@ -72,6 +76,9 @@ Usage
     - surfaceAndDirection
 
     Output data is written to files of the form \<timeDir\>/\<faceZoneName\>.dat
+
+Note
+    For surface and direction, can use phi = 'U' for determining the fluxes.
 
 See also
     Foam::functionObjects::fvMeshFunctionObject
@@ -90,16 +97,18 @@ SourceFiles
 #include "writeFile.H"
 #include "vector.H"
 #include "DynamicList.H"
-#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
 class dimensionSet;
 
 namespace functionObjects
 {
+
 /*---------------------------------------------------------------------------*\
                          Class fluxSummary Declaration
 \*---------------------------------------------------------------------------*/
@@ -116,20 +125,23 @@ public:
         //- Face mode type
         enum modeType
         {
-            mdFaceZone,                 //!< face zone
-            mdFaceZoneAndDirection,     //!< face zone with prescribed direction
-            mdCellZoneAndDirection,     //!< cell zone with prescribed direction
-            mdSurface,                  //!< surfMesh
-            mdSurfaceAndDirection       //!< surfMesh with prescribed direction
+            mdFaceZone,             //!< Face zone
+            mdFaceZoneAndDirection, //!< Face zone with prescribed direction
+            mdCellZoneAndDirection, //!< Cell zone with prescribed direction
+            mdSurface,              //!< A functionObject surface
+            mdSurfaceAndDirection   //!< A surface with prescribed direction
         };
 
-        //- Mode type names
+        //- Face mode names
         static const Enum<modeType> modeTypeNames_;
 
 
 protected:
 
-    // Protected data
+    // Protected Data
+
+        //- Track if the surface needs an update
+        bool needsUpdate_;
 
         //- Mode for face determination
         modeType mode_;
@@ -146,11 +158,14 @@ protected:
             //- Region (zone/surface) names
             List<word> zoneNames_;
 
+            //- Region (zone/surface) directions
+            List<vector> zoneDirections_;
+
             //- Face IDs
-            List<List<label>> faceID_;
+            List<labelList> faceID_;
 
             //- Face patch IDs
-            List<List<label>> facePatchID_;
+            List<labelList> facePatchID_;
 
             //- Face flip map signs
             List<boolList> faceFlip_;
@@ -201,8 +216,8 @@ protected:
             const word& faceZoneName,
             DynamicList<word>& names,
             DynamicList<vector>& dir,
-            DynamicList<List<label>>& faceID,
-            DynamicList<List<label>>& facePatchID,
+            DynamicList<labelList>& faceID,
+            DynamicList<labelList>& facePatchID,
             DynamicList<boolList>& faceFlip
         ) const;
 
@@ -213,8 +228,8 @@ protected:
             const vector& refDir,
             DynamicList<word>& names,
             DynamicList<vector>& dir,
-            DynamicList<List<label>>& faceID,
-            DynamicList<List<label>>& facePatchID,
+            DynamicList<labelList>& faceID,
+            DynamicList<labelList>& facePatchID,
             DynamicList<boolList>& faceFlip
         ) const;
 
@@ -225,13 +240,17 @@ protected:
             const vector& refDir,
             DynamicList<word>& names,
             DynamicList<vector>& dir,
-            DynamicList<List<label>>& faceID,
-            DynamicList<List<label>>& facePatchID,
+            DynamicList<labelList>& faceID,
+            DynamicList<labelList>& facePatchID,
             DynamicList<boolList>& faceFlip
         ) const;
 
         //- Calculate the total area for the surface or derived faceZone
         scalar totalArea(const label idx) const;
+
+        //- Initialise - after read(), before write()
+        bool update();
+
 
         //- Output file header information
         virtual void writeFileHeader
@@ -270,13 +289,13 @@ public:
 
 
     //- Destructor
-    virtual ~fluxSummary();
+    virtual ~fluxSummary() = default;
 
 
     // Member Functions
 
         //- Read the field fluxSummary data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute, currently does nothing
         virtual bool execute();

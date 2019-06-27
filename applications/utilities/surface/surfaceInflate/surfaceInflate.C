@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,7 +143,7 @@ tmp<vectorField> calcPointNormals
     {
         const labelListList& edgeFaces = s.edgeFaces();
 
-        labelList nNormals(s.nPoints(), 0);
+        labelList nNormals(s.nPoints(), Zero);
         forAll(edgeStat, edgeI)
         {
             if (edgeStat[edgeI] != surfaceFeatures::NONE)
@@ -355,10 +357,10 @@ tmp<scalarField> avg
     const scalarField& edgeWeights
 )
 {
-    tmp<scalarField> tres(new scalarField(s.nPoints(), 0.0));
+    tmp<scalarField> tres(new scalarField(s.nPoints(), Zero));
     scalarField& res = tres.ref();
 
-    scalarField sumWeight(s.nPoints(), 0.0);
+    scalarField sumWeight(s.nPoints(), Zero);
 
     const edgeList& edges = s.edges();
 
@@ -499,7 +501,7 @@ void lloydsSmoothing
         const pointField& points = s.points();
 
         vectorField pointSum(s.nPoints(), Zero);
-        labelList nPointSum(s.nPoints(), 0);
+        labelList nPointSum(s.nPoints(), Zero);
 
         forAll(edges, edgeI)
         {

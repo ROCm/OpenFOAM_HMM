@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -27,6 +27,10 @@ Description
     Finite-Area matrix basic solvers.
 
 \*---------------------------------------------------------------------------*/
+
+#include "PrecisionAdaptor.H"
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::faMatrix<Type>::setComponentReference
@@ -96,25 +100,30 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
         // Use the initMatrixInterfaces and updateMatrixInterfaces to correct
         // bouCoeffsCmpt for the explicit part of the coupled boundary
         // conditions
-        initMatrixInterfaces
-        (
-            true,
-            bouCoeffsCmpt,
-            interfaces,
-            psiCmpt,
-            sourceCmpt,
-            cmpt
-        );
+        {
+            PrecisionAdaptor<solveScalar, scalar> sourceCmpt_ss(sourceCmpt);
+            ConstPrecisionAdaptor<solveScalar, scalar> psiCmpt_ss(psiCmpt);
 
-        updateMatrixInterfaces
-        (
-            true,
-            bouCoeffsCmpt,
-            interfaces,
-            psiCmpt,
-            sourceCmpt,
-            cmpt
-        );
+            initMatrixInterfaces
+            (
+                true,
+                bouCoeffsCmpt,
+                interfaces,
+                psiCmpt_ss(),
+                sourceCmpt_ss.ref(),
+                cmpt
+            );
+
+            updateMatrixInterfaces
+            (
+                true,
+                bouCoeffsCmpt,
+                interfaces,
+                psiCmpt_ss(),
+                sourceCmpt_ss.ref(),
+                cmpt
+            );
+        }
 
         solverPerformance solverPerf;
 
@@ -179,7 +188,7 @@ Foam::tmp<Foam::Field<Type>> Foam::faMatrix<Type>::residual() const
     {
         scalarField psiCmpt(psi_.internalField().component(cmpt));
 
-        scalarField boundaryDiagCmpt(psi_.size(), 0.0);
+        scalarField boundaryDiagCmpt(psi_.size(), Zero);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
 
         FieldField<Field, scalar> bouCoeffsCmpt

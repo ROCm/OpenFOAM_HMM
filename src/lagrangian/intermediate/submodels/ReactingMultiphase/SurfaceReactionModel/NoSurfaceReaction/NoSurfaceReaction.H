@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +77,7 @@ public:
 
 
     //- Destructor
-    virtual ~NoSurfaceReaction();
+    virtual ~NoSurfaceReaction() = default;
 
 
     // Member Functions
@@ -87,6 +89,8 @@ public:
         virtual scalar calculate
         (
             const scalar dt,
+            const scalar Re,
+            const scalar nu,
             const label celli,
             const scalar d,
             const scalar T,

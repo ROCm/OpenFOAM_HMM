@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,10 +93,8 @@ bool limitRefinementLevel
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -213,7 +213,9 @@ int main(int argc, char *argv[])
         (
             fvMesh::defaultRegion,
             runTime.timeName(),
-            runTime
+            runTime,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         pointField(mesh.points()),  // Could we safely re-use the data?
         faceList(mesh.faces()),
@@ -263,7 +265,7 @@ int main(int argc, char *argv[])
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        labelList(mesh.nCells(), 0)
+        labelList(mesh.nCells(), Zero)
     );
 
     if (readLevel)

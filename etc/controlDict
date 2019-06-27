@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -37,6 +37,8 @@ InfoSwitches
     writePrecision  6;
 
     writeDictionaries 0;
+
+    // Report optional dictionary entries. For value > 1, treat as fatal.
     writeOptionalEntries 0;
 
     // Write lagrangian "positions" file in v1706 format (and earlier)
@@ -64,6 +66,10 @@ InfoSwitches
 
     // Allow case-supplied C++ code (#codeStream, codedFixedValue)
     allowSystemOperations   1;
+
+    // Allow space character in fileName (use with caution)
+    // Default: 0 for non-Windows, 1 for Windows
+    //// allowSpaceInFileName    0;
 }
 
 
@@ -215,7 +221,7 @@ DebugSwitches
     FDIC                0;
     FaceCellWave        0;
     GAMG                0;
-    GAMGAgglomeration   1;
+    GAMGAgglomeration   0;
     GAMGInterface       0;
     GAMGInterfaceField  0;
     Gamma               0;
@@ -482,6 +488,7 @@ DebugSwitches
     directionMixed      0;
     directional         0;
     disallowGenericFvPatchField 0;
+    disallowGenericFvsPatchField 0;
     disallowGenericPointPatchField 0;
     disallowGenericPolyPatch    0;
     dispersionLESModel  0;
@@ -517,6 +524,7 @@ DebugSwitches
     exponential         0;
     extendedLeastSquares    0;
     extendedLeastSquaresVectors 0;
+    extrudeModel        1;
     face                0;
     faceAreaPair        0;
     faceCoupleInfo      0;
@@ -818,6 +826,7 @@ DebugSwitches
     rotatedBoxToCell    0;
     rotatingPressureInletOutletVelocity 0;
     rotatingTotalPressure 0;
+    runTimePostPro::geometryBase        0;
     sampledPatch        0;
     sampledPlane        0;
     sampledSet          0;

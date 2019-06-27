@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,6 +68,9 @@ protected:
         //- Reference to point motion field
         pointVectorField& pointDisplacement_;
 
+        //- In dry-run mode?
+        const bool dryRun_;
+
 
     // Protected Member functions
 
@@ -110,9 +115,10 @@ public:
             (
                 const dictionary& dict,
                 const List<labelPair>& baffles,
-                pointVectorField& pointDisplacement
+                pointVectorField& pointDisplacement,
+                const bool dryRun
             ),
-            (dict, baffles, pointDisplacement)
+            (dict, baffles, pointDisplacement, dryRun)
         );
 
 
@@ -124,7 +130,8 @@ public:
         (
             const dictionary& dict,
             const List<labelPair>& baffles,
-            pointVectorField& pointDisplacement
+            pointVectorField& pointDisplacement,
+            const bool dryRun
         );
 
 
@@ -136,7 +143,8 @@ public:
             const word& type,
             const dictionary& dict,
             const List<labelPair>& baffles,
-            pointVectorField& pointDisplacement
+            pointVectorField& pointDisplacement,
+            const bool dryRun = false
         );
 
 

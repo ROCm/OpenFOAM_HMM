@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,17 +17,16 @@ FoamFile
 
 ".*"
 {
-    mode            lookup;
+    type            lookup;
     emissivity      0.8;
-    absorptivity    0.0;
+    absorptivity    0.8;
 }
 
 inlet
 {
-     mode           lookup;
+    type            lookup;
     emissivity      0.9;
-    absorptivity    0.0;
+    absorptivity    0.9;
 }
-
 
 // ************************************************************************* //

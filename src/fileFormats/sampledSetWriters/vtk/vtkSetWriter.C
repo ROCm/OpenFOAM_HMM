@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,7 +95,7 @@ void Foam::vtkSetWriter<Type>::write
 
         forAll(fld, pointi)
         {
-            if (pointi != 0)
+            if (pointi)
             {
                 os  << ' ';
             }
@@ -135,9 +137,8 @@ void Foam::vtkSetWriter<Type>::write
         << "DATASET POLYDATA" << nl
         << "POINTS " << nPoints << " double" << nl;
 
-    forAll(tracks, trackI)
+    for (const coordSet& points : tracks)
     {
-        const coordSet& points = tracks[trackI];
         for (const point& pt : points)
         {
             os  << float(pt.x()) << ' '
@@ -156,11 +157,13 @@ void Foam::vtkSetWriter<Type>::write
         {
             const coordSet& points = tracks[trackI];
 
-            os  << points.size();
-            forAll(points, i)
+            const label len = points.size();
+
+            os  << len;
+            for (label i = 0; i < len; ++i)
             {
                 os  << ' ' << globalPtI;
-                globalPtI++;
+                ++globalPtI;
             }
             os << nl;
         }
@@ -177,13 +180,11 @@ void Foam::vtkSetWriter<Type>::write
 
         const List<Field<Type>>& fieldVals = valueSets[setI];
 
-        forAll(fieldVals, i)
+        for (const Field<Type>& vals : fieldVals)
         {
-            const Field<Type>& vals = fieldVals[i];
-
             forAll(vals, j)
             {
-                if (j != 0)
+                if (j)
                 {
                     os  << ' ';
                 }

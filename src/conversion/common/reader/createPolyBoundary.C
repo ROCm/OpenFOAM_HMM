@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -320,7 +322,7 @@ void Foam::meshReader::createPolyBoundary()
 
     // check the mesh for face mismatch
     // (faces addressed once or more than twice)
-    labelList markupFaces(meshFaces_.size(), 0);
+    labelList markupFaces(meshFaces_.size(), Zero);
 
     forAll(cellPolys_, celli)
     {

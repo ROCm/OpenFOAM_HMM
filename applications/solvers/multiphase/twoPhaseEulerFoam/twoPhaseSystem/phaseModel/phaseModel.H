@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,6 +208,18 @@ public:
         tmp<volScalarField> kappa() const
         {
             return thermo_->kappa();
+        }
+
+         //- Thermal diffusivity for energy of mixture [kg/m/s]
+        tmp<volScalarField> alphahe() const
+        {
+            return thermo_->alphahe();
+        }
+
+        //- Thermal diffusivity for energy of mixture for patch [kg/m/s]
+        tmp<scalarField> alphahe(const label patchi) const
+        {
+            return thermo_->alphahe(patchi);
         }
 
         //- Return the laminar thermal conductivity

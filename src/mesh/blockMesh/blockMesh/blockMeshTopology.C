@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,19 +81,12 @@ void Foam::blockMesh::checkPatchLabels
         }
         else
         {
-            forAll(f, fp)
+            for (const label pointi : f)
             {
-                if (f[fp] < 0)
+                if (pointi < 0 || pointi >= points.size())
                 {
                     FatalIOErrorInFunction(source)
-                        << "Negative point label " << f[fp] << nl
-                        << "    on patch " << patchName << ", face " << facei
-                        << exit(FatalIOError);
-                }
-                else if (f[fp] >= points.size())
-                {
-                    FatalIOErrorInFunction(source)
-                        << "Point label " << f[fp]
+                        << "Point label " << pointi
                         << " out of range 0.." << points.size() - 1 << nl
                         << "    on patch " << patchName << ", face " << facei
                         << exit(FatalIOError);

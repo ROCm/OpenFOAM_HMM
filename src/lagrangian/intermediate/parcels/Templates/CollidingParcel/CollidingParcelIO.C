@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,10 +164,8 @@ void Foam::CollidingParcel<ParcelType>::readFields(CloudType& c)
 
     label i = 0;
 
-    forAllIter(typename CloudType, c, iter)
+    for (CollidingParcel<ParcelType>& p : c)
     {
-        CollidingParcel<ParcelType>& p = iter();
-
         p.f_ = f[i];
         p.angularMomentum_ = angularMomentum[i];
         p.torque_ = torque[i];
@@ -181,7 +181,7 @@ void Foam::CollidingParcel<ParcelType>::readFields(CloudType& c)
             collisionRecordsWallData[i]
         );
 
-        i++;
+        ++i;
     }
 }
 
@@ -243,11 +243,8 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
     );
 
     label i = 0;
-
-    forAllConstIter(typename CloudType, c, iter)
+    for (const CollidingParcel<ParcelType>& p : c)
     {
-        const CollidingParcel<ParcelType>& p = iter();
-
         f[i] = p.f();
         angularMomentum[i] = p.angularMomentum();
         torque[i] = p.torque();
@@ -262,7 +259,7 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
         collisionRecordsWallPRel[i] = p.collisionRecords().wallPRel();
         collisionRecordsWallData[i] = p.collisionRecords().wallData();
 
-        i++;
+        ++i;
     }
 
     const bool valid = (np > 0);
@@ -301,15 +298,13 @@ void Foam::CollidingParcel<ParcelType>::writeObjects
     IOField<vector>& torque(cloud::createIOField<vector>("torque", np, obr));
 
     label i = 0;
-    forAllConstIter(typename CloudType, c, iter)
+    for (const CollidingParcel<ParcelType>& p : c)
     {
-        const CollidingParcel<ParcelType>& p = iter();
-
         f[i] = p.f();
         angularMomentum[i] = p.angularMomentum();
         torque[i] = p.torque();
 
-        i++;
+        ++i;
     }
 }
 

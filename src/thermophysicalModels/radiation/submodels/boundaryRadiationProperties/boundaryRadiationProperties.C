@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "boundaryRadiationProperties.H"
+#include "radiationModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -63,6 +64,15 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 
     if (boundaryIO.typeHeaderOk<IOdictionary>(true))
     {
+        const radiationModel& radiation =
+            mesh.lookupObject<radiationModel>
+            (
+                "radiationProperties"
+            );
+
+        // Model number of bands
+        label nBands = radiation.nBands();
+
         const IOdictionary radiationDict(boundaryIO);
 
         forAll(mesh.boundary(), patchi)
@@ -75,8 +85,17 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
 
                 radBoundaryPropertiesPtrList_[patchi].reset
                 (
-                    new boundaryRadiationPropertiesPatch(pp, dict)
+                    boundaryRadiationPropertiesPatch::New(dict, pp)
                 );
+
+                if (nBands != radBoundaryPropertiesPtrList_[patchi]->nBands())
+                {
+                    FatalErrorInFunction
+                        << "Radiation bands : " <<  nBands << nl
+                        << "Bands on patch : " << patchi << " is "
+                        << radBoundaryPropertiesPtrList_[patchi]->nBands()
+                        << abort(FatalError);
+                }
             }
         }
     }
@@ -89,12 +108,19 @@ Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationProperties::emissivity
 (
     const label patchi,
-    const label bandi
+    const label bandi,
+    vectorField* incomingDirection,
+    scalarField* T
 ) const
 {
     if (!radBoundaryPropertiesPtrList_[patchi].empty())
     {
-        return radBoundaryPropertiesPtrList_[patchi]->emissivity(bandi);
+        return radBoundaryPropertiesPtrList_[patchi]->e
+        (
+            bandi,
+            incomingDirection,
+            T
+        );
     }
 
     FatalErrorInFunction
@@ -107,16 +133,53 @@ Foam::radiation::boundaryRadiationProperties::emissivity
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationProperties::absorptivity
+Foam::scalar Foam::radiation::boundaryRadiationProperties::faceEmissivity
 (
     const label patchi,
-    const label bandi
+    const label faceI,
+    const label bandi,
+    vector incomingDirection,
+    scalar T
 ) const
 {
     if (!radBoundaryPropertiesPtrList_[patchi].empty())
     {
-        return radBoundaryPropertiesPtrList_[patchi]->absorptivity(bandi);
+        return radBoundaryPropertiesPtrList_[patchi]->e
+        (
+            faceI,
+            bandi,
+            incomingDirection,
+            T
+        );
+    }
+
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return Zero;
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::absorptivity
+(
+    const label patchi,
+    const label bandi,
+    vectorField* incomingDirection,
+    scalarField* T
+) const
+{
+    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    {
+        return radBoundaryPropertiesPtrList_[patchi]->a
+        (
+            bandi,
+            incomingDirection,
+            T
+        );
     }
 
      FatalErrorInFunction
@@ -129,16 +192,53 @@ Foam::radiation::boundaryRadiationProperties::absorptivity
 }
 
 
+Foam::scalar Foam::radiation::boundaryRadiationProperties::faceAbsorptivity
+(
+    const label patchi,
+    const label faceI,
+    const label bandi,
+    vector incomingDirection,
+    scalar T
+) const
+{
+    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    {
+        return radBoundaryPropertiesPtrList_[patchi]->a
+        (
+            faceI,
+            bandi,
+            incomingDirection,
+            T
+        );
+    }
+
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return Zero;
+}
+
+
 Foam::tmp<Foam::scalarField>
 Foam::radiation::boundaryRadiationProperties::transmissivity
 (
     const label patchi,
-    const label bandi
+    const label bandi,
+    vectorField* incomingDirection,
+    scalarField* T
 ) const
 {
     if (!radBoundaryPropertiesPtrList_[patchi].empty())
     {
-        return radBoundaryPropertiesPtrList_[patchi]->transmissivity(bandi);
+        return radBoundaryPropertiesPtrList_[patchi]->t
+        (
+            bandi,
+            incomingDirection,
+            T
+        );
     }
 
     FatalErrorInFunction
@@ -148,19 +248,56 @@ Foam::radiation::boundaryRadiationProperties::transmissivity
         << exit(FatalError);
 
     return tmp<scalarField>::New();
+}
+
+
+Foam::scalar Foam::radiation::boundaryRadiationProperties::faceTransmissivity
+(
+    const label patchi,
+    const label faceI,
+    const label bandi,
+    vector incomingDirection,
+    scalar T
+) const
+{
+    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    {
+        return radBoundaryPropertiesPtrList_[patchi]->t
+        (
+            faceI,
+            bandi,
+            incomingDirection,
+            T
+        );
+    }
+
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return Zero;
 }
 
 
 Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationProperties::reflectivity
+Foam::radiation::boundaryRadiationProperties::diffReflectivity
 (
     const label patchi,
-    const label bandi
+    const label bandi,
+    vectorField* incomingDirection,
+    scalarField* T
 ) const
 {
     if (!radBoundaryPropertiesPtrList_[patchi].empty())
     {
-        return radBoundaryPropertiesPtrList_[patchi]->reflectivity(bandi);
+        return radBoundaryPropertiesPtrList_[patchi]->rDiff
+        (
+            bandi,
+            incomingDirection,
+            T
+        );
     }
 
     FatalErrorInFunction
@@ -173,10 +310,93 @@ Foam::radiation::boundaryRadiationProperties::reflectivity
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
+Foam::scalar Foam::radiation::boundaryRadiationProperties::faceDiffReflectivity
+(
+    const label patchi,
+    const label faceI,
+    const label bandi,
+    vector incomingDirection,
+    scalar T
+) const
+{
+    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    {
+        return radBoundaryPropertiesPtrList_[patchi]->rDiff
+        (
+            faceI,
+            bandi,
+            incomingDirection,
+            T
+        );
+    }
 
-Foam::radiation::boundaryRadiationProperties::~boundaryRadiationProperties()
-{}
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return Zero;
+}
+
+
+Foam::tmp<Foam::scalarField>
+Foam::radiation::boundaryRadiationProperties::specReflectivity
+(
+    const label patchi,
+    const label bandi,
+    vectorField* incomingDirection,
+    scalarField* T
+) const
+{
+    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    {
+        return radBoundaryPropertiesPtrList_[patchi]->rSpec
+        (
+            bandi,
+            incomingDirection,
+            T
+        );
+    }
+
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return tmp<scalarField>::New();
+}
+
+
+Foam::scalar Foam::radiation::boundaryRadiationProperties::faceSpecReflectivity
+(
+    const label patchi,
+    const label faceI,
+    const label bandi,
+    vector incomingDirection,
+    scalar T
+) const
+{
+    if (!radBoundaryPropertiesPtrList_[patchi].empty())
+    {
+        return radBoundaryPropertiesPtrList_[patchi]->rSpec
+        (
+            faceI,
+            bandi,
+            incomingDirection,
+            T
+        );
+    }
+
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return Zero;
+}
 
 
 // ************************************************************************* //

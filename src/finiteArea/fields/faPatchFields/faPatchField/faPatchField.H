@@ -94,6 +94,11 @@ class faPatchField
         //  the construction of the matrix
         bool updated_;
 
+        //- Optional patch type, used to allow specified boundary conditions
+        //  to be applied to constraint patches by providing the constraint
+        //  patch type as 'patchType'
+        word patchType_;
+
 
 public:
 
@@ -217,7 +222,18 @@ public:
         //  (does not set the patch field values)
         static tmp<faPatchField<Type>> New
         (
-            const word&,
+            const word& patchFieldType,
+            const word& actualPatchType,
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&
+        );
+
+        //- Return a pointer to a new patchField created on freestore given
+        //  patch and internal field
+        //  (does not set the patch field values)
+        static tmp<faPatchField<Type>> New
+        (
+            const word& patchFieldType,
             const faPatch&,
             const DimensionedField<Type, areaMesh>&
         );
@@ -278,6 +294,18 @@ public:
             const Field<Type>& primitiveField() const
             {
                 return internalField_;
+            }
+
+            //- Optional patch type
+            const word& patchType() const
+            {
+                return patchType_;
+            }
+
+            //- Optional patch type
+            word& patchType()
+            {
+                return patchType_;
             }
 
             //- Return the type of the calculated for of faPatchField

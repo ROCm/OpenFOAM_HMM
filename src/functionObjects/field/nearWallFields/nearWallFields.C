@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,8 +75,8 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
     {
         const fvPatch& patch = mesh_.boundary()[patchi];
 
-        vectorField nf(patch.nf());
-        vectorField faceCellCentres(patch.patch().faceCellCentres());
+        const vectorField nf(patch.nf());
+        const vectorField faceCellCentres(patch.patch().faceCellCentres());
         const labelUList& faceCells = patch.patch().faceCells();
 
         forAll(patch, patchFacei)
@@ -96,8 +98,6 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
 
             // Starting point and tet
             point start;
-            label tetFacei = -1;
-            label tetPti = -1;
             const label celli = faceCells[patchFacei];
 
             if (startInfo.hit())
@@ -105,22 +105,28 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
                 // Move start point slightly in so it is inside the tet
                 const face& f = mesh_.faces()[meshFacei];
 
-                tetFacei = meshFacei;
-                tetPti = (startInfo.index()+1) % f.size();
+                label tetFacei = meshFacei;
+                label tetPti = (startInfo.index()+1) % f.size();
 
                 start = startInfo.hitPoint();
 
-                //// Uncomment below to shift slightly in:
-                tetIndices tet(celli, meshFacei, tetPti);
+                // Uncomment below to shift slightly in:
+                tetIndices tet(celli, tetFacei, tetPti);
                 start =
                     (1.0 - 1e-6)*startInfo.hitPoint()
                   + 1e-6*tet.tet(mesh_).centre();
+
+                // Re-check that we have a valid location
+                mesh_.findTetFacePt(celli, start, tetFacei, tetPti);
+                if (tetFacei == -1)
+                {
+                    start = faceCellCentres[patchFacei];
+                }
             }
             else
             {
                 // Fallback: start tracking from neighbouring cell centre
                 start = faceCellCentres[patchFacei];
-                mesh_.findTetFacePt(celli, start, tetFacei, tetPti);
             }
 
             const point end = start-distance_*nf[patchFacei];
@@ -132,7 +138,7 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
                 (
                     mesh_,
                     start,
-                    -1,
+                    celli,
                     end,
                     globalWalls.toGlobal(nPatchFaces) // passive data
                 )
@@ -154,9 +160,8 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
         );
         InfoInFunction << "Dumping tracks to " << str.name() << endl;
 
-        forAllConstIter(Cloud<findCellParticle>, cloud, iter)
+        for (const findCellParticle& tp : cloud)
         {
-            const findCellParticle& tp = iter();
             str.write(linePointRef(tp.position(), tp.end()));
         }
     }
@@ -180,9 +185,8 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
     {
         start.setSize(nPatchFaces);
         nPatchFaces = 0;
-        forAllConstIter(Cloud<findCellParticle>, cloud, iter)
+        for (const findCellParticle& tp : cloud)
         {
-            const findCellParticle& tp = iter();
             start[nPatchFaces++] = tp.position();
         }
     }

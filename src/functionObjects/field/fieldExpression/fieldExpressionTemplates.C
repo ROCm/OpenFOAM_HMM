@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,18 +40,16 @@ bool Foam::functionObjects::fieldExpression::foundObject
     {
         return true;
     }
-    else
-    {
-        if (debug || verbose)
-        {
-            Warning
-                << "    functionObjects::" << type() << " " << this->name()
-                << " cannot find required object " << name << " of type "
-                << Type::typeName << endl;
-        }
 
-        return false;
+    if (debug || verbose)
+    {
+        Warning
+            << "    functionObjects::" << type() << " " << this->name()
+            << " cannot find required object " << name << " of type "
+            << Type::typeName << endl;
     }
+
+    return false;
 }
 
 

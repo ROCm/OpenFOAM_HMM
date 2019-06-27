@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +37,13 @@ inline Foam::UniformField<Type>::UniformField(const Type& value)
 
 
 template<class Type>
+inline Foam::UniformField<Type>::operator Type() const
+{
+    return value_;
+}
+
+
+template<class Type>
 inline Type Foam::UniformField<Type>::operator[](const label) const
 {
     return value_;
@@ -47,5 +56,66 @@ inline Foam::UniformField<Type> Foam::UniformField<Type>::field() const
     return UniformField(value_);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+inline UniformField<Type> min
+(
+    const UniformField<Type>& u1,
+    const UniformField<Type>& u2
+)
+{
+    return UniformField<Type>(min(u1.operator Type(), u2.operator Type()));
+}
+
+
+template<class Type, class OtherType>
+inline OtherType min(const UniformField<Type>& u, const OtherType& o)
+{
+    return min(u.operator Type(), o);
+}
+
+
+template<class Type, class OtherType>
+inline OtherType min(const OtherType& o, const UniformField<Type>& u)
+{
+    return min(o, u.operator Type());
+}
+
+
+template<class Type>
+inline UniformField<Type> max
+(
+    const UniformField<Type>& u1,
+    const UniformField<Type>& u2
+)
+{
+    return UniformField<Type>(max(u1.operator Type(), u2.operator Type()));
+}
+
+
+template<class Type, class OtherType>
+inline OtherType max(const UniformField<Type>& u, const OtherType& o)
+{
+    return max(u.operator Type(), o);
+}
+
+
+template<class Type, class OtherType>
+inline OtherType max(const OtherType& o, const UniformField<Type>& u)
+{
+    return max(o, u.operator Type());
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

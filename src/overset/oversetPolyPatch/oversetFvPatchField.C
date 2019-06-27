@@ -37,7 +37,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    semiImplicitOversetFvPatchField<Type>(p, iF)
+    zeroGradientFvPatchField<Type>(p, iF),
+    oversetPatch_(refCast<const oversetFvPatch>(p))
 {}
 
 
@@ -50,7 +51,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    semiImplicitOversetFvPatchField<Type>(ptf, p, iF, mapper)
+    zeroGradientFvPatchField<Type>(ptf, p, iF, mapper),
+    oversetPatch_(refCast<const oversetFvPatch>(p))
 {}
 
 
@@ -62,7 +64,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const dictionary& dict
 )
 :
-    semiImplicitOversetFvPatchField<Type>(p, iF, dict)
+    zeroGradientFvPatchField<Type>(p, iF, dict),
+    oversetPatch_(refCast<const oversetFvPatch>(p, dict))
 {}
 
 
@@ -72,7 +75,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const oversetFvPatchField<Type>& ptf
 )
 :
-    semiImplicitOversetFvPatchField<Type>(ptf)
+    zeroGradientFvPatchField<Type>(ptf),
+    oversetPatch_(ptf.oversetPatch_)
 {}
 
 
@@ -83,7 +87,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    semiImplicitOversetFvPatchField<Type>(ptf, iF)
+    zeroGradientFvPatchField<Type>(ptf, iF),
+    oversetPatch_(ptf.oversetPatch_)
 {}
 
 
@@ -168,7 +173,7 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
         {
             const dictionary* dictPtr
             (
-                fvSchemes.subDictPtr("oversetInterpolationSuppressed")
+                fvSchemes.findDict("oversetInterpolationSuppressed")
             );
 
             const wordHashSet& suppress =
@@ -212,78 +217,11 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
 
 
 template<class Type>
-void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
-(
-    scalarField& result,
-    const bool add,
-    const scalarField& psiInternal,
-    const scalarField& coeffs,
-    const direction cmpt,
-    const Pstream::commsTypes
-) const
+void Foam::oversetFvPatchField<Type>::write(Ostream& os) const
 {
-    // Add remote values
-
-    const oversetFvPatch& ovp = this->oversetPatch_;
-
-    if (ovp.master())
-    {
-        const fvMesh& mesh = this->patch().boundaryMesh().mesh();
-
-        // Try to find out if the solve routine comes from the mesh
-        // TBD. This should be cleaner.
-        if (&mesh.lduAddr() == &mesh.fvMesh::lduAddr())
-        {
-            return;
-        }
-
-        const labelListList& stencil = ovp.stencil();
-
-        if (stencil.size() != psiInternal.size())
-        {
-            FatalErrorInFunction << "psiInternal:" << psiInternal.size()
-                << " stencil:" << stencil.size() << exit(FatalError);
-        }
-
-        const mapDistribute& map = ovp.cellInterpolationMap();
-        const List<scalarList>& wghts = ovp.cellInterpolationWeights();
-        const labelList& cellIDs = ovp.interpolationCells();
-        const scalarList& factor = ovp.cellInterpolationWeight();
-        const scalarField& normalisation = ovp.normalisation();
-
-
-        // Since we're inside initEvaluate/evaluate there might be processor
-        // comms underway. Change the tag we use.
-        scalarField work(psiInternal);
-        map.mapDistributeBase::distribute(work, UPstream::msgType()+1);
-
-        forAll(cellIDs, i)
-        {
-            label celli = cellIDs[i];
-
-            const scalarList& w = wghts[celli];
-            const labelList& nbrs = stencil[celli];
-            scalar f = factor[celli];
-            const scalar norm = normalisation[celli];
-
-            // Add the non-local matrix contribution to psi. Note that the
-            // matrix coefficients are -weights
-
-            if (add)
-            {
-                f = -1.0*f;
-            }
-
-            forAll(nbrs, nbrI)
-            {
-                label slotI = nbrs[nbrI];
-                if (slotI >= psiInternal.size())
-                {
-                    result[celli] += f*norm*w[nbrI]*work[slotI];
-                }
-            }
-        }
-    }
+    zeroGradientFvPatchField<Type>::write(os);
+    // Make sure to write the value for ease of postprocessing.
+    this->writeEntry("value", os);
 }
 
 

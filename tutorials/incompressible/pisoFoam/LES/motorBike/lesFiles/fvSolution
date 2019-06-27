@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -33,6 +33,15 @@ solvers
     {
         $p;
         relTol          0;
+
+        // Explicit specify solver for coarse-level correction to override
+        // solution tolerance
+        coarsestLevelCorr
+        {
+            solver          PCG;
+            preconditioner  DIC;
+            relTol          0.05;
+        }
     }
 
     "(U|k|B|nuTilda)"

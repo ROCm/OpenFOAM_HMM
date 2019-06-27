@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,6 +57,24 @@ void Foam::coordinateRotations::axisAngle::checkSpec()
 }
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::tensor Foam::coordinateRotations::axisAngle::rotation
+(
+    const vector& axis,
+    const scalar angle,
+    bool degrees
+)
+{
+    if (mag(angle) < VSMALL || mag(axis) < SMALL)
+    {
+        return sphericalTensor::I;  // identity rotation
+    }
+
+    return quaternion(axis, (degrees ? degToRad(angle) : angle)).R();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::coordinateRotations::axisAngle::axisAngle()
@@ -106,6 +124,22 @@ Foam::coordinateRotations::axisAngle::axisAngle
 }
 
 
+Foam::coordinateRotations::axisAngle::axisAngle
+(
+    const vector::components axis,
+    scalar angle,
+    bool degrees
+)
+:
+    coordinateRotation(),
+    axis_(Zero),
+    angle_(angle),
+    degrees_(degrees)
+{
+    axis_[axis] = 1;
+}
+
+
 Foam::coordinateRotations::axisAngle::axisAngle(const dictionary& dict)
 :
     axisAngle
@@ -128,12 +162,7 @@ void Foam::coordinateRotations::axisAngle::clear()
 
 Foam::tensor Foam::coordinateRotations::axisAngle::R() const
 {
-    if (mag(angle_) < VSMALL || mag(axis_) < SMALL)
-    {
-        return sphericalTensor::I; // identity rotation
-    }
-
-    return quaternion(axis_, (degrees_ ? degToRad(angle_) : angle_)).R();
+    return rotation(axis_, angle_, degrees_);
 }
 
 

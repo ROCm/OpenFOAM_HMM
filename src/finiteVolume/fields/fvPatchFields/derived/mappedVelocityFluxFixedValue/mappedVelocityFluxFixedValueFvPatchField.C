@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,7 +170,7 @@ void Foam::mappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
         case mappedPolyPatch::NEARESTFACE:
         {
             vectorField allUValues(nbrMesh.nFaces(), Zero);
-            scalarField allPhiValues(nbrMesh.nFaces(), 0.0);
+            scalarField allPhiValues(nbrMesh.nFaces(), Zero);
 
             forAll(UField.boundaryField(), patchi)
             {

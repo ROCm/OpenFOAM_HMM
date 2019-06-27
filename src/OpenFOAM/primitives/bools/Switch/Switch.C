@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,18 +110,66 @@ Foam::Switch::switchType Foam::Switch::parse
 }
 
 
-Foam::Switch Foam::Switch::lookupOrAddToDict
+Foam::Switch Foam::Switch::getOrAddToDict
 (
     const word& name,
     dictionary& dict,
-    const Switch defaultValue
+    const Switch deflt
 )
 {
-    return dict.lookupOrAddDefault<Switch>(name, defaultValue);
+    return dict.getOrAdd<Switch>(name, deflt);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::Switch::Switch
+(
+    const word& key,
+    const dictionary& dict
+)
+{
+    const word str(dict.get<word>(key, keyType::LITERAL));
+
+    (*this) = parse(str, true);
+
+    if (!valid())
+    {
+        FatalIOErrorInFunction(dict)
+            << "Expected 'true/false', 'on/off' ... found " << str << nl
+            << exit(FatalIOError);
+    }
+}
+
+
+Foam::Switch::Switch
+(
+    const word& key,
+    const dictionary& dict,
+    const Switch deflt
+)
+:
+    Switch(deflt)
+{
+    const entry* eptr = dict.findEntry(key, keyType::LITERAL);
+
+    if (eptr)
+    {
+        const word str(eptr->get<word>());
+
+        (*this) = parse(str, true);
+
+        if (!valid())
+        {
+            // Found entry, but was bad input
+
+            FatalIOErrorInFunction(dict)
+                << "Expected 'true/false', 'on/off' ... found " << str << nl
+                << exit(FatalIOError);
+        }
+    }
+}
+
 
 Foam::Switch::Switch(Istream& is)
 {
@@ -131,19 +181,25 @@ Foam::Switch::Switch(Istream& is)
 
 bool Foam::Switch::valid() const noexcept
 {
-    return switch_ <= switchType::NONE;
+    return switch_ != switchType::INVALID;
+}
+
+
+Foam::Switch::switchType Foam::Switch::type() const noexcept
+{
+    return switchType(switch_);
 }
 
 
 const char* Foam::Switch::c_str() const noexcept
 {
-    return names[switch_];
+    return names[(switch_ & 0x0F)];
 }
 
 
 std::string Foam::Switch::str() const
 {
-    return names[switch_];
+    return names[(switch_ & 0x0F)];
 }
 
 

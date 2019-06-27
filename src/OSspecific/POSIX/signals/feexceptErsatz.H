@@ -20,8 +20,8 @@
 
 #ifndef feexceptErsatz_H
 #define feexceptErsatz_H
-#ifdef darwin
 
+#ifdef __APPLE__
 #include <fenv.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -68,7 +68,7 @@ inline int fedisableexcept(unsigned int excepts)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif  // darwin
+#endif  // __APPLE__
 #endif
 
 // ************************************************************************* //

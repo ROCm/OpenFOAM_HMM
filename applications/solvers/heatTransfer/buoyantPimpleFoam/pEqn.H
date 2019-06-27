@@ -72,8 +72,7 @@ while (pimple.correctNonOrthogonal())
 
 p = p_rgh + rho*gh;
 
-#include "rhoEqn.H"
-#include "compressibleContinuityErrs.H"
+pressureControl.limit(p);
 
 if (p_rgh.needReference())
 {
@@ -90,15 +89,19 @@ if (p_rgh.needReference())
     {
         p += (initialMass - fvc::domainIntegrate(psi*p))
             /compressibility;
-        thermo.correctRho(psi*p - psip0);
+        thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
         rho = thermo.rho();
         p_rgh = p - rho*gh;
+        p_rgh.correctBoundaryConditions();
     }
 }
 else
 {
-    thermo.correctRho(psi*p - psip0);
+    thermo.correctRho(psi*p - psip0, rhoMin, rhoMax);
 }
+
+#include "rhoEqn.H"
+#include "compressibleContinuityErrs.H"
 
 rho = thermo.rho();
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,10 +116,8 @@ bool Foam::medialAxisMeshMover::isMaxEdge
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -138,38 +138,55 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     //- Smooth surface normals
     const label nSmoothSurfaceNormals
     (
-        coeffDict.get<label>("nSmoothSurfaceNormals")
+        meshRefinement::get<label>
+        (
+            coeffDict,
+            "nSmoothSurfaceNormals",
+            dryRun_
+        )
     );
 
     // Note: parameter name changed
     // "minMedianAxisAngle" -> "minMedialAxisAngle" (DEC-2013)
     // but not previously reported.
-    scalar minMedialAxisAngleCos = Foam::cos
+    scalar minMedialAxisAngle(Zero);
+    if
     (
-        degToRad
+       !coeffDict.readCompat
         (
-            coeffDict.getCompat<scalar>
-            (
-                "minMedialAxisAngle", {{ "minMedianAxisAngle", 1712 }}
-            )
+            "minMedialAxisAngle",
+            {{ "minMedianAxisAngle", 1712 }},
+            minMedialAxisAngle,
+            keyType::REGEX,
+            !dryRun_
         )
-    );
+    )
+    {
+        FatalIOError
+            << "Entry '" << "minMedialAxisAngle"
+            << "' not found in dictionary " << coeffDict.name() << endl;
+    }
+
+    const scalar minMedialAxisAngleCos(Foam::cos(degToRad(minMedialAxisAngle)));
 
     //- Feature angle when to stop adding layers
-    const scalar featureAngle = coeffDict.get<scalar>("featureAngle");
+    const scalar featureAngle
+    (
+        meshRefinement::get<scalar>(coeffDict, "featureAngle", dryRun_)
+    );
 
     //- When to slip along wall
     const scalar slipFeatureAngle =
-        coeffDict.lookupOrDefault<scalar>
-        (
-            "slipFeatureAngle",
-            0.5*featureAngle
-        );
+    (
+        coeffDict.found("slipFeatureAngle")
+      ? coeffDict.get<scalar>("slipFeatureAngle")
+      : 0.5*featureAngle
+    );
 
     //- Smooth internal normals
     const label nSmoothNormals
     (
-        coeffDict.get<label>("nSmoothNormals")
+        meshRefinement::get<label>(coeffDict, "nSmoothNormals", dryRun_)
     );
 
     //- Number of edges walking out
@@ -681,10 +698,8 @@ bool Foam::medialAxisMeshMover::unmarkExtrusion
         patchDisp[patchPointI] = Zero;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1131,7 +1146,7 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
     // Count number of mesh edges using a point
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    labelList isolatedPoint(pp.nPoints(),0);
+    labelList isolatedPoint(pp.nPoints(), Zero);
 
     forAll(edges, edgeI)
     {
@@ -1222,10 +1237,11 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
 (
     const dictionary& dict,
     const List<labelPair>& baffles,
-    pointVectorField& pointDisplacement
+    pointVectorField& pointDisplacement,
+    const bool dryRun
 )
 :
-    externalDisplacementMeshMover(dict, baffles, pointDisplacement),
+    externalDisplacementMeshMover(dict, baffles, pointDisplacement, dryRun),
     adaptPatchIDs_(getFixedValueBCs(pointDisplacement)),
     adaptPatchPtr_(getPatch(mesh(), adaptPatchIDs_)),
     scale_
@@ -1251,7 +1267,8 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
         scale_,
         oldPoints_,
         adaptPatchIDs_,
-        dict
+        dict,
+        dryRun
     ),
     fieldSmoother_(mesh()),
     dispVec_
@@ -1341,23 +1358,15 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     // ~~~~~~~~~~~~~
 
     //- (lambda-mu) smoothing of internal displacement
-    const label nSmoothDisplacement =  coeffDict.lookupOrDefault
-    (
-        "nSmoothDisplacement",
-        0
-    );
+    const label nSmoothDisplacement =
+        coeffDict.lookupOrDefault("nSmoothDisplacement", 0);
 
     //- Layer thickness too big
-    const scalar maxThicknessToMedialRatio
-    (
-        coeffDict.get<scalar>("maxThicknessToMedialRatio")
-    );
+    const scalar maxThicknessToMedialRatio =
+        coeffDict.get<scalar>("maxThicknessToMedialRatio");
 
     //- Feature angle when to stop adding layers
-    const scalar featureAngle
-    (
-        coeffDict.get<scalar>("featureAngle")
-    );
+    const scalar featureAngle = coeffDict.get<scalar>("featureAngle");
 
     //- Stop layer growth where mesh wraps around sharp edge
     scalar layerTerminationAngle = coeffDict.lookupOrDefault<scalar>
@@ -1368,10 +1377,8 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     scalar minCosLayerTermination = Foam::cos(degToRad(layerTerminationAngle));
 
     //- Smoothing wanted patch thickness
-    const label nSmoothPatchThickness
-    (
-        coeffDict.get<label>("nSmoothThickness")
-    );
+    const label nSmoothPatchThickness =
+        coeffDict.get<label>("nSmoothThickness");
 
     //- Number of edges walking out
     const label nMedialAxisIter = coeffDict.lookupOrDefault<label>
@@ -1765,7 +1772,7 @@ bool Foam::medialAxisMeshMover::move
     scalarField zeroMinThickness;
     if (minThicknessName == "none")
     {
-        zeroMinThickness = scalarField(pp.nPoints(), 0.0);
+        zeroMinThickness = scalarField(pp.nPoints(), Zero);
     }
     const scalarField& minThickness =
     (

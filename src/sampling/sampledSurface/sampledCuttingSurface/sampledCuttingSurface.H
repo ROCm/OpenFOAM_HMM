@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,11 +166,11 @@ public:
             return cuttingSurface::surfFaces();
         }
 
-        //- Const access to per-face zone/region information
+        //- Per-face zone/region information
         //  Could instead return meshCells or cellZoneId of the meshCells.
         virtual const labelList& zoneIds() const
         {
-            return Foam::emptyLabelList;
+            return labelList::null();
         }
 
         //- Face area magnitudes

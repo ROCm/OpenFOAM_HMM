@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,7 @@ Description
         directory   | The output directory name     | no | postProcessing/NAME
         width       | Padding width for file name           | no  | 8
         decompose   | Decompose polyhedral cells            | no  | false
-        writeIds    | Write cell/patch ids as field         | no  | false
+        writeIds    | Write cell,patch,proc id fields       | no  | false
     \endtable
 
     \heading Output Selection
@@ -132,7 +132,7 @@ SourceFiles
 #ifndef functionObjects_vtkWrite_H
 #define functionObjects_vtkWrite_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "foamVtkInternalWriter.H"
 #include "foamVtkPatchWriter.H"
 #include "foamVtkSeriesWriter.H"
@@ -152,12 +152,9 @@ namespace functionObjects
 
 class vtkWrite
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
     // Private Data
-
-        //- Reference to the time database
-        const Time& time_;
 
         //- The output directory
         fileName outputDir_;
@@ -324,7 +321,7 @@ public:
         //- Write fields
         virtual bool write();
 
-        //- On end - provide feedback about disconnecting from catatyst.
+        //- On end - cleanup internal allocations
         virtual bool end();
 
         //- Update for changes of mesh

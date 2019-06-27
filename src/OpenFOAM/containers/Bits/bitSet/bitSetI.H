@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,7 +120,12 @@ inline Foam::bitSet::bitSet(const label n, const labelUList& locations)
 }
 
 
-inline Foam::bitSet::bitSet(const label n, const labelUIndList& locations)
+template<class Addr>
+inline Foam::bitSet::bitSet
+(
+    const label n,
+    const IndirectListBase<label, Addr>& locations
+)
 :
     bitSet(n)
 {
@@ -148,7 +153,11 @@ inline Foam::bitSet::bitSet(const labelUList& locations)
 }
 
 
-inline Foam::bitSet::bitSet(const labelUIndList& locations)
+template<class Addr>
+inline Foam::bitSet::bitSet
+(
+    const IndirectListBase<label, Addr>& locations
+)
 :
     bitSet()
 {
@@ -449,7 +458,7 @@ inline bool Foam::bitSet::none() const
 
 inline bool Foam::bitSet::uniform() const
 {
-    return (size() > 1 && (test(0) ? all() : none()));
+    return (size() == 1 || (size() > 1 && (test(0) ? all() : none())));
 }
 
 
@@ -537,7 +546,11 @@ inline Foam::label Foam::bitSet::set(const labelUList& locations)
 }
 
 
-inline Foam::label Foam::bitSet::set(const labelUIndList& locations)
+template<class Addr>
+inline Foam::label Foam::bitSet::set
+(
+    const IndirectListBase<label, Addr>& locations
+)
 {
     return setMany(locations.begin(), locations.end());
 }
@@ -549,7 +562,11 @@ inline Foam::label Foam::bitSet::unset(const labelUList& locations)
 }
 
 
-inline Foam::label Foam::bitSet::unset(const labelUIndList& locations)
+template<class Addr>
+inline Foam::label Foam::bitSet::unset
+(
+    const IndirectListBase<label, Addr>& locations
+)
 {
     return unset(locations.begin(), locations.end());
 }
@@ -635,10 +652,9 @@ inline unsigned int Foam::bitSet::operator[](const label i) const
 
 inline Foam::bitSet::reference Foam::bitSet::operator[](const label i)
 {
-    // Leave enabled during testing period (MAR-2018) ... and perhaps later too
-    // #ifdef FULLDEBUG
+    #ifdef FULLDEBUG
     checkIndex(i);
-    // #endif
+    #endif
     return reference(this, i);
 }
 
@@ -661,14 +677,6 @@ inline Foam::bitSet& Foam::bitSet::operator=(bitSet&& bitset)
 {
     transfer(bitset);
     return *this;
-}
-
-
-inline Foam::bitSet Foam::bitSet::operator~() const
-{
-    bitSet result(*this);
-    result.flip();
-    return result;
 }
 
 
@@ -697,6 +705,14 @@ inline Foam::bitSet& Foam::bitSet::operator-=(const bitSet& other)
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+inline Foam::bitSet Foam::operator~(const bitSet& bitset)
+{
+    bitSet result(bitset);
+    result.flip();
+    return result;
+}
+
 
 inline Foam::bitSet Foam::operator&(const bitSet& a, const bitSet& b)
 {

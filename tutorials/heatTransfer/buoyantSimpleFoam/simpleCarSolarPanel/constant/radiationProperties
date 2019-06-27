@@ -1,0 +1,97 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      radiationProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+radiation       on;
+
+radiationModel  solarLoad;
+
+solarLoadCoeffs
+{
+    sunDirectionModel   sunDirConstant;
+
+    skyCloudCoverFraction 0;
+
+    sunDirection        (-1 0.7 -1.5);
+
+    localStandardMeridian   -8;     // GMT offset (hours)
+    startDay                22;     // day of the year
+    startTime               10;     // time of the day (hours decimal)
+
+    longitude               -118.243683;    // longitude (degrees)
+    latitude                34.052235;      // latitude (degrees)
+
+    // Grid orientation
+    gridUp                  (0 0 1);
+    gridEast                (0 1 0);
+
+    // Energy spectrum
+    spectralDistribution (2 1);
+
+    // Solar model:
+    // sunLoadConstant-sunLoadFairWeatherConditions-SunLoadTheoreticalMaximum;
+    sunLoadModel sunLoadFairWeatherConditions;
+
+    // Sun load constant model
+    //directSolarRad  500;
+    //diffuseSolarRad 40;
+
+    // Fair Weather Conditions Model Constants.
+    // Calculate beta from the Solar calculator or input
+    A       2229.78119355;       // Apparent solar irradiation at air mass m = 0
+    B       0.142064516129;      // Atmospheric extinction coefficient
+
+    //beta    45;       // Solar altitude (in degrees) above the horizontal
+
+    // Theoretical maximum model constants
+    //Setrn       10;
+    //SunPrime    1;
+
+    // Ground reflectivity
+    groundReflectivity 0.2;
+
+    // Solar diffusivity constants
+    C       0.058064516129;  // Model constant
+
+    // Radiative flux coupling flags
+    solidCoupled    false;  // Couple through Qr the solid regions (default true)
+    wallCoupled     true;  // Couple through Qr wall patches (default false)
+
+        // Reflecting rays
+        useReflectedRays true;
+        reflecting
+        {
+            nPhi        10;
+            nTheta      10;
+        }
+
+    absorptionEmissionModel none;
+    scatterModel            none;
+    sootModel               none;
+
+}
+
+// Number of flow iterations per radiation iteration
+solverFreq 1;
+
+absorptionEmissionModel none;
+
+scatterModel    none;
+
+sootModel       none;
+
+
+// ************************************************************************* //

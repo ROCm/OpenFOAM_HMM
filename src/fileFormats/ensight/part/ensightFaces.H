@@ -51,7 +51,7 @@ class ensightFaces
 {
 public:
 
-    // Public data
+    // Public Data
 
         //- Addressable ensight element types
         enum elemType
@@ -62,7 +62,7 @@ public:
         };
 
         //- Number of element types (3)
-        static constexpr label nTypes = 3;
+        static constexpr int nTypes = 3;
 
         //- The ensight element type names
         static const char* elemNames[3];
@@ -97,9 +97,6 @@ private:
 
 
     // Private Member Functions
-
-        //- Simple classifier
-        inline static elemType whatType(const face& f);
 
         //- Low-level internal addition routine
         inline void add(const face& f, const label id, const bool flip = false);

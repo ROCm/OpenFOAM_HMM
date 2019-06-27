@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -180,7 +180,7 @@ Foam::faMeshDecomposition::faMeshDecomposition
     faceToProc_(nFaces()),
     procFaceLabels_(nProcs_),
     procMeshEdgesMap_(nProcs_),
-    procNInternalEdges_(nProcs_, 0),
+    procNInternalEdges_(nProcs_, Zero),
     procPatchEdgeLabels_(nProcs_),
     procPatchPointAddressing_(nProcs_),
     procPatchEdgeAddressing_(nProcs_),
@@ -435,59 +435,55 @@ void Foam::faMeshDecomposition::decomposeMesh()
                 // inside boundaries for the owner processor and try to find
                 // this inter-processor patch.
 
-                const label ownerProc = faceToProc_[owner[edgeI]];
-                const label neighbourProc = faceToProc_[neighbour[edgeI]];
-
-                SLList<label>::iterator curInterProcBdrsOwnIter =
-                    interProcBoundaries[ownerProc].begin();
-
-                SLList<SLList<label>>::iterator curInterProcBEdgesOwnIter =
-                    interProcBEdges[ownerProc].begin();
-
                 bool interProcBouFound = false;
+
+                const label ownProc = faceToProc_[owner[edgeI]];
+                const label neiProc = faceToProc_[neighbour[edgeI]];
+
+                auto curInterProcBdrsOwnIter =
+                    interProcBoundaries[ownProc].cbegin();
+
+                auto curInterProcBEdgesOwnIter =
+                    interProcBEdges[ownProc].begin();
 
                 // WARNING: Synchronous SLList iterators
 
                 for
                 (
                     ;
-                    curInterProcBdrsOwnIter
-                 != interProcBoundaries[ownerProc].end()
-                 && curInterProcBEdgesOwnIter
-                 != interProcBEdges[ownerProc].end();
-                    ++curInterProcBdrsOwnIter, ++curInterProcBEdgesOwnIter
+                    curInterProcBdrsOwnIter.good()
+                 && curInterProcBEdgesOwnIter.good();
+                    ++curInterProcBdrsOwnIter,
+                    ++curInterProcBEdgesOwnIter
                 )
                 {
-                    if (curInterProcBdrsOwnIter() == neighbourProc)
+                    if (curInterProcBdrsOwnIter() == neiProc)
                     {
                         // the inter - processor boundary exists. Add the face
                         interProcBouFound = true;
 
+                        bool neighbourFound = false;
+
                         curInterProcBEdgesOwnIter().append(edgeI);
 
-                        SLList<label>::iterator curInterProcBdrsNeiIter =
-                            interProcBoundaries[neighbourProc].begin();
+                        auto curInterProcBdrsNeiIter =
+                            interProcBoundaries[neiProc].cbegin();
 
-                        SLList<SLList<label>>::iterator
-                            curInterProcBEdgesNeiIter =
-                            interProcBEdges[neighbourProc].begin();
-
-                        bool neighbourFound = false;
+                        auto curInterProcBEdgesNeiIter =
+                            interProcBEdges[neiProc].begin();
 
                         // WARNING: Synchronous SLList iterators
 
                         for
                         (
                             ;
-                            curInterProcBdrsNeiIter !=
-                            interProcBoundaries[neighbourProc].end()
-                         && curInterProcBEdgesNeiIter !=
-                            interProcBEdges[neighbourProc].end();
+                            curInterProcBdrsNeiIter.good()
+                         && curInterProcBEdgesNeiIter.good();
                             ++curInterProcBdrsNeiIter,
                             ++curInterProcBEdgesNeiIter
                         )
                         {
-                            if (curInterProcBdrsNeiIter() == ownerProc)
+                            if (curInterProcBdrsNeiIter() == ownProc)
                             {
                                 // boundary found. Add the face
                                 neighbourFound = true;
@@ -504,7 +500,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                                 ("faDomainDecomposition::decomposeMesh()")
                                 << "Inconsistency in inter - "
                                 << "processor boundary lists for processors "
-                                << ownerProc << " and " << neighbourProc
+                                << ownProc << " and " << neiProc
                                 << abort(FatalError);
                         }
                     }
@@ -520,12 +516,13 @@ void Foam::faMeshDecomposition::decomposeMesh()
                     // set the new addressing information
 
                     // owner
-                    interProcBoundaries[ownerProc].append(neighbourProc);
-                    interProcBEdges[ownerProc].append(SLList<label>(edgeI));
+                    interProcBoundaries[ownProc].append(neiProc);
+                    interProcBEdges[ownProc].append(SLList<label>(edgeI));
 
                     // neighbour
-                    interProcBoundaries[neighbourProc].append(ownerProc);
-                    interProcBEdges[neighbourProc].append
+                    interProcBoundaries[neiProc].append(ownProc);
+                    interProcBEdges[neiProc]
+                        .append
                         (
                             SLList<label>(edgeI)
                         );
@@ -624,64 +621,59 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
                         cyclicParallel_ = true;
 
-                        label ownerProc = faceToProc_[firstEdgeFaces[edgeI]];
-                        label neighbourProc =
+                        bool interProcBouFound = false;
+
+                        const label ownProc =
+                            faceToProc_[firstEdgeFaces[edgeI]];
+                        const label neiProc =
                             faceToProc_[secondEdgeFaces[edgeI]];
 
-                        SLList<label>::iterator curInterProcBdrsOwnIter =
-                            interProcBoundaries[ownerProc].begin();
+                        auto curInterProcBdrsOwnIter =
+                            interProcBoundaries[ownProc].cbegin();
 
-                        SLList<SLList<label>>::iterator
-                            curInterProcBEdgesOwnIter =
-                            interProcBEdges[ownerProc].begin();
-
-                        bool interProcBouFound = false;
+                        auto curInterProcBEdgesOwnIter =
+                            interProcBEdges[ownProc].begin();
 
                         // WARNING: Synchronous SLList iterators
 
                         for
                         (
                             ;
-                            curInterProcBdrsOwnIter !=
-                            interProcBoundaries[ownerProc].end()
-                         && curInterProcBEdgesOwnIter !=
-                            interProcBEdges[ownerProc].end();
+                            curInterProcBdrsOwnIter.good()
+                         && curInterProcBEdgesOwnIter.good();
                             ++curInterProcBdrsOwnIter,
                             ++curInterProcBEdgesOwnIter
                         )
                         {
-                            if (curInterProcBdrsOwnIter() == neighbourProc)
+                            if (curInterProcBdrsOwnIter() == neiProc)
                             {
                                 // the inter - processor boundary exists.
                                 // Add the face
                                 interProcBouFound = true;
 
-                                curInterProcBEdgesOwnIter().append
-                                    (patchStart + edgeI);
-
-                                SLList<label>::iterator curInterProcBdrsNeiIter
-                                   = interProcBoundaries[neighbourProc].begin();
-
-                                SLList<SLList<label>>::iterator
-                                    curInterProcBEdgesNeiIter =
-                                    interProcBEdges[neighbourProc].begin();
-
                                 bool neighbourFound = false;
+
+                                curInterProcBEdgesOwnIter()
+                                    .append(patchStart + edgeI);
+
+                                auto curInterProcBdrsNeiIter
+                                   = interProcBoundaries[neiProc].cbegin();
+
+                                auto curInterProcBEdgesNeiIter =
+                                    interProcBEdges[neiProc].begin();
 
                                 // WARNING: Synchronous SLList iterators
 
                                 for
                                 (
                                     ;
-                                    curInterProcBdrsNeiIter
-                                   != interProcBoundaries[neighbourProc].end()
-                                 && curInterProcBEdgesNeiIter
-                                   != interProcBEdges[neighbourProc].end();
+                                    curInterProcBdrsNeiIter.good()
+                                 && curInterProcBEdgesNeiIter.good();
                                     ++curInterProcBdrsNeiIter,
                                     ++curInterProcBEdgesNeiIter
                                 )
                                 {
-                                    if (curInterProcBdrsNeiIter() == ownerProc)
+                                    if (curInterProcBdrsNeiIter() == ownProc)
                                     {
                                         // boundary found. Add the face
                                         neighbourFound = true;
@@ -705,7 +697,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
                                         "faDomainDecomposition::decomposeMesh()"
                                     )   << "Inconsistency in inter-processor "
                                         << "boundary lists for processors "
-                                        << ownerProc << " and " << neighbourProc
+                                        << ownProc << " and " << neiProc
                                         << " in cyclic boundary matching"
                                         << abort(FatalError);
                                 }
@@ -722,15 +714,13 @@ void Foam::faMeshDecomposition::decomposeMesh()
                             // set the new addressing information
 
                             // owner
-                            interProcBoundaries[ownerProc]
-                                .append(neighbourProc);
-                            interProcBEdges[ownerProc]
+                            interProcBoundaries[ownProc].append(neiProc);
+                            interProcBEdges[ownProc]
                                 .append(SLList<label>(patchStart + edgeI));
 
                             // neighbour
-                            interProcBoundaries[neighbourProc]
-                               .append(ownerProc);
-                            interProcBEdges[neighbourProc]
+                            interProcBoundaries[neiProc].append(ownProc);
+                            interProcBEdges[neiProc]
                                .append
                                 (
                                     SLList<label>
@@ -745,13 +735,13 @@ void Foam::faMeshDecomposition::decomposeMesh()
                     else
                     {
                         // This cyclic edge remains on the processor
-                        label ownerProc = faceToProc_[firstEdgeFaces[edgeI]];
+                        label ownProc = faceToProc_[firstEdgeFaces[edgeI]];
 
                         // add the edge
-                        procEdgeList[ownerProc].append(patchStart + edgeI);
+                        procEdgeList[ownProc].append(patchStart + edgeI);
 
                         // increment the number of edges for this patch
-                        procPatchSize_[ownerProc][patchI]++;
+                        procPatchSize_[ownProc][patchI]++;
 
                         // Note: I cannot add the other side of the cyclic
                         // boundary here because this would violate the order.
@@ -771,14 +761,14 @@ void Foam::faMeshDecomposition::decomposeMesh()
                     )
                     {
                         // This cyclic edge remains on the processor
-                        label ownerProc = faceToProc_[firstEdgeFaces[edgeI]];
+                        label ownProc = faceToProc_[firstEdgeFaces[edgeI]];
 
                         // add the second edge
-                        procEdgeList[ownerProc].append
+                        procEdgeList[ownProc].append
                             (patchStart + cycOffset + edgeI);
 
                         // increment the number of edges for this patch
-                        procPatchSize_[ownerProc][patchI]++;
+                        procPatchSize_[ownProc][patchI]++;
                     }
                 }
             }
@@ -806,15 +796,9 @@ void Foam::faMeshDecomposition::decomposeMesh()
             // calculate the size
             label nEdgesOnProcessor = curProcEdges.size();
 
-            for
-            (
-                SLList<SLList<label>>::iterator curInterProcBEdgesIter =
-                    interProcBEdges[procI].begin();
-                curInterProcBEdgesIter != interProcBEdges[procI].end();
-                ++curInterProcBEdgesIter
-            )
+            for (const auto& bedges : interProcBEdges[procI])
             {
-                nEdgesOnProcessor += curInterProcBEdgesIter().size();
+                nEdgesOnProcessor += bedges.size();
             }
 
             curProcEdgeAddressing.setSize(nEdgesOnProcessor);
@@ -830,16 +814,11 @@ void Foam::faMeshDecomposition::decomposeMesh()
             // Add internal and boundary edges
             // Remember to increment the index by one such that the
             // turning index works properly.
-            for
-            (
-                SLList<label>::iterator curProcEdgeIter = curProcEdges.begin();
-                curProcEdgeIter != curProcEdges.end();
-                ++curProcEdgeIter
-            )
+            for (const label procEdgei : curProcEdges)
             {
-                curProcEdgeAddressing[nEdges] = curProcEdgeIter();
-//                 curProcEdgeAddressing[nEdges] = curProcEdgeIter() + 1;
-                nEdges++;
+                curProcEdgeAddressing[nEdges] = procEdgei;
+//                 curProcEdgeAddressing[nEdges] = procEdgei + 1;
+                ++nEdges;
             }
 
             // Add inter-processor boundary edges. At the beginning of each
@@ -862,18 +841,19 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
             label nProcPatches = 0;
 
-            SLList<label>::iterator curInterProcBdrsIter =
-                interProcBoundaries[procI].begin();
+            auto curInterProcBdrsIter =
+                interProcBoundaries[procI].cbegin();
 
-            SLList<SLList<label>>::iterator curInterProcBEdgesIter =
-                interProcBEdges[procI].begin();
+            auto curInterProcBEdgesIter =
+                interProcBEdges[procI].cbegin();
 
             for
             (
                 ;
-                curInterProcBdrsIter != interProcBoundaries[procI].end()
-             && curInterProcBEdgesIter != interProcBEdges[procI].end();
-                ++curInterProcBdrsIter, ++curInterProcBEdgesIter
+                curInterProcBdrsIter.good()
+             && curInterProcBEdgesIter.good();
+                ++curInterProcBdrsIter,
+                ++curInterProcBEdgesIter
             )
             {
                 curProcNeighbourProcessors[nProcPatches] =
@@ -889,37 +869,31 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
                 // add faces for this processor boundary
 
-                for
-                (
-                    SLList<label>::iterator curEdgesIter =
-                        curInterProcBEdgesIter().begin();
-                    curEdgesIter != curInterProcBEdgesIter().end();
-                    ++curEdgesIter
-                )
+                for (const label edgei : *curInterProcBEdgesIter)
                 {
                     // add the edges
 
                     // Remember to increment the index by one such that the
                     // turning index works properly.
-                    if (faceToProc_[owner[curEdgesIter()]] == procI)
+                    if (faceToProc_[owner[edgei]] == procI)
                     {
-                        curProcEdgeAddressing[nEdges] = curEdgesIter();
-//                      curProcEdgeAddressing[nEdges] = curEdgesIter() + 1;
+                        curProcEdgeAddressing[nEdges] = edgei;
+//                      curProcEdgeAddressing[nEdges] = edgei + 1;
                     }
                     else
                     {
                         // turning edge
-                        curProcEdgeAddressing[nEdges] = curEdgesIter();
-//                      curProcEdgeAddressing[nEdges] = -(curEdgesIter() + 1);
+                        curProcEdgeAddressing[nEdges] = edgei;
+//                      curProcEdgeAddressing[nEdges] = -(edgei + 1);
                     }
 
                     // increment the size
-                    curSize++;
+                    ++curSize;
 
-                    nEdges++;
+                    ++nEdges;
                 }
 
-                nProcPatches++;
+                ++nProcPatches;
             }
         }
     }
@@ -991,7 +965,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
     // Memory management
     {
-        labelList pointsUsage(nPoints(), 0);
+        labelList pointsUsage(nPoints(), Zero);
 
         // Globally shared points are the ones used by more than 2 processors
         // Size the list approximately and gather the points

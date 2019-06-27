@@ -63,7 +63,7 @@ MultiComponentPhaseModel
         ).ptr()
     );
 
-    if (thermoPtr_->composition().species().size() == 0)
+    if (thermoPtr_->composition().species().empty())
     {
         FatalErrorInFunction
             << " The selected thermo is pure. Use a multicomponent thermo."
@@ -72,7 +72,7 @@ MultiComponentPhaseModel
 
     species_ = thermoPtr_->composition().species();
 
-    inertIndex_ = species_[thermoPtr_->getWord("inertSpecie")];
+    inertIndex_ = species_[thermoPtr_().template get<word>("inertSpecie")];
 
     X_.setSize(thermoPtr_->composition().species().size());
 
@@ -103,6 +103,7 @@ MultiComponentPhaseModel
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 
 template<class BasePhaseModel, class phaseThermo>
 void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>
@@ -190,7 +191,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     const dictionary& MULEScontrols = mesh.solverDict(alpha1.name());
 
-    scalar cAlpha(MULEScontrols.get<scalar>("cYi"));
+    scalar cAlpha(readScalar(MULEScontrols.lookup("cYi")));
 
     PtrList<surfaceScalarField> phiYiCorrs(species_.size());
     const surfaceScalarField& phi = this->fluid().phi();
@@ -201,9 +202,9 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
     surfaceScalarField phir(0.0*phi);
 
-    forAllConstIters(this->fluid().phases(),iter2)
+    forAllConstIter(phaseSystem::phaseModelTable,this->fluid().phases(),iter2)
     {
-        const volScalarField& alpha2 = iter2();
+        const volScalarField& alpha2 = iter2()();
         if (&alpha2 == &alpha1)
         {
             continue;
@@ -250,10 +251,13 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
 
             surfaceScalarField& phiYiCorr = phiYiCorrs[i];
 
-            forAllConstIters(this->fluid().phases(), iter2)
+            forAllConstIter
+            (
+                phaseSystem::phaseModelTable, this->fluid().phases(), iter2
+            )
             {
                 //const volScalarField& alpha2 = iter2()().oldTime();
-                const volScalarField& alpha2 = iter2();
+                const volScalarField& alpha2 = iter2()();
 
                 if (&alpha2 == &alpha1)
                 {
@@ -298,8 +302,8 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
                 phiYiCorr,
                 Sp[i],
                 Su[i],
-                1,
-                0,
+                oneField(),
+                zeroField(),
                 true
             );
         }
@@ -354,8 +358,8 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
                         phiYiCorr,
                         Sp[i],
                         Su[i],
-                        1,
-                        0
+                        oneField(),
+                        zeroField()
                     );
                 }
             }
@@ -369,8 +373,8 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
                     phiYiCorr,
                     Sp[i],
                     Su[i],
-                    1,
-                    0
+                    oneField(),
+                    zeroField()
                 );
             }
             Yt += Yi;

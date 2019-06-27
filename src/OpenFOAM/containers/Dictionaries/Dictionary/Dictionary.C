@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,17 +48,15 @@ Foam::Dictionary<T>::Dictionary(const Dictionary& dict)
 template<class T>
 bool Foam::Dictionary<T>::erase(const word& keyword)
 {
-    T* tPtr = this->remove(keyword);
+    T* ptr = this->remove(keyword);
 
-    if (tPtr)
+    if (ptr)
     {
-        delete tPtr;
+        delete ptr;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

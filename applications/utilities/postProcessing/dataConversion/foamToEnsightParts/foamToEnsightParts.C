@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,8 +96,8 @@ Note
 #include "ensightCase.H"
 #include "ensightGeoFile.H"
 #include "ensightParts.H"
-#include "ensightSerialOutput.H"
 #include "ensightOutputCloud.H"
+#include "ensightOutputVolField.H"
 #include "fvMeshSubsetProxy.H"
 
 // local files

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -271,7 +273,7 @@ Foam::mirrorFvMesh::mirrorFvMesh
     }
 
     // Mirror boundary faces patch by patch
-    labelList newPatchSizes(boundary().size(), 0);
+    labelList newPatchSizes(boundary().size(), Zero);
     labelList newPatchStarts(boundary().size(), -1);
 
     forAll(boundaryMesh(), patchi)

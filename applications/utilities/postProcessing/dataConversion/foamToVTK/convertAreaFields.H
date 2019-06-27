@@ -47,7 +47,7 @@ if (doFiniteArea)
         {
             faMeshPtr.reset(new faMesh(meshProxy.baseMesh()));
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             faMeshPtr.clear();
         }

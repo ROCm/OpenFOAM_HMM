@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,18 +46,19 @@ SourceFiles
 namespace Foam
 {
 
-#define MAXMIN(retType, type1, type2)              \
-                                                   \
-inline retType max(const type1 s1, const type2 s2) \
-{                                                  \
-    return (s1 > s2)? s1: s2;                      \
-}                                                  \
-                                                   \
-inline retType min(const type1 s1, const type2 s2) \
-{                                                  \
-    return (s1 < s2)? s1: s2;                      \
+#define MAXMIN(retType, type1, type2)                                          \
+                                                                               \
+/** \brief Floating/integral min. Use stdFoam::min() to preserve references */ \
+inline retType min(const type1 s1, const type2 s2)                             \
+{                                                                              \
+    return (s1 < s2) ? s1 : s2;                                                \
+}                                                                              \
+                                                                               \
+/** \brief Floating/integral max. Use stdFoam::max() to preserve references */ \
+inline retType max(const type1 s1, const type2 s2)                             \
+{                                                                              \
+    return (s2 < s1) ? s1 : s2;                                                \
 }
-
 
 MAXMIN(uint8_t, uint8_t, uint8_t)
 MAXMIN(uint16_t, uint16_t, uint16_t)

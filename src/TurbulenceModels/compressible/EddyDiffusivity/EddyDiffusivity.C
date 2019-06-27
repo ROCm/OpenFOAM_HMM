@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,13 +33,7 @@ template<class BasicTurbulenceModel>
 void Foam::EddyDiffusivity<BasicTurbulenceModel>::correctNut()
 {
     // Read Prt if provided
-    Prt_ = dimensioned<scalar>::lookupOrDefault
-    (
-        "Prt",
-        this->coeffDict(),
-        1.0
-    );
-
+    Prt_ = dimensionedScalar("Prt", dimless, 1.0, this->coeffDict());
     alphat_ = this->rho_*this->nut()/Prt_;
     alphat_.correctBoundaryConditions();
 }
@@ -99,10 +95,8 @@ bool Foam::EddyDiffusivity<BasicTurbulenceModel>::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +43,7 @@ filmModel() const
     HashTable<const filmModelType*> models
         = db().time().lookupClass<filmModelType>();
 
-    forAllConstIter(HashTable<const filmModelType*>, models, iter)
+    forAllConstIters(models, iter)
     {
         if (iter()->regionMesh().name() == filmRegionName_)
         {
@@ -50,7 +52,7 @@ filmModel() const
     }
 
     DynamicList<word> modelNames;
-    forAllConstIter(HashTable<const filmModelType*>, models, iter)
+    forAllConstIters(models, iter)
     {
         modelNames.append(iter()->regionMesh().name());
     }
@@ -72,7 +74,7 @@ pyrModel() const
     HashTable<const pyrolysisModelType*> models =
         db().time().lookupClass<pyrolysisModelType>();
 
-    forAllConstIter(HashTable<const pyrolysisModelType*>, models, iter)
+    forAllConstIters(models, iter)
     {
         if (iter()->regionMesh().name() == pyrolysisRegionName_)
         {
@@ -81,7 +83,7 @@ pyrModel() const
     }
 
     DynamicList<word> modelNames;
-    forAllConstIter(HashTable<const pyrolysisModelType*>, models, iter)
+    forAllConstIters(models, iter)
     {
         modelNames.append(iter()->regionMesh().name());
     }
@@ -261,15 +263,15 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::updateCoeffs()
 
     scalarField myKDelta(K*patch().deltaCoeffs());
 
-    scalarList Tfilm(patch().size(), 0.0);
-    scalarList htcwfilm(patch().size(), 0.0);
-    scalarList filmDelta(patch().size(), 0.0);
+    scalarList Tfilm(patch().size(), Zero);
+    scalarList htcwfilm(patch().size(), Zero);
+    scalarList filmDelta(patch().size(), Zero);
 
     const pyrolysisModelType& pyrolysis = pyrModel();
     const filmModelType& film = filmModel();
 
     // Obtain Rad heat (qr)
-    scalarField qr(patch().size(), 0.0);
+    scalarField qr(patch().size(), Zero);
 
     label coupledPatchi = -1;
     if (pyrolysisRegionName_ == mesh.name())

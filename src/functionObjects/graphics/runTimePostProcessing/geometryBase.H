@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,14 +25,15 @@ Class
     Foam::functionObjects::runTimePostPro::geometryBase
 
 Description
-    Base class for surface, text handling
+    Base class for surface, text handling etc.
 
     Dictionary controls
     \table
-        Property    | Description                          | Required | Default
-        visible     | Display the object                   | yes |
-        renderMode  | Shading (flat/gouraud/phong)         | no  | gouraud
-        opacity     | Object opacity                       | no  | 1.0
+        Property    | Description                           | Required | Default
+        visible     | Display the object                    | no  | yes
+        renderMode  | Shading (flat/gouraud/phong)          | no  | gouraud
+        opacity     | Object opacity                        | no  | 1.0
+        parallel    | Allow parallel rendering              | no  | true
     \endtable
 
 SourceFiles
@@ -51,7 +52,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward declarations
+// Forward Declarations (VTK)
 class vtkRenderer;
 class vtkActor;
 
@@ -60,7 +61,7 @@ namespace Foam
 namespace functionObjects
 {
 
-// Forward declarations
+// Forward Declarations
 class runTimePostProcessing;
 
 namespace runTimePostPro
@@ -73,11 +74,11 @@ namespace runTimePostPro
 
 class geometryBase
 {
-
 public:
 
-    // Public enumerations
+    // Public Enumerations
 
+        //- Surface shading types
         enum renderModeType
         {
             rmFlat,             //!< Flat shading
@@ -85,6 +86,7 @@ public:
             rmPhong             //!< Phong shading
         };
 
+        //- Names for surface shading types
         static const Enum<renderModeType> renderModeTypeNames;
 
 
@@ -95,11 +97,14 @@ protected:
         //- Reference to the parent function object
         const runTimePostProcessing& parent_;
 
-        //- Name
+        //- The surface name
         word name_;
 
         //- Visible flag
         bool visible_;
+
+        //- Allow parallel rendering
+        bool parallel_;
 
         //- Render mode
         renderModeType renderMode_;
@@ -111,7 +116,7 @@ protected:
         const HashPtrTable<Function1<vector>>& colours_;
 
 
-    // Protected functions
+    // Protected Functions
 
         //- Initialise actor
         void initialiseActor(vtkActor* actor) const;
@@ -124,6 +129,9 @@ protected:
 
 
 public:
+
+    //- Debug switch
+    static int debug;
 
     // Constructors
 
@@ -142,16 +150,27 @@ public:
 
     // Member Functions
 
-    // Access
-
         //- Return the reference to the parent function object
         const runTimePostProcessing& parent() const;
+
+        //- May need to gather geometry parts to render on single-processor
+        //  True when OpenFOAM is running in parallel but VTK is not.
+        bool needsCollective() const;
 
         //- Return the name
         const word& name() const;
 
         //- Return the visible flag
-        bool visible() const;
+        bool visible() const
+        {
+            return visible_;
+        }
+
+        //- Allow parallel rendering
+        bool parallel() const
+        {
+            return parallel_;
+        }
 
         //- Return the opacity
         scalar opacity(const scalar position) const;
@@ -160,7 +179,7 @@ public:
         const HashPtrTable<Function1<vector>>& colours() const;
 
 
-    // Scene interaction
+    // Scene Interaction
 
         //- Add geometry to scene
         virtual void addGeometryToScene
@@ -172,7 +191,7 @@ public:
         //- Update the actors
         virtual void updateActors(const scalar position) = 0;
 
-        //- Clear files used to create the object(s)
+        //- Clear any files used to create the object(s)
         virtual bool clear() = 0;
 };
 

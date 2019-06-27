@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,9 +80,6 @@ protected:
         //- Reference to the condition dictionary
         dictionary& conditionDict_;
 
-        //- Switch to send output to Info
-        Switch log_;
-
         //- Group index - if applied, all conditions in a group must be
         //  satisfied before condition is met
         label groupID_;
@@ -129,7 +128,7 @@ public:
     );
 
     //- Destructor
-    virtual ~runTimeCondition();
+    virtual ~runTimeCondition() = default;
 
     //- Selector
     static autoPtr<runTimeCondition> New
@@ -139,6 +138,11 @@ public:
         const dictionary& dict,
         stateFunctionObject& state
     );
+
+    // Public Data
+
+        //- Switch to send output to Info
+        Switch log;
 
 
     // Public Member Functions

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -234,6 +236,9 @@ Foam::label Foam::scotchDecomp::decomposeSerial
         }
     }
 
+    // Make repeatable
+    SCOTCH_randomReset();
+
     // Strategy
     // ~~~~~~~~
 
@@ -347,6 +352,14 @@ Foam::label Foam::scotchDecomp::decomposeSerial
             Info<< "scotchDecomp : Using procesor weights " << processorWeights
                 << endl;
         }
+        if (processorWeights.size() != nDomains_)
+        {
+            FatalIOErrorInFunction(coeffsDict_)
+                << "processorWeights not the same size"
+                << " as the wanted number of domains " << nDomains_
+                << exit(FatalIOError);
+        }
+
         check
         (
             SCOTCH_archCmpltw

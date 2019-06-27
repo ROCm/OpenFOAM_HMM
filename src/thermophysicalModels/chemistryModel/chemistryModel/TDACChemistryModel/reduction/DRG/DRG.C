@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +76,7 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
     const scalar p
 )
 {
-    scalarField c1(this->nSpecie_+2, 0.0);
+    scalarField c1(this->nSpecie_+2, Zero);
 
     for(label i=0; i<this->nSpecie_; i++)
     {
@@ -85,11 +87,11 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
     c1[this->nSpecie_+1] = p;
 
     // Compute the rAB matrix
-    RectangularMatrix<scalar> rABNum(this->nSpecie_,this->nSpecie_,0.0);
-    scalarField rABDen(this->nSpecie_,0.0);
+    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_, Zero);
+    scalarField rABDen(this->nSpecie_, Zero);
 
     // Number of initialized rAB for each lines
-    Field<label> NbrABInit(this->nSpecie_,0);
+    Field<label> NbrABInit(this->nSpecie_, Zero);
 
     // Position of the initialized rAB, -1 when not initialized
     RectangularMatrix<label> rABPos(this->nSpecie_, this->nSpecie_, -1);

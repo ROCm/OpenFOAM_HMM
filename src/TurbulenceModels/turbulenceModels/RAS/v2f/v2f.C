@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -262,7 +264,7 @@ v2f<BasicTurbulenceModel>::v2f
         this->mesh_
     ),
     v2Min_(dimensionedScalar("v2Min", v2_.dimensions(), SMALL)),
-    fMin_(dimensionedScalar("fMin", f_.dimensions(), 0.0))
+    fMin_(dimensionedScalar("fMin", f_.dimensions(), Zero))
 {
     bound(k_, this->kMin_);
     bound(epsilon_, this->epsilonMin_);
@@ -296,10 +298,8 @@ bool v2f<BasicTurbulenceModel>::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

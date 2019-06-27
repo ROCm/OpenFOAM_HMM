@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,15 +82,6 @@ inline Foam::autoPtr<T>::autoPtr(autoPtr<U>&& ap)
 :
     ptr_(ap.release())
 {}
-
-
-#ifdef Foam_autoPtr_copyConstruct
-template<class T>
-inline Foam::autoPtr<T>::autoPtr(const autoPtr<T>& ap) noexcept
-:
-    ptr_(const_cast<autoPtr<T>&>(ap).release())
-{}
-#endif
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -172,13 +165,6 @@ template<class T>
 inline void Foam::autoPtr<T>::reset(autoPtr<T>&& ap) noexcept
 {
     reset(ap.release());
-}
-
-
-template<class T>
-inline void Foam::autoPtr<T>::set(T* p) noexcept
-{
-    reset(p);
 }
 
 
@@ -286,15 +272,6 @@ inline void Foam::autoPtr<T>::operator=(autoPtr<U>&& ap) noexcept
         reset(ap.release());
     }
 }
-
-
-#ifdef Foam_autoPtr_copyAssign
-template<class T>
-inline void Foam::autoPtr<T>::operator=(const autoPtr<T>& ap) noexcept
-{
-    operator=(std::move(const_cast<autoPtr<T>&>(ap)));
-}
-#endif
 
 
 template<class T>

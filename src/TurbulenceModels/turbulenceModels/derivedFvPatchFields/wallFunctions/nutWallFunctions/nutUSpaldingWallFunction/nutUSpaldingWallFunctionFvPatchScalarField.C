@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,22 +50,62 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
             internalField().group()
         )
     );
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magGradU(mag(Uw.snGrad()));
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 
-    return max
+
+    // Calculate new viscosity
+    tmp<scalarField> tnutw
     (
-        scalar(0),
-        sqr(calcUTau(magGradU))/(magGradU + ROOTVSMALL) - nuw
+        max
+        (
+            scalar(0),
+            sqr(calcUTau(magGradU))/(magGradU + ROOTVSMALL) - nuw
+        )
     );
+
+    if (tolerance_ != 0.01)
+    {
+        // User-specified tolerance. Find out if current nut already satisfies
+        // eqns.
+
+        // Run ut for one iteration
+        scalarField err;
+        tmp<scalarField> UTau(calcUTau(magGradU, 1, err));
+
+        // Preserve nutw if the initial error (err) already lower than the
+        // tolerance.
+
+        scalarField& nutw = tnutw.ref();
+        forAll(err, facei)
+        {
+            if (err[facei] < tolerance_)
+            {
+                nutw[facei] = this->operator[](facei);
+            }
+        }
+    }
+    return tnutw;
 }
 
 
 tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 (
     const scalarField& magGradU
+) const
+{
+    scalarField err;
+    return calcUTau(magGradU, maxIter_, err);
+}
+
+
+tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
+(
+    const scalarField& magGradU,
+    const label maxIter,
+    scalarField& err
 ) const
 {
     const label patchi = patch().index();
@@ -78,7 +120,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
     );
     const scalarField& y = turbModel.y()[patchi];
 
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
 
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
@@ -86,17 +128,21 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
     const scalarField& nutw = *this;
 
-    tmp<scalarField> tuTau(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tuTau(new scalarField(patch().size(), Zero));
     scalarField& uTau = tuTau.ref();
+
+    err.setSize(uTau.size());
+    err = 0.0;
 
     forAll(uTau, facei)
     {
         scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
+        // Note: for exact restart seed with laminar viscosity only:
+        //scalar ut = sqrt(nuw[facei]*magGradU[facei]);
 
         if (ut > ROOTVSMALL)
         {
             int iter = 0;
-            scalar err = GREAT;
 
             do
             {
@@ -114,16 +160,45 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
                   + 1/E_*kUu*fkUu/ut;
 
                 scalar uTauNew = ut + f/df;
-                err = mag((ut - uTauNew)/ut);
+                err[facei] = mag((ut - uTauNew)/ut);
                 ut = uTauNew;
 
-            } while (ut > ROOTVSMALL && err > 0.01 && ++iter < 10);
+                //iterations_++;
+
+            } while
+            (
+                ut > ROOTVSMALL
+             && err[facei] > tolerance_
+             && ++iter < maxIter
+            );
 
             uTau[facei] = max(0.0, ut);
+
+            //invocations_++;
+            //if (iter > 1)
+            //{
+            //    nontrivial_++;
+            //}
+            //if (iter >= maxIter_)
+            //{
+            //    nonconvergence_++;
+            //}
         }
     }
 
     return tuTau;
+}
+
+
+void Foam::nutUSpaldingWallFunctionFvPatchScalarField::writeLocalEntries
+(
+    Ostream& os
+) const
+{
+    nutWallFunctionFvPatchScalarField::writeLocalEntries(os);
+
+    os.writeEntryIfDifferent<label>("maxIter", 10, maxIter_);
+    os.writeEntryIfDifferent<scalar>("tolerance", 0.01, tolerance_);
 }
 
 
@@ -136,7 +211,13 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF)
+    nutWallFunctionFvPatchScalarField(p, iF),
+    maxIter_(10),
+    tolerance_(0.01)
+    //invocations_(0),
+    //nontrivial_(0),
+    //nonconvergence_(0),
+    //iterations_(0)
 {}
 
 
@@ -149,7 +230,13 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
+    maxIter_(ptf.maxIter_),
+    tolerance_(ptf.tolerance_)
+    //invocations_(0),
+    //nontrivial_(0),
+    //nonconvergence_(0),
+    //iterations_(0)
 {}
 
 
@@ -161,7 +248,13 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF, dict)
+    nutWallFunctionFvPatchScalarField(p, iF, dict),
+    maxIter_(dict.lookupOrDefault<label>("maxIter", 10)),
+    tolerance_(dict.lookupOrDefault<scalar>("tolerance", 0.01))
+    //invocations_(0),
+    //nontrivial_(0),
+    //nonconvergence_(0),
+    //iterations_(0)
 {}
 
 
@@ -171,7 +264,13 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const nutUSpaldingWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    nutWallFunctionFvPatchScalarField(wfpsf)
+    nutWallFunctionFvPatchScalarField(wfpsf),
+    maxIter_(wfpsf.maxIter_),
+    tolerance_(wfpsf.tolerance_)
+    //invocations_(wfpsf.invocations_),
+    //nontrivial_(wfpsf.nontrivial_),
+    //nonconvergence_(wfpsf.nonconvergence_),
+    //iterations_(wfpsf.iterations_)
 {}
 
 
@@ -182,8 +281,35 @@ nutUSpaldingWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(wfpsf, iF)
+    nutWallFunctionFvPatchScalarField(wfpsf, iF),
+    maxIter_(wfpsf.maxIter_),
+    tolerance_(wfpsf.tolerance_)
+    //invocations_(0),
+    //nontrivial_(0),
+    //nonconvergence_(0),
+    //iterations_(0)
 {}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+nutUSpaldingWallFunctionFvPatchScalarField::
+~nutUSpaldingWallFunctionFvPatchScalarField()
+{
+    //if (debug)
+    //{
+    //    Info<< "nutUSpaldingWallFunctionFvPatchScalarField :"
+    //        << " total invocations:"
+    //        << returnReduce(invocations_, sumOp<label>())
+    //        << " total iterations:"
+    //        << returnReduce(iterations_, sumOp<label>())
+    //        << " total non-convergence:"
+    //        << returnReduce(nonconvergence_, sumOp<label>())
+    //        << " total non-trivial:"
+    //        << returnReduce(nontrivial_, sumOp<label>())
+    //        << endl;
+    //}
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -201,7 +327,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::yPlus() const
         )
     );
     const scalarField& y = turbModel.y()[patchi];
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,28 +152,14 @@ inline bool CGAL::indexedVertex<Gt, Vb>::pairPoint() const
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::ppMaster() const
 {
-    if (type_ > index_)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return (type_ > index_);
 }
 
 
 template<class Gt, class Vb>
 inline bool CGAL::indexedVertex<Gt, Vb>::ppSlave() const
 {
-    if (type_ >= 0 && type_ < index_)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return (type_ >= 0 && type_ < index_);
 }
 
 

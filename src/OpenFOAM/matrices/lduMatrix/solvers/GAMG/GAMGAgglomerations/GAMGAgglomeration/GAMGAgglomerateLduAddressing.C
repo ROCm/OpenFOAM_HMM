@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +72,7 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     label maxNnbrs = 10;
 
     // Number of faces for each coarse-cell
-    labelList cCellnFaces(nCoarseCells, 0);
+    labelList cCellnFaces(nCoarseCells, Zero);
 
     // Setup initial packed storage for coarse-cell faces
     labelList cCellFaces(maxNnbrs*nCoarseCells);
@@ -260,7 +262,11 @@ void Foam::GAMGAgglomeration::agglomerateLduAddressing
     // Get reference to fine-level interfaces
     const lduInterfacePtrsList& fineInterfaces = interfaceLevel(fineLevelIndex);
 
-    nPatchFaces_.set(fineLevelIndex, new labelList(fineInterfaces.size(), 0));
+    nPatchFaces_.set
+    (
+        fineLevelIndex,
+        new labelList(fineInterfaces.size(), Zero)
+    );
     labelList& nPatchFaces = nPatchFaces_[fineLevelIndex];
 
     patchFaceRestrictAddressing_.set
@@ -676,23 +682,23 @@ void Foam::GAMGAgglomeration::calculateRegionMaster
 
     forAll(procAgglomMap, proci)
     {
-        label coarseI = procAgglomMap[proci];
+        const label coarsei = procAgglomMap[proci];
 
-        Map<label>::iterator fnd = agglomToMaster.find(coarseI);
-        if (fnd == agglomToMaster.end())
+        auto iter = agglomToMaster.find(coarsei);
+        if (iter.found())
         {
-            agglomToMaster.insert(coarseI, proci);
+            iter.val() = min(iter.val(), proci);
         }
         else
         {
-            fnd() = min(fnd(), proci);
+            agglomToMaster.insert(coarsei, proci);
         }
     }
 
     masterProcs.setSize(agglomToMaster.size());
-    forAllConstIter(Map<label>, agglomToMaster, iter)
+    forAllConstIters(agglomToMaster, iter)
     {
-        masterProcs[iter.key()] = iter();
+        masterProcs[iter.key()] = iter.val();
     }
 
 
@@ -703,6 +709,7 @@ void Foam::GAMGAgglomeration::calculateRegionMaster
     // Get all processors agglomerating to the same coarse
     // processor
     agglomProcIDs = findIndices(procAgglomMap, myAgglom);
+
     // Make sure the master is the first element.
     const label index =
         agglomProcIDs.find(agglomToMaster[myAgglom]);

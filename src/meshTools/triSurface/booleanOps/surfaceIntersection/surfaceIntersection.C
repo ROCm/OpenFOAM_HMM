@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -982,7 +984,7 @@ void Foam::surfaceIntersection::joinDisconnected
     forAllConstIters(facePairToEdge_, iter)
     {
         const labelPair& twoFaces = iter.key();
-        const edge& e = iter.object();
+        const edge& e = iter.val();
 
         if (e.count() == 1)
         {
@@ -1012,7 +1014,7 @@ void Foam::surfaceIntersection::joinDisconnected
 
         forAllConstIters(mapping, iter)
         {
-            const auto& connect = iter.object();
+            const auto& connect = iter.val();
 
             if (connect.size() == 2)
             {
@@ -1553,7 +1555,7 @@ void Foam::surfaceIntersection::mergeEdges()
     //     // Additional safety, in case the edge was replaced?
     //     forAllIters(facePairToEdge_, iter)
     //     {
-    //         iter.object() = edgeNumbering[iter.object()];
+    //         iter.val() = edgeNumbering[iter.val()];
     //     }
     // }
 

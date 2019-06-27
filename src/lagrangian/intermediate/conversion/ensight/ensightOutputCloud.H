@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,12 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::ensightCloud
+InNamespace
+    Foam::ensightOutput
 
 Description
-    A collection of global functions for writing clouds as
-    ensight file content.
+    A collection of functions for writing clouds as ensight file content.
 
 SourceFiles
     ensightOutputCloud.C
@@ -45,14 +44,18 @@ SourceFiles
 
 namespace Foam
 {
+
 // Forward declarations
 class fvMesh;
 
-namespace ensightCloud
+namespace ensightOutput
 {
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
 //- Write cloud positions
-bool writePositions
+bool writeCloudPositions
 (
     const fvMesh& mesh,
     const word& cloudName,
@@ -84,7 +87,7 @@ bool writeCloudField
 );
 
 
-} // End namespace ensightCloud
+} // End namespace ensightOutput
 } // End namespace Foam
 
 

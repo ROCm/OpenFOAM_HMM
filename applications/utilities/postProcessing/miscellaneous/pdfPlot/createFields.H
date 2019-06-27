@@ -44,4 +44,4 @@
         filePtr.reset(new OFstream(fName));
     }
 
-    scalarField samples(nIntervals, 0);
+    scalarField samples(nIntervals, Zero);

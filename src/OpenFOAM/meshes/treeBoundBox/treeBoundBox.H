@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ Class
     Foam::treeBoundBox
 
 Description
-    Standard boundBox + extra functionality for use in octree.
+    Standard boundBox with extra functionality for use in octree.
 
     Numbering of corner points is according to octant numbering.
 
@@ -71,7 +73,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Random;
 class treeBoundBox;
 Istream& operator>>(Istream& is, treeBoundBox& bb);
@@ -89,11 +91,11 @@ class treeBoundBox
 
 public:
 
-    // Static data members
+    // Static Data Members
 
-        //- Bits used for octant/point coding.
+        //- Bits used for octant/point encoding.
         //  Every octant/corner point is the combination of three faces.
-        enum octantBit
+        enum octantBit : direction
         {
             RIGHTHALF = 0x1,
             TOPHALF   = 0x2,
@@ -112,16 +114,16 @@ public:
             FRONT  = 5   //!< 5: z-max, front
         };
 
-        //- Bits used for face coding
-        enum faceBit
+        //- Bits used for face encoding
+        enum faceBit : direction
         {
             NOFACE    = 0,
-            LEFTBIT   = 0x1 << LEFT,    //1
-            RIGHTBIT  = 0x1 << RIGHT,   //2
-            BOTTOMBIT = 0x1 << BOTTOM,  //4
-            TOPBIT    = 0x1 << TOP,     //8
-            BACKBIT   = 0x1 << BACK,    //16
-            FRONTBIT  = 0x1 << FRONT,   //32
+            LEFTBIT   = 0x1 << LEFT,    //!<  1: x-min, left
+            RIGHTBIT  = 0x1 << RIGHT,   //!<  2: x-max, right
+            BOTTOMBIT = 0x1 << BOTTOM,  //!<  4: y-min, bottom
+            TOPBIT    = 0x1 << TOP,     //!<  8: y-max, top
+            BACKBIT   = 0x1 << BACK,    //!< 16: z-min, back
+            FRONTBIT  = 0x1 << FRONT    //!< 32: z-max, front
         };
 
         //- Edges codes.
@@ -153,7 +155,7 @@ public:
 
     // Constructors
 
-        //- Construct null setting points to zero
+        //- Construct without any points - an inverted bounding box
         inline treeBoundBox();
 
         //- Construct from a boundBox
@@ -176,11 +178,11 @@ public:
         //- Construct as subset of points
         //  The indices could be from edge/triFace etc.
         //  Local processor domain only (no reduce as in boundBox)
-        template<unsigned Size>
+        template<unsigned N>
         treeBoundBox
         (
             const UList<point>& points,
-            const FixedList<label, Size>& indices
+            const FixedList<label, N>& indices
         );
 
 

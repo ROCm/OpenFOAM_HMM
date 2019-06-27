@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +60,7 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
 ) const
 {
     Log << "    functionObjects::" << type() << " " << name()
-        << " calculating steam-function" << endl;
+        << " calculating stream-function" << endl;
 
     Vector<label> slabNormal((Vector<label>::one - mesh_.geometricD())/2);
     const direction slabDir
@@ -414,10 +416,8 @@ bool Foam::functionObjects::streamFunction::calc()
 
         return store(resultName_, calc(phi));
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

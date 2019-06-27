@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2012 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,7 +221,7 @@ Foam::cellList Foam::extrudedMesh::extrudedCells
     }
 
     // Current face count per cell.
-    labelList nCellFaces(eCells.size(), 0);
+    labelList nCellFaces(eCells.size(), Zero);
 
 
     label facei = 0;

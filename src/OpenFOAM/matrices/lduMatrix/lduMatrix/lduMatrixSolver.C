@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +27,7 @@ License
 
 #include "lduMatrix.H"
 #include "diagonalSolver.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -168,12 +171,29 @@ void Foam::lduMatrix::solver::read(const dictionary& solverControls)
 }
 
 
-Foam::scalar Foam::lduMatrix::solver::normFactor
+Foam::solverPerformance Foam::lduMatrix::solver::scalarSolve
 (
-    const scalarField& psi,
-    const scalarField& source,
-    const scalarField& Apsi,
-    scalarField& tmpField
+    solveScalarField& psi,
+    const solveScalarField& source,
+    const direction cmpt
+) const
+{
+    PrecisionAdaptor<scalar, solveScalar> tpsi_s(psi);
+    return solve
+    (
+        tpsi_s.ref(),
+        ConstPrecisionAdaptor<scalar, solveScalar>(source)(),
+        cmpt
+    );
+}
+
+
+Foam::solveScalarField::cmptType Foam::lduMatrix::solver::normFactor
+(
+    const solveScalarField& psi,
+    const solveScalarField& source,
+    const solveScalarField& Apsi,
+    solveScalarField& tmpField
 ) const
 {
     // --- Calculate A dot reference value of psi

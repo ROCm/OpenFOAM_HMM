@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,8 +120,9 @@ public:
         //- Copy construct from UList\<Type\>
         inline explicit Field(const UList<Type>& list);
 
-        //- Copy construct from UIndirectList\<Type\>
-        inline explicit Field(const UIndirectList<Type>& list);
+        //- Copy construct from IndirectList
+        template<class Addr>
+        inline explicit Field(const IndirectListBase<Type, Addr>& list);
 
         //- Move construct from Field
         inline Field(Field<Type>&& fld);
@@ -196,7 +199,7 @@ public:
         );
 
         //- Construct by mapping from the given tmp field. Supplied uniform
-        //  value for unmapped items
+        //- value for unmapped items
         Field
         (
             const tmp<Field<Type>>& tmapF,
@@ -206,7 +209,7 @@ public:
         );
 
         //- Construct by mapping from the given tmp field. Supplied values
-        //  for unmapped items
+        //- for unmapped items
         Field
         (
             const tmp<Field<Type>>& tmapF,
@@ -219,9 +222,7 @@ public:
         inline Field(Field<Type>& fld, bool reuse);
 
         //- Copy or move construct from tmp
-        #ifndef NoConstructFromTmp
         inline Field(const tmp<Field<Type>>& tfld);
-        #endif
 
         //- Construct from Istream
         inline Field(Istream& is);
@@ -231,6 +232,12 @@ public:
 
         //- Clone
         inline tmp<Field<Type>> clone() const;
+
+        //- Return a pointer to a new Field created on freestore
+        static autoPtr<Field<Type>> New(Istream& is)
+        {
+            return autoPtr<Field<Type>>(new Field<Type>(is));
+        }
 
         //- Return a pointer to a new calculatedFvPatchFieldField created on
         //  freestore without setting patchField values

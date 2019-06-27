@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,10 +29,10 @@ License
 #include "pTraits.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::dimensioned<Type>::initialize(Istream& is, bool checkDims)
+void Foam::dimensioned<Type>::initialize(Istream& is, const bool checkDims)
 {
     token nextToken(is);
     is.putBack(nextToken);
@@ -67,13 +69,50 @@ void Foam::dimensioned<Type>::initialize(Istream& is, bool checkDims)
 }
 
 
+template<class Type>
+bool Foam::dimensioned<Type>::readEntry
+(
+    const word& key,
+    const dictionary& dict,
+    const bool mandatory,
+    const bool checkDims,
+    enum keyType::option matchOpt
+)
+{
+    // Largely identical to dictionary::readEntry(),
+    // but with optional handling of checkDims
+
+    const auto finder(dict.csearch(key, matchOpt));
+
+    if (finder.found())
+    {
+        ITstream& is = finder.ptr()->stream();
+
+        initialize(is, checkDims);
+
+        dict.checkITstream(is, key);
+
+        return true;
+    }
+    else if (mandatory)
+    {
+        FatalIOErrorInFunction(dict)
+            << "Entry '" << key << "' not found in dictionary "
+            << dict.name()
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::dimensioned<Type>::dimensioned()
 :
     name_("0"),
-    dimensions_(dimless),
+    dimensions_(),
     value_(Zero)
 {}
 
@@ -124,9 +163,78 @@ Foam::dimensioned<Type>::dimensioned
 
 
 template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const word& name,
+    const dictionary& dict
+)
+:
+    name_(name),
+    dimensions_(),
+    value_(Zero)
+{
+    // mandatory, no checkDims
+    readEntry(name, dict, true, false);
+}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const word& name,
+    const dimensionSet& dims,
+    const dictionary& dict
+)
+:
+    name_(name),
+    dimensions_(dims),
+    value_(Zero)
+{
+    // mandatory, checkDims
+    readEntry(name, dict);
+}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const word& name,
+    const dimensionSet& dims,
+    const dictionary& dict,
+    const word& entryName
+)
+:
+    name_(name),
+    dimensions_(dims),
+    value_(Zero)
+{
+    // mandatory, checkDims
+    readEntry(entryName, dict);
+}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const word& name,
+    const dimensionSet& dims,
+    const Type& val,
+    const dictionary& dict
+)
+:
+    name_(name),
+    dimensions_(dims),
+    value_(val)
+{
+    // non-mandatory, checkDims
+    readEntry(name, dict, false);
+}
+
+
+template<class Type>
 Foam::dimensioned<Type>::dimensioned(Istream& is)
 :
-    dimensions_(dimless)
+    dimensions_()
 {
     read(is);
 }
@@ -140,15 +248,9 @@ Foam::dimensioned<Type>::dimensioned
 )
 :
     name_(name),
-    dimensions_(dimless)
+    dimensions_()
 {
-    // Read dimensionSet + multiplier
-    scalar mult(1.0);
-    dimensions_.read(is, mult);
-
-    // Read value
-    is >> value_;
-    value_ *= mult;
+    read(is, false);  // Don't read name. Read dimensionSet + multiplier only.
 }
 
 
@@ -164,100 +266,67 @@ Foam::dimensioned<Type>::dimensioned
     dimensions_(dims),
     value_(Zero)
 {
-    initialize(is, true);  // checkDims
-}
-
-
-template<class Type>
-Foam::dimensioned<Type>::dimensioned
-(
-    const word& name,
-    const dictionary& dict
-)
-:
-    dimensioned<Type>(name, dimless, dict, false)  // no checkDims
-{}
-
-
-template<class Type>
-Foam::dimensioned<Type>::dimensioned
-(
-    const word& name,
-    const dimensionSet& dims,
-    const dictionary& dict,
-    const bool checkDims
-)
-:
-    name_(name),
-    dimensions_(dims),
-    value_(Zero)
-{
-    // Like dictionary::lookup(), but in two stages to detect input errors
-    const entry& e = dict.lookupEntry(name, keyType::REGEX);
-    ITstream& is = e.stream();
-
-    initialize(is, checkDims);
-    e.checkITstream(is);
+    // checkDims
+    initialize(is, true);
 }
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
-Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrDefault
+Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrDefault
 (
     const word& name,
     const dictionary& dict,
     const dimensionSet& dims,
-    const Type& defaultValue
+    const Type& deflt
+)
+{
+    // checkDims = true
+    return dimensioned<Type>(name, dims, deflt, dict);
+}
+
+
+template<class Type>
+Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrDefault
+(
+    const word& name,
+    const dictionary& dict,
+    const Type& deflt
+)
+{
+    return dimensioned<Type>(name, dimless, deflt, dict);
+}
+
+
+template<class Type>
+Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrAddToDict
+(
+    const word& name,
+    dictionary& dict,
+    const dimensionSet& dims,
+    const Type& deflt
 )
 {
     if (dict.found(name))
     {
         return dimensioned<Type>(name, dims, dict);
     }
-    else
-    {
-        return dimensioned<Type>(name, dims, defaultValue);
-    }
+
+    (void) dict.add(name, deflt);
+    return dimensioned<Type>(name, dims, deflt);
 }
 
 
 template<class Type>
-Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrDefault
-(
-    const word& name,
-    const dictionary& dict,
-    const Type& defaultValue
-)
-{
-    return lookupOrDefault(name, dict, dimless, defaultValue);
-}
-
-
-template<class Type>
-Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrAddToDict
+Foam::dimensioned<Type> Foam::dimensioned<Type>::getOrAddToDict
 (
     const word& name,
     dictionary& dict,
-    const dimensionSet& dims,
-    const Type& defaultValue
+    const Type& deflt
 )
 {
-    Type value = dict.lookupOrAddDefault<Type>(name, defaultValue);
-    return dimensioned<Type>(name, dims, value);
-}
-
-
-template<class Type>
-Foam::dimensioned<Type> Foam::dimensioned<Type>::lookupOrAddToDict
-(
-    const word& name,
-    dictionary& dict,
-    const Type& defaultValue
-)
-{
-    return lookupOrAddToDict(name, dict, dimless, defaultValue);
+    return getOrAddToDict(name, dict, dimless, deflt);
 }
 
 
@@ -268,6 +337,7 @@ const Foam::word& Foam::dimensioned<Type>::name() const
 {
     return name_;
 }
+
 
 template<class Type>
 Foam::word& Foam::dimensioned<Type>::name()
@@ -282,6 +352,7 @@ const Foam::dimensionSet& Foam::dimensioned<Type>::dimensions() const
     return dimensions_;
 }
 
+
 template<class Type>
 Foam::dimensionSet& Foam::dimensioned<Type>::dimensions()
 {
@@ -294,6 +365,7 @@ const Type& Foam::dimensioned<Type>::value() const
 {
     return value_;
 }
+
 
 template<class Type>
 Type& Foam::dimensioned<Type>::value()
@@ -331,24 +403,51 @@ void Foam::dimensioned<Type>::replace
 
 
 template<class Type>
-void Foam::dimensioned<Type>::read(const dictionary& dict)
+bool Foam::dimensioned<Type>::read(const dictionary& dict)
 {
-    dict.readEntry(name_, value_);
+    return read(name_, dict);
 }
 
 
 template<class Type>
 bool Foam::dimensioned<Type>::readIfPresent(const dictionary& dict)
 {
-    return dict.readIfPresent(name_, value_);
+    return readIfPresent(name_, dict);
 }
 
 
 template<class Type>
-Foam::Istream& Foam::dimensioned<Type>::read(Istream& is)
+bool Foam::dimensioned<Type>::read
+(
+    const word& entryName,
+    const dictionary& dict
+)
 {
-    // Read name
-    is >> name_;
+    // mandatory, checkDims
+    return readEntry(entryName, dict);
+}
+
+
+template<class Type>
+bool Foam::dimensioned<Type>::readIfPresent
+(
+    const word& entryName,
+    const dictionary& dict
+)
+{
+    // non-mandatory, checkDims
+    return readEntry(entryName, dict, false);
+}
+
+
+template<class Type>
+Foam::Istream& Foam::dimensioned<Type>::read(Istream& is, const bool readName)
+{
+    if (readName)
+    {
+        // Read name
+        is >> name_;
+    }
 
     // Read dimensionSet + multiplier
     scalar mult(1.0);
@@ -515,9 +614,12 @@ Foam::sqr(const dimensioned<Type>& dt)
 }
 
 template<class Type>
-Foam::dimensioned<Foam::scalar> Foam::magSqr(const dimensioned<Type>& dt)
+Foam::dimensioned<typename Foam::typeOfMag<Type>::type>
+Foam::magSqr(const dimensioned<Type>& dt)
 {
-    return dimensioned<scalar>
+    typedef typename typeOfMag<Type>::type magType;
+
+    return dimensioned<magType>
     (
         "magSqr(" + dt.name() + ')',
         magSqr(dt.dimensions()),
@@ -526,9 +628,12 @@ Foam::dimensioned<Foam::scalar> Foam::magSqr(const dimensioned<Type>& dt)
 }
 
 template<class Type>
-Foam::dimensioned<Foam::scalar> Foam::mag(const dimensioned<Type>& dt)
+Foam::dimensioned<typename Foam::typeOfMag<Type>::type>
+Foam::mag(const dimensioned<Type>& dt)
 {
-    return dimensioned<scalar>
+    typedef typename typeOfMag<Type>::type magType;
+
+    return dimensioned<magType>
     (
         "mag(" + dt.name() + ')',
         dt.dimensions(),
@@ -628,17 +733,15 @@ Foam::Istream& Foam::operator>>(Istream& is, dimensioned<Type>& dt)
 template<class Type>
 Foam::Ostream& Foam::operator<<(Ostream& os, const dimensioned<Type>& dt)
 {
-    // Write the name
+    // The name
     os << dt.name() << token::SPACE;
 
-    // Write the dimensions
+    // The dimensions
     scalar mult(1.0);
     dt.dimensions().write(os, mult);
 
-    os << token::SPACE;
-
-    // Write the value
-    os << dt.value()/mult;
+    // The value
+    os << token::SPACE << dt.value()/mult;
 
     os.check(FUNCTION_NAME);
     return os;
@@ -739,8 +842,8 @@ Foam::dimensioned<Type> Foam::operator/
     return dimensioned<Type>
     (
         '(' + dt.name() + '|' + ds.name() + ')',
-        dt.dimensions()/ds.dimensions(),
-        dt.value()/ds.value()
+        dt.dimensions() / ds.dimensions(),
+        dt.value() / ds.value()
     );
 }
 

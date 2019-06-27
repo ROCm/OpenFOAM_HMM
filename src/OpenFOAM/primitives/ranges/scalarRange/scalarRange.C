@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,21 @@ License
 
 #include "scalarRange.H"
 #include "string.H"
+#include "Switch.H"
+#include "MinMax.H"
 #include "error.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::scalarRange Foam::scalarRange::null;
+
+const Foam::scalarRange Foam::scalarRange::always
+(
+    scalarRange::ALWAYS,
+    -GREAT,
+    GREAT
+);
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -39,10 +53,23 @@ bool Foam::scalarRange::parse(const std::string& str, scalarRange& range)
     {
         // No colon
 
-        if (str == "none")
+        // Use Switch to accept none/true/false.
+        // Do not accept shorter ones though (f|n|t|y) or (on|off|yes|no)
+        // since these are not really appropriate here.
+
+        if (str.size() >= 4)
         {
-            // "none" is an empty (inverse) range
-            return true;
+            Switch sw(str, true);
+
+            if (sw.valid())
+            {
+                if (sw)
+                {
+                    range = scalarRange::always;
+                }
+
+                return true; // parsed ok
+            }
         }
 
         // "VALUE"
@@ -106,6 +133,24 @@ Foam::scalarRange Foam::scalarRange::parse(const std::string& str)
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::scalarRange::scalarRange(const MinMax<label>& range) noexcept
+:
+    min_(range.min()),
+    max_(range.max()),
+    type_(max_ < min_ ? scalarRange::NONE : scalarRange::GE_LE)
+{}
+
+
+Foam::scalarRange::scalarRange(const MinMax<scalar>& range) noexcept
+:
+    min_(range.min()),
+    max_(range.max()),
+    type_(max_ < min_ ? scalarRange::NONE : scalarRange::GE_LE)
+{}
+
+
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const scalarRange& range)
@@ -113,21 +158,25 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const scalarRange& range)
     switch (range.type_)
     {
         case scalarRange::EQ:
-            os << range.min_;
+            os << range.min();
             break;
 
         case scalarRange::GE:
         case scalarRange::GT:
-            os << range.min_ << ":Inf";
+            os << range.min() << ":Inf";
             break;
 
         case scalarRange::LE:
         case scalarRange::LT:
-            os << "-Inf:" << range.max_;
+            os << "-Inf:" << range.max();
             break;
 
         case scalarRange::GE_LE:
-            os << range.min_ << ':' << range.max_;
+            os << range.min() << ':' << range.max();
+            break;
+
+        case scalarRange::ALWAYS:
+            os << "true";
             break;
 
         default:

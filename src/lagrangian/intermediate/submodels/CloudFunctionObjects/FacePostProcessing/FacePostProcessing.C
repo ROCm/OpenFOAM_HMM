@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +28,8 @@ License
 #include "FacePostProcessing.H"
 #include "Pstream.H"
 #include "ListListOps.H"
-#include "surfaceWriter.H"
 #include "globalIndex.H"
+#include "surfaceWriter.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -192,35 +194,29 @@ void Foam::FacePostProcessing<CloudType>::write()
                     )
                 );
 
-                autoPtr<surfaceWriter> writer
+                auto writer = surfaceWriter::New
                 (
-                    surfaceWriter::New
-                    (
-                        surfaceFormat_,
-                        this->coeffDict().subOrEmptyDict("formatOptions").
-                            subOrEmptyDict(surfaceFormat_)
-                    )
+                    surfaceFormat_,
+                    this->coeffDict().subOrEmptyDict("formatOptions")
+                        .subOrEmptyDict(surfaceFormat_)
                 );
 
-                writer->write
+                if (debug)
+                {
+                    writer->verbose() = true;
+                }
+
+                writer->open
                 (
-                    this->writeTimeDir(),
-                    fZone.name(),
-                    meshedSurfRef(allPoints, allFaces),
-                    "massTotal",
-                    zoneMassTotal[zoneI],
-                    false
+                    allPoints,
+                    allFaces,
+                    (this->writeTimeDir() / fZone.name()),
+                    false  // serial - already merged
                 );
 
-                writer->write
-                (
-                    this->writeTimeDir(),
-                    fZone.name(),
-                    meshedSurfRef(allPoints, allFaces),
-                    "massFlowRate",
-                    zoneMassFlowRate[zoneI],
-                    false
-                );
+                writer->write("massTotal", zoneMassTotal[zoneI]);
+
+                writer->write("massFlowRate", zoneMassFlowRate[zoneI]);
             }
         }
     }
@@ -258,12 +254,12 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     CloudFunctionObject<CloudType>(dict, owner, modelName, typeName),
     faceZoneIDs_(),
     surfaceFormat_(this->coeffDict().lookup("surfaceFormat")),
-    resetOnWrite_(this->coeffDict().lookup("resetOnWrite")),
+    resetOnWrite_(this->coeffDict().getBool("resetOnWrite")),
+    log_(this->coeffDict().getBool("log")),
     totalTime_(0.0),
     mass_(),
     massTotal_(),
     massFlowRate_(),
-    log_(this->coeffDict().lookup("log")),
     outputFilePtr_(),
     timeOld_(owner.mesh().time().value())
 {
@@ -340,11 +336,11 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     faceZoneIDs_(pff.faceZoneIDs_),
     surfaceFormat_(pff.surfaceFormat_),
     resetOnWrite_(pff.resetOnWrite_),
+    log_(pff.log_),
     totalTime_(pff.totalTime_),
     mass_(pff.mass_),
     massTotal_(pff.massTotal_),
     massFlowRate_(pff.massFlowRate_),
-    log_(pff.log_),
     outputFilePtr_(),
     timeOld_(0.0)
 {}

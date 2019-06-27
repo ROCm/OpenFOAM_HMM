@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,20 +52,24 @@ public:
     //- Component type
     typedef Scalar cmptType;
 
+    //- Magnitude type
+    typedef Scalar magType;
+
     //- Equivalent type of labels used for valid component indexing
     typedef label labelType;
+
 
 
     // Member constants
 
         //- Dimensionality of space
-        static const direction dim = 3;
+        static constexpr direction dim = 3;
 
         //- Rank of Scalar is 0
-        static const direction rank = 0;
+        static constexpr direction rank = 0;
 
         //- Number of components in Scalar is 1
-        static const direction nComponents = 1;
+        static constexpr direction nComponents = 1;
 
 
     // Static data members
@@ -76,6 +82,7 @@ public:
         static const Scalar min;
         static const Scalar rootMax;
         static const Scalar rootMin;
+        static const Scalar vsmall;
 
 
     // Constructors
@@ -182,6 +189,8 @@ besselFunc(j0)
 besselFunc(j1)
 besselFunc(y0)
 besselFunc(y1)
+besselFunc2(jn)
+besselFunc2(yn)
 
 
 inline Scalar& setComponent(Scalar& s, const direction)

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DILUPreconditioner.H"
+#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,8 +49,11 @@ Foam::DILUPreconditioner::DILUPreconditioner
 )
 :
     lduMatrix::preconditioner(sol),
-    rD_(sol.matrix().diag())
+    rD_(sol.matrix().diag().size())
 {
+    const scalarField& diag = sol.matrix().diag();
+    std::copy(diag.begin(), diag.end(), rD_.begin());
+
     calcReciprocalD(rD_, sol.matrix());
 }
 
@@ -56,11 +62,11 @@ Foam::DILUPreconditioner::DILUPreconditioner
 
 void Foam::DILUPreconditioner::calcReciprocalD
 (
-    scalarField& rD,
+    solveScalarField& rD,
     const lduMatrix& matrix
 )
 {
-    scalar* __restrict__ rDPtr = rD.begin();
+    solveScalar* __restrict__ rDPtr = rD.begin();
 
     const label* const __restrict__ uPtr = matrix.lduAddr().upperAddr().begin();
     const label* const __restrict__ lPtr = matrix.lduAddr().lowerAddr().begin();
@@ -76,7 +82,7 @@ void Foam::DILUPreconditioner::calcReciprocalD
 
 
     // Calculate the reciprocal of the preconditioned diagonal
-    label nCells = rD.size();
+    const label nCells = rD.size();
 
     for (label cell=0; cell<nCells; cell++)
     {
@@ -87,14 +93,14 @@ void Foam::DILUPreconditioner::calcReciprocalD
 
 void Foam::DILUPreconditioner::precondition
 (
-    scalarField& wA,
-    const scalarField& rA,
+    solveScalarField& wA,
+    const solveScalarField& rA,
     const direction
 ) const
 {
-    scalar* __restrict__ wAPtr = wA.begin();
-    const scalar* __restrict__ rAPtr = rA.begin();
-    const scalar* __restrict__ rDPtr = rD_.begin();
+    solveScalar* __restrict__ wAPtr = wA.begin();
+    const solveScalar* __restrict__ rAPtr = rA.begin();
+    const solveScalar* __restrict__ rDPtr = rD_.begin();
 
     const label* const __restrict__ uPtr =
         solver_.matrix().lduAddr().upperAddr().begin();
@@ -108,21 +114,18 @@ void Foam::DILUPreconditioner::precondition
     const scalar* const __restrict__ lowerPtr =
         solver_.matrix().lower().begin();
 
-    label nCells = wA.size();
-    label nFaces = solver_.matrix().upper().size();
-    label nFacesM1 = nFaces - 1;
+    const label nCells = wA.size();
+    const label nFaces = solver_.matrix().upper().size();
+    const label nFacesM1 = nFaces - 1;
 
     for (label cell=0; cell<nCells; cell++)
     {
         wAPtr[cell] = rDPtr[cell]*rAPtr[cell];
     }
 
-
-    label sface;
-
     for (label face=0; face<nFaces; face++)
     {
-        sface = losortPtr[face];
+        const label sface = losortPtr[face];
         wAPtr[uPtr[sface]] -=
             rDPtr[uPtr[sface]]*lowerPtr[sface]*wAPtr[lPtr[sface]];
     }
@@ -137,14 +140,14 @@ void Foam::DILUPreconditioner::precondition
 
 void Foam::DILUPreconditioner::preconditionT
 (
-    scalarField& wT,
-    const scalarField& rT,
+    solveScalarField& wT,
+    const solveScalarField& rT,
     const direction
 ) const
 {
-    scalar* __restrict__ wTPtr = wT.begin();
-    const scalar* __restrict__ rTPtr = rT.begin();
-    const scalar* __restrict__ rDPtr = rD_.begin();
+    solveScalar* __restrict__ wTPtr = wT.begin();
+    const solveScalar* __restrict__ rTPtr = rT.begin();
+    const solveScalar* __restrict__ rDPtr = rD_.begin();
 
     const label* const __restrict__ uPtr =
         solver_.matrix().lduAddr().upperAddr().begin();
@@ -158,9 +161,9 @@ void Foam::DILUPreconditioner::preconditionT
     const scalar* const __restrict__ lowerPtr =
         solver_.matrix().lower().begin();
 
-    label nCells = wT.size();
-    label nFaces = solver_.matrix().upper().size();
-    label nFacesM1 = nFaces - 1;
+    const label nCells = wT.size();
+    const label nFaces = solver_.matrix().upper().size();
+    const label nFacesM1 = nFaces - 1;
 
     for (label cell=0; cell<nCells; cell++)
     {
@@ -174,11 +177,9 @@ void Foam::DILUPreconditioner::preconditionT
     }
 
 
-    label sface;
-
     for (label face=nFacesM1; face>=0; face--)
     {
-        sface = losortPtr[face];
+        const label sface = losortPtr[face];
         wTPtr[lPtr[sface]] -=
             rDPtr[lPtr[sface]]*lowerPtr[sface]*wTPtr[uPtr[sface]];
     }

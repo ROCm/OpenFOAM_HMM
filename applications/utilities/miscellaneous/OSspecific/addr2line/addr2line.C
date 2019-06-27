@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 Alexey Matveichev
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018 Alexey Matveichev
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,14 +121,14 @@ void usage()
     std::cout
         << "usage: addr2line [-e filename|--exe=filename]"
            " address [address...]\n" << std::endl;
-    ::exit(1);
+    std::exit(1);
 }
 
 
 void version()
 {
     std::cout<< "OpenFOAM addr2line emulator\n" << std::endl;
-    ::exit(0);
+    std::exit(0);
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,12 +59,6 @@ linearDirection::linearDirection(const dictionary& dict)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-linearDirection::~linearDirection()
-{}
-
-
 // * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
 
 point linearDirection::operator()
@@ -72,9 +68,7 @@ point linearDirection::operator()
     const label layer
 ) const
 {
-    //scalar d = thickness_*layer/nLayers_;
-    scalar d = thickness_*sumThickness(layer);
-    return surfacePoint + d*direction_;
+    return surfacePoint + (thickness_*sumThickness(layer)) * direction_;
 }
 
 

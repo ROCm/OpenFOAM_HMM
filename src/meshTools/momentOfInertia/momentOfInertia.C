@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +82,7 @@ void Foam::momentOfInertia::massPropertiesSolid
     const scalar r120 = 1.0/120.0;
 
     // order:  1, x, y, z, x^2, y^2, z^2, xy, yz, zx
-    scalarField integrals(10, 0.0);
+    scalarField integrals(10, Zero);
 
     forAll(triFaces, i)
     {

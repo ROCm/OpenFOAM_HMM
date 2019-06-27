@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,9 +47,10 @@ Description
     except that no interpolation in time is supported.  These should be
     located in the directory:
 
+    \verbatim
         \$FOAM_CASE/constant/boundaryData/\<patchName\>/points
         \$FOAM_CASE/constant/boundaryData/\<patchName\>/0/\{R|U|L\}
-
+    \endverbatim
 
 Usage
     \table
@@ -328,10 +331,15 @@ public:
             );
         }
 
-    virtual ~turbulentDFSEMInletFvPatchVectorField();
+
+    //- Destructor
+    virtual ~turbulentDFSEMInletFvPatchVectorField() = default;
 
 
     // Member functions
+
+        //- Helper function to check that Reynold stresses are valid
+        static bool checkStresses(const symmTensorField& Rf);
 
 
         // Mapping functions

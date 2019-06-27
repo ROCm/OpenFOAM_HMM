@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,10 +62,6 @@ typedef List<word> wordList;
 class wordRe;
 class fileName;
 
-Istream& operator>>(Istream&, fileName&);
-Ostream& operator<<(Ostream&, const fileName&);
-
-
 /*---------------------------------------------------------------------------*\
                           Class fileName Declaration
 \*---------------------------------------------------------------------------*/
@@ -72,12 +70,6 @@ class fileName
 :
     public string
 {
-    // Private Member Functions
-
-        //- Strip invalid characters
-        inline void stripInvalid();
-
-
 public:
 
     //- Enumerations to handle directory entry types.
@@ -90,10 +82,16 @@ public:
     };
 
 
-    // Static data members
+    // Static Data Members
 
+        //- The typeName
         static const char* const typeName;
+
+        //- Debugging
         static int debug;
+
+        //- Allow space character in fileName. To be used with caution.
+        static int allowSpaceInFileName;
 
         //- An empty fileName
         static const fileName null;
@@ -146,19 +144,23 @@ public:
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
 
-        //- Construct validated fileName (no invalid characters).
-        //  Optionally perform some additional cleanup such as removing
-        //  duplicate or trailing slashes.
-        static fileName validate
-        (
-            const std::string& s,
-            const bool doClean=false
-        );
+        //- Construct fileName with no invalid characters, possibly applying
+        //- other transformations such as changing the path separator,
+        //- removing duplicate or trailing slashes, etc.
+        static fileName validate(const std::string& s, const bool doClean=true);
+
+        //- Join two strings with '/' as a path separator.
+        //  No '/' separator is added if either argument is an empty string or
+        //  if the arguments already had the path separator at the junction.
+        //  Invalid characters are \em not stripped (ie, retained).
+        static fileName concat(const std::string& s1, const std::string& s2);
 
         //- This is a specialized (possibly slower) version of compare()
         //- that ignores duplicate or trailing slashes.
         static bool equals(const std::string& s1, const std::string& s2);
 
+        //- Strip invalid characters
+        inline void stripInvalid();
 
         //- Cleanup filename
         //
@@ -351,15 +353,17 @@ public:
         ) const;
 
 
-    // Member operators
+    // Member Operators
 
     // Assignment
 
         //- Copy assignment, no character validation required
-        fileName& operator=(const fileName&) = default;
+        //  Self-assignment is a no-op.
+        inline fileName& operator=(const fileName& str);
 
         //- Move assignment, no character validation required
-        fileName& operator=(fileName&&) = default;
+        //  Self-assignment is a no-op.
+        inline fileName& operator=(fileName&& str);
 
         //- Copy assignment, no character validation required
         inline fileName& operator=(const word& str);
@@ -388,20 +392,23 @@ public:
         //- Append a path element with '/' separator.
         //  No '/' separator is added if this or the argument are empty.
         fileName& operator/=(const string& other);
-
-
-    // IOstream operators
-
-        friend Istream& operator>>(Istream& is, fileName& fn);
-        friend Ostream& operator<<(Ostream& os, const fileName& fn);
 };
+
+
+// IOstream Operators
+
+//- Read operator
+Istream& operator>>(Istream& is, fileName& val);
+
+//- Write operator
+Ostream& operator<<(Ostream& os, const fileName& val);
 
 
 // Global Operators
 
 //- Assemble words and fileNames as pathnames by adding a '/' separator.
 //  No '/' separator is added if either argument is an empty string.
-fileName operator/(const string& a, const string& b);
+fileName operator/(const string& s1, const string& s2);
 
 
 //- Recursively search the given directory for the file

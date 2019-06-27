@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,12 +32,12 @@ License
 
 void Foam::GAMGSolver::scale
 (
-    scalarField& field,
-    scalarField& Acf,
+    solveScalarField& field,
+    solveScalarField& Acf,
     const lduMatrix& A,
     const FieldField<Field, scalar>& interfaceLevelBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaceLevel,
-    const scalarField& source,
+    const solveScalarField& source,
     const direction cmpt
 ) const
 {
@@ -50,13 +52,13 @@ void Foam::GAMGSolver::scale
 
 
     const label nCells = field.size();
-    scalar* __restrict__ fieldPtr = field.begin();
-    const scalar* const __restrict__ sourcePtr = source.begin();
-    const scalar* const __restrict__ AcfPtr = Acf.begin();
+    solveScalar* __restrict__ fieldPtr = field.begin();
+    const solveScalar* const __restrict__ sourcePtr = source.begin();
+    const solveScalar* const __restrict__ AcfPtr = Acf.begin();
 
 
-    scalar scalingFactorNum = 0.0;
-    scalar scalingFactorDenom = 0.0;
+    solveScalar scalingFactorNum = 0.0;
+    solveScalar scalingFactorDenom = 0.0;
 
     for (label i=0; i<nCells; i++)
     {
@@ -64,10 +66,12 @@ void Foam::GAMGSolver::scale
         scalingFactorDenom += AcfPtr[i]*fieldPtr[i];
     }
 
-    vector2D scalingVector(scalingFactorNum, scalingFactorDenom);
-    A.mesh().reduce(scalingVector, sumOp<vector2D>());
+    Vector2D<solveScalar> scalingVector(scalingFactorNum, scalingFactorDenom);
+    A.mesh().reduce(scalingVector, sumOp<Vector2D<solveScalar>>());
 
-    const scalar sf = scalingVector.x()/stabilise(scalingVector.y(), VSMALL);
+    const solveScalar sf =
+        scalingVector.x()
+       /stabilise(scalingVector.y(), pTraits<solveScalar>::vsmall);
 
     if (debug >= 2)
     {

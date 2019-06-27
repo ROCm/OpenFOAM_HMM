@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,54 +48,62 @@ Foam::thermoIncompressibleTwoPhaseMixture::thermoIncompressibleTwoPhaseMixture
     (
         "kappa1",
         dimEnergy/dimTime/dimLength/dimTemperature,
-        subDict(phase1Name_).lookup("kappa")
+        subDict(phase1Name_),
+        "kappa"
     ),
     kappa2_
     (
         "kappa2",
         kappa1_.dimensions(),
-        subDict(phase2Name_).lookup("kappa")
+        subDict(phase2Name_),
+        "kappa"
     ),
 
     Cp1_
     (
         "Cp1",
         dimEnergy/dimTemperature/dimMass,
-        subDict(phase1Name_).lookup("Cp")
+        subDict(phase1Name_),
+        "Cp"
     ),
     Cp2_
     (
         "Cp2",
         dimEnergy/dimTemperature/dimMass,
-        subDict(phase2Name_).lookup("Cp")
+        subDict(phase2Name_),
+        "Cp"
     ),
 
     Cv1_
     (
         "Cv1",
         dimEnergy/dimTemperature/dimMass,
-        subDict(phase1Name_).lookup("Cv")
+        subDict(phase1Name_),
+        "Cv"
     ),
 
     Cv2_
     (
         "Cv2",
         dimEnergy/dimTemperature/dimMass,
-        subDict(phase2Name_).lookup("Cv")
+        subDict(phase2Name_),
+        "Cv"
     ),
 
     Hf1_
     (
         "Hf1",
         dimEnergy/dimMass,
-        subDict(phase1Name_).lookup("hf")
+        subDict(phase1Name_),
+        "hf"
     ),
 
     Hf2_
     (
         "Hf2",
         dimEnergy/dimMass,
-        subDict(phase2Name_).lookup("hf")
+        subDict(phase2Name_),
+        "hf"
     )
 {
 
@@ -103,7 +111,6 @@ Foam::thermoIncompressibleTwoPhaseMixture::thermoIncompressibleTwoPhaseMixture
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
 
 bool Foam::thermoIncompressibleTwoPhaseMixture::read()
 {
@@ -123,10 +130,8 @@ bool Foam::thermoIncompressibleTwoPhaseMixture::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

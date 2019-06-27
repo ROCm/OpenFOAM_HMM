@@ -1,5 +1,5 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # run from this directory
+cd ${0%/*} || exit 1    # Run from this directory
 
 time=$1
 resultsDir="postProcessing/sample1/$time"
@@ -47,3 +47,5 @@ gnuplot<<EOF
     plot "$resultsDir/x40_U_UMean.xy" u (\$5/Ub):1 title "X/h = 4" w lines lc "black" lw 2
 
 EOF
+
+# ------------------------------------------------------------------------------

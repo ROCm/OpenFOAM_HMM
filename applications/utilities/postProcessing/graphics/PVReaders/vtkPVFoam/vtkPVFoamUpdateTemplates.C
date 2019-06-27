@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,13 +40,11 @@ void Foam::vtkPVFoam::updateInfoFields
     const IOobjectList& objects
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> updateInfoFields <"
-            << meshType::Mesh::typeName
-            << "> [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]"
-            << nl;
-    }
+    DebugInfo
+        << "<beg> updateInfoFields <"
+        << meshType::Mesh::typeName
+        << "> [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]"
+        << nl;
 
     // Add geometric fields (volume/area) to GUI
     addToSelection<GeometricField<scalar, patchType, meshType>>
@@ -100,10 +100,7 @@ void Foam::vtkPVFoam::updateInfoFields
         objects
     );
 
-    if (debug)
-    {
-        Info<< "<end> updateInfoFields" << nl;
-    }
+    DebugInfo << "<end> updateInfoFields" << nl;
 }
 
 

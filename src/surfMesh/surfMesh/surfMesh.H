@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +43,9 @@ SourceFiles
 #include "MeshedSurfaceIOAllocator.H"
 #include "PrimitivePatch.H"
 #include "SubField.H"
+#include "surfZoneIOList.H"
+
+#include "surfFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,6 +53,8 @@ namespace Foam
 {
 
 // Forward declarations
+class dimensionSet;
+class meshedSurf;
 template<class Face> class MeshedSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -62,7 +69,7 @@ class surfMesh
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Enumeration defining the state of the mesh after a read update.
         //  Used for post-processing applications, where the mesh
@@ -92,6 +99,12 @@ private:
         MeshReference;
 
 
+    // Demand driven private data
+
+        //- The surface zones
+        surfZoneIOList surfZones_;
+
+
     // Private Member Functions
 
         //- No copy construct
@@ -117,10 +130,10 @@ protected:
             return Allocator::storedIOFaces();
         }
 
-        //- Non-const access to the zones
+        //- Non-const access to the surface zones
         surfZoneList& storedZones()
         {
-            return Allocator::storedIOZones();
+            return surfZones_;
         }
 
         //- Update references to storedFaces
@@ -131,9 +144,6 @@ protected:
 
         //- Update references to storedPoints/storedFaces
         virtual void updateRefs();
-
-        //- Update with new contents
-        void copyContents(const MeshedSurface<face>& surf, bool validate=false);
 
 
 public:
@@ -156,15 +166,16 @@ public:
 
     // Constructors
 
-        //- Read construct from IOobject
+        //- Read construct from IOobject.
+        //  Writing = NO_WRITE
         explicit surfMesh(const IOobject& io);
 
         //- Read construct from IOobject, with alternative surface name
-        surfMesh
-        (
-            const IOobject& io,
-            const word& surfName
-        );
+        //  Writing = NO_WRITE
+        surfMesh(const IOobject& io, const word& surfName);
+
+        //- Construct null with specified name on the given registry.
+        surfMesh(const word& surfName, const objectRegistry& obr);
 
         //- Copy construct from MeshedSurface<face>
         surfMesh
@@ -236,9 +247,8 @@ public:
         //- Return surface zones
         virtual const surfZoneList& surfZones() const
         {
-            return Allocator::storedIOZones();
+            return surfZones_;
         }
-
 
         //- Return face area vectors (normals)
         inline const vectorField& Sf() const
@@ -264,7 +274,7 @@ public:
         //- Add surface zones, optionally validating the zone coverage
         void addZones
         (
-            const surfZoneList& srfZones,
+            const surfZoneList& zones,
             bool validate = true
         );
 
@@ -277,12 +287,59 @@ public:
 
     // Modification
 
+        //- Update with new contents
+        void copySurface
+        (
+            const pointField& points,
+            const faceList& faces,
+            bool validate=false
+        );
+
+        //- Update with new contents
+        void copySurface
+        (
+            const meshedSurf& surf,
+            bool validate=false
+        );
+
+        //- Update with new contents
+        void copySurface
+        (
+            const MeshedSurface<face>& surf,
+            bool validate=false
+        );
+
         //- Transfer the contents of the argument and annul the argument
         //  Optionally validate the zone coverage.
         void transfer(MeshedSurface<face>& surf, bool validate=false);
 
         //- Update mesh based on the files saved in time directories
         virtual readUpdateState readUpdate();
+
+
+    // Fields
+
+        //- Copy/store named field as face or point data (template parameter).
+        //
+        //  Default is face-data (surfGeoMesh as template).
+        template<class Type, class GeoMeshType = surfGeoMesh>
+        void storeField
+        (
+            const word& fieldName,
+            const dimensionSet& dims,
+            const Field<Type>& values
+        );
+
+        //- Move/store named field as face or point data (template parameter).
+        //
+        //  Default is face-data (surfGeoMesh as template).
+        template<class Type, class GeoMeshType = surfGeoMesh>
+        void storeField
+        (
+            const word& fieldName,
+            const dimensionSet& dims,
+            Field<Type>&& values
+        );
 
 
     // Writing
@@ -335,6 +392,9 @@ public:
         //- Clear primitive data (points, faces and cells)
         void clearPrimitives();
 
+        //- Clear stored fields
+        void clearFields();
+
         //- Remove all files from mesh instance
         void removeFiles(const fileName& instanceDir) const;
 
@@ -346,6 +406,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "surfMeshTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

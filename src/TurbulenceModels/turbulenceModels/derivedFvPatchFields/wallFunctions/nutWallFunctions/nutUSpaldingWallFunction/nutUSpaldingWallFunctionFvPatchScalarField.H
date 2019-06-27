@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,11 +53,38 @@ Usage
     <patchName>
     {
         type            nutUSpaldingWallFunction;
+
+        // .. nutWallFunctionFvPatchScalarField entries ..
+
     }
     \endverbatim
 
+    Additional entries (see below)
+    \table
+        Property  | Description               | Required   | Default value
+        maxIter   | Number of N-R iterations  | no         | 10
+        tolerance | Convergence tolerance     | no         | 0.01
+    \endtable
+
 See also
     Foam::nutWallFunctionFvPatchScalarField
+
+Note
+    Suffers from non-exact restart since correctNut() (called through
+    turbulence->validate) returns a slightly different value every time
+    it is called. This is since the seed for the Newton-Raphson iteration
+    uses the current value of *this (= nut).
+
+    This can be avoided by overriding the tolerance. This also switches on
+    a pre-detection whether the current nut already satisfies the turbulence
+    conditions and if so does not change it at all. This means that the nut
+    only changes if it 'has really changed'. This probably should be used with
+    a tight tolerance, e.g.
+
+        maxIter     100;
+        tolerance   1e-7;
+
+    to make sure to kick every iteration.
 
 SourceFiles
     nutUSpaldingWallFunctionFvPatchScalarField.C
@@ -82,6 +111,21 @@ class nutUSpaldingWallFunctionFvPatchScalarField
 {
 protected:
 
+    // Protected data
+
+        //- Max iterations in calcNut
+        const label maxIter_;
+
+        //- Convergence tolerance
+        const scalar tolerance_;
+
+        //- Uncomment in case of intrumentation
+        //mutable uint64_t invocations_;
+        //mutable uint64_t nontrivial_;
+        //mutable uint64_t nonconvergence_;
+        //mutable uint64_t iterations_;
+
+
     // Protected Member Functions
 
         //- Calculate the turbulence viscosity
@@ -89,6 +133,18 @@ protected:
 
         //- Calculate the friction velocity
         virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+
+        //- Calculate the friction velocity and number of iterations for
+        //  convergence
+        virtual tmp<scalarField> calcUTau
+        (
+            const scalarField& magGradU,
+            const label maxIter,
+            scalarField& err
+        ) const;
+
+        //- Write local wall function variables
+        virtual void writeLocalEntries(Ostream&) const;
 
 
 public:
@@ -158,6 +214,10 @@ public:
                 new nutUSpaldingWallFunctionFvPatchScalarField(*this, iF)
             );
         }
+
+
+    //- Destructor
+    virtual ~nutUSpaldingWallFunctionFvPatchScalarField();
 
 
     // Member functions

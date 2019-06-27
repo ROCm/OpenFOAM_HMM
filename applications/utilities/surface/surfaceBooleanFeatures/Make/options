@@ -3,10 +3,12 @@ EXE_NDEBUG = -DNDEBUG
 
 c++CGALWARN = -Wno-old-style-cast
 
-/*-- Define NO_CGAL to avoid using CGAL altogether */
+/*-- Define NO_CGAL in COMP_FLAGS to avoid using CGAL altogether */
 /*-- Define CGAL_INEXACT to use inexact CGAL constructions */
 
+ifeq (,$(findstring NO_CGAL,$(COMP_FLAGS)))
 include $(GENERAL_RULES)/CGAL
+endif
 
 EXE_INC = \
     ${ROUNDING_MATH} \
@@ -18,5 +20,6 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 EXE_LIBS = \
+    -lsurfMesh \
     -lmeshTools \
     $(LINK_FLAGS)

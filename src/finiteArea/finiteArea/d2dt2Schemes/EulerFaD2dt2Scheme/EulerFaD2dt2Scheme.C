@@ -95,12 +95,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
             (
                 d2dt2IOobject,
                 mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime/dimTime,
-                    pTraits<Type>::zero
-                )
+                dimensioned<Type>(dt.dimensions()/dimTime/dimTime, Zero)
             )
         );
 
@@ -119,12 +114,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
             (
                 d2dt2IOobject,
                 mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime/dimTime,
-                    pTraits<Type>::zero
-                ),
+                dimensioned<Type>(dt.dimensions()/dimTime/dimTime, Zero),
                 calculatedFaPatchField<Type>::typeName
             )
         );

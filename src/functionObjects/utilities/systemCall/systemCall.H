@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,11 +118,11 @@ protected:
         //- List of calls to execute - every step
         stringList executeCalls_;
 
-        //- List of calls to execute when exiting the time-loop
-        stringList endCalls_;
-
         //- List of calls to execute - write steps
         stringList writeCalls_;
+
+        //- List of calls to execute when exiting the time-loop
+        stringList endCalls_;
 
         //- Perform system calls on the master only
         bool masterOnly_;

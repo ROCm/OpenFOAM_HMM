@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,10 +109,8 @@ inline bool Foam::PointData<DataType>::updatePoint
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -141,10 +141,8 @@ inline bool Foam::PointData<DataType>::updatePoint
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -163,10 +161,8 @@ inline bool Foam::PointData<DataType>::updatePoint
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -200,10 +196,8 @@ inline bool Foam::PointData<DataType>::updateEdge
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

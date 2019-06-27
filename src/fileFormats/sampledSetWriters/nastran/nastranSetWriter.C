@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -159,14 +159,11 @@ void Foam::nastranSetWriter<Type>::write
 //    }
 
     label globalPti = 0;
-    forAll(tracks, tracki)
+    for (const coordSet& points : tracks)
     {
-        const coordSet& points = tracks[tracki];
-        forAll(points, pointi)
+        for (const point& pt : points)
         {
             fileFormats::NASCore::writeKeyword(os, "GRID", fieldFormat::FREE);
-
-            const point& pt = points[pointi];
 
             //os.setf(std::ios_base::right);
             //os  << setw(8) << globalPti++
@@ -190,10 +187,8 @@ void Foam::nastranSetWriter<Type>::write
         // Write ids of track points to file
         label globalEdgei = 0;
         label globalPointi = 0;
-        forAll(tracks, tracki)
+        for (const coordSet& points : tracks)
         {
-            const coordSet& points = tracks[tracki];
-
             const label nEdges = points.size()-1;
             for (label edgei = 0; edgei < nEdges; ++edgei)
             {

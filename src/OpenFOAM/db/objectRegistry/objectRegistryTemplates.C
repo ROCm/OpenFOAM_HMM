@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,12 +44,12 @@ Foam::HashTable<Foam::wordHashSet> Foam::objectRegistry::classesImpl
     // Summary (key,val) = (class-name, object-names)
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if (matchName(obj->name()))
         {
             // Create entry (if needed) and insert
-            summary(iter.object()->type()).insert(obj->name());
+            summary(obj->type()).insert(obj->name());
         }
     }
 
@@ -68,7 +70,7 @@ Foam::label Foam::objectRegistry::countImpl
 
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if (matchClass(obj->type()) && matchName(obj->name()))
         {
@@ -92,7 +94,7 @@ Foam::label Foam::objectRegistry::countTypeImpl
 
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if
         (
@@ -123,7 +125,7 @@ Foam::wordList Foam::objectRegistry::namesImpl
     label count=0;
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if (matchClass(obj->type()) && matchName(obj->name()))
         {
@@ -157,7 +159,7 @@ Foam::wordList Foam::objectRegistry::namesTypeImpl
     label count = 0;
     forAllConstIters(list, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if
         (
@@ -235,7 +237,7 @@ Foam::label Foam::objectRegistry::count
 
     forAllConstIters(*this, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if
         (
@@ -337,7 +339,7 @@ Foam::HashTable<const Type*> Foam::objectRegistry::lookupClass
 
     forAllConstIters(*this, iter)
     {
-        const regIOobject* obj = iter.object();
+        const regIOobject* obj = iter.val();
 
         if (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
         {
@@ -359,7 +361,7 @@ Foam::HashTable<Type*> Foam::objectRegistry::lookupClass
 
     forAllIters(*this, iter)
     {
-        regIOobject* obj = iter.object();
+        regIOobject* obj = iter.val();
 
         if (strict ? isType<Type>(*obj) : bool(isA<Type>(*obj)))
         {
@@ -389,23 +391,7 @@ const Type* Foam::objectRegistry::cfindObject
     const bool recursive
 ) const
 {
-    const_iterator iter = cfind(name);
-
-    if (iter.found())
-    {
-        const Type* ptr = dynamic_cast<const Type*>(iter());
-
-        if (ptr)
-        {
-            return ptr;
-        }
-    }
-    else if (recursive && this->parentNotTime())
-    {
-        return parent_.cfindObject<Type>(name, recursive);
-    }
-
-    return nullptr;
+    return dynamic_cast<const Type*>(this->cfindIOobject(name, recursive));
 }
 
 
@@ -427,9 +413,7 @@ Type* Foam::objectRegistry::findObject
     const bool recursive
 )
 {
-    const Type* ptr = this->cfindObject<Type>(name, recursive);
-
-    return const_cast<Type*>(ptr);
+    return const_cast<Type*>(this->cfindObject<Type>(name, recursive));
 }
 
 
@@ -440,9 +424,7 @@ Type* Foam::objectRegistry::getObjectPtr
     const bool recursive
 ) const
 {
-    const Type* ptr = this->cfindObject<Type>(name, recursive);
-
-    return const_cast<Type*>(ptr);
+    return const_cast<Type*>(this->cfindObject<Type>(name, recursive));
 }
 
 
@@ -469,7 +451,7 @@ const Type& Foam::objectRegistry::lookupObject
             << "    lookup of " << name << " from objectRegistry "
             << this->name()
             << " successful\n    but it is not a " << Type::typeName
-            << ", it is a " << iter()->type()
+            << ", it is a " << iter->type()
             << abort(FatalError);
     }
     else if (recursive && this->parentNotTime())

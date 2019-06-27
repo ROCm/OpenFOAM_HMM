@@ -169,7 +169,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::Cf() const
 
     forAll(Cf, patchi)
     {
-        Cf.set(patchi, new Field<scalar>(Ubf[patchi].size(), 0));
+        Cf.set(patchi, new Field<scalar>(Ubf[patchi].size(), Zero));
     }
 
     const volSymmTensorField R(devReff());
@@ -203,7 +203,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::ReynoldsAnalogy
 :
     heatTransferCoeffModel(dict, mesh, TName),
     UName_("U"),
-    URef_(vector::zero),
+    URef_(Zero),
     rhoName_("rho"),
     rhoRef_(0.0),
     CpName_("Cp"),

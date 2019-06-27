@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +32,9 @@ Group
 Description
     Calculates average quantities for a user-specified selection of volumetric
     and surface fields.
-    With the %subRegion option, also supports fields on a surfMesh.
+    With the %subRegion option, also supports fields on functionObject
+    surface output (eg, sampledSurfaces).
+
 
     Fields are entered as a list of sub-dictionaries, which indicate the type of
     averages to perform, and can be updated during the calculation.  The current
@@ -102,15 +106,15 @@ Usage
 
     Where the entries comprise:
     \table
-        Property          | Description               | Required | Default
-        type              | type name: fieldAverage              | yes |
-        restartOnRestart  | Restart the averaging on restart     | no  | no
-        restartOnOutput   | Restart the averaging on output      | no  | no
-        periodicRestart   | Periodically restart the averaging   | no  | no
-        restartPeriod     | Periodic restart period              | conditional |
-        restartTime       | One-shot reset of the averaging | no | great
-        fields            | list of fields and averaging options | yes |
-        subRegion         | name of a sub-region such as a surface name | no |
+        Property        | Description                       | Required | Default
+        type            | Type name: fieldAverage           | yes |
+        restartOnRestart| Restart the averaging on restart  | no  | no
+        restartOnOutput | Restart the averaging on output   | no  | no
+        periodicRestart | Periodically restart the averaging | no  | no
+        restartPeriod   | Periodic restart period            | conditional |
+        restartTime     | One-shot reset of the averaging    | no | great
+        fields          | list of fields and averaging options | yes |
+        subRegion       | Name for alternative objectRegistry  | no  | ""
     \endtable
 
 
@@ -159,6 +163,9 @@ protected:
         //- Time at last call, prevents repeated averaging
         label prevTimeIndex_;
 
+        //- Initialised flag
+        bool initialised_;
+
         //- Restart the averaging process on restart
         Switch restartOnRestart_;
 
@@ -173,9 +180,6 @@ protected:
 
         //- Specific restart time
         scalar restartTime_;
-
-        //- Initialised flag
-        bool initialised_;
 
         //- List of field average items, describing what averages to be
         //  calculated and output
@@ -299,7 +303,7 @@ public:
 
 
     //- Destructor
-    virtual ~fieldAverage();
+    virtual ~fieldAverage() = default;
 
 
     // Member Functions

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,14 +142,13 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::addToMRU
 {
     if (maxMRUSize_ > 0 && MRURetrieve_)
     {
-        typename SLList<chemPointISAT<CompType, ThermoType>*>::iterator iter =
-            MRUList_.begin();
+        auto iter = MRUList_.begin();
 
         // First search if the chemPoint is already in the list
         bool isInList = false;
-        for ( ; iter != MRUList_.end(); ++iter)
+        for (; iter.good(); ++iter)
         {
-            if (iter() == phi0)
+            if (*iter == phi0)
             {
                 isInList = true;
                 break;
@@ -159,10 +160,7 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::addToMRU
             // If it is in the list, then move it to front
             if (iter != MRUList_.begin())
             {
-                // iter hold the position of the element to move
                 MRUList_.remove(iter);
-
-                // Insert the element in front of the list
                 MRUList_.insert(phi0);
             }
         }
@@ -293,11 +291,9 @@ bool Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::grow
     {
         return phi0->grow(phiq);
     }
+
     // The actual solution and the approximation given by ISAT are too different
-    else
-    {
-        return false;
-    }
+    return false;
 }
 
 
@@ -499,12 +495,11 @@ bool Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::retrieve
         ++nRetrieved_;
         return true;
     }
-    else
-    {
-        // This point is reached when every retrieve trials have failed
-        // or if the tree is empty
-        return false;
-    }
+
+
+    // This point is reached when every retrieve trials have failed
+    // or if the tree is empty
+    return false;
 }
 
 

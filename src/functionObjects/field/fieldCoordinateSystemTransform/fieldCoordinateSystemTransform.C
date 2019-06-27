@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,7 +193,7 @@ bool Foam::functionObjects::fieldCoordinateSystemTransform::execute()
 {
     fieldSet_.updateSelection();
 
-    for (const word& fieldName : fieldSet_.selection())
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
         transform<scalar>(fieldName);
         transform<vector>(fieldName);
@@ -210,9 +212,9 @@ bool Foam::functionObjects::fieldCoordinateSystemTransform::execute()
 
 bool Foam::functionObjects::fieldCoordinateSystemTransform::write()
 {
-    forAllConstIters(fieldSet_, iter)
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
-        writeObject(transformFieldName(iter()));
+        writeObject(transformFieldName(fieldName));
     }
 
     return true;

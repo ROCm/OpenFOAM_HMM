@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -988,7 +990,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::findOffsetPatchFaces
         offsetBoundaryCells.write();
     }
 
-    return offsetBoundaryCells;
+    return std::move(offsetBoundaryCells);
 }
 
 
@@ -1063,7 +1065,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
         // Check for cells with one internal face only
 
-        labelList nInternalFaces(pMesh.nCells(), label(0));
+        labelList nInternalFaces(pMesh.nCells(), Zero);
 
         for (label fI = 0; fI < pMesh.nInternalFaces(); fI++)
         {

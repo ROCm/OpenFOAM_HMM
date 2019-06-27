@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -55,96 +55,73 @@ echo_metis()
 # -> HAVE_METIS, METIS_ARCH_PATH, METIS_INC_DIR, METIS_LIB_DIR
 have_metis()
 {
-    local header library static label settings warn
+    local prefix header library incName libName settings warn
     warn="==> skip metis"
 
-    # Basic setup/checks
-    settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/metis) || {
-        [ -n "$warn" ] && echo "$warn (no config.sh/metis settings)"
-        return 1
-    }
-    . $settings
-    if isNone "$METIS_ARCH_PATH"
+    # Setup
+    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/metis)
     then
-        [ -n "$warn" ] && echo "$warn (not available)"
-        return 1
-    fi
-
-
-    # Header/library names
-    header="metis.h"
-    library="libmetis$extLibso"
-    static="libmetis$extLiba"
-
-
-    if hasAbsdir "$METIS_ARCH_PATH"
-    then
-        header=$(findFirstFile $METIS_ARCH_PATH/include/$header)
-
-        library=$(findFirstFile \
-            "$(thirdExtLib $library)" \
-            $METIS_ARCH_PATH/lib/$static \
-            $METIS_ARCH_PATH/lib/$library \
-            $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$static \
-            $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$library \
-        )
-    elif isSystem "$METIS_ARCH_PATH"
-    then
-        header=$(findFirstFile /usr/local/include/$header /usr/include/$header)
-
-        case "$header" in
-        /usr/local/*)
-            library=$(findFirstFile \
-                /usr/local/lib/$library \
-                /usr/local/lib$WM_COMPILER_LIB_ARCH/$library \
-            )
-            ;;
-
-        *)
-            library=$(findFirstFile \
-                /usr/lib/$library \
-                /usr/lib$WM_COMPILER_LIB_ARCH/$library \
-            )
-            ;;
-        esac
+        . "$settings"
     else
-        unset header library
+        [ -n "$warn" ] && echo "$warn (no config.sh/metis settings)"
+        return 2
     fi
 
+    # Expected location, include/library names
+    prefix="$METIS_ARCH_PATH"
+    incName="metis.h"
+    libName="libmetis"
 
-    # Header found?
+    # ----------------------------------
+    if isNone "$prefix"
+    then
+        [ -n "$warn" ] && echo "$warn (disabled)"
+        return 1
+    elif hasAbsdir "$prefix"
+    then
+        header=$(findFirstFile "$prefix/include/$incName")
+        library="$(findExtLib $libName)"
+    elif isSystem "$prefix"
+    then
+        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        prefix=$(sysPrefix "$header")
+    else
+        unset prefix
+    fi
+    # ----------------------------------
+
+    # Header
     [ -n "$header" ] || {
         [ -n "$warn" ] && echo "$warn (no header)"
         return 2
     }
 
-    # Library found?
-    [ -n "$library" ] || {
-        [ -n "$warn" ] && echo "$warn (missing library)"
+    # Library
+    [ -n "$library" ] || library=$(findLibrary \
+        "$prefix/lib/$libName" \
+        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
+    ) || {
+        [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
 
+    # ----------------------------------
+
+    local label
 
     # Ensure consistent sizes between OpenFOAM and metis header
     # Extract IDXTYPEWIDTH from metis.h: regex as per ThirdParty Allwmake
-    label=$(sed -ne 's/^.*#define  *IDXTYPEWIDTH  *\([1-9][0-9]\).*/\1/p' $header)
-    : ${label:=unknown}
+    label=$(sed -ne \
+        's/^.*#define  *IDXTYPEWIDTH  *\([1-9][0-9]\).*/\1/p' \
+        "$header")
+    : "${label:=unknown}"
 
-    if [ "$WM_LABEL_SIZE" = "$label" ]
-    then
-        echo "Metis (label=$label) - $METIS_ARCH_PATH"
-        export HAVE_METIS=true
-        export METIS_ARCH_PATH
-        export METIS_INC_DIR="${header%/*}"     # Basename
-        export METIS_LIB_DIR="${library%/*}"    # Basename
-    else
-        if [ -n "$warn" ]
-        then
-            echo "$warn (label=$WM_LABEL_SIZE, metis.h has '$label')"
-        fi
-        no_metis
-        return 1
-    fi
+    # OK
+    echo "metis (label=$label) - $prefix"
+    export HAVE_METIS=true
+    export METIS_ARCH_PATH="$prefix"
+    export METIS_INC_DIR="${header%/*}"     # Basename
+    export METIS_LIB_DIR="${library%/*}"    # Basename
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +40,7 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
 {
     for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
     {
-        const T* ptr = iter.object();
+        const T* ptr = iter.val();
         if (ptr)
         {
             this->set(iter.key(), new T(*ptr));
@@ -75,9 +77,9 @@ Foam::HashPtrTable<T, Key, Hash>::~HashPtrTable()
 template<class T, class Key, class Hash>
 Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 {
-    if (iter.found())
+    if (iter.good())
     {
-        autoPtr<T> aptr(iter.object());
+        autoPtr<T> aptr(iter.val());
         this->parent_type::erase(iter);
         return aptr;
     }
@@ -97,9 +99,9 @@ Foam::autoPtr<T> Foam::HashPtrTable<T, Key, Hash>::remove(const Key& key)
 template<class T, class Key, class Hash>
 bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 {
-    if (iter.found())
+    if (iter.good())
     {
-        T* ptr = iter.object();
+        T* ptr = iter.val();
 
         if (this->parent_type::erase(iter))
         {
@@ -129,7 +131,7 @@ void Foam::HashPtrTable<T, Key, Hash>::clear()
 {
     for (iterator iter = this->begin(); iter != this->end(); ++iter)
     {
-        delete iter.object();
+        delete iter.val();
     }
 
     this->parent_type::clear();
@@ -155,7 +157,7 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
 
     for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
     {
-        const T* ptr = iter.object();
+        const T* ptr = iter.val();
         if (ptr)
         {
             this->set(iter.key(), new T(*ptr));

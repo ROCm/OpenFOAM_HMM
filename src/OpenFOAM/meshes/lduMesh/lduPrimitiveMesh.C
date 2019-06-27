@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,9 +119,9 @@ Foam::label Foam::lduPrimitiveMesh::totalSize
 {
     label size = 0;
 
-    forAll(meshes, i)
+    for (const lduPrimitiveMesh& msh : meshes)
     {
-        size += meshes[i].lduAddr().size();
+        size += msh.lduAddr().size();
     }
     return size;
 }
@@ -132,7 +134,7 @@ Foam::labelList Foam::lduPrimitiveMesh::upperTriOrder
     const labelUList& upper
 )
 {
-    labelList nNbrs(nCells, 0);
+    labelList nNbrs(nCells, Zero);
 
     // Count number of upper neighbours
     forAll(lower, facei)
@@ -377,7 +379,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
 
     label nOtherInterfaces = 0;
-    labelList nCoupledFaces(nMeshes, 0);
+    labelList nCoupledFaces(nMeshes, Zero);
 
     for (label procMeshI = 0; procMeshI < nMeshes; procMeshI++)
     {
@@ -435,21 +437,10 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                             nCoupledFaces[procMeshI] += ldui.faceCells().size();
                         }
 
-                        EdgeMap<labelPairList>::iterator iter =
-                            mergedMap.find(procEdge);
-
-                        if (iter != mergedMap.end())
-                        {
-                            iter().append(labelPair(procMeshI, intI));
-                        }
-                        else
-                        {
-                            mergedMap.insert
-                            (
-                                procEdge,
-                                labelPairList(1, labelPair(procMeshI, intI))
-                            );
-                        }
+                        mergedMap(procEdge).append
+                        (
+                            labelPair(procMeshI, intI)
+                        );
                     }
                     else
                     {
@@ -462,21 +453,10 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                                 << endl;
                         }
 
-                        EdgeMap<labelPairList>::iterator iter =
-                            unmergedMap.find(procEdge);
-
-                        if (iter != unmergedMap.end())
-                        {
-                            iter().append(labelPair(procMeshI, intI));
-                        }
-                        else
-                        {
-                            unmergedMap.insert
-                            (
-                                procEdge,
-                                labelPairList(1, labelPair(procMeshI, intI))
-                            );
-                        }
+                        unmergedMap(procEdge).append
+                        (
+                            labelPair(procMeshI, intI)
+                        );
                     }
                 }
                 else
@@ -488,7 +468,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                         << " of unhandled type " << interfaces[intI].type()
                         << exit(FatalError);
 
-                    nOtherInterfaces++;
+                    ++nOtherInterfaces;
                 }
             }
         }
@@ -499,10 +479,10 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     if (debug)
     {
         Pout<< "Remaining interfaces:" << endl;
-        forAllConstIter(EdgeMap<labelPairList>, unmergedMap, iter)
+        forAllConstIters(unmergedMap, iter)
         {
             Pout<< "    agglom procEdge:" << iter.key() << endl;
-            const labelPairList& elems = iter();
+            const labelPairList& elems = iter.val();
             forAll(elems, i)
             {
                 label procMeshI = elems[i][0];
@@ -528,10 +508,10 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
     if (debug)
     {
         Pout<< "Merged interfaces:" << endl;
-        forAllConstIter(EdgeMap<labelPairList>, mergedMap, iter)
+        forAllConstIters(mergedMap, iter)
         {
             Pout<< "    agglom procEdge:" << iter.key() << endl;
-            const labelPairList& elems = iter();
+            const labelPairList& elems = iter.val();
 
             forAll(elems, i)
             {
@@ -629,13 +609,13 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                         // I am 'master' since my cell numbers will be lower
                         // since cells get added in procMeshI order.
 
-                        label agglom0 = procAgglomMap[myP];
-                        label agglom1 = procAgglomMap[nbrP];
+                        const label agglom0 = procAgglomMap[myP];
+                        const label agglom1 = procAgglomMap[nbrP];
 
-                        EdgeMap<labelPairList>::const_iterator fnd =
-                            mergedMap.find(edge(agglom0, agglom1));
+                        const auto fnd =
+                            mergedMap.cfind(edge(agglom0, agglom1));
 
-                        if (fnd != mergedMap.end())
+                        if (fnd.found())
                         {
                             const labelPairList& elems = fnd();
 
@@ -794,9 +774,9 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
 
     label allInterfacei = 0;
 
-    forAllConstIter(EdgeMap<labelPairList>, unmergedMap, iter)
+    forAllConstIters(unmergedMap, iter)
     {
-        const labelPairList& elems = iter();
+        const labelPairList& elems = iter.val();
 
         // Sort processors in increasing order so both sides walk through in
         // same order.

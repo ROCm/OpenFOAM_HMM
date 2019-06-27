@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -508,9 +508,8 @@ Foam::functionObjects::externalCoupled::externalCoupled
     const dictionary& dict
 )
 :
-    functionObject(name),
+    timeFunctionObject(name, runTime),
     externalFileCoupler(),
-    time_(runTime),
     calcFrequency_(-1),
     lastTrigger_(-1),
     initialisedCoupling_(false)
@@ -565,7 +564,7 @@ bool Foam::functionObjects::externalCoupled::end()
 
 bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
 {
-    functionObject::read(dict);
+    timeFunctionObject::read(dict);
     externalFileCoupler::readDict(dict);
 
     calcFrequency_ = dict.lookupOrDefault("calcFrequency", 1);

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,7 +145,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
     else
     {
         label nCells = ldum.lduAddr().size();
-        scalarSquareMatrix m(nCells, 0.0);
+        scalarSquareMatrix m(nCells, Zero);
         transfer(m);
         convert(ldum, interfaceCoeffs, interfaces);
     }

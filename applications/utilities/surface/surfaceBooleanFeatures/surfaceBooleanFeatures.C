@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1242,7 +1244,7 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     label nFeatEds = inter.cutEdges().size();
 
     DynamicList<vector> normals(2*nFeatEds);
-    vectorField edgeDirections(nFeatEds, vector::zero);
+    vectorField edgeDirections(nFeatEds, Zero);
     DynamicList<extendedFeatureEdgeMesh::sideVolumeType> normalVolumeTypes
     (
         2*nFeatEds
@@ -1257,7 +1259,7 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     forAllConstIters(inter.facePairToEdgeId(), iter)
     {
         const labelPair& facePair = iter.key();
-        const label cutEdgeI = iter.object();
+        const label cutEdgeI = iter.val();
 
         const edge& fE = inter.cutEdges()[cutEdgeI];
 

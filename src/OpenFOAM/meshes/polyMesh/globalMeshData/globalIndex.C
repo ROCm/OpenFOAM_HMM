@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +36,66 @@ Foam::globalIndex::globalIndex(Istream& is)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::globalIndex::bin
+(
+    const labelUList& offsets,
+    const labelUList& globalIds,
+    labelList& order,
+    CompactListList<label>& bins,
+    DynamicList<label>& validBins
+)
+{
+    sortedOrder(globalIds, order);
+
+    bins.m() = UIndirectList<label>(globalIds, order);
+
+    labelList& binOffsets = bins.offsets();
+    binOffsets.setSize(offsets.size());
+    binOffsets = 0;
+
+    validBins.clear();
+
+    if (globalIds.size())
+    {
+        const label id = bins.m()[0];
+        label proci = findLower(offsets, id+1);
+
+        validBins.append(proci);
+        label binSize = 1;
+
+        for (label i = 1; i < order.size(); i++)
+        {
+            const label id = bins.m()[i];
+
+            if (id < offsets[proci+1])
+            {
+                binSize++;
+            }
+            else
+            {
+                // Not local. Reset proci
+                label oldProci = proci;
+                proci = findLower(offsets, id+1);
+
+                // Set offsets
+                for (label j = oldProci+1; j < proci; ++j)
+                {
+                    binOffsets[j] = binOffsets[oldProci]+binSize;
+                }
+                binOffsets[proci] = i;
+                validBins.append(proci);
+                binSize = 1;
+            }
+        }
+
+        for (label j = proci+1; j < binOffsets.size(); ++j)
+        {
+            binOffsets[j] = binOffsets[proci]+binSize;
+        }
+    }
+}
+
 
 void Foam::globalIndex::reset
 (
@@ -74,33 +136,25 @@ void Foam::globalIndex::reset
 }
 
 
-void Foam::globalIndex::reset(const label localSize)
+Foam::labelList Foam::globalIndex::sizes() const
 {
-    offsets_.resize(Pstream::nProcs()+1);
+    labelList values;
 
-    labelList localSizes(Pstream::nProcs(), Zero);
-    localSizes[Pstream::myProcNo()] = localSize;
+    const label len = (offsets_.size() - 1);
 
-    Pstream::gatherList(localSizes, Pstream::msgType());
-    Pstream::scatterList(localSizes, Pstream::msgType());
-
-    label offset = 0;
-    offsets_[0] = 0;
-    for (label proci = 0; proci < Pstream::nProcs(); ++proci)
+    if (len < 1)
     {
-        const label oldOffset = offset;
-        offset += localSizes[proci];
-
-        if (offset < oldOffset)
-        {
-            FatalErrorInFunction
-                << "Overflow : sum of sizes " << localSizes
-                << " exceeds capability of label (" << labelMax
-                << "). Please recompile with larger datatype for label."
-                << exit(FatalError);
-        }
-        offsets_[proci+1] = offset;
+        return values;
     }
+
+    values.resize(len);
+
+    for (label proci=0; proci < len; ++proci)
+    {
+        values[proci] = offsets_[proci+1] - offsets_[proci];
+    }
+
+    return values;
 }
 
 

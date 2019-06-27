@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,8 +78,7 @@ Foam::labelList Foam::manualRenumber::renumber
         )
     );
 
-    // check if the final renumbering is OK
-
+    // Check if the final renumbering is OK
     if (newToOld.size() != points.size())
     {
         FatalErrorInFunction
@@ -94,7 +95,7 @@ Foam::labelList Foam::manualRenumber::renumber
     labelList oldToNew(points.size(), -1);
     forAll(newToOld, i)
     {
-        label origCelli = newToOld[i];
+        const label origCelli = newToOld[i];
 
         if (origCelli < 0 || origCelli >= points.size())
         {
@@ -122,7 +123,7 @@ Foam::labelList Foam::manualRenumber::renumber
         }
     }
 
-    return newToOld;
+    return std::move(newToOld);
 }
 
 

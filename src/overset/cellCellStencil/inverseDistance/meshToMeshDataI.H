@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,12 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 inline Foam::meshToMeshData::meshToMeshData()
 :
     tgtCelli_(-2)
 {}
 
 
-// Construct from components
 inline Foam::meshToMeshData::meshToMeshData(const label tgtCelli)
 :
     tgtCelli_(tgtCelli)
@@ -141,6 +139,7 @@ inline bool Foam::meshToMeshData::updateCell
 
         // Leave unmatched cell for visit from different face
     }
+
     return false;
 }
 
@@ -162,10 +161,8 @@ inline bool Foam::meshToMeshData::updateFace
         tgtCelli_ = neighbourInfo.tgtCelli_;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -185,10 +182,8 @@ inline bool Foam::meshToMeshData::updateFace
         tgtCelli_ = neighbourInfo.tgtCelli_;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -201,14 +196,7 @@ inline bool Foam::meshToMeshData::equal
 {
     if (!valid(td))
     {
-        if (!rhs.valid(td))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return (!rhs.valid(td));
     }
     else
     {
@@ -222,8 +210,7 @@ inline bool Foam::meshToMeshData::equal
 inline bool Foam::meshToMeshData::operator==
 (
     const Foam::meshToMeshData& rhs
-)
- const
+) const
 {
     return tgtCelli_ == rhs.tgtCelli_;
 }
@@ -232,8 +219,7 @@ inline bool Foam::meshToMeshData::operator==
 inline bool Foam::meshToMeshData::operator!=
 (
     const Foam::meshToMeshData& rhs
-)
- const
+) const
 {
     return !(*this == rhs);
 }

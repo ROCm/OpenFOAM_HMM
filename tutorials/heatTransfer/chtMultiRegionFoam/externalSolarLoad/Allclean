@@ -3,6 +3,7 @@ cd ${0%/*} || exit 1                        # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
 
 cleanCase0
+\rm allVisibleFaces.obj 2>/dev/null
 
 rm -rf constant/cellToRegion
 rm -rf constant/*/polyMesh  # region meshes
@@ -13,5 +14,7 @@ rm -f constant/air/finalAgglom
 rm -f constant/air/globalFaceFaces
 rm -f constant/air/mapDist
 rm -f constant/air/visibleFaceFaces
+
+rm -rf constant/triSurface
 
 #------------------------------------------------------------------------------

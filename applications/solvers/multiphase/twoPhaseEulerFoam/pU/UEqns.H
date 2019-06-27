@@ -4,8 +4,8 @@ MRF.correctBoundaryVelocity(U1);
 MRF.correctBoundaryVelocity(U2);
 MRF.correctBoundaryVelocity(U);
 
-fvVectorMatrix U1Eqn(U1, rho1.dimensions()*U1.dimensions()*dimVol/dimTime);
-fvVectorMatrix U2Eqn(U2, rho2.dimensions()*U2.dimensions()*dimVol/dimTime);
+fvVectorMatrix U1Eqn(U1, rho1.dimensions()*U1.dimensions()*dimVolume/dimTime);
+fvVectorMatrix U2Eqn(U2, rho2.dimensions()*U2.dimensions()*dimVolume/dimTime);
 
 volScalarField Kd(fluid.Kd());
 

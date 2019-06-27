@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -560,9 +562,9 @@ Foam::Field<Type>::component
     const direction d
 ) const
 {
-    tmp<Field<cmptType>> Component(new Field<cmptType>(this->size()));
-    ::Foam::component(Component.ref(), *this, d);
-    return Component;
+    auto tres = tmp<Field<cmptType>>::New(this->size());
+    ::Foam::component(tres.ref(), *this, d);
+    return tres;
 }
 
 
@@ -618,9 +620,9 @@ VSForm Foam::Field<Type>::block(const label start) const
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::T() const
 {
-    tmp<Field<Type>> transpose(new Field<Type>(this->size()));
-    ::Foam::T(transpose.ref(), *this);
-    return transpose;
+    auto tres = tmp<Field<Type>>::New(this->size());
+    ::Foam::T(tres.ref(), *this);
+    return tres;
 }
 
 
@@ -629,27 +631,12 @@ void Foam::Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 {
     os.writeKeyword(keyword);
 
-    const label len = this->size();
+    // The contents are 'uniform' if the list is non-empty
+    // and all entries have identical values.
 
-    // Can the contents be considered 'uniform' (ie, identical)?
-    bool uniform = (contiguous<Type>() && len);
-    if (uniform)
+    if (contiguous<Type>() && List<Type>::uniform())
     {
-        const Type& val = this->operator[](0);
-
-        for (label i=1; i<len; ++i)
-        {
-            if (val != this->operator[](i))
-            {
-                uniform = false;
-                break;
-            }
-        }
-    }
-
-    if (uniform)
-    {
-        os << "uniform " << this->operator[](0);
+        os << "uniform " << this->first();
     }
     else
     {

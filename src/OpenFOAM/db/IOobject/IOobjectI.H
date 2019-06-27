@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,6 +104,18 @@ inline bool Foam::IOobject::globalObject() const
 inline bool& Foam::IOobject::globalObject()
 {
     return globalObject_;
+}
+
+
+inline unsigned Foam::IOobject::labelByteSize() const
+{
+    return labelByteSize_;
+}
+
+
+inline unsigned Foam::IOobject::scalarByteSize() const
+{
+    return scalarByteSize_;
 }
 
 

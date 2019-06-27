@@ -3,8 +3,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -29,22 +31,54 @@
 #     Run either Allwclean, Allclean or default cleanCase in current directory
 #     and all its subdirectories.
 #
+#     When an argument is provided, it is treated as a directory name.
+#     If an option (eg, -self) is provided, it suppresses calling
+#     Allwclean or Allclean (ie, to avoid recursion)
+#
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
 
-thisScript=$0
+thisScript="$0"
 if [ "/${thisScript#/}" != "$thisScript" ]
 then
     thisScript="$PWD/$thisScript"
 fi
 
-# If an argument is supplied do not execute ./Allwclean or ./Allclean
-# (to avoid recursion)
-if [ $# -eq 0 -a -f Allwclean ]
+# Simple option/argument parsing.
+# By default use Allclean, Allwclean when present
+#
+# If an argument is supplied, treat as a change directory
+#
+# If an option (eg, -self) is provided,
+# do not execute ./Allwclean or ./Allclean (to avoid recursion)
+
+withAllclean=true
+
+if [ "$#" -gt 0 ]
+then
+    case "$1" in
+    -h | -help*)
+        echo "${0##*/}: recursively clean an OpenFOAM case directory" 1>&2
+        exit 0
+        ;;
+    -self | -*)
+        unset withAllclean
+        ;;
+    *)
+        cd "$1" 2>/dev/null || {
+            echo "${0##*}: No such directory" 1>&2
+            exit 2
+        }
+        ;;
+    esac
+fi
+
+
+if [ -n "$withAllclean" ] && [ -f Allwclean ]
 then
     # Specialized script
     ./Allwclean
-elif [ $# -eq 0 -a -f Allclean ]
+elif [ -n "$withAllclean" ] && [ -f Allclean ]
 then
     # Specialized script
     ./Allclean

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,6 @@ License
 #include "vtkProperty.h"
 #include "vtkRenderer.h"
 #include "vtkSmartPointer.h"
-#include "vtkTubeFilter.h"
-#include "vtkLookupTable.h"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -44,7 +42,7 @@ namespace functionObjects
 {
 namespace runTimePostPro
 {
-    defineTypeNameAndDebug(pointData, 0);
+    defineTypeName(pointData);
     defineRunTimeSelectionTable(pointData, dictionary);
 }
 }
@@ -139,10 +137,7 @@ Foam::functionObjects::runTimePostPro::pointData::New
     const word& pointDataType
 )
 {
-    if (debug)
-    {
-        Info<< "Selecting pointData " << pointDataType << endl;
-    }
+    DebugInfo << "Selecting pointData " << pointDataType << endl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(pointDataType);
 

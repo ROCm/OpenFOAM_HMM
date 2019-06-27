@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,8 +48,7 @@ Description
 Note
     For historical reasons, dereferencing the table iterator
     (eg, \a *iter) returns a reference to the stored object value
-    value rather than the stored key/object value like std::unordered_map
-    does.
+    rather than the stored key/val pair like std::unordered_map does.
 
     The HashTable iterator:
     \code
@@ -55,7 +56,7 @@ Note
         {
             Info<< "val:" << *iter << nl
                 << "key:" << iter.key() << nl;
-                << "val:" << iter.object() << nl;
+                << "val:" << iter.val() << nl;
         }
     \endcode
     whereas for the \c std::unordered_map iterator:
@@ -84,6 +85,7 @@ SourceFiles
 #include "word.H"
 #include "zero.H"
 #include "Hash.H"
+#include "HashTableDetail.H"
 #include "HashTableCore.H"
 
 #include <initializer_list>
@@ -95,15 +97,15 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 template<class T> class List;
 template<class T> class UList;
-template<class T, unsigned Size> class FixedList;
+template<class T, unsigned N> class FixedList;
 template<class T, class Key, class Hash> class HashTable;
 
 template<class T, class Key, class Hash>
-Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& L);
+Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& tbl);
 
 template<class T, class Key, class Hash>
 Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& tbl);
@@ -118,118 +120,14 @@ class HashTable
 :
     public HashTableCore
 {
-    // Private types for table entries
+    // Types
 
-        //- Structure with a (K,V) tuple and a linked-list for collisions
-        //  Could store key/object as std::pair, but no particular advantage
-        //  unless the iterator dereference type changes.
-        struct pair_entry
-        {
-            //- Type of key
-            typedef Key key_type;
-
-            //- Object content type
-            typedef T mapped_type;
-
-            //- The lookup key
-            key_type key_;
-
-            //- The data object
-            mapped_type obj_;
-
-            //- Addressing (next in collision list)
-            pair_entry* next_;
-
-            //- Construct from key, object, next pointer
-            pair_entry(const Key& key, const T& obj, pair_entry* next)
-            :
-                key_(key),
-                obj_(obj),
-                next_(next)
-            {}
-
-            //- The key
-            const key_type& key() const
-            {
-                return key_;
-            }
-
-            //- The mapped object
-            const mapped_type& mapped() const
-            {
-                return obj_;
-            }
-            mapped_type& mapped()
-            {
-                return obj_;
-            }
-
-        private:
-            //- No copy construct
-            pair_entry(const pair_entry&) = delete;
-
-            //- No copy assignment
-            void operator=(const pair_entry&) = delete;
-        };
-
-
-        //- Structure with a single (K) value and a linked-list for collisions
-        struct unary_entry
-        {
-            //- Type of key
-            typedef Key key_type;
-
-            //- Object content type
-            typedef zero::null mapped_type;
-
-            //- Content storage type to the entry
-            typedef key_type value_type;
-
-            //- The lookup key == content
-            key_type key_;
-
-            //- Addressing (next in collision list)
-            unary_entry* next_;
-
-            //- Construct from key, (ununsed) object, next pointer
-            unary_entry(const Key& key, const T&, unary_entry* next)
-            :
-                key_(key),
-                next_(next)
-            {}
-
-            //- The key
-            const key_type& key() const
-            {
-                return key_;
-            }
-
-            //- Dummy mapped object
-            const mapped_type& mapped() const
-            {
-                return zeroNullElement;
-            }
-            mapped_type& mapped()
-            {
-                return zeroNullElement;
-            }
-
-
-        private:
-            //- No copy construct
-            unary_entry(const unary_entry&) = delete;
-
-            //- No copy assignment
-            void operator=(const unary_entry&) = delete;
-        };
-
-
-        //- Hashed node with a linked-list for collisions
+        //- Table entry. A hashed node with a linked-list for collisions
         typedef typename std::conditional
         <
             std::is_same<zero::null, typename std::remove_cv<T>::type>::value,
-            unary_entry,
-            pair_entry
+            Detail::HashTableSingle<T, Key>,
+            Detail::HashTablePair<T, Key>
         >::type node_type;
 
 
@@ -251,9 +149,14 @@ class HashTable
         //  No checks for zero-sized tables.
         inline label hashKeyIndex(const Key& key) const;
 
+        //- Read entry (key, val) and assign
+        //  \return True if the new entry was set.
+        bool addEntry(Istream& is, const bool overwrite = false);
+
         //- Assign a new hash-entry to a possibly already existing key.
         //  \return True if the new entry was set.
-        bool setEntry(const Key& key, const T& obj, const bool overwrite);
+        template<class... Args>
+        bool setEntry(const bool overwrite, const Key& key, Args&&... args);
 
 
 public:
@@ -335,7 +238,7 @@ public:
         HashTable(this_type&& rhs);
 
         //- Construct from an initializer list
-        HashTable(std::initializer_list<std::pair<Key, T>> lst);
+        HashTable(std::initializer_list<std::pair<Key, T>> list);
 
 
     //- Destructor
@@ -354,6 +257,12 @@ public:
 
         //- Return true if the hash table is empty
         inline bool empty() const;
+
+        //- Find and return a hashed entry. FatalError if it does not exist.
+        inline T& at(const Key& key);
+
+        //- Find and return a hashed entry. FatalError if it does not exist.
+        inline const T& at(const Key& key) const;
 
         //- Return true if hashed entry is found in table
         inline bool found(const Key& key) const;
@@ -459,15 +368,26 @@ public:
 
     // Edit
 
-        //- Insert a new entry, not overwriting existing entries.
-        //  \return True if the entry inserted, which means that it did
-        //  not previously exist in the table.
+        //- Emplace insert a new entry, not overwriting existing entries.
+        //  \return True if the entry did not previously exist in the table.
+        template<class... Args>
+        inline bool emplace(const Key& key, Args&&... args);
+
+        //- Copy insert a new entry, not overwriting existing entries.
+        //  \return True if the entry did not previously exist in the table.
         inline bool insert(const Key& key, const T& obj);
 
-        //- Assign a new entry, overwriting existing entries.
-        //
+        //- Move insert a new entry, not overwriting existing entries.
+        //  \return True if the entry did not previously exist in the table.
+        inline bool insert(const Key& key, T&& obj);
+
+        //- Copy assign a new entry, overwriting existing entries.
         //  \return True, since it always overwrites any entries.
         inline bool set(const Key& key, const T& obj);
+
+        //- Move assign a new entry, overwriting existing entries.
+        //  \return True, since it always overwrites any entries.
+        inline bool set(const Key& key, T&& obj);
 
         //- Erase an entry specified by given iterator
         //  This invalidates the iterator until the next ++ operation.
@@ -506,8 +426,8 @@ public:
 
         //- Remove table entries given by the listed keys
         //  \return The number of items removed
-        template<unsigned Size>
-        inline label erase(const FixedList<Key, Size>& keys);
+        template<unsigned N>
+        inline label erase(const FixedList<Key, N>& keys);
 
         //- Remove table entries given by the listed keys
         //  \return The number of items removed
@@ -611,20 +531,20 @@ public:
         inline T& operator()(const Key& key, const T& deflt);
 
         //- Copy assign
-        void operator=(const HashTable<T, Key, Hash>& rhs);
+        void operator=(const this_type& rhs);
 
         //- Copy assign from an initializer list
         void operator=(std::initializer_list<std::pair<Key, T>> rhs);
 
         //- Move assign
-        void operator=(HashTable<T, Key, Hash>&& rhs);
+        void operator=(this_type&& rhs);
 
         //- Equality. Tables are equal if all keys and values are equal,
         //- independent of order or underlying storage size.
-        bool operator==(const HashTable<T, Key, Hash>& rhs) const;
+        bool operator==(const this_type& rhs) const;
 
         //- The opposite of the equality operation.
-        bool operator!=(const HashTable<T, Key, Hash>& rhs) const;
+        bool operator!=(const this_type& rhs) const;
 
         //- Add entries into this HashTable
         this_type& operator+=(const this_type& rhs);
@@ -680,12 +600,23 @@ protected:
 
             //- True if iterator points to an entry
             //  This can be used directly instead of comparing to end()
+            inline bool good() const;
+
+            //- True if iterator points to an entry - same as good()
             inline bool found() const;
 
             //- The key associated with the iterator
             inline const Key& key() const;
 
+            //- Write the (key, val) pair
+            inline Ostream& print(Ostream& os) const;
+
+
         // Member Operators
+
+            //- True if iterator points to an entry
+            //  This can be used directly instead of comparing to end()
+            explicit inline operator bool() const noexcept;
 
             //- Compare hash-entry element pointers.
             //  Independent of const/non-const access
@@ -733,7 +664,14 @@ protected:
             //- Increment to the next position
             inline void increment();
 
-            //- The object associated with the iterator
+            //- The value associated with the iterator
+            inline mapped_type& val() const
+            {
+                return entry_->mapped();
+            }
+
+            //- The object (value) associated with the iterator
+            //  \deprecated(2019-01) use val() method
             inline mapped_type& object() const
             {
                 return entry_->mapped();
@@ -782,14 +720,25 @@ public:
             {}
 
 
-        // Member functions/operators
+        // Member Functions/Operators
+
+            //- Non-const access to referenced object (value)
+            using Iterator<false>::val;
 
             //- Non-const access to referenced object
             using Iterator<false>::object;
 
             //- Non-const access to referenced object
-            inline reference operator*() const  { return this->object(); }
-            inline reference operator()() const { return this->object(); }
+            inline reference operator*() const  { return this->val(); }
+            inline reference operator()() const { return this->val(); }
+
+            //- For pointer types, allow direct pointer dereferencing
+            template<class TypeT = T>
+            typename std::enable_if
+            <
+                Detail::isPointer<TypeT>::value,
+                T
+            >::type operator->() const { return this->val(); }
 
             inline iterator& operator++();
             inline iterator operator++(int);
@@ -841,17 +790,29 @@ public:
             {}
 
 
-        // Member functions/operators
+        // Member Functions/Operators
 
-            //- Const access to referenced object
+            //- Const access to referenced value
+            using Iterator<true>::val;
+
+            //- Const access to referenced object (value)
             using Iterator<true>::object;
 
-            //- Const access to referenced object
-            inline reference operator*() const  { return this->object(); }
-            inline reference operator()() const { return this->object(); }
+            //- Const access to referenced value
+            inline reference operator*() const  { return this->val(); }
+            inline reference operator()() const { return this->val(); }
+
+            //- For pointer types, allow direct pointer dereferencing
+            template<class TypeT = T>
+            typename std::enable_if
+            <
+                Detail::isPointer<TypeT>::value,
+                const T
+            >::type operator->() const { return this->val(); }
 
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
+
 
         // Assignment
 
@@ -946,10 +907,10 @@ public:
         //- Print information
         Ostream& printInfo(Ostream& os) const;
 
-        //- Write the unordered keys as a list, with line-breaks if list length
-        //- exceeds shortListLen.
+        //- Write unordered keys (list), with line-breaks
+        //- when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeKeys(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeKeys(Ostream& os, const label shortLen=0) const;
 
 
     // IOstream Operator
@@ -957,7 +918,7 @@ public:
         friend Istream& operator>> <T, Key, Hash>
         (
             Istream& is,
-            HashTable<T, Key, Hash>& L
+            HashTable<T, Key, Hash>& tbl
         );
 
         friend Ostream& operator<< <T, Key, Hash>

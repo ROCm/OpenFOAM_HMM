@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,11 +59,8 @@ Foam::swarmCorrections::TomiyamaSwarm::TomiyamaSwarm
     (
         "residualAlpha",
         dimless,
-        dict.lookupOrDefault<scalar>
-        (
-            "residualAlpha",
-            pair_.dispersed().residualAlpha().value()
-        )
+        pair_.dispersed().residualAlpha().value(),
+        dict
     ),
     l_("l", dimless, dict)
 {}

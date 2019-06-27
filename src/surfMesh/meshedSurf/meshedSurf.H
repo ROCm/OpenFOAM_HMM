@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,6 +49,10 @@ class meshedSurf
 {
 public:
 
+    // Forward declarations
+    class emptySurface;
+
+
     // Constructors
 
         //- Construct null
@@ -59,18 +63,59 @@ public:
     virtual ~meshedSurf() = default;
 
 
-    // Access Member Functions
+    // Member Functions
 
-        //- Const access to (global) points used for the surface
+        //- The points used for the surface
         virtual const pointField& points() const = 0;
 
-        //- Const access to the surface faces
+        //- The faces used for the surface
         virtual const faceList& faces() const = 0;
 
-        //- Const access to per-face zone/region information
-        virtual const labelList& zoneIds() const = 0;
-
+        //- Per-face zone/region information.
+        //  Default is zero-sizes (ie, no zone information)
+        virtual const labelList& zoneIds() const
+        {
+            return labelList::null();
+        }
 };
+
+
+/*---------------------------------------------------------------------------*\
+                  Class meshedSurf::emptySurface Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A meshedSurf class with no faces, points or zoneId
+class meshedSurf::emptySurface
+:
+    public meshedSurf
+{
+public:
+
+    // Constructors
+
+        //- Construct null
+        emptySurface() = default;
+
+
+    //- Destructor
+    virtual ~emptySurface() = default;
+
+
+    // Member Functions
+
+        //- Zero-sized point field
+        virtual const pointField& points() const
+        {
+            return pointField::null();
+        }
+
+        //- Zero-sized face list
+        virtual const faceList& faces() const
+        {
+            return faceList::null();
+        }
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

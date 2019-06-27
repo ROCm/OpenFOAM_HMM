@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,10 +214,8 @@ bool Foam::linearDistance::setCellSize(const pointField& pts)
 {
 //    labelHashSet surfaceAlreadyHit(surfaceCellSize_.size());
 
-//    forAll(pts, ptI)
+//    for (const Foam::point& pt : pts)
 //    {
-//        const Foam::point& pt = pts[ptI];
-
 //        List<pointIndexHit> hits;
 
 //        surface_.findNearest

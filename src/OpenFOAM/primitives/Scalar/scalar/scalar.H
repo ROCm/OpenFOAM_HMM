@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +28,7 @@ Typedef
 
 Description
     A floating-point number identical to float or double depending on
-    whether WM_SP or WM_DP is defined.
+    whether WM_SP, WM_SPDP or WM_DP is defined.
 
 SourceFiles
     scalar.C
@@ -41,13 +43,18 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#if defined(WM_SP)
+#if defined(WM_SP) || defined(WM_SPDP)
 
 // Define scalar as a float
 
 namespace Foam
 {
     typedef floatScalar scalar;
+    #if defined(WM_SPDP)
+    typedef doubleScalar solveScalar;
+    #else
+    typedef floatScalar solveScalar;
+    #endif
 
     constexpr scalar GREAT = floatScalarGREAT;
     constexpr scalar VGREAT = floatScalarVGREAT;
@@ -87,6 +94,7 @@ namespace Foam
 namespace Foam
 {
     typedef doubleScalar scalar;
+    typedef doubleScalar solveScalar;
 
     constexpr scalar GREAT = doubleScalarGREAT;
     constexpr scalar VGREAT = doubleScalarVGREAT;
@@ -128,6 +136,18 @@ namespace Foam
 {
     //- Inverse normalized incomplete gamma function
     scalar invIncGamma(const scalar a, const scalar P);
+
+    //- Normalized upper incomplete gamma function
+    scalar incGammaRatio_Q(const scalar a, const scalar x);
+
+    //- Normalized lower incomplete gamma function
+    scalar incGammaRatio_P(const scalar a, const scalar x);
+
+    //- Upper incomplete gamma function
+    scalar incGamma_Q(const scalar a, const scalar x);
+
+    //- Lower incomplete gamma function
+    scalar incGamma_P(const scalar a, const scalar x);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

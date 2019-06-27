@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -54,71 +54,56 @@ echo_boost()
 # -> HAVE_BOOST, BOOST_INC_DIR, BOOST_LIB_DIR
 have_boost()
 {
-    local header library static label settings warn
+    local prefix header library incName libName settings warn
     # warn="==> skip boost"
 
-    # Basic setup/checks
-    if isNone "$BOOST_ARCH_PATH"
+    # Setup - from the current environment
+
+    # Expected location, include/library names
+    prefix="$BOOST_ARCH_PATH"
+    incName="boost/version.hpp"
+    libName="libboost_system"
+
+    # ----------------------------------
+    if isNone "$prefix"
     then
-        [ -n "$warn" ] && echo "$warn (not available)"
+        [ -n "$warn" ] && echo "$warn (disabled)"
         return 1
-    fi
-
-
-    # Header/library names
-    header="boost/version.hpp"
-    library="libboost_system$extLibso"
-
-
-    if hasAbsdir "$BOOST_ARCH_PATH"
+    elif hasAbsdir "$prefix"
     then
-        header=$(findFirstFile $BOOST_ARCH_PATH/include/$header)
-
-        library=$(findFirstFile \
-            "$(thirdExtLib $library)" \
-            $BOOST_ARCH_PATH/lib/$library \
-            $BOOST_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$library \
-        )
-    elif isSystem "$BOOST_ARCH_PATH"
+        header=$(findFirstFile "$prefix/include/$incName")
+        library="$(findExtLib $libName)"
+    elif isSystem "$prefix"
     then
-        header=$(findFirstFile /usr/local/include/$header /usr/include/$header)
-
-        case "$header" in
-        /usr/local/*)
-            library=$(findFirstFile \
-                /usr/local/lib/$library \
-                /usr/local/lib$WM_COMPILER_LIB_ARCH/$library \
-            )
-            ;;
-
-        *)
-            library=$(findFirstFile \
-                /usr/lib/$library \
-                /usr/lib$WM_COMPILER_LIB_ARCH/$library \
-            )
-            ;;
-        esac
+        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        prefix=$(sysPrefix "$header")
     else
-        unset header library
+        unset prefix
     fi
+    # ----------------------------------
 
-
-    # Header found?
+    # Header
     [ -n "$header" ] || {
         [ -n "$warn" ] && echo "$warn (no header)"
         return 2
     }
 
-    # Library found?
-    [ -n "$library" ] || {
-        [ -n "$warn" ] && echo "$warn (missing library)"
+    # Library
+    [ -n "$library" ] || library=$(findLibrary \
+        "$prefix/lib/$libName" \
+        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
+    ) || {
+        [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
 
-    header="${header%/*}"     # Strip one-level (include/boost/...)
+    # ----------------------------------
 
+    header="${header%/*}"   # Strip one-level (include/boost/...)
+
+    # OK
     export HAVE_BOOST=true
-    export BOOST_ARCH_PATH
+    export BOOST_ARCH_PATH="$prefix"
     export BOOST_INC_DIR="${header%/*}"     # Basename
     export BOOST_LIB_DIR="${library%/*}"    # Basename
 }

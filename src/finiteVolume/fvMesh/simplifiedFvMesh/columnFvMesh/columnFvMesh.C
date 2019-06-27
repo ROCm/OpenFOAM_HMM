@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
     (
         "boundary",
         localInstance_,
-        polyMesh::meshSubDir,
+        regionPrefix_ + polyMesh::meshSubDir,
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
@@ -97,7 +97,12 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
     else
     {
         // No boundary file - try reading from a field
-        IOobjectList objects(runTime, runTime.timeName());
+        IOobjectList objects
+        (
+            runTime,
+            runTime.timeName(),
+            (regionName_ == fvMesh::defaultRegion ? "" : regionName_)
+        );
 
         if (objects.empty())
         {
@@ -122,8 +127,9 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
 
         WarningInFunction
             << "All boundaries will be approximated using wall-type patches. "
-            << "This may cause your final case to run differntly.  "
-            << "Create you mesh first for improved performance"
+            << "This may cause your" << nl
+            << "    final case to run differently. "
+            << "Create your mesh first for improved performance"
             << endl;
 
         const dictionary& boundaryFieldDict =
@@ -201,7 +207,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialise(const Time& runTime)
         (
             "points",
             localInstance_,
-            polyMesh::meshSubDir,
+            regionPrefix_ + polyMesh::meshSubDir,
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
@@ -211,7 +217,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialise(const Time& runTime)
         scalar dxi = 0;
         scalar dyi = 0;
         scalar dzi = 0;
-        point origin(point::zero);
+        point origin(Zero);
 
         if (pointsIO.typeHeaderOk<vectorIOField>(true))
         {
@@ -370,12 +376,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::addLocalPatches
 
     if (debug)
     {
-        Pout<< "patches:" << nl << endl;
-        forAll(patches, patchi)
-        {
-            Pout<< "patch: " << patches[patchi]->name() << nl
-                << *patches[patchi] << endl;
-        }
+        Pout<< "patches:" << nl << mesh.boundaryMesh() << endl;
     }
 }
 
@@ -399,13 +400,24 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialiseZones(fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo(const Time& runTime)
+Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo
+(
+    const Time& runTime,
+    const word& regionName
+)
 :
+    regionName_(regionName),
+    regionPrefix_
+    (
+        regionName_ == fvMesh::defaultRegion
+      ? ""
+      : regionName_ + '/'
+    ),
     localInstance_
     (
         runTime.findInstance
         (
-            polyMesh::meshSubDir,
+            regionPrefix_ + polyMesh::meshSubDir,
             "boundary",
             IOobject::READ_IF_PRESENT
         )
@@ -427,14 +439,18 @@ Foam::simplifiedMeshes::columnFvMeshInfo::columnFvMeshInfo(const Time& runTime)
 }
 
 
-Foam::simplifiedMeshes::columnFvMesh::columnFvMesh(const Time& runTime)
+Foam::simplifiedMeshes::columnFvMesh::columnFvMesh
+(
+    const Time& runTime,
+    const word& regionName
+)
 :
-    columnFvMeshInfo(runTime),
+    columnFvMeshInfo(runTime, regionName),
     simplifiedFvMesh
     (
         IOobject
         (
-            fvMesh::defaultRegion,
+            regionName,
             runTime.constant(),
             runTime,
             IOobject::NO_READ, // Do not read any existing mesh

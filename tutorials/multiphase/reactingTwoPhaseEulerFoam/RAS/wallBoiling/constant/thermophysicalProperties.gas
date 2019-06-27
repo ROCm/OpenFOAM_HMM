@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -18,28 +18,16 @@ FoamFile
 thermoType
 {
     type            heRhoThermo;
-    mixture         multiComponentMixture;
+    mixture         pureMixture;
     transport       const;
-    thermo          hRefConst;
+    thermo          eRefConst;
     equationOfState perfectGas;
     specie          specie;
-    energy          sensibleEnthalpy;
+    energy          sensibleInternalEnergy;
 }
 
-dpdt no;
 
-species
-(
-    water
-);
-
-inertSpecie water;
-
-chemistryReader foamChemistryReader;
-
-foamChemistryFile "<constant>/reactions.gas";
-
-water
+mixture
 {
     specie
     {
@@ -53,9 +41,9 @@ water
     thermodynamics
     {
         Hf          0;
-        Cp          12078.4;
+        Cv          12078.4;
         Tref        373.55;
-        Href        2675500;
+        Eref        2675500;
     }
     transport
     {

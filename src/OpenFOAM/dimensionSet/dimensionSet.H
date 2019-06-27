@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,14 +70,12 @@ public:
     typedef FixedList<scalar,7> list_type;
 
 
-    // Member constants
+    // Member Constants
 
-        enum
-        {
-            nDimensions = 7     //!< 7 base dimensions
-        };
+        //- There are 7 base dimensions
+        static constexpr int nDimensions = 7;
 
-        //- Define an enumeration for the names of the dimension exponents
+        //- Enumeration for the dimension exponents
         enum dimensionType
         {
             MASS,               //!< kilogram   kg
@@ -88,8 +88,9 @@ public:
         };
 
 
-    // Static data members
+    // Static Data Members
 
+        //- Tolerance for 'small' exponents, for near-zero rounding
         static const scalar smallExponent;
 
 
@@ -189,8 +190,11 @@ public:
         //- Construct from exponents for all seven dimensions
         dimensionSet(const FixedList<scalar,7>& dimensions);
 
-        //- Copy constructor
+        //- Copy construct
         dimensionSet(const dimensionSet& ds);
+
+        //- Construct from dictionary entry - usually "dimensions".
+        dimensionSet(const dictionary& dict, const word& entryName);
 
         //- Construct and return a clone
         autoPtr<dimensionSet> clone() const
@@ -213,6 +217,7 @@ public:
         //- Return non-const access to the exponents as a list
         FixedList<scalar,7>& values();
 
+        //- Copy assign the exponents from the dimensionSet
         void reset(const dimensionSet& ds);
 
 
@@ -288,6 +293,7 @@ Ostream& operator<<(Ostream& os, const dimensionSet& ds);
 
 dimensionSet min(const dimensionSet& ds1, const dimensionSet& ds2);
 dimensionSet max(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet clip(const dimensionSet& ds1, const dimensionSet& ds2);
 
 dimensionSet cmptMultiply(const dimensionSet& ds1, const dimensionSet& ds2);
 dimensionSet cmptDivide(const dimensionSet& ds1, const dimensionSet& ds2);

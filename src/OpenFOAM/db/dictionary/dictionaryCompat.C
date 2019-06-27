@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
 {
     const_searcher finder(csearch(keyword, matchOpt));
 
-    if (finder.found())
+    if (finder.good())
     {
         return finder;
     }
@@ -63,7 +63,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
     {
         finder = csearch(word::validate(iter.first), matchOpt);
 
-        if (finder.found())
+        if (finder.good())
         {
             // Only want a single warning (on master), but guard with a
             // parRun check to avoid Pstream::master() when Pstream has not
@@ -101,7 +101,7 @@ bool Foam::dictionary::foundCompat
     enum keyType::option matchOpt
 ) const
 {
-    return csearchCompat(keyword, compat, matchOpt).found();
+    return csearchCompat(keyword, compat, matchOpt).good();
 }
 
 
@@ -125,7 +125,7 @@ const Foam::entry& Foam::dictionary::lookupEntryCompat
 {
     const const_searcher finder(csearchCompat(keyword, compat, matchOpt));
 
-    if (!finder.found())
+    if (!finder.good())
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "

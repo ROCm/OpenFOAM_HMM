@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,13 +149,13 @@ public:
             }
 
             //- Return name
-            const word& name() const
+            virtual const word& name() const
             {
                 return polyPatch_.name();
             }
 
             //- Return start label of this patch in the polyMesh face list
-            label start() const
+            virtual label start() const
             {
                 return polyPatch_.start();
             }

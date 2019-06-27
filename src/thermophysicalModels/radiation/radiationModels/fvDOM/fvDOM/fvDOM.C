@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,10 +193,7 @@ void Foam::radiation::fvDOM::initialise()
     if (useSolarLoad_)
     {
         const dictionary& solarDict = this->subDict("solarLoarCoeffs");
-        solarLoad_.reset
-        (
-            new solarLoad(solarDict, T_, externalRadHeatFieldName_)
-        );
+        solarLoad_.reset(new solarLoad(solarDict, T_));
 
         if (solarLoad_->nBands() > 1)
         {
@@ -420,10 +419,8 @@ bool Foam::radiation::fvDOM::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

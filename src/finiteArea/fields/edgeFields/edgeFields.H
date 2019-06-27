@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    edgeFields
+    Foam::edgeFields
 
 Description
     Finite area edge fields

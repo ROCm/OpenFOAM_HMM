@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +57,7 @@ void Foam::shortEdgeFilter2D::assignBoundaryPointRegions
     List<DynamicList<label>>& boundaryPointRegions
 ) const
 {
-    forAllConstIter(EdgeMap<label>, mapEdgesRegion_, iter)
+    forAllConstIters(mapEdgesRegion_, iter)
     {
         const edge& e = iter.key();
         const label& regionI = iter();
@@ -188,7 +190,7 @@ Foam::shortEdgeFilter2D::shortEdgeFilter2D
 
         Info<< "Writing indirectPatchEdges to " << str.name() << endl;
 
-        forAllConstIter(EdgeMap<label>, indirectPatchEdge_, iter)
+        forAllConstIters(indirectPatchEdge_, iter)
         {
             const edge& e = iter.key();
 

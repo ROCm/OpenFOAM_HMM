@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermo_H
-#define thermo_H
+#ifndef regionModels_pyrolysisModels_thermo_H
+#define regionModels_pyrolysisModels_thermo_H
 
 #include "pyrolysisModel.H"
 #include "volFieldsFwd.H"

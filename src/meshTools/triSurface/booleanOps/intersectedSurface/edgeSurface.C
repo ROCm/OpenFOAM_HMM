@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +78,7 @@ void Foam::edgeSurface::calcPointEdges()
 {
     pointEdges_.setSize(points_.size());
 
-    labelList pointNEdges(points_.size(), 0);
+    labelList pointNEdges(points_.size(), Zero);
 
     forAll(edges_, edgeI)
     {
@@ -247,7 +249,7 @@ Foam::edgeSurface::edgeSurface
         const label facei = iter.key()[isFirstSurface ? 0 : 1];
 
         // Edge label in intersection
-        const label edgeI = iter.object();
+        const label edgeI = iter.val();
 
         // Store on face-edge addressing. (note: offset edge)
         allFaceEdges[facei].append(edgeI + nSurfaceEdges_);

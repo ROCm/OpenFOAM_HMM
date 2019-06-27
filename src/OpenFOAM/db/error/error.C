@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +82,7 @@ Foam::error::error(const string& title)
 {
     if (!messageStreamPtr_->good())
     {
-        Perr<< endl
+        Perr<< nl
             << "error::error(const string& title) : cannot open error stream"
             << endl;
         exit(1);
@@ -100,7 +102,7 @@ Foam::error::error(const dictionary& errDict)
 {
     if (!messageStreamPtr_->good())
     {
-        Perr<< endl
+        Perr<< nl
             << "error::error(const dictionary& errDict) : "
                "cannot open error stream"
             << endl;
@@ -168,7 +170,7 @@ Foam::error::operator Foam::OSstream&()
 {
     if (!messageStreamPtr_->good())
     {
-        Perr<< endl
+        Perr<< nl
             << "error::operator OSstream&() : error stream has failed"
             << endl;
         abort();
@@ -203,6 +205,12 @@ Foam::string Foam::error::message() const
 }
 
 
+void Foam::error::clear() const
+{
+    return messageStreamPtr_->reset();
+}
+
+
 void Foam::error::exit(const int errNo)
 {
     if (!throwExceptions_ && JobInfo::constructed)
@@ -215,8 +223,7 @@ void Foam::error::exit(const int errNo)
     {
         abort();
     }
-
-    if (throwExceptions_)
+    else if (throwExceptions_)
     {
         // Make a copy of the error to throw
         error errorException(*this);
@@ -228,15 +235,15 @@ void Foam::error::exit(const int errNo)
     }
     else if (Pstream::parRun())
     {
-        Perr<< endl << *this << endl
+        Perr<< nl << *this << nl
             << "\nFOAM parallel run exiting\n" << endl;
         Pstream::exit(errNo);
     }
     else
     {
-        Perr<< endl << *this << endl
+        Perr<< nl << *this << nl
             << "\nFOAM exiting\n" << endl;
-        ::exit(errNo);
+        std::exit(errNo);
     }
 }
 
@@ -251,13 +258,12 @@ void Foam::error::abort()
 
     if (env("FOAM_ABORT"))
     {
-        Perr<< endl << *this << endl
+        Perr<< nl << *this << nl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
         printStack(Perr);
-        ::abort();
+        std::abort();
     }
-
-    if (throwExceptions_)
+    else if (throwExceptions_)
     {
         // Make a copy of the error to throw
         error errorException(*this);
@@ -269,17 +275,22 @@ void Foam::error::abort()
     }
     else if (Pstream::parRun())
     {
-        Perr<< endl << *this << endl
+        Perr<< nl << *this << nl
             << "\nFOAM parallel run aborting\n" << endl;
         printStack(Perr);
         Pstream::abort();
     }
     else
     {
-        Perr<< endl << *this << endl
+        Perr<< nl << *this << nl
             << "\nFOAM aborting\n" << endl;
         printStack(Perr);
-        ::abort();
+
+        #ifdef _WIN32
+        std::exit(1);  // Prefer exit() to avoid unnecessary warnings
+        #else
+        std::abort();
+        #endif
     }
 }
 
@@ -289,14 +300,14 @@ void Foam::error::write(Ostream& os, const bool includeTitle) const
     os  << nl;
     if (includeTitle)
     {
-        os  << title().c_str() << endl;
+        os  << title().c_str() << nl;
     }
     os  << message().c_str();
 
     if (error::level >= 2 && sourceFileLineNumber())
     {
         os  << nl << nl
-            << "    From function " << functionName().c_str() << endl
+            << "    From function " << functionName().c_str() << nl
             << "    in file " << sourceFileName().c_str()
             << " at line " << sourceFileLineNumber() << '.';
     }

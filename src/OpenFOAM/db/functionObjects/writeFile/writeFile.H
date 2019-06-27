@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +53,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class writeFile Declaration
+                 Class functionObjects::writeFile Declaration
 \*---------------------------------------------------------------------------*/
 
 class writeFile
@@ -120,10 +122,6 @@ protected:
         //- Return the value width when writing to stream with optional offset
         Omanip<int> valueWidth(const label offset = 0) const;
 
-
-private:
-
-    // Private Member Functions
 
         //- No copy construct
         writeFile(const writeFile&) = delete;

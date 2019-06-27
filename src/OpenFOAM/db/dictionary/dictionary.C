@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,11 +42,10 @@ namespace Foam
 
 const Foam::dictionary Foam::dictionary::null;
 
-bool Foam::dictionary::writeOptionalEntries
+int Foam::dictionary::writeOptionalEntries
 (
     Foam::debug::infoSwitch("writeOptionalEntries", 0)
 );
-
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -270,7 +271,7 @@ void Foam::dictionary::checkITstream
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
-            ::exit(1);
+            std::exit(1);
         }
     }
     else if (!is.size())
@@ -303,9 +304,26 @@ void Foam::dictionary::checkITstream
                 << " at line " << is.lineNumber() << '.' << nl
                 << std::endl;
 
-            ::exit(1);
+            std::exit(1);
         }
     }
+}
+
+
+void Foam::dictionary::raiseBadInput(const word& keyword) const
+{
+    // Can use FatalIOError instead of SafeFatalIOError
+    // since predicate checks are not used at the earliest stages
+    FatalIOError
+    (
+        "",                 // functionName
+        "",                 // sourceFileName
+        0,                  // sourceFileLineNumber
+        *this               // ios
+    )
+        << "Entry '" << keyword << "' with invalid input in dictionary "
+        << name() << nl << nl
+        << exit(FatalIOError);
 }
 
 
@@ -315,7 +333,7 @@ bool Foam::dictionary::found
     enum keyType::option matchOpt
 ) const
 {
-    return csearch(keyword, matchOpt).found();
+    return csearch(keyword, matchOpt).good();
 }
 
 
@@ -357,11 +375,11 @@ const Foam::entry& Foam::dictionary::lookupEntry
 {
     const const_searcher finder(csearch(keyword, matchOpt));
 
-    if (!finder.found())
+    if (!finder.good())
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name()
+            << name() << nl
             << exit(FatalIOError);
     }
 
@@ -393,7 +411,7 @@ bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
     const const_searcher finder(csearch(varName, keyType::REGEX_RECURSIVE));
 
     // If defined insert its entries into this dictionary
-    if (finder.found())
+    if (finder.good())
     {
         for (const entry& e : finder.dict())
         {
@@ -425,7 +443,7 @@ bool Foam::dictionary::substituteScopedKeyword
     const auto finder(csearchScoped(varName, keyType::REGEX_RECURSIVE));
 
     // If defined insert its entries into this dictionary
-    if (finder.found())
+    if (finder.good())
     {
         for (const entry& e : finder.dict())
         {
@@ -471,11 +489,11 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
     // Allow patterns, non-recursive
     const const_searcher finder(csearch(keyword, keyType::REGEX));
 
-    if (!finder.found())
+    if (!finder.good())
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name()
+            << name() << nl
             << exit(FatalIOError);
     }
 
@@ -488,11 +506,11 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
     // Allow patterns, non-recursive
     searcher finder(search(keyword, keyType::REGEX));
 
-    if (!finder.found())
+    if (!finder.good())
     {
         FatalIOErrorInFunction(*this)
             << "Entry '" << keyword << "' not found in dictionary "
-            << name()
+            << name() << nl
             << exit(FatalIOError);
     }
 
@@ -524,7 +542,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
             << exit(FatalIOError);
     }
 
-    if (finder.found())
+    if (finder.good())
     {
         IOWarningInFunction(*this)
             << "Entry '" << keyword
@@ -550,7 +568,7 @@ const Foam::dictionary& Foam::dictionary::optionalSubDict
         return finder.dict();
     }
 
-    if (finder.found())
+    if (finder.good())
     {
         IOWarningInFunction(*this)
             << "Entry '" << keyword
@@ -609,7 +627,7 @@ Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
     auto iter = hashedEntries_.find(entryPtr->keyword());
 
-    if (mergeEntry && iter.found())
+    if (mergeEntry && iter.good())
     {
         // Merge dictionary with dictionary
         if (iter()->isDict() && entryPtr->isDict())
@@ -784,7 +802,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
     {
         auto fnd = hashedEntries_.find(e.keyword());
 
-        if (fnd.found())
+        if (fnd.good())
         {
             // Recursively merge sub-dictionaries
             // TODO: merge without copying

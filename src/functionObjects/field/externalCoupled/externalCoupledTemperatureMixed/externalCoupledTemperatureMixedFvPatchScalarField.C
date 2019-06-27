@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +46,18 @@ Foam::externalCoupledTemperatureMixedFvPatchScalarField::outputTemperatureNames
 });
 
 
+const Foam::Enum
+<
+    Foam::externalCoupledTemperatureMixedFvPatchScalarField::
+    refTemperatureType
+>
+Foam::externalCoupledTemperatureMixedFvPatchScalarField::refTemperatureNames
+({
+    { refTemperatureType::CELL, "cell" },
+    { refTemperatureType::USER, "user" },
+});
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeHeader
@@ -51,13 +65,13 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeHeader
     Ostream& os
 ) const
 {
-    if (outputTemperature_ == outputTemperatureType::FLUID)
+    if (outTempType_ == outputTemperatureType::WALL)
     {
-        os  << "# Values: area Tfluid qDot htc" << endl;
+        os  << "# Values: area Twall qDot htc" << endl;
     }
     else
     {
-        os  << "# Values: area Twall qDot htc" << endl;
+        os  << "# Values: area Tfluid qDot htc" << endl;
     }
 }
 
@@ -72,7 +86,9 @@ externalCoupledTemperatureMixedFvPatchScalarField
 )
 :
     externalCoupledMixedFvPatchField<scalar>(p, iF),
-    outputTemperature_(outputTemperatureType::WALL)
+    outTempType_(outputTemperatureType::WALL),
+    refTempType_(refTemperatureType::CELL),
+    Tref_(Zero)
 {}
 
 
@@ -86,7 +102,9 @@ externalCoupledTemperatureMixedFvPatchScalarField
 )
 :
     externalCoupledMixedFvPatchField<scalar>(ptf, p, iF, mapper),
-    outputTemperature_(ptf.outputTemperature_)
+    outTempType_(ptf.outTempType_),
+    refTempType_(ptf.refTempType_),
+    Tref_(ptf.Tref_)
 {}
 
 
@@ -100,12 +118,21 @@ externalCoupledTemperatureMixedFvPatchScalarField
 :
     //externalCoupledMixedFvPatchField<scalar>(p, iF, dict)
     externalCoupledMixedFvPatchField<scalar>(p, iF),
-    outputTemperature_(outputTemperatureType::WALL)
+    outTempType_(outputTemperatureType::WALL),
+    refTempType_
+    (
+        refTemperatureNames.lookupOrDefault
+        (
+            "htcRefTemperature",
+            dict,
+            refTemperatureType::CELL
+        )
+    ),
+    Tref_(Zero)
 {
     if (dict.found("outputTemperature"))
     {
-        outputTemperature_ =
-            outputTemperatureNames.get("outputTemperature", dict);
+        outTempType_ = outputTemperatureNames.get("outputTemperature", dict);
     }
     else
     {
@@ -114,6 +141,11 @@ externalCoupledTemperatureMixedFvPatchScalarField
             << flatOutput(outputTemperatureNames) << nl
             << "using 'wall' as compatibility default" << nl
             << endl;
+    }
+
+    if (refTempType_ == refTemperatureType::USER)
+    {
+        Tref_ = dict.get<scalar>("Tref");
     }
 
     if (dict.found("refValue"))
@@ -156,7 +188,9 @@ externalCoupledTemperatureMixedFvPatchScalarField
 )
 :
     externalCoupledMixedFvPatchField<scalar>(ecmpf),
-    outputTemperature_(ecmpf.outputTemperature_)
+    outTempType_(ecmpf.outTempType_),
+    refTempType_(ecmpf.refTempType_),
+    Tref_(ecmpf.Tref_)
 {}
 
 
@@ -168,7 +202,9 @@ externalCoupledTemperatureMixedFvPatchScalarField
 )
 :
     externalCoupledMixedFvPatchField<scalar>(ecmpf, iF),
-    outputTemperature_(ecmpf.outputTemperature_)
+    outTempType_(ecmpf.outTempType_),
+    refTempType_(ecmpf.refTempType_),
+    Tref_(ecmpf.Tref_)
 {}
 
 
@@ -224,22 +260,36 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
     }
 
 
-    // Patch (wall) temperature [K]
-    const scalarField& Tp(*this);
+    // Wall temperature [K]
+    const scalarField& Twall = *this;
 
-    // Near wall cell (fluid) temperature [K]
-    const scalarField Tc(patchInternalField());
+    // Fluid temperature [K]
+    tmp<scalarField> tfluid;
+
+    if (refTempType_ == refTemperatureType::USER)
+    {
+        // User-specified reference temperature
+        tfluid = tmp<scalarField>::New(size(), Tref_);
+    }
+    else
+    {
+        // Near wall cell temperature
+        tfluid = patchInternalField();
+    }
+
+    const scalarField Tfluid(tfluid);
+
 
     // Heat transfer coefficient [W/m2/K]
-    const scalarField htc(qDot/(Tp - Tc + 1e-3));
+    const scalarField htc(qDot/(max(Twall - Tfluid), 1e-3));
 
-    const Field<scalar>& magSf(this->patch().magSf());
+    const Field<scalar>& magSf = this->patch().magSf();
 
     const UList<scalar>& Tout =
     (
-        outputTemperature_ == outputTemperatureType::FLUID
-      ? Tc
-      : Tp
+        outTempType_ == outputTemperatureType::FLUID
+      ? Tfluid
+      : Twall
     );
 
     forAll(patch(), facei)
@@ -285,8 +335,18 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::write
     os.writeEntry
     (
         "outputTemperature",
-        outputTemperatureNames[outputTemperature_]
+        outputTemperatureNames[outTempType_]
     );
+    os.writeEntry
+    (
+        "htcRefTemperature",
+        refTemperatureNames[refTempType_]
+    );
+
+    if (refTempType_ == refTemperatureType::USER)
+    {
+        os.writeEntry("Tref", Tref_);
+    }
 }
 
 

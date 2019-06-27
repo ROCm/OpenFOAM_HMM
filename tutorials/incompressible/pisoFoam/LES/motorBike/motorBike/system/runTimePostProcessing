@@ -1,14 +1,34 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
 postPro1
 {
-    type            runTimePostProcessing;
-    libs            ("librunTimePostProcessing.so");
-    writeControl    writeTime;
+    #includeEtc "caseDicts/postProcessing/visualization/runTimePostPro.cfg"
+
+    // Time control etc
+    ${_visualization};
+
+    // debug       true;
+    // parallel    true;
+
     output
     {
         name            image;
         width           2000;
         height          1200;
     }
+
+    // Default colours. Used for colourBy == colour unless locally overridden
+    colours
+    {
+        ${..colourScheme.blueGradient};
+    }
+
     camera
     {
         // If camera is moving, optionally provide start and end times
@@ -19,27 +39,15 @@ postPro1
         nFrameTotal         1;
 
         // Parallel projection flag
-        parallelProjection  no;
+        parallelProjection  off;
 
         clipBox         (-0.2 -0.2 0)(1.65 0.2 1.25); // optional
 
         focalPoint      (1.2 1.1 0.2);
-        up              (0 0 1);
         position        (3.6 5.1 -1.3);
+        up              (0 0 1);
     }
 
-    // Default colours
-    // - If select to colourBy colour, these values are used unless
-    // they are locally overridden
-    colours
-    {
-        background      (1 1 1);
-        background2     (0 0 1);
-        text            (0 0 0);
-        edge            (1 0 0);
-        surface         (0.5 0.5 0.5);
-        line            (1 0 0);
-    }
     // Line data
     lines
     {
@@ -47,8 +55,9 @@ postPro1
         {
             type            functionObjectLine;
             functionObject  streamLines;
+            colourMap       rainbow;
             representation  tube;
-            visible         yes;
+            visible         true;
             tubeRadius      0.01;
             colourBy        field;
             field           U;
@@ -56,13 +65,17 @@ postPro1
             opacity         1;
             scalarBar
             {
-                visible         yes;
+                visible         true;
                 position        (0.8 0.1);
                 vertical        yes;
                 fontSize        16;
-                title           "velocity / [m/s]";
+                title           "velocity [m/s]";
                 labelFormat     "%6.2f";
                 numberOfLabels  5;
+                bold            true;
+                italic          true;
+                italic          true;
+                colour          (0.75 0.75 0.75);
             }
         }
     }
@@ -77,27 +90,40 @@ postPro1
             renderMode      phong;
             representation  surface;
             edgeColour      (0 0 0);
-            visible         yes;
             featureEdges    yes;
             opacity         1;
+            visible         false;
         }
-        cuttingPlane1
+
+        patches
+        {
+            type            patches;
+            patches         ("motorBike.*");
+            renderMode      phong;
+            representation  surface;
+            colourMap       coolToWarm;
+            colourBy        field;
+            field           U;
+            range           (0 30);
+            nearCellValue   true;
+            smooth          true;
+            featureEdges    yes;
+            edgeColour      (0 0 0);
+        }
+
+        plane1
         {
             type            functionObjectSurface;
-            functionObject  cuttingPlane;
-            colourMap       blueWhiteRed;
+            functionObject  samples.yNormal;
+            colourMap       coolToWarm;
             representation  glyph;
             maxGlyphLength  0.1;
-            visible         yes;
+            visible         true;
             featureEdges    no;
             colourBy        field;
             field           U;
             range           (0 30);
             opacity         1;
-            scalarBar
-            {
-                visible         no;
-            }
         }
     }
 
@@ -106,11 +132,14 @@ postPro1
     {
         text1
         {
-            string          "Motorbike";
-            position        (0.1 0.05);
-            size            72;
-            bold            yes;
-            visible         yes;
+            visible     true;
+            string      "Motorbike";
+            position    (0.1 0.05);
+            size        72;
+            bold        true;
+            italic      true;
         }
     }
 }
+
+// ************************************************************************* //

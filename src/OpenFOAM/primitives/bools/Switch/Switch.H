@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +56,6 @@ namespace Foam
 {
 
 // Forward declarations
-
 class Switch;
 class dictionary;
 
@@ -91,6 +92,7 @@ private:
 
         //- The logic and enumerated text representation stored in a byte
         unsigned char switch_;
+
 
     // Static Member Functions
 
@@ -140,17 +142,35 @@ public:
 
         //- Construct from string.
         //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const std::string& str, const bool allowBad)
+        Switch(const std::string& str, bool allowBad)
         :
             switch_(parse(str, allowBad))
         {}
 
         //- Construct from character array.
         //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const char* str, const bool allowBad)
+        Switch(const char* str, bool allowBad)
         :
             switch_(parse(str, allowBad))
         {}
+
+        //- Construct from dictionary lookup.
+        //  FatalError if anything is incorrect.
+        Switch
+        (
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict  //!< dictionary
+        );
+
+        //- Find the key in the dictionary and return the corresponding
+        //- switch value, or the default value.
+        //  FatalError if anything is incorrect.
+        Switch
+        (
+            const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
+            const dictionary& dict, //!< dictionary
+            const Switch deflt      //!< fallback if not found
+        );
 
         //- Construct from Istream
         explicit Switch(Istream& is);
@@ -159,19 +179,22 @@ public:
     // Helpers
 
         //- Construct from dictionary, supplying default value so that if the
-        //  value is not found, it is added into the dictionary.
-        static Switch lookupOrAddToDict
+        //- value is not found, it is added into the dictionary.
+        static Switch getOrAddToDict
         (
-            const word& name,
-            dictionary& dict,
-            const Switch defaultValue = switchType::FALSE
+            const word& name,           //!< Lookup key. Uses REGEX!
+            dictionary& dict,           //!< dictionary
+            const Switch deflt = switchType::FALSE //!< default to add
         );
 
 
     // Member Functions
 
-        //- Return true if the Switch has a valid value
+        //- True if the Switch represents a valid enumeration
         bool valid() const noexcept;
+
+        //- The underlying enumeration value
+        switchType type() const noexcept;
 
         //- A string representation of the Switch value
         const char* c_str() const noexcept;
@@ -180,7 +203,11 @@ public:
         std::string str() const;
 
         //- Update the value of the Switch if it is found in the dictionary
-        bool readIfPresent(const word& name, const dictionary& dict);
+        bool readIfPresent
+        (
+            const word& name,           //!< Lookup key. Uses REGEX!
+            const dictionary& dict      //!< dictionary
+        );
 
 
     // Member Operators
@@ -192,19 +219,33 @@ public:
         }
 
         //- Assignment from enumerated value
-        void operator=(const switchType sw) noexcept
+        Switch& operator=(const switchType sw) noexcept
         {
             switch_ = sw;
+            return *this;
         }
 
         //- Assignment from bool
-        void operator=(const bool b) noexcept
+        Switch& operator=(const bool b) noexcept
         {
             switch_ = (b ? Switch::TRUE : Switch::FALSE);
+            return *this;
         }
 
 
     // Housekeeping
+
+        //- Construct from dictionary, supplying default value so that if the
+        //- value is not found, it is added into the dictionary.
+        static Switch lookupOrAddToDict
+        (
+            const word& name,           //!< Lookup key. Uses REGEX!
+            dictionary& dict,           //!< dictionary
+            const Switch deflt = switchType::FALSE //!< default to add
+        )
+        {
+            return getOrAddToDict(name, dict, deflt);
+        }
 
         //- Deprecated(2018-03) text representation of the Switch value
         //  \deprecated(2018-03) - use c_str() method

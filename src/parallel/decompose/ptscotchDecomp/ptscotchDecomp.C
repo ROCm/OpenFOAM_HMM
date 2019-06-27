@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -320,7 +322,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //
 //    // Number of cells to send to the next processor
 //    // (is same as number of cells next processor has to receive)
-//    List<label> nSendCells(Pstream::nProcs(), 0);
+//    List<label> nSendCells(Pstream::nProcs(), Zero);
 //
 //    for (label proci = nSendCells.size()-1; proci >=1; proci--)
 //    {
@@ -547,6 +549,10 @@ Foam::label Foam::ptscotchDecomp::decompose
         }
     }
 
+
+    // Make repeatable
+    SCOTCH_randomReset();
+
     // Strategy
     // ~~~~~~~~
 
@@ -716,6 +722,15 @@ Foam::label Foam::ptscotchDecomp::decompose
                 << processorWeights
                 << endl;
         }
+
+        if (processorWeights.size() != nDomains_)
+        {
+            FatalIOErrorInFunction(coeffsDict_)
+                << "processorWeights not the same size"
+                << " as the wanted number of domains " << nDomains_
+                << exit(FatalIOError);
+        }
+
         check
         (
             SCOTCH_archCmpltw

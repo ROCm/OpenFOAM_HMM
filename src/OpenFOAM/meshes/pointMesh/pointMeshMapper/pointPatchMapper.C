@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,6 +60,7 @@ void Foam::pointPatchMapper::calcAddressing() const
             if (addr[i] < 0)
             {
                 hasUnmapped_ = true;
+                break;
             }
         }
     }
@@ -83,14 +86,14 @@ void Foam::pointPatchMapper::calcAddressing() const
             if (ppm[i] >= 0)
             {
                 addr[i] = labelList(1, ppm[i]);
-                w[i] = scalarList(1, 1.0);
+                w[i] = scalarList(1, scalar(1));
             }
             else
             {
                 // Inserted point.
                 ///// Map from point0 (arbitrary choice)
-                //addr[i] = labelList(1, label(0));
-                //w[i] = scalarList(1, 1.0);
+                //addr[i] = labelList(1, Zero);
+                //w[i] = scalarList(1, scalar(1));
                 hasUnmapped_ = true;
             }
         }

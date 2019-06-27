@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PCG.H"
+#include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -62,10 +65,10 @@ Foam::PCG::PCG
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::solverPerformance Foam::PCG::solve
+Foam::solverPerformance Foam::PCG::scalarSolve
 (
-    scalarField& psi,
-    const scalarField& source,
+    solveScalarField& psi,
+    const solveScalarField& source,
     const direction cmpt
 ) const
 {
@@ -78,28 +81,33 @@ Foam::solverPerformance Foam::PCG::solve
 
     label nCells = psi.size();
 
-    scalar* __restrict__ psiPtr = psi.begin();
+    solveScalar* __restrict__ psiPtr = psi.begin();
 
-    scalarField pA(nCells);
-    scalar* __restrict__ pAPtr = pA.begin();
+    solveScalarField pA(nCells);
+    solveScalar* __restrict__ pAPtr = pA.begin();
 
-    scalarField wA(nCells);
-    scalar* __restrict__ wAPtr = wA.begin();
+    solveScalarField wA(nCells);
+    solveScalar* __restrict__ wAPtr = wA.begin();
 
-    scalar wArA = solverPerf.great_;
-    scalar wArAold = wArA;
+    solveScalar wArA = solverPerf.great_;
+    solveScalar wArAold = wArA;
 
     // --- Calculate A.psi
     matrix_.Amul(wA, psi, interfaceBouCoeffs_, interfaces_, cmpt);
 
     // --- Calculate initial residual field
-    scalarField rA(source - wA);
-    scalar* __restrict__ rAPtr = rA.begin();
+    solveScalarField rA(source - wA);
+    solveScalar* __restrict__ rAPtr = rA.begin();
 
-    matrix().setResidualField(rA, fieldName_, true);
+    matrix().setResidualField
+    (
+        ConstPrecisionAdaptor<scalar, solveScalar>(rA)(),
+        fieldName_,
+        false
+    );
 
     // --- Calculate normalisation factor
-    scalar normFactor = this->normFactor(psi, source, wA, pA);
+    solveScalar normFactor = this->normFactor(psi, source, wA, pA);
 
     if (lduMatrix::debug >= 2)
     {
@@ -148,7 +156,7 @@ Foam::solverPerformance Foam::PCG::solve
             }
             else
             {
-                scalar beta = wArA/wArAold;
+                solveScalar beta = wArA/wArAold;
 
                 for (label cell=0; cell<nCells; cell++)
                 {
@@ -160,8 +168,7 @@ Foam::solverPerformance Foam::PCG::solve
             // --- Update preconditioned residual
             matrix_.Amul(wA, pA, interfaceBouCoeffs_, interfaces_, cmpt);
 
-            scalar wApA = gSumProd(wA, pA, matrix().mesh().comm());
-
+            solveScalar wApA = gSumProd(wA, pA, matrix().mesh().comm());
 
             // --- Test for singularity
             if (solverPerf.checkSingularity(mag(wApA)/normFactor)) break;
@@ -169,7 +176,7 @@ Foam::solverPerformance Foam::PCG::solve
 
             // --- Update solution and residual:
 
-            scalar alpha = wArA/wApA;
+            solveScalar alpha = wArA/wApA;
 
             for (label cell=0; cell<nCells; cell++)
             {
@@ -191,9 +198,32 @@ Foam::solverPerformance Foam::PCG::solve
         );
     }
 
-    matrix().setResidualField(rA, fieldName_, false);
+    matrix().setResidualField
+    (
+        ConstPrecisionAdaptor<scalar, solveScalar>(rA)(),
+        fieldName_,
+        false
+    );
 
     return solverPerf;
+}
+
+
+
+Foam::solverPerformance Foam::PCG::solve
+(
+    scalarField& psi_s,
+    const scalarField& source,
+    const direction cmpt
+) const
+{
+    PrecisionAdaptor<solveScalar, scalar> tpsi(psi_s);
+    return scalarSolve
+    (
+        tpsi.ref(),
+        ConstPrecisionAdaptor<solveScalar, scalar>(source)(),
+        cmpt
+    );
 }
 
 

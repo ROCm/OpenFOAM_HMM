@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,25 @@ Foam::label Foam::Detail::PtrListDetail<T>::count() const
     }
 
     return ngood;
+}
+
+
+template<class T>
+Foam::label Foam::Detail::PtrListDetail<T>::findNull() const
+{
+    label idx = 0;
+
+    for (const T* ptr : *this)
+    {
+        if (!ptr)
+        {
+            return idx;
+        }
+
+        ++idx;
+    }
+
+    return -1;
 }
 
 

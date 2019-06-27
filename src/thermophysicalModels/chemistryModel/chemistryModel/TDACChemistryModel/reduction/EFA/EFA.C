@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,10 +38,10 @@ Foam::chemistryReductionMethods::EFA<CompType, ThermoType>::EFA
 )
 :
     chemistryReductionMethod<CompType, ThermoType>(dict, chemistry),
-    sC_(this->nSpecie_,0),
-    sH_(this->nSpecie_,0),
-    sO_(this->nSpecie_,0),
-    sN_(this->nSpecie_,0),
+    sC_(this->nSpecie_, Zero),
+    sH_(this->nSpecie_, Zero),
+    sO_(this->nSpecie_, Zero),
+    sN_(this->nSpecie_, Zero),
     sortPart_(0.05)
 {
     const List<List<specieElement>>& specieComposition =
@@ -98,7 +100,7 @@ void Foam::chemistryReductionMethods::EFA<CompType, ThermoType>::reduceMechanism
 )
 {
     scalarField& completeC(this->chemistry_.completeC());
-    scalarField c1(this->chemistry_.nEqns(), 0.0);
+    scalarField c1(this->chemistry_.nEqns(), Zero);
 
     for (label i=0; i<this->nSpecie_; i++)
     {
@@ -111,14 +113,14 @@ void Foam::chemistryReductionMethods::EFA<CompType, ThermoType>::reduceMechanism
 
 
     // Number of initialized rAB for each lines
-    Field<label> NbrABInit(this->nSpecie_,0);
+    Field<label> NbrABInit(this->nSpecie_, Zero);
 
     // Position of the initialized rAB, -1 when not initialized
     RectangularMatrix<label> rABPos(this->nSpecie_, this->nSpecie_, -1);
-    RectangularMatrix<scalar> CFluxAB(this->nSpecie_, this->nSpecie_, 0.0);
-    RectangularMatrix<scalar> HFluxAB(this->nSpecie_, this->nSpecie_, 0.0);
-    RectangularMatrix<scalar> OFluxAB(this->nSpecie_, this->nSpecie_, 0.0);
-    RectangularMatrix<scalar> NFluxAB(this->nSpecie_, this->nSpecie_, 0.0);
+    RectangularMatrix<scalar> CFluxAB(this->nSpecie_, this->nSpecie_, Zero);
+    RectangularMatrix<scalar> HFluxAB(this->nSpecie_, this->nSpecie_, Zero);
+    RectangularMatrix<scalar> OFluxAB(this->nSpecie_, this->nSpecie_, Zero);
+    RectangularMatrix<scalar> NFluxAB(this->nSpecie_, this->nSpecie_, Zero);
     scalar CFlux(0.0), HFlux(0.0), OFlux(0.0), NFlux(0.0);
     label nbPairs(0);
 

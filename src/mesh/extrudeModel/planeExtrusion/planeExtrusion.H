@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +30,8 @@ Description
     Extrudes by transforming points normal to the surface by 1 layer over
     a given distance.
 
+    Uses the linearNormalCoeffs dictionary
+
 See also
     Foam::extrudeModels::linearNormal
 
@@ -46,7 +50,7 @@ namespace extrudeModels
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class plane Declaration
+                    Class extrudeModels::plane Declaration
 \*---------------------------------------------------------------------------*/
 
 class plane
@@ -62,11 +66,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        plane(const dictionary& dict);
+        explicit plane(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~plane();
+    virtual ~plane() = default;
 };
 
 

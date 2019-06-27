@@ -3,8 +3,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -20,7 +22,7 @@
 #     The entire OpenFOAM environment (WM_PROJECT_DIR, etc)
 #
 #------------------------------------------------------------------------------
-cd ${0%/*} || exit 1    # Run from this directory
+cd "${0%/*}" || exit 1      # Run from this directory
 
 usage()
 {
@@ -33,6 +35,7 @@ usage: ${0##*/} [OPTION]
 options:
   -git          Use git to retrieve the tutorials
   -no-git       Do not use git to retrieve the tutorials
+  -debug        Adjust DebugSwitches (fvSchemes, solution)
   -root dir     Specify root directory to run tests from
   -default      Sets up a default scheme on all schemes
   -help         Print the usage
@@ -61,7 +64,8 @@ die()
 #------------------------------------------------------------------------------
 
 ROOT="./"
-unset DEFAULT_SCHEMES
+adjustDebugSwitches=false
+useDefaultSchemes=false
 useGit=auto
 
 # Parse options
@@ -82,8 +86,11 @@ do
     -no-git)
         unset useGit
         ;;
-    -d | -default)
-        DEFAULT_SCHEMES=true
+    -debug)
+        adjustDebugSwitches=true
+        ;;
+    -default)
+        useDefaultSchemes=true
         ;;
     *)
         die "Unknown option/argument: '$1'"
@@ -93,7 +100,7 @@ do
 done
 
 # Set FOAM_TUTORIALS directory location, as required.
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+. "${WM_PROJECT_DIR:?}/bin/tools/RunFunctions"
 
 
 #------------------------------------------------------------------------------
@@ -131,17 +138,30 @@ EOF
 
 
 #
-# Location of the user or project controlDict
+# Locate the user or project controlDict to adjust
 #
-if MAIN_CONTROL_DICT="$($WM_PROJECT_DIR/bin/foamEtcFile -mode=uo controlDict)"
+unset ETC_CONTROL_DICT
+if [ "$adjustDebugSwitches" = true ]
 then
-    if [ -e "${MAIN_CONTROL_DICT}.orig" ]
+    if ETC_CONTROL_DICT="$($WM_PROJECT_DIR/bin/foamEtcFile -mode=uo controlDict)"
     then
-        die "File ${MAIN_CONTROL_DICT}.orig already exists" \
-            "Did Alltest fail in some way and then run again?"
+        if [ -e "${ETC_CONTROL_DICT}.orig" ]
+        then
+            echo "File ${ETC_CONTROL_DICT}.orig already exists" \
+                "Did Alltest fail in some way and then run again?" 2>&1
+
+            echo "Not adjusting DebugSwitches ..." 2>&1
+            unset ETC_CONTROL_DICT
+        else
+            grep DebugSwitches "${ETC_CONTROL_DICT}" 1> /dev/null 2>&1 || {
+                echo "No DebugSwitches to adjust in ${ETC_CONTROL_DICT}" 1>&2
+                unset ETC_CONTROL_DICT
+            }
+        fi
+    else
+        echo "No main (user or project) controlDict to adjust" 1>&2
+        unset ETC_CONTROL_DICT
     fi
-else
-    die "No main (user or project) controlDict found"
 fi
 
 
@@ -176,7 +196,7 @@ buildDir="$WM_PROJECT_DIR/build/$WM_OPTIONS/${TEST_RUN_DIR##*/}"
 if [ -d "$buildDir" ]
 then
     echo "Removing old build directory: $buildDir" 1>&2
-    rm -rf $buildDir
+    rm -rf "$buildDir"
 fi
 
 unset gitbase
@@ -208,7 +228,7 @@ fi
 if [ -n "$gitbase" ]
 then
     echo "Copying the tutorials from current git branch" 1>&2
-    mkdir -p ${TEST_RUN_DIR}
+    mkdir -p "${TEST_RUN_DIR}"
     ( cd "$gitbase/tutorials" && git archive --format=tar HEAD . ) | \
     ( cd "$TEST_RUN_DIR" && tar -xf - )
 else
@@ -216,37 +236,41 @@ else
     cp -a "$TUTORIALS_DIR" "$TEST_RUN_DIR"
 fi
 
+cd "${TEST_RUN_DIR}" || exit 1
+
 echo 1>&2
 
 
-# Clean up on termination and on Ctrl-C
-trap 'mv ${MAIN_CONTROL_DICT}.orig ${MAIN_CONTROL_DICT} 2>/dev/null; exit 0' \
-    EXIT TERM INT
-cp -f "${MAIN_CONTROL_DICT}" "${MAIN_CONTROL_DICT}.orig"
+# Adjust etc controlDict, and clean up on termination and on Ctrl-C
+if [ -f "${ETC_CONTROL_DICT}" ]
+then
+    trap 'mv ${ETC_CONTROL_DICT}.orig ${ETC_CONTROL_DICT} 2>/dev/null; exit 0' \
+        EXIT TERM INT
 
-echo "Modifying ${MAIN_CONTROL_DICT}" 1>&2
+    echo "Modifying DebugSwitches: ${ETC_CONTROL_DICT}" 1>&2
 
-sed \
-    -e s/"\(fvSchemes[ \t]*\)\([0-9]\);"/"\1 1;"/g \
-    -e s/"\(solution[ \t]*\)\([0-9]\);"/"\1 1;"/g  \
-    "${MAIN_CONTROL_DICT}.orig" > "${MAIN_CONTROL_DICT}"
+    cp -f "${ETC_CONTROL_DICT}" "${ETC_CONTROL_DICT}.orig"
+    sed \
+        -e 's/\(fvSchemes[ \t]*\)\([0-9]\);/\1 1;/g' \
+        -e 's/"\(solution[ \t]*\)\([0-9]\);/\1 1;/g'  \
+        "${ETC_CONTROL_DICT}.orig" > "${ETC_CONTROL_DICT}"
+fi
 
-cd "${TEST_RUN_DIR}" || exit 1
-
-echo "Modifying the controlDicts to run only one time step" 1>&2
+echo "Modifying the case controlDicts to run only one time step" 1>&2
+echo 1>&2
 
 for CD in $(find . -name "controlDict*" -type f)
 do
     cp -f "${CD}" "${CD}.orig"
     sed \
-        -e s/"\(startFrom[ \t]*\)\([a-zA-Z]*\);"/"\1 latestTime;"/g \
-        -e s/"\(stopAt[ \t]*\)\([a-zA-Z]*\);"/"\1 nextWrite;"/g \
-        -e s/"\(writeControl[ \t]*\)\([a-zA-Z]*\);"/"\1 timeStep;"/g \
-        -e s/"\(writeInterval[ \t]*\)\([0-9a-zA-Z.-]*\);"/"\1 1;"/g \
+        -e 's/\(startFrom[ \t]*\)\([a-zA-Z]*\);/\1 latestTime;/g' \
+        -e 's/\(stopAt[ \t]*\)\([a-zA-Z]*\);/\1 nextWrite;/g' \
+        -e 's/\(writeControl[ \t]*\)\([a-zA-Z]*\);/\1 timeStep;/g' \
+        -e 's/\(writeInterval[ \t]*\)\([0-9a-zA-Z.-]*\);/\1 1;/g' \
         "${CD}.orig" > "${CD}"
 done
 
-if [ "$DEFAULT_SCHEMES" = true ]
+if [ "$useDefaultSchemes" = true ]
 then
     echo "Modifying the fvSchemes to contain only default schemes" 1>&2
     for FV_SC in $(find . -name fvSchemes -type f)
@@ -260,38 +284,12 @@ then
     done
 fi
 
+[ -f Allrun ] || cp -f "${FOAM_TUTORIALS:?}/Allrun" .
 
-cp -f $FOAM_TUTORIALS/Allrun .
-./Allrun -test
+echo "Starting Allrun -test" 1>&2
+echo "    $PWD" 1>&2
+echo 1>&2
 
-sed -e :a -e '/\\$/N; s/\\\n//; ta' Allrun > temp
-APPLICATIONS=\
-    $(grep "applications=" temp | sed 's/applications=\"\([A-Za-z \t]*\)\"/\1/g')
-
-rm $SCHEMES_FILE > /dev/null 2>&1
-for APP in $APPLICATIONS
-do
-    echo $APP >> $SCHEMES_FILE
-    echo "$APP: " | tr -d "\n" >> $SOLVERS_FILE
-    for ST in $FV_SCHEMES
-    do
-        rm $SCHEMES_TEMP $SOLVERS_TEMP > /dev/null 2>&1
-        echo "  ${ST}" >> $SCHEMES_FILE
-        for LOG in $(find ${APP} -name "log.${APP}" -type f)
-        do
-            for S in $(grep ${ST} ${LOG} | cut -d" " -f4)
-            do
-                echo "    ${S}" >> $SCHEMES_TEMP
-            done
-        echo $(grep solver ${LOG} | cut -d" " -f4) >> $SOLVERS_TEMP
-        done
-        if [ -f $SCHEMES_TEMP ]
-        then
-            cat $SCHEMES_TEMP | sort -u >> $SCHEMES_FILE
-        fi
-    done
-    cat $SOLVERS_TEMP | tr " " "\n" | sort -u | tr "\n" " " >> $SOLVERS_FILE
-    echo "" >> $SOLVERS_FILE
-done
+exec ./Allrun -test
 
 #------------------------------------------------------------------------------

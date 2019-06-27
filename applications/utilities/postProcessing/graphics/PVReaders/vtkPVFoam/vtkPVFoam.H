@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2005-2010, 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,13 +74,7 @@ SourceFiles
 #include "PrimitivePatchInterpolation.H"
 #include "volPointInterpolation.H"
 #include "foamPvCore.H"
-#include "foamVtkTools.H"
-#include "foamVtkMeshMaps.H"
-
-#include "vtkPoints.h"
-#include "vtkPolyData.h"
-#include "vtkSmartPointer.h"
-#include "vtkUnstructuredGrid.h"
+#include "foamVtkVtuAdaptor.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
@@ -87,7 +83,6 @@ class vtkDataArraySelection;
 class vtkDataSet;
 class vtkFloatArray;
 class vtkIndent;
-class vtkMultiBlockDataSet;
 class vtkPVFoamReader;
 class vtkRenderer;
 class vtkTextActor;
@@ -97,7 +92,7 @@ class vtkTextActor;
 namespace Foam
 {
 
-// OpenFOAM class forward declarations
+// Forward declarations (OpenFOAM)
 class argList;
 class Time;
 class faMesh;
@@ -116,8 +111,7 @@ template<class Type> class List;
 
 class vtkPVFoam
 :
-    private foamPvCore,
-    protected vtk::Tools
+    private foamPvCore
 {
     // Convenience typedefs
     typedef PrimitivePatchInterpolation<primitivePatch> patchInterpolator;
@@ -132,35 +126,13 @@ class vtkPVFoam
         //- Bookkeeping for vtkUnstructuredGrid
         struct foamVtuData
         :
-            public vtk::Caching<vtkUnstructuredGrid>,
-            public foamVtkMeshMaps
+            public vtk::vtuAdaptor
         {
-            //- The vtk points for the mesh (and decomposition)
-            vtkSmartPointer<vtkPoints> points
-            (
-                const fvMesh& mesh
-            ) const;
-
-            //- The vtk points for the mesh (and decomposition),
-            //- using the provided pointMap
-            vtkSmartPointer<vtkPoints> points
-            (
-                const fvMesh& mesh,
-                const labelUList& pointMap
-            ) const;
-
-            //- Internal mesh as vtkUnstructuredGrid
-            vtkSmartPointer<vtkUnstructuredGrid> internal
-            (
-                const fvMesh& mesh,
-                const bool decompPoly
-            );
-
             //- Subsetted mesh as vtkUnstructuredGrid
             vtkSmartPointer<vtkUnstructuredGrid> subset
             (
                 const fvMeshSubset& subsetter,
-                const bool decompPoly
+                bool decompPoly = false
             );
         };
 
@@ -345,14 +317,6 @@ class vtkPVFoam
         (
             const GeometricField<Type, fvPatchField, volMesh>& fld,
             const labelUList& faceLabels
-        ) const;
-
-        //- Volume field
-        template<class Type>
-        vtkSmartPointer<vtkFloatArray> convertVolFieldToVTK
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& fld,
-            const foamVtuData& vtuData
         ) const;
 
 

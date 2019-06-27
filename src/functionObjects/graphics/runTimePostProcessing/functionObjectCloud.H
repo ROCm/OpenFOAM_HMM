@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,17 @@ Class
     Foam::functionObjects::runTimePostPro::functionObjectCloud
 
 Description
-    Visualisation of cloud data from function object output
+    Visualisation of cloud data from function object output (file-based only).
+
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        type        | The point type: functionObjectCloud   | yes |
+        functionObject | The data source                    | yes |
+        cloud         | The cloud name                      | no  |
+        field         | The field for glyphs scaling        | no  |
+        colourField   | The field to display                | no  |
+    \endtable
 
 SourceFiles
     functionObjectCloud.C
@@ -85,7 +95,7 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("functionObjectCloud");
+    TypeNameNoDebug("functionObjectCloud");
 
 
     // Constructors
@@ -105,7 +115,14 @@ public:
 
     // Member Functions
 
-        //- Add tube(s) to scene
+        //- Add cloud to scene (using file source)
+        bool addGeometryFromFile
+        (
+            const scalar position,
+            vtkRenderer* renderer
+        );
+
+        //- Add cloud to scene
         virtual void addGeometryToScene
         (
             const scalar position,

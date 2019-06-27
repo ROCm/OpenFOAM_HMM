@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,6 +157,30 @@ inline Foam::scalar Foam::hPowerThermo<EquationOfState>::S
     return
         c0_*(pow(T, n0_) - pow(Tstd, n0_))/(pow(Tref_, n0_)*n0_)
       + EquationOfState::S(p, T);
+}
+
+
+template<class EquationOfState>
+inline Foam::scalar Foam::hPowerThermo<EquationOfState>::dGdT
+(
+    const scalar p, const scalar T
+) const
+{
+    // To be implemented
+    NotImplemented;
+    return 0;
+}
+
+
+template<class EquationOfState>
+inline Foam::scalar Foam::hPowerThermo<EquationOfState>::dCpdT
+(
+    const scalar p, const scalar T
+) const
+{
+    // To be implemented
+    NotImplemented;
+    return 0;
 }
 
 

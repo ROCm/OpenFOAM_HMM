@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,7 +84,7 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
     const surfaceScalarField& phi
 )
 :
-    basicThermo(U.mesh(),  word::null),
+    basicThermo(U.mesh(), word::null),
     thermoIncompressibleTwoPhaseMixture(U, phi),
 
     e_
@@ -105,12 +105,7 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
         )
     ),
 
-    TSat_
-    (
-        "TSat",
-        dimTemperature,
-        basicThermo::lookup("TSat")
-    ),
+    TSat_("TSat", dimTemperature, static_cast<const basicThermo&>(*this)),
 
     pDivU_(basicThermo::lookupOrDefault<Switch>("pDivU", true))
 
@@ -118,12 +113,6 @@ Foam::twoPhaseMixtureEThermo::twoPhaseMixtureEThermo
     // Initialise e
     init();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-Foam::twoPhaseMixtureEThermo::~twoPhaseMixtureEThermo()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -187,7 +176,7 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::he
 
     forAll(T, i)
     {
-        label celli = cells[i];
+        const label celli = cells[i];
         he[i] =
             (
                 (T[i] - TSat_.value())
@@ -501,6 +490,22 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::kappa
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::alphahe() const
+{
+    NotImplemented;
+    return nullptr;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::alphahe
+(
+    const label patchi
+) const
+{
+    NotImplemented;
+    return nullptr;
+}
+
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::kappaEff
 (
     const volScalarField& kappat
@@ -581,7 +586,7 @@ bool Foam::twoPhaseMixtureEThermo::read()
 {
     if (basicThermo::read() && thermoIncompressibleTwoPhaseMixture::read())
     {
-        basicThermo::readEntry("pDivU", pDivU_);
+        basicThermo::readIfPresent("pDivU", pDivU_);
         basicThermo::readEntry("TSat", TSat_);
         return true;
     }

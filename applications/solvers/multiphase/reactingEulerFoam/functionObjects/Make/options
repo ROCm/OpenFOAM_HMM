@@ -1,0 +1,11 @@
+EXE_INC = \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
+    -I$(LIB_SRC)/functionObjects/field/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/interfacialModels/lnInclude \
+    -I$(LIB_SRC)/phaseSystemModels/reactingEulerFoam/phaseSystems/lnInclude
+
+LIB_LIBS = \
+    -lfiniteVolume \
+    -lfieldFunctionObjects

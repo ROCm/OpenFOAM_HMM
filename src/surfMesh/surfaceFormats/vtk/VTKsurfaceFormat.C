@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,7 +131,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     const faceList& faces = reader.faces();
 
     // Assume all faces in zone0 unless a region field is present
-    labelList zones(faces.size(), 0);
+    labelList zones(faces.size(), Zero);
 
     for (auto fieldName : { "region", "STLSolidLabeling" })
     {
@@ -202,7 +204,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
         zones.clear();
 
         // Count
-        labelList zoneSizes(nZones, 0);
+        labelList zoneSizes(nZones, Zero);
         for (const label zonei : dynZones)
         {
             zoneSizes[zonei]++;
@@ -224,7 +226,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
         }
 
         // Count
-        labelList zoneSizes(nZones, 0);
+        labelList zoneSizes(nZones, Zero);
         for (const label zonei : zones)
         {
             zoneSizes[zonei]++;

@@ -109,10 +109,8 @@ bool interpolate
             return true;
         }
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 
@@ -170,8 +168,8 @@ bool Xinterpolate
     vector D = p2 - p1;
     scalar lamda = (n.x() - p1.x())/D.x();
     n.y() = p1.y() + lamda*D.y();
-    return false;
 
+    return false;
 }
 
 

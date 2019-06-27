@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +30,7 @@ Group
     grpReactionThermophysicalMixtures
 
 Description
-    Foam::inhomogeneousMixture
+    The inhomogeneous mixture contains species ("ft", "b").
 
 SourceFiles
     inhomogeneousMixture.C
@@ -54,10 +56,7 @@ class inhomogeneousMixture
 :
     public basicCombustionMixture
 {
-    // Private data
-
-        static const int nSpecies_ = 2;
-        static const char* specieNames_[2];
+    // Private Data
 
         dimensionedScalar stoicRatio_;
 
@@ -73,8 +72,11 @@ class inhomogeneousMixture
         //- Regress variable
         volScalarField& b_;
 
-        //- Construct as copy (not implemented)
-        inhomogeneousMixture(const inhomogeneousMixture<ThermoType>&);
+        //- No copy construct
+        inhomogeneousMixture
+        (
+            const inhomogeneousMixture<ThermoType>&
+        ) = delete;
 
 
 public:
@@ -86,7 +88,12 @@ public:
     // Constructors
 
         //- Construct from dictionary, mesh and phase name
-        inhomogeneousMixture(const dictionary&, const fvMesh&, const word&);
+        inhomogeneousMixture
+        (
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
 
 
     //- Destructor
@@ -174,7 +181,7 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
     #include "inhomogeneousMixture.C"

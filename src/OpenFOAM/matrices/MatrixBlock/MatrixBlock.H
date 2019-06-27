@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2004-2010, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,18 +60,25 @@ namespace Foam
 template<class MatrixType>
 class ConstMatrixBlock
 {
-    // Private data
+    // Private Data
 
         //- Const reference to the parent matrix
         const MatrixType& matrix_;
 
-        // Block size
+        //- Block size
         const label mRows_;
         const label nCols_;
 
-        // Block location in parent matrix
+        //- Block location in parent matrix
         const label rowStart_;
         const label colStart_;
+
+
+    // Private Member Functions
+
+        //- Error message for failed sanity checks during matrix construction
+        label disallow(const char *what) const;
+
 
 public:
 
@@ -96,6 +105,9 @@ public:
         //- Return the number of columns in the block
         inline label n() const;
 
+        //- Return row/column sizes
+        inline labelPair sizes() const;
+
         //- (i, j) const element access operator
         inline const cmptType& operator()
         (
@@ -105,6 +117,9 @@ public:
 
         //- Convert a column of a matrix to a Field
         operator Field<cmptType>() const;
+
+        //- Check if (i, j) is within range of row-column limits
+        void checkIndex(const label i, const label j) const;
 };
 
 
@@ -115,18 +130,25 @@ public:
 template<class MatrixType>
 class MatrixBlock
 {
-    // Private data
+    // Private Data
 
         //- Reference to the parent matrix
         MatrixType& matrix_;
 
-        // Block size
+        //- Block size
         const label mRows_;
         const label nCols_;
 
-        // Block location in parent matrix
+        //- Block location in parent matrix
         const label rowStart_;
         const label colStart_;
+
+
+    // Private Member Functions
+
+        //- Error message for failed sanity checks during matrix construction
+        label disallow(const char *what) const;
+
 
 public:
 
@@ -153,6 +175,9 @@ public:
         //- Return the number of columns in the block
         inline label n() const;
 
+        //- Return row/column sizes
+        inline labelPair sizes() const;
+
         //- (i, j) const element access operator
         inline const cmptType& operator()
         (
@@ -166,8 +191,11 @@ public:
         //- Convert a column of a matrix to a Field
         operator Field<cmptType>() const;
 
+        //- Check if (i, j) is within range of row-column limits
+        void checkIndex(const label i, const label j) const;
 
-    // Member operators
+
+    // Member Operators
 
         //- Assignment to a compatible matrix
         template<class Form>

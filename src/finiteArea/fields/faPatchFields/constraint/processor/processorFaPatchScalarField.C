@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -32,7 +32,7 @@ License
 template<>
 void Foam::processorFaPatchField<Foam::scalar>::transformCoupleField
 (
-    scalarField& f,
+    solveScalarField& f,
     const direction cmpt
 ) const
 {}
@@ -41,9 +41,9 @@ void Foam::processorFaPatchField<Foam::scalar>::transformCoupleField
 template<>
 void Foam::processorFaPatchField<Foam::scalar>::initInterfaceMatrixUpdate
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction,
     const Pstream::commsTypes commsType
@@ -60,17 +60,17 @@ void Foam::processorFaPatchField<Foam::scalar>::initInterfaceMatrixUpdate
 template<>
 void Foam::processorFaPatchField<Foam::scalar>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField&,
+    const solveScalarField&,
     const scalarField& coeffs,
     const direction,
     const Pstream::commsTypes commsType
 ) const
 {
-    scalarField pnf
+    solveScalarField pnf
     (
-        procPatch_.receive<scalar>(commsType, this->size())()
+        procPatch_.receive<solveScalar>(commsType, this->size())()
     );
 
     const labelUList& edgeFaces = patch().edgeFaces();

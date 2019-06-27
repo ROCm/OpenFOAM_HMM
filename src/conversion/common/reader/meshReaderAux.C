@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,26 +41,26 @@ void Foam::meshReader::warnDuplicates
     HashTable<label> hashed(list.size());
     bool duplicates = false;
 
-    forAll(list, listI)
+    for (const word& w : list)
     {
-        // check duplicate name
-        HashTable<label>::iterator iter = hashed.find(list[listI]);
-        if (iter != hashed.end())
+        // Check duplicate name
+        auto iter = hashed.find(w);
+        if (iter.found())
         {
-            (*iter)++;
+            ++(*iter);
             duplicates = true;
         }
         else
         {
-            hashed.insert(list[listI], 1);
+            hashed.insert(w, 1);
         }
     }
 
-    // warn about duplicate names
+    // Warn about duplicate names
     if (duplicates)
     {
         Info<< nl << "WARNING: " << context << " with identical names:";
-        forAllConstIter(HashTable<label>, hashed, iter)
+        forAllConstIters(hashed, iter)
         {
             if (*iter > 1)
             {

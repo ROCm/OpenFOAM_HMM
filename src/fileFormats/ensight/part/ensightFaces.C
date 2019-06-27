@@ -26,7 +26,6 @@ License
 #include "ensightFaces.H"
 #include "error.H"
 #include "polyMesh.H"
-#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -34,11 +33,13 @@ const char* Foam::ensightFaces::elemNames[3] =
     { "tria3", "quad4", "nsided" };
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-// only used in this file-scope
-inline Foam::ensightFaces::elemType
-Foam::ensightFaces::whatType(const face& f)
+namespace
+{
+
+// Simple shape classifier
+static inline Foam::ensightFaces::elemType whatType(const Foam::face& f)
 {
     return
     (
@@ -50,8 +51,12 @@ Foam::ensightFaces::whatType(const face& f)
     );
 }
 
+} // End anonymous namespace
 
-// only used in this file-scope
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+// Only used in this file-scope
 inline void Foam::ensightFaces::add
 (
     const face& f,
@@ -223,8 +228,7 @@ void Foam::ensightFaces::classify(const faceList& faces)
 {
     const label sz = faces.size();
 
-    // Count the shapes
-    // Can avoid double looping, but only at the expense of allocation
+    // Pass 1: Count the shapes
 
     sizes_ = Zero;  // reset sizes
     for (label listi = 0; listi < sz; ++listi)
@@ -236,7 +240,8 @@ void Foam::ensightFaces::classify(const faceList& faces)
     resizeAll();    // adjust allocation
     sizes_ = Zero;  // reset sizes - use for local indexing here
 
-    // Assign face-id per shape type
+    // Pass 2: Assign face-id per shape type
+
     for (label listi = 0; listi < sz; ++listi)
     {
         add(faces[listi], listi);
@@ -252,14 +257,10 @@ void Foam::ensightFaces::classify
     const bitSet& exclude
 )
 {
-    // Note: Since PackedList::operator[] returns zero (false) for out-of-range
-    // indices, can skip our own bounds checking here.
-
     const label sz = addressing.size();
     const bool useFlip = (addressing.size() == flipMap.size());
 
-    // Count the shapes
-    // Can avoid double looping, but only at the expense of allocation
+    // Pass 1: Count the shapes
 
     sizes_ = Zero;  // reset sizes
     for (label listi = 0; listi < sz; ++listi)
@@ -282,7 +283,8 @@ void Foam::ensightFaces::classify
         flipMap_ = false;
     }
 
-    // Assign face-id per shape type
+    // Pass 2: Assign face-id per shape type
+
     for (label listi = 0; listi < sz; ++listi)
     {
         const label faceId = addressing[listi];

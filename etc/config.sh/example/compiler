@@ -2,8 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -32,8 +34,8 @@ Gcc70)
 Gcc48u)
     # Example of using the system GCC 4.8 in Ubuntu 15.10. Keep in mind you
     # will also need to create the respective directory in "wmake/rules"
-    export WM_CC='gcc-4.8'
-    export WM_CXX='g++-4.8'
+    export CC='gcc-4.8'
+    export CXX='g++-4.8'
     ;;
 esac
 

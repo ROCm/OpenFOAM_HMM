@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,13 +103,13 @@ public:
 
 
     //- Destructor
-    virtual ~specieReactionRates();
+    virtual ~specieReactionRates() = default;
 
 
     // Member Functions
 
         //- Read the specieReactionRates data
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Do nothing
         virtual bool execute();

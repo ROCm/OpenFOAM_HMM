@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -423,10 +423,8 @@ bool Foam::vtk::vtmWriter::append(const fileName& file)
     {
         return append(fileName::nameLessExt(file), file);
     }
-    else
-    {
-        return append(word::null, file);
-    }
+
+    return append(word::null, file);
 }
 
 
@@ -440,10 +438,8 @@ bool Foam::vtk::vtmWriter::append
     {
         return append(fileName::nameLessExt(file), file, contentType);
     }
-    else
-    {
-        return append(word::null, file, contentType);
-    }
+
+    return append(word::null, file, contentType);
 }
 
 

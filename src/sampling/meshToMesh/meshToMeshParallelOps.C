@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +47,7 @@ Foam::label Foam::meshToMesh::calcDistribution
 
     if (Pstream::parRun())
     {
-        List<label> cellsPresentOnProc(Pstream::nProcs(), 0);
+        List<label> cellsPresentOnProc(Pstream::nProcs(), Zero);
         if ((src.nCells() > 0) || (tgt.nCells() > 0))
         {
             cellsPresentOnProc[Pstream::myProcNo()] = 1;
@@ -601,7 +603,7 @@ void Foam::meshToMesh::distributeAndMergeCells
 
     // Starting offset for points
     label nPoints = 0;
-    labelList pointOffset(Pstream::nProcs(), 0);
+    labelList pointOffset(Pstream::nProcs(), Zero);
     forAll(allPoints, proci)
     {
         pointOffset[proci] = nPoints;
@@ -610,7 +612,7 @@ void Foam::meshToMesh::distributeAndMergeCells
 
     // Starting offset for cells
     label nCells = 0;
-    labelList cellOffset(Pstream::nProcs(), 0);
+    labelList cellOffset(Pstream::nProcs(), Zero);
     forAll(allTgtCellIDs, proci)
     {
         cellOffset[proci] = nCells;
@@ -636,10 +638,9 @@ void Foam::meshToMesh::distributeAndMergeCells
                 key[1] = max(proci, nbrProci[i]);
                 key[2] = localFacei[i];
 
-                procCoupleInfo::const_iterator fnd =
-                    procFaceToGlobalCell.find(key);
+                const auto fnd = procFaceToGlobalCell.cfind(key);
 
-                if (fnd == procFaceToGlobalCell.end())
+                if (!fnd.found())
                 {
                     procFaceToGlobalCell.insert(key, -1);
                 }
@@ -662,7 +663,7 @@ void Foam::meshToMesh::distributeAndMergeCells
     // Starting offset for internal faces
     label nIntFaces = 0;
     label nFacesTotal = 0;
-    labelList internalFaceOffset(Pstream::nProcs(), 0);
+    labelList internalFaceOffset(Pstream::nProcs(), Zero);
     forAll(allNIntCoupledFaces, proci)
     {
         label nCoupledFaces =
@@ -752,9 +753,9 @@ void Foam::meshToMesh::distributeAndMergeCells
                 key[1] = max(proci, nbrProci[i]);
                 key[2] = localFacei[i];
 
-                procCoupleInfo::iterator fnd = procFaceToGlobalCell.find(key);
+                auto fnd = procFaceToGlobalCell.find(key);
 
-                if (fnd != procFaceToGlobalCell.end())
+                if (fnd.found())
                 {
                     label tgtFacei = fnd();
                     if (tgtFacei == -1)

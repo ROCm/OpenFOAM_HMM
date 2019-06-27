@@ -97,10 +97,10 @@ $(faceToCell)/MeshObjects/centredCFCFaceToCellStencilObject.C
 
 functionObjects/fvMeshFunctionObject/fvMeshFunctionObject.C
 functionObjects/volRegion/volRegion.C
-functionObjects/fieldSelection/fieldSelection.C
-functionObjects/fieldSelection/fileFieldSelection.C
-functionObjects/fieldSelection/volFieldSelection.C
-functionObjects/fieldSelection/solverFieldSelection.C
+functionObjects/fieldSelections/fieldSelection/fieldSelection.C
+functionObjects/fieldSelections/fileFieldSelection/fileFieldSelection.C
+functionObjects/fieldSelections/volFieldSelection/volFieldSelection.C
+functionObjects/fieldSelections/solverFieldSelection/solverFieldSelection.C
 
 fvPatchFields = fields/fvPatchFields
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
@@ -129,7 +129,6 @@ $(constraintFvPatchFields)/jumpCyclic/jumpCyclicFvPatchFields.C
 $(constraintFvPatchFields)/jumpCyclicAMI/jumpCyclicAMIFvPatchFields.C
 $(constraintFvPatchFields)/nonuniformTransformCyclic/nonuniformTransformCyclicFvPatchFields.C
 $(constraintFvPatchFields)/processor/processorFvPatchFields.C
-$(constraintFvPatchFields)/processor/processorFvPatchScalarField.C
 $(constraintFvPatchFields)/processorCyclic/processorCyclicFvPatchFields.C
 $(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchFields.C
 $(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchScalarField.C
@@ -201,6 +200,7 @@ $(derivedFvPatchFields)/translatingWallVelocity/translatingWallVelocityFvPatchVe
 $(derivedFvPatchFields)/turbulentDFSEMInlet/turbulentDFSEMInletFvPatchVectorField.C
 $(derivedFvPatchFields)/turbulentDFSEMInlet/eddy/eddy.C
 $(derivedFvPatchFields)/turbulentDFSEMInlet/eddy/eddyIO.C
+$(derivedFvPatchFields)/turbulentDigitalFilterInlet/turbulentDigitalFilterInletFvPatchVectorField.C
 $(derivedFvPatchFields)/turbulentInlet/turbulentInletFvPatchFields.C
 $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityKineticEnergyInletFvPatchScalarField.C
 $(derivedFvPatchFields)/uniformDensityHydrostaticPressure/uniformDensityHydrostaticPressureFvPatchScalarField.C
@@ -255,7 +255,6 @@ fields/surfaceFields/surfaceFields.C
 fvMatrices/fvMatrices.C
 fvMatrices/fvScalarMatrix/fvScalarMatrix.C
 fvMatrices/solvers/MULES/MULES.C
-fvMatrices/solvers/MULES/CMULES.C
 fvMatrices/solvers/isoAdvection/isoCutCell/isoCutCell.C
 fvMatrices/solvers/isoAdvection/isoCutFace/isoCutFace.C
 fvMatrices/solvers/isoAdvection/isoAdvection/isoAdvection.C

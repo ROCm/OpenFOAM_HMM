@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +82,7 @@ Foam::tmp<Foam::scalarField> Foam::GAMGInterface::agglomerateCoeffs
     const scalarField& fineCoeffs
 ) const
 {
-    tmp<scalarField> tcoarseCoeffs(new scalarField(size(), 0.0));
+    tmp<scalarField> tcoarseCoeffs(new scalarField(size(), Zero));
     scalarField& coarseCoeffs = tcoarseCoeffs.ref();
 
     if (fineCoeffs.size() != faceRestrictAddressing_.size())

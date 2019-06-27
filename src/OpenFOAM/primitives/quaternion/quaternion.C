@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +31,29 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const char* const Foam::quaternion::typeName = "quaternion";
 const Foam::quaternion Foam::quaternion::zero(0, vector(0, 0, 0));
 const Foam::quaternion Foam::quaternion::I(1, vector(0, 0, 0));
+
+const Foam::Enum<Foam::quaternion::eulerOrder>
+Foam::quaternion::eulerOrderNames
+({
+    // Proper Euler angles
+    { eulerOrder::XZX, "xzx" },
+    { eulerOrder::XYX, "xyx" },
+    { eulerOrder::YXY, "yxy" },
+    { eulerOrder::YZY, "yzy" },
+    { eulerOrder::ZYZ, "zyz" },
+    { eulerOrder::ZXZ, "zxz" },
+
+    // Tait-Bryan angles
+    { eulerOrder::XZY, "xzy" },
+    { eulerOrder::XYZ, "xyz" },
+    { eulerOrder::YXZ, "yxz" },
+    { eulerOrder::YZX, "yzx" },
+    { eulerOrder::ZYX, "zyx" },
+    { eulerOrder::ZXY, "zxy" },
+});
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -151,12 +173,8 @@ Foam::quaternion Foam::pow(const quaternion& q, const scalar power)
 
 Foam::Istream& Foam::operator>>(Istream& is, quaternion& q)
 {
-    // Read beginning of quaternion
     is.readBegin("quaternion");
-
     is  >> q.w() >> q.v();
-
-    // Read end of quaternion
     is.readEnd("quaternion");
 
     is.check(FUNCTION_NAME);

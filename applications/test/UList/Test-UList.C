@@ -46,7 +46,7 @@ using namespace Foam;
 template<class ListType>
 void print(const ListType& list)
 {
-    Info << flatOutput(list) << " data addr: " << long(list.cdata()) << nl;
+    Info << flatOutput(list) << " data addr: " << uintptr_t(list.cdata()) << nl;
 }
 
 

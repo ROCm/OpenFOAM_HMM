@@ -94,7 +94,7 @@ void Foam::ccm::reader::warnDuplicates
         Info << nl << "WARNING: " << context << " with identical names:";
         forAllConstIters(hashed, iter)
         {
-            if (iter.object() > 1)
+            if (iter.val() > 1)
             {
                 Info << "  " << iter.key();
             }

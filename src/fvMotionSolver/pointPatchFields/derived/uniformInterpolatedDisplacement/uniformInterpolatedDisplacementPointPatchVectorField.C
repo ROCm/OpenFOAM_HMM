@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,12 +73,12 @@ uniformInterpolatedDisplacementPointPatchVectorField
     DynamicList<word> names(allTimes.size());
     DynamicList<scalar> values(allTimes.size());
 
-    forAll(allTimes, i)
+    for (const instant& inst : allTimes)
     {
         IOobject io
         (
             fieldName_,
-            allTimes[i].name(),
+            inst.name(),
             pMesh(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
@@ -84,8 +86,8 @@ uniformInterpolatedDisplacementPointPatchVectorField
         );
         if (io.typeHeaderOk<pointVectorField>(false))
         {
-            names.append(allTimes[i].name());
-            values.append(allTimes[i].value());
+            names.append(inst.name());
+            values.append(inst.value());
         }
     }
     timeNames_.transfer(names);
@@ -185,7 +187,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
         (
             pMesh.thisDb().subRegistry("fieldsCache", true)
         );
-        // Save old times so we now which ones have been loaded and need
+        // Save old times so we know which ones have been loaded and need
         // 'correctBoundaryConditions'. Bit messy.
         wordHashSet oldTimes(fieldsCache.toc());
 
@@ -196,7 +198,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
             currentTimeNames
         );
 
-        forAllConstIter(objectRegistry, fieldsCache, fieldsCacheIter)
+        forAllConstIters(fieldsCache, fieldsCacheIter)
         {
             if (!oldTimes.found(fieldsCacheIter.key()))
             {

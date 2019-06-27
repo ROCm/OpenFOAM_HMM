@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,13 +43,17 @@ Foam::block::block
     const pointField& vertices,
     const blockEdgeList& edges,
     const blockFaceList& faces,
-    const Vector<label>& density,
+    const labelVector& density,
     const UList<gradingDescriptors>& expand,
     const word& zoneName
 )
 :
-    blockDescriptor(bshape, vertices, edges, faces, density, expand, zoneName)
+    blockDescriptor(bshape, vertices, edges, faces, density, expand, zoneName),
+    points_(),
+    blockCells_(),
+    blockPatches_()
 {
+    // Always need points, and demand-driven data leaves dangling addressing?
     createPoints();
     createBoundary();
 }
@@ -63,8 +69,12 @@ Foam::block::block
     Istream& is
 )
 :
-    blockDescriptor(dict, index, vertices, edges, faces, is)
+    blockDescriptor(dict, index, vertices, edges, faces, is),
+    points_(),
+    blockCells_(),
+    blockPatches_()
 {
+    // Always need points, and demand-driven data leaves dangling addressing?
     createPoints();
     createBoundary();
 }
@@ -72,12 +82,18 @@ Foam::block::block
 
 Foam::block::block(const blockDescriptor& blockDesc)
 :
-    blockDescriptor(blockDesc)
+    blockDescriptor(blockDesc),
+    points_(),
+    blockCells_(),
+    blockPatches_()
 {
+    // Always need points, and demand-driven data leaves dangling addressing?
     createPoints();
     createBoundary();
 }
 
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::block> Foam::block::New
 (
@@ -89,10 +105,7 @@ Foam::autoPtr<Foam::block> Foam::block::New
     Istream& is
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing block" << endl;
-    }
+    DebugInFunction << "Constructing block" << endl;
 
     const word blockOrCellShapeType(is);
 

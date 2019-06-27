@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +31,17 @@ License
 #include <limits>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dimensionSet::dimensionSet(const dictionary& dict, const word& entryName)
+{
+    const entry& e = dict.lookupEntry(entryName, keyType::REGEX);
+    ITstream& is = e.stream();
+
+    is >> *this;
+
+    e.checkITstream(is);
+}
+
 
 Foam::dimensionSet::dimensionSet(Istream& is)
 {
@@ -57,7 +70,7 @@ void Foam::dimensionSet::tokeniser::push(const token& t)
     }
     else
     {
-        size_++;
+        ++size_;
     }
 }
 
@@ -410,8 +423,8 @@ Foam::Istream& Foam::dimensionSet::read
     if (startToken != token::BEGIN_SQR)
     {
         FatalIOErrorInFunction(is)
-            << "Expected a " << token::BEGIN_SQR << " in dimensionSet"
-            << endl << "in stream " << is.info()
+            << "Expected a '" << token::BEGIN_SQR << "' in dimensionSet\n"
+            << "in stream " << is.info() << nl
             << exit(FatalIOError);
     }
 
@@ -433,7 +446,7 @@ Foam::Istream& Foam::dimensionSet::read
     {
         // Read first five dimensions
         exponents_[dimensionSet::MASS] = nextToken.number();
-        for (int d=1; d<dimensionSet::CURRENT; ++d)
+        for (int d=1; d < dimensionSet::CURRENT; ++d)
         {
             is >> exponents_[d];
         }
@@ -461,8 +474,8 @@ Foam::Istream& Foam::dimensionSet::read
         if (nextToken != token::END_SQR)
         {
             FatalIOErrorInFunction(is)
-                << "Expected a " << token::END_SQR << " in dimensionSet "
-                << endl << "in stream " << is.info()
+                << "Expected a '" << token::END_SQR << "' in dimensionSet\n"
+                << "in stream " << is.info() << nl
                 << exit(FatalIOError);
         }
     }
@@ -497,8 +510,8 @@ Foam::Istream& Foam::dimensionSet::read
     if (startToken != token::BEGIN_SQR)
     {
         FatalIOErrorInFunction(is)
-            << "Expected a " << token::BEGIN_SQR << " in dimensionSet"
-            << endl << "in stream " << is.info()
+            << "Expected a '" << token::BEGIN_SQR << "' in dimensionSet\n"
+            << "in stream " << is.info() << nl
             << exit(FatalIOError);
     }
 
@@ -595,8 +608,8 @@ Foam::Istream& Foam::dimensionSet::read
         if (nextToken != token::END_SQR)
         {
             FatalIOErrorInFunction(is)
-                << "Expected a " << token::END_SQR << " in dimensionSet " << nl
-                << "in stream " << is.info() << endl
+                << "Expected a '" << token::END_SQR << "' in dimensionSet\n"
+                << "in stream " << is.info() << nl
                 << exit(FatalIOError);
         }
     }
@@ -620,7 +633,7 @@ Foam::Ostream& Foam::dimensionSet::write
     if (writeUnits.valid() && os.format() == IOstream::ASCII)
     {
         scalarField exponents(dimensionSet::nDimensions);
-        for (int d=0; d<dimensionSet::nDimensions; d++)
+        for (int d=0; d < dimensionSet::nDimensions; ++d)
         {
             exponents[d] = exponents_[d];
         }
@@ -664,7 +677,7 @@ Foam::Ostream& Foam::dimensionSet::write
     }
     else
     {
-        for (int d=0; d<dimensionSet::nDimensions; ++d)
+        for (int d=0; d < dimensionSet::nDimensions; ++d)
         {
             if (d) os << token::SPACE;
             os << exponents_[d];

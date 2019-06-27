@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,7 +153,7 @@ void Foam::IOerror::SafeFatalIOError
             << "    in file " << sourceFileName
             << " at line " << sourceFileLineNumber << '.'
             << std::endl;
-        ::exit(1);
+        std::exit(1);
     }
 }
 
@@ -185,31 +187,27 @@ void Foam::IOerror::exit(const int)
     {
         abort();
     }
-
-    if (Pstream::parRun())
+    else if (throwExceptions_)
     {
-        Perr<< endl << *this << endl
+        // Make a copy of the error to throw
+        IOerror errorException(*this);
+
+        // Reset the message buffer for the next error message
+        messageStreamPtr_->reset();
+
+        throw errorException;
+    }
+    else if (Pstream::parRun())
+    {
+        Perr<< nl << *this << nl
             << "\nFOAM parallel run exiting\n" << endl;
         Pstream::exit(1);
     }
     else
     {
-        if (throwExceptions_)
-        {
-            // Make a copy of the error to throw
-            IOerror errorException(*this);
-
-            // Reset the message buffer for the next error message
-            messageStreamPtr_->reset();
-
-            throw errorException;
-        }
-        else
-        {
-            Perr<< endl << *this << endl
-                << "\nFOAM exiting\n" << endl;
-            ::exit(1);
-        }
+        Perr<< nl << *this << nl
+            << "\nFOAM exiting\n" << endl;
+        std::exit(1);
     }
 }
 
@@ -224,38 +222,39 @@ void Foam::IOerror::abort()
 
     if (env("FOAM_ABORT"))
     {
-        Perr<< endl << *this << endl
+        Perr<< nl << *this << nl
             << "\nFOAM aborting (FOAM_ABORT set)\n" << endl;
         printStack(Perr);
-        ::abort();
+        std::abort();
     }
-
-    if (Pstream::parRun())
+    else if (throwExceptions_)
     {
-        Perr<< endl << *this << endl
+        // Make a copy of the error to throw
+        IOerror errorException(*this);
+
+        // Reset the message buffer for the next error message
+        messageStreamPtr_->reset();
+
+        throw errorException;
+    }
+    else if (Pstream::parRun())
+    {
+        Perr<< nl << *this << nl
             << "\nFOAM parallel run aborting\n" << endl;
         printStack(Perr);
         Pstream::abort();
     }
     else
     {
-        if (throwExceptions_)
-        {
-            // Make a copy of the error to throw
-            IOerror errorException(*this);
+        Perr<< nl << *this << nl
+            << "\nFOAM aborting\n" << endl;
+        printStack(Perr);
 
-            // Reset the message buffer for the next error message
-            messageStreamPtr_->reset();
-
-            throw errorException;
-        }
-        else
-        {
-            Perr<< endl << *this << endl
-                << "\nFOAM aborting\n" << endl;
-            printStack(Perr);
-            ::abort();
-        }
+        #ifdef _WIN32
+        std::exit(1);  // Prefer exit() to avoid unnecessary warnings
+        #else
+        std::abort();
+        #endif
     }
 }
 
@@ -269,7 +268,7 @@ void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
         {
             os  << title().c_str() << nl;
         }
-        os  << message().c_str() << nl << endl;
+        os  << message().c_str() << nl << nl;
 
         os  << "file: " << ioFileName().c_str();
 
@@ -286,13 +285,15 @@ void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
         if (IOerror::level >= 2 && sourceFileLineNumber())
         {
             os  << nl << nl
-                << "    From function " << functionName().c_str() << endl
+                << "    From function " << functionName().c_str() << nl
                 << "    in file " << sourceFileName().c_str()
                 << " at line " << sourceFileLineNumber() << '.';
         }
     }
 }
 
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& err)
 {

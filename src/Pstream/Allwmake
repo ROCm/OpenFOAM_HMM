@@ -17,7 +17,7 @@ wmakeMpiLib()
         objectsDir="$WM_PROJECT_DIR/build/$WM_OPTIONS/src/Pstream/$libName"
         whichmpi="$objectsDir/using:$FOAM_MPI"
         [ -e "$whichmpi" ] || wclean $libName
-        echo "wmake $targetType $libName"
+        echo "wmake $targetType $libName (mpi=$WM_MPLIB)"
         wmake $targetType $libName
         mkdir -p "$objectsDir"
         touch "$whichmpi"
@@ -25,11 +25,11 @@ wmakeMpiLib()
     done
 }
 
-echo "wmake $targetType dummy"
+echo "wmake $targetType dummy (mpi=$WM_MPLIB)"
 wmake $targetType dummy
 
 case "$WM_MPLIB" in
-*MPI*)
+(*MPI*)
     wmakeMpiLib mpi
     ;;
 esac

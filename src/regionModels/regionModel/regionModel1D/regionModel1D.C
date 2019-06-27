@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,10 +172,8 @@ bool Foam::regionModels::regionModel1D::read()
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -185,10 +185,8 @@ bool Foam::regionModels::regionModel1D::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -198,7 +196,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
     const scalar minDelta
 )
 {
-    tmp<labelField> tcellMoveMap(new labelField(regionMesh().nCells(), 0));
+    tmp<labelField> tcellMoveMap(new labelField(regionMesh().nCells(), Zero));
     labelField& cellMoveMap = tcellMoveMap.ref();
 
     if (!moveMesh_)
@@ -226,7 +224,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
             const vector n = pp.faceNormals()[patchFacei];
             const vector sf = pp.faceAreas()[patchFacei];
 
-            List<point> oldCf(faces.size() + 1, vector::zero);
+            List<point> oldCf(faces.size() + 1, Zero);
             List<bool> frozen(faces.size(), false);
 
             forAll(faces, i)
@@ -247,7 +245,7 @@ Foam::tmp<Foam::labelField> Foam::regionModels::regionModel1D::moveMesh
                 }
             }
 
-            vectorField newDelta(cells.size() + 1, vector::zero);
+            vectorField newDelta(cells.size() + 1, Zero);
 
             label j = 0;
             forAllReverse(cells, i)

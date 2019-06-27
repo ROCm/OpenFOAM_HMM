@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +97,7 @@ bool Foam::masterCoarsestGAMGProcAgglomeration::agglomerate()
             if (nProcs > 1)
             {
                 // Processor restriction map: per processor the coarse processor
-                labelList procAgglomMap(nProcs, 0);
+                labelList procAgglomMap(nProcs, Zero);
 
                 // Master processor
                 labelList masterProcs;

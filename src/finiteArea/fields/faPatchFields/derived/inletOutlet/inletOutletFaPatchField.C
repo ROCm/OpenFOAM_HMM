@@ -68,7 +68,7 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 )
 :
     mixedFaPatchField<Type>(p, iF),
-    phiName_("phi")
+    phiName_(dict.lookupOrDefault<word>("phi", "phi"))
 {
     this->refValue() = Field<Type>("inletValue", dict, p.size());
 
@@ -86,8 +86,6 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 
     this->refGrad() = pTraits<Type>::zero;
     this->valueFraction() = 0.0;
-
-    dict.readIfPresent("phi", phiName_);
 }
 
 
@@ -140,11 +138,7 @@ template<class Type>
 void Foam::inletOutletFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi")
-            << phiName_ << token::END_STATEMENT << nl;
-    }
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->refValue().writeEntry("inletValue", os);
     this->writeEntry("value", os);
 }

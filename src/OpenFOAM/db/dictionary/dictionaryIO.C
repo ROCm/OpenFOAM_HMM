@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,7 +165,7 @@ void Foam::dictionary::writeEntry(const keyType& kw, Ostream& os) const
 {
     os.beginBlock(kw);
     writeEntries(os);
-    os.endBlock() << flush;
+    os.endBlock();
 }
 
 
@@ -205,7 +207,7 @@ void Foam::dictionary::write(Ostream& os, const bool subDict) const
 
     if (subDict)
     {
-        os.endBlock() << flush;
+        os.endBlock();
     }
 }
 

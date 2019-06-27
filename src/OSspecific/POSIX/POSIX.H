@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,11 +48,11 @@ namespace Foam
 
 namespace POSIX
 {
-    //- Declare name of the class and its debug switch
+    //- Declare namespace and its debug switch
     NamespaceName("POSIX");
 
-    const label pathLengthChunk = 256;
-    const label pathLengthMax = 4096;
+    constexpr label pathLengthChunk = 256;
+    constexpr label pathLengthMax = 4096;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,13 +61,11 @@ class FacePostProcessing
 :
     public CloudFunctionObject<CloudType>
 {
+        //- Convenience typedef for parcel type
+        typedef typename CloudType::parcelType parcelType;
+
+
     // Private Data
-
-        // Typedefs
-
-            //- Convenience typedef for parcel type
-            typedef typename CloudType::parcelType parcelType;
-
 
         //- Face zone IDs
         labelList faceZoneIDs_;
@@ -73,8 +73,11 @@ class FacePostProcessing
         //- Surface output format
         const word surfaceFormat_;
 
-        //- Flag to indicate whether data should be reset/cleared on writing
-        Switch resetOnWrite_;
+        //- Should be reset/cleared on writing?
+        bool resetOnWrite_;
+
+        //- Flag to indicate whether data should be written to file
+        bool log_;
 
         //- Total time
         scalar totalTime_;
@@ -87,9 +90,6 @@ class FacePostProcessing
 
         //- Mass flow rate storage
         List<scalarField> massFlowRate_;
-
-        //- Flag to indicate whether data should be written to file
-        Switch log_;
 
         //- Output file pointer per zone
         PtrList<OFstream> outputFilePtr_;
@@ -153,16 +153,16 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return const access to the reset on write flag
-            inline const Switch& resetOnWrite() const;
+        //- Should data be reset on write?
+        inline bool resetOnWrite() const;
 
 
-        // Evaluation
+    // Evaluation
 
-            //- Post-face hook
-            virtual void postFace(const parcelType& p, bool& keepParticle);
+        //- Post-face hook
+        virtual void postFace(const parcelType& p, bool& keepParticle);
 };
 
 

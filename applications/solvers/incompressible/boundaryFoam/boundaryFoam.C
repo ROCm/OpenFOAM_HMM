@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +30,7 @@ Group
     grpIncompressibleSolvers
 
 Description
-    Steady-state solver for incompressible, 1D turbulent flow, 
+    Steady-state solver for incompressible, 1D turbulent flow,
     typically to generate boundary layer conditions at an inlet.
 
     Boundary layer code to calculate the U, k and epsilon distributions.

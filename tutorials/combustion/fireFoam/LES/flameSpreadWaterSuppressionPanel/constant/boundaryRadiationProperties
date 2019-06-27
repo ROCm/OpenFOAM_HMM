@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,19 +15,21 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-region0_to_pyrolysisRegion_coupledWall
-{
-    mode            solidRadiation;
-}
-
 ".*"
 {
-    mode            lookup;
+    type            lookup;
     emissivity      1.0;
     absorptivity    1.0;
     transmissivity  0.0;
 }
 
+region0_to_pyrolysisRegion_coupledWall
+{
+    type            opaqueDiffusive;
+    wallAbsorptionEmissionModel
+    {
+        type    solidAbsorption;
+    }
+}
 
 // ************************************************************************* //

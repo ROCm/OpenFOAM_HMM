@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,27 +79,27 @@ Usage
 
     Where the entries comprise:
     \table
-        Property     | Description                      | Required    | Default
-        type         | type name: surfaceFieldValue     | yes         |
-        log          | write data to standard output    | no          | no
-        writeFields  | Write the region field values    | yes         |
-        writeArea    | Write the area of the surfaceFieldValue | no   |
-        surfaceFormat | output value format             | no          |
-        regionType   | face regionType: see below       | yes         |
-        name         | name of face regionType if required  | no      |
-        operation    | operation to perform             | yes         |
-        postOperation | post-operation to perform       | no          | none
-        weightField  | name of field to apply weighting | no          |
-        scaleFactor  | scale factor                     | no          | 1
-        fields       | list of fields to operate on     | yes         |
+        Property     | Description                          | Required | Default
+        type         | Type name: surfaceFieldValue         | yes |
+        log          | Write data to standard output        | no  | no
+        regionType   | Face regionType: see below           | yes |
+        name         | Name for regionType                  | yes |
+        operation    | Operation to perform                 | yes |
+        postOperation | Post-operation to perform           | no  | none
+        fields       | List of fields to operate on         | yes |
+        weightField  | Name of field to apply weighting     | no  |
+        scaleFactor  | Output value scaling factor          | no  | 1
+        writeArea    | Write the surface area               | no  |
+        writeFields  | Write the region field values        | yes |
+        surfaceFormat | Output value format                 | no  | none
     \endtable
 
     Where \c regionType is defined by
     \plaintable
-        faceZone     | requires a \b name entry to specify the faceZone
-        patch        | requires a \b name entry to specify the patch
-        surface      | requires a \b name entry to specify the surfMesh
-        sampledSurface | requires a \b sampledSurfaceDict sub-dictionary
+        faceZone     | The \b name entry to specify the faceZone
+        patch        | The \b name entry to specify the patch
+        functionObjectSurface | The \b name entry to specify a polySurface
+        sampledSurface | A \b sampledSurfaceDict sub-dictionary and \b name
     \endplaintable
 
     The \c operation is one of:
@@ -132,13 +134,14 @@ Note
     - The values reported by the areaNormalAverage and areaNormalIntegrate
       operations are written as the first component of a field with the same
       rank as the input field.
-    - faces on empty patches get ignored
-    - if the field is a volField the \c faceZone can only consist of boundary
+    - Faces on empty patches get ignored
+    - If the field is a volField the \c faceZone can only consist of boundary
       faces
-    - Using \c surface:
+    - Using \c functionObjectSurface:
       - The keyword %subRegion should not be used to select surfaces.
-        Specify instead the regionType 'surface' and provide the surface name.
-    - using \c sampledSurface:
+        Instead specify the regionType 'functionObjectSurface' and provide
+        the name.
+    - Using \c sampledSurface:
         - not available for surface fields
         - if interpolate=true they use \c interpolationCellPoint
           otherwise they use cell values
@@ -178,17 +181,18 @@ SourceFiles
 
 #include "fieldValue.H"
 #include "Enum.H"
-#include "meshedSurf.H"
 #include "surfaceMesh.H"
+#include "polySurface.H"
 #include "fvsPatchField.H"
 #include "volFieldsFwd.H"
-#include "surfFieldsFwd.H"
+#include "polySurfaceFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declarations
 class sampledSurface;
 class surfaceWriter;
 
@@ -207,15 +211,15 @@ class surfaceFieldValue
 {
 public:
 
-    // Public data types
+    // Public Data Types
 
         //- Region type enumeration
         enum regionTypes
         {
-            stFaceZone,         //!< Calculate on a faceZone
-            stPatch,            //!< Calculate on a patch
-            stSurface,          //!< Calculate with fields on a surfMesh
-            stSampledSurface    //!< Sample onto surface and calculate
+            stFaceZone = 0x01,   //!< Calculate on a faceZone
+            stPatch    = 0x02,   //!< Calculate on a patch
+            stObject   = 0x11,   //!< Calculate with function object surface
+            stSampled  = 0x12    //!< Sample onto surface and calculate
         };
 
         //- Region type names
@@ -334,7 +338,7 @@ private:
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Region type
         regionTypes regionType_;
@@ -348,11 +352,14 @@ protected:
         //- Weight field name - optional
         word weightFieldName_;
 
-        //- Total area of the surfaceFieldValue
-        scalar totalArea_;
+        //- Track if the surface needs an update
+        bool needsUpdate_;
 
         //- Optionally write the area of the surfaceFieldValue
         bool writeArea_;
+
+        //- Total area of the surfaceFieldValue
+        scalar totalArea_;
 
         //- Global number of faces
         label nFaces_;
@@ -370,9 +377,8 @@ protected:
             //  (false: use as-is, true: negate)
             boolList faceFlip_;
 
-
-        //- Underlying sampledSurface (if operating on sampledSurface)
-        autoPtr<sampledSurface> surfacePtr_;
+        //- The sampledSurface (when operating on sampledSurface)
+        autoPtr<sampledSurface> sampledPtr_;
 
         //- Surface writer
         autoPtr<surfaceWriter> surfaceWriterPtr_;
@@ -382,6 +388,12 @@ protected:
 
         //- The volume mesh or surface registry being used
         const objectRegistry& obr() const;
+
+        //- Can the surface definition sample surface-fields?
+        inline bool withSurfaceFields() const;
+
+        //- Can use mesh topological merge?
+        inline bool withTopologicalMerge() const;
 
         //- Return the local list of face IDs
         inline const labelList& faceId() const;
@@ -406,8 +418,9 @@ protected:
         template<class WeightType>
         inline bool canWeight(const Field<WeightType>& weightField) const;
 
-        //- Initialise, e.g. face addressing
-        void initialise(const dictionary& dict);
+        //- Update the surface and surface information as required.
+        //  Do nothing (and return false) if no update was required
+        bool update();
 
         //- Return true if the field name is known and a valid type
         template<class Type>
@@ -418,7 +431,7 @@ protected:
         tmp<Field<Type>> getFieldValues
         (
             const word& fieldName,
-            const bool mustGet = false
+            const bool mandatory = false
         ) const;
 
         //- Apply the 'operation' to the values. Operation must preserve Type.
@@ -481,7 +494,8 @@ protected:
         (
             const vectorField& Sf,
             const Field<WeightType>& weightField,
-            const meshedSurf& surfToWrite
+            const pointField& points,
+            const faceList& faces
         );
 
         //- Templated helper function to output field values
@@ -491,7 +505,8 @@ protected:
             const word& fieldName,
             const vectorField& Sf,
             const Field<WeightType>& weightField,
-            const meshedSurf& surfToWrite
+            const pointField& points,
+            const faceList& faces
         );
 
 
@@ -525,13 +540,13 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceFieldValue();
+    virtual ~surfaceFieldValue() = default;
 
 
     // Public Member Functions
 
         //- Return the region type
-        inline const regionTypes& regionType() const;
+        inline regionTypes regionType() const;
 
         //- Return the output directory
         inline fileName outputDir() const;
@@ -541,6 +556,12 @@ public:
 
         //- Calculate and write
         virtual bool write();
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh& mpm);
+
+        //- Update for changes of mesh
+        virtual void movePoints(const polyMesh& mesh);
 };
 
 

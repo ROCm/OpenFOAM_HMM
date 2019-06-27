@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,70 +26,85 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "CodedSource.H"
-#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 bool Foam::fv::CodedSource<Type>::read(const dictionary& dict)
 {
-    if (cellSetOption::read(dict))
+    codedBase::setCodeContext(coeffs_);
+
+    if (!cellSetOption::read(dict))
     {
-        coeffs_.readEntry("fields", fieldNames_);
-        applied_.setSize(fieldNames_.size(), false);
-
-        dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
-
-        // Code snippets
-        {
-            const entry& e =
-                coeffs_.lookupEntry("codeCorrect", keyType::LITERAL);
-
-            e.readEntry(codeCorrect_);
-            stringOps::inplaceTrim(codeCorrect_);
-            stringOps::inplaceExpand(codeCorrect_, coeffs_);
-            dynamicCodeContext::addLineDirective
-            (
-                codeCorrect_,
-                e.startLineNumber(),
-                coeffs_.name()
-            );
-        }
-
-        {
-            const entry& e =
-                coeffs_.lookupEntry("codeAddSup", keyType::LITERAL);
-
-            e.readEntry(codeAddSup_);
-            stringOps::inplaceTrim(codeAddSup_);
-            stringOps::inplaceExpand(codeAddSup_, coeffs_);
-            dynamicCodeContext::addLineDirective
-            (
-                codeAddSup_,
-                e.startLineNumber(),
-                coeffs_.name()
-            );
-        }
-
-        {
-            const entry& e =
-                coeffs_.lookupEntry("codeSetValue", keyType::LITERAL);
-
-            e.readEntry(codeSetValue_);
-            stringOps::inplaceTrim(codeSetValue_);
-            stringOps::inplaceExpand(codeSetValue_, coeffs_);
-            dynamicCodeContext::addLineDirective
-            (
-                codeSetValue_,
-                e.startLineNumber(),
-                coeffs_.name()
-            );
-        }
-
-        return true;
+        return false;
     }
 
-    return false;
+    coeffs_.readEntry("fields", fieldNames_);
+    applied_.setSize(fieldNames_.size(), false);
+
+    dict.readCompat<word>("name", {{"redirectType", 1706}}, name_);
+
+    // Code chunks
+
+    codedBase::append("<codeCorrect>");
+    {
+        const entry& e =
+            coeffs_.lookupEntry("codeCorrect", keyType::LITERAL);
+
+        e.readEntry(codeCorrect_);
+        dynamicCodeContext::inplaceExpand(codeCorrect_, coeffs_);
+
+        codedBase::append(codeCorrect_);
+
+        dynamicCodeContext::addLineDirective
+        (
+            codeCorrect_,
+            e.startLineNumber(),
+            coeffs_
+        );
+    }
+
+    codedBase::append("<codeAddSup>");
+    {
+        const entry& e =
+            coeffs_.lookupEntry("codeAddSup", keyType::LITERAL);
+
+        e.readEntry(codeAddSup_);
+        dynamicCodeContext::inplaceExpand(codeAddSup_, coeffs_);
+
+        codedBase::append(codeAddSup_);
+
+        dynamicCodeContext::addLineDirective
+        (
+            codeAddSup_,
+            e.startLineNumber(),
+            coeffs_
+        );
+    }
+
+    codedBase::append("<codeConstrain>");
+    {
+        const entry& e =
+            coeffs_.lookupEntryCompat
+            (
+                "codeConstrain",
+                {{ "codeSetValue", 1812 }}, keyType::LITERAL
+            );
+
+        e.readEntry(codeConstrain_);
+        dynamicCodeContext::inplaceExpand(codeConstrain_, coeffs_);
+
+        codedBase::append(codeConstrain_);
+
+        dynamicCodeContext::addLineDirective
+        (
+            codeConstrain_,
+            e.startLineNumber(),
+            coeffs_
+        );
+    }
+
+    return true;
 }
 
 

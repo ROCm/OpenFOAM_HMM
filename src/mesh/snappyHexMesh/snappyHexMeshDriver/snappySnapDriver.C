@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -223,10 +225,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
     // Unmark any point on the boundary. If we're doing zero iterations of
     // face-cell wave we might have coupled points not being unmarked.
-    forAll(pp.meshPoints(), pointi)
-    {
-        isMovingPoint.unset(pp.meshPoints()[pointi]);
-    }
+    isMovingPoint.unset(pp.meshPoints());
 
     // Make sure that points that are coupled to meshPoints but not on a patch
     // are unmarked as well
@@ -234,7 +233,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothInternalDisplacement
 
 
     // Calculate average of connected cells
-    labelList nCells(mesh.nPoints(), 0);
+    labelList nCells(mesh.nPoints(), Zero);
     pointField sumLocation(mesh.nPoints(), Zero);
 
     forAll(isMovingPoint, pointi)
@@ -356,7 +355,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     vectorField avgBoundary(pointFaces.size(), Zero);
-    labelList nBoundary(pointFaces.size(), 0);
+    labelList nBoundary(pointFaces.size(), Zero);
 
     forAll(pointFaces, patchPointi)
     {
@@ -404,7 +403,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::smoothPatchDisplacement
     labelList nInternal;
     {
         vectorField globalSum(mesh.nPoints(), Zero);
-        labelList globalNum(mesh.nPoints(), 0);
+        labelList globalNum(mesh.nPoints(), Zero);
 
         // Note: no use of pointFaces
         const faceList& faces = mesh.faces();
@@ -757,12 +756,14 @@ Foam::snappySnapDriver::snappySnapDriver
 (
     meshRefinement& meshRefiner,
     const labelList& globalToMasterPatch,
-    const labelList& globalToSlavePatch
+    const labelList& globalToSlavePatch,
+    const bool dryRun
 )
 :
     meshRefiner_(meshRefiner),
     globalToMasterPatch_(globalToMasterPatch),
-    globalToSlavePatch_(globalToSlavePatch)
+    globalToSlavePatch_(globalToSlavePatch),
+    dryRun_(dryRun)
 {}
 
 
@@ -958,12 +959,11 @@ Foam::labelList Foam::snappySnapDriver::getZoneSurfacePoints
         {
             label meshPointi = f[fp];
 
-            Map<label>::const_iterator iter =
-                pp.meshPointMap().find(meshPointi);
+            const auto iter = pp.meshPointMap().cfind(meshPointi);
 
-            if (iter != pp.meshPointMap().end())
+            if (iter.found())
             {
-                label pointi = iter();
+                const label pointi = iter.val();
                 pointOnZone[pointi] = true;
             }
         }
@@ -987,7 +987,7 @@ Foam::tmp<Foam::pointField> Foam::snappySnapDriver::avgCellCentres
         new pointField(pointFaces.size(), Zero)
     );
     pointField& avgBoundary = tavgBoundary.ref();
-    labelList nBoundary(pointFaces.size(), 0);
+    labelList nBoundary(pointFaces.size(), Zero);
 
     forAll(pointFaces, pointi)
     {
@@ -2093,6 +2093,11 @@ void Foam::snappySnapDriver::smoothDisplacement
     motionSmoother& meshMover
 ) const
 {
+    if (dryRun_)
+    {
+        return;
+    }
+
     const fvMesh& mesh = meshRefiner_.mesh();
     const indirectPrimitivePatch& pp = meshMover.patch();
 
@@ -2523,7 +2528,7 @@ void Foam::snappySnapDriver::doSnap
 (
     const dictionary& snapDict,
     const dictionary& motionDict,
-    const bool mergePatchFaces,
+    const meshRefinement::FaceMergeType mergeType,
     const scalar featureCos,
     const scalar planarAngle,
     const snapParameters& snapParams
@@ -2606,7 +2611,11 @@ void Foam::snappySnapDriver::doSnap
     if (snapParams.nFeatureSnap() > 0)
     {
         doFeatures = true;
-        nFeatIter = snapParams.nFeatureSnap();
+
+        if (!dryRun_)
+        {
+            nFeatIter = snapParams.nFeatureSnap();
+        }
 
         Info<< "Snapping to features in " << nFeatIter
             << " iterations ..." << endl;
@@ -2652,7 +2661,8 @@ void Foam::snappySnapDriver::doSnap
                     pointMesh::New(mesh),
                     adaptPatchIDs
                 ),
-                motionDict
+                motionDict,
+                dryRun_
             )
         );
 
@@ -2660,7 +2670,7 @@ void Foam::snappySnapDriver::doSnap
         // Check initial mesh
         Info<< "Checking initial mesh ..." << endl;
         labelHashSet wrongFaces(mesh.nFaces()/100);
-        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces);
+        motionSmoother::checkMesh(false, mesh, motionDict, wrongFaces, dryRun_);
         const label nInitErrors = returnReduce
         (
             wrongFaces.size(),
@@ -2934,7 +2944,8 @@ void Foam::snappySnapDriver::doSnap
                             pointMesh::New(mesh),
                             adaptPatchIDs
                         ),
-                        motionDict
+                        motionDict,
+                        dryRun_
                     )
                 );
 
@@ -3020,7 +3031,11 @@ void Foam::snappySnapDriver::doSnap
         repatchToSurface(snapParams, adaptPatchIDs, duplicateFace);
     }
 
-    if (mergePatchFaces)
+    if
+    (
+        mergeType == meshRefinement::FaceMergeType::GEOMETRIC
+     || mergeType == meshRefinement::FaceMergeType::IGNOREPATCH
+    )
     {
         labelList duplicateFace(getInternalOrBaffleDuplicateFace());
 
@@ -3033,7 +3048,8 @@ void Foam::snappySnapDriver::doSnap
             featureCos,     // concaveCos
             meshRefiner_.meshedPatches(),
             motionDict,
-            duplicateFace   // faces not to merge
+            duplicateFace,  // faces not to merge
+            mergeType
         );
 
         nChanged += meshRefiner_.mergeEdgesUndo(featureCos, motionDict);

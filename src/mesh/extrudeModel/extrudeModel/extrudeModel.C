@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,15 +45,12 @@ Foam::extrudeModel::extrudeModel
 :
     nLayers_(dict.lookupOrDefault<label>("nLayers", 1)),
     expansionRatio_(dict.lookupOrDefault<scalar>("expansionRatio", 1)),
-    dict_(dict),
     coeffDict_(dict.optionalSubDict(modelType + "Coeffs"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::extrudeModel::~extrudeModel()
-{}
+{
+    DebugInfo
+        << "Selected extrudeModel for " << modelType
+        << "using coeffs " << coeffDict_ << nl;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +79,7 @@ Foam::plenumPressureFvPatchScalarField::plenumPressureFvPatchScalarField
     hasRho_(false),
     inletAreaRatio_(dict.get<scalar>("inletAreaRatio")),
     inletDischargeCoefficient_(dict.get<scalar>("inletDischargeCoefficient")),
-    timeScale_(dict.lookupOrDefault<scalar>("timeScale", 0.0)),
+    timeScale_(dict.lookupOrDefault<scalar>("timeScale", 0)),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     UName_(dict.lookupOrDefault<word>("U", "U"))
 {

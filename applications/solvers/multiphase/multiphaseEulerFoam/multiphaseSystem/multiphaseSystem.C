@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +37,12 @@ License
 #include "fvcDiv.H"
 #include "fvcFlux.H"
 #include "fvcAverage.H"
-#include "unitConversion.H"
+
+// * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
+
+const Foam::scalar Foam::multiphaseSystem::convertToRad =
+    Foam::constant::mathematical::pi/180.0;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -44,9 +51,9 @@ void Foam::multiphaseSystem::calcAlphas()
     scalar level = 0.0;
     alphas_ == 0.0;
 
-    forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (const phaseModel& phase : phases_)
     {
-        alphas_ += level*iter();
+        alphas_ += level * phase;
         level += 1.0;
     }
 }
@@ -57,9 +64,8 @@ void Foam::multiphaseSystem::solveAlphas()
     PtrList<surfaceScalarField> alphaPhiCorrs(phases_.size());
     int phasei = 0;
 
-    forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (phaseModel& phase : phases_)
     {
-        phaseModel& phase = iter();
         volScalarField& alpha1 = phase;
 
         alphaPhiCorrs.set
@@ -79,21 +85,17 @@ void Foam::multiphaseSystem::solveAlphas()
 
         surfaceScalarField& alphaPhiCorr = alphaPhiCorrs[phasei];
 
-        forAllIter(PtrDictionary<phaseModel>, phases_, iter2)
+        for (phaseModel& phase2 : phases_)
         {
-            phaseModel& phase2 = iter2();
             volScalarField& alpha2 = phase2;
 
             if (&phase2 == &phase) continue;
 
             surfaceScalarField phir(phase.phi() - phase2.phi());
 
-            scalarCoeffSymmTable::const_iterator cAlpha
-            (
-                cAlphas_.find(interfacePair(phase, phase2))
-            );
+            const auto cAlpha = cAlphas_.cfind(interfacePair(phase, phase2));
 
-            if (cAlpha != cAlphas_.end())
+            if (cAlpha.found())
             {
                 surfaceScalarField phic
                 (
@@ -103,7 +105,7 @@ void Foam::multiphaseSystem::solveAlphas()
                 phir += min(cAlpha()*phic, max(phic))*nHatf(phase, phase2);
             }
 
-            word phirScheme
+            const word phirScheme
             (
                 "div(phir," + alpha2.name() + ',' + alpha1.name() + ')'
             );
@@ -127,12 +129,12 @@ void Foam::multiphaseSystem::solveAlphas()
             alphaPhiCorr,
             zeroField(),
             zeroField(),
-            1,
-            0,
+            oneField(),
+            zeroField(),
             true
         );
 
-        phasei++;
+        ++phasei;
     }
 
     MULES::limitSum(alphaPhiCorrs);
@@ -146,15 +148,13 @@ void Foam::multiphaseSystem::solveAlphas()
             mesh_
         ),
         mesh_,
-        dimensionedScalar(dimless, Zero)
+        dimensionedScalar("sumAlpha", dimless, 0)
     );
 
     phasei = 0;
 
-    forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (phaseModel& phase : phases_)
     {
-        phaseModel& phase = iter();
-
         surfaceScalarField& alphaPhi = alphaPhiCorrs[phasei];
         alphaPhi += upwind<scalar>(mesh_, phi_).flux(phase);
         phase.correctInflowOutflow(alphaPhi);
@@ -163,9 +163,7 @@ void Foam::multiphaseSystem::solveAlphas()
         (
             geometricOneField(),
             phase,
-            alphaPhi,
-            zeroField(),
-            zeroField()
+            alphaPhi
         );
 
         phase.alphaPhi() = alphaPhi;
@@ -178,7 +176,7 @@ void Foam::multiphaseSystem::solveAlphas()
 
         sumAlpha += phase;
 
-        phasei++;
+        ++phasei;
     }
 
     Info<< "Phase-sum volume fraction, min, max = "
@@ -189,9 +187,8 @@ void Foam::multiphaseSystem::solveAlphas()
 
     // Correct the sum of the phase-fractions to avoid 'drift'
     volScalarField sumCorr(1.0 - sumAlpha);
-    forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (phaseModel& phase : phases_)
     {
-        phaseModel& phase = iter();
         volScalarField& alpha = phase;
         alpha += alpha*sumCorr;
     }
@@ -270,11 +267,10 @@ void Foam::multiphaseSystem::correctContactAngle
                /mesh_.magSf().boundaryField()[patchi]
             );
 
-            alphaContactAngleFvPatchScalarField::thetaPropsTable::
-                const_iterator tp =
-                acap.thetaProps().find(interfacePair(phase1, phase2));
+            const auto tp =
+                acap.thetaProps().cfind(interfacePair(phase1, phase2));
 
-            if (tp == acap.thetaProps().end())
+            if (!tp.found())
             {
                 FatalErrorInFunction
                     << "Cannot find interface " << interfacePair(phase1, phase2)
@@ -285,7 +281,7 @@ void Foam::multiphaseSystem::correctContactAngle
 
             bool matched = (tp.key().first() == phase1.name());
 
-            const scalar theta0 = degToRad(tp().theta0(matched));
+            scalar theta0 = convertToRad*tp().theta0(matched);
             scalarField theta(boundary[patchi].size(), theta0);
 
             scalar uTheta = tp().uTheta();
@@ -293,8 +289,8 @@ void Foam::multiphaseSystem::correctContactAngle
             // Calculate the dynamic contact angle if required
             if (uTheta > SMALL)
             {
-                const scalar thetaA = degToRad(tp().thetaA(matched));
-                const scalar thetaR = degToRad(tp().thetaR(matched));
+                scalar thetaA = convertToRad*tp().thetaA(matched);
+                scalar thetaR = convertToRad*tp().thetaR(matched);
 
                 // Calculated the component of the velocity parallel to the wall
                 vectorField Uwall
@@ -398,7 +394,7 @@ Foam::multiphaseSystem::multiphaseSystem
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar(dimless, Zero)
+        dimensionedScalar("alphas", dimless, 0.0)
     ),
 
     sigmas_(lookup("sigmas")),
@@ -408,7 +404,7 @@ Foam::multiphaseSystem::multiphaseSystem
     deltaN_
     (
         "deltaN",
-        1e-8/pow(average(mesh_.V()), 1.0/3.0)
+        1e-8/cbrt(average(mesh_.V()))
     )
 {
     calcAlphas();
@@ -416,9 +412,9 @@ Foam::multiphaseSystem::multiphaseSystem
 
     interfaceDictTable dragModelsDict(lookup("drag"));
 
-    forAllConstIter(interfaceDictTable, dragModelsDict, iter)
+    forAllConstIters(dragModelsDict, iter)
     {
-        dragModels_.insert
+        dragModels_.set
         (
             iter.key(),
             dragModel::New
@@ -426,43 +422,28 @@ Foam::multiphaseSystem::multiphaseSystem
                 iter(),
                 *phases_.lookup(iter.key().first()),
                 *phases_.lookup(iter.key().second())
-            )
+            ).ptr()
         );
     }
 
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, iter1)
+    for (const phaseModel& phase1 : phases_)
     {
-        const phaseModel& phase1 = iter1();
-
-        forAllConstIter(PtrDictionary<phaseModel>, phases_, iter2)
+        for (const phaseModel& phase2 : phases_)
         {
-            const phaseModel& phase2 = iter2();
-
-            if (&phase2 != &phase1)
+            if (&phase2 == &phase1)
             {
-                scalarCoeffSymmTable::const_iterator sigma
-                (
-                    sigmas_.find(interfacePair(phase1, phase2))
-                );
+                continue;
+            }
 
-                if (sigma != sigmas_.end())
-                {
-                    scalarCoeffSymmTable::const_iterator cAlpha
-                    (
-                        cAlphas_.find(interfacePair(phase1, phase2))
-                    );
+            const interfacePair key(phase1, phase2);
 
-                    if (cAlpha == cAlphas_.end())
-                    {
-                        WarningInFunction
-                          << "Compression coefficient not specified for "
-                             "phase pair ("
-                          << phase1.name() << ' ' << phase2.name()
-                          << ") for which a surface tension "
-                             "coefficient is specified"
-                          << endl;
-                    }
-                }
+            if (sigmas_.found(key) && !cAlphas_.found(key))
+            {
+                WarningInFunction
+                    << "Compression coefficient not specified for phase pair ("
+                    << phase1.name() << ' ' << phase2.name()
+                    << ") for which a surface tension coefficient is specified"
+                    << endl;
             }
         }
     }
@@ -473,12 +454,12 @@ Foam::multiphaseSystem::multiphaseSystem
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::rho() const
 {
-    PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<volScalarField> trho = iter()*iter().rho();
     volScalarField& rho = trho.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         rho += iter()*iter().rho();
     }
@@ -490,12 +471,12 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::rho() const
 Foam::tmp<Foam::scalarField>
 Foam::multiphaseSystem::rho(const label patchi) const
 {
-    PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<scalarField> trho = iter().boundaryField()[patchi]*iter().rho().value();
     scalarField& rho = trho.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         rho += iter().boundaryField()[patchi]*iter().rho().value();
     }
@@ -506,12 +487,12 @@ Foam::multiphaseSystem::rho(const label patchi) const
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::nu() const
 {
-    PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<volScalarField> tmu = iter()*(iter().rho()*iter().nu());
     volScalarField& mu = tmu.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         mu += iter()*(iter().rho()*iter().nu());
     }
@@ -523,14 +504,14 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::nu() const
 Foam::tmp<Foam::scalarField>
 Foam::multiphaseSystem::nu(const label patchi) const
 {
-    PtrDictionary<phaseModel>::const_iterator iter = phases_.begin();
+    auto iter = phases_.cbegin();
 
     tmp<scalarField> tmu =
         iter().boundaryField()[patchi]
        *(iter().rho().value()*iter().nu().value());
     scalarField& mu = tmu.ref();
 
-    for (++iter; iter != phases_.end(); ++iter)
+    for (++iter; iter != phases_.cend(); ++iter)
     {
         mu +=
             iter().boundaryField()[patchi]
@@ -557,33 +538,30 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::Cvm
                 mesh_
             ),
             mesh_,
-            dimensionedScalar(dimensionSet(1, -3, 0, 0, 0), Zero)
+            dimensionedScalar(dimDensity, Zero)
         )
     );
 
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (const phaseModel& phase2 : phases_)
     {
-        const phaseModel& phase2 = iter();
-
-        if (&phase2 != &phase)
+        if (&phase2 == &phase)
         {
-            scalarCoeffTable::const_iterator Cvm
-            (
-                Cvms_.find(interfacePair(phase, phase2))
-            );
+            continue;
+        }
 
-            if (Cvm != Cvms_.end())
-            {
-                tCvm.ref() += Cvm()*phase2.rho()*phase2;
-            }
-            else
-            {
-                Cvm = Cvms_.find(interfacePair(phase2, phase));
+        auto iterCvm = Cvms_.cfind(interfacePair(phase, phase2));
 
-                if (Cvm != Cvms_.end())
-                {
-                    tCvm.ref() += Cvm()*phase.rho()*phase2;
-                }
+        if (iterCvm.found())
+        {
+            tCvm.ref() += iterCvm()*phase2.rho()*phase2;
+        }
+        else
+        {
+            iterCvm = Cvms_.cfind(interfacePair(phase2, phase));
+
+            if (iterCvm.found())
+            {
+                tCvm.ref() += iterCvm()*phase.rho()*phase2;
             }
         }
     }
@@ -608,33 +586,35 @@ Foam::tmp<Foam::volVectorField> Foam::multiphaseSystem::Svm
                 mesh_
             ),
             mesh_,
-            dimensionedVector(dimensionSet(1, -2, -2, 0, 0), Zero)
+            dimensionedVector
+            (
+                "Svm",
+                dimensionSet(1, -2, -2, 0, 0),
+                Zero
+            )
         )
     );
 
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (const phaseModel& phase2 : phases_)
     {
-        const phaseModel& phase2 = iter();
-
-        if (&phase2 != &phase)
+        if (&phase2 == &phase)
         {
-            scalarCoeffTable::const_iterator Cvm
-            (
-                Cvms_.find(interfacePair(phase, phase2))
-            );
+            continue;
+        }
 
-            if (Cvm != Cvms_.end())
-            {
-                tSvm.ref() += Cvm()*phase2.rho()*phase2*phase2.DDtU();
-            }
-            else
-            {
-                Cvm = Cvms_.find(interfacePair(phase2, phase));
+        auto Cvm = Cvms_.cfind(interfacePair(phase, phase2));
 
-                if (Cvm != Cvms_.end())
-                {
-                    tSvm.ref() += Cvm()*phase.rho()*phase2*phase2.DDtU();
-                }
+        if (Cvm.found())
+        {
+            tSvm.ref() += Cvm()*phase2.rho()*phase2*phase2.DDtU();
+        }
+        else
+        {
+            Cvm = Cvms_.cfind(interfacePair(phase2, phase));
+
+            if (Cvm.found())
+            {
+                tSvm.ref() += Cvm()*phase.rho()*phase2*phase2.DDtU();
             }
         }
     }
@@ -664,9 +644,9 @@ Foam::tmp<Foam::volVectorField> Foam::multiphaseSystem::Svm
 Foam::autoPtr<Foam::multiphaseSystem::dragCoeffFields>
 Foam::multiphaseSystem::dragCoeffs() const
 {
-    auto dragCoeffsPtr = autoPtr<dragCoeffFields>::New();
+    autoPtr<dragCoeffFields> dragCoeffsPtr(new dragCoeffFields);
 
-    forAllConstIter(dragModelTable, dragModels_, iter)
+    forAllConstIters(dragModels_, iter)
     {
         const dragModel& dm = *iter();
 
@@ -674,8 +654,8 @@ Foam::multiphaseSystem::dragCoeffs() const
             (
                 max
                 (
-                    //fvc::average(dm.phase1()*dm.phase2()),
-                    //fvc::average(dm.phase1())*fvc::average(dm.phase2()),
+                    // fvc::average(dm.phase1()*dm.phase2()),
+                    // fvc::average(dm.phase1())*fvc::average(dm.phase2()),
                     dm.phase1()*dm.phase2(),
                     dm.residualPhaseFraction()
                 )
@@ -730,7 +710,12 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::dragCoeff
                 mesh_
             ),
             mesh_,
-            dimensionedScalar(dimensionSet(1, -3, -1, 0, 0), Zero)
+            dimensionedScalar
+            (
+                "dragCoeff",
+                dimensionSet(1, -3, -1, 0, 0),
+                0
+            )
         )
     );
 
@@ -739,7 +724,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::dragCoeff
     for
     (
         ;
-        dmIter != dragModels_.end() && dcIter != dragCoeffs.end();
+        dmIter.good() && dcIter.good();
         ++dmIter, ++dcIter
     )
     {
@@ -773,32 +758,34 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseSystem::surfaceTension
                 mesh_
             ),
             mesh_,
-            dimensionedScalar(dimensionSet(1, -2, -2, 0, 0), Zero)
+            dimensionedScalar
+            (
+                "surfaceTension",
+                dimensionSet(1, -2, -2, 0, 0),
+                0
+            )
         )
     );
     tSurfaceTension.ref().setOriented();
 
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (const phaseModel& phase2 : phases_)
     {
-        const phaseModel& phase2 = iter();
-
-        if (&phase2 != &phase1)
+        if (&phase2 == &phase1)
         {
-            scalarCoeffSymmTable::const_iterator sigma
-            (
-                sigmas_.find(interfacePair(phase1, phase2))
-            );
+            continue;
+        }
 
-            if (sigma != sigmas_.end())
-            {
-                tSurfaceTension.ref() +=
-                    dimensionedScalar("sigma", dimSigma_, sigma())
-                   *fvc::interpolate(K(phase1, phase2))*
-                    (
-                        fvc::interpolate(phase2)*fvc::snGrad(phase1)
-                      - fvc::interpolate(phase1)*fvc::snGrad(phase2)
-                    );
-            }
+        const auto sigma = sigmas_.cfind(interfacePair(phase1, phase2));
+
+        if (sigma.found())
+        {
+            tSurfaceTension.ref() +=
+                dimensionedScalar("sigma", dimSigma_, *sigma)
+               *fvc::interpolate(K(phase1, phase2))*
+                (
+                    fvc::interpolate(phase2)*fvc::snGrad(phase1)
+                  - fvc::interpolate(phase1)*fvc::snGrad(phase2)
+                );
         }
     }
 
@@ -820,14 +807,14 @@ Foam::multiphaseSystem::nearInterface() const
                 mesh_
             ),
             mesh_,
-            dimensionedScalar(dimless, Zero)
+            dimensionedScalar("nearInterface", dimless, 0.0)
         )
     );
 
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (const phaseModel& phase : phases_)
     {
         tnearInt.ref() =
-            max(tnearInt(), pos0(iter() - 0.01)*pos0(0.99 - iter()));
+            max(tnearInt(), pos0(phase - 0.01)*pos0(0.99 - phase));
     }
 
     return tnearInt;
@@ -836,15 +823,15 @@ Foam::multiphaseSystem::nearInterface() const
 
 void Foam::multiphaseSystem::solve()
 {
-    forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+    for (phaseModel& phase : phases_)
     {
-        iter().correct();
+        phase.correct();
     }
 
     const Time& runTime = mesh_.time();
 
     const dictionary& alphaControls = mesh_.solverDict("alpha");
-    label nAlphaSubCycles(alphaControls.get<label>("nAlphaSubCycles"));
+    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
 
     if (nAlphaSubCycles > 1)
     {
@@ -853,10 +840,9 @@ void Foam::multiphaseSystem::solve()
         PtrList<volScalarField> alpha0s(phases_.size());
         PtrList<surfaceScalarField> alphaPhiSums(phases_.size());
 
-        int phasei = 0;
-        forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+        label phasei = 0;
+        for (phaseModel& phase : phases_)
         {
-            phaseModel& phase = iter();
             volScalarField& alpha = phase;
 
             alpha0s.set
@@ -877,11 +863,11 @@ void Foam::multiphaseSystem::solve()
                         mesh_
                     ),
                     mesh_,
-                    dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
+                    dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
                 )
             );
 
-            phasei++;
+            ++phasei;
         }
 
         for
@@ -896,18 +882,18 @@ void Foam::multiphaseSystem::solve()
         {
             solveAlphas();
 
-            int phasei = 0;
-            forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+            label phasei = 0;
+            for (const phaseModel& phase : phases_)
             {
-                alphaPhiSums[phasei] += iter().alphaPhi()/nAlphaSubCycles;
-                phasei++;
+                alphaPhiSums[phasei] += phase.alphaPhi()/nAlphaSubCycles;
+
+                ++phasei;
             }
         }
 
         phasei = 0;
-        forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+        for (phaseModel& phase : phases_)
         {
-            phaseModel& phase = iter();
             volScalarField& alpha = phase;
 
             phase.alphaPhi() = alphaPhiSums[phasei];
@@ -920,7 +906,7 @@ void Foam::multiphaseSystem::solve()
             alpha.oldTime() = alpha0s[phasei];
             alpha.oldTime().timeIndex() = runTime.timeIndex();
 
-            phasei++;
+            ++phasei;
         }
     }
     else
@@ -939,19 +925,21 @@ bool Foam::multiphaseSystem::read()
         PtrList<entry> phaseData(lookup("phases"));
         label phasei = 0;
 
-        forAllIter(PtrDictionary<phaseModel>, phases_, iter)
+        for (phaseModel& phase : phases_)
         {
-            readOK &= iter().read(phaseData[phasei++].dict());
+            readOK &= phase.read(phaseData[phasei++].dict());
         }
 
-        readEntry("sigmas", sigmas_);
-        readEntry("interfaceCompression", cAlphas_);
-        readEntry("virtualMass", Cvms_);
+        lookup("sigmas") >> sigmas_;
+        lookup("interfaceCompression") >> cAlphas_;
+        lookup("virtualMass") >> Cvms_;
 
         return readOK;
     }
-
-    return false;
+    else
+    {
+        return false;
+    }
 }
 
 

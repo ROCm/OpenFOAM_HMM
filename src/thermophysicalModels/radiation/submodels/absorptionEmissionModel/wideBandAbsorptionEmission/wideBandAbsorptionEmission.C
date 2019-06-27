@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +59,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
     absorptionEmissionModel(dict, mesh),
     coeffsDict_((dict.optionalSubDict(typeName + "Coeffs"))),
     speciesNames_(0),
-    specieIndex_(label(0)),
+    specieIndex_(Zero),
     lookUpTablePtr_(),
     thermo_(mesh.lookupObject<fluidThermo>(basicThermo::dictName)),
     Yj_(nSpecies_),
@@ -134,7 +136,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
     forAllConstIters(speciesNames_, iter)
     {
         const word& specieName = iter.key();
-        const label index = iter.object();
+        const label index = iter.val();
 
         volScalarField* fldPtr = mesh.getObjectPtr<volScalarField>(specieName);
 

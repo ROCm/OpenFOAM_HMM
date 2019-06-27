@@ -145,15 +145,15 @@ int main(int argc, char *argv[])
     const label nElem  = 1000000;
 
     argList::noBanner();
-    argList::addBoolOption("std", "use std::unordered_map or std::set");
-    argList::addBoolOption("set", "test HashSet");
     argList::addBoolOption("find", "test find");
+    argList::addBoolOption("set", "test HashSet");
+    argList::addBoolOption("std", "std::unordered_map or std::unordered_set");
 
     argList args(argc, argv);
 
-    const bool optStd = args.found("std");
-    const bool optSet = args.found("set");
     const bool optFnd = args.found("find");
+    const bool optSet = args.found("set");
+    const bool optStd = args.found("std");
 
 
     cpuTime timer;
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
 
     if (false)
     {
-        // verify that resizing around (0) doesn't fail
+        // Verify that resizing around (0) doesn't fail
         HashTable<label, label, Hash<label>> map(32);
         printInfo(Info, map) << endl;
 
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
             #ifdef ORDERED
             Info<< "using stl::map" << endl;
             #else
-            Info<< "using stl::unordered_set" << endl;
+            Info<< "using stl::unordered_map" << endl;
             #endif
 
             for (label loopi = 0; loopi < nLoops; ++loopi)

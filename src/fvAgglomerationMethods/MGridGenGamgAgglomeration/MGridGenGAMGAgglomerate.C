@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +51,7 @@ makeCompactCellFaceAddressingAndFaceWeights
     const labelUList& lowerAddr = fineAddressing.lowerAddr();
 
     // Number of neighbours for each cell
-    labelList nNbrs(nFineCells, 0);
+    labelList nNbrs(nFineCells, Zero);
 
     forAll(upperAddr, facei)
     {
@@ -124,7 +126,7 @@ Foam::tmp<Foam::labelField> Foam::MGridGenGAMGAgglomeration::agglomerate
     );
 
     // agglomeration options.
-    List<int> options(4, 0);
+    List<int> options(4, Zero);
     options[0] = 4;                     // globular agglom
     options[1] = 6;                     // objective F3 and F2
     options[2] = 128;                   // debugging output level

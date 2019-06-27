@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,93 +21,19 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
+Typedef
     Foam::cpuTime
 
 Description
-    Starts timing CPU usage and return elapsed time from start.
-
-See also
-    clockTime
-
-SourceFiles
-    cpuTime.C
+    Selection of preferred clock mechanism for the elapsed cpu time.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef cpuTime_H
 #define cpuTime_H
 
-#include <string>
-#include <time.h>
-#include <sys/times.h>
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-/*---------------------------------------------------------------------------*\
-                           Class cpuTime Declaration
-\*---------------------------------------------------------------------------*/
-
-class cpuTime
-{
-    //- Time structure used, with additional methods
-    struct value_type : tms
-    {
-        //- Construct with the current clock time
-        value_type();
-
-        //- Update with the current clock time
-        void update();
-    };
-
-
-    // Private Data
-
-        //- Start time, at the time of construction
-        value_type start_;
-
-        //- Last time when elapsedTime or timeIncrement was called
-        mutable value_type last_;
-
-        //- Clock-ticks per second
-        static const long clockTicks_;
-
-
-    // Private Member Functions
-
-        //- Difference between two times  (a - b)
-        static double diff(const value_type& a, const value_type& b);
-
-
-public:
-
-    // Constructors
-
-        //- Construct with the current clock time
-        cpuTime();
-
-
-    // Member Functions
-
-        //- Reset to use the current time for the start time
-        void resetCpuTime();
-
-        //- Return CPU time (in seconds) from the start
-        double elapsedCpuTime() const;
-
-        //- Return CPU time (in seconds) since last call to cpuTimeIncrement()
-        double cpuTimeIncrement() const;
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "cpuTimePosix.H"
+#include "cpuTimeFwd.H"
 
 #endif
 

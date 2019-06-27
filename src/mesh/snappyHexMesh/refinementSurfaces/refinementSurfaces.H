@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,6 +88,10 @@ class refinementSurfaces
         //- From global region number to small-gap level
         labelList gapLevel_;
 
+        //- From global region number to cell level at which blockage detection
+        //  needs to apply
+        labelList blockLevel_;
+
         //- From global region number to small-gap level specification
         List<FixedList<label, 3>> extendedGapLevel_;
 
@@ -97,6 +103,9 @@ class refinementSurfaces
 
         //- From global region number to patchType
         PtrList<dictionary> patchInfo_;
+
+        //- Are we operating in test mode?
+        const bool dryRun_;
 
 
     // Private Member Functions
@@ -127,7 +136,8 @@ public:
         (
             const searchableSurfaces& allGeometry,
             const dictionary&,
-            const label gapLevelIncrement
+            const label gapLevelIncrement,
+            const bool dryRun
         );
 
         //- Construct from components
@@ -142,7 +152,8 @@ public:
             const labelList& maxLevel,
             const labelList& gapLevel,
             const scalarField& perpendicularAngle,
-            PtrList<dictionary>& patchInfo
+            PtrList<dictionary>& patchInfo,
+            const bool dryRun
         );
 
 
@@ -193,6 +204,13 @@ public:
             const labelList& gapLevel() const
             {
                 return gapLevel_;
+            }
+
+            //- From global region number to cell level at which blockage
+            //- detection is applied
+            const labelList& blockLevel() const
+            {
+                return blockLevel_;
             }
 
             //- From global region number to specification of gap and its
@@ -280,25 +298,31 @@ public:
                 labelList& surfaceLevel
             ) const;
 
-            //- Find all intersections of edge. Unsorted order.
-            void findAllHigherIntersections
+            //- Find all intersections of edge with any surface with applicable
+            //  min/max refinement level. Unsorted order.
+            void findAllIntersections
             (
                 const pointField& start,
                 const pointField& end,
                 const labelList& currentLevel,  // current cell refinement level
-                const labelList& globalRegionLevel, // level per surfregion
+
+                const labelList& globalMinLevel,    // level per surfregion
+                const labelList& globalMaxLevel,    // level per surfregion
 
                 List<vectorList>& surfaceNormal,
                 labelListList& surfaceLevel
             ) const;
 
-            //- Find all intersections of edge. Unsorted order.
-            void findAllHigherIntersections
+            //- Find all intersections of edge with any surface with applicable
+            //  min/max refinement level. Unsorted order.
+            void findAllIntersections
             (
                 const pointField& start,
                 const pointField& end,
                 const labelList& currentLevel,  // current cell refinement level
-                const labelList& globalRegionLevel, // level per surfregion
+
+                const labelList& globalMinLevel,    // level per surfregion
+                const labelList& globalMaxLevel,    // level per surfregion
 
                 List<pointList>& surfaceLocation,
                 List<vectorList>& surfaceNormal,

@@ -505,8 +505,6 @@ void Foam::vtk::vtuSizing::populateArrays
                         vertLabels[vrtLoc++] = nShapePoints;
                     }
 
-                    cellTypes[celLoc] = vtk::cellType::VTK_TETRA;
-
                     // See note above about the orientation.
                     if (isOwner)
                     {
@@ -624,14 +622,14 @@ void Foam::vtk::vtuSizing::populateArrays
             if (sizing.nFaceLabels())
             {
                 // End face offsets, leaving -1 untouched
-                label prev = 0;
-                forAll(faceOffset, i)
+                LabelType prev = 0;
+                for (LabelType& off : faceOffset)
                 {
-                    const label sz = faceOffset[i];
+                    const auto sz = off;
                     if (sz > 0)
                     {
                         prev += sz;
-                        faceOffset[i] = prev;
+                        off = prev;
                     }
                 }
             }
@@ -641,10 +639,10 @@ void Foam::vtk::vtuSizing::populateArrays
         {
             // Has prefix, determine begin offsets
             label beg = 0;
-            forAll(vertOffset, i)
+            for (LabelType& off : vertOffset)
             {
-                const label sz = vertOffset[i];
-                vertOffset[i] = beg;
+                const auto sz = off;
+                off = beg;
                 beg += 1 + sz;
             }
 
@@ -652,12 +650,12 @@ void Foam::vtk::vtuSizing::populateArrays
             if (sizing.nFaceLabels())
             {
                 beg = 0;
-                forAll(faceOffset, i)
+                for (LabelType& off : faceOffset)
                 {
-                    const label sz = faceOffset[i];
+                    const auto sz = off;
                     if (sz > 0)
                     {
-                        faceOffset[i] = beg;
+                        off = beg;
                         beg += sz;
                     }
                 }

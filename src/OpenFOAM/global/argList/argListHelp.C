@@ -33,6 +33,12 @@ License
 namespace Foam
 {
 
+// Convert api number (YYMM) -> 20YY. Eg, 1906 -> 2019
+static inline int apiYear()
+{
+    return 2000 + (foamVersion::api / 100);
+}
+
 // manpage Footer
 static inline void printManFooter()
 {
@@ -40,7 +46,7 @@ static inline void printManFooter()
         << "Online documentation "
         << "https://www.openfoam.com/documentation/" << nl
         << ".SH COPYRIGHT" << nl
-        << "Copyright \\(co 2018 OpenCFD Ltd." << nl;
+        << "Copyright \\(co 2018-" << apiYear() << " OpenCFD Ltd." << nl;
 }
 
 
@@ -284,7 +290,6 @@ void Foam::argList::printMan() const
     // Standard documentation/help options
 
     printManOption("doc", "Display documentation in browser");
-    printManOption("doc-source", "Display source code in browser");
     printManOption("help", "Display short help and exit");
     printManOption("help-full", "Display full help and exit");
 
@@ -301,6 +306,8 @@ void Foam::argList::printMan() const
         }
     }
 
+    printManOption("doc-source", "Display source code in browser");
+
 
     const bool hasCompat =
     (
@@ -314,6 +321,7 @@ void Foam::argList::printMan() const
     }
 
     printManOption("help-man", "Display full help (manpage format) and exit");
+    printManOption("help-notes", "Display help notes (description) and exit");
 
     printManCompat();
 
@@ -392,7 +400,10 @@ void Foam::argList::printUsage(bool full) const
     // Place documentation/help options at the end
 
     printOption("doc", "Display documentation in browser");
-    printOption("doc-source", "Display source code in browser");
+    if (full)
+    {
+        printOption("doc-source", "Display source code in browser");
+    }
     printOption("help", "Display short help and exit");
 
     if
@@ -407,6 +418,7 @@ void Foam::argList::printUsage(bool full) const
     if (full)
     {
         printOption("help-man", "Display full help (manpage format) and exit");
+        printOption("help-notes", "Display help notes (description) and exit");
     }
 
     printOption("help-full", "Display full help and exit");

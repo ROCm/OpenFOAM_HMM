@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,7 +132,7 @@ int main(int argc, char *argv[])
     }
     {
         // Number of (master)faces per edge
-        labelList nMasterFaces(patch.nEdges(), 0);
+        labelList nMasterFaces(patch.nEdges(), Zero);
 
         forAll(faceLabels, facei)
         {

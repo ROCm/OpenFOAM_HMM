@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,16 +72,15 @@ public:
         //- Construct from Istream setting pointsList
         pointVertex
         (
-            const dictionary&,
+            const dictionary& dict,
             const label index,
             const searchableSurfaces& geometry,
-            Istream&
+            Istream& is
         );
 
 
     //- Destructor
-    virtual ~pointVertex()
-    {}
+    virtual ~pointVertex() = default;
 
 
     // Member Functions

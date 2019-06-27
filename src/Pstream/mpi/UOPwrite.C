@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +30,7 @@ Description
 
 #include "UOPstream.H"
 #include "PstreamGlobals.H"
+#include "profilingPstream.H"
 
 #include <mpi.h>
 
@@ -68,6 +71,8 @@ bool Foam::UOPstream::write
 
     bool transferFailed = true;
 
+    profilingPstream::beginTiming();
+
     if (commsType == commsTypes::blocking)
     {
         transferFailed = MPI_Bsend
@@ -79,6 +84,9 @@ bool Foam::UOPstream::write
             tag,
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
+
+        // Assume these are from scatters ...
+        profilingPstream::addScatterTime();
 
         if (debug)
         {
@@ -99,6 +107,9 @@ bool Foam::UOPstream::write
             tag,
             PstreamGlobals::MPICommunicators_[communicator] //MPI_COMM_WORLD
         );
+
+        // Assume these are from scatters ...
+        profilingPstream::addScatterTime();
 
         if (debug)
         {
@@ -122,6 +133,8 @@ bool Foam::UOPstream::write
             PstreamGlobals::MPICommunicators_[communicator],//MPI_COMM_WORLD,
             &request
         );
+
+        profilingPstream::addWaitTime();
 
         if (debug)
         {

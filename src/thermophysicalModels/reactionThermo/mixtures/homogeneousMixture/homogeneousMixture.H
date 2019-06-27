@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +30,7 @@ Group
     grpReactionThermophysicalMixtures
 
 Description
-    Foam::homogeneousMixture
+    The homogeneous mixture contains species ("b").
 
 SourceFiles
     homogeneousMixture.C
@@ -54,21 +56,18 @@ class homogeneousMixture
 :
     public basicCombustionMixture
 {
-    // Private data
-
-        static const int nSpecies_ = 1;
-        static const char* specieNames_[1];
+    // Private Data
 
         ThermoType reactants_;
         ThermoType products_;
 
         mutable ThermoType mixture_;
 
-        //- Construct as copy (not implemented)
-        homogeneousMixture(const homogeneousMixture<ThermoType>&);
-
         //- Regress variable
         volScalarField& b_;
+
+        //- No copy construct
+        homogeneousMixture(const homogeneousMixture<ThermoType>&) = delete;
 
 
 public:
@@ -80,12 +79,16 @@ public:
     // Constructors
 
         //- Construct from dictionary, mesh and phase name
-        homogeneousMixture(const dictionary&, const fvMesh&, const word&);
+        homogeneousMixture
+        (
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
 
 
     //- Destructor
-    virtual ~homogeneousMixture()
-    {}
+    virtual ~homogeneousMixture() = default;
 
 
     // Member functions
@@ -144,7 +147,7 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
     #include "homogeneousMixture.C"

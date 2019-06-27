@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +57,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class T> class PtrList;
 template<class T> class UPtrList;
@@ -132,7 +134,7 @@ public:
         inline explicit UPtrList(UList<T>& list);
 
 
-    // Member functions
+    // Member Functions
 
     // Access
 
@@ -164,9 +166,12 @@ public:
         //  New entries are initialized to nullptr.
         inline void resize(const label newLen);
 
-        //- Reset size of list.
-        //  New entries are initialized to nullptr.
+        //- Same as resize()
         inline void setSize(const label newLen);
+
+        //- Squeeze out intermediate nullptr entries in the list of pointers
+        //  \return the number of non-null entries
+        label squeezeNull();
 
         //- Append an element to the end of the list
         inline void append(T* ptr);
@@ -177,16 +182,24 @@ public:
         //- Transfer contents into this list and annul the argument
         inline void transfer(UPtrList<T>& list);
 
-        //- Return true if element is set (not a nullptr)
-        inline bool set(const label i) const;
+        //- Return const pointer to element (if set) or nullptr.
+        //  The return value can be tested as a bool.
+        inline const T* set(const label i) const;
 
         //- Set element to specified pointer and return the old list element,
         //- which can be a nullptr.
         //  No-op if the new pointer value is identical to the current content.
         inline T* set(const label i, T* ptr);
 
-        //- Reorder elements. Reordering must be unique (ie, shuffle).
-        void reorder(const labelUList& oldToNew);
+        //- Reorder elements.
+        //- Reordering must be unique (ie, shuffle).
+        //  Optionally verify that all pointers have been set.
+        void reorder(const labelUList& oldToNew, const bool testNull = true);
+
+        //- Reorder elements according to new order mapping (newToOld).
+        //- Reordering must be unique (ie, shuffle).
+        //  Optionally verify that all pointers have been set.
+        void sortOrder(const labelUList& order, const bool testNull = true);
 
 
     // Member Operators

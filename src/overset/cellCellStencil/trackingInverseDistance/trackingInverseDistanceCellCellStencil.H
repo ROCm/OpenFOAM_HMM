@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,13 +74,13 @@ protected:
     // Protected Member Functions
 
         //- Mark voxels of patchTypes with type of patch face
-        static void markBoundaries
+        static bool markBoundaries
         (
             const fvMesh& mesh,
             const vector& smallVec,
 
             const boundBox& bb,
-            const labelVector& nDivs,
+            labelVector& nDivs,
             PackedList<2>& patchTypes,
 
             const labelList& cellMap,

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +96,7 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
         tmp<volScalarField> trho(this->rho());
         const volScalarField& rho = trho();
 
-        scalarField tauStar(epsilon.size(), 0);
+        scalarField tauStar(epsilon.size(), Zero);
 
         if (version_ == EDCversions::v2016)
         {
@@ -234,10 +236,8 @@ bool Foam::combustionModels::EDC<ReactionThermo>::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

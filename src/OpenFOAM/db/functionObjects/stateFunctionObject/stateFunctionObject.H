@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionObjectState
+    Foam::functionObjects::stateFunctionObject
 
 Description
     Base class for function objects, adding functionality to read/write state
@@ -46,7 +48,7 @@ SourceFiles
 #ifndef functionObjects_stateFunctionObject_H
 #define functionObjects_stateFunctionObject_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,35 +66,17 @@ namespace functionObjects
 
 class stateFunctionObject
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
-
-private:
-
-    // Private member data
+    // Private Member Data
 
         //- Name of the results dictionary
         static const word resultsName_;
 
 
-    // Private Member Functions
-
-        //- No copy construct
-        stateFunctionObject(const stateFunctionObject&) = delete;
-
-        //- No copy assignment
-        void operator=(const stateFunctionObject&) = delete;
-
-
 protected:
 
-    // Protected Member Data
-
-        //- Reference to the time database
-        const Time& time_;
-
-
-    // Protacted Member Functions
+    // Protected Member Functions
 
         //- Return a const reference to the state dictionary
         const IOdictionary& stateDict() const;
@@ -100,6 +84,12 @@ protected:
         //- Return non-const access to the state dictionary
         IOdictionary& stateDict();
 
+
+        //- No copy construct
+        stateFunctionObject(const stateFunctionObject&) = delete;
+
+        //- No copy assignment
+        void operator=(const stateFunctionObject&) = delete;
 
 
 public:
@@ -111,7 +101,7 @@ public:
 
 
     //- Destructor
-    ~stateFunctionObject();
+    virtual ~stateFunctionObject() = default;
 
 
     // Member Functions
@@ -124,6 +114,12 @@ public:
 
             //- Return true if the property exists
             bool foundProperty(const word& entryName) const;
+
+            //- Get the current trigger index
+            label getTrigger() const;
+
+            //- Set the current trigger index
+            bool setTrigger(const label triggeri);
 
             //- Set dictionary, return true if set
             bool getDict
@@ -244,6 +240,15 @@ public:
 
             //- Return result entries for named object
             List<word> objectResultEntries(const word& objectName) const;
+
+            //- Write the results entries for all objects to stream
+            void writeResultEntries(Ostream& os) const;
+
+            //- Write the results entries for named object to stream
+            void writeResultEntries(const word& objectName, Ostream& os) const;
+
+            //- Write the results entries for all objects to stream
+            void writeAllResultEntries(Ostream& os) const;
 };
 
 

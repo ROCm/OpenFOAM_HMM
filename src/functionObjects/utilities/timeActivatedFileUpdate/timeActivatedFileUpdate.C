@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,8 +91,7 @@ Foam::functionObjects::timeActivatedFileUpdate::timeActivatedFileUpdate
     const dictionary& dict
 )
 :
-    functionObject(name),
-    time_(runTime),
+    timeFunctionObject(name, runTime),
     fileToUpdate_("unknown-fileToUpdate"),
     timeVsFile_(),
     lastIndex_(-1),
@@ -100,12 +101,6 @@ Foam::functionObjects::timeActivatedFileUpdate::timeActivatedFileUpdate
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::timeActivatedFileUpdate::~timeActivatedFileUpdate()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::timeActivatedFileUpdate::read
@@ -113,7 +108,7 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
     const dictionary& dict
 )
 {
-    functionObject::read(dict);
+    timeFunctionObject::read(dict);
 
     dict.readEntry("fileToUpdate", fileToUpdate_);
     dict.readEntry("timeVsFile", timeVsFile_);

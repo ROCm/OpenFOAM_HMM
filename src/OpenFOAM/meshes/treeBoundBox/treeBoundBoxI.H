@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +82,7 @@ inline Foam::point Foam::treeBoundBox::corner(const direction octant) const
 // Returns octant in which point resides. Reverse of subBbox.
 inline Foam::direction Foam::treeBoundBox::subOctant(const point& pt) const
 {
-    return subOctant(midpoint(), pt);
+    return subOctant(centre(), pt);
 }
 
 
@@ -121,7 +123,7 @@ inline Foam::direction Foam::treeBoundBox::subOctant
     bool& onEdge
 ) const
 {
-    return subOctant(midpoint(), pt, onEdge);
+    return subOctant(centre(), pt, onEdge);
 }
 
 
@@ -234,7 +236,7 @@ inline void Foam::treeBoundBox::searchOrder
     FixedList<direction,8>& octantOrder
 ) const
 {
-    vector dist = midpoint() - pt;
+    vector dist = centre() - pt;
 
     direction octant = 0;
 

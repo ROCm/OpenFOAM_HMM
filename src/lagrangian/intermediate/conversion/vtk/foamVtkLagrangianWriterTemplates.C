@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ void Foam::vtk::lagrangianWriter::write(const IOField<Type>& field)
     static_assert
     (
         (
-            std::is_same<typename pTraits<Type>::cmptType,label>::value
+            std::is_same<label, typename pTraits<Type>::cmptType>::value
          || std::is_floating_point<typename pTraits<Type>::cmptType>::value
         ),
         "Label and Floating-point vector space only"
@@ -72,9 +72,6 @@ void Foam::vtk::lagrangianWriter::write(const IOField<Type>& field)
     //     }
     // }
 
-    const bool isLabel =
-        std::is_same<typename pTraits<Type>::cmptType(), label>::value;
-
 
     const direction nCmpt(pTraits<Type>::nComponents);
 
@@ -89,7 +86,7 @@ void Foam::vtk::lagrangianWriter::write(const IOField<Type>& field)
     {
         // Non-legacy
 
-        if (isLabel)
+        if (std::is_same<label, typename pTraits<Type>::cmptType>::value)
         {
             const uint64_t payLoad = vtk::sizeofData<label, nCmpt>(nVals);
 

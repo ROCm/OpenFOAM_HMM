@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,6 +75,7 @@ class functionObjectList
         //- Quick lookup of the index into functions/digests
         HashTable<label> indices_;
 
+        //- Reference to Time
         const Time& time_;
 
         //- The parent dictionary containing a "functions" entry
@@ -83,6 +86,9 @@ class functionObjectList
         //- Function object properties - stores state information
         mutable autoPtr<IOdictionary> stateDictPtr_;
 
+        //- Function objects output registry
+        mutable autoPtr<objectRegistry> objectsRegistryPtr_;
+
         //- Switch for the execution of the functionObjects
         bool execution_;
 
@@ -92,13 +98,22 @@ class functionObjectList
 
     // Private Member Functions
 
-        //- Create state dictionary
+        //- List of functions
+        const PtrList<functionObject>& functions() const { return *this; }
+
+        //- List of functions
+        PtrList<functionObject>& functions() { return *this; }
+
+        //- Create state dictionary - attached to Time.
         void createStateDict() const;
 
+        //- Create registry for output objects - attached to Time.
+        void createOutputRegistry() const;
+
         //- Remove and return the function object pointer by name,
-        //- and returns the old index via the parameter.
-        //  Returns a nullptr (and index -1) if it didn't exist
-        functionObject* remove(const word& key, label& oldIndex);
+        //- and returns the old index (into digest) via the parameter.
+        //  Returns nullptr (and index -1) if it didn't exist
+        autoPtr<functionObject> remove(const word& key, label& oldIndex);
 
         //- Search the specified directory for functionObject
         //- configuration files, add to the given map and recurse
@@ -174,19 +189,32 @@ public:
         //- Access to the functionObjects
         using PtrList<functionObject>::operator[];
 
+        //- Return the current trigger index (read from the stateDict)
+        label triggerIndex() const;
+
         //- Reset/read state dictionary for current time
         void resetState();
 
-        //- Return the state dictionary
+        //- Write access to the state dictionary ("functionObjectProperties")
+        //- registered on Time
         IOdictionary& stateDict();
 
-        //- Return const access to the state dictionary
+        //- Const access to the state dictionary ("functionObjectProperties")
+        //- registered on Time
         const IOdictionary& stateDict() const;
+
+        //- Write access to the output objects ("functionObjectObjects")
+        //- registered on Time
+        objectRegistry& storedObjects();
+
+        //- Const access to the output objects ("functionObjectObjects")
+        //- registered on Time
+        const objectRegistry& storedObjects() const;
 
         //- Clear the list of function objects
         void clear();
 
-        //- Find the ID of a given function object by name
+        //- Find the ID of a given function object by name, -1 if not found.
         label findObjectID(const word& name) const;
 
         //- Print a list of functionObject configuration files in the

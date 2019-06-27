@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -103,6 +103,7 @@ SourceFiles
 #define swirlFanVelocityFvPatchField_H
 
 #include "fixedJumpFvPatchField.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -132,7 +133,7 @@ class swirlFanVelocityFvPatchField
         const vector origin_;
 
         //- Fan rpm
-        scalar rpm_;
+        autoPtr<Function1<scalar>> rpm_;
 
         //- Effective fan radius
         scalar rEff_;

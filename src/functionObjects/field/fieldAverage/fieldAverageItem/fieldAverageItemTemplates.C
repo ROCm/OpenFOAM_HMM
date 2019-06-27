@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -106,17 +106,16 @@ bool Foam::functionObjects::fieldAverageItem::calculateMeanField
                     // Note: looks up all window fields from the registry
 
                     meanField = 0*baseField;
-                    FIFOStack<scalar>::const_iterator timeIter =
-                        windowTimes_.begin();
-                    FIFOStack<word>::const_iterator nameIter =
-                        windowFieldNames_.begin();
+
+                    auto timeIter = windowTimes_.cbegin();
+                    auto nameIter = windowFieldNames_.cbegin();
 
                     const Type* wOld = nullptr;
 
                     for
                     (
                         ;
-                        timeIter != windowTimes_.end();
+                        timeIter.good();
                         ++timeIter, ++nameIter
                     )
                     {
@@ -223,10 +222,9 @@ bool Foam::functionObjects::fieldAverageItem::calculatePrime2MeanField
         {
             // Not storing old time mean fields - treat all as TIME (integrated)
             prime2MeanField = 0*prime2MeanField;
-            FIFOStack<scalar>::const_iterator timeIter =
-                windowTimes_.begin();
-            FIFOStack<word>::const_iterator nameIter =
-                windowFieldNames_.begin();
+
+            auto timeIter = windowTimes_.cbegin();
+            auto nameIter = windowFieldNames_.cbegin();
 
             switch (base_)
             {
@@ -236,7 +234,7 @@ bool Foam::functionObjects::fieldAverageItem::calculatePrime2MeanField
                     ++timeIter;
                     ++nameIter;
 
-                    if (timeIter == windowTimes_.end()) return false;
+                    if (!timeIter.good()) return false;
 
                     break;
                 }
@@ -252,7 +250,7 @@ bool Foam::functionObjects::fieldAverageItem::calculatePrime2MeanField
             for
             (
                 ;
-                timeIter != windowTimes_.end();
+                timeIter.good();
                 ++timeIter, ++nameIter
             )
             {
@@ -271,7 +269,6 @@ bool Foam::functionObjects::fieldAverageItem::calculatePrime2MeanField
             }
 
             prime2MeanField /= windowLength;
-
 
             break;
         }

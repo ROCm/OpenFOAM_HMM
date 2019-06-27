@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +59,7 @@ Foam::phaseModel::phaseModel
     nu_
     (
         "nu",
-        dimensionSet(0, 2, -1, 0, 0),
+        dimViscosity,
         phaseDict_
     ),
     kappa_
@@ -69,7 +71,7 @@ Foam::phaseModel::phaseModel
     Cp_
     (
         "Cp",
-        dimensionSet(0, 2, -2, -1, 0),
+        dimSpecificHeatCapacity,
         phaseDict_
     ),
     rho_
@@ -229,12 +231,8 @@ bool Foam::phaseModel::read(const dictionary& phaseDict)
 
         return true;
     }
-    // else
-    // {
-    //     return false;
-    // }
 
-    return true;
+    // return false;
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,9 +113,9 @@ public:
                     weights_(weights),
                     hasUnmapped_(false)
                 {
-                    forAll(addressing_, i)
+                    for (const labelList& addr : addressing)
                     {
-                        if (addressing_[i].empty())
+                        if (addr.empty())
                         {
                             hasUnmapped_ = true;
                             break;

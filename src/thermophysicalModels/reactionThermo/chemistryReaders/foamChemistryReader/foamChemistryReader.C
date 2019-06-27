@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +38,7 @@ Foam::speciesTable& Foam::foamChemistryReader<ThermoType>::setSpecies
     speciesTable& species
 )
 {
-    wordList s(dict.lookup("species"));
+    wordList s(dict.get<wordList>("species"));
     species.transfer(s);
     return species;
 }
@@ -51,72 +53,59 @@ void Foam::foamChemistryReader<ThermoType>::readSpeciesComposition()
         return;
     }
 
-    wordList e(chemDict_.lookup("elements"));
+    wordList e(chemDict_.get<wordList>("elements"));
     label currentElementIndex(0);
 
     DynamicList<word> elementNames_;
     HashTable<label> elementIndices_;
 
-    forAll(e, ei)
+    for (const word& elemName : e)
     {
-        if (!elementIndices_.found(e[ei]))
+        if (!elementIndices_.found(elemName))
         {
-            elementIndices_.insert(e[ei], currentElementIndex++);
-            elementNames_.append(e[ei]);
+            elementIndices_.insert(elemName, currentElementIndex++);
+            elementNames_.append(elemName);
         }
         else
         {
             IOWarningInFunction(chemDict_)
-                << "element " << e[ei] << " already in table." << endl;
+                << "element " << elemName << " already in table." << endl;
         }
     }
 
-    // Loop through all species in thermoDict to retrieve
-    // the species composition
-    forAll(speciesTable_, si)
+    // Loop through all species in thermoDict to retrieve species composition
+    for (const word& specieName : speciesTable_)
     {
-        if (thermoDict_.subDict(speciesTable_[si]).isDict("elements"))
-        {
-            dictionary currentElements
-            (
-                thermoDict_.subDict(speciesTable_[si]).subDict("elements")
-            );
+        const dictionary* elemsDict =
+            thermoDict_.subDict(specieName).findDict("elements");
 
-            wordList currentElementsName(currentElements.toc());
-            List<specieElement> currentComposition(currentElementsName.size());
-
-            forAll(currentElementsName, eni)
-            {
-                currentComposition[eni].name() = currentElementsName[eni];
-
-                currentComposition[eni].nAtoms() =
-                    currentElements.lookupOrDefault
-                    (
-                        currentElementsName[eni],
-                        0
-                    );
-            }
-
-            // Add current specie composition to the hash table
-            speciesCompositionTable::iterator specieCompositionIter
-            (
-                speciesComposition_.find(speciesTable_[si])
-            );
-
-            if (specieCompositionIter != speciesComposition_.end())
-            {
-                speciesComposition_.erase(specieCompositionIter);
-            }
-
-            speciesComposition_.insert(speciesTable_[si], currentComposition);
-        }
-        else
+        if (!elemsDict)
         {
             FatalIOErrorInFunction(thermoDict_)
-                << "Specie " << speciesTable_[si]
-                << " does not contain element description."
+                << "Specie " << specieName
+                << " does not contain \"elements\" description."
                 << exit(FatalIOError);
         }
+
+        wordList elemNames(elemsDict->toc());
+        List<specieElement> currentComposition(elemNames.size());
+
+        forAll(elemNames, eni)
+        {
+            currentComposition[eni].name() = elemNames[eni];
+
+            currentComposition[eni].nAtoms() =
+                elemsDict->lookupOrDefault<label>
+                (
+                    elemNames[eni],
+                    0
+                );
+        }
+
+        // Add current specie composition to the hash table
+        // - overwrite existing
+        speciesComposition_.erase(specieName);
+        speciesComposition_.set(specieName, currentComposition);
     }
 }
 

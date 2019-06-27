@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1185,7 +1187,7 @@ Foam::label Foam::isoSurfaceCell::markDanglingTriangles
         // with only one connected edge (= this edge)
 
         const label edgeI = iter.key();
-        const labelList& otherEdgeFaces = iter.object();
+        const labelList& otherEdgeFaces = iter.val();
 
         // Remove all dangling triangles
         if (danglingTriangle(faceEdges[edgeFace0[edgeI]], edgeFace1))
@@ -1460,7 +1462,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
         DynamicList<label> trimTriMap;
         // Trimmed to original point
         labelList trimTriPointMap;
-        if (!bounds_.empty())
+        if (bounds_.valid())
         {
             isoSurface::trimToBox
             (
@@ -1492,7 +1494,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
                 << " merged triangles." << endl;
         }
 
-        if (!bounds_.empty())
+        if (bounds_.valid())
         {
             // Adjust interpolatedPoints_
             inplaceRenumber(triPointMergeMap_, interpolatedPoints_);

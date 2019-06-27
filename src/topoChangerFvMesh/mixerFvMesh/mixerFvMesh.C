@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,7 +189,7 @@ void Foam::mixerFvMesh::calcMovingMasks() const
     }
 
     // Set the point mask
-    movingPointsMaskPtr_ = new scalarField(points().size(), 0);
+    movingPointsMaskPtr_ = new scalarField(points().size(), Zero);
     scalarField& movingPointsMask = *movingPointsMaskPtr_;
 
     const cellList& c = cells();

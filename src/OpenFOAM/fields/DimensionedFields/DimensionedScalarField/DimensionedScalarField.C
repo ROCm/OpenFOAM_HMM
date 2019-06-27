@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +44,8 @@ tmp<DimensionedField<scalar, GeoMesh>> stabilise
     const dimensioned<scalar>& ds
 )
 {
-    tmp<DimensionedField<scalar, GeoMesh>> tRes
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -54,12 +55,11 @@ tmp<DimensionedField<scalar, GeoMesh>> stabilise
             ),
             dsf.mesh(),
             dsf.dimensions() + ds.dimensions()
-        )
-    );
+        );
 
-    stabilise(tRes.ref().field(), dsf.field(), ds.value());
+    stabilise(tres.ref().field(), dsf.field(), ds.value());
 
-    return tRes;
+    return tres;
 }
 
 
@@ -72,18 +72,18 @@ tmp<DimensionedField<scalar, GeoMesh>> stabilise
 {
     const DimensionedField<scalar, GeoMesh>& dsf = tdsf();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tRes = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf,
         "stabilise(" + dsf.name() + ',' + ds.name() + ')',
         dsf.dimensions() + ds.dimensions()
     );
 
-    stabilise(tRes.ref().field(), dsf.field(), ds.value());
+    stabilise(tres.ref().field(), dsf.field(), ds.value());
 
     tdsf.clear();
 
-    return tRes;
+    return tres;
 }
 
 
@@ -120,9 +120,8 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             << exit(FatalError);
     }
 
-    tmp<DimensionedField<scalar, GeoMesh>> tPow
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -132,12 +131,11 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             ),
             dsf1.mesh(),
             dimless
-        )
-    );
+        );
 
-    pow(tPow.ref().field(), dsf1.field(), dsf2.field());
+    pow(tres.ref().field(), dsf1.field(), dsf2.field());
 
-    return tPow;
+    return tres;
 }
 
 
@@ -164,18 +162,18 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             << exit(FatalError);
     }
 
-    tmp<DimensionedField<scalar, GeoMesh>> tPow = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf1,
         "pow(" + dsf1.name() + ',' + dsf2.name() + ')',
         dimless
     );
 
-    pow(tPow.ref().field(), dsf1.field(), dsf2.field());
+    pow(tres.ref().field(), dsf1.field(), dsf2.field());
 
     tdsf1.clear();
 
-    return tPow;
+    return tres;
 }
 
 
@@ -202,18 +200,18 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             << exit(FatalError);
     }
 
-    tmp<DimensionedField<scalar, GeoMesh>> tPow = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf2,
         "pow(" + dsf1.name() + ',' + dsf2.name() + ')',
         dimless
     );
 
-    pow(tPow.ref().field(), dsf1.field(), dsf2.field());
+    pow(tres.ref().field(), dsf1.field(), dsf2.field());
 
     tdsf2.clear();
 
-    return tPow;
+    return tres;
 }
 
 
@@ -241,7 +239,7 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             << exit(FatalError);
     }
 
-    tmp<DimensionedField<scalar, GeoMesh>> tPow =
+    auto tres =
         reuseTmpTmpDimensionedField<scalar, scalar, scalar, scalar, GeoMesh>::
         New
         (
@@ -251,12 +249,12 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             dimless
         );
 
-    pow(tPow.ref().field(), dsf1.field(), dsf2.field());
+    pow(tres.ref().field(), dsf1.field(), dsf2.field());
 
     tdsf1.clear();
     tdsf2.clear();
 
-    return tPow;
+    return tres;
 }
 
 
@@ -274,9 +272,8 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             << exit(FatalError);
     }
 
-    tmp<DimensionedField<scalar, GeoMesh>> tPow
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -286,12 +283,11 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             ),
             dsf.mesh(),
             pow(dsf.dimensions(), ds)
-        )
-    );
+        );
 
-    pow(tPow.ref().field(), dsf.field(), ds.value());
+    pow(tres.ref().field(), dsf.field(), ds.value());
 
-    return tPow;
+    return tres;
 }
 
 
@@ -311,18 +307,18 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
 
     const DimensionedField<scalar, GeoMesh>& dsf = tdsf();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tPow = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf,
         "pow(" + dsf.name() + ',' + ds.name() + ')',
         pow(dsf.dimensions(), ds)
     );
 
-    pow(tPow.ref().field(), dsf.field(), ds.value());
+    pow(tres.ref().field(), dsf.field(), ds.value());
 
     tdsf.clear();
 
-    return tPow;
+    return tres;
 }
 
 
@@ -369,9 +365,8 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             << exit(FatalError);
     }
 
-    tmp<DimensionedField<scalar, GeoMesh>> tPow
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -381,12 +376,11 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             ),
             dsf.mesh(),
             dimless
-        )
-    );
+        );
 
-    pow(tPow.ref().field(), ds.value(), dsf.field());
+    pow(tres.ref().field(), ds.value(), dsf.field());
 
-    return tPow;
+    return tres;
 }
 
 
@@ -413,18 +407,18 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
             << exit(FatalError);
     }
 
-    tmp<DimensionedField<scalar, GeoMesh>> tPow = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf,
         "pow(" + ds.name() + ',' + dsf.name() + ')',
         dimless
     );
 
-    pow(tPow.ref().field(), ds.value(), dsf.field());
+    pow(tres.ref().field(), ds.value(), dsf.field());
 
     tdsf.clear();
 
-    return tPow;
+    return tres;
 }
 
 template<class GeoMesh>
@@ -457,9 +451,8 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
     const DimensionedField<scalar, GeoMesh>& dsf2
 )
 {
-    tmp<DimensionedField<scalar, GeoMesh>> tAtan2
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -469,12 +462,11 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
             ),
             dsf1.mesh(),
             atan2(dsf1.dimensions(), dsf2.dimensions())
-        )
-    );
+        );
 
-    atan2(tAtan2.ref().field(), dsf1.field(), dsf2.field());
+    atan2(tres.ref().field(), dsf1.field(), dsf2.field());
 
-    return tAtan2;
+    return tres;
 }
 
 
@@ -487,18 +479,18 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
 {
     const DimensionedField<scalar, GeoMesh>& dsf1 = tdsf1();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tAtan2 = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf1,
         "atan2(" + dsf1.name() + ',' + dsf2.name() + ')',
         atan2(dsf1.dimensions(), dsf2.dimensions())
     );
 
-    atan2(tAtan2.ref().field(), dsf1.field(), dsf2.field());
+    atan2(tres.ref().field(), dsf1.field(), dsf2.field());
 
     tdsf1.clear();
 
-    return tAtan2;
+    return tres;
 }
 
 
@@ -511,18 +503,18 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
 {
     const DimensionedField<scalar, GeoMesh>& dsf2 = tdsf2();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tAtan2 = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf2,
         "atan2(" + dsf1.name() + ',' + dsf2.name() + ')',
         atan2(dsf1.dimensions(), dsf2.dimensions())
     );
 
-    atan2(tAtan2.ref().field(), dsf1.field(), dsf2.field());
+    atan2(tres.ref().field(), dsf1.field(), dsf2.field());
 
     tdsf2.clear();
 
-    return tAtan2;
+    return tres;
 }
 
 template<class GeoMesh>
@@ -535,7 +527,7 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
     const DimensionedField<scalar, GeoMesh>& dsf1 = tdsf1();
     const DimensionedField<scalar, GeoMesh>& dsf2 = tdsf2();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tAtan2 =
+    auto tres =
         reuseTmpTmpDimensionedField<scalar, scalar, scalar, scalar, GeoMesh>::
         New
         (
@@ -545,12 +537,12 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
             atan2(dsf1.dimensions(), dsf2.dimensions())
         );
 
-    atan2(tAtan2.ref().field(), dsf1.field(), dsf2.field());
+    atan2(tres.ref().field(), dsf1.field(), dsf2.field());
 
     tdsf1.clear();
     tdsf2.clear();
 
-    return tAtan2;
+    return tres;
 }
 
 
@@ -561,9 +553,8 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
     const dimensionedScalar& ds
 )
 {
-    tmp<DimensionedField<scalar, GeoMesh>> tAtan2
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -573,12 +564,11 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
             ),
             dsf.mesh(),
             atan2(dsf.dimensions(), ds)
-        )
-    );
+        );
 
-    atan2(tAtan2.ref().field(), dsf.field(), ds.value());
+    atan2(tres.ref().field(), dsf.field(), ds.value());
 
-    return tAtan2;
+    return tres;
 }
 
 template<class GeoMesh>
@@ -590,18 +580,18 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
 {
     const DimensionedField<scalar, GeoMesh>& dsf = tdsf();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tAtan2 = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf,
         "atan2(" + dsf.name() + ',' + ds.name() + ')',
         atan2(dsf.dimensions(), ds)
     );
 
-    atan2(tAtan2.ref().field(), dsf.field(), ds.value());
+    atan2(tres.ref().field(), dsf.field(), ds.value());
 
     tdsf.clear();
 
-    return tAtan2;
+    return tres;
 }
 
 template<class GeoMesh>
@@ -632,9 +622,8 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
     const DimensionedField<scalar, GeoMesh>& dsf
 )
 {
-    tmp<DimensionedField<scalar, GeoMesh>> tAtan2
-    (
-        new DimensionedField<scalar, GeoMesh>
+    auto tres =
+        tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
@@ -644,12 +633,11 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
             ),
             dsf.mesh(),
             atan2(ds, dsf.dimensions())
-        )
-    );
+        );
 
-    atan2(tAtan2.ref().field(), ds.value(), dsf.field());
+    atan2(tres.ref().field(), ds.value(), dsf.field());
 
-    return tAtan2;
+    return tres;
 }
 
 
@@ -662,18 +650,18 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
 {
     const DimensionedField<scalar, GeoMesh>& dsf = tdsf();
 
-    tmp<DimensionedField<scalar, GeoMesh>> tAtan2 = New
+    tmp<DimensionedField<scalar, GeoMesh>> tres = New
     (
         tdsf,
         "atan2(" + ds.name() + ',' + dsf.name() + ')',
         atan2(ds, dsf.dimensions())
     );
 
-    atan2(tAtan2.ref().field(), ds.value(), dsf.field());
+    atan2(tres.ref().field(), ds.value(), dsf.field());
 
     tdsf.clear();
 
-    return tAtan2;
+    return tres;
 }
 
 template<class GeoMesh>
@@ -756,9 +744,8 @@ tmp<DimensionedField<scalar, GeoMesh>> func                                    \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \
-    tmp<DimensionedField<scalar, GeoMesh>> tFunc                               \
-    (                                                                          \
-        new DimensionedField<scalar, GeoMesh>                                  \
+    auto tres =                                                                \
+        tmp<DimensionedField<scalar, GeoMesh>>::New                            \
         (                                                                      \
             IOobject                                                           \
             (                                                                  \
@@ -768,13 +755,13 @@ tmp<DimensionedField<scalar, GeoMesh>> func                                    \
             ),                                                                 \
             dsf.mesh(),                                                        \
             dimless                                                            \
-        )                                                                      \
-    );                                                                         \
+        );                                                                     \
                                                                                \
-    func(tFunc.ref().field(), n, dsf.field());                                 \
+    func(tres.ref().field(), n, dsf.field());                                  \
                                                                                \
-    return tFunc;                                                              \
+    return tres;                                                               \
 }                                                                              \
+                                                                               \
                                                                                \
 template<class GeoMesh>                                                        \
 tmp<DimensionedField<scalar, GeoMesh>> func                                    \
@@ -792,7 +779,7 @@ tmp<DimensionedField<scalar, GeoMesh>> func                                    \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \
-    tmp<DimensionedField<scalar, GeoMesh>> tFunc                               \
+    tmp<DimensionedField<scalar, GeoMesh>> tres                                \
     (                                                                          \
         New                                                                    \
         (                                                                      \
@@ -802,11 +789,11 @@ tmp<DimensionedField<scalar, GeoMesh>> func                                    \
         )                                                                      \
     );                                                                         \
                                                                                \
-    func(tFunc.ref().field(), n, dsf.field());                                 \
+    func(tres.ref().field(), n, dsf.field());                                  \
                                                                                \
     tdsf.clear();                                                              \
                                                                                \
-    return tFunc;                                                              \
+    return tres;                                                               \
 }
 
 BesselFunc(jn)

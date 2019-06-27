@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,35 +86,100 @@ public:
         tmp<scalarField> emissivity
         (
             const label patchI,
-            const label bandI = 0
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
         ) const;
 
+        //- Access boundary emissivity on face
+        scalar faceEmissivity
+        (
+            const label patchI,
+            const label faceI,
+            const label bandI = 0,
+            vector incomingDirection = Zero,
+            scalar T = 0
+        ) const;
 
         //- Access boundary absorptivity on patch
         tmp<scalarField> absorptivity
         (
             const label patchI,
-            const label bandI = 0
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
         ) const;
 
+        //- Access boundary absorptivity on face
+        scalar faceAbsorptivity
+        (
+            const label patchI,
+            const label faceI,
+            const label bandI = 0,
+            vector incomingDirection = Zero,
+            scalar T = 0
+        ) const;
 
         //- Access boundary transmissivity on patch
         tmp<scalarField> transmissivity
         (
             const label patchI,
-            const label bandI = 0
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
         ) const;
 
-        //- Access boundary reflectivity on patch
-        tmp<scalarField> reflectivity
+        //- Access boundary transmissivity on face
+        scalar faceTransmissivity
         (
             const label patchI,
-            const label bandI = 0
+            const label faceI,
+            const label bandI = 0,
+            vector incomingDirection = Zero,
+            scalar T = 0
+        ) const;
+
+        //- Access boundary diffuse reflectivity on patch
+        tmp<scalarField> diffReflectivity
+        (
+            const label patchI,
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const;
+
+        //- Access boundary diffuse reflectivity on face
+        scalar faceDiffReflectivity
+        (
+            const label patchI,
+            const label faceI,
+            const label bandI = 0,
+            vector incomingDirection = Zero,
+            scalar T = 0
+        ) const;
+
+        //- Access boundary specular reflectivity on patch
+        tmp<scalarField> specReflectivity
+        (
+            const label patchI,
+            const label bandI = 0,
+            vectorField* incomingDirection = nullptr,
+            scalarField* T = nullptr
+        ) const;
+
+        //- Access boundary specular reflectivity on face
+        scalar faceSpecReflectivity
+        (
+            const label patchI,
+            const label faceI,
+            const label bandI = 0,
+            vector incomingDirection = Zero,
+            scalar T = 0
         ) const;
 
 
     //- Destructor
-    ~boundaryRadiationProperties();
+    ~boundaryRadiationProperties() = default;
 };
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,22 +71,6 @@ void Foam::functionObjects::forces::createFiles()
             momentBinFilePtr_ = createFile("momentBin");
             writeBinHeader("Moment", momentBinFilePtr_());
         }
-
-        if (localSystem_)
-        {
-            localForceFilePtr_ = createFile("localForce");
-            writeIntegratedHeader("Force", localForceFilePtr_());
-            localMomentFilePtr_ = createFile("localMoment");
-            writeIntegratedHeader("Moment", localMomentFilePtr_());
-
-            if (nBin_ > 1)
-            {
-                localForceBinFilePtr_ = createFile("localForceBin");
-                writeBinHeader("Force", localForceBinFilePtr_());
-                localMomentBinFilePtr_ = createFile("localMomentBin");
-                writeBinHeader("Moment", localMomentBinFilePtr_());
-            }
-        }
     }
 }
 
@@ -121,6 +107,7 @@ void Foam::functionObjects::forces::writeBinHeader
     writeHeader(os, header + " bins");
     writeHeaderValue(os, "bins", nBin_);
     writeHeaderValue(os, "start", binMin_);
+    writeHeaderValue(os, "end", binMax_);
     writeHeaderValue(os, "delta", binDx_);
     writeHeaderValue(os, "direction", binDir_);
 
@@ -166,6 +153,49 @@ void Foam::functionObjects::forces::writeBinHeader
     os << endl;
 }
 
+
+void Foam::functionObjects::forces::setCoordinateSystem
+(
+    const dictionary& dict,
+    const word& e3Name,
+    const word& e1Name
+)
+{
+    coordSys_.clear();
+
+    if (dict.readIfPresent<point>("CofR", coordSys_.origin()))
+    {
+        const vector e3 = e3Name == word::null ?
+            vector(0, 0, 1) : dict.get<vector>(e3Name);
+        const vector e1 = e1Name == word::null ?
+            vector(1, 0, 0) : dict.get<vector>(e1Name);
+
+        coordSys_ =
+            coordSystem::cartesian(coordSys_.origin(), e3, e1);
+    }
+    else
+    {
+        // The 'coordinateSystem' sub-dictionary is optional,
+        // but enforce use of a cartesian system if not found.
+
+        if (dict.found(coordinateSystem::typeName_()))
+        {
+            // New() for access to indirect (global) coordinate system
+            coordSys_ =
+                coordinateSystem::New
+                (
+                    obr_,
+                    dict,
+                    coordinateSystem::typeName_()
+                );
+        }
+        else
+        {
+            coordSys_ = coordSystem::cartesian(dict);
+        }
+    }
+
+}
 
 
 void Foam::functionObjects::forces::initialise()
@@ -220,14 +250,14 @@ void Foam::functionObjects::forces::initialiseBins()
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
         // Determine extents of patches
-        binMin_ = GREAT;
-        scalar binMax = -GREAT;
+        scalar geomMin = GREAT;
+        scalar geomMax = -GREAT;
         for (const label patchi : patchSet_)
         {
             const polyPatch& pp = pbm[patchi];
             scalarField d(pp.faceCentres() & binDir_);
-            binMin_ = min(min(d), binMin_);
-            binMax = max(max(d), binMax);
+            geomMin = min(min(d), geomMin);
+            geomMax = max(max(d), geomMax);
         }
 
         // Include porosity
@@ -238,7 +268,7 @@ void Foam::functionObjects::forces::initialiseBins()
 
             const scalarField dd(mesh_.C() & binDir_);
 
-            forAllConstIter(HashTable<const porosityModel*>, models, iter)
+            forAllConstIters(models, iter)
             {
                 const porosityModel& pm = *iter();
                 const labelList& cellZoneIDs = pm.cellZoneIDs();
@@ -247,22 +277,31 @@ void Foam::functionObjects::forces::initialiseBins()
                 {
                     const cellZone& cZone = mesh_.cellZones()[zonei];
                     const scalarField d(dd, cZone);
-                    binMin_ = min(min(d), binMin_);
-                    binMax = max(max(d), binMax);
+                    geomMin = min(min(d), geomMin);
+                    geomMax = max(max(d), geomMax);
                 }
             }
         }
 
-        reduce(binMin_, minOp<scalar>());
-        reduce(binMax, maxOp<scalar>());
+        reduce(geomMin, minOp<scalar>());
+        reduce(geomMax, maxOp<scalar>());
 
-        // Slightly boost binMax so that region of interest is fully
-        // within bounds
-        binMax = 1.0001*(binMax - binMin_) + binMin_;
+        // Slightly boost max so that region of interest is fully within bounds
+        geomMax = 1.0001*(geomMax - geomMin) + geomMin;
 
-        binDx_ = (binMax - binMin_)/scalar(nBin_);
+        // Use geometry limits if not specified by the user
+        if (binMin_ == GREAT)
+        {
+            binMin_ = geomMin;
+        }
+        if (binMax_ == GREAT)
+        {
+            binMax_ = geomMax;
+        }
 
-        // Create the bin points used for writing
+        binDx_ = (binMax_ - binMin_)/scalar(nBin_);
+
+        // Create the bin mid-points used for writing
         binPoints_.setSize(nBin_);
         forAll(binPoints_, i)
         {
@@ -385,12 +424,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::forces::mu() const
         const dictionary& transportProperties =
              lookupObject<dictionary>("transportProperties");
 
-        dimensionedScalar nu
-        (
-            "nu",
-            dimViscosity,
-            transportProperties.lookup("nu")
-        );
+        dimensionedScalar nu("nu", dimViscosity, transportProperties);
 
         return rho()*nu;
     }
@@ -589,41 +623,20 @@ void Foam::functionObjects::forces::writeForces()
     writeIntegratedForceMoment
     (
         "forces",
-        force_[0],
-        force_[1],
-        force_[2],
+        coordSys_.localVector(force_[0]),
+        coordSys_.localVector(force_[1]),
+        coordSys_.localVector(force_[2]),
         forceFilePtr_
     );
 
     writeIntegratedForceMoment
     (
         "moments",
-        moment_[0],
-        moment_[1],
-        moment_[2],
+        coordSys_.localVector(moment_[0]),
+        coordSys_.localVector(moment_[1]),
+        coordSys_.localVector(moment_[2]),
         momentFilePtr_
     );
-
-    if (localSystem_)
-    {
-        writeIntegratedForceMoment
-        (
-            "local forces",
-            coordSys_.localVector(force_[0]),
-            coordSys_.localVector(force_[1]),
-            coordSys_.localVector(force_[2]),
-            localForceFilePtr_
-        );
-
-        writeIntegratedForceMoment
-        (
-            "local moments",
-            coordSys_.localVector(moment_[0]),
-            coordSys_.localVector(moment_[1]),
-            coordSys_.localVector(moment_[2]),
-            localMomentFilePtr_
-        );
-    }
 
     Log << endl;
 }
@@ -676,23 +689,17 @@ void Foam::functionObjects::forces::writeBinnedForceMoment
 
 void Foam::functionObjects::forces::writeBins()
 {
-    writeBinnedForceMoment(force_, forceBinFilePtr_);
-    writeBinnedForceMoment(moment_, momentBinFilePtr_);
+    List<Field<vector>> lf(3);
+    List<Field<vector>> lm(3);
+    lf[0] = coordSys_.localVector(force_[0]);
+    lf[1] = coordSys_.localVector(force_[1]);
+    lf[2] = coordSys_.localVector(force_[2]);
+    lm[0] = coordSys_.localVector(moment_[0]);
+    lm[1] = coordSys_.localVector(moment_[1]);
+    lm[2] = coordSys_.localVector(moment_[2]);
 
-    if (localSystem_)
-    {
-        List<Field<vector>> lf(3);
-        List<Field<vector>> lm(3);
-        lf[0] = coordSys_.localVector(force_[0]);
-        lf[1] = coordSys_.localVector(force_[1]);
-        lf[2] = coordSys_.localVector(force_[2]);
-        lm[0] = coordSys_.localVector(moment_[0]);
-        lm[1] = coordSys_.localVector(moment_[1]);
-        lm[2] = coordSys_.localVector(moment_[2]);
-
-        writeBinnedForceMoment(lf, localForceBinFilePtr_);
-        writeBinnedForceMoment(lm, localMomentBinFilePtr_);
-    }
+    writeBinnedForceMoment(lf, forceBinFilePtr_);
+    writeBinnedForceMoment(lm, momentBinFilePtr_);
 }
 
 
@@ -714,25 +721,21 @@ Foam::functionObjects::forces::forces
     momentFilePtr_(),
     forceBinFilePtr_(),
     momentBinFilePtr_(),
-    localForceFilePtr_(),
-    localMomentFilePtr_(),
-    localForceBinFilePtr_(),
-    localMomentBinFilePtr_(),
     patchSet_(),
-    pName_(word::null),
-    UName_(word::null),
-    rhoName_(word::null),
+    pName_("p"),
+    UName_("U"),
+    rhoName_("rho"),
     directForceDensity_(false),
-    fDName_(""),
+    fDName_("fD"),
     rhoRef_(VGREAT),
     pRef_(0),
     coordSys_(),
-    localSystem_(false),
     porosity_(false),
     nBin_(1),
     binDir_(Zero),
-    binDx_(0.0),
+    binDx_(0),
     binMin_(GREAT),
+    binMax_(GREAT),
     binPoints_(),
     binCumulative_(true),
     writeFields_(false),
@@ -741,6 +744,7 @@ Foam::functionObjects::forces::forces
     if (readFields)
     {
         read(dict);
+        setCoordinateSystem(dict);
         Log << endl;
     }
 }
@@ -762,25 +766,21 @@ Foam::functionObjects::forces::forces
     momentFilePtr_(),
     forceBinFilePtr_(),
     momentBinFilePtr_(),
-    localForceFilePtr_(),
-    localMomentFilePtr_(),
-    localForceBinFilePtr_(),
-    localMomentBinFilePtr_(),
     patchSet_(),
-    pName_(word::null),
-    UName_(word::null),
-    rhoName_(word::null),
+    pName_("p"),
+    UName_("U"),
+    rhoName_("rho"),
     directForceDensity_(false),
-    fDName_(""),
+    fDName_("fD"),
     rhoRef_(VGREAT),
     pRef_(0),
     coordSys_(),
-    localSystem_(false),
     porosity_(false),
     nBin_(1),
     binDir_(Zero),
-    binDx_(0.0),
+    binDx_(0),
     binMin_(GREAT),
+    binMax_(GREAT),
     binPoints_(),
     binCumulative_(true),
     writeFields_(false),
@@ -789,6 +789,7 @@ Foam::functionObjects::forces::forces
     if (readFields)
     {
         read(dict);
+        setCoordinateSystem(dict);
         Log << endl;
     }
 
@@ -803,12 +804,6 @@ Foam::functionObjects::forces::forces
     }
 */
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::forces::~forces()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -831,50 +826,39 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
     if (directForceDensity_)
     {
         // Optional entry for fDName
-        fDName_ = dict.lookupOrDefault<word>("fD", "fD");
+        if (dict.readIfPresent<word>("fD", fDName_))
+        {
+            Info<< "    fD: " << fDName_ << endl;
+        }
     }
     else
     {
-        // Optional entries U and p
-        pName_ = dict.lookupOrDefault<word>("p", "p");
-        UName_ = dict.lookupOrDefault<word>("U", "U");
-        rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
+        // Optional field name entries
+        if (dict.readIfPresent<word>("p", pName_))
+        {
+            Info<< "    p: " << pName_ << endl;
+        }
+        if (dict.readIfPresent<word>("U", UName_))
+        {
+            Info<< "    U: " << UName_ << endl;
+        }
+        if (dict.readIfPresent<word>("rho", rhoName_))
+        {
+            Info<< "    rho: " << rhoName_ << endl;
+        }
 
         // Reference density needed for incompressible calculations
         if (rhoName_ == "rhoInf")
         {
-            dict.readEntry("rhoInf", rhoRef_);
+            rhoRef_ = dict.get<scalar>("rhoInf");
+            Info<< "    Freestream density (rhoInf) set to " << rhoRef_ << endl;
         }
 
         // Reference pressure, 0 by default
-        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0.0);
-    }
-
-    coordSys_.clear();
-    localSystem_ = false;
-
-    // Centre of rotation for moment calculations
-    // specified directly, from coordinate system, or implicitly (0 0 0)
-    if (!dict.readIfPresent<point>("CofR", coordSys_.origin()))
-    {
-        // The 'coordinateSystem' sub-dictionary is optional,
-        // but enforce use of a cartesian system.
-
-        if (dict.found(coordinateSystem::typeName_()))
+        if (dict.readIfPresent<scalar>("pRef", pRef_))
         {
-            // New() for access to indirect (global) coordinate system
-            coordSys_ =
-                coordinateSystem::New
-                (
-                    obr_, dict, coordinateSystem::typeName_()
-                );
+            Info<< "    Reference pressure (pRef) set to " << pRef_ << endl;
         }
-        else
-        {
-            coordSys_ = coordSystem::cartesian(dict);
-        }
-
-        localSystem_ = true;
     }
 
     dict.readIfPresent("porosity", porosity_);
@@ -889,8 +873,9 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
 
     if (dict.found("binData"))
     {
+        Info<< "    Activated data bins" << endl;
         const dictionary& binDict(dict.subDict("binData"));
-        binDict.readEntry("nBin", nBin_);
+        nBin_ = binDict.get<label>("nBin");
 
         if (nBin_ < 0)
         {
@@ -905,9 +890,22 @@ bool Foam::functionObjects::forces::read(const dictionary& dict)
         }
         else
         {
-            binDict.readEntry("cumulative", binCumulative_);
-            binDict.readEntry("direction", binDir_);
+            Info<< "    Employing " << nBin_ << " bins" << endl;
+            if (binDict.readIfPresent("min", binMin_))
+            {
+                Info<< "    - min         : " << binMin_ << endl;
+            }
+            if (binDict.readIfPresent("max", binMax_))
+            {
+                Info<< "    - max         : " << binMax_ << endl;
+            }
+
+            binCumulative_ = binDict.get<bool>("cumulative");
+            Info<< "    - cumuluative : " << binCumulative_ << endl;
+
+            binDir_ = binDict.get<vector>("direction");
             binDir_.normalise();
+            Info<< "    - direction   : " << binDir_ << endl;
         }
     }
 

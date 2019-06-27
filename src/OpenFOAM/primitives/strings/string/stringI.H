@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -257,6 +259,16 @@ inline String Foam::string::validate(const std::string& str)
 inline bool Foam::string::match(const std::string& text) const
 {
     return !compare(text);  // Always compare as literal string
+}
+
+
+inline void Foam::string::swap(std::string& str)
+{
+    // Self-swapping is a no-op
+    if (this != &str)
+    {
+        std::string::swap(str);
+    }
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +44,7 @@ autoPtr<filmThermoModel> filmThermoModel::New
     const dictionary& dict
 )
 {
-    word modelType(dict.get<word>("filmThermoModel"));
+    const word modelType(dict.get<word>("filmThermoModel"));
 
     Info<< "    Selecting filmThermoModel " << modelType << endl;
 

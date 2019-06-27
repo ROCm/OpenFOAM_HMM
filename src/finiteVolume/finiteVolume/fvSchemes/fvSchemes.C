@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -337,10 +339,8 @@ bool Foam::fvSchemes::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -350,10 +350,8 @@ const Foam::dictionary& Foam::fvSchemes::schemesDict() const
     {
         return subDict(word(lookup("select")));
     }
-    else
-    {
-        return *this;
-    }
+
+    return *this;
 }
 
 
@@ -516,10 +514,8 @@ bool Foam::fvSchemes::fluxRequired(const word& name) const
     {
         return true;
     }
-    else
-    {
-        return defaultFluxRequired_;
-    }
+
+    return defaultFluxRequired_;
 }
 
 

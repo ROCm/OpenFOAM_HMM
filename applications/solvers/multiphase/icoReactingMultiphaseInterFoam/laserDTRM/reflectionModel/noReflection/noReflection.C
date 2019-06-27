@@ -67,7 +67,7 @@ Foam::vector Foam::radiation::noReflection::R
     const vector& n
 ) const
 {
-    return (vector::zero);
+    return vector::zero;
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,28 +152,28 @@ inline Foam::tmpNrc<T>::~tmpNrc()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline bool Foam::tmpNrc<T>::isTmp() const
+inline bool Foam::tmpNrc<T>::isTmp() const noexcept
 {
     return type_ == PTR;
 }
 
 
 template<class T>
-inline bool Foam::tmpNrc<T>::empty() const
+inline bool Foam::tmpNrc<T>::empty() const noexcept
 {
     return (!ptr_ && isTmp());
 }
 
 
 template<class T>
-inline bool Foam::tmpNrc<T>::valid() const
+inline bool Foam::tmpNrc<T>::valid() const noexcept
 {
     return (ptr_ || type_ == CREF);
 }
 
 
 template<class T>
-inline bool Foam::tmpNrc<T>::movable() const
+inline bool Foam::tmpNrc<T>::movable() const noexcept
 {
     return (type_ == PTR && ptr_);
 }
@@ -181,6 +183,20 @@ template<class T>
 inline Foam::word Foam::tmpNrc<T>::typeName() const
 {
     return "tmpNrc<" + word(typeid(T).name()) + '>';
+}
+
+
+template<class T>
+inline T* Foam::tmpNrc<T>::get() noexcept
+{
+    return ptr_; // non-const pointer
+}
+
+
+template<class T>
+inline const T* Foam::tmpNrc<T>::get() const noexcept
+{
+    return ptr_; // const pointer
 }
 
 
@@ -262,7 +278,7 @@ inline T* Foam::tmpNrc<T>::ptr() const
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::clear() const
+inline void Foam::tmpNrc<T>::clear() const noexcept
 {
     if (isTmp() && ptr_)
     {
@@ -273,7 +289,7 @@ inline void Foam::tmpNrc<T>::clear() const
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::reset()
+inline void Foam::tmpNrc<T>::reset() noexcept
 {
     clear();
     ptr_ = nullptr;
@@ -282,11 +298,20 @@ inline void Foam::tmpNrc<T>::reset()
 
 
 template<class T>
-inline void Foam::tmpNrc<T>::reset(T* p)
+inline void Foam::tmpNrc<T>::reset(T* p) noexcept
 {
     clear();
     ptr_ = p;
     type_ = PTR;
+}
+
+
+template<class T>
+inline void Foam::tmpNrc<T>::cref(const T& obj) noexcept
+{
+    clear();
+    ptr_ = const_cast<T*>(&obj);
+    type_ = CREF;
 }
 
 
@@ -398,6 +423,20 @@ inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
             << "Attempted assignment to a const reference to an object"
             << " of type " << typeid(T).name()
             << abort(FatalError);
+    }
+}
+
+
+template<class T>
+inline Foam::tmpNrc<T>::operator tmp<T>()
+{
+    if (isTmp())
+    {
+        return tmp<T>(ptr());
+    }
+    else
+    {
+        return tmp<T>(cref());
     }
 }
 

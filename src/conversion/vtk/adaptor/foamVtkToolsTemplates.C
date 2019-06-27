@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,67 +21,40 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
+InNamespace
     Foam::vtk::Tools
 
 \*---------------------------------------------------------------------------*/
-
-#ifndef foamVtkToolsTemplates_C
-#define foamVtkToolsTemplates_C
 
 // OpenFOAM includes
 #include "error.H"
 
 // VTK includes
-#include <vtkFloatArray.h>
-#include <vtkCellData.h>
-#include <vtkPointData.h>
-#include <vtkSmartPointer.h>
+#include "vtkFloatArray.h"
+#include "vtkCellData.h"
+#include "vtkPointData.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class PatchType>
-vtkSmartPointer<vtkPoints>
-Foam::vtk::Tools::Patch::points(const PatchType& p)
-{
-    // Local patch points to vtkPoints
-    const pointField& pts = p.localPoints();
-
-    auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
-
-    vtkpoints->SetNumberOfPoints(pts.size());
-
-    vtkIdType pointId = 0;
-    for (const point& p : pts)
-    {
-        vtkpoints->SetPoint(pointId++, p.v_);
-    }
-
-    return vtkpoints;
-}
-
-
-template<class PatchType>
+template<class Face>
 vtkSmartPointer<vtkCellArray>
-Foam::vtk::Tools::Patch::faces(const PatchType& p)
+Foam::vtk::Tools::Faces(const UList<Face>& faces)
 {
-    // List of faces or triFaces
-    const auto& fcs = p.localFaces();
-
-    label nAlloc = fcs.size();
-    for (const auto& f : fcs)
+    label nAlloc = faces.size();
+    for (const auto& f : faces)
     {
         nAlloc += f.size();
     }
 
     auto vtkcells = vtkSmartPointer<vtkCellArray>::New();
 
-    UList<vtkIdType> list = asUList(vtkcells, fcs.size(), nAlloc);
+    UList<vtkIdType> list = asUList(vtkcells, faces.size(), nAlloc);
 
     // Cell connectivity for polygons
     // [size, verts..., size, verts... ]
     auto iter = list.begin();
-    for (const auto& f : fcs)
+    for (const auto& f : faces)
     {
         *(iter++) = f.size();
 
@@ -96,6 +69,23 @@ Foam::vtk::Tools::Patch::faces(const PatchType& p)
 
 
 template<class PatchType>
+vtkSmartPointer<vtkPoints>
+Foam::vtk::Tools::Patch::points(const PatchType& p)
+{
+    // Local patch points to vtkPoints
+    return Tools::Points(p.localPoints());
+}
+
+
+template<class PatchType>
+vtkSmartPointer<vtkCellArray>
+Foam::vtk::Tools::Patch::faces(const PatchType& p)
+{
+    return Tools::Faces(p.localFaces());
+}
+
+
+template<class PatchType>
 vtkSmartPointer<vtkPolyData>
 Foam::vtk::Tools::Patch::mesh(const PatchType& p)
 {
@@ -103,6 +93,23 @@ Foam::vtk::Tools::Patch::mesh(const PatchType& p)
 
     vtkmesh->SetPoints(points(p));
     vtkmesh->SetPolys(faces(p));
+
+    return vtkmesh;
+}
+
+
+template<class Face>
+vtkSmartPointer<vtkPolyData>
+Foam::vtk::Tools::Patch::mesh
+(
+    const UList<point>& pts,
+    const UList<Face>& fcs
+)
+{
+    auto vtkmesh = vtkSmartPointer<vtkPolyData>::New();
+
+    vtkmesh->SetPoints(Tools::Points(pts));
+    vtkmesh->SetPolys(Tools::Faces(fcs));
 
     return vtkmesh;
 }
@@ -139,6 +146,39 @@ Foam::vtk::Tools::Patch::faceNormals(const PatchType& p)
     }
 
     return array;
+}
+
+
+template<class PatchType>
+vtkSmartPointer<vtkPoints>
+Foam::vtk::Tools::Patch::faceCentres(const PatchType& p)
+{
+    auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+    vtkpoints->SetNumberOfPoints(p.size());
+
+    // Use cached values if available or loop over faces
+    // (avoid triggering cache)
+
+    vtkIdType pointId = 0;
+
+    if (p.hasFaceCentres())
+    {
+        for (const point& pt : p.faceCentres())
+        {
+            vtkpoints->SetPoint(pointId++, pt.v_);
+        }
+    }
+    else
+    {
+        for (const auto& f : p)
+        {
+            const point pt(f.centre(p.points()));
+            vtkpoints->SetPoint(pointId++, pt.v_);
+        }
+    }
+
+    return vtkpoints;
 }
 
 
@@ -257,9 +297,5 @@ Foam::vtk::Tools::convertFieldToVTK
     return data;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

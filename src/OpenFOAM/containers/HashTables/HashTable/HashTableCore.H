@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +42,6 @@ SourceFiles
 #include "uLabel.H"
 #include "className.H"
 #include "nullObject.H"
-#include "zero.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -113,13 +114,6 @@ struct HashTableCore
         inline const IteratorType& end() const;
         inline const IteratorType& cend() const;
     };
-
-
-protected:
-
-    //- A static zero::null for dereferencing as a dummy HashSet element
-    static zero::null zeroNullElement;
-
 };
 
 

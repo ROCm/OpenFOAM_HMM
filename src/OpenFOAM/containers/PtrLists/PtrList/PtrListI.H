@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,6 +68,20 @@ inline Foam::PtrList<T>::PtrList(PtrList<T>&& list)
 
 
 template<class T>
+inline Foam::PtrList<T>::PtrList(UList<T*>& list)
+:
+    UPtrList<T>(list.size())
+{
+    // Take ownership of the pointer
+    forAll(list, i)
+    {
+        set(i, list[i]);
+        list[i] = nullptr;
+    }
+}
+
+
+template<class T>
 template<class CloneArg>
 inline Foam::PtrList<T>::PtrList
 (
@@ -123,37 +139,49 @@ inline void Foam::PtrList<T>::append(const tmp<T>& tptr)
 
 
 template<class T>
-inline bool Foam::PtrList<T>::set(const label i) const
+inline const T* Foam::PtrList<T>::set(const label i) const
 {
     return UPtrList<T>::set(i);
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, T* ptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, T* ptr)
 {
     return autoPtr<T>(UPtrList<T>::set(i, ptr));
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, autoPtr<T>& aptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, autoPtr<T>& aptr)
 {
     return set(i, aptr.release());
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, autoPtr<T>&& aptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, autoPtr<T>&& aptr)
 {
     return set(i, aptr.release());
 }
 
 
 template<class T>
-inline Foam::autoPtr<T> Foam::PtrList<T>::set(label i, const tmp<T>& tptr)
+inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, const tmp<T>& tptr)
 {
     return set(i, tptr.ptr());
+}
+
+
+template<class T>
+inline Foam::autoPtr<T> Foam::PtrList<T>::release(const label i)
+{
+    if (i < 0 || i >= this->size())
+    {
+        return nullptr;
+    }
+
+    return autoPtr<T>(UPtrList<T>::set(i, nullptr));
 }
 
 

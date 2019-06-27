@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +45,6 @@ SourceFiles
 #include "word.H"
 #include "pTraits.H"
 #include "direction.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,9 +119,10 @@ inline bool read(const std::string& str, int64_t& val)
 Istream& operator>>(Istream& is, int64_t& val);
 Ostream& operator<<(Ostream& os, const int64_t val);
 
-// On Darwin: long is not unambiguously (int32_t | int64_t)
+// On Darwin and Windows (mingw):
+// long is not unambiguously (int32_t | int64_t)
 // - explicitly resolve for input and output
-#ifdef darwin
+#if defined(__APPLE__) || defined(_WIN32)
     Istream& operator>>(Istream& is, long& val);
     Ostream& operator<<(Ostream& os, const long val);
 #endif
@@ -137,17 +139,20 @@ public:
     //- Component type
     typedef int64_t cmptType;
 
+    //- Magnitude type
+    typedef int64_t magType;
+
 
     // Member constants
 
         //- Dimensionality of space
-        static const direction dim = 3;
+        static constexpr direction dim = 3;
 
         //- Rank of int64_t is 0
-        static const direction rank = 0;
+        static constexpr direction rank = 0;
 
         //- Number of components in int64_t is 1
-        static const direction nComponents = 1;
+        static constexpr direction nComponents = 1;
 
 
     // Static data members

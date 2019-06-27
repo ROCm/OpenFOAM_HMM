@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -207,7 +209,7 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
 void Foam::mergeAndWrite
 (
     const polyMesh& mesh,
-    const surfaceWriter& writer,
+    surfaceWriter& writer,
     const word& name,
     const indirectPrimitivePatch& setPatch,
     const fileName& outputDir
@@ -240,37 +242,37 @@ void Foam::mergeAndWrite
         // Write
         if (Pstream::master())
         {
-            writer.write
+            writer.open
             (
-                outputDir,
-                name,
-                meshedSurfRef
-                (
-                    mergedPoints,
-                    mergedFaces
-                )
+                mergedPoints,
+                mergedFaces,
+                (outputDir / name),
+                false  // serial - already merged
             );
+
+            writer.write();
+            writer.clear();
         }
     }
     else
     {
-        writer.write
+        writer.open
         (
-            outputDir,
-            name,
-            meshedSurfRef
-            (
-                setPatch.localPoints(),
-                setPatch.localFaces()
-            )
+            setPatch.localPoints(),
+            setPatch.localFaces(),
+            (outputDir / name),
+            false  // serial - already merged
         );
+
+        writer.write();
+        writer.clear();
     }
 }
 
 
 void Foam::mergeAndWrite
 (
-    const surfaceWriter& writer,
+    surfaceWriter& writer,
     const faceSet& set
 )
 {
@@ -297,7 +299,7 @@ void Foam::mergeAndWrite
 
 void Foam::mergeAndWrite
 (
-    const surfaceWriter& writer,
+    surfaceWriter& writer,
     const cellSet& set
 )
 {
@@ -307,9 +309,9 @@ void Foam::mergeAndWrite
 
     // Determine faces on outside of cellSet
     bitSet isInSet(mesh.nCells());
-    forAllConstIter(cellSet, set, iter)
+    for (const label celli : set)
     {
-        isInSet.set(iter.key());
+        isInSet.set(celli);
     }
 
 

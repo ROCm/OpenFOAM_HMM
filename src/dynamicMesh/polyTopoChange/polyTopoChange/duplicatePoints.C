@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,9 +39,7 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(duplicatePoints, 0);
-
+    defineTypeNameAndDebug(duplicatePoints, 0);
 }
 
 
@@ -73,10 +73,10 @@ void Foam::duplicatePoints::setRefinement
     // Per point-to-be-duplicated, in order of the regions the point added.
     duplicates_.setSize(meshPointMap.size());
 
-    forAllConstIter(Map<label>, meshPointMap, iter)
+    forAllConstIters(meshPointMap, iter)
     {
-        label pointi = iter.key();
-        label localI = iter();
+        const label pointi = iter.key();
+        const label localI = iter.val();
         const labelList& regions = pointRegions[localI];
 
         duplicates_[localI].setSize(regions.size());
@@ -109,10 +109,10 @@ void Foam::duplicatePoints::setRefinement
 
     face newFace;
 
-    forAllConstIter(Map<label>, meshFaceMap, iter)
+    forAllConstIters(meshFaceMap, iter)
     {
-        label facei = iter.key();
-        label localI = iter();
+        const label facei = iter.key();
+        const label localI = iter.val();
 
         // Replace points with duplicated ones.
         const face& fRegion = faceRegions[localI];
@@ -191,9 +191,9 @@ void Foam::duplicatePoints::setRefinement
         // Output duplicated points
         {
             OFstream str(mesh_.time().path()/"duplicatedPoints.obj");
-            forAllConstIter(Map<label>, meshPointMap, iter)
+            forAllConstIters(meshPointMap, iter)
             {
-                label localI = iter();
+                const label localI = iter.val();
                 const labelList& dups = duplicates_[localI];
 
                 forAll(dups, i)

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +56,7 @@ class hyperbolic
     // Private data
 
         //- Maximum fraction of phases which can be considered dispersed
-        HashTable<dimensionedScalar> maxDispersedAlpha_;
+        HashTable<dimensionedScalar, word, word::hash> maxDispersedAlpha_;
 
         //- Width of the transition
         const dimensionedScalar transitionAlphaScale_;
@@ -77,7 +79,7 @@ public:
 
 
     //- Destructor
-    ~hyperbolic();
+    ~hyperbolic() = default;
 
 
     // Member Functions

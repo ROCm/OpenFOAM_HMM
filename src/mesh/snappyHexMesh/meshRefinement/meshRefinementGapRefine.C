@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1378,7 +1380,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
                 << mesh_.globalData().nTotalFaces() << endl;
 
 
-            transportData::trackData td(surfaceIndex_);
+            transportData::trackData td(surfaceIndex());
 
             FaceCellWave<transportData, transportData::trackData> deltaCalc
             (
@@ -1535,7 +1537,7 @@ Foam::label Foam::meshRefinement::markSmallFeatureRefinement
         shells_.findHigherGapLevel
         (
             ctrs,
-            labelList(ctrs.size(), 0),
+            labelList(ctrs.size(), Zero),
             shellGapInfo,
             shellGapMode
         );

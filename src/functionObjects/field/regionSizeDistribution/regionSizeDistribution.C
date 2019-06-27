@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,7 +121,7 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
     // Knock out any cell not in patchRegions
     forAll(liquidCore, celli)
     {
-        label regioni = regions[celli];
+        const label regioni = regions[celli];
         if (patchRegions.found(regioni))
         {
             backgroundAlpha[celli] = 0;
@@ -128,7 +130,7 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
         {
             liquidCore[celli] = 0;
 
-            scalar regionVol = regionVolume[regioni];
+            const scalar regionVol = regionVolume[regioni];
             if (regionVol < maxDropletVol)
             {
                 backgroundAlpha[celli] = 0;
@@ -142,8 +144,8 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
     {
         Info<< "    Volume of liquid-core = "
             << fvc::domainIntegrate(liquidCore).value()
-            << endl;
-        Info<< "    Volume of background  = "
+            << nl
+            << "    Volume of background  = "
             << fvc::domainIntegrate(backgroundAlpha).value()
             << endl;
     }
@@ -239,7 +241,7 @@ void Foam::functionObjects::regionSizeDistribution::writeGraphs
     if (Pstream::master())
     {
         // Calculate per-bin average
-        scalarField binSum(nBins_, 0.0);
+        scalarField binSum(nBins_, Zero);
         forAll(sortedField, i)
         {
             binSum[indices[i]] += sortedField[i];
@@ -248,7 +250,7 @@ void Foam::functionObjects::regionSizeDistribution::writeGraphs
         scalarField binAvg(divide(binSum, binCount));
 
         // Per bin deviation
-        scalarField binSqrSum(nBins_, 0.0);
+        scalarField binSqrSum(nBins_, Zero);
         forAll(sortedField, i)
         {
             binSqrSum[indices[i]] += Foam::sqr(sortedField[i]);
@@ -547,19 +549,18 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             << token::TAB << "Volume(mesh)"
             << token::TAB << "Volume(" << alpha.name() << "):"
             << token::TAB << "nCells"
-            << endl;
+            << nl;
         scalar meshSumVol = 0.0;
         scalar alphaSumVol = 0.0;
         label nCells = 0;
 
-        Map<scalar>::const_iterator vIter = allRegionVolume.begin();
-        Map<scalar>::const_iterator aIter = allRegionAlphaVolume.begin();
-        Map<label>::const_iterator numIter = allRegionNumCells.begin();
+        auto vIter = allRegionVolume.cbegin();
+        auto aIter = allRegionAlphaVolume.cbegin();
+        auto numIter = allRegionNumCells.cbegin();
         for
         (
             ;
-            vIter != allRegionVolume.end()
-         && aIter != allRegionAlphaVolume.end();
+            vIter.good() && aIter.good();
             ++vIter, ++aIter, ++numIter
         )
         {
@@ -567,7 +568,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                 << token::TAB << vIter()
                 << token::TAB << aIter()
                 << token::TAB << numIter()
-                << endl;
+                << nl;
 
             meshSumVol += vIter();
             alphaSumVol += aIter();
@@ -581,20 +582,20 @@ bool Foam::functionObjects::regionSizeDistribution::write()
     }
 
 
-
     if (log)
     {
-        Info<< "    Patch connected regions (liquid core):" << endl;
+        Info<< "    Patch connected regions (liquid core):" << nl;
         Info<< token::TAB << "    Region"
             << token::TAB << "Volume(mesh)"
             << token::TAB << "Volume(" << alpha.name() << "):"
-            << endl;
+            << nl;
+
         forAllConstIters(patchRegions, iter)
         {
             const label regioni = iter.key();
             Info<< "    " << token::TAB << regioni
                 << token::TAB << allRegionVolume[regioni]
-                << token::TAB << allRegionAlphaVolume[regioni] << endl;
+                << token::TAB << allRegionAlphaVolume[regioni] << nl;
 
         }
         Info<< endl;
@@ -602,19 +603,19 @@ bool Foam::functionObjects::regionSizeDistribution::write()
 
     if (log)
     {
-        Info<< "    Background regions:" << endl;
+        Info<< "    Background regions:" << nl;
         Info<< "    " << token::TAB << "Region"
             << token::TAB << "Volume(mesh)"
             << token::TAB << "Volume(" << alpha.name() << "):"
-            << endl;
-        Map<scalar>::const_iterator vIter = allRegionVolume.begin();
-        Map<scalar>::const_iterator aIter = allRegionAlphaVolume.begin();
+            << nl;
+
+        auto vIter = allRegionVolume.cbegin();
+        auto aIter = allRegionAlphaVolume.cbegin();
 
         for
         (
             ;
-            vIter != allRegionVolume.end()
-         && aIter != allRegionAlphaVolume.end();
+            vIter.good() && aIter.good();
             ++vIter, ++aIter
         )
         {
@@ -626,7 +627,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             {
                 Info<< "    " << token::TAB << vIter.key()
                     << token::TAB << vIter()
-                    << token::TAB << aIter() << endl;
+                    << token::TAB << aIter() << nl;
             }
         }
         Info<< endl;
@@ -649,9 +650,9 @@ bool Foam::functionObjects::regionSizeDistribution::write()
     // allRegionAlphaVolume since background might not have alpha in it.
     // Deleting regions where the volume-alpha-weighted is lower than
     // threshold
-    forAllIter(Map<scalar>, allRegionVolume, vIter)
+    forAllIters(allRegionVolume, vIter)
     {
-        label regioni = vIter.key();
+        const label regioni = vIter.key();
         if
         (
             patchRegions.found(regioni)
@@ -694,7 +695,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             )
         );
 
-        vectorField centroids(sortedVols.size(), vector::zero);
+        vectorField centroids(sortedVols.size(), Zero);
 
         // Check if downstream bins are calculated
         if (isoPlanes_)
@@ -748,7 +749,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                 }
             }
 
-            scalarField binDownCount(nDownstreamBins_, 0.0);
+            scalarField binDownCount(nDownstreamBins_, Zero);
             forAll(distToPlane, i)
             {
                 if (downstreamIndices[i] != -1)
@@ -781,14 +782,14 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                     << "    " << token::TAB << "Bin"
                     << token::TAB << "Min distance"
                     << token::TAB << "Count:"
-                    << endl;
+                    << nl;
 
                 scalar delta = 0.0;
                 forAll(binDownCount, bini)
                 {
                     Info<< "    " << token::TAB << bini
                         << token::TAB << delta
-                        << token::TAB << binDownCount[bini] << endl;
+                        << token::TAB << binDownCount[bini] << nl;
                     delta += deltaX;
                 }
                 Info<< endl;
@@ -815,7 +816,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
         }
 
         // Calculate the counts per diameter bin
-        scalarField binCount(nBins_, 0.0);
+        scalarField binCount(nBins_, Zero);
         forAll(sortedDiameters, i)
         {
             binCount[indices[i]] += 1.0;
@@ -834,14 +835,14 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                 << "    " << token::TAB << "Bin"
                 << token::TAB << "Min diameter"
                 << token::TAB << "Count:"
-                << endl;
+                << nl;
 
             scalar diam = 0.0;
             forAll(binCount, bini)
             {
                 Info<< "    " << token::TAB << bini
                     << token::TAB << diam
-                    << token::TAB << binCount[bini] << endl;
+                    << token::TAB << binCount[bini] << nl;
 
                 diam += delta;
             }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,6 +39,17 @@ Foam::fileFormats::NASCore::fieldFormatNames
     { fieldFormat::SHORT, "short" },
     { fieldFormat::LONG,  "long" },
     { fieldFormat::FREE,  "free" },
+});
+
+
+const Foam::Enum
+<
+    Foam::fileFormats::NASCore::loadFormat
+>
+Foam::fileFormats::NASCore::loadFormatNames
+({
+    { loadFormat::PLOAD2, "PLOAD2" },
+    { loadFormat::PLOAD4, "PLOAD4" },
 });
 
 

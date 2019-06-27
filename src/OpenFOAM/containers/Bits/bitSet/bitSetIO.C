@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ void Foam::bitSet::writeEntry(Ostream& os) const
 Foam::Ostream& Foam::bitSet::writeList
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
     const bitSet& list = *this;
@@ -48,12 +48,12 @@ Foam::Ostream& Foam::bitSet::writeList
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII)
     {
-        if (list.uniform())
+        if (len > 1 && list.uniform())
         {
             // Two or more entries, and all entries have identical values.
             os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
         }
-        else if (!shortListLen || len <= shortListLen)
+        else if (!shortLen || len <= shortLen)
         {
             // Shorter list, or line-breaks suppressed
             os  << len << token::BEGIN_LIST;
@@ -111,7 +111,7 @@ void Foam::bitSet::writeEntry
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const bitSet& bitset)
 {
-    return bitset.writeList(os, 10);
+    return bitset.writeList(os, 40);
 }
 
 

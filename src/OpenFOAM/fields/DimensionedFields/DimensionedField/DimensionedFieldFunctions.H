@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,34 +62,29 @@ tmp<DimensionedField<typename outerProduct<Type, Type>::type, GeoMesh>>
 sqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> magSqr
-(
-    const DimensionedField<Type, GeoMesh>& df
-);
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+magSqr(const DimensionedField<Type, GeoMesh>& df);
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> magSqr
-(
-    const tmp<DimensionedField<Type, GeoMesh>>& tdf
-);
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+magSqr(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> mag
-(
-    const DimensionedField<Type, GeoMesh>& df
-);
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+mag(const DimensionedField<Type, GeoMesh>& df);
 
 template<class Type, class GeoMesh>
-tmp<DimensionedField<scalar, GeoMesh>> mag
-(
-    const tmp<DimensionedField<Type, GeoMesh>>& tdf
-);
+tmp<DimensionedField<typename typeOfMag<Type>::type, GeoMesh>>
+mag(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
 template<class Type, class GeoMesh>
 tmp
 <
     DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+    <
+        typename DimensionedField<Type, GeoMesh>::cmptType,
+        GeoMesh
+    >
 >
 cmptAv(const DimensionedField<Type, GeoMesh>& df);
 
@@ -95,11 +92,15 @@ template<class Type, class GeoMesh>
 tmp
 <
     DimensionedField
-        <typename DimensionedField<Type, GeoMesh>::cmptType, GeoMesh>
+    <
+        typename DimensionedField<Type, GeoMesh>::cmptType,
+        GeoMesh
+    >
 >
 cmptAv(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
 
 
+// Forward to FieldFunction via dfunc()
 #define UNARY_REDUCTION_FUNCTION(returnType, func, dfunc)                      \
                                                                                \
 template<class Type, class GeoMesh>                                            \
@@ -116,8 +117,11 @@ dimensioned<returnType> func                                                   \
 UNARY_REDUCTION_FUNCTION(Type, max, gMax)
 UNARY_REDUCTION_FUNCTION(Type, min, gMin)
 UNARY_REDUCTION_FUNCTION(Type, sum, gSum)
-UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
+UNARY_REDUCTION_FUNCTION(MinMax<Type>, minMax, gMinMax)
+UNARY_REDUCTION_FUNCTION(scalarMinMax, minMaxMag, gMinMaxMag)
+
+UNARY_REDUCTION_FUNCTION(typename typeOfMag<Type>::type, sumMag, gSumMag)
 
 #undef UNARY_REDUCTION_FUNCTION
 
@@ -131,6 +135,8 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
 
 
 // * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //

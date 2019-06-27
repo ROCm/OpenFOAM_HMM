@@ -3,9 +3,11 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -68,12 +70,23 @@ options:
   -s | -silent      Quiet mode (does not echo commands)
   -a | -all         wmake all sub-directories, running Allwmake if present
   -q | -queue       wmakeCollect all sub-directories, running Allwmake if present
-  -k or -non-stop   Compile without stopping when errors occur
+  -k | -keep-going  Keep going even when errors occur (-non-stop)
+  -debug            Define c++DBUG='-DFULLDEBUG -g -O0' as override
   -j                Compile using all local cores/hyperthreads
-  -jN or -j N       Compile using N cores/hyperthreads
-  -no-scheduler     Compile without wmakeScheduler
-  -update           Update lnInclude directories, dep files, remove deprecated
-                    files and directories
+  -jN | -j N        Compile using N cores/hyperthreads
+  -no-scheduler     Disable scheduled parallel compilation
+  -pwd              Print root directory containing a Make/ directory
+  -update           Update lnInclude dirs, dep files, remove deprecated files/dirs
+  -show-api         Print api value
+  -show-ext-so      Print shared library extension (with '.' separator)
+  -show-compile-c   Same as '-show-c -show-cflags'
+  -show-compile-cxx Same as '-show-cxx -show-cxxflags'
+  -show-c           Print C compiler value
+  -show-cflags      Print C compiler flags
+  -show-cxx         Print C++ compiler value
+  -show-cxxflags    Print C++ compiler flags
+  -show-cflags-arch     The C compiler arch flag (eg, -m64 etc)
+  -show-cxxflags-arch   The C++ compiler arch flag (eg, -m64 etc)
   -h | -help        Print the usage
 
 
@@ -118,7 +131,7 @@ allCores()
 #------------------------------------------------------------------------------
 
 # Default to compiling the local target only
-unset all update
+unset all update optDebug optShow optPrintRootDir
 
 while [ "$#" -gt 0 ]
 do
@@ -129,6 +142,15 @@ do
             ;;
         -s | -silent)
             export WM_QUIET=true
+            ;;
+        -debug)
+            optDebug="-DFULLDEBUG -g -O0"
+            ;;
+        -show-api | -show-ext-so | \
+        -show-compile-c   | -show-c   | -show-cflags   | -show-cflags-arch | \
+        -show-compile-cxx | -show-cxx | -show-cxxflags | -show-cxxflags-arch )
+            $make -f $WM_DIR/makefiles/info "${1#-show-}"
+            optShow=true
             ;;
         -a | -all | all)
             all=all
@@ -144,20 +166,24 @@ do
 
             [ "$nCores" = 0 ] && allCores
             export WM_NCOMPPROCS=$nCores
-            echo "Compiling enabled on $WM_NCOMPPROCS cores"
+            echo "Compiling enabled on $WM_NCOMPPROCS cores" 1>&2
             ;;
         # Parallel compilation on specified number of cores
         -j[1-9]*)
             export WM_NCOMPPROCS=${1#-j}
-            echo "Compiling enabled on $WM_NCOMPPROCS cores"
+            echo "Compiling enabled on $WM_NCOMPPROCS cores" 1>&2
             ;;
-        # Non-stop compilation, ignoring errors
-        -k | -non-stop)
+        # Keep going, ignoring errors
+        -k | -keep-going | -non-stop)
             export WM_CONTINUE_ON_ERROR=true
             ;;
         # Disable scheduled parallel compilation
         -no-scheduler)
             unset WM_SCHEDULER
+            ;;
+        # Print root directory containing a Make/ directory and exit
+        -pwd)
+            optPrintRootDir=true
             ;;
         # Meant to be used following a pull, this will:
         # - remove dep files that depend on deleted files;
@@ -183,6 +209,11 @@ do
     shift
 done
 
+if [ "$optShow" = true ]
+then
+    exit 0
+fi
+
 
 #------------------------------------------------------------------------------
 # Check environment variables
@@ -205,27 +236,12 @@ checkEnv
 # Setup parallel compilation
 #------------------------------------------------------------------------------
 
-# Set WM_NCOMPPROCS automatically when both WM_HOSTS and WM_SCHEDULER are set
-if [ -z "$WM_NCOMPPROCS" -a -n "$WM_HOSTS" -a -n "$WM_SCHEDULER" ]
-then
-    WM_NCOMPPROCS=$(wmakeScheduler -count) || unset WM_NCOMPPROCS
-fi
-
 if [ -n "$WM_NCOMPPROCS" ]
 then
     parOpt="-j $WM_NCOMPPROCS"
 
     if [ "$WM_NCOMPPROCS" -gt 1 -a -z "$MAKEFLAGS" ]
     then
-        lockDir=$HOME/.$WM_PROJECT/.wmake
-
-        if [ -d $lockDir ]
-        then
-            rm -f $lockDir/*
-        else
-            mkdir -p $lockDir
-        fi
-
         make="$make --no-print-directory $parOpt"
     fi
 fi
@@ -239,41 +255,78 @@ fi
 unset targetType
 MakeDir=Make
 
-if [ $# -ge 1 ]
+unset dir
+
+if [ -n "$optPrintRootDir" ]
 then
-    unset dir
-    if [ -d "$1" ]
+    if [ $# -ge 1 ]
     then
-        dir="${1%/}"
-    elif [ -f "$1" ]
-    then
-        dir="${1%/*}"
-        : "${dir:=.}"
-    else
-        targetType="$1"
-    fi
+        if [ -d "$1" ]
+        then
+            dir="${1%/}"
+        elif [ -f "$1" ]
+        then
+            dir="${1%/*}"
+            : "${dir:=.}"
+        else
+            echo "$Script error: not a file or directory" 1>&2
+            exit 1
+        fi
 
-    # Specified directory name:
-    [ $# -ge 2 ] && dir="${2%/}"
-
-    # Specified alternative name for the Make sub-directory:
-    [ $# -ge 3 ] && MakeDir="${3%/}"
-
-    if [ -n "$dir" ]
-    then
-        cd $dir 2>/dev/null || {
+        cd "$dir" 2>/dev/null || {
             echo "$Script error: could not change to directory '$dir'" 1>&2
             exit 1
         }
-    elif [ -f "$MakeDir/files" ]
-    then
-        dir="(${PWD##*/})"  # Implicit directory information
     fi
 
-    # Print command
-    echo "$Script $targetType${targetType:+ }$dir"
-    unset dir
+    # Locate target with Make/ directory
+    if dir="$(findTarget .)"
+    then
+        (cd "$dir" && pwd -L)
+        exit 0
+    else
+        exit 2
+    fi
+
+else
+
+    if [ $# -ge 1 ]
+    then
+        if [ -d "$1" ]
+        then
+            dir="${1%/}"
+        elif [ -f "$1" ]
+        then
+            dir="${1%/*}"
+            : "${dir:=.}"
+        else
+            targetType="$1"
+        fi
+
+        # Specified directory name:
+        [ $# -ge 2 ] && dir="${2%/}"
+
+        # Specified alternative name for the Make sub-directory:
+        [ $# -ge 3 ] && MakeDir="${3%/}"
+
+        if [ -n "$dir" ]
+        then
+            cd $dir 2>/dev/null || {
+                echo "$Script error: could not change to directory '$dir'" 1>&2
+                exit 1
+            }
+        elif [ -f "$MakeDir/files" ]
+        then
+            dir="(${PWD##*/})"  # Implicit directory information
+        fi
+
+        # Print command
+        echo "$Script $targetType${targetType:+ }$dir"
+        unset dir
+    fi
 fi
+
+unset dir
 
 
 #------------------------------------------------------------------------------
@@ -298,7 +351,7 @@ if [ "$all" = all ]
 then
     if [ -e Allwmake ]
     then
-        ./Allwmake -fromWmake $targetType
+        ./Allwmake -fromWmake ${optDebug:+-debug} $targetType
         exit $?
     fi
 
@@ -314,6 +367,7 @@ then
         # Compile all applications in sub-directories
         $make ${WM_CONTINUE_ON_ERROR:+-k} \
               -f $WM_DIR/makefiles/apps \
+              ${optDebug:+c++DBUG="$optDebug"} \
               TARGET="$targetType" FOAM_APPS="$FOAM_APPS"
         makeExitCode=$?
     else
@@ -338,13 +392,13 @@ then
     [ "$update" = true ] || wmakeLnIncludeAll $parOpt
 
     (
-        export WM_COLLECT_DIR=$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD////_}
-        export WM_SCHEDULER=wmakeCollect
+        export WM_COLLECT_DIR="$WM_PROJECT_DIR/build/${WM_OPTIONS}/${PWD////_}"
+        export WM_SCHEDULER="$WM_DIR/wmakeCollect"
         trap '$WM_SCHEDULER -kill' TERM INT
-        $WM_SCHEDULER -clean \
+        "$WM_SCHEDULER" -clean \
      && wmake -all objects   \
-     && $WM_SCHEDULER
-    ) && wmake -all
+     && "$WM_SCHEDULER"
+    ) && wmake -all ${optDebug:+-debug}
     exit $?
 fi
 
@@ -399,11 +453,11 @@ esac
 
     # Pre-build the $WM_OPTIONS/options file
     # which is included when building the $WM_OPTIONS/files file
-    $make -s -f $WM_DIR/makefiles/files MAKE_DIR=$MakeDir \
-          OBJECTS_DIR=$objectsDir $objectsDir/options
+    $make -s -f $WM_DIR/makefiles/files \
+        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir $objectsDir/options
 
-    $make -s -f $WM_DIR/makefiles/files MAKE_DIR=$MakeDir \
-          OBJECTS_DIR=$objectsDir
+    $make -s -f $WM_DIR/makefiles/files \
+        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir
 )
 
 
@@ -427,8 +481,8 @@ case "$targetType" in
 (lib | libo | libso | dep)
     if grep -qe '^ *LIB *=' "$MakeDir/files" 2>/dev/null
     then
-        $make -s -f $WM_DIR/makefiles/general MAKE_DIR=$MakeDir \
-              OBJECTS_DIR=$objectsDir lnInclude
+        $make -s -f $WM_DIR/makefiles/general \
+            MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir lnInclude
     fi
     ;;
 esac
@@ -441,8 +495,8 @@ esac
 if [ -n "$WM_UPDATE_DEPENDENCIES" ]
 then
 
-    $make -f $WM_DIR/makefiles/general MAKE_DIR=$MakeDir \
-        OBJECTS_DIR=$objectsDir updatedep
+    $make -f $WM_DIR/makefiles/general \
+        MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir updatedep
     makeExitCode=$?
 
     [ $makeExitCode -eq 0 ] || exit $makeExitCode
@@ -453,8 +507,9 @@ fi
 # Make the dependency files or object files and link
 #------------------------------------------------------------------------------
 
-exec $make -f $WM_DIR/makefiles/general MAKE_DIR=$MakeDir \
-     OBJECTS_DIR=$objectsDir $targetType
+exec $make -f $WM_DIR/makefiles/general \
+     ${optDebug:+c++DBUG="$optDebug"} \
+     MAKE_DIR=$MakeDir OBJECTS_DIR=$objectsDir $targetType
 
 exit 0 # clean exit
 

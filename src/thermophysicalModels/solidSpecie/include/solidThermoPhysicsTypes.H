@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +36,7 @@ Description
 
 #include "specie.H"
 #include "rhoConst.H"
+#include "icoPolynomial.H"
 #include "hConstThermo.H"
 #include "hPolynomialThermo.H"
 #include "hPowerThermo.H"
@@ -103,6 +106,21 @@ namespace Foam
                 sensibleEnthalpy
             >
         > hExpKappaConstSolidThermoPhysics;
+
+    typedef
+        polynomialSolidTransport
+        <
+            species::thermo
+            <
+                hPolynomialThermo
+                <
+                    icoPolynomial<specie, 8>,
+                    8
+                >,
+                sensibleEnthalpy
+            >,
+            8
+        > hPolyTranspPolyIcoSolidThermoPhysics;
 }
 
 

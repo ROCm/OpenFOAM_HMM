@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,18 +90,18 @@ void Foam::primitiveMesh::makeCellCentresAndVols
     // face centres
 
     vectorField cEst(nCells(), Zero);
-    labelField nCellFaces(nCells(), 0);
+    labelField nCellFaces(nCells(), Zero);
 
     forAll(own, facei)
     {
         cEst[own[facei]] += fCtrs[facei];
-        nCellFaces[own[facei]] += 1;
+        ++nCellFaces[own[facei]];
     }
 
     forAll(nei, facei)
     {
         cEst[nei[facei]] += fCtrs[facei];
-        nCellFaces[nei[facei]] += 1;
+        ++nCellFaces[nei[facei]];
     }
 
     forAll(cEst, celli)

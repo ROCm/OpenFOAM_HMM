@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +119,7 @@ reduceMechanism
 )
 {
     scalarField& completeC(this->chemistry_.completeC());
-    scalarField c1(this->chemistry_.nEqns(), 0.0);
+    scalarField c1(this->chemistry_.nEqns(), Zero);
 
     for (label i=0; i<this->nSpecie_; ++i)
     {
@@ -129,12 +131,12 @@ reduceMechanism
     c1[this->nSpecie_+1] = p;
 
     // Compute the rAB matrix
-    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_, 0.0);
-    scalarField PA(this->nSpecie_, 0.0);
-    scalarField CA(this->nSpecie_, 0.0);
+    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_, Zero);
+    scalarField PA(this->nSpecie_, Zero);
+    scalarField CA(this->nSpecie_, Zero);
 
     // Number of initialized rAB for each lines
-    Field<label> NbrABInit(this->nSpecie_, 0);
+    Field<label> NbrABInit(this->nSpecie_, Zero);
     // Position of the initialized rAB, -1 when not initialized
     RectangularMatrix<label> rABPos(this->nSpecie_, this->nSpecie_, -1);
     // Index of the other species involved in the rABNum
@@ -314,8 +316,8 @@ reduceMechanism
 
     // Compute the production rate of each element Pa
     label nElements = 4; // 4 main elements (C, H, O, N)
-    scalarList Pa(nElements,0.0);
-    scalarList Ca(nElements,0.0);
+    scalarList Pa(nElements, Zero);
+    scalarList Ca(nElements, Zero);
 
     // for (label q=0; q<SIS.size(); ++q)
     for (label i=0; i<this->nSpecie_; ++i)
@@ -332,7 +334,7 @@ reduceMechanism
 
     // Using the rAB matrix (numerator and denominator separated)
     // compute the R value according to the search initiating set
-    scalarField Rvalue(this->nSpecie_, 0.0);
+    scalarField Rvalue(this->nSpecie_, Zero);
     label speciesNumber = 0;
     List<bool> disabledSpecies(this->nSpecie_, false);
 

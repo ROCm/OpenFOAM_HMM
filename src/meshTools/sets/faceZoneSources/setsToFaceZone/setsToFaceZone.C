@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,8 +114,18 @@ void Foam::setsToFaceZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Adding all faces from faceSet " << faceSetName_
-                    << " ..." << endl;
+                if (flip_)
+                {
+                    Info<< "    Adding all faces from faceSet " << faceSetName_
+                        << "; orientation pointing into cellSet "
+                        << cellSetName_ << " ..." << endl;
+                }
+                else
+                {
+                    Info<< "    Adding all faces from faceSet " << faceSetName_
+                        << "; orientation pointing away from cellSet "
+                        << cellSetName_ << " ..." << endl;
+                }
             }
 
             // Load the sets
@@ -124,10 +136,8 @@ void Foam::setsToFaceZone::applyToSet
             DynamicList<label> newAddressing(zoneSet.addressing());
             DynamicList<bool> newFlipMap(zoneSet.flipMap());
 
-            forAllConstIter(faceSet, fSet, iter)
+            for (const label facei : fSet)
             {
-                label facei = iter.key();
-
                 if (!zoneSet.found(facei))
                 {
                     bool flipFace = false;

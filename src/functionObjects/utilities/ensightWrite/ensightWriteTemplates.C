@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ensightOutput.H"
+#include "ensightOutputVolField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -54,11 +54,11 @@ Foam::label Foam::functionObjects::ensightWrite::writeVolFields
 
         autoPtr<ensightFile> os = ensCase().newData<Type>(fieldName);
 
-        ensightOutput::writeField<Type>
+        ensightOutput::writeVolField<Type>
         (
             field,
             ensMesh(),
-            os,
+            os.ref(),
             caseOpts_.nodeValues()
         );
 

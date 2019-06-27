@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +50,7 @@ void Foam::DSMCCloud<ParcelType>::buildConstProps()
 
     forAll(typeIdList_, i)
     {
-        const word& id(typeIdList_[i]);
+        const word& id = typeIdList_[i];
 
         Info<< "    " << id << endl;
 
@@ -62,14 +64,14 @@ void Foam::DSMCCloud<ParcelType>::buildConstProps()
 template<class ParcelType>
 void Foam::DSMCCloud<ParcelType>::buildCellOccupancy()
 {
-    forAll(cellOccupancy_, cO)
+    for (auto& list : cellOccupancy_)
     {
-        cellOccupancy_[cO].clear();
+        list.clear();
     }
 
-    forAllIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (ParcelType& p : *this)
     {
-        cellOccupancy_[iter().cell()].append(&iter());
+        cellOccupancy_[p.cell()].append(&p);
     }
 }
 
@@ -374,28 +376,16 @@ void Foam::DSMCCloud<ParcelType>::collisions()
 template<class ParcelType>
 void Foam::DSMCCloud<ParcelType>::resetFields()
 {
-    q_ = dimensionedScalar("zero",  dimensionSet(1, 0, -3, 0, 0), 0.0);
+    q_ = dimensionedScalar("0", dimensionSet(1, 0, -3, 0, 0), Zero);
+    fD_ = dimensionedVector("0", dimensionSet(1, -1, -2, 0, 0), Zero);
 
-    fD_ = dimensionedVector
-    (
-        "zero",
-        dimensionSet(1, -1, -2, 0, 0),
-        Zero
-    );
-
-    rhoN_ = dimensionedScalar("zero",  dimensionSet(0, -3, 0, 0, 0), VSMALL);
-    rhoM_ =  dimensionedScalar("zero",  dimensionSet(1, -3, 0, 0, 0), VSMALL);
-    dsmcRhoN_ = dimensionedScalar("zero",  dimensionSet(0, -3, 0, 0, 0), 0.0);
-    linearKE_ = dimensionedScalar("zero",  dimensionSet(1, -1, -2, 0, 0), 0.0);
-    internalE_ = dimensionedScalar("zero",  dimensionSet(1, -1, -2, 0, 0), 0.0);
-    iDof_ = dimensionedScalar("zero",  dimensionSet(0, -3, 0, 0, 0), VSMALL);
-
-    momentum_ = dimensionedVector
-    (
-        "zero",
-        dimensionSet(1, -2, -1, 0, 0),
-        Zero
-    );
+    rhoN_ = dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), VSMALL);
+    rhoM_ =  dimensionedScalar("0", dimensionSet(1, -3, 0, 0, 0), VSMALL);
+    dsmcRhoN_ = dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), Zero);
+    linearKE_ = dimensionedScalar("0", dimensionSet(1, -1, -2, 0, 0), Zero);
+    internalE_ = dimensionedScalar("0", dimensionSet(1, -1, -2, 0, 0), Zero);
+    iDof_ = dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), VSMALL);
+    momentum_ = dimensionedVector("0", dimensionSet(1, -2, -1, 0, 0), Zero);
 }
 
 
@@ -410,9 +400,8 @@ void Foam::DSMCCloud<ParcelType>::calculateFields()
     scalarField& iDof = iDof_.primitiveFieldRef();
     vectorField& momentum = momentum_.primitiveFieldRef();
 
-    forAllConstIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (const ParcelType& p : *this)
     {
-        const ParcelType& p = iter();
         const label celli = p.cell();
 
         rhoN[celli]++;
@@ -702,7 +691,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
     const fvMesh& mesh,
     const IOdictionary& dsmcInitialiseDict
 )
-    :
+:
     Cloud<ParcelType>(mesh, cloudName, false),
     DSMCBaseCloud(),
     cloudName_(cloudName),
@@ -783,7 +772,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), VSMALL)
+        dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), VSMALL)
     ),
     rhoM_
     (
@@ -796,7 +785,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0), VSMALL)
+        dimensionedScalar("0", dimensionSet(1, -3, 0, 0, 0), VSMALL)
     ),
     dsmcRhoN_
     (
@@ -848,7 +837,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), VSMALL)
+        dimensionedScalar("0", dimensionSet(0, -3, 0, 0, 0), VSMALL)
     ),
     momentum_
     (
@@ -1009,35 +998,32 @@ Foam::scalar Foam::DSMCCloud<ParcelType>::equipartitionInternalEnergy
     direction iDof
 )
 {
-    scalar Ei = 0.0;
-
-    if (iDof < SMALL)
+    if (iDof == 0)
     {
-        return Ei;
+        return 0;
     }
-    else if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
+    else if (iDof == 2)
     {
         // Special case for iDof = 2, i.e. diatomics;
-        Ei =
-           -log(rndGen_.sample01<scalar>())
-           *physicoChemical::k.value()*temperature;
+        return
+        (
+            -log(rndGen_.sample01<scalar>())
+            *physicoChemical::k.value()*temperature
+        );
     }
-    else
+
+
+    const scalar a = 0.5*iDof - 1;
+    scalar energyRatio = 0;
+    scalar P = -1;
+
+    do
     {
-        scalar a = 0.5*iDof - 1;
-        scalar energyRatio;
-        scalar P = -1;
+        energyRatio = 10*rndGen_.sample01<scalar>();
+        P = pow((energyRatio/a), a)*exp(a - energyRatio);
+    } while (P < rndGen_.sample01<scalar>());
 
-        do
-        {
-            energyRatio = 10*rndGen_.sample01<scalar>();
-            P = pow((energyRatio/a), a)*exp(a - energyRatio);
-        } while (P < rndGen_.sample01<scalar>());
-
-        Ei = energyRatio*physicoChemical::k.value()*temperature;
-    }
-
-    return Ei;
+    return energyRatio*physicoChemical::k.value()*temperature;
 }
 
 
@@ -1051,13 +1037,11 @@ void Foam::DSMCCloud<ParcelType>::dumpParticlePositions() const
       + this->db().time().timeName() + ".obj"
     );
 
-    forAllConstIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (const ParcelType& p : *this)
     {
-        const ParcelType& p = iter();
-
         pObj<< "v " << p.position().x()
-            << " "  << p.position().y()
-            << " "  << p.position().z()
+            << ' '  << p.position().y()
+            << ' '  << p.position().z()
             << nl;
     }
 

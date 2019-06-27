@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ License
 
 #include "ConeNozzleInjection.H"
 #include "TimeFunction1.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "distributionModel.H"
 
 using namespace Foam::constant;
@@ -136,7 +138,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     innerDiameter_(this->coeffDict().getScalar("innerDiameter")),
     duration_(this->coeffDict().getScalar("duration")),
     positionVsTime_(owner.db().time(), "position"),
-    position_(vector::zero),
+    position_(Zero),
     injectorCell_(-1),
     tetFacei_(-1),
     tetPti_(-1),
@@ -312,10 +314,8 @@ Foam::label Foam::ConeNozzleInjection<CloudType>::parcelsToInject
     {
         return floor((time1 - time0)*parcelsPerSecond_);
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
@@ -330,10 +330,8 @@ Foam::scalar Foam::ConeNozzleInjection<CloudType>::volumeToInject
     {
         return flowRateProfile_.integrate(time0, time1);
     }
-    else
-    {
-        return 0.0;
-    }
+
+    return 0.0;
 }
 
 
@@ -419,14 +417,11 @@ void Foam::ConeNozzleInjection<CloudType>::setProperties
     Random& rndGen = this->owner().rndGen();
 
     // Set particle velocity
-    const scalar deg2Rad = mathematical::pi/180.0;
-
     scalar t = time - this->SOI_;
     scalar ti = thetaInner_.value(t);
     scalar to = thetaOuter_.value(t);
-    scalar coneAngle = rndGen.sample01<scalar>()*(to - ti) + ti;
+    scalar coneAngle = degToRad(rndGen.sample01<scalar>()*(to - ti) + ti);
 
-    coneAngle *= deg2Rad;
     scalar alpha = sin(coneAngle);
     scalar dcorr = cos(coneAngle);
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,60 +55,44 @@ Foam::blendingMethods::linear::linear
 :
     blendingMethod(dict)
 {
-    forAllConstIter(wordList, phaseNames, iter)
+    for (const word& phaseName : phaseNames)
     {
-        const word nameFull
-        (
-            IOobject::groupName("maxFullyDispersedAlpha", *iter)
-        );
-
         maxFullyDispersedAlpha_.insert
         (
-            *iter,
+            phaseName,
             dimensionedScalar
             (
-                nameFull,
+                IOobject::groupName("maxFullyDispersedAlpha", phaseName),
                 dimless,
-                dict.lookup(nameFull)
+                dict
             )
-        );
-
-        const word namePart
-        (
-            IOobject::groupName("maxPartlyDispersedAlpha", *iter)
         );
 
         maxPartlyDispersedAlpha_.insert
         (
-            *iter,
+            phaseName,
             dimensionedScalar
             (
-                namePart,
+                IOobject::groupName("maxPartlyDispersedAlpha", phaseName),
                 dimless,
-                dict.lookup(namePart)
+                dict
             )
         );
 
         if
         (
-            maxFullyDispersedAlpha_[*iter]
-          > maxPartlyDispersedAlpha_[*iter]
+            maxFullyDispersedAlpha_[phaseName]
+          > maxPartlyDispersedAlpha_[phaseName]
         )
         {
             FatalErrorInFunction
                 << "The supplied fully dispersed volume fraction for "
-                << *iter
+                << phaseName
                 << " is greater than the partly dispersed value."
                 << endl << exit(FatalError);
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::blendingMethods::linear::~linear()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

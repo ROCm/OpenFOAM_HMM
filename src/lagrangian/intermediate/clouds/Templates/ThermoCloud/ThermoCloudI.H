@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -372,48 +374,42 @@ Foam::ThermoCloud<CloudType>::sigmap() const
 template<class CloudType>
 inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmax() const
 {
-    scalar T = -GREAT;
-    scalar n = 0;
-    forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
+    scalar val = -GREAT;
+    bool nonEmpty = false;
+
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
-        T = max(T, p.T());
-        n++;
+        val = max(val, p.T());
+        nonEmpty = true;
     }
 
-    reduce(T, maxOp<scalar>());
-    reduce(n, sumOp<label>());
-
-    if (n > 0)
+    if (returnReduce(nonEmpty, orOp<bool>()))
     {
-        return T;
+        return returnReduce(val, maxOp<scalar>());
     }
 
-    return 0.0;
+    return 0;
 }
 
 
 template<class CloudType>
 inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmin() const
 {
-    scalar T = GREAT;
-    scalar n = 0;
-    forAllConstIter(typename ThermoCloud<CloudType>, *this, iter)
+    scalar val = GREAT;
+    bool nonEmpty = false;
+
+    for (const parcelType& p : *this)
     {
-        const parcelType& p = iter();
-        T = min(T, p.T());
-        n++;
+        val = min(val, p.T());
+        nonEmpty = true;
     }
 
-    reduce(T, minOp<scalar>());
-    reduce(n, sumOp<label>());
-
-    if (n > 0)
+    if (returnReduce(nonEmpty, orOp<bool>()))
     {
-        return T;
+        return returnReduce(val, minOp<scalar>());
     }
 
-    return 0.0;
+    return 0;
 }
 
 

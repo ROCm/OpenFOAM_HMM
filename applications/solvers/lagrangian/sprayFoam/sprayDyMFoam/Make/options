@@ -29,6 +29,9 @@ EXE_INC = \
     -I$(LIB_SRC)/meshTools/lnInclude
 
 EXE_LIBS = \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lmeshTools \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
     -llagrangian \
@@ -47,9 +50,6 @@ EXE_LIBS = \
     -lregionModels \
     -lsurfaceFilmModels \
     -lcombustionModels \
-     -lfiniteVolume \
-    -lfvOptions \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
-    -ldynamicMesh \
-    -lmeshTools
+    -ldynamicMesh

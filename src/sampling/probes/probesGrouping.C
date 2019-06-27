@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +64,7 @@ Foam::label Foam::probes::classifyFields()
     forAllConstIters(available, iter)
     {
         const word& fieldType = iter.key();
-        const wordList fieldNames = iter.object().sortedToc();
+        const wordList fieldNames = iter.val().sortedToc();
 
         const label count = fieldNames.size(); // pre-filtered, so non-empty
 

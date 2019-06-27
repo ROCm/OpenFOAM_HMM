@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -27,12 +27,12 @@ gradSchemes
 
 divSchemes
 {
-    div(rhoPhi,U)            Gauss linearUpwind grad(U);
-    "div\(phi,alpha.*\)"      Gauss vanLeer;
-    "div\(phir,alpha.*\)"     Gauss linear;
+    div(rhoPhi,U)           Gauss linearUpwind grad(U);
+    "div\(phi,alpha.*\)"    Gauss vanLeer;
+    "div\(phir,alpha.*\)"   Gauss linear;
 
-    "div\(Yiphir,alpha.*)"   Gauss linear;
-    "div\(phi,.*.gas*\)"     Gauss vanLeer;
+    "div\(Yiphir,alpha.*\)" Gauss linear;
+    "div\(phi,.*\.gas.*\)"  Gauss vanLeer;
 
     div(((rho*nuEff)*dev2(T(grad(U))))) Gauss linear;
 

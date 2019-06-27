@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,10 +33,22 @@ inline const Foam::pointField& Foam::block::points() const
 }
 
 
+inline const Foam::List<Foam::FixedList<Foam::label, 8>>&
+Foam::block::cells() const
+{
+    if (blockCells_.empty())
+    {
+        const_cast<block&>(*this).createCells();
+    }
+
+    return blockCells_;
+}
+
+
 inline const Foam::FixedList<Foam::List<Foam::FixedList<Foam::label, 4>>, 6>&
 Foam::block::boundaryPatches() const
 {
-    return boundaryPatches_;
+    return blockPatches_;
 }
 
 

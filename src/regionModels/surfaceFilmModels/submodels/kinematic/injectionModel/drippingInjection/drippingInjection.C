@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,7 +100,7 @@ void drippingInjection::correct
     const scalarField& delta = film.delta();
     const scalarField& rho = film.rho();
 
-    scalarField massDrip(film.regionMesh().nCells(), 0.0);
+    scalarField massDrip(film.regionMesh().nCells(), Zero);
 
     forAll(gNorm, i)
     {

@@ -14,7 +14,7 @@ if (mesh.dynamic())
     // Note
     // - set to READ_IF_PRESENT and AUTO_WRITE to simplify dpdt correction
     //   by meshPhi
-    
+
     dpdtHeader.readOpt() = IOobject::READ_IF_PRESENT;
     dpdtHeader.writeOpt() = IOobject::AUTO_WRITE;
 }

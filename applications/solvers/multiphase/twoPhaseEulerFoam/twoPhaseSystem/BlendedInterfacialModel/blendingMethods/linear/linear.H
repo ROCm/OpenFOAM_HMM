@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,10 +56,12 @@ class linear
     // Private data
 
         //- Maximum fraction of phases which can be considered fully dispersed
-        HashTable<dimensionedScalar> maxFullyDispersedAlpha_;
+        HashTable<dimensionedScalar, word, word::hash>
+            maxFullyDispersedAlpha_;
 
         //- Maximum fraction of phases which can be considered partly dispersed
-        HashTable<dimensionedScalar> maxPartlyDispersedAlpha_;
+        HashTable<dimensionedScalar, word, word::hash>
+            maxPartlyDispersedAlpha_;
 
 
 public:
@@ -77,7 +81,7 @@ public:
 
 
     //- Destructor
-    ~linear();
+    ~linear() = default;
 
 
     // Member Functions

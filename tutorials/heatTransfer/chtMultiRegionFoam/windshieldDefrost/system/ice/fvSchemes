@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -40,7 +40,7 @@ laplacianSchemes
     default         none;
     laplacian((rho*nuEff),U) Gauss linear limited corrected 0.333;
     laplacian(rhorAUf,p_rgh) Gauss linear limited corrected 0.333;
-    laplacian(thermo:alpha,h) Gauss linear limited corrected 0.333;
+    laplacian(alphahe,h) Gauss linear limited corrected 0.333;
 }
 
 interpolationSchemes

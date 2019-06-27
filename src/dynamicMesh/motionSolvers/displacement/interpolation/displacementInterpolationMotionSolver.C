@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -239,7 +241,7 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
         // ~~~~~~~~~~~~~~~
 
         // Count all the points inbetween rangeI and rangeI+1
-        labelList nRangePoints(rangeToCoord.size(), 0);
+        labelList nRangePoints(rangeToCoord.size(), Zero);
 
         forAll(meshCoords, pointi)
         {

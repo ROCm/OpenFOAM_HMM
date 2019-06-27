@@ -32,7 +32,7 @@ namespace Foam
 {
 namespace meshObjects
 {
-    defineTypeNameAndDebug(gravity, 0);
+    defineTypeName(gravity);
 }
 }
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,14 +155,14 @@ void Foam::KinematicCloud<CloudType>::buildCellOccupancy()
 
     List<DynamicList<parcelType*>>& cellOccupancy = cellOccupancyPtr_();
 
-    forAll(cellOccupancy, cO)
+    for (auto& list : cellOccupancy)
     {
-        cellOccupancy[cO].clear();
+        list.clear();
     }
 
-    forAllIter(typename KinematicCloud<CloudType>, *this, iter)
+    for (parcelType& p : *this)
     {
-        cellOccupancy[iter().cell()].append(&iter());
+        cellOccupancy[p.cell()].append(&p);
     }
 }
 
@@ -755,23 +757,29 @@ void Foam::KinematicCloud<CloudType>::autoMap(const mapPolyMesh& mapper)
 template<class CloudType>
 void Foam::KinematicCloud<CloudType>::info()
 {
-    vector linearMomentum = linearMomentumOfSystem();
-    reduce(linearMomentum, sumOp<vector>());
+    const vector linearMomentum =
+        returnReduce(linearMomentumOfSystem(), sumOp<vector>());
 
-    scalar linearKineticEnergy = linearKineticEnergyOfSystem();
-    reduce(linearKineticEnergy, sumOp<scalar>());
+    const scalar linearKineticEnergy =
+        returnReduce(linearKineticEnergyOfSystem(), sumOp<scalar>());
+
+    const label nTotParcel = returnReduce(this->size(), sumOp<label>());
+
+    const scalar particlePerParcel =
+    (
+        nTotParcel
+      ? (returnReduce(totalParticlePerParcel(), sumOp<scalar>()) / nTotParcel)
+      : 0
+    );
 
     Info<< "Cloud: " << this->name() << nl
-        << "    Current number of parcels       = "
-        << returnReduce(this->size(), sumOp<label>()) << nl
+        << "    Current number of parcels       = " << nTotParcel << nl
         << "    Current mass in system          = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl
-        << "    Linear momentum                 = "
-        << linearMomentum << nl
-        << "   |Linear momentum|                = "
-        << mag(linearMomentum) << nl
-        << "    Linear kinetic energy           = "
-        << linearKineticEnergy << nl;
+        << "    Linear momentum                 = " << linearMomentum << nl
+        << "   |Linear momentum|                = " << mag(linearMomentum) << nl
+        << "    Linear kinetic energy           = " << linearKineticEnergy << nl
+        << "    Average particle per parcel     = " << particlePerParcel << nl;
 
     injectors_.info(Info);
     this->surfaceFilm().info(Info);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,6 +125,16 @@ protected:
 
         //- True if the output state does not correspond to the test state.
         inline bool notState(outputState test) const;
+
+        //- Write uniform field content.
+        //  No context checking (eg, file-open, CellData, PointData, etc)
+        template<class Type>
+        void writeUniform
+        (
+            const word& fieldName,
+            const Type& val,
+            const label nValues
+        );
 
 
         //- Trigger change state to Piece. Resets nCellData_, nPointData_.
@@ -281,6 +291,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "foamVtkFileWriterI.H"
+
+#ifdef NoRepository
+    #include "foamVtkFileWriterTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,19 +32,12 @@ License
 
 void Foam::blockDescriptor::check(const Istream& is)
 {
-    forAll(blockShape_, pi)
+    for (const label pointi : blockShape_)
     {
-        if (blockShape_[pi] < 0)
+        if (pointi < 0 || pointi >= vertices_.size())
         {
             FatalIOErrorInFunction(is)
-                << "Negative point label " << blockShape_[pi]
-                << " in block " << *this
-                << exit(FatalIOError);
-        }
-        else if (blockShape_[pi] >= vertices_.size())
-        {
-            FatalIOErrorInFunction(is)
-                << "Point label " << blockShape_[pi]
+                << "Point label " << pointi
                 << " out of range 0.." << vertices_.size() - 1
                 << " in block " << *this
                 << exit(FatalIOError);
@@ -106,22 +101,22 @@ void Foam::blockDescriptor::check(const Istream& is)
 
 void Foam::blockDescriptor::findCurvedFaces()
 {
-    const faceList blockFaces(blockShape().faces());
+    const faceList shapeFaces(blockShape().faces());
 
-    forAll(blockFaces, blockFacei)
+    forAll(shapeFaces, shapeFacei)
     {
-        forAll(faces_, facei)
+        forAll(blockFaces_, facei)
         {
             if
             (
                 face::sameVertices
                 (
-                    faces_[facei].vertices(),
-                    blockFaces[blockFacei]
+                    blockFaces_[facei].vertices(),
+                    shapeFaces[shapeFacei]
                 )
             )
             {
-                curvedFaces_[blockFacei] = facei;
+                curvedFaces_[shapeFacei] = facei;
                 nCurvedFaces_++;
                 break;
             }
@@ -138,22 +133,26 @@ Foam::blockDescriptor::blockDescriptor
     const pointField& vertices,
     const blockEdgeList& edges,
     const blockFaceList& faces,
-    const Vector<label>& density,
+    const labelVector& density,
     const UList<gradingDescriptors>& expand,
     const word& zoneName
 )
 :
+    ijkMesh(density),
     vertices_(vertices),
-    edges_(edges),
-    faces_(faces),
+    blockEdges_(edges),
+    blockFaces_(faces),
     blockShape_(bshape),
-    density_(density),
     expand_(expand),
     zoneName_(zoneName),
     curvedFaces_(-1),
     nCurvedFaces_(0)
 {
-    if (expand_.size() != 12)
+    if (expand_.empty())
+    {
+        expand_.resize(12, gradingDescriptors());
+    }
+    else if (expand_.size() != 12)
     {
         FatalErrorInFunction
             << "Unknown definition of expansion ratios"
@@ -174,10 +173,10 @@ Foam::blockDescriptor::blockDescriptor
     Istream& is
 )
 :
+    ijkMesh(),
     vertices_(vertices),
-    edges_(edges),
-    faces_(faces),
-    density_(),
+    blockEdges_(edges),
+    blockFaces_(faces),
     expand_(12, gradingDescriptors()),
     zoneName_(),
     curvedFaces_(-1),
@@ -213,7 +212,7 @@ Foam::blockDescriptor::blockDescriptor
         // New-style: read a list of 3 values
         if (t.pToken() == token::BEGIN_LIST)
         {
-            is >> density_;
+            is >> ijkMesh::sizes();
         }
         else
         {
@@ -226,9 +225,9 @@ Foam::blockDescriptor::blockDescriptor
     else
     {
         // Old-style: read three labels
-        is  >> density_.x()
-            >> density_.y()
-            >> density_.z();
+        is  >> ijkMesh::sizes().x()
+            >> ijkMesh::sizes().y()
+            >> ijkMesh::sizes().z();
     }
 
     is >> t;
@@ -286,13 +285,12 @@ Foam::blockDescriptor::blockDescriptor
 Foam::FixedList<Foam::pointField, 6>
 Foam::blockDescriptor::facePoints(const pointField& points) const
 {
+    const label ni = sizes().x();
+    const label nj = sizes().y();
+    const label nk = sizes().z();
+
     // Caches points for curvature correction
     FixedList<pointField, 6> facePoints;
-
-    // Set local variables for mesh specification
-    const label ni = density_.x();
-    const label nj = density_.y();
-    const label nk = density_.z();
 
     facePoints[0].setSize((nj + 1)*(nk + 1));
     facePoints[1].setSize((nj + 1)*(nk + 1));
@@ -349,7 +347,7 @@ void Foam::blockDescriptor::correctFacePoints
     {
         if (curvedFaces_[blockFacei] != -1)
         {
-            faces_[curvedFaces_[blockFacei]].project
+            blockFaces_[curvedFaces_[blockFacei]].project
             (
                 *this,
                 blockFacei,
@@ -379,7 +377,7 @@ void Foam::blockDescriptor::write
 }
 
 
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
 {
@@ -388,13 +386,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
 
     os  << bshape.model().name() << " (";
 
-    forAll(blockLabels, labelI)
+    forAll(blockLabels, labeli)
     {
-        if (labelI)
+        if (labeli)
         {
             os  << ' ';
         }
-        os  << blockLabels[labelI];
+        os  << blockLabels[labeli];
     }
     os  << ')';
 
@@ -407,7 +405,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
         << " simpleGrading (";
 
 
-    const List<gradingDescriptors>& expand = bd.expand_;
+    const List<gradingDescriptors>& expand = bd.grading();
 
     // Can we use a compact notation?
     if
@@ -448,6 +446,25 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
 
 
     os  << ")";
+
+    return os;
+}
+
+
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<blockDescriptor>& iproxy
+)
+{
+    const blockDescriptor& bd = iproxy.t_;
+
+    os  << "Dimensions:" << bd.density()
+        << " nPoints:" << bd.nPoints()
+        << " nCells:" << bd.nCells()
+        << " nFaces:" << bd.nFaces()
+        << " nInternalFaces:" << bd.nInternalFaces()
+        << nl;
 
     return os;
 }

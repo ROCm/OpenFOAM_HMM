@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2018 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,12 +27,12 @@ License
 
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
-#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
 {}
+
 
 bool Foam::UPstream::initNull()
 {
@@ -56,14 +58,14 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 void Foam::UPstream::exit(int errnum)
 {
     // No MPI - just exit
-    ::exit(errnum);
+    std::exit(errnum);
 }
 
 
 void Foam::UPstream::abort()
 {
     // No MPI - just abort
-    ::abort();
+    std::abort();
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,14 +62,9 @@ minTimeStepCondition
 :
     runTimeCondition(name, obr, dict, state),
     minValue_(dict.get<scalar>("minValue"))
-{}
-
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::functionObjects::runTimeControls::minTimeStepCondition::
-~minTimeStepCondition()
-{}
+{
+    minValue_ = obr_.time().userTimeToTime(minValue_);
+}
 
 
 // * * * * * * * * * * * * * * Public Member Functions * * * * * * * * * * * //

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,12 +69,12 @@ public:
 
         // Fundamental properties
 
-            static word name()
+            static word energyName()
             {
                 return "h";
             }
 
-            // Heat capacity at constant pressure [J/(kg K)]
+            //- Heat capacity at constant pressure [J/(kg K)]
             scalar Cpv
             (
                 const Thermo& thermo,
@@ -80,7 +82,14 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar cp = thermo.Cp(p, T);
+                return cp;
+                #else
                 return thermo.Cp(p, T);
+                #endif
             }
 
             //- Cp/Cp []
@@ -94,7 +103,7 @@ public:
                 return 1;
             }
 
-            // Sensible enthalpy [J/kg]
+            //- Sensible enthalpy [J/kg]
             scalar HE
             (
                 const Thermo& thermo,
@@ -102,7 +111,14 @@ public:
                 const scalar T
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar hs = thermo.Hs(p, T);
+                return hs;
+                #else
                 return thermo.Hs(p, T);
+                #endif
             }
 
             //- Temperature from sensible enthalpy
@@ -115,7 +131,14 @@ public:
                 const scalar T0
             ) const
             {
+                #ifdef __clang__
+                // Using volatile to prevent compiler optimisations leading to
+                // a sigfpe
+                volatile const scalar ths = thermo.THs(h, p, T0);
+                return ths;
+                #else
                 return thermo.THs(h, p, T0);
+                #endif
             }
 };
 

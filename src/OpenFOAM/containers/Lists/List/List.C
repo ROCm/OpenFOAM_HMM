@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +30,7 @@ License
 #include "FixedList.H"
 #include "PtrList.H"
 #include "SLList.H"
-#include "IndirectList.H"
-#include "UIndirectList.H"
-#include "BiIndirectList.H"
 #include "contiguous.H"
-
 #include <utility>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -302,10 +300,10 @@ Foam::List<T>::List(InputIterator begIter, InputIterator endIter)
 
 
 template<class T>
-template<unsigned Size>
-Foam::List<T>::List(const FixedList<T, Size>& list)
+template<unsigned N>
+Foam::List<T>::List(const FixedList<T, N>& list)
 :
-    UList<T>(nullptr, Size)
+    UList<T>(nullptr, label(N))
 {
     doAlloc();
     copyList(list);
@@ -330,17 +328,8 @@ Foam::List<T>::List(const SLList<T>& list)
 
 
 template<class T>
-Foam::List<T>::List(const UIndirectList<T>& list)
-:
-    UList<T>(nullptr, list.size())
-{
-    doAlloc();
-    copyList(list);
-}
-
-
-template<class T>
-Foam::List<T>::List(const BiIndirectList<T>& list)
+template<class Addr>
+Foam::List<T>::List(const IndirectListBase<T, Addr>& list)
 :
     UList<T>(nullptr, list.size())
 {
@@ -521,26 +510,8 @@ void Foam::List<T>::operator=(const SLList<T>& list)
 
 
 template<class T>
-void Foam::List<T>::operator=(const UIndirectList<T>& list)
-{
-    const label len = list.size();
-
-    reAlloc(len);
-
-    if (len)
-    {
-        List_ACCESS(T, (*this), vp);
-
-        for (label i=0; i<len; ++i)
-        {
-            vp[i] = list[i];
-        }
-    }
-}
-
-
-template<class T>
-void Foam::List<T>::operator=(const BiIndirectList<T>& list)
+template<class Addr>
+void Foam::List<T>::operator=(const IndirectListBase<T, Addr>& list)
 {
     const label len = list.size();
 

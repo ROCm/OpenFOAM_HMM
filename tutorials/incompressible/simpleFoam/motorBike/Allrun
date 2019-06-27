@@ -19,7 +19,8 @@ runApplication $decompDict decomposePar
 if foamDictionary -entry geometry -value system/snappyHexMeshDict | \
    grep -q distributedTriSurfaceMesh
 then
-    runParallel $decompDict surfaceRedistributePar motorBike.obj independent
+    echo "surfaceRedistributePar does not need to be run anymore"
+    echo " - distributedTriSurfaceMesh will do on-the-fly redistribution"
 fi
 
 runParallel $decompDict snappyHexMesh -overwrite

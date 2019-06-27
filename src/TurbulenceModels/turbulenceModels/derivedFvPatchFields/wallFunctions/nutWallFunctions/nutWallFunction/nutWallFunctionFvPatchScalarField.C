@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +29,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "wallFvPatch.H"
+#include "turbulenceModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,11 +55,32 @@ void Foam::nutWallFunctionFvPatchScalarField::checkType()
 }
 
 
+const Foam::volVectorField& Foam::nutWallFunctionFvPatchScalarField::U
+(
+    const turbulenceModel& turb
+) const
+{
+    if (UName_ == word::null)
+    {
+        return turb.U();
+    }
+    else
+    {
+        return db().lookupObject<volVectorField>(UName_);
+    }
+}
+
+
 void Foam::nutWallFunctionFvPatchScalarField::writeLocalEntries
 (
     Ostream& os
 ) const
 {
+    if (UName_ != word::null)
+    {
+        os.writeEntry("U", UName_);
+    }
+
     os.writeEntry("Cmu", Cmu_);
     os.writeEntry("kappa", kappa_);
     os.writeEntry("E", E_);
@@ -72,6 +96,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
+    UName_(word::null),
     Cmu_(0.09),
     kappa_(0.41),
     E_(9.8),
@@ -90,6 +115,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
     Cmu_(ptf.Cmu_),
     kappa_(ptf.kappa_),
     E_(ptf.E_),
@@ -107,6 +133,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", word::null)),
     Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8)),
@@ -122,6 +149,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(wfpsf),
+    UName_(wfpsf.UName_),
     Cmu_(wfpsf.Cmu_),
     kappa_(wfpsf.kappa_),
     E_(wfpsf.E_),
@@ -138,6 +166,7 @@ Foam::nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(wfpsf, iF),
+    UName_(wfpsf.UName_),
     Cmu_(wfpsf.Cmu_),
     kappa_(wfpsf.kappa_),
     E_(wfpsf.E_),

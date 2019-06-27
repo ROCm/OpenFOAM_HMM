@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +75,7 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
     }
 
     // Print a bit
-    if (processorAgglomerate() && debug)
+    if (debug)
     {
         Info<< "GAMGAgglomeration:" << nl
             << "    local agglomerator     : " << type() << nl;
@@ -581,15 +583,15 @@ bool Foam::GAMGAgglomeration::checkRestriction
     labelList& newRestrict,
     label& nNewCoarse,
     const lduAddressing& fineAddressing,
-    const labelUList& restrict,
+    const labelUList& restriction,
     const label nCoarse
 )
 {
-    if (fineAddressing.size() != restrict.size())
+    if (fineAddressing.size() != restriction.size())
     {
         FatalErrorInFunction
             << "nCells:" << fineAddressing.size()
-            << " agglom:" << restrict.size()
+            << " agglom:" << restriction.size()
             << abort(FatalError);
     }
 
@@ -609,7 +611,7 @@ bool Foam::GAMGAgglomeration::checkRestriction
             label own = lower[facei];
             label nei = upper[facei];
 
-            if (restrict[own] == restrict[nei])
+            if (restriction[own] == restriction[nei])
             {
                 // coarse-mesh-internal face
 
@@ -638,9 +640,9 @@ bool Foam::GAMGAgglomeration::checkRestriction
     // Count number of regions/masters per coarse cell
     labelListList coarseToMasters(nCoarse);
     nNewCoarse = 0;
-    forAll(restrict, celli)
+    forAll(restriction, celli)
     {
-        labelList& masters = coarseToMasters[restrict[celli]];
+        labelList& masters = coarseToMasters[restriction[celli]];
 
         if (!masters.found(master[celli]))
         {
@@ -676,9 +678,9 @@ bool Foam::GAMGAgglomeration::checkRestriction
         }
 
         newRestrict.setSize(fineAddressing.size());
-        forAll(restrict, celli)
+        forAll(restriction, celli)
         {
-            label coarseI = restrict[celli];
+            const label coarseI = restriction[celli];
 
             label index = coarseToMasters[coarseI].find(master[celli]);
             newRestrict[celli] = coarseToNewCoarse[coarseI][index];
@@ -686,10 +688,8 @@ bool Foam::GAMGAgglomeration::checkRestriction
 
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 

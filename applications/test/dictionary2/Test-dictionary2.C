@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,8 @@ Description
 #include "IOobject.H"
 #include "IFstream.H"
 #include "dictionary.H"
+#include "ops.H"
+#include "scalarRange.H"
 #include "stringOps.H"
 
 using namespace Foam;
@@ -61,12 +63,12 @@ scalar try_readScalar(const dictionary& dict, const word& k)
         val = readScalar(dict.lookup(k));
         Info<< "readScalar(" << k << ") = " << val << nl;
     }
-    catch (Foam::IOerror& err)
+    catch (const Foam::IOerror& err)
     {
         Info<< "readScalar(" << k << ") Caught FatalIOError "
             << err << nl << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "readScalar(" << k << ") Caught FatalError "
             << err << nl << endl;
@@ -91,14 +93,50 @@ scalar try_getScalar(const dictionary& dict, const word& k)
         val = dict.get<scalar>(k);
         Info<< "get<scalar>(" << k << ") = " << val << nl;
     }
-    catch (Foam::IOerror& err)
+    catch (const Foam::IOerror& err)
     {
         Info<< "get<scalar>(" << k << ") Caught FatalIOError "
             << err << nl << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "get<scalar>(" << k << ") Caught FatalError "
+            << err << nl << endl;
+    }
+    FatalError.throwExceptions(throwingError);
+    FatalIOError.throwExceptions(throwingIOError);
+
+    return val;
+}
+
+
+// Try with getCheck<scalar>
+template<class Predicate>
+scalar try_getCheckScalar
+(
+    const dictionary& dict,
+    const word& k,
+    const Predicate& pred
+)
+{
+    scalar val(-GREAT);
+
+    const bool throwingIOError = FatalIOError.throwExceptions();
+    const bool throwingError = FatalError.throwExceptions();
+
+    try
+    {
+        val = dict.getCheck<scalar>(k, pred);
+        Info<< "getCheck<scalar>(" << k << ") = " << val << nl;
+    }
+    catch (const Foam::IOerror& err)
+    {
+        Info<< "getCheck<scalar>(" << k << ") Caught FatalIOError "
+            << err << nl << endl;
+    }
+    catch (const Foam::error& err)
+    {
+        Info<< "getCheck<scalar>(" << k << ") Caught FatalError "
             << err << nl << endl;
     }
     FatalError.throwExceptions(throwingError);
@@ -127,12 +165,12 @@ scalar try_getScalar(const entry* eptr, const word& k)
         val = eptr->get<scalar>();
         Info<< "entry get<scalar>(" << k << ") = " << val << nl;
     }
-    catch (Foam::IOerror& err)
+    catch (const Foam::IOerror& err)
     {
         Info<< "entry get<scalar>(" << k << ") Caught FatalIOError "
             << err << nl << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "entry get<scalar>(" << k << ") Caught FatalError "
             << err << nl << endl;
@@ -311,6 +349,7 @@ int main(int argc, char *argv[])
             IStringStream
             (
                 "good 3.14159;\n"
+                "negative -3.14159;\n"
                 "empty;\n"
                 // "bad  text;\n"            // always fails
                 // "bad  3.14159 1234;\n"    // fails for readScalar
@@ -336,6 +375,26 @@ int main(int argc, char *argv[])
             try_getScalar(dict2, "good");
             // try_getScalar(dict2, "bad");
             try_getScalar(dict2, "empty");
+        }
+
+
+        // With getCheck<scalar>
+        {
+            Info<< nl << "Test some input with getCheck<scalar>()" << nl;
+
+            try_getCheckScalar(dict2, "good", scalarRange::gt0());
+            try_getCheckScalar(dict2, "negative", scalarRange::gt0());
+
+            try_getCheckScalar(dict2, "good", greaterOp1<scalar>(0));
+            try_getCheckScalar(dict2, "negative", greaterOp1<scalar>(0));
+
+            Info<< nl << "with lambda" << nl;
+            try_getCheckScalar
+            (
+                dict2,
+                "good",
+                [](const scalar x) { return x > 0; }
+            );
         }
 
         // With findEntry and get<scalar>

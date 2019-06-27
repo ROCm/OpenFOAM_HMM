@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +55,7 @@ class projectEdge
 :
     public blockEdge
 {
-    // Private data
+    // Private Data
 
         const searchableSurfaces& geometry_;
 
@@ -88,13 +90,12 @@ public:
             const label index,
             const searchableSurfaces& geometry,
             const pointField& points,
-            Istream&
+            Istream& is
         );
 
 
     //- Destructor
-    virtual ~projectEdge()
-    {}
+    virtual ~projectEdge() = default;
 
 
     // Member Functions

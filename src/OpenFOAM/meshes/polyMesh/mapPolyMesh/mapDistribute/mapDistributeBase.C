@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016, 2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -289,15 +291,13 @@ void Foam::mapDistributeBase::calcCompactAddressing
     compactMap.setSize(Pstream::nProcs());
 
     // Count all (non-local) elements needed. Just for presizing map.
-    labelList nNonLocal(Pstream::nProcs(), 0);
+    labelList nNonLocal(Pstream::nProcs(), Zero);
 
-    forAll(elements, i)
+    for (const label globalIdx : elements)
     {
-        label globalIndex = elements[i];
-
-        if (globalIndex != -1 && !globalNumbering.isLocal(globalIndex))
+        if (globalIdx != -1 && !globalNumbering.isLocal(globalIdx))
         {
-            label proci = globalNumbering.whichProcID(globalIndex);
+            label proci = globalNumbering.whichProcID(globalIdx);
             nNonLocal[proci]++;
         }
     }
@@ -313,14 +313,12 @@ void Foam::mapDistributeBase::calcCompactAddressing
 
 
     // Collect all (non-local) elements needed.
-    forAll(elements, i)
+    for (const label globalIdx : elements)
     {
-        label globalIndex = elements[i];
-
-        if (globalIndex != -1 && !globalNumbering.isLocal(globalIndex))
+        if (globalIdx != -1 && !globalNumbering.isLocal(globalIdx))
         {
-            label proci = globalNumbering.whichProcID(globalIndex);
-            label index = globalNumbering.toLocal(proci, globalIndex);
+            label proci = globalNumbering.whichProcID(globalIdx);
+            label index = globalNumbering.toLocal(proci, globalIdx);
             label nCompact = compactMap[proci].size();
             compactMap[proci].insert(index, nCompact);
         }
@@ -338,19 +336,15 @@ void Foam::mapDistributeBase::calcCompactAddressing
     compactMap.setSize(Pstream::nProcs());
 
     // Count all (non-local) elements needed. Just for presizing map.
-    labelList nNonLocal(Pstream::nProcs(), 0);
+    labelList nNonLocal(Pstream::nProcs(), Zero);
 
-    forAll(cellCells, cellI)
+    for (const labelList& cCells : cellCells)
     {
-        const labelList& cCells = cellCells[cellI];
-
-        forAll(cCells, i)
+        for (const label globalIdx : cCells)
         {
-            label globalIndex = cCells[i];
-
-            if (globalIndex != -1 && !globalNumbering.isLocal(globalIndex))
+            if (globalIdx != -1 && !globalNumbering.isLocal(globalIdx))
             {
-                label proci = globalNumbering.whichProcID(globalIndex);
+                label proci = globalNumbering.whichProcID(globalIdx);
                 nNonLocal[proci]++;
             }
         }
@@ -367,18 +361,14 @@ void Foam::mapDistributeBase::calcCompactAddressing
 
 
     // Collect all (non-local) elements needed.
-    forAll(cellCells, cellI)
+    for (const labelList& cCells : cellCells)
     {
-        const labelList& cCells = cellCells[cellI];
-
-        forAll(cCells, i)
+        for (const label globalIdx : cCells)
         {
-            label globalIndex = cCells[i];
-
-            if (globalIndex != -1 && !globalNumbering.isLocal(globalIndex))
+            if (globalIdx != -1 && !globalNumbering.isLocal(globalIdx))
             {
-                label proci = globalNumbering.whichProcID(globalIndex);
-                label index = globalNumbering.toLocal(proci, globalIndex);
+                label proci = globalNumbering.whichProcID(globalIdx);
+                label index = globalNumbering.toLocal(proci, globalIdx);
                 label nCompact = compactMap[proci].size();
                 compactMap[proci].insert(index, nCompact);
             }
@@ -437,9 +427,9 @@ void Foam::mapDistributeBase::exchangeAddressing
             remoteElem.setSize(compactMap[proci].size());
             localElem.setSize(compactMap[proci].size());
             label i = 0;
-            forAllIter(Map<label>, compactMap[proci], iter)
+            forAllIters(compactMap[proci], iter)
             {
-                const label compactI = compactStart[proci] + iter();
+                const label compactI = compactStart[proci] + iter.val();
                 remoteElem[i] = iter.key();
                 localElem[i]  = compactI;
                 iter() = compactI;
@@ -458,9 +448,9 @@ void Foam::mapDistributeBase::exchangeAddressing
     );
 
     // Renumber elements
-    forAll(elements, i)
+    for (label& elem : elements)
     {
-        elements[i] = renumber(globalNumbering, compactMap, elements[i]);
+        elem = renumber(globalNumbering, compactMap, elem);
     }
 }
 
@@ -514,9 +504,9 @@ void Foam::mapDistributeBase::exchangeAddressing
             remoteElem.setSize(compactMap[proci].size());
             localElem.setSize(compactMap[proci].size());
             label i = 0;
-            forAllIter(Map<label>, compactMap[proci], iter)
+            forAllIters(compactMap[proci], iter)
             {
-                const label compactI = compactStart[proci] + iter();
+                const label compactI = compactStart[proci] + iter.val();
                 remoteElem[i] = iter.key();
                 localElem[i]  = compactI;
                 iter() = compactI;
@@ -535,13 +525,11 @@ void Foam::mapDistributeBase::exchangeAddressing
     );
 
     // Renumber elements
-    forAll(cellCells, cellI)
+    for (labelList& cCells : cellCells)
     {
-        labelList& cCells = cellCells[cellI];
-
-        forAll(cCells, i)
+        for (label& celli : cCells)
         {
-            cCells[i] = renumber(globalNumbering, compactMap, cCells[i]);
+            celli = renumber(globalNumbering, compactMap, celli);
         }
     }
 }
@@ -616,8 +604,8 @@ Foam::mapDistributeBase::mapDistributeBase
     }
 
     // Per processor the number of samples we have to send/receive.
-    labelList nSend(Pstream::nProcs(), 0);
-    labelList nRecv(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
+    labelList nRecv(Pstream::nProcs(), Zero);
 
     forAll(sendProcs, sampleI)
     {
@@ -704,8 +692,7 @@ Foam::mapDistributeBase::mapDistributeBase
     //
     //        forAll(sorted, i)
     //        {
-    //            Map<label>::iterator iter = globalMap.find(sorted[i]);
-    //            iter() = i;
+    //            globalMap(sorted[i]) = i;
     //        }
     //    }
     //}
@@ -764,8 +751,7 @@ Foam::mapDistributeBase::mapDistributeBase
     //
     //        forAll(sorted, i)
     //        {
-    //            Map<label>::iterator iter = globalMap.find(sorted[i]);
-    //            iter() = i;
+    //            globalMap(sorted[i]) = i;
     //        }
     //    }
     //}

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,15 +31,15 @@ License
 
 void Foam::GAMGSolver::interpolate
 (
-    scalarField& psi,
-    scalarField& Apsi,
+    solveScalarField& psi,
+    solveScalarField& Apsi,
     const lduMatrix& m,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
     const direction cmpt
 ) const
 {
-    scalar* __restrict__ psiPtr = psi.begin();
+    solveScalar* __restrict__ psiPtr = psi.begin();
 
     const label* const __restrict__ uPtr = m.lduAddr().upperAddr().begin();
     const label* const __restrict__ lPtr = m.lduAddr().lowerAddr().begin();
@@ -47,7 +49,7 @@ void Foam::GAMGSolver::interpolate
     const scalar* const __restrict__ lowerPtr = m.lower().begin();
 
     Apsi = 0;
-    scalar* __restrict__ ApsiPtr = Apsi.begin();
+    solveScalar* __restrict__ ApsiPtr = Apsi.begin();
 
     m.initMatrixInterfaces
     (
@@ -86,13 +88,13 @@ void Foam::GAMGSolver::interpolate
 
 void Foam::GAMGSolver::interpolate
 (
-    scalarField& psi,
-    scalarField& Apsi,
+    solveScalarField& psi,
+    solveScalarField& Apsi,
     const lduMatrix& m,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
     const labelList& restrictAddressing,
-    const scalarField& psiC,
+    const solveScalarField& psiC,
     const direction cmpt
 ) const
 {
@@ -107,17 +109,17 @@ void Foam::GAMGSolver::interpolate
     );
 
     const label nCells = m.diag().size();
-    scalar* __restrict__ psiPtr = psi.begin();
+    solveScalar* __restrict__ psiPtr = psi.begin();
     const scalar* const __restrict__ diagPtr = m.diag().begin();
-    const scalar* const __restrict__ psiCPtr = psiC.begin();
+    const solveScalar* const __restrict__ psiCPtr = psiC.begin();
 
 
     const label nCCells = psiC.size();
-    scalarField corrC(nCCells, 0);
-    scalar* __restrict__ corrCPtr = corrC.begin();
+    solveScalarField corrC(nCCells, 0);
+    solveScalar* __restrict__ corrCPtr = corrC.begin();
 
-    scalarField diagC(nCCells, 0);
-    scalar* __restrict__ diagCPtr = diagC.begin();
+    solveScalarField diagC(nCCells, 0);
+    solveScalar* __restrict__ diagCPtr = diagC.begin();
 
     for (label celli=0; celli<nCells; celli++)
     {

@@ -37,7 +37,7 @@ Foam::fixedGradientFaPatchField<Type>::fixedGradientFaPatchField
 )
 :
     faPatchField<Type>(p, iF),
-    gradient_(p.size(), pTraits<Type>::zero)
+    gradient_(p.size(), Zero)
 {}
 
 
@@ -165,7 +165,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::fixedGradientFaPatchField<Type>::gradientInternalCoeffs() const
 {
-    return tmp<Field<Type>>::New(this->size(), pTraits<Type>::zero);
+    return tmp<Field<Type>>::New(this->size(), Zero);
 }
 
 

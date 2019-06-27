@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,13 @@ Class
     Foam::functionObjects::runTimePostPro::functionObjectLine
 
 Description
-    Visualisation of line data from function object output
+    Visualisation of line data from function object output (file-based only).
+
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        type        | The line type: functionObjectLine     | yes |
+    \endtable
 
 SourceFiles
     functionObjectLine.C
@@ -76,7 +82,7 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("functionObjectLine");
+    TypeNameNoDebug("functionObjectLine");
 
 
     // Constructors

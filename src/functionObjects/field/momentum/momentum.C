@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,14 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * //
 
+void Foam::functionObjects::momentum::purgeFields()
+{
+    obr_.checkOut(scopedName("momentum"));
+    obr_.checkOut(scopedName("angularMomentum"));
+    obr_.checkOut(scopedName("angularVelocity"));
+}
+
+
 template<class GeoField>
 Foam::autoPtr<GeoField>
 Foam::functionObjects::momentum::newField
@@ -74,6 +82,13 @@ Foam::functionObjects::momentum::newField
 void Foam::functionObjects::momentum::calc()
 {
     initialise();
+
+    // Ensure volRegion is properly up-to-date.
+    // Purge old fields if anything has changed (eg, mesh size etc)
+    if (volRegion::update())
+    {
+        purgeFields();
+    }
 
     // When field writing is not enabled we need our local storage
     // for the momentum and angular velocity fields
@@ -249,8 +264,9 @@ void Foam::functionObjects::momentum::writeFileHeader(Ostream& os)
     {
         writeTabbed(os, "(momentum_r momentum_rtheta momentum_axis)");
     }
-    os  << endl;
 
+    writeTabbed(os, "volume");
+    os  << endl;
 
     writtenHeader_ = true;
 }
@@ -291,22 +307,27 @@ void Foam::functionObjects::momentum::initialise()
 
 void Foam::functionObjects::momentum::writeValues(Ostream& os)
 {
-    Log << type() << " " << name() << " write:" << nl;
-
-    Log << "    Sum of Momentum";
-
-    if (regionType_ != vrtAll)
+    if (log)
     {
-        Log << ' ' << regionTypeNames_[regionType_]
-            << ' ' << regionName_;
-    }
+        Info<< type() << " " << name() << " write:" << nl;
 
-    Log << nl
-        << "        linear  : " << sumMomentum_ << nl;
+        Info<< "    Sum of Momentum";
 
-    if (hasCsys_)
-    {
-        Log << "        angular : " << sumAngularMom_ << nl;
+        if (regionType_ != vrtAll)
+        {
+            Info<< ' ' << regionTypeNames_[regionType_]
+                << ' ' << regionName_;
+        }
+
+        Info<< " (volume " << volRegion::V() << ')' << nl
+            << "        linear  : " << sumMomentum_ << nl;
+
+        if (hasCsys_)
+        {
+            Info<< "        angular : " << sumAngularMom_ << nl;
+        }
+
+        Info<< endl;
     }
 
     if (writeToFile())
@@ -319,10 +340,9 @@ void Foam::functionObjects::momentum::writeValues(Ostream& os)
         {
             os << tab << sumAngularMom_;
         }
-        os << endl;
-    }
 
-    Log << endl;
+        os << tab << volRegion::V() << endl;
+    }
 }
 
 
@@ -409,9 +429,6 @@ bool Foam::functionObjects::momentum::read(const dictionary& dict)
     pName_ = dict.lookupOrDefault<word>("p", "p");
     rhoName_ = dict.lookupOrDefault<word>("rho", "rho");
     rhoRef_ = dict.lookupOrDefault<scalar>("rhoRef", 1.0);
-
-    rhoRef_ = dict.lookupOrDefault<scalar>("rhoRef", 1.0);
-
     hasCsys_ = dict.lookupOrDefault("cylindrical", false);
 
     if (hasCsys_)
@@ -497,7 +514,7 @@ bool Foam::functionObjects::momentum::write()
 {
     if (writeMomentum_ || (hasCsys_ && (writeVelocity_ || writePosition_)))
     {
-        Log <<"Writing fields" << nl;
+        Log << "Writing fields" << nl;
 
         const volVectorField* fieldPtr;
 
@@ -567,6 +584,20 @@ bool Foam::functionObjects::momentum::write()
     }
 
     return true;
+}
+
+
+void Foam::functionObjects::momentum::updateMesh(const mapPolyMesh& mpm)
+{
+    volRegion::updateMesh(mpm);
+    purgeFields();  // Mesh motion makes calculated fields dubious
+}
+
+
+void Foam::functionObjects::momentum::movePoints(const polyMesh& pm)
+{
+    volRegion::movePoints(pm);
+    purgeFields();  // Mesh motion makes calculated fields dubious
 }
 
 

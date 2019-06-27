@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,8 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy(fvMesh& baseMesh)
     exposedPatchId_(-1),
     type_(NONE),
     name_(),
-    names_()
+    names_(),
+    selectedCells_()
 {
     if (useSubMesh())
     {
@@ -59,7 +60,8 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
     exposedPatchId_(exposedPatchId),
     type_(selectionName.empty() ? NONE : type),
     name_(),
-    names_()
+    names_(),
+    selectedCells_()
 {
     if (type_ == ZONES)
     {
@@ -91,7 +93,8 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
     exposedPatchId_(exposedPatchId),
     type_(ZONES),
     name_(),
-    names_(zoneNames)
+    names_(zoneNames),
+    selectedCells_()
 {
     if (useSubMesh())
     {
@@ -112,7 +115,8 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
     exposedPatchId_(exposedPatchId),
     type_(ZONES),
     name_(),
-    names_(std::move(zoneNames))
+    names_(std::move(zoneNames)),
+    selectedCells_()
 {
     if (useSubMesh())
     {
@@ -123,12 +127,13 @@ Foam::fvMeshSubsetProxy::fvMeshSubsetProxy
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fvMeshSubsetProxy::correct(bool verbose)
+bool Foam::fvMeshSubsetProxy::correct(bool verbose)
 {
     if (type_ == NONE)
     {
         subsetter_.clear();
-        return;
+        selectedCells_.clearStorage();
+        return false;
     }
 
     const label nCells = baseMesh_.nCells();
@@ -171,7 +176,18 @@ void Foam::fvMeshSubsetProxy::correct(bool verbose)
         selectedCells = baseMesh_.cellZones().selection(names_);
     }
 
-    subsetter_.setCellSubset(selectedCells, exposedPatchId_);
+
+    const bool changed = (selectedCells_ != selectedCells);
+
+    // Use as a cached value for next time
+    selectedCells_.transfer(selectedCells);
+
+    if (changed || selectedCells_.empty())
+    {
+        subsetter_.setCellSubset(selectedCells_, exposedPatchId_);
+    }
+
+    return returnReduce(changed, orOp<bool>());
 }
 
 
@@ -179,7 +195,16 @@ Foam::polyMesh::readUpdateState Foam::fvMeshSubsetProxy::readUpdate()
 {
     const polyMesh::readUpdateState meshState = baseMesh_.readUpdate();
 
-    if
+    if (meshState == polyMesh::POINTS_MOVED)
+    {
+        if (correct(true))
+        {
+            // The cellSet/cellZone changed on POINTS_MOVED,
+            // treat like TOPO_CHANGE
+            return polyMesh::TOPO_CHANGE;
+        }
+    }
+    else if
     (
         meshState == polyMesh::TOPO_CHANGE
      || meshState == polyMesh::TOPO_PATCH_CHANGE

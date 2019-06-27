@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,7 +25,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class GeoField>
@@ -37,22 +38,19 @@ Foam::tmp<GeoField> Foam::uniformInterpolate
     const GeoField& field0 = *(*fields.begin());
 
     // Interpolate
-    tmp<GeoField> tfld
+    auto tfld = tmp<GeoField>::New
     (
-        new GeoField
+        IOobject
         (
-            IOobject
-            (
-                "uniformInterpolate(" + field0.name() + ')',
-                field0.time().timeName(),
-                field0.db(),
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            weights[0]*(*fields[indices[0]])
-        )
+            "uniformInterpolate(" + field0.name() + ')',
+            field0.time().timeName(),
+            field0.db(),
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        weights[0]*(*fields[indices[0]])
     );
-    GeoField& fld = tfld();
+    auto& fld = tfld();
 
     for (label i = 1; i < indices.size(); ++i)
     {
@@ -91,25 +89,16 @@ Foam::tmp<GeoField> Foam::uniformInterpolate
 
 
     // Interpolate
-    tmp<GeoField> tfld(new GeoField(fieldIO, weights[0]*field0));
+    auto tfld = tmp<GeoField>::New(fieldIO, weights[0]*field0);
     GeoField& fld = tfld.ref();
 
     for (label i = 1; i < times.size(); ++i)
     {
-        const objectRegistry& timeIFields = fieldsCache.lookupObject
-        <
-            const objectRegistry
-        >
-        (
-            times[i]
-        );
-        const GeoField& fieldi = timeIFields.lookupObject
-        <
-            const GeoField
-        >
-        (
-            fieldName
-        );
+        const objectRegistry& timeIFields =
+            fieldsCache.lookupObject<const objectRegistry>(times[i]);
+
+        const GeoField& fieldi =
+            timeIFields.lookupObject<const GeoField>(fieldName);
 
         fld += weights[i]*fieldi;
     }

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,32 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include <iostream>  // for std::cerr
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-inline void Foam::fileName::stripInvalid()
-{
-    // Skip stripping unless debug is active (to avoid costly operations)
-    if (debug && string::stripInvalid<fileName>(*this))
-    {
-        std::cerr
-            << "fileName::stripInvalid() called for invalid fileName "
-            << this->c_str() << std::endl;
-
-        if (debug > 1)
-        {
-            std::cerr
-                << "    For debug level (= " << debug
-                << ") > 1 this is considered fatal" << std::endl;
-            std::abort();
-        }
-
-        removeRepeated('/');
-        removeTrailing('/');
-    }
-}
-
+#include <iostream>  // For std::cerr
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -125,16 +102,53 @@ inline bool Foam::fileName::valid(char c)
 {
     return
     (
-        !isspace(c)
-     && c != '"'   // string quote
-     && c != '\''  // string quote
+        c != '"'    // string quote
+     && c != '\''   // string quote
+     && (!isspace(c) || (allowSpaceInFileName && c == ' '))
     );
+}
+
+
+inline void Foam::fileName::stripInvalid()
+{
+    // Only strip when debug is active (potentially costly operation)
+    if (debug && string::stripInvalid<fileName>(*this))
+    {
+        std::cerr
+            << "fileName::stripInvalid() called for invalid fileName "
+            << this->c_str() << std::endl;
+
+        if (debug > 1)
+        {
+            std::cerr
+                << "    For debug level (= " << debug
+                << ") > 1 this is considered fatal" << std::endl;
+            std::exit(1);
+        }
+
+        removeRepeated('/');
+        removeTrailing('/');
+    }
 }
 
 
 inline bool Foam::fileName::isAbsolute(const std::string& str)
 {
-    return !str.empty() && str[0] == '/';
+    return
+    (
+        (!str.empty() && str[0] == '/')
+        #ifdef _WIN32
+        ||
+        (
+            // Eg, d:/path or \\machine/path
+            (str.length() > 2) &&
+            (
+                (str[1] == ':'  && str[2] == '/')
+             || (str[0] == '\\' && str[1] == '\\')
+            )
+        )
+        #endif
+    );
 }
 
 
@@ -255,6 +269,28 @@ inline Foam::fileName& Foam::fileName::ext(const word& ending)
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline Foam::fileName& Foam::fileName::operator=(const fileName& str)
+{
+    // Self-assignment is a no-op
+    if (this != &str)
+    {
+        assign(str);
+    }
+    return *this;
+}
+
+
+inline Foam::fileName& Foam::fileName::operator=(fileName&& str)
+{
+    // Self-assignment is a no-op
+    if (this != &str)
+    {
+        assign(std::move(str));
+    }
+    return *this;
+}
+
 
 inline Foam::fileName& Foam::fileName::operator=(const word& str)
 {

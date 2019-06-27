@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -584,7 +586,7 @@ Foam::vector Foam::turbulentDFSEMInletFvPatchVectorField::uDashEddy
     const point& patchFaceCf
 ) const
 {
-    vector uDash(vector::zero);
+    vector uDash(Zero);
 
     forAll(eddies, k)
     {
@@ -740,17 +742,17 @@ turbulentDFSEMInletFvPatchVectorField
     L_(),
     interpolateU_(false),
     U_(),
-    UMean_(vector::zero),
+    UMean_(Zero),
 
     patchArea_(-1),
     triFace_(),
     triToFace_(),
     triCumulativeMagSf_(),
-    sumTriMagSf_(Pstream::nProcs() + 1, 0.0),
+    sumTriMagSf_(Pstream::nProcs() + 1, Zero),
 
     eddies_(0),
     nCellPerEddy_(5),
-    patchNormal_(vector::zero),
+    patchNormal_(Zero),
     v0_(0),
     rndGen_(Pstream::myProcNo()),
     sigmax_(size(), 0),
@@ -831,20 +833,20 @@ turbulentDFSEMInletFvPatchVectorField
     L_(interpolateOrRead<scalar>("L", dict, interpolateL_)),
     interpolateU_(false),
     U_(interpolateOrRead<vector>("U", dict, interpolateU_)),
-    UMean_(vector::zero),
+    UMean_(Zero),
 
     patchArea_(-1),
     triFace_(),
     triToFace_(),
     triCumulativeMagSf_(),
-    sumTriMagSf_(Pstream::nProcs() + 1, 0.0),
+    sumTriMagSf_(Pstream::nProcs() + 1, Zero),
 
     eddies_(),
     nCellPerEddy_(dict.lookupOrDefault<label>("nCellPerEddy", 5)),
-    patchNormal_(vector::zero),
+    patchNormal_(Zero),
     v0_(0),
     rndGen_(0, -1),
-    sigmax_(size(), 0),
+    sigmax_(size(), Zero),
     maxSigmaX_(0),
     nEddy_(0),
     curTimeIndex_(-1),
@@ -853,6 +855,8 @@ turbulentDFSEMInletFvPatchVectorField
     writeEddies_(dict.lookupOrDefault("writeEddies", false))
 {
     eddy::debug = debug;
+
+    checkStresses(R_);
 
     // Set UMean as patch area average value
     UMean_ = gSum(U_*patch().magSf())/(gSum(patch().magSf()) + ROOTVSMALL);
@@ -946,14 +950,75 @@ turbulentDFSEMInletFvPatchVectorField
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::turbulentDFSEMInletFvPatchVectorField::~
-turbulentDFSEMInletFvPatchVectorField()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::turbulentDFSEMInletFvPatchVectorField::checkStresses
+(
+    const symmTensorField& Rf
+)
+{
+    // Perform checks of the stress tensor based on Cholesky decomposition
+    // constraints
+
+    forAll(Rf, facei)
+    {
+        const symmTensor& R = Rf[facei];
+
+        if (R.xx() <= 0)
+        {
+            FatalErrorInFunction
+                << "Reynolds stress " << R << " at face " << facei
+                << " does not obey the constraint: R_xx > 0"
+                << exit(FatalError);
+        }
+
+        scalar a_xx = sqrt(R.xx());
+
+        scalar a_xy = R.xy()/a_xx;
+
+        scalar a_yy_2 = R.yy() - sqr(a_xy);
+
+        if (a_yy_2 < 0)
+        {
+            FatalErrorInFunction
+                << "Reynolds stress " << R << " at face " << facei
+                << " leads to an invalid Cholesky decomposition due to the "
+                << "constraint R_yy - sqr(a_xy) >= 0"
+                << exit(FatalError);
+        }
+
+        scalar a_yy = Foam::sqrt(a_yy_2);
+
+        scalar a_xz = R.xz()/a_xx;
+
+        scalar a_yz = (R.yz() - a_xy*a_xz)*a_yy;
+
+        scalar a_zz_2 = R.zz() - sqr(a_xz) - sqr(a_yz);
+
+        if (a_zz_2 < 0)
+        {
+            FatalErrorInFunction
+                << "Reynolds stress " << R << " at face " << facei
+                << " leads to an invalid Cholesky decomposition due to the "
+                << "constraint R_zz - sqr(a_xz) - sqr(a_yz) >= 0"
+                << exit(FatalError);
+        }
+
+        scalar a_zz = Foam::sqrt(a_zz_2);
+
+        if (debug)
+        {
+            Pout<< "R: " << R
+                << " a_xx:" << a_xx << " a_xy:" << a_xy << " a_xz:" << a_xy
+                <<                     " a_yy:" << a_yy << " a_yz:" << a_yz
+                <<                                         " a_zz:" << a_zz
+                << endl;
+        }
+    }
+
+    return true;
+}
+
 
 void Foam::turbulentDFSEMInletFvPatchVectorField::autoMap
 (

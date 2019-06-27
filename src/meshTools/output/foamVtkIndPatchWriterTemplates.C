@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,6 +24,34 @@ License
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+
+template<class Type>
+void Foam::vtk::indirectPatchWriter::writeUniform
+(
+    const word& fieldName,
+    const Type& val
+)
+{
+    if (isState(outputState::CELL_DATA))
+    {
+        ++nCellData_;
+        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfCells_);
+    }
+    else if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+        vtk::fileWriter::writeUniform<Type>(fieldName, val, numberOfPoints_);
+    }
+    else
+    {
+        WarningInFunction
+            << "Bad writer state (" << stateNames[state_]
+            << ") for field " << fieldName << nl << endl
+            << exit(FatalError);
+    }
+}
+
 
 template<class Type>
 void Foam::vtk::indirectPatchWriter::write
@@ -53,15 +81,11 @@ void Foam::vtk::indirectPatchWriter::write
     static_assert
     (
         (
-            std::is_same<typename pTraits<Type>::cmptType,label>::value
+            std::is_same<label, typename pTraits<Type>::cmptType>::value
          || std::is_floating_point<typename pTraits<Type>::cmptType>::value
         ),
         "Label and Floating-point vector space only"
     );
-
-    const bool isLabel =
-        std::is_same<typename pTraits<Type>::cmptType(), label>::value;
-
 
     const direction nCmpt(pTraits<Type>::nComponents);
 
@@ -78,7 +102,7 @@ void Foam::vtk::indirectPatchWriter::write
 
     if (format_)
     {
-        if (isLabel)
+        if (std::is_same<label, typename pTraits<Type>::cmptType>::value)
         {
             if (legacy())
             {

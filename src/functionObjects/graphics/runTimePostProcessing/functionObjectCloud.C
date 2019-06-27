@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,11 +31,11 @@ License
 
 // VTK includes
 #include "vtkActor.h"
-#include "vtkRenderer.h"
-#include "vtkSmartPointer.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
+#include "vtkRenderer.h"
+#include "vtkSmartPointer.h"
 
 // VTK Readers
 #include "vtkPolyDataReader.h"
@@ -49,11 +49,40 @@ namespace functionObjects
 {
 namespace runTimePostPro
 {
-    defineTypeNameAndDebug(functionObjectCloud, 0);
+    defineTypeName(functionObjectCloud);
     addToRunTimeSelectionTable(pointData, functionObjectCloud, dictionary);
 }
 }
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+
+static vtkSmartPointer<vtkPolyData> getPolyDataFile(const Foam::fileName& fName)
+{
+    // Very simple - we only support vtp files, which are expected to have
+    // the scaling and colouring fields.
+
+    vtkSmartPointer<vtkPolyData> dataset;
+
+    if (fName.ext() == "vtp")
+    {
+        auto reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
+
+        reader->SetFileName(fName.c_str());
+        reader->Update();
+        dataset = reader->GetOutput();
+
+        return dataset;
+    }
+
+    return dataset;
+}
+
+} // End anonymous namespace
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -71,9 +100,7 @@ Foam::functionObjects::runTimePostPro::functionObjectCloud::functionObjectCloud
     inputFileName_(),
     colourFieldName_(dict.get<word>("colourField")),
     actor_()
-{
-    actor_ = vtkSmartPointer<vtkActor>::New();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -85,8 +112,8 @@ Foam::functionObjects::runTimePostPro::functionObjectCloud::
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::functionObjects::runTimePostPro::functionObjectCloud::
-addGeometryToScene
+bool Foam::functionObjects::runTimePostPro::functionObjectCloud::
+addGeometryFromFile
 (
     const scalar position,
     vtkRenderer* renderer
@@ -94,72 +121,123 @@ addGeometryToScene
 {
     if (!visible_)
     {
-        return;
+        return false;
     }
+
+    vtkSmartPointer<vtkPolyData> polyData;
+
+    bool good = true;
 
     // The vtkCloud stores 'file' via the stateFunctionObject
     // (lookup by cloudName).
     // It only generates VTP format, which means there is a single file
     // containing all fields.
 
-    inputFileName_ = getFileName("file", cloudName_);
-
-    if (inputFileName_.empty())
+    if (Pstream::master())
     {
-        WarningInFunction
-            << "Unable to find function object " << functionObjectName_
-            << " output for field " << fieldName_
-            << ". Cloud will not be processed"
-            << endl;
-        return;
-    }
+        inputFileName_ = getFileName("file", cloudName_);
 
+        if (inputFileName_.size())
+        {
+            polyData = getPolyDataFile(inputFileName_);
 
-    vtkSmartPointer<vtkPolyData> dataset;
+            if (!polyData || polyData->GetNumberOfPoints() == 0)
+            {
+                good = false;
 
-    if (inputFileName_.hasExt("vtp"))
-    {
-        auto reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
-        reader->SetFileName(inputFileName_.c_str());
-        reader->Update();
+                WarningInFunction
+                    << "Could not read "<< inputFileName_ << nl
+                    << "Only VTK (.vtp) files are supported"
+                    << endl;
+            }
+            else
+            {
+                DebugInfo
+                    << "    Resolved cloud file " << inputFileName_ << endl;
+            }
+        }
+        else
+        {
+            good = false;
 
-        dataset = reader->GetOutput();
+            WarningInFunction
+                << "Unable to find function object " << functionObjectName_
+                << " output for field " << fieldName_
+                << ". Cloud will not be processed"
+                << endl;
+        }
     }
     else
     {
-        // Invalid name - ignore.
-        // Don't support VTK legacy format at all - it is too wasteful
-        // and cumbersome.
-
-        WarningInFunction
-            << "Could not read "<< inputFileName_ << nl
-            << "Only VTK (.vtp) files are supported"
-            << ". Cloud will not be processed"
-            << endl;
-
         inputFileName_.clear();
     }
 
+    reduce(good, andOp<bool>());
 
-    if (dataset)
+    if (!good)
     {
+        return false;
+    }
+
+    // Only render on master
+    if (!renderer || !Pstream::master())
+    {
+        return true;
+    }
+
+
+    // Rendering
+
+    actor_ = vtkSmartPointer<vtkActor>::New();
+
+    {
+        fieldSummary scaleFieldInfo =
+            queryFieldSummary(fieldName_, polyData);
+
+        fieldSummary colourFieldInfo =
+            queryFieldSummary(colourFieldName_, polyData);
+
+        DebugInfo
+            << "    Field " << fieldName_ << ' ' << scaleFieldInfo.info() << nl
+            << "    Field " << colourFieldName_ << ' ' << colourFieldInfo.info()
+            << endl;
+
+
+        // No reduction
+
         auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 
         actor_->SetMapper(mapper);
 
+        /// dataset->Print(std::cout);
+
         addGlyphs
         (
             position,
-            fieldName_,
-            colourFieldName_,
+            fieldName_, scaleFieldInfo,         // scaling
+            colourFieldName_, colourFieldInfo,  // colour
             maxGlyphLength_,
-            dataset,
+            polyData,
             actor_,
             renderer
         );
 
         renderer->AddActor(actor_);
     }
+
+    return true;
+}
+
+
+void Foam::functionObjects::runTimePostPro::functionObjectCloud::
+addGeometryToScene
+(
+    const scalar position,
+    vtkRenderer* renderer
+)
+{
+    // File source
+    addGeometryFromFile(position, renderer);
 }
 
 
@@ -168,10 +246,16 @@ void Foam::functionObjects::runTimePostPro::functionObjectCloud::updateActors
     const scalar position
 )
 {
-    actor_->GetProperty()->SetOpacity(opacity(position));
+    if (actor_)
+    {
+        const vector colour = pointColour_->value(position);
 
-    vector pc = pointColour_->value(position);
-    actor_->GetProperty()->SetColor(pc[0], pc[1], pc[2]);
+        vtkProperty* prop = actor_->GetProperty();
+
+        prop->SetOpacity(opacity(position));
+
+        prop->SetColor(colour[0], colour[1], colour[2]);
+    }
 }
 
 

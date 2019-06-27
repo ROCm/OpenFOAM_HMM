@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,7 +181,7 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
 
     operator==
     (
-        pow(3*sqr(mup/rhop)/(gTan + ROOTVSMALL), 1.0/3.0)*pow(Re, 1.0/3.0)
+        cbrt(3*sqr(mup/rhop)/(gTan + ROOTVSMALL))*cbrt(Re)
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +42,15 @@ Description
     more communication.
     - frozen : no change
 
+    Note: addressing used:
+    distributedTriSurfaceMesh: none
+
+    triSurfaceMesh:
+    - surf.pointFaces()     : edge addressing (for volume tests only)
+    - surf.edges()          : edgeTree
+    - surf.faceFaces()      : only if minQuality > 0
+
+
 SourceFiles
     distributedTriSurfaceMesh.C
 
@@ -53,6 +64,7 @@ SourceFiles
 #include "IOdictionary.H"
 #include "Pair.H"
 #include "globalIndex.H"
+#include "DynamicField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,7 +96,8 @@ public:
         {
             FOLLOW = 0,
             INDEPENDENT = 1,
-            FROZEN = 2
+            DISTRIBUTED = 2,
+            FROZEN = 3
         };
 
         static const Enum<distributionType> distributionTypeNames_;
@@ -110,13 +123,21 @@ private:
         //- Global triangle numbering
         mutable autoPtr<globalIndex> globalTris_;
 
-        //- The distribution type.
+        //- The (wanted) distribution type.
         distributionType distType_;
+
+        //- The (current) distribution type. Used to trigger re-distribution
+        //  when starting from undecomposed surface.
+        distributionType currentDistType_;
 
 
     // Private Member Functions
 
         // Read
+
+            //- Search for io.local directory (=triSurface) either in case
+            //  directory or in parent directory
+            static word findLocalInstance(const IOobject& io);
 
             //- Read my additional data
             bool read();
@@ -181,6 +202,10 @@ private:
 
         // Triangle index
 
+
+            //- Helper: convert local triangle indices to global ones
+            void convertTriIndices(List<pointIndexHit>& info) const;
+
             //- Obtains global indices from pointIndexHit and swaps them back
             //  to their original processor. Used to calculate local region
             //  and normal.
@@ -193,6 +218,24 @@ private:
 
         // Nearest
 
+            //- Is location inside any of the bounding boxes
+            bool contains
+            (
+                const List<treeBoundBox>& bbs,
+                const point& sample
+            ) const;
+
+            //- Is location inside any of the processors bb or if not
+            //  does it overlap
+            Tuple2<label, scalar> findBestProcs
+            (
+                const point& centre,
+                const scalar radiusSqr,
+                boolList& procContains,
+                boolList& procOverlaps,
+                label& minProci
+            ) const;
+
             label calcOverlappingProcs
             (
                 const point& centre,
@@ -200,8 +243,10 @@ private:
                 boolList& overlaps
             ) const;
 
+            //- Calculate map to send centres+radius to processors
             autoPtr<mapDistribute> calcLocalQueries
             (
+                const bool includeLocalProcessor,
                 const pointField& centres,
                 const scalarField& radiusSqr,
 
@@ -211,7 +256,70 @@ private:
             ) const;
 
 
+        // Side
+
+            //- Side of nearest point w.r.t. edge between face0 and face1
+            volumeType edgeSide
+            (
+                const point& sample,
+                const point& nearestPoint,
+                const label face0,
+                const label face1
+            ) const;
+
+            //- Find edge-connected face
+            label findOtherFace
+            (
+                const labelListList& pointFaces,
+                const label nearFacei,
+                const label nearLabel
+            ) const;
+
+            //- Side of nearest point on faces w.r.t. samples. Handles nearest
+            //  on edge/point
+            void surfaceSide
+            (
+                const pointField& samples,
+                const List<pointIndexHit>& nearestInfo,
+                List<volumeType>& region
+            ) const;
+
+
+            // Caching of volume type (based on indexedOctree)
+
+            //- Collect mid points of tree boxes
+            void collectLeafMids
+            (
+                const label nodeI,
+                DynamicField<point>& midPoints
+            ) const;
+
+            //- Find volume type of tree boxes
+            volumeType calcVolumeType
+            (
+                const List<volumeType>& midPointTypes,
+                label& index,
+                PackedList<2>& nodeTypes,
+                const label nodeI
+            ) const;
+
+            //- Look up any cached data. Return unknown if cannot be determined.
+            volumeType cachedVolumeType
+            (
+                const label nodeI,
+                const point& sample
+            ) const;
+
+
         // Surface redistribution
+
+            //- Calculate face-faces
+            static void calcFaceFaces
+            (
+                const triSurface& s,
+                const labelListList& pointFaces,
+                labelListList& faceFaces
+            );
 
             //- Finds new bounds based on an independent decomposition.
             List<List<treeBoundBox>> independentlyDistributedBbs
@@ -342,13 +450,6 @@ public:
 
         // searchableSurface implementation
 
-            //- Whether supports volume type below. I.e. whether is closed.
-            //  Not supported.
-            virtual bool hasVolumeType() const
-            {
-                return false;
-            }
-
             //- Range of global indices that can be returned.
             virtual label globalSize() const
             {
@@ -360,6 +461,16 @@ public:
                 const pointField& sample,
                 const scalarField& nearestDistSqr,
                 List<pointIndexHit>&
+            ) const;
+
+            //- Find the nearest locations for the supplied points to a
+            //  particular region in the searchable surface.
+            virtual void findNearest
+            (
+                const pointField& samples,
+                const scalarField& nearestDistSqr,
+                const labelList& regionIndices,
+                List<pointIndexHit>& info
             ) const;
 
             virtual void findLine
@@ -432,6 +543,14 @@ public:
             //  indices) get the specified field. Misses do not get set.
             virtual void getField(const List<pointIndexHit>&, labelList&) const;
 
+            //- Calculate the triangles that are overlapping bounds.
+            static void overlappingSurface
+            (
+                const triSurface&,
+                const List<treeBoundBox>&,
+                boolList& includedFace
+            );
+
             //- Subset the part of surface that is overlapping bounds.
             static triSurface overlappingSurface
             (
@@ -440,6 +559,17 @@ public:
                 labelList& subPointMap,
                 labelList& subFaceMap
             );
+
+
+            //- Obtains global indices from pointIndexHit and swaps them back
+            //  to their original processor. Used to calculate local region
+            //  and normal.
+            virtual autoPtr<mapDistribute> localQueries
+            (
+                const List<pointIndexHit>&,
+                labelList& triangleIndex
+            ) const;
+
 
             //- Print some stats. Parallel aware version of
             //  triSurface::writeStats.

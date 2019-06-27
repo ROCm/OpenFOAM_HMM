@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,8 +115,6 @@ void Foam::reactionRateFlameAreaModels::relaxation::correct
 
     const volScalarField omegaInf(correlation_.omega0Sigma(sigmaTotal));
 
-    dimensionedScalar sigma0("sigma0", sigma.dimensions(), 0.0);
-
     const volScalarField tau(C_*mag(sigmaTotal));
 
     volScalarField Rc
@@ -157,10 +157,8 @@ bool  Foam::reactionRateFlameAreaModels::relaxation::read
         );
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 // ************************************************************************* //

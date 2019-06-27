@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,11 @@ License
 #include "voxelMeshSearch.H"
 #include "polyMesh.H"
 #include "processorPolyPatch.H"
-
+#include "IOobject.H"
+#include "fvMesh.H"
+#include "block.H"
+#include "emptyPolyPatch.H"
+#include "fvMeshTools.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -37,6 +41,43 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::labelVector Foam::voxelMeshSearch::offset
+(
+    const labelVector& nDivs
+)
+{
+    return labelVector(1, nDivs.x(), nDivs.x()*nDivs.y());
+}
+
+
+Foam::label Foam::voxelMeshSearch::index
+(
+    const labelVector& nDivs,
+    const labelVector& voxel
+)
+{
+    return voxel.x()+voxel.y()*nDivs.x()+voxel.z()*nDivs.x()*nDivs.y();
+}
+
+
+Foam::labelVector Foam::voxelMeshSearch::index3
+(
+    const labelVector& nDivs,
+    label voxeli
+)
+{
+    const label nxy = nDivs.x()*nDivs.y();
+
+    labelVector voxel;
+    voxel.z() = voxeli/nxy;
+    voxeli = voxeli % nxy;
+    voxel.y() = voxeli/nDivs.x();
+    voxel.x() = voxeli%nDivs.x();
+
+    return voxel;
+}
+
 
 Foam::labelVector Foam::voxelMeshSearch::index3
 (
@@ -94,7 +135,7 @@ Foam::label Foam::voxelMeshSearch::index
         return -1;
     }
 
-    return v[0] + g[0]*v[1] + g[1]*g.y()*v[2];
+    return index(g, v);
 }
 
 
@@ -277,6 +318,14 @@ Foam::voxelMeshSearch::voxelMeshSearch
         }
     }
 
+    // Redo the local bounding box
+    localBb_ = boundBox(mesh_.points(), false);
+
+    const point eps(1e-10, 1e-10, 1e-10);
+
+    localBb_.min() = localBb_.min()-eps;
+    localBb_.max() = localBb_.max()+eps;
+
     if (debug)
     {
         Pout<< "voxelMeshSearch : mesh:" << mesh_.name()
@@ -293,11 +342,13 @@ Foam::voxelMeshSearch::voxelMeshSearch
 Foam::voxelMeshSearch::voxelMeshSearch
 (
     const polyMesh& mesh,
+    const boundBox& localBb,
     const labelVector& nDivs,
     const bool doUpdate
 )
 :
     mesh_(mesh),
+    localBb_(localBb),
     nDivs_(nDivs)
 {
     if (doUpdate)
@@ -311,14 +362,6 @@ Foam::voxelMeshSearch::voxelMeshSearch
 
 bool Foam::voxelMeshSearch::update()
 {
-    // Redo the local bounding box
-    localBb_ = boundBox(mesh_.points(), false);
-
-    const point eps(1e-10, 1e-10, 1e-10);
-
-    localBb_.min() = localBb_.min()-eps;
-    localBb_.max() = localBb_.max()+eps;
-
     // Initialise seed cell array
 
     seedCell_.setSize(cmptProduct(nDivs_));
@@ -337,6 +380,14 @@ bool Foam::voxelMeshSearch::update()
         boundBox bb(points, cPoints, false);
 
         fill(seedCell_, localBb_, nDivs_, bb, celli);
+    }
+
+
+    if (debug)
+    {
+        Pout<< "voxelMeshSearch : mesh:" << mesh_.name()
+            << " nDivs:" << nDivs_
+            << " localBb:" << localBb_ << endl;
     }
 
 
@@ -360,6 +411,7 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
     {
         return -1;
     }
+
 
     // Locate the voxel index for this point. Do not clip.
     label voxeli = index(localBb_, nDivs_, p, false);
@@ -385,10 +437,14 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
             // found does not have to be the absolute 'correct' one as
             // long as at least one of the processors finds a cell.
 
-            label nextCellOld = -1;
-
+            track_.clear();
             while (true)
             {
+                if (track_.size() < 5)
+                {
+                    track_.append(celli);
+                }
+
                 // I am in celli now. How many faces do I have ?
                 label facei = findIntersectedFace(celli, p);
 
@@ -397,6 +453,7 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
                     return celli;
                 }
 
+                const label startOfTrack(max(0, track_.size()-5));
 
                 label nextCell;
                 if (mesh_.isInternalFace(facei))
@@ -404,21 +461,24 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
                     label own = mesh_.faceOwner()[facei];
                     label nei = mesh_.faceNeighbour()[facei];
                     nextCell = (own == celli ? nei : own);
+
+                    if (track_.found(nextCell, startOfTrack))
+                    {
+                        return celli;
+                    }
                 }
                 else
                 {
                     nextCell = searchProcPatch(facei, p);
 
-                    if (nextCell == nextCellOld)
-                    {
-                        return -1; // point is really out
-                    }
-
                     if (nextCell == -1 || nextCell == celli)
                     {
                         return nextCell;
                     }
-                    nextCellOld = nextCell;
+                    else if (track_.found(nextCell, startOfTrack))
+                    {
+                        return -1;  // point is really out
+                    }
                 }
 
                 celli = nextCell;
@@ -426,6 +486,108 @@ Foam::label Foam::voxelMeshSearch::findCell(const point& p) const
             return -1;
         }
     }
+}
+
+
+Foam::autoPtr<Foam::fvMesh> Foam::voxelMeshSearch::makeMesh
+(
+    const IOobject& io
+) const
+{
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+
+    cellShapeList cellShapes;
+    faceListList boundary;
+    pointField points;
+    {
+        //Info<< "Creating block" << endl;
+
+        block b
+        (
+            cellShape(hex, identity(8), false),
+            localBb_.points(),
+            blockEdgeList(),
+            blockFaceList(),
+            nDivs_,
+            List<gradingDescriptors>(12)
+        );
+
+        List<FixedList<label, 8>> bCells(b.cells());
+        cellShapes.setSize(bCells.size());
+        forAll(cellShapes, celli)
+        {
+            cellShapes[celli] =
+                cellShape(hex, labelList(bCells[celli]), false);
+        }
+
+        //Info<< "Creating boundary faces" << endl;
+
+        boundary.setSize(b.boundaryPatches().size());
+        forAll(boundary, patchi)
+        {
+            faceList faces(b.boundaryPatches()[patchi].size());
+            forAll(faces, facei)
+            {
+                faces[facei] = face(b.boundaryPatches()[patchi][facei]);
+            }
+            boundary[patchi].transfer(faces);
+        }
+
+        points.transfer(const_cast<pointField&>(b.points()));
+    }
+
+    //Info<< "Creating patch dictionaries" << endl;
+    wordList patchNames(boundary.size());
+    forAll(patchNames, patchi)
+    {
+        patchNames[patchi] = "patch" + Foam::name(patchi);
+    }
+
+    PtrList<dictionary> boundaryDicts(boundary.size());
+    forAll(boundaryDicts, patchi)
+    {
+        boundaryDicts.set(patchi, new dictionary());
+        dictionary& patchDict = boundaryDicts[patchi];
+        patchDict.add("type", emptyPolyPatch::typeName);
+    }
+
+    //Info<< "Creating polyMesh" << endl;
+    IOobject polyIO(io);
+    polyIO.readOpt() = IOobject::NO_READ;
+    polyMesh mesh
+    (
+        //IOobject
+        //(
+        //    polyMesh::defaultRegion,
+        //    runTime.constant(),
+        //    runTime,
+        //    IOobject::NO_READ
+        //),
+        polyIO,
+        std::move(points),
+        cellShapes,
+        boundary,
+        patchNames,
+        boundaryDicts,
+        "defaultFaces",
+        emptyPolyPatch::typeName,
+        false
+    );
+
+    //Info<< "Writing polyMesh" << endl;
+    mesh.write();
+
+    //Info<< "Reading fvMesh" << endl;
+
+    fvMeshTools::createDummyFvMeshFiles
+    (
+        io.db(),
+        io.name()
+    );
+    IOobject fvIO(io);
+    fvIO.readOpt() = IOobject::MUST_READ;
+
+    return autoPtr<fvMesh>::New(fvIO);
 }
 
 

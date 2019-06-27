@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +53,12 @@ Description
         // (only used if interpolate=true for the surfaces below)
         interpolationScheme cell;
 
+        // Optional: registry storage
+        store           true
+
         // Output surface format
         surfaceFormat   vtk;
+
         formatOptions
         {
             vtk
@@ -74,6 +80,12 @@ Description
 
                 // Optional: generate values on points instead of faces
                 interpolate true;
+
+                // Optional: alternative output type
+                surfaceFormat   ensight;
+
+                // Optional: registry storage
+                store       true
             }
         );
     }
@@ -81,22 +93,30 @@ Description
 
     Entries:
     \table
-        Property | Description                             | Required | Default
-        type     | surfaces                                | yes      |
-        surfaces | the list of sample surfaces             | recommended |
-        fields   | word/regex list of fields to sampled    | yes      |
-        sampleScheme | scheme to obtain face centre value  | no       | cell
-        interpolationScheme | scheme to obtain node values | yes      |
-        surfaceFormat | output surface format              | yes      |
-        formatOptions | dictionary of format options       | no       |
+        Property | Description                              | Required | Default
+        type     | Type-name: surfaces                      | yes |
+        surfaces | Dictionary or list of sample surfaces    | expected |
+        fields   | word/regex list of fields to sample      | yes |
+        sampleScheme | scheme to obtain face centre value   | no  | cell
+        interpolationScheme | scheme to obtain node values  | no  | cellPoint
+        surfaceFormat | output surface format               | yes |
+        formatOptions | dictionary of format options        | no  |
+        sampleOnExecute | Sample (store) on execution as well | no | false
+        store    | Store surface/fields on registry         | no  | false
+    \endtable
+
+    Additional per-surface entries:
+    \table
+        Property | Description                              | Required | Default
+        store    | Store surface/fields on registry         | no  |
+        surfaceFormat | output surface format               | no  |
+        formatOptions | dictionary of format options        | no  |
+        surfMeshStore | Store surface/fields as surfMesh (transitional) | no  |
     \endtable
 
 Note
     The interpolationScheme is only used if interpolate=true is used by any
     of the surfaces.
-
-See also
-    Foam::surfMeshSamplers
 
 SourceFiles
     sampledSurfaces.C
@@ -106,13 +126,11 @@ SourceFiles
 #ifndef sampledSurfaces_H
 #define sampledSurfaces_H
 
-#include "regionFunctionObject.H"
+#include "fvMeshFunctionObject.H"
 #include "sampledSurface.H"
 #include "surfaceWriter.H"
-#include "mergedSurf.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
-#include "wordRes.H"
 #include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -120,10 +138,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class Time;
-class fvMesh;
-class dictionary;
+// Forward Declarations
+class polySurface;
 
 /*---------------------------------------------------------------------------*\
                        Class sampledSurfaces Declaration
@@ -131,31 +147,41 @@ class dictionary;
 
 class sampledSurfaces
 :
-    public functionObjects::regionFunctionObject,
+    public functionObjects::fvMeshFunctionObject,
     public PtrList<sampledSurface>
 {
-    // Static data members
-
-        //- Output verbosity
-        static bool verbose_;
+    // Static Data Members
 
         //- Tolerance for merging points (fraction of mesh bounding box)
         static scalar mergeTol_;
 
+        //- Local control for sampling actions
+        enum sampleActionType : unsigned
+        {
+            ACTION_NONE  = 0,
+            ACTION_WRITE = 0x1,
+            ACTION_STORE = 0x2,
+            ACTION_SURF_MESH = 0x4,
+            ACTION_ALL = 0xF
+        };
 
-    // Private data
 
-        //- Const reference to fvMesh
-        const fvMesh& mesh_;
+    // Private Data
 
         //- Load fields from files (not from objectRegistry)
         const bool loadFromFiles_;
+
+        //- Output verbosity
+        bool verbose_;
+
+        //- Perform sample/store actions on execute as well
+        bool onExecute_;
 
         //- Output path
         fileName outputPath_;
 
 
-    // Read from dictonary
+    // Read from dictionary
 
         //- Names of fields to sample
         wordRes fieldSelection_;
@@ -167,19 +193,16 @@ class sampledSurfaces
         word sampleNodeScheme_;
 
 
-    // Surfaces
+    // Output control
 
-        //- Merged meshed surfaces (parallel only)
-        List<mergedSurf> mergedList_;
+        //- Surface writers (one per surface)
+        PtrList<surfaceWriter> writers_;
 
-        //- Track which surfaces have changed
-        List<bool> changedGeom_;
+        //- Per-surface selection of store/write actions
+        List<unsigned> actions_;
 
-
-    // Calculated
-
-        //- Surface formatter
-        autoPtr<surfaceWriter> formatter_;
+        //- Cached values of the global number of faces per-surface
+        labelList nFaces_;
 
 
     // Private Member Functions
@@ -196,42 +219,91 @@ class sampledSurfaces
             return *this;
         }
 
-        //- Return number of fields
-        label classifyFields();
+        //- A new surfaceWriter, with per-surface formatOptions
+        static autoPtr<surfaceWriter> newWriter
+        (
+            word writeType,
+            const dictionary& formatOptions,
+            const dictionary& surfDict
+        );
 
-        //- Write geometry only
-        void writeGeometry() const;
 
-        //- Write scalar field with original ids
-        void writeOriginalIds();
+        //- Perform sampling action with store/write
+        bool performAction(unsigned request);
+
+        //- Count selected/sampled fields per surface
+        void countFields();
 
         //- Write sampled fieldName on surface and on outputDir path
         template<class Type>
         void writeSurface
         (
+            surfaceWriter& writer,
             const Field<Type>& values,
-            const label surfi,
+            const word& fieldName
+        );
+
+        //- Sample and store/write a specific volume field
+        template<class Type>
+        void performAction
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& fld,
+            unsigned request
+        );
+
+        //- Sample and store/write a specific surface field
+        template<class Type>
+        void performAction
+        (
+            const GeometricField<Type, fvsPatchField, surfaceMesh>& fld,
+            unsigned request
+        );
+
+        //- Sample and write all applicable sampled fields
+        template<class GeoField>
+        void performAction
+        (
+            const IOobjectList& objects,
+            unsigned request
+        );
+
+
+        //- Get surface from registry if available.
+        //  \return surface or nullptr
+        polySurface* getRegistrySurface(const sampledSurface& s) const;
+
+        //- Put surface onto registry, when enabled.
+        //  \return surface or nullptr it surface should not be stored
+        polySurface* storeRegistrySurface(const sampledSurface& s);
+
+        //- Remove surface from registry.
+        //  \return True if surface existed and was removed
+        bool removeRegistrySurface(const sampledSurface& s);
+
+        //- Store sampled field onto surface registry if it exists
+        template<class Type, class GeoMeshType>
+        bool storeRegistryField
+        (
+            const sampledSurface& s,
             const word& fieldName,
-            const fileName& outputDir
+            const dimensionSet& dims,
+            Field<Type>&& values
         );
 
-        //- Sample and write a particular volume field
-        template<class Type>
-        void sampleAndWrite
-        (
-            const GeometricField<Type, fvPatchField, volMesh>& vField
-        );
+        //- Test surfaces for condition
+        template<class Container, class Predicate>
+        static bool testAny(const Container& items, const Predicate& pred);
 
-        //- Sample and write a particular surface field
-        template<class Type>
-        void sampleAndWrite
-        (
-            const GeometricField<Type, fvsPatchField, surfaceMesh>& sField
-        );
+        //- Do any surfaces need an update?
+        virtual bool needsUpdate() const;
 
-        //- Sample and write all sampled fields
-        template<class Type> void sampleAndWrite(const IOobjectList& objects);
+        //- Mark the surfaces as needing an update.
+        //  Return false if all surfaces were already marked as expired.
+        virtual bool expire();
 
+        //- Update the surfaces as required.
+        //  Return false if no surfaces required an update.
+        virtual bool update();
 
         //- No copy construct
         sampledSurfaces(const sampledSurfaces&) = delete;
@@ -273,35 +345,23 @@ public:
 
     // Member Functions
 
-        //- Does any of the surfaces need an update?
-        virtual bool needsUpdate() const;
-
-        //- Mark the surfaces as needing an update.
-        //  May also free up unneeded data.
-        //  Return false if all surfaces were already marked as expired.
-        virtual bool expire();
-
-        //- Update the surfaces as required and merge surface points (parallel).
-        //  Return false if no surfaces required an update.
-        virtual bool update();
-
         //- Set verbosity level
         void verbose(const bool verbosity = true);
 
         //- Read the sampledSurfaces dictionary
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
-        //- Execute, currently does nothing
+        //- Sample and store if the sampleOnExecute is enabled.
         virtual bool execute();
 
         //- Sample and write
         virtual bool write();
 
         //- Update for changes of mesh - expires the surfaces
-        virtual void updateMesh(const mapPolyMesh&);
+        virtual void updateMesh(const mapPolyMesh& mpm);
 
         //- Update for mesh point-motion - expires the surfaces
-        virtual void movePoints(const polyMesh&);
+        virtual void movePoints(const polyMesh& mesh);
 
         //- Update for changes of mesh due to readUpdate - expires the surfaces
         virtual void readUpdate(const polyMesh::readUpdateState state);
@@ -309,7 +369,7 @@ public:
         //- Get merge tolerance
         static scalar mergeTol();
 
-        //- Set tolerance (and return old tolerance)
+        //- Set merge tolerance and return old value
         static scalar mergeTol(const scalar tol);
 };
 

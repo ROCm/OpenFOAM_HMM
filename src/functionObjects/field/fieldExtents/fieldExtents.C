@@ -60,9 +60,8 @@ void Foam::functionObjects::fieldExtents::writeFileHeader(Ostream& os)
 
     writeCommented(os, "Time");
 
-    forAllConstIters(fieldSet_.selection(), iter)
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
-        const word& fieldName = iter();
         if (internalField_)
         {
             writeTabbed(os, fieldName + "_internal");
@@ -183,7 +182,7 @@ bool Foam::functionObjects::fieldExtents::write()
 
     Log << type() << " " << name() <<  " write:" << nl;
 
-    for (const word& fieldName : fieldSet_.selection())
+    for (const word& fieldName : fieldSet_.selectionNames())
     {
         calcFieldExtents<scalar>(fieldName, true);
         calcFieldExtents<vector>(fieldName);

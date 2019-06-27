@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -184,9 +186,9 @@ void Foam::vtkUnstructuredReader::extractCells
                 lineMap_[lineI] = i;
                 labelList& segment = lines_[lineI++];
                 segment.setSize(nRead);
-                forAll(segment, i)
+                for (label& pointi : segment)
                 {
-                    segment[i] = cellVertData[dataIndex++];
+                    pointi = cellVertData[dataIndex++];
                 }
             }
             break;
@@ -234,9 +236,9 @@ void Foam::vtkUnstructuredReader::extractCells
                 face& f = faces_[facei++];
                 label nRead = cellVertData[dataIndex++];
                 f.setSize(nRead);
-                forAll(f, fp)
+                for (label& pointi : f)
                 {
-                    f[fp] = cellVertData[dataIndex++];
+                    pointi = cellVertData[dataIndex++];
                 }
             }
             break;
@@ -396,9 +398,9 @@ void Foam::vtkUnstructuredReader::readField
                 inFile.getLine(fieldVals()[0]);
 
                 // Read without parsing
-                forAll(fieldVals(), i)
+                for (string& s : fieldVals())
                 {
-                    inFile.getLine(fieldVals()[i]);
+                    inFile.getLine(s);
                 }
                 regIOobject::store(fieldVals);
             }
@@ -625,9 +627,9 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 lineMap_[lineI] = lineI;
                 labelList& f = lines_[lineI];
                 f.setSize(lineVerts[elemI++]);
-                forAll(f, fp)
+                for (label& pointi : f)
                 {
-                    f[fp] = lineVerts[elemI++];
+                    pointi = lineVerts[elemI++];
                 }
                 lineI++;
             }
@@ -654,9 +656,9 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 faceMap_[facei] = facei;
                 face& f = faces_[facei];
                 f.setSize(faceVerts[elemI++]);
-                forAll(f, fp)
+                for (label& pointi : f)
                 {
-                    f[fp] = faceVerts[elemI++];
+                    pointi = faceVerts[elemI++];
                 }
                 facei++;
             }
@@ -767,11 +769,11 @@ void Foam::vtkUnstructuredReader::read(ISstream& inFile)
                 );
 
                 label elemI = 0;
-                forAll(fieldVals(), i)
+                for (vector& val : fieldVals())
                 {
-                    fieldVals()[i].x() = s[elemI++];
-                    fieldVals()[i].y() = s[elemI++];
-                    fieldVals()[i].z() = s[elemI++];
+                    val.x() = s[elemI++];
+                    val.y() = s[elemI++];
+                    val.z() = s[elemI++];
                 }
                 regIOobject::store(fieldVals);
             }

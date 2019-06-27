@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +50,7 @@ namespace Foam
 typedef Vector<float> floatVector;
 
 //- Data associated with floatVector type are contiguous
-#if !defined(WM_SP)
+#if !defined(WM_SP) && !defined(WM_SPDP)
 template<>
 inline bool contiguous<floatVector>() {return true;}
 #endif

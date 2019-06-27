@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +36,18 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::fileName::typeName = "fileName";
-int Foam::fileName::debug(debug::debugSwitch(fileName::typeName, 0));
+
+int Foam::fileName::debug(Foam::debug::debugSwitch(fileName::typeName, 0));
+
+int Foam::fileName::allowSpaceInFileName
+(
+    #ifdef _WIN32
+    Foam::debug::infoSwitch("allowSpaceInFileName", 1)
+    #else
+    Foam::debug::infoSwitch("allowSpaceInFileName", 0)
+    #endif
+);
+
 const Foam::fileName Foam::fileName::null;
 
 
@@ -46,16 +59,42 @@ Foam::fileName Foam::fileName::validate
     const bool doClean
 )
 {
-    fileName out;
-    out.resize(s.size());
+    // The logic is very similar to stripInvalid,
+    // but silently removes bad characters
 
-    char prev = 0;
+    fileName out;
+    out.resize(s.length());
+
     std::string::size_type len = 0;
 
-    // Largely as per stripInvalid
-    for (auto iter = s.cbegin(); iter != s.cend(); ++iter)
+    auto iter = s.cbegin();
+
+    #ifdef _WIN32
+    // Preserve UNC \\server-name\...
+    if (s.length() > 2 && s[0] == '\\' && s[1] == '\\')
     {
-        const char c = *iter;
+        len += 2;
+        ++iter;
+        ++iter;
+    }
+    #endif
+
+    char prev = 0;
+    for (/*nil*/; iter != s.cend(); ++iter)
+    {
+        char c = *iter;
+
+        // Treat raw backslash like a path separator. There is no "normal"
+        // way for these to be there (except for an OS that uses them), but
+        // could also cause issues when writing strings, shell commands etc.
+
+        if (c == '\\')
+        {
+            c = '/';
+        }
+
+        // Could explicitly allow space character or rely on
+        // allowSpaceInFileName via fileName::valid()
 
         if (fileName::valid(c))
         {
@@ -82,6 +121,33 @@ Foam::fileName Foam::fileName::validate
 }
 
 
+Foam::fileName Foam::fileName::concat
+(
+    const std::string& s1,
+    const std::string& s2
+)
+{
+    const auto n1 = s1.length();
+    const auto n2 = s2.length();
+
+    fileName out;
+    out.reserve(n1 + n2 + 1);
+
+    out += s1;
+
+    if (n1 && n2 && s1.back() != '/' && s2.front() != '/')
+    {
+        // Add separator
+        out += '/';
+    }
+
+    out += s2;
+
+    // Could also remove trailing '/', if desired.
+    return out;
+}
+
+
 bool Foam::fileName::equals(const std::string& s1, const std::string& s2)
 {
     // Do not use (s1 == s2) or s1.compare(s2) first since this would
@@ -90,8 +156,8 @@ bool Foam::fileName::equals(const std::string& s1, const std::string& s2)
     std::string::size_type i1 = 0;
     std::string::size_type i2 = 0;
 
-    const auto n1 = s1.size();
-    const auto n2 = s2.size();
+    const auto n1 = s1.length();
+    const auto n2 = s2.length();
 
     //Info<< "compare " << s1 << " == " << s2 << endl;
     while (i1 < n1 && i2 < n2)
@@ -247,7 +313,7 @@ bool Foam::fileName::clean(std::string& str)
     // Number of output characters
     auto nChar = top+1;
 
-    const auto maxLen = str.size();
+    const auto maxLen = str.length();
 
     for (auto src = nChar; src < maxLen; /*nil*/)
     {
@@ -460,7 +526,7 @@ Foam::fileName& Foam::fileName::operator/=(const string& other)
                 s += '/';
             }
 
-            s.append(other);
+            s += other;
         }
     }
     else if (other.size())
@@ -475,31 +541,32 @@ Foam::fileName& Foam::fileName::operator/=(const string& other)
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-Foam::fileName Foam::operator/(const string& a, const string& b)
+Foam::fileName Foam::operator/(const string& s1, const string& s2)
 {
-    if (a.size())
+    if (s1.length())
     {
-        if (b.size())
+        if (s2.length())
         {
             // Two non-empty strings: can concatenate
 
-            if (a.back() == '/' || b.front() == '/')
+            if (s1.back() == '/' || s2.front() == '/')
             {
-                return fileName(a + b);
+                return fileName(s1 + s2);
             }
             else
             {
-                return fileName(a + '/' + b);
+                return fileName(s1 + '/' + s2);
             }
         }
 
-        return a;  // The second string was empty
+        // The second string was empty
+        return s1;
     }
 
-    if (b.size())
+    if (s2.length())
     {
         // The first string is empty
-        return b;
+        return s2;
     }
 
     // Both strings are empty

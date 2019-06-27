@@ -1,6 +1,8 @@
 interfaceProperties.C
 interfaceCompression/interfaceCompression.C
 
+alphaContactAngle/alphaContactAngleTwoPhaseFvPatchScalarField.C
+
 surfaceTensionModels/surfaceTensionModel/surfaceTensionModel.C
 surfaceTensionModels/surfaceTensionModel/surfaceTensionModelNew.C
 surfaceTensionModels/constant/constantSurfaceTension.C

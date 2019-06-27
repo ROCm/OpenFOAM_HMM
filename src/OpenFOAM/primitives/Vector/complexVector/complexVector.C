@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,37 +44,37 @@ const char* const Foam::complexVector::vsType::componentNames[] =
 template<>
 const Foam::complexVector Foam::complexVector::vsType::zero
 (
-    complexVector::uniform(complex(0, 0))
+    complexVector::uniform(pTraits<complex>::zero)
 );
 
 template<>
 const Foam::complexVector Foam::complexVector::vsType::one
 (
-    complexVector::uniform(complex(1, 1))
+    complexVector::uniform(pTraits<complex>::one)
 );
 
 template<>
 const Foam::complexVector Foam::complexVector::vsType::max
 (
-    complexVector::uniform(complex(VGREAT, VGREAT))
+    complexVector::uniform(pTraits<complex>::max)
 );
 
 template<>
 const Foam::complexVector Foam::complexVector::vsType::min
 (
-    complexVector::uniform(complex(-VGREAT, -VGREAT))
+    complexVector::uniform(pTraits<complex>::min)
 );
 
 template<>
 const Foam::complexVector Foam::complexVector::vsType::rootMax
 (
-    complexVector::uniform(complex(ROOTVGREAT, ROOTVGREAT))
+    complexVector::uniform(pTraits<complex>::rootMax)
 );
 
 template<>
 const Foam::complexVector Foam::complexVector::vsType::rootMin
 (
-    complexVector::uniform(complex(-ROOTVGREAT, -ROOTVGREAT))
+    complexVector::uniform(pTraits<complex>::rootMin)
 );
 
 

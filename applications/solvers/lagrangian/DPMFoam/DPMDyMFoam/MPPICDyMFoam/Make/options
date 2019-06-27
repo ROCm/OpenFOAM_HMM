@@ -36,7 +36,7 @@ EXE_LIBS = \
     -lDPMTurbulenceModels \
     -lregionModels \
     -lsurfaceFilmModels \
-    -lsampling \
+    -ldynamicMesh \
     -ldynamicFvMesh \
     -ltopoChangerFvMesh \
-    -ldynamicMesh
+    -lsampling

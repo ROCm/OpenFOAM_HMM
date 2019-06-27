@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +55,7 @@ class projectFace
 :
     public blockFace
 {
-    // Private data
+    // Private Data
 
         //- The surface onto which the points are projected
         const searchableSurface& surface_;
@@ -68,11 +70,7 @@ class projectFace
         ) const;
 
         //- Convert i,j to single index
-        label index
-        (
-            const labelPair& n,
-            const labelPair& coord
-        ) const;
+        static label index(const labelPair& n, const labelPair& coord);
 
         //- Calulate lambdas (but unnormalised)
         void calcLambdas
@@ -104,13 +102,12 @@ public:
             const dictionary& dict,
             const label index,
             const searchableSurfaces& geometry,
-            Istream&
+            Istream& is
         );
 
 
     //- Destructor
-    virtual ~projectFace()
-    {}
+    virtual ~projectFace() = default;
 
 
     // Member Functions

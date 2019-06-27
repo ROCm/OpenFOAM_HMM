@@ -1,0 +1,86 @@
+solid C
+facet normal 0.0 1.0 0.0
+   outer loop
+      vertex 4.065 0.5475 0.25
+      vertex 5.7 0.5475 0.0
+      vertex 4.065 0.5475 0.0
+   endloop
+endfacet
+facet normal 0.0 1.0 0.0
+   outer loop
+      vertex 5.7 0.5475 0.0
+      vertex 4.065 0.5475 0.25
+      vertex 5.7 0.5475 0.25
+   endloop
+endfacet
+facet normal 1.0 0.0 0.0
+   outer loop
+      vertex 5.7 0.5475 0.0
+      vertex 5.7 0.0025 0.25
+      vertex 5.7 0.0025 0.0
+   endloop
+endfacet
+facet normal 1.0 0.0 0.0
+   outer loop
+      vertex 5.7 0.0025 0.25
+      vertex 5.7 0.5475 0.0
+      vertex 5.7 0.5475 0.25
+   endloop
+endfacet
+facet normal 1.63851263511957e-017 -1.0 0.0
+   outer loop
+      vertex 5.7 0.0025 0.25
+      vertex 4.065 0.00249999999999997 0.0
+      vertex 5.7 0.0025 0.0
+   endloop
+endfacet
+facet normal 1.63851263511957e-017 -1.0 0.0
+   outer loop
+      vertex 4.065 0.00249999999999997 0.0
+      vertex 5.7 0.0025 0.25
+      vertex 4.065 0.00249999999999997 0.25
+   endloop
+endfacet
+facet normal 0.0 0.0 -1.0
+   outer loop
+      vertex 5.7 0.5475 0.0
+      vertex 4.065 0.00249999999999997 0.0
+      vertex 4.065 0.5475 0.0
+   endloop
+endfacet
+facet normal 0.0 0.0 -1.0
+   outer loop
+      vertex 4.065 0.00249999999999997 0.0
+      vertex 5.7 0.5475 0.0
+      vertex 5.7 0.0025 0.0
+   endloop
+endfacet
+facet normal 0.0 0.0 1.0
+   outer loop
+      vertex 5.7 0.0025 0.25
+      vertex 4.065 0.5475 0.25
+      vertex 4.065 0.00249999999999997 0.25
+   endloop
+endfacet
+facet normal 0.0 0.0 1.0
+   outer loop
+      vertex 4.065 0.5475 0.25
+      vertex 5.7 0.0025 0.25
+      vertex 5.7 0.5475 0.25
+   endloop
+endfacet
+facet normal -1.0 0.0 0.0
+   outer loop
+      vertex 4.065 0.5475 0.25
+      vertex 4.065 0.00249999999999997 0.0
+      vertex 4.065 0.00249999999999997 0.25
+   endloop
+endfacet
+facet normal -1.0 0.0 0.0
+   outer loop
+      vertex 4.065 0.00249999999999997 0.0
+      vertex 4.065 0.5475 0.25
+      vertex 4.065 0.5475 0.0
+   endloop
+endfacet
+endsolid C

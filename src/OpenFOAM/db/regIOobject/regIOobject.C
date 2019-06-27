@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -154,19 +156,36 @@ Foam::regIOobject::~regIOobject()
 {
     if (objectRegistry::debug)
     {
-        Pout<< "Destroying regIOobject called " << name()
-            << " of type " << type()
-            << " registered " << registered_
-            << " owned " << ownedByRegistry_
-            << " in directory " << path()
+        Pout<< "Destroy regIOobject: " << name()
+            << " type=" << type()
+            << " registered=" << registered_
+            << " owned=" << ownedByRegistry_
+            << " directory=" << path()
             << endl;
     }
 
-    // Check out of objectRegistry if not owned by the registry
-    if (!ownedByRegistry_)
-    {
-        checkOut();
-    }
+    // Deletion of a regIOobject should remove itself from its registry
+    // (ie, checkOut), but there are different paths for destruction to occur.
+    // The complications are only when the object is ownedByRegistry.
+    //
+    // 1. The objectRegistry clear()/erase() is called (and object is
+    //    'ownedByRegistry').
+    //
+    //  - Mark as unowned/unregistered prior to deletion.
+    //    This ensures that this checkOut() only clears file watches and
+    //    does nothing else.
+    //
+    // 2. The regIOobject is deleted directly (and also 'ownedByRegistry').
+    //
+    //  - Mark as unowned (but keep as registered) prior to triggering
+    //    checkOut(). By being 'unowned', the registry will not attempt a
+    //    second deletion when the object name is removed from the registry.
+
+    // Revoke any registry ownership: we are already deleting
+    ownedByRegistry_ = false;
+
+    // Remove registered object from objectRegistry
+    checkOut();
 }
 
 
@@ -210,15 +229,16 @@ bool Foam::regIOobject::checkIn()
 
 bool Foam::regIOobject::checkOut()
 {
+    forAllReverse(watchIndices_, i)
+    {
+        fileHandler().removeWatch(watchIndices_[i]);
+    }
+    watchIndices_.clear();
+
     if (registered_)
     {
         registered_ = false;
 
-        forAllReverse(watchIndices_, i)
-        {
-            fileHandler().removeWatch(watchIndices_[i]);
-        }
-        watchIndices_.clear();
         return db().checkOut(*this);
     }
 
@@ -245,6 +265,7 @@ Foam::label Foam::regIOobject::addWatch(const fileName& f)
             watchIndices_.append(fileHandler().addWatch(f));
         }
     }
+
     return index;
 }
 
@@ -353,10 +374,8 @@ bool Foam::regIOobject::upToDate(const regIOobject& a) const
         // My event number higher than a
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

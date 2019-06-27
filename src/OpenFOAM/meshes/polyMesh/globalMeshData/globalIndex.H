@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +44,8 @@ SourceFiles
 #define globalIndex_H
 
 #include "Pstream.H"
+#include "CompactListList.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,6 +67,19 @@ Ostream& operator<<(Ostream& os, const globalIndex& gi);
 
 class globalIndex
 {
+    // Private Member Functions
+
+        //- Sort and bin. validBins contains bins with non-zero size.
+        static void bin
+        (
+            const labelUList& offsets,
+            const labelUList& globalIds,
+            labelList& order,
+            CompactListList<label>& sortedElems,
+            DynamicList<label>& validBins
+        );
+
+
     // Private data
 
         //- Start of proci. Size is nProcs()+1. (so like CompactListList)
@@ -108,6 +125,12 @@ public:
         //- Const-access to the offsets
         inline const labelList& offsets() const;
 
+        //- Global sum of localSizes
+        inline label size() const;
+
+        //- The local sizes
+        labelList sizes() const;
+
 
     // Edit
 
@@ -116,7 +139,7 @@ public:
 
         //- Reset from local size.
         //  Does communication with default communicator and message tag.
-        void reset(const label localSize);
+        inline void reset(const label localSize);
 
         //- Reset from local size.
         //  Does communication with given communicator and message tag
@@ -158,9 +181,6 @@ public:
 
 
         // Global queries
-
-            //- Global sum of localSizes
-            inline label size() const;
 
             //- Start of proci data
             inline label offset(const label proci) const;
@@ -206,12 +226,12 @@ public:
 
             //- Collect data in processor order on master (== procIDs[0]).
             //  Needs offsets only on master.
-            template<class Type>
+            template<class Container, class Type>
             static void gather
             (
                 const labelUList& offsets,
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
@@ -221,11 +241,11 @@ public:
 
             //- Collect data in processor order on master (== procIDs[0]).
             //  Needs offsets only on master.
-            template<class Type>
+            template<class Container, class Type>
             void gather
             (
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 const UList<Type>& fld,
                 List<Type>& allFld,
                 const int tag = UPstream::msgType(),
@@ -236,27 +256,52 @@ public:
                 gather(offsets_, comm, procIDs, fld, allFld, tag, commsType);
             }
 
-            //- Inplace collect data in processor order on master
-            //  (== procIDs[0]). Needs offsets only on master.
+            //- Collect data in processor order on master.
+            //  Does communication with default communicator and message tag.
             template<class Type>
+            void gather
+            (
+                const UList<Type>& fld,
+                List<Type>& allFld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType =
+                    Pstream::commsTypes::nonBlocking
+            ) const;
+
+            //- Collect data in processor order on master.
+            //  Does communication with default communicator and message tag.
+            template<class Type>
+            static void gatherOp
+            (
+                const UList<Type>& fld,
+                List<Type>& allFld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType =
+                    Pstream::commsTypes::nonBlocking
+            );
+
+
+            //- Inplace collect in processor order on master (== procIDs[0]).
+            //- Needs offsets only on master.
+            template<class Container, class Type>
             static void gather
             (
                 const labelUList& offsets,
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes commsType =
                     Pstream::commsTypes::nonBlocking
             );
 
-            //- Inplace collect data in processor order on master
-            //  (== procIDs[0]). Needs offsets only on master.
-            template<class Type>
+            //- Inplace collect in processor order on master (== procIDs[0]).
+            //- Needs offsets only on master.
+            template<class Container, class Type>
             void gather
             (
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 List<Type>& fld,
                 const int tag = UPstream::msgType(),
                 const Pstream::commsTypes commsType =
@@ -266,13 +311,38 @@ public:
                 gather(offsets_, comm, procIDs, fld, tag, commsType);
             }
 
-            //- Distribute data in processor order. Requires fld to be sized!
+            //- Inplace collect data in processor order on master
+            //  Does communication with default communicator and message tag.
+            //  After the gather, the field is zero-sized on the slaves.
             template<class Type>
+            void gather
+            (
+                List<Type>& fld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType =
+                    Pstream::commsTypes::nonBlocking
+            ) const;
+
+            //- Inplace collect data in processor order on master
+            //  Does communication with default communicator and message tag.
+            //  After the gather, the field is zero-sized on the slaves.
+            template<class Type>
+            static void gatherOp
+            (
+                List<Type>& fld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType =
+                    Pstream::commsTypes::nonBlocking
+            );
+
+
+            //- Distribute data in processor order. Requires fld to be sized!
+            template<class Container, class Type>
             static void scatter
             (
                 const labelUList& offsets,
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
@@ -281,11 +351,11 @@ public:
             );
 
             //- Distribute data in processor order. Requires fld to be sized!
-            template<class Type>
+            template<class Container, class Type>
             void scatter
             (
                 const label comm,
-                const labelList& procIDs,
+                const Container& procIDs,
                 const UList<Type>& allFld,
                 UList<Type>& fld,
                 const int tag = UPstream::msgType(),
@@ -295,6 +365,30 @@ public:
             {
                 scatter(offsets_, comm, procIDs, allFld, fld, tag, commsType);
             }
+
+            //- Distribute data in processor order. Requires fld to be sized!
+            //  Does communication with default communicator and message tag.
+            template<class Type>
+            void scatter
+            (
+                const UList<Type>& allFld,
+                UList<Type>& fld,
+                const int tag = UPstream::msgType(),
+                const Pstream::commsTypes commsType =
+                    Pstream::commsTypes::nonBlocking
+            ) const;
+
+            //- Get (potentially remote) data. Elements required given as
+            //  global indices
+            template<class Type, class CombineOp>
+            void get
+            (
+                List<Type>& allFld,
+                const labelUList& globalIds,
+                const CombineOp& cop,
+                const label comm = Pstream::worldComm,
+                const int tag = UPstream::msgType()
+            ) const;
 
 
     // IOstream Operators
@@ -310,13 +404,13 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-    #include "globalIndexTemplates.C"
-#endif
+#include "globalIndexI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "globalIndexI.H"
+#ifdef NoRepository
+    #include "globalIndexTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

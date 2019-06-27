@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2012 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,8 +88,17 @@ public:
         //- Smooth the solution for a given number of sweeps
         void smooth
         (
-            scalarField& psi,
+            solveScalarField& psi,
             const scalarField& source,
+            const direction cmpt,
+            const label nSweeps
+        ) const;
+
+        //- Smooth the solution for a given number of sweeps
+        virtual void scalarSmooth
+        (
+            solveScalarField& psi,
+            const solveScalarField& source,
             const direction cmpt,
             const label nSweeps
         ) const;

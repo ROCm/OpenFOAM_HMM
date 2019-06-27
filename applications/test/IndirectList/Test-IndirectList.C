@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +27,21 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "IndirectList.H"
-#include "IOstreams.H"
+#include "argList.H"
 #include "Fstream.H"
 #include "ListOps.H"
+#include "IndirectList.H"
 #include "labelIndList.H"
-#include "argList.H"
+#include "SortList.H"
+#include "Random.H"
+#include <functional>
 
 using namespace Foam;
 
 template<class ListType>
 void printInfo(const ListType& lst)
 {
-    Info<< "full: " << flatOutput(lst.completeList()) << nl
+    Info<< "full: " << flatOutput(lst.values()) << nl
         << "addr: " << flatOutput(lst.addressing()) << nl
         << "list: " << flatOutput(lst) << nl
         << endl;
@@ -60,8 +64,7 @@ void testFind(const T& val, const ListType& lst)
         <<" find() = " << lst.find(val)
         <<" rfind() = " << lst.rfind(val)
         <<" find(2) = " << lst.find(val, 2)
-        <<" rfind(2) = " << lst.rfind(val, 2)
-        <<" findIndex = " << findIndex(lst, val) << nl
+        <<" rfind(2) = " << lst.rfind(val, 2) << nl
         << nl;
 }
 
@@ -102,7 +105,7 @@ int main(int argc, char *argv[])
 
     inplaceReverseList(addresses);
 
-    idl1.resetAddressing(std::move(addresses));
+    idl1.addressing() = std::move(addresses);
 
     printInfo(idl1);
 
@@ -113,10 +116,10 @@ int main(int argc, char *argv[])
 
     printInfo(uidl1);
 
-    idl1.resetAddressing(List<label>());
-//    idl2.resetAddressing(List<label>());
+    idl1.addressing().clear();
+    // idl2.addressing().clear();
 
-    Info<<"after resetAddressing:" << nl << endl;
+    Info<<"after reset addressing:" << nl << endl;
 
     printInfo(uidl1);
     printInfo(idl1);
@@ -139,7 +142,7 @@ int main(int argc, char *argv[])
     {
         if (Pstream::master())
         {
-            Pout<< "full: " << flatOutput(idl3.completeList()) << nl
+            Pout<< "full: " << flatOutput(idl3.values()) << nl
                 << "send: " << flatOutput(idl3) << endl;
 
             for
@@ -170,6 +173,61 @@ int main(int argc, char *argv[])
         // MPI barrier
         bool barrier = true;
         Pstream::scatter(barrier);
+    }
+
+    // SortList
+    {
+        List<scalar> list1(20);
+
+        Random rnd(1234);
+
+        for (scalar& val : list1)
+        {
+            val = 100 * rnd.sample01<scalar>();
+        }
+
+        // Pick out 1/2 the values and make the negative
+        for (label i=0; i < list1.size()/2; ++i)
+        {
+            label pos = rnd.position(0, list1.size()-1);
+            list1[pos] = -list1[pos];
+        }
+
+        Info<< nl << "Random list: " << flatOutput(list1) << nl;
+
+        SortList<scalar> sorter1(list1);
+
+        Info<< nl << "Sort indices: " << flatOutput(sorter1.indices()) << nl;
+
+        Info<< nl << "Reverse indices: " << flatOutput(sorter1.indices()) << nl;
+
+        sorter1.reverse();
+
+        Info<< nl << "Again indices: " << flatOutput(sorter1.indices()) << nl;
+
+        sorter1.reverseSort();
+
+        Info<< nl << "Reverse indices: " << flatOutput(sorter1.indices()) << nl;
+
+        Info<< nl << "Sorted  : " << flatOutput(sorter1) << nl;
+
+        sorter1.sort(std::greater<scalar>());
+
+        SortList<scalar> sorter2(list1, std::greater<scalar>());
+
+        sorter2.reverse();
+
+        Info<< "sorted: ";
+        for (const auto& val : sorter2)
+        {
+            Info<< ' ' << val;
+        }
+        Info<< nl;
+
+
+        sorter2.sort([](scalar a, scalar b) { return mag(a) < mag(b); });
+
+        Info<< nl << "Mag sorted: " << flatOutput(sorter2) << nl;
     }
 
     Info<< "End\n" << endl;

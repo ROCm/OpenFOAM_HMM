@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class T, int SizeMin> class PtrDynList;
 
@@ -62,10 +62,17 @@ class PtrDynList
 {
     static_assert(SizeMin > 0, "Invalid min size parameter");
 
-    // Private data
+    // Private Data
 
         //- The capacity (allocated size) of the list.
         label capacity_;
+
+
+    // Private Member Functions
+
+        //- Adjust addressable size
+        void setAddressableSize(const label len);
+
 
 public:
 
@@ -82,6 +89,9 @@ public:
 
         //- Move construct
         inline PtrDynList(PtrDynList<T, SizeMin>&& list);
+
+        //- Take ownerskip of pointers in the list, set old pointers to null.
+        inline explicit PtrDynList(UList<T*>& list);
 
 
     //- Destructor
@@ -106,7 +116,7 @@ public:
         //- Alter the addressed list size.
         inline void resize(const label newLen);
 
-        //- Alter the addressed list size.
+        //- Same as resize()
         inline void setSize(const label newLen);
 
         //- Reserve allocation space for at least this size.
@@ -127,20 +137,33 @@ public:
         //- Shrink the allocated space to the number of elements used.
         inline void shrink();
 
+        //- Squeeze out intermediate nullptr entries in the list of pointers
+        //- and adjust the addressable size accordingly.
+        //  \return the number of non-null entries
+        inline label squeezeNull();
+
         //- Append an element to the end of the list
         inline void append(T* ptr);
 
-        //- Append an element to the end of the list
+        //- Move append an element to the end of the list
         inline void append(const autoPtr<T>& aptr);
 
-        //- Append an element to the end of the list
+        //- Move or clone append a tmp to the end of the list
         inline void append(const tmp<T>& tptr);
+
+        //- Move append another list to the end of this list.
+        inline void append(PtrList<T>&& other);
+
+        //- Move append another list to the end of this list.
+        template<int AnySizeMin>
+        inline void append(PtrDynList<T, AnySizeMin>&& other);
 
         //- Remove and return the top element
         inline autoPtr<T> remove();
 
-        //- Return true if element is set (ie, not a nullptr)
-        inline bool set(const label i) const;
+        //- Return const pointer to element (if set) or nullptr.
+        //  The return value can be tested as a bool.
+        inline const T* set(const label i) const;
 
         //- Set element to given pointer and return old element (can be null)
         inline autoPtr<T> set(const label i, T* ptr);

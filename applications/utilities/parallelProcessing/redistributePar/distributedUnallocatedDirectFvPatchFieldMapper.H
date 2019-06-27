@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,22 +68,12 @@ public:
         :
             directAddressing_(directAddressing),
             distMap_(distMap),
-            hasUnmapped_(false)
-        {
-            if
-            (
-                notNull(directAddressing_)
-             && directAddressing_.size()
-             && min(directAddressing_) < 0
-            )
-            {
-                hasUnmapped_ = true;
-            }
-        }
+            hasUnmapped_(directAddressing_.size() && min(directAddressing_) < 0)
+        {}
+
 
     //- Destructor
-    virtual ~distributedUnallocatedDirectFvPatchFieldMapper()
-    {}
+    virtual ~distributedUnallocatedDirectFvPatchFieldMapper() = default;
 
 
     // Member Functions

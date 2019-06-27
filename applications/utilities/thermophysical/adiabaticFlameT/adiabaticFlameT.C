@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -214,7 +216,7 @@ int main(int argc, char *argv[])
         Info<< "Tad = " << Tad << nl << endl;
     }
 
-    Info<< nl << "end" << endl;
+    Info<< nl << "End" << endl;
 
     return 0;
 }

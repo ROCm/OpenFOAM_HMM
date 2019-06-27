@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +27,7 @@ License
 
 #include "pressure.H"
 #include "volFields.H"
+#include "basicThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -38,6 +41,18 @@ namespace functionObjects
 }
 }
 
+const Foam::Enum
+<
+    Foam::functionObjects::pressure::mode
+>
+Foam::functionObjects::pressure::modeNames
+({
+    { STATIC, "static" },
+    { TOTAL, "total" },
+    { ISENTROPIC, "isentropic" },
+    { STATIC_COEFF, "staticCoeff" },
+    { TOTAL_COEFF, "totalCoeff" },
+});
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -45,16 +60,26 @@ Foam::word Foam::functionObjects::pressure::resultName() const
 {
     word rName;
 
-    if (calcTotal_)
-    {
-        rName = "total(" + fieldName_ + ")";
-    }
-    else
+    if (mode_ & STATIC)
     {
         rName = "static(" + fieldName_ + ")";
     }
+    else if (mode_ & TOTAL)
+    {
+        rName = "total(" + fieldName_ + ")";
+    }
+    else if (mode_ & ISENTROPIC)
+    {
+        rName = "isentropic(" + fieldName_ + ")";
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Unhandled calculation mode " << modeNames[mode_]
+            << abort(FatalError);
+    }
 
-    if (calcCoeff_)
+    if (mode_ & COEFF)
     {
         rName += "_coeff";
     }
@@ -85,20 +110,18 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
             fvPatchField<scalar>::calculatedType()
         );
     }
-    else
-    {
-        if (!rhoInfInitialised_)
-        {
-            FatalErrorInFunction
-                << type() << " " << name() << ": "
-                << "pressure identified as incompressible, but reference "
-                << "density is not set.  Please set 'rho' to 'rhoInf', and "
-                << "set an appropriate value for 'rhoInf'"
-                << exit(FatalError);
-        }
 
-        return dimensionedScalar("rhoInf", dimDensity, rhoInf_)*p;
+    if (!rhoInfInitialised_)
+    {
+        FatalErrorInFunction
+            << type() << " " << name() << ": "
+            << "pressure identified as incompressible, but reference "
+            << "density is not set.  Please set 'rho' to 'rhoInf', and "
+            << "set an appropriate value for 'rhoInf'"
+            << exit(FatalError);
     }
+
+    return dimensionedScalar("rhoInf", dimDensity, rhoInf_)*p;
 }
 
 
@@ -117,37 +140,49 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
 }
 
 
-Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::pRef
-(
-    const tmp<volScalarField>& tp
-) const
-{
-    if (calcTotal_)
-    {
-        return tp + dimensionedScalar("pRef", dimPressure, pRef_);
-    }
-    else
-    {
-        return std::move(tp);
-    }
-}
-
-
-Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::pDyn
+Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::calcPressure
 (
     const volScalarField& p,
     const tmp<volScalarField>& tp
 ) const
 {
-    if (calcTotal_)
+    switch (mode_)
     {
-        return
-            tp
-          + rhoScale(p, 0.5*magSqr(lookupObject<volVectorField>(UName_)));
-    }
-    else
-    {
-        return std::move(tp);
+        case TOTAL:
+        {
+            return
+                tp
+              + dimensionedScalar("pRef", dimPressure, pRef_)
+              + rhoScale(p, 0.5*magSqr(lookupObject<volVectorField>(UName_)));
+        }
+        case ISENTROPIC:
+        {
+            const basicThermo* thermoPtr =
+                p.mesh().lookupObjectPtr<basicThermo>(basicThermo::dictName);
+
+            if (!thermoPtr)
+            {
+                FatalErrorInFunction
+                    << "Isentropic pressure calculation requires a "
+                    << "thermodynamics package"
+                    << exit(FatalError);
+            }
+
+            const volScalarField gamma(thermoPtr->gamma());
+            const volScalarField Mb
+            (
+                mag(lookupObject<volVectorField>(UName_))
+               /sqrt(gamma*tp.ref()/thermoPtr->rho())
+            );
+
+            return tp()*(pow(1 + (gamma - 1)/2*sqr(Mb), gamma/(gamma - 1)));
+        }
+        default:
+        {
+            return
+                tp
+              + dimensionedScalar("pRef", dimPressure, pRef_);
+        }
     }
 }
 
@@ -157,7 +192,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::coeff
     const tmp<volScalarField>& tp
 ) const
 {
-    if (calcCoeff_)
+    if (mode_ & COEFF)
     {
         tmp<volScalarField> tpCoeff(tp.ptr());
         volScalarField& pCoeff = tpCoeff.ref();
@@ -197,7 +232,7 @@ bool Foam::functionObjects::pressure::calc()
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            coeff(pRef(pDyn(p, rhoScale(p))))
+            coeff(calcPressure(p, rhoScale(p)))
         );
 
         return store(resultName_, tp);
@@ -217,11 +252,10 @@ Foam::functionObjects::pressure::pressure
 )
 :
     fieldExpression(name, runTime, dict, "p"),
+    mode_(STATIC),
     UName_("U"),
     rhoName_("rho"),
-    calcTotal_(false),
     pRef_(0),
-    calcCoeff_(false),
     pInf_(0),
     UInf_(Zero),
     rhoInf_(1),
@@ -231,16 +265,12 @@ Foam::functionObjects::pressure::pressure
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::pressure::~pressure()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::pressure::read(const dictionary& dict)
 {
+    Info<< type() << " " << name() << ":" << nl;
+
     fieldExpression::read(dict);
 
     UName_   = dict.lookupOrDefault<word>("U", "U");
@@ -252,14 +282,36 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
         rhoInfInitialised_ = true;
     }
 
-    dict.readEntry("calcTotal", calcTotal_);
-    if (calcTotal_)
+    if (!modeNames.readIfPresent("mode", dict, mode_))
     {
-        pRef_ = dict.lookupOrDefault<scalar>("pRef", 0.0);
+        // Backwards compatibility
+        // - check for the presence of 'calcTotal' and 'calcCoeff'
+
+        bool calcTotal =
+            dict.getOrDefaultCompat<bool>("mode", {{"calcTotal", 1812}}, false);
+        bool calcCoeff =
+            dict.getOrDefaultCompat<bool>("mode", {{"calcCoeff", 1812}}, false);
+
+        if (calcTotal)
+        {
+            mode_ = TOTAL;
+        }
+        else
+        {
+            mode_ = STATIC;
+        }
+
+        if (calcCoeff)
+        {
+            mode_ = static_cast<mode>(COEFF | mode_);
+        }
     }
 
-    dict.readEntry("calcCoeff", calcCoeff_);
-    if (calcCoeff_)
+    Info<< "    operating mode: " << modeNames[mode_] << nl;
+
+    pRef_ = dict.lookupOrDefault<scalar>("pRef", 0);
+
+    if (mode_ & COEFF)
     {
         dict.readEntry("pInf", pInf_);
         dict.readEntry("UInf", UInf_);
@@ -280,6 +332,8 @@ bool Foam::functionObjects::pressure::read(const dictionary& dict)
     }
 
     resultName_ = dict.lookupOrDefault<word>("result", resultName());
+
+    Info<< endl;
 
     return true;
 }

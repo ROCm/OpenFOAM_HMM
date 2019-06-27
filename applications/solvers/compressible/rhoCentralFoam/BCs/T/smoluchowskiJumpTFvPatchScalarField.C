@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +46,7 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
     psiName_("thermo:psi"),
     muName_("thermo:mu"),
     accommodationCoeff_(1.0),
-    Twall_(p.size(), 0.0),
+    Twall_(p.size(), Zero),
     gamma_(1.4)
 {
     refValue() = 0.0;
@@ -180,7 +182,6 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
         "Pr",
         dimless,
         thermophysicalProperties.subDict("mixture").subDict("transport")
-        .lookup("Pr")
     );
 
     Field<scalar> C2

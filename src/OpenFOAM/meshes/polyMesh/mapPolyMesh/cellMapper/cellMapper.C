@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -262,8 +264,8 @@ void Foam::cellMapper::calcAddressing() const
             if (addr[celli].empty())
             {
                 // Mapped from a dummy cell
-                addr[celli] = labelList(1, label(0));
-                w[celli] = scalarList(1, 1.0);
+                addr[celli] = labelList(1, Zero);
+                w[celli] = scalarList(1, scalar(1));
 
                 insertedCells[nInsertedCells] = celli;
                 nInsertedCells++;

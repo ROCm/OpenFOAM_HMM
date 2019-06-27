@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,11 +57,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class error;
-Ostream& operator<<(Ostream& os, const error& err);
-
-
 /*---------------------------------------------------------------------------*\
                             Class error Declaration
 \*---------------------------------------------------------------------------*/
@@ -110,9 +107,12 @@ public:
         static void warnAboutAge(const char* what, const int version);
 
 
-    // Member functions
+    // Member Functions
 
         string message() const;
+
+        //- Clear any messages
+        void clear() const;
 
         inline const string& functionName() const
         {
@@ -207,17 +207,7 @@ public:
 
         //- Print error message
         void write(Ostream& os, const bool includeTitle = true) const;
-
-
-    // Ostream operator
-
-        friend Ostream& operator<<(Ostream& os, const error& err);
 };
-
-
-// Forward declarations
-class IOerror;
-Ostream& operator<<(Ostream& os, const IOerror& err);
 
 
 /*---------------------------------------------------------------------------*\
@@ -323,12 +313,16 @@ public:
 
         //- Print error message
         void write(Ostream& os, const bool includeTitle = true) const;
-
-
-    // Ostream operator
-
-        friend Ostream& operator<<(Ostream& os, const IOerror& err);
 };
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+//- Ostream operator
+Ostream& operator<<(Ostream& os, const error& err);
+
+//- Ostream operator
+Ostream& operator<<(Ostream& os, const IOerror& err);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

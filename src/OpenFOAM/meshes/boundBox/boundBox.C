@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,7 +148,7 @@ Foam::tmp<Foam::pointField> Foam::boundBox::faceCentres() const
 
 Foam::point Foam::boundBox::faceCentre(const direction facei) const
 {
-    point pt = boundBox::midpoint();
+    point pt = boundBox::centre();
 
     if (facei > 5)
     {
@@ -190,7 +192,7 @@ bool Foam::boundBox::intersect(const boundBox& bb)
     min_ = ::Foam::max(min_, bb.min_);
     max_ = ::Foam::min(max_, bb.max_);
 
-    return !empty();
+    return valid();
 }
 
 

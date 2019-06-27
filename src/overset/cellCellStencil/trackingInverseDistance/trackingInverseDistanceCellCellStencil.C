@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ License
 #include "syncTools.H"
 #include "treeBoundBoxList.H"
 #include "voxelMeshSearch.H"
+#include "dynamicOversetFvMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -48,13 +49,13 @@ namespace cellCellStencils
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
+bool Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 (
     const fvMesh& mesh,
     const vector& smallVec,
 
     const boundBox& bb,
-    const labelVector& nDivs,
+    labelVector& nDivs,
     PackedList<2>& patchTypes,
 
     const labelList& cellMap,
@@ -62,6 +63,8 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 )
 {
     // Mark all voxels that overlap the bounding box of any patch
+
+    static bool hasWarned = false;
 
     const fvBoundaryMesh& pbm = mesh.boundary();
 
@@ -113,6 +116,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
         {
             //Info<< "Marking cells on overset patch " << fvp.name() << endl;
             const polyPatch& pp = fvp.patch();
+            const vectorField::subField faceCentres(pp.faceCentres());
             forAll(pp, i)
             {
                 // Mark in overall patch types
@@ -122,8 +126,54 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
                 boundBox faceBb(pp.points(), pp[i], false);
                 faceBb.min() -= smallVec;
                 faceBb.max() += smallVec;
-                if (bb.overlaps(faceBb))
+                if (!bb.contains(faceCentres[i]))
                 {
+                    if (!hasWarned)
+                    {
+                        hasWarned = true;
+                        WarningInFunction << "Patch " << pp.name()
+                            << " : face at " << faceCentres[i]
+                            << " is not inside search bounding box of"
+                            << " voxel mesh " << bb << endl
+                            << "    Is your 'searchBox' specification correct?"
+                            << endl;
+                    }
+                }
+                else
+                {
+                    // Test for having voxels already marked as patch
+                    // -> voxel mesh is too coarse
+                    if
+                    (
+                        voxelMeshSearch::overlaps
+                        (
+                            bb,
+                            nDivs,
+                            faceBb,
+                            patchTypes,
+                            static_cast<unsigned int>(patchCellType::PATCH)
+                        )
+                    )
+                    {
+                        // Determine number of voxels from number of cells
+                        // in mesh
+                        const labelVector& dim = mesh.geometricD();
+                        forAll(dim, i)
+                        {
+                            if (dim[i] != -1)
+                            {
+                                nDivs[i] *= 2;
+                            }
+                        }
+
+                        Pout<< "Voxel mesh too coarse. Bounding box "
+                            << faceBb
+                            << " contains both non-overset and overset patches"
+                            << ". Refining voxel mesh to " << nDivs << endl;
+
+                        return false;
+                    }
+
                     voxelMeshSearch::fill
                     (
                         patchTypes,
@@ -136,6 +186,8 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
             }
         }
     }
+
+    return true;
 }
 
 
@@ -441,55 +493,55 @@ Foam::cellCellStencils::trackingInverseDistance::trackingInverseDistance
     inverseDistance(mesh, dict, false),
     globalCells_(mesh_.nCells())
 {
+    // Initialise donor cell
+    globalDonor_.setSize(mesh_.nCells());
+    globalDonor_ = -1;
+
+    // Initialise mesh partitions
+    const labelIOList& zoneID = this->zoneID();
+    label nZones = gMax(zoneID)+1;
+
+    labelList nCellsPerZone(nZones, Zero);
+    forAll(zoneID, celli)
+    {
+        nCellsPerZone[zoneID[celli]]++;
+    }
+    Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
+    Pstream::listCombineScatter(nCellsPerZone);
+
+    meshParts_.setSize(nZones);
+    forAll(meshParts_, zonei)
+    {
+        meshParts_.set
+        (
+            zonei,
+            new fvMeshSubset(mesh_, zonei, zoneID)
+        );
+
+        // Trigger early evaluation of mesh dimension
+        // (in case there are locally zero cells in mesh)
+        (void)meshParts_[zonei].subMesh().nGeometricD();
+    }
+
+
+    // Print a bit
+    {
+        Info<< typeName << " : detected " << nZones
+            << " mesh regions" << endl;
+        Info<< incrIndent;
+        forAll(nCellsPerZone, zonei)
+        {
+            Info<< indent<< "zone:" << zonei
+                << " nCells:" << nCellsPerZone[zonei]
+                << endl;
+        }
+        Info<< decrIndent;
+    }
+
+
+    // Do geometry update
     if (doUpdate)
     {
-        // Initialise donor cell
-        globalDonor_.setSize(mesh_.nCells());
-        globalDonor_ = -1;
-
-        // Initialise mesh partitions
-        const labelIOList& zoneID = this->zoneID();
-        label nZones = gMax(zoneID)+1;
-
-        labelList nCellsPerZone(nZones, 0);
-        forAll(zoneID, celli)
-        {
-            nCellsPerZone[zoneID[celli]]++;
-        }
-        Pstream::listCombineGather(nCellsPerZone, plusEqOp<label>());
-        Pstream::listCombineScatter(nCellsPerZone);
-
-        meshParts_.setSize(nZones);
-        forAll(meshParts_, zonei)
-        {
-            meshParts_.set
-            (
-                zonei,
-                new fvMeshSubset(mesh_, zonei, zoneID)
-            );
-
-            // Trigger early evaluation of mesh dimension
-            // (in case there are locally zero cells in mesh)
-            (void)meshParts_[zonei].subMesh().nGeometricD();
-        }
-
-
-        // Print a bit
-        {
-            Info<< typeName << " : detected " << nZones
-                << " mesh regions" << endl;
-            Info<< incrIndent;
-            forAll(nCellsPerZone, zonei)
-            {
-                Info<< indent<< "zone:" << zonei
-                    << " nCells:" << nCellsPerZone[zonei]
-                    << endl;
-            }
-            Info<< decrIndent;
-        }
-
-
-        // Do geometry update
         update();
     }
 }
@@ -522,40 +574,15 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
 
     DebugInfo<< FUNCTION_NAME << " : Moved zone sub-meshes" << endl;
 
-
     // Calculate fast search structure for each zone
-    PtrList<voxelMeshSearch> meshSearches(nZones);
-
-    List<labelVector> searchBoxDivisions;
-    if (dict_.readIfPresent("searchBoxDivisions", searchBoxDivisions))
+    List<labelVector> searchBoxDivisions(dict_.lookup("searchBoxDivisions"));
+    if (searchBoxDivisions.size() != nZones)
     {
-        forAll(meshParts_, zonei)
-        {
-            meshSearches.set
-            (
-                zonei,
-                new voxelMeshSearch
-                (
-                    meshParts_[zonei].subMesh(),
-                    searchBoxDivisions[zonei],
-                    true
-                )
-            );
-        }
+        FatalIOErrorInFunction(dict_) << "Number of searchBoxDivisions "
+            << searchBoxDivisions.size()
+            << " should  equal the number of zones " << nZones
+            << exit(FatalIOError);
     }
-    else
-    {
-        forAll(meshParts_, zonei)
-        {
-            meshSearches.set
-            (
-                zonei,
-                new voxelMeshSearch(meshParts_[zonei].subMesh(), true)
-            );
-        }
-    }
-    DebugInfo<< FUNCTION_NAME << " : Constructed cell voxel meshes" << endl;
-
 
     const boundBox& allBb(mesh_.bounds());
 
@@ -628,35 +655,96 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
             patchBb = meshBb;
         }
     }
-    if (patchDivisions.empty())
-    {
-        patchDivisions.setSize(nZones);
-        forAll(patchDivisions, zonei)
-        {
-            patchDivisions[zonei] = meshSearches[zonei].nDivs();
-        }
-    }
 
     forAll(patchParts, zonei)
     {
-        const labelVector& g = patchDivisions[zonei];
-        patchParts.set(zonei, new PackedList<2>(cmptProduct(g)));
+        while (true)
+        {
+            patchParts.set
+            (
+                zonei,
+                new PackedList<2>(cmptProduct(patchDivisions[zonei]))
+            );
 
-        markBoundaries
-        (
-            meshParts_[zonei].subMesh(),
-            smallVec_,
+            bool ok = markBoundaries
+            (
+                meshParts_[zonei].subMesh(),
+                smallVec_,
 
-            patchBb[zonei][Pstream::myProcNo()],
-            patchDivisions[zonei],
-            patchParts[zonei],
+                patchBb[zonei][Pstream::myProcNo()],
+                patchDivisions[zonei],
+                patchParts[zonei],
 
-            meshParts_[zonei].cellMap(),
-            allPatchTypes
-        );
+                meshParts_[zonei].cellMap(),
+                allPatchTypes
+            );
+
+            //if (returnReduce(ok, andOp<bool>()))
+            if (ok)
+            {
+                break;
+            }
+        }
     }
     DebugInfo<< FUNCTION_NAME << " : Calculated boundary voxel meshes" << endl;
 
+
+    PtrList<voxelMeshSearch> meshSearches(meshParts_.size());
+    forAll(meshParts_, zonei)
+    {
+        meshSearches.set
+        (
+            zonei,
+            new voxelMeshSearch
+            (
+                meshParts_[zonei].subMesh(),
+                patchBb[zonei][Pstream::myProcNo()],
+                patchDivisions[zonei],
+                true
+            )
+        );
+    }
+
+    DebugInfo<< FUNCTION_NAME << " : Constructed cell voxel meshes" << endl;
+
+    PtrList<fvMesh> voxelMeshes;
+    if (debug)
+    {
+        voxelMeshes.setSize(meshSearches.size());
+        forAll(meshSearches, zonei)
+        {
+            IOobject meshIO
+            (
+                word("voxelMesh" + Foam::name(zonei)),
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ
+            );
+
+            Pout<< "Constructing voxel mesh " << meshIO.objectPath() << endl;
+            voxelMeshes.set(zonei, meshSearches[zonei].makeMesh(meshIO));
+        }
+    }
+
+
+    if (debug)
+    {
+        forAll(patchParts, zonei)
+        {
+            const labelList voxelTypes(patchParts[zonei].values());
+            const fvMesh& vm = voxelMeshes[zonei];
+            tmp<volScalarField> tfld
+            (
+                createField<label>
+                (
+                    vm,
+                    "patchTypes",
+                    voxelTypes
+                )
+            );
+            tfld().write();
+        }
+    }
 
     // Current best guess for cells
     labelList allCellTypes(mesh_.nCells(), CALCULATED);
@@ -698,7 +786,13 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
                 srci,
                 allCellTypes
             );
+        }
+    }
 
+    for (label srci = 0; srci < meshParts_.size()-1; srci++)
+    {
+        for (label tgti = srci+1; tgti < meshParts_.size(); tgti++)
+        {
             markDonors
             (
                 pBufs,
@@ -727,6 +821,15 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     DebugInfo<< FUNCTION_NAME << " : Determined holes and donor-acceptors"
         << endl;
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes", allCellTypes)
+        );
+        tfld().write();
+    }
+
 
     // Use the patch types and weights to decide what to do
     forAll(allPatchTypes, celli)
@@ -753,14 +856,76 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
     }
     DebugInfo<< FUNCTION_NAME << " : Removed bad donors" << endl;
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_patch", allCellTypes)
+        );
+        tfld().write();
+    }
+
+
+    // Check previous iteration cellTypes_ for any hole->calculated changes
+    // If so set the cell either to interpolated (if there are donors) or
+    // holes (if there are no donors). Note that any interpolated cell might
+    // still be overwritten by the flood filling
+    {
+        label nCalculated = 0;
+
+        forAll(cellTypes_, celli)
+        {
+            if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+            {
+                if (allStencil[celli].size() == 0)
+                {
+                    // Reset to hole
+                    allCellTypes[celli] = HOLE;
+                    allStencil[celli].clear();
+                }
+                else
+                {
+                    allCellTypes[celli] = INTERPOLATED;
+                    nCalculated++;
+                }
+            }
+        }
+
+        if (debug)
+        {
+            Pout<< "Detected " << nCalculated << " cells changing from hole"
+                << " to calculated. Changed to interpolated"
+                << endl;
+        }
+    }
+
+
     // Mark unreachable bits
     findHoles(globalCells_, mesh_, zoneID, allStencil, allCellTypes);
     DebugInfo<< FUNCTION_NAME << " : Flood-filled holes" << endl;
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_hole", allCellTypes)
+        );
+        tfld().write();
+    }
+
     // Add buffer interpolation layer(s) around holes
-    scalarField allWeight(mesh_.nCells(), 0.0);
+    scalarField allWeight(mesh_.nCells(), Zero);
     walkFront(layerRelax, allStencil, allCellTypes, allWeight);
     DebugInfo<< FUNCTION_NAME << " : Implemented layer relaxation" << endl;
+
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_front", allCellTypes)
+        );
+        tfld().write();
+    }
 
 
     // Convert cell-cell addressing to stencil in compact notation
@@ -797,7 +962,12 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
         )
     );
     cellInterpolationWeight_.transfer(allWeight);
-    cellInterpolationWeight_.correctBoundaryConditions();
+    //cellInterpolationWeight_.correctBoundaryConditions();
+    dynamicOversetFvMesh::correctBoundaryConditions
+    <
+        volScalarField,
+        oversetFvPatchField<scalar>
+    >(cellInterpolationWeight_.boundaryFieldRef(), false);
 
 
     if (debug & 2)
@@ -860,7 +1030,12 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
         {
             volTypes[celli] = cellTypes_[celli];
         }
-        volTypes.correctBoundaryConditions();
+        //volTypes.correctBoundaryConditions();
+        dynamicOversetFvMesh::correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >(volTypes.boundaryFieldRef(), false);
         volTypes.write();
 
         // Dump stencil

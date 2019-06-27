@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -801,11 +803,11 @@ Foam::surfaceFeatures::surfaceFeatures
 
     forAll(allEdgeStat, eI)
     {
-        EdgeMap<label>::const_iterator iter = dynFeatEdges.find(surfEdges[eI]);
+        const auto iter = dynFeatEdges.cfind(surfEdges[eI]);
 
-        if (iter != dynFeatEdges.end())
+        if (iter.found())
         {
-            allEdgeStat[eI] = edgeStat[iter()];
+            allEdgeStat[eI] = edgeStat[iter.val()];
         }
     }
 
@@ -1213,10 +1215,8 @@ void Foam::surfaceFeatures::writeObj(const fileName& prefix) const
     OFstream pointStr(prefix + "_points.obj");
     Pout<< "Writing feature points to " << pointStr.name() << endl;
 
-    forAll(featurePoints_, i)
+    for (const label pointi : featurePoints_)
     {
-        label pointi = featurePoints_[i];
-
         meshTools::writeOBJ(pointStr, surf_.localPoints()[pointi]);
     }
 }
@@ -1263,7 +1263,7 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
 
     forAll(pointLabels, i)
     {
-        label surfPointi = pointLabels[i];
+        const label surfPointi = pointLabels[i];
 
         const point& surfPt = surfPoints[surfPointi];
 
@@ -1302,10 +1302,10 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         OFstream objStream("nearestSamples.obj");
 
         label vertI = 0;
-        forAllConstIter(Map<label>, nearest, iter)
+        forAllConstIters(nearest, iter)
         {
             meshTools::writeOBJ(objStream, samples[iter.key()]); vertI++;
-            meshTools::writeOBJ(objStream, surfPoints[iter()]); vertI++;
+            meshTools::writeOBJ(objStream, surfPoints[iter.val()]); vertI++;
             objStream<< "l " << vertI-1 << ' ' << vertI << endl;
         }
     }
@@ -1426,13 +1426,13 @@ Foam::Map<Foam::label> Foam::surfaceFeatures::nearestSamples
         OFstream objStream("nearestEdges.obj");
 
         label vertI = 0;
-        forAllConstIter(Map<label>, nearest, iter)
+        forAllConstIters(nearest, iter)
         {
             const label sampleI = iter.key();
 
-            meshTools::writeOBJ(objStream, samples[sampleI]); vertI++;
+            const edge& e = surfEdges[iter.val()];
 
-            const edge& e = surfEdges[iter()];
+            meshTools::writeOBJ(objStream, samples[sampleI]); vertI++;
 
             point nearPt =
                 e.line(surfPoints).nearestDist(samples[sampleI]).rawPoint();
@@ -1580,7 +1580,7 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
         OFstream objStream("nearestEdges.obj");
 
         label vertI = 0;
-        forAllConstIter(Map<pointIndexHit>, nearest, iter)
+        forAllConstIters(nearest, iter)
         {
             const label sampleEdgeI = iter.key();
 
@@ -1590,7 +1590,7 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
             meshTools::writeOBJ(objStream, sampleEdge.centre(samplePoints));
             vertI++;
 
-            meshTools::writeOBJ(objStream, iter().rawPoint());
+            meshTools::writeOBJ(objStream, iter.val().rawPoint());
             vertI++;
 
             objStream<< "l " << vertI-1 << ' ' << vertI << endl;

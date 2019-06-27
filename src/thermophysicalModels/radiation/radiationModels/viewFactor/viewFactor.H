@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,12 +74,23 @@ class viewFactor
 :
     public radiationModel
 {
+private:
+
+    // Private Member Functions
+
+        //- No copy construct
+        viewFactor(const viewFactor&) = delete;
+
+        //- No copy assignment
+        void operator=(const viewFactor&) = delete;
+
+
 protected:
 
-// Static data
+    // Static data
 
-    //- Static name for view factor walls
-    static const word viewFactorWalls;
+        //- Static name for view factor walls
+        static const word viewFactorWalls;
 
 
     // Private data
@@ -124,6 +137,9 @@ protected:
         //- Solar load radiation model
         autoPtr<solarLoad> solarLoad_;
 
+        //-Number of bands
+        label nBands_;
+
 
     // Private Member Functions
 
@@ -139,12 +155,6 @@ protected:
             const scalarListList& viewFactors,
             scalarSquareMatrix& matrix
         );
-
-        //- No copy construct
-        viewFactor(const viewFactor&) = delete;
-
-        //- No copy assignment
-        void operator=(const viewFactor&) = delete;
 
 
 public:
@@ -163,7 +173,7 @@ public:
 
 
     //- Destructor
-    virtual ~viewFactor();
+    virtual ~viewFactor() = default;
 
 
     // Member functions
@@ -187,6 +197,12 @@ public:
 
         //- Const access to total radiative heat flux field
         inline const volScalarField& qr() const;
+
+        //- Use useSolarLoad
+        inline bool useSolarLoad() const;
+
+        //- Number of bands
+        virtual label nBands() const;
 };
 
 

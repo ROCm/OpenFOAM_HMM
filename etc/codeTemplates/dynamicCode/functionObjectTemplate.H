@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) YEAR AUTHOR,AFFILIATION
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) YEAR AUTHOR,AFFILIATION
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,8 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Template for use with dynamic code generation of a
-    OutputFilter functionObject.
+    Template for use with dynamic code generation of a functionObject.
 
 SourceFiles
     functionObjectTemplate.C
@@ -55,7 +56,7 @@ class ${typeName}FunctionObject
 :
     public functionObjects::regionFunctionObject
 {
-    // Private data
+    // Private Data
 
 //{{{ begin codeData
         ${codeData}
@@ -64,6 +65,13 @@ class ${typeName}FunctionObject
 
     // Private Member Functions
 
+        //- Report a message with the SHA1sum
+        inline static void printMessage(const char* message)
+        {
+            Info<< message << " sha1: " << SHA1sum << '\n';
+        }
+
+        //- Cast reference of objectRegistry to fvMesh
         const fvMesh& mesh() const;
 
         //- No copy construct
@@ -72,8 +80,10 @@ class ${typeName}FunctionObject
         //- No copy assignment
         void operator=(const ${typeName}FunctionObject&) = delete;
 
-
 public:
+
+    //- SHA1 representation of the code content
+    static constexpr const char* const SHA1sum = "${SHA1sum}";
 
     //- Runtime type information
     TypeName("${typeName}");
@@ -96,17 +106,17 @@ public:
 
     // Member Functions
 
-        //- Read the system calls
+        //- Read the dictionary
         virtual bool read(const dictionary& dict);
 
-        //- Execute the "executeCalls" at each time-step
+        //- Execute (at time-step)
         virtual bool execute();
 
-        //- Execute the "endCalls" at the final time-loop
-        virtual bool end();
-
-        //- Write, execute the "writeCalls"
+        //- Write (at write interval)
         virtual bool write();
+
+        //- Executed at the final time-loop
+        virtual bool end();
 };
 
 

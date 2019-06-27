@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,19 +99,15 @@ const
     {
         return Pstream::master(comm_);
     }
+    else if (ioRanks_.size())
+    {
+        // Found myself in IO rank
+        return ioRanks_.found(proci);
+    }
     else
     {
-        // Use any IO ranks
-        if (ioRanks_.size())
-        {
-            // Find myself in IO rank
-            return findIndex(ioRanks_, proci) != -1;
-        }
-        else
-        {
-            // Assume all in single communicator
-            return proci == 0;
-        }
+        // Assume all in single communicator
+        return proci == 0;
     }
 }
 

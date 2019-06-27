@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,6 +68,9 @@ class snappySnapDriver
 
         //- From global surface region to slave side patch
         const labelList globalToSlavePatch_;
+
+        //- Are we operating in test mode?
+        const bool dryRun_;
 
 
     // Private Member Functions
@@ -670,7 +675,8 @@ public:
         (
             meshRefinement& meshRefiner,
             const labelList& globalToMasterPatch,
-            const labelList& globalToSlavePatch
+            const labelList& globalToSlavePatch,
+            const bool dryRun = false
         );
 
 
@@ -775,12 +781,11 @@ public:
             (
                 const dictionary& snapDict,
                 const dictionary& motionDict,
-                const bool mergePatchFaces,
+                const meshRefinement::FaceMergeType mergeType,
                 const scalar featureCos,
                 const scalar planarAngle,
                 const snapParameters& snapParams
             );
-
 };
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +28,12 @@ License
 // * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * //
 
 inline Foam::forceSuSp::forceSuSp()
+{}
+
+
+inline Foam::forceSuSp::forceSuSp(const zero)
+:
+    Tuple2<vector, scalar>(vector::zero, 0.0)
 {}
 
 

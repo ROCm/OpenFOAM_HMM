@@ -94,7 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~twoPhaseMixtureEThermo();
+    virtual ~twoPhaseMixtureEThermo() = default;
 
 
     // Member Functions
@@ -162,14 +162,14 @@ public:
         //- i.e. rho != f(p)
         bool incompressible() const
         {
-            return (true);
+            return true;
         }
 
         //- Return true if the equation of state is isochoric
         //- i.e. rho = const
         bool isochoric() const
         {
-            return (false);
+            return false;
         }
 
         //- Return rho of the mixture
@@ -245,6 +245,12 @@ public:
         (
             const label patchi
         ) const;
+
+        //- Thermal diffusivity for energy of mixture [kg/m/s]
+        virtual tmp<volScalarField> alphahe() const;
+
+        //- Thermal diffusivity for energy of mixture for patch [kg/m/s]
+        virtual tmp<scalarField> alphahe(const label patchi) const;
 
         //- Effective thermal diffusivity for temperature
         //- of mixture [J/m/s/K]

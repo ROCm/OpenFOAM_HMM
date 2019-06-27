@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -174,13 +176,13 @@ public:
         }
 
         //- Return const reference to boundBox
-        const boundBox& bounds() const
+        virtual const boundBox& bounds() const
         {
             return bounds_;
         }
 
         //- Return non-const access to the boundBox to allow it to be set.
-        boundBox& bounds()
+        virtual boundBox& bounds()
         {
             return bounds_;
         }
@@ -191,6 +193,10 @@ public:
         //- Whether supports volume type (below).
         //  This is false for the base class.
         virtual bool hasVolumeType() const;
+
+        //- If surface supports volume queries, what is type of points outside
+        //  bounds
+        virtual volumeType outsideVolumeType() const = 0;
 
         //- Range of local indices that can be returned
         virtual label size() const = 0;

@@ -31,6 +31,7 @@ template<class Type>
 Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
 (
     const word& patchFieldType,
+    const word& actualPatchType,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
 )
@@ -52,14 +53,44 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
 
     auto patchTypeCstrIter = patchConstructorTablePtr_->cfind(p.type());
 
-    if (patchTypeCstrIter.found())
+    if
+    (
+        actualPatchType == word::null
+     || actualPatchType != p.type()
+    )
     {
-        return patchTypeCstrIter()(p, iF);
+        if (patchTypeCstrIter.found())
+        {
+            return patchTypeCstrIter()(p, iF);
+        }
+        else
+        {
+            return cstrIter()(p, iF);
+        }
     }
     else
     {
-        return cstrIter()(p, iF);
+        tmp<faPatchField<Type>> tfap = cstrIter()(p, iF);
+
+        // Check if constraint type override and store patchType if so
+        if (patchTypeCstrIter.found())
+        {
+            tfap.ref().patchType() = actualPatchType;
+        }
+        return tfap;
     }
+}
+
+
+template<class Type>
+Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
+(
+    const word& patchFieldType,
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF
+)
+{
+    return New(patchFieldType, word::null, p, iF);
 }
 
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,20 +17,40 @@ FoamFile
 
 ".*"
 {
-    mode            lookup;
-    emissivity      1.0;
-    absorptivity    0.0;
-    transmissivity  1.0;
+    type        transparent;
+
+    wallAbsorptionEmissionModel
+    {
+        type            multiBandAbsorption;
+        emissivity      (1 1);
+        absorptivity    (0 0);
+    }
 }
 
 air_to_solid
 {
-    mode            solidRadiation;
+    type        opaqueReflective;
+
+    // Fraction of the reflected is diffussive
+    fd          0.0; // 0: all specular 1: all diffusive
+
+    wallAbsorptionEmissionModel
+    {
+        type            multiBandAbsorption;
+        absorptivity    (0.1 0.1);
+        emissivity      (0.1 0.1);
+    };
 }
 
 air_to_floor
 {
-    mode            solidRadiation;
+    type       opaqueDiffusive;
+    wallAbsorptionEmissionModel
+    {
+        type            multiBandAbsorption;
+        absorptivity    (0.3 0.7);
+        emissivity      (0.3 0.7);
+    };
 }
 
 // ************************************************************************* //

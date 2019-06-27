@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,7 @@ namespace
         ReIterator& reIter
     )
     {
-        while (wcIter.found())
+        while (wcIter.good())
         {
             if
             (
@@ -130,7 +130,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchDotScoped
     // a.b.c.d it would try
     // a.b, a.b.c, a.b.c.d
 
-    if (!finder.found())
+    if (!finder.good())
     {
         while (!finder.isDict())
         {
@@ -225,7 +225,7 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchSlashScoped
 
             auto finder = dictPtr->csearch(key, matchOpt);
 
-            if (finder.found())
+            if (finder.good())
             {
                 if (remaining)
                 {
@@ -269,16 +269,16 @@ Foam::dictionary::const_searcher Foam::dictionary::csearch
 
     auto iter = hashedEntries_.cfind(keyword);
 
-    if (iter.found())
+    if (iter.good())
     {
-        finder.set(iter.object());
+        finder.set(iter.val());
         return finder;
     }
 
     if ((matchOpt & keyType::REGEX) && patterns_.size())
     {
-        pattern_const_iterator wcLink = patterns_.begin();
-        regexp_const_iterator  reLink = regexps_.begin();
+        auto wcLink = patterns_.cbegin();
+        auto reLink = regexps_.cbegin();
 
         // Find in patterns using regular expressions only
         if (findInPatterns(true, keyword, wcLink, reLink))
@@ -425,9 +425,9 @@ const Foam::dictionary* Foam::dictionary::cfindScopedDict
 
             auto iter = dictPtr->hashedEntries_.cfind(cmpt);
 
-            if (iter.found())
+            if (iter.good())
             {
-                const entry *eptr = iter.object();
+                const entry *eptr = iter.val();
 
                 if (eptr->isDict())
                 {
@@ -532,9 +532,9 @@ Foam::dictionary* Foam::dictionary::makeScopedDict(const fileName& dictPath)
 
             auto iter = dictPtr->hashedEntries_.find(cmptName);
 
-            if (iter.found())
+            if (iter.good())
             {
-                entry *eptr = iter.object();
+                entry *eptr = iter.val();
 
                 if (eptr->isDict())
                 {
@@ -581,11 +581,11 @@ bool Foam::dictionary::remove(const word& keyword)
 {
     auto iter = hashedEntries_.find(keyword);
 
-    if (iter.found())
+    if (iter.good())
     {
         // Delete from patterns
-        pattern_iterator wcLink = patterns_.begin();
-        regexp_iterator  reLink = regexps_.begin();
+        auto wcLink = patterns_.begin();
+        auto reLink = regexps_.begin();
 
         // Find in pattern using exact match only
         if (findInPatterns(false, keyword, wcLink, reLink))
@@ -621,7 +621,7 @@ bool Foam::dictionary::changeKeyword
     // Check that oldKeyword exists and can be changed
     auto iter = hashedEntries_.find(oldKeyword);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         return false;
     }
@@ -638,15 +638,15 @@ bool Foam::dictionary::changeKeyword
     auto iter2 = hashedEntries_.find(newKeyword);
 
     // newKeyword already exists
-    if (iter2.found())
+    if (iter2.good())
     {
         if (overwrite)
         {
             if (iter2()->keyword().isPattern())
             {
                 // Delete from patterns
-                pattern_iterator wcLink = patterns_.begin();
-                regexp_iterator  reLink = regexps_.begin();
+                auto wcLink = patterns_.begin();
+                auto reLink = regexps_.begin();
 
                 // Find in patterns using exact match only
                 if (findInPatterns(false, iter2()->keyword(), wcLink, reLink))

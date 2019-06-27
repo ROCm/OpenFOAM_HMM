@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,12 +49,11 @@ Foam::labelList Foam::snappySnapDriver::getFacePoints
         {
             label meshPointi = f[fp];
 
-            Map<label>::const_iterator iter =
-                pp.meshPointMap().find(meshPointi);
+            const auto iter = pp.meshPointMap().cfind(meshPointi);
 
-            if (iter != pp.meshPointMap().end())
+            if (iter.found())
             {
-                label pointi = iter();
+                const label pointi = iter.val();
                 pointOnZone[pointi] = true;
             }
         }

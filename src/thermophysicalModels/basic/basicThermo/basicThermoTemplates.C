@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +34,7 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 (
     const dictionary& thermoTypeDict,
     Table* tablePtr,
-    const int nCmpt,
-    const char* cmptNames[],
+    std::initializer_list<const char*> cmptNames,
     const word& thermoTypeName
 )
 {
@@ -62,15 +63,19 @@ typename Table::iterator Foam::basicThermo::lookupThermo
             validThermoTypeNames.size() + 1
         );
 
+        const int nCmpt = cmptNames.size();
         validThermoTypeNameCmpts[0].setSize(nCmpt);
-        forAll(validThermoTypeNameCmpts[0], j)
+
+        label j = 0;
+        for (const char* cmptName : cmptNames)
         {
-            validThermoTypeNameCmpts[0][j] = cmptNames[j];
+            validThermoTypeNameCmpts[0][j] = cmptName;
+            ++j;
         }
 
         // Split the thermo package names into their constituent parts
         // Removing incompatible entries from the list
-        label j = 0;
+        j = 0;
         forAll(validThermoTypeNames, i)
         {
             wordList names
@@ -111,8 +116,7 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 
         if (thermoTypeDict.found("properties"))
         {
-            const int nCmpt = 4;
-            const char* cmptNames[nCmpt] =
+            std::initializer_list<const char*> cmptNames
             {
                 "type",
                 "mixture",
@@ -133,15 +137,13 @@ typename Table::iterator Foam::basicThermo::lookupThermo
             (
                 thermoTypeDict,
                 tablePtr,
-                nCmpt,
                 cmptNames,
                 thermoTypeName
             );
         }
         else
         {
-            const int nCmpt = 7;
-            const char* cmptNames[nCmpt] =
+            std::initializer_list<const char*> cmptNames
             {
                 "type",
                 "mixture",
@@ -168,7 +170,6 @@ typename Table::iterator Foam::basicThermo::lookupThermo
             (
                 thermoTypeDict,
                 tablePtr,
-                nCmpt,
                 cmptNames,
                 thermoTypeName
             );
@@ -268,7 +269,7 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
         )
     );
 
-    typename Thermo::fvMeshDictPhaseConstructorTable::iterator cstrIter =
+    auto cstrIter =
         lookupThermo<Thermo, typename Thermo::fvMeshDictPhaseConstructorTable>
         (
             thermoDict,

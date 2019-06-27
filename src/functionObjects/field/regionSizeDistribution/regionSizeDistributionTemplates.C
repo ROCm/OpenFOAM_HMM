@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,18 +43,10 @@ Foam::Map<Type> Foam::functionObjects::regionSizeDistribution::regionSum
 
     forAll(fld, celli)
     {
-        label regioni = regions[celli];
-
-        typename Map<Type>::iterator fnd = regionToSum.find(regioni);
-        if (fnd == regionToSum.end())
-        {
-            regionToSum.insert(regioni, fld[celli]);
-        }
-        else
-        {
-            fnd() += fld[celli];
-        }
+        const label regioni = regions[celli];
+        regionToSum(regioni, Type(Zero)) += fld[celli];
     }
+
     Pstream::mapCombineGather(regionToSum, plusEqOp<Type>());
     Pstream::mapCombineScatter(regionToSum);
 

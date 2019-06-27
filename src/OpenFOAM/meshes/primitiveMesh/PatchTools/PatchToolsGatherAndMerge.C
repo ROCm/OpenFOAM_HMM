@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,25 +51,11 @@ void Foam::PatchTools::gatherAndMerge
     // Collect points from all processors
     labelList pointSizes;
     {
-        List<Field<PointType>> gatheredPoints(Pstream::nProcs());
-        gatheredPoints[Pstream::myProcNo()] = p.points();
+        const globalIndex gi(p.points().size());
 
-        Pstream::gatherList(gatheredPoints);
+        gi.gather(p.points(), mergedPoints);
 
-        if (Pstream::master())
-        {
-            pointSizes = ListListOps::subSizes
-            (
-                gatheredPoints,
-                accessOp<Field<PointType>>()
-            );
-
-            mergedPoints = ListListOps::combine<Field<PointType>>
-            (
-                gatheredPoints,
-                accessOp<Field<PointType>>()
-            );
-        }
+        pointSizes = gi.sizes();
     }
 
     // Collect faces from all processors and renumber using sizes of

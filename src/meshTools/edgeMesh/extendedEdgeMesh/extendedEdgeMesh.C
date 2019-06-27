@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -188,10 +190,8 @@ Foam::extendedEdgeMesh::classifyFeaturePoint
     {
         return CONCAVE;
     }
-    else
-    {
-        return MIXED;
-    }
+
+    return MIXED;
 }
 
 
@@ -1864,7 +1864,7 @@ bool Foam::extendedEdgeMesh::mergePointsAndSort
     }
 
     // Re-classify merged points
-    labelList nPoints(nNewPoints, 0);
+    labelList nPoints(nNewPoints, Zero);
     forAll(oldToMerged, oldPointI)
     {
         nPoints[oldToMerged[oldPointI]]++;
@@ -2133,11 +2133,9 @@ Foam::extendedEdgeMesh::classifyEdge
     {
         return MULTIPLE;
     }
-    else
-    {
-        // There is a problem - the edge has no normals
-        return NONE;
-    }
+
+    // There is a problem - the edge has no normals
+    return NONE;
 }
 
 

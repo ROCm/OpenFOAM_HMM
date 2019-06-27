@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,10 +263,10 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         }
 
         // 2. Does sparseData contain more?
-        forAllConstIter(Map<point>, sparseData, iter)
+        forAllConstIters(sparseData, iter)
         {
-            const point& sparsePt = iter();
-            label meshPointi = iter.key();
+            const label meshPointi = iter.key();
+            const point& sparsePt = iter.val();
             const point& fullPt = fullData[meshPointi];
 
             if (fullPt != sparsePt)
@@ -350,9 +352,9 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
         {
             const edge& e = mesh.edges()[meshEdgeI];
 
-            EdgeMap<point>::const_iterator iter = sparseData.find(e);
+            const auto iter = sparseData.cfind(e);
 
-            if (iter != sparseData.end())
+            if (iter.found())
             {
                 const point& sparsePt = iter();
                 const point& fullPt = fullData[meshEdgeI];
@@ -404,7 +406,7 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
     // Test masterPoints
 
     {
-        labelList nMasters(mesh.nPoints(), 0);
+        labelList nMasters(mesh.nPoints(), Zero);
 
         bitSet isMasterPoint(syncTools::getMasterPoints(mesh));
 
@@ -480,7 +482,7 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
     // Test masterEdges
 
     {
-        labelList nMasters(edges.size(), 0);
+        labelList nMasters(edges.size(), Zero);
 
         bitSet isMasterEdge(syncTools::getMasterEdges(mesh));
 
@@ -549,7 +551,7 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
     // Test masterFaces
 
     {
-        labelList nMasters(mesh.nFaces(), 0);
+        labelList nMasters(mesh.nFaces(), Zero);
 
         bitSet isMasterFace(syncTools::getMasterFaces(mesh));
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -134,14 +134,6 @@ castellatedMeshControls
         {
             level (1 1);
             faceType baffle;
-        }
-        cooling
-        {
-            level (1 1);
-            patchInfo
-            {
-                type patch;
-            }
         }
         inlet
         {

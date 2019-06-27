@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,8 +62,8 @@ Note
         key2        $..key1; // use key1 value from parent
         subdict2
         {
-            key2        val2;
-            key3        $...key1; // use key1 value from grandparent
+            key2    val2;
+            key3    $...key1; // use key1 value from grandparent
         }
     }
 
@@ -98,14 +100,14 @@ SeeAlso
 // Some common data types
 #include "label.H"
 #include "scalar.H"
+#include "regExpFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
-class regExp;
+// Forward Declarations
 class dictionary;
 class SHA1Digest;
 
@@ -193,6 +195,12 @@ public:
 
 
             //- True if entry was found
+            inline bool good() const
+            {
+                return eptr_;
+            }
+
+            //- True if entry was found
             inline bool found() const
             {
                 return eptr_;
@@ -274,11 +282,12 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Report optional keywords and values if not present in dictionary
+        //  For value greater than 1: fatal.
         //  Set/unset via an InfoSwitch
-        static bool writeOptionalEntries;
+        static int writeOptionalEntries;
 
         //- The dictionary name
         fileName name_;
@@ -300,12 +309,6 @@ private:
 
         //- The storage container
         typedef IDLList<entry> parent_type;
-
-        typedef DLList<entry*>::iterator pattern_iterator;
-        typedef DLList<entry*>::const_iterator pattern_const_iterator;
-
-        typedef DLList<autoPtr<regExp>>::iterator regexp_iterator;
-        typedef DLList<autoPtr<regExp>>::const_iterator regexp_const_iterator;
 
 
     // Private Member Functions
@@ -355,6 +358,10 @@ private:
             const word& keyword,
             enum keyType::option matchOpt
         ) const;
+
+
+        //- Emit IOError about bad input for the entry
+        void raiseBadInput(const word& keyword) const;
 
 
 public:
@@ -530,7 +537,6 @@ public:
             enum keyType::option matchOpt = keyType::REGEX
         );
 
-        //- Search for an entry (const access) with the given keyword.
         //- Find and return a sub-dictionary pointer if present
         //  (and a sub-dictionary) otherwise return nullptr.
         //
@@ -541,6 +547,7 @@ public:
             enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
+        //- Search for an entry (const access) with the given keyword.
         //
         //  \param matchOpt the default search is non-recursive with patterns
         //
@@ -549,6 +556,16 @@ public:
         (
             const word& keyword,
             enum keyType::option matchOpt
+        ) const;
+
+        //- Find and return an entry data stream.
+        //- FatalIOError if not found, or if the number of tokens is incorrect.
+        //
+        //  \param matchOpt the default search is non-recursive with patterns
+        ITstream& lookup
+        (
+            const word& keyword,
+            enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
         //- Find and return a T.
@@ -562,22 +579,12 @@ public:
             enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
-        //- Find and return an entry data stream.
-        //- FatalIOError if not found, or if the number of tokens is incorrect.
-        //
-        //  \param matchOpt the default search is non-recursive with patterns
-        ITstream& lookup
-        (
-            const word& keyword,
-            enum keyType::option matchOpt = keyType::REGEX
-        ) const;
-
         //- Find and return a T, or return the given default value.
         //- FatalIOError if it is found and the number of tokens is incorrect.
         //
         //  \param matchOpt the default search is non-recursive with patterns
         template<class T>
-        T lookupOrDefault
+        T getOrDefault
         (
             const word& keyword,
             const T& deflt,
@@ -590,7 +597,7 @@ public:
         //
         //  \param matchOpt the default search is non-recursive with patterns
         template<class T>
-        T lookupOrAddDefault
+        T getOrAdd
         (
             const word& keyword,
             const T& deflt,
@@ -628,6 +635,86 @@ public:
         (
             const word& keyword,
             T& val,
+            enum keyType::option matchOpt = keyType::REGEX
+        ) const;
+
+        //- Find and return a T with additional checking
+        //- FatalIOError if not found, or if the number of tokens is incorrect.
+        //
+        //  \param pred the value check predicate
+        //  \param matchOpt the default search is non-recursive with patterns
+        template<class T, class Predicate>
+        T getCheck
+        (
+            const word& keyword,
+            const Predicate& pred,
+            enum keyType::option matchOpt = keyType::REGEX
+        ) const;
+
+        //- Find and return a T, or return the given default value.
+        //- FatalIOError if it is found and the number of tokens is incorrect.
+        //
+        //  \param pred the value check predicate
+        //  \param matchOpt the default search is non-recursive with patterns
+        template<class T, class Predicate>
+        T getCheckOrDefault
+        (
+            const word& keyword,
+            const T& deflt,
+            const Predicate& pred,
+            enum keyType::option matchOpt = keyType::REGEX
+        ) const;
+
+        //- Find and return a T, or return the given default value
+        //- and add it to dictionary.
+        //- FatalIOError if it is found and the number of tokens is incorrect.
+        //
+        //  \param pred the value check predicate
+        //  \param matchOpt the default search is non-recursive with patterns
+        template<class T, class Predicate>
+        T getCheckOrAdd
+        (
+            const word& keyword,
+            const T& deflt,
+            const Predicate& pred,
+            enum keyType::option matchOpt = keyType::REGEX
+        );
+
+        //- Find entry and assign to T val.
+        //- FatalIOError if it is found and the number of tokens is incorrect,
+        //- or it is mandatory and not found.
+        //
+        //  \param val the value to read into
+        //  \param pred the value check predicate
+        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param mandatory the keyword is mandatory
+        //
+        //  \return true if the entry was found.
+        template<class T, class Predicate>
+        bool readCheck
+        (
+            const word& keyword,
+            T& val,
+            const Predicate& pred,
+            enum keyType::option matchOpt = keyType::REGEX,
+            bool mandatory = true
+        ) const;
+
+        //- Find an entry if present, and assign to T val.
+        //- FatalIOError if it is found and the number of tokens is incorrect.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param val the value to read into
+        //  \param pred the value check predicate
+        //  \param matchOpt the default search is non-recursive with patterns
+        //
+        //  \return true if the entry was found.
+        template<class T, class Predicate>
+        bool readCheckIfPresent
+        (
+            const word& keyword,
+            T& val,
+            const Predicate& pred,
             enum keyType::option matchOpt = keyType::REGEX
         ) const;
 
@@ -981,6 +1068,21 @@ public:
             enum keyType::option
         ) const;
 
+        //- Find and return an entry data stream,
+        //- using any compatibility names if needed.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        ITstream& lookupCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            enum keyType::option = keyType::REGEX
+        ) const;
+
         //- Find and return a T
         //- using any compatibility names if needed.
         //- FatalIOError if not found, or if there are excess tokens.
@@ -998,21 +1100,6 @@ public:
             enum keyType::option = keyType::REGEX
         ) const;
 
-        //- Find and return an entry data stream,
-        //- using any compatibility names if needed.
-        //  Default search: non-recursive with patterns.
-        //
-        //  \param compat list of old compatibility keywords and the last
-        //      OpenFOAM version for which they were used.
-        //  \param recursive search parent dictionaries
-        //  \param patternMatch use regular expressions
-        ITstream& lookupCompat
-        (
-            const word& keyword,
-            std::initializer_list<std::pair<const char*,int>> compat,
-            enum keyType::option = keyType::REGEX
-        ) const;
-
         //- Find and return a T, or return the given default value
         //- using any compatibility names if needed.
         //  Default search: non-recursive with patterns.
@@ -1022,7 +1109,7 @@ public:
         //  \param recursive search parent dictionaries
         //  \param patternMatch use regular expressions
         template<class T>
-        T lookupOrDefaultCompat
+        T getOrDefaultCompat
         (
             const word& keyword,
             std::initializer_list<std::pair<const char*,int>> compat,
@@ -1103,10 +1190,63 @@ public:
 
     // Housekeeping
 
+        //- Find and return a T, or return the given default value.
+        //- FatalIOError if it is found and the number of tokens is incorrect.
+        //
+        //  \param matchOpt the default search is non-recursive with patterns
+        template<class T>
+        T lookupOrDefault
+        (
+            const word& keyword,
+            const T& deflt,
+            enum keyType::option matchOpt = keyType::REGEX
+        ) const
+        {
+            return getOrDefault<T>(keyword, deflt, matchOpt);
+        }
+
+
+        //- Find and return a T, or return the given default value
+        //- and add it to dictionary.
+        //- FatalIOError if it is found and the number of tokens is incorrect.
+        //
+        //  \param matchOpt the default search is non-recursive with patterns
+        template<class T>
+        T lookupOrAddDefault
+        (
+            const word& keyword,
+            const T& deflt,
+            enum keyType::option matchOpt = keyType::REGEX
+        )
+        {
+            return getOrAdd<T>(keyword, deflt, matchOpt);
+        }
+
+        //- Find and return a T, or return the given default value
+        //- using any compatibility names if needed.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        template<class T>
+        T lookupOrDefaultCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            const T& deflt,
+            enum keyType::option matchOpt = keyType::REGEX
+        ) const
+        {
+            return getOrDefaultCompat<T>(keyword, compat, deflt, matchOpt);
+        }
+
         //- Deprecated(2018-07) find and return an entry data stream
         //
         //  \deprecated(2018-07) - use lookup() method
-        ITstream& operator[](const word& keyword) const
+        ITstream& FOAM_DEPRECATED_FOR(2018-07, "lookup() method")
+        operator[](const word& keyword) const
         {
             return lookup(keyword);
         }
@@ -1114,7 +1254,8 @@ public:
         //- Deprecated(2018-10) find and return a T.
         //  \deprecated(2018-10) - use get() method
         template<class T>
-        T lookupType
+        T FOAM_DEPRECATED_FOR(2018-10, "get() method")
+        lookupType
         (
             const word& keyword,
             bool recursive = false,
@@ -1126,7 +1267,8 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        bool found
+        bool FOAM_DEPRECATED_FOR(2018-10, "found(keyType::option)")
+        found
         (
             const word& keyword,
             bool recursive,
@@ -1138,7 +1280,9 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        entry* lookupEntryPtr
+        entry*
+        FOAM_DEPRECATED_FOR(2018-10, "findEntry(keyType::option)")
+        lookupEntryPtr
         (
             const word& keyword,
             bool recursive,
@@ -1150,7 +1294,9 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        const entry* lookupEntryPtr
+        const entry*
+        FOAM_DEPRECATED_FOR(2018-10, "findEntry(keyType::option)")
+        lookupEntryPtr
         (
             const word& keyword,
             bool recursive,
@@ -1162,7 +1308,9 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        const entry* lookupScopedEntryPtr
+        const entry*
+        FOAM_DEPRECATED_FOR(2018-10, "findScoped(keyType::option)")
+        lookupScopedEntryPtr
         (
             const word& keyword,
             bool recursive,
@@ -1178,7 +1326,9 @@ public:
         //
         //  Search type: non-recursive with patterns.
         //  \deprecated(2018-10) - use findDict() method
-        const dictionary* subDictPtr(const word& keyword) const
+        const dictionary*
+        FOAM_DEPRECATED_FOR(2018-10, "findDict() method")
+        subDictPtr(const word& keyword) const
         {
             return findDict(keyword, keyType::REGEX);
         }
@@ -1189,14 +1339,18 @@ public:
         //
         //  Search type: non-recursive with patterns.
         //  \deprecated(2018-10) - use findDict() method
-        dictionary* subDictPtr(const word& keyword)
+        dictionary*
+        FOAM_DEPRECATED_FOR(2018-10, "findDict() method")
+        subDictPtr(const word& keyword)
         {
             return findDict(keyword, keyType::REGEX);
         }
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        const entry& lookupEntry
+        const entry&
+        FOAM_DEPRECATED_FOR(2018-10, "lookupEntry(keyType::option)")
+        lookupEntry
         (
             const word& keyword,
             bool recursive,
@@ -1208,7 +1362,9 @@ public:
 
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
-        ITstream& lookup
+        ITstream&
+        FOAM_DEPRECATED_FOR(2018-10, "lookup(keyType::option)")
+        lookup
         (
             const word& keyword,
             bool recursive,
@@ -1221,7 +1377,8 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         template<class T>
-        T lookupOrDefault
+        T FOAM_DEPRECATED_FOR(2018-10, "lookupOrDefault(keyType::option)")
+        lookupOrDefault
         (
             const word& keyword,
             const T& deflt,
@@ -1237,7 +1394,8 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         template<class T>
-        T lookupOrAddDefault
+        T FOAM_DEPRECATED_FOR(2018-10, "lookupOrAddDefault(keyType::option)")
+        lookupOrAddDefault
         (
             const word& keyword,
             const T& deflt,
@@ -1253,7 +1411,9 @@ public:
         //- Deprecated(2018-10)
         //  \deprecated(2018-10) - use keyType::option version
         template<class T>
-        bool readIfPresent
+        bool
+        FOAM_DEPRECATED_FOR(2018-10, "readIfPresent(keyType::option)")
+        readIfPresent
         (
             const word& keyword,
             T& val,

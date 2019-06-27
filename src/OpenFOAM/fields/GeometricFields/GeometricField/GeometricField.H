@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -397,12 +399,10 @@ public:
         );
 
         //- Construct from tmp\<GeometricField\> deleting argument
-        #ifndef NoConstructFromTmp
         GeometricField
         (
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
-        #endif
 
         //- Construct as copy resetting IO parameters
         GeometricField
@@ -412,13 +412,11 @@ public:
         );
 
         //- Construct as copy of tmp<GeometricField> resetting IO parameters
-        #ifndef NoConstructFromTmp
         GeometricField
         (
             const IOobject& io,
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
-        #endif
 
         //- Copy construct with a new name
         GeometricField
@@ -428,13 +426,11 @@ public:
         );
 
         //- Construct with a new name from tmp\<GeometricField\>
-        #ifndef NoConstructFromTmp
         GeometricField
         (
             const word& newName,
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
-        #endif
 
         //- Construct as copy resetting IO parameters and patch type
         GeometricField
@@ -454,7 +450,6 @@ public:
         );
 
         //- Construct as copy resetting IO parameters and boundary types
-        #ifndef NoConstructFromTmp
         GeometricField
         (
             const IOobject& io,
@@ -462,10 +457,56 @@ public:
             const wordList& patchFieldTypes,
             const wordList& actualPatchTypes = wordList()
         );
-        #endif
 
         //- Clone
         tmp<GeometricField<Type, PatchField, GeoMesh>> clone() const;
+
+        //- Return a temporary field constructed from name, mesh, dimensionSet
+        //  and patch type.
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh&,
+            const dimensionSet&,
+            const word& patchFieldType=PatchField<Type>::calculatedType()
+        );
+
+        //- Return a temporary field constructed from mesh, dimensioned<Type>
+        //  and patch type.
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh&,
+            const dimensioned<Type>&,
+            const word& patchFieldType=PatchField<Type>::calculatedType()
+        );
+
+        //- Return a temporary field constructed from mesh, dimensioned<Type>
+        //  and patch types.
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh&,
+            const dimensioned<Type>&,
+            const wordList& patchFieldTypes,
+            const wordList& actualPatchTypes = wordList()
+        );
+
+        //- Rename temporary field and return
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& newName,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>&
+        );
+
+        //- Rename and reset patch fields types of temporary field and return
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& newName,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>&,
+            const wordList& patchFieldTypes,
+            const wordList& actualPatchTypes = wordList()
+        );
 
 
     //- Destructor
@@ -487,6 +528,8 @@ public:
         //- Return a const-reference to the dimensioned internal field
         //- of a "vol" field.
         //  Useful in the formulation of source-terms for FV equations
+        //
+        //  \note definition in finiteVolume/fields/volFields/volFieldsI.H
         inline const Internal& v() const;
 
         //- Return a reference to the internal field
@@ -579,55 +622,51 @@ public:
 
     // Member function *this operators
 
+        //- Negate the field inplace
         void negate();
 
+        //- Replace specified field component with content from another field
         void replace
         (
-            const direction,
-            const GeometricField<cmptType, PatchField, GeoMesh>&
+            const direction d,
+            const GeometricField<cmptType, PatchField, GeoMesh>& gcf
         );
 
+        //- Replace specified field component with specified value
         void replace
         (
-            const direction,
-            const dimensioned<cmptType>&
+            const direction d,
+            const dimensioned<cmptType>& ds
         );
 
-        void max(const dimensioned<Type>&);
-        void min(const dimensioned<Type>&);
+        //- Use the minimum of the field and specified value
+        //  This sets the \em ceiling on the field values
+        void min(const dimensioned<Type>& dt);
 
+        //- Use the maximum of the field and specified value
+        //  This sets the \em floor on the field values
+        void max(const dimensioned<Type>& dt);
+
+        //- Clip the field to be bounded within the specified range
+        void clip(const dimensioned<MinMax<Type>>& range);
+
+        //- Clip the field to be bounded within the specified range
+        void clip
+        (
+            const dimensioned<Type>& minVal,
+            const dimensioned<Type>& maxVal
+        );
+
+        //- Deprecated(2019-01) identical to clip()
+        //  \deprecated(2019-01) identical to clip()
         void maxMin
         (
-            const dimensioned<Type>& minDt,
-            const dimensioned<Type>& maxDt
-        );
-
-        void max
-        (
-            const GeometricField<Type, PatchField, GeoMesh>&,
-            const dimensioned<Type>&
-        );
-
-        void min
-        (
-            const GeometricField<Type, PatchField, GeoMesh>&,
-            const dimensioned<Type>&
-        );
-
-        void scale
-        (
-            const GeometricField<Type, PatchField, GeoMesh>&,
-            const GeometricField<Type, PatchField, GeoMesh>&
-        );
-
-        void scale
-        (
-            const GeometricField<Type, PatchField, GeoMesh>&,
-            const dimensioned<Type>&
-        );
+            const dimensioned<Type>& minVal,
+            const dimensioned<Type>& maxVal
+        ) FOAM_DEPRECATED_FOR(2019-01, "clip() method");
 
 
-    // Member operators
+    // Member Operators
 
         //- Return a const-reference to the dimensioned internal field
         //  Useful in the formulation of source-terms for FV equations

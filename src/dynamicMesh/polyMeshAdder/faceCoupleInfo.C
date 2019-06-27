@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,10 +55,12 @@ void Foam::faceCoupleInfo::writeOBJ
 {
     OFstream str(fName);
 
-    labelList pointMap(points.size(), -1);
+    labelList pointMap;
 
     if (compact)
     {
+        pointMap.resize(points.size(), -1);
+
         label newPointi = 0;
 
         forAll(edges, edgeI)
@@ -65,7 +69,7 @@ void Foam::faceCoupleInfo::writeOBJ
 
             forAll(e, eI)
             {
-                label pointi = e[eI];
+                const label pointi = e[eI];
 
                 if (pointMap[pointi] == -1)
                 {
@@ -78,12 +82,12 @@ void Foam::faceCoupleInfo::writeOBJ
     }
     else
     {
+        pointMap = identity(points.size());
+
         forAll(points, pointi)
         {
             meshTools::writeOBJ(str, points[pointi]);
         }
-
-        pointMap = identity(points.size());
     }
 
     forAll(edges, edgeI)
@@ -241,8 +245,7 @@ void Foam::faceCoupleInfo::writeEdges
         {
             if (cutToMasterEdges[cutEdgeI] != -1)
             {
-                const edge& masterEdge =
-                    m.edges()[cutToMasterEdges[cutEdgeI]];
+                const edge& masterEdge = m.edges()[cutToMasterEdges[cutEdgeI]];
                 const edge& cutEdge = c.edges()[cutEdgeI];
 
                 meshTools::writeOBJ(str, m.localPoints()[masterEdge[0]]);
@@ -364,8 +367,9 @@ bool Foam::faceCoupleInfo::regionEdge
                 return true;
             }
         }
-        return false;
     }
+
+    return false;
 }
 
 
@@ -1282,9 +1286,9 @@ Foam::label Foam::faceCoupleInfo::matchEdgeFaces
 
                     // Combine master faces with current set of candidate
                     // master faces.
-                    Map<labelList>::iterator fnd = candidates.find(cutFacei);
+                    auto fnd = candidates.find(cutFacei);
 
-                    if (fnd == candidates.end())
+                    if (!fnd.found())
                     {
                         // No info yet for cutFacei. Add all master faces as
                         // candidates
@@ -1295,7 +1299,7 @@ Foam::label Foam::faceCoupleInfo::matchEdgeFaces
                         // From some other cutEdgeI there are already some
                         // candidate master faces. Check the overlap with
                         // the current set of master faces.
-                        const labelList& masterFaces = fnd();
+                        const labelList& masterFaces = fnd.val();
 
                         DynamicList<label> newCandidates(masterFaces.size());
 
@@ -1309,8 +1313,7 @@ Foam::label Foam::faceCoupleInfo::matchEdgeFaces
 
                         if (newCandidates.size() == 1)
                         {
-                            // We found a perfect match. Delete entry from
-                            // candidates map.
+                            // Perfect match. Delete entry from candidates map.
                             cutToMasterFaces_[cutFacei] = newCandidates[0];
                             candidates.erase(cutFacei);
                             nChanged++;
@@ -1366,16 +1369,15 @@ Foam::label Foam::faceCoupleInfo::geometricMatchEdgeFaces
         )
     );
 
-    forAllConstIter(Map<labelList>, candidates, iter)
+    forAllConstIters(candidates, iter)
     {
         label cutFacei = iter.key();
+        const labelList& masterFaces = iter.val();
 
         const face& cutF = cutFaces()[cutFacei];
 
         if (cutToMasterFaces_[cutFacei] == -1)
         {
-            const labelList& masterFaces = iter();
-
             // Find the best matching master face.
             scalar minDist = GREAT;
             label minMasterFacei = -1;

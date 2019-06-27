@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -187,7 +189,7 @@ void Foam::volPointInterpolation::interpolateDimensionedInternalField
     // then saves on space.
 
     // Multiply volField by weighting factor matrix to create pointField
-    scalarField sumW(points.size(), 0.0);
+    scalarField sumW(points.size(), Zero);
     forAll(pointCells, pointi)
     {
         const labelList& ppc = pointCells[pointi];

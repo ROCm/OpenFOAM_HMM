@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,6 +107,9 @@ private:
 
         //- From surface region to patch
         const labelList globalToSlavePatch_;
+
+        //- Are we operating in test mode?
+        const bool dryRun_;
 
 
     // Private Member Functions
@@ -618,7 +623,8 @@ public:
         (
             meshRefinement& meshRefiner,
             const labelList& globalToMasterPatch,
-            const labelList& globalToSlavePatch
+            const labelList& globalToSlavePatch,
+            const bool dryRun = false
         );
 
 
@@ -628,7 +634,8 @@ public:
             void mergePatchFacesUndo
             (
                 const layerParameters& layerParams,
-                const dictionary& motionDict
+                const dictionary& motionDict,
+                const meshRefinement::FaceMergeType mergeType
             );
 
             //- Add cell layers
@@ -648,12 +655,11 @@ public:
                 const dictionary& shrinkDict,
                 const dictionary& motionDict,
                 const layerParameters& layerParams,
-                const bool mergePatchFaces,         // merging patch faces
+                const meshRefinement::FaceMergeType mergeType,
                 const bool preBalance,              // balance before adding?
                 decompositionMethod& decomposer,
                 fvMeshDistribute& distributor
             );
-
 };
 
 

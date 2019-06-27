@@ -11,6 +11,7 @@ sampledSet/face/faceOnlySet.C
 sampledSet/midPoint/midPointSet.C
 sampledSet/midPointAndFace/midPointAndFaceSet.C
 sampledSet/patchSeed/patchSeedSet.C
+sampledSet/patchEdge/patchEdgeSet.C
 sampledSet/sampledSet/sampledSet.C
 sampledSet/sampledSets/sampledSets.C
 sampledSet/sampledSets/sampledSetsGrouping.C
@@ -33,12 +34,6 @@ surface/isoSurface/isoSurfaceTopo.C
 surface/thresholdCellFaces/thresholdCellFaces.C
 surface/triSurfaceMesh/discreteSurface.C
 
-surfMeshSample/surfMeshSample/surfMeshSample.C
-surfMeshSample/surfMeshSamplers/surfMeshSamplers.C
-surfMeshSample/distanceSurface/surfMeshSampleDistanceSurface.C
-surfMeshSample/plane/surfMeshSamplePlane.C
-surfMeshSample/triSurfaceMesh/surfMeshSampleDiscrete.C
-
 sampledSurface/sampledNone/sampledNone.C
 sampledSurface/sampledPatch/sampledPatch.C
 sampledSurface/sampledPatchInternalField/sampledPatchInternalField.C
@@ -50,8 +45,8 @@ sampledSurface/distanceSurface/sampledDistanceSurface.C
 sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledCuttingSurface/sampledCuttingSurface.C
 sampledSurface/sampledSurface/sampledSurface.C
+sampledSurface/sampledSurface/sampledSurfaceRegister.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
-sampledSurface/sampledSurfaces/sampledSurfacesGrouping.C
 sampledSurface/sampledTriSurfaceMesh/sampledTriSurfaceMesh.C
 sampledSurface/sampledTriSurfaceMesh/sampledTriSurfaceMeshNormal.C
 sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
@@ -59,24 +54,11 @@ sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
 /* Proof-of-concept: */
 /* sampledSurface/triSurfaceMesh/sampledDiscreteSurface.C */
 
+readers = sampledSurface/readers
 
-surfWriters = sampledSurface/writers
-
-$(surfWriters)/surfaceWriter.C
-$(surfWriters)/ensight/ensightSurfaceWriter.C
-$(surfWriters)/foam/foamSurfaceWriter.C
-$(surfWriters)/nastran/nastranSurfaceWriter.C
-$(surfWriters)/proxy/proxySurfaceWriter.C
-$(surfWriters)/raw/rawSurfaceWriter.C
-$(surfWriters)/starcd/starcdSurfaceWriter.C
-$(surfWriters)/vtk/vtkSurfaceWriter.C
-$(surfWriters)/boundaryData/boundaryDataSurfaceWriter.C
-
-surfReaders = sampledSurface/readers
-
-$(surfReaders)/surfaceReader.C
-$(surfReaders)/surfaceReaderNew.C
-$(surfReaders)/ensight/ensightSurfaceReader.C
+$(readers)/surfaceReader.C
+$(readers)/surfaceReaderNew.C
+$(readers)/ensight/ensightSurfaceReader.C
 
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C

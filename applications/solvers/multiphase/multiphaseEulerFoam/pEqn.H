@@ -31,17 +31,15 @@
     PtrList<surfaceScalarField> rAlphaAUfs(fluid.phases().size());
 
     phasei = 0;
-    forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+    for (phaseModel& phase : fluid.phases())
     {
-        phaseModel& phase = iter();
-
         MRF.makeAbsolute(phase.phi().oldTime());
         MRF.makeAbsolute(phase.phi());
 
         HbyAs.set(phasei, new volVectorField(phase.U()));
         phiHbyAs.set(phasei, new surfaceScalarField(1.0*phase.phi()));
 
-        phasei++;
+        ++phasei;
     }
 
     surfaceScalarField phiHbyA
@@ -62,9 +60,8 @@
     surfaceScalarField ghSnGradRho(ghf*fvc::snGrad(rho)*mesh.magSf());
 
     phasei = 0;
-    forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+    for (phaseModel& phase : fluid.phases())
     {
-        phaseModel& phase = iter();
         const volScalarField& alpha = phase;
 
         alphafs.set(phasei, fvc::interpolate(alpha).ptr());
@@ -115,14 +112,13 @@
              - ghSnGradRho
             )/phase.rho();
 
-        multiphaseSystem::dragModelTable::const_iterator dmIter =
-            fluid.dragModels().begin();
-        multiphaseSystem::dragCoeffFields::const_iterator dcIter =
-            dragCoeffs().begin();
+        auto dmIter = fluid.dragModels().cbegin();
+        auto dcIter = dragCoeffs().cbegin();
+
         for
         (
             ;
-            dmIter != fluid.dragModels().end() && dcIter != dragCoeffs().end();
+            dmIter.good() && dcIter.good();
             ++dmIter, ++dcIter
         )
         {
@@ -164,7 +160,7 @@
 
         phiHbyA += alphafs[phasei]*phiHbyAs[phasei];
 
-        phasei++;
+        ++phasei;
     }
 
     surfaceScalarField rAUf
@@ -180,12 +176,11 @@
     );
 
     phasei = 0;
-    forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+    for (const phaseModel& phase : fluid.phases())
     {
-        phaseModel& phase = iter();
         rAUf += mag(alphafs[phasei]*rAlphaAUfs[phasei])/phase.rho();
 
-        phasei++;
+        ++phasei;
     }
 
     // Update the fixedFluxPressure BCs to ensure flux consistency
@@ -193,15 +188,13 @@
         surfaceScalarField::Boundary phib(phi.boundaryField());
         phib = 0;
         phasei = 0;
-        forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+        for (const phaseModel& phase : fluid.phases())
         {
-            phaseModel& phase = iter();
-
             phib +=
                 alphafs[phasei].boundaryField()
                *(mesh.Sf().boundaryField() & phase.U().boundaryField());
 
-            phasei++;
+            ++phasei;
         }
 
         setSnGrad<fixedFluxPressureFvPatchScalarField>
@@ -238,20 +231,20 @@
             surfaceScalarField mSfGradp("mSfGradp", pEqnIncomp.flux()/rAUf);
 
             phasei = 0;
-            phi = dimensionedScalar("phi", phi.dimensions(), 0);
-            forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
-            {
-                phaseModel& phase = iter();
+            phi = dimensionedScalar("phi", phi.dimensions(), Zero);
 
+            for (phaseModel& phase : fluid.phases())
+            {
                 phase.phi() =
                     phiHbyAs[phasei]
                   + rAlphaAUfs[phasei]*mSfGradp/phase.rho();
+
                 phi +=
                     alphafs[phasei]*phiHbyAs[phasei]
                   + mag(alphafs[phasei]*rAlphaAUfs[phasei])
                    *mSfGradp/phase.rho();
 
-                phasei++;
+                ++phasei;
             }
 
             // dgdt =
@@ -270,9 +263,8 @@
             U = dimensionedVector("U", dimVelocity, Zero);
 
             phasei = 0;
-            forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+            for (phaseModel& phase : fluid.phases())
             {
-                phaseModel& phase = iter();
                 const volScalarField& alpha = phase;
 
                 phase.U() =
@@ -293,7 +285,7 @@
 
                 U += alpha*phase.U();
 
-                phasei++;
+                ++phasei;
             }
         }
     }

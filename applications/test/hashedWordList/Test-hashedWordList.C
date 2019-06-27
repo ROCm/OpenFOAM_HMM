@@ -37,7 +37,7 @@ Ostream& printInfo(const hashedWordList& list, bool withAddr=false)
     Info<< flatOutput(list) << nl << list.lookup() << nl;
     if (withAddr)
     {
-        Info<< "addr=" << long(list.cdata()) << nl;
+        Info<< "addr=" << uintptr_t(list.cdata()) << nl;
     }
 
     return Info;

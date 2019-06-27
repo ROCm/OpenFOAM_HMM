@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,15 +58,15 @@ Foam::phaseSystem::generatePhaseModels(const wordList& phaseNames) const
 {
     phaseModelTable phaseModels;
 
-    forAllConstIter(wordList, phaseNames, phaseNameIter)
+    for (const word& phaseName : phaseNames)
     {
         phaseModels.insert
         (
-            *phaseNameIter,
+            phaseName,
             phaseModel::New
             (
                 *this,
-                *phaseNameIter
+                phaseName
             )
         );
     }
@@ -80,21 +80,17 @@ Foam::tmp<Foam::surfaceScalarField> Foam::phaseSystem::generatePhi
     const phaseModelTable& phaseModels
 ) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels.begin();
+    auto iter = phaseModels.cbegin();
 
     auto tmpPhi = tmp<surfaceScalarField>::New
     (
         "phi",
-        fvc::interpolate(phaseModelIter()())*phaseModelIter()->phi()
+        fvc::interpolate(iter()()) * iter()->phi()
     );
 
-    ++phaseModelIter;
-
-    for (; phaseModelIter != phaseModels.end(); ++phaseModelIter)
+    for (++iter; iter != phaseModels.cend(); ++iter)
     {
-        tmpPhi.ref() +=
-            fvc::interpolate(phaseModelIter()())
-           *phaseModelIter()->phi();
+        tmpPhi.ref() += fvc::interpolate(iter()()) * iter()->phi();
     }
 
     return tmpPhi;
@@ -103,7 +99,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::phaseSystem::generatePhi
 
 void Foam::phaseSystem::generatePairs(const dictTable& modelDicts)
 {
-    forAllConstIter(dictTable, modelDicts, iter)
+    forAllConstIters(modelDicts, iter)
     {
         const phasePairKey& key = iter.key();
 
@@ -150,10 +146,9 @@ void Foam::phaseSystem::generatePairs(const dictTable& modelDicts)
 
 void Foam::phaseSystem::generatePairsTable()
 {
-
-    forAllConstIter(phaseModelTable, phaseModels_, phaseIter1)
+    forAllConstIters(phaseModels_, phaseIter1)
     {
-        forAllConstIter(phaseModelTable, phaseModels_, phaseIter2)
+        forAllConstIters(phaseModels_, phaseIter2)
         {
             if (phaseIter1()->name() != phaseIter2()->name())
             {
@@ -236,7 +231,8 @@ Foam::phaseSystem::phaseSystem
     phasePairs_(),
     totalPhasePairs_(),
     Prt_
-    (   dimensioned<scalar>::lookupOrAddToDict
+    (
+        dimensionedScalar::lookupOrAddToDict
         (
             "Prt", *this, 1.0
         )
@@ -315,17 +311,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::he
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::hc() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tAlphaHc
     (
-        phaseModelIter()()*phaseModelIter()->hc()
+        iter()() * iter()->hc()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); phaseModelIter++)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tAlphaHc.ref() += phaseModelIter()()*phaseModelIter()->hc();
+        tAlphaHc.ref() += iter()() * iter()->hc();
     }
 
     return tAlphaHc;
@@ -360,17 +355,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::THE
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::rho() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpRho
     (
-        phaseModelIter()()*phaseModelIter()->rho()
+        iter()() * iter()->rho()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); phaseModelIter++)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpRho.ref() += phaseModelIter()()*phaseModelIter()->rho();
+        tmpRho.ref() += iter()() * iter()->rho();
     }
 
     return tmpRho;
@@ -379,20 +373,21 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::rho() const
 
 Foam::tmp<Foam::scalarField> Foam::phaseSystem::rho(const label patchI) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpRho
     (
-        phaseModelIter()().boundaryField()[patchI]
-      * phaseModelIter()->rho()().boundaryField()[patchI]
+        iter()().boundaryField()[patchI]
+      * iter()->rho()().boundaryField()[patchI]
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); phaseModelIter++)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
         tmpRho.ref() +=
-            phaseModelIter()().boundaryField()[patchI]
-          * phaseModelIter()->rho()().boundaryField()[patchI];
+        (
+            iter()().boundaryField()[patchI]
+          * iter()->rho()().boundaryField()[patchI]
+        );
     }
 
     return tmpRho;
@@ -401,17 +396,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::rho(const label patchI) const
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cp() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpCp
     (
-        phaseModelIter()()*phaseModelIter()->Cp()
+        iter()() * iter()->Cp()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); phaseModelIter++)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpCp.ref() += phaseModelIter()()*phaseModelIter()->Cp();
+        tmpCp.ref() += iter()() * iter()->Cp();
     }
 
     return tmpCp;
@@ -425,17 +419,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cp
     const label patchI
 ) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpCp
     (
-        phaseModelIter()()*phaseModelIter()->Cp(p, T, patchI)
+        iter()() * iter()->Cp(p, T, patchI)
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpCp.ref() += phaseModelIter()()*phaseModelIter()->Cp(p, T, patchI);
+        tmpCp.ref() += iter()() * iter()->Cp(p, T, patchI);
     }
 
     return tmpCp;
@@ -444,17 +437,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cp
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cv() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpCv
     (
-        phaseModelIter()()*phaseModelIter()->Cv()
+        iter()() * iter()->Cv()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); phaseModelIter++)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpCv.ref() += phaseModelIter()()*phaseModelIter()->Cv();
+        tmpCv.ref() += iter()() * iter()->Cv();
     }
 
     return tmpCv;
@@ -468,17 +460,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cv
     const label patchI
 ) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpCv
     (
-        phaseModelIter()()*phaseModelIter()->Cv(p, T, patchI)
+        iter()() * iter()->Cv(p, T, patchI)
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpCv.ref() += phaseModelIter()()*phaseModelIter()->Cv(p, T, patchI);
+        tmpCv.ref() += iter()() * iter()->Cv(p, T, patchI);
     }
 
     return tmpCv;
@@ -487,23 +478,22 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cv
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::gamma() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpCp
     (
-        phaseModelIter()()*phaseModelIter()->Cp()
+        iter()() * iter()->Cp()
     );
 
     tmp<volScalarField> tmpCv
     (
-        phaseModelIter()()*phaseModelIter()->Cv()
+        iter()() * iter()->Cv()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); phaseModelIter++)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpCp.ref() += phaseModelIter()()*phaseModelIter()->Cp();
-        tmpCv.ref() += phaseModelIter()()*phaseModelIter()->Cv();
+        tmpCp.ref() += iter()() * iter()->Cp();
+        tmpCv.ref() += iter()() * iter()->Cv();
     }
 
     return (tmpCp/tmpCv);
@@ -526,17 +516,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::gamma
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::Cpv() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpCpv
     (
-        phaseModelIter()()*phaseModelIter()->Cpv()
+        iter()() * iter()->Cpv()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); phaseModelIter++)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpCpv.ref() += phaseModelIter()()*phaseModelIter()->Cpv();
+        tmpCpv.ref() += iter()() * iter()->Cpv();
     }
 
     return tmpCpv;
@@ -550,17 +539,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cpv
     const label patchI
 ) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpCpv
     (
-        phaseModelIter()()*phaseModelIter()->Cpv(p, T, patchI)
+        iter()() * iter()->Cpv(p, T, patchI)
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpCpv.ref() += phaseModelIter()()*phaseModelIter()->Cpv(p, T, patchI);
+        tmpCpv.ref() += iter()() * iter()->Cpv(p, T, patchI);
     }
 
     return tmpCpv;
@@ -569,17 +557,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::Cpv
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::CpByCpv() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpCpByCpv
     (
-        phaseModelIter()()*phaseModelIter()->CpByCpv()
+        iter()() * iter()->CpByCpv()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); phaseModelIter++)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpCpByCpv.ref() += phaseModelIter()()*phaseModelIter()->CpByCpv();
+        tmpCpByCpv.ref() += iter()() * iter()->CpByCpv();
     }
 
     return tmpCpByCpv;
@@ -593,20 +580,21 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::CpByCpv
     const label patchI
 ) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpCpv
     (
-        phaseModelIter()().boundaryField()[patchI]
-       *phaseModelIter()->CpByCpv(p, T, patchI)
+        iter()().boundaryField()[patchI]
+      * iter()->CpByCpv(p, T, patchI)
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
         tmpCpv.ref() +=
-            phaseModelIter()().boundaryField()[patchI]
-           *phaseModelIter()->CpByCpv(p, T, patchI);
+        (
+            iter()().boundaryField()[patchI]
+          * iter()->CpByCpv(p, T, patchI)
+        );
     }
 
     return tmpCpv;
@@ -622,17 +610,16 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::W() const
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::kappa() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpkappa
     (
-        phaseModelIter()()*phaseModelIter()->kappa()
+        iter()() * iter()->kappa()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpkappa.ref() += phaseModelIter()()*phaseModelIter()->kappa();
+        tmpkappa.ref() += iter()() * iter()->kappa();
     }
 
     return tmpkappa;
@@ -641,23 +628,66 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::kappa() const
 
 Foam::tmp<Foam::scalarField> Foam::phaseSystem::kappa(const label patchI) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpKappa
     (
-        phaseModelIter()().boundaryField()[patchI]
-       *phaseModelIter()->kappa(patchI)
+        iter()().boundaryField()[patchI]
+      * iter()->kappa(patchI)
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
         tmpKappa.ref() +=
-            phaseModelIter()().boundaryField()[patchI]
-           *phaseModelIter()->kappa(patchI);
+        (
+            iter()().boundaryField()[patchI]
+          * iter()->kappa(patchI)
+        );
     }
 
     return tmpKappa;
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::phaseSystem::alphahe() const
+{
+    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+
+    tmp<volScalarField> talphaEff
+    (
+        phaseModelIter()()*phaseModelIter()->alphahe()
+    );
+
+    for (; phaseModelIter != phaseModels_.end(); ++phaseModelIter)
+    {
+        talphaEff.ref() += phaseModelIter()()*phaseModelIter()->alphahe();
+    }
+
+    return talphaEff;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::phaseSystem::alphahe
+(
+    const label patchi
+) const
+{
+    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+
+    tmp<scalarField> talphaEff
+    (
+        phaseModelIter()().boundaryField()[patchi]
+       *phaseModelIter()->alphahe(patchi)
+    );
+
+    for (; phaseModelIter != phaseModels_.end(); ++phaseModelIter)
+    {
+        talphaEff.ref() +=
+            phaseModelIter()().boundaryField()[patchi]
+           *phaseModelIter()->alphahe(patchi);
+    }
+
+    return talphaEff;
 }
 
 
@@ -687,17 +717,16 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::alphaEff
     const volScalarField& alphat
 ) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpAlpha
     (
-        phaseModelIter()()*phaseModelIter()->alpha()
+        iter()() * iter()->alpha()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpAlpha.ref() += phaseModelIter()()*phaseModelIter()->alpha();
+        tmpAlpha.ref() += iter()() * iter()->alpha();
     }
 
     tmpAlpha.ref() += alphat;
@@ -712,20 +741,21 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::alphaEff
     const label patchI
 ) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpAlpha
     (
-        phaseModelIter()().boundaryField()[patchI]
-       *phaseModelIter()->alpha(patchI)
+        iter()().boundaryField()[patchI]
+      * iter()->alpha(patchI)
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
         tmpAlpha.ref() +=
-            phaseModelIter()().boundaryField()[patchI]
-           *phaseModelIter()->alpha(patchI);
+        (
+            iter()().boundaryField()[patchI]
+          * iter()->alpha(patchI)
+        );
     }
 
     tmpAlpha.ref() += alphat;
@@ -742,17 +772,16 @@ const Foam::dimensionedScalar& Foam::phaseSystem::Prt() const
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::mu() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpMu
     (
-        phaseModelIter()()*phaseModelIter()->mu()
+        iter()() * iter()->mu()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpMu.ref() += phaseModelIter()()*phaseModelIter()->mu();
+        tmpMu.ref() += iter()() * iter()->mu();
     }
 
     return tmpMu;
@@ -761,20 +790,21 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::mu() const
 
 Foam::tmp<Foam::scalarField> Foam::phaseSystem::mu(const label patchI) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpMu
     (
-        phaseModelIter()().boundaryField()[patchI]
-       *phaseModelIter()->mu(patchI)
+        iter()().boundaryField()[patchI]
+      * iter()->mu(patchI)
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
         tmpMu.ref() +=
-            phaseModelIter()().boundaryField()[patchI]
-           *phaseModelIter()->mu(patchI);
+        (
+            iter()().boundaryField()[patchI]
+          * iter()->mu(patchI)
+        );
     }
 
     return tmpMu;
@@ -783,17 +813,16 @@ Foam::tmp<Foam::scalarField> Foam::phaseSystem::mu(const label patchI) const
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nu() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<volScalarField> tmpNu
     (
-        phaseModelIter()()*phaseModelIter()->nu()
+        iter()() * iter()->nu()
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        tmpNu.ref() += phaseModelIter()()*phaseModelIter()->nu();
+        tmpNu.ref() += iter()() * iter()->nu();
     }
 
     return tmpNu;
@@ -802,24 +831,26 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nu() const
 
 Foam::tmp<Foam::scalarField> Foam::phaseSystem::nu(const label patchI) const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
+    auto iter = phaseModels_.cbegin();
 
     tmp<scalarField> tmpNu
     (
-        phaseModelIter()().boundaryField()[patchI]
-       *phaseModelIter()->nu(patchI)
+        iter()().boundaryField()[patchI]
+      * iter()->nu(patchI)
     );
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
         tmpNu.ref() +=
-            phaseModelIter()().boundaryField()[patchI]
-           *phaseModelIter()->nu(patchI);
+        (
+            iter()().boundaryField()[patchI]
+          * iter()->nu(patchI)
+        );
     }
 
     return tmpNu;
 }
+
 
 const Foam::surfaceScalarField& Foam::phaseSystem::phi() const
 {
@@ -847,18 +878,18 @@ Foam::surfaceScalarField& Foam::phaseSystem::rhoPhi()
 
 void Foam::phaseSystem::correct()
 {
-    forAllIter(phaseModelTable, phaseModels_, phaseModelIter)
+    forAllIters(phaseModels_, iter)
     {
-        phaseModelIter()->correct();
+        iter()->correct();
     }
 }
 
 
 void Foam::phaseSystem::correctTurbulence()
 {
-    forAllIter(phaseModelTable, phaseModels_, phaseModelIter)
+    forAllIters(phaseModels_, iter)
     {
-        phaseModelIter()->correctTurbulence();
+        iter()->correctTurbulence();
     }
 }
 
@@ -890,14 +921,15 @@ Foam::phaseSystem::phasePairTable& Foam::phaseSystem::totalPhasePairs()
 
 bool Foam::phaseSystem::incompressible() const
 {
-    bool incompressible = true;
-
-    forAllConstIter(phaseModelTable, phaseModels_, phaseModelIter)
+    forAllConstIters(phaseModels_, iter)
     {
-        incompressible *= phaseModelIter()->thermo().incompressible();
+        if (!iter()->thermo().incompressible())
+        {
+            return false;
+        }
     }
 
-    return incompressible;
+    return true;
 }
 
 
@@ -909,14 +941,15 @@ bool Foam::phaseSystem::incompressible(const word phaseName) const
 
 bool Foam::phaseSystem::isochoric() const
 {
-     bool isochoric = true;
-
-    forAllConstIter(phaseModelTable, phaseModels_, phaseModelIter)
+    forAllConstIters(phaseModels_, iter)
     {
-        isochoric *= phaseModelIter()->thermo().isochoric();
+        if (!iter()->thermo().isochoric())
+        {
+            return false;
+        }
     }
 
-    return isochoric;
+    return true;
 }
 
 
@@ -938,22 +971,21 @@ Foam::phaseSystem::surfaceTensionForce() const
             mesh_
         ),
         mesh_,
-        dimensionedScalar(dimensionSet(1, -2, -2, 0, 0), Zero)
+        dimensionedScalar({1, -2, -2, 0, 0, 0}, Zero)
     );
 
     auto& stf = tstf.ref();
     stf.setOriented();
 
-    if (surfaceTensionModels_.size() > 0)
+    if (surfaceTensionModels_.size())
     {
-        forAllConstIter(phaseModelTable, phaseModels_, iter1)
+        forAllConstIters(phaseModels_, iter1)
         {
             const volScalarField& alpha1 = iter1()();
 
-            phaseModelTable::const_iterator iter2 = iter1;
-            ++iter2;
+            auto iter2 = iter1;
 
-            for (; iter2 != phaseModels_.end(); ++iter2)
+            for (++iter2; iter2 != phaseModels_.cend(); ++iter2)
             {
                 const volScalarField& alpha2 = iter2()();
 
@@ -989,14 +1021,14 @@ Foam::tmp<Foam::volVectorField> Foam::phaseSystem::U() const
             mesh_
         ),
         mesh_,
-        dimensionedVector("U", dimVelocity, Zero)
+        dimensionedVector(dimVelocity, Zero)
     );
 
     auto& stf = tstf.ref();
 
-    forAllConstIter(phaseModelTable, phaseModels_, iter1)
+    forAllConstIters(phaseModels_, iter)
     {
-        stf += iter1()()*iter1()->U();
+        stf += iter()() * iter()->U();
     }
 
     return tstf;
@@ -1024,22 +1056,17 @@ void Foam::phaseSystem::addInterfacePorosity(fvVectorMatrix& UEqn)
     const scalarField& Vc = mesh_.V();
     scalarField& Udiag = UEqn.diag();
 
-    forAllIter(phaseModelTable,  phaseModels_, iteri)
+    forAllConstIters(phaseModels_, iteri)
     {
-        const phaseModel& phasei = iteri();
+        const phaseModel& phasei = iteri()();
 
-        phaseModelTable::iterator iterk = iteri;
-        ++iterk;
-        for
-        (
-            ;
-            iterk != phaseModels_.end();
-            ++iterk
-        )
+        auto iterk = iteri;
+
+        for (++iterk; iterk != phaseModels_.cend(); ++iterk)
         {
             if (iteri()().name() != iterk()().name())
             {
-                phaseModel& phasek = iterk()();
+                const phaseModel& phasek = iterk()();
 
                 // Phase i and k
                 const phasePairKey keyik
@@ -1091,7 +1118,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface
 
 Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface() const
 {
-    auto tnI = tmp<volScalarField>::New
+    auto tnearInt = tmp<volScalarField>::New
     (
         IOobject
         (
@@ -1103,20 +1130,19 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface() const
         dimensionedScalar(dimless, Zero)
     );
 
-    auto& nI = tnI.ref();
+    auto& nearInt = tnearInt.ref();
 
-    forAllConstIter(phaseModelTable, phaseModels_, iter1)
+    forAllConstIters(phaseModels_, iter1)
     {
         const volScalarField& alpha1 = iter1()();
 
-        phaseModelTable::const_iterator iter2 = iter1;
-        ++iter2;
+        auto iter2 = iter1;
 
-        for (; iter2 != phaseModels_.end(); ++iter2)
+        for (++iter2; iter2 != phaseModels_.cend(); ++iter2)
         {
             const volScalarField& alpha2 = iter2()();
 
-            nI +=
+            nearInt +=
             (
                 pos(alpha1 - 0.1)*pos(0.9 - alpha1)
                *pos(alpha2 - 0.1)*pos(0.9 - alpha2)
@@ -1124,7 +1150,7 @@ Foam::tmp<Foam::volScalarField> Foam::phaseSystem::nearInterface() const
         }
     }
 
-    return tnI;
+    return tnearInt;
 }
 
 
@@ -1144,7 +1170,7 @@ Foam::tmp<Foam::surfaceVectorField> Foam::phaseSystem::nHatfv
     const dimensionedScalar deltaN
     (
         "deltaN",
-        1e-8/pow(average(mesh_.V()), 1.0/3.0)
+        1e-8/cbrt(average(mesh_.V()))
     );
 
     // Face unit interface normal
@@ -1167,9 +1193,7 @@ bool Foam::phaseSystem::read()
 {
     if (regIOobject::read())
     {
-        bool readOK = true;
-
-        return readOK;
+        return true;
     }
 
     return false;

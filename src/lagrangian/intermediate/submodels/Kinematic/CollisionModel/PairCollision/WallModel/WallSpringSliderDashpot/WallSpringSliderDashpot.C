@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +41,8 @@ void Foam::WallSpringSliderDashpot<CloudType>::findMinMaxProperties
     rhoMax = -VGREAT;
     UMagMax = -VGREAT;
 
-    forAllConstIter(typename CloudType, this->owner(), iter)
+    for (const typename CloudType::parcelType& p : this->owner())
     {
-        const typename CloudType::parcelType& p = iter();
-
         // Finding minimum diameter to avoid excessive arithmetic
 
         scalar dEff = p.d();
@@ -219,10 +219,8 @@ Foam::scalar Foam::WallSpringSliderDashpot<CloudType>::pREff
     {
         return p.d()/2*cbrt(p.nParticle()*volumeFactor_);
     }
-    else
-    {
-        return p.d()/2;
-    }
+
+    return p.d()/2;
 }
 
 

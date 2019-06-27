@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,29 +44,59 @@ See also
 
 using namespace Foam;
 
-template<class T, unsigned Size>
-Ostream& printInfo(const FixedList<List<T>, Size>& list)
+template<class T, unsigned N>
+Ostream& printInfo(const FixedList<List<T>, N>& list)
 {
     Info<< list << " addresses:";
-    for (unsigned i = 0; i < Size; ++i)
+    for (unsigned i = 0; i < N; ++i)
     {
-        Info<< " " << long(list[i].cdata());
+        Info<< " " << uintptr_t(list[i].cdata());
     }
     Info<< nl;
     return Info;
 }
 
 
-template<class T, unsigned Size>
+template<class T, unsigned N>
 Ostream& printInfo
 (
-    const FixedList<List<T>, Size>& list1,
-    const FixedList<List<T>, Size>& list2
+    const FixedList<List<T>, N>& list1,
+    const FixedList<List<T>, N>& list2
 )
 {
     Info<< "llist1:"; printInfo(list1);
     Info<< "llist2:"; printInfo(list2);
     return Info;
+}
+
+
+template<class T, unsigned N>
+void compileInfo()
+{
+    // Info<< typeid(decltype(FixedList<T, N>)).name() << nl;
+
+    // Info<< "  holds: "
+    // << typeid(decltype(FixedList<T, N>::value_type())).name() << nl;
+
+    Info<< "max_size:"
+        << FixedList<T, N>::max_size() << nl;
+}
+
+
+template<class FixedListType>
+typename std::enable_if
+<(FixedListType::max_size() == 2), bool>::type
+is_pair()
+{
+     return true;
+}
+
+
+template<class FixedListType>
+typename std::enable_if<(FixedListType::max_size() != 2), std::string>::type
+is_pair()
+{
+     return "not really at all";
 }
 
 
@@ -85,6 +117,18 @@ int main(int argc, char *argv[])
     const bool defaultTests =
         args.found("default") || args.options().empty();
 
+
+    typedef FixedList<scalar,2> scalar2Type;
+    typedef FixedList<label,3>  label3Type;
+
+    // Compile-time info
+
+    compileInfo<label, 5>();
+
+    Info<< "pair: " << is_pair<scalar2Type>() << nl;
+    Info<< "pair: " << is_pair<label3Type>() << nl;
+
+    Info<< "max_size:" << scalar2Type::max_size() << nl;
 
     if (defaultTests || args.found("iter"))
     {
@@ -139,15 +183,15 @@ int main(int argc, char *argv[])
         FixedList<label, 4> list1{2, 3, 4, 5};
 
         Info<< "list1:" << list1
-            << " hash:" << FixedList<label,4>::Hash<>()(list1) << nl
-            << " hash:" << Hash<FixedList<label,4>>()(list1) << nl;
+            << " hash:" << FixedList<label, 4>::Hash<>()(list1) << nl
+            << " hash:" << Hash<FixedList<label, 4>>()(list1) << nl;
 
         label a[4] = {0, 1, 2, 3};
         FixedList<label, 4> list2(a);
 
         Info<< "list2:" << list2
-            << " hash:" << FixedList<label,4>::Hash<>()(list2) << nl
-            << " hash:" << Hash<FixedList<label,4>>()(list2) << nl;
+            << " hash:" << FixedList<label, 4>::Hash<>()(list2) << nl
+            << " hash:" << Hash<FixedList<label, 4>>()(list2) << nl;
 
 
         // Using FixedList for content too
@@ -166,21 +210,24 @@ int main(int argc, char *argv[])
             << "list2: " << list2 << nl;
 
         // Addresses don't change with swap
-        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+        Info<< "mem: "
+            << uintptr_t(list1.data()) << " " << uintptr_t(list2.data()) << nl;
 
         list1.swap(list2);
         Info<< "The swap() method" << nl;
         Info<< "list1: " << list1 << nl
             << "list2: " << list2 << nl;
 
-        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+        Info<< "mem: "
+            << uintptr_t(list1.data()) << " " << uintptr_t(list2.data()) << nl;
 
         Swap(list1, list2);
         Info<< "The Swap() function" << nl;
         Info<< "list1: " << list1 << nl
             << "list2: " << list2 << nl;
 
-        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+        Info<< "mem: "
+            << uintptr_t(list1.data()) << " " << uintptr_t(list2.data()) << nl;
 
         Info<< "====" << nl;
 

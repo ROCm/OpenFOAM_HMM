@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ License
 
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
+#include "polySurfaceFields.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -34,7 +36,7 @@ bool Foam::functionObjects::fieldsExpression::calcFieldTypes(FOType& fo)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    typedef DimensionedField<Type, polySurfaceGeoMesh> SurfFieldType;
 
     if (foundObject<VolFieldType>(fieldNames_[0]))
     {
@@ -60,10 +62,8 @@ bool Foam::functionObjects::fieldsExpression::calcFieldTypes(FOType& fo)
             fo.template calcFieldType<SurfFieldType>()
         );
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

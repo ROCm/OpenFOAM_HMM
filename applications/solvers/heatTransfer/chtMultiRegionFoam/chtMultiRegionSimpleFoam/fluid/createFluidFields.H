@@ -12,7 +12,7 @@ PtrList<radiation::radiationModel> radiation(fluidRegions.size());
 
 List<scalar> initialMassFluid(fluidRegions.size());
 List<label> pRefCellFluid(fluidRegions.size(), -1);
-List<scalar> pRefValueFluid(fluidRegions.size(), 0.0);
+List<scalar> pRefValueFluid(fluidRegions.size(), Zero);
 List<bool> frozenFlowFluid(fluidRegions.size(), false);
 
 PtrList<dimensionedScalar> rhoMax(fluidRegions.size());
@@ -199,31 +199,13 @@ forAll(fluidRegions, i)
     rhoMax.set
     (
         i,
-        new dimensionedScalar
-        (
-            dimensionedScalar::lookupOrDefault
-            (
-                "rhoMax",
-                simpleDict,
-                dimDensity,
-                GREAT
-            )
-        )
+        new dimensionedScalar("rhoMax", dimDensity, GREAT, simpleDict)
     );
 
     rhoMin.set
     (
         i,
-        new dimensionedScalar
-        (
-            dimensionedScalar::lookupOrDefault
-            (
-                "rhoMin",
-                simpleDict,
-                dimDensity,
-                0
-            )
-        )
+        new dimensionedScalar("rhoMin", dimDensity, Zero, simpleDict)
     );
 
     Info<< "    Adding MRF\n" << endl;

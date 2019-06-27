@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,10 +24,9 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    testSHA1
+    Test-SHA1
 
 Description
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,14 +41,26 @@ using namespace Foam;
 int main(int argc, char * argv[])
 {
     SHA1 sha;
+    OSHA1stream osha;
     SHA1Digest shaDig;
 
     const std::string str("The quick brown fox jumps over the lazy dog");
     Info<< shaDig << " : empty" << nl;
     Info<< SHA1(str) << " : " << str << nl;
 
+    Info<< osha.digest() << " : empty" << nl;
+
+    osha<< "";
+    Info<< osha.digest() << " : still empty" << nl;
+
+    osha<< std::string();
+    Info<< osha.digest() << " : still empty" << nl;
+
     sha.append(str);
     Info<< sha << " : appended to empty" << nl;
+
+    osha<< str;
+    Info<< osha.digest() << " : output << to empty" << nl;
 
     sha.clear();
     sha.append(str);

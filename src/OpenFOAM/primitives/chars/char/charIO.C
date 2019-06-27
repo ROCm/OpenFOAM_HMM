@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,9 +32,9 @@ License
 
 char Foam::readChar(Istream& is)
 {
-   char c;
-   is.read(c);
-   return c;
+    char c;
+    is.read(c);
+    return c;
 }
 
 
@@ -52,9 +54,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const char c)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const char* s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const char* str)
 {
-    os.write(s);
+    os.write(str);
     os.check(FUNCTION_NAME);
     return os;
 }

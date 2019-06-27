@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +78,7 @@ Foam::label Foam::regionProperties::count() const
 
     forAllConstIters(props, iter)
     {
-        n += iter.object().size();
+        n += iter.val().size();
     }
 
     return n;
@@ -114,7 +116,7 @@ Foam::wordList Foam::regionProperties::sortedNames() const
 
     forAllConstIters(props, iter)
     {
-        for (const word& name : iter.object())
+        for (const word& name : iter.val())
         {
             list[n] = name;
             ++n;

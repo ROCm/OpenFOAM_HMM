@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,9 +119,10 @@ inline bool read(const std::string& str, uint64_t& val)
 Istream& operator>>(Istream& is, uint64_t& val);
 Ostream& operator<<(Ostream& os, const uint64_t val);
 
-// On Darwin: unsigned long is not unambiguously (uint32_t | uint64_t)
+// On Darwin:
+// unsigned long is not unambiguously (uint32_t | uint64_t)
 // - explicitly resolve for output
-#ifdef darwin
+#ifdef __APPLE__
     Ostream& operator<<(Ostream& os, const unsigned long val);
 #endif
 
@@ -139,13 +142,13 @@ public:
     // Member constants
 
         //- Dimensionality of space
-        static const direction dim = 3;
+        static constexpr direction dim = 3;
 
         //- Rank of uint64_t is 0
-        static const direction rank = 0;
+        static constexpr direction rank = 0;
 
         //- Number of components in uint64_t is 1
-        static const direction nComponents = 1;
+        static constexpr direction nComponents = 1;
 
 
     // Static data members

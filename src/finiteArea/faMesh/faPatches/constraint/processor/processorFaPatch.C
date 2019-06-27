@@ -506,10 +506,8 @@ Foam::tmp<Foam::labelField> Foam::processorFaPatch::internalFieldTransfer
 void Foam::processorFaPatch::write(Ostream& os) const
 {
     faPatch::write(os);
-    os.writeKeyword("myProcNo") << myProcNo_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("neighbProcNo") << neighbProcNo_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("myProcNo",  myProcNo_);
+    os.writeEntry("neighbProcNo", neighbProcNo_);
 }
 
 

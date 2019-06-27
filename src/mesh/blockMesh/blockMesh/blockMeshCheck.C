@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,8 +79,7 @@ void Foam::blockMesh::check(const polyMesh& bm, const dictionary& dict) const
         {
             Info<< "    Curved edge ";
             edges_[cei].write(Info, dict);
-            Info<< "    does not correspond to a block edge."
-                << endl;
+            Info<< "    does not correspond to a block edge." << endl;
             ok = false;
         }
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,6 +73,12 @@ protected:
 
     // Protected data
 
+        //- Region of existing mesh
+        const word regionName_;
+
+        //- Additional prefix for region. Empty if default region
+        const fileName regionPrefix_;
+
         //- Location of existing mesh (if present)
         const word localInstance_;
 
@@ -118,7 +124,11 @@ public:
     ClassName("columnFvMeshInfo");
 
     // Constructor
-    columnFvMeshInfo(const Time& runTime);
+    columnFvMeshInfo
+    (
+        const Time& runTime,
+        const word& regionName
+    );
 };
 
 
@@ -134,7 +144,11 @@ public:
     TypeName("columnFvMesh");
 
     //- Constructor
-    columnFvMesh(const Time& runTime);
+    columnFvMesh
+    (
+        const Time& runTime,
+        const word& regionName = fvMesh::defaultRegion
+    );
 };
 
 

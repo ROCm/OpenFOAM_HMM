@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,8 +123,8 @@ int main(int argc, char *argv[])
         }
 
         #include "rhoEqn.H"
-        Info<< "rhoEqn max/min : " << max(rho).value()
-            << " " << min(rho).value() << endl;
+        Info<< "rho min/max : " << min(rho).value() << " " << max(rho).value()
+            << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())

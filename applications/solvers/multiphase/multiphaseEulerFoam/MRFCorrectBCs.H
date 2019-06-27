@@ -1,6 +1,6 @@
-    forAllIter(PtrDictionary<phaseModel>, fluid.phases(), iter)
+    for (phaseModel& phase : fluid.phases())
     {
-        MRF.correctBoundaryVelocity(iter().U());
+        MRF.correctBoundaryVelocity(phase.U());
     }
 
     MRF.correctBoundaryVelocity(U);

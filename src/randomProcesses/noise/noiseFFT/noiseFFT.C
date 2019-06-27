@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -322,7 +324,7 @@ Foam::graph Foam::noiseFFT::meanPf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField meanPf(N/2 + 1, 0.0);
+    scalarField meanPf(N/2 + 1, Zero);
 
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
@@ -354,7 +356,7 @@ Foam::graph Foam::noiseFFT::RMSmeanPf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField RMSMeanPf(N/2 + 1, 0.0);
+    scalarField RMSMeanPf(N/2 + 1, Zero);
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
         RMSMeanPf += sqr(Pf(window.apply<scalar>(*this, windowI)));
@@ -385,7 +387,7 @@ Foam::graph Foam::noiseFFT::PSDf(const windowModel& window) const
     const label N = window.nSamples();
     const label nWindow = window.nWindow();
 
-    scalarField psd(N/2 + 1, 0.0);
+    scalarField psd(N/2 + 1, Zero);
 
     for (label windowI = 0; windowI < nWindow; ++windowI)
     {
@@ -441,8 +443,7 @@ Foam::graph Foam::noiseFFT::PSD(const graph& gPSDf) const
 Foam::graph Foam::noiseFFT::octaves
 (
     const graph& g,
-    const labelUList& freqBandIDs,
-    bool integrate
+    const labelUList& freqBandIDs
 ) const
 {
     if (freqBandIDs.size() < 2)
@@ -465,8 +466,8 @@ Foam::graph Foam::noiseFFT::octaves
     const scalarField& f = g.x();
     const scalarField& data = g.y();
 
-    scalarField octData(freqBandIDs.size() - 1, 0.0);
-    scalarField fm(freqBandIDs.size() -1, 0.0);
+    scalarField octData(freqBandIDs.size() - 1, Zero);
+    scalarField fm(freqBandIDs.size() -1, Zero);
 
     for (label bandI = 0; bandI < freqBandIDs.size() - 1; ++bandI)
     {
@@ -476,22 +477,12 @@ Foam::graph Foam::noiseFFT::octaves
 
         if (fb0 == fb1) continue;
 
-        if (integrate)
+        for (label freqI = fb0; freqI < fb1; ++freqI)
         {
-            for (label freqI = fb0; freqI < fb1; ++freqI)
-            {
-                label f0 = f[freqI];
-                label f1 = f[freqI + 1];
-                scalar dataAve = 0.5*(data[freqI] + data[freqI + 1]);
-                octData[bandI] += dataAve*(f1 - f0);
-            }
-        }
-        else
-        {
-            for (label freqI = fb0; freqI < fb1; ++freqI)
-            {
-                octData[bandI] += data[freqI];
-            }
+            label f0 = f[freqI];
+            label f1 = f[freqI + 1];
+            scalar dataAve = 0.5*(data[freqI] + data[freqI + 1]);
+            octData[bandI] += dataAve*(f1 - f0);
         }
     }
 

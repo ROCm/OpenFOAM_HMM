@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,15 +55,15 @@ void MapConsistentVolFields
 
     forAllConstIters(fields, fieldIter)
     {
-        Info<< "    interpolating " << fieldIter()->name()
+        Info<< "    interpolating " << fieldIter->name()
             << endl;
 
-        // Read field
-        fieldType fieldSource(*fieldIter(), meshSource);
+        // Read field. Do not auto-load old-time field
+        fieldType fieldSource(*fieldIter(), meshSource, false);
 
         IOobject fieldTargetIOobject
         (
-            fieldIter()->name(),
+            fieldIter->name(),
             meshTarget.time().timeName(),
             meshTarget,
             IOobject::MUST_READ,
@@ -71,7 +73,7 @@ void MapConsistentVolFields
         if (fieldTargetIOobject.typeHeaderOk<fieldType>(true))
         {
             // Read fieldTarget
-            fieldType fieldTarget(fieldTargetIOobject, meshTarget);
+            fieldType fieldTarget(fieldTargetIOobject, meshTarget, false);
 
             // Interpolate field
             meshToMesh0Interp.interpolate

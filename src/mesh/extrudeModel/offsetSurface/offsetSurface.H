@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +31,14 @@ Description
     have to be topologically identical i.e. one has to be an offsetted version
     of the other.
 
+    The offsetSurfaceCoeffs dictionary entries
+    \table
+        Property      | Description                         | Required | Default
+        baseSurface   | Base surface file name              | yes |
+        offsetSurface | Offset surface file name            | yes |
+        project       | Project onto offsetted surface      | no  | false
+    \endtable
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef offsetSurface_H
@@ -41,16 +51,15 @@ Description
 
 namespace Foam
 {
-
+// Forward declarations
 class triSurface;
 class triSurfaceSearch;
-
 
 namespace extrudeModels
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class offsetSurface Declaration
+                Class extrudeModels::offsetSurface Declaration
 \*---------------------------------------------------------------------------*/
 
 class offsetSurface
@@ -59,20 +68,21 @@ class offsetSurface
 {
     // Private data
 
-        //- surface
+        //- The base surface
         autoPtr<triSurface> baseSurfPtr_;
 
-        //- search engine
-        autoPtr<triSurfaceSearch> baseSearchPtr_;
-
-        //- offsets
+        //- The offset surface
         autoPtr<triSurface> offsetSurfPtr_;
 
-        //- search engine
+        //- The search engine
+        autoPtr<triSurfaceSearch> baseSearchPtr_;
+
+        //- The search engine
         autoPtr<triSurfaceSearch> offsetSearchPtr_;
 
-        // Whether to re-project onto offsetted surface
+        //- Project onto offsetted surface?
         const bool project_;
+
 
 public:
 
@@ -82,7 +92,7 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        offsetSurface(const dictionary& dict);
+        explicit offsetSurface(const dictionary& dict);
 
 
     //- Destructor

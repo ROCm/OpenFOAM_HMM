@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ eddyDissipationDiffusionModel<ReactionThermo, ThermoType>::rtDiff() const
     );
 
     volScalarField& delta = tdelta.ref();
-    delta.ref() = pow(this->mesh().V(), 1.0/3.0);
+    delta.ref() = cbrt(this->mesh().V());
     delta.correctBoundaryConditions();
 
     // NOTE: Assume Prt = 1
@@ -110,10 +110,8 @@ bool eddyDissipationDiffusionModel<ReactionThermo, ThermoType>::read()
         this->coeffs().readEntry("Cd", Cd_);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

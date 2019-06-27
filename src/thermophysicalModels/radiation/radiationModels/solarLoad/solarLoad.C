@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +34,10 @@ License
 #include "cyclicAMIPolyPatch.H"
 #include "mappedPatchBase.H"
 #include "wallPolyPatch.H"
+#include "constants.H"
+
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -44,10 +50,69 @@ namespace Foam
     }
 }
 
-const Foam::word Foam::radiation::solarLoad::viewFactorWalls = "viewFactorWall";
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::radiation::solarLoad::updateReflectedRays
+(
+    const labelHashSet& includePatches
+)
+{
+    if (reflectedFaces_.empty() && !hitFaces_.empty())
+    {
+        reflectedFaces_.reset
+        (
+            new faceReflecting
+            (
+                mesh_,
+                hitFaces_(),
+                solarCalc_,
+                spectralDistribution_,
+                dict_
+            )
+        );
+    }
+
+    reflectedFaces_->correct();
+
+    volScalarField::Boundary& qrBf = qr_.boundaryFieldRef();
+    const scalarField& V = mesh_.V();
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    forAll(qrBf, patchID)
+    {
+        if (includePatches[patchID])
+        {
+            for (label bandI = 0; bandI < nBands_; bandI++)
+            {
+                qrBf[patchID] +=
+                reflectedFaces_->qreflective(bandI).boundaryField()[patchID];
+            }
+        }
+        else
+        {
+            const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
+            const labelUList& cellIs = patches[patchID].faceCells();
+
+            for (label bandI = 0; bandI < nBands_; bandI++)
+            {
+                forAll(cellIs, i)
+                {
+                    const label cellI = cellIs[i];
+
+                    Ru_[cellI] +=
+                        (
+                            reflectedFaces_->qreflective(bandI).
+                                boundaryField()[patchID][i] * sf[i]
+                        )/V[cellI];
+                }
+            }
+        }
+    }
+
+
+
+}
+
 
 bool Foam::radiation::solarLoad::updateHitFaces()
 {
@@ -80,8 +145,8 @@ bool Foam::radiation::solarLoad::updateHitFaces()
                     hitFaces_->direction() = solarCalc_.direction();
                     hitFaces_->correct();
                     return true;
-                    break;
                 }
+                break;
             }
         }
     }
@@ -120,33 +185,43 @@ void Foam::radiation::solarLoad::updateDirectHitRadiation
     const scalarField& V = mesh_.V();
     volScalarField::Boundary& qrBf = qr_.boundaryFieldRef();
 
-    forAll(hitFacesId, i)
+    // Reset qr and qrPrimary
+    qrBf = 0.0;
+
+    for (label bandI = 0; bandI < nBands_; bandI++)
     {
-        const label faceI = hitFacesId[i];
-        label patchID = patches.whichPatch(faceI);
-        const polyPatch& pp = patches[patchID];
-        const label localFaceI = faceI - pp.start();
-        const vector qPrim = solarCalc_.directSolarRad()*solarCalc_.direction();
+        volScalarField::Boundary& qprimaryBf =
+            qprimaryRad_[bandI].boundaryFieldRef();
 
-        if (includeMappedPatchBasePatches[patchID])
+        qprimaryBf = 0.0;
+
+        forAll(hitFacesId, i)
         {
-            const vectorField n = pp.faceNormals();
+            const label faceI = hitFacesId[i];
+            label patchID = patches.whichPatch(faceI);
+            const polyPatch& pp = patches[patchID];
+            const label localFaceI = faceI - pp.start();
+            const vector qPrim =
+                solarCalc_.directSolarRad()*solarCalc_.direction();
 
-            for (label bandI = 0; bandI < nBands_; bandI++)
+            const vectorField& n = pp.faceNormals();
+
             {
-                qrBf[patchID][localFaceI] +=
+                qprimaryBf[patchID][localFaceI] +=
                     (qPrim & n[localFaceI])
-                  * spectralDistribution_[bandI]
-                  * absorptivity_[patchID][bandI]()[localFaceI];
+                    * spectralDistribution_[bandI]
+                    * absorptivity_[patchID][bandI]()[localFaceI];
             }
-        }
-        else
-        {
-            const vectorField& sf = mesh_.Sf().boundaryField()[patchID];
-            const label cellI = pp.faceCells()[localFaceI];
 
-            for (label bandI = 0; bandI < nBands_; bandI++)
+            if (includeMappedPatchBasePatches[patchID])
             {
+                qrBf[patchID][localFaceI] += qprimaryBf[patchID][localFaceI];
+            }
+            else
+            {
+                const vectorField& sf = mesh_.Sf().boundaryField()[patchID];
+                const label cellI = pp.faceCells()[localFaceI];
+
                 Ru_[cellI] +=
                     (qPrim & sf[localFaceI])
                   * spectralDistribution_[bandI]
@@ -294,6 +369,12 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
 
 void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
 {
+    coeffs.readEntry("spectralDistribution", spectralDistribution_);
+
+    nBands_ = spectralDistribution_.size();
+
+    qprimaryRad_.setSize(nBands_);
+
     if (coeffs.readIfPresent("gridUp", verticalDir_))
     {
          verticalDir_.normalise();
@@ -305,31 +386,28 @@ void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
         verticalDir_ = (-g/mag(g)).value();
     }
 
-    includePatches_ = mesh_.boundaryMesh().indices(viewFactorWalls);
-
-    coeffs.readEntry("useVFbeamToDiffuse", useVFbeamToDiffuse_);
-
-    coeffs.readEntry("spectralDistribution", spectralDistribution_);
+    coeffs.readEntry("useReflectedRays", useReflectedRays_);
 
     spectralDistribution_ =
         spectralDistribution_/sum(spectralDistribution_);
 
-    nBands_ = spectralDistribution_.size();
-
-    if (useVFbeamToDiffuse_)
+    forAll(qprimaryRad_, bandI)
     {
-        map_.reset
+        qprimaryRad_.set
         (
-            new IOmapDistribute
+            bandI,
+            new volScalarField
             (
                 IOobject
                 (
-                    "mapDist",
-                    mesh_.facesInstance(),
+                    "qprimaryRad_" + Foam::name(bandI) ,
+                    mesh_.time().timeName(),
                     mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                )
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh_,
+                dimensionedScalar(dimMass/pow3(dimTime), Zero)
             )
         );
     }
@@ -339,7 +417,7 @@ void Foam::radiation::solarLoad::initialise(const dictionary& coeffs)
     coeffs.readIfPresent("updateAbsorptivity", updateAbsorptivity_);
 }
 
-
+/*
 void Foam::radiation::solarLoad::calculateQdiff
 (
     const labelHashSet& includePatches,
@@ -391,12 +469,16 @@ void Foam::radiation::solarLoad::calculateQdiff
     reduce(totalFVNCoarseFaces, sumOp<label>());
 
     // Calculate weighted absorptivity on coarse patches
-    List<scalar> localCoarseRave(nLocalVFCoarseFaces);
+    List<scalar> localCoarseEave(nLocalVFCoarseFaces);
+    List<scalar> localTave(nLocalVFCoarseFaces);
     List<scalar> localCoarsePartialArea(nLocalVFCoarseFaces);
     List<vector> localCoarseNorm(nLocalVFCoarseFaces);
 
-    scalarField compactCoarseRave(map_->constructSize(), 0.0);
+    scalarField compactCoarseEave(map_->constructSize(), 0.0);
+    scalarField compactCoarseTave(map_->constructSize(), 0.0);
+
     scalarField compactCoarsePartialArea(map_->constructSize(), 0.0);
+
     vectorList compactCoarseNorm(map_->constructSize(), Zero);
 
     const boundaryRadiationProperties& boundaryRadiation =
@@ -416,29 +498,31 @@ void Foam::radiation::solarLoad::calculateQdiff
         const polyPatch& cpp = coarseMesh_->boundaryMesh()[patchID];
 
         const labelList& agglom = finalAgglom_[patchID];
-        //if (pp.size() > 0)
+
         if (agglom.size() > 0)
         {
             label nAgglom = max(agglom) + 1;
             coarseToFine_[i] = invertOneToMany(nAgglom, agglom);
         }
 
-        scalarField r(pp.size(), 0.0);
+        // Weight emissivity by spectral distribution
+        scalarField e(pp.size(), 0.0);
+
         for (label bandI = 0; bandI < nBands_; bandI++)
         {
-            const tmp<scalarField> tr =
+            const tmp<scalarField> te =
                 spectralDistribution_[bandI]
-               *boundaryRadiation.reflectivity(patchID, bandI);
-            r += tr();
+               *boundaryRadiation.diffReflectivity(patchID, bandI);
+            e += te();
         }
 
-        scalarList Rave(cpp.size(), 0.0);
-        scalarList area(cpp.size(), 0.0);
+        scalarList Eave(cpp.size(), 0.0);
+        scalarList Tave(cpp.size(), 0.0);
 
         const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
+        const scalarField& Tf = T_.boundaryField()[patchID];
 
-        const labelList& coarsePatchFace =
-            coarseMesh_->patchFaceMap()[patchID];
+        const labelList& coarsePatchFace=coarseMesh_->patchFaceMap()[patchID];
 
         forAll(cpp, coarseI)
         {
@@ -458,18 +542,25 @@ void Foam::radiation::solarLoad::calculateQdiff
                 {
                     fullArea += sf[faceI];
                 }
-                Rave[coarseI] += (r[faceI]*sf[faceI])/fineArea;
+                Eave[coarseI] += (e[faceI]*sf[faceI])/fineArea;
+                Tave[coarseI] += (pow4(Tf[faceI])*sf[faceI])/fineArea;
             }
             localCoarsePartialArea[compactI++] = fullArea/fineArea;
         }
 
         SubList<scalar>
         (
-            localCoarseRave,
-            Rave.size(),
+            localCoarseEave,
+            Eave.size(),
             startI
-        ) = Rave;
+        ) = Eave;
 
+        SubList<scalar>
+        (
+            localTave,
+            Tave.size(),
+            startI
+        ) = Tave;
 
         const vectorList coarseNSf = cpp.faceNormals();
         SubList<vector>
@@ -478,6 +569,7 @@ void Foam::radiation::solarLoad::calculateQdiff
             cpp.size(),
             startI
         ) = coarseNSf;
+
         startI += cpp.size();
     }
 
@@ -485,19 +577,23 @@ void Foam::radiation::solarLoad::calculateQdiff
     SubList<scalar>(compactCoarsePartialArea, nLocalVFCoarseFaces) =
         localCoarsePartialArea;
 
-    SubList<scalar>(compactCoarseRave, nLocalVFCoarseFaces) =
-        localCoarseRave;
+    SubList<scalar>(compactCoarseEave, nLocalVFCoarseFaces) =
+        localCoarseEave;
+
+    SubList<scalar>(compactCoarseTave, nLocalVFCoarseFaces) =
+        localTave;
 
     SubList<vector>(compactCoarseNorm, nLocalVFCoarseFaces) =
         localCoarseNorm;
 
     map_->distribute(compactCoarsePartialArea);
-    map_->distribute(compactCoarseRave);
+    map_->distribute(compactCoarseEave);
+    map_->distribute(compactCoarseTave);
     map_->distribute(compactCoarseNorm);
 
 
     // Calculate coarse hitFaces and Sun direct hit heat fluxes
-    scalarList localqDiffusive(nLocalVFCoarseFaces, 0.0);
+    scalarList localqDiffusive(nLocalVFCoarseFaces, Zero);
 
     label locaFaceI = 0;
     forAll(includePatches_, i)
@@ -509,7 +605,9 @@ void Foam::radiation::solarLoad::calculateQdiff
         const labelList& coarsePatchFace = coarseMesh_->patchFaceMap()[patchID];
         const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
 
-        scalarField a(ppf.size(), 0.0);
+
+        scalarField a(ppf.size(), Zero);
+
         for (label bandI = 0; bandI < nBands_; bandI++)
         {
             const tmp<scalarField> ta =
@@ -525,6 +623,7 @@ void Foam::radiation::solarLoad::calculateQdiff
             UIndirectList<scalar> fineSf(sf, fineFaces);
             scalar fineArea = sum(fineSf());
 
+            // // Weighting absorptivity per area on secondary diffussive flux
             scalar aAve = 0.0;
             forAll(fineFaces, j)
             {
@@ -539,14 +638,22 @@ void Foam::radiation::solarLoad::calculateQdiff
             {
                 label compactI = compactFaces[j];
 
-                localqDiffusive[locaFaceI] +=
-                    compactCoarsePartialArea[compactI]
-                  * aAve
-                  * (solarCalc_.directSolarRad()*solarCalc_.direction())
-                  & compactCoarseNorm[compactI]
-                  * vf[j]
-                  * compactCoarseRave[compactI];
+                scalar qin =
+                    (
+                        solarCalc_.directSolarRad()*solarCalc_.direction()
+                      & compactCoarseNorm[compactI]
+                    )*compactCoarsePartialArea[compactI];
 
+                // q emission
+                scalar qem =
+                    compactCoarseEave[compactI]
+                   *physicoChemical::sigma.value()
+                   *compactCoarseTave[compactI];
+
+                // compactCoarseEave is the diffussive reflected coeff
+                scalar qDiff = (compactCoarseEave[compactI])*qin;
+
+                localqDiffusive[locaFaceI] += (qDiff)*aAve*vf[j];
             }
             locaFaceI++;
         }
@@ -606,26 +713,14 @@ void Foam::radiation::solarLoad::calculateQdiff
         }
     }
 }
-
+*/
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::radiation::solarLoad::solarLoad(const volScalarField& T)
 :
     radiationModel(typeName, T),
-    finalAgglom_
-    (
-        IOobject
-        (
-            "finalAgglom",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
-    coarseMesh_(),
+    dict_(coeffs_),
     qr_
     (
         IOobject
@@ -639,20 +734,8 @@ Foam::radiation::solarLoad::solarLoad(const volScalarField& T)
         mesh_,
         dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
-    qsecondRad_
-    (
-        IOobject
-        (
-            "qsecondRad",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimMass/pow3(dimTime), Zero)
-    ),
     hitFaces_(),
+    reflectedFaces_(),
     Ru_
     (
         IOobject
@@ -666,26 +749,12 @@ Foam::radiation::solarLoad::solarLoad(const volScalarField& T)
         mesh_,
         dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     ),
-    solarCalc_(this->subDict(typeName + "Coeffs"), mesh_),
+    solarCalc_(coeffs_, mesh_),
     verticalDir_(Zero),
-    useVFbeamToDiffuse_(false),
-    includePatches_(mesh_.boundary().size(), -1),
-    coarseToFine_(),
-    nBands_(1),
-    spectralDistribution_(nBands_),
-    map_(),
-    visibleFaceFaces_
-    (
-        IOobject
-        (
-            "visibleFaceFaces",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
+    useReflectedRays_(false),
+    spectralDistribution_(),
+    nBands_(0),
+    qprimaryRad_(0),
     solidCoupled_(true),
     absorptivity_(mesh_.boundaryMesh().size()),
     updateAbsorptivity_(false),
@@ -703,19 +772,7 @@ Foam::radiation::solarLoad::solarLoad
 )
 :
     radiationModel(typeName, dict, T),
-    finalAgglom_
-    (
-        IOobject
-        (
-            "finalAgglom",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
-    coarseMesh_(),
+    dict_(dict),
     qr_
     (
         IOobject
@@ -729,112 +786,8 @@ Foam::radiation::solarLoad::solarLoad
         mesh_,
         dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
-    qsecondRad_
-    (
-        IOobject
-        (
-            "qsecondRad",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimMass/pow3(dimTime), Zero)
-    ),
     hitFaces_(),
-    Ru_
-    (
-        IOobject
-        (
-            "Ru",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
-    ),
-    solarCalc_(coeffs_, mesh_),
-    verticalDir_(Zero),
-    useVFbeamToDiffuse_(false),
-    includePatches_(mesh_.boundary().size(), -1),
-    coarseToFine_(),
-    nBands_(1),
-    spectralDistribution_(nBands_),
-    map_(),
-    visibleFaceFaces_
-    (
-        IOobject
-        (
-            "visibleFaceFaces",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
-    solidCoupled_(true),
-    wallCoupled_(false),
-    absorptivity_(mesh_.boundaryMesh().size()),
-    updateAbsorptivity_(false),
-    firstIter_(true),
-    updateTimeIndex_(0)
-{
-    initialise(coeffs_);
-}
-
-
-Foam::radiation::solarLoad::solarLoad
-(
-    const dictionary& dict,
-    const volScalarField& T,
-    const word radWallFieldName
-)
-:
-    radiationModel("none", T),
-    finalAgglom_
-    (
-        IOobject
-        (
-            "finalAgglom",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
-    coarseMesh_(),
-    qr_
-    (
-        IOobject
-        (
-            radWallFieldName,
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimMass/pow3(dimTime), Zero)
-    ),
-    qsecondRad_
-    (
-        IOobject
-        (
-            "qsecondRad",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimMass/pow3(dimTime), Zero)
-    ),
-    hitFaces_(),
+    reflectedFaces_(),
     Ru_
     (
         IOobject
@@ -850,38 +803,19 @@ Foam::radiation::solarLoad::solarLoad
     ),
     solarCalc_(dict, mesh_),
     verticalDir_(Zero),
-    useVFbeamToDiffuse_(false),
-    includePatches_(mesh_.boundary().size(), -1),
-    coarseToFine_(),
-    nBands_(1),
-    spectralDistribution_(nBands_),
-    map_(),
-    visibleFaceFaces_
-    (
-        IOobject
-        (
-            "visibleFaceFaces",
-            mesh_.facesInstance(),
-            mesh_,
-            IOobject::READ_IF_PRESENT,
-            IOobject::NO_WRITE,
-            false
-        )
-    ),
+    useReflectedRays_(false),
+    spectralDistribution_(),
+    nBands_(0),
+    qprimaryRad_(0),
     solidCoupled_(true),
     wallCoupled_(false),
     absorptivity_(mesh_.boundaryMesh().size()),
     updateAbsorptivity_(false),
-    firstIter_(true)
+    firstIter_(true),
+    updateTimeIndex_(0)
 {
     initialise(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::solarLoad::~solarLoad()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -898,10 +832,8 @@ bool Foam::radiation::solarLoad::read()
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -938,13 +870,11 @@ void Foam::radiation::solarLoad::calculate()
     }
 
     bool facesChanged = updateHitFaces();
-    volScalarField::Boundary& qrBf = qr_.boundaryFieldRef();
 
     if (facesChanged)
     {
-        // Reset Ru and qr
-        Ru_ = dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), 0.0);
-        qrBf = 0.0;
+        // Reset Ru
+        Ru_ = dimensionedScalar("Ru", dimMass/dimLength/pow3(dimTime), Zero);
 
         // Add direct hit radiation
         const labelList& hitFacesId = hitFaces_->rayStartFaces();
@@ -957,10 +887,10 @@ void Foam::radiation::solarLoad::calculate()
             includeMappedPatchBasePatches
         );
 
-        // Add indirect diffusive radiation
-        if (useVFbeamToDiffuse_)
+        // Add specular reflected radiation
+        if (useReflectedRays_)
         {
-            calculateQdiff(includePatches, includeMappedPatchBasePatches);
+            updateReflectedRays(includeMappedPatchBasePatches);
         }
 
         firstIter_ = false;

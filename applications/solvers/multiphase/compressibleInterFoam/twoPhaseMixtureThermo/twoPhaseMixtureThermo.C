@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -328,6 +330,25 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::kappa
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::alphahe() const
+{
+    return
+        alpha1()*thermo1_->alphahe()
+      + alpha2()*thermo2_->alphahe();
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureThermo::alphahe
+(
+    const label patchi
+) const
+{
+    return
+        alpha1().boundaryField()[patchi]*thermo1_->alphahe(patchi)
+      + alpha2().boundaryField()[patchi]*thermo2_->alphahe(patchi);
+}
+
+
 Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureThermo::kappaEff
 (
     const volScalarField& alphat
@@ -380,10 +401,8 @@ bool Foam::twoPhaseMixtureThermo::read()
     {
         return interfaceProperties::read();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

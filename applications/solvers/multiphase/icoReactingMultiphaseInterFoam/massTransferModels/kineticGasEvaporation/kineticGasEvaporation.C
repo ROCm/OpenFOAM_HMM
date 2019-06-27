@@ -46,19 +46,9 @@ Foam::meltingEvaporationModels::kineticGasEvaporation<Thermo, OtherThermo>
 )
 :
     InterfaceCompositionModel<Thermo, OtherThermo>(dict, pair),
-    C_("C",  dimless, dict.lookup("C")),
-    Tactivate_
-    (
-        "Tactivate",
-        dimTemperature,
-        dict.lookup("Tactivate")
-    ),
-    Mv_
-    (
-        "Mv",
-        dimMass/dimMoles,
-        dict.lookupOrDefault<scalar>("Mv", -1)
-    ),
+    C_("C", dimless, dict),
+    Tactivate_("Tactivate", dimTemperature, dict),
+    Mv_("Mv", dimMass/dimMoles, -1, dict),
     alphaMax_(dict.lookupOrDefault<scalar>("alphaMax", 1.0)),
     alphaMin_(dict.lookupOrDefault<scalar>("alphaMin", 0.5)),
     alphaRestMax_(dict.lookupOrDefault<scalar>("alphaRestMax", 0.01))

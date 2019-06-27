@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -29,7 +29,7 @@ deltaT          0.005;
 
 writeControl    runTime;
 
-writeInterval   1;
+writeInterval   10;
 
 purgeWrite      0;
 
@@ -51,7 +51,7 @@ maxCo           0.5;
 
 maxDeltaT       1;
 
-functions0
+functions
 {
     fieldAverage1
     {

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -53,8 +53,7 @@ functions
         libs            ("libfieldFunctionObjects.so");
         writeControl    writeTime;
         result          Cp;
-        calcTotal       no;
-        calcCoeff       yes;
+        mode            staticCoeff;
         rho             rhoInf;
         rhoInf          1;
         U               UInf;
@@ -104,7 +103,7 @@ functions
 
     residuals
     {
-        type            residuals;
+        type            solverInfo;
         libs            ("libutilityFunctionObjects.so");
         fields          (".*");
     }

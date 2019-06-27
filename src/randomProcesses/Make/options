@@ -1,10 +1,11 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(FFTW_INC_DIR)
 
 LIB_LIBS = \
-    -L$(FFTW_LIB_DIR) -lfftw3 \
     -lfiniteVolume \
-    -lsampling
+    -lsurfMesh \
+    -lsampling \
+    -L$(FFTW_LIB_DIR) -lfftw3

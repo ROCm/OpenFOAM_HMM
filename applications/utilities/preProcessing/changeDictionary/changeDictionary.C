@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,23 +109,23 @@ HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
         const word& patchName = dEntry.keyword();
         const dictionary& patchDict = dEntry.dict();
 
-        wordList groups;
-        if (patchDict.readIfPresent("inGroups", groups))
+        wordList groupNames;
+        patchDict.readIfPresent("inGroups", groupNames);
+
+        for (const word& groupName : groupNames)
         {
-            forAll(groups, i)
+            auto groupIter = groupToPatch.find(groupName);
+            if (groupIter.found())
             {
-                auto fndGroup = groupToPatch.find(groups[i]);
-                if (!fndGroup.found())
-                {
-                    groupToPatch.insert(groups[i], wordList(1, patchName));
-                }
-                else
-                {
-                    fndGroup().append(patchName);
-                }
+                (*groupIter).append(patchName);
+            }
+            else
+            {
+                groupToPatch.insert(groupName, wordList(one(), patchName));
             }
         }
     }
+
     return groupToPatch;
 }
 
@@ -628,29 +630,31 @@ int main(int argc, char *argv[])
                 wordList doneKeys(dictList.size());
 
                 label nEntries = fieldDict.size();
+                nEntries = 0;
 
                 forAll(dictList, i)
                 {
                     doneKeys[i] = dictList[i].keyword();
-                    dictList.set
+
+                    const entry* ePtr = fieldDict.findEntry
                     (
-                        i,
-                        fieldDict.lookupEntry
-                        (
-                            doneKeys[i],
-                            keyType::REGEX
-                        ).clone()
+                        doneKeys[i],
+                        keyType::REGEX
                     );
-                    fieldDict.remove(doneKeys[i]);
+                    // Check that it hasn't been removed from fieldDict
+                    if (ePtr)
+                    {
+                        dictList.set(nEntries++, ePtr->clone());
+                        fieldDict.remove(doneKeys[i]);
+                    }
                 }
 
                 // Add remaining entries
-                label sz = dictList.size();
-                dictList.setSize(nEntries);
                 for (const entry& e : fieldDict)
                 {
-                    dictList.set(sz++, e.clone());
+                    dictList.set(nEntries++, e.clone());
                 }
+                dictList.setSize(nEntries);
 
                 Info<< "Writing modified " << fieldName << endl;
                 dictList.writeObject

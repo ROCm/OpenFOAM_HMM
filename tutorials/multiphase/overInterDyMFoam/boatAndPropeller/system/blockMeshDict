@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -62,7 +62,7 @@ vertices
 blocks
 (
   //  hex (0 1 2 3 4 5 6 7) background (60 40 56) simpleGrading (1 1 1) // coarser mesh cell size 0.025 m
-	hex (0 1 2 3 4 5 6 7) background (75 50 70) simpleGrading (1 1 1)   // cell size 0.02 m
+    hex (0 1 2 3 4 5 6 7) background (75 50 70) simpleGrading (1 1 1)   // cell size 0.02 m
 
     hex (8 9 10 11 12 13 14 15) hullBox (32 16 16) simpleGrading (1 1 1)
 

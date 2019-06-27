@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,7 +77,7 @@ SourceFiles
 #ifndef functionObjects_codedFunctionObject_H
 #define functionObjects_codedFunctionObject_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "codedBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,15 +93,12 @@ namespace functionObjects
 
 class codedFunctionObject
 :
-    public functionObject,
+    public functionObjects::timeFunctionObject,
     public codedBase
 {
 protected:
 
     // Protected data
-
-        //- Reference to the time database
-        const Time& time_;
 
         //- Input dictionary
         dictionary dict_;
@@ -124,13 +123,13 @@ protected:
         //- Adapt the context for the current object
         virtual void prepare(dynamicCode&, const dynamicCodeContext&) const;
 
-        // Return a description (type + name) for the output
+        //- Return a description (type + name) for the output
         virtual string description() const;
 
-        // Clear any redirected objects
+        //- Clear any redirected objects
         virtual void clearRedirect() const;
 
-        // Get the dictionary to initialize the codeContext
+        //- The dictionary to initialize the codeContext
         virtual const dictionary& codeDict() const;
 
 
@@ -143,6 +142,17 @@ protected:
 
 public:
 
+    // Static Data Members
+
+        //- Name of the C code template to be used
+        static constexpr const char* const codeTemplateC
+            = "functionObjectTemplate.C";
+
+        //- Name of the H code template to be used
+        static constexpr const char* const codeTemplateH
+            = "functionObjectTemplate.H";
+
+
     //- Runtime type information
     TypeName("coded");
 
@@ -153,13 +163,13 @@ public:
         codedFunctionObject
         (
             const word& name,
-            const Time& time,
+            const Time& runTime,
             const dictionary& dict
         );
 
 
     //- Destructor
-    virtual ~codedFunctionObject();
+    virtual ~codedFunctionObject() = default;
 
 
     // Member Functions

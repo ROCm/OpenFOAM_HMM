@@ -334,8 +334,8 @@ void Foam::PatchFunction1Types::Sampled<Type>::writeData
 ) const
 {
     PatchFunction1<Type>::writeData(os);
-    os.writeKeyword(this->name()) << type();
-    os  << token::END_STATEMENT << nl;
+
+    os.writeEntry(this->name(), type());
 
     mappedPatchBase::write(os);
 

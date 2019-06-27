@@ -48,8 +48,8 @@ Foam::DTRMParticle::DTRMParticle
 )
 :
     particle(mesh, is, readFields, newFormat),
-    p0_(point::zero),
-    p1_(point::zero),
+    p0_(Zero),
+    p1_(Zero),
     I0_(0),
     I_(0),
     dA_(0),

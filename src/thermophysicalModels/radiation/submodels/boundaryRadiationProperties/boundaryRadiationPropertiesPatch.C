@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,17 +29,47 @@ License
 #include "absorptionEmissionModel.H"
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
+namespace Foam
+{
+    namespace radiation
+    {
+        defineTypeNameAndDebug(boundaryRadiationPropertiesPatch, 0);
+        defineRunTimeSelectionTable
+        (
+            boundaryRadiationPropertiesPatch,
+            dictionary
+        );
+    }
+}
 
-const Foam::Enum
-<
-    Foam::radiation::boundaryRadiationPropertiesPatch::methodType
->
-Foam::radiation::boundaryRadiationPropertiesPatch::methodTypeNames_
-({
-    { methodType::SOLIDRADIATION, "solidRadiation" },
-    { methodType::LOOKUP, "lookup" },
-    { methodType::MODEL, "model" },
-});
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::radiation::boundaryRadiationPropertiesPatch>
+Foam::radiation::boundaryRadiationPropertiesPatch::New
+(
+    const dictionary& dict,
+    const polyPatch& pp
+)
+{
+    const word modelType(dict.getCompat<word>("type", {{"mode", 1812}}));
+
+    Info<< "Selecting boundary radiation Model: "
+        << modelType << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
+
+    if (!cstrIter.found())
+    {
+        FatalErrorInFunction
+            << "Unknown modelType type "
+            << modelType << nl << nl
+            << "Valid radiation types are : " << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return cstrIter()(dict, pp);
+}
 
 
 // * * * * * * * * * * * * * * * * Private functions * * * * * * * * * * * * //
@@ -70,360 +100,36 @@ Foam::radiation::boundaryRadiationPropertiesPatch::nbrRegion() const
 Foam::radiation::boundaryRadiationPropertiesPatch::
 boundaryRadiationPropertiesPatch
 (
-    const polyPatch& p,
-    const dictionary& dict
+    const dictionary& dict,
+    const polyPatch& p
 )
 :
-    method_(methodTypeNames_.get("mode", dict)),
     dict_(dict),
+    patch_(p),
     absorptionEmission_(nullptr),
-    transmissivity_(nullptr),
-    patch_(p)
-{
-    switch (method_)
-    {
-        case SOLIDRADIATION:
-        {
-            if (!isA<mappedPatchBase>(p))
-            {
-                FatalErrorInFunction
-                    << "\n    patch type '" << p.type()
-                    << "' not type '" << mappedPatchBase::typeName << "'"
-                    << "\n    for patch " << p.name()
-                    << abort(FatalIOError);
-            }
-        }
-        break;
-
-        case MODEL:
-        {
-            const fvMesh& mesh =
-                refCast<const fvMesh>(p.boundaryMesh().mesh());
-
-            absorptionEmission_.reset
-            (
-                absorptionEmissionModel::New(dict, mesh).ptr()
-            );
-
-            transmissivity_.reset
-            (
-                transmissivityModel::New(dict, mesh).ptr()
-            );
-        }
-        case LOOKUP:
-        {
-            //Do nothing
-        }
-        break;
-    }
-
-}
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::radiation::boundaryRadiationPropertiesPatch::
-~boundaryRadiationPropertiesPatch()
+    transmissivity_(nullptr)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::radiation::absorptionEmissionModel&
+const Foam::radiation::wallAbsorptionEmissionModel&
 Foam::radiation::boundaryRadiationPropertiesPatch::absorptionEmission() const
 {
     return *absorptionEmission_;
 }
 
 
-const Foam::radiation::transmissivityModel&
+const Foam::radiation::wallTransmissivityModel&
 Foam::radiation::boundaryRadiationPropertiesPatch::transmissiveModel() const
 {
     return *transmissivity_;
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationPropertiesPatch::emissivity
-(
-    const label bandI
-) const
+void Foam::radiation::boundaryRadiationPropertiesPatch::write(Ostream& os) const
 {
-    switch (method_)
-    {
-        case SOLIDRADIATION:
-        {
-            const fvMesh& nbrMesh = nbrRegion();
-
-            const radiation::radiationModel& radiation =
-                nbrMesh.lookupObject<radiation::radiationModel>
-                (
-                    "radiationProperties"
-                );
-
-            scalarField emissivity
-            (
-                radiation.absorptionEmission().e(bandI)().boundaryField()
-                [
-                    nbrPatchIndex()
-                ]
-            );
-
-            const mappedPatchBase& mpp =
-                refCast<const mappedPatchBase>(patch_);
-
-            mpp.distribute(emissivity);
-
-            return tmp<scalarField>::New(std::move(emissivity));
-        }
-        break;
-
-        case LOOKUP:
-        {
-            return tmp<scalarField>::New
-            (
-                patch_.size(),
-                dict_.get<scalar>("emissivity")
-            );
-        }
-        break;
-
-        case MODEL:
-        {
-            const label index = patch_.index();
-
-            return tmp<scalarField>::New
-            (
-                absorptionEmission_->e(bandI)().boundaryField()[index]
-            );
-        }
-        break;
-
-        default:
-        {
-            FatalErrorInFunction
-                << "Please set 'mode' to one of "
-                << methodTypeNames_
-                << exit(FatalError);
-        }
-        break;
-    }
-
-    return scalarField(0);
-}
-
-
-Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationPropertiesPatch::absorptivity
-(
-    const label bandI
-) const
-{
-    switch (method_)
-    {
-        case SOLIDRADIATION:
-        {
-            const fvMesh& nbrMesh = nbrRegion();
-
-            const radiation::radiationModel& radiation =
-                nbrMesh.lookupObject<radiation::radiationModel>
-                (
-                    "radiationProperties"
-                );
-
-            scalarField absorp
-            (
-                radiation.absorptionEmission().a(bandI)().boundaryField()
-                [
-                    nbrPatchIndex()
-                ]
-            );
-
-            const mappedPatchBase& mpp =
-                refCast<const mappedPatchBase>(patch_);
-
-            mpp.distribute(absorp);
-
-            return tmp<scalarField>::New(std::move(absorp));
-
-        }
-        break;
-
-        case MODEL:
-        {
-            const label index = patch_.index();
-
-            return tmp<scalarField>::New
-            (
-                absorptionEmission_->a(bandI)().boundaryField()[index]
-            );
-        }
-        break;
-
-        case LOOKUP:
-        {
-            return tmp<scalarField>::New
-            (
-                patch_.size(),
-                dict_.get<scalar>("absorptivity")
-            );
-        }
-        break;
-
-        default:
-        {
-            FatalErrorInFunction
-                << "Unimplemented method " << method_ << endl
-                << "Please set 'mode' to one of "
-                << methodTypeNames_
-                << exit(FatalError);
-        }
-        break;
-    }
-
-    return scalarField(0);
-}
-
-
-Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationPropertiesPatch::transmissivity
-(
-    const label bandI
-) const
-{
-    switch (method_)
-    {
-        case SOLIDRADIATION:
-        {
-            const fvMesh& nbrMesh = nbrRegion();
-
-            const radiation::radiationModel& radiation =
-                nbrMesh.lookupObject<radiation::radiationModel>
-                (
-                    "radiationProperties"
-                );
-
-            scalarField trans
-            (
-                radiation.transmissivity().tauEff(bandI)().boundaryField()
-                [
-                     nbrPatchIndex()
-                ]
-            );
-
-            const mappedPatchBase& mpp =
-                refCast<const mappedPatchBase>(patch_);
-
-            mpp.distribute(trans);
-
-            return tmp<scalarField>::New(std::move(trans));
-
-        }
-        break;
-
-        case MODEL:
-        {
-            const label index = patch_.index();
-
-            return tmp<scalarField>::New
-            (
-                transmissivity_->tauEff(bandI)().boundaryField()[index]
-            );
-        }
-
-        case LOOKUP:
-        {
-            return tmp<scalarField>::New
-            (
-                patch_.size(),
-                dict_.get<scalar>("transmissivity")
-            );
-        }
-
-        default:
-        {
-            FatalErrorInFunction
-                << "Unimplemented method " << method_ << endl
-                << "Please set 'mode' to one of "
-                << methodTypeNames_
-                << exit(FatalError);
-        }
-        break;
-    }
-
-    return scalarField(0);
-}
-
-
-Foam::tmp<Foam::scalarField>
-Foam::radiation::boundaryRadiationPropertiesPatch::reflectivity
-(
-    const label bandI
-) const
-{
-    const tmp<scalarField> tt = transmissivity(bandI);
-    const tmp<scalarField> ta = absorptivity(bandI);
-
-    return (1.0 - tt - ta);
-}
-
-
-void Foam::radiation::boundaryRadiationPropertiesPatch::write
-(
-    Ostream& os
-) const
-{
-    os.writeEntry("mode", methodTypeNames_[method_]);
-
-    switch (method_)
-    {
-        case MODEL:
-        {
-            word modelType(dict_.get<word>("absorptionEmissionModel"));
-
-            os.writeEntry("absorptionEmissionModel", modelType);
-
-            word modelCoeffs(modelType + word("Coeffs"));
-            os.writeKeyword(modelCoeffs);
-
-            dict_.subDict(modelCoeffs).write(os);
-
-            modelType = dict_.get<word>("transmissivityModel");
-
-            os.writeEntry("transmissivityModel", modelType);
-
-            modelCoeffs = modelType + word("Coeffs");
-
-            os.writeKeyword(modelCoeffs);
-
-            dict_.subDict(modelCoeffs).write(os);
-
-            break;
-        }
-
-        case LOOKUP:
-        {
-            const scalarField emissivity("emissivity", dict_, patch_.size());
-            emissivity.writeEntry("emissivity", os);
-
-            const scalarField absorptivity
-            (
-                "absorptivity", dict_, patch_.size()
-            );
-            absorptivity.writeEntry("absorptivity", os);
-
-            const scalarField transmissivity
-            (
-                "transmissivity", dict_, patch_.size()
-            );
-            transmissivity.writeEntry("transmissivity", os);
-
-            break;
-        }
-
-        case SOLIDRADIATION:
-        {
-        }
-    }
+    NotImplemented;
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,13 +163,11 @@ void Foam::meshRefinement::collectAndPrint
     const UList<T>& data
 )
 {
-    globalIndex globalPoints(points.size());
+    const globalIndex globalPoints(points.size());
 
     pointField allPoints;
     globalPoints.gather
     (
-        Pstream::worldComm,
-        identity(Pstream::nProcs()),
         points,
         allPoints,
         UPstream::msgType(),
@@ -177,8 +177,6 @@ void Foam::meshRefinement::collectAndPrint
     List<T> allData;
     globalPoints.gather
     (
-        Pstream::worldComm,
-        identity(Pstream::nProcs()),
         data,
         allData,
         UPstream::msgType(),
@@ -211,11 +209,10 @@ void Foam::meshRefinement::addPatchFields
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    forAllIter(typename HashTable<GeoField*>, flds, iter)
+    forAllIters(flds, iter)
     {
         GeoField& fld = *iter();
-        typename GeoField::Boundary& fldBf =
-            fld.boundaryFieldRef();
+        auto& fldBf = fld.boundaryFieldRef();
 
         label sz = fldBf.size();
         fldBf.setSize(sz+1);
@@ -245,7 +242,7 @@ void Foam::meshRefinement::reorderPatchFields
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    forAllIter(typename HashTable<GeoField*>, flds, iter)
+    forAllIters(flds, iter)
     {
         iter()->boundaryFieldRef().reorder(oldToNew);
     }
@@ -326,6 +323,37 @@ void Foam::meshRefinement::weightedSum
         plusEqOp<Type>(),
         Type(Zero)          // null value
     );
+}
+
+
+template<class Type>
+Type Foam::meshRefinement::get
+(
+    const dictionary& dict,
+    const word& keyword,
+    const bool noExit,
+    enum keyType::option matchOpt,
+    const Type& defaultValue
+)
+{
+    Type val(defaultValue);
+
+    if
+    (
+       !dict.readEntry
+        (
+            keyword,
+            val,
+            matchOpt,
+            !noExit
+        )
+    )
+    {
+        FatalIOError
+            << "Entry '" << keyword << "' not found in dictionary "
+            << dict.name() << endl;
+    }
+    return val;
 }
 
 

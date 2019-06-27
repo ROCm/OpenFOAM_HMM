@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +45,9 @@ namespace Foam
     defineTypeNameAndDebug(multiphaseMixtureThermo, 0);
 }
 
+const Foam::scalar Foam::multiphaseMixtureThermo::convertToRad =
+    Foam::constant::mathematical::pi/180.0;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -51,9 +56,9 @@ void Foam::multiphaseMixtureThermo::calcAlphas()
     scalar level = 0.0;
     alphas_ == 0.0;
 
-    forAllIter(PtrDictionary<phaseModel>, phases_, phase)
+    for (const phaseModel& phase : phases_)
     {
-        alphas_ += level*phase();
+        alphas_ += level * phase;
         level += 1.0;
     }
 }
@@ -107,7 +112,7 @@ Foam::multiphaseMixtureThermo::multiphaseMixtureThermo
     deltaN_
     (
         "deltaN",
-        1e-8/pow(average(mesh_.V()), 1.0/3.0)
+        1e-8/cbrt(average(mesh_.V()))
     )
 {
     rhoPhi_.setOriented();
@@ -121,18 +126,18 @@ Foam::multiphaseMixtureThermo::multiphaseMixtureThermo
 
 void Foam::multiphaseMixtureThermo::correct()
 {
-    forAllIter(PtrDictionary<phaseModel>, phases_, phasei)
+    for (phaseModel& phase : phases_)
     {
-        phasei().correct();
+        phase.correct();
     }
 
-    PtrDictionary<phaseModel>::iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     psi_ = phasei()*phasei().thermo().psi();
     mu_ = phasei()*phasei().thermo().mu();
     alpha_ = phasei()*phasei().thermo().alpha();
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         psi_ += phasei()*phasei().thermo().psi();
         mu_ += phasei()*phasei().thermo().mu();
@@ -143,20 +148,20 @@ void Foam::multiphaseMixtureThermo::correct()
 
 void Foam::multiphaseMixtureThermo::correctRho(const volScalarField& dp)
 {
-    forAllIter(PtrDictionary<phaseModel>, phases_, phasei)
+    for (phaseModel& phase : phases_)
     {
-        phasei().thermo().rho() +=  phasei().thermo().psi()*dp;
+        phase.thermo().rho() += phase.thermo().psi()*dp;
     }
 }
 
 
 Foam::word Foam::multiphaseMixtureThermo::thermoName() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     word name = phasei().thermo().thermoName();
 
-    for (++ phasei; phasei != phases_.end(); ++ phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         name += ',' + phasei().thermo().thermoName();
     }
@@ -167,27 +172,29 @@ Foam::word Foam::multiphaseMixtureThermo::thermoName() const
 
 bool Foam::multiphaseMixtureThermo::incompressible() const
 {
-    bool ico = true;
-
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, phase)
+    for (const phaseModel& phase : phases_)
     {
-        ico &= phase().thermo().incompressible();
+        if (!phase.thermo().incompressible())
+        {
+            return false;
+        }
     }
 
-    return ico;
+    return true;
 }
 
 
 bool Foam::multiphaseMixtureThermo::isochoric() const
 {
-    bool iso = true;
-
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, phase)
+    for (const phaseModel& phase : phases_)
     {
-        iso &= phase().thermo().incompressible();
+        if (!phase.thermo().isochoric())
+        {
+            return false;
+        }
     }
 
-    return iso;
+    return true;
 }
 
 
@@ -197,11 +204,11 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::he
     const volScalarField& T
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> the(phasei()*phasei().thermo().he(p, T));
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         the.ref() += phasei()*phasei().thermo().he(p, T);
     }
@@ -217,14 +224,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::he
     const labelList& cells
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> the
     (
         scalarField(phasei(), cells)*phasei().thermo().he(p, T, cells)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         the.ref() +=
             scalarField(phasei(), cells)*phasei().thermo().he(p, T, cells);
@@ -241,14 +248,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::he
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> the
     (
         phasei().boundaryField()[patchi]*phasei().thermo().he(p, T, patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         the.ref() +=
             phasei().boundaryField()[patchi]*phasei().thermo().he(p, T, patchi);
@@ -260,11 +267,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::he
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::hc() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> thc(phasei()*phasei().thermo().hc());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         thc.ref() += phasei()*phasei().thermo().hc();
     }
@@ -301,11 +308,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::THE
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::rho() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> trho(phasei()*phasei().thermo().rho());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         trho.ref() += phasei()*phasei().thermo().rho();
     }
@@ -319,14 +326,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::rho
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> trho
     (
         phasei().boundaryField()[patchi]*phasei().thermo().rho(patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         trho.ref() +=
             phasei().boundaryField()[patchi]*phasei().thermo().rho(patchi);
@@ -338,11 +345,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::rho
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::Cp() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> tCp(phasei()*phasei().thermo().Cp());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tCp.ref() += phasei()*phasei().thermo().Cp();
     }
@@ -358,14 +365,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::Cp
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> tCp
     (
         phasei().boundaryField()[patchi]*phasei().thermo().Cp(p, T, patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tCp.ref() +=
             phasei().boundaryField()[patchi]*phasei().thermo().Cp(p, T, patchi);
@@ -377,11 +384,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::Cp
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::Cv() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> tCv(phasei()*phasei().thermo().Cv());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tCv.ref() += phasei()*phasei().thermo().Cv();
     }
@@ -397,14 +404,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::Cv
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> tCv
     (
         phasei().boundaryField()[patchi]*phasei().thermo().Cv(p, T, patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tCv.ref() +=
             phasei().boundaryField()[patchi]*phasei().thermo().Cv(p, T, patchi);
@@ -416,11 +423,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::Cv
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::gamma() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> tgamma(phasei()*phasei().thermo().gamma());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tgamma.ref() += phasei()*phasei().thermo().gamma();
     }
@@ -436,14 +443,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::gamma
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> tgamma
     (
         phasei().boundaryField()[patchi]*phasei().thermo().gamma(p, T, patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tgamma.ref() +=
             phasei().boundaryField()[patchi]
@@ -456,11 +463,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::gamma
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::Cpv() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> tCpv(phasei()*phasei().thermo().Cpv());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tCpv.ref() += phasei()*phasei().thermo().Cpv();
     }
@@ -476,14 +483,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::Cpv
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> tCpv
     (
         phasei().boundaryField()[patchi]*phasei().thermo().Cpv(p, T, patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tCpv.ref() +=
             phasei().boundaryField()[patchi]
@@ -496,11 +503,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::Cpv
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::CpByCpv() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> tCpByCpv(phasei()*phasei().thermo().CpByCpv());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tCpByCpv.ref() += phasei()*phasei().thermo().CpByCpv();
     }
@@ -516,14 +523,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::CpByCpv
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> tCpByCpv
     (
         phasei().boundaryField()[patchi]*phasei().thermo().CpByCpv(p, T, patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tCpByCpv.ref() +=
             phasei().boundaryField()[patchi]
@@ -536,11 +543,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::CpByCpv
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::W() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> tW(phasei()*phasei().thermo().W());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tW.ref() += phasei()*phasei().thermo().W();
     }
@@ -566,11 +573,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::nu
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::kappa() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> tkappa(phasei()*phasei().thermo().kappa());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tkappa.ref() += phasei()*phasei().thermo().kappa();
     }
@@ -584,14 +591,14 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::kappa
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> tkappa
     (
         phasei().boundaryField()[patchi]*phasei().thermo().kappa(patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tkappa.ref() +=
             phasei().boundaryField()[patchi]*phasei().thermo().kappa(patchi);
@@ -601,16 +608,55 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::kappa
 }
 
 
+Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::alphahe() const
+{
+    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+
+    tmp<volScalarField> talphaEff(phasei()*phasei().thermo().alphahe());
+
+    for (++phasei; phasei != phases_.end(); ++phasei)
+    {
+        talphaEff.ref() += phasei()*phasei().thermo().alphahe();
+    }
+
+    return talphaEff;
+}
+
+
+Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::alphahe
+(
+    const label patchi
+) const
+{
+    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+
+    tmp<scalarField> talphaEff
+    (
+        phasei().boundaryField()[patchi]
+       *phasei().thermo().alphahe(patchi)
+    );
+
+    for (++phasei; phasei != phases_.end(); ++phasei)
+    {
+        talphaEff.ref() +=
+            phasei().boundaryField()[patchi]
+           *phasei().thermo().alphahe(patchi);
+    }
+
+    return talphaEff;
+}
+
+
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::kappaEff
 (
     const volScalarField& alphat
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> tkappaEff(phasei()*phasei().thermo().kappaEff(alphat));
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tkappaEff.ref() += phasei()*phasei().thermo().kappaEff(alphat);
     }
@@ -625,7 +671,7 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::kappaEff
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> tkappaEff
     (
@@ -633,7 +679,7 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::kappaEff
        *phasei().thermo().kappaEff(alphat, patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         tkappaEff.ref() +=
             phasei().boundaryField()[patchi]
@@ -649,11 +695,11 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::alphaEff
     const volScalarField& alphat
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> talphaEff(phasei()*phasei().thermo().alphaEff(alphat));
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         talphaEff.ref() += phasei()*phasei().thermo().alphaEff(alphat);
     }
@@ -668,7 +714,7 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::alphaEff
     const label patchi
 ) const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<scalarField> talphaEff
     (
@@ -676,7 +722,7 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::alphaEff
        *phasei().thermo().alphaEff(alphat, patchi)
     );
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         talphaEff.ref() +=
             phasei().boundaryField()[patchi]
@@ -689,11 +735,11 @@ Foam::tmp<Foam::scalarField> Foam::multiphaseMixtureThermo::alphaEff
 
 Foam::tmp<Foam::volScalarField> Foam::multiphaseMixtureThermo::rCv() const
 {
-    PtrDictionary<phaseModel>::const_iterator phasei = phases_.begin();
+    auto phasei = phases_.cbegin();
 
     tmp<volScalarField> trCv(phasei()/phasei().thermo().Cv());
 
-    for (++phasei; phasei != phases_.end(); ++phasei)
+    for (++phasei; phasei != phases_.cend(); ++phasei)
     {
         trCv.ref() += phasei()/phasei().thermo().Cv();
     }
@@ -723,21 +769,19 @@ Foam::multiphaseMixtureThermo::surfaceTensionForce() const
     surfaceScalarField& stf = tstf.ref();
     stf.setOriented();
 
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, phase1)
+    forAllConstIters(phases_, phase1)
     {
-        const phaseModel& alpha1 = phase1();
+        const phaseModel& alpha1 = *phase1;
 
-        PtrDictionary<phaseModel>::const_iterator phase2 = phase1;
-        ++phase2;
+        auto phase2 = phase1;
 
-        for (; phase2 != phases_.end(); ++phase2)
+        for (++phase2; phase2 != phases_.cend(); ++phase2)
         {
-            const phaseModel& alpha2 = phase2();
+            const phaseModel& alpha2 = *phase2;
 
-            sigmaTable::const_iterator sigma =
-                sigmas_.find(interfacePair(alpha1, alpha2));
+            auto sigma = sigmas_.cfind(interfacePair(alpha1, alpha2));
 
-            if (sigma == sigmas_.end())
+            if (!sigma.found())
             {
                 FatalErrorInFunction
                     << "Cannot find interface " << interfacePair(alpha1, alpha2)
@@ -745,7 +789,7 @@ Foam::multiphaseMixtureThermo::surfaceTensionForce() const
                     << exit(FatalError);
             }
 
-            stf += dimensionedScalar("sigma", dimSigma_, sigma())
+            stf += dimensionedScalar("sigma", dimSigma_, *sigma)
                *fvc::interpolate(K(alpha1, alpha2))*
                 (
                     fvc::interpolate(alpha2)*fvc::snGrad(alpha1)
@@ -862,11 +906,10 @@ void Foam::multiphaseMixtureThermo::correctContactAngle
                /mesh_.magSf().boundaryField()[patchi]
             );
 
-            alphaContactAngleFvPatchScalarField::thetaPropsTable::
-                const_iterator tp =
-                acap.thetaProps().find(interfacePair(alpha1, alpha2));
+            const auto tp =
+                acap.thetaProps().cfind(interfacePair(alpha1, alpha2));
 
-            if (tp == acap.thetaProps().end())
+            if (!tp.found())
             {
                 FatalErrorInFunction
                     << "Cannot find interface " << interfacePair(alpha1, alpha2)
@@ -875,12 +918,12 @@ void Foam::multiphaseMixtureThermo::correctContactAngle
                     << exit(FatalError);
             }
 
-            bool matched = (tp.key().first() == alpha1.name());
+            const bool matched = (tp.key().first() == alpha1.name());
 
             const scalar theta0 = degToRad(tp().theta0(matched));
             scalarField theta(boundary[patchi].size(), theta0);
 
-            scalar uTheta = tp().uTheta();
+            const scalar uTheta = tp().uTheta();
 
             // Calculate the dynamic contact angle if required
             if (uTheta > SMALL)
@@ -972,10 +1015,10 @@ Foam::multiphaseMixtureThermo::nearInterface() const
         )
     );
 
-    forAllConstIter(PtrDictionary<phaseModel>, phases_, phase)
+    for (const phaseModel& phase : phases_)
     {
         tnearInt.ref() =
-            max(tnearInt(), pos0(phase() - 0.01)*pos0(0.99 - phase()));
+            max(tnearInt(), pos0(phase - 0.01)*pos0(0.99 - phase));
     }
 
     return tnearInt;
@@ -987,22 +1030,20 @@ void Foam::multiphaseMixtureThermo::solveAlphas
     const scalar cAlpha
 )
 {
-    static label nSolves=-1;
-    nSolves++;
+    static label nSolves(-1);
+    ++nSolves;
 
-    word alphaScheme("div(phi,alpha)");
-    word alpharScheme("div(phirb,alpha)");
+    const word alphaScheme("div(phi,alpha)");
+    const word alpharScheme("div(phirb,alpha)");
 
     surfaceScalarField phic(mag(phi_/mesh_.magSf()));
     phic = min(cAlpha*phic, max(phic));
 
     PtrList<surfaceScalarField> alphaPhiCorrs(phases_.size());
+
     int phasei = 0;
-
-    forAllIter(PtrDictionary<phaseModel>, phases_, phase)
+    for (phaseModel& alpha : phases_)
     {
-        phaseModel& alpha = phase();
-
         alphaPhiCorrs.set
         (
             phasei,
@@ -1020,10 +1061,8 @@ void Foam::multiphaseMixtureThermo::solveAlphas
 
         surfaceScalarField& alphaPhiCorr = alphaPhiCorrs[phasei];
 
-        forAllIter(PtrDictionary<phaseModel>, phases_, phase2)
+        for (phaseModel& alpha2 : phases_)
         {
-            phaseModel& alpha2 = phase2();
-
             if (&alpha2 == &alpha) continue;
 
             surfaceScalarField phir(phic*nHatf(alpha, alpha2));
@@ -1045,12 +1084,12 @@ void Foam::multiphaseMixtureThermo::solveAlphas
             alphaPhiCorr,
             zeroField(),
             zeroField(),
-            1,
-            0,
+            oneField(),
+            zeroField(),
             true
         );
 
-        phasei++;
+        ++phasei;
     }
 
     MULES::limitSum(alphaPhiCorrs);
@@ -1075,10 +1114,8 @@ void Foam::multiphaseMixtureThermo::solveAlphas
 
     phasei = 0;
 
-    forAllIter(PtrDictionary<phaseModel>, phases_, phase)
+    for (phaseModel& alpha : phases_)
     {
-        phaseModel& alpha = phase();
-
         surfaceScalarField& alphaPhi = alphaPhiCorrs[phasei];
         alphaPhi += upwind<scalar>(mesh_, phi_).flux(alpha);
 
@@ -1124,10 +1161,8 @@ void Foam::multiphaseMixtureThermo::solveAlphas
             }
         }
 
-        forAllConstIter(PtrDictionary<phaseModel>, phases_, phase2)
+        for (const phaseModel& alpha2 : phases_)
         {
-            const phaseModel& alpha2 = phase2();
-
             if (&alpha2 == &alpha) continue;
 
             const scalarField& dgdt2 = alpha2.dgdt();
@@ -1165,7 +1200,7 @@ void Foam::multiphaseMixtureThermo::solveAlphas
 
         sumAlpha += alpha;
 
-        phasei++;
+        ++phasei;
     }
 
     Info<< "Phase-sum volume fraction, min, max = "

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +50,8 @@ JohnsonJacksonParticleThetaFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    restitutionCoefficient_("restitutionCoefficient", dimless, 0),
-    specularityCoefficient_("specularityCoefficient", dimless, 0)
+    restitutionCoefficient_("restitutionCoefficient", dimless, Zero),
+    specularityCoefficient_("specularityCoefficient", dimless, Zero)
 {}
 
 
@@ -78,18 +80,8 @@ JohnsonJacksonParticleThetaFvPatchScalarField
 )
 :
     mixedFvPatchScalarField(p, iF),
-    restitutionCoefficient_
-    (
-        "restitutionCoefficient",
-        dimless,
-        dict.lookup("restitutionCoefficient")
-    ),
-    specularityCoefficient_
-    (
-        "specularityCoefficient",
-        dimless,
-        dict.lookup("specularityCoefficient")
-    )
+    restitutionCoefficient_("restitutionCoefficient", dimless, dict),
+    specularityCoefficient_("specularityCoefficient", dimless, dict)
 {
     if
     (
@@ -233,7 +225,6 @@ void Foam::JohnsonJacksonParticleThetaFvPatchScalarField::updateCoeffs()
         )
        .subDict("RAS")
        .subDict("kineticTheoryCoeffs")
-       .lookup("alphaMax")
     );
 
     // calculate the reference value and the value fraction

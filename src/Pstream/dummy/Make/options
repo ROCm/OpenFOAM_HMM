@@ -1,1 +1,5 @@
-LIB_LIBS = -lpthread
+EXE_INC =
+
+LIB_LIBS =
+
+PROJECT_LIBS = -L$(FOAM_LIBBIN) -lOpenFOAM

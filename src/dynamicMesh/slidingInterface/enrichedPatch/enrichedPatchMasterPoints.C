@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +92,7 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
 
     forAllIters(mpf, mpfIter)
     {
-        masterPointFaceMap(mpfIter.key()).transfer(mpfIter.object());
+        masterPointFaceMap(mpfIter.key()).transfer(mpfIter.val());
     }
     // Pout<< "masterPointFaceMap: " << masterPointFaceMap << endl;
 }

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +109,8 @@ public:
             pointMesh& pMesh,
             indirectPrimitivePatch& pp,         //!< 'outside' points
             const labelList& adaptPatchIDs,     //!< patches forming 'outside'
-            const dictionary& paramDict
+            const dictionary& paramDict,
+            const bool dryRun = false
         );
 
         //- Construct from mesh, patches to work on and smoothing parameters and
@@ -118,7 +121,8 @@ public:
             indirectPrimitivePatch& pp,         //!< 'outside' points
             const labelList& adaptPatchIDs,     //!< patches forming 'outside'
             const pointVectorField& displacement,
-            const dictionary& paramDict
+            const dictionary& paramDict,
+            const bool dryRun = false
         );
 };
 

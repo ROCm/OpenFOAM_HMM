@@ -106,7 +106,7 @@ bool Foam::loopControl::checkConverged() const
 
     forAllConstIters(meshes, meshIter)
     {
-        const fvMesh& regionMesh = *(meshIter.object());
+        const fvMesh& regionMesh = *(meshIter.val());
 
         const dictionary& solverDict = regionMesh.solverPerformanceDict();
 

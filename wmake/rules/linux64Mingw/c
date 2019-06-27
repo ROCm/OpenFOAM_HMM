@@ -1,0 +1,28 @@
+include $(GENERAL_RULES)/Gcc/c
+
+cARCH       = -m64
+
+cc          = x86_64-w64-mingw32-gcc
+
+include $(RULES)/c$(WM_COMPILE_OPTION)
+
+cFLAGS      = $(cARCH) $(GFLAGS) $(cWARN) $(cOPT) $(cDBUG) $(LIB_HEADER_DIRS)
+
+ctoo        = $(WM_SCHEDULER) $(cc) $(cFLAGS) -c $< -o $@
+
+LINK_LIBS   = $(cDBUG)
+
+LINKLIBSO   = $(cc) $(cARCH) \
+    -Wl,--output-def=$(LIB).def \
+    -Wl,--out-implib,$(LIB).dll.a \
+    -Wl,--no-undefined \
+    -Wl,--enable-runtime-pseudo-reloc \
+    -Wl,--enable-auto-import \
+    -Wl,--enable-auto-image-base \
+    -Wl,--strip-all \
+    -shared
+
+LINKEXE     = $(cc) $(cARCH) \
+    -Wl,--enable-auto-import \
+    -Wl,--strip-all \
+    -Wl,--force-exe-suffix

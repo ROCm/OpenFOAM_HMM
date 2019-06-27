@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "allReduce.H"
+#include "profilingPstream.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -43,6 +46,8 @@ void Foam::allReduce
     {
         return;
     }
+
+    profilingPstream::beginTiming();
 
     if (UPstream::nProcs(communicator) <= UPstream::nProcsSimpleSum)
     {
@@ -165,6 +170,8 @@ void Foam::allReduce
         );
         Value = sum;
     }
+
+    profilingPstream::addReduceTime();
 }
 
 

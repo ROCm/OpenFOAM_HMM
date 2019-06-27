@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +28,9 @@ Class
 
 Description
     Conversion of OpenFOAM pTraits into the Ensight equivalent
+
+    For the purpose of traits, integers (label) are treated like
+    floating point (scalar). Spherical tensors are mapped as a scalar.
 
 \*---------------------------------------------------------------------------*/
 
@@ -59,6 +64,12 @@ public:
         //  xx yy zz xy xz yz
         static const direction componentOrder[];
 };
+
+template<>
+const char* const ensightPTraits<label>::typeName;
+
+template<>
+const direction ensightPTraits<label>::componentOrder[];
 
 template<>
 const char* const ensightPTraits<scalar>::typeName;

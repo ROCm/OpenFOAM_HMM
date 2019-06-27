@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ License
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-inline bool Foam::wordRe::meta(const char c)
+inline bool Foam::wordRe::meta(char c)
 {
     return regExp::meta(c);
 }
@@ -169,7 +171,7 @@ inline bool Foam::wordRe::isPattern() const
 }
 
 
-inline bool Foam::wordRe::compile(const compOption opt) const
+inline bool Foam::wordRe::compile(const compOption opt)
 {
     if (opt)
     {
@@ -200,24 +202,18 @@ inline bool Foam::wordRe::compile(const compOption opt) const
 }
 
 
-inline bool Foam::wordRe::compile() const
+inline bool Foam::wordRe::compile()
 {
     return re_.set(*this);
 }
 
 
-inline void Foam::wordRe::uncompile(bool doStrip) const
+inline void Foam::wordRe::uncompile(bool doStrip)
 {
-    if (re_.clear() && doStrip)
+    // Only strip when debug is active (potentially costly operation)
+    if (re_.clear() && doStrip && word::debug)
     {
-        // Skip stripping unless debug is active to avoid costly operations
-        if (word::debug)
-        {
-            string::stripInvalid<word>
-            (
-                const_cast<word&>(static_cast<const word&>(*this))
-            );
-        }
+        string::stripInvalid<word>(*this);
     }
 }
 
@@ -262,6 +258,12 @@ inline void Foam::wordRe::set(const char* str, const compOption opt)
 
 inline void Foam::wordRe::swap(wordRe& str)
 {
+    // Self-swapping is a no-op
+    if (this == &str)
+    {
+        return;
+    }
+
     word::swap(static_cast<word&>(str));
     re_.swap(str.re_);
 }
@@ -277,6 +279,12 @@ inline bool Foam::wordRe::operator()(const std::string& text) const
 
 inline void Foam::wordRe::operator=(const wordRe& str)
 {
+    // Self-assignment is a no-op
+    if (this == &str)
+    {
+        return;
+    }
+
     assign(str);
     if (str.isPattern())
     {
@@ -333,6 +341,12 @@ inline void Foam::wordRe::operator=(const char* str)
 
 inline void Foam::wordRe::operator=(wordRe&& str)
 {
+    // Self-assignment is a no-op
+    if (this == &str)
+    {
+        return;
+    }
+
     clear();
     swap(str);
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,8 +79,6 @@ int main(int argc, char *argv[])
     #include "setInitialDeltaT.H"
 
     volScalarField& T = thermo->T();
-    volScalarField& e = thermo->he();
-    e.oldTime();
 
     turbulence->validate();
 
@@ -120,9 +118,8 @@ int main(int argc, char *argv[])
             #include "alphaEqnSubCycle.H"
 
             solve(fvm::ddt(rho) + fvc::div(rhoPhi));
-
             #include "UEqn.H"
-            #include "eEqn.H"
+            #include "TEqn.H"
 
             // --- Pressure corrector loop
             while (pimple.correct())

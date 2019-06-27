@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,6 +75,9 @@ private:
 
         //- Reference to all geometry.
         const searchableSurfaces& allGeometry_;
+
+        //- Dry-run mode?
+        const bool dryRun_;
 
         //- Indices of surfaces that are shells
         labelList shells_;
@@ -173,7 +178,8 @@ public:
         shellSurfaces
         (
             const searchableSurfaces& allGeometry,
-            const dictionary& shellsDict
+            const dictionary& shellsDict,
+            const bool dryRun = false
         );
 
 
@@ -185,6 +191,18 @@ public:
             const labelList& shells() const
             {
                 return shells_;
+            }
+
+            //- Per shell, per region the small-gap level specification
+            const List<List<FixedList<label, 3>>>& extendedGapLevel() const
+            {
+                return extendedGapLevel_;
+            }
+
+            //- Per shell, per region the small-gap level specification
+            const List<List<volumeType>>& extendedGapMode() const
+            {
+                return extendedGapMode_;
             }
 
         // Query

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +109,7 @@ Foam::Istream& Foam::operator>>(Istream& is, uint64_t& val)
 
 uint64_t Foam::readUint64(Istream& is)
 {
-    uint64_t val;
+    uint64_t val(0);
     is >> val;
 
     return val;
@@ -122,7 +124,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const uint64_t val)
 }
 
 
-#ifdef darwin
+#ifdef __APPLE__
 Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long val)
 {
     os << uint64_t(val);

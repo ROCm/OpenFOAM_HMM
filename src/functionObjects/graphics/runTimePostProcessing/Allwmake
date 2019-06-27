@@ -7,7 +7,7 @@ cd ${0%/*} || exit 1                            # Run from this directory
 echo "======================================================================"
 echo "${PWD##*/} : $PWD"
 
-unset depend
+unset depend runTimePostProDebug
 
 if [ -d "$VTK_DIR" ]
 then
@@ -17,8 +17,11 @@ then
     depend="ParaView_DIR=$ParaView_DIR"
 fi
 
-# Or force use of dummy only
+# Force use of dummy only
 # unset depend
+
+# For rebuilding (on error) instead of dropping back to dummy
+# runTimePostProDebug=true
 
 if [ "$targetType" = objects ]
 then
@@ -31,7 +34,10 @@ then
             echo
             echo "    WARNING: incomplete build of VTK-based post-processing"
             echo
-            depend="dummy"
+            if [ -z "$runTimePostProDebug" ]
+            then
+                depend="dummy"
+            fi
         }
     else
         echo "==> skip runTimePostProcessing (needs cmake)"

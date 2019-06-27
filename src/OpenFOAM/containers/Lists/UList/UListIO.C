@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +73,7 @@ template<class T>
 Foam::Ostream& Foam::UList<T>::writeList
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
     const UList<T>& list = *this;
@@ -81,15 +83,23 @@ Foam::Ostream& Foam::UList<T>::writeList
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        if (contiguous<T>() && list.uniform())
+        if (len > 1 && contiguous<T>() && list.uniform())
         {
             // Two or more entries, and all entries have identical values.
             os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
         }
         else if
         (
-            len <= 1 || !shortListLen
-         || (len <= shortListLen && contiguous<T>())
+            (len <= 1 || !shortLen)
+         ||
+            (
+                (len <= shortLen)
+             &&
+                (
+                    Detail::ListPolicy::no_linebreak<T>::value
+                 || contiguous<T>()
+                )
+            )
         )
         {
             // Size and start delimiter
@@ -141,14 +151,7 @@ Foam::Ostream& Foam::UList<T>::writeList
 }
 
 
-// * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
-
-template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const UList<T>& list)
-{
-    return list.writeList(os, 10);
-}
-
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T>
 Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
@@ -231,7 +234,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
                 }
                 else
                 {
-                    // uniform content (delimiter == token::BEGIN_BLOCK)
+                    // Uniform content (delimiter == token::BEGIN_BLOCK)
 
                     T element;
                     is >> element;

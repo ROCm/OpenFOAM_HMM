@@ -1,10 +1,10 @@
 include $(GENERAL_RULES)/Gcc/c++
 
-CC          = g++ -std=c++11 -m64
+c++ARCH     = -m64
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 
-c++FLAGS    = $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS) -fPIC
+c++FLAGS    = $(c++ARCH) $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS) -fPIC
 
 Ctoo        = $(WM_SCHEDULER) $(CC) $(c++FLAGS) -c $< -o $@
 cxxtoo      = $(Ctoo)

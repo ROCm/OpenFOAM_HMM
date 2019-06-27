@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,17 +94,6 @@ SourceFiles
 
 namespace Foam
 {
-
-//- Dummy access operator for ListListOps::combine()
-template<class T>
-struct accessOp
-{
-    const T& operator()(const T& x) const
-    {
-        return x;
-    }
-};
-
 
 //- Offset operator for ListListOps::combineOffset()
 template<class T>

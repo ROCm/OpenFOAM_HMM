@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,9 +128,9 @@ int main(int argc, char *argv[])
     );
 
 
-    forAllConstIter(SLPtrList<thermo>, EQreactions, iter)
+    for (const thermo& react : EQreactions)
     {
-        Info<< "Kc(EQreactions) = " << iter().Kc(P, T) << endl;
+        Info<< "Kc(EQreactions) = " << react.Kc(P, T) << endl;
     }
 
     Info<< nl << "End" << nl << endl;

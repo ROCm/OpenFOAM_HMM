@@ -4,10 +4,14 @@ global/global.Cver
 global/argList/argList.C
 global/argList/argListHelp.C
 global/clock/clock.C
+global/clockTime/clockTime.C
+global/clockValue/clockValue.C
+global/cpuTime/cpuTimeCxx.C
 global/profiling/profiling.C
 global/profiling/profilingInformation.C
 global/profiling/profilingSysInfo.C
 global/profiling/profilingTrigger.C
+global/profiling/profilingPstream.C
 global/etcFiles/etcFiles.C
 global/version/foamVersion.C
 
@@ -47,12 +51,14 @@ $(ints)/int64/int64IO.C
 $(ints)/int/intIO.C
 $(ints)/label/label.C
 $(ints)/uLabel/uLabel.C
+$(ints)/lists/labelList.C
 $(ints)/lists/labelIOList.C
 $(ints)/lists/labelListIOList.C
 
 primitives/Scalar/doubleScalar/doubleScalar.C
 primitives/Scalar/floatScalar/floatScalar.C
 primitives/Scalar/scalar/scalar.C
+primitives/Scalar/scalar/incGamma.C
 primitives/Scalar/scalar/invIncGamma.C
 primitives/Scalar/lists/scalarList.C
 primitives/Scalar/lists/scalarIOList.C
@@ -74,7 +80,7 @@ primitives/Vector/complexVector/complexVector.C
 primitives/Vector/doubleVector/doubleVector.C
 primitives/Tensor/doubleTensor/doubleTensor.C
 #endif
-#if !defined(WM_SP)
+#if !defined(WM_SP) && !defined(WM_SPDP)
 primitives/Vector/floatVector/floatVector.C
 primitives/Tensor/floatTensor/floatTensor.C
 #endif
@@ -87,6 +93,7 @@ primitives/Vector/lists/vectorListIOList.C
 primitives/Tensor2D/tensor2D/tensor2D.C
 primitives/SphericalTensor2D/sphericalTensor2D/sphericalTensor2D.C
 primitives/SymmTensor2D/symmTensor2D/symmTensor2D.C
+primitives/Vector2D/labelVector2D/labelVector2D.C
 primitives/Vector2D/vector2D/vector2D.C
 
 primitives/complex/complex.C
@@ -118,6 +125,7 @@ $(strings)/word/wordIOList.C
 $(strings)/fileName/fileName.C
 $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
+$(strings)/regex/regExpCxx.C
 $(strings)/wordRe/wordRe.C
 $(strings)/wordRes/wordRes.C
 $(strings)/lists/CStringList.C
@@ -144,6 +152,7 @@ $(ranges)/labelRange/labelRange.C
 $(ranges)/labelRange/labelRanges.C
 $(ranges)/scalarRange/scalarRange.C
 $(ranges)/scalarRange/scalarRanges.C
+$(ranges)/sliceRange/sliceRange.C
 $(ranges)/tableBounds/tableBounds.C
 
 spatialVectorAlgebra = primitives/spatialVectorAlgebra
@@ -244,6 +253,8 @@ $(functionEntries)/includeEtcEntry/includeEtcEntry.C
 $(functionEntries)/includeFuncEntry/includeFuncEntry.C
 $(functionEntries)/inputMode/inputMode.C
 $(functionEntries)/removeEntry/removeEntry.C
+$(functionEntries)/ifeqEntry/ifeqEntry.C
+$(functionEntries)/ifEntry/ifEntry.C
 
 IOdictionary = db/IOobjects/IOdictionary
 $(IOdictionary)/baseIOdictionary.C
@@ -281,14 +292,17 @@ $(dll)/dynamicCode/dynamicCode.C
 $(dll)/dynamicCode/dynamicCodeContext.C
 $(dll)/codedBase/codedBase.C
 
-db/functionObjects/functionObject/functionObject.C
-db/functionObjects/functionObjectList/functionObjectList.C
-db/functionObjects/stateFunctionObject/stateFunctionObject.C
-db/functionObjects/writeFile/writeFile.C
-db/functionObjects/logFiles/logFiles.C
-db/functionObjects/timeControl/timeControl.C
-db/functionObjects/timeControl/timeControlFunctionObject.C
-db/functionObjects/regionFunctionObject/regionFunctionObject.C
+funcObjs = db/functionObjects
+
+$(funcObjs)/functionObject/functionObject.C
+$(funcObjs)/functionObjectList/functionObjectList.C
+$(funcObjs)/stateFunctionObject/stateFunctionObject.C
+$(funcObjs)/timeFunctionObject/timeFunctionObject.C
+$(funcObjs)/writeFile/writeFile.C
+$(funcObjs)/logFiles/logFiles.C
+$(funcObjs)/timeControl/timeControl.C
+$(funcObjs)/timeControl/timeControlFunctionObject.C
+$(funcObjs)/regionFunctionObject/regionFunctionObject.C
 
 Time = db/Time
 $(Time)/TimePaths.C
@@ -664,7 +678,8 @@ $(Fields)/quaternionField/quaternionField.C
 $(Fields)/quaternionField/quaternionIOField.C
 $(Fields)/triadField/triadField.C
 $(Fields)/triadField/triadIOField.C
-$(Fields)/complexFields/complexFields.C
+$(Fields)/complex/complexField.C
+$(Fields)/complex/complexVectorField.C
 $(Fields)/transformField/transformField.C
 $(Fields)/fieldTypes.C
 
@@ -693,7 +708,6 @@ $(constraintPointPatchFields)/wedge/wedgePointPatchFields.C
 derivedPointPatchFields = $(pointPatchFields)/derived
 $(derivedPointPatchFields)/slip/slipPointPatchFields.C
 $(derivedPointPatchFields)/fixedNormalSlip/fixedNormalSlipPointPatchFields.C
-$(derivedPointPatchFields)/uniformFixedValue/uniformFixedValuePointPatchFields.C
 $(derivedPointPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValuePointPatchFields.C
 $(derivedPointPatchFields)/codedFixedValue/codedFixedValuePointPatchFields.C
 

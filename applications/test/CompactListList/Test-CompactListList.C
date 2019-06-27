@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +49,7 @@ int main(int argc, char *argv[])
         Info<< "cll1:" << cll1 << endl;
 
         // Resize and assign row by row
-        labelList row0(2, label(0));
+        labelList row0(2, Zero);
         labelList row1(3, label(1));
 
         labelList rowSizes(2);

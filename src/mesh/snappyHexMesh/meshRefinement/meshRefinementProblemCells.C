@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +42,6 @@ License
 
 #include "snapParameters.H"
 #include "motionSmoother.H"
-#include "topoDistanceData.H"
-#include "FaceCellWave.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -373,94 +373,6 @@ bool Foam::meshRefinement::isCollapsedCell
 }
 
 
-Foam::labelList Foam::meshRefinement::nearestPatch
-(
-    const labelList& adaptPatchIDs
-) const
-{
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    labelList nearestAdaptPatch;
-
-    if (adaptPatchIDs.size())
-    {
-        nearestAdaptPatch.setSize(mesh_.nFaces(), adaptPatchIDs[0]);
-
-
-        // Count number of faces in adaptPatchIDs
-        label nFaces = 0;
-        forAll(adaptPatchIDs, i)
-        {
-            const polyPatch& pp = patches[adaptPatchIDs[i]];
-            nFaces += pp.size();
-        }
-
-        // Field on cells and faces.
-        List<topoDistanceData> cellData(mesh_.nCells());
-        List<topoDistanceData> faceData(mesh_.nFaces());
-
-        // Start of changes
-        labelList patchFaces(nFaces);
-        List<topoDistanceData> patchData(nFaces);
-        nFaces = 0;
-        forAll(adaptPatchIDs, i)
-        {
-            label patchi = adaptPatchIDs[i];
-            const polyPatch& pp = patches[patchi];
-
-            forAll(pp, i)
-            {
-                patchFaces[nFaces] = pp.start()+i;
-                patchData[nFaces] = topoDistanceData(patchi, 0);
-                nFaces++;
-            }
-        }
-
-        // Propagate information inwards
-        FaceCellWave<topoDistanceData> deltaCalc
-        (
-            mesh_,
-            patchFaces,
-            patchData,
-            faceData,
-            cellData,
-            mesh_.globalData().nTotalCells()+1
-        );
-
-        // And extract
-
-        bool haveWarned = false;
-        forAll(faceData, facei)
-        {
-            if (!faceData[facei].valid(deltaCalc.data()))
-            {
-                if (!haveWarned)
-                {
-                    WarningInFunction
-                        << "Did not visit some faces, e.g. face " << facei
-                        << " at " << mesh_.faceCentres()[facei] << endl
-                        << "Assigning  these cells to patch "
-                        << adaptPatchIDs[0]
-                        << endl;
-                    haveWarned = true;
-                }
-            }
-            else
-            {
-                nearestAdaptPatch[facei] = faceData[facei].data();
-            }
-        }
-    }
-    else
-    {
-        // Use patch 0
-        nearestAdaptPatch.setSize(mesh_.nFaces(), 0);
-    }
-
-    return nearestAdaptPatch;
-}
-
-
 // Returns list with for every internal face -1 or the patch they should
 // be baffled into. Gets run after createBaffles so all the unzoned surface
 // intersections have already been turned into baffles. (Note: zoned surfaces
@@ -633,8 +545,8 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     if (checkCollapse)
     {
-        motionDict.readEntry("minArea", minArea);
-        motionDict.readEntry("maxNonOrtho", maxNonOrtho);
+        minArea = get<scalar>(motionDict, "minArea", dryRun_);
+        maxNonOrtho = get<scalar>(motionDict, "maxNonOrtho", dryRun_);
 
         Info<< "markFacesOnProblemCells :"
             << " Deleting all-anchor surface cells only if"
@@ -1123,7 +1035,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
         // Check initial mesh
         Info<< "Checking initial mesh ..." << endl;
         labelHashSet wrongFaces(mesh_.nFaces()/100);
-        motionSmoother::checkMesh(false, mesh_, motionDict, wrongFaces);
+        motionSmoother::checkMesh
+        (
+            false,
+            mesh_,
+            motionDict,
+            wrongFaces,
+            dryRun_
+        );
         const label nInitErrors = returnReduce
         (
             wrongFaces.size(),
@@ -1235,7 +1154,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
             //    nWrongFaces = nNewWrongFaces;
             //}
 
-            scalar minArea(motionDict.get<scalar>("minArea"));
+            scalar minArea(get<scalar>(motionDict, "minArea", dryRun_));
             if (minArea > -SMALL)
             {
                 polyMeshGeometry::checkFaceArea
@@ -1262,7 +1181,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
                 nWrongFaces = nNewWrongFaces;
             }
 
-            scalar minDet(motionDict.get<scalar>("minDeterminant"));
+            scalar minDet(get<scalar>(motionDict, "minDeterminant", dryRun_));
             if (minDet > -1)
             {
                 polyMeshGeometry::checkCellDeterminant
@@ -1291,18 +1210,18 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
         }
 
 
-        forAllConstIter(faceSet, wrongFaces, iter)
+        for (const label facei : wrongFaces)
         {
-            label patchi = mesh_.boundaryMesh().whichPatch(iter.key());
+            const label patchi = mesh_.boundaryMesh().whichPatch(facei);
 
             if (patchi == -1 || mesh_.boundaryMesh()[patchi].coupled())
             {
-                facePatch[iter.key()] = nearestAdaptPatch[iter.key()];
+                facePatch[facei] = nearestAdaptPatch[facei];
                 nBaffleFaces++;
 
-                //Pout<< "    " << iter.key()
+                //Pout<< "    " << facei
                 //    //<< " on patch " << mesh_.boundaryMesh()[patchi].name()
-                //    << " is destined for patch " << facePatch[iter.key()]
+                //    << " is destined for patch " << facePatch[facei]
                 //    << endl;
             }
         }

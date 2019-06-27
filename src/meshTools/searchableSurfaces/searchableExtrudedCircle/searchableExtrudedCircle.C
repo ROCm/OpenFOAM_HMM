@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +89,7 @@ Foam::searchableExtrudedCircle::searchableExtrudedCircle
     bounds() = boundBox(points, false);
 
     vector halfSpan(0.5*bounds().span());
-    point ctr(bounds().midpoint());
+    point ctr(bounds().centre());
 
     bounds().min() = ctr - mag(halfSpan) * vector::one;
     bounds().max() = ctr + mag(halfSpan) * vector::one;

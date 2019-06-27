@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,8 +34,8 @@ void Foam::lduMatrix::initMatrixInterfaces
     const bool add,
     const FieldField<Field, scalar>& coupleCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    const scalarField& psiif,
-    scalarField& result,
+    const solveScalarField& psiif,
+    solveScalarField& result,
     const direction cmpt
 ) const
 {
@@ -101,8 +103,8 @@ void Foam::lduMatrix::updateMatrixInterfaces
     const bool add,
     const FieldField<Field, scalar>& coupleCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    const scalarField& psiif,
-    scalarField& result,
+    const solveScalarField& psiif,
+    solveScalarField& result,
     const direction cmpt
 ) const
 {

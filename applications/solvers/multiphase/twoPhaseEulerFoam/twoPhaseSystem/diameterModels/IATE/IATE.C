@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,12 +80,7 @@ Foam::diameterModels::IATE::IATE
     ),
     dMax_("dMax", dimLength, diameterProperties_),
     dMin_("dMin", dimLength, diameterProperties_),
-    residualAlpha_
-    (
-        "residualAlpha",
-        dimless,
-        diameterProperties_
-    ),
+    residualAlpha_("residualAlpha", dimless, diameterProperties_),
     d_
     (
         IOobject

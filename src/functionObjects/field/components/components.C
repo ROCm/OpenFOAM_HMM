@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,37 +68,31 @@ Foam::functionObjects::components::components
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::components::~components()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::components::write()
 {
-    bool written = true;
+    bool ok = true;
 
-    forAll(resultNames_, i)
+    for (const word& result : resultNames_)
     {
-        written = written && writeObject(resultNames_[i]);
+        ok = writeObject(result) && ok;
     }
 
-    return written;
+    return ok;
 }
 
 
 bool Foam::functionObjects::components::clear()
 {
-    bool cleared = true;
+    bool ok = true;
 
-    forAll(resultNames_, i)
+    for (const word& result : resultNames_)
     {
-        cleared = cleared && clearObject(resultNames_[i]);
+        ok = clearObject(result) && ok;
     }
 
-    return cleared;
+    return ok;
 }
 
 

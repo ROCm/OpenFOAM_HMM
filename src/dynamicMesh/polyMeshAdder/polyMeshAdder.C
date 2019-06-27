@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +53,7 @@ Foam::label Foam::polyMeshAdder::patchIndex
     const word& pType = p.type();
     const word& pName = p.name();
 
-    label patchi = allPatchNames.find(pName);
+    const label patchi = allPatchNames.find(pName);
 
     if (patchi == -1)
     {
@@ -96,7 +98,7 @@ Foam::label Foam::polyMeshAdder::zoneIndex
     DynamicList<word>& names
 )
 {
-    label zoneI = names.find(curName);
+    const label zoneI = names.find(curName);
 
     if (zoneI != -1)
     {
@@ -334,7 +336,7 @@ Foam::labelList Foam::polyMeshAdder::getFaceOrder
 
         forAll(cFaces, i)
         {
-            label facei = cFaces[i];
+            const label facei = cFaces[i];
 
             label nbrCelli = neighbour[facei];
 
@@ -420,11 +422,11 @@ void Foam::polyMeshAdder::insertVertices
 
         // See if any edge between v0,v1
 
-        Map<label>::const_iterator v0Fnd = meshToMaster.find(v0);
-        if (v0Fnd != meshToMaster.end())
+        const auto v0Fnd = meshToMaster.cfind(v0);
+        if (v0Fnd.found())
         {
-            Map<label>::const_iterator v1Fnd = meshToMaster.find(v1);
-            if (v1Fnd != meshToMaster.end())
+            const auto v1Fnd = meshToMaster.cfind(v1);
+            if (v1Fnd.found())
             {
                 // Get edge in cutPoint numbering
                 edge cutEdge
@@ -433,12 +435,12 @@ void Foam::polyMeshAdder::insertVertices
                     masterToCutPoints[v1Fnd()]
                 );
 
-                edgeLookup::const_iterator iter = cutEdgeToPoints.find(cutEdge);
+                const auto iter = cutEdgeToPoints.cfind(cutEdge);
 
-                if (iter != cutEdgeToPoints.end())
+                if (iter.found())
                 {
                     const edge& e = iter.key();
-                    const labelList& addedPoints = iter();
+                    const labelList& addedPoints = iter.val();
 
                     // cutPoints first in allPoints so no need for renumbering
                     if (e[0] == cutEdge[0])
@@ -949,7 +951,7 @@ void Foam::polyMeshAdder::mergePointZones
     // Extract back into zones
 
     // 1. Count
-    labelList nPoints(zoneNames.size(), 0);
+    labelList nPoints(zoneNames.size(), Zero);
     forAll(pointToZone, allPointi)
     {
         label zoneI = pointToZone[allPointi];
@@ -1127,7 +1129,7 @@ void Foam::polyMeshAdder::mergeFaceZones
     // Extract back into zones
 
     // 1. Count
-    labelList nFaces(zoneNames.size(), 0);
+    labelList nFaces(zoneNames.size(), Zero);
     forAll(faceToZone, allFacei)
     {
         label zoneI = faceToZone[allFacei];
@@ -1271,7 +1273,7 @@ void Foam::polyMeshAdder::mergeCellZones
     // Extract back into zones
 
     // 1. Count
-    labelList nCells(zoneNames.size(), 0);
+    labelList nCells(zoneNames.size(), Zero);
     forAll(cellToZone, allCelli)
     {
         label zoneI = cellToZone[allCelli];
@@ -1506,7 +1508,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::polyMeshAdder::add
     label nCells;
 
     // Sizes per patch
-    labelList nFaces(allPatchNames.size(), 0);
+    labelList nFaces(allPatchNames.size(), Zero);
 
     // Maps
     labelList from0ToAllFaces(mesh0.nFaces(), -1);
@@ -1720,7 +1722,7 @@ Foam::autoPtr<Foam::mapAddedPolyMesh> Foam::polyMeshAdder::add
     labelList allNeighbour;
     label nInternalFaces;
     // Sizes per patch
-    labelList nFaces(allPatchNames.size(), 0);
+    labelList nFaces(allPatchNames.size(), Zero);
     label nCells;
 
     // Maps
@@ -2019,15 +2021,15 @@ Foam::Map<Foam::label> Foam::polyMeshAdder::findSharedPoints
 
         label sharedI = sharedPointAddr[i];
 
-        Map<labelList>::iterator iter = sharedToMesh.find(sharedI);
+        auto iter = sharedToMesh.find(sharedI);
 
-        if (iter != sharedToMesh.end())
+        if (iter.found())
         {
             // sharedI already used by other point. Add this one.
 
             nMultiple++;
 
-            labelList& connectedPointLabels = iter();
+            labelList& connectedPointLabels = iter.val();
 
             label sz = connectedPointLabels.size();
 
@@ -2057,9 +2059,9 @@ Foam::Map<Foam::label> Foam::polyMeshAdder::findSharedPoints
 
     Map<label> pointToMaster(nMultiple);
 
-    forAllConstIter(Map<labelList>, sharedToMesh, iter)
+    forAllConstIters(sharedToMesh, iter)
     {
-        const labelList& connectedPointLabels = iter();
+        const labelList& connectedPointLabels = iter.val();
 
         //Pout<< "For shared:" << iter.key()
         //    << " found points:" << connectedPointLabels
@@ -2215,13 +2217,13 @@ void Foam::polyMeshAdder::mergePoints
     // Remove all non-master points.
     forAll(mesh.points(), pointi)
     {
-        Map<label>::const_iterator iter = pointToMaster.find(pointi);
+        const auto iter = pointToMaster.cfind(pointi);
 
-        if (iter != pointToMaster.end())
+        if (iter.found())
         {
-            if (iter() != pointi)
+            if (iter.val() != pointi)
             {
-                meshMod.removePoint(pointi, iter());
+                meshMod.removePoint(pointi, iter.val());
             }
         }
     }
@@ -2240,11 +2242,11 @@ void Foam::polyMeshAdder::mergePoints
         {
             label pointi = f[fp];
 
-            Map<label>::const_iterator iter = pointToMaster.find(pointi);
+            const auto iter = pointToMaster.cfind(pointi);
 
-            if (iter != pointToMaster.end())
+            if (iter.found())
             {
-                if (iter() != pointi)
+                if (iter.val() != pointi)
                 {
                     hasMerged = true;
                     break;
@@ -2260,11 +2262,11 @@ void Foam::polyMeshAdder::mergePoints
             {
                 label pointi = f[fp];
 
-                Map<label>::const_iterator iter = pointToMaster.find(pointi);
+                const auto iter = pointToMaster.cfind(pointi);
 
-                if (iter != pointToMaster.end())
+                if (iter.found())
                 {
-                    newF[fp] = iter();
+                    newF[fp] = iter.val();
                 }
             }
 

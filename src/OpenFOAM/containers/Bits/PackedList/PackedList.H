@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,7 +93,7 @@ SourceFiles
 
 #include "BitOps.H"
 #include "labelList.H"
-#include "UIndirectList.H"
+#include "IndirectListBase.H"
 #include "InfoProxy.H"
 #include "PackedListCore.H"
 
@@ -250,7 +252,12 @@ public:
         PackedList(const PackedList<Width>& list, const labelUList& addr);
 
         //- Copy construct a subset
-        PackedList(const PackedList<Width>& list, const labelUIndList& addr);
+        template<class Addr>
+        PackedList
+        (
+            const PackedList<Width>& list,
+            const IndirectListBase<label, Addr>& addr
+        );
 
         //- Copy construct a subset range
         PackedList(const PackedList<Width>& list, const labelRange& range);
@@ -258,8 +265,9 @@ public:
         //- Construct from a list of values
         inline explicit PackedList(const labelUList& values);
 
-        //- Construct from a list of values
-        inline explicit PackedList(const labelUIndList& values);
+        //- Construct from a indirect list of values
+        template<class Addr>
+        inline explicit PackedList(const IndirectListBase<label, Addr>& values);
 
         //- Clone
         inline autoPtr<PackedList<Width>> clone() const;
@@ -281,9 +289,11 @@ public:
         //- The number of elements that can be stored with reallocating
         inline label capacity() const;
 
-        //- True if there are two or more entries and all entries have
-        //- identical values.
+        //- True if all entries have identical values, and list is non-empty
         bool uniform() const;
+
+        //- Test for equality of sizes and the bits set
+        bool equal(const PackedList<Width>& other) const;
 
 
     // Access
@@ -400,10 +410,9 @@ public:
         //- Clear list and read from stream
         Istream& read(Istream& is);
 
-        //- Write the List, with line-breaks in ASCII if the list length
-        //- exceeds shortListLen.
+        //- Write List, with line-breaks in ASCII when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
         //- Write as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
@@ -492,13 +501,27 @@ public:
             Istream& is,
             PackedList<Width>& list
         );
-
-        friend Ostream& operator<< <Width>
-        (
-            Ostream& os,
-            const PackedList<Width>& list
-        );
 };
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+//- Write List to Ostream, as per UList::writeList() with default length.
+//  The default short-length is given by Detail::ListPolicy::short_length
+template<unsigned Width>
+Ostream& operator<<(Ostream& os, const PackedList<Width>& list)
+{
+    return list.writeList(os, Detail::ListPolicy::short_length<void>::value);
+}
+
+
+//- Test for equality of sizes and the bits set
+template<unsigned Width>
+inline bool operator==(const PackedList<Width>& a, const PackedList<Width>& b);
+
+//- Test for inequality of sizes or the bits set
+template<unsigned Width>
+inline bool operator!=(const PackedList<Width>& a, const PackedList<Width>& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -746,7 +748,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
         mesh.objectRegistry::lookupClass<GeoField>()
     );
 
-    forAllIter(typename HashTable<GeoField*>, flds, iter)
+    forAllIters(flds, iter)
     {
         GeoField& fld = *iter();
 
@@ -1944,16 +1946,11 @@ void readLagrangian
         );
 
 
-        //forAllConstIter
-        //(
-        //    unmappedPassivePositionParticleCloud,
-        //    clouds[i],
-        //    iter
-        //)
+        //for (passivePositionParticle& p : clouds[i]))
         //{
-        //    Pout<< "Particle position:" << iter().position()
-        //        << " cell:" << iter().cell()
-        //        << " with cc:" << mesh.cellCentres()[iter().cell()]
+        //    Pout<< "Particle position:" << p.position()
+        //        << " cell:" << p.cell()
+        //        << " with cc:" << mesh.cellCentres()[p.cell()]
         //        << endl;
         //}
 
@@ -2310,7 +2307,9 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~
     // (replacement for setRootCase that does not abort)
 
-    Foam::argList args(argc, argv);
+    argList args(argc, argv);
+    #include "foamDlOpenLibs.H"
+
     const bool reconstruct = args.found("reconstruct");
     const bool writeCellDist = args.found("cellDist");
     const bool dryrun = args.found("dry-run");
@@ -2671,7 +2670,7 @@ int main(int argc, char *argv[])
                         << endl;
 
                     label nDestProcs = 1;
-                    labelList finalDecomp = labelList(mesh.nCells(), 0);
+                    labelList finalDecomp = labelList(mesh.nCells(), Zero);
 
                     redistributeAndWrite
                     (

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +83,7 @@ Description
         <fileName>.in
     \endverbatim
 
-    ... and then re-instate the lock file.  The boundary condition will then
+    ... and then reinstate the lock file.  The boundary condition will then
     read the return values, and pass program execution back to OpenFOAM.
 
     To be used in combination with the functionObjects::externalCoupled
@@ -89,11 +91,11 @@ Description
 
 Usage
     \table
-        Property    | Description                           | Required | Default
-        outputTemperature | The output temperature: fluid/wall | yes |
+        Property | Description                              | Required | Default
+        outputTemperature | Output temperature: fluid/wall  | yes |
+        htcRefTemperature | Fluid temperature for htc: cell/user  | no | cell
+        Tref     | Reference temperature [K] for htc        | partly |
     \endtable
-
-Note the
 
 SeeAlso
     externalCoupledFunctionObject
@@ -126,7 +128,7 @@ class externalCoupledTemperatureMixedFvPatchScalarField
 {
     // Data Types
 
-        //- Location for the ouput temperature
+        //- Location for the output temperature
         enum outputTemperatureType
         {
             FLUID,      //!< Use fluid (cell) temperature
@@ -136,11 +138,27 @@ class externalCoupledTemperatureMixedFvPatchScalarField
         //- Names for outputTemperatureType
         static const Enum<outputTemperatureType> outputTemperatureNames;
 
+        //- Reference temperature type for HTC calculation
+        enum refTemperatureType
+        {
+            CELL,       //!< Use cell temperature (default)
+            USER        //!< User-specified reference temperature
+        };
+
+        //- Names for refTemperatureType
+        static const Enum<refTemperatureType> refTemperatureNames;
+
 
     // Private Data
 
-        //- Location for the ouput temperature
-        enum outputTemperatureType outputTemperature_;
+        //- Location for the output temperature
+        enum outputTemperatureType outTempType_;
+
+        //- Reference temperature type for HTC calculation
+        enum refTemperatureType refTempType_;
+
+        //- User-specified reference temperature for HTC calculation
+        scalar Tref_;
 
 
 public:

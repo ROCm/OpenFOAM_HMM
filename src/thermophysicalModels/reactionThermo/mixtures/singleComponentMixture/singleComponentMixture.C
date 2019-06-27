@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,13 +39,6 @@ Foam::singleComponentMixture<ThermoType>::singleComponentMixture
 :
     basicSpecieMixture(thermoDict, wordList::null(), mesh, phaseName),
     thermo_(thermoDict.subDict("mixture"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class ThermoType>
-Foam::singleComponentMixture<ThermoType>::~singleComponentMixture()
 {}
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
     }
     else
     {
-        ITstream& is = dict.lookup(entryName, false);
+        ITstream& is = dict.lookup(entryName, keyType::LITERAL);
 
         token firstToken(is);
 
@@ -69,7 +69,11 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
             is.putBack(firstToken);
 
             const Type uniformValue = pTraits<Type>(is);
-            const Field<Type> value(pp.size(), uniformValue);
+            const Field<Type> value
+            (
+                (faceValues ? pp.size() : pp.nPoints()),
+                uniformValue
+            );
 
             return autoPtr<PatchFunction1<Type>>
             (
@@ -98,7 +102,8 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
                     pp,
                     PatchFunction1Types::ConstantField<Type>::typeName,
                     entryName,
-                    dict
+                    dict,
+                    faceValues
                 )
             );
         }

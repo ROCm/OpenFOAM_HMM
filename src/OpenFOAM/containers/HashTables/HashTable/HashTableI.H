@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,11 +62,45 @@ inline bool Foam::HashTable<T, Key, Hash>::empty() const
 
 
 template<class T, class Key, class Hash>
+inline T& Foam::HashTable<T, Key, Hash>::at(const Key& key)
+{
+    const iterator iter(this->find(key));
+
+    if (!iter.good())
+    {
+        FatalErrorInFunction
+            << key << " not found in table.  Valid entries: "
+            << toc()
+            << exit(FatalError);
+    }
+
+    return iter.val();
+}
+
+
+template<class T, class Key, class Hash>
+inline const T& Foam::HashTable<T, Key, Hash>::at(const Key& key) const
+{
+    const const_iterator iter(this->cfind(key));
+
+    if (!iter.good())
+    {
+        FatalErrorInFunction
+            << key << " not found in table.  Valid entries: "
+            << toc()
+            << exit(FatalError);
+    }
+
+    return iter.val();
+}
+
+
+template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::found(const Key& key) const
 {
     if (size_)
     {
-        return Iterator<true>(this, key).found();
+        return Iterator<true>(this, key).good();
     }
 
     return false;
@@ -115,13 +151,36 @@ Foam::HashTable<T, Key, Hash>::cfind
 
 
 template<class T, class Key, class Hash>
+template<class... Args>
+inline bool Foam::HashTable<T, Key, Hash>::emplace
+(
+    const Key& key,
+    Args&&... args
+)
+{
+    return this->setEntry(false, key, std::forward<Args>(args)...);
+}
+
+
+template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::insert
 (
     const Key& key,
-    const T& obj
+    const T& val
 )
 {
-    return this->setEntry(key, obj, false);  // No overwrite
+    return this->setEntry(false, key, val);
+}
+
+
+template<class T, class Key, class Hash>
+inline bool Foam::HashTable<T, Key, Hash>::insert
+(
+    const Key& key,
+    T&& val
+)
+{
+    return this->setEntry(false, key, std::forward<T>(val));
 }
 
 
@@ -129,10 +188,21 @@ template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::set
 (
     const Key& key,
-    const T& obj
+    const T& val
 )
 {
-    return this->setEntry(key, obj, true);   // Overwrite
+    return this->setEntry(true, key, val);   // Overwrite
+}
+
+
+template<class T, class Key, class Hash>
+inline bool Foam::HashTable<T, Key, Hash>::set
+(
+    const Key& key,
+    T&& val
+)
+{
+    return this->setEntry(true, key, std::forward<T>(val));  // Overwrite
 }
 
 
@@ -144,7 +214,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::lookup
 ) const
 {
     const const_iterator iter(this->cfind(key));
-    return iter.found() ? iter.object() : deflt;
+    return iter.good() ? iter.val() : deflt;
 }
 
 
@@ -155,7 +225,7 @@ inline T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key)
 {
     const iterator iter(this->find(key));
 
-    if (!iter.found())
+    if (!iter.good())
     {
         FatalErrorInFunction
             << key << " not found in table.  Valid entries: "
@@ -163,7 +233,7 @@ inline T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key)
             << exit(FatalError);
     }
 
-    return iter.object();
+    return iter.val();
 }
 
 
@@ -172,7 +242,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key) const
 {
     const const_iterator iter(this->cfind(key));
 
-    if (!iter.found())
+    if (!iter.good())
     {
         FatalErrorInFunction
             << key << " not found in table.  Valid entries: "
@@ -180,7 +250,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key) const
             << exit(FatalError);
     }
 
-    return iter.object();
+    return iter.val();
 }
 
 
@@ -189,13 +259,13 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()(const Key& key)
 {
     const iterator iter(this->find(key));
 
-    if (iter.found())
+    if (iter.good())
     {
-        return iter.object();
+        return iter.val();
     }
 
     this->insert(key, mapped_type());
-    return find(key).object();
+    return find(key).val();
 }
 
 
@@ -208,13 +278,13 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()
 {
     const iterator iter(this->find(key));
 
-    if (iter.found())
+    if (iter.good())
     {
-        return iter.object();
+        return iter.val();
     }
 
     this->insert(key, deflt);
-    return find(key).object();
+    return find(key).val();
 }
 
 

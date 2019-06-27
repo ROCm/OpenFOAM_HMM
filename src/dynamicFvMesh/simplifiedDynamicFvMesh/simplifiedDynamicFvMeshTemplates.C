@@ -29,16 +29,17 @@ template<class DynamicMeshType>
 Foam::simplifiedMeshes::SimplifiedDynamicFvMesh<DynamicMeshType>::
 SimplifiedDynamicFvMesh
 (
-    const Time& runTime
+    const Time& runTime,
+    const word& regionName
 )
 :
     simplifiedDynamicFvMeshBase(),
-    columnFvMeshInfo(runTime),
+    columnFvMeshInfo(runTime, regionName),
     DynamicMeshType
     (
         IOobject
         (
-            fvMesh::defaultRegion,
+            regionName,
             runTime.constant(),
             runTime,
             IOobject::NO_READ, // Do not read any existing mesh

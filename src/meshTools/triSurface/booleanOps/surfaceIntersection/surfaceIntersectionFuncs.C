@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,9 +41,8 @@ namespace Foam
 // Write points in obj format
 static void writeObjPoints(const UList<point>& pts, Ostream& os)
 {
-    forAll(pts, i)
+    for (const point& pt : pts)
     {
-        const point& pt = pts[i];
         os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
     }
 }
@@ -175,14 +176,9 @@ Foam::edgeList Foam::surfaceIntersection::filterEdges
     {
         const edge& e = edges[edgeI];
 
-        if
-        (
-            (e.start() != e.end())
-         && (uniqueEdges.find(e) == uniqueEdges.end())
-        )
+        if ((e.start() != e.end()) && uniqueEdges.insert(e))
         {
-            // Edge is -non degenerate and -not yet seen.
-            uniqueEdges.insert(e);
+            // Edge is non-degenerate and not yet seen.
 
             map[edgeI] = newEdgeI;
 
@@ -216,10 +212,9 @@ Foam::labelList Foam::surfaceIntersection::filterLabels
     {
         label elem = elems[elemI];
 
-        if (uniqueElems.find(elem) == uniqueElems.end())
+        if (uniqueElems.insert(elem))
         {
             // First time elem is seen
-            uniqueElems.insert(elem);
 
             map[elemI] = newElemI;
 
@@ -289,10 +284,8 @@ Foam::label Foam::surfaceIntersection::classify
     {
         return 1;
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 

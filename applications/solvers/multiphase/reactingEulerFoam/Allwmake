@@ -4,12 +4,18 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 #------------------------------------------------------------------------------
 
-wmakeLnInclude interfacialModels
-wmakeLnInclude interfacialCompositionModels
-wmake $targetType phaseSystems
-wmake $targetType interfacialModels
-wmake $targetType interfacialCompositionModels
+case "$WM_COMPILER" in
+Mingw*)
+    echo "Skipping $WM_COMPILER compilation of $PWD"
+    echo "... needs further resolution of cyclic dependencies"
+    exit 0
+    ;;
+esac
+
+#------------------------------------------------------------------------------
+
 reactingTwoPhaseEulerFoam/Allwmake $targetType $*
 reactingMultiphaseEulerFoam/Allwmake $targetType $*
+wmake $targetType functionObjects
 
 #------------------------------------------------------------------------------

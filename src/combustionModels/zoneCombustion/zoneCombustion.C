@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +38,7 @@ Foam::combustionModels::zoneCombustion<ReactionThermo>::filter
 {
     fvScalarMatrix& R = tR.ref();
     scalarField& Su = R.source();
-    scalarField filteredField(Su.size(), 0);
+    scalarField filteredField(Su.size(), Zero);
 
     forAll(zoneNames_, zonei)
     {
@@ -80,7 +82,7 @@ Foam::combustionModels::zoneCombustion<ReactionThermo>::filter
 ) const
 {
     scalarField& S = tS.ref();
-    scalarField filteredField(S.size(), 0);
+    scalarField filteredField(S.size(), Zero);
 
     forAll(zoneNames_, zonei)
     {
@@ -187,10 +189,8 @@ bool Foam::combustionModels::zoneCombustion<ReactionThermo>::read()
         combustionModelPtr_->read();
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

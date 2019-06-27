@@ -8,20 +8,17 @@ cd ${0%/*} || exit 1                            # Run from this directory
 
 unset COMP_FLAGS LINK_FLAGS
 
-if [ -f $FOAM_LIBBIN/libSloanRenumber$extLibso ]
+if findLibrary "$FOAM_LIBBIN/libSloanRenumber" > /dev/null
 then
-    echo "    found libSloanRenumber  --  enabling sloan renumbering support."
+    echo "    found libSloanRenumber -- enabling sloan renumbering support."
     export LINK_FLAGS="$LINK_FLAGS -lSloanRenumber"
 fi
 
-if [ -f $FOAM_LIBBIN/libzoltanRenumber$extLibso ]
+if findLibrary "$FOAM_LIBBIN/libzoltanRenumber" > /dev/null && have_zoltan
 then
-    if have_zoltan
-    then
-        echo "    found libzoltanRenumber  --  enabling zoltan renumbering support."
-        export COMP_FLAGS="$COMP_FLAGS -DHAVE_ZOLTAN"
-        export LINK_FLAGS="$LINK_FLAGS -lzoltanRenumber -L$ZOLTAN_LIB_DIR -lzoltan"
-    fi
+    echo "    found libzoltanRenumber -- enabling zoltan renumbering support."
+    export COMP_FLAGS="$COMP_FLAGS -DHAVE_ZOLTAN"
+    export LINK_FLAGS="$LINK_FLAGS -lzoltanRenumber -L$ZOLTAN_LIB_DIR -lzoltan"
 fi
 
 wmake $targetType

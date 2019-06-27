@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +55,7 @@ Description
 #include "faceSet.H"
 #include "pointSet.H"
 #include "processorMeshes.H"
-#include "hexRef8.H"
+#include "hexRef8Data.H"
 
 #ifdef HAVE_ZOLTAN
     #include "zoltanRenumber.H"
@@ -130,8 +132,8 @@ void getBand
     scalar& sumSqrIntersect     // scalar to avoid overflow
 )
 {
-    labelList cellBandwidth(nCells, 0);
-    scalarField nIntersect(nCells, 0.0);
+    labelList cellBandwidth(nCells, Zero);
+    scalarField nIntersect(nCells, Zero);
 
     forAll(neighbour, facei)
     {
@@ -1325,8 +1327,24 @@ int main(int argc, char *argv[])
 
     // Remove old procAddressing files
     processorMeshes::removeFiles(mesh);
-    // Remove refinement data
-    hexRef8::removeFiles(mesh);
+
+    // Update refinement data
+    hexRef8Data refData
+    (
+        IOobject
+        (
+            "dummy",
+            mesh.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh,
+            IOobject::READ_IF_PRESENT,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+    refData.updateMesh(map());
+    refData.write();
+
     // Update sets
     topoSet::updateMesh(mesh.facesInstance(), map(), cellSets);
     topoSet::updateMesh(mesh.facesInstance(), map(), faceSets);

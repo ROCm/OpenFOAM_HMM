@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,21 +38,21 @@ void Foam::polyMeshFilter::updateSets(const mapPolyMesh& map)
     HashTable<const SetType*> sets =
         map.mesh().objectRegistry::lookupClass<const SetType>();
 
-    forAllIter(typename HashTable<const SetType*>, sets, iter)
+    forAllIters(sets, iter)
     {
         SetType& set = const_cast<SetType&>(*iter());
         set.updateMesh(map);
         set.sync(map.mesh());
     }
 
-    IOobjectList Objects
+    IOobjectList objs
     (
         map.mesh().time(),
         map.mesh().facesInstance(),
         "polyMesh/sets"
     );
 
-    IOobjectList fileSets(Objects.lookupClass(SetType::typeName));
+    IOobjectList fileSets(objs.lookupClass<SetType>());
 
     forAllConstIters(fileSets, iter)
     {
@@ -76,17 +78,17 @@ void Foam::polyMeshFilter::copySets
     HashTable<const SetType*> sets =
         oldMesh.objectRegistry::lookupClass<const SetType>();
 
-    forAllConstIter(typename HashTable<const SetType*>, sets, iter)
+    forAllConstIters(sets, iter)
     {
         const SetType& set = *iter();
 
-        if (newMesh.objectRegistry::foundObject<SetType>(set.name()))
-        {
-            const SetType& origSet =
-                newMesh.objectRegistry::lookupObject<SetType>(set.name());
+        SetType* origSet =
+            newMesh.objectRegistry::getObjectPtr<SetType>(set.name());
 
-            const_cast<SetType&>(origSet) = set;
-            const_cast<SetType&>(origSet).sync(newMesh);
+        if (origSet)
+        {
+            (*origSet) = set;
+            (*origSet).sync(newMesh);
         }
         else
         {

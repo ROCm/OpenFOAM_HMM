@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,6 +63,7 @@ Foam::radiation::laserDTRM::powerDistNames_
     { powerDistributionMode::pdGaussian, "Gaussian" },
     { powerDistributionMode::pdManual,   "manual" },
     { powerDistributionMode::pdUniform,  "uniform" },
+    { powerDistributionMode::pdGaussianPeak, "GaussianPeak" },
 };
 
 
@@ -74,6 +75,11 @@ Foam::scalar Foam::radiation::laserDTRM::calculateIp(scalar r, scalar theta)
     const scalar power = laserPower_->value(t);
     switch (mode_)
     {
+        case pdGaussianPeak:
+        {
+            return I0_*exp(-2.0*sqr(r)/sqr(sigma_));
+            break;
+        }
         case pdGaussian:
         {
             scalar I0 = power/(mathematical::twoPi*sqr(sigma_));
@@ -133,7 +139,7 @@ void Foam::radiation::laserDTRM::initialiseReflection()
     {
         dictTable modelDicts(lookup("reflectionModel"));
 
-        forAllConstIter(dictTable, modelDicts, iter)
+        forAllConstIters(modelDicts, iter)
         {
             const phasePairKey& key = iter.key();
 
@@ -142,7 +148,7 @@ void Foam::radiation::laserDTRM::initialiseReflection()
                 key,
                 reflectionModel::New
                 (
-                    *iter,
+                    iter.val(),
                     mesh_
                 )
             );
@@ -196,6 +202,12 @@ void Foam::radiation::laserDTRM::initialise()
 
     switch (mode_)
     {
+        case pdGaussianPeak:
+        {
+            I0_ = get<scalar>("I0");
+            sigma_ = get<scalar>("sigma");
+            break;
+        }
         case pdGaussian:
         {
             sigma_ = get<scalar>("sigma");
@@ -346,6 +358,7 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
     ),
 
     sigma_(0),
+    I0_(0),
     laserPower_(Function1<scalar>::New("laserPower", *this)),
     powerDistribution_(),
 
@@ -353,19 +366,6 @@ Foam::radiation::laserDTRM::laserDTRM(const volScalarField& T)
 
     alphaCut_(lookupOrDefault<scalar>("alphaCut", 0.5)),
 
-    Qin_
-    (
-        IOobject
-        (
-            "Qin",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimPower/dimArea, Zero)
-    ),
     a_
     (
         IOobject
@@ -455,6 +455,7 @@ Foam::radiation::laserDTRM::laserDTRM
     ),
 
     sigma_(0),
+    I0_(0),
     laserPower_(Function1<scalar>::New("laserPower", *this)),
     powerDistribution_(),
 
@@ -462,19 +463,6 @@ Foam::radiation::laserDTRM::laserDTRM
 
     alphaCut_(lookupOrDefault<scalar>("alphaCut", 0.5)),
 
-    Qin_
-    (
-        IOobject
-        (
-            "Qin",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh_,
-        dimensionedScalar(dimPower/dimArea, Zero)
-    ),
     a_
     (
         IOobject
@@ -541,10 +529,13 @@ bool Foam::radiation::laserDTRM::read()
     {
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
+}
+
+Foam::label Foam::radiation::laserDTRM::nBands() const
+{
+    return 1;
 }
 
 
@@ -588,8 +579,7 @@ void Foam::radiation::laserDTRM::calculate()
     volVectorField& nHat = tnHat.ref();
 
 
-    // Reset the fields
-    Qin_ == dimensionedScalar(Qin_.dimensions(), Zero);
+    // Reset the field
     Q_ == dimensionedScalar(Q_.dimensions(), Zero);
 
     a_ = absorptionEmission_->a();
@@ -612,20 +602,23 @@ void Foam::radiation::laserDTRM::calculate()
         reflectionUPtr.resize(reflections_.size());
 
         label reflectionModelId(0);
-        forAllIter(reflectionModelTable, reflections_, iter1)
+        forAllIters(reflections_, iter1)
         {
             reflectionModel& model = iter1()();
 
             reflectionUPtr.set(reflectionModelId, &model);
 
-            const word alpha1Name = "alpha." + iter1.key().first();
-            const word alpha2Name = "alpha." + iter1.key().second();
-
             const volScalarField& alphaFrom =
-                mesh_.lookupObject<volScalarField>(alpha1Name);
+                mesh_.lookupObject<volScalarField>
+                (
+                    IOobject::groupName("alpha", iter1.key().first())
+                );
 
             const volScalarField& alphaTo =
-                mesh_.lookupObject<volScalarField>(alpha2Name);
+                mesh_.lookupObject<volScalarField>
+                (
+                    IOobject::groupName("alpha", iter1.key().second())
+                );
 
             const volVectorField nHatPhase(nHatfv(alphaFrom, alphaTo));
 
@@ -700,9 +693,8 @@ void Foam::radiation::laserDTRM::calculate()
         DynamicList<point>  positionsMyProc;
         DynamicList<point>  p0MyProc;
 
-        forAllIter(Cloud<DTRMParticle>, DTRMCloud_, iter)
+        for (const DTRMParticle& p : DTRMCloud_)
         {
-            DTRMParticle& p = iter();
             positionsMyProc.append(p.position());
             p0MyProc.append(p.p0());
         }

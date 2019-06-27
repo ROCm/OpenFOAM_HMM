@@ -59,7 +59,6 @@ class greyMeanSolidAbsorptionEmission
 :
     public absorptionEmissionModel
 {
-
 private:
 
     // Private data
@@ -113,23 +112,16 @@ public:
 
 
     //- Destructor
-    virtual ~greyMeanSolidAbsorptionEmission();
+    virtual ~greyMeanSolidAbsorptionEmission() = default;
 
 
     // Member Functions
 
-        // Access
+        //- Absorption coefficient for continuous phase
+        tmp<volScalarField> aCont(const label bandI = 0) const;
 
-            // Absorption coefficient
-
-                //- Absorption coefficient for continuous phase
-                tmp<volScalarField> aCont(const label bandI = 0) const;
-
-
-            // Emission coefficient
-
-                //- Emission coefficient for continuous phase
-                tmp<volScalarField> eCont(const label bandI = 0) const;
+        //- Emission coefficient for continuous phase
+        tmp<volScalarField> eCont(const label bandI = 0) const;
 
 
     // Member Functions

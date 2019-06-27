@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "FDICPreconditioner.H"
+#include <algorithm>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,13 +49,16 @@ Foam::FDICPreconditioner::FDICPreconditioner
 )
 :
     lduMatrix::preconditioner(sol),
-    rD_(sol.matrix().diag()),
+    rD_(sol.matrix().diag().size()),
     rDuUpper_(sol.matrix().upper().size()),
     rDlUpper_(sol.matrix().upper().size())
 {
-    scalar* __restrict__ rDPtr = rD_.begin();
-    scalar* __restrict__ rDuUpperPtr = rDuUpper_.begin();
-    scalar* __restrict__ rDlUpperPtr = rDlUpper_.begin();
+    const scalarField& diag = sol.matrix().diag();
+    std::copy(diag.begin(), diag.end(), rD_.begin());
+
+    solveScalar* __restrict__ rDPtr = rD_.begin();
+    solveScalar* __restrict__ rDuUpperPtr = rDuUpper_.begin();
+    solveScalar* __restrict__ rDlUpperPtr = rDlUpper_.begin();
 
     const label* const __restrict__ uPtr =
         solver_.matrix().lduAddr().upperAddr().begin();
@@ -61,8 +67,8 @@ Foam::FDICPreconditioner::FDICPreconditioner
     const scalar* const __restrict__ upperPtr =
         solver_.matrix().upper().begin();
 
-    label nCells = rD_.size();
-    label nFaces = solver_.matrix().upper().size();
+    const label nCells = rD_.size();
+    const label nFaces = solver_.matrix().upper().size();
 
     for (label face=0; face<nFaces; face++)
     {
@@ -87,26 +93,26 @@ Foam::FDICPreconditioner::FDICPreconditioner
 
 void Foam::FDICPreconditioner::precondition
 (
-    scalarField& wA,
-    const scalarField& rA,
+    solveScalarField& wA,
+    const solveScalarField& rA,
     const direction
 ) const
 {
-    scalar* __restrict__ wAPtr = wA.begin();
-    const scalar* __restrict__ rAPtr = rA.begin();
-    const scalar* __restrict__ rDPtr = rD_.begin();
+    solveScalar* __restrict__ wAPtr = wA.begin();
+    const solveScalar* __restrict__ rAPtr = rA.begin();
+    const solveScalar* __restrict__ rDPtr = rD_.begin();
 
     const label* const __restrict__ uPtr =
         solver_.matrix().lduAddr().upperAddr().begin();
     const label* const __restrict__ lPtr =
         solver_.matrix().lduAddr().lowerAddr().begin();
 
-    const scalar* const __restrict__ rDuUpperPtr = rDuUpper_.begin();
-    const scalar* const __restrict__ rDlUpperPtr = rDlUpper_.begin();
+    const solveScalar* const __restrict__ rDuUpperPtr = rDuUpper_.begin();
+    const solveScalar* const __restrict__ rDlUpperPtr = rDlUpper_.begin();
 
-    label nCells = wA.size();
-    label nFaces = solver_.matrix().upper().size();
-    label nFacesM1 = nFaces - 1;
+    const label nCells = wA.size();
+    const label nFaces = solver_.matrix().upper().size();
+    const label nFacesM1 = nFaces - 1;
 
     for (label cell=0; cell<nCells; cell++)
     {

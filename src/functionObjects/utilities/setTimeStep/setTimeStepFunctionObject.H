@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,9 +71,8 @@ SourceFiles
 #ifndef functionObjects_setTimeStepFunctionObject_H
 #define functionObjects_setTimeStepFunctionObject_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "Function1.H"
-#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,18 +87,15 @@ namespace functionObjects
 
 class setTimeStepFunctionObject
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
-    // Private data
-
-        //- Reference to the time database
-        const Time& time_;
+    // Private Member Data
 
         //- Time step function/table
         autoPtr<Function1<scalar>> timeStepPtr_;
 
 
-    // Private member functions
+    // Private Member Functions
 
         //- No copy construct
         setTimeStepFunctionObject(const setTimeStepFunctionObject&) = delete;
@@ -124,27 +122,21 @@ public:
 
 
     // Destructor
-    virtual ~setTimeStepFunctionObject();
+    virtual ~setTimeStepFunctionObject() = default;
 
 
     // Member Functions
-
-        //- Return time database
-        const Time& time() const;
 
         //- Called at the end of Time::adjustDeltaT() if adjustTime is true
         virtual bool adjustTimeStep();
 
         //- Read and set the function object if its data have changed
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
-        //- Called at each ++ or += of the time-loop.
-        //  postProcess overrides the usual executeControl behaviour and
-        //  forces execution (used in post-processing mode)
+        //- Execute does nothing
         virtual bool execute();
-        //- Called at each ++ or += of the time-loop.
-        //  postProcess overrides the usual writeControl behaviour and
-        //  forces writing always (used in post-processing mode)
+
+        //- Write does nothing
         virtual bool write();
 };
 

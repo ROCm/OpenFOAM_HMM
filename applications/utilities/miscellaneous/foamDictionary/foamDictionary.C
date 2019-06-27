@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,6 +65,9 @@ Usage
 
       - \par -disableFunctionEntries
         Do not expand macros or directives (\#include etc)
+
+      - \par -precision int
+        Set default write precision for IOstreams
 
     Example usage:
       - Change simulation to run for one timestep only:
@@ -307,6 +312,12 @@ int main(int argc, char *argv[])
         "As per -diff, but locate the file as per foamEtcFile"
     );
     argList::addOptionCompat("diff-etc", {"diffEtc", 1712});
+    argList::addOption
+    (
+        "precision",
+        "int",
+        "Set default write precision for IOstreams"
+    );
 
     argList::addBoolOption
     (
@@ -346,6 +357,20 @@ int main(int argc, char *argv[])
         entry::disableFunctionEntries = true;
     }
 
+    // Set the default output precision
+    {
+        const unsigned prec = args.lookupOrDefault<unsigned>("precision", 0u);
+        if (prec)
+        {
+            // if (Pstream::master())
+            // {
+            //     Serr<< "Output write precision set to " << prec << endl;
+            // }
+
+            IOstream::defaultPrecision(prec);
+            Sout.precision(prec);
+        }
+    }
 
     const fileName dictFileName(args[1]);
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +33,7 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * global functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void transform
@@ -62,9 +64,9 @@ tmp<Field<Type>> transform
     const Field<Type>& tf
 )
 {
-    tmp<Field<Type>> tranf(new Field<Type> (tf.size()));
-    transform(tranf.ref(), trf, tf);
-    return tranf;
+    auto tresult = tmp<Field<Type>>::New(tf.size());
+    transform(tresult.ref(), trf, tf);
+    return tresult;
 }
 
 
@@ -75,10 +77,10 @@ tmp<Field<Type>> transform
     const tmp<Field<Type>>& ttf
 )
 {
-    tmp<Field<Type>> tranf = New(ttf);
-    transform(tranf.ref(), trf, ttf());
+    tmp<Field<Type>> tresult = New(ttf);
+    transform(tresult.ref(), trf, ttf());
     ttf.clear();
-    return tranf;
+    return tresult;
 }
 
 
@@ -89,10 +91,10 @@ tmp<Field<Type>> transform
     const Field<Type>& tf
 )
 {
-    tmp<Field<Type>> tranf(new Field<Type> (tf.size()));
-    transform(tranf.ref(), ttrf(), tf);
+    auto tresult = tmp<Field<Type>>::New(tf.size());
+    transform(tresult.ref(), ttrf(), tf);
     ttrf.clear();
-    return tranf;
+    return tresult;
 }
 
 
@@ -103,11 +105,11 @@ tmp<Field<Type>> transform
     const tmp<Field<Type>>& ttf
 )
 {
-    tmp<Field<Type>> tranf = New(ttf);
-    transform(tranf.ref(), ttrf(), ttf());
+    tmp<Field<Type>> tresult = New(ttf);
+    transform(tresult.ref(), ttrf(), ttf());
     ttf.clear();
     ttrf.clear();
-    return tranf;
+    return tresult;
 }
 
 
@@ -130,9 +132,9 @@ tmp<Field<Type>> transform
     const Field<Type>& tf
 )
 {
-    tmp<Field<Type>> tranf(new Field<Type>(tf.size()));
-    transform(tranf.ref(), t, tf);
-    return tranf;
+    auto tresult = tmp<Field<Type>>::New(tf.size());
+    transform(tresult.ref(), t, tf);
+    return tresult;
 }
 
 
@@ -143,10 +145,10 @@ tmp<Field<Type>> transform
     const tmp<Field<Type>>& ttf
 )
 {
-    tmp<Field<Type>> tranf = New(ttf);
-    transform(tranf.ref(), t, ttf());
+    tmp<Field<Type>> tresult = New(ttf);
+    transform(tresult.ref(), t, ttf());
     ttf.clear();
-    return tranf;
+    return tresult;
 }
 
 

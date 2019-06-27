@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,8 +130,40 @@ inline bool Foam::keyType::isPattern() const
 }
 
 
+inline bool Foam::keyType::compile()
+{
+    isPattern_ = true;
+    return true;
+}
+
+
+inline void Foam::keyType::uncompile(bool doStrip)
+{
+    // Only strip when debug is active (potentially costly operation)
+    if (isPattern_ && doStrip && word::debug)
+    {
+        string::stripInvalid<word>(*this);
+    }
+
+    isPattern_ = false;
+}
+
+
+inline void Foam::keyType::clear()
+{
+    word::clear();
+    isPattern_ = false;
+}
+
+
 inline void Foam::keyType::swap(keyType& s)
 {
+    // Self-swapping is a no-op
+    if (this == &s)
+    {
+        return;
+    }
+
     word::swap(static_cast<word&>(s));
     std::swap(isPattern_, s.isPattern_);
 }
@@ -145,6 +179,12 @@ inline bool Foam::keyType::operator()(const std::string& text) const
 
 inline void Foam::keyType::operator=(const keyType& s)
 {
+    // Self-assignment is a no-op
+    if (this == &s)
+    {
+        return;
+    }
+
     assign(s); // Bypasses char checking
     isPattern_ = s.isPattern_;
 }
@@ -152,6 +192,12 @@ inline void Foam::keyType::operator=(const keyType& s)
 
 inline void Foam::keyType::operator=(keyType&& s)
 {
+    // Self-assignment is a no-op
+    if (this == &s)
+    {
+        return;
+    }
+
     clear();
     swap(s);
 }

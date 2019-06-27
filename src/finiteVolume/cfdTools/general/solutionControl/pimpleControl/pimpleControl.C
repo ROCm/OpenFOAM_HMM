@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::pimpleControl::read()
+bool Foam::pimpleControl::read()
 {
     solutionControl::read(false);
 
@@ -47,6 +49,8 @@ void Foam::pimpleControl::read()
     SIMPLErho_ = pimpleDict.lookupOrDefault("SIMPLErho", false);
     turbOnFinalIterOnly_ =
         pimpleDict.lookupOrDefault("turbOnFinalIterOnly", true);
+
+    return true;
 }
 
 
@@ -134,7 +138,12 @@ void Foam::pimpleControl::setFirstIterFlag(const bool check, const bool force)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::pimpleControl::pimpleControl(fvMesh& mesh, const word& dictName)
+Foam::pimpleControl::pimpleControl
+(
+    fvMesh& mesh,
+    const word& dictName,
+    const bool verbose
+)
 :
     solutionControl(mesh, dictName),
     solveFlow_(true),
@@ -147,36 +156,38 @@ Foam::pimpleControl::pimpleControl(fvMesh& mesh, const word& dictName)
 {
     read();
 
-    Info<< nl
-        << algorithmName_;
-
-    if (nCorrPIMPLE_ > 1)
+    if (verbose)
     {
-        if (residualControl_.empty())
+        Info<< nl << algorithmName_;
+
+        if (nCorrPIMPLE_ > 1)
         {
-            Info<< ": no residual control data found. "
-                << "Calculations will employ " << nCorrPIMPLE_
-                << " corrector loops" << nl;
+            if (residualControl_.empty())
+            {
+                Info<< ": no residual control data found. "
+                    << "Calculations will employ " << nCorrPIMPLE_
+                    << " corrector loops" << nl;
+            }
+            else
+            {
+                Info<< ": max iterations = " << nCorrPIMPLE_ << nl;
+
+                for (const fieldData& ctrl : residualControl_)
+                {
+                    Info<< "    field " << ctrl.name << token::TAB
+                        << ": relTol " << ctrl.relTol
+                        << ", tolerance " << ctrl.absTol
+                        << nl;
+                }
+            }
         }
         else
         {
-            Info<< ": max iterations = " << nCorrPIMPLE_ << nl;
-
-            for (const fieldData& ctrl : residualControl_)
-            {
-                Info<< "    field " << ctrl.name << token::TAB
-                    << ": relTol " << ctrl.relTol
-                    << ", tolerance " << ctrl.absTol
-                    << nl;
-            }
+            Info<< ": Operating solver in PISO mode" << nl;
         }
-    }
-    else
-    {
-        Info<< ": Operating solver in PISO mode" << nl;
-    }
 
-    Info<< endl;
+        Info<< endl;
+    }
 }
 
 

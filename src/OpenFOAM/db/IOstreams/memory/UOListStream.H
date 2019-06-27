@@ -210,15 +210,15 @@ public:
         {}
 
         //- Construct using data area from a FixedList
-        template<unsigned FixedSize>
+        template<unsigned N>
         UOListStream
         (
-            FixedList<char,FixedSize>& buffer,
+            FixedList<char, N>& buffer,
             streamFormat format=ASCII,
             versionNumber version=currentVersion
         )
         :
-            UOListStream(buffer.data(), FixedSize, format, version)
+            UOListStream(buffer.data(), N, format, version)
         {}
 
         //- Construct using data area from a List and its inherent storage size

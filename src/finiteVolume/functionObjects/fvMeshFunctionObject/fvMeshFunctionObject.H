@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,18 +66,15 @@ class fvMeshFunctionObject
 :
     public regionFunctionObject
 {
-
 protected:
 
-    // Protected member data
+    // Protected Member Data
 
         //- Reference to the fvMesh
         const fvMesh& mesh_;
 
 
-private:
-
-    // Private Member Functions
+    // Protected Member Functions
 
         //- No copy construct
         fvMeshFunctionObject(const fvMeshFunctionObject&) = delete;

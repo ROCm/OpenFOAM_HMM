@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +34,8 @@ Description
 
     The operation can be applied to any volume or surface fields generating a
     volume or surface scalar field.
-    With the %subRegion option, also supports fields on a surfMesh.
+    With the %subRegion option, also supports fields on functionObject
+    surface output (eg, sampledSurfaces).
 
 See also
     Foam::functionObjects::fvMeshFunctionObject
@@ -90,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~mag();
+    virtual ~mag() = default;
 };
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +28,6 @@ License
 #include "readFields.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "surfFields.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -36,7 +37,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
 {
     typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
     typedef GeometricField<Type, fvsPatchField, surfaceMesh> SurfaceFieldType;
-    typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
+    /// typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
 
     if (foundObject<VolFieldType>(fieldName))
     {
@@ -52,13 +53,13 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
             << " " << fieldName << " already exists in database"
             << " already in database" << endl;
     }
-    else if (foundObject<SurfFieldType>(fieldName))
-    {
-        DebugInfo
-            << "readFields: " << SurfFieldType::typeName
-            << " " << fieldName << " already exists in database"
-            << " already in database" << endl;
-    }
+    /// else if (foundObject<SurfFieldType>(fieldName))
+    /// {
+    ///     DebugInfo
+    ///         << "readFields: " << SurfFieldType::typeName
+    ///         << " " << fieldName << " already exists in database"
+    ///         << " already in database" << endl;
+    /// }
     else
     {
         IOobject fieldHeader
@@ -74,35 +75,32 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
-            VolFieldType* vfPtr(new VolFieldType(fieldHeader, mesh_));
-            mesh_.objectRegistry::store(vfPtr);
+            VolFieldType* fldPtr(new VolFieldType(fieldHeader, mesh_));
+            mesh_.objectRegistry::store(fldPtr);
             return true;
         }
         else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true, true, false))
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
-            SurfaceFieldType* sfPtr(new SurfaceFieldType(fieldHeader, mesh_));
-            mesh_.objectRegistry::store(sfPtr);
+            SurfaceFieldType* fldPtr(new SurfaceFieldType(fieldHeader, mesh_));
+            mesh_.objectRegistry::store(fldPtr);
             return true;
         }
-        else if (fieldHeader.typeHeaderOk<SurfFieldType>(true, true, false))
-        {
-            if (isA<surfMesh>(obr()))
-            {
-                const surfMesh& s = dynamicCast<const surfMesh>(obr());
-
-                // Store field on surfMesh database
-                Log << "    Reading " << fieldName << endl;
-                SurfFieldType* sfPtr(new SurfFieldType(fieldHeader, s));
-                s.store(sfPtr);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        /// else if (fieldHeader.typeHeaderOk<SurfFieldType>(true, true, false))
+        /// {
+        ///     const surfMesh* surfptr = isA<surfMesh>(obr());
+        ///     if (surfptr)
+        ///     {
+        ///         const surfMesh& s = surfptr;
+        ///
+        ///         // Store field on surfMesh database
+        ///         Log << "    Reading " << fieldName << endl;
+        ///         SurfFieldType* fldPtr(new SurfFieldType(fieldHeader, s));
+        ///         s.store(fldPtr);
+        ///         return true;
+        ///     }
+        /// }
     }
 
     return false;

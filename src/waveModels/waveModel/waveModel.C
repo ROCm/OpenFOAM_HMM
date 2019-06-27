@@ -3,7 +3,9 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +85,7 @@ void Foam::waveModel::initialiseGeometry()
     for (label paddlei = 0; paddlei < nPaddle_; ++paddlei)
     {
         xPaddle_[paddlei] = xMid;
-        yPaddle_[paddlei] = paddlei*paddleDy + yMin + 0.5*paddleDy;;
+        yPaddle_[paddlei] = paddlei*paddleDy + yMin + 0.5*paddleDy;
     }
 
     // Local face centres
@@ -134,8 +136,8 @@ Foam::tmp<Foam::scalarField> Foam::waveModel::waterLevel() const
     const scalarField alphac(alphap.patchInternalField());
 
     const scalarField& magSf = alphap.patch().magSf();
-    scalarList paddleMagSf(nPaddle_, 0.0);
-    scalarList paddleWettedMagSf(nPaddle_, 0.0);
+    scalarList paddleMagSf(nPaddle_, Zero);
+    scalarList paddleWettedMagSf(nPaddle_, Zero);
 
     forAll(alphac, facei)
     {
@@ -277,8 +279,8 @@ Foam::waveModel::waveModel
     initialDepth_(0),
     currTimeIndex_(-1),
     activeAbsorption_(false),
-    U_(patch.size(), vector::zero),
-    alpha_(patch.size(), 0)
+    U_(patch.size(), Zero),
+    alpha_(patch.size(), Zero)
 {
     if (readFields)
     {
@@ -359,7 +361,7 @@ void Foam::waveModel::correct(const scalar t)
         alpha_ = 0;
 
         // Update the calculated water level field
-        scalarField calculatedLevel(nPaddle_, 0);
+        scalarField calculatedLevel(nPaddle_, Zero);
 
         if (patch_.size())
         {

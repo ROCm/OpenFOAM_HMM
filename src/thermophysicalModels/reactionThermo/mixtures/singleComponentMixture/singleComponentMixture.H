@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,11 +68,16 @@ public:
     // Constructors
 
         //- Construct from dictionary, mesh and phase name
-        singleComponentMixture(const dictionary&, const fvMesh&, const word&);
+        singleComponentMixture
+        (
+            const dictionary& thermoDict,
+            const fvMesh& mesh,
+            const word& phaseName
+        );
 
 
     //- Destructor
-    virtual ~singleComponentMixture();
+    virtual ~singleComponentMixture() = default;
 
 
     // Member Functions

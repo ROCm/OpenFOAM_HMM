@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,9 +115,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
     const wordList& stateLabels = compModel.stateLabels();
 
     // Set storage for each Y... for each parcel
-    forAllIter(typename Cloud<ReactingMultiphaseParcel<ParcelType>>, c, iter)
+    for (ReactingMultiphaseParcel<ParcelType>& p : c)
     {
-        ReactingMultiphaseParcel<ParcelType>& p = iter();
         p.YGas_.setSize(gasNames.size(), 0.0);
         p.YLiquid_.setSize(liquidNames.size(), 0.0);
         p.YSolid_.setSize(solidNames.size(), 0.0);
@@ -135,15 +136,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         );
 
         label i = 0;
-        forAllIter
-        (
-            typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-            c,
-            iter
-        )
+        for (ReactingMultiphaseParcel<ParcelType>& p : c)
         {
-            ReactingMultiphaseParcel<ParcelType>& p = iter();
-            p.YGas_[j] = YGas[i++]/(p.Y()[GAS] + ROOTVSMALL);
+            p.YGas_[j] = YGas[i]/(p.Y()[GAS] + ROOTVSMALL);
+            ++i;
         }
     }
     // Populate YLiquid for each parcel
@@ -160,15 +156,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         );
 
         label i = 0;
-        forAllIter
-        (
-            typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-            c,
-            iter
-        )
+        for (ReactingMultiphaseParcel<ParcelType>& p : c)
         {
-            ReactingMultiphaseParcel<ParcelType>& p = iter();
-            p.YLiquid_[j] = YLiquid[i++]/(p.Y()[LIQ] + ROOTVSMALL);
+            p.YLiquid_[j] = YLiquid[i]/(p.Y()[LIQ] + ROOTVSMALL);
+            ++i;
         }
     }
     // Populate YSolid for each parcel
@@ -185,15 +176,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         );
 
         label i = 0;
-        forAllIter
-        (
-            typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-            c,
-            iter
-        )
+        for (ReactingMultiphaseParcel<ParcelType>& p : c)
         {
-            ReactingMultiphaseParcel<ParcelType>& p = iter();
-            p.YSolid_[j] = YSolid[i++]/(p.Y()[SLD] + ROOTVSMALL);
+            p.YSolid_[j] = YSolid[i]/(p.Y()[SLD] + ROOTVSMALL);
+            ++i;
         }
     }
 }
@@ -238,15 +224,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
             );
 
             label i = 0;
-            forAllConstIter
-            (
-                typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-                c,
-                iter
-            )
+            for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                const ReactingMultiphaseParcel<ParcelType>& p0 = iter();
-                YGas[i++] = p0.YGas()[j]*p0.Y()[GAS];
+                YGas[i] = p0.YGas()[j]*p0.Y()[GAS];
+                ++i;
             }
 
             YGas.write(np > 0);
@@ -267,15 +248,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
             );
 
             label i = 0;
-            forAllConstIter
-            (
-                typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-                c,
-                iter
-            )
+            for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                const ReactingMultiphaseParcel<ParcelType>& p0 = iter();
-                YLiquid[i++] = p0.YLiquid()[j]*p0.Y()[LIQ];
+                YLiquid[i] = p0.YLiquid()[j]*p0.Y()[LIQ];
+                ++i;
             }
 
             YLiquid.write(np > 0);
@@ -296,15 +272,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
             );
 
             label i = 0;
-            forAllConstIter
-            (
-                typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-                c,
-                iter
-            )
+            for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                const ReactingMultiphaseParcel<ParcelType>& p0 = iter();
-                YSolid[i++] = p0.YSolid()[j]*p0.Y()[SLD];
+                YSolid[i] = p0.YSolid()[j]*p0.Y()[SLD];
+                ++i;
             }
 
             YSolid.write(np > 0);
@@ -354,15 +325,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeObjects
             );
 
             label i = 0;
-            forAllConstIter
-            (
-                typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-                c,
-                iter
-            )
+            for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                const ReactingMultiphaseParcel<ParcelType>& p0 = iter();
-                YGas[i++] = p0.YGas()[j]*p0.Y()[GAS];
+                YGas[i] = p0.YGas()[j]*p0.Y()[GAS];
+                ++i;
             }
         }
 
@@ -377,15 +343,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeObjects
             );
 
             label i = 0;
-            forAllConstIter
-            (
-                typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-                c,
-                iter
-            )
+            for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                const ReactingMultiphaseParcel<ParcelType>& p0 = iter();
-                YLiquid[i++] = p0.YLiquid()[j]*p0.Y()[LIQ];
+                YLiquid[i] = p0.YLiquid()[j]*p0.Y()[LIQ];
+                ++i;
             }
         }
 
@@ -400,15 +361,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeObjects
             );
 
             label i = 0;
-            forAllConstIter
-            (
-                typename Cloud<ReactingMultiphaseParcel<ParcelType>>,
-                c,
-                iter
-            )
+            for (const ReactingMultiphaseParcel<ParcelType>& p0 : c)
             {
-                const ReactingMultiphaseParcel<ParcelType>& p0 = iter();
-                YSolid[i++] = p0.YSolid()[j]*p0.Y()[SLD];
+                YSolid[i] = p0.YSolid()[j]*p0.Y()[SLD];
+                ++i;
             }
         }
     }

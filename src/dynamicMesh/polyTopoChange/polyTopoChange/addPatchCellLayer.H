@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -125,40 +127,6 @@ class globalIndex;
 
 class addPatchCellLayer
 {
-    // Private classes
-
-        // To combineReduce a labelList. Filters out duplicates.
-        class uniqueEqOp
-        {
-
-        public:
-
-            void operator()(labelList& x, const labelList& y) const
-            {
-                if (x.empty())
-                {
-                    if (y.size())
-                    {
-                        x = y;
-                    }
-                }
-                else
-                {
-                    forAll(y, yi)
-                    {
-                        if (!x.found(y[yi]))
-                        {
-                            label sz = x.size();
-                            x.setSize(sz+1);
-                            x[sz] = y[yi];
-                        }
-                    }
-                }
-            }
-        };
-
-
-
     // Private data
 
         //- Reference to mesh
@@ -330,8 +298,8 @@ public:
 
         // Edit
 
-            //- Per patch edge the pp faces (in global indices) using it. Uses
-            //  uniqueEqOp() to remove duplicates.
+            //- Per patch edge the pp faces (in global indices) using it.
+            //  Uses ListOps::uniqueEqOp to remove duplicates.
             static labelListList globalEdgeFaces
             (
                 const polyMesh&,

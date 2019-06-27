@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,9 +159,9 @@ void subsetVolFields
     (
         mesh.objectRegistry::lookupClass<GeoField>()
     );
-    forAllConstIter(typename HashTable<const GeoField*>, fields, iter)
+    forAllConstIters(fields, iter)
     {
-        const GeoField& fld = *iter();
+        const GeoField& fld = *iter.val();
 
         Info<< "Mapping field " << fld.name() << endl;
 
@@ -211,9 +213,9 @@ void subsetSurfaceFields
     (
         mesh.objectRegistry::lookupClass<GeoField>()
     );
-    forAllConstIter(typename HashTable<const GeoField*>, fields, iter)
+    forAllConstIters(fields, iter)
     {
-        const GeoField& fld = *iter();
+        const GeoField& fld = *iter.val();
 
         Info<< "Mapping field " << fld.name() << endl;
 
@@ -278,19 +280,16 @@ void addToInterface
         max(ownRegion, neiRegion)
     );
 
-    EdgeMap<Map<label>>::iterator iter = regionsToSize.find
-    (
-        interface
-    );
+    auto iter = regionsToSize.find(interface);
 
-    if (iter != regionsToSize.end())
+    if (iter.found())
     {
         // Check if zone present
-        Map<label>::iterator zoneFnd = iter().find(zoneID);
-        if (zoneFnd != iter().end())
+        auto zoneIter = iter().find(zoneID);
+        if (zoneIter.found())
         {
             // Found zone. Increment count.
-            zoneFnd()++;
+            ++(*zoneIter);
         }
         else
         {
@@ -398,29 +397,26 @@ void getInterfaceSizes
 
                 EdgeMap<Map<label>> slaveSizes(fromSlave);
 
-                forAllConstIter(EdgeMap<Map<label>>, slaveSizes, slaveIter)
+                forAllConstIters(slaveSizes, slaveIter)
                 {
-                    EdgeMap<Map<label>>::iterator masterIter =
-                        regionsToSize.find(slaveIter.key());
+                    const Map<label>& slaveInfo = *slaveIter;
 
-                    if (masterIter != regionsToSize.end())
+                    auto masterIter = regionsToSize.find(slaveIter.key());
+
+                    if (masterIter.found())
                     {
                         // Same inter-region
-                        const Map<label>& slaveInfo = slaveIter();
-                        Map<label>& masterInfo = masterIter();
+                        Map<label>& masterInfo = *masterIter;
 
-                        forAllConstIter(Map<label>, slaveInfo, iter)
+                        forAllConstIters(slaveInfo, iter)
                         {
-                            label zoneID = iter.key();
-                            label slaveSize = iter();
+                            const label zoneID = iter.key();
+                            const label slaveSize = iter.val();
 
-                            Map<label>::iterator zoneFnd = masterInfo.find
-                            (
-                                zoneID
-                            );
-                            if (zoneFnd != masterInfo.end())
+                            auto zoneIter = masterInfo.find(zoneID);
+                            if (zoneIter.found())
                             {
-                                zoneFnd() += slaveSize;
+                                *zoneIter += slaveSize;
                             }
                             else
                             {
@@ -430,7 +426,7 @@ void getInterfaceSizes
                     }
                     else
                     {
-                        regionsToSize.insert(slaveIter.key(), slaveIter());
+                        regionsToSize.insert(slaveIter.key(), slaveInfo);
                     }
                 }
             }
@@ -458,9 +454,9 @@ void getInterfaceSizes
     // Now we have the global sizes of all inter-regions.
     // Invert this on master and distribute.
     label nInterfaces = 0;
-    forAllConstIter(EdgeMap<Map<label>>, regionsToSize, iter)
+    forAllConstIters(regionsToSize, iter)
     {
-        const Map<label>& info = iter();
+        const Map<label>& info = iter.val();
         nInterfaces += info.size();
     }
 
@@ -470,14 +466,15 @@ void getInterfaceSizes
     EdgeMap<Map<label>> regionsToInterface(nInterfaces);
 
     nInterfaces = 0;
-    forAllConstIter(EdgeMap<Map<label>>, regionsToSize, iter)
+    forAllConstIters(regionsToSize, iter)
     {
         const edge& e = iter.key();
+        const Map<label>& info = iter.val();
+
         const word& name0 = regionNames[e[0]];
         const word& name1 = regionNames[e[1]];
 
-        const Map<label>& info = iter();
-        forAllConstIter(Map<label>, info, infoIter)
+        forAllConstIters(info, infoIter)
         {
             interfaces[nInterfaces] = iter.key();
             label zoneID = infoIter.key();
@@ -589,56 +586,7 @@ autoPtr<mapPolyMesh> createRegionMesh
 )
 {
     // Create dummy system/fv*
-    {
-        IOobject io
-        (
-            "fvSchemes",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        Info<< "Testing:" << io.objectPath() << endl;
-
-        if (!io.typeHeaderOk<IOdictionary>(true))
-        // if (!exists(io.objectPath()))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            dictionary divDict;
-            dummyDict.add("divSchemes", divDict);
-            dictionary gradDict;
-            dummyDict.add("gradSchemes", gradDict);
-            dictionary laplDict;
-            dummyDict.add("laplacianSchemes", laplDict);
-
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-    {
-        IOobject io
-        (
-            "fvSolution",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if (!io.typeHeaderOk<IOdictionary>(true))
-        //if (!exists(io.objectPath()))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-
+    fvMeshTools::createDummyFvMeshFiles(mesh, regionName, true);
 
     // Neighbour cellRegion.
     labelList coupledRegion(mesh.nBoundaryFaces());
@@ -1149,7 +1097,7 @@ label findCorrespondingRegion
 )
 {
     // Per region the number of cells in zoneI
-    labelList cellsInZone(nCellRegions, 0);
+    labelList cellsInZone(nCellRegions, Zero);
 
     forAll(cellRegion, celli)
     {
@@ -1267,7 +1215,7 @@ void matchRegions
     getZoneID(mesh, cellZones, zoneID, neiZoneID);
 
     // Sizes per cellzone
-    labelList zoneSizes(cellZones.size(), 0);
+    labelList zoneSizes(cellZones.size(), Zero);
     {
         List<wordList> zoneNames(Pstream::nProcs());
         zoneNames[Pstream::myProcNo()] = cellZones.names();
@@ -1666,9 +1614,9 @@ int main(int argc, char *argv[])
 
             blockedFace.setSize(mesh.nFaces(), false);
 
-            forAllConstIter(faceSet, blockedFaceSet, iter)
+            for (const label facei : blockedFaceSet)
             {
-                blockedFace[iter.key()] = true;
+                blockedFace[facei] = true;
             }
         }
 
@@ -1753,7 +1701,7 @@ int main(int argc, char *argv[])
     // Sizes per region
     // ~~~~~~~~~~~~~~~~
 
-    labelList regionSizes(nCellRegions, 0);
+    labelList regionSizes(nCellRegions, Zero);
 
     forAll(cellRegion, celli)
     {

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +80,7 @@ Foam::Ostream& Foam::operator<<
         os  << "    "
             << extendedFeatureEdgeMesh::edgeStatusNames_[iter.key()]
             << " = "
-            << iter.object()
+            << iter.val()
             << endl;
     }
 

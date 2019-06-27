@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,10 +57,6 @@ class patchPatchDist
 :
     public scalarField
 {
-
-
-private:
-
     // Private Member Data
 
         //- Patch to operate on
@@ -83,7 +81,7 @@ public:
 
 
     //- Destructor
-    virtual ~patchPatchDist();
+    virtual ~patchPatchDist() = default;
 
 
     // Member Functions

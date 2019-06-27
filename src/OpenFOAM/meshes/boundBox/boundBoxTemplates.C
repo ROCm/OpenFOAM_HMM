@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +30,11 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<unsigned Size>
+template<unsigned N>
 Foam::boundBox::boundBox
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices,
+    const FixedList<label, N>& indices,
     bool doReduce
 )
 :
@@ -49,10 +51,10 @@ Foam::boundBox::boundBox
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template<unsigned Size>
+template<unsigned N>
 void Foam::boundBox::add
 (
-    const FixedList<point, Size>& points
+    const FixedList<point, N>& points
 )
 {
     for (const point& p : points)
@@ -62,24 +64,26 @@ void Foam::boundBox::add
 }
 
 
-template<unsigned Size>
+template<unsigned N>
 void Foam::boundBox::add
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices
+    const FixedList<label, N>& indices
 )
 {
     const label len = points.size();
 
     // Skip if points is empty
-    if (len)
+    if (!len)
     {
-        for (const label pointi : indices)
+        return;
+    }
+
+    for (const label pointi : indices)
+    {
+        if (pointi >= 0 && pointi < len)
         {
-            if (pointi >= 0 && pointi < len)
-            {
-                add(points[pointi]);
-            }
+            add(points[pointi]);
         }
     }
 }
@@ -95,24 +99,26 @@ void Foam::boundBox::add
     const label len = points.size();
 
     // Skip if points is empty
-    if (len)
+    if (!len)
     {
-        for (const label pointi : indices)
+        return;
+    }
+
+    for (const label pointi : indices)
+    {
+        if (pointi >= 0 && pointi < len)
         {
-            if (pointi >= 0 && pointi < len)
-            {
-                add(points[pointi]);
-            }
+            add(points[pointi]);
         }
     }
 }
 
 
-template<unsigned Size>
+template<unsigned N>
 inline bool Foam::boundBox::contains
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices
+    const FixedList<label, N>& indices
 ) const
 {
     const label len = points.size();
@@ -166,11 +172,11 @@ inline bool Foam::boundBox::contains
 }
 
 
-template<unsigned Size>
+template<unsigned N>
 inline bool Foam::boundBox::containsAny
 (
     const UList<point>& points,
-    const FixedList<label, Size>& indices
+    const FixedList<label, N>& indices
 ) const
 {
     const label len = points.size();

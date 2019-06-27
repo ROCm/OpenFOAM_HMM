@@ -1,0 +1,116 @@
+/* TURBULENCE MODEL VARIABLE REFS */
+turbulenceModels/turbulenceModelVariables/RAS/RASModelVariables/RASModelVariables.C
+turbulenceModels/turbulenceModelVariables/RAS/laminar/laminar.C
+turbulenceModels/turbulenceModelVariables/RAS/SpalartAllmaras/SpalartAllmaras.C
+turbulenceModels/turbulenceModelVariables/RAS/kOmegaSST/kOmegaSST.C
+turbulenceModels/turbulenceModelVariables/RAS/kEpsilon/kEpsilon.C
+turbulenceModels/turbulenceModelVariables/RAS/LaunderSharmaKE/LaunderSharmaKE.C
+
+/* VARIABLES SET */
+solvers/variablesSet/variablesSet/variablesSet.C
+solvers/variablesSet/incompressible/incompressibleVars.C
+solvers/variablesSet/incompressibleAdjointMeanFlow/incompressibleAdjointMeanFlowVars.C
+solvers/variablesSet/incompressibleAdjoint/incompressibleAdjointVars.C
+
+/* SOLVER CONTROL */
+solvers/solverControl/solverControl/solverControl.C
+solvers/solverControl/SIMPLEControl/SIMPLEControl/SIMPLEControl.C
+solvers/solverControl/SIMPLEControl/singleRun/SIMPLEControlSingleRun.C
+
+/* SOLVERS */
+solvers/solver/solver.C
+solvers/primalSolvers/primalSolver/primalSolver.C
+solvers/primalSolvers/incompressible/incompressiblePrimalSolver/incompressiblePrimalSolver.C
+solvers/primalSolvers/incompressible/simple/simple.C
+solvers/primalSolvers/incompressible/RASTurbulenceModel/RASTurbulenceModel.C
+solvers/adjointSolvers/adjointSolver/adjointSolver.C
+solvers/adjointSolvers/incompressible/incompressibleAdjointSolver/incompressibleAdjointSolver.C
+solvers/adjointSolvers/incompressible/adjointSimple/adjointSimple.C
+
+/* ADJOINT SOLVER MANAGER */
+solvers/adjointSolverManager/adjointSolverManager.C
+
+/* ZERO ATC CELLS OPTIONS*/
+ATCModel/zeroATCcells/zeroATCcells/zeroATCcells.C
+ATCModel/zeroATCcells/faceCells/faceCells.C
+ATCModel/zeroATCcells/pointCells/pointCells.C
+
+/* ATC MODELS */
+ATCModel/ATCModel/ATCModel.C
+ATCModel/ATCstandard/ATCstandard.C
+ATCModel/ATCUaGradU/ATCUaGradU.C
+ATCModel/cancelATC/cancelATC.C
+
+/* ADJOINT FVOPTIONS */
+fvOptionsAdjoint/fvOptions/fvOptionAdjoint.C
+fvOptionsAdjoint/fvOptions/fvOptionAdjointList.C
+fvOptionsAdjoint/fvOptions/fvIOoptionListAdjoint.C
+
+/* OBJECTIVES */
+objectives/objective/objective.C
+objectives/incompressible/objectiveIncompressible/objectiveIncompressible.C
+objectives/incompressible/objectiveForce/objectiveForce.C
+objectives/incompressible/objectiveMoment/objectiveMoment.C
+objectives/incompressible/objectivePtLosses/objectivePtLosses.C
+
+/* OBJECTIVE MANAGER*/
+objectiveManager/objectiveManager/objectiveManager.C
+objectiveManager/objectiveManagerIncompressible/objectiveManagerIncompressible.C
+
+/* BOUNDARY ADJOINT CONTRIBUTIONS */
+boundaryAdjointContributions/boundaryAdjointContribution/boundaryAdjointContribution.C
+boundaryAdjointContributions/boundaryAdjointContributionIncompressible/boundaryAdjointContributionIncompressible.C
+
+/* ADJOINT TURBULENCE MODELS*/
+turbulenceModels/incompressibleAdjoint/adjointTurbulenceModel/adjointTurbulenceModel.C
+turbulenceModels/incompressibleAdjoint/adjointRAS/adjointRASModel/adjointRASModel.C
+turbulenceModels/incompressibleAdjoint/adjointRAS/adjointLaminar/adjointLaminar.C
+turbulenceModels/incompressibleAdjoint/adjointRAS/adjointSpalartAllmaras/adjointSpalartAllmaras.C
+turbulenceModels/incompressibleAdjoint/adjointRAS/derivedFvPatchFields/adjointInletNuaTilda/adjointInletNuaTildaFvPatchScalarField.C
+turbulenceModels/incompressibleAdjoint/adjointRAS/derivedFvPatchFields/adjointOutletNuaTilda/adjointOutletNuaTildaFvPatchScalarField.C
+turbulenceModels/incompressibleAdjoint/adjointRAS/derivedFvPatchFields/adjointFarFieldNuaTilda/adjointFarFieldNuaTildaFvPatchScalarField.C
+turbulenceModels/incompressibleAdjoint/adjointRAS/derivedFvPatchFields/adjointOutletNuaTildaFlux/adjointOutletNuaTildaFluxFvPatchScalarField.C
+turbulenceModels/incompressibleAdjoint/adjointRAS/derivedFvPatchFields/adjointOutletFlux/adjointOutletFluxFvPatchScalarField.C
+
+/* ADJOINT BOUNDARY CONDITIONS */
+adjointBoundaryConditions/adjointBoundaryCondition/adjointBoundaryCondition.C
+adjointBoundaryConditions/adjointInletVelocity/adjointInletVelocityFvPatchVectorField.C
+adjointBoundaryConditions/adjointOutletVelocity/adjointOutletVelocityFvPatchVectorField.C
+adjointBoundaryConditions/adjointWallVelocity/adjointWallVelocityFvPatchVectorField.C
+adjointBoundaryConditions/adjointWallVelocityLowRe/adjointWallVelocityLowReFvPatchVectorField.C
+adjointBoundaryConditions/adjointOutletPressure/adjointOutletPressureFvPatchScalarField.C
+adjointBoundaryConditions/adjointFarFieldPressure/adjointFarFieldPressureFvPatchScalarField.C
+adjointBoundaryConditions/adjointFarFieldVelocity/adjointFarFieldVelocityFvPatchVectorField.C
+adjointBoundaryConditions/adjointZeroInlet/adjointZeroInletFvPatchFields.C
+adjointBoundaryConditions/adjointOutletVelocityFlux/adjointOutletVelocityFluxFvPatchVectorField.C
+
+/* DELTA BOUNDARY */
+deltaBoundary/deltaBoundary.C
+
+/* ADJOINT SENSITIVITY */
+optimisation/adjointSensitivity/sensitivity/sensitivity.C
+incoSens=optimisation/adjointSensitivity/incompressible
+$(incoSens)/adjointSensitivity/adjointSensitivityIncompressible.C
+$(incoSens)/adjointEikonalSolver/adjointEikonalSolverIncompressible.C
+$(incoSens)/adjointMeshMovementSolver/adjointMeshMovementSolverIncompressible.C
+$(incoSens)/sensitivitySurface/sensitivitySurfaceIncompressible.C
+$(incoSens)/sensitivitySurfacePoints/sensitivitySurfacePointsIncompressible.C
+$(incoSens)/sensitivityMultiple/sensitivityMultipleIncompressible.C
+
+/* LINE SEARCH */
+optimisation/lineSearch/lineSearch/lineSearch.C
+optimisation/lineSearch/stepUpdate/stepUpdate/stepUpdate.C
+
+/* UPDATE METHOD */
+optimisation/updateMethod/updateMethod/updateMethod.C
+optimisation/updateMethod/constrainedOptimisationMethod/constrainedOptimisationMethod.C
+
+/* OPTIMIZATION TYPE */
+incoOptType=optimisation/optimisationType/incompressible
+$(incoOptType)/optimisationType/optimisationTypeIncompressible.C
+
+/* OPTIMIZATION MANAGER */
+optimisation/optimisationManager/optimisationManager/optimisationManager.C
+optimisation/optimisationManager/singleRun/singleRun.C
+
+LIB = $(FOAM_LIBBIN)/libadjointOptimisation

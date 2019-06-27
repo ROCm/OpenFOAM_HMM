@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,7 +155,7 @@ void Foam::snappySnapDriver::smoothAndConstrain
         //   nearest feature point.
 
         vectorField dispSum(pp.nPoints(), Zero);
-        labelList dispCount(pp.nPoints(), 0);
+        labelList dispCount(pp.nPoints(), Zero);
 
         const labelListList& pointEdges = pp.pointEdges();
         const edgeList& edges = pp.edges();
@@ -2050,7 +2052,6 @@ void Foam::snappySnapDriver::avoidDiagonalAttraction
                         scalar distSqr = magSqr(mid-pt);
                         if (distSqr < minDistSqr)
                         {
-                            distSqr = minDistSqr;
                             minFp = fp;
                         }
                     }
@@ -3855,6 +3856,12 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurfaceFeature
 
 ) const
 {
+    if (dryRun_)
+    {
+        return nearestDisp;
+    }
+
+
     const Switch implicitFeatureAttraction = snapParams.implicitFeatureSnap();
     const Switch explicitFeatureAttraction = snapParams.explicitFeatureSnap();
     const Switch multiRegionFeatureSnap = snapParams.multiRegionFeatureSnap();
@@ -3864,7 +3871,6 @@ Foam::vectorField Foam::snappySnapDriver::calcNearestSurfaceFeature
         << "   explicit features    : " << explicitFeatureAttraction << nl
         << "   multi-patch features : " << multiRegionFeatureSnap << nl
         << endl;
-
 
     const indirectPrimitivePatch& pp = meshMover.patch();
     const pointField& localPoints = pp.localPoints();

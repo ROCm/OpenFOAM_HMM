@@ -2,8 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2019 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -20,14 +22,14 @@
 setenv WM_ARCH `uname -s`                   # System name
 ## if (! $?WM_OSTYPE ) setenv WM_OSTYPE POSIX  # System type (POSIX is default)
 
-# Default compiler = gcc/g++ and C++11
-setenv WM_CC "gcc"
-setenv WM_CXX "g++"
-setenv WM_CFLAGS "-fPIC"
-setenv WM_CXXFLAGS "-fPIC -std=c++11"
-setenv WM_COMPILER_ARCH      # Defined but empty
-setenv WM_COMPILER_LIB_ARCH  # Defined but empty: default for 32bit
-unsetenv WM_LDFLAGS
+set archOption=64
+if ($?WM_ARCH_OPTION) then
+    set archOption="$WM_ARCH_OPTION"
+endif
+
+unsetenv WM_ARCH_OPTION     # Compiling 32-bit on 64-bit system
+setenv WM_COMPILER_ARCH     # Host compiler type (when different than target)
+setenv WM_COMPILER_LIB_ARCH # Additional ending for lib directories
 
 # Adjust according to system and architecture
 switch ($WM_ARCH)
@@ -36,29 +38,22 @@ case Linux:
 
     switch (`uname -m`)
     case i686:
-        setenv WM_ARCH_OPTION 32
         breaksw
 
     case x86_64:
-        if (! $?WM_ARCH_OPTION ) setenv WM_ARCH_OPTION 64  # Default to 64-bit
-        switch ($WM_ARCH_OPTION)
+        switch ("$archOption")
         case 32:
-            setenv WM_COMPILER_ARCH 64
-            setenv WM_CFLAGS "$WM_CFLAGS -m32"
-            setenv WM_CXXFLAGS "$WM_CXXFLAGS -m32"
-            setenv WM_LDFLAGS "-m32"
+            setenv WM_ARCH_OPTION 32        # Need to propagate the value
+            setenv WM_COMPILER_ARCH 64      # 64-bit compiler, 32-bit target
             breaksw
 
         case 64:
             setenv WM_ARCH linux64
-            setenv WM_COMPILER_LIB_ARCH 64
-            setenv WM_CFLAGS "$WM_CFLAGS -m64"
-            setenv WM_CXXFLAGS "$WM_CXXFLAGS -m64"
-            setenv WM_LDFLAGS "-m64"
+            setenv WM_COMPILER_LIB_ARCH 64  # Target with lib64
             breaksw
 
         default:
-            echo "Unknown WM_ARCH_OPTION '$WM_ARCH_OPTION', should be 32|64"
+            echo "Unknown WM_ARCH_OPTION '$archOption', should be 32|64"
             breaksw
 
         endsw
@@ -70,30 +65,22 @@ case Linux:
 
     case armv7l:
         setenv WM_ARCH linuxARM7
-        setenv WM_ARCH_OPTION 32
         setenv WM_COMPILER_LIB_ARCH 32
         breaksw
 
     case aarch64:
         setenv WM_ARCH linuxARM64
-        setenv WM_ARCH_OPTION 64
         setenv WM_COMPILER_LIB_ARCH 64
         breaksw
 
     case ppc64:
         setenv WM_ARCH linuxPPC64
         setenv WM_COMPILER_LIB_ARCH 64
-        setenv WM_CFLAGS "$WM_CFLAGS -m64"
-        setenv WM_CXXFLAGS "$WM_CXXFLAGS -m64"
-        setenv WM_LDFLAGS "-m64"
         breaksw
 
     case ppc64le:
         setenv WM_ARCH linuxPPC64le
         setenv WM_COMPILER_LIB_ARCH 64
-        setenv WM_CFLAGS "$WM_CFLAGS -m64"
-        setenv WM_CXXFLAGS "$WM_CXXFLAGS -m64"
-        setenv WM_LDFLAGS "-m64"
         breaksw
 
     default:
@@ -104,25 +91,13 @@ case Linux:
     breaksw
 
 case Darwin:    # Presumably x86_64
-    if (! $?WM_ARCH_OPTION ) setenv WM_ARCH_OPTION 64  # Default to 64-bit
     setenv WM_ARCH darwin64
-    setenv WM_CFLAGS "$WM_CFLAGS -m64 -Ddarwin"
-    setenv WM_CXXFLAGS "$WM_CXXFLAGS -m64 -Ddarwin"
-    /bin/cat << INCOMPLETE
-===============================================================================
-Darwin support (clang only) is incomplete or untested in this OpenFOAM release.
-For further assistance, please contact www.OpenFOAM.com
-===============================================================================
-INCOMPLETE
+    echo "Darwin support is clang/llvm only"
     breaksw
 
-case SunOS:
-    setenv WM_ARCH SunOS64
-    setenv WM_MPLIB FJMPI
+case SunOS*:
+    setenv WM_ARCH solaris64
     setenv WM_COMPILER_LIB_ARCH 64
-    setenv WM_CFLAGS "$WM_CFLAGS -mabi=64"
-    setenv WM_CXXFLAGS "$WM_CXXFLAGS -mabi=64"
-    setenv WM_LDFLAGS "-mabi=64 -G0"
     breaksw
 
 default:
@@ -229,23 +204,10 @@ setenv FOAM_RUN "$WM_PROJECT_USER_DIR/run"
 # Default to system compiler
 if (! $?WM_COMPILER_TYPE ) setenv WM_COMPILER_TYPE system
 
-# Adjustments for non-gcc compilers
+# Non-POSIX systems and cross-compiling
 switch ("$WM_COMPILER")
-case Clang*:  # Clang compiler suite
-    setenv WM_CC 'clang'
-    setenv WM_CXX 'clang++'
-    breaksw
-case Cray*:   # Cray system compilers
-    setenv WM_CC 'cc'
-    setenv WM_CXX 'CC'
-    breaksw
-case Icc*:    # Intel compilers
-    setenv WM_CC 'icc'
-    setenv WM_CXX 'icpc'
-    breaksw
-case Arm*:    # Arm system compilers
-    setenv WM_CC 'armclang'
-    setenv WM_CXX 'armclang++'
+case Mingw*:
+    setenv WM_OSTYPE MSwindows
     breaksw
 endsw
 
@@ -355,7 +317,7 @@ endsw
 
 # Cleanup
 # ~~~~~~~
-unset archDir siteDir foundDir
+unset archDir siteDir foundDir archOption
 unset gcc_version gccDir
 unset gmp_version gmpDir  mpfr_version mpfrDir  mpc_version mpcDir
 unset clang_version clangDir

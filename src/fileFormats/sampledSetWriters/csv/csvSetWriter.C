@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,7 +140,7 @@ namespace Foam
 
         forAll(valueSetNames, i)
         {
-            if (i > 0)
+            if (i)
             {
                 writeSeparator(os);
             }
@@ -164,7 +166,7 @@ void Foam::csvSetWriter<Type>::writeHeader
     {
         for (label j=0; j<Type::nComponents; j++)
         {
-            if (i>0 || j>0)
+            if (i || j)
             {
                 writeSeparator(os);
             }
@@ -187,12 +189,7 @@ void Foam::csvSetWriter<Type>::writeCoordHeader
 
     if (points.hasVectorAxis())
     {
-        for
-        (
-            word::const_iterator iter = axisName.begin();
-            iter != axisName.end();
-            ++iter
-        )
+        for (auto iter = axisName.cbegin(); iter != axisName.cend(); ++iter)
         {
             os << *iter;
             writeSeparator(os);

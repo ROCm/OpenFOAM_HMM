@@ -40,7 +40,8 @@ Foam::faPatchField<Type>::faPatchField
     Field<Type>(p.size()),
     patch_(p),
     internalField_(iF),
-    updated_(false)
+    updated_(false),
+    patchType_(word::null)
 {}
 
 
@@ -55,7 +56,8 @@ Foam::faPatchField<Type>::faPatchField
     Field<Type>(f),
     patch_(p),
     internalField_(iF),
-    updated_(false)
+    updated_(false),
+    patchType_(word::null)
 {}
 
 
@@ -71,7 +73,8 @@ Foam::faPatchField<Type>::faPatchField
     Field<Type>(ptf, mapper),
     patch_(p),
     internalField_(iF),
-    updated_(false)
+    updated_(false),
+    patchType_(word::null)
 {}
 
 
@@ -86,7 +89,8 @@ Foam::faPatchField<Type>::faPatchField
     Field<Type>(p.size()),
     patch_(p),
     internalField_(iF),
-    updated_(false)
+    updated_(false),
+    patchType_(dict.lookupOrDefault<word>("patchType", word::null))
 {
     if (dict.found("value"))
     {
@@ -111,7 +115,8 @@ Foam::faPatchField<Type>::faPatchField
     Field<Type>(ptf),
     patch_(ptf.patch_),
     internalField_(ptf.internalField_),
-    updated_(false)
+    updated_(false),
+    patchType_(ptf.patchType_)
 {}
 
 
@@ -125,7 +130,8 @@ Foam::faPatchField<Type>::faPatchField
     Field<Type>(ptf),
     patch_(ptf.patch_),
     internalField_(iF),
-    updated_(false)
+    updated_(false),
+    patchType_(ptf.patchType_)
 {}
 
 
@@ -199,7 +205,12 @@ void Foam::faPatchField<Type>::evaluate(const Pstream::commsTypes)
 template<class Type>
 void Foam::faPatchField<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
+
+    if (patchType_.size())
+    {
+        os.writeEntry("patchType", patchType_);
+    }
 }
 
 

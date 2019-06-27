@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +50,7 @@ void Foam::fv::CodedSource<Type>::prepare
     //dynCode.removeFilterVariable("code");
     dynCode.setFilterVariable("codeCorrect", codeCorrect_);
     dynCode.setFilterVariable("codeAddSup", codeAddSup_);
-    dynCode.setFilterVariable("codeSetValue", codeSetValue_);
+    dynCode.setFilterVariable("codeConstrain", codeConstrain_);
 
     // compile filtered C template
     dynCode.addCompileFile("codedFvOptionTemplate.C");
@@ -56,27 +58,28 @@ void Foam::fv::CodedSource<Type>::prepare
     // copy filtered H template
     dynCode.addCopyFile("codedFvOptionTemplate.H");
 
-    // debugging: make BC verbose
-    //         dynCode.setFilterVariable("verbose", "true");
-    //         Info<<"compile " << name_ << " sha1: "
-    //             << context.sha1() << endl;
+    // debugging: make  verbose
+    // dynCode.setFilterVariable("verbose", "true");
+    // DetailInfo
+    //     <<"compile " << name_ << " sha1: "
+    //     << context.sha1() << endl;
 
     // define Make/options
     dynCode.setMakeOptions
-        (
-            "EXE_INC = -g \\\n"
-            "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
-            "-I$(LIB_SRC)/meshTools/lnInclude \\\n"
-            "-I$(LIB_SRC)/sampling/lnInclude \\\n"
-            "-I$(LIB_SRC)/fvOptions/lnInclude \\\n"
-            + context.options()
-            + "\n\nLIB_LIBS = \\\n"
-            + "    -lmeshTools \\\n"
-            + "    -lfvOptions \\\n"
-            + "    -lsampling \\\n"
-            + "    -lfiniteVolume \\\n"
-            + context.libs()
-        );
+    (
+        "EXE_INC = -g \\\n"
+        "-I$(LIB_SRC)/finiteVolume/lnInclude \\\n"
+        "-I$(LIB_SRC)/fvOptions/lnInclude \\\n"
+        "-I$(LIB_SRC)/meshTools/lnInclude \\\n"
+        "-I$(LIB_SRC)/sampling/lnInclude \\\n"
+      + context.options()
+      + "\n\nLIB_LIBS = \\\n"
+        "    -lfvOptions \\\n"
+        "    -lmeshTools \\\n"
+        "    -lsampling \\\n"
+        "    -lfiniteVolume \\\n"
+      + context.libs()
+    );
 }
 
 

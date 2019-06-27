@@ -44,7 +44,7 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcNut() const
             internalField().group()
         )
     );
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magGradU(mag(Uw.snGrad()));
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
@@ -80,12 +80,12 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
     const scalarField& nuw = tnuw();
 
     const vectorField n(patch().nf());
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     vectorField Up(Uw.patchInternalField() - Uw);
     Up -= n*(n & Up);
     const scalarField magUp(mag(Up));
 
-    tmp<scalarField> tuTaup(new scalarField(patch().size(), 0.0));
+    tmp<scalarField> tuTaup(new scalarField(patch().size(), Zero));
     scalarField& uTaup = tuTaup.ref();
 
     const scalarField& nutw = *this;
@@ -197,7 +197,7 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::yPlus() const
     const scalarField& y = turbModel.y()[patchi];
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
-    const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+    const fvPatchVectorField& Uw = U(turbModel).boundaryField()[patchi];
     const scalarField magGradU(mag(Uw.snGrad()));
 
     return y*calcUTau(magGradU)/nuw;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyrigravityht (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -19,13 +19,15 @@ License
     for more details.
 
     You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gravitynu.orgravity/licenses/>.
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
     Foam::meshObjects::gravity
 
 Description
     Gravitational acceleration vector
+    Although termed a \em MeshObject it is registered on Time only
+    and thus identical for all regions.
 
 SourceFiles
     gravityMeshObject.C
@@ -52,67 +54,49 @@ namespace meshObjects
 
 class gravity
 :
-    public uniformDimensionedVectorField,
     public MeshObject
     <
         Time,
-        Foam::UpdateableMeshObject,
+        TopologicalMeshObject,
         gravity
-    >
+    >,
+    public uniformDimensionedVectorField
 {
 
 public:
 
     //- Run-time type information
-    TypeName("g");
+    TypeNameNoDebug("g");
 
 
-    //- Construct with objectRegistry and IOobject
-    explicit gravity(const Time& runTime, const IOobject& io)
+    //- Construct on Time
+    explicit gravity(const Time& runTime)
     :
-        uniformDimensionedVectorField(io),
-        MeshObject
-        <
-            Time,
-            Foam::UpdateableMeshObject,
-            gravity
-        >(runTime)
-    {}
-
-
-    //- Construct from Time
-    static const gravity& New(const Time& runTime)
-    {
-        return MeshObject<Time, Foam::UpdateableMeshObject, gravity>::New
+        MeshObject<Time, TopologicalMeshObject, gravity>(runTime),
+        uniformDimensionedVectorField
         (
-            runTime,
             IOobject
             (
-                "g",
+                "g",   // Must be identical to typeName!
                 runTime.constant(),
                 runTime,
                 IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                false  // let MeshObject register it
             )
-        );
+        )
+    {}
+
+
+    //- Construct on Time
+    static const gravity& New(const Time& runTime)
+    {
+        return MeshObject<Time, TopologicalMeshObject, gravity>::New(runTime);
     }
-        
+
 
     //- Destructor
     virtual ~gravity() = default;
-
-
-    // Member Functions
-
-        //- Callback for gometry motion
-        virtual bool movePoints()
-        {
-            return false;
-        }
-
-        //- Callback for topology change
-        virtual void updateMesh(const mapPolyMesh& mpm)
-        {}
 };
 
 

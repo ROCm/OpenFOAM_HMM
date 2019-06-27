@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,10 +181,10 @@ public:
             return *this;
         }
 
-        //- Const access to per-face zone/region information
+        //- Per-face zone/region information
         virtual const labelList& zoneIds() const
         {
-            return Foam::emptyLabelList;
+            return labelList::null();
         }
 
         //- Face area magnitudes

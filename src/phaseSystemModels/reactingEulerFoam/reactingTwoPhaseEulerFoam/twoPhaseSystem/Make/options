@@ -1,0 +1,26 @@
+EXE_INC = \
+    -I../../interfacialModels/lnInclude \
+    -I../../interfacialCompositionModels/lnInclude \
+    -I../../phaseSystems/lnInclude \
+    -I../twoPhaseCompressibleTurbulenceModels/lnInclude \
+    -I../../derivedFvPatchFields/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
+    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/phaseCompressible/lnInclude \
+    -I$(LIB_SRC)/combustionModels/lnInclude \
+
+LIB_LIBS = \
+    -lfiniteVolume \
+    -lmeshTools \
+    -lsampling \
+    -lcombustionModels \
+    -lreactingPhaseSystem \
+    -lturbulenceModels \
+    -lcompressibleTurbulenceModels

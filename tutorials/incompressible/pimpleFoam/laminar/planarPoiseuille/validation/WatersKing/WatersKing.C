@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,10 +85,10 @@ int main(int argc, char *argv[])
 
     label order = 8;
 
-    scalarField ak(order, 0);
-    scalarField bk(order, 0);
-    scalarField ck(order, 0);
-    scalarField B(order, 0);
+    scalarField ak(order, Zero);
+    scalarField bk(order, Zero);
+    scalarField ck(order, Zero);
+    scalarField B(order, Zero);
 
     forAll(ak, i)
     {
@@ -98,7 +100,7 @@ int main(int argc, char *argv[])
                 ::cos((2*k - 1)*constant::mathematical::pi*y/2);
     }
 
-    scalarField A(order, 0);
+    scalarField A(order, Zero);
     OFstream file(runTime.path()/"WatersKing.dat");
     const scalar LOGVGREAT = ::log(VGREAT);
     while (!runTime.end())

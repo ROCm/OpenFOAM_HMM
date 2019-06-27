@@ -1,5 +1,5 @@
 Info<< "\nConstructing reacting cloud" << endl;
-basicReactingMultiphaseCloud parcels
+basicReactingTypeCloud parcels
 (
     "reactingCloud1",
     rho,

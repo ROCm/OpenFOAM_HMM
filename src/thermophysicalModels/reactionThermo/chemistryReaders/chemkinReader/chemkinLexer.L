@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -423,12 +425,12 @@ bool finishReaction = false;
         if (newFormat_)
         {
             specieString.replaceAll(" ", "_");
-            size_t strEnd = specieString.find_last_not_of('_');
+            const auto strEnd = specieString.find_last_not_of('_');
             currentSpecieName = specieString.substr(0, strEnd + 1);
         }
         else
         {
-            size_t spacePos = specieString.find(' ');
+            const auto spacePos = specieString.find(' ');
             if (spacePos != string::npos)
             {
                 currentSpecieName = specieString.substr(0, spacePos);
@@ -457,13 +459,12 @@ bool finishReaction = false;
         for (int i=0; i<4; i++)
         {
             word elementName = word::validate(thermoFormula.substr(5*i, 2));
-            label nAtoms = atoi(thermoFormula.substr(5*i + 2, 3).c_str());
+            const int nAtoms = atoi(thermoFormula.substr(5*i + 2, 3).c_str());
 
             if (elementName.size() && nAtoms)
             {
                 correctElementName(elementName);
-                currentSpecieComposition[nSpecieElements].name() =
-                    elementName;
+                currentSpecieComposition[nSpecieElements].name() = elementName;
                 currentSpecieComposition[nSpecieElements++].nAtoms() = nAtoms;
             }
         }
@@ -501,38 +502,26 @@ bool finishReaction = false;
 <readThermoFormula2>{thermoFormula2} {
         const string thermoFormula(YYText());
         word elementName = word::validate(thermoFormula.substr(0, 2));
-        const label nAtoms = atoi(thermoFormula.substr(2, 3).c_str());
+        const int nAtoms = atoi(thermoFormula.substr(2, 3).c_str());
 
         if
         (
             elementName.size()
-         && elementName.find('0') == string::npos
+         && elementName.find('0') == std::string::npos
          && nAtoms
         )
         {
             correctElementName(elementName);
-            currentSpecieComposition[nSpecieElements].name() =
-                elementName;
+            currentSpecieComposition[nSpecieElements].name() = elementName;
             currentSpecieComposition[nSpecieElements++].nAtoms() = nAtoms;
         }
 
         currentSpecieComposition.setSize(nSpecieElements);
 
-        speciesCompositionTable::iterator specieCompositionIter
-        (
-            speciesComposition_.find(currentSpecieName)
-        );
-
-        if (specieCompositionIter != speciesComposition_.end())
-        {
-            speciesComposition_.erase(specieCompositionIter);
-        }
-
-        speciesComposition_.insert
-        (
-            currentSpecieName,
-            currentSpecieComposition
-        );
+        // Add current specie composition to the hash table
+        // - overwrite existing
+        speciesComposition_.erase(currentSpecieName);
+        speciesComposition_.set(currentSpecieName, currentSpecieComposition);
 
         BEGIN(readThermoLineLabel1);
     }
@@ -587,17 +576,9 @@ bool finishReaction = false;
 
 <readThermoLineLabel4>{thermoLineLabel4} {
 
-        HashPtrTable<gasHThermoPhysics>::iterator specieThermoIter
-        (
-            speciesThermo_.find(currentSpecieName)
-        );
+        speciesThermo_.erase(currentSpecieName);
 
-        if (specieThermoIter != speciesThermo_.end())
-        {
-            speciesThermo_.erase(specieThermoIter);
-        }
-
-        speciesThermo_.insert
+        speciesThermo_.set
         (
             currentSpecieName,
             autoPtr<gasHThermoPhysics>::New
@@ -671,14 +652,12 @@ bool finishReaction = false;
 
         const word keyword = word::validate(YYText());
 
-        HashTable<int>::iterator reactionKeywordIter
-        (
-            reactionKeywordTable_.find(keyword)
-        );
+        const auto reactionKeywordIter =
+            reactionKeywordTable_.cfind(keyword);
 
-        if (reactionKeywordIter != reactionKeywordTable_.end())
+        if (reactionKeywordIter.found())
         {
-            switch(reactionKeywordIter())
+            switch (reactionKeywordIter.val())
             {
                 case duplicateReactionType:
                 {
@@ -783,12 +762,10 @@ bool finishReaction = false;
         {
             currentSpecieName = word::validate(YYText());
 
-            HashTable<label>::iterator specieIndexIter
-            (
-                specieIndices_.find(currentSpecieName)
-            );
+            const auto specieIndexIter =
+                specieIndices_.cfind(currentSpecieName);
 
-            if (specieIndexIter != specieIndices_.end())
+            if (specieIndexIter.found())
             {
                 if (finishReaction)
                 {
@@ -813,7 +790,7 @@ bool finishReaction = false;
                     lrhsPtr = &lhs;
                 }
 
-                currentSpecieCoeff.index = specieIndexIter();
+                currentSpecieCoeff.index = specieIndexIter.val();
                 lrhsPtr->append(currentSpecieCoeff);
 
                 BEGIN(readReactionDelimiter);
@@ -827,16 +804,14 @@ bool finishReaction = false;
 
 <readReactionKeyword>{reactionKeywordSlash} {
 
-        word keyword = word::validate(YYText());
+        const word keyword = word::validate(YYText());
 
-        HashTable<int>::iterator reactionKeywordIter
-        (
-            reactionKeywordTable_.find(keyword)
-        );
+        const auto reactionKeywordIter =
+            reactionKeywordTable_.cfind(keyword);
 
-        if (reactionKeywordIter != reactionKeywordTable_.end())
+        if (reactionKeywordIter.found())
         {
-            switch(reactionKeywordIter())
+            switch (reactionKeywordIter.val())
             {
                 case unimolecularFallOffReactionType:
                 {
@@ -1142,14 +1117,12 @@ bool finishReaction = false;
         }
         else
         {
-            HashTable<label>::iterator specieIndexIter
-            (
-                specieIndices_.find(keyword)
-            );
+            const auto specieIndexIter =
+                specieIndices_.cfind(keyword);
 
-            if (specieIndexIter != specieIndices_.end())
+            if (specieIndexIter.found())
             {
-                currentThirdBodyIndex = specieIndexIter();
+                currentThirdBodyIndex = specieIndexIter.val();
             }
             else
             {
@@ -1168,12 +1141,10 @@ bool finishReaction = false;
 <readSpecieNamePlus>"+" {
         currentSpecieName += "+";
 
-        HashTable<label>::iterator specieIndexIter
-        (
-            specieIndices_.find(currentSpecieName)
-        );
+        const auto specieIndexIter =
+            specieIndices_.cfind(currentSpecieName);
 
-        if (specieIndexIter != specieIndices_.end())
+        if (specieIndexIter.found())
         {
             if (finishReaction)
             {
@@ -1198,7 +1169,7 @@ bool finishReaction = false;
                 lrhsPtr = &lhs;
             }
 
-            currentSpecieCoeff.index = specieIndexIter();
+            currentSpecieCoeff.index = specieIndexIter.val();
             lrhsPtr->append(currentSpecieCoeff);
 
             BEGIN(readReactionDelimiter);
@@ -1337,15 +1308,13 @@ bool finishReaction = false;
 
         if (pDependentSpecieName != "M")
         {
-            HashTable<label>::iterator specieIndexIter
-            (
-                specieIndices_.find(pDependentSpecieName)
-            );
+            const auto specieIndexIter =
+                specieIndices_.cfind(pDependentSpecieName);
 
-            if (specieIndexIter != specieIndices_.end())
+            if (specieIndexIter.found())
             {
                 thirdBodyEfficiencies = 0.0;
-                thirdBodyEfficiencies[specieIndexIter()] = 1.0;
+                thirdBodyEfficiencies[specieIndexIter.val()] = 1.0;
             }
             else
             {
@@ -1383,14 +1352,11 @@ bool finishReaction = false;
 <readReactionOrderSpecie>{specieName} {
         currentSpecieName = word::validate(YYText());
 
-        HashTable<label>::iterator specieIndexIter
-        (
-            specieIndices_.find(currentSpecieName)
-        );
+        const auto specieIndexIter = specieIndices_.cfind(currentSpecieName);
 
-        if (specieIndexIter != specieIndices_.end())
+        if (specieIndexIter.found())
         {
-            currentSpecieIndex = specieIndexIter();
+            currentSpecieIndex = specieIndexIter.val();
         }
         else
         {
@@ -1412,11 +1378,11 @@ bool finishReaction = false;
 
         bool found = false;
 
-        forAll(lrhs, i)
+        for (gasHReaction::specieCoeffs& coeffs : lrhs)
         {
-            if (lrhs[i].index == currentSpecieIndex)
+            if (coeffs.index == currentSpecieIndex)
             {
-                lrhs[i].exponent = stringToScalar(YYText());
+                coeffs.exponent = stringToScalar(YYText());
                 found = true;
                 break;
             }

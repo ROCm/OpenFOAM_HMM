@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
+   \\    /   O peration     | Version:  v1906
     \\  /    A nd           | Web:      www.OpenFOAM.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
@@ -10,8 +10,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-name   <patchName>;
-fields (<field names>);
+name    <patchName>;
+fields  (<field names>);
 
 operation areaIntegrate;
 #includeEtc "caseDicts/postProcessing/surfaceFieldValue/patch.cfg"

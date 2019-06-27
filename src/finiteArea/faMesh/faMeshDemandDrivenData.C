@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
 -------------------------------------------------------------------------------
@@ -487,7 +487,7 @@ void Foam::faMesh::calcEdgeAreaNormals() const
 //     // Primitive patch edge normals
 //     const labelListList& patchPointEdges = patch().pointEdges();
 
-//     vectorField patchEdgeNormals(nEdges(), vector::zero);
+//     vectorField patchEdgeNormals(nEdges(), Zero);
 
 //     forAll(pointNormals, pointI)
 //     {
@@ -920,7 +920,7 @@ void Foam::faMesh::calcPointAreaNormals() const
     }
 
 
-    pointAreaNormalsPtr_ = new vectorField(nPoints(), vector::zero);
+    pointAreaNormalsPtr_ = new vectorField(nPoints(), Zero);
 
     vectorField& result = *pointAreaNormalsPtr_;
 
@@ -1075,7 +1075,7 @@ void Foam::faMesh::calcPointAreaNormals() const
             vectorField patchPointNormals
             (
                 patchPointLabels.size(),
-                vector::zero
+                Zero
             );
 
             forAll(patchPointNormals, pointI)
@@ -1096,7 +1096,7 @@ void Foam::faMesh::calcPointAreaNormals() const
             vectorField ngbPatchPointNormals
             (
                 procPatch.neighbPoints().size(),
-                vector::zero
+                Zero
             );
 
             {
@@ -1126,7 +1126,7 @@ void Foam::faMesh::calcPointAreaNormals() const
     {
         const labelList& spLabels(globalData().sharedPointLabels());
 
-        vectorField spNormals(spLabels.size(), vector::zero);
+        vectorField spNormals(spLabels.size(), Zero);
         forAll(spNormals, pointI)
         {
             spNormals[pointI] = result[spLabels[pointI]];
@@ -1137,7 +1137,7 @@ void Foam::faMesh::calcPointAreaNormals() const
         vectorField gpNormals
         (
             globalData().nGlobalPoints(),
-            vector::zero
+            Zero
         );
 
         forAll(addr, i)
@@ -1308,7 +1308,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
             M[i][4] = allPoints[i].y();
         }
 
-        scalarSquareMatrix MtM(5, 0.0);
+        scalarSquareMatrix MtM(5, Zero);
 
         for (label i = 0; i < MtM.n(); ++i)
         {
@@ -1321,7 +1321,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
             }
         }
 
-        scalarField MtR(5, 0);
+        scalarField MtR(5, Zero);
 
         for (label i=0; i<MtR.size(); ++i)
         {
@@ -1354,11 +1354,11 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
             const labelList& patchPointLabels = procPatch.pointLabels();
 
-            labelList toNgbProcLsPointStarts(patchPointLabels.size(), 0);
+            labelList toNgbProcLsPointStarts(patchPointLabels.size(), Zero);
             vectorField toNgbProcLsPoints
             (
                 10*patchPointLabels.size(),
-                vector::zero
+                Zero
             );
             label nPoints = 0;
 
@@ -1422,7 +1422,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 
             const labelList& patchPointLabels = procPatch.pointLabels();
 
-            labelList fromNgbProcLsPointStarts(patchPointLabels.size(), 0);
+            labelList fromNgbProcLsPointStarts(patchPointLabels.size(), Zero);
             vectorField fromNgbProcLsPoints;
 
             {
@@ -1520,7 +1520,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
                 }
 
                 // Remove duplicate points
-                vectorField allPoints(nAllPoints, vector::zero);
+                vectorField allPoints(nAllPoints, Zero);
                 boundBox bb(allPointsExt, false);
                 scalar tol = 0.001*mag(bb.max() - bb.min());
 
@@ -1595,7 +1595,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
                     M[i][4] = allPoints[i].y();
                 }
 
-                scalarSquareMatrix MtM(5, 0.0);
+                scalarSquareMatrix MtM(5, Zero);
 
                 for (label i = 0; i < MtM.n(); ++i)
                 {
@@ -1608,7 +1608,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
                     }
                 }
 
-                scalarField MtR(5, 0);
+                scalarField MtR(5, Zero);
 
                 for (label i = 0; i < MtR.size(); ++i)
                 {
@@ -1690,7 +1690,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
                     nAllPoints += procLsPoints[procI].size();
                 }
 
-                vectorField allPoints(nAllPoints, vector::zero);
+                vectorField allPoints(nAllPoints, Zero);
 
                 nAllPoints = 0;
                 forAll(procLsPoints, procI)
@@ -1768,7 +1768,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
                     M[i][4] = allPoints[i].y();
                 }
 
-                scalarSquareMatrix MtM(5, 0.0);
+                scalarSquareMatrix MtM(5, Zero);
                 for (label i = 0; i < MtM.n(); ++i)
                 {
                     for (label j = 0; j < MtM.m(); ++j)
@@ -1780,7 +1780,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
                     }
                 }
 
-                scalarField MtR(5, 0);
+                scalarField MtR(5, Zero);
                 for (label i = 0; i < MtR.size(); ++i)
                 {
                     for (label j = 0; j < M.n(); ++j)

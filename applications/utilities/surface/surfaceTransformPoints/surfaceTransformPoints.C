@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,12 +33,18 @@ Description
     Transform (scale/rotate) a surface.
     Like transformPoints but for surfaces.
 
-    The rollPitchYaw option takes three angles (degrees):
-    - roll (rotation about x) followed by
-    - pitch (rotation about y) followed by
-    - yaw (rotation about z)
+    The rollPitchYaw and yawPitchRoll options take three angles (degrees)
+    that describe the intrinsic Euler rotation.
 
-    The yawPitchRoll does yaw followed by pitch followed by roll.
+    rollPitchYaw
+    - roll (rotation about X) followed by
+    - pitch (rotation about Y) followed by
+    - yaw (rotation about Z)
+
+    yawPitchRoll
+    - yaw (rotation about Z) followed by
+    - pitch (rotation about Y) followed by
+    - roll (rotation about X)
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,13 +54,12 @@ Description
 #include "transformField.H"
 #include "Pair.H"
 #include "Tuple2.H"
-#include "quaternion.H"
-#include "mathematicalConstants.H"
-
+#include "axisAngleRotation.H"
+#include "EulerCoordinateRotation.H"
 #include "MeshedSurfaces.H"
 
 using namespace Foam;
-using namespace Foam::constant::mathematical;
+using namespace Foam::coordinateRotations;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -178,31 +185,29 @@ int main(int argc, char *argv[])
         n1n2[0].normalise();
         n1n2[1].normalise();
 
-        const tensor rotT = rotationTensor(n1n2[0], n1n2[1]);
+        const tensor rot(rotationTensor(n1n2[0], n1n2[1]));
 
-        Info<< "Rotating points by " << rotT << endl;
-
-        points = transform(rotT, points);
+        Info<< "Rotating points by " << rot << endl;
+        points = transform(rot, points);
     }
     else if (args.found("rotate-angle"))
     {
-        const Tuple2<vector, scalar> axisAngle
+        const Tuple2<vector, scalar> rotAxisAngle
         (
             args.lookup("rotate-angle")()
         );
 
+        const vector& axis  = rotAxisAngle.first();
+        const scalar& angle = rotAxisAngle.second();
+
         Info<< "Rotating points " << nl
-            << "    about " << axisAngle.first() << nl
-            << "    angle " << axisAngle.second() << nl;
+            << "    about " << axis << nl
+            << "    angle " << angle << nl;
 
-        const quaternion quat
-        (
-            axisAngle.first(),
-            axisAngle.second() * pi/180.0  // degToRad
-        );
+        const tensor rot(axisAngle::rotation(axis, angle, true));
 
-        Info<< "Rotating points by quaternion " << quat << endl;
-        points = transform(quat, points);
+        Info<< "Rotating points by " << rot << endl;
+        points = transform(rot, points);
     }
     else if (args.readIfPresent("rollPitchYaw", v))
     {
@@ -211,13 +216,10 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    yaw   " << v.z() << nl;
 
-        // degToRad
-        v *= pi/180.0;
+        const tensor rot(euler::rotation(euler::eulerOrder::XYZ, v, true));
 
-        const quaternion quat(quaternion::rotationSequence::XYZ, v);
-
-        Info<< "Rotating points by quaternion " << quat << endl;
-        points = transform(quat, points);
+        Info<< "Rotating points by " << rot << endl;
+        points = transform(rot, points);
     }
     else if (args.readIfPresent("yawPitchRoll", v))
     {
@@ -226,13 +228,10 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    roll  " << v.z() << nl;
 
-        // degToRad
-        v *= pi/180.0;
+        const tensor rot(euler::rotation(euler::eulerOrder::ZYX, v, true));
 
-        const quaternion quat(quaternion::rotationSequence::ZYX, v);
-
-        Info<< "Rotating points by quaternion " << quat << endl;
-        points = transform(quat, points);
+        Info<< "Rotating points by " << rot << endl;
+        points = transform(rot, points);
     }
 
     List<scalar> scaling;

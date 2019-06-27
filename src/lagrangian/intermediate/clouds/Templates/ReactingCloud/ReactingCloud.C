@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,7 +26,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReactingCloud.H"
-
 #include "CompositionModel.H"
 #include "PhaseChangeModel.H"
 
@@ -197,7 +198,6 @@ Foam::ReactingCloud<CloudType>::ReactingCloud
     cloudCopyPtr_(nullptr),
     constProps_(),
     compositionModel_(c.compositionModel_->clone()),
-//    compositionModel_(nullptr),
     phaseChangeModel_(nullptr),
     rhoTrans_(0)
 {}

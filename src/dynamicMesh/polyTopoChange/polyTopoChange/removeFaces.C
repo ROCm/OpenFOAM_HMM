@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -689,7 +691,7 @@ Foam::label Foam::removeFaces::compatibleRemoves
     // - master is lowest numbered in any region
     // - regions have more than 1 cell
     {
-        labelList nCells(regionMaster.size(), 0);
+        labelList nCells(regionMaster.size(), Zero);
 
         forAll(cellRegion, celli)
         {

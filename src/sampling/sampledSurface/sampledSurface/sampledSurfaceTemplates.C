@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,6 +113,102 @@ Foam::sampledSurface::pointAverage
     cellAvg.correctBoundaryConditions();
 
     return tcellAvg;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type, class GeoMeshType>
+bool Foam::sampledSurface::storeRegistryField
+(
+    const objectRegistry& obr,
+    const word& fieldName,
+    const dimensionSet& dims,
+    const Field<Type>& values,
+    word lookupName
+) const
+{
+    polySurface* surfptr = this->getRegistrySurface(obr, lookupName);
+
+    if (surfptr)
+    {
+        surfptr->storeField<Type, GeoMeshType>
+        (
+            fieldName, dims, values
+        );
+    }
+
+    return surfptr;
+}
+
+
+template<class Type, class GeoMeshType>
+bool Foam::sampledSurface::storeRegistryField
+(
+    const objectRegistry& obr,
+    const word& fieldName,
+    const dimensionSet& dims,
+    Field<Type>&& values,
+    word lookupName
+) const
+{
+    polySurface* surfptr = this->getRegistrySurface(obr, lookupName);
+
+    if (surfptr)
+    {
+        surfptr->storeField<Type, GeoMeshType>
+        (
+            fieldName, dims, std::move(values)
+        );
+    }
+
+    return surfptr;
+}
+
+
+template<class Type, class GeoMeshType>
+bool Foam::sampledSurface::storeSurfMeshField
+(
+    const word& fieldName,
+    const dimensionSet& dims,
+    const Field<Type>& values,
+    word lookupName
+) const
+{
+    surfMesh* surfptr = this->getSurfMesh(lookupName);
+
+    if (surfptr)
+    {
+        surfptr->storeField<Type, GeoMeshType>
+        (
+            fieldName, dims, values
+        );
+    }
+
+    return surfptr;
+}
+
+
+template<class Type, class GeoMeshType>
+bool Foam::sampledSurface::storeSurfMeshField
+(
+    const word& fieldName,
+    const dimensionSet& dims,
+    Field<Type>&& values,
+    word lookupName
+) const
+{
+    surfMesh* surfptr = this->getSurfMesh(lookupName);
+
+    if (surfptr)
+    {
+        surfptr->storeField<Type, GeoMeshType>
+        (
+            fieldName, dims, std::move(values)
+        );
+    }
+
+    return surfptr;
 }
 
 

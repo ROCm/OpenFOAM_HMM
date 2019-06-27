@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -111,9 +113,9 @@ public:
             //- Interface matrix update
             virtual void updateInterfaceMatrix
             (
-                scalarField&,
+                solveScalarField&,
                 const bool add,
-                const scalarField&,
+                const solveScalarField&,
                 const scalarField&,
                 const direction,
                 const Pstream::commsTypes commsType

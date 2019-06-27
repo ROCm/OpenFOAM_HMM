@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -353,59 +355,6 @@ void deleteEmptyPatches(fvMesh& mesh)
 }
 
 
-void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
-{
-    // Create dummy system/fv*
-    {
-        IOobject io
-        (
-            "fvSchemes",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        Info<< "Testing:" << io.objectPath() << endl;
-
-        if (!io.typeHeaderOk<IOdictionary>(true))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            dictionary divDict;
-            dummyDict.add("divSchemes", divDict);
-            dictionary gradDict;
-            dummyDict.add("gradSchemes", gradDict);
-            dictionary laplDict;
-            dummyDict.add("laplacianSchemes", laplDict);
-
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-    {
-        IOobject io
-        (
-            "fvSolution",
-            mesh.time().system(),
-            regionName,
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if (!io.typeHeaderOk<IOdictionary>(true))
-        {
-            Info<< "Writing dummy " << regionName/io.name() << endl;
-            dictionary dummyDict;
-            IOdictionary(io, dummyDict).regIOobject::write();
-        }
-    }
-}
-
-
 // Check zone either all internal or all external faces
 void checkZoneInside
 (
@@ -445,37 +394,6 @@ void checkZoneInside
 }
 
 
-// To combineReduce a labelList. Filters out duplicates.
-class uniqueEqOp
-{
-
-public:
-
-    void operator()(labelList& x, const labelList& y) const
-    {
-        if (x.empty())
-        {
-            if (y.size())
-            {
-                x = y;
-            }
-        }
-        else
-        {
-            forAll(y, yi)
-            {
-                if (!x.found(y[yi]))
-                {
-                    label sz = x.size();
-                    x.setSize(sz+1);
-                    x[sz] = y[yi];
-                }
-            }
-        }
-    }
-};
-
-
 // Calculate global pp faces per pp edge.
 labelListList globalEdgeFaces
 (
@@ -502,7 +420,7 @@ labelListList globalEdgeFaces
         mesh,
         ppMeshEdges,
         globalEdgeFaces,
-        uniqueEqOp(),
+        ListOps::uniqueEqOp<label>(),
         labelList()             // null value
     );
 
@@ -1642,7 +1560,7 @@ int main(int argc, char *argv[])
 
 
     // Create dummy fv* files
-    createDummyFvMeshFiles(mesh, shellRegionName);
+    fvMeshTools::createDummyFvMeshFiles(mesh, shellRegionName, true);
 
 
     word meshInstance;
@@ -1796,9 +1714,8 @@ int main(int argc, char *argv[])
         forAll(zones, i)
         {
             const faceSet& fz = zones[i];
-            forAllConstIter(faceSet, fz, iter)
+            for (const label facei : fz)
             {
-                label facei = iter.key();
                 if (mesh.isInternalFace(facei))
                 {
                     FatalIOErrorInFunction(dict)
@@ -1834,9 +1751,9 @@ int main(int argc, char *argv[])
             }
 
             label nShadowFaces = 0;
-            forAll(shadowZones, i)
+            for (const faceSet& fz : shadowZones)
             {
-                nShadowFaces += shadowZones[i].size();
+                nShadowFaces += fz.size();
             }
 
             if (nExtrudeFaces != nShadowFaces)
@@ -1856,9 +1773,8 @@ int main(int argc, char *argv[])
             forAll(shadowZones, i)
             {
                 const faceSet& fz = shadowZones[i];
-                forAllConstIter(faceSet, fz, iter)
+                for (const label facei : fz)
                 {
-                    label facei = iter.key();
                     if (mesh.isInternalFace(facei))
                     {
                         FatalIOErrorInFunction(dict)
@@ -1883,7 +1799,6 @@ int main(int argc, char *argv[])
 
     // Check zone either all internal or all external faces
     checkZoneInside(mesh, zoneNames, zoneID, extrudeMeshFaces, isInternal);
-
 
 
     const pointField& extrudePoints = extrudePatch.localPoints();
@@ -2053,11 +1968,11 @@ int main(int argc, char *argv[])
     // Count how many patches on special edges of extrudePatch are necessary
     // - zoneXXX_sides
     // - zoneXXX_zoneYYY
-    labelList zoneSidePatch(zoneNames.size(), 0);
+    labelList zoneSidePatch(zoneNames.size(), Zero);
     // Patch to use for minZone
-    labelList zoneZonePatch_min(zoneNames.size()*zoneNames.size(), 0);
+    labelList zoneZonePatch_min(zoneNames.size()*zoneNames.size(), Zero);
     // Patch to use for maxZone
-    labelList zoneZonePatch_max(zoneNames.size()*zoneNames.size(), 0);
+    labelList zoneZonePatch_max(zoneNames.size()*zoneNames.size(), Zero);
 
     countExtrudePatches
     (

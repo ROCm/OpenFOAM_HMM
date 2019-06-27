@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            ("liboverset.so");
+libs            ("liboverset.so" "libfvMotionSolvers.so");
 
 DebugSwitches
 {
@@ -31,7 +31,7 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         1.0;
+endTime         0.5;
 
 deltaT          2e-5;
 
@@ -55,7 +55,7 @@ runTimeModifiable true;
 
 adjustTimeStep  true;
 
-maxCo          0.2;
+maxCo          1.2;
 
 functions
 {

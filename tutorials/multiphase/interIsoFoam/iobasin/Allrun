@@ -8,5 +8,6 @@ runApplication createPatch -overwrite
 runApplication setFields
 runApplication decomposePar
 runParallel $(getApplication)
+runApplication reconstructPar
 
 #------------------------------------------------------------------------------

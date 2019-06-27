@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,10 +48,8 @@ inline bool Foam::pointEdgeStructuredWalk::update
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -199,10 +199,8 @@ inline bool Foam::pointEdgeStructuredWalk::updatePoint
     {
         return update(edgeInfo, tol, td);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -221,10 +219,8 @@ inline bool Foam::pointEdgeStructuredWalk::updatePoint
     {
         return update(newPointInfo, tol, td);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -257,10 +253,8 @@ inline bool Foam::pointEdgeStructuredWalk::updateEdge
     {
         return update(pointInfo, tol, td);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +41,9 @@ SourceFiles
 #include "scalarField.H"
 #include "Tuple2.H"
 #include "writer.H"
+#include "DynamicList.H"
+#include "labelVector.H"
+#include "meshRefinement.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +54,6 @@ namespace Foam
 class refinementParameters;
 class snapParameters;
 
-class meshRefinement;
 class decompositionMethod;
 class fvMeshDistribute;
 class fvMesh;
@@ -80,8 +84,26 @@ class snappyRefineDriver
         //- How to write lines. Used e.g. when writing leak-paths
         const writer<scalar>& setFormatter_;
 
+        //- Are we operating in test mode?
+        const bool dryRun_;
+
 
     // Private Member Functions
+
+        void addNeighbours
+        (
+            const labelVector& n,
+            const labelList& cellLevel,
+            const labelVector& voxel,
+            const label voxeli,
+            DynamicList<labelVector>& front
+        ) const;
+
+        //- Rough estimate of cell size and cell count
+        void estimateCellSizeAndCount
+        (
+            const refinementParameters& refineParams
+        ) const;
 
         //- Refine all cells pierced by explicit feature edges
         label featureEdgeRefine
@@ -107,6 +129,13 @@ class snappyRefineDriver
 
         //- Refine all cells in small gaps
         label gapOnlyRefine
+        (
+            const refinementParameters& refineParams,
+            const label maxIter
+        );
+
+        //- Block all cells in small gaps
+        label surfaceProximityBlock
         (
             const refinementParameters& refineParams,
             const label maxIter
@@ -197,7 +226,7 @@ class snappyRefineDriver
         //- Merge refined boundary faces (from exposing coarser cell)
         void mergePatchFaces
         (
-            const bool geometricMerge,
+            const meshRefinement::FaceMergeType mergeType,
             const refinementParameters& refineParams,
             const dictionary& motionDict
         );
@@ -225,7 +254,8 @@ public:
             fvMeshDistribute& distributor,
             const labelUList& globalToMasterPatch,
             const labelUList& globalToSlavePatch,
-            const writer<scalar>& setFormatter
+            const writer<scalar>& setFormatter,
+            const bool dryRun = false
         );
 
 
@@ -238,7 +268,7 @@ public:
             const refinementParameters& refineParams,
             const snapParameters& snapParams,
             const bool prepareForSnapping,
-            const bool mergePatchFaces,
+            const meshRefinement::FaceMergeType mergeType,
             const dictionary& motionDict
         );
 

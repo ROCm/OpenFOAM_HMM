@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -456,7 +458,7 @@ void Foam::polyTopoChange::makeCells
     cellFaceOffsets.setSize(cellMap_.size() + 1);
 
     // Faces per cell
-    labelList nNbrs(cellMap_.size(), 0);
+    labelList nNbrs(cellMap_.size(), Zero);
 
     // 1. Count faces per cell
 
@@ -539,7 +541,7 @@ void Foam::polyTopoChange::makeCellCells
 ) const
 {
     // Neighbours per cell
-    labelList nNbrs(cellMap_.size(), 0);
+    labelList nNbrs(cellMap_.size(), Zero);
 
     // 1. Count neighbours (through internal faces) per cell
 
@@ -1363,7 +1365,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
         forAllConstIters(faceFromPoint_, iter)
         {
             const label facei = iter.key();
-            const label pointi = iter.object();
+            const label pointi = iter.val();
 
             // Get internal or patch faces using point on old mesh
             const bool internal = (region_[facei] == -1);
@@ -1395,7 +1397,7 @@ void Foam::polyTopoChange::calcFaceInflationMaps
         forAllConstIters(faceFromEdge_, iter)
         {
             const label facei = iter.key();
-            const label edgei = iter.object();
+            const label edgei = iter.val();
 
             // Get internal or patch faces using edge on old mesh
             const bool internal = (region_[facei] == -1);
@@ -1445,7 +1447,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
         forAllConstIters(cellFromPoint_, iter)
         {
             const label celli = iter.key();
-            const label pointi = iter.object();
+            const label pointi = iter.val();
 
             cellsFromPoints[nCellsFromPoints++] = objectMap
             (
@@ -1466,7 +1468,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
         forAllConstIters(cellFromEdge_, iter)
         {
             const label celli = iter.key();
-            const label edgei = iter.object();
+            const label edgei = iter.val();
 
             cellsFromEdges[nCellsFromEdges++] = objectMap
             (
@@ -1489,7 +1491,7 @@ void Foam::polyTopoChange::calcCellInflationMaps
         forAllConstIters(cellFromFace_, iter)
         {
             const label celli = iter.key();
-            const label oldFacei = iter.object();
+            const label oldFacei = iter.val();
 
             if (mesh.isInternalFace(oldFacei))
             {
@@ -1543,12 +1545,12 @@ void Foam::polyTopoChange::resetZones
 
         // Count points per zone
 
-        labelList nPoints(pointZones.size(), 0);
+        labelList nPoints(pointZones.size(), Zero);
 
         forAllConstIters(pointZone_, iter)
         {
             const label pointi = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             if (zonei < 0 || zonei >= pointZones.size())
             {
@@ -1572,7 +1574,7 @@ void Foam::polyTopoChange::resetZones
         forAllConstIters(pointZone_, iter)
         {
             const label pointi = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             addressing[zonei][nPoints[zonei]++] = pointi;
         }
@@ -1629,12 +1631,12 @@ void Foam::polyTopoChange::resetZones
     {
         const faceZoneMesh& faceZones = mesh.faceZones();
 
-        labelList nFaces(faceZones.size(), 0);
+        labelList nFaces(faceZones.size(), Zero);
 
         forAllConstIters(faceZone_, iter)
         {
             const label facei = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             if (zonei < 0 || zonei >= faceZones.size())
             {
@@ -1659,7 +1661,7 @@ void Foam::polyTopoChange::resetZones
         forAllConstIters(faceZone_, iter)
         {
             const label facei = iter.key();
-            const label zonei = iter.object();
+            const label zonei = iter.val();
 
             const label index = nFaces[zonei]++;
 
@@ -1744,7 +1746,7 @@ void Foam::polyTopoChange::resetZones
     {
         const cellZoneMesh& cellZones = mesh.cellZones();
 
-        labelList nCells(cellZones.size(), 0);
+        labelList nCells(cellZones.size(), Zero);
 
         forAll(cellZone_, celli)
         {
@@ -1885,7 +1887,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
     labelList oldToNew(identity(faces_.size()));
 
     // Rotation on new faces.
-    labelList rotation(faces_.size(), 0);
+    labelList rotation(faces_.size(), Zero);
 
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
@@ -1925,7 +1927,7 @@ void Foam::polyTopoChange::reorderCoupledFaces
         if (syncParallel || !isA<processorPolyPatch>(boundary[patchi]))
         {
             labelList patchFaceMap(patchSizes[patchi], -1);
-            labelList patchFaceRotation(patchSizes[patchi], 0);
+            labelList patchFaceRotation(patchSizes[patchi], Zero);
 
             const bool changed = boundary[patchi].order
             (
@@ -3311,6 +3313,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
     IOobject noReadIO(io);
     noReadIO.readOpt() = IOobject::NO_READ;
+    noReadIO.writeOpt() = IOobject::AUTO_WRITE;
     newMeshPtr.reset
     (
         new fvMesh

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +51,7 @@ patchInjection::patchInjection
 )
 :
     injectionModel(type(), film, dict),
-    deltaStable_(coeffDict_.lookupOrDefault<scalar>("deltaStable", 0.0))
+    deltaStable_(coeffDict_.lookupOrDefault<scalar>("deltaStable", 0))
 {
     const polyBoundaryMesh& pbm = film.regionMesh().boundaryMesh();
     patchIDs_.setSize
@@ -180,7 +182,7 @@ void patchInjection::patchInjectedMassTotals(scalarField& patchMasses) const
         getModelProperty<scalarField>
         (
             "patchInjectedMasses",
-            scalarField(patchInjectedMasses_.size(), 0)
+            scalarField(patchInjectedMasses_.size(), Zero)
         )
     );
 

@@ -1,0 +1,12 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+targetType=libo                             # Preferred library type
+. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments $*
+
+#------------------------------------------------------------------------------
+unset COMP_FLAGS LINK_FLAGS
+
+# Make object (non-shared by default)
+wmake $targetType
+
+#------------------------------------------------------------------------------

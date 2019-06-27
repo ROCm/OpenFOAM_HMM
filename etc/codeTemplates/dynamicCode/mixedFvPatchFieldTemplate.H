@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) YEAR AUTHOR,AFFILIATION
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) YEAR AUTHOR,AFFILIATION
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,10 +52,18 @@ class ${typeName}MixedValueFvPatch${FieldType}
 :
     public mixedFvPatchField<${TemplateType}>
 {
+    // Private Member Functions
+
+        //- Report a message with the SHA1sum
+        inline static void printMessage(const char* message)
+        {
+            Info<< message << " sha1: " << SHA1sum << '\n';
+        }
+
 public:
 
-    //- Information about the SHA1 of the code itself
-    static const char* const SHA1sum;
+    //- SHA1 representation of the code content
+    static constexpr const char* const SHA1sum = "${SHA1sum}";
 
     //- Runtime type information
     TypeName("${typeName}");
@@ -124,7 +134,7 @@ public:
     virtual ~${typeName}MixedValueFvPatch${FieldType}();
 
 
-    // Member functions
+    // Member Functions
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

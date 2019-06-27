@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,15 +26,15 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LUscalarMatrix.H"
-#include "SubField.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::LUscalarMatrix::solve
 (
-    Field<Type>& x,
-    const Field<Type>& source
+    List<Type>& x,
+    const UList<Type>& source
 ) const
 {
     // If x and source are different initialize x = source
@@ -43,15 +45,13 @@ void Foam::LUscalarMatrix::solve
 
     if (Pstream::parRun())
     {
-        Field<Type> X(m());
+        List<Type> X; // scratch space (on master)
 
         if (Pstream::master(comm_))
         {
-            typename Field<Type>::subField
-            (
-                X,
-                x.size()
-            ) = x;
+            X.resize(m());
+
+            SubList<Type>(X, x.size()) = x;
 
             for
             (
@@ -80,7 +80,7 @@ void Foam::LUscalarMatrix::solve
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo(),
-                reinterpret_cast<const char*>(x.begin()),
+                reinterpret_cast<const char*>(x.cdata()),
                 x.byteSize(),
                 Pstream::msgType(),
                 comm_
@@ -91,11 +91,7 @@ void Foam::LUscalarMatrix::solve
         {
             LUBacksubstitute(*this, pivotIndices_, X);
 
-            x = typename Field<Type>::subField
-            (
-                X,
-                x.size()
-            );
+            x = SubList<Type>(X, x.size());
 
             for
             (
@@ -112,7 +108,7 @@ void Foam::LUscalarMatrix::solve
                     (
                         &(X[procOffsets_[slave]])
                     ),
-                    (procOffsets_[slave + 1]-procOffsets_[slave])*sizeof(Type),
+                    (procOffsets_[slave+1]-procOffsets_[slave])*sizeof(Type),
                     Pstream::msgType(),
                     comm_
                 );
@@ -124,7 +120,7 @@ void Foam::LUscalarMatrix::solve
             (
                 Pstream::commsTypes::scheduled,
                 Pstream::masterNo(),
-                reinterpret_cast<char*>(x.begin()),
+                reinterpret_cast<char*>(x.data()),
                 x.byteSize(),
                 Pstream::msgType(),
                 comm_
@@ -141,13 +137,12 @@ void Foam::LUscalarMatrix::solve
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::LUscalarMatrix::solve
 (
-    const Field<Type>& source
+    const UList<Type>& source
 ) const
 {
-    tmp<Field<Type>> tx(new Field<Type>(m()));
-    Field<Type>& x = tx.ref();
+    auto tx(tmp<Field<Type>>::New(m()));
 
-    solve(x, source);
+    solve(tx.ref(), source);
 
     return tx;
 }

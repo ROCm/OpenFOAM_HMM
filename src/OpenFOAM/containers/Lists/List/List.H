@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,23 +60,19 @@ class Istream;
 class Ostream;
 
 template<class T> class List;
-template<class T, unsigned Size> class FixedList;
+template<class T, unsigned N> class FixedList;
 template<class T, int SizeMin> class DynamicList;
 
 template<class T> class PtrList;
 template<class T> class SortableList;
-template<class T> class IndirectList;
-template<class T> class UIndirectList;
-template<class T> class BiIndirectList;
+template<class T, class Addr> class IndirectListBase;
 
 template<class T> Istream& operator>>(Istream& is, List<T>& list);
 
 // Common list types
-typedef List<char> charList;
-typedef List<label> labelList;
-
-//- A zero-sized list of labels
-extern const labelList emptyLabelList;
+typedef List<bool> boolList;        //!< A List of bools
+typedef List<char> charList;        //!< A List of chars
+typedef List<label> labelList;      //!< A List of labels
 
 
 /*---------------------------------------------------------------------------*\
@@ -160,9 +158,9 @@ public:
         template<class InputIterator>
         List(InputIterator begIter, InputIterator endIter);
 
-        //- Construct as copy of FixedList<T, Size>
-        template<unsigned Size>
-        explicit List(const FixedList<T, Size>& list);
+        //- Construct as copy of FixedList\<T, N\>
+        template<unsigned N>
+        explicit List(const FixedList<T, N>& list);
 
         //- Construct as copy of PtrList<T>
         explicit List(const PtrList<T>& list);
@@ -170,11 +168,9 @@ public:
         //- Construct as copy of SLList<T>
         explicit List(const SLList<T>& list);
 
-        //- Construct as copy of UIndirectList<T>
-        explicit List(const UIndirectList<T>& list);
-
-        //- Construct as copy of BiIndirectList<T>
-        explicit List(const BiIndirectList<T>& list);
+        //- Construct as copy of IndirectList contents
+        template<class Addr>
+        explicit List(const IndirectListBase<T, Addr>& list);
 
         //- Construct from an initializer list
         List(std::initializer_list<T> list);
@@ -238,8 +234,9 @@ public:
             //- Append a List to the end of this list
             inline void append(const UList<T>& list);
 
-            //- Append a UIndirectList at the end of this list
-            inline void append(const UIndirectList<T>& list);
+            //- Append IndirectList contents at the end of this list
+            template<class Addr>
+            inline void append(const IndirectListBase<T, Addr>& list);
 
             //- Transfer the contents of the argument List into this list
             //- and annul the argument list
@@ -270,11 +267,9 @@ public:
         //- Assignment to SLList operator. Takes linear time
         void operator=(const SLList<T>& list);
 
-        //- Assignment to UIndirectList operator. Takes linear time
-        void operator=(const UIndirectList<T>& list);
-
-        //- Assignment to BiIndirectList operator. Takes linear time
-        void operator=(const BiIndirectList<T>& list);
+        //- Assignment from IndirectList. Takes linear time
+        template<class Addr>
+        void operator=(const IndirectListBase<T, Addr>& list);
 
         //- Assignment to an initializer list
         void operator=(std::initializer_list<T> list);
@@ -322,7 +317,7 @@ public:
         //
         //  \return True if value changed.
         template<class TypeT = T>
-        typename std::enable_if<std::is_same<TypeT, bool>::value, bool>::type
+        typename std::enable_if<std::is_same<bool, TypeT>::value, bool>::type
         inline set(const label i, bool val = true)
         {
             if (i < 0)
@@ -345,6 +340,11 @@ public:
 
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+//- Create identity map of the given length with (map[i] == i)
+//  Optionally with an alternative start index, so that (map[i] == i+start)
+labelList identity(const label len, label start=0);
+
 
 //- Hashing for List data, which uses Hasher for contiguous data and
 //- element-wise incrementally hashing otherwise.

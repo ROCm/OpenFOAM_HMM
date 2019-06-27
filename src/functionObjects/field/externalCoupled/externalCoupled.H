@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,7 +88,7 @@ Usage
         log             yes;
         commsDir        "<case>/comms";
         initByExternal  yes;
-        stateEnd        remove;  // (remove | done)
+        statusDone      done;  // Any arbitrary status=... value
 
         regions
         {
@@ -103,7 +103,6 @@ Usage
         }
     }
     \endverbatim
-
 
     This reads/writes (on the master processor) the directory:
     \verbatim
@@ -125,17 +124,16 @@ Usage
 
     The entries comprise:
     \table
-        Property     | Description             | Required | Default value
-        type         | type name: externalCoupled | yes |
-        commsDir     | communication directory | yes |
-        waitInterval | wait interval in (s)    | no | 1
-        timeOut      | timeout in (s)          | no | 100*waitInterval
-        stateEnd     | Lockfile treatment on termination | no | done
-        initByExternal | initialization values supplied by external app | yes
-        calcFrequency | calculation frequency  | no | 1
-        regions  | the regions to couple | yes
+        Property     | Description                          | Required | Default
+        type         | Type name: externalCoupled           | yes |
+        commsDir     | Communication directory              | yes |
+        waitInterval | wait interval in (s)                 | no  | 1
+        timeOut      | timeout in (s)                    | no | 100*waitInterval
+        statusDone   | Lockfile status=... on termination   | no  | done
+        initByExternal | Initialization values supplied by external app | yes
+        calcFrequency | Calculation frequency               | no  | 1
+        regions      | The regions to couple                | yes |
     \endtable
-
 
 SourceFiles
     externalCoupled.C
@@ -146,13 +144,11 @@ SourceFiles
 #ifndef functionObjects_externalCoupled_H
 #define functionObjects_externalCoupled_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "externalFileCoupler.H"
 #include "DynamicList.H"
 #include "wordReList.H"
 #include "scalarField.H"
-#include "Enum.H"
-#include "Switch.H"
 #include "UPtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -160,7 +156,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class fvMesh;
 class IFstream;
 
@@ -168,35 +164,16 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-              Class functionObjects::externalCoupled Declaration
+                       Class externalCoupled Declaration
 \*---------------------------------------------------------------------------*/
 
 class externalCoupled
 :
-    public functionObject,
+    public functionObjects::timeFunctionObject,
     public externalFileCoupler
 {
-public:
 
-    // Public data types
-
-        //- Lockfile state on termination
-        enum stateEnd
-        {
-            REMOVE,     //!< Remove lock file on end
-            DONE,       //!< Lock file contains status=done on end
-            IGNORE      //!< Internal use only (for handling cleanup).
-        };
-
-private:
-
-        //- State end names (NB, only selectable values itemized)
-        static const Enum<stateEnd> stateEndNames_;
-
-    // Private data
-
-        //- Reference to the time database
-        const Time& time_;
+    // Private Member Data
 
         //- Calculation frequency
         label calcFrequency_;

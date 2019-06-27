@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -158,14 +160,14 @@ public:
         //  [kg/m/s]
         virtual tmp<volScalarField> alphaEff() const
         {
-            return alpha();
+            return this->transport_.alphahe();
         }
 
         //- Return the effective turbulent thermal diffusivity for enthalpy
         //  for a patch [kg/m/s]
         virtual tmp<scalarField> alphaEff(const label patchi) const
         {
-            return alpha(patchi);
+            return this->transport_.alphahe(patchi);
         }
 };
 

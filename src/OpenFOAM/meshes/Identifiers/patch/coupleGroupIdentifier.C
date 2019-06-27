@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +67,7 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
     }
 
     // Mesh has patch group
-    const labelList& patchIDs = fnd.object();
+    const labelList& patchIDs = fnd.val();
 
     if (&mesh == &thisPatch.boundaryMesh().mesh())
     {
@@ -177,11 +179,11 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
 
     label otherPatchID = -1;
 
-    forAllConstIter(HashTable<const polyMesh*>, meshSet, iter)
+    forAllConstIters(meshSet, iter)
     {
         const polyMesh& mesh = *iter();
 
-        label patchID = findOtherPatchID(mesh, thisPatch);
+        const label patchID = findOtherPatchID(mesh, thisPatch);
 
         if (patchID != -1)
         {

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,25 +58,25 @@ Foam::compressibilityModels::Chung::Chung
     (
         "psiv",
         dimCompressibility,
-        compressibilityProperties_.lookup("psiv")
+        compressibilityProperties_
     ),
     psil_
     (
         "psil",
         dimCompressibility,
-        compressibilityProperties_.lookup("psil")
+        compressibilityProperties_
     ),
     rhovSat_
     (
         "rhovSat",
         dimDensity,
-        compressibilityProperties_.lookup("rhovSat")
+        compressibilityProperties_
     ),
     rholSat_
     (
         "rholSat",
         dimDensity,
-        compressibilityProperties_.lookup("rholSat")
+        compressibilityProperties_
     )
 {
     correct();

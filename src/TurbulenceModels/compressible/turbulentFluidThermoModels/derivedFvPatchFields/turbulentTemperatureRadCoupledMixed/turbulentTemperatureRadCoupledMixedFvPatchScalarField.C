@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -219,13 +221,13 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
     scalarField KDelta(kappa(Tp)*patch().deltaCoeffs());
 
-    scalarField qr(Tp.size(), 0.0);
+    scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
         qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
     }
 
-    scalarField qrNbr(Tp.size(), 0.0);
+    scalarField qrNbr(Tp.size(), Zero);
     if (qrNbrName_ != "none")
     {
         qrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
@@ -260,7 +262,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
             }
             else
             {
-                mCpDtNbr.setSize(Tp.size(), 0.0);
+                mCpDtNbr.setSize(Tp.size(), Zero);
             }
         }
 
@@ -285,7 +287,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
             else
             {
                 // Issue warning?
-                mCpDt.setSize(Tp.size(), 0.0);
+                mCpDt.setSize(Tp.size(), Zero);
             }
         }
 

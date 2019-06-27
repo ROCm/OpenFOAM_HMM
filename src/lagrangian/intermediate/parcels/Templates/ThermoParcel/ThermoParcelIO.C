@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,13 +94,11 @@ void Foam::ThermoParcel<ParcelType>::readFields(CloudType& c)
 
 
     label i = 0;
-    forAllIter(typename Cloud<ThermoParcel<ParcelType>>, c, iter)
+    for (ThermoParcel<ParcelType>& p : c)
     {
-        ThermoParcel<ParcelType>& p = iter();
-
         p.T_ = T[i];
         p.Cp_ = Cp[i];
-        i++;
+        ++i;
     }
 }
 
@@ -115,13 +115,11 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const CloudType& c)
     IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::NO_READ), np);
 
     label i = 0;
-    forAllConstIter(typename Cloud<ThermoParcel<ParcelType>>, c, iter)
+    for (const ThermoParcel<ParcelType>& p : c)
     {
-        const ThermoParcel<ParcelType>& p = iter();
-
         T[i] = p.T_;
         Cp[i] = p.Cp_;
-        i++;
+        ++i;
     }
 
     T.write(np > 0);
@@ -145,13 +143,11 @@ void Foam::ThermoParcel<ParcelType>::writeObjects
     IOField<scalar>& Cp(cloud::createIOField<scalar>("Cp", np, obr));
 
     label i = 0;
-    forAllConstIter(typename Cloud<ThermoParcel<ParcelType>>, c, iter)
+    for (const ThermoParcel<ParcelType>& p : c)
     {
-        const ThermoParcel<ParcelType>& p = iter();
-
         T[i] = p.T_;
         Cp[i] = p.Cp_;
-        i++;
+        ++i;
     }
 }
 

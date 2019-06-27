@@ -77,7 +77,7 @@ bool Foam::HashTable<T, Key, Hash>::iterator_erase
     }
 
     // Decrease count
-    size_--;
+    --size_;
 
     // The previous element in the singly linked list
     node_type* prev = nullptr;

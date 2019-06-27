@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +60,7 @@ injectionModelList::injectionModelList
         "injectionModelList",
         "injectionModelList"
     ),
-    massInjected_(film.intCoupledPatchIDs().size(), 0.0)
+    massInjected_(film.intCoupledPatchIDs().size(), Zero)
 {
     const wordList activeModels(dict.lookup("injectionModels"));
 
@@ -149,7 +151,7 @@ void injectionModelList::info(Ostream& os)
         }
     }
 
-    scalarField mass0(massInjected_.size(), 0);
+    scalarField mass0(massInjected_.size(), Zero);
     this->getBaseProperty("massInjected", mass0);
 
     scalarField mass(massInjected_);

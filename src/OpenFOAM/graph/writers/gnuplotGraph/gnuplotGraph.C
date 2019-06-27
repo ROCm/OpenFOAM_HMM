@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2012 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +53,7 @@ void Foam::gnuplotGraph::write(const graph& g, Ostream& os) const
 
     bool firstField = true;
 
-    forAllConstIter(graph, g, iter)
+    forAllConstIters(g, iter)
     {
         if (!firstField)
         {
@@ -64,7 +66,7 @@ void Foam::gnuplotGraph::write(const graph& g, Ostream& os) const
     os << "; pause -1" << endl;
 
 
-    forAllConstIter(graph, g, iter)
+    forAllConstIters(g, iter)
     {
         os  << endl;
         writeXY(g.x(), *iter(), os);

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +37,8 @@ bool Foam::motionSmootherAlgo::checkMesh
     const polyMesh& mesh,
     const dictionary& dict,
     const labelList& checkFaces,
-    labelHashSet& wrongFaces
+    labelHashSet& wrongFaces,
+    const bool dryRun
 )
 {
     List<labelPair> emptyBaffles;
@@ -46,7 +49,8 @@ bool Foam::motionSmootherAlgo::checkMesh
         dict,
         checkFaces,
         emptyBaffles,
-        wrongFaces
+        wrongFaces,
+        dryRun
     );
 }
 
@@ -57,54 +61,60 @@ bool Foam::motionSmootherAlgo::checkMesh
     const dictionary& dict,
     const labelList& checkFaces,
     const List<labelPair>& baffles,
-    labelHashSet& wrongFaces
+    labelHashSet& wrongFaces,
+    const bool dryRun
 )
 {
     const scalar maxNonOrtho
     (
-        dict.get<scalar>("maxNonOrtho", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "maxNonOrtho", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minVol
     (
-        dict.get<scalar>("minVol", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minVol", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minTetQuality
     (
-        dict.get<scalar>("minTetQuality", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minTetQuality", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar maxConcave
     (
-        dict.get<scalar>("maxConcave", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "maxConcave", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minArea
     (
-        dict.get<scalar>("minArea", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minArea", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar maxIntSkew
     (
-        dict.get<scalar>("maxInternalSkewness", keyType::REGEX_RECURSIVE)
+        get<scalar>
+        (
+            dict, "maxInternalSkewness", dryRun, keyType::REGEX_RECURSIVE
+        )
     );
     const scalar maxBounSkew
     (
-        dict.get<scalar>("maxBoundarySkewness", keyType::REGEX_RECURSIVE)
+        get<scalar>
+        (
+            dict, "maxBoundarySkewness", dryRun, keyType::REGEX_RECURSIVE
+        )
     );
     const scalar minWeight
     (
-        dict.get<scalar>("minFaceWeight", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minFaceWeight", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minVolRatio
     (
-        dict.get<scalar>("minVolRatio", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minVolRatio", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minTwist
     (
-        dict.get<scalar>("minTwist", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minTwist", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minTriangleTwist
     (
-        dict.get<scalar>("minTriangleTwist", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minTriangleTwist", dryRun, keyType::REGEX_RECURSIVE)
     );
-
     const scalar minFaceFlatness
     (
         dict.lookupOrDefault<scalar>
@@ -114,8 +124,38 @@ bool Foam::motionSmootherAlgo::checkMesh
     );
     const scalar minDet
     (
-        dict.get<scalar>("minDeterminant", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minDeterminant", dryRun, keyType::REGEX_RECURSIVE)
     );
+
+
+    if (dryRun)
+    {
+        string errorMsg(FatalError.message());
+        string IOerrorMsg(FatalIOError.message());
+
+        if (errorMsg.size() || IOerrorMsg.size())
+        {
+            //errorMsg = "[dryRun] " + errorMsg;
+            //errorMsg.replaceAll("\n", "\n[dryRun] ");
+            //IOerrorMsg = "[dryRun] " + IOerrorMsg;
+            //IOerrorMsg.replaceAll("\n", "\n[dryRun] ");
+
+            IOWarningInFunction(dict)
+                << nl
+                << "Missing/incorrect required dictionary entries:" << nl
+                << nl
+                << IOerrorMsg.c_str() << nl
+                << errorMsg.c_str() << nl
+                //<< nl << "Exiting dry-run" << nl
+                << endl;
+
+            FatalError.clear();
+            FatalIOError.clear();
+        }
+        return false;
+    }
+
+
     label nWrongFaces = 0;
 
     Info<< "Checking faces in error :" << endl;
@@ -422,7 +462,8 @@ bool Foam::motionSmootherAlgo::checkMesh
     const bool report,
     const polyMesh& mesh,
     const dictionary& dict,
-    labelHashSet& wrongFaces
+    labelHashSet& wrongFaces,
+    const bool dryRun
 )
 {
     return checkMesh
@@ -431,7 +472,8 @@ bool Foam::motionSmootherAlgo::checkMesh
         mesh,
         dict,
         identity(mesh.nFaces()),
-        wrongFaces
+        wrongFaces,
+        dryRun
     );
 }
 
@@ -442,7 +484,8 @@ bool Foam::motionSmootherAlgo::checkMesh
     const polyMeshGeometry& meshGeom,
     const pointField& points,
     const labelList& checkFaces,
-    labelHashSet& wrongFaces
+    labelHashSet& wrongFaces,
+    const bool dryRun
 )
 {
     List<labelPair> emptyBaffles;
@@ -455,7 +498,8 @@ bool Foam::motionSmootherAlgo::checkMesh
         points,
         checkFaces,
         emptyBaffles,
-        wrongFaces
+        wrongFaces,
+        dryRun
      );
 }
 
@@ -468,64 +512,93 @@ bool Foam::motionSmootherAlgo::checkMesh
     const pointField& points,
     const labelList& checkFaces,
     const List<labelPair>& baffles,
-    labelHashSet& wrongFaces
+    labelHashSet& wrongFaces,
+    const bool dryRun
 )
 {
     const scalar maxNonOrtho
     (
-        dict.get<scalar>("maxNonOrtho", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "maxNonOrtho", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minVol
     (
-        dict.get<scalar>("minVol", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minVol", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minTetQuality
     (
-        dict.get<scalar>("minTetQuality", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minTetQuality", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar maxConcave
     (
-        dict.get<scalar>("maxConcave", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "maxConcave", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minArea
     (
-        dict.get<scalar>("minArea", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minArea", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar maxIntSkew
     (
-        dict.get<scalar>("maxInternalSkewness", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "maxInternalSkewness", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar maxBounSkew
     (
-        dict.get<scalar>("maxBoundarySkewness", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "maxBoundarySkewness", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minWeight
     (
-        dict.get<scalar>("minFaceWeight", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minFaceWeight", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minVolRatio
     (
-        dict.get<scalar>("minVolRatio", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minVolRatio", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minTwist
     (
-        dict.get<scalar>("minTwist", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minTwist", dryRun, keyType::REGEX_RECURSIVE)
     );
     const scalar minTriangleTwist
     (
-        dict.get<scalar>("minTriangleTwist", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minTriangleTwist", dryRun, keyType::REGEX_RECURSIVE)
     );
-    const scalar minFaceFlatness
+    scalar minFaceFlatness = -1.0;
+    dict.readIfPresent
     (
-        dict.lookupOrDefault<scalar>
-        (
-            "minFaceFlatness", -1, keyType::REGEX_RECURSIVE
-        )
+        "minFaceFlatness",
+        minFaceFlatness,
+        keyType::REGEX_RECURSIVE
     );
     const scalar minDet
     (
-        dict.get<scalar>("minDeterminant", keyType::REGEX_RECURSIVE)
+        get<scalar>(dict, "minDeterminant", dryRun, keyType::REGEX_RECURSIVE)
     );
+
+    if (dryRun)
+    {
+        string errorMsg(FatalError.message());
+        string IOerrorMsg(FatalIOError.message());
+
+        if (errorMsg.size() || IOerrorMsg.size())
+        {
+            //errorMsg = "[dryRun] " + errorMsg;
+            //errorMsg.replaceAll("\n", "\n[dryRun] ");
+            //IOerrorMsg = "[dryRun] " + IOerrorMsg;
+            //IOerrorMsg.replaceAll("\n", "\n[dryRun] ");
+
+            Perr<< nl
+                << "Missing/incorrect required dictionary entries:" << nl
+                << nl
+                << IOerrorMsg.c_str() << nl
+                << errorMsg.c_str() << nl
+                //<< nl << "Exiting dry-run" << nl
+                << endl;
+
+            FatalError.clear();
+            FatalIOError.clear();
+        }
+        return false;
+    }
+
+
     label nWrongFaces = 0;
 
     Info<< "Checking faces in error :" << endl;

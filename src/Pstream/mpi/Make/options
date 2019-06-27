@@ -2,4 +2,7 @@ sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
 sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
 
 EXE_INC  = $(PFLAGS) $(PINC) $(c++LESSWARN)
+
 LIB_LIBS = $(PLIBS)
+
+PROJECT_LIBS = -L$(FOAM_LIBBIN) -lOpenFOAM

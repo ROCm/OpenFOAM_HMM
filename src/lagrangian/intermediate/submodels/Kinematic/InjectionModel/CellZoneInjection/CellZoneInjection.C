@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,7 +75,7 @@ void Foam::CellZoneInjection<CloudType>::setPositions
             polyMeshTetDecomposition::cellTetIndices(mesh, celli);
 
         // Construct cell tet volume fractions
-        scalarList cTetVFrac(cellTetIs.size(), 0.0);
+        scalarList cTetVFrac(cellTetIs.size(), Zero);
         for (label tetI = 1; tetI < cellTetIs.size() - 1; tetI++)
         {
             cTetVFrac[tetI] =
@@ -285,10 +287,8 @@ Foam::label Foam::CellZoneInjection<CloudType>::parcelsToInject
     {
         return positions_.size();
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
@@ -304,10 +304,8 @@ Foam::scalar Foam::CellZoneInjection<CloudType>::volumeToInject
     {
         return this->volumeTotal_;
     }
-    else
-    {
-        return 0.0;
-    }
+
+    return 0.0;
 }
 
 

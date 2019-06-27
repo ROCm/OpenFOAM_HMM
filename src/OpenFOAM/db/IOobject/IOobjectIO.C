@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +39,8 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<IOobject>& ip)
         << io.type() << token::SPACE
         << io.name()
         << " local: " << io.local()
-        << " readOpt: " << io.readOpt()
-        << " writeOpt: " << io.writeOpt()
+        << " readOpt: " << static_cast<int>(io.readOpt())
+        << " writeOpt: " << static_cast<int>(io.writeOpt())
         << " globalObject: " << io.globalObject()
         << token::SPACE << io.path() << endl;
 

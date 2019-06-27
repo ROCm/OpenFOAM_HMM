@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ Class
     Foam::boundBox
 
 Description
-    A bounding box defined in terms of the points at its extremities.
+    A bounding box defined in terms of min/max extrema points.
 
 Note
     When a bounding box is created without any points, it creates an inverted
@@ -45,7 +47,7 @@ Note
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class boundBox;
 class plane;
 template<class T> class tmp;
@@ -67,7 +69,15 @@ class boundBox
 
 public:
 
-    // Static data members
+    // Static Data Members
+
+        //- Bits used for (x/y/z) direction encoding.
+        enum directionBit : direction
+        {
+            XDIR = 0x1,  //!< 1: x-direction (vector component 0)
+            YDIR = 0x2,  //!< 2: y-direction (vector component 1)
+            ZDIR = 0x4   //!< 4: z-direction (vector component 2)
+        };
 
         //- A large boundBox: min/max == -/+ ROOTVGREAT
         static const boundBox greatBox;
@@ -114,11 +124,11 @@ public:
         //- Construct bounding box as an indirect subset of the points.
         //  The indices could be from edge/triFace etc.
         //  Does parallel communication (doReduce = true)
-        template<unsigned Size>
+        template<unsigned N>
         boundBox
         (
             const UList<point>& points,
-            const FixedList<label, Size>& indices,
+            const FixedList<label, N>& indices,
             bool doReduce = true
         );
 
@@ -133,8 +143,8 @@ public:
             //- Bounding box is inverted, contains no points.
             inline bool empty() const;
 
-            //- Clear bounding box of all points - make it an inverted box
-            inline void clear();
+            //- Bounding box is non-inverted.
+            inline bool valid() const;
 
             //- Minimum describing the bounding box
             inline const point& min() const;
@@ -148,7 +158,10 @@ public:
             //- Maximum describing the bounding box, non-const access
             inline point& max();
 
-            //- The midpoint of the bounding box
+            //- The centre (midpoint) of the bounding box
+            inline point centre() const;
+
+            //- The midpoint (centre) of the bounding box. Identical to centre()
             inline point midpoint() const;
 
             //- The bounding box span (from minimum to maximum)
@@ -189,6 +202,9 @@ public:
 
         // Manipulate
 
+            //- Clear bounding box and make it an inverted box
+            inline void clear();
+
             //- Extend to include the second box.
             inline void add(const boundBox& bb);
 
@@ -202,16 +218,16 @@ public:
             inline void add(const tmp<pointField>& tpoints);
 
             //- Extend to include the points.
-            template<unsigned Size>
-            void add(const FixedList<point, Size>& points);
+            template<unsigned N>
+            void add(const FixedList<point, N>& points);
 
             //- Extend to include a (subsetted) point field.
             //  The indices could be from edge/triFace etc.
-            template<unsigned Size>
+            template<unsigned N>
             void add
             (
                 const UList<point>& points,
-                const FixedList<label, Size>& indices
+                const FixedList<label, N>& indices
             );
 
             //- Extend to include a (subsetted) point field.
@@ -230,6 +246,7 @@ public:
 
             //- Parallel reduction of min/max values
             void reduce();
+
 
         // Query
 
@@ -266,11 +283,11 @@ public:
             bool contains(const UList<point>& points) const;
 
             //- Contains all of the (subsetted) points? (inside or on edge)
-            template<unsigned Size>
+            template<unsigned N>
             bool contains
             (
                 const UList<point>& points,
-                const FixedList<label, Size>& indices
+                const FixedList<label, N>& indices
             ) const;
 
 
@@ -290,11 +307,11 @@ public:
             bool containsAny(const UList<point>& points) const;
 
             //- Contains any of the (subsetted) points? (inside or on edge)
-            template<unsigned Size>
+            template<unsigned N>
             bool containsAny
             (
                 const UList<point>& points,
-                const FixedList<label, Size>& indices
+                const FixedList<label, N>& indices
             ) const;
 
             //- Contains any of the (subsetted) points? (inside or on edge)

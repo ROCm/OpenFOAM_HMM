@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,10 +111,11 @@ Foam::displacementMotionSolverMeshMover::displacementMotionSolverMeshMover
 (
     const dictionary& dict,
     const List<labelPair>& baffles,
-    pointVectorField& pointDisplacement
+    pointVectorField& pointDisplacement,
+    const bool dryRun
 )
 :
-    externalDisplacementMeshMover(dict, baffles, pointDisplacement),
+    externalDisplacementMeshMover(dict, baffles, pointDisplacement, dryRun),
 
     solverPtr_
     (
@@ -178,7 +181,8 @@ Foam::displacementMotionSolverMeshMover::displacementMotionSolverMeshMover
         scale_,
         oldPoints_,
         adaptPatchIDs_,
-        dict
+        dict,
+        dryRun
     ),
 
     fieldSmoother_(mesh())
@@ -205,12 +209,15 @@ bool Foam::displacementMotionSolverMeshMover::move
     // Note that this has to update the pointDisplacement boundary conditions
     // as well, not just the internal field.
     {
-        const label nSmoothPatchThickness
+        const label nSmoothPatchThickness = meshRefinement::get<label>
         (
-            moveDict.get<label>("nSmoothThickness")
+            moveDict, "nSmoothThickness", dryRun_, keyType::REGEX
         );
 
-        const word minThicknessName(moveDict.get<word>("minThicknessName"));
+        const word minThicknessName = meshRefinement::get<word>
+        (
+            moveDict, "minThicknessName", dryRun_, keyType::REGEX, word::null
+        );
 
         scalarField zeroMinThickness;
 

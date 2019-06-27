@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +101,7 @@ Foam::labelList Foam::removeCells::getExposedFaces
     const labelList& faceNeighbour = mesh_.faceNeighbour();
 
     // Count cells using face.
-    labelList nCellsUsingFace(mesh_.nFaces(), 0);
+    labelList nCellsUsingFace(mesh_.nFaces(), Zero);
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); ++facei)
     {
@@ -264,7 +266,7 @@ void Foam::removeCells::setRefinement
 
     // Count starting number of faces using each point.
     // Update whenever removing a face.
-    labelList nFacesUsingPoint(mesh_.nPoints(), 0);
+    labelList nFacesUsingPoint(mesh_.nPoints(), Zero);
 
     for (const face& f : faces)
     {

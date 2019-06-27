@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,16 +24,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    Tuple2Test
+    Test-Tuple2
 
 Description
+    Test construction, comparision etc for Tuple2 and Pair.
 
 \*---------------------------------------------------------------------------*/
 
+#include "labelPair.H"
 #include "Tuple2.H"
 #include "label.H"
 #include "scalar.H"
 #include "List.H"
+#include "ListOps.H"
 #include "ops.H"
 #include <functional>
 
@@ -65,6 +70,26 @@ struct special2
 };
 
 
+// Print info
+void printTuple2(const Tuple2<word, word>& t)
+{
+    Info<< "tuple: " << t << nl;
+
+    Info<< "first  @: " << uintptr_t(t.first().data()) << nl;
+    Info<< "second @: " << uintptr_t(t.second().data()) << nl;
+}
+
+
+// Print info
+void printTuple2(const Pair<word>& t)
+{
+    Info<< "tuple: " << t << nl;
+
+    Info<< "first  @: " << uintptr_t(t.first().data()) << nl;
+    Info<< "second @: " << uintptr_t(t.second().data()) << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -72,11 +97,14 @@ int main()
 {
     typedef Tuple2<label, scalar> indexedScalar;
 
+    Info<< "null constructed Tuple: " << indexedScalar() << nl;
+    Info<< "null constructed Pair: "  << Pair<scalar>() << nl;
+
     indexedScalar t2(1, 3.2);
 
-    Info<< "tuple: "
-        << t2 << " "
-        << t2.first() << " " << t2.second() << nl;
+    Info<< "Foam::Tuple2: "
+        << t2 << " => "
+        << t2.first() << ' ' << t2.second() << nl;
 
     // As list. Generated so that we have duplicate indices
     List<indexedScalar> list1(3*4);
@@ -110,7 +138,86 @@ int main()
     Info<< "special sorted tuples - sort on value, reverse on index:"
         << nl << list1 << nl;
 
-    Info<< "End\n" << endl;
+
+    {
+        Info<< nl << nl << "Foam::Pair" << nl;
+
+        typedef Pair<label> indexedLabel;
+
+        indexedLabel pr(1, 3);
+
+        Info<< "pair: "
+            << pr << " => "
+            << pr.first() << ' ' << pr.second() << nl;
+
+        List<indexedLabel> list2 = ListOps::create<indexedLabel>
+        (
+            list1,
+            [](const indexedScalar& t2)
+            {
+                return indexedLabel(t2.first(), t2.second());
+            }
+        );
+
+        Info<< "Unsorted pairs:" << nl << list2 << nl;
+    }
+
+
+    {
+        Info<< nl << nl << "std::pair" << nl;
+
+        typedef std::pair<label, label> indexedLabel;
+
+        indexedLabel pr(1, 3);
+
+        Info<< "pair: "
+            << pr << " => "
+            << pr.first << ' ' << pr.second << nl;
+
+        List<indexedLabel> list2 = ListOps::create<indexedLabel>
+        (
+            list1,
+            [](const indexedScalar& t2)
+            {
+                return indexedLabel(t2.first(), t2.second());
+            }
+        );
+
+        Info<< "Unsorted pairs:" << nl << list2 << nl;
+    }
+
+
+    {
+        word word1("hello");
+        word word2("word");
+
+        Info<< "create with " << word1 << " @ " << uintptr_t(word1.data())
+            << " " << word2 << " @ " << uintptr_t(word2.data()) << nl;
+
+        Tuple2<word, word> tup(std::move(word2), std::move(word1));
+
+        printTuple2(tup);
+
+        Info<< "input is now " << word1 << " @ " << uintptr_t(word1.data())
+            << " " << word2 << " @ " << uintptr_t(word2.data()) << nl;
+    }
+
+    {
+        word word1("hello");
+        word word2("word");
+
+        Info<< "create with " << word1 << " @ " << uintptr_t(word1.data())
+            << " " << word2 << " @ " << uintptr_t(word2.data()) << nl;
+
+        Pair<word> tup(std::move(word2), std::move(word1));
+
+        printTuple2(tup);
+
+        Info<< "input is now " << word1 << " @ " << uintptr_t(word1.data())
+            << " " << word2 << " @ " << uintptr_t(word2.data()) << nl;
+    }
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,12 @@ License
 
 template<class Type>
 Foam::tmp<Foam::volScalarField>
-Foam::cellCellStencil::createField(const word& name, UList<Type>& psi) const
+Foam::cellCellStencil::createField
+(
+    const fvMesh& mesh,
+    const word& name,
+    const UList<Type>& psi
+)
 {
     tmp<volScalarField> tfld
     (
@@ -38,13 +43,13 @@ Foam::cellCellStencil::createField(const word& name, UList<Type>& psi) const
             IOobject
             (
                 name,
-                mesh_.time().timeName(),
-                mesh_,
+                mesh.time().timeName(),
+                mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            mesh_,
+            mesh,
             dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         )

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -479,6 +481,12 @@ bool Foam::fileOperations::uncollatedFileOperation::readHeader
     const word& typeName
 ) const
 {
+    if (debug)
+    {
+        Pout<< "uncollatedFileOperation::readHeader :"
+            << " fName:" << fName
+            << " typeName:" << typeName << endl;
+    }
     if (fName.empty())
     {
         if (IOobject::debug)
@@ -504,6 +512,14 @@ bool Foam::fileOperations::uncollatedFileOperation::readHeader
     {
         // Read the header inside the container (master data)
         ok = decomposedBlockData::readMasterHeader(io, isPtr());
+    }
+
+    if (debug)
+    {
+        Pout<< "uncollatedFileOperation::readHeader :"
+            << " for fName:" << fName
+            << " ok:" << ok
+            << " headerClassName:" << io.headerClassName() << endl;
     }
 
     return ok;
@@ -570,6 +586,7 @@ Foam::fileOperations::uncollatedFileOperation::readStream
             FatalIOErrorInFunction(isPtr())
                 << "could not detect processor number"
                 << " from objectPath:" << io.objectPath()
+                << " fName:" << fName
                 << exit(FatalIOError);
         }
 
@@ -632,6 +649,13 @@ bool Foam::fileOperations::uncollatedFileOperation::read
         // Restore flags
         io.globalObject() = oldGlobal;
         regIOobject::masterOnlyReading = oldFlag;
+
+        if (debug)
+        {
+            Pout<< "uncollatedFileOperation::read :"
+                << " Done reading object " << io.objectPath()
+                << " from file " << endl;
+        }
     }
 
     if (masterOnly && Pstream::parRun())

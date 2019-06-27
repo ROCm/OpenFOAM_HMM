@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +41,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(multiDirRefinement, 0);
+    defineTypeNameAndDebug(multiDirRefinement, 0);
 }
 
 
@@ -63,16 +65,17 @@ void Foam::multiDirRefinement::addCells
     {
         const refineCell& refCell = refCells[refI];
 
-        Map<label>::const_iterator iter = splitMap.find(refCell.cellNo());
+        const auto iter = splitMap.cfind(refCell.cellNo());
 
-        if (iter == splitMap.end())
+        if (!iter.found())
         {
             FatalErrorInFunction
                 << "Problem : cannot find added cell for cell "
-                << refCell.cellNo() << abort(FatalError);
+                << refCell.cellNo() << endl
+                << abort(FatalError);
         }
 
-        refCells[newRefI++] = refineCell(iter(), refCell.direction());
+        refCells[newRefI++] = refineCell(iter.val(), refCell.direction());
     }
 }
 
@@ -87,9 +90,9 @@ void Foam::multiDirRefinement::update
 {
     field.setSize(field.size() + splitMap.size());
 
-    forAllConstIter(Map<label>, splitMap, iter)
+    forAllConstIters(splitMap, iter)
     {
-        field[iter()] = field[iter.key()];
+        field[iter.val()] = field[iter.key()];
     }
 }
 
@@ -105,9 +108,9 @@ void Foam::multiDirRefinement::addCells
 
     labels.setSize(labels.size() + splitMap.size());
 
-    forAllConstIter(Map<label>, splitMap, iter)
+    forAllConstIters(splitMap, iter)
     {
-        labels[newCelli++] = iter();
+        labels[newCelli++] = iter.val();
     }
 }
 
@@ -146,10 +149,10 @@ void Foam::multiDirRefinement::addCells
     }
 
 
-    forAllConstIter(Map<label>, splitMap, iter)
+    forAllConstIters(splitMap, iter)
     {
         label masterI = iter.key();
-        label newCelli = iter();
+        const label newCelli = iter.val();
 
         while (origCell[masterI] != -1 && origCell[masterI] != masterI)
         {
@@ -176,7 +179,7 @@ void Foam::multiDirRefinement::addCells
         }
         else if (!added.found(newCelli))
         {
-            label sz = added.size();
+            const label sz = added.size();
             added.setSize(sz + 1);
             added[sz] = newCelli;
         }
@@ -238,8 +241,8 @@ void Foam::multiDirRefinement::refineHex8
     hexRef8 hexRefiner
     (
         mesh,
-        labelList(mesh.nCells(), 0),    // cellLevel
-        labelList(mesh.nPoints(), 0),   // pointLevel
+        labelList(mesh.nCells(), Zero),    // cellLevel
+        labelList(mesh.nPoints(), Zero),   // pointLevel
         refinementHistory
         (
             IOobject
@@ -283,25 +286,25 @@ void Foam::multiDirRefinement::refineHex8
         {
             const label celli = consistentCells[i];
 
-            Map<label>::iterator iter = hexCellSet.find(celli);
+            auto iter = hexCellSet.find(celli);
 
-            if (iter == hexCellSet.end())
+            if (iter.found())
+            {
+                iter.val() = 2;
+            }
+            else
             {
                 FatalErrorInFunction
                     << "Resulting mesh would not satisfy 2:1 ratio"
                     << " when refining cell " << celli << abort(FatalError);
             }
-            else
-            {
-                iter() = 2;
-            }
         }
 
         // Check if all been visited (should always be since
         // consistentRefinement set up to extend set.
-        forAllConstIter(Map<label>, hexCellSet, iter)
+        forAllConstIters(hexCellSet, iter)
         {
-            if (iter() != 2)
+            if (iter.val() != 2)
             {
                 FatalErrorInFunction
                     << "Resulting mesh would not satisfy 2:1 ratio"
@@ -342,7 +345,7 @@ void Foam::multiDirRefinement::refineHex8
     {
         addedCells_[consistentCells[i]].setSize(8);
     }
-    labelList nAddedCells(addedCells_.size(), 0);
+    labelList nAddedCells(addedCells_.size(), Zero);
 
     const labelList& cellMap = morphMap.cellMap();
 
@@ -397,7 +400,7 @@ void Foam::multiDirRefinement::refineAllDirs
 
             forAll(refCells, refI)
             {
-                label celli = cellLabels_[refI];
+                const label celli = cellLabels_[refI];
 
                 refCells[refI] = refineCell(celli, dirField[0]);
             }

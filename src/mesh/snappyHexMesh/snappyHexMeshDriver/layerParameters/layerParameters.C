@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,12 +98,13 @@ Foam::scalar Foam::layerParameters::layerExpansionRatio
 Foam::layerParameters::layerParameters
 (
     const dictionary& dict,
-    const polyBoundaryMesh& boundaryMesh
+    const polyBoundaryMesh& boundaryMesh,
+    const bool dryRun
 )
 :
     dict_(dict),
     numLayers_(boundaryMesh.size(), -1),
-    relativeSizes_(dict.lookup("relativeSizes")),
+    relativeSizes_(meshRefinement::get<bool>(dict, "relativeSizes", dryRun)),
     layerSpec_(ILLEGAL),
     firstLayerThickness_(boundaryMesh.size(), -123),
     finalLayerThickness_(boundaryMesh.size(), -123),
@@ -110,9 +113,9 @@ Foam::layerParameters::layerParameters
     minThickness_
     (
         boundaryMesh.size(),
-        dict.get<scalar>("minThickness")
+        meshRefinement::get<scalar>(dict, "minThickness", dryRun)
     ),
-    featureAngle_(dict.get<scalar>("featureAngle")),
+    featureAngle_(meshRefinement::get<scalar>(dict, "featureAngle", dryRun)),
     mergePatchFacesAngle_
     (
         dict.lookupOrDefault<scalar>
@@ -125,16 +128,16 @@ Foam::layerParameters::layerParameters
     (
         dict.lookupOrDefault("concaveAngle", defaultConcaveAngle)
     ),
-    nGrow_(dict.get<label>("nGrow")),
+    nGrow_(meshRefinement::get<label>(dict, "nGrow", dryRun)),
     maxFaceThicknessRatio_
     (
-        dict.get<scalar>("maxFaceThicknessRatio")
+        meshRefinement::get<scalar>(dict, "maxFaceThicknessRatio", dryRun)
     ),
     nBufferCellsNoExtrude_
     (
-        dict.get<label>("nBufferCellsNoExtrude")
+        meshRefinement::get<label>(dict, "nBufferCellsNoExtrude", dryRun)
     ),
-    nLayerIter_(dict.get<label>("nLayerIter")),
+    nLayerIter_(meshRefinement::get<label>(dict, "nLayerIter", dryRun)),
     nRelaxedIter_(labelMax),
     additionalReporting_(dict.lookupOrDefault("additionalReporting", false)),
     meshShrinker_
@@ -144,7 +147,8 @@ Foam::layerParameters::layerParameters
             "meshShrinker",
             medialAxisMeshMover::typeName
         )
-    )
+    ),
+    dryRun_(dryRun)
 {
     // Detect layer specification mode
 
@@ -255,7 +259,12 @@ Foam::layerParameters::layerParameters
     }
 
 
-    const dictionary& layersDict = dict.subDict("layers");
+    const dictionary& layersDict = meshRefinement::subDict
+    (
+        dict,
+        "layers",
+        dryRun
+    );
 
     for (const entry& dEntry : layersDict)
     {

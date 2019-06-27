@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +97,7 @@ timeVaryingMappedFixedValueFvPatchField
     (
         new PatchFunction1Types::MappedFile<Type>
         (
-            ptf.uniformValue_,
+            ptf.uniformValue_(),
             p.patch()
         )
     )
@@ -114,7 +116,7 @@ timeVaryingMappedFixedValueFvPatchField
     (
         new PatchFunction1Types::MappedFile<Type>
         (
-            ptf.uniformValue_,
+            ptf.uniformValue_(),
             this->patch().patch()
         )
     )
@@ -134,7 +136,7 @@ timeVaryingMappedFixedValueFvPatchField
     (
         new PatchFunction1Types::MappedFile<Type>
         (
-            ptf.uniformValue_,
+            ptf.uniformValue_(),
             this->patch().patch()
         )
     )

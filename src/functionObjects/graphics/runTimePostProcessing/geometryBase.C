@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,17 @@ License
 #include "vtkProperty.h"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace functionObjects
+{
+namespace runTimePostPro
+{
+    defineDebugSwitchWithName(geometryBase, "runTimePostPro::geometryBase", 0);
+}
+}
+}
 
 const Foam::Enum
 <
@@ -87,10 +98,20 @@ Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
 :
     parent_(parent),
     name_(dict.dictName()),
-    visible_(dict.get<bool>("visible")),
+    visible_(dict.getOrDefault("visible", true)),
+    parallel_
+    (
+        // User input can only disable parallel here
+        #ifdef FOAM_USING_VTK_MPI
+        Pstream::parRun() && parent.parallel()
+     && dict.getOrDefault("parallel", parent.parallel())
+        #else
+        false
+        #endif
+    ),
     renderMode_
     (
-        renderModeTypeNames.lookupOrDefault("renderMode", dict, rmGouraud)
+        renderModeTypeNames.getOrDefault("renderMode", dict, rmGouraud)
     ),
     opacity_(nullptr),
     colours_(colours)
@@ -121,16 +142,17 @@ Foam::functionObjects::runTimePostPro::geometryBase::parent() const
 }
 
 
+bool Foam::functionObjects::runTimePostPro::geometryBase::
+needsCollective() const
+{
+    return Pstream::parRun() && (!parent_.parallel() || !parallel_);
+}
+
+
 const Foam::word&
 Foam::functionObjects::runTimePostPro::geometryBase::name() const
 {
     return name_;
-}
-
-
-bool Foam::functionObjects::runTimePostPro::geometryBase::visible() const
-{
-    return visible_;
 }
 
 

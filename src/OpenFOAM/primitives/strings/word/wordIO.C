@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,9 +87,9 @@ Foam::Istream& Foam::operator>>(Istream& is, word& val)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const word& w)
+Foam::Ostream& Foam::operator<<(Ostream& os, const word& val)
 {
-    os.write(w);
+    os.write(val);
     os.check(FUNCTION_NAME);
     return os;
 }

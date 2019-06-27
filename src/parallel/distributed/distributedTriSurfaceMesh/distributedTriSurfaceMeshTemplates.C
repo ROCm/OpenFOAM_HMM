@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +39,7 @@ License
 //    List<Type>& values
 //) const
 //{
-//    typedef DimensionedField<Type, triSurfaceGeoMesh> DimensionedSurfField;
-//
+//    typedef DimensionedField<Type, triSurfaceGeoMesh> fieldType;
 //
 //    // Get query data (= local index of triangle)
 //    // ~~~~~~~~~~~~~~
@@ -58,10 +59,8 @@ License
 //    // Do my tests
 //    // ~~~~~~~~~~~
 //
-//    const DimensionedSurfField& fld = lookupObject<DimensionedSurfField>
-//    (
-//        fieldName
-//    );
+//    const auto& fld = lookupObject<fieldType>(fieldName);
+//
 //    const triSurface& s = static_cast<const triSurface&>(*this);
 //
 //    values.setSize(triangleIndex.size());
@@ -86,33 +85,24 @@ void Foam::distributedTriSurfaceMesh::distributeFields
     const mapDistribute& map
 )
 {
-    typedef DimensionedField<Type, triSurfaceGeoMesh> DimensionedSurfField;
+    typedef DimensionedField<Type, triSurfaceGeoMesh> fieldType;
 
-    HashTable<DimensionedSurfField*> fields
+    HashTable<fieldType*> fields
     (
-        objectRegistry::lookupClass<DimensionedSurfField>()
+        objectRegistry::lookupClass<fieldType>()
     );
 
-    for
-    (
-        typename HashTable<DimensionedSurfField*>::iterator fieldIter =
-            fields.begin();
-        fieldIter != fields.end();
-        ++fieldIter
-    )
+    forAllIters(fields, fieldIter)
     {
-        DimensionedSurfField& field = *fieldIter();
+        fieldType& field = *fieldIter();
 
-        label oldSize = field.size();
+        const label oldSize = field.size();
 
         map.distribute(field);
 
-        if (debug)
-        {
-            Info<< "Mapped " << field.typeName << ' ' << field.name()
-                << " from size " << oldSize << " to size " << field.size()
-                << endl;
-        }
+        DebugInfo
+            << "Mapped " << field.typeName << ' ' << field.name()
+            << " from size " << oldSize << " to size " << field.size() << endl;
     }
 }
 

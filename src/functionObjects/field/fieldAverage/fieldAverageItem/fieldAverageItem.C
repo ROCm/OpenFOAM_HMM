@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2011, 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,7 +152,7 @@ void Foam::functionObjects::fieldAverageItem::evolve(const objectRegistry& obr)
             const word fieldName = windowFieldNames_.pop();
 
             //Info<< "evolve: removing field: " << fieldName << endl;
-            obr.checkOut(*obr[fieldName]);
+            obr.checkOut(fieldName);
         }
     }
 }
@@ -162,22 +164,19 @@ void Foam::functionObjects::fieldAverageItem::clear
     bool fullClean
 )
 {
-    if (mean_ && obr.found(meanFieldName_))
+    if (mean_)
     {
-        obr.checkOut(*obr[meanFieldName_]);
+        obr.checkOut(meanFieldName_);
     }
 
-    if (prime2Mean_ && obr.found(prime2MeanFieldName_))
+    if (prime2Mean_)
     {
-        obr.checkOut(*obr[prime2MeanFieldName_]);
+        obr.checkOut(prime2MeanFieldName_);
     }
 
     for (const word& fieldName : windowFieldNames_)
     {
-        if (obr.found(fieldName))
-        {
-            obr.checkOut(*obr[fieldName]);
-        }
+        obr.checkOut(fieldName);
     }
 
     if (totalTime_ < 0 || fullClean)

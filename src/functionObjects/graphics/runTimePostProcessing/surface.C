@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,9 +27,15 @@ License
 #include "surface.H"
 #include "runTimePostProcessing.H"
 
+#include "foamVtkTools.H"
+#include "polySurfaceFields.H"
+#include "polySurfacePointFields.H"
+
 // VTK includes
 #include "vtkActor.h"
+#include "vtkCompositeDataGeometryFilter.h"
 #include "vtkFeatureEdges.h"
+#include "vtkMultiPieceDataSet.h"
 #include "vtkPolyData.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
@@ -44,7 +50,7 @@ namespace functionObjects
 {
 namespace runTimePostPro
 {
-    defineTypeNameAndDebug(surface, 0);
+    defineTypeName(surface);
     defineRunTimeSelectionTable(surface, dictionary);
 }
 }
@@ -58,11 +64,28 @@ const Foam::Enum
 Foam::functionObjects::runTimePostPro::surface::representationTypeNames
 ({
     { representationType::rtNone, "none" },
+    { representationType::rtGlyph, "glyph" },
     { representationType::rtWireframe, "wireframe" },
     { representationType::rtSurface, "surface" },
     { representationType::rtSurfaceWithEdges, "surfaceWithEdges" },
-    { representationType::rtGlyph, "glyph" },
 });
+
+
+// * * * * * * * * * * * * * * * Specializations * * * * * * * * * * * * * * //
+
+// These need to shift elsewhere
+
+vtkCellData* Foam::vtk::Tools::GetCellData(vtkDataSet* dataset)
+{
+    if (dataset) return dataset->GetCellData();
+    return nullptr;
+}
+
+vtkPointData* Foam::vtk::Tools::GetPointData(vtkDataSet* dataset)
+{
+    if (dataset) return dataset->GetPointData();
+    return nullptr;
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -83,7 +106,7 @@ void Foam::functionObjects::runTimePostPro::surface::setRepresentation
         }
         case rtWireframe:
         {
-            // note: colour is set using general SetColor, not SetEdgeColor
+            // Note: colour is set using general SetColor, not SetEdgeColor
             actor->GetProperty()->SetRepresentationToWireframe();
             break;
         }
@@ -106,21 +129,19 @@ void Foam::functionObjects::runTimePostPro::surface::setRepresentation
 void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
 (
     vtkRenderer* renderer,
-    vtkPolyData* data
+    vtkFeatureEdges* featureEdges
 ) const
 {
-    if (!featureEdges_)
+    if (!featureEdges)
     {
         return;
     }
 
-    auto featureEdges = vtkSmartPointer<vtkFeatureEdges>::New();
-    featureEdges->SetInputData(data);
     featureEdges->BoundaryEdgesOn();
     featureEdges->FeatureEdgesOn();
     featureEdges->ManifoldEdgesOff();
     featureEdges->NonManifoldEdgesOff();
-//    featureEdges->SetFeatureAngle(60);
+    /// featureEdges->SetFeatureAngle(60);
     featureEdges->ColoringOff();
     featureEdges->Update();
 
@@ -134,6 +155,38 @@ void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
     edgeActor_->SetMapper(mapper);
 
     renderer->AddActor(edgeActor_);
+}
+
+
+void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
+(
+    vtkRenderer* renderer,
+    vtkPolyData* data
+) const
+{
+    if (featureEdges_)
+    {
+        auto featureEdges = vtkSmartPointer<vtkFeatureEdges>::New();
+        featureEdges->SetInputData(data);
+
+        addFeatureEdges(renderer, featureEdges);
+    }
+}
+
+
+void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
+(
+    vtkRenderer* renderer,
+    vtkCompositeDataGeometryFilter* input
+) const
+{
+    if (featureEdges_)
+    {
+        auto featureEdges = vtkSmartPointer<vtkFeatureEdges>::New();
+        featureEdges->SetInputConnection(input->GetOutputPort());
+
+        addFeatureEdges(renderer, featureEdges);
+    }
 }
 
 
@@ -151,12 +204,12 @@ Foam::functionObjects::runTimePostPro::surface::surface
     (
         representationTypeNames.get("representation", dict)
     ),
-    featureEdges_(false),
+    featureEdges_(dict.getOrDefault("featureEdges", false)),
     surfaceColour_(nullptr),
     edgeColour_(nullptr),
     surfaceActor_(),
     edgeActor_(),
-    maxGlyphLength_(0.0)
+    maxGlyphLength_(0)
 {
     surfaceActor_ = vtkSmartPointer<vtkActor>::New();
     edgeActor_ = vtkSmartPointer<vtkActor>::New();
@@ -183,10 +236,6 @@ Foam::functionObjects::runTimePostPro::surface::surface
     {
         dict.readEntry("maxGlyphLength", maxGlyphLength_);
     }
-    else
-    {
-        dict.readEntry("featureEdges", featureEdges_);
-    }
 }
 
 
@@ -201,10 +250,7 @@ Foam::functionObjects::runTimePostPro::surface::New
     const word& surfaceType
 )
 {
-    if (debug)
-    {
-        Info<< "Selecting surface " << surfaceType << endl;
-    }
+    DebugInfo << "Selecting surface " << surfaceType << endl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(surfaceType);
 
@@ -240,22 +286,14 @@ void Foam::functionObjects::runTimePostPro::surface::updateActors
         return;
     }
 
-    edgeActor_->GetProperty()->SetLineWidth(2);
-    edgeActor_->GetProperty()->SetOpacity(opacity(position));
+    vtkProperty* edgeProp = edgeActor_->GetProperty();
 
-    const vector colour = edgeColour_->value(position);
-    edgeActor_->GetProperty()->SetColor
-    (
-        colour[0],
-        colour[1],
-        colour[2]
-    );
-    edgeActor_->GetProperty()->SetEdgeColor
-    (
-        colour[0],
-        colour[1],
-        colour[2]
-    );
+    edgeProp->SetLineWidth(2);
+    edgeProp->SetOpacity(opacity(position));
+
+    const vector ec = edgeColour_->value(position);
+    edgeProp->SetColor(ec[0], ec[1], ec[2]);
+    edgeProp->SetEdgeColor(ec[0], ec[1], ec[2]);
 }
 
 

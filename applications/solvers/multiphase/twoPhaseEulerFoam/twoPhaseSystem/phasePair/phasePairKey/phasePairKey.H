@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +59,29 @@ class phasePairKey
 :
     public Pair<word>
 {
+public:
+
+        class hash
+        :
+            public Hash<phasePairKey>
+        {
+        public:
+
+            // Constructors
+
+                // Construct null
+                hash();
+
+
+            // Member operators
+
+                // Generate a hash from a phase pair key
+                label operator()(const phasePairKey& key) const;
+        };
+
+
+private:
+
     // Private data
 
         //- Flag to indicate whether ordering is important
@@ -64,30 +89,23 @@ class phasePairKey
 
 public:
 
-        //- Ordered or unordered hashing of word pair
-        struct hash
-        {
-            //- Generate a hash from a phase pair key
-            label operator()(const phasePairKey& key) const;
-        };
-
 
     // Constructors
 
         //- Construct null
-        phasePairKey() {} // = default
+        phasePairKey();
 
-        //- Construct from names and optional ordering flag
+        //- Construct from names and the ordering flag
         phasePairKey
         (
             const word& name1,
             const word& name2,
-            const bool ordered = false
+            const bool ordered
         );
 
 
     //- Destructor
-    virtual ~phasePairKey() = default;
+    virtual ~phasePairKey();
 
 
     // Access

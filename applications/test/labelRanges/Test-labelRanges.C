@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,6 +142,39 @@ int main(int argc, char *argv[])
         }
         Info<< nl;
     }
+
+
+    {
+        range.reset(5, 5);
+        Info<< nl << "Tests on " << range << nl;
+
+        Info<< "first   " << range.first() << nl
+            << "last    " << range.last() << nl
+            << "min     " << range.min() << nl
+            << "max     " << range.max() << nl
+            << "after   " << range.after() << nl
+            << "*begin  " << *range.begin() << nl
+            << "*end    " << *range.end() << nl;
+
+        range += 3;
+        Info<< "increase size " << range << nl;
+
+        range -= 3;  // Probably not a great idea
+        Info<< "decrese size " << range << nl;
+
+        auto iter = range.begin();
+
+        Info<< "iter: " << *iter << nl;
+        ++iter;
+
+        Info<< "iter: " << *iter << nl;
+
+        iter += 3;
+        Info<< "iter: " << *iter << nl;
+    }
+
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

@@ -65,18 +65,18 @@ Foam::multiphaseSystem::multiphaseSystem
     Su_(phaseModels_.size()),
     Sp_(phaseModels_.size())
 {
-    label phaseI = 0;
+    label phasei = 0;
     phases_.setSize(phaseModels_.size());
-    forAllConstIter(HashTable<autoPtr<phaseModel>>, phaseModels_, iter)
+    forAllIters(phaseModels_, iter)
     {
-        phaseModel& pm = const_cast<phaseModel&>(iter()());
-        phases_.set(phaseI++, &pm);
+        phaseModel& pm = iter()();
+        phases_.set(phasei++, &pm);
     }
 
     // Initiate Su and Sp
-    forAllConstIter(HashTable<autoPtr<phaseModel>>, phaseModels_, iter)
+    forAllConstIters(phaseModels_, iter)
     {
-        phaseModel& pm = const_cast<phaseModel&>(iter()());
+        const phaseModel& pm = iter()();
 
         Su_.insert
         (
@@ -117,7 +117,7 @@ Foam::multiphaseSystem::multiphaseSystem
 
 void Foam::multiphaseSystem::calculateSuSp()
 {
-    forAllIter(phaseSystem::phasePairTable, totalPhasePairs_, iter)
+    forAllConstIters(totalPhasePairs_, iter)
     {
         const phasePair& pair = iter()();
 
@@ -297,10 +297,9 @@ void Foam::multiphaseSystem::solve()
 
     for (int acorr=0; acorr<nAlphaCorr; acorr++)
     {
-        int phasei = 0;
-        forAllIter(UPtrList<phaseModel>, phases_, iter)
+        label phasei = 0;
+        for (phaseModel& phase1 : phases_)
         {
-            phaseModel& phase1 = iter();
             const volScalarField& alpha1 = phase1;
 
             phiAlphaCorrs.set
@@ -320,15 +319,11 @@ void Foam::multiphaseSystem::solve()
 
             surfaceScalarField& phiAlphaCorr = phiAlphaCorrs[phasei];
 
-            forAllIter(UPtrList<phaseModel>, phases_, iter2)
+            for (phaseModel& phase2 : phases_)
             {
-                phaseModel& phase2 = iter2();
                 const volScalarField& alpha2 = phase2;
 
-                if (&phase2 == &phase1)
-                {
-                    continue;
-                }
+                if (&phase2 == &phase1) continue;
 
                 const phasePairKey key12(phase1.name(), phase2.name());
 
@@ -337,7 +332,7 @@ void Foam::multiphaseSystem::solve()
                     FatalErrorInFunction
                         << "Phase compression factor (cAlpha) not found for : "
                         << key12
-                    << exit(FatalError);
+                        << exit(FatalError);
                 }
                 scalar cAlpha = cAlphas_.find(key12)();
 
@@ -380,13 +375,12 @@ void Foam::multiphaseSystem::solve()
                 }
             }
 
-            phasei++;
+            ++phasei;
         }
 
-        // Set Su and Sp tp zero
-        forAllIter(UPtrList<phaseModel>, phases_, iter)
+        // Set Su and Sp to zero
+        for (const phaseModel& phase : phases_)
         {
-            phaseModel& phase = iter();
             Su_[phase.name()] = dimensionedScalar("Su", dimless/dimTime, Zero);
             Sp_[phase.name()] = dimensionedScalar("Sp", dimless/dimTime, Zero);
 
@@ -402,9 +396,8 @@ void Foam::multiphaseSystem::solve()
 
         // Limit phiAlphaCorr on each phase
         phasei = 0;
-        forAllIter(UPtrList<phaseModel>, phases_, iter)
+        for (phaseModel& phase : phases_)
         {
-            phaseModel& phase = iter();
             volScalarField& alpha1 = phase;
 
             surfaceScalarField& phiAlphaCorr = phiAlphaCorrs[phasei];
@@ -421,11 +414,11 @@ void Foam::multiphaseSystem::solve()
                 phiAlphaCorr,
                 Sp,
                 Su,
-                1,
-                0,
+                oneField(),
+                zeroField(),
                 true
             );
-            phasei ++;
+            ++phasei;
         }
 
         MULES::limitSum(phiAlphaCorrs);
@@ -443,9 +436,8 @@ void Foam::multiphaseSystem::solve()
         );
 
         phasei = 0;
-        forAllIter(UPtrList<phaseModel>, phases_, iter)
+        for (phaseModel& phase : phases_)
         {
-            phaseModel& phase = iter();
             volScalarField& alpha1 = phase;
 
             const volScalarField::Internal& Su = Su_[phase.name()];
@@ -493,8 +485,8 @@ void Foam::multiphaseSystem::solve()
                         phiAlpha,
                         (alphaSubCycle.index()*Sp)(),
                         (Su - (alphaSubCycle.index() - 1)*Sp*alpha1)(),
-                        1,
-                        0
+                        oneField(),
+                        zeroField()
                     );
 
                     if (alphaSubCycle.index() == 1)
@@ -508,13 +500,9 @@ void Foam::multiphaseSystem::solve()
                 }
 
                 phase.alphaPhi() /= nAlphaSubCycles;
-
             }
             else
             {
-                phaseModel& phase = iter();
-                volScalarField& alpha1 = phase;
-
                 MULES::explicitSolve
                 (
                     geometricOneField(),
@@ -523,14 +511,14 @@ void Foam::multiphaseSystem::solve()
                     phiAlpha,
                     Sp,
                     Su,
-                    1,
-                    0
+                    oneField(),
+                    zeroField()
                 );
 
                 phase.alphaPhi() = phiAlpha;
             }
 
-            phasei++;
+            ++phasei;
         }
 
         if (acorr == nAlphaCorr - 1)
@@ -550,15 +538,13 @@ void Foam::multiphaseSystem::solve()
             // Reset rhoPhi
             rhoPhi_ = dimensionedScalar("rhoPhi", dimMass/dimTime, Zero);
 
-            forAllIter(UPtrList<phaseModel>, phases_, iter)
+            for (phaseModel& phase : phases_)
             {
-                phaseModel& phase = iter();
                 volScalarField& alpha1 = phase;
                 sumAlpha += alpha1;
 
                 // Update rhoPhi
-                rhoPhi_ +=
-                    fvc::interpolate(phase.rho())*phase.alphaPhi();
+                rhoPhi_ += fvc::interpolate(phase.rho()) * phase.alphaPhi();
 
             }
 
@@ -570,9 +556,8 @@ void Foam::multiphaseSystem::solve()
 
             volScalarField sumCorr(1.0 - sumAlpha);
 
-            forAllIter(UPtrList<phaseModel>, phases_, iter)
+            for (phaseModel& phase : phases_)
             {
-                phaseModel& phase = iter();
                 volScalarField& alpha = phase;
                 alpha += alpha*sumCorr;
 
@@ -619,24 +604,16 @@ Foam::dimensionedScalar Foam::multiphaseSystem::ddtAlphaMax() const
 
 Foam::scalar Foam::multiphaseSystem::maxDiffNo() const
 {
-    phaseModelTable::const_iterator phaseModelIter = phaseModels_.begin();
-    tmp<surfaceScalarField> kapparhoCpbyDelta(phaseModelIter()->diffNo());
+    auto iter = phaseModels_.cbegin();
 
-    scalar DiNum =
-        max(kapparhoCpbyDelta.ref()).value()*mesh_.time().deltaT().value();
+    scalar maxVal = max(iter()->diffNo()).value();
 
-    ++phaseModelIter;
-    for (; phaseModelIter != phaseModels_.end(); ++ phaseModelIter)
+    for (++iter; iter != phaseModels_.cend(); ++iter)
     {
-        kapparhoCpbyDelta = phaseModelIter()->diffNo();
-        DiNum =
-            max
-            (
-                DiNum,
-                max(kapparhoCpbyDelta).value()*mesh_.time().deltaT().value()
-            );
+        maxVal = max(maxVal, max(iter()->diffNo()).value());
     }
-    return DiNum;
+
+    return maxVal * mesh_.time().deltaT().value();
 }
 
 

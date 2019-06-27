@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -463,11 +465,11 @@ Foam::fvMeshSubset::interpolate
                 // Get mesh point on original mesh.
                 label meshPointi = pointMap[subMeshPoints[localI]];
 
-                Map<label>::const_iterator iter = meshPointMap.find(meshPointi);
+                const auto iter = meshPointMap.cfind(meshPointi);
 
-                if (iter != meshPointMap.end())
+                if (iter.found())
                 {
-                    directAddressing[localI] = iter();
+                    directAddressing[localI] = *iter;
                 }
             }
 

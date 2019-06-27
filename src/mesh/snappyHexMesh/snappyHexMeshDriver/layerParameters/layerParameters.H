@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,6 +134,9 @@ private:
 
         word meshShrinker_;
 
+        //- In dry-run mode?
+        const bool dryRun_;
+
 
     // Private Member Functions
 
@@ -155,7 +160,12 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        layerParameters(const dictionary& dict, const polyBoundaryMesh&);
+        layerParameters
+        (
+            const dictionary& dict,
+            const polyBoundaryMesh&,
+            const bool dryRun = false
+        );
 
 
     // Member Functions

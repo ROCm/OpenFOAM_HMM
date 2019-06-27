@@ -17,6 +17,8 @@
                     |                   |
   #calc             | dict/primitive    | string
   #codeStream       | dict/primitive    | dictionary
+  #if               | dict              | string
+  #ifeq             | dict              | entry entry
 
 
 Pending future extensions

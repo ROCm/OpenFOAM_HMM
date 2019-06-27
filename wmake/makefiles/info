@@ -1,0 +1,96 @@
+#----------------------------*- makefile-gmake -*------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# File
+#     wmake/makefiles/info
+#
+# Description
+#     Makefile to generate information.
+#     Used by wmake -show-*
+#
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Use POSIX shell
+#------------------------------------------------------------------------------
+
+SHELL   = /bin/sh
+
+#------------------------------------------------------------------------------
+# No default suffix rules used
+#------------------------------------------------------------------------------
+
+.SUFFIXES:
+
+
+#------------------------------------------------------------------------------
+# Some default values
+#------------------------------------------------------------------------------
+
+# Shared library extension (with '.' separator)
+EXT_SO  = .so
+
+#------------------------------------------------------------------------------
+# Compilation rules
+#------------------------------------------------------------------------------
+
+GENERAL_RULES = $(WM_DIR)/rules/General
+include $(GENERAL_RULES)/general
+
+# Commands
+COMPILE_C    := $(strip $(cc) $(cFLAGS))
+COMPILE_CXX  := $(strip $(CC) $(c++FLAGS))
+
+#------------------------------------------------------------------------------
+# Display information
+#------------------------------------------------------------------------------
+
+.PHONY: api
+api:
+	@echo "$(lastword $(subst =, ,$(WM_VERSION)))"
+
+.PHONY: ext-so
+ext-so:
+	@echo "$(EXT_SO)"
+
+.PHONY: compile-c
+compile-c:
+	@echo "$(COMPILE_C)"
+
+.PHONY: compile-cxx
+compile-cxx:
+	@echo "$(COMPILE_CXX)"
+
+.PHONY: c
+c:
+	@echo "$(firstword $(cc))"
+
+.PHONY: cxx
+cxx:
+	@echo "$(firstword $(CC))"
+
+.PHONY: cflags
+cflags:
+	@echo "$(wordlist 2,$(words $(COMPILE_C)), $(COMPILE_C))"
+
+.PHONY: cxxflags
+cxxflags:
+	@echo "$(wordlist 2,$(words $(COMPILE_CXX)), $(COMPILE_CXX))"
+
+.PHONY: cflags-arch
+cflags-arch:
+	@echo "$(strip $(cARCH))"
+
+.PHONY: cxxflags-arch
+cxxflags-arch:
+	@echo "$(strip $(c++ARCH))"
+
+#----------------------------- vim: set ft=make: ------------------------------

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -206,7 +206,7 @@ template<unsigned Width>
 Foam::Ostream& Foam::PackedList<Width>::writeList
 (
     Ostream& os,
-    const label shortListLen
+    const label shortLen
 ) const
 {
     const PackedList<Width>& list = *this;
@@ -215,12 +215,12 @@ Foam::Ostream& Foam::PackedList<Width>::writeList
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII)
     {
-        if (list.uniform())
+        if (len > 1 && list.uniform())
         {
-            // Two or more entries, and all entries have identical values.
+            // Two or more entries, and all have identical values.
             os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
         }
-        else if (!shortListLen || len <= shortListLen)
+        else if (!shortLen || len <= shortLen)
         {
             // Shorter list, or line-breaks suppressed
             os  << len << token::BEGIN_LIST;
@@ -281,13 +281,6 @@ template<unsigned Width>
 Foam::Istream& Foam::operator>>(Istream& is, PackedList<Width>& list)
 {
     return list.read(is);
-}
-
-
-template<unsigned Width>
-Foam::Ostream& Foam::operator<<(Ostream& os, const PackedList<Width>& list)
-{
-    return list.writeList(os, 10);
 }
 
 

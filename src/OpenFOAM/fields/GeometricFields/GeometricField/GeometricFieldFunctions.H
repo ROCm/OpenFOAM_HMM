@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,18 +142,20 @@ sqr(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf);
 template<class Type, template<class> class PatchField, class GeoMesh>
 void magSqr
 (
-    GeometricField<scalar, PatchField, GeoMesh>& gsf,
+    GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>& gsf,
     const GeometricField<Type, PatchField, GeoMesh>& gf
 );
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
+tmp<GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>>
+magSqr
 (
     const GeometricField<Type, PatchField, GeoMesh>& gf
 );
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
+tmp<GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>>
+magSqr
 (
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 );
@@ -159,18 +163,20 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> magSqr
 template<class Type, template<class> class PatchField, class GeoMesh>
 void mag
 (
-    GeometricField<scalar, PatchField, GeoMesh>& gsf,
+    GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>& gsf,
     const GeometricField<Type, PatchField, GeoMesh>& gf
 );
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
+tmp<GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>>
+mag
 (
     const GeometricField<Type, PatchField, GeoMesh>& gf
 );
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> mag
+tmp<GeometricField<typename typeOfMag<Type>::type, PatchField, GeoMesh>>
+mag
 (
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 );
@@ -228,6 +234,8 @@ dimensioned<returnType> func                                                   \
 
 UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, max, maxOp)
 UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(Type, min, minOp)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(MinMax<Type>, minMax, minMaxOp)
+UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY(scalarMinMax, minMaxMag, minMaxMagOp)
 
 #undef UNARY_REDUCTION_FUNCTION_WITH_BOUNDARY
 
@@ -247,8 +255,8 @@ dimensioned<returnType> func                                                   \
 );
 
 UNARY_REDUCTION_FUNCTION(Type, sum, gSum)
-UNARY_REDUCTION_FUNCTION(scalar, sumMag, gSumMag)
 UNARY_REDUCTION_FUNCTION(Type, average, gAverage)
+UNARY_REDUCTION_FUNCTION(typename typeOfMag<Type>::type, sumMag, gSumMag)
 
 #undef UNARY_REDUCTION_FUNCTION
 

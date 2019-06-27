@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +31,11 @@ if (mesh.time().timeIndex() % vacf.sampleSteps() == 0)
 
     label uV = 0;
 
-    forAllConstIter(IDLList<molecule>, molecules, mol)
+    for (const molecule& mol : molecules)
     {
-        uVals[uV++] = mol().U();
+        uVals[uV] = mol.U();
+
+        ++uV;
     }
 
     vacf.calculateCorrelationFunction(uVals);
@@ -41,19 +45,19 @@ if (mesh.time().timeIndex() % pacf.sampleSteps() == 0)
 {
     vector p = Zero;
 
-    forAllConstIter(IDLList<molecule>, molecules, mol)
+    for (const molecule& mol : molecules)
     {
         p.x() +=
-            mol().mass() * mol().U().y() * mol().U().z()
-          + 0.5*mol().rf().yz();
+            mol.mass() * mol.U().y() * mol.U().z()
+          + 0.5*mol.rf().yz();
 
         p.y() +=
-            mol().mass() * mol().U().z() * mol().U().x()
-          + 0.5*mol().rf().zx();
+            mol.mass() * mol.U().z() * mol.U().x()
+          + 0.5*mol.rf().zx();
 
         p.z() +=
-            mol().mass() * mol().U().x() * mol().U().y()
-          + 0.5*mol().rf().xy();
+            mol.mass() * mol.U().x() * mol.U().y()
+          + 0.5*mol.rf().xy();
     }
 
     pacf.calculateCorrelationFunction(p);
@@ -63,14 +67,14 @@ if (mesh.time().timeIndex() % hfacf.sampleSteps() == 0)
 {
     vector s = Zero;
 
-    forAllConstIter(IDLList<molecule>, molecules, mol)
+    for (const molecule& mol : molecules)
     {
         s +=
         (
-            0.5*mol().mass()*magSqr(mol().U())
-          + mol().potentialEnergy()
-        )*mol().U()
-      + 0.5*(mol().rf() & mol().U());
+            0.5*mol.mass()*magSqr(mol.U())
+          + mol.potentialEnergy()
+        )*mol.U()
+      + 0.5*(mol.rf() & mol.U());
     }
 
     hfacf.calculateCorrelationFunction(s);

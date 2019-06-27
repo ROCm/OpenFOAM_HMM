@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +29,17 @@ Class
 Description
     Specialization of Foam::functionObject for a region and providing a
     reference to the region Foam::objectRegistry.
-    Also provides support for referencing a sub-region, which is typically
-    needed when dealing with surfMesh and their fields.
+
+    Also provides support for referencing an alternative objectRegistry
+    that can hold fields. This may be used, for example, to access
+    stored surfaces and fields.
+
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        region      | Name of the mesh region               | no | region0
+        subRegion   | Name for alternative objectRegistry   | no | ""
+    \endtable
 
 See also
     Foam::functionObjects::stateFunctionObject
@@ -48,7 +59,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class objectRegistry;
 
 namespace functionObjects
@@ -65,26 +76,20 @@ class regionFunctionObject
 
 protected:
 
-    // Protected member data
+    // Protected Member Data
+
+        //- Name for alternative object registry
+        word subRegistryName_;
 
         //- Reference to the region objectRegistry
         const objectRegistry& obr_;
 
-        //- Optional reference to the sub-region objectRegistry.
-        //  If a sub-region is not in effect, this reference is identical
-        //  to the usual region objectRegistry.
-        const objectRegistry& subObr_;
+        //- Pointer to alternative (eg, sub-region) objectRegistry.
+        //  If a sub-region is not in effect, this is a nullptr
+        mutable const objectRegistry* obrPtr_;
 
 
-    // Protected member functions
-
-        //- Selector for alternative sub-registry,
-        //  when the keyword %subRegion is present in the dictionary
-        static const objectRegistry& whichSubRegistry
-        (
-            const objectRegistry& obr,
-            const dictionary& dict
-        );
+    // Protected Member Functions
 
         //- The region or sub-region registry being used
         virtual const objectRegistry& obr() const;
@@ -147,10 +152,9 @@ protected:
         //- Clear field from the (sub) objectRegistry if present
         bool clearObject(const word& fieldName);
 
+        //- Clear fields from the (sub) objectRegistry if present
+        void clearObjects(const wordList& objNames);
 
-private:
-
-    // Private Member Functions
 
         //- No copy construct
         regionFunctionObject(const regionFunctionObject&) = delete;

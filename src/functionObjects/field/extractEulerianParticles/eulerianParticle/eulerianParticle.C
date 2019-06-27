@@ -33,8 +33,8 @@ using namespace Foam::constant;
 Foam::functionObjects::eulerianParticle::eulerianParticle()
 :
     faceIHit(-1),
-    VC(vector::zero),
-    VU(vector::zero),
+    VC(Zero),
+    VU(Zero),
     V(0),
     time(0)
 {}

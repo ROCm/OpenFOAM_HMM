@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +114,7 @@ int main()
     Info<< "\nerase table2 by iterator" << nl;
     forAllIters(table2, iter)
     {
-        Info<< "erasing " << iter.key() << " => " << iter.object() << " ... ";
+        Info<< "erasing " << iter.key() << " => " << iter.val() << " ... ";
         table2.erase(iter);
         Info<< "erased" << endl;
     }

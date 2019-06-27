@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,15 +159,15 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
             // This requires there to be no boundary in the way.
 
 
-            forAllConstIters(sourceParcels, iter)
+            for (const passiveParticle& p : sourceParcels)
             {
                 bool foundCell = false;
 
                 // Assume that cell from read parcel is the correct one...
-                if (iter().cell() >= 0)
+                if (p.cell() >= 0)
                 {
                     const labelList& targetCells =
-                        sourceToTargets[iter().cell()];
+                        sourceToTargets[p.cell()];
 
                     // Particle probably in one of the targetcells. Try
                     // all by tracking from their cell centre to the parcel
@@ -187,7 +189,7 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
                         );
                         passiveParticle& newP = newPtr();
 
-                        newP.track(iter().position() - newP.position(), 0);
+                        newP.track(p.position() - newP.position(), 0);
 
                         if (!newP.onFace())
                         {
@@ -221,12 +223,12 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
             {
                 sourceParticleI = 0;
 
-                forAllIters(sourceParcels, iter)
+                for (passiveParticle& p : sourceParcels)
                 {
                     if (unmappedSource.found(sourceParticleI))
                     {
                         const label targetCell =
-                            findCell(targetParcels, iter().position());
+                            findCell(targetParcels, p.position());
 
                         if (targetCell >= 0)
                         {
@@ -237,11 +239,11 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
                                 new passiveParticle
                                 (
                                     meshTarget,
-                                    iter().position(),
+                                    p.position(),
                                     targetCell
                                 )
                             );
-                            sourceParcels.remove(&iter());
+                            sourceParcels.remove(&p);
                         }
                     }
                     sourceParticleI++;

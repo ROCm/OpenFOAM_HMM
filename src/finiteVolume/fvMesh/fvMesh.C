@@ -2,9 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -271,7 +272,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
 
     // Check the existence of the cell volumes and read if present
     // and set the storage of V00
-    if (fileHandler().isFile(time().timePath()/"V0"))
+    if (fileHandler().isFile(time().timePath()/dbDir()/"V0"))
     {
         V0Ptr_ = new DimensionedField<scalar, volMesh>
         (
@@ -292,7 +293,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
 
     // Check the existence of the mesh fluxes, read if present and set the
     // mesh to be moving
-    if (fileHandler().isFile(time().timePath()/"meshPhi"))
+    if (fileHandler().isFile(time().timePath()/dbDir()/"meshPhi"))
     {
         phiPtr_ = new surfaceScalarField
         (
@@ -477,7 +478,7 @@ Foam::SolverPerformance<Foam::tensor> Foam::fvMesh::solve
 
 void Foam::fvMesh::addFvPatches
 (
-    const List<polyPatch*>& p,
+    PtrList<polyPatch>& plist,
     const bool validBoundary
 )
 {
@@ -488,9 +489,21 @@ void Foam::fvMesh::addFvPatches
             << abort(FatalError);
     }
 
-    // first add polyPatches
-    addPatches(p, validBoundary);
+    addPatches(plist, validBoundary);
     boundary_.addPatches(boundaryMesh());
+}
+
+
+void Foam::fvMesh::addFvPatches
+(
+    const List<polyPatch*>& p,
+    const bool validBoundary
+)
+{
+    // Acquire ownership of the pointers
+    PtrList<polyPatch> plist(const_cast<List<polyPatch*>&>(p));
+
+    addFvPatches(plist, validBoundary);
 }
 
 

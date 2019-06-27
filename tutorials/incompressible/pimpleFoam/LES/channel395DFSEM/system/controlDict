@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -65,6 +65,20 @@ functions
         libs            ("libfieldFunctionObjects.so");
         writeControl    writeTime;
     }
+    lambVector1                                                                 
+    {                                                                           
+        type            lambVector;                                                 
+        libs            ("libfieldFunctionObjects.so");                             
+        writeControl    writeTime;                                              
+        field           U;                                                          
+    }                                                                           
+    div1                                                                        
+    {                                                                           
+        type            div;                                                        
+        libs            ("libfieldFunctionObjects.so");                             
+        writeControl    writeTime;                                              
+        field           lambVector;                                                 
+    }
     fieldAverage1
     {
         type            fieldAverage;
@@ -86,6 +100,20 @@ functions
                 mean        on;
                 prime2Mean  on;
                 base        time;
+            }
+
+            lambVector                                                          
+            {                                                                   
+                mean        on;                                                 
+                prime2Mean  off;                                                
+                base        time;                                               
+            }                                                                                                                                      
+
+            div(lambVector)                                                     
+            {                                                                   
+                mean        on;                                                 
+                prime2Mean  off;                                                
+                base        time;                                               
             }
         );
     }

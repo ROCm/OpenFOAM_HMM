@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2013 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~lduInterfaceField();
+    virtual ~lduInterfaceField() = default;
 
 
     // Member Functions
@@ -135,11 +137,11 @@ public:
             //  or subtract coupled contributions to matrix
             virtual void initInterfaceMatrixUpdate
             (
-                scalarField&,
+                solveScalarField& result,
                 const bool add,
-                const scalarField&,
-                const scalarField&,
-                const direction,
+                const solveScalarField& psiInternal,
+                const scalarField& coeffs,
+                const direction cmpt,
                 const Pstream::commsTypes commsType
             ) const
             {}
@@ -148,11 +150,11 @@ public:
             //  or subtract coupled contributions to matrix
             virtual void updateInterfaceMatrix
             (
-                scalarField&,
+                solveScalarField& result,
                 const bool add,
-                const scalarField&,
-                const scalarField&,
-                const direction,
+                const solveScalarField& psiInternal,
+                const scalarField& coeffs,
+                const direction cmpt,
                 const Pstream::commsTypes commsType
             ) const = 0;
 

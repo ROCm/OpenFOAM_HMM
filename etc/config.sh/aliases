@@ -2,8 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -23,17 +25,12 @@
 alias wmSet='. $WM_PROJECT_DIR/etc/bashrc'
 alias wmInt32='wmSet WM_LABEL_SIZE=32'
 alias wmInt64='wmSet WM_LABEL_SIZE=64'
-alias wmSP='wmSet WM_PRECISION_OPTION=SP'
 alias wmDP='wmSet WM_PRECISION_OPTION=DP'
+alias wmSP='wmSet WM_PRECISION_OPTION=SP'
+alias wmSPDP='wmSet WM_PRECISION_OPTION=SPDP'
 
 # Clear env
 alias wmUnset='. $WM_PROJECT_DIR/etc/config.sh/unset'
-
-# Toggle wmakeScheduler on/off
-#  - also need to set WM_HOSTS
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-alias wmSchedOn='export WM_SCHEDULER=$WM_PROJECT_DIR/wmake/wmakeScheduler'
-alias wmSchedOff='unset WM_SCHEDULER'
 
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~

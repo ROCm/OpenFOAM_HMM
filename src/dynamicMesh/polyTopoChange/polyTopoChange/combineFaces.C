@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +40,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(combineFaces, 0);
+    defineTypeNameAndDebug(combineFaces, 0);
 }
 
 
@@ -127,6 +129,7 @@ bool Foam::combineFaces::validFace
 void Foam::combineFaces::regioniseFaces
 (
     const scalar minCos,
+    const bool mergeAcrossPatches,
     const label celli,
     const labelList& cEdges,
     Map<label>& faceRegion
@@ -136,45 +139,47 @@ void Foam::combineFaces::regioniseFaces
 
     forAll(cEdges, i)
     {
-        label edgeI = cEdges[i];
+        const label edgeI = cEdges[i];
 
         label f0, f1;
         meshTools::getEdgeFaces(mesh_, celli, edgeI, f0, f1);
 
-        label p0 = patches.whichPatch(f0);
-        label p1 = patches.whichPatch(f1);
+        const vector& a0 = mesh_.faceAreas()[f0];
+        const vector& a1 = mesh_.faceAreas()[f1];
+
+        const label p0 = patches.whichPatch(f0);
+        const label p1 = patches.whichPatch(f1);
 
         // Face can be merged if
-        // - same non-coupled patch
         // - small angle
-        if (p0 != -1 && p0 == p1 && !patches[p0].coupled())
+        // - mergeAcrossPatches=false : same non-coupled patch
+        // - mergeAcrossPatches=true  : always
+        if
+        (
+            p0 != -1
+         && p1 != -1
+         && !patches[p0].coupled()
+         && !patches[p1].coupled()
+        )
         {
-            vector f0Normal = normalised(mesh_.faceAreas()[f0]);
-            vector f1Normal = normalised(mesh_.faceAreas()[f1]);
+            if (!mergeAcrossPatches && (p0 != p1))
+            {
+                continue;
+            }
+
+            const vector f0Normal = normalised(a0);
+            const vector f1Normal = normalised(a1);
 
             if ((f0Normal & f1Normal) > minCos)
             {
-                Map<label>::const_iterator f0Fnd = faceRegion.find(f0);
-
-                label region0 = -1;
-                if (f0Fnd != faceRegion.end())
-                {
-                    region0 = f0Fnd();
-                }
-
-                Map<label>::const_iterator f1Fnd = faceRegion.find(f1);
-
-                label region1 = -1;
-                if (f1Fnd != faceRegion.end())
-                {
-                    region1 = f1Fnd();
-                }
+                const label region0 = faceRegion.lookup(f0, -1);
+                const label region1 = faceRegion.lookup(f1, -1);
 
                 if (region0 == -1)
                 {
                     if (region1 == -1)
                     {
-                        label useRegion = faceRegion.size();
+                        const label useRegion = faceRegion.size();
                         faceRegion.insert(f0, useRegion);
                         faceRegion.insert(f1, useRegion);
                     }
@@ -192,14 +197,14 @@ void Foam::combineFaces::regioniseFaces
                     else if (region0 != region1)
                     {
                         // Merge the two regions
-                        label useRegion = min(region0, region1);
-                        label freeRegion = max(region0, region1);
+                        const label useRegion = min(region0, region1);
+                        const label freeRegion = max(region0, region1);
 
-                        forAllIter(Map<label>, faceRegion, iter)
+                        forAllIters(faceRegion, iter)
                         {
-                            if (iter() == freeRegion)
+                            if (iter.val() == freeRegion)
                             {
-                                iter() = useRegion;
+                                iter.val() = useRegion;
                             }
                         }
                     }
@@ -244,21 +249,21 @@ bool Foam::combineFaces::faceNeighboursValid
 
             forAll(fEdges, i)
             {
-                label edgeI = fEdges[i];
+                const label edgeI = fEdges[i];
                 label nbrI = meshTools::otherFace(mesh_, celli, facei, edgeI);
 
-                Map<label>::const_iterator iter = faceRegion.find(nbrI);
+                const auto iter = faceRegion.cfind(nbrI);
 
-                if (iter == faceRegion.end())
+                if (iter.found())
+                {
+                    neighbourRegions.insert(iter.val());
+                }
+                else
                 {
                     if (!neighbourFaces.found(nbrI))
                     {
                         neighbourFaces.append(nbrI);
                     }
-                }
-                else
-                {
-                    neighbourRegions.insert(iter());
                 }
             }
 
@@ -296,7 +301,8 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 (
     const scalar featureCos,
     const scalar minConcaveCos,
-    const labelHashSet& boundaryCells
+    const labelHashSet& boundaryCells,
+    const bool mergeAcrossPatches
 ) const
 {
     // Lists of faces that can be merged.
@@ -314,7 +320,14 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 
         // Region per face
         Map<label> faceRegion(cFaces.size());
-        regioniseFaces(featureCos, celli, cEdges, faceRegion);
+        regioniseFaces
+        (
+            featureCos,
+            mergeAcrossPatches,
+            celli,
+            cEdges,
+            faceRegion
+        );
 
         // Now we have in faceRegion for every face the region with planar
         // face sharing the same region. We now check whether the resulting
@@ -327,14 +340,14 @@ Foam::labelListList Foam::combineFaces::getMergeSets
             // Create region-to-faces addressing
             Map<labelList> regionToFaces(faceRegion.size());
 
-            forAllConstIter(Map<label>, faceRegion, iter)
+            forAllConstIters(faceRegion, iter)
             {
-                label facei = iter.key();
-                label region = iter();
+                const label facei = iter.key();
+                const label region = iter.val();
 
-                Map<labelList>::iterator regionFnd = regionToFaces.find(region);
+                auto regionFnd = regionToFaces.find(region);
 
-                if (regionFnd != regionToFaces.end())
+                if (regionFnd.found())
                 {
                     labelList& setFaces = regionFnd();
                     label sz = setFaces.size();
@@ -349,7 +362,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 
             // For every set check if it forms a valid convex face
 
-            forAllConstIter(Map<labelList>, regionToFaces, iter)
+            forAllIters(regionToFaces, iter)
             {
                 // Make face out of setFaces
                 indirectPrimitivePatch bigFace
@@ -357,7 +370,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
                     IndirectList<face>
                     (
                         mesh_.faces(),
-                        iter()
+                        iter.val()
                     ),
                     mesh_.points()
                 );
@@ -365,7 +378,33 @@ Foam::labelListList Foam::combineFaces::getMergeSets
                 // Only store if -only one outside loop -which forms convex face
                 if (validFace(minConcaveCos, bigFace))
                 {
-                    allFaceSets.append(iter());
+                    labelList& faceIDs = iter.val();
+
+                    // For cross-patch merging we want to make the
+                    // largest face the one to decide the final patch
+                    // (i.e. master face)
+                    if (mergeAcrossPatches)
+                    {
+                        const vectorField& areas = mesh_.faceAreas();
+
+                        label maxIndex = 0;
+                        scalar maxMagSqr = magSqr(areas[faceIDs[0]]);
+                        for (label i = 1; i < faceIDs.size(); ++i)
+                        {
+                            const scalar a2 = magSqr(areas[faceIDs[i]]);
+                            if (a2 > maxMagSqr)
+                            {
+                                maxMagSqr = a2;
+                                maxIndex = i;
+                            }
+                        }
+                        if (maxIndex != 0)
+                        {
+                            Swap(faceIDs[0], faceIDs[maxIndex]);
+                        }
+                    }
+
+                    allFaceSets.append(faceIDs);
                 }
             }
         }
@@ -378,7 +417,8 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 Foam::labelListList Foam::combineFaces::getMergeSets
 (
     const scalar featureCos,
-    const scalar minConcaveCos
+    const scalar minConcaveCos,
+    const bool mergeAcrossPatches
 ) const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
@@ -399,7 +439,13 @@ Foam::labelListList Foam::combineFaces::getMergeSets
         }
     }
 
-    return getMergeSets(featureCos, minConcaveCos, boundaryCells);
+    return getMergeSets
+    (
+        featureCos,
+        minConcaveCos,
+        boundaryCells,
+        mergeAcrossPatches
+    );
 }
 
 
@@ -558,7 +604,7 @@ void Foam::combineFaces::setRefinement
     }
 
     // Running count of number of faces using a point
-    labelList nPointFaces(mesh_.nPoints(), 0);
+    labelList nPointFaces(mesh_.nPoints(), Zero);
 
     const labelListList& pointFaces = mesh_.pointFaces();
 
@@ -841,11 +887,11 @@ void Foam::combineFaces::setUnrefinement
 
     forAll(masterFaces, i)
     {
-        label masterFacei = masterFaces[i];
+        const label masterFacei = masterFaces[i];
 
-        Map<label>::const_iterator iter = masterToSet.find(masterFacei);
+        const auto iter = masterToSet.cfind(masterFacei);
 
-        if (iter == masterToSet.end())
+        if (!iter.found())
         {
             FatalErrorInFunction
                 << "Master face " << masterFacei
@@ -854,7 +900,7 @@ void Foam::combineFaces::setUnrefinement
                 << abort(FatalError);
         }
 
-        label setI = iter();
+        const label setI = iter.val();
 
 
         // Update faces of the merge setI for reintroduced vertices

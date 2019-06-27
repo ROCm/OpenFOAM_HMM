@@ -444,7 +444,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::processorLODs::box::createMap
     {
         // Per processor refinement info
         List<labelList> refineFlags(Pstream::nProcs());
-        labelList nElems(Pstream::nProcs(), 0);
+        labelList nElems(Pstream::nProcs(), Zero);
 
         // Assess how many target elements intersect the source bounding boxes
         // and use the info to flag how the source boxes should be refined

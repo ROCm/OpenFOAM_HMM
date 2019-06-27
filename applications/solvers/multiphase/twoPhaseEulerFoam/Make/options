@@ -1,6 +1,9 @@
 EXE_INC = \
-    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
+    -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
@@ -8,11 +11,12 @@ EXE_INC = \
     -IphaseCompressibleTurbulenceModels/lnInclude \
     -IinterfacialModels/lnInclude \
     -ItwoPhaseSystem/lnInclude \
-    -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/meshTools/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude
 
 EXE_LIBS = \
+    -lfiniteVolume \
+    -lfvOptions \
+    -lmeshTools \
+    -lsampling \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \
@@ -21,8 +25,4 @@ EXE_LIBS = \
     -lphaseCompressibleTurbulenceModels \
     -lincompressibleTransportModels \
     -lcompressibleTwoPhaseSystem \
-    -lcompressibleEulerianInterfacialModels \
-    -lfiniteVolume \
-    -lfvOptions \
-    -lmeshTools \
-    -lsampling
+    -lcompressibleEulerianInterfacialModels

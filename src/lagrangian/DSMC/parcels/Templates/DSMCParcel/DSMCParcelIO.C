@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,14 +94,12 @@ void Foam::DSMCParcel<ParcelType>::readFields(Cloud<DSMCParcel<ParcelType>>& c)
     c.checkFieldIOobject(c, typeId);
 
     label i = 0;
-    forAllIter(typename Cloud<DSMCParcel<ParcelType>>, c, iter)
+    for (DSMCParcel<ParcelType>& p : c)
     {
-        DSMCParcel<ParcelType>& p = iter();
-
         p.U_ = U[i];
         p.Ei_ = Ei[i];
         p.typeId_ = typeId[i];
-        i++;
+        ++i;
     }
 }
 
@@ -119,14 +119,12 @@ void Foam::DSMCParcel<ParcelType>::writeFields
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::NO_READ), np);
 
     label i = 0;
-    forAllConstIter(typename Cloud<DSMCParcel<ParcelType>>, c, iter)
+    for (const DSMCParcel<ParcelType>& p : c)
     {
-        const DSMCParcel<ParcelType>& p = iter();
-
         U[i] = p.U();
         Ei[i] = p.Ei();
         typeId[i] = p.typeId();
-        i++;
+        ++i;
     }
 
     U.write(np > 0);

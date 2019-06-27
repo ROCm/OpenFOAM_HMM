@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ namespace Foam
 {
 
 // Forward declarations
+class bitSet;
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -65,7 +66,7 @@ public:
         };
 
         //- Number of element types (5)
-        static constexpr label nTypes = 5;
+        static constexpr int nTypes = 5;
 
         //- The ensight element type names
         static const char* elemNames[5];
@@ -79,7 +80,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Location within a list.
         //  The ensight part number is typically this value +1.
@@ -100,6 +101,10 @@ private:
 
         //- Use temporarily stored sizes to redimension the element lists
         void resizeAll();
+
+        //- Classify cell types, set element lists for selection (implemention)
+        template<class Addressing>
+        void classifyImpl(const polyMesh& mesh, const Addressing& cellIds);
 
         //- No copy assignment
         void operator=(const ensightCells&) = delete;
@@ -167,14 +172,15 @@ public:
     // Edit
 
         //- Classify cell types and set the element lists.
-        //  The optional indirect addressing can be used when classifying
-        //  groups of cells (eg, from a cellZone etc).
-        void classify
-        (
-            const polyMesh& mesh,
-            const labelUList& addressing = labelUList::null()
-        );
+        void classify(const polyMesh& mesh);
 
+        //- Classify cell types and set element lists,
+        //- using a subgroup of cells (eg, from a cellZone etc).
+        void classify(const polyMesh& mesh, const labelUList& cellIds);
+
+        //- Classify cell types and set element lists,
+        //- using a subgroup of cells
+        void classify(const polyMesh& mesh, const bitSet& selection);
 
         //- Set addressable sizes to zero, free up addressing memory.
         void clear();

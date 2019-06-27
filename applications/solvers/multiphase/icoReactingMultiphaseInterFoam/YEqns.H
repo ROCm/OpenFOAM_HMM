@@ -1,7 +1,6 @@
 {
-    forAllIter(UPtrList<phaseModel>, fluid.phases(), iter)
+    for (phaseModel& phase : fluid.phases())
     {
-        phaseModel& phase = iter();
         PtrList<volScalarField>& Y = phase.Y();
 
         if (!Y.empty())
@@ -55,4 +54,3 @@
         }
     }
 }
-

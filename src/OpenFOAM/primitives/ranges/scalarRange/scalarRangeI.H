@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,99 +30,121 @@ inline Foam::scalarRange::scalarRange
     const scalarRange::testType type,
     const scalar minVal,
     const scalar maxVal
-)
+) noexcept
 :
-    type_(type),
     min_(minVal),
-    max_(maxVal)
+    max_(maxVal),
+    type_(type)
 {}
 
 
-inline Foam::scalarRange::scalarRange()
+inline Foam::scalarRange::scalarRange() noexcept
 :
-    scalarRange(NONE, Foam::VGREAT, -Foam::VGREAT)
+    scalarRange(scalarRange::NONE, GREAT, -GREAT)
 {}
 
 
-inline Foam::scalarRange::scalarRange(const scalar value)
+inline Foam::scalarRange::scalarRange(const scalar value) noexcept
 :
-    scalarRange(EQ, value, value)
+    scalarRange(scalarRange::EQ, value, value)
 {}
 
 
-inline Foam::scalarRange::scalarRange(const scalar minVal, const scalar maxVal)
+inline Foam::scalarRange::scalarRange
+(
+    const scalar minVal,
+    const scalar maxVal
+) noexcept
 :
-    scalarRange(GE_LE, minVal, maxVal)
+    scalarRange(scalarRange::GE_LE, minVal, maxVal)
 {
     if (minVal > maxVal)
     {
         clear();  // Inverted - explicitly mark as such
     }
-    else if (minVal == maxVal)
+    else if (equal(minVal, maxVal))
     {
         type_ = EQ;
     }
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::ge(const scalar minVal)
+inline Foam::scalarRange Foam::scalarRange::ge(const scalar minVal) noexcept
 {
-    return scalarRange(GE, minVal, Foam::VGREAT);
+    return scalarRange(scalarRange::GE, minVal, GREAT);
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::gt(const scalar minVal)
+inline Foam::scalarRange Foam::scalarRange::gt(const scalar minVal) noexcept
 {
-    return scalarRange(GT, minVal, Foam::VGREAT);
+    return scalarRange(scalarRange::GT, minVal, GREAT);
 }
 
 
-inline Foam::scalarRange Foam::scalarRange::le(const scalar maxVal)
+inline Foam::scalarRange Foam::scalarRange::ge0() noexcept
 {
-    return scalarRange(LE, -Foam::VGREAT, maxVal);
+    return scalarRange(scalarRange::GE, 0, GREAT);
 }
 
-inline Foam::scalarRange Foam::scalarRange::lt(const scalar maxVal)
+
+inline Foam::scalarRange Foam::scalarRange::gt0() noexcept
 {
-    return scalarRange(LT, -Foam::VGREAT, maxVal);
+    return scalarRange(scalarRange::GT, 0, GREAT);
+}
+
+
+inline Foam::scalarRange Foam::scalarRange::le(const scalar maxVal) noexcept
+{
+    return scalarRange(scalarRange::LE, -GREAT, maxVal);
+}
+
+inline Foam::scalarRange Foam::scalarRange::lt(const scalar maxVal) noexcept
+{
+    return scalarRange(scalarRange::LT, -GREAT, maxVal);
+}
+
+
+inline Foam::scalarRange Foam::scalarRange::zero_one() noexcept
+{
+    return scalarRange(scalarRange::GE_LE, 0, 1);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline void Foam::scalarRange::clear()
+inline void Foam::scalarRange::clear() noexcept
 {
+    min_ = GREAT;
+    max_ = -GREAT;
     type_ = scalarRange::NONE;
-    min_ = Foam::VGREAT;
-    max_ = -Foam::VGREAT;
 }
 
 
-inline bool Foam::scalarRange::empty() const
+inline bool Foam::scalarRange::empty() const noexcept
 {
     return type_ == NONE;
 }
 
 
-inline bool Foam::scalarRange::valid() const
+inline bool Foam::scalarRange::valid() const noexcept
 {
     return type_;
 }
 
 
-inline bool Foam::scalarRange::single() const
+inline bool Foam::scalarRange::single() const noexcept
 {
-    return type_ == EQ;
+    return type_ == scalarRange::EQ;
 }
 
 
-inline Foam::scalar Foam::scalarRange::min() const
+inline Foam::scalar Foam::scalarRange::min() const noexcept
 {
     return min_;
 }
 
 
-inline Foam::scalar Foam::scalarRange::max() const
+inline Foam::scalar Foam::scalarRange::max() const noexcept
 {
     return max_;
 }
@@ -132,36 +154,36 @@ inline Foam::scalar Foam::scalarRange::value() const
 {
     switch (type_)
     {
-        case EQ:
-            return min_;    // For equals, min and max are identical
-
-        case GE:
-        case GT:
+        case scalarRange::EQ: // For equals, min and max are identical
+        case scalarRange::GE:
+        case scalarRange::GT:
             return min_;
 
-        case LE:
-        case LT:
+        case scalarRange::LE:
+        case scalarRange::LT:
             return max_;
 
-        case GE_LE:
-            return 0.5*(min_ + max_);
+        case scalarRange::GE_LE:
+            // Multiply before adding to avoid possible overflow
+            return (0.5 * min_) + (0.5 * max_);
 
-        default:
+        default:  // NONE or ALWAYS. Zero is reasonable dummy value.
             return 0;
     }
 }
 
 
-inline bool Foam::scalarRange::match(const scalar& value) const
+inline bool Foam::scalarRange::match(const scalar& val) const
 {
     switch (type_)
     {
-        case EQ:    return equal(value, min_);
-        case GE:    return (value >= min_);
-        case GT:    return (value > min_);
-        case LE:    return (value <= max_);
-        case LT:    return (value < max_);
-        case GE_LE: return (value >= min_ && value <= max_);
+        case EQ:    return equal(val, min_);
+        case GE:    return (val >= min_);
+        case GT:    return (val > min_);
+        case LE:    return (val <= max_);
+        case LT:    return (val < max_);
+        case GE_LE: return (val >= min_ && val <= max_);
+        case ALWAYS: return true;
         default:    return false;
     }
 }
@@ -169,19 +191,25 @@ inline bool Foam::scalarRange::match(const scalar& value) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline bool Foam::scalarRange::operator()(const scalar& value) const
+inline bool Foam::scalarRange::operator()(const scalar& val) const
 {
-    return match(value);
+    return match(val);
 }
 
 
-inline bool Foam::scalarRange::operator==(const scalarRange& rhs) const
+inline bool Foam::scalarRange::operator==
+(
+    const scalarRange& rhs
+) const noexcept
 {
     return (type_ == rhs.type_ && min_ == rhs.min_ && max_ == rhs.max_);
 }
 
 
-inline bool Foam::scalarRange::operator!=(const scalarRange& rhs) const
+inline bool Foam::scalarRange::operator!=
+(
+    const scalarRange& rhs
+) const noexcept
 {
     return !(operator==(rhs));
 }

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,7 +43,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
 
     if (Pstream::parRun())
     {
-        List<label> facesPresentOnProc(Pstream::nProcs(), 0);
+        labelList facesPresentOnProc(Pstream::nProcs(), Zero);
         if ((srcPatch.size() > 0) || (tgtPatch.size() > 0))
         {
             facesPresentOnProc[Pstream::myProcNo()] = 1;

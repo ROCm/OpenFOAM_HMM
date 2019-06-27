@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -48,12 +48,14 @@ boundaryField
     }
     air_to_floor
     {
-        type            calculated;
+        type            greyDiffusiveRadiationViewFactor;
+        qro             uniform 0;
         value           uniform 0;
     }
     air_to_solid
     {
-        type            calculated;
+        type            greyDiffusiveRadiationViewFactor;
+        qro             uniform 0;
         value           uniform 0;
     }
 }

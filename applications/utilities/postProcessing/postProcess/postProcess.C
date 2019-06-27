@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -164,16 +166,21 @@ int main(int argc, char *argv[])
     functionObjects::fileFieldSelection fields(mesh);
     if (args.found("fields"))
     {
-        fields.insert(args.getList<wordRe>("fields"));
+        fields.resetFieldFilters
+        (
+            HashSet<wordRe>(args.getList<wordRe>("fields"))
+        );
     }
     if (args.found("field"))
     {
-        fields.insert(args.opt<wordRe>("field"));
+        fields.resetFieldFilters(args.opt<wordRe>("field"));
     }
 
     // Externally stored dictionary for functionObjectList
     // if not constructed from runTime
     dictionary functionsDict;
+
+    HashSet<wordRe> fieldFilters(fields.filters());
 
     // Construct functionObjectList
     autoPtr<functionObjectList> functionsPtr
@@ -183,7 +190,7 @@ int main(int argc, char *argv[])
             args,
             runTime,
             functionsDict,
-            fields
+            fieldFilters // include any additional command-line fields
         )
     );
 
@@ -192,8 +199,6 @@ int main(int argc, char *argv[])
         runTime.setTime(timeDirs[timei], timei);
 
         Info<< "Time = " << runTime.timeName() << endl;
-
-        fields.updateSelection();
 
         if (mesh.readUpdate() != polyMesh::UNCHANGED)
         {
@@ -205,9 +210,13 @@ int main(int argc, char *argv[])
                 args,
                 runTime,
                 functionsDict,
-                fields
+                fieldFilters
             );
         }
+
+        fields.resetFieldFilters(fieldFilters);
+
+        fields.updateSelection();
 
         const bool throwingIOErr = FatalIOError.throwExceptions();
 
@@ -218,7 +227,7 @@ int main(int argc, char *argv[])
                 args,
                 runTime,
                 mesh,
-                fields.selection(),
+                fields.selectionNames(),
                 functionsPtr(),
                 timei == timeDirs.size()-1
             );
@@ -226,9 +235,9 @@ int main(int argc, char *argv[])
             // Report to output (avoid overwriting values from simulation)
             profiling::print(Info);
         }
-        catch (Foam::IOerror& err)
+        catch (const Foam::IOerror& err)
         {
-            Warning<< err << endl;
+            Warning << err << endl;
         }
 
         Info<< endl;

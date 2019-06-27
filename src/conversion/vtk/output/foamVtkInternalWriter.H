@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -207,8 +207,16 @@ public:
         //  Must be called within the CELL_DATA state.
         bool writeProcIDs();
 
+        //- Write point ids as PointData.
+        //  Must be called within the POINT_DATA state.
+        void writePointIDs();
+
 
     // Write
+
+        //- Write a uniform field of Cell or Point values
+        template<class Type>
+        void writeUniform(const word& fieldName, const Type& val);
 
         //- Write point field
         //  Interpolate to originating cell centre for decomposed cells.

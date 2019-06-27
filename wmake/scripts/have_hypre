@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -40,7 +40,7 @@ no_hypre()
 }
 
 
-# Reset variables
+# Report
 echo_hypre()
 {
     echo "hypre=${HAVE_HYPRE:-false}"
@@ -54,77 +54,64 @@ echo_hypre()
 # -> HAVE_HYPRE, HYPRE_INC_DIR, HYPRE_LIB_DIR
 have_hypre()
 {
-    local header library static label settings warn
+    local prefix header library incName libName settings warn
     warn="==> skip hypre"
 
-    # Basic setup/checks. Prefer current environment value? (TDB)
+    # Setup - prefer current environment value? (TDB)
     if [ ! -d "$HYPRE_ARCH_PATH" ]
     then
-        settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/hypre) || {
+        if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/hypre)
+        then
+            . "$settings"
+        else
             [ -n "$warn" ] && echo "$warn (no config.sh/hypre settings)"
-            return 1
-        }
-        . $settings
+            return 2
+        fi
     fi
-    if isNone "$HYPRE_ARCH_PATH"
+
+    # Expected location, include/library names
+    prefix="$HYPRE_ARCH_PATH"
+    incName="HYPRE.h"
+    libName="libHYPRE"
+
+    # ----------------------------------
+    if isNone "$prefix"
     then
-        [ -n "$warn" ] && echo "$warn (not available)"
+        [ -n "$warn" ] && echo "$warn (disabled)"
         return 1
-    fi
-
-
-    # Header/library names
-    header="HYPRE.h"
-    library="libHYPRE$extLibso"
-
-
-    if hasAbsdir "$HYPRE_ARCH_PATH"
+    elif hasAbsdir "$prefix"
     then
-        header=$(findFirstFile $HYPRE_ARCH_PATH/include/$header)
-
-        library=$(findFirstFile \
-            "$(thirdExtLib $library)" \
-            $HYPRE_ARCH_PATH/lib/$library \
-            $HYPRE_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$library \
-        )
-    elif isSystem "$HYPRE_ARCH_PATH"
+        header=$(findFirstFile "$prefix/include/$incName")
+        library="$(findExtLib $libName)"
+    elif isSystem "$prefix"
     then
-        header=$(findFirstFile /usr/local/include/$header /usr/include/$header)
-
-        case "$header" in
-        /usr/local/*)
-            library=$(findFirstFile \
-                /usr/local/lib/$library \
-                /usr/local/lib$WM_COMPILER_LIB_ARCH/$library \
-            )
-            ;;
-
-        *)
-            library=$(findFirstFile \
-                /usr/lib/$library \
-                /usr/lib$WM_COMPILER_LIB_ARCH/$library \
-            )
-            ;;
-        esac
+        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        prefix=$(sysPrefix "$header")
     else
-        unset header library
+        unset prefix
     fi
+    # ----------------------------------
 
-
-    # Header found?
+    # Header
     [ -n "$header" ] || {
         [ -n "$warn" ] && echo "$warn (no header)"
         return 2
     }
 
-    # Library found?
-    [ -n "$library" ] || {
-        [ -n "$warn" ] && echo "$warn (missing library)"
+    # Library
+    [ -n "$library" ] || library=$(findLibrary \
+        "$prefix/lib/$libName" \
+        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
+    ) || {
+        [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
 
+    # ----------------------------------
+
+    # OK
     export HAVE_HYPRE=true
-    export HYPRE_ARCH_PATH
+    export HYPRE_ARCH_PATH="$prefix"
     export HYPRE_INC_DIR="${header%/*}"     # Basename
     export HYPRE_LIB_DIR="${library%/*}"    # Basename
 }

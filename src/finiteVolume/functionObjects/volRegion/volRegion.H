@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +31,11 @@ Group
 
 Description
     Volume (cell) region selection class.
+
+    The adjustments for mesh changes have been implemented with a lazy
+    evaluation, to avoid unnecessary recalculation until the values are
+    actually required. The update() method is used to ensure the cache
+    values are up-to-date.
 
     Examples of function object specification:
     \verbatim
@@ -80,6 +87,8 @@ namespace Foam
 
 // Forward declarations
 class fvMesh;
+class polyMesh;
+class mapPolyMesh;
 
 namespace functionObjects
 {
@@ -94,13 +103,23 @@ class volRegion
 
         const fvMesh& volMesh_;
 
+        //- Flag to indicate whether the volRegion requires updating
+        bool requireUpdate_;
+
         //- The cell ids, from cellSet
         labelList cellIds_;
 
-        // Cache integral properties of the region for writeFileHeader
+        //- Cached total number of cells selected
         label nCells_;
 
+        //- Cached total selection volume
         scalar V_;
+
+
+    // Private Member Functions
+
+        //- Update cellIds, nCells, volume
+        void calculateCache();
 
 
 public:
@@ -155,10 +174,7 @@ public:
     virtual ~volRegion() = default;
 
 
-    // Public Member Functions
-
-        //- Read from dictionary
-        bool read(const dictionary& dict);
+    // Member Functions
 
         //- Return the region type
         inline const regionTypes& regionType() const;
@@ -167,10 +183,24 @@ public:
         const labelList& cellIDs() const;
 
         //- Return the number of cells selected in the region
-        label nCells() const;
+        inline label nCells() const;
 
-        //- Return total volume of the region
-        scalar V() const;
+        //- Return total volume of the selected region
+        inline scalar V() const;
+
+        //- Update the cached values as required
+        //  \return False if the values were already up to date
+        bool update();
+
+
+        //- Read from dictionary
+        virtual bool read(const dictionary& dict);
+
+        //- Update for changes of mesh
+        virtual void updateMesh(const mapPolyMesh&);
+
+        //- Update for mesh point-motion
+        virtual void movePoints(const polyMesh&);
 };
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,12 +29,12 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
+template<class Container, class Type>
 void Foam::globalIndex::gather
 (
     const labelUList& off,
     const label comm,
-    const labelList& procIDs,
+    const Container& procIDs,
     const UList<Type>& fld,
     List<Type>& allFld,
     const int tag,
@@ -52,7 +54,7 @@ void Foam::globalIndex::gather
          || commsType == Pstream::commsTypes::blocking
         )
         {
-            for (label i = 1; i < procIDs.size(); i++)
+            for (label i = 1; i < procIDs.size(); ++i)
             {
                 SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
@@ -96,7 +98,7 @@ void Foam::globalIndex::gather
             label startOfRequests = Pstream::nRequests();
 
             // Set up reads
-            for (label i = 1; i < procIDs.size(); i++)
+            for (label i = 1; i < procIDs.size(); ++i)
             {
                 SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
@@ -182,9 +184,43 @@ void Foam::globalIndex::gather
 template<class Type>
 void Foam::globalIndex::gather
 (
+    const UList<Type>& fld,
+    List<Type>& allFld,
+    const int tag,
+    const Pstream::commsTypes commsType
+) const
+{
+    gather
+    (
+        UPstream::worldComm,
+        UPstream::procID(UPstream::worldComm),
+        fld,
+        allFld,
+        tag,
+        commsType
+    );
+}
+
+
+template<class Type>
+void Foam::globalIndex::gatherOp
+(
+    const UList<Type>& fld,
+    List<Type>& allFld,
+    const int tag,
+    const Pstream::commsTypes commsType
+)
+{
+    globalIndex(fld.size()).gather(fld, allFld, tag, commsType);
+}
+
+
+template<class Container, class Type>
+void Foam::globalIndex::gather
+(
     const labelUList& off,
     const label comm,
-    const labelList& procIDs,
+    const Container& procIDs,
     List<Type>& fld,
     const int tag,
     const Pstream::commsTypes commsType
@@ -202,11 +238,54 @@ void Foam::globalIndex::gather
 
 
 template<class Type>
+void Foam::globalIndex::gather
+(
+    List<Type>& fld,
+    const int tag,
+    const Pstream::commsTypes commsType
+) const
+{
+    List<Type> allFld;
+
+    gather
+    (
+        UPstream::worldComm,
+        UPstream::procID(UPstream::worldComm),
+        fld,
+        allFld,
+        tag,
+        commsType
+    );
+
+    if (Pstream::master(UPstream::worldComm))
+    {
+        fld.transfer(allFld);
+    }
+    else
+    {
+        fld.clear();
+    }
+}
+
+
+template<class Type>
+void Foam::globalIndex::gatherOp
+(
+    List<Type>& fld,
+    const int tag,
+    const Pstream::commsTypes commsType
+)
+{
+    globalIndex(fld.size()).gather(fld, tag, commsType);
+}
+
+
+template<class Container, class Type>
 void Foam::globalIndex::scatter
 (
     const labelUList& off,
     const label comm,
-    const labelList& procIDs,
+    const Container& procIDs,
     const UList<Type>& allFld,
     UList<Type>& fld,
     const int tag,
@@ -223,7 +302,7 @@ void Foam::globalIndex::scatter
          || commsType == Pstream::commsTypes::blocking
         )
         {
-            for (label i = 1; i < procIDs.size(); i++)
+            for (label i = 1; i < procIDs.size(); ++i)
             {
                 const SubList<Type> procSlot
                 (
@@ -272,7 +351,7 @@ void Foam::globalIndex::scatter
             label startOfRequests = Pstream::nRequests();
 
             // Set up writes
-            for (label i = 1; i < procIDs.size(); i++)
+            for (label i = 1; i < procIDs.size(); ++i)
             {
                 const SubList<Type> procSlot
                 (
@@ -355,6 +434,112 @@ void Foam::globalIndex::scatter
 
             // Wait for all to finish
             Pstream::waitRequests(startOfRequests);
+        }
+    }
+}
+
+
+template<class Type>
+void Foam::globalIndex::scatter
+(
+    const UList<Type>& allFld,
+    UList<Type>& fld,
+    const int tag,
+    const Pstream::commsTypes commsType
+) const
+{
+    scatter
+    (
+        offsets_,
+        UPstream::worldComm,
+        UPstream::procID(UPstream::worldComm),
+        allFld,
+        fld,
+        tag,
+        commsType
+    );
+}
+
+
+template<class Type, class CombineOp>
+void Foam::globalIndex::get
+(
+    List<Type>& allFld,
+    const labelUList& globalIds,
+    const CombineOp& cop,
+    const label comm,
+    const int tag
+) const
+{
+    allFld.setSize(globalIds.size());
+    if (globalIds.size())
+    {
+        // Sort according to processor
+        labelList order;
+        CompactListList<label> bins;
+        DynamicList<label> validBins(Pstream::nProcs());
+        bin
+        (
+            offsets(),
+            globalIds,
+            order,
+            bins,
+            validBins
+        );
+
+        // Send local indices to individual processors as local index
+        PstreamBuffers sendBufs(Pstream::commsTypes::nonBlocking, tag, comm);
+
+        for (const auto proci : validBins)
+        {
+            const labelUList& es = bins[proci];
+
+            labelList localIDs(es.size());
+            forAll(es, i)
+            {
+                localIDs[i] = toLocal(proci, es[i]);
+            }
+
+            UOPstream os(proci, sendBufs);
+            os << localIDs;
+        }
+        labelList recvSizes;
+        sendBufs.finishedSends(recvSizes);
+
+
+        PstreamBuffers returnBufs(Pstream::commsTypes::nonBlocking, tag, comm);
+
+        forAll(recvSizes, proci)
+        {
+            if (recvSizes[proci])
+            {
+                UIPstream is(proci, sendBufs);
+                labelList localIDs(is);
+
+                // Collect entries
+                List<Type> fld(localIDs.size());
+                cop(fld, localIDs);
+
+                UOPstream os(proci, returnBufs);
+                os << fld;
+            }
+        }
+        returnBufs.finishedSends();
+
+        // Slot back
+        for (const auto proci : validBins)
+        {
+            label start = bins.offsets()[proci];
+            const SubList<label> es
+            (
+                order,
+                bins.offsets()[proci+1]-start,  // start
+                start
+            );
+            UIPstream is(proci, returnBufs);
+            List<Type> fld(is);
+
+            UIndirectList<Type>(allFld, es) = fld;
         }
     }
 }

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,10 +50,8 @@ Foam::label Foam::blockDescriptor::edgePointsWeights
     // Set the edge points/weights
     // The edge is a straight-line if it is not in the list of blockEdges
 
-    forAll(edges_, cedgei)
+    for (const blockEdge& cedge : blockEdges_)
     {
-        const blockEdge& cedge = edges_[cedgei];
-
         const int cmp = cedge.compare(blockLabels[start], blockLabels[end]);
 
         if (cmp)
@@ -116,24 +116,25 @@ Foam::label Foam::blockDescriptor::edgesPointsWeights
     scalarList (&edgeWeights)[12]
 ) const
 {
+    const label ni = sizes().x();
+    const label nj = sizes().y();
+    const label nk = sizes().z();
+
     label nCurvedEdges = 0;
 
     // X-direction
-    const label ni = density_.x();
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 0,  0, 1, ni);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 1,  3, 2, ni);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 2,  7, 6, ni);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 3,  4, 5, ni);
 
     // Y-direction
-    const label nj = density_.y();
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 4,  0, 3, nj);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 5,  1, 2, nj);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 6,  5, 6, nj);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 7,  4, 7, nj);
 
     // Z-direction
-    const label nk = density_.z();
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 8,  0, 4, nk);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 9,  1, 5, nk);
     nCurvedEdges += edgePointsWeights(edgePoints, edgeWeights, 10, 2, 6, nk);

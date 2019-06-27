@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -244,7 +246,7 @@ bool Foam::entry::New
             const auto finder =
                 parentDict.csearchScoped(varName, keyType::REGEX_RECURSIVE);
 
-            if (finder.found())
+            if (finder.good())
             {
                 // Read as primitiveEntry
                 const keyType newKeyword(finder.ptr()->stream());
@@ -309,7 +311,7 @@ bool Foam::entry::New
         // How to manage duplicate entries
         bool mergeEntry = false;
 
-        if (finder.found())
+        if (finder.good())
         {
             // Use keyword from the found entry (ie, eliminate scoping chars)
             const keyType key = finder.ref().keyword();

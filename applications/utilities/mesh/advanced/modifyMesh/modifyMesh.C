@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,10 +85,8 @@ label findPoint(const primitivePatch& pp, const point& nearPoint)
     scalar almostMinDistSqr = GREAT;
     label almostMinI = -1;
 
-    forAll(meshPoints, i)
+    for (const label pointi : meshPoints)
     {
-        label pointi = meshPoints[i];
-
         scalar distSqr = magSqr(nearPoint - points[pointi]);
 
         if (distSqr < minDistSqr)
@@ -147,10 +147,8 @@ label findEdge
     scalar almostMinDist = GREAT;
     label almostMinI = -1;
 
-    forAll(edges, edgeI)
+    for (const edge& e : edges)
     {
-        const edge& e = edges[edgeI];
-
         pointHit pHit(e.line(localPoints).nearestDist(nearPoint));
 
         if (pHit.hit())
@@ -296,10 +294,8 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
         label minI = -1;
         scalar minDistSqr = GREAT;
 
-        forAll(cPoints, i)
+        for (const label pointi : cPoints)
         {
-            label pointi = cPoints[i];
-
             scalar distSqr = magSqr(nearPoint - mesh.points()[pointi]);
 
             if (distSqr < minDistSqr)
@@ -432,11 +428,9 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Looking up points to move ..." << nl << endl;
     Map<point> pointToPos(pointsToMove.size());
-    forAll(pointsToMove, i)
+    for (const Pair<point>& pts : pointsToMove)
     {
-        const Pair<point>& pts = pointsToMove[i];
-
-        label pointi = findPoint(allBoundary, pts.first());
+        const label pointi = findPoint(allBoundary, pts.first());
 
         if (pointi == -1 || !pointToPos.insert(pointi, pts.second()))
         {
@@ -450,10 +444,8 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Looking up edges to split ..." << nl << endl;
     Map<List<point>> edgeToCuts(edgesToSplit.size());
-    forAll(edgesToSplit, i)
+    for (const Pair<point>& pts : edgesToSplit)
     {
-        const Pair<point>& pts = edgesToSplit[i];
-
         label edgeI = findEdge(mesh, allBoundary, pts.first());
 
         if
@@ -473,10 +465,8 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Looking up faces to triangulate ..." << nl << endl;
     Map<point> faceToDecompose(facesToTriangulate.size());
-    forAll(facesToTriangulate, i)
+    for (const Pair<point>& pts : facesToTriangulate)
     {
-        const Pair<point>& pts = facesToTriangulate[i];
-
         label facei = findFace(mesh, allBoundary, pts.first());
 
         if (facei == -1 || !faceToDecompose.insert(facei, pts.second()))
@@ -494,10 +484,8 @@ int main(int argc, char *argv[])
     Info<< nl << "Looking up cells to convert to pyramids around"
         << " cell centre ..." << nl << endl;
     Map<point> cellToPyrCentre(cellsToPyramidise.size());
-    forAll(cellsToPyramidise, i)
+    for (const Pair<point>& pts : cellsToPyramidise)
     {
-        const Pair<point>& pts = cellsToPyramidise[i];
-
         label celli = findCell(mesh, pts.first());
 
         if (celli == -1 || !cellToPyrCentre.insert(celli, pts.second()))
@@ -513,10 +501,8 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Looking up edges to collapse ..." << nl << endl;
     Map<point> edgeToPos(edgesToCollapse.size());
-    forAll(edgesToCollapse, i)
+    for (const Pair<point>& pts : edgesToCollapse)
     {
-        const Pair<point>& pts = edgesToCollapse[i];
-
         label edgeI = findEdge(mesh, allBoundary, pts.first());
 
         if (edgeI == -1 || !edgeToPos.insert(edgeI, pts.second()))
@@ -590,7 +576,7 @@ int main(int argc, char *argv[])
         Map<point> collapsePointToLocation(mesh.nPoints());
 
         // Get new positions and construct collapse network
-        forAllConstIter(Map<point>, edgeToPos, iter)
+        forAllConstIters(edgeToPos, iter)
         {
             label edgeI = iter.key();
             const edge& e = edges[edgeI];
@@ -598,7 +584,7 @@ int main(int argc, char *argv[])
             collapseEdge.set(edgeI);
             collapsePointToLocation.set(e[1], points[e[0]]);
 
-            newPoints[e[0]] = iter();
+            newPoints[e[0]] = iter.val();
         }
 
         // Move master point to destination.
@@ -606,7 +592,7 @@ int main(int argc, char *argv[])
 
         List<pointEdgeCollapse> allPointInfo;
         const globalIndex globalPoints(mesh.nPoints());
-        labelList pointPriority(mesh.nPoints(), 0);
+        labelList pointPriority(mesh.nPoints(), Zero);
 
         cutter.consistentCollapse
         (

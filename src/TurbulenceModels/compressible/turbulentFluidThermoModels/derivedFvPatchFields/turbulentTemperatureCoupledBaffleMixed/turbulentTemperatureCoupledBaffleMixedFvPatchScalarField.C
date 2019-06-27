@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -189,8 +191,8 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     );
 
     // Swap to obtain full local values of neighbour internal field
-    tmp<scalarField> nbrIntFld(new scalarField(nbrField.size(), 0.0));
-    tmp<scalarField> nbrKDelta(new scalarField(nbrField.size(), 0.0));
+    tmp<scalarField> nbrIntFld(new scalarField(nbrField.size(), Zero));
+    tmp<scalarField> nbrKDelta(new scalarField(nbrField.size(), Zero));
 
     if (contactRes_ == 0.0)
     {

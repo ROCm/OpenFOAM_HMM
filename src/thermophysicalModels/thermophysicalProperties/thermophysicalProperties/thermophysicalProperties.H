@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,14 +141,14 @@ public:
             //- Heat capacity at constant pressure [J/(kg K)]
             virtual scalar Cp(const scalar p, const scalar T) const = 0;
 
-            //- Absolute Enthalpy [J/kg]
-            virtual scalar Ha(const scalar p, const scalar T) const = 0;
-
             //- Sensible enthalpy [J/kg]
             virtual scalar Hs(const scalar p, const scalar T) const = 0;
 
             //- Chemical enthalpy [J/kg]
             virtual scalar Hc() const = 0;
+
+            //- Absolute Enthalpy [J/kg]
+            virtual scalar Ha(const scalar p, const scalar T) const = 0;
 
             // Entropy [J/(kg K)]
             virtual scalar S(const scalar p, const scalar T) const = 0;

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "labelRange.H"
+#include "MinMax.H"
 #include "List.H"
 #include "token.H"
 #include <numeric>
@@ -39,6 +42,19 @@ const Foam::labelRange Foam::labelRange::null;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::labelRange::labelRange(const MinMax<label>& range) noexcept
+:
+    start_(0),
+    size_(0)
+{
+    if (range.min() < range.max())
+    {
+        start_ = range.min();
+        size_  = (range.max() - range.min()); // Hope for no overflow?
+    }
+}
+
 
 Foam::labelRange::labelRange(Istream& is)
 :
@@ -182,18 +198,20 @@ Foam::labelRange Foam::labelRange::subset0(const label size) const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
 {
+    label start, size;
+
     is.readBegin("labelRange");
-    is  >> range.start_ >> range.size_;
+    is >> start >> size;
     is.readEnd("labelRange");
 
-    if (range.size_ < 0)
-    {
-        range.size_ = 0;  // No negative sizes
-    }
+    if (size < 0) size = 0;  // No negative sizes
+
+    range.setStart(start);
+    range.setSize(size);
 
     is.check(FUNCTION_NAME);
     return is;
@@ -202,7 +220,6 @@ Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const labelRange& range)
 {
-    // Only write as ASCII for now
     os  << token::BEGIN_LIST
         << range.start() << token::SPACE << range.size()
         << token::END_LIST;

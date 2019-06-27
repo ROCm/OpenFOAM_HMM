@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,14 +92,11 @@ void Foam::MPPICParcel<ParcelType>::readFields(CloudType& c)
     c.checkFieldIOobject(c, UCorrect);
 
     label i = 0;
-
-    forAllIter(typename CloudType, c, iter)
+    for (MPPICParcel<ParcelType>& p : c)
     {
-        MPPICParcel<ParcelType>& p = iter();
-
         p.UCorrect_ = UCorrect[i];
 
-        i++;
+        ++i;
     }
 }
 
@@ -115,13 +114,11 @@ void Foam::MPPICParcel<ParcelType>::writeFields(const CloudType& c)
 
     label i = 0;
 
-    forAllConstIter(typename CloudType, c, iter)
+    for (const MPPICParcel<ParcelType>& p : c)
     {
-        const MPPICParcel<ParcelType>& p = iter();
-
         UCorrect[i] = p.UCorrect();
 
-        i++;
+        ++i;
     }
 
     UCorrect.write(np > 0);
@@ -145,13 +142,11 @@ void Foam::MPPICParcel<ParcelType>::writeObjects
 
     label i = 0;
 
-    forAllConstIter(typename CloudType, c, iter)
+    for (const MPPICParcel<ParcelType>& p : c)
     {
-        const MPPICParcel<ParcelType>& p = iter();
-
         UCorrect[i] = p.UCorrect();
 
-        i++;
+        ++i;
     }
 }
 

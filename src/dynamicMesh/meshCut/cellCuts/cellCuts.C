@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,13 +178,13 @@ void Foam::cellCuts::syncProc()
                     label facei = pp.start()+i;
                     label bFacei = facei-mesh().nInternalFaces();
 
-                    const Map<edge>::const_iterator iter =
-                        faceSplitCut_.find(facei);
-                    if (iter != faceSplitCut_.end())
+                    const auto iter = faceSplitCut_.cfind(facei);
+
+                    if (iter.found())
                     {
                         const face& f = mesh().faces()[facei];
                         const labelList& fEdges = mesh().faceEdges()[facei];
-                        const edge& cuts = iter();
+                        const edge& cuts = iter.val();
 
                         forAll(cuts, i)
                         {
@@ -1138,7 +1140,7 @@ void Foam::cellCuts::calcCellLoops(const labelList& cutCells)
 
     // Per cell the number of faces with valid cuts. Is used as quick
     // rejection to see if cell can be cut.
-    labelList nCutFaces(mesh().nCells(), 0);
+    labelList nCutFaces(mesh().nCells(), Zero);
 
     forAll(allFaceCuts, facei)
     {
@@ -1487,13 +1489,13 @@ bool Foam::cellCuts::calcAnchors
     DynamicList<label> connectedPoints(cPoints.size());
     DynamicList<label> otherPoints(cPoints.size());
 
-    forAllConstIter(Map<label>, pointStatus, iter)
+    forAllConstIters(pointStatus, iter)
     {
-        if (iter() == 1)
+        if (iter.val() == 1)
         {
             connectedPoints.append(iter.key());
         }
-        else if (iter() == 2)
+        else if (iter.val() == 2)
         {
             otherPoints.append(iter.key());
         }
@@ -1523,13 +1525,13 @@ bool Foam::cellCuts::calcAnchors
     labelHashSet connectedFaces(2*cFaces.size());
     labelHashSet otherFaces(2*cFaces.size());
 
-    forAllConstIter(Map<label>, pointStatus, iter)
+    forAllConstIters(pointStatus, iter)
     {
-        label pointi = iter.key();
+        const label pointi = iter.key();
 
         const labelList& pFaces = mesh().pointFaces()[pointi];
 
-        if (iter() == 1)
+        if (iter.val() == 1)
         {
             forAll(pFaces, pFacei)
             {
@@ -1539,7 +1541,7 @@ bool Foam::cellCuts::calcAnchors
                 }
             }
         }
-        else if (iter() == 2)
+        else if (iter.val() == 2)
         {
             forAll(pFaces, pFacei)
             {
@@ -2104,9 +2106,9 @@ bool Foam::cellCuts::validLoop
             // edge). Check if this is compatible with existing pattern.
             edge cutEdge(cut, nextCut);
 
-            Map<edge>::const_iterator iter = faceSplitCut_.find(meshFacei);
+            const auto iter = faceSplitCut_.cfind(meshFacei);
 
-            if (iter == faceSplitCut_.end())
+            if (!iter.found())
             {
                 // Face not yet cut so insert.
                 newFaceSplitCut.insert(meshFacei, cutEdge);
@@ -2114,7 +2116,7 @@ bool Foam::cellCuts::validLoop
             else
             {
                 // Face already cut. Ok if same edge.
-                if (iter() != cutEdge)
+                if (iter.val() != cutEdge)
                 {
                     return false;
                 }
@@ -2202,9 +2204,9 @@ void Foam::cellCuts::setFromCellLoops()
                 cellAnchorPoints_[celli].transfer(anchorPoints);
 
                 // Copy faceSplitCuts into overall faceSplit info.
-                forAllConstIter(Map<edge>, faceSplitCuts, iter)
+                forAllConstIters(faceSplitCuts, iter)
                 {
-                    faceSplitCut_.insert(iter.key(), iter());
+                    faceSplitCut_.insert(iter.key(), iter.val());
                 }
 
                 // Update edgeIsCut, pointIsCut information
@@ -2303,20 +2305,20 @@ bool Foam::cellCuts::setFromCellLoop
             cellAnchorPoints_[celli].transfer(anchorPoints);
 
             // Copy split cuts
-            forAllConstIter(Map<edge>, faceSplitCuts, iter)
+            forAllConstIters(faceSplitCuts, iter)
             {
-                faceSplitCut_.insert(iter.key(), iter());
+                faceSplitCut_.insert(iter.key(), iter.val());
             }
 
 
             // Update edgeIsCut, pointIsCut information
             forAll(loop, cutI)
             {
-                label cut = loop[cutI];
+                const label cut = loop[cutI];
 
                 if (isEdge(cut))
                 {
-                    label edgeI = getEdge(cut);
+                    const label edgeI = getEdge(cut);
 
                     edgeIsCut_[edgeI] = true;
 
@@ -2324,7 +2326,7 @@ bool Foam::cellCuts::setFromCellLoop
                 }
                 else
                 {
-                    label vertI = getVertex(cut);
+                    const label vertI = getVertex(cut);
 
                     pointIsCut_[vertI] = true;
                 }
@@ -2350,7 +2352,7 @@ void Foam::cellCuts::setFromCellLoops
 
     forAll(cellLabels, cellLabelI)
     {
-        label celli = cellLabels[cellLabelI];
+        const label celli = cellLabels[cellLabelI];
 
         const labelList& loop = cellLoops[cellLabelI];
 
@@ -2397,7 +2399,7 @@ void Foam::cellCuts::setFromCellCutter
     {
         const refineCell& refCell = refCells[refCelli];
 
-        label celli = refCell.cellNo();
+        const label celli = refCell.cellNo();
 
         const vector& refDir = refCell.direction();
 
@@ -2522,7 +2524,7 @@ void Foam::cellCuts::setFromCellCutter
 
     forAll(cellLabels, i)
     {
-        label celli = cellLabels[i];
+        const label celli = cellLabels[i];
 
         // Cut cell. Determines cellLoop and cellLoopWeights
         bool goodCut =
@@ -2825,9 +2827,9 @@ void Foam::cellCuts::check() const
         syncTools::swapBoundaryCellList(mesh(), cellIsCut, nbrCellIsCut);
     }
 
-    forAllConstIter(Map<edge>, faceSplitCut_, iter)
+    forAllConstIters(faceSplitCut_, iter)
     {
-        label facei = iter.key();
+        const label facei = iter.key();
 
         if (mesh().isInternalFace(facei))
         {
@@ -2837,7 +2839,7 @@ void Foam::cellCuts::check() const
             if (cellLoops_[own].empty() && cellLoops_[nei].empty())
             {
                 FatalErrorInFunction
-                    << "Internal face:" << facei << " cut by " << iter()
+                    << "Internal face:" << facei << " cut by " << iter.val()
                     << " has owner:" << own
                     << " and neighbour:" << nei
                     << " that are both uncut"
@@ -2853,7 +2855,7 @@ void Foam::cellCuts::check() const
             if (cellLoops_[own].empty() && !nbrCellIsCut[bFacei])
             {
                 FatalErrorInFunction
-                    << "Boundary face:" << facei << " cut by " << iter()
+                    << "Boundary face:" << facei << " cut by " << iter.val()
                     << " has owner:" << own
                     << " that is uncut"
                     << abort(FatalError);
@@ -3159,7 +3161,7 @@ Foam::pointField Foam::cellCuts::loopPoints(const label celli) const
 
     forAll(loop, fp)
     {
-        label cut = loop[fp];
+        const label cut = loop[fp];
 
         if (isEdge(cut))
         {

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -725,6 +727,9 @@ Foam::Time::~Time()
 
     // Clean up profiling
     profiling::stop(*this);
+
+    // Ensure all owned objects are also cleaned up now
+    objectRegistry::clear();
 }
 
 
@@ -942,6 +947,12 @@ bool Foam::Time::stopAt(const stopAtControls stopCtrl) const
     }
 
     return changed;
+}
+
+
+bool Foam::Time::isAdjustTimeStep() const
+{
+    return controlDict_.lookupOrDefault("adjustTimeStep", false);
 }
 
 

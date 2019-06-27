@@ -4,7 +4,7 @@ if (runTime.writeTime())
         Number density
     \*-----------------------------------------------------------------------*/
 
-    scalarField totalRhoN_sum(mesh.nCells(), 0.0);
+    scalarField totalRhoN_sum(mesh.nCells(), Zero);
 
     forAll(allSpeciesRhoN, rN)
     {
@@ -23,7 +23,7 @@ if (runTime.writeTime())
         Mass density
     \*-----------------------------------------------------------------------*/
 
-    scalarField totalRhoM_sum(mesh.nCells(), 0.0);
+    scalarField totalRhoM_sum(mesh.nCells(), Zero);
 
     forAll(allSpeciesRhoM, rM)
     {
@@ -43,7 +43,7 @@ if (runTime.writeTime())
 
     vectorField totalMomentum_sum(mesh.nCells(), Zero);
 
-    scalarField totalMass_sum(mesh.nCells(), 0.0);
+    scalarField totalMass_sum(mesh.nCells(), Zero);
 
     forAll(allSpeciesVelocity, v)
     {
@@ -94,9 +94,9 @@ if (runTime.writeTime())
         Kinetic temperature
     \*-----------------------------------------------------------------------*/
 
-    scalarField totalTemperatureVTerms_sum(mesh.nCells(), 0.0);
+    scalarField totalTemperatureVTerms_sum(mesh.nCells(), Zero);
 
-    scalarField totalN_sum(mesh.nCells(), 0.0);
+    scalarField totalN_sum(mesh.nCells(), Zero);
 
     forAll(allSpeciesTemperature, t)
     {
@@ -170,7 +170,7 @@ if (runTime.writeTime())
         Mean kinetic energy
     \*-----------------------------------------------------------------------*/
 
-    scalarField totalKE_sum(mesh.nCells(), 0.0);
+    scalarField totalKE_sum(mesh.nCells(), Zero);
 
     forAll(allSpeciesMeanKE, mKE)
     {

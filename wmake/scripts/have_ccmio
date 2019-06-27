@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -53,60 +53,60 @@ echo_ccmio()
 # -> HAVE_CCMIO, CCMIO_INC_DIR, CCMIO_LIB_DIR
 have_ccmio()
 {
-    local header library static label settings warn good
+    local prefix header library incName libName settings warn
     warn="==> skip ccmio"
 
-    # Basic setup/checks
-    settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ccmio) || {
-        [ -n "$warn" ] && echo "$warn (no config.sh/ccmio settings)"
-        return 1
-    }
-    . $settings
-    if isNone "$CCMIO_ARCH_PATH"
+    # Setup
+    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ccmio)
     then
-        [ -n "$warn" ] && echo "$warn (not available)"
-        return 1
-    fi
-
-
-    # Header/library names.
-    # Link with static libccmio only (fewer issues)
-    #
-    header="libccmio/ccmio.h"
-    static="libccmio$extLiba"
-
-
-    if hasAbsdir "$CCMIO_ARCH_PATH"
-    then
-        header=$(findFirstFile $CCMIO_ARCH_PATH/include/$header)
-
-        library=$(findFirstFile \
-            "$(thirdExtLib $library)" \
-            $CCMIO_ARCH_PATH/lib/$static \
-            $CCMIO_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/$static \
-        )
+        . "$settings"
     else
-        unset header library
+        [ -n "$warn" ] && echo "$warn (no config.sh/ccmio settings)"
+        return 2
     fi
 
+    # Expected location, include/library names
+    # Link with static libccmio only (fewer issues)
+    prefix="$CCMIO_ARCH_PATH"
+    incName="libccmio/ccmio.h"
+    libName="libccmio.a"
 
-    # Header found?
+    # ----------------------------------
+    if isNone "$prefix"
+    then
+        [ -n "$warn" ] && echo "$warn (disabled)"
+        return 1
+    elif hasAbsdir "$prefix"
+    then
+        header=$(findFirstFile "$prefix/include/$incName")
+        library="$(findExtLib $libName)"
+    else
+        unset prefix
+    fi
+    # ----------------------------------
+
+    # Header
     [ -n "$header" ] || {
         [ -n "$warn" ] && echo "$warn (no header)"
         return 2
     }
 
-    # Library found?
-    [ -n "$library" ] || {
-        [ -n "$warn" ] && echo "$warn (missing library)"
+    # Library
+    [ -n "$library" ] || library=$(findLibrary \
+        "$prefix/lib/$libName" \
+        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
+    ) || {
+        [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
 
-    header="${header%/*}"     # Strip one-level (include/libccmio/...)
+    # ----------------------------------
 
     # The libccmio uses int32_t.
     # The OpenFOAM adapter thus requires additional work for 64-bit labels.
     # The OpenFOAM adapter was originally only designed for 'double'
+
+    local good
 
     if [ "$WM_LABEL_SIZE" = 32 ]
     then
@@ -124,8 +124,12 @@ have_ccmio()
         return 1
     fi
 
+
+    header="${header%/*}"   # Strip one-level (include/libccmio/...)
+
+    # OK
     export HAVE_CCMIO=true
-    export CCMIO_ARCH_PATH
+    export CCMIO_ARCH_PATH="$prefix"
     export CCMIO_INC_DIR="${header%/*}"     # Basename
     export CCMIO_LIB_DIR="${library%/*}"    # Basename
 }

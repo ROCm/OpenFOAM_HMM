@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -422,7 +424,7 @@ Foam::dynamicRefineFvMesh::refine
     //    cellTreePtr_.clear();
 
     // Update fields
-    updateMesh(map);
+    updateMesh(*map);
 
 
     // Move mesh
@@ -442,7 +444,7 @@ Foam::dynamicRefineFvMesh::refine
 
 
     // Update numbering of cells/vertices.
-    meshCutter_.updateMesh(map);
+    meshCutter_.updateMesh(*map);
 
     // Update numbering of protectedCell_
     if (protectedCell_.size())
@@ -517,7 +519,7 @@ Foam::dynamicRefineFvMesh::unrefine
         << endl;
 
     // Update fields
-    updateMesh(map);
+    updateMesh(*map);
 
 
     // Move mesh
@@ -589,7 +591,7 @@ Foam::dynamicRefineFvMesh::unrefine
             forAllConstIters(faceToSplitPoint, iter)
             {
                 const label oldFacei = iter.key();
-                const label oldPointi = iter.object();
+                const label oldPointi = iter.val();
 
                 if (reversePointMap[oldPointi] < 0)
                 {
@@ -620,7 +622,7 @@ Foam::dynamicRefineFvMesh::unrefine
 
 
     // Update numbering of cells/vertices.
-    meshCutter_.updateMesh(map);
+    meshCutter_.updateMesh(*map);
 
     // Update numbering of protectedCell_
     if (protectedCell_.size())

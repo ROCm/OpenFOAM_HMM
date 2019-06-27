@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class modelType>
@@ -38,7 +37,7 @@ void Foam::phaseSystem::createSubModels
     >& models
 )
 {
-    forAllConstIter(dictTable, modelDicts, iter)
+    forAllConstIters(modelDicts, iter)
     {
         const phasePairKey& key = iter.key();
 
@@ -47,8 +46,8 @@ void Foam::phaseSystem::createSubModels
             key,
             modelType::New
             (
-               *iter,
-               phasePairs_[key]
+                iter.val(),
+                phasePairs_[key]
             )
         );
     }
@@ -68,7 +67,7 @@ void Foam::phaseSystem::createSubModels
     >& models
 )
 {
-    forAllConstIter(dictTable, modelDicts, iter)
+    forAllConstIters(modelDicts, iter)
     {
         const phasePairKey& key = iter.key();
 
@@ -77,8 +76,8 @@ void Foam::phaseSystem::createSubModels
             key,
             modelType::New
             (
-               *iter,
-               mesh
+                iter.val(),
+                mesh
             )
         );
     }
@@ -142,18 +141,18 @@ void Foam::phaseSystem::generatePairsAndSubModels
         HashTable<autoPtr<modelType>, phasePairKey, phasePairKey::hash>
         modelTypeTable;
 
-    forAllConstIter(wordList, phaseNames_, phaseNameIter)
+    for (const word& phaseName : phaseNames_)
     {
         modelTypeTable tempModels;
         generatePairsAndSubModels
         (
-            IOobject::groupName(modelName, *phaseNameIter),
+            IOobject::groupName(modelName, phaseName),
             tempModels
         );
 
-        forAllConstIter(typename modelTypeTable, tempModels, tempModelIter)
+        forAllConstIters(tempModels, tempModelIter)
         {
-            const phasePairKey key(tempModelIter.key());
+            const phasePairKey& key = tempModelIter.key();
 
             if (!models.found(key))
             {
@@ -164,9 +163,9 @@ void Foam::phaseSystem::generatePairsAndSubModels
                 );
             }
 
-            models[tempModelIter.key()].insert
+            models[key].insert
             (
-                *phaseNameIter,
+                phaseName,
                 *tempModelIter
             );
         }

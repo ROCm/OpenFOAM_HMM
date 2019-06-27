@@ -160,7 +160,7 @@ Foam::triSurfaceTools::curvatures
         symmTensor2D::zero
     );
 
-    scalarList accumulatedWeights(points.size(), 0.0);
+    scalarList accumulatedWeights(points.size(), Zero);
 
     forAll(surf, fI)
     {

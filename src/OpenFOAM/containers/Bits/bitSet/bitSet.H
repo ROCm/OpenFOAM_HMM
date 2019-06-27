@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -120,6 +120,7 @@ protected:
         //  A and B can have different sizes. Sizing behaviour as per orEq.
         bitSet& xorEq(const bitSet& other, const bool strict=true);
 
+
 public:
 
     // Forward declaration of access classes
@@ -156,7 +157,12 @@ public:
         bitSet(const bitSet& bitset, const labelUList& addr);
 
         //- Copy construct a subset
-        bitSet(const bitSet& bitset, const labelUIndList& addr);
+        template<class Addr>
+        bitSet
+        (
+            const bitSet& bitset,
+            const IndirectListBase<label, Addr>& addr
+        );
 
         //- Copy construct a subset range
         bitSet(const bitSet& bitset, const labelRange& range);
@@ -170,7 +176,12 @@ public:
 
         //- Construct with given size with all bits set to 0,
         //- subsequently add specified locations as 1.
-        inline bitSet(const label n, const labelUIndList& locations);
+        template<class Addr>
+        bitSet
+        (
+            const label n,
+            const IndirectListBase<label, Addr>& locations
+        );
 
         //- Construct with given size with all bits set to 0,
         //- subsequently add specified locations as 1.
@@ -187,7 +198,8 @@ public:
 
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
-        inline explicit bitSet(const labelUIndList& locations);
+        template<class Addr>
+        inline explicit bitSet(const IndirectListBase<label, Addr>& locations);
 
         //- Construct with automatic sizing (filled with 0),
         //- and populate with specified locations as 1.
@@ -211,8 +223,7 @@ public:
         //- True if no bits in this bitset are set.
         inline bool none() const;
 
-        //- True if there are two or more entries and all entries have
-        //- identical values.
+        //- True if all entries have identical values, and the set is non-empty
         inline bool uniform() const;
 
         //- Count number of bits set.
@@ -382,7 +393,8 @@ public:
         //  Does auto-vivify for non-existent entries.
         //
         //  \return number of locations changed
-        inline label set(const labelUIndList& locations);
+        template<class Addr>
+        inline label set(const IndirectListBase<label, Addr>& locations);
 
         //- Set the listed locations to true.
         //  Does auto-vivify for non-existent entries.
@@ -406,7 +418,8 @@ public:
         //- Unset the listed locations, never auto-vivifies.
         //
         //  \return number of locations changed
-        inline label unset(const labelUIndList& locations);
+        template<class Addr>
+        inline label unset(const IndirectListBase<label, Addr>& locations);
 
         //- Unset the listed locations, never auto-vivifies.
         //
@@ -514,10 +527,6 @@ public:
         //- Move assignment
         inline bitSet& operator=(bitSet&& bitset);
 
-        //- Complement operator.
-        //  Return a copy of the existing set with all its bits flipped.
-        inline bitSet operator~() const;
-
         //- Bitwise-AND all the bits in other with the bits in this bitset.
         //  The operands may have dissimilar sizes without affecting the size
         //  of the set.
@@ -541,10 +550,9 @@ public:
 
     // IO
 
-        //- Write the bitSet, with line-breaks in ASCII if the size
-        //- exceeds shortListLen.
+        //- Write bitSet, with line-breaks (ASCII) when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
+        Ostream& writeList(Ostream& os, const label shortLen=0) const;
 
         //- Write as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
@@ -557,22 +565,21 @@ public:
         {
             return *this;
         }
-
-
-    // Housekeeping
-
-        //- \deprecated(2018-04) compatibility name for PackedBoolList
-        //  \deprecated(2018-04) - use toc() method
-        inline labelList used() const { return toc(); }
-
 };
 
 
-// Global Operators
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
+//- Write bitset to Ostream, as per bitSet::writeList() with default length
+//- of 40 items.
 Ostream& operator<<(Ostream& os, const bitSet& bitset);
 
+//- Output bitset information
+Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
+
+
+//- Bitset complement, returns a copy of the bitset with all its bits flipped
+inline bitSet operator~(const bitSet& bitset);
 
 //- Bitwise-AND of two bitsets.
 //  See bitSet::operator&= for more details.

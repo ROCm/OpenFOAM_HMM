@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -80,12 +80,10 @@ oversetInterpolation
     searchBoxDivisions  (100 100 1);
 }
 
-oversetInterpolationRequired
+oversetInterpolationSuppressed
 {
-    omega;
-    k;
-    nut;
 }
+
 
 wallDist
 {

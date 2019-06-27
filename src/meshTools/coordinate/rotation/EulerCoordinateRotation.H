@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +61,7 @@ SourceFiles
 #define coordinateRotations_euler_H
 
 #include "coordinateRotation.H"
+#include "quaternion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,6 +78,16 @@ class euler
 :
     public coordinateRotation
 {
+public:
+
+    // Public Types
+
+    //- Euler-angle rotation order
+    using eulerOrder = quaternion::eulerOrder;
+
+
+private:
+
     // Private Data
 
         //- The rotation angles
@@ -82,6 +95,9 @@ class euler
 
         //- Angles measured in degrees
         bool degrees_;
+
+        //- The Euler-angle rotation order (default: zxz)
+        eulerOrder order_;
 
 
 public:
@@ -98,11 +114,11 @@ public:
         //- Copy construct
         euler(const euler& crot);
 
-        //- Construct from Euler rotation angles (z-x-z)
-        euler(const vector& phiThetaPsi, bool degrees);
+        //- Construct from Euler intrinsic rotation angles (z-x-z)
+        euler(const vector& angles, bool degrees);
 
-        //- Construct from Euler rotation angles (z-x-z)
-        euler(scalar phi, scalar theta, scalar psi, bool degrees);
+        //- Construct from Euler intrinsic rotation angles (z-x-z)
+        euler(scalar angle1, scalar angle2, scalar angle3, bool degrees);
 
         //- Construct from dictionary
         explicit euler(const dictionary& dict);
@@ -122,9 +138,17 @@ public:
 
     // Static Member Functions
 
-        //- The rotation tensor calculated for the specified Euler angles
-        //- interpreted as phi/theta/psi (z-x-z order)
-        static tensor rotation(const vector& angles, bool degrees);
+        //- The rotation tensor calculated for the intrinsic Euler
+        //- angles in z-x-z order
+        static tensor rotation(const vector& angles, bool degrees=false);
+
+        //- The rotation tensor calculated for given angles and order
+        static tensor rotation
+        (
+            const eulerOrder order,
+            const vector& angles,
+            bool degrees=false
+        );
 
 
     // Member Functions

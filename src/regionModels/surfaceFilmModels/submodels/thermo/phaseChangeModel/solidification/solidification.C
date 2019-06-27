@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,13 +65,10 @@ solidification::solidification
     ),
     maxSolidificationRate_
     (
-        dimensioned<scalar>::lookupOrDefault
-        (
-            "maxSolidificationRate",
-            coeffDict_,
-            dimless/dimTime,
-            GREAT
-        )
+        "maxSolidificationRate",
+        dimless/dimTime,
+        GREAT,
+        coeffDict_
     ),
     mass_
     (

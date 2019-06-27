@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,11 +47,19 @@ class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-char readChar(Istream&);
-Istream& operator>>(Istream&, char&);
-Ostream& operator<<(Ostream&, const char);
-Ostream& operator<<(Ostream&, const char*);
+//- Read single character
+char readChar(Istream& is);
 
+//- Read single character
+Istream& operator>>(Istream& is, char& c);
+
+//- Write single character
+Ostream& operator<<(Ostream& os, const char c);
+
+//- Write a nul-terminated C-string
+Ostream& operator<<(Ostream& os, const char* str);
+
+//- Test for \em horizontal whitespace
 inline bool isspace(char c)
 {
     return
@@ -60,6 +70,7 @@ inline bool isspace(char c)
      || c == '\t'
     );
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

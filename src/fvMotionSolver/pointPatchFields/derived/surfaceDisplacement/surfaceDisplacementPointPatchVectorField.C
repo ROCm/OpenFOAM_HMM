@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,7 +169,7 @@ void Foam::surfaceDisplacementPointPatchVectorField::calcProjection
         }
 
         // Knock out any wedge component
-        scalarField offset(start.size(), 0.0);
+        scalarField offset(start.size(), Zero);
         if (wedgePlane_ >= 0 && wedgePlane_ <= vector::nComponents)
         {
             forAll(offset, i)

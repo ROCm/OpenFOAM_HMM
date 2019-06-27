@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -365,7 +367,7 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
     {
         zoneToc_[zonei] = surfZoneIdentifier
         (
-            word("zone") + ::Foam::name(zonei),
+            "zone" + ::Foam::name(zonei),
             zonei
         );
 
@@ -384,7 +386,7 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
 )
 {
     // Re-assign the zone Ids
-    if (isNull(faceMap) || faceMap.empty())
+    if (faceMap.empty())
     {
         return;
     }
@@ -475,53 +477,39 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
 
     // Step 1: get zone sizes and store (origId => zoneI)
     Map<label> lookup;
-    forAll(zoneIds_, facei)
+    for (const label origId : zoneIds_)
     {
-        const label origId = zoneIds_[facei];
-
-        Map<label>::iterator fnd = lookup.find(origId);
-        if (fnd != lookup.end())
-        {
-            fnd()++;
-        }
-        else
-        {
-            lookup.insert(origId, 1);
-        }
+        ++(lookup(origId, 0));
     }
 
     // Step 2: assign start/size (and name) to the newZones
     // re-use the lookup to map (zoneId => zoneI)
     surfZoneList zoneLst(lookup.size());
     label start = 0;
-    label zoneI = 0;
-    forAllIter(Map<label>, lookup, iter)
+    label zonei = 0;
+    forAllIters(lookup, iter)
     {
-        label origId = iter.key();
+        const label origId = iter.key();
 
-        word name;
-        Map<word>::const_iterator fnd = zoneNames.find(origId);
-        if (fnd != zoneNames.end())
-        {
-            name = fnd();
-        }
-        else
-        {
-            name = word("zone") + ::Foam::name(zoneI);
-        }
+        const word zoneName =
+            zoneNames.lookup
+            (
+                origId,
+                "zone" + ::Foam::name(zonei)  // default name
+            );
 
-        zoneLst[zoneI] = surfZone
+        zoneLst[zonei] = surfZone
         (
-            name,
+            zoneName,
             0,           // initialize with zero size
             start,
-            zoneI
+            zonei
         );
 
         // increment the start for the next zone
         // and save the (zoneId => zoneI) mapping
         start += iter();
-        iter() = zoneI++;
+        iter() = zonei++;
     }
 
 
@@ -530,7 +518,7 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
 
     forAll(zoneIds_, facei)
     {
-        label zonei = lookup[zoneIds_[facei]];
+        const label zonei = lookup[zoneIds_[facei]];
         faceMap[facei] = zoneLst[zonei].start() + zoneLst[zonei].size()++;
     }
 
@@ -573,10 +561,9 @@ Foam::UnsortedMeshedSurface<Face>::subsetMesh
         newFaces[facei] = Face(locFaces[origFacei]);
 
         // Renumber labels for face
-        Face& f = newFaces[facei];
-        forAll(f, fp)
+        for (label& pointi : newFaces[facei])
         {
-            f[fp] = oldToNew[f[fp]];
+            pointi = oldToNew[pointi];
         }
 
         newZones[facei] = zoneIds_[origFacei];

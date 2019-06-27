@@ -1,8 +1,8 @@
 EXE_INC = \
-    -I$(LIB_SRC)/randomProcesses/lnInclude \
+    -I$(LIB_SRC)/surfMesh/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/surfMesh/lnInclude
+    -I$(LIB_SRC)/randomProcesses/lnInclude
 
 EXE_LIBS = \
-    -lrandomProcesses \
-    -lsampling
+    -lsampling \
+    -lrandomProcesses

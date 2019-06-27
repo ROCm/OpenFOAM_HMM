@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,7 +96,7 @@ void transferModel::correct
     scalarField& energyToTransfer
 )
 {
-    scalarField massToTransfer0(massToTransfer.size(), scalar(0));
+    scalarField massToTransfer0(massToTransfer.size(), Zero);
     correct(availableMass, massToTransfer0);
     massToTransfer += massToTransfer0;
     energyToTransfer += massToTransfer0*film().hs();

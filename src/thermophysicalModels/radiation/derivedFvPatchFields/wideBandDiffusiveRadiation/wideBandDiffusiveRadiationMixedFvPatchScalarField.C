@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -192,7 +194,7 @@ updateCoeffs()
     */
 
     // Calculate Ir into the wall on the same lambdaId
-    scalarField Ir(patch().size(), 0.0);
+    scalarField Ir(patch().size(), Zero);
     forAll(Iw, facei)
     {
         for (label rayi=0; rayi < dom.nRay(); rayi++)
@@ -208,6 +210,25 @@ updateCoeffs()
                 const vector& rayDave = dom.IRay(rayi).dAve();
                 Ir[facei] += IFace[facei]*(n[facei] & rayDave);
             }
+        }
+    }
+
+    if (dom.useSolarLoad())
+    {
+        // Looking for primary heat flux single band
+        Ir += patch().lookupPatchField<volScalarField,scalar>
+        (
+            dom.primaryFluxName_ + "_" + name(lambdaId - 1)
+        );
+
+        word qSecName = dom.relfectedFluxName_ + "_" + name(lambdaId - 1);
+
+        if (this->db().foundObject<volScalarField>(qSecName))
+        {
+             const volScalarField& qSec =
+                this->db().lookupObject<volScalarField>(qSecName);
+
+            Ir += qSec.boundaryField()[patch().index()];
         }
     }
 

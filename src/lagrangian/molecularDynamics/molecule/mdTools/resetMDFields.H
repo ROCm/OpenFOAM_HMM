@@ -3,13 +3,13 @@ if (runTime.writeTime())
     allSpeciesN_RU = List<scalarField>
     (
         molecules.potential().nIds(),
-        scalarField(mesh.nCells(), 0.0)
+        scalarField(mesh.nCells(), Zero)
     );
 
     allSpeciesM_RU = List<scalarField>
     (
         molecules.potential().nIds(),
-        scalarField(mesh.nCells(), 0.0)
+        scalarField(mesh.nCells(), Zero)
     );
 
     allSpeciesVelocitySum_RU = List<vectorField>
@@ -21,6 +21,6 @@ if (runTime.writeTime())
     allSpeciesVelocityMagSquaredSum_RU = List<scalarField>
     (
         molecules.potential().nIds(),
-        scalarField(mesh.nCells(), 0.0)
+        scalarField(mesh.nCells(), Zero)
     );
 }

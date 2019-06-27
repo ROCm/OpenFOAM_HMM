@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -194,6 +194,10 @@ public:
 
 
     // Write
+
+        //- Write a uniform field of Cell (Face) or Point values
+        template<class Type>
+        void writeUniform(const word& fieldName, const Type& val);
 
         //- Write a list of Cell (Face) or Point values
         template<class Type>

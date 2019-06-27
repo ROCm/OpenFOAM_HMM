@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +87,7 @@ void genFaceFaceRotMap()
     }
 }
 
+
 // Return the direction map for the merge-faces
 Pair<int> faceMap
 (
@@ -110,6 +113,7 @@ Pair<int> faceMap
 
     return Pair<int>(0, 0);
 }
+
 
 // Set the block and face indices for all the merge faces
 void setBlockFaceCorrespondence
@@ -153,6 +157,7 @@ void setBlockFaceCorrespondence
     }
 }
 
+
 // Return the number of divisions in each direction for the face
 Pair<label> faceNij(const label facei, const block& block)
 {
@@ -179,11 +184,13 @@ Pair<label> faceNij(const label facei, const block& block)
     return fnij;
 }
 
+
 // Sign the index corresponding to the map
 inline label signIndex(const int map, const label i)
 {
     return map < 0 ? -i-1 : i;
 }
+
 
 // Reverse a signed index with the number of divisions
 inline label unsignIndex(const label i, const label ni)
@@ -191,11 +198,13 @@ inline label unsignIndex(const label i, const label ni)
     return i >= 0 ? i : ni + i + 1;
 }
 
+
 // Return the mapped index
 inline label mapij(const int map, const label i, const label j)
 {
     return signIndex(map, mag(map) == 1 ? i : j);
 }
+
 
 // Return the face point index
 inline label facePoint
@@ -225,6 +234,7 @@ inline label facePoint
     }
 }
 
+
 // Return the neighbour face point from the signed indices
 inline label facePointN
 (
@@ -241,6 +251,7 @@ inline label facePointN
         unsignIndex(k, block.density().z())
     );
 }
+
 
 // Return the neighbour face point from the mapped indices
 inline label facePointN
@@ -270,6 +281,7 @@ inline label facePointN
     }
 }
 
+
 // Return the neighbour face point using the map
 inline label facePointN
 (
@@ -283,7 +295,7 @@ inline label facePointN
     return facePointN(facei, block, mapij(fmap[0], i, j), mapij(fmap[1], i, j));
 }
 
-}
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -356,17 +368,11 @@ void Foam::blockMesh::calcMergeInfoFast()
         mergeBlockN
     );
 
-    if (debug)
-    {
-        Info<< endl;
-    }
+    DebugInfo << endl;
 
     forAll(topoInternalFaces, topoFacei)
     {
-        if (debug)
-        {
-            Info<< "Processing face " << topoFacei << endl;
-        }
+        DebugInfo << "Processing face " << topoFacei << endl;
 
         label blockPi = mergeBlockP[topoFacei].first();
         label blockPfacei = mergeBlockP[topoFacei].second();
@@ -385,13 +391,11 @@ void Foam::blockMesh::calcMergeInfoFast()
             )
         );
 
-        if (debug)
-        {
-            Info<< "    Face map for faces "
-                << blocks[blockPi].blockShape().faces()[blockPfacei] << " "
-                << blocks[blockNi].blockShape().faces()[blockNfacei] << ": "
-                << fmap << endl;
-        }
+        DebugInfo
+            << "    Face map for faces "
+            << blocks[blockPi].blockShape().faces()[blockPfacei] << " "
+            << blocks[blockNi].blockShape().faces()[blockNfacei] << ": "
+            << fmap << endl;
 
         const pointField& blockPpoints = blocks[blockPi].points();
         const pointField& blockNpoints = blocks[blockNi].points();
@@ -480,11 +484,9 @@ void Foam::blockMesh::calcMergeInfoFast()
             }
         }
 
-        if (debug)
-        {
-            Info<< "    Max distance between merge points: "
-                << sqrt(maxSqrDist) << endl;
-        }
+        DebugInfo
+            << "    Max distance between merge points: "
+            << sqrt(maxSqrDist) << endl;
     }
 
 

@@ -165,8 +165,6 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
     outputDir_.clear();
     dict.readIfPresent("directory", outputDir_);
 
-    const Time& time_ = obr_.time();
-
     if (outputDir_.size())
     {
         // User-defined output directory
@@ -195,23 +193,21 @@ bool Foam::functionObjects::ensightWrite::execute()
 
 bool Foam::functionObjects::ensightWrite::write()
 {
-    const Time& t = obr_.time();
-
     if (!ensCase_.valid())
     {
         ensCase_.reset
         (
-            new ensightCase(outputDir_, t.globalCaseName(), caseOpts_)
+            new ensightCase(outputDir_, time_.globalCaseName(), caseOpts_)
         );
     }
 
     if (consecutive_)
     {
-        ensCase().nextTime(t.value());
+        ensCase().nextTime(time_.value());
     }
     else
     {
-        ensCase().setTime(t.value(), t.timeIndex());
+        ensCase().setTime(time_.value(), time_.timeIndex());
     }
 
 

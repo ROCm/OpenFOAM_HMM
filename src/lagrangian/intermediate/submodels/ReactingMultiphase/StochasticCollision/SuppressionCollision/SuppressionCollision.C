@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,10 +46,9 @@ void Foam::SuppressionCollision<CloudType>::collide
     dimensionedScalar Dt("dt", dimTime, dt);
     volScalarField P(type() + ":p", 1.0 - exp(-vDotSweep*Dt));
 
-    forAllIter(typename CloudType, this->owner(), iter)
+    for (typename CloudType::parcelType& p : this->owner())
     {
-        typename CloudType::parcelType& p = iter();
-        label celli = p.cell();
+        const label celli = p.cell();
 
         scalar xx = this->owner().rndGen().template sample01<scalar>();
 

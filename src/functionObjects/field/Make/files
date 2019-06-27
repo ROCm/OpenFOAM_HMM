@@ -2,6 +2,10 @@ AMIWeights/AMIWeights.C
 
 columnAverage/columnAverage.C
 
+continuityError/continuityError.C
+
+derivedFields/derivedFields.C
+
 fieldAverage/fieldAverage.C
 fieldAverage/fieldAverageItem/fieldAverageItem.C
 fieldAverage/fieldAverageItem/fieldAverageItemIO.C
@@ -56,6 +60,7 @@ ddt/ddt.C
 mag/mag.C
 magSqr/magSqr.C
 vorticity/vorticity.C
+lambVector/lambVector.C
 enstrophy/enstrophy.C
 Q/Q.C
 Lambda2/Lambda2.C

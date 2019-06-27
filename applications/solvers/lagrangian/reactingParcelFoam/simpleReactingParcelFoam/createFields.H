@@ -52,27 +52,8 @@ volVectorField U
 
 mesh.setFluxRequired(p.name());
 
-dimensionedScalar rhoMax
-(
-    dimensionedScalar::lookupOrDefault
-    (
-        "rhoMax",
-        simple.dict(),
-        dimDensity,
-        GREAT
-    )
-);
-
-dimensionedScalar rhoMin
-(
-    dimensionedScalar::lookupOrDefault
-    (
-        "rhoMin",
-        simple.dict(),
-        dimDensity,
-        0
-    )
-);
+const dimensionedScalar rhoMax("rhoMax", dimDensity, GREAT, simple.dict());
+const dimensionedScalar rhoMin("rhoMin", dimDensity, Zero, simple.dict());
 
 Info<< "Creating turbulence model\n" << endl;
 autoPtr<compressible::turbulenceModel> turbulence

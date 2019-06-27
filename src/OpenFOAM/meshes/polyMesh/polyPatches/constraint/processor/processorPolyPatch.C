@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -998,7 +1000,7 @@ bool Foam::processorPolyPatch::order
                 // aspect ratios) we will probably also have problems with
                 // reliable normals calculation
                 labelList faceMap2(faceMap.size(), -1);
-                matchedAll = matchPoints
+                matchPoints
                 (
                     facePointAverages,
                     masterFacePointAverages,
@@ -1007,21 +1009,18 @@ bool Foam::processorPolyPatch::order
                     faceMap2
                 );
 
-                forAll(faceMap, oldFacei)
-                {
-                    if (faceMap[oldFacei] == -1)
-                    {
-                        faceMap[oldFacei] = faceMap2[oldFacei];
-                    }
-                }
-
                 matchedAll = true;
 
                 forAll(faceMap, oldFacei)
                 {
                     if (faceMap[oldFacei] == -1)
                     {
-                        matchedAll = false;
+                        faceMap[oldFacei] = faceMap2[oldFacei];
+
+                        if (faceMap[oldFacei] == -1)
+                        {
+                            matchedAll = false;
+                        }
                     }
                 }
             }

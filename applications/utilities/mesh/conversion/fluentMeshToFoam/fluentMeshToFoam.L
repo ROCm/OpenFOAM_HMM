@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -936,7 +938,7 @@ int main(int argc, char *argv[])
 
     labelListList cellFaces(nCells);
 
-    labelList nFacesInCell(nCells, 0);
+    labelList nFacesInCell(nCells, Zero);
 
     forAll(cellFaces, celli)
     {
@@ -1236,9 +1238,9 @@ int main(int argc, char *argv[])
     for
     (
         ;
-        faceGroupZoneIDIter != faceGroupZoneID.end()
-     && faceGroupStartIndexIter != faceGroupStartIndex.end()
-     && faceGroupEndIndexIter != faceGroupEndIndex.end();
+        faceGroupZoneIDIter.good()
+     && faceGroupStartIndexIter.good()
+     && faceGroupEndIndexIter.good();
         ++faceGroupZoneIDIter,
         ++faceGroupStartIndexIter,
         ++faceGroupEndIndexIter
@@ -1613,7 +1615,7 @@ int main(int argc, char *argv[])
         SLList<label>::iterator start = cellGroupStartIndex.begin();
         SLList<label>::iterator end = cellGroupEndIndex.begin();
 
-        for (; cg != cellGroupZoneID.end(); ++cg, ++start, ++end)
+        for (; cg.good(); ++cg, ++start, ++end)
         {
             const word& name = patchNameIDs[cg()];
             const word& type = patchTypeIDs[cg()];
@@ -1736,7 +1738,7 @@ int main(int argc, char *argv[])
             // Note: cellGroupXXX are all Fluent indices (starting at 1)
             // so offset before using.
 
-            for (; cg != cellGroupZoneID.end(); ++cg, ++start, ++end)
+            for (; cg.good(); ++cg, ++start, ++end)
             {
                 const word& name=patchNameIDs[cg()];
                 const word& type=patchTypeIDs[cg()];

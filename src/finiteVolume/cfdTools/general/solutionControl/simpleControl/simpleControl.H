@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +65,7 @@ protected:
     // Protected Member Functions
 
         //- Read controls from fvSolution dictionary
-        void read();
+        bool read();
 
         //- Return true if all convergence checks are satisfied
         bool criteriaSatisfied();
@@ -91,7 +93,12 @@ public:
     // Constructors
 
         //- Construct from mesh and the name of control sub-dictionary
-        simpleControl(fvMesh& mesh, const word& dictName="SIMPLE");
+        simpleControl
+        (
+            fvMesh& mesh,
+            const word& dictName = "SIMPLE",
+            const bool verbose = true
+        );
 
 
     //- Destructor

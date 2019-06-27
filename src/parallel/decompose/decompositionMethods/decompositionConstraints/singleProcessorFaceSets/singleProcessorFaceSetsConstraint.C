@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,10 +158,10 @@ void Foam::decompositionConstraints::singleProcessorFaceSets::add
         const faceSet fz(mesh, setNameAndProcs_[setI].first());
 
         // Check that it does not overlap with existing specifiedProcessorFaces
-        labelList nMatch(specifiedProcessorFaces.size(), 0);
-        forAllConstIter(faceSet, fz, iter)
+        labelList nMatch(specifiedProcessorFaces.size(), Zero);
+        for (const label facei : fz)
         {
-            label seti = faceToSet[iter.key()];
+            const label seti = faceToSet[facei];
             if (seti != -1)
             {
                 ++nMatch[seti];
@@ -188,7 +190,6 @@ void Foam::decompositionConstraints::singleProcessorFaceSets::add
         }
 
         reduce(store, andOp<bool>());
-
 
         if (store)
         {

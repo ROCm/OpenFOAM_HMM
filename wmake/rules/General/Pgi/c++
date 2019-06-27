@@ -1,0 +1,14 @@
+SUFFIXES += .C .cc .cpp .cxx
+
+CC          = pgc++ -std=c++11
+
+c++ARCH     =
+c++DBUG     =
+c++OPT      = -O2
+ptFLAGS     = -DNoRepository
+
+# - Standard warnings
+# - Less restrictive warnings (may be needed for flex++, CGAL, etc.)
+
+c++WARN     =
+c++LESSWARN =

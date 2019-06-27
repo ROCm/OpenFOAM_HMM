@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +51,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
 
     scalarField& result = tresult.ref();
 
-    scalarField sumArea(mesh_.nCells(), 0.0);
+    scalarField sumArea(mesh_.nCells(), Zero);
 
     const vectorField& centres = mesh_.cellCentres();
     const vectorField& areas = mesh_.faceAreas();
@@ -110,7 +112,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::skewness() const
     );
     scalarField& result = tresult.ref();
 
-    scalarField sumArea(mesh_.nCells(), 0.0);
+    scalarField sumArea(mesh_.nCells(), Zero);
 
     const vectorField& cellCtrs = mesh_.cellCentres();
     const vectorField& faceCtrs = mesh_.faceCentres();

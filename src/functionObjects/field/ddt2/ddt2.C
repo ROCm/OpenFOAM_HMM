@@ -50,13 +50,15 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::ddt2::checkFormatName(const word& str)
+bool Foam::functionObjects::ddt2::checkFormatName
+(
+    const std::string& str
+)
 {
-    if (str.find("@@") == string::npos)
+    if (std::string::npos == str.find("@@"))
     {
         WarningInFunction
-            << "Bad result naming "
-            << "(no '@@' token found), deactivating."
+            << "Bad result naming (no '@@' token found)."
             << nl << endl;
 
         return false;
@@ -64,10 +66,8 @@ bool Foam::functionObjects::ddt2::checkFormatName(const word& str)
     else if (str == "@@")
     {
         WarningInFunction
-            << "Bad result naming "
-            << "(only a '@@' token found), deactivating."
-            << nl
-            << endl;
+            << "Bad result naming (only a '@@' token found)."
+            << nl << endl;
 
         return false;
     }
@@ -145,7 +145,12 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
         ( mag_ ? "mag(ddt(@@))" : "magSqr(ddt(@@))" )
     );
 
-    if (checkFormatName(resultName_))
+    // Expect '@@' token for result, unless a single (non-regex) source field
+    if
+    (
+        (selectFields_.size() == 1 && selectFields_.first().isLiteral())
+     || checkFormatName(resultName_)
+    )
     {
         blacklist_.set
         (

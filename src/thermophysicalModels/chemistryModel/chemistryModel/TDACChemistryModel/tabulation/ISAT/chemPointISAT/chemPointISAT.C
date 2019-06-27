@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -379,7 +381,7 @@ bool Foam::chemPointISAT<CompType, ThermoType>::inEOA(const scalarField& phiq)
     }
 
     scalar epsTemp = 0;
-    List<scalar> propEps(completeSpaceSize(), scalar(0));
+    List<scalar> propEps(completeSpaceSize(), Zero);
 
     for (label i=0; i<completeSpaceSize()-nAdditionalEqns_; ++i)
     {
@@ -522,10 +524,8 @@ bool Foam::chemPointISAT<CompType, ThermoType>::inEOA(const scalarField& phiq)
         }
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 
@@ -738,7 +738,7 @@ bool Foam::chemPointISAT<CompType, ThermoType>::grow(const scalarField& phiq)
     }
 
     // beginning of grow algorithm
-    scalarField phiTilde(dim, 0);
+    scalarField phiTilde(dim, Zero);
     scalar normPhiTilde = 0;
     // p' = L^T.(p-phi)
 
@@ -770,7 +770,7 @@ bool Foam::chemPointISAT<CompType, ThermoType>::grow(const scalarField& phiq)
     // gamma = (1/|p'| - 1)/|p'|^2
     scalar gamma = (1/normPhiTilde - 1)*invSqrNormPhiTilde;
     scalarField u(gamma*phiTilde);
-    scalarField v(dim, 0);
+    scalarField v(dim, Zero);
 
     for (label i=0; i<dim; ++i)
     {
@@ -831,10 +831,8 @@ simplifiedToCompleteIndex
     {
         return completeSpaceSize_-nAdditionalEqns_ + 2;
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 

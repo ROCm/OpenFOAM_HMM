@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +90,7 @@ inline To& dynamicCast(From& r)
     {
         return dynamic_cast<To&>(r);
     }
-    catch (std::bad_cast&)
+    catch (const std::bad_cast&)
     {
         FatalErrorInFunction
             << "Attempt to cast type " << typeid(r).name()
@@ -109,7 +111,7 @@ inline To& dynamicCast(From& r, const dictionary& d)
     {
         return dynamic_cast<To&>(r);
     }
-    catch (std::bad_cast&)
+    catch (const std::bad_cast&)
     {
         FatalIOErrorInFunction(d)
             << "Attempt to cast type " << typeid(r).name()
@@ -131,7 +133,7 @@ inline To& refCast(From& r)
     {
         return dynamic_cast<To&>(r);
     }
-    catch (std::bad_cast&)
+    catch (const std::bad_cast&)
     {
         FatalErrorInFunction
             << "Attempt to cast type " << r.type()
@@ -153,7 +155,7 @@ inline To& refCast(From& r, const dictionary& d)
     {
         return dynamic_cast<To&>(r);
     }
-    catch (std::bad_cast&)
+    catch (const std::bad_cast&)
     {
         FatalIOErrorInFunction(d)
             << "Attempt to cast type " << r.type()
@@ -167,7 +169,7 @@ inline To& refCast(From& r, const dictionary& d)
 
 //- Check if dynamic_cast to TargetType is possible
 template<class TargetType, class Type>
-inline bool isA(const Type& t)
+inline const TargetType* isA(const Type& t)
 {
     const Type* p = &t;
     return dynamic_cast<const TargetType*>(p);

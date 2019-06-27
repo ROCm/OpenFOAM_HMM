@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -150,9 +152,15 @@ bool Foam::IOobject::fileNameComponents
 
         name = word::validate(path);
     }
-    else if (first == 0)
+    else if
+    (
+        first == 0
+        #ifdef _WIN32
+     || (first == 2 && path[1] == ':')  // Eg, d:/path
+        #endif
+    )
     {
-        // Absolute path (starts with '/')
+        // Absolute path (starts with '/' or 'd:/')
         // => no local
 
         instance = path.substr(0, last);
@@ -237,6 +245,36 @@ Foam::IOobject Foam::IOobject::selectIO
 }
 
 
+Foam::word Foam::IOobject::group(const word& name)
+{
+    word::size_type i = name.find_last_of('.');
+
+    if (i == word::npos || i == 0)
+    {
+        return word::null;
+    }
+    else
+    {
+        return name.substr(i+1, word::npos);
+    }
+}
+
+
+Foam::word Foam::IOobject::member(const word& name)
+{
+    word::size_type i = name.find_last_of('.');
+
+    if (i == word::npos || i == 0)
+    {
+        return name;
+    }
+    else
+    {
+        return name.substr(0, i);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IOobject::IOobject
@@ -259,7 +297,9 @@ Foam::IOobject::IOobject
     wOpt_(wo),
     registerObject_(registerObject),
     globalObject_(false),
-    objState_(GOOD)
+    objState_(GOOD),
+    labelByteSize_(sizeof(Foam::label)),
+    scalarByteSize_(sizeof(Foam::scalar))
 {
     if (objectRegistry::debug)
     {
@@ -293,7 +333,9 @@ Foam::IOobject::IOobject
     wOpt_(wo),
     registerObject_(registerObject),
     globalObject_(globalObject),
-    objState_(GOOD)
+    objState_(GOOD),
+    labelByteSize_(sizeof(Foam::label)),
+    scalarByteSize_(sizeof(Foam::scalar))
 {
     if (objectRegistry::debug)
     {
@@ -325,7 +367,9 @@ Foam::IOobject::IOobject
     wOpt_(wo),
     registerObject_(registerObject),
     globalObject_(globalObject),
-    objState_(GOOD)
+    objState_(GOOD),
+    labelByteSize_(sizeof(Foam::label)),
+    scalarByteSize_(sizeof(Foam::scalar))
 {
     if (!fileNameComponents(path, instance_, local_, name_))
     {
@@ -360,7 +404,9 @@ Foam::IOobject::IOobject
     wOpt_(io.wOpt_),
     registerObject_(io.registerObject_),
     globalObject_(io.globalObject_),
-    objState_(io.objState_)
+    objState_(io.objState_),
+    labelByteSize_(io.labelByteSize_),
+    scalarByteSize_(io.scalarByteSize_)
 {}
 
 
@@ -380,7 +426,9 @@ Foam::IOobject::IOobject
     wOpt_(io.wOpt_),
     registerObject_(io.registerObject_),
     globalObject_(io.globalObject_),
-    objState_(io.objState_)
+    objState_(io.objState_),
+    labelByteSize_(io.labelByteSize_),
+    scalarByteSize_(io.scalarByteSize_)
 {}
 
 

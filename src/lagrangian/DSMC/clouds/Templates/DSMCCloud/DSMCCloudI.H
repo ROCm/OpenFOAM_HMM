@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -257,10 +259,8 @@ inline Foam::scalar Foam::DSMCCloud<ParcelType>::massInSystem() const
 {
     scalar sysMass = 0.0;
 
-    forAllConstIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (const ParcelType& p : *this)
     {
-        const ParcelType& p = iter();
-
         const typename ParcelType::constantProperties& cP = constProps
         (
             p.typeId()
@@ -278,10 +278,8 @@ inline Foam::vector Foam::DSMCCloud<ParcelType>::linearMomentumOfSystem() const
 {
     vector linearMomentum(Zero);
 
-    forAllConstIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (const ParcelType& p : *this)
     {
-        const ParcelType& p = iter();
-
         const typename ParcelType::constantProperties& cP = constProps
         (
             p.typeId()
@@ -300,10 +298,8 @@ Foam::DSMCCloud<ParcelType>::linearKineticEnergyOfSystem() const
 {
     scalar linearKineticEnergy = 0.0;
 
-    forAllConstIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (const ParcelType& p : *this)
     {
-        const ParcelType& p = iter();
-
         const typename ParcelType::constantProperties& cP = constProps
         (
             p.typeId()
@@ -322,10 +318,8 @@ Foam::DSMCCloud<ParcelType>::internalEnergyOfSystem() const
 {
     scalar internalEnergy = 0.0;
 
-    forAllConstIter(typename DSMCCloud<ParcelType>, *this, iter)
+    for (const ParcelType& p : *this)
     {
-        const ParcelType& p = iter();
-
         internalEnergy += p.Ei();
     }
 

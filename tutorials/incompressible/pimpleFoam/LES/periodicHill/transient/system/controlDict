@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -80,7 +80,7 @@ functions
         type            columnAverage;
         libs            ("libfieldFunctionObjects.so");
 
-        evaluateControl writeTime;
+        executeControl  writeTime;
         writeControl    none;
         timeStart       1500.5; // approx 2x flow-throughs
 

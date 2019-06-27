@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,10 +132,10 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 
 
 template<class T, int SizeMin>
-template<unsigned FixedSize>
+template<unsigned N>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const FixedList<T, FixedSize>& lst
+    const FixedList<T, N>& lst
 )
 :
     capacity_(0)
@@ -167,9 +169,10 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 
 
 template<class T, int SizeMin>
+template<class Addr>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const UIndirectList<T>& lst
+    const IndirectListBase<T, Addr>& lst
 )
 :
     List<T>(lst),
@@ -515,11 +518,11 @@ Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
-template<unsigned FixedSize>
+template<unsigned N>
 inline Foam::DynamicList<T, SizeMin>&
 Foam::DynamicList<T, SizeMin>::append
 (
-    const FixedList<T, FixedSize>& lst
+    const FixedList<T, N>& lst
 )
 {
     label idx = List<T>::size();
@@ -553,10 +556,11 @@ Foam::DynamicList<T, SizeMin>::append
 
 
 template<class T, int SizeMin>
+template<class Addr>
 inline Foam::DynamicList<T, SizeMin>&
 Foam::DynamicList<T, SizeMin>::append
 (
-    const UIndirectList<T>& lst
+    const IndirectListBase<T, Addr>& lst
 )
 {
     label idx = List<T>::size();
@@ -770,10 +774,10 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 
 
 template<class T, int SizeMin>
-template<unsigned FixedSize>
+template<unsigned N>
 inline void Foam::DynamicList<T, SizeMin>::operator=
 (
-    const FixedList<T, FixedSize>& lst
+    const FixedList<T, N>& lst
 )
 {
     const label n = lst.size();
@@ -825,9 +829,10 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
 
 
 template<class T, int SizeMin>
+template<class Addr>
 inline void Foam::DynamicList<T, SizeMin>::operator=
 (
-    const UIndirectList<T>& lst
+    const IndirectListBase<T, Addr>& lst
 )
 {
     assignDynList(lst);

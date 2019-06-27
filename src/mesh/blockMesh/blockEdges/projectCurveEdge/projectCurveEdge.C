@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,14 +204,14 @@ Foam::projectCurveEdge::position(const scalarList& lambdas) const
 
         // Compare actual distances and move points (along straight line;
         // not along surface)
-        vectorField residual(points.size(), vector::zero);
+        vectorField residual(points.size(), Zero);
         labelList indices;
         scalarField weights;
         for (label i = 1; i < points.size() - 1; i++)
         {
             interpolator.valueWeights(lambdas[i], indices, weights);
 
-            point predicted = vector::zero;
+            point predicted(Zero);
             forAll(indices, indexi)
             {
                 predicted += weights[indexi]*points[indices[indexi]];

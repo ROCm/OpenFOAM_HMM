@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +28,11 @@ Class
 
 Description
     Singleton null-object class and instance.
-    Its contents occupy just enough space to also be reinterpreted
+
+    Its contents occupy enough space to also be reinterpreted
     as another class with a null pointer or zero long for its first
-    member.
+    member. There is an additional zero second parameter for safe
+    casting to List etc.
 
 SourceFiles
     nullObjectI.H
@@ -56,25 +60,35 @@ class NullObject;
 
 class NullObject
 {
-    //- Ensure it occupies enough space to reinterpret_cast to a class
-    //  having some member data
-    const union
+    //- A %union of zero data types
+    union zeros
     {
         void* ptr;
         unsigned long val;
-    } content;
+    };
 
-    //- Private constructor for singleton only
-    NullObject()
-    :
-        content{nullptr}
-    {}
 
-    //- No copy construct
-    NullObject(const NullObject&) = delete;
+    // Private Data
 
-    //- No copy assignment
-    void operator=(const NullObject&) = delete;
+        //- The zero data content
+        zeros data_[4];
+
+
+    // Constructors
+
+        //- Private constructor for singleton only
+        //  Could also rely on bit-wise zero initialization for union content
+        NullObject()
+        :
+           data_{{nullptr}, {nullptr}, {nullptr}, {nullptr}}
+        {}
+
+        //- No copy construct
+        NullObject(const NullObject&) = delete;
+
+        //- No copy assignment
+        void operator=(const NullObject&) = delete;
+
 
 public:
 
@@ -89,13 +103,13 @@ public:
         //- A nullptr pointer content
         inline const void* pointer() const
         {
-            return content.ptr;
+            return data_[0].ptr;
         }
 
         //- Zero valued integer content
         inline unsigned long value() const
         {
-            return content.val;
+            return data_[0].val;
         }
 };
 
@@ -119,29 +133,29 @@ inline Ostream& operator<<(Ostream& os, const NullObject&)
 extern const NullObject* nullObjectPtr;
 
 
-//- Return reference to the nullObject of type T
+//- Reference to the nullObject of type T
 template<class T>
 inline const T& NullObjectRef();
 
-//- Return pointer to the nullObject of type T
+//- Pointer to the nullObject of type T
 template<class T>
 inline const T* NullObjectPtr();
 
 
-//- Return true if t is a reference to the nullObject of type T
+//- True if t is a reference to the nullObject of type T
 template<class T>
 inline bool isNull(const T& t);
 
-//- Return true if t is not a reference to the nullObject of type T
+//- True if t is not a reference to the nullObject of type T
 template<class T>
 inline bool notNull(const T& t);
 
 
-//- Return true if t is a pointer to the nullObject of type T
+//- True if t is a pointer to the nullObject of type T
 template<class T>
 inline bool isNull(const T* t);
 
-//- Return true if t is not a pointer to the nullObject of type T
+//- True if t is not a pointer to the nullObject of type T
 template<class T>
 inline bool notNull(const T* t);
 

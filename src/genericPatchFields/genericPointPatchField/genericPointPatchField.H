@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,14 +55,15 @@ class genericPointPatchField
 :
     public calculatedPointPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         const word actualTypeName_;
+
         dictionary dict_;
 
         HashPtrTable<scalarField> scalarFields_;
         HashPtrTable<vectorField> vectorFields_;
-        HashPtrTable<sphericalTensorField> sphericalTensorFields_;
+        HashPtrTable<sphericalTensorField> sphTensorFields_;
         HashPtrTable<symmTensorField> symmTensorFields_;
         HashPtrTable<tensorField> tensorFields_;
 
@@ -133,9 +136,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Mapping functions
+        // Mapping Functions
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap

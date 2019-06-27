@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +58,7 @@ Description
 #include "repatchPolyTopoChanger.H"
 #include "cellSet.H"
 #include "faceSet.H"
+#include "List.H"
 
 using namespace Foam;
 
@@ -219,26 +222,26 @@ void storeCellInZone
     List<DynamicList<label>>& zoneCells
 )
 {
-    Map<label>::const_iterator zoneFnd = physToZone.find(regPhys);
+    const auto zoneFnd = physToZone.cfind(regPhys);
 
-    if (zoneFnd == physToZone.end())
-    {
-        // New region. Allocate zone for it.
-        label zoneI = zoneCells.size();
-        zoneCells.setSize(zoneI+1);
-        zoneToPhys.setSize(zoneI+1);
-
-        Info<< "Mapping region " << regPhys << " to Foam cellZone "
-            << zoneI << endl;
-        physToZone.insert(regPhys, zoneI);
-
-        zoneToPhys[zoneI] = regPhys;
-        zoneCells[zoneI].append(celli);
-    }
-    else
+    if (zoneFnd.found())
     {
         // Existing zone for region
         zoneCells[zoneFnd()].append(celli);
+    }
+    else
+    {
+        // New region. Allocate zone for it.
+        const label zonei = zoneCells.size();
+        zoneCells.setSize(zonei+1);
+        zoneToPhys.setSize(zonei+1);
+
+        Info<< "Mapping region " << regPhys << " to Foam cellZone "
+            << zonei << endl;
+        physToZone.insert(regPhys, zonei);
+
+        zoneToPhys[zonei] = regPhys;
+        zoneCells[zonei].append(celli);
     }
 }
 
@@ -283,8 +286,8 @@ scalar readMeshFormat(IFstream& inFile)
 }
 
 
-// Reads points and map
-void readPoints(IFstream& inFile, pointField& points, Map<label>& mshToFoam)
+// Reads points and map for gmsh MSH file <4
+void readPointsLegacy(IFstream& inFile, pointField& points, Map<label>& mshToFoam)
 {
     Info<< "Starting to read points at line " << inFile.lineNumber() << endl;
 
@@ -295,10 +298,9 @@ void readPoints(IFstream& inFile, pointField& points, Map<label>& mshToFoam)
     label nVerts;
     lineStr >> nVerts;
 
-    Info<< "Vertices to be read:" << nVerts << endl;
+    Info<< "Vertices to be read: " << nVerts << endl;
 
-    points.setSize(nVerts);
-    mshToFoam.resize(2*nVerts);
+    points.resize(nVerts);
 
     for (label pointi = 0; pointi < nVerts; pointi++)
     {
@@ -335,6 +337,76 @@ void readPoints(IFstream& inFile, pointField& points, Map<label>& mshToFoam)
     Info<< endl;
 }
 
+// Reads points and map for gmsh MSH file >=4
+void readPoints(IFstream& inFile, pointField& points, Map<label>& mshToFoam)
+{
+    Info<< "Starting to read points at line " << inFile.lineNumber() << endl;
+
+    string line;
+    inFile.getLine(line);
+    IStringStream lineStr(line);
+
+    // Number of "entities": 0, 1, 2, and 3 dimensional geometric structures
+    label nEntities, nVerts;
+    lineStr >> nEntities >> nVerts;
+
+    Info<< "Vertices to be read: " << nVerts << endl;
+
+    points.resize(nVerts);
+
+    // Index of points, in the order as they appeared, not what gmsh
+    // labelled them.
+    label pointi = 0;
+
+    for (label entityi = 0; entityi < nEntities; entityi++)
+    {
+        label entityDim, entityLabel, isParametric, nNodes;
+        scalar xVal, yVal, zVal;
+        inFile.getLine(line);
+        IStringStream lineStr(line); // can IStringStream be removed?
+
+        // Read entity entry, then set up a list for node IDs
+        lineStr >> entityDim >> entityLabel >> isParametric >> nNodes;
+        List<label> nodeIDs(nNodes);
+
+        // Loop over entity node IDs
+        for (label eNode = 0; eNode < nNodes; ++eNode)
+        {
+            inFile.getLine(line);
+            IStringStream lineStr(line);
+            lineStr >> nodeIDs[eNode];
+        }
+
+        // Loop over entity node values, saving to points[]
+        for (label eNode = 0; eNode < nNodes; ++eNode)
+        {
+            inFile.getLine(line);
+            IStringStream lineStr(line);
+            lineStr >> xVal >> yVal >> zVal;
+            point& pt = points[nodeIDs[eNode]-1];
+            pt.x() = xVal;
+            pt.y() = yVal;
+            pt.z() = zVal;
+            mshToFoam.insert(nodeIDs[eNode], pointi++);
+        }
+
+    }
+
+    Info<< "Vertices read: " << mshToFoam.size() << endl;
+
+    inFile.getLine(line);
+    IStringStream tagStr(line);
+    word tag(tagStr);
+
+    if (tag != "$ENDNOD" && tag != "$EndNodes")
+    {
+        FatalIOErrorInFunction(inFile)
+            << "Did not find $ENDNOD tag on line "
+            << inFile.lineNumber() << exit(FatalIOError);
+    }
+    Info<< endl;
+}
+
 
 // Reads physical names
 void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
@@ -350,8 +422,6 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
     lineStr >> nNames;
 
     Info<< "Physical names:" << nNames << endl;
-
-    physicalNames.resize(nNames);
 
     for (label i = 0; i < nNames; i++)
     {
@@ -391,6 +461,10 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
                     << word::validate(regionName) << endl;
             }
         }
+        else
+        {
+            continue;
+        }
 
         physicalNames.insert(regionI, word::validate(regionName));
     }
@@ -408,9 +482,7 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
     Info<< endl;
 }
 
-
-// Reads cells and patch faces
-void readCells
+void readCellsLegacy
 (
     const scalar versionFormat,
     const bool keepOrientation,
@@ -453,7 +525,7 @@ void readCells
     label nElems;
     lineStr >> nElems;
 
-    Info<< "Cells to be read:" << nElems << endl << endl;
+    Info<< "Cells to be read: " << nElems << endl << endl;
 
 
     // Storage for all cells. Too big. Shrink later
@@ -516,10 +588,15 @@ void readCells
 
             renumber(mshToFoam, triPoints);
 
-            Map<label>::iterator regFnd = physToPatch.find(regPhys);
+            const auto regFnd = physToPatch.cfind(regPhys);
 
             label patchi = -1;
-            if (regFnd == physToPatch.end())
+            if (regFnd.found())
+            {
+                // Existing patch for region
+                patchi = regFnd();
+            }
+            else
             {
                 // New region. Allocate patch for it.
                 patchi = patchFaces.size();
@@ -531,11 +608,6 @@ void readCells
                     << patchi << endl;
                 physToPatch.insert(regPhys, patchi);
                 patchToPhys[patchi] = regPhys;
-            }
-            else
-            {
-                // Existing patch for region
-                patchi = regFnd();
             }
 
             // Add triangle to correct patchFaces.
@@ -549,10 +621,15 @@ void readCells
 
             renumber(mshToFoam, quadPoints);
 
-            Map<label>::iterator regFnd = physToPatch.find(regPhys);
+            const auto regFnd = physToPatch.cfind(regPhys);
 
             label patchi = -1;
-            if (regFnd == physToPatch.end())
+            if (regFnd.found())
+            {
+                // Existing patch for region
+                patchi = regFnd();
+            }
+            else
             {
                 // New region. Allocate patch for it.
                 patchi = patchFaces.size();
@@ -564,11 +641,6 @@ void readCells
                     << patchi << endl;
                 physToPatch.insert(regPhys, patchi);
                 patchToPhys[patchi] = regPhys;
-            }
-            else
-            {
-                // Existing patch for region
-                patchi = regFnd();
             }
 
             // Add quad to correct patchFaces.
@@ -748,20 +820,480 @@ void readCells
     Info<< "CellZones:" << nl
         << "Zone\tSize" << endl;
 
-    forAll(zoneCells, zoneI)
+    forAll(zoneCells, zonei)
     {
-        zoneCells[zoneI].shrink();
+        zoneCells[zonei].shrink();
 
-        const labelList& zCells = zoneCells[zoneI];
+        const labelList& zCells = zoneCells[zonei];
 
         if (zCells.size())
         {
-            Info<< "    " << zoneI << '\t' << zCells.size() << endl;
+            Info<< "    " << zonei << '\t' << zCells.size() << endl;
         }
     }
     Info<< endl;
 }
 
+void readCells
+(
+    const scalar versionFormat,
+    const bool keepOrientation,
+    const pointField& points,
+    const Map<label>& mshToFoam,
+    IFstream& inFile,
+    cellShapeList& cells,
+
+    labelList& patchToPhys,
+    List<DynamicList<face>>& patchFaces,
+
+    labelList& zoneToPhys,
+    List<DynamicList<label>>& zoneCells,
+    Map<label> surfEntityToPhysSurface,
+    Map<label> volEntityToPhysVolume
+)
+{
+    Info<< "Starting to read cells at line " << inFile.lineNumber() << endl;
+
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
+
+    face triPoints(3);
+    face quadPoints(4);
+    labelList tetPoints(4);
+    labelList pyrPoints(5);
+    labelList prismPoints(6);
+    labelList hexPoints(8);
+
+
+    string line;
+    inFile.getLine(line);
+    IStringStream lineStr(line);
+
+    label nEntities, nElems, minElemTag, maxElemTag;
+    lineStr >> nEntities >> nElems >> minElemTag >> maxElemTag;
+
+    Info<< "Cells to be read:" << nElems << endl << endl;
+
+    // Storage for all cells. Too big. Shrink later
+    cells.setSize(nElems);
+
+    label celli = 0;
+    label nTet = 0;
+    label nPyr = 0;
+    label nPrism = 0;
+    label nHex = 0;
+
+
+    // From gmsh physical region to Foam patch
+    Map<label> physToPatch;
+
+    // From gmsh physical region to Foam cellZone
+    Map<label> physToZone;
+
+
+    for (label entityi = 0; entityi < nEntities; entityi++)
+    {
+        string line;
+        inFile.getLine(line);
+        IStringStream lineStr(line);
+
+        label entityDim, entityID, regPhys, elmType, nElemInBlock, elemID;
+        lineStr >> entityDim >> entityID >> elmType >> nElemInBlock;
+
+        if (entityDim == 2)
+            regPhys = surfEntityToPhysSurface[entityID];
+        else if (entityDim == 3)
+            regPhys = volEntityToPhysVolume[entityID];
+        else
+            regPhys = 0; // Points and lines don't matter to openFOAM
+
+        // regPhys on surface elements is region number.
+        if (elmType == MSHLINE)
+        {
+            for (label entityElm = 0; entityElm < nElemInBlock; entityElm++)
+            {
+                inFile.getLine(line);
+                IStringStream lineStr(line);
+                label meshPti;
+                lineStr >> elemID >> meshPti >> meshPti;
+            }
+        }
+        else if (elmType == MSHTRI)
+        {
+            for (label entityElm = 0; entityElm < nElemInBlock; entityElm++)
+            {
+                inFile.getLine(line);
+                IStringStream lineStr(line);
+                lineStr >> elemID >> triPoints[0] >> triPoints[1] >> triPoints[2];
+
+                renumber(mshToFoam, triPoints);
+
+                const auto regFnd = physToPatch.cfind(regPhys);
+
+                label patchi = -1;
+                if (regFnd.found())
+                {
+                    // Existing patch for region
+                    patchi = regFnd();
+                }
+                else
+                {
+                    // New region. Allocate patch for it.
+                    patchi = patchFaces.size();
+
+                    patchFaces.setSize(patchi + 1);
+                    patchToPhys.setSize(patchi + 1);
+
+                    Info<< "Mapping region " << regPhys << " to Foam patch "
+                        << patchi << endl;
+                    physToPatch.insert(regPhys, patchi);
+                    patchToPhys[patchi] = regPhys;
+                }
+
+                // Add triangle to correct patchFaces.
+                patchFaces[patchi].append(triPoints);
+            }
+        }
+        else if (elmType == MSHQUAD)
+        {
+            for (label entityElm = 0; entityElm < nElemInBlock; entityElm++)
+            {
+                inFile.getLine(line);
+                IStringStream lineStr(line);
+                lineStr >> elemID
+                    >> quadPoints[0] >> quadPoints[1] >> quadPoints[2]
+                    >> quadPoints[3];
+
+                renumber(mshToFoam, quadPoints);
+
+                const auto regFnd = physToPatch.cfind(regPhys);
+
+                label patchi = -1;
+                if (regFnd.found())
+                {
+                    // Existing patch for region
+                    patchi = regFnd();
+                }
+                else
+                {
+                    // New region. Allocate patch for it.
+                    patchi = patchFaces.size();
+
+                    patchFaces.setSize(patchi + 1);
+                    patchToPhys.setSize(patchi + 1);
+
+                    Info<< "Mapping region " << regPhys << " to Foam patch "
+                        << patchi << endl;
+                    physToPatch.insert(regPhys, patchi);
+                    patchToPhys[patchi] = regPhys;
+                }
+
+                // Add quad to correct patchFaces.
+                patchFaces[patchi].append(quadPoints);
+            }
+        }
+        else if (elmType == MSHTET)
+        {
+            nTet += nElemInBlock;
+
+            for (label entityElm = 0; entityElm < nElemInBlock; entityElm++)
+            {
+                inFile.getLine(line);
+                IStringStream lineStr(line);
+
+                storeCellInZone
+                (
+                    regPhys,
+                    celli,
+                    physToZone,
+                    zoneToPhys,
+                    zoneCells
+                );
+
+                lineStr >> elemID
+                    >> tetPoints[0] >> tetPoints[1] >> tetPoints[2]
+                    >> tetPoints[3];
+
+                renumber(mshToFoam, tetPoints);
+
+                cells[celli++] = cellShape(tet, tetPoints);
+            }
+        }
+        else if (elmType == MSHPYR)
+        {
+            nPyr += nElemInBlock;
+
+            for (label entityElm = 0; entityElm < nElemInBlock; entityElm++)
+            {
+                inFile.getLine(line);
+                IStringStream lineStr(line);
+
+                storeCellInZone
+                (
+                    regPhys,
+                    celli,
+                    physToZone,
+                    zoneToPhys,
+                    zoneCells
+                );
+
+                lineStr >> elemID
+                    >> pyrPoints[0] >> pyrPoints[1] >> pyrPoints[2]
+                    >> pyrPoints[3] >> pyrPoints[4];
+
+                renumber(mshToFoam, pyrPoints);
+
+                cells[celli++] = cellShape(pyr, pyrPoints);
+            }
+        }
+        else if (elmType == MSHPRISM)
+        {
+            nPrism += nElemInBlock;
+
+            for (label entityElm = 0; entityElm < nElemInBlock; entityElm++)
+            {
+                inFile.getLine(line);
+                IStringStream lineStr(line);
+
+                storeCellInZone
+                (
+                    regPhys,
+                    celli,
+                    physToZone,
+                    zoneToPhys,
+                    zoneCells
+                );
+
+                lineStr >> elemID
+                    >> prismPoints[0] >> prismPoints[1] >> prismPoints[2]
+                    >> prismPoints[3] >> prismPoints[4] >> prismPoints[5];
+
+                renumber(mshToFoam, prismPoints);
+
+                cells[celli] = cellShape(prism, prismPoints);
+
+                const cellShape& cell = cells[celli];
+
+                if (!keepOrientation && !correctOrientation(points, cell))
+                {
+                    Info<< "Inverting prism " << celli << endl;
+                    // Reorder prism.
+                    prismPoints[0] = cell[0];
+                    prismPoints[1] = cell[2];
+                    prismPoints[2] = cell[1];
+                    prismPoints[3] = cell[3];
+                    prismPoints[4] = cell[4];
+                    prismPoints[5] = cell[5];
+
+                    cells[celli] = cellShape(prism, prismPoints);
+                }
+
+                celli++;
+            }
+        }
+        else if (elmType == MSHHEX)
+        {
+            nHex += nElemInBlock;
+
+            for (label entityElm = 0; entityElm < nElemInBlock; entityElm++)
+            {
+                inFile.getLine(line);
+                IStringStream lineStr(line);
+
+                storeCellInZone
+                (
+                    regPhys,
+                    celli,
+                    physToZone,
+                    zoneToPhys,
+                    zoneCells
+                );
+
+                lineStr >> elemID
+                    >> hexPoints[0] >> hexPoints[1]
+                    >> hexPoints[2] >> hexPoints[3]
+                    >> hexPoints[4] >> hexPoints[5]
+                    >> hexPoints[6] >> hexPoints[7];
+
+                renumber(mshToFoam, hexPoints);
+
+                cells[celli] = cellShape(hex, hexPoints);
+
+                const cellShape& cell = cells[celli];
+
+                if (!keepOrientation && !correctOrientation(points, cell))
+                {
+                    Info<< "Inverting hex " << celli << endl;
+                    // Reorder hex.
+                    hexPoints[0] = cell[4];
+                    hexPoints[1] = cell[5];
+                    hexPoints[2] = cell[6];
+                    hexPoints[3] = cell[7];
+                    hexPoints[4] = cell[0];
+                    hexPoints[5] = cell[1];
+                    hexPoints[6] = cell[2];
+                    hexPoints[7] = cell[3];
+
+                    cells[celli] = cellShape(hex, hexPoints);
+                }
+
+                celli++;
+            }
+        }
+        else
+        {
+            Info<< "Unhandled element " << elmType << " at line "
+                << inFile.lineNumber() << "in/on physical region ID: "
+                << regPhys << endl;
+            Info << "Perhaps you created a higher order mesh?" << endl;
+        }
+    }
+
+
+    inFile.getLine(line);
+    IStringStream tagStr(line);
+    word tag(tagStr);
+
+    if (tag != "$ENDELM" && tag != "$EndElements")
+    {
+        FatalIOErrorInFunction(inFile)
+            << "Did not find $ENDELM tag on line "
+            << inFile.lineNumber() << exit(FatalIOError);
+    }
+
+
+    cells.setSize(celli);
+
+    forAll(patchFaces, patchi)
+    {
+        patchFaces[patchi].shrink();
+    }
+
+
+    Info<< "Cells:" << endl
+    << "    total: " << cells.size() << endl
+    << "    hex  : " << nHex << endl
+    << "    prism: " << nPrism << endl
+    << "    pyr  : " << nPyr << endl
+    << "    tet  : " << nTet << endl
+    << endl;
+
+    if (cells.size() == 0)
+    {
+        FatalIOErrorInFunction(inFile)
+            << "No cells read from file " << inFile.name() << nl
+            << "Does your file specify any 3D elements (hex=" << MSHHEX
+            << ", prism=" << MSHPRISM << ", pyramid=" << MSHPYR
+            << ", tet=" << MSHTET << ")?" << nl
+            << "Perhaps you have not exported the 3D elements?"
+            << exit(FatalIOError);
+    }
+
+    Info<< "CellZones:" << nl
+        << "Zone\tSize" << endl;
+
+    forAll(zoneCells, zonei)
+    {
+        zoneCells[zonei].shrink();
+
+        const labelList& zCells = zoneCells[zonei];
+
+        if (zCells.size())
+        {
+            Info<< "    " << zonei << '\t' << zCells.size() << endl;
+        }
+    }
+    Info<< endl;
+}
+
+void readEntities
+(
+    IFstream& inFile,
+    Map<label>& surfEntityToPhysSurface,
+    Map<label>& volEntityToPhysVolume
+)
+{
+    label nPoints, nCurves, nSurfaces, nVolumes;
+    label entityID, physicalID, nPhysicalTags;
+    scalar pt; // unused scalar, gives bounding boxes of entities
+    string line;
+    inFile.getLine(line);
+    IStringStream lineStr(line);
+
+    lineStr >> nPoints >> nCurves >> nSurfaces >> nVolumes;
+
+    // Skip over the points, since only the full nodes list matters.
+    for (label i = 0; i < nPoints; ++i)
+        inFile.getLine(line);
+
+    // Skip over the curves
+    for (label i = 0; i < nCurves; ++i)
+        inFile.getLine(line);
+
+    // Read in physical surface entity groupings
+    for (label i = 0; i < nSurfaces; ++i)
+    {
+        inFile.getLine(line);
+        IStringStream lineStr(line);
+        lineStr >> entityID;
+
+        // Skip 6 useless (to us) numbers
+        for (label j = 0; j < 6; ++j)
+            lineStr >> pt;
+
+        // Number of physical groups associated to this surface
+        lineStr >> nPhysicalTags;
+        if (nPhysicalTags > 1)
+        {
+            FatalIOErrorInFunction(inFile)
+                << "Cannot interpret multiple physical surfaces associated"
+                << " with one surface on line number " << inFile.lineNumber()
+                << exit(FatalIOError);
+        }
+
+        lineStr >> physicalID;
+        surfEntityToPhysSurface.insert(entityID, physicalID);
+    }
+
+    // Read in physical volume entity groupings
+    for (label i = 0; i < nVolumes; ++i)
+    {
+        inFile.getLine(line);
+        IStringStream lineStr(line);
+        lineStr >> entityID;
+
+        // Skip 6 useless (to us) numbers
+        for (label j = 0; j < 6; ++j)
+            lineStr >> pt;
+
+        // Number of physical groups associated to this volume
+        lineStr >> nPhysicalTags;
+        if (nPhysicalTags > 1)
+        {
+            FatalIOErrorInFunction(inFile)
+                << "Cannot interpret multiple physical volumes associated"
+                << " with one volume on line number " << inFile.lineNumber()
+                << exit(FatalIOError);
+        }
+
+        lineStr >> physicalID;
+        volEntityToPhysVolume.insert(entityID, physicalID);
+    }
+
+    // Try to read end of section tag:
+    inFile.getLine(line);
+    IStringStream tagStr(line);
+    word tag(tagStr);
+
+    if (tag != "$EndEntities")
+    {
+        FatalIOErrorInFunction(inFile)
+            << "Did not find $EndEntities tag on line "
+            << inFile.lineNumber() << exit(FatalIOError);
+    }
+}
 
 
 int main(int argc, char *argv[])
@@ -814,11 +1346,14 @@ int main(int argc, char *argv[])
     // Name per physical region
     Map<word> physicalNames;
 
+    // Maps from 2 and 3 dimensional entity IDs to physical region ID
+    Map<label> surfEntityToPhysSurface;
+    Map<label> volEntityToPhysVolume;
+
     // Version 1 or 2 format
     scalar versionFormat = 1;
 
-
-    while (inFile.good())
+    do
     {
         string line;
         inFile.getLine(line);
@@ -830,6 +1365,10 @@ int main(int argc, char *argv[])
 
         IStringStream lineStr(line);
 
+        // This implies the end of while has been reached
+        if (line == "")
+            break;
+
         word tag(lineStr);
 
         if (tag == "$MeshFormat")
@@ -840,25 +1379,52 @@ int main(int argc, char *argv[])
         {
             readPhysNames(inFile, physicalNames);
         }
+        else if (tag == "$Entities")
+        {
+            // This will only happen to .msh files over version 4.
+            readEntities(inFile,
+                         surfEntityToPhysSurface,
+                         volEntityToPhysVolume);
+        }
         else if (tag == "$NOD" || tag == "$Nodes")
         {
-            readPoints(inFile, points, mshToFoam);
+            if (versionFormat < 4.0)
+                readPointsLegacy(inFile, points, mshToFoam);
+            else
+                readPoints(inFile, points, mshToFoam);
         }
         else if (tag == "$ELM" || tag == "$Elements")
         {
-            readCells
-            (
-                versionFormat,
-                keepOrientation,
-                points,
-                mshToFoam,
-                inFile,
-                cells,
-                patchToPhys,
-                patchFaces,
-                zoneToPhys,
-                zoneCells
-            );
+            if (versionFormat < 4.0)
+                readCellsLegacy
+                (
+                    versionFormat,
+                    keepOrientation,
+                    points,
+                    mshToFoam,
+                    inFile,
+                    cells,
+                    patchToPhys,
+                    patchFaces,
+                    zoneToPhys,
+                    zoneCells
+                );
+            else
+                readCells
+                (
+                    versionFormat,
+                    keepOrientation,
+                    points,
+                    mshToFoam,
+                    inFile,
+                    cells,
+                    patchToPhys,
+                    patchFaces,
+                    zoneToPhys,
+                    zoneCells,
+                    surfEntityToPhysSurface,
+                    volEntityToPhysVolume
+                );
         }
         else
         {
@@ -871,16 +1437,16 @@ int main(int argc, char *argv[])
                 break;
             }
         }
-    }
+    } while (inFile.good());
 
 
     label nValidCellZones = 0;
 
-    forAll(zoneCells, zoneI)
+    forAll(zoneCells, zonei)
     {
-        if (zoneCells[zoneI].size())
+        if (zoneCells[zonei].size())
         {
-            nValidCellZones++;
+            ++nValidCellZones;
         }
     }
 
@@ -901,18 +1467,13 @@ int main(int argc, char *argv[])
 
     forAll(boundaryPatchNames, patchi)
     {
-        label physReg = patchToPhys[patchi];
+        boundaryPatchNames[patchi] =
+            physicalNames.lookup
+            (
+                patchToPhys[patchi],
+                "patch" + Foam::name(patchi) // default name
+            );
 
-        Map<word>::const_iterator iter = physicalNames.find(physReg);
-
-        if (iter != physicalNames.end())
-        {
-            boundaryPatchNames[patchi] = iter();
-        }
-        else
-        {
-            boundaryPatchNames[patchi] = word("patch") + name(patchi);
-        }
         Info<< "Patch " << patchi << " gets name "
             << boundaryPatchNames[patchi] << endl;
     }
@@ -1007,17 +1568,17 @@ int main(int argc, char *argv[])
     Info<< "FaceZones:" << nl
         << "Zone\tSize" << endl;
 
-    forAll(zoneFaces, zoneI)
+    forAll(zoneFaces, zonei)
     {
-        zoneFaces[zoneI].shrink();
+        zoneFaces[zonei].shrink();
 
-        const labelList& zFaces = zoneFaces[zoneI];
+        const labelList& zFaces = zoneFaces[zonei];
 
         if (zFaces.size())
         {
-            nValidFaceZones++;
+            ++nValidFaceZones;
 
-            Info<< "    " << zoneI << '\t' << zFaces.size() << endl;
+            Info<< "    " << zonei << '\t' << zFaces.size() << endl;
         }
     }
     Info<< endl;
@@ -1042,31 +1603,30 @@ int main(int argc, char *argv[])
 
         nValidCellZones = 0;
 
-        forAll(zoneCells, zoneI)
+        forAll(zoneCells, zonei)
         {
-            if (zoneCells[zoneI].size())
+            if (zoneCells[zonei].size())
             {
-                label physReg = zoneToPhys[zoneI];
+                const word zoneName
+                (
+                    physicalNames.lookup
+                    (
+                        zoneToPhys[zonei],
+                        "cellZone_" + Foam::name(zonei)  // default name
+                    )
+                );
 
-                Map<word>::const_iterator iter = physicalNames.find(physReg);
-
-                word zoneName = "cellZone_" + name(zoneI);
-                if (iter != physicalNames.end())
-                {
-                    zoneName = iter();
-                }
-
-                Info<< "Writing zone " << zoneI << " to cellZone "
+                Info<< "Writing zone " << zonei << " to cellZone "
                     << zoneName << " and cellSet"
                     << endl;
 
-                cellSet cset(mesh, zoneName, zoneCells[zoneI]);
+                cellSet cset(mesh, zoneName, zoneCells[zonei]);
                 cset.write();
 
                 cz[nValidCellZones] = new cellZone
                 (
                     zoneName,
-                    zoneCells[zoneI],
+                    zoneCells[zonei],
                     nValidCellZones,
                     mesh.cellZones()
                 );
@@ -1081,31 +1641,30 @@ int main(int argc, char *argv[])
 
         nValidFaceZones = 0;
 
-        forAll(zoneFaces, zoneI)
+        forAll(zoneFaces, zonei)
         {
-            if (zoneFaces[zoneI].size())
+            if (zoneFaces[zonei].size())
             {
-                label physReg = patchToPhys[zoneI];
+                const word zoneName
+                (
+                    physicalNames.lookup
+                    (
+                        patchToPhys[zonei],
+                        "faceZone_" + Foam::name(zonei)  // default name
+                    )
+                );
 
-                Map<word>::const_iterator iter = physicalNames.find(physReg);
-
-                word zoneName = "faceZone_" + name(zoneI);
-                if (iter != physicalNames.end())
-                {
-                    zoneName = iter();
-                }
-
-                Info<< "Writing zone " << zoneI << " to faceZone "
+                Info<< "Writing zone " << zonei << " to faceZone "
                     << zoneName << " and faceSet"
                     << endl;
 
-                faceSet fset(mesh, zoneName, zoneFaces[zoneI]);
+                faceSet fset(mesh, zoneName, zoneFaces[zonei]);
                 fset.write();
 
                 fz[nValidFaceZones] = new faceZone
                 (
                     zoneName,
-                    zoneFaces[zoneI],
+                    zoneFaces[zonei],
                     true, // all are flipped
                     nValidFaceZones,
                     mesh.faceZones()

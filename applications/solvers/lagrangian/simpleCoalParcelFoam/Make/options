@@ -1,5 +1,6 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/fvOptions/lnInclude \
     -I${LIB_SRC}/meshTools/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
@@ -20,12 +21,11 @@ EXE_INC = \
     -I$(LIB_SRC)/regionModels/regionModel/lnInclude \
     -I$(LIB_SRC)/regionModels/surfaceFilmModels/lnInclude \
     -I$(LIB_SRC)/combustionModels/lnInclude \
-    -I$(LIB_SRC)/fvOptions/lnInclude \
     -I$(LIB_SRC)/sampling/lnInclude
-
 
 EXE_LIBS = \
     -lfiniteVolume \
+    -lfvOptions \
     -lmeshTools \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
@@ -35,6 +35,7 @@ EXE_LIBS = \
     -lspecie \
     -lfluidThermophysicalModels \
     -lreactionThermophysicalModels \
+    -lthermophysicalProperties \
     -lSLGThermo \
     -lchemistryModel \
     -lradiationModels \
@@ -42,7 +43,5 @@ EXE_LIBS = \
     -lregionModels \
     -lsurfaceFilmModels \
     -lcombustionModels \
-    -lfvOptions \
     -lsampling \
     -lcoalCombustion
-

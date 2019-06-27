@@ -2,8 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -33,6 +35,12 @@ SFILES          = $(OBJECTS_DIR)/sourceFiles
 
 sinclude $(OPTIONS)
 
+#------------------------------------------------------------------------------
+# Directory containing the wmake scripts
+#------------------------------------------------------------------------------
+
+WM_SCRIPTS      = $(WM_DIR)/scripts
+
 
 #------------------------------------------------------------------------------
 # Declare dependency of all make system files on FILES
@@ -43,7 +51,9 @@ all : $(OPTIONS) $(SFILES) $(VARS)
 
 $(OPTIONS) : $(MAKE_DIR)/options
 	@$(CPP) $(GFLAGS) $(MAKE_DIR)/options | sed -e 's@   *@ @g' > $(OPTIONS)
-
+ifeq ("$(WM_OSTYPE)","MSwindows")
+	@$(WM_SCRIPTS)/wmakeWindowsDlOpenLibs $(OPTIONS) >> $(OPTIONS)
+endif
 
 $(SFILES): $(MAKE_DIR)/files
 	@$(CPP) $(GFLAGS) $(MAKE_DIR)/files | sed -e 's@   *@ @g' > $(FILES)

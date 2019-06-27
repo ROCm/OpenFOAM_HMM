@@ -3,7 +3,9 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
-     \\/     M anipulation  | Copyright (C) 2015 IH-Cantabria
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2015 IH-Cantabria
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +78,7 @@ Foam::vector Foam::waveModels::Boussinesq::Deta
     const scalar X0
 ) const
 {
-    vector deta(vector::zero);
+    vector deta(Zero);
 
     scalar C = sqrt(mag(g_)*(H + h));
     scalar ts = 3.5*h/sqrt(H/h);

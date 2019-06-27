@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,9 +114,7 @@ public:
         FieldField(PtrList<Field<Type>>&& list);
 
         //- Move/copy construct from tmp<FieldField>
-        #ifndef NoConstructFromTmp
         FieldField(const tmp<FieldField<Field, Type>>& tf);
-        #endif
 
         //- Construct from Istream
         FieldField(Istream& is);
@@ -161,7 +161,7 @@ public:
         void operator=(const tmp<FieldField<Field, Type>>&);
 
         //- Assign uniform value
-        void operator=(const Type&);
+        void operator=(const Type& val);
 
         void operator+=(const FieldField<Field, Type>&);
         void operator+=(const tmp<FieldField<Field, Type>>&);

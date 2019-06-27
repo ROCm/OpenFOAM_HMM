@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -203,28 +205,26 @@ bool Foam::functionObjects::dsmcFields::write()
             }
         }
 
-        if (log)
-        {
-            Log << "    mag(UMean) max/min : "
-                << max(mag(UMean)).value() << " "
-                << min(mag(UMean)).value() << endl;
 
-            Log << "    translationalT max/min : "
-                << max(translationalT).value() << " "
-                << min(translationalT).value() << endl;
+        Log << "    mag(UMean) max/min : "
+            << max(mag(UMean)).value() << " "
+            << min(mag(UMean)).value() << nl
 
-            Log << "    internalT max/min : "
-                << max(internalT).value() << " "
-                << min(internalT).value() << endl;
+            << "    translationalT max/min : "
+            << max(translationalT).value() << " "
+            << min(translationalT).value() << nl
 
-            Log << "    overallT max/min : "
-                << max(overallT).value() << " "
-                << min(overallT).value() << endl;
+            << "    internalT max/min : "
+            << max(internalT).value() << " "
+            << min(internalT).value() << nl
 
-            Log << "    p max/min : "
-                << max(p).value() << " "
-                << min(p).value() << endl;
-        }
+            << "    overallT max/min : "
+            << max(overallT).value() << " "
+            << min(overallT).value() << nl
+
+            << "    p max/min : "
+            << max(p).value() << " "
+            << min(p).value() << endl;
 
         UMean.write();
 

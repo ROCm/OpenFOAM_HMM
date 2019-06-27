@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,7 +80,7 @@ void Foam::chemistryReductionMethods::PFA<CompType, ThermoType>::reduceMechanism
 )
 {
     scalarField& completeC(this->chemistry_.completeC());
-    scalarField c1(this->chemistry_.nEqns(), 0.0);
+    scalarField c1(this->chemistry_.nEqns(), Zero);
 
     for (label i=0; i<this->nSpecie_; i++)
     {
@@ -90,13 +92,13 @@ void Foam::chemistryReductionMethods::PFA<CompType, ThermoType>::reduceMechanism
     c1[this->nSpecie_+1] = p;
 
     // Compute the rAB matrix
-    RectangularMatrix<scalar> PAB(this->nSpecie_,this->nSpecie_,0.0);
-    RectangularMatrix<scalar> CAB(this->nSpecie_,this->nSpecie_,0.0);
-    scalarField PA(this->nSpecie_,0.0);
-    scalarField CA(this->nSpecie_,0.0);
+    RectangularMatrix<scalar> PAB(this->nSpecie_, this->nSpecie_, Zero);
+    RectangularMatrix<scalar> CAB(this->nSpecie_, this->nSpecie_, Zero);
+    scalarField PA(this->nSpecie_, Zero);
+    scalarField CA(this->nSpecie_, Zero);
 
     // Number of initialized rAB for each lines
-    Field<label> NbrABInit(this->nSpecie_,0);
+    Field<label> NbrABInit(this->nSpecie_, Zero);
     // Position of the initialized rAB, -1 when not initialized
     RectangularMatrix<label> rABPos(this->nSpecie_, this->nSpecie_, -1);
     // Index of the other species involved in the rABNum
@@ -253,11 +255,11 @@ void Foam::chemistryReductionMethods::PFA<CompType, ThermoType>::reduceMechanism
     // is a connection of second generation and it will be aggregated in the
     // final step to evaluate the total connection strength (or path flux).
     // Compute rsecond=rAri*rriB with A!=ri!=B
-    RectangularMatrix<scalar> PAB2nd(this->nSpecie_,this->nSpecie_,0.0);
-    RectangularMatrix<scalar> CAB2nd(this->nSpecie_,this->nSpecie_,0.0);
+    RectangularMatrix<scalar> PAB2nd(this->nSpecie_, this->nSpecie_, Zero);
+    RectangularMatrix<scalar> CAB2nd(this->nSpecie_, this->nSpecie_, Zero);
 
     // Number of initialized rAB for each lines
-    Field<label> NbrABInit2nd(this->nSpecie_, 0);
+    Field<label> NbrABInit2nd(this->nSpecie_, Zero);
 
     // Position of the initialized rAB, -1 when not initialized
     RectangularMatrix<label> rABPos2nd(this->nSpecie_, this->nSpecie_, -1);

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +46,21 @@ Foam::wordRe::wordRe(Istream& is)
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::wordRe::info(Ostream& os) const
+{
+    if (isPattern())
+    {
+        os  << "wordRe(regex) " << *this;
+    }
+    else
+    {
+        os  << "wordRe(plain) \"" << *this << '"';
+    }
+
+    return os;
+}
+
 
 Foam::Istream& Foam::operator>>(Istream& is, wordRe& val)
 {
@@ -92,25 +109,10 @@ Foam::Istream& Foam::operator>>(Istream& is, wordRe& val)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const wordRe& w)
+Foam::Ostream& Foam::operator<<(Ostream& os, const wordRe& val)
 {
-    os.writeQuoted(w, w.isPattern());
+    os.writeQuoted(val, val.isPattern());
     os.check(FUNCTION_NAME);
-    return os;
-}
-
-
-Foam::Ostream& Foam::wordRe::info(Ostream& os) const
-{
-    if (isPattern())
-    {
-        os  << "wordRe(regex) " << *this;
-    }
-    else
-    {
-        os  << "wordRe(plain) \"" << *this << '"';
-    }
-
     return os;
 }
 

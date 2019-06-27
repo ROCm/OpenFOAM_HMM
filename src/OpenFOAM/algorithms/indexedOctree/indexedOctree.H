@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -467,6 +469,12 @@ public:
                         << "Tree is empty" << abort(FatalError);
                 }
                 return nodes_[0].bb_;
+            }
+
+            //- Per node, per octant whether is fully inside/outside/mixed.
+            PackedList<2>& nodeTypes() const
+            {
+                return nodeTypes_;
             }
 
 

@@ -3,9 +3,11 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -26,7 +28,7 @@
 #     wmakeLnInclude
 #
 # Usage
-#     wmakeLnInclude [-u | -update] [-s | -silent] <dir>
+#     wmakeLnInclude [OPTION] [-pwd | <dir>]
 #
 # Description
 #     Link all the source files in the <dir> directory into <dir>/lnInclude
@@ -38,21 +40,23 @@
 #         *.c (C source)
 #
 #------------------------------------------------------------------------------
-Script=${0##*/}
+Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
+. "${0%/*}/scripts/wmakeFunctions"              # Source wmake functions
 
 usage() {
     exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: $Script [OPTION] dir
+Usage: $Script [OPTION] [-pwd | dir]
 
 options:
-  -u | -update      update
-  -s | -silent      use 'silent' mode (do not echo command)
-  -help             print the usage
+  -u | -update      Update
+  -s | -silent      Use 'silent' mode (do not echo command)
+  -pwd              Locate root directory containing a Make/ directory.
+  -h | -help        Print the usage
 
-    Link all the source files in the <dir> into <dir>/lnInclude
+Link all the source files in the <dir> into <dir>/lnInclude
 
 Note
     The '-u' option forces an update when the lnInclude directory already exists
@@ -68,9 +72,9 @@ USAGE
 #------------------------------------------------------------------------------
 
 # Option for 'ln'
-lnOpt="-s"
+optLink="-s"
 
-unset update silentOpt
+unset update optQuiet optFindRootDir
 
 while [ "$#" -gt 0 ]
 do
@@ -80,12 +84,13 @@ do
             ;;
         -u | -update)
             update=true
-            lnOpt="-sf"
-            shift
+            optLink="-sf"
             ;;
         -s | -silent)
-            silentOpt=true
-            shift
+            optQuiet=true
+            ;;
+        -pwd)
+            optFindRootDir=true
             ;;
         -*)
             usage "unknown option: '$1'"
@@ -94,13 +99,50 @@ do
             break
             ;;
     esac
+    shift
 done
 
-if [ $# -eq 1 ]
-then
-    baseDir=$1
-else
+[ "$optFindRootDir" = true ] || [ "$#" -eq 1 ] || \
     usage "Error: incorrect number of arguments"
+
+#------------------------------------------------------------------------------
+
+unset dir
+baseDir="$1"
+
+# With -root, go on discovery
+if [ "$optFindRootDir" = true ]
+then
+    if [ -n "$baseDir" ]
+    then
+        dir="$baseDir"
+        if [ -d "$dir" ]
+        then
+            dir="${dir%/}"
+        elif [ -f "$dir" ]
+        then
+            dir="${dir%/*}"
+            : "${dir:=.}"
+        else
+            echo "$Script error: not a file or directory" 1>&2
+            exit 1
+        fi
+
+        cd "$dir" 2>/dev/null || {
+            echo "$Script error: could not change to directory '$dir'" 1>&2
+            exit 1
+        }
+    fi
+
+    # Locate target with Make/ directory
+    if dir="$(findTarget .)"
+    then
+        baseDir="$(cd "$dir" && pwd -L)"
+    else
+        exit 2
+    fi
+
+    echo "Using $baseDir" 1>&2
 fi
 
 
@@ -113,34 +155,30 @@ do
         baseDir="."
     fi
 done
-incDir=$baseDir/lnInclude
+incDir="$baseDir/lnInclude"
 
 
-[ -d $baseDir ] || {
+[ -d "$baseDir" ] || {
     echo "$Script error: base directory $baseDir does not exist" 1>&2
     exit 2
 }
 
-if [ -d $incDir ]
+if [ -d "$incDir" ]
 then
     [ "$update" = true ] || exit 0
 else
-    mkdir $incDir
+    mkdir "$incDir"
 fi
 
-[ -d $incDir ] || {
+[ -d "$incDir" ] || {
     echo "$Script error: failed to create include directory $incDir" 1>&2
     exit 0
 }
 
-cd $incDir || exit 1
+cd "$incDir" || exit 1
 
-if [ "$silentOpt" = true -o -n "$WM_QUIET" ]
-then
-    echo "    ln: $incDir" 1>&2
-else
-    echo "$Script: linking include files to $incDir" 1>&2
-fi
+# Always just display compact info
+echo "    ln: $incDir" 1>&2
 
 
 #------------------------------------------------------------------------------
@@ -148,10 +186,10 @@ fi
 #------------------------------------------------------------------------------
 
 case "$WM_ARCH" in
-darwin*)
+(darwin*)
     find -L . -type l -exec rm -- {} \+
     ;;
-*)
+(*)
     find -L . -type l -delete
     ;;
 esac
@@ -170,7 +208,7 @@ find .. \
         -o -name '*.[ch]pp' \
         -o -name '*.type' \
     \)  \
-    -exec ln $lnOpt {} . \;
+    -exec ln "$optLink" {} . \;
 
 exit 0 # clean exit
 

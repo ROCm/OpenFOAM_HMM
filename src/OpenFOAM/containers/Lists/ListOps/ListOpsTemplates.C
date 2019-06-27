@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -210,8 +212,8 @@ Foam::PackedList<Width> Foam::reorder
     }
 
     // Verify addresses (for movable refs)
-    // Info<< "reordered in " << long(input.storage().cdata()) << nl
-    //     << "reordered out " << long(output.storage().cdata()) << nl;
+    // Info<< "reordered in " << uintptr_t(input.storage().cdata()) << nl
+    //     << "reordered out " << uintptr_t(output.storage().cdata()) << nl;
 
     return output;
 }
@@ -228,7 +230,7 @@ void Foam::inplaceReorder
     input = reorder(oldToNew, input, prune);
 
     // Verify address (for movable refs)
-    // Info<< "now have " << long(input.storage().cdata()) << nl;
+    // Info<< "now have " << uintptr_t(input.storage().cdata()) << nl;
 }
 
 
@@ -249,7 +251,7 @@ void Foam::inplaceMapKey
             // Could enforce (oldIdx < oldToNew.size())
             // ... or just rely on FULLDEBUG from UList
 
-            output.insert(oldToNew[oldIdx], iter.object());
+            output.insert(oldToNew[oldIdx], iter.val());
         }
     }
 
@@ -268,7 +270,7 @@ Foam::label Foam::inplaceMapValue
 
     for (auto iter = input.begin(); iter != input.end(); ++iter)
     {
-        const label oldIdx = iter.object();
+        const label oldIdx = iter.val();
         if (oldIdx >= 0)
         {
             // Could enforce (oldIdx < oldToNew.size())
@@ -278,7 +280,7 @@ Foam::label Foam::inplaceMapValue
 
             if (oldIdx != newIdx)
             {
-                iter.object() = newIdx;
+                iter.val() = newIdx;
                 ++nChanged;
             }
         }
@@ -304,7 +306,7 @@ Foam::label Foam::inplaceMapValue
 
     for (auto iter = input.begin(); iter != input.end(); ++iter)
     {
-        label& value = iter.object();
+        label& value = iter.val();
 
         auto mapIter = mapper.find(value);
         if (mapIter.found() && value != *mapIter)
@@ -347,10 +349,7 @@ void Foam::sortedOrder
         order.resize(len);
     }
 
-    for (label i=0; i < len; ++i)
-    {
-        order[i] = i; // identity
-    }
+    ListOps::identity(order);
 
     Foam::stableSort(order, comp);
 }
@@ -695,7 +694,7 @@ void Foam::invertManyToMany
 )
 {
     // The output list sizes
-    labelList sizes(len, 0);
+    labelList sizes(len, Zero);
 
     for (const InputIntListType& sublist : input)
     {
@@ -740,12 +739,16 @@ Foam::labelList Foam::findIndices
 
     // Pass 1: count occurrences
     label count = 0;
-    for (label i = start; i < len; ++i)
+
+    if (start >= 0)
     {
-        if (input[i] == val)
+        for (label i = start; i < len; ++i)
         {
-            if (!count) start = i;  // adjust start for second pass
-            ++count;
+            if (input[i] == val)
+            {
+                if (!count) start = i;  // adjust start for second pass
+                ++count;
+            }
         }
     }
 
@@ -761,7 +764,7 @@ Foam::labelList Foam::findIndices
             if (input[i] == val)
             {
                 indices[count] = i;
-                if (++count == total)
+                if (++count == total)  // early termination
                 {
                     break;
                 }
@@ -1090,6 +1093,43 @@ void Foam::ListOps::uniqueEqOp<T>::operator()
             x = y;
         }
     }
+}
+
+
+template<class ListType, class UnaryPredicate>
+Foam::label Foam::ListOps::find
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start
+)
+{
+    const label len = input.size();
+
+    if (start >= 0)
+    {
+        for (label i = start; i < len; ++i)
+        {
+            if (pred(input[i]))
+            {
+                return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
+
+template<class ListType, class UnaryPredicate>
+bool Foam::ListOps::found
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start
+)
+{
+    return (ListOps::find(input, pred, start) >= 0);
 }
 
 

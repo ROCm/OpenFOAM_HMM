@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +36,7 @@ License
 template<class CloudType>
 void Foam::PatchCollisionDensity<CloudType>::write()
 {
-    const scalarField z(this->owner().mesh().nCells(), 0);
+    const scalarField z(this->owner().mesh().nCells(), Zero);
 
     volScalarField
     (

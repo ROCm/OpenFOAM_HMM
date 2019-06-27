@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,7 +98,7 @@ Foam::List<int> Foam::NamedEnum<EnumType, nEnum>::values() const
 
             if (iter.found())
             {
-                lst[count++] = iter.object();
+                lst[count++] = iter.val();
             }
         }
     }
@@ -113,7 +115,7 @@ bool Foam::NamedEnum<EnumType, nEnum>::hasName(const EnumType e) const
 
     forAllConstIters(lookup_, iter)
     {
-        if (iter.object() == enumValue)
+        if (iter.val() == enumValue)
         {
             return true;
         }
@@ -140,7 +142,7 @@ EnumType Foam::NamedEnum<EnumType, nEnum>::lookup
             << exit(FatalIOError);
     }
 
-    return EnumType(iter.object());
+    return EnumType(iter.val());
 }
 
 
@@ -156,10 +158,8 @@ EnumType Foam::NamedEnum<EnumType, nEnum>::lookupOrDefault
     {
         return lookup(key, dict);
     }
-    else
-    {
-        return deflt;
-    }
+
+    return deflt;
 }
 
 
@@ -177,7 +177,7 @@ EnumType Foam::NamedEnum<EnumType, nEnum>::read(Istream& is) const
             << exit(FatalIOError);
     }
 
-    return EnumType(iter.object());
+    return EnumType(iter.val());
 }
 
 

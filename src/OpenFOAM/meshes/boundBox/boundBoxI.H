@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,10 +72,18 @@ inline bool Foam::boundBox::empty() const
 }
 
 
-inline void Foam::boundBox::clear()
+inline bool Foam::boundBox::valid() const
 {
-    min_ = invertedBox.min();
-    max_ = invertedBox.max();
+    // Check each component for max < min
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        if (max_[dir] < min_[dir])
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 
@@ -101,9 +111,15 @@ inline Foam::point& Foam::boundBox::max()
 }
 
 
+inline Foam::point Foam::boundBox::centre() const
+{
+    return 0.5 * (min_ + max_);
+}
+
+
 inline Foam::point Foam::boundBox::midpoint() const
 {
-    return 0.5 * (max_ + min_);
+    return this->centre();
 }
 
 
@@ -161,6 +177,13 @@ inline Foam::label Foam::boundBox::nDim() const
     }
 
     return ngood;
+}
+
+
+inline void Foam::boundBox::clear()
+{
+    min_ = invertedBox.min();
+    max_ = invertedBox.max();
 }
 
 
@@ -248,9 +271,9 @@ inline bool Foam::boundBox::contains(const point& pt) const
 {
     return
     (
-        pt.x() >= min_.x() && pt.x() <= max_.x()
-     && pt.y() >= min_.y() && pt.y() <= max_.y()
-     && pt.z() >= min_.z() && pt.z() <= max_.z()
+        min_.x() <= pt.x() && pt.x() <= max_.x()
+     && min_.y() <= pt.y() && pt.y() <= max_.y()
+     && min_.z() <= pt.z() && pt.z() <= max_.z()
     );
 }
 
@@ -265,9 +288,9 @@ inline bool Foam::boundBox::containsInside(const point& pt) const
 {
     return
     (
-        pt.x() > min_.x() && pt.x() < max_.x()
-     && pt.y() > min_.y() && pt.y() < max_.y()
-     && pt.z() > min_.z() && pt.z() < max_.z()
+        min_.x() < pt.x() && pt.x() < max_.x()
+     && min_.y() < pt.y() && pt.y() < max_.y()
+     && min_.z() < pt.z() && pt.z() < max_.z()
     );
 }
 

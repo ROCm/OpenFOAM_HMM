@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +45,7 @@ void Foam::singleCellFvMesh::agglomerateMesh
     const polyBoundaryMesh& oldPatches = mesh.boundaryMesh();
 
     // Check agglomeration within patch face range and continuous
-    labelList nAgglom(oldPatches.size(), 0);
+    labelList nAgglom(oldPatches.size(), Zero);
 
     forAll(oldPatches, patchi)
     {
@@ -102,18 +104,12 @@ void Foam::singleCellFvMesh::agglomerateMesh
                     label myZone = agglom[patchi][i];
                     label nbrZone = nbrAgglom[bFacei];
 
-                    Map<label>::const_iterator iter = localToNbr.find(myZone);
+                    const auto iter = localToNbr.cfind(myZone);
 
-                    if (iter == localToNbr.end())
-                    {
-                        // First occurrence of this zone. Store correspondence
-                        // to remote zone number.
-                        localToNbr.insert(myZone, nbrZone);
-                    }
-                    else
+                    if (iter.found())
                     {
                         // Check that zone numbers are still the same.
-                        if (iter() != nbrZone)
+                        if (iter.val() != nbrZone)
                         {
                             FatalErrorInFunction
                                 << "agglomeration is not synchronised across"
@@ -123,6 +119,12 @@ void Foam::singleCellFvMesh::agglomerateMesh
                                 << ". Remote agglomeration " << nbrZone
                                 << exit(FatalError);
                         }
+                    }
+                    else
+                    {
+                        // First occurrence of this zone. Store correspondence
+                        // to remote zone number.
+                        localToNbr.insert(myZone, nbrZone);
                     }
                 }
             }
@@ -379,6 +381,10 @@ void Foam::singleCellFvMesh::agglomerateMesh
             );
         }
     }
+
+    // Make sure we don't start dumping mesh every timestep (since
+    // resetPrimitives sets AUTO_WRITE)
+    setInstance(time().constant(), IOobject::NO_WRITE);
 }
 
 

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +60,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         haveThreads_ = haveThreads;
 
         freeCommunicator(UPstream::worldComm);
-        label comm = allocateCommunicator(-1, labelList(1, label(0)), false);
+        label comm = allocateCommunicator(-1, labelList(1, Zero), false);
         if (comm != UPstream::worldComm)
         {
             FatalErrorInFunction
@@ -382,7 +384,7 @@ Foam::UPstream::treeCommunication_(10);
 Foam::UPstream::communicator serialComm
 (
     -1,
-    Foam::labelList(1, Foam::label(0)),
+    Foam::labelList(1, Foam::Zero),
     false
 );
 

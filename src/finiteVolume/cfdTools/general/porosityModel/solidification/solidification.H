@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,8 +78,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidification_H
-#define solidification_H
+#ifndef porosityModels_solidification_H
+#define porosityModels_solidification_H
 
 #include "porosityModel.H"
 #include "Function1.H"

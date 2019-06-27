@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -386,7 +388,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     forAllConstIters(zoneLookup, iter)
     {
         const label groupId = iter.key();
-        const label zoneId  = iter.object();
+        const label zoneId  = iter.val();
 
         const auto iterName = nameLookup.cfind(groupId);
         if (iterName.found())

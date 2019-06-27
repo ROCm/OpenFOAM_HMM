@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::ensightCloud::writeCloudField
+bool Foam::ensightOutput::writeCloudField
 (
     const IOField<Type>& field,
     ensightFile& os,
@@ -113,7 +113,7 @@ bool Foam::ensightCloud::writeCloudField
 
 
 template<class Type>
-bool Foam::ensightCloud::writeCloudField
+bool Foam::ensightOutput::writeCloudField
 (
     const IOobject& io,
     const bool exists,

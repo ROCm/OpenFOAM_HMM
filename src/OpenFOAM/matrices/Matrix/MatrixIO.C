@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +30,8 @@ License
 #include "Ostream.H"
 #include "token.H"
 #include "contiguous.H"
+#include "ListPolicy.H"
+#include <algorithm>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,26 +47,25 @@ Foam::Matrix<Form, Type>::Matrix(Istream& is)
 
 
 template<class Form, class Type>
-Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
+bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
 {
     // Anull matrix
-    M.clear();
+    clear();
 
     is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
-    is.fatalCheck
-    (
-        "operator>>(Istream&, Matrix<Form, Type>&) : reading first token"
-    );
+    is.fatalCheck("readMatrix : reading first token");
 
     if (firstToken.isLabel())
     {
-        M.mRows_ = firstToken.labelToken();
-        M.nCols_ = readLabel(is);
+        mRows_ = firstToken.labelToken();
+        nCols_ = readLabel(is);
+        doAlloc();
 
-        label mn = M.mRows_*M.nCols_;
+        // The total size
+        const label len = size();
 
         // Read list contents depending on data format
         if (is.format() == IOstream::ASCII || !contiguous<Type>())
@@ -70,29 +73,22 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
             // Read beginning of contents
             char listDelimiter = is.readBeginList("Matrix");
 
-            if (mn)
+            if (len)
             {
-                M.allocate();
-                Type* v = M.v_;
-
                 if (listDelimiter == token::BEGIN_LIST)
                 {
-                    label k = 0;
+                    label idx = 0;
 
-                    // loop over rows
-                    for (label i=0; i<M.m(); i++)
+                    // Loop over rows
+                    for (label i = 0; i < mRows_; ++i)
                     {
                         listDelimiter = is.readBeginList("MatrixRow");
 
-                        for (label j=0; j<M.n(); j++)
+                        for (label j = 0; j < nCols_; ++j)
                         {
-                            is >> v[k++];
+                            is >> v_[idx++];
 
-                            is.fatalCheck
-                            (
-                                "operator>>(Istream&, Matrix<Form, Type>&) : "
-                                "reading entry"
-                            );
+                            is.fatalCheck("readMatrix : reading reading entry");
                         }
 
                         is.readEndList("MatrixRow");
@@ -103,16 +99,9 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
                     Type element;
                     is >> element;
 
-                    is.fatalCheck
-                    (
-                        "operator>>(Istream&, Matrix<Form, Type>&) : "
-                        "reading the single entry"
-                    );
+                    is.fatalCheck("readMatrix : reading the single entry");
 
-                    for (label i=0; i<mn; i++)
-                    {
-                        v[i] = element;
-                    }
+                    std::fill(begin(), end(), element);
                 }
             }
 
@@ -121,89 +110,72 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
         }
         else
         {
-            if (mn)
+            if (len)
             {
-                M.allocate();
-                Type* v = M.v_;
+                is.read(reinterpret_cast<char*>(v_), len*sizeof(Type));
 
-                is.read(reinterpret_cast<char*>(v), mn*sizeof(Type));
-
-                is.fatalCheck
-                (
-                    "operator>>(Istream&, Matrix<Form, Type>&) : "
-                    "reading the binary block"
-                );
+                is.fatalCheck("readMatrix : reading the binary block");
             }
         }
-    }
-    else
-    {
-        FatalIOErrorInFunction(is)
-            << "incorrect first token, expected <int>, found "
-            << firstToken.info()
-            << exit(FatalIOError);
+
+        return len;
     }
 
-    return is;
+
+    FatalIOErrorInFunction(is)
+        << "incorrect first token, expected <int>, found "
+        << firstToken.info()
+        << exit(FatalIOError);
+
+    return 0;
 }
 
 
 template<class Form, class Type>
-Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
+Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
+(
+    Ostream& os,
+    const label shortLen
+) const
 {
-    label mn = M.mRows_*M.nCols_;
+    const Matrix<Form, Type>& mat = *this;
 
-    os  << M.m() << token::SPACE << M.n();
+    // The total size
+    const label len = mat.size();
+
+    // Rows, columns size
+    os  << mat.m() << token::SPACE << mat.n();
 
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<Type>())
     {
-        if (mn)
+        if (len)
         {
-            const Type* v = M.v_;
+            const Type* v = mat.cdata();
 
-            // can the contents be considered 'uniform' (ie, identical)
-            bool uniform = (mn > 1 && contiguous<Type>());
-            if (uniform)
+            // Can the contents be considered 'uniform' (ie, identical)
+            if (len > 1 && contiguous<Type>() && mat.uniform())
             {
-                for (label i=0; i<mn; ++i)
-                {
-                    if (v[i] != v[0])
-                    {
-                        uniform = false;
-                        break;
-                    }
-                }
+                // Two or more entries, and all entries have identical values.
+                os  << token::BEGIN_BLOCK << v[0] << token::END_BLOCK;
             }
-
-            if (uniform)
-            {
-                // Write start delimiter
-                os  << token::BEGIN_BLOCK;
-
-                // Write contents
-                os << v[0];
-
-                // Write end delimiter
-                os << token::END_BLOCK;
-            }
-            else if (mn < 10 && contiguous<Type>())
+            else if (len < shortLen && contiguous<Type>())
             {
                 // Write start contents delimiter
                 os  << token::BEGIN_LIST;
 
-                label k = 0;
+                label idx = 0;
 
-                // loop over rows
-                for (label i=0; i<M.m(); i++)
+                // Loop over rows
+                for (label i = 0; i < mat.m(); ++i)
                 {
                     os  << token::BEGIN_LIST;
 
                     // Write row
-                    for (label j=0; j< M.n(); j++)
+                    for (label j = 0; j < mat.n(); ++j)
                     {
                         if (j) os << token::SPACE;
-                        os << v[k++];
+                        os << v[idx++];
                     }
 
                     os << token::END_LIST;
@@ -217,17 +189,17 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
                 // Write start contents delimiter
                 os  << nl << token::BEGIN_LIST;
 
-                label k = 0;
+                label idx = 0;
 
-                // loop over rows
-                for (label i=0; i<M.m(); i++)
+                // Loop over rows
+                for (label i=0; i < mat.m(); ++i)
                 {
                     os  << nl << token::BEGIN_LIST;
 
                     // Write row
-                    for (label j=0; j< M.n(); j++)
+                    for (label j=0; j < mat.n(); ++j)
                     {
-                        os << nl << v[k++];
+                        os << nl << v[idx++];
                     }
 
                     os << nl << token::END_LIST;
@@ -244,14 +216,36 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
     }
     else
     {
-        if (mn)
+        // Contents are binary and contiguous
+
+        if (len)
         {
-            os.write(reinterpret_cast<const char*>(M.v_), mn*sizeof(Type));
+            // write(...) includes surrounding start/end delimiters
+            os.write
+            (
+                reinterpret_cast<const char*>(mat.cdata()),
+                len*sizeof(Type)
+            );
         }
     }
 
     os.check(FUNCTION_NAME);
     return os;
+}
+
+
+template<class Form, class Type>
+Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& mat)
+{
+    mat.readMatrix(is);
+    return is;
+}
+
+
+template<class Form, class Type>
+Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& mat)
+{
+    return mat.writeMatrix(os, Detail::ListPolicy::short_length<Type>::value);
 }
 
 

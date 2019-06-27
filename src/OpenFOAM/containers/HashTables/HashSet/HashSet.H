@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +65,7 @@ Description
 #define HashSet_H
 
 #include "HashTable.H"
-#include "UIndirectList.H"
+#include "IndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -134,14 +136,15 @@ public:
         {}
 
         //- Construct from FixedList of Key
-        template<unsigned Size>
-        explicit HashSet(const FixedList<Key, Size>& list);
+        template<unsigned N>
+        explicit HashSet(const FixedList<Key, N>& list);
 
         //- Construct from UList of Key
         explicit HashSet(const UList<Key>& list);
 
         //- Construct from an indirect list
-        explicit HashSet(const UIndirectList<Key>& list);
+        template<class Addr>
+        explicit HashSet(const IndirectListBase<Key, Addr>& list);
 
         //- Construct from an initializer list of Key
         HashSet(std::initializer_list<Key> list);
@@ -165,6 +168,14 @@ public:
 
 
     // Member Functions
+
+        //- Same as found() - return true if key exists in the set.
+        //  Method name compatibility with bitSet and boolList.
+        bool test(const Key& key) const
+        {
+            return found(key);
+        }
+
 
     // Edit
 
@@ -203,8 +214,8 @@ public:
 
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
-        template<unsigned Size>
-        inline label insert(const FixedList<Key, Size>& list);
+        template<unsigned N>
+        inline label insert(const FixedList<Key, N>& list);
 
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
@@ -212,7 +223,8 @@ public:
 
         //- Insert keys from the list of Key
         //  \return The number of new elements inserted
-        inline label insert(const UIndirectList<Key>& list);
+        template<class Addr>
+        inline label insert(const IndirectListBase<Key, Addr>& list);
 
         //- Same as insert (no value to overwrite)
         template<class InputIter>
@@ -228,8 +240,8 @@ public:
         }
 
         //- Same as insert (no value to overwrite)
-        template<unsigned Size>
-        inline label set(const FixedList<Key, Size>& list)
+        template<unsigned N>
+        inline label set(const FixedList<Key, N>& list)
         {
             return insert(list);
         }
@@ -241,7 +253,8 @@ public:
         }
 
         //- Same as insert (no value to overwrite)
-        inline label set(const UIndirectList<Key>& list)
+        template<class Addr>
+        inline label set(const IndirectListBase<Key, Addr>& list)
         {
             return insert(list);
         }
@@ -265,8 +278,8 @@ public:
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
-        template<unsigned Size>
-        inline label unset(const FixedList<Key, Size>& list);
+        template<unsigned N>
+        inline label unset(const FixedList<Key, N>& list);
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
@@ -274,7 +287,8 @@ public:
 
         //- Unset the listed keys - same as erase
         //  \return The number of items removed
-        inline label unset(const UIndirectList<Key>& list);
+        template<class Addr>
+        inline label unset(const IndirectListBase<Key, Addr>& list);
 
 
     // STL iterators
@@ -290,12 +304,12 @@ public:
 
     // Writing
 
-        //- Write the unordered keys as a list, with line-breaks if list length
-        //- exceeds shortListLen.
+        //- Write unordered keys (list), with line-breaks
+        //- when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
-        Ostream& writeList(Ostream& os, const label shortListLen=0) const
+        Ostream& writeList(Ostream& os, const label shortLen=0) const
         {
-            return this->writeKeys(os, shortListLen);
+            return this->writeKeys(os, shortLen);
         }
 
 
@@ -338,8 +352,8 @@ public:
         void operator=(const UList<Key>& rhs);
 
         //- Assignment from a FixedList of keys
-        template<unsigned Size>
-        void operator=(const FixedList<Key, Size>& rhs);
+        template<unsigned N>
+        void operator=(const FixedList<Key, N>& rhs);
 
         //- Assignment from an initializer list of keys
         void operator=(std::initializer_list<Key> rhs);
@@ -408,28 +422,28 @@ public:
 
 //- Combine entries from HashSets
 template<class Key, class Hash>
-HashSet<Key,Hash> operator|
+HashSet<Key, Hash> operator|
 (
-    const HashSet<Key,Hash>& hash1,
-    const HashSet<Key,Hash>& hash2
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
 );
 
 
 //- Create a HashSet that only contains entries found in both HashSets
 template<class Key, class Hash>
-HashSet<Key,Hash> operator&
+HashSet<Key, Hash> operator&
 (
-    const HashSet<Key,Hash>& hash1,
-    const HashSet<Key,Hash>& hash2
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
 );
 
 
 //- Create a HashSet that only contains unique entries (xor)
 template<class Key, class Hash>
-HashSet<Key,Hash> operator^
+HashSet<Key, Hash> operator^
 (
-    const HashSet<Key,Hash>& hash1,
-    const HashSet<Key,Hash>& hash2
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
 );
 
 

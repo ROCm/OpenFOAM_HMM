@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,18 +48,8 @@ Foam::dragModel::dragModel
     interfaceDict_(interfaceDict),
     phase1_(phase1),
     phase2_(phase2),
-    residualPhaseFraction_
-    (
-        "residualPhaseFraction",
-        dimless,
-        interfaceDict.lookup("residualPhaseFraction")
-    ),
-    residualSlip_
-    (
-        "residualSlip",
-        dimVelocity,
-        interfaceDict.lookup("residualSlip")
-    )
+    residualPhaseFraction_("residualPhaseFraction", dimless, interfaceDict),
+    residualSlip_("residualSlip", dimVelocity, interfaceDict)
 {}
 
 

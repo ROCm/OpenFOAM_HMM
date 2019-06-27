@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,23 +159,29 @@ public:
     // Query
 
         //- True if this is a managed pointer (not a const reference)
-        inline bool isTmp() const;
+        inline bool isTmp() const noexcept;
 
         //- True if this is a non-null managed pointer
-        inline bool empty() const;
+        inline bool empty() const noexcept;
 
         //- True if this is a non-null managed pointer,
         //- or is a const object reference
-        inline bool valid() const;
+        inline bool valid() const noexcept;
 
         //- True if this is a non-null managed pointer with a unique ref-count
-        inline bool movable() const;
+        inline bool movable() const noexcept;
 
         //- Return type-name of the tmp, constructed from type-name of T
         inline word typeName() const;
 
 
     // Access
+
+        //- Return pointer without nullptr checking.
+        inline T* get() noexcept;
+
+        //- Return const pointer without nullptr checking.
+        inline const T* get() const noexcept;
 
         //- Return the const object reference or a const reference to the
         //- contents of a non-null managed pointer.
@@ -200,14 +208,17 @@ public:
 
         //- If object pointer points to valid object:
         //- delete object and set pointer to nullptr
-        inline void clear() const;
+        inline void clear() const noexcept;
 
         //- Release ownership of managed temporary object.
         //  After this call no object is managed.
-        inline void reset();
+        inline void reset() noexcept;
 
         //- Delete managed temporary object and set to new given pointer
-        inline void reset(T* p);
+        inline void reset(T* p) noexcept;
+
+        //- Delete managed temporary object and set to const reference
+        inline void cref(const T& obj) noexcept;
 
         //- Swaps the managed object with other tmp.
         inline void swap(tmp<T>& other) noexcept;

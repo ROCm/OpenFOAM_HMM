@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,12 +27,8 @@ License
 
 #include "polyMesh.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 inline Foam::topoDistanceData::topoDistanceData()
 :
     data_(-1),
@@ -38,7 +36,6 @@ inline Foam::topoDistanceData::topoDistanceData()
 {}
 
 
-// Construct from components
 inline Foam::topoDistanceData::topoDistanceData
 (
     const label data,
@@ -127,10 +124,8 @@ inline bool Foam::topoDistanceData::updateCell
         operator=(neighbourInfo);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -154,10 +149,8 @@ inline bool Foam::topoDistanceData::updateFace
         distance_ = neighbourInfo.distance_ + 1;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -178,10 +171,8 @@ inline bool Foam::topoDistanceData::updateFace
         operator=(neighbourInfo);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

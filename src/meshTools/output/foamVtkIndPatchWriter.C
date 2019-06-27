@@ -193,7 +193,7 @@ void Foam::vtk::indirectPatchWriter::writePolysLegacy(const label pointOffset)
                     ++iter;
                 }
             }
-            off += pp_.nPoints();
+            // off += pp_.nPoints();
         }
     }
 
@@ -259,7 +259,7 @@ void Foam::vtk::indirectPatchWriter::writePolys(const label pointOffset)
                         ++iter;
                     }
                 }
-                off += pp_.nPoints();
+                // off += pp_.nPoints();
             }
         }
 

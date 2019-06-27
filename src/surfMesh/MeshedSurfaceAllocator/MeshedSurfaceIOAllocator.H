@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +27,7 @@ Class
     Foam::Detail::MeshedSurfaceIOAllocator
 
 Description
-    A helper class for storing points, faces and zones with IO capabilities.
+    A helper class for storing points and faces with IO capabilities.
 
 SourceFiles
     MeshedSurfaceIOAllocator.C
@@ -37,7 +39,6 @@ SourceFiles
 
 #include "pointIOField.H"
 #include "faceIOList.H"
-#include "surfZoneIOList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,16 +53,13 @@ namespace Detail
 
 class MeshedSurfaceIOAllocator
 {
-    // Private data
+    // Private Data
 
         //- Points
         pointIOField points_;
 
         //- Faces
         faceCompactIOList faces_;
-
-        //- Surface zones
-        surfZoneIOList zones_;
 
 
     // Private Member Functions
@@ -81,24 +79,21 @@ public:
         MeshedSurfaceIOAllocator
         (
             const IOobject& ioPoints,
-            const IOobject& ioFaces,
-            const IOobject& ioZones
+            const IOobject& ioFaces
         );
 
         //- Construct from IOobjects, copying components
         MeshedSurfaceIOAllocator
         (
             const IOobject& ioPoints, const pointField& points,
-            const IOobject& ioFaces,  const faceList& faces,
-            const IOobject& ioZones,  const surfZoneList& zones
+            const IOobject& ioFaces,  const faceList& faces
         );
 
         //- Construct from IOobjects, moving components
         MeshedSurfaceIOAllocator
         (
             const IOobject& ioPoints, pointField&& points,
-            const IOobject& ioFaces,  faceList&& faces,
-            const IOobject& ioZones,  surfZoneList&& zones
+            const IOobject& ioFaces,  faceList&& faces
         );
 
 
@@ -131,12 +126,6 @@ public:
             return faces_;
         }
 
-        //- Non-const access to the zones
-        surfZoneIOList& storedIOZones()
-        {
-            return zones_;
-        }
-
         //- Const access to the points
         const pointIOField& storedIOPoints() const
         {
@@ -149,16 +138,10 @@ public:
             return faces_;
         }
 
-        //- Const access to the zones
-        const surfZoneIOList& storedIOZones() const
-        {
-            return zones_;
-        }
 
+    // Storage Management
 
-    //  Storage Management
-
-        //- Clear primitive data (points, faces and zones)
+        //- Clear primitive data (points, faces)
         void clear();
 
 

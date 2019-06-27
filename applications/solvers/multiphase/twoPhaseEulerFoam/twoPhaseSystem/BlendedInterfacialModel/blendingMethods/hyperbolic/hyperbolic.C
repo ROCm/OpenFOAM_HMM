@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2014 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,35 +54,22 @@ Foam::blendingMethods::hyperbolic::hyperbolic
 )
 :
     blendingMethod(dict),
-    transitionAlphaScale_
-    (
-        "transitionAlphaScale",
-        dimless,
-        dict.lookup("transitionAlphaScale")
-    )
+    transitionAlphaScale_("transitionAlphaScale", dimless, dict)
 {
-    forAllConstIter(wordList, phaseNames, iter)
+    for (const word& phaseName : phaseNames)
     {
-        const word name(IOobject::groupName("maxDispersedAlpha", *iter));
-
         maxDispersedAlpha_.insert
         (
-            *iter,
+            phaseName,
             dimensionedScalar
             (
-                name,
+                IOobject::groupName("maxDispersedAlpha", phaseName),
                 dimless,
-                dict.lookup(name)
+                dict
             )
         );
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::blendingMethods::hyperbolic::~hyperbolic()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

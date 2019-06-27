@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,7 +172,7 @@ Foam::wallLayerCells::wallLayerCells
             {
                 const face& f = mesh.faces()[facei];
 
-                point mid(0.0, 0.0, 0.0);
+                point mid(Zero);
 
                 forAll(f, fp)
                 {

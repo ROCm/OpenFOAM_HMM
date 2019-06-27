@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,29 +45,6 @@ Foam::labelRange Foam::UList<T>::validateRange(const labelRange& range) const
     #endif
 
     return slice;
-}
-
-
-template<class T>
-Foam::labelRange Foam::UList<T>::validateRange
-(
-    std::initializer_list<label> start_size
-) const
-{
-    if (start_size.size() != 2)
-    {
-        FatalErrorInFunction
-            << "range specified with " << start_size.size()
-            << " elements instead of 2"
-            << abort(FatalError);
-    }
-
-    auto iter = start_size.begin();
-
-    const label beg = *(iter++);
-    const label len = *iter;
-
-    return this->validateRange(labelRange(beg, len));
 }
 
 
@@ -169,31 +148,6 @@ template<class T>
 const Foam::UList<T> Foam::UList<T>::operator[](const labelRange& range) const
 {
     const labelRange slice = validateRange(range);
-
-    return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
-}
-
-
-template<class T>
-Foam::UList<T> Foam::UList<T>::operator[]
-(
-    std::initializer_list<label> start_size
-)
-{
-    const labelRange slice = validateRange(start_size);
-
-    return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
-}
-
-
-template<class T>
-const Foam::UList<T> Foam::UList<T>::operator[]
-(
-    std::initializer_list<label> start_size
-) const
-{
-    // Restricted range
-    const labelRange slice = validateRange(start_size);
 
     return UList<T>(&(this->v_[slice.start()]), slice.size()); // SubList
 }

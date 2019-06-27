@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +49,7 @@ void MapDimensionedFields(const MeshMapper& mapper)
 
     TableType fields(mapper.thisDb().template lookupClass<FieldType>(true));
 
-    forAllConstIter(typename TableType, fields, fieldIter)
+    forAllConstIters(fields, fieldIter)
     {
         FieldType& field = const_cast<FieldType&>(*fieldIter());
 

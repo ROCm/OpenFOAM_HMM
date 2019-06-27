@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,11 +47,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-class hashedWordList;
-inline Istream& operator>>(Istream& is, hashedWordList& lst);
-
-
 /*---------------------------------------------------------------------------*\
                        Class hashedWordList Declaration
 \*---------------------------------------------------------------------------*/
@@ -71,22 +68,22 @@ public:
         inline hashedWordList() = default;
 
         //- Copy construct.
-        inline hashedWordList(const hashedWordList& lst);
+        inline hashedWordList(const hashedWordList& list);
 
         //- Move construct.
-        inline hashedWordList(hashedWordList&& lst);
+        inline hashedWordList(hashedWordList&& list);
 
         //- Copy construct from list of words
-        inline explicit hashedWordList(const wordUList& lst);
+        inline explicit hashedWordList(const wordUList& list);
 
         //- Copy construct from list of words, eliminating duplicates
-        inline hashedWordList(const wordUList& lst, bool unique);
+        inline hashedWordList(const wordUList& list, bool unique);
 
         //- Move construct from list of words, optionally eliminating duplicates
-        inline hashedWordList(wordList&& lst, bool unique=false);
+        inline hashedWordList(wordList&& list, bool unique=false);
 
         //- Construct from an initializer list
-        inline hashedWordList(std::initializer_list<word> lst);
+        inline hashedWordList(std::initializer_list<word> list);
 
         //- Construct from the word keys of any HashTable, sorting immediately.
         //  This also handles a wordHashSet, which is derived from a HashTable.
@@ -102,7 +99,7 @@ public:
         hashedWordList(const label len, const char** array, bool unique=false);
 
         //- Construct from a nullptr-terminated list of words,
-        //  optionally eliminating duplicates
+        //- optionally eliminating duplicates
         hashedWordList(const char** array, bool unique=false);
 
         //- Construct from Istream
@@ -115,28 +112,25 @@ public:
         inline void clear();
 
         //- Append an element at the end of the list,
-        //  optionally avoid append if it would be a duplicate entry
+        //- optionally avoid append if it would be a duplicate entry
         inline void append(const word& name, bool unique=false);
 
-        //- Does the list contain the specified name
+        //- Search hashed values for the specified name
         inline bool found(const word& name) const;
-
-        //- Does the list contain the specified name
-        inline bool contains(const word& name) const;
 
         //- Return the hash of words/indices for inspection
         inline const HashTable<label>& lookup() const;
 
         //- Swap contents
-        inline void swap(hashedWordList& lst);
+        inline void swap(hashedWordList& list);
 
         //- Transfer contents of the argument into this list
         //- and annul the argument list, optionally eliminating duplicates
-        inline void transfer(hashedWordList& lst);
+        inline void transfer(hashedWordList& list);
 
         //- Transfer the contents of the argument List into this list
         //- and annul the argument list, optionally eliminating duplicates
-        inline void transfer(wordList& lst, bool unique=false);
+        inline void transfer(wordList& list, bool unique=false);
 
         //- Rebuild the lookup hash indices
         void rehash() const;
@@ -166,26 +160,38 @@ public:
         inline bool operator()(const word& name) const;
 
 
-      // Assignment
+    // Assignment
 
         //- Copy assignment. Rehashes the indices.
-        inline void operator=(const hashedWordList& lst);
+        inline void operator=(const hashedWordList& list);
 
         //- Copy assignment from list of words. Rehashes the indices.
-        inline void operator=(const wordUList& lst);
+        inline void operator=(const wordUList& list);
 
         //- Copy assignment from initializer list. Rehashes the indices.
-        inline void operator=(std::initializer_list<word> lst);
+        inline void operator=(std::initializer_list<word> list);
 
         //- Move assignment operator.
-        inline void operator=(hashedWordList&& lst);
+        inline void operator=(hashedWordList&& list);
 
         //- Move assignment from list of words. Rehashes the indices.
-        inline void operator=(wordList&& lst);
+        inline void operator=(wordList&& list);
 
-        //- Read from an input stream. Rehashes the indices.
-        inline friend Istream& operator>>(Istream& is, hashedWordList& lst);
+
+    // Housekeeping
+
+        //- Deprecated(2019-01) Is the specified name found in the list?
+        //  \deprecated(2019-01) - use found() method
+        bool FOAM_DEPRECATED_FOR(2019-01, "found() method")
+        contains(const word& name) const
+        {
+            return this->found(name);
+        }
 };
+
+
+//- Read from an input stream. Rehashes the indices.
+inline Istream& operator>>(Istream& is, hashedWordList& list);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -1,0 +1,9 @@
+isentropicPressure
+{
+    type            pressure;
+    libs            ("libfieldFunctionObjects.so");
+    enabled         yes;
+    writeControl    writeTime;
+    mode            isentropic;
+    result          isentropicP;
+}

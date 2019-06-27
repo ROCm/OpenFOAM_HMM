@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,10 +179,8 @@ bool Foam::refinementHistory::splitCell8::operator==(const splitCell8& s) const
     {
         return addedCellsPtr_() == s.addedCellsPtr_();
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 
@@ -1028,7 +1028,7 @@ Foam::autoPtr<Foam::refinementHistory> Foam::refinementHistory::clone
     if (active_)
     {
         // Mark selected cells with '1'
-        labelList decomposition(visibleCells_.size(), 0);
+        labelList decomposition(visibleCells_.size(), Zero);
         forAll(cellMap, i)
         {
             decomposition[cellMap[i]] = 1;
@@ -1039,7 +1039,7 @@ Foam::autoPtr<Foam::refinementHistory> Foam::refinementHistory::clone
         labelList splitCellProc(splitCells_.size(), -1);
         // Per splitCell entry the number of live cells that move to that
         // processor
-        labelList splitCellNum(splitCells_.size(), 0);
+        labelList splitCellNum(splitCells_.size(), Zero);
 
         forAll(visibleCells_, cellI)
         {
@@ -1283,7 +1283,7 @@ void Foam::refinementHistory::distribute(const mapDistributePolyMesh& map)
     // Per splitCell entry the processor it moves to
     labelList splitCellProc(splitCells_.size(), -1);
     // Per splitCell entry the number of live cells that move to that processor
-    labelList splitCellNum(splitCells_.size(), 0);
+    labelList splitCellNum(splitCells_.size(), Zero);
 
     forAll(visibleCells_, celli)
     {

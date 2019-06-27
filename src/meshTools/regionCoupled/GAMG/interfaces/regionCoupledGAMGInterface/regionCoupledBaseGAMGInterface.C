@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,23 +71,20 @@ Foam::regionCoupledBaseGAMGInterface::regionCoupledBaseGAMGInterface
         {
             label curMaster = localRestrictAddressing[ffi];
 
-            Map<label>::const_iterator fnd = masterToCoarseFace.find
-            (
-                curMaster
-            );
+            const auto fnd = masterToCoarseFace.cfind(curMaster);
 
-            if (fnd == masterToCoarseFace.end())
+            if (fnd.found())
             {
-                // New coarse face
-                label coarseI = dynFaceCells.size();
-                dynFaceRestrictAddressing.append(coarseI);
-                dynFaceCells.append(curMaster);
-                masterToCoarseFace.insert(curMaster, coarseI);
+                // Already have coarse face
+                dynFaceRestrictAddressing.append(fnd.val());
             }
             else
             {
-                // Already have coarse face
-                dynFaceRestrictAddressing.append(fnd());
+                // New coarse face
+                const label coarseI = dynFaceCells.size();
+                dynFaceRestrictAddressing.append(coarseI);
+                dynFaceCells.append(curMaster);
+                masterToCoarseFace.insert(curMaster, coarseI);
             }
         }
 
@@ -151,22 +150,19 @@ Foam::regionCoupledBaseGAMGInterface::regionCoupledBaseGAMGInterface
                 {
                     label curMaster = nbrPatchRestrictMap[ffi];
 
-                    Map<label>::const_iterator fnd = masterToCoarseFace.find
-                    (
-                        curMaster
-                    );
+                    const auto fnd = masterToCoarseFace.cfind(curMaster);
 
-                    if (fnd == masterToCoarseFace.end())
+                    if (fnd.found())
                     {
-                        // New coarse face
-                        label coarseI = masterToCoarseFace.size();
-                        dynNbrFaceRestrictAddressing.append(coarseI);
-                        masterToCoarseFace.insert(curMaster, coarseI);
+                        // Already have coarse face
+                        dynNbrFaceRestrictAddressing.append(fnd.val());
                     }
                     else
                     {
-                        // Already have coarse face
-                        dynNbrFaceRestrictAddressing.append(fnd());
+                        // New coarse face
+                        const label coarseI = masterToCoarseFace.size();
+                        dynNbrFaceRestrictAddressing.append(coarseI);
+                        masterToCoarseFace.insert(curMaster, coarseI);
                     }
                 }
 

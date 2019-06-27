@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -161,15 +161,15 @@ Foam::cyclicFaPatchField<Type>::patchNeighbourField() const
 template<class Type>
 void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
 (
-    scalarField& result,
+    solveScalarField& result,
     const bool add,
-    const scalarField& psiInternal,
+    const solveScalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
     const Pstream::commsTypes commsType
 ) const
 {
-    scalarField pnf(this->size());
+    solveScalarField pnf(this->size());
 
     label sizeby2 = this->size()/2;
     const labelUList& faceCells = cyclicPatch_.faceCells();

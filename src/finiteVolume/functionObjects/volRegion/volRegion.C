@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +53,69 @@ Foam::functionObjects::volRegion::regionTypeNames_
 });
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::functionObjects::volRegion::calculateCache()
+{
+    regionID_ = -1;
+    cellIds_.clear();
+
+    switch (regionType_)
+    {
+        case vrtAll:
+        {
+            nCells_ = volMesh_.globalData().nTotalCells();
+            V_ = gSum(volMesh_.V());
+            return;
+            break;
+        }
+
+        case vrtCellSet:
+        {
+            cellIds_ = cellSet(volMesh_, regionName_).sortedToc();
+            break;
+        }
+
+        case vrtCellZone:
+        {
+            regionID_ = volMesh_.cellZones().findZoneID(regionName_);
+
+            if (regionID_ < 0)
+            {
+                FatalErrorInFunction
+                    << "Unknown cell zone name: " << regionName_
+                    << ". Valid cell zones    : "
+                    << flatOutput(volMesh_.cellZones().names())
+                    << exit(FatalError);
+            }
+            break;
+        }
+    }
+
+    // Cached value for nCells()
+    nCells_ = returnReduce(cellIDs().size(), sumOp<label>());
+
+    // Cached value for V()
+    V_ = 0;
+    for (const label celli : cellIDs())
+    {
+        V_ += volMesh_.V()[celli];
+    }
+    reduce(V_, sumOp<scalar>());
+
+    if (!nCells_)
+    {
+        FatalErrorInFunction
+            << regionTypeNames_[regionType_]
+            << "(" << regionName_ << "):" << nl
+            << "    Region has no cells"
+            << exit(FatalError);
+    }
+
+    requireUpdate_ = false;
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::volRegion::writeFileHeader
@@ -76,6 +141,10 @@ Foam::functionObjects::volRegion::volRegion
 )
 :
     volMesh_(mesh),
+    requireUpdate_(true),
+    cellIds_(),
+    nCells_(0),
+    V_(Zero),
     regionType_
     (
         regionTypeNames_.lookupOrDefault
@@ -89,73 +158,25 @@ Foam::functionObjects::volRegion::volRegion
     regionID_(-1)
 {
     read(dict);
-
-    // Cache integral properties of the region for writeFileHeader
-    nCells_ = nCells();
-    V_ = V();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionObjects::volRegion::read
-(
-    const dictionary& dict
-)
+bool Foam::functionObjects::volRegion::read(const dictionary& dict)
 {
-    regionID_ = -1;
-    cellIds_.clear();
-
     switch (regionType_)
     {
-        case vrtCellSet:
+        case vrtAll:
         {
-            dict.readEntry("name", regionName_);
-
-            cellIds_ = cellSet(volMesh_, regionName_).sortedToc();
-
-            if (nCells() == 0)
-            {
-                FatalIOErrorInFunction(dict)
-                    << regionTypeNames_[regionType_]
-                    << "(" << regionName_ << "):" << nl
-                    << "    Region has no cells"
-                    << exit(FatalIOError);
-            }
-
+            regionName_ = volMesh_.name();
             break;
         }
 
+        case vrtCellSet:
         case vrtCellZone:
         {
             dict.readEntry("name", regionName_);
-
-            regionID_ = volMesh_.cellZones().findZoneID(regionName_);
-
-            if (regionID_ < 0)
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Unknown cell zone name: " << regionName_
-                    << ". Valid cell zones    : "
-                    << flatOutput(volMesh_.cellZones().names())
-                    << exit(FatalIOError);
-            }
-
-            if (nCells() == 0)
-            {
-                FatalIOErrorInFunction(dict)
-                    << regionTypeNames_[regionType_]
-                    << "(" << regionName_ << "):" << nl
-                    << "    Region has no cells"
-                    << exit(FatalIOError);
-            }
-
-            break;
-        }
-
-        case vrtAll:
-        {
-            regionName_= volMesh_.name();
             break;
         }
 
@@ -165,15 +186,26 @@ bool Foam::functionObjects::volRegion::read
                 << "Unknown region type. Valid region types are:"
                 << flatOutput(regionTypeNames_.names()) << nl
                 << exit(FatalIOError);
+            break;
         }
     }
 
+    calculateCache();
     return true;
 }
 
 
 const Foam::labelList& Foam::functionObjects::volRegion::cellIDs() const
 {
+    #ifdef FULLDEBUG
+    if (requireUpdate_)
+    {
+        FatalErrorInFunction
+            << "Retrieving cached values that are not up-to-date" << nl
+            << exit(FatalError);
+    }
+    #endif
+
     switch (regionType_)
     {
         case vrtCellSet:
@@ -192,35 +224,27 @@ const Foam::labelList& Foam::functionObjects::volRegion::cellIDs() const
 }
 
 
-Foam::label Foam::functionObjects::volRegion::nCells() const
+bool Foam::functionObjects::volRegion::update()
 {
-    if (regionType_ == vrtAll)
+    if (requireUpdate_)
     {
-        return volMesh_.globalData().nTotalCells();
+        calculateCache();
+        return true;
     }
-    else
-    {
-        return returnReduce(cellIDs().size(), sumOp<label>());
-    }
+
+    return false;
 }
 
 
-Foam::scalar Foam::functionObjects::volRegion::V() const
+void Foam::functionObjects::volRegion::updateMesh(const mapPolyMesh&)
 {
-    if (regionType_ == vrtAll)
-    {
-        return gSum(volMesh_.V());
-    }
-    else
-    {
-        scalar vol = 0;
-        for (const label celli : cellIDs())
-        {
-            vol += volMesh_.V()[celli];
-        }
+    requireUpdate_ = true;
+}
 
-        return returnReduce(vol, sumOp<scalar>());
-    }
+
+void Foam::functionObjects::volRegion::movePoints(const polyMesh&)
+{
+    requireUpdate_ = true;
 }
 
 

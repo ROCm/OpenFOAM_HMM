@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,10 +53,8 @@ bool Foam::functionObjects::grad::calcGrad()
             mesh_.changing() && mesh_.cache(resultName_)
         );
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

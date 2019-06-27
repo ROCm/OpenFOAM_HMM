@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +90,7 @@ class lduPrimitiveProcessorInterface
 public:
 
     //- Runtime type information
-    TypeName("primitiveProcessor");
+    TypeName("calculatedProcessor");
 
 
     // Constructors
@@ -178,10 +180,13 @@ public:
             }
 
 
-//        // I/O
-//
-//            //- Write to stream
-//            virtual void write(Ostream&) const;
+        // Edit
+
+            //- Return message tag used for sending
+            int& tag()
+            {
+                return tag_;
+            }
 };
 
 

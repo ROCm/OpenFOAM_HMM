@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -207,6 +209,16 @@ public:
             allocator_type(),
             OSstream(stream_, "sha1", format, version)
         {}
+
+
+    // Write Functions
+
+        //- Add (unquoted) string contents.
+        //  Ensures that SHA1 of C-string or C++-string content are identical.
+        virtual Ostream& write(const string& str)
+        {
+            return writeQuoted(str, false); // Unquoted!
+        }
 
 
     // Housekeeping

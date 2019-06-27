@@ -81,19 +81,6 @@ autoPtr<compressible::turbulenceModel> turbulence
 
 mesh.setFluxRequired(p.name());
 
-Info<< "Creating field dpdt\n" << endl;
-volScalarField dpdt
-(
-    IOobject
-    (
-        "dpdt",
-        runTime.timeName(),
-        mesh
-    ),
-    mesh,
-    dimensionedScalar(p.dimensions()/dimTime, Zero)
-);
-
 #include "createMRF.H"
 
 Info<< "Creating compressibility field psi\n" << endl;

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,7 +123,7 @@ tmp<scalarField> curvatureSeparation::calcCosAngle
     const labelUList& nbr = mesh.neighbour();
 
     scalarField phiMax(mesh.nCells(), -GREAT);
-    scalarField cosAngle(mesh.nCells(), 0.0);
+    scalarField cosAngle(mesh.nCells(), Zero);
     forAll(nbr, facei)
     {
         label cellO = own[facei];
@@ -226,7 +228,7 @@ curvatureSeparation::curvatureSeparation
 :
     injectionModel(type(), film, dict),
     gradNHat_(fvc::grad(film.nHat())),
-    deltaByR1Min_(coeffDict_.lookupOrDefault<scalar>("deltaByR1Min", 0.0)),
+    deltaByR1Min_(coeffDict_.lookupOrDefault<scalar>("deltaByR1Min", 0)),
     definedPatchRadii_(),
     magG_(mag(film.g().value())),
     gHat_(Zero)
@@ -299,8 +301,8 @@ void curvatureSeparation::correct
 
     // calculate force balance
     const scalar Fthreshold = 1e-10;
-    scalarField Fnet(mesh.nCells(), 0.0);
-    scalarField separated(mesh.nCells(), 0.0);
+    scalarField Fnet(mesh.nCells(), Zero);
+    scalarField separated(mesh.nCells(), Zero);
     forAll(invR1, i)
     {
         if ((invR1[i] > 0) && (delta[i]*invR1[i] > deltaByR1Min_))

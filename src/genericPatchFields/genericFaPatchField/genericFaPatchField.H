@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,14 +59,15 @@ class genericFaPatchField
 :
     public calculatedFaPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         const word actualTypeName_;
+
         dictionary dict_;
 
         HashPtrTable<scalarField> scalarFields_;
         HashPtrTable<vectorField> vectorFields_;
-        HashPtrTable<sphericalTensorField> sphericalTensorFields_;
+        HashPtrTable<sphericalTensorField> sphTensorFields_;
         HashPtrTable<symmTensorField> symmTensorFields_;
         HashPtrTable<tensorField> tensorFields_;
 
@@ -136,9 +139,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Mapping functions
+        // Mapping Functions
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap
@@ -154,7 +157,7 @@ public:
             );
 
 
-        // Evaluation functions
+        // Evaluation Functions
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights

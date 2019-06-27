@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -304,7 +306,7 @@ void Foam::RBD::rigidBodyModel::makeComposite(const label bodyID)
     if (!isA<compositeBody>(bodies_[bodyID]))
     {
         // Retrieve the un-merged body
-        autoPtr<rigidBody> bodyPtr = bodies_.set(bodyID, nullptr);
+        autoPtr<rigidBody> bodyPtr = bodies_.release(bodyID);
 
         // Insert the compositeBody containing the original body
         bodies_.set

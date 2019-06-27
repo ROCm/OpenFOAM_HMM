@@ -61,3 +61,8 @@
     const label pRefCell = pRefCellFluid[i];
     const scalar pRefValue = pRefValueFluid[i];
 
+    const dimensionedScalar rhoMax = rhoMaxFluid[i];
+    const dimensionedScalar rhoMin = rhoMinFluid[i];
+
+    const pressureControl& pressureControl = pressureControls[i];
+

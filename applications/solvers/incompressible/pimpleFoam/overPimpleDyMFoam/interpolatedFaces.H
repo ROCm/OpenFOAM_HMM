@@ -11,7 +11,7 @@ labelListList donorCell(mesh.nInternalFaces());
 scalarListList weightCellCells(mesh.nInternalFaces());
 
 // Interpolated HbyA faces
-vectorField UIntFaces(mesh.nInternalFaces(), vector::zero);
+vectorField UIntFaces(mesh.nInternalFaces(), Zero);
 
 // Determine receptor neighbour cells
 labelList receptorNeigCell(mesh.nInternalFaces(), -1);
@@ -23,7 +23,7 @@ labelList receptorNeigCell(mesh.nInternalFaces(), -1);
 
     label nZones = gMax(zoneID)+1;
     PtrList<fvMeshSubset> meshParts(nZones);
-    labelList nCellsPerZone(nZones, 0);
+    labelList nCellsPerZone(nZones, Zero);
 
     // A mesh subset for each zone
     forAll(meshParts, zonei)
@@ -173,7 +173,7 @@ labelList receptorNeigCell(mesh.nInternalFaces(), -1);
 }
 
 // contravariant U
-vectorField U1Contrav(mesh.nInternalFaces(), vector::zero);
+vectorField U1Contrav(mesh.nInternalFaces(), Zero);
 
 surfaceVectorField faceNormals(mesh.Sf()/mesh.magSf());
 
@@ -192,7 +192,8 @@ forAll(isNeiInterpolatedFace, faceI)
     if (cellId != -1)
     {
         const vector& n = faceNormals[faceI];
-        vector n1 = vector::zero;
+        vector n1(Zero);
+
         // 2-D cases
         if (mesh.nSolutionD() == 2)
         {

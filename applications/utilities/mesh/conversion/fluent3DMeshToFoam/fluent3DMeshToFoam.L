@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1057,9 +1059,9 @@ int main(int argc, char *argv[])
 
         uniquify(name, patchNames);
 
-        HashTable<word>::const_iterator iter = fluentToFoamType.find(type);
+        const auto iter = fluentToFoamType.cfind(type);
 
-        if (iter != fluentToFoamType.end())
+        if (iter.found())
         {
             // See if we have a periodic and can derive the other side.
             word neighbPatchName;

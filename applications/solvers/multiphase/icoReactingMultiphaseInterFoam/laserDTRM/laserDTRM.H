@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,7 +87,8 @@ public:
         {
             pdGaussian,
             pdManual,
-            pdUniform
+            pdUniform,
+            pdGaussianPeak
         };
 
 
@@ -153,6 +154,9 @@ private:
                 //- Sigma deviation
                 scalar sigma_;
 
+                //- Peak flux for GaussianPeak mode
+                scalar I0_;
+
                 //- Power
                 autoPtr<Function1<scalar>> laserPower_;
 
@@ -177,9 +181,6 @@ private:
 
         // Fields
 
-
-            //- Incident radiative heat flux [W/m2]
-            volScalarField Qin_;
 
             //- Absorption coefficient
             volScalarField a_;
@@ -248,6 +249,9 @@ public:
 
         //- Read radiation properties dictionary
         bool read();
+
+        //- Number of bands for this radiation model
+        virtual label nBands() const;
 
 
     // Access

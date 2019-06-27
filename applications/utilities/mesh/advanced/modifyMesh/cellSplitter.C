@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,25 +82,24 @@ Foam::label Foam::cellSplitter::newOwner
     const Map<labelList>& cellToCells
 ) const
 {
-    label oldOwn = mesh_.faceOwner()[facei];
+    const label old = mesh_.faceOwner()[facei];
 
-    Map<labelList>::const_iterator fnd = cellToCells.find(oldOwn);
+    const auto iter = cellToCells.cfind(old);
 
-    if (fnd == cellToCells.end())
+    if (!iter.found())
     {
         // Unsplit cell
-        return oldOwn;
+        return old;
     }
-    else
-    {
-        // Look up index of face in the cells' faces.
 
-        const labelList& newCells = fnd();
 
-        const cell& cFaces = mesh_.cells()[oldOwn];
+    // Look up index of face in the cells' faces.
 
-        return newCells[cFaces.find(facei)];
-    }
+    const labelList& newCells = *iter;
+
+    const cell& cFaces = mesh_.cells()[old];
+
+    return newCells[cFaces.find(facei)];
 }
 
 
@@ -108,41 +109,33 @@ Foam::label Foam::cellSplitter::newNeighbour
     const Map<labelList>& cellToCells
 ) const
 {
-    label oldNbr = mesh_.faceNeighbour()[facei];
+    const label old = mesh_.faceNeighbour()[facei];
 
-    Map<labelList>::const_iterator fnd = cellToCells.find(oldNbr);
+    const auto iter = cellToCells.cfind(old);
 
-    if (fnd == cellToCells.end())
+    if (!iter.found())
     {
         // Unsplit cell
-        return oldNbr;
+        return old;
     }
-    else
-    {
-        // Look up index of face in the cells' faces.
 
-        const labelList& newCells = fnd();
 
-        const cell& cFaces = mesh_.cells()[oldNbr];
+    // Look up index of face in the cells' faces.
 
-        return newCells[cFaces.find(facei)];
-    }
+    const labelList& newCells = *iter;
+
+    const cell& cFaces = mesh_.cells()[old];
+
+    return newCells[cFaces.find(facei)];
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::cellSplitter::cellSplitter(const polyMesh& mesh)
 :
     mesh_(mesh),
     addedPoints_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellSplitter::~cellSplitter()
 {}
 
 
@@ -162,9 +155,9 @@ void Foam::cellSplitter::setRefinement
     // Introduce cellToMidPoints.
     //
 
-    forAllConstIter(Map<point>, cellToMidPoint, iter)
+    forAllConstIters(cellToMidPoint, iter)
     {
-        label celli = iter.key();
+        const label celli = iter.key();
 
         label anchorPoint = mesh_.cellPoints()[celli][0];
 
@@ -173,7 +166,7 @@ void Foam::cellSplitter::setRefinement
             (
                 polyAddPoint
                 (
-                    iter(),         // point
+                    iter.val(),     // point
                     anchorPoint,    // master point
                     -1,             // zone for point
                     true            // supports a cell
@@ -193,9 +186,9 @@ void Foam::cellSplitter::setRefinement
 
     Map<labelList> cellToCells(cellToMidPoint.size());
 
-    forAllConstIter(Map<point>, cellToMidPoint, iter)
+    forAllConstIters(cellToMidPoint, iter)
     {
-        label celli = iter.key();
+        const label celli = iter.key();
 
         const cell& cFaces = mesh_.cells()[celli];
 
@@ -238,9 +231,9 @@ void Foam::cellSplitter::setRefinement
     // point.
     //
 
-    forAllConstIter(Map<point>, cellToMidPoint, iter)
+    forAllConstIters(cellToMidPoint, iter)
     {
-        label celli = iter.key();
+        const label celli = iter.key();
 
         label midPointi = addedPoints_[celli];
 
@@ -368,9 +361,9 @@ void Foam::cellSplitter::setRefinement
     // Mark off affected face.
     bitSet faceUpToDate(mesh_.nFaces(), true);
 
-    forAllConstIter(Map<point>, cellToMidPoint, iter)
+    forAllConstIters(cellToMidPoint, iter)
     {
-        label celli = iter.key();
+        const label celli = iter.key();
 
         const cell& cFaces = mesh_.cells()[celli];
 
@@ -462,15 +455,13 @@ void Foam::cellSplitter::updateMesh(const mapPolyMesh& morphMap)
     // point get mapped do they get inserted.
     Map<label> newAddedPoints(addedPoints_.size());
 
-    forAllConstIter(Map<label>, addedPoints_, iter)
+    forAllConstIters(addedPoints_, iter)
     {
-        label oldCelli = iter.key();
+        const label oldCelli = iter.key();
+        const label oldPointi = iter.val();
 
-        label newCelli = morphMap.reverseCellMap()[oldCelli];
-
-        label oldPointi = iter();
-
-        label newPointi = morphMap.reversePointMap()[oldPointi];
+        const label newCelli = morphMap.reverseCellMap()[oldCelli];
+        const label newPointi = morphMap.reversePointMap()[oldPointi];
 
         if (newCelli >= 0 && newPointi >= 0)
         {

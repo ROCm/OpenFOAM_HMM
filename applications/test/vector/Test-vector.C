@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ Description
 
 #include "vector.H"
 #include "IOstreams.H"
+#include <algorithm>
 
 using namespace Foam;
 
@@ -74,6 +75,18 @@ void doTest(vector& vec1, vector& vec2)
 }
 
 
+template<class VecSpace>
+void testIterator(const VecSpace& vs)
+{
+    Info<< "size: " << vs.size() << " for:";
+    for (const auto& val : vs)
+    {
+        Info<< " " << val;
+    }
+    Info<< nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -89,7 +102,20 @@ int main(int argc, char *argv[])
         vector vec2(0.5, 0.51, -0.5);
 
         doTest(vec1, vec2);
+
+        testIterator(vec1);
+        testIterator(vec2);
+
+        // Use STL algorithm(s)
+
+        std::sort(vec2.begin(), vec2.end());
+        Info<< "sorted: " << vec2 << nl;
+
+        std::random_shuffle(vec2.begin(), vec2.end());
+        Info<< "shuffled: " << vec2 << nl;
     }
+
+    Info<< "\nEnd\n" << nl;
 
     return 0;
 }

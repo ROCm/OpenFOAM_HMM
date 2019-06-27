@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -242,7 +244,7 @@ Foam::commSchedule::commSchedule
 
     // Sort schedule_ by processor
 
-    labelList nProcScheduled(nProcs, 0);
+    labelList nProcScheduled(nProcs, Zero);
 
     // Count
     forAll(schedule_, i)

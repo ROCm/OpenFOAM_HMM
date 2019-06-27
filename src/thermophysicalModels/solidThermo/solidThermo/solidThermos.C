@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +31,7 @@ License
 
 #include "specie.H"
 #include "rhoConst.H"
+#include "icoPolynomial.H"
 #include "hConstThermo.H"
 #include "hPowerThermo.H"
 #include "hPolynomialThermo.H"
@@ -85,6 +88,19 @@ makeSolidThermo
     rhoConst,
     specie
 );
+
+makeSolidThermo
+(
+    solidThermo,
+    heSolidThermo,
+    pureMixture,
+    polynomialSolidTransport,
+    sensibleEnthalpy,
+    hPolynomialThermo,
+    icoPolynomial,
+    specie
+);
+
 
 makeSolidThermoPhysicsType
 (

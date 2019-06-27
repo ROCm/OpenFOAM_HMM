@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2012-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +79,7 @@ void Foam::PrintTable<KeyType, DataType>::print
         label largestKeyLength = 6;
         label largestDataLength = 0;
 
-        List<label> largestProcSize(Pstream::nProcs(), 0);
+        labelList largestProcSize(Pstream::nProcs(), Zero);
 
         forAll(procData, proci)
         {
@@ -96,12 +98,12 @@ void Foam::PrintTable<KeyType, DataType>::print
 
                 Map<DataType>& key = combinedTable[iter.key()];
 
-                key.insert(proci, iter.object());
+                key.insert(proci, iter.val());
 
                 forAllConstIters(key, dataIter)
                 {
                     std::ostringstream buf;
-                    buf << dataIter.object();
+                    buf << dataIter.val();
 
                     largestDataLength = max
                     (

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,9 +30,11 @@ License
 #include "JobInfo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// File-local functions
+#include "signalMacros.C"
 
-struct sigaction Foam::sigSegv::oldAction_;
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::sigSegv::sigActive_ = false;
 
@@ -39,17 +43,11 @@ bool Foam::sigSegv::sigActive_ = false;
 
 void Foam::sigSegv::sigHandler(int)
 {
-    // Reset old handling
-    if (sigaction(SIGSEGV, &oldAction_, nullptr) < 0)
-    {
-        FatalErrorInFunction
-            << "Cannot reset SIGSEGV trapping"
-            << abort(FatalError);
-    }
+    resetHandler("SIGSEGV", SIGSEGV);
 
     jobInfo.signalEnd();        // Update jobInfo file
     error::printStack(Perr);
-    raise(SIGSEGV);             // Throw signal (to old handler)
+    ::raise(SIGSEGV);           // Throw signal (to old handler)
 }
 
 
@@ -73,35 +71,25 @@ Foam::sigSegv::~sigSegv()
 
 void Foam::sigSegv::set(bool)
 {
-    if (!sigActive_)
+    if (sigActive_)
     {
-        struct sigaction newAction;
-        newAction.sa_handler = sigHandler;
-        newAction.sa_flags = SA_NODEFER;
-        sigemptyset(&newAction.sa_mask);
-        if (sigaction(SIGSEGV, &newAction, &oldAction_) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot call more than once"
-                << abort(FatalError);
-        }
-        sigActive_ = true;
+        return;
     }
+    sigActive_ = true;
+
+    setHandler("SIGSEGV", SIGSEGV, sigHandler);
 }
 
 
 void Foam::sigSegv::unset(bool)
 {
-    if (sigActive_)
+    if (!sigActive_)
     {
-        if (sigaction(SIGSEGV, &oldAction_, nullptr) < 0)
-        {
-            FatalErrorInFunction
-                << "Cannot unset SIGSEGV trapping"
-                << abort(FatalError);
-        }
-        sigActive_ = false;
+        return;
     }
+    sigActive_ = false;
+
+    resetHandler("SIGSEGV", SIGSEGV);
 }
 
 

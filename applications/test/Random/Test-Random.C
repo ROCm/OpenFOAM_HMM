@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,10 @@ Description
 #include <iostream>
 #include <iomanip>
 
+#ifdef __linux__
+#define TEST_POSIX_RAND
 #define TEST_RAW_IEEE
+#endif
 
 // Construct a positive double with the 48 random bits distributed over
 // its fractional part so the resulting FP number is [0.0,1.0).
@@ -84,9 +87,13 @@ void testPosition(const label n)
 }
 
 
-// Output with cout instead of Info to keep values unsigned on output
+// Output with cout instead of Info to retain unsigned values on output
 using std::cout;
 using std::setw;
+
+#define PutValue(arg)   \
+    cout<< setw(12) << (arg);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -105,22 +112,30 @@ int main(int argc, char *argv[])
         for (label iter=0; iter < maxIter; ++iter)
         {
             rnd.seed(123456);
+            #ifdef TEST_POSIX_RAND
             ::srand48(123456);
+            #endif
             mtwist.seed(123456);
 
-            Info<< nl << "32-bit random with seed = 123456" << nl;
+            cout<< nl << "32-bit random with seed = 123456" << nl;
 
-            cout<< setw(12) << "Rand48()"
-                << setw(12) << "lrand48()"
-                << setw(12) << "mtwister"
-                << setw(12) << "default" << nl;
+            PutValue("Rand48()");
+            #ifdef TEST_POSIX_RAND
+            PutValue("lrand48()");
+            #endif
+            PutValue("mtwister");
+            PutValue("default");
+            cout<< nl;
 
             for (int i=0; i<25; i++)
             {
-                cout<< setw(12) << rnd()
-                    << setw(12) << long(::lrand48())
-                    << setw(12) << long(mtwist())
-                    << setw(12) << long(deflt()) << nl;
+                PutValue(rnd());
+                #ifdef TEST_POSIX_RAND
+                PutValue(long(::lrand48()));
+                #endif
+                PutValue(long(mtwist()));
+                PutValue(long(deflt()));
+                cout<< nl;
             }
         }
     }
@@ -134,7 +149,9 @@ int main(int argc, char *argv[])
         // Two passes to ensure that reset is working properly
         for (label iter=0; iter < maxIter; ++iter)
         {
+            #ifdef TEST_POSIX_RAND
             ::srand48(123456);
+            #endif
             rnd.reset(123456);
             manual.seed(123456);
             mtwist.seed(123456);
@@ -143,25 +160,24 @@ int main(int argc, char *argv[])
             cout<< nl << "Random (Rand48) with seed = " << rnd.seed()
                 << " interval [0,1000]" << nl;
 
-            cout<< setw(12) << "Rand48()"
-                << setw(12) << "drand48()";
-
+            PutValue("Rand48()");
             #ifdef TEST_RAW_IEEE
-            cout<< setw(12) << "manual";
+            PutValue("manual");
             #endif
-            cout<< setw(12) << "mtwister";
+            PutValue("mtwister");
             cout<< nl;
 
             for (int i=0; i<25; i++)
             {
-                cout<< setw(12) << (rnd.sample01<scalar>()*1000)
-                    << setw(12) << (drand48()*1000);
-
-                #ifdef TEST_RAW_IEEE
-                cout<< setw(12) << (randomFraction(manual.raw())*1000);
+                PutValue(rnd.sample01<scalar>()*1000);
+                #ifdef TEST_POSIX_RAND
+                PutValue(drand48()*1000);
                 #endif
-                cout<< setw(12) << (uniform01(mtwist)*1000);
-                cout<< setw(12) << (uniform01(deflt)*1000);
+                #ifdef TEST_RAW_IEEE
+                PutValue(randomFraction(manual.raw())*1000);
+                #endif
+                PutValue(uniform01(mtwist)*1000);
+                PutValue(uniform01(deflt)*1000);
                 cout<< nl;
             }
         }
@@ -170,23 +186,29 @@ int main(int argc, char *argv[])
     {
         Rand48 rnd1(123456);
         Rand48 rnd2(123456);
+        #ifdef TEST_POSIX_RAND
         ::srand48(123456);
+        #endif
 
         rnd2.discard(10);
 
         cout<< nl << "Rand48 - test with offset of 10" << nl;
 
-        cout<< setw(12) << "Rand48()"
-            << setw(12) << "offset-10"
-            << setw(12) << "lrand48()"
-            << nl;
+        PutValue("Rand48()");
+        PutValue("offset-10");
+        #ifdef TEST_POSIX_RAND
+        PutValue("lrand48()");
+        #endif
+        cout<< nl;
 
         for (int i=0; i<25; i++)
         {
-            cout<< setw(12) << (rnd1())
-                << setw(12) << (rnd2())
-                << setw(12) << long(::lrand48())
-                << nl;
+            PutValue(rnd1());
+            PutValue(rnd2());
+            #ifdef TEST_POSIX_RAND
+            PutValue(long(::lrand48()));
+            #endif
+            cout<< nl;
         }
     }
 
@@ -201,7 +223,7 @@ int main(int argc, char *argv[])
         Info<<"Random position(10,5): "
             << Random().position<label>(10, 5) << endl;
     }
-    catch (Foam::error& err)
+    catch (const Foam::error& err)
     {
         Info<< "Caught FatalError " << err << nl << endl;
     }

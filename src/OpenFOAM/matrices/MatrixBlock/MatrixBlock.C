@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2004-2010, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +71,76 @@ Foam::MatrixBlock<MatrixType>::operator Field<cmptType>() const
 }
 
 
+template<class MatrixType>
+Foam::label Foam::ConstMatrixBlock<MatrixType>::disallow
+(
+    const char* what
+) const
+{
+    FatalErrorInFunction
+        << "Block addresses " << what
+        << " outside matrix or invalid matrix components"
+        << abort(FatalError);
+    return 0;
+}
+
+
+template<class MatrixType>
+Foam::label Foam::MatrixBlock<MatrixType>::disallow
+(
+    const char* what
+) const
+{
+    FatalErrorInFunction
+        << "Block addresses " << what
+        << " outside matrix or invalid matrix components"
+        << abort(FatalError);
+    return 0;
+}
+
+
+template<class MatrixType> void Foam::ConstMatrixBlock<MatrixType>::checkIndex
+(
+    const label i,
+    const label j
+) const
+{
+    if (i < 0 || i >= mRows_)
+    {
+        FatalErrorInFunction
+            << "Index " << i << " is out of range 0 ... " << mRows_ - 1
+            << abort(FatalError);
+    }
+    else if (j < 0 || j >= nCols_)
+    {
+        FatalErrorInFunction
+            << "Index " << j << " is out of range 0 ... " << nCols_ - 1
+            << abort(FatalError);
+    }
+}
+
+
+template<class MatrixType> void Foam::MatrixBlock<MatrixType>::checkIndex
+(
+    const label i,
+    const label j
+) const
+{
+    if (i < 0 || i >= mRows_)
+    {
+        FatalErrorInFunction
+            << "Index " << i << " is out of range 0 ... " << mRows_ - 1
+            << abort(FatalError);
+    }
+    else if (j < 0 || j >= nCols_)
+    {
+        FatalErrorInFunction
+            << "Index " << j << " is out of range 0 ... " << nCols_ - 1
+            << abort(FatalError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class MatrixType>
@@ -87,9 +159,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (label i=0; i<mRows_; i++)
+    for (label i = 0; i < mRows_; ++i)
     {
-        for (label j=0; j<nCols_; j++)
+        for (label j = 0; j < nCols_; ++j)
         {
             (*this)(i, j) = Mb(i, j);
         }
@@ -114,9 +186,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
                 << abort(FatalError);
         }
 
-        for (label i=0; i<mRows_; i++)
+        for (label i = 0; i < mRows_; ++i)
         {
-            for (label j=0; j<nCols_; j++)
+            for (label j = 0; j < nCols_; ++j)
             {
                 (*this)(i, j) = Mb(i, j);
             }
@@ -142,9 +214,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
                 << abort(FatalError);
         }
 
-        for (label i=0; i<mRows_; i++)
+        for (label i = 0; i < mRows_; ++i)
         {
-            for (label j=0; j<nCols_; j++)
+            for (label j = 0; j < nCols_; ++j)
             {
                 (*this)(i, j) = Mb(i, j);
             }
@@ -171,9 +243,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
                 << abort(FatalError);
         }
 
-        for (label i=0; i<mRows_; i++)
+        for (label i = 0; i < mRows_; ++i)
         {
-            for (label j=0; j<nCols_; j++)
+            for (label j = 0; j < nCols_; ++j)
             {
                 (*this)(i, j) = Mb(i, j);
             }
@@ -200,9 +272,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
                 << abort(FatalError);
         }
 
-        for (label i=0; i<mRows_; i++)
+        for (label i = 0; i < mRows_; ++i)
         {
-            for (label j=0; j<nCols_; j++)
+            for (label j = 0; j < nCols_; ++j)
             {
                 (*this)(i, j) = Mb(i, j);
             }
@@ -233,9 +305,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (direction i=0; i<mRows_; ++i)
+    for (direction i = 0; i < mRows_; ++i)
     {
-        for (direction j=0; j<nCols_; ++j)
+        for (direction j = 0; j < nCols_; ++j)
         {
             operator()(i, j) = Mb(i, j);
         }
@@ -264,7 +336,7 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (direction i=0; i<mRows_; ++i)
+    for (direction i = 0; i < mRows_; ++i)
     {
         operator()(i, 0) = Mb[i];
     }
@@ -287,9 +359,9 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (label i=0; i<mRows_; i++)
+    for (label i = 0; i < mRows_; ++i)
     {
-        for (label j=0; j<nCols_; j++)
+        for (label j = 0; j < nCols_; ++j)
         {
             (*this)(i, j) = ms(i, j);
         }
@@ -313,7 +385,7 @@ void Foam::MatrixBlock<MatrixType>::operator=
             << abort(FatalError);
     }
 
-    for (direction i=0; i<Ncmpts; ++i)
+    for (direction i = 0; i < Ncmpts; ++i)
     {
         operator()(i, 0) = ms[i];
     }

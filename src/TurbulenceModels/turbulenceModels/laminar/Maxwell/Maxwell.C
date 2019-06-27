@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2016-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,25 +63,9 @@ Maxwell<BasicTurbulenceModel>::Maxwell
         propertiesName
     ),
 
-    nuM_
-    (
-        dimensioned<scalar>
-        (
-            "nuM",
-            dimViscosity,
-            this->coeffDict_.lookup("nuM")
-        )
-    ),
+    nuM_("nuM", dimViscosity, this->coeffDict_),
 
-    lambda_
-    (
-        dimensioned<scalar>
-        (
-            "lambda",
-            dimTime,
-            this->coeffDict_.lookup("lambda")
-        )
-    ),
+    lambda_("lambda", dimTime, this->coeffDict_),
 
     sigma_
     (
@@ -113,10 +99,8 @@ bool Maxwell<BasicTurbulenceModel>::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 template<class BasicTurbulenceModel>

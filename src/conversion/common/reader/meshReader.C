@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,7 +52,7 @@ void Foam::meshReader::addFaceZones(polyMesh& mesh) const
     }
 
     nZone = 0;
-    forAllConstIter(HashTable<labelList>, monitoringSets_, iter)
+    forAllConstIters(monitoringSets_, iter)
     {
         Info<< "faceZone " << nZone
             << " (size: " << iter().size() << ") name: "
@@ -97,7 +99,9 @@ Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
         (
             polyMesh::defaultRegion,
             registry.time().constant(),
-            registry
+            registry,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
         ),
         std::move(points_),
         std::move(meshFaces_),

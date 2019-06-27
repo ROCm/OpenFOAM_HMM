@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +71,7 @@ SourceFiles
 #ifndef functionObjects_timeActivatedFileUpdate_H
 #define functionObjects_timeActivatedFileUpdate_H
 
-#include "functionObject.H"
+#include "timeFunctionObject.H"
 #include "Tuple2.H"
 #include "Switch.H"
 
@@ -78,24 +80,21 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Time;
 
 namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class timeActivatedFileUpdate Declaration
+                   Class timeActivatedFileUpdate Declaration
 \*---------------------------------------------------------------------------*/
 
 class timeActivatedFileUpdate
 :
-    public functionObject
+    public functionObjects::timeFunctionObject
 {
-    // Private data
-
-        //- Reference to Time
-        const Time& time_;
+    // Private Member Data
 
         //- Name of file to update
         fileName fileToUpdate_;
@@ -140,7 +139,7 @@ public:
 
 
     //- Destructor
-    virtual ~timeActivatedFileUpdate();
+    virtual ~timeActivatedFileUpdate() = default;
 
 
     // Member Functions

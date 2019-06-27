@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -266,7 +268,7 @@ void VoFPatchTransfer::correct
             getModelProperty<scalarField>
             (
                 "patchTransferredMasses",
-                scalarField(patchTransferredMasses_.size(), 0)
+                scalarField(patchTransferredMasses_.size(), Zero)
             )
         );
 
@@ -302,7 +304,7 @@ void VoFPatchTransfer::patchTransferredMassTotals
         getModelProperty<scalarField>
         (
             "patchTransferredMasses",
-            scalarField(patchTransferredMasses_.size(), 0)
+            scalarField(patchTransferredMasses_.size(), Zero)
         )
     );
 

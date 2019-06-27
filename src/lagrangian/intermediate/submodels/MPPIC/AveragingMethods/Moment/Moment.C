@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2013-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +44,7 @@ Foam::AveragingMethods::Moment<Type>::Moment
     dataY_(FieldField<Field, Type>::operator[](2)),
     dataZ_(FieldField<Field, Type>::operator[](3)),
     transform_(mesh.nCells(), Zero),
-    scale_(0.5*pow(mesh.V(), 1.0/3.0))
+    scale_(0.5*cbrt(mesh.V()))
 {
     scalar a = 1.0/24.0;
     scalar b = 0.5854101966249685;

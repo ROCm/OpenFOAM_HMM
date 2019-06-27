@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,19 +153,10 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
         );
 
         // Transfer ownership of this object to the objectRegistry
-        ptr->store(ptr);
+        ptr->store();
     }
 
     return *ptr;
-}
-
-
-void Foam::basicThermo::lookupAndCheckout(const char* name) const
-{
-    if (db().foundObject<volScalarField>(name))
-    {
-         db().checkOut(*db()[name]);
-    }
 }
 
 
@@ -249,7 +242,9 @@ Foam::basicThermo::basicThermo
         ),
         mesh,
         dimensionedScalar(dimensionSet(1, -1, -1, 0, 0), Zero)
-    )
+    ),
+
+    dpdt_(lookupOrDefault<Switch>("dpdt", true))
 {}
 
 
@@ -324,7 +319,7 @@ Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New
 
 Foam::basicThermo::~basicThermo()
 {
-    lookupAndCheckout("p");
+    db().checkOut("p");
 }
 
 

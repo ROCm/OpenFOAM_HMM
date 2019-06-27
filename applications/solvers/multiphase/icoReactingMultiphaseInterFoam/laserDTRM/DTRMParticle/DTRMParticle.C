@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -99,11 +99,12 @@ bool Foam::DTRMParticle::move
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    while (td.keepParticle && !td.switchProcessor && stepFraction() < 1)
+    do
     {
         //Cache old data of particle to use for reflected particle
         const point pos0 = position();
-        const label cell0 = cell();
+        const label cell1 = cell();
+        const tetIndices tetIs = this->currentTetIndices();
 
         scalar f = 1 - stepFraction();
         const vector s = p1() - p0() - deviationFromMeshCentre();
@@ -113,7 +114,7 @@ bool Foam::DTRMParticle::move
         vector dsv = p1 - pos0;
         scalar ds = mag(dsv);
 
-        const label cell1 = cell();
+        //const label cell1 = cell();
 
         //NOTE:
         // Under the new barocentric tracking alghorithm the newly
@@ -181,7 +182,8 @@ bool Foam::DTRMParticle::move
                             , 0.98
                         );
 
-                    scalar delaM = cbrt(mesh().cellVolumes()[cell0]);
+                    //scalar delaM = cbrt(mesh().cellVolumes()[cell0]);
+                    scalar delaM = cbrt(mesh().cellVolumes()[cell1]);
 
                     const point insertP(position() - pDir*0.1*delaM);
                     label cellI = mesh().findCell(insertP);
@@ -208,11 +210,11 @@ bool Foam::DTRMParticle::move
             // Change transmissiveId of the particle
             transmissiveId_ = reflectedZoneId;
 
-            const tetIndices tetIs = this->currentTetIndices();
-            scalar a = td.aInterp().interpolate(this->coordinates(), tetIs);
-            scalar e = td.eInterp().interpolate(this->coordinates(), tetIs);
-            scalar E = td.EInterp().interpolate(this->coordinates(), tetIs);
-            scalar T = td.TInterp().interpolate(this->coordinates(), tetIs);
+            scalar a = td.aInterp().interpolate(pos0, cell1);
+            scalar e = td.eInterp().interpolate(pos0, cell1);
+            scalar E = td.EInterp().interpolate(pos0, cell1);
+            scalar T = td.TInterp().interpolate(pos0, cell1);
+
 
             // Left intensity after reflection
             const scalar Itran = I_*(1.0 - rho);
@@ -234,11 +236,10 @@ bool Foam::DTRMParticle::move
         }
         else
         {
-            const tetIndices tetIs = this->currentTetIndices();
-            scalar a = td.aInterp().interpolate(this->coordinates(), tetIs);
-            scalar e = td.eInterp().interpolate(this->coordinates(), tetIs);
-            scalar E = td.EInterp().interpolate(this->coordinates(), tetIs);
-            scalar T = td.TInterp().interpolate(this->coordinates(), tetIs);
+            scalar a = td.aInterp().interpolate(pos0, cell1);
+            scalar e = td.eInterp().interpolate(pos0, cell1);
+            scalar E = td.EInterp().interpolate(pos0, cell1);
+            scalar T = td.TInterp().interpolate(pos0, cell1);
 
             const scalar I1 =
             (
@@ -257,7 +258,7 @@ bool Foam::DTRMParticle::move
             }
         }
 
-    }
+    }while (td.keepParticle && !td.switchProcessor && stepFraction() < 1);
 
     return td.keepParticle;
 }

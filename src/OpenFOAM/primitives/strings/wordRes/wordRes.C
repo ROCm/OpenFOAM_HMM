@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,26 +24,41 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "wordRes.H"
-#include "HashSet.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::wordRes Foam::wordRes::uniq(const UList<wordRe>& input)
 {
     wordRes output(input.size());
-    wordHashSet uniqWord;
+
+    // Use linear List search instead of HashSet, since the lists are
+    // normally fairly small and mostly just have unique entries
+    // anyhow. This reduces the overall overhead.
+
+    List<bool> duplicate(input.size(), false);  // Track duplicates
 
     label count = 0;
-    for (const wordRe& select : input)
+
+    forAll(input, i)
     {
-        if (select.isPattern() || uniqWord.insert(select))
+        const wordRe& val = input[i];
+
+        const label next = input.find(val, i+1);
+
+        if (next > i)
         {
-            output[count] = select;
+            duplicate[next] = true;  // Duplicate
+        }
+
+        if (!duplicate[i])
+        {
+            output[count] = val;
             ++count;
         }
     }
 
     output.resize(count);
+
     return output;
 }
 
@@ -52,23 +67,37 @@ Foam::wordRes Foam::wordRes::uniq(const UList<wordRe>& input)
 
 void Foam::wordRes::uniq()
 {
-    wordHashSet uniqWord;
+    List<wordRe> input = *this;
 
-    label i = 0, count = 0;
-    for (wordRe& select : *this)
+    wordRes& output = *this;
+
+    // Use linear List search instead of HashSet, since the lists are
+    // normally fairly small and mostly just have unique entries
+    // anyhow. This reduces the overall overhead.
+
+    List<bool> duplicate(input.size(), false);  // Track duplicates
+
+    label count = 0;
+
+    forAll(input, i)
     {
-        if (select.isPattern() || uniqWord.insert(select))
+        wordRe& val = input[i];
+
+        const label next = input.find(val, i+1);
+
+        if (next > i)
         {
-            if (count != i)
-            {
-                (*this)[count] = std::move(select);
-            }
+            duplicate[next] = true;  // Duplicate
+        }
+
+        if (!duplicate[i])
+        {
+            output[count] = std::move(val);
             ++count;
         }
-        ++i;
     }
 
-    resize(count);
+    output.resize(count);
 }
 
 

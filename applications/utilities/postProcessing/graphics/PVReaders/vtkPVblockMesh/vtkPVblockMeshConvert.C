@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,10 +51,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
     int& blockNo
 )
 {
-    if (debug)
-    {
-        Info<< "<beg> convertMeshBlocks" << endl;
-    }
+    DebugInfo << "<beg> convertMeshBlocks" << endl;
 
     const Map<string> blockStatus = getSelectedArrayMap
     (
@@ -116,10 +115,7 @@ void Foam::vtkPVblockMesh::convertMeshBlocks
         ++blockNo;
     }
 
-    if (debug)
-    {
-        Info<< "<end> convertMeshBlocks" << endl;
-    }
+    DebugInfo << "<end> convertMeshBlocks" << endl;
 }
 
 
@@ -218,11 +214,7 @@ void Foam::vtkPVblockMesh::convertMeshEdges
         ++blockNo;
     }
 
-    if (debug)
-    {
-        Info<< "<end> convertMeshEdges" << endl;
-    }
-
+    DebugInfo << "<end> convertMeshEdges" << endl;
 }
 
 
@@ -238,10 +230,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
 
     const pointField blkPoints(meshPtr_->vertices() * meshPtr_->scaleFactor());
 
-    if (debug)
-    {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
-    }
+    DebugInfo << "<beg> " << FUNCTION_NAME << endl;
 
     if (true)  // Or some flag or other condition
     {
@@ -268,10 +257,7 @@ void Foam::vtkPVblockMesh::convertMeshCorners
         ++blockNo;
     }
 
-    if (debug)
-    {
-        Info<< "<end> " << FUNCTION_NAME << endl;
-    }
+    DebugInfo << "<end> " << FUNCTION_NAME << endl;
 }
 
 

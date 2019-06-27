@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,7 +65,7 @@ bool Foam::functionEntries::removeEntry::execute
             // Remove scoped keyword, or keyword in the local scope
             auto finder(parentDict.searchScoped(key, keyType::LITERAL));
 
-            if (finder.found())
+            if (finder.good())
             {
                 finder.context().remove(finder.ptr()->keyword());
             }

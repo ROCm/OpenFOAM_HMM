@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -387,11 +389,11 @@ void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
     c.checkFieldIOobject(c, sampledPositions);
 
     label i = 0;
-    forAllIter(Cloud<streamLineParticle>, c, iter)
+    for (streamLineParticle& p : c)
     {
-        iter().lifeTime_ = lifeTime[i];
-        iter().sampledPositions_.transfer(sampledPositions[i]);
-        i++;
+        p.lifeTime_ = lifeTime[i];
+        p.sampledPositions_.transfer(sampledPositions[i]);
+        ++i;
     }
 }
 
@@ -400,7 +402,7 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
 {
     particle::writeFields(c);
 
-    label np = c.size();
+    const label np = c.size();
 
     IOField<label> lifeTime
     (
@@ -414,11 +416,11 @@ void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
     );
 
     label i = 0;
-    forAllConstIter(Cloud<streamLineParticle>, c, iter)
+    for (const streamLineParticle& p : c)
     {
-        lifeTime[i] = iter().lifeTime_;
-        sampledPositions[i] = iter().sampledPositions_;
-        i++;
+        lifeTime[i] = p.lifeTime_;
+        sampledPositions[i] = p.sampledPositions_;
+        ++i;
     }
 
     lifeTime.write(np > 0);

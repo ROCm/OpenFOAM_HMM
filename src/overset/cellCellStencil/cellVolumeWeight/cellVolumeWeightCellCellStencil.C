@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2014-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,7 @@ License
 #include "oversetFvPatch.H"
 #include "zeroGradientFvPatchFields.H"
 #include "syncTools.H"
+#include "dynamicOversetFvMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -73,8 +74,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
     {
         if (isA<oversetFvPatch>(fvm[patchI]))
         {
-            Pout<< "Storing faces on patch " << fvm[patchI].name() << endl;
-
+            //Pout<< "Storing faces on patch " << fvm[patchI].name() << endl;
             forAll(fvm[patchI], i)
             {
                 isFront.set(fvm[patchI].start()+i);
@@ -155,12 +155,12 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
                     {
                         allWeight[own] = fraction;
 
-                        if (debug)
-                        {
-                            Pout<< "    setting cell "
-                                << mesh_.cellCentres()[own]
-                                << " to " << fraction << endl;
-                        }
+                        //if (debug)
+                        //{
+                        //    Pout<< "    setting cell "
+                        //        << mesh_.cellCentres()[own]
+                        //        << " to " << fraction << endl;
+                        //}
                         allCellTypes[own] = INTERPOLATED;
                         newIsFront.set(mesh_.cells()[own]);
                     }
@@ -174,12 +174,12 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
                         {
                             allWeight[nei] = fraction;
 
-                            if (debug)
-                            {
-                                Pout<< "    setting cell "
-                                    << mesh_.cellCentres()[nei]
-                                    << " to " << fraction << endl;
-                            }
+                            //if (debug)
+                            //{
+                            //    Pout<< "    setting cell "
+                            //        << mesh_.cellCentres()[nei]
+                            //        << " to " << fraction << endl;
+                            //}
 
                             allCellTypes[nei] = INTERPOLATED;
                             newIsFront.set(mesh_.cells()[nei]);
@@ -270,7 +270,7 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
     //  1 : borders blockage so is not ok (but can be overridden by real
     //      patch)
     //  2 : has real patch in it so is reachable
-    labelList regionType(cellRegion.nRegions(), 0);
+    labelList regionType(cellRegion.nRegions(), Zero);
 
 
     // See if any regions borders blockage. Note: isBlockedFace is already
@@ -286,11 +286,10 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
                 {
                     if (regionType[ownRegion] == 0)
                     {
-                        Pout<< "Mark region:" << ownRegion
-                            << " on zone:" << zoneID[own[faceI]]
-                            << " as next to blockage at:"
-                            << mesh.faceCentres()[faceI] << endl;
-
+                        //Pout<< "Mark region:" << ownRegion
+                        //    << " on zone:" << zoneID[own[faceI]]
+                        //    << " as next to blockage at:"
+                        //    << mesh.faceCentres()[faceI] << endl;
                         regionType[ownRegion] = 1;
                     }
                 }
@@ -301,10 +300,10 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
                 {
                     if (regionType[neiRegion] == 0)
                     {
-                        Pout<< "Mark region:" << neiRegion
-                            << " on zone:" << zoneID[nei[faceI]]
-                            << " as next to blockage at:"
-                            << mesh.faceCentres()[faceI] << endl;
+                        //Pout<< "Mark region:" << neiRegion
+                        //    << " on zone:" << zoneID[nei[faceI]]
+                        //    << " as next to blockage at:"
+                        //    << mesh.faceCentres()[faceI] << endl;
                         regionType[neiRegion] = 1;
                     }
                 }
@@ -323,10 +322,10 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
 
                 if (regionType[ownRegion] == 0)
                 {
-                    Pout<< "Mark region:" << ownRegion
-                        << " on zone:" << zoneID[own[faceI]]
-                        << " as next to blockage at:"
-                        << mesh.faceCentres()[faceI] << endl;
+                    //Pout<< "Mark region:" << ownRegion
+                    //    << " on zone:" << zoneID[own[faceI]]
+                    //    << " as next to blockage at:"
+                    //    << mesh.faceCentres()[faceI] << endl;
                     regionType[ownRegion] = 1;
                 }
             }
@@ -343,8 +342,8 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
         {}
         else if (!fvPatch::constraintType(fvp.type()))
         {
-            Pout<< "Proper patch " << fvp.name() << " of type " << fvp.type()
-                << endl;
+            //Pout<< "Proper patch " << fvp.name() << " of type " << fvp.type()
+            //    << endl;
 
             const labelList& fc = fvp.faceCells();
             forAll(fc, i)
@@ -353,10 +352,9 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
 
                 if (cellTypes[fc[i]] != HOLE && regionType[regionI] != 2)
                 {
-                    Pout<< "reachable region : " << regionI
-                        << " at cell " << mesh.cellCentres()[fc[i]]
-                        << " on zone " << zoneID[fc[i]]
-                        << endl;
+                    //Pout<< "reachable region : " << regionI
+                    //    << " at cell " << mesh.cellCentres()[fc[i]]
+                    //    << " on zone " << zoneID[fc[i]] << endl;
                     regionType[regionI] = 2;
                 }
             }
@@ -407,10 +405,9 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
 
                             if (otherType == 2)
                             {
-                                Pout<< "Reachable through interpolation : "
-                                    << regionI << " at cell "
-                                    << mesh.cellCentres()[cellI]
-                                    << endl;
+                                //Pout<< "Reachable through interpolation : "
+                                //    << regionI << " at cell "
+                                //    << mesh.cellCentres()[cellI] << endl;
                                 regionType[regionI] = 2;
                                 nChanged++;
                                 break;
@@ -458,7 +455,7 @@ void Foam::cellCellStencils::cellVolumeWeight::markPatchCells
 
         if (isA<oversetFvPatch>(fvp))
         {
-            Pout<< "Marking cells on overset patch " << fvp.name() << endl;
+            //Pout<< "Marking cells on overset patch " << fvp.name() << endl;
             forAll(fc, i)
             {
                 label cellI = fc[i];
@@ -467,8 +464,8 @@ void Foam::cellCellStencils::cellVolumeWeight::markPatchCells
         }
         else if (!fvPatch::constraintType(fvp.type()))
         {
-            Pout<< "Marking cells on proper patch " << fvp.name()
-                << " with type " << fvp.type() << endl;
+            //Pout<< "Marking cells on proper patch " << fvp.name()
+            //    << " with type " << fvp.type() << endl;
             forAll(fc, i)
             {
                 label cellI = fc[i];
@@ -589,18 +586,24 @@ void Foam::cellCellStencils::cellVolumeWeight::combineCellTypes
 
             case PATCH:
             {
-                if (allCellTypes[cellI] != HOLE)
-                {
-                    scalar overlapVol = sum(weights[subCellI]);
-                    scalar v = mesh_.V()[cellI];
-                    if (overlapVol < (1.0-overlapTolerance_)*v)
-                    {
-                        //Pout<< "** Patch overlap:" << cellI
-                        //    << " at:" << mesh_.cellCentres()[cellI] << endl;
-                        allCellTypes[cellI] = HOLE;
-                        validDonors = false;
-                    }
-                }
+                // Patch-patch interaction... For now disable always
+                allCellTypes[cellI] = HOLE;
+                validDonors = false;
+
+                // Alternative is to look at the amount of overlap but this
+                // is not very robust
+                //if (allCellTypes[cellI] != HOLE)
+                //{
+                //    scalar overlapVol = sum(weights[subCellI]);
+                //    scalar v = mesh_.V()[cellI];
+                //    if (overlapVol < (1.0-overlapTolerance_)*v)
+                //    {
+                //        //Pout<< "** Patch overlap:" << cellI
+                //        //    << " at:" << mesh_.cellCentres()[cellI] << endl;
+                //        allCellTypes[cellI] = HOLE;
+                //        validDonors = false;
+                //    }
+                //}
             }
             break;
 
@@ -745,7 +748,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     const labelIOList& zoneID = this->zoneID();
 
     label nZones = gMax(zoneID)+1;
-    labelList nCellsPerZone(nZones, 0);
+    labelList nCellsPerZone(nZones, Zero);
     forAll(zoneID, cellI)
     {
         nCellsPerZone[zoneID[cellI]]++;
@@ -928,6 +931,16 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
     }
 
 
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes", allCellTypes)
+        );
+        tfld().write();
+    }
+
+
     // Use the patch types and weights to decide what to do
     forAll(allPatchTypes, cellI)
     {
@@ -977,17 +990,21 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         }
     }
 
-
-    // Mark unreachable bits
-    findHoles(globalCells, mesh_, zoneID, allStencil, allCellTypes);
-
-
-    // Add buffer interpolation layer around holes
-    scalarField allWeight(mesh_.nCells(), 0.0);
-    walkFront(layerRelax, allCellTypes, allWeight);
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_patch", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
 
 
     // Check previous iteration cellTypes_ for any hole->calculated changes
+    // If so set the cell either to interpolated (if there are donors) or
+    // holes (if there are no donors). Note that any interpolated cell might
+    // still be overwritten by the flood filling
     {
         label nCalculated = 0;
 
@@ -997,13 +1014,10 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
             {
                 if (allStencil[celli].size() == 0)
                 {
-                    FatalErrorInFunction
-                        << "Cell:" << celli
-                        << " at:" << mesh_.cellCentres()[celli]
-                        << " zone:" << zoneID[celli]
-                        << " changed from hole to calculated"
-                        << " but there is no donor"
-                        << exit(FatalError);
+                    // Reset to hole
+                    allCellTypes[celli] = HOLE;
+                    allWeights[celli].clear();
+                    allStencil[celli].clear();
                 }
                 else
                 {
@@ -1019,6 +1033,35 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                 << " to calculated. Changed these to interpolated"
                 << endl;
         }
+    }
+
+
+    // Mark unreachable bits
+    findHoles(globalCells, mesh_, zoneID, allStencil, allCellTypes);
+
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_hole", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
+    }
+
+
+    // Add buffer interpolation layer around holes
+    scalarField allWeight(mesh_.nCells(), Zero);
+    walkFront(layerRelax, allCellTypes, allWeight);
+
+    if (debug)
+    {
+        tmp<volScalarField> tfld
+        (
+            createField(mesh_, "allCellTypes_front", allCellTypes)
+        );
+        //tfld.ref().correctBoundaryConditions();
+        tfld().write();
     }
 
     // Normalise weights, Clear storage
@@ -1074,7 +1117,12 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         {
             patchTypes[cellI] = allPatchTypes[cellI];
         }
-        patchTypes.correctBoundaryConditions();
+        //patchTypes.correctBoundaryConditions();
+        dynamicOversetFvMesh::correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >(patchTypes.boundaryFieldRef(), false);
         patchTypes.write();
     }
     if (debug)
@@ -1099,51 +1147,61 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         {
             volTypes[cellI] = allCellTypes[cellI];
         }
-        volTypes.correctBoundaryConditions();
+        //volTypes.correctBoundaryConditions();
+        dynamicOversetFvMesh::correctBoundaryConditions
+        <
+            volScalarField,
+            oversetFvPatchField<scalar>
+        >(volTypes.boundaryFieldRef(), false);
         volTypes.write();
     }
 
 
-//     // Check previous iteration cellTypes_ for any hole->calculated changes
-//     {
-//         label nCalculated = 0;
+//  // Check previous iteration cellTypes_ for any hole->calculated changes
+//  {
+//      label nCalculated = 0;
 //
-//         forAll(cellTypes_, celli)
-//         {
-//             if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
-//             {
-//                 if (allStencil[celli].size() == 0)
-//                 {
-//                     FatalErrorInFunction
-//                         << "Cell:" << celli
-//                         << " at:" << mesh_.cellCentres()[celli]
-//                         << " zone:" << zoneID[celli]
-//                         << " changed from hole to calculated"
-//                         << " but there is no donor"
-//                         << exit(FatalError);
-//                 }
-//                 else
-//                 {
-//                     allCellTypes[celli] = INTERPOLATED;
-//                     nCalculated++;
-//                 }
-//             }
-//         }
+//      forAll(cellTypes_, celli)
+//      {
+//          if (allCellTypes[celli] == CALCULATED && cellTypes_[celli] == HOLE)
+//          {
+//              if (allStencil[celli].size() == 0)
+//              {
+//                  FatalErrorInFunction
+//                      << "Cell:" << celli
+//                      << " at:" << mesh_.cellCentres()[celli]
+//                      << " zone:" << zoneID[celli]
+//                      << " changed from hole to calculated"
+//                      << " but there is no donor"
+//                      << exit(FatalError);
+//              }
+//              else
+//              {
+//                  allCellTypes[celli] = INTERPOLATED;
+//                  nCalculated++;
+//              }
+//          }
+//      }
 //
-//         if (debug)
-//         {
-//             Pout<< "Detected " << nCalculated << " cells changing from hole"
-//                 << " to calculated. Changed these to interpolated"
-//                 << endl;
-//         }
-//     }
+//      if (debug)
+//      {
+//          Pout<< "Detected " << nCalculated << " cells changing from hole"
+//              << " to calculated. Changed these to interpolated"
+//              << endl;
+//      }
+//  }
 
 
     cellTypes_.transfer(allCellTypes);
     cellStencil_.transfer(allStencil);
     cellInterpolationWeights_.transfer(allWeights);
     cellInterpolationWeight_.transfer(allWeight);
-    cellInterpolationWeight_.correctBoundaryConditions();
+    //cellInterpolationWeight_.correctBoundaryConditions();
+    dynamicOversetFvMesh::correctBoundaryConditions
+    <
+        volScalarField,
+        oversetFvPatchField<scalar>
+    >(cellInterpolationWeight_.boundaryFieldRef(), false);
 
     DynamicList<label> interpolationCells;
     forAll(cellStencil_, cellI)

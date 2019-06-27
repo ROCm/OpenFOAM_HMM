@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +45,13 @@ inline Foam::SortableList<T>::SortableList(const label size)
 
 
 template<class T>
+inline Foam::SortableList<T>::SortableList(const label size, const zero)
+:
+    List<T>(size, zero())
+{}
+
+
+template<class T>
 inline Foam::SortableList<T>::SortableList(const label size, const T& val)
 :
     List<T>(size, val)
@@ -66,7 +75,7 @@ inline Foam::SortableList<T>::SortableList(SortableList<T>&& lst)
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(const UList<T>& values)
+inline Foam::SortableList<T>::SortableList(const UList<T>& values)
 :
     List<T>(values)
 {
@@ -75,7 +84,7 @@ Foam::SortableList<T>::SortableList(const UList<T>& values)
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(List<T>&& values)
+inline Foam::SortableList<T>::SortableList(List<T>&& values)
 :
     List<T>(std::move(values))
 {
@@ -98,7 +107,7 @@ inline Foam::SortableList<T>::SortableList
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(std::initializer_list<T> values)
+inline Foam::SortableList<T>::SortableList(std::initializer_list<T> values)
 :
     List<T>(values)
 {
@@ -127,10 +136,10 @@ Foam::List<T>& Foam::SortableList<T>::shrink()
 template<class T>
 void Foam::SortableList<T>::sort()
 {
-    Foam::sortedOrder(*this, indices_);
+    Foam::sortedOrder(*this, indices_, typename UList<T>::less(*this));
 
-    List<T> lst(*this, indices_); // Copy with indices for mapping
-    List<T>::transfer(lst);
+    List<T> list(*this, indices_); // Copy with indices for mapping
+    List<T>::transfer(list);
 }
 
 
@@ -139,8 +148,48 @@ void Foam::SortableList<T>::reverseSort()
 {
     Foam::sortedOrder(*this, indices_, typename UList<T>::greater(*this));
 
-    List<T> lst(*this, indices_); // Copy with indices for mapping
-    List<T>::transfer(lst);
+    List<T> list(*this, indices_); // Copy with indices for mapping
+    List<T>::transfer(list);
+}
+
+
+template<class T>
+void Foam::SortableList<T>::partialSort(label n, label start)
+{
+    indices_.resize(this->size());
+    ListOps::identity(indices_);
+
+    // Forward partial sort of indices
+    std::partial_sort
+    (
+        indices_.begin() + start,
+        indices_.begin() + start + n,
+        indices_.end(),
+        typename UList<T>::less(*this)
+    );
+
+    List<T> list(*this, indices_); // Copy with indices for mapping
+    List<T>::transfer(list);
+}
+
+
+template<class T>
+void Foam::SortableList<T>::partialReverseSort(label n, label start)
+{
+    indices_.resize(this->size());
+    ListOps::identity(indices_);
+
+    // Reverse partial sort of indices
+    std::partial_sort
+    (
+        indices_.begin() + start,
+        indices_.begin() + start + n,
+        indices_.end(),
+        typename UList<T>::greater(*this)
+    );
+
+    List<T> list(*this, indices_); // Copy with indices for mapping
+    List<T>::transfer(list);
 }
 
 

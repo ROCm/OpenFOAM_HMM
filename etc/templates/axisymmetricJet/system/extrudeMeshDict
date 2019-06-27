@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,9 +24,9 @@ extrudeModel    wedge;
 
 sectorCoeffs
 {
-    axisPt          (0 0 0);
-    axis            (1 0 0);
-    angle           1;
+    point       (0 0 0);
+    axis        (1 0 0);
+    angle       1;
 }
 
 flipNormals     false;

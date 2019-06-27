@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -183,7 +185,7 @@ int main(int argc, char *argv[])
                     << "(non-const)\n";
             }
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             Info<< "Failed (expected) " << err << nl << endl;
         }
@@ -205,7 +207,7 @@ int main(int argc, char *argv[])
                 Info<< "[20] is false, as expected for const-access\n";
             }
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             Info<< "Failed (expected) " << err << nl << endl;
         }
@@ -275,7 +277,7 @@ int main(int argc, char *argv[])
             list1[16] = 5;
             list1[36] = list1.max_value;
         }
-        catch (Foam::error& err)
+        catch (const Foam::error& err)
         {
             Info<< "Failed (expected) " << err << nl << endl;
 

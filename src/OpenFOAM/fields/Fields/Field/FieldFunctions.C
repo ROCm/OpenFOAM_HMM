@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,12 +85,12 @@ pow
 )
 {
     typedef typename powProduct<Type, r>::type powProductType;
-    tmp<Field<powProductType>> tRes
+    auto tres
     (
-        new Field<powProductType>(f.size())
+        tmp<Field<powProductType>>::New(f.size())
     );
-    pow<Type, r>(tRes.ref(), f);
-    return tRes;
+    pow<Type, r>(tres.ref(), f);
+    return tres;
 }
 
 template<class Type, direction r>
@@ -100,10 +102,10 @@ pow
 )
 {
     typedef typename powProduct<Type, r>::type powProductType;
-    tmp<Field<powProductType>> tRes = reuseTmp<powProductType, Type>::New(tf);
-    pow<Type, r>(tRes.ref(), tf());
+    auto tres = reuseTmp<powProductType, Type>::New(tf);
+    pow<Type, r>(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 
@@ -123,12 +125,12 @@ tmp<Field<typename outerProduct<Type, Type>::type>>
 sqr(const UList<Type>& f)
 {
     typedef typename outerProduct<Type, Type>::type outerProductType;
-    tmp<Field<outerProductType>> tRes
+    auto tres
     (
-        new Field<outerProductType>(f.size())
+        tmp<Field<outerProductType>>::New(f.size())
     );
-    sqr(tRes.ref(), f);
-    return tRes;
+    sqr(tres.ref(), f);
+    return tres;
 }
 
 template<class Type>
@@ -136,59 +138,82 @@ tmp<Field<typename outerProduct<Type, Type>::type>>
 sqr(const tmp<Field<Type>>& tf)
 {
     typedef typename outerProduct<Type, Type>::type outerProductType;
-    tmp<Field<outerProductType>> tRes =
-        reuseTmp<outerProductType, Type>::New(tf);
-    sqr(tRes.ref(), tf());
+    auto tres = reuseTmp<outerProductType, Type>::New(tf);
+    sqr(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 
 template<class Type>
-void magSqr(Field<scalar>& res, const UList<Type>& f)
+void magSqr
+(
+    Field<typename typeOfMag<Type>::type>& res,
+    const UList<Type>& f
+)
 {
-    TFOR_ALL_F_OP_FUNC_F(scalar, res, =, magSqr, Type, f)
+    typedef typename typeOfMag<Type>::type magType;
+
+    TFOR_ALL_F_OP_FUNC_F(magType, res, =, magSqr, Type, f)
 }
 
 template<class Type>
-tmp<Field<scalar>> magSqr(const UList<Type>& f)
+tmp<Field<typename typeOfMag<Type>::type>>
+magSqr(const UList<Type>& f)
 {
-    tmp<Field<scalar>> tRes(new Field<scalar>(f.size()));
-    magSqr(tRes.ref(), f);
-    return tRes;
+    typedef typename typeOfMag<Type>::type magType;
+
+    auto tres = tmp<Field<magType>>::New(f.size());
+    magSqr(tres.ref(), f);
+    return tres;
 }
 
 template<class Type>
-tmp<Field<scalar>> magSqr(const tmp<Field<Type>>& tf)
+tmp<Field<typename typeOfMag<Type>::type>>
+magSqr(const tmp<Field<Type>>& tf)
 {
-    tmp<Field<scalar>> tRes = reuseTmp<scalar, Type>::New(tf);
-    magSqr(tRes.ref(), tf());
+    typedef typename typeOfMag<Type>::type magType;
+
+    auto tres = reuseTmp<magType, Type>::New(tf);
+    magSqr(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 
 template<class Type>
-void mag(Field<scalar>& res, const UList<Type>& f)
+void mag
+(
+    Field<typename typeOfMag<Type>::type>& res,
+    const UList<Type>& f
+)
 {
-    TFOR_ALL_F_OP_FUNC_F(scalar, res, =, mag, Type, f)
+    typedef typename typeOfMag<Type>::type magType;
+
+    TFOR_ALL_F_OP_FUNC_F(magType, res, =, mag, Type, f)
 }
 
 template<class Type>
-tmp<Field<scalar>> mag(const UList<Type>& f)
+tmp<Field<typename typeOfMag<Type>::type>>
+mag(const UList<Type>& f)
 {
-    tmp<Field<scalar>> tRes(new Field<scalar>(f.size()));
-    mag(tRes.ref(), f);
-    return tRes;
+    typedef typename typeOfMag<Type>::type magType;
+
+    auto tres = tmp<Field<magType>>::New(f.size());
+    mag(tres.ref(), f);
+    return tres;
 }
 
 template<class Type>
-tmp<Field<scalar>> mag(const tmp<Field<Type>>& tf)
+tmp<Field<typename typeOfMag<Type>::type>>
+mag(const tmp<Field<Type>>& tf)
 {
-    tmp<Field<scalar>> tRes = reuseTmp<scalar, Type>::New(tf);
-    mag(tRes.ref(), tf());
+    typedef typename typeOfMag<Type>::type magType;
+
+    auto tres = reuseTmp<magType, Type>::New(tf);
+    mag(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 
@@ -203,19 +228,19 @@ template<class Type>
 tmp<Field<typename Field<Type>::cmptType>> cmptMax(const UList<Type>& f)
 {
     typedef typename Field<Type>::cmptType cmptType;
-    tmp<Field<cmptType>> tRes(new Field<cmptType>(f.size()));
-    cmptMax(tRes.ref(), f);
-    return tRes;
+    auto tres = tmp<Field<cmptType>>::New(f.size());
+    cmptMax(tres.ref(), f);
+    return tres;
 }
 
 template<class Type>
 tmp<Field<typename Field<Type>::cmptType>> cmptMax(const tmp<Field<Type>>& tf)
 {
     typedef typename Field<Type>::cmptType cmptType;
-    tmp<Field<cmptType>> tRes = reuseTmp<cmptType, Type>::New(tf);
-    cmptMax(tRes.ref(), tf());
+    auto tres = reuseTmp<cmptType, Type>::New(tf);
+    cmptMax(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 
@@ -230,19 +255,19 @@ template<class Type>
 tmp<Field<typename Field<Type>::cmptType>> cmptMin(const UList<Type>& f)
 {
     typedef typename Field<Type>::cmptType cmptType;
-    tmp<Field<cmptType>> tRes(new Field<cmptType>(f.size()));
-    cmptMin(tRes.ref(), f);
-    return tRes;
+    auto tres = tmp<Field<cmptType>>::New(f.size());
+    cmptMin(tres.ref(), f);
+    return tres;
 }
 
 template<class Type>
 tmp<Field<typename Field<Type>::cmptType>> cmptMin(const tmp<Field<Type>>& tf)
 {
     typedef typename Field<Type>::cmptType cmptType;
-    tmp<Field<cmptType>> tRes = reuseTmp<cmptType, Type>::New(tf);
-    cmptMin(tRes.ref(), tf());
+    auto tres = reuseTmp<cmptType, Type>::New(tf);
+    cmptMin(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 
@@ -257,19 +282,19 @@ template<class Type>
 tmp<Field<typename Field<Type>::cmptType>> cmptAv(const UList<Type>& f)
 {
     typedef typename Field<Type>::cmptType cmptType;
-    tmp<Field<cmptType>> tRes(new Field<cmptType>(f.size()));
-    cmptAv(tRes.ref(), f);
-    return tRes;
+    auto tres = tmp<Field<cmptType>>::New(f.size());
+    cmptAv(tres.ref(), f);
+    return tres;
 }
 
 template<class Type>
 tmp<Field<typename Field<Type>::cmptType>> cmptAv(const tmp<Field<Type>>& tf)
 {
     typedef typename Field<Type>::cmptType cmptType;
-    tmp<Field<cmptType>> tRes = reuseTmp<cmptType, Type>::New(tf);
-    cmptAv(tRes.ref(), tf());
+    auto tres = reuseTmp<cmptType, Type>::New(tf);
+    cmptAv(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 
@@ -282,18 +307,18 @@ void cmptMag(Field<Type>& res, const UList<Type>& f)
 template<class Type>
 tmp<Field<Type>> cmptMag(const UList<Type>& f)
 {
-    tmp<Field<Type>> tRes(new Field<Type>(f.size()));
-    cmptMag(tRes.ref(), f);
-    return tRes;
+    auto tres = tmp<Field<Type>>::New(f.size());
+    cmptMag(tres.ref(), f);
+    return tres;
 }
 
 template<class Type>
 tmp<Field<Type>> cmptMag(const tmp<Field<Type>>& tf)
 {
-    tmp<Field<Type>> tRes = New(tf);
-    cmptMag(tRes.ref(), tf());
+    auto tres = New(tf);
+    cmptMag(tres.ref(), tf());
     tf.clear();
-    return tRes;
+    return tres;
 }
 
 
@@ -316,10 +341,8 @@ Type max(const UList<Type>& f)
         TFOR_ALL_S_OP_FUNC_F_S(Type, Max, =, max, Type, f, Type, Max)
         return Max;
     }
-    else
-    {
-        return pTraits<Type>::min;
-    }
+
+    return pTraits<Type>::min;
 }
 
 TMP_UNARY_FUNCTION(Type, max)
@@ -333,10 +356,8 @@ Type min(const UList<Type>& f)
         TFOR_ALL_S_OP_FUNC_F_S(Type, Min, =, min, Type, f, Type, Min)
         return Min;
     }
-    else
-    {
-        return pTraits<Type>::max;
-    }
+
+    return pTraits<Type>::max;
 }
 
 TMP_UNARY_FUNCTION(Type, min)
@@ -344,19 +365,26 @@ TMP_UNARY_FUNCTION(Type, min)
 template<class Type>
 Type sum(const UList<Type>& f)
 {
+    Type Sum = Zero;
+
     if (f.size())
     {
-        Type Sum = Zero;
         TFOR_ALL_S_OP_F(Type, Sum, +=, Type, f)
-        return Sum;
     }
-    else
-    {
-        return Zero;
-    }
+
+    return Sum;
 }
 
 TMP_UNARY_FUNCTION(Type, sum)
+
+
+// From MinMaxOps.H:
+//   - Foam::minMax(const UList<Type>&)
+//   - Foam::minMaxMag(const UList<Type>&)
+
+TMP_UNARY_FUNCTION(MinMax<Type>, minMax)
+TMP_UNARY_FUNCTION(scalarMinMax, minMaxMag)
+
 
 template<class Type>
 Type maxMagSqr(const UList<Type>& f)
@@ -377,10 +405,8 @@ Type maxMagSqr(const UList<Type>& f)
         )
         return Max;
     }
-    else
-    {
-        return Zero;
-    }
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, maxMagSqr)
@@ -404,36 +430,33 @@ Type minMagSqr(const UList<Type>& f)
         )
         return Min;
     }
-    else
-    {
-        return pTraits<Type>::rootMax;
-    }
+
+    return pTraits<Type>::rootMax;
 }
 
 TMP_UNARY_FUNCTION(Type, minMagSqr)
 
 template<class Type>
-scalar sumProd(const UList<Type>& f1, const UList<Type>& f2)
+typename scalarProduct<Type, Type>::type
+sumProd(const UList<Type>& f1, const UList<Type>& f2)
 {
+    typedef typename scalarProduct<Type, Type>::type prodType;
+
+    prodType result = Zero;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        scalar SumProd = 0;
-        TFOR_ALL_S_OP_F_OP_F(scalar, SumProd, +=, Type, f1, &&, Type, f2)
-        return SumProd;
+        TFOR_ALL_S_OP_F_OP_F(prodType, result, +=, Type, f1, &&, Type, f2)
     }
-    else
-    {
-        return 0;
-    }
+    return result;
 }
 
 
 template<class Type>
 Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
 {
+    Type SumProd = Zero;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        Type SumProd = Zero;
         TFOR_ALL_S_OP_FUNC_F_F
         (
             Type,
@@ -445,63 +468,60 @@ Type sumCmptProd(const UList<Type>& f1, const UList<Type>& f2)
             Type,
             f2
         )
-        return SumProd;
     }
-    else
-    {
-        return Zero;
-    }
+    return SumProd;
 }
 
 
 template<class Type>
-scalar sumSqr(const UList<Type>& f)
+typename outerProduct1<Type>::type
+sumSqr(const UList<Type>& f)
 {
+    typedef typename outerProduct1<Type>::type prodType;
+    prodType result = Zero;
     if (f.size())
     {
-        scalar SumSqr = 0;
-        TFOR_ALL_S_OP_FUNC_F(scalar, SumSqr, +=, sqr, Type, f)
-        return SumSqr;
+        TFOR_ALL_S_OP_FUNC_F(prodType, result, +=, sqr, Type, f)
     }
-    else
-    {
-        return 0;
-    }
+    return result;
 }
-
-TMP_UNARY_FUNCTION(scalar, sumSqr)
 
 template<class Type>
-scalar sumMag(const UList<Type>& f)
+typename outerProduct1<Type>::type
+sumSqr(const tmp<Field<Type>>& tf)
 {
-    if (f.size())
-    {
-        scalar SumMag = 0;
-        TFOR_ALL_S_OP_FUNC_F(scalar, SumMag, +=, mag, Type, f)
-        return SumMag;
-    }
-    else
-    {
-        return 0;
-    }
+    typedef typename outerProduct1<Type>::type prodType;
+    prodType result = sumSqr(tf());
+    tf.clear();
+    return result;
 }
 
-TMP_UNARY_FUNCTION(scalar, sumMag)
+
+template<class Type>
+typename typeOfMag<Type>::type
+sumMag(const UList<Type>& f)
+{
+    typedef typename typeOfMag<Type>::type magType;
+    magType result = Zero;
+    if (f.size())
+    {
+        TFOR_ALL_S_OP_FUNC_F(magType, result, +=, mag, Type, f)
+    }
+    return result;
+}
+
+TMP_UNARY_FUNCTION(typename typeOfMag<Type>::type, sumMag)
 
 
 template<class Type>
 Type sumCmptMag(const UList<Type>& f)
 {
+    Type result = Zero;
     if (f.size())
     {
-        Type SumMag = Zero;
-        TFOR_ALL_S_OP_FUNC_F(scalar, SumMag, +=, cmptMag, Type, f)
-        return SumMag;
+        TFOR_ALL_S_OP_FUNC_F(Type, result, +=, cmptMag, Type, f)
     }
-    else
-    {
-        return Zero;
-    }
+    return result;
 }
 
 TMP_UNARY_FUNCTION(Type, sumCmptMag)
@@ -515,25 +535,24 @@ Type average(const UList<Type>& f)
 
         return avrg;
     }
-    else
-    {
-        WarningInFunction
-            << "empty field, returning zero" << endl;
 
-        return Zero;
-    }
+    WarningInFunction
+        << "empty field, returning zero" << endl;
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, average)
 
 
+// With reduction on ReturnType
 #define G_UNARY_FUNCTION(ReturnType, gFunc, Func, rFunc)                       \
                                                                                \
 template<class Type>                                                           \
 ReturnType gFunc(const UList<Type>& f, const label comm)                       \
 {                                                                              \
     ReturnType res = Func(f);                                                  \
-    reduce(res, rFunc##Op<Type>(), Pstream::msgType(), comm);                  \
+    reduce(res, rFunc##Op<ReturnType>(), Pstream::msgType(), comm);            \
     return res;                                                                \
 }                                                                              \
 TMP_UNARY_FUNCTION(ReturnType, gFunc)
@@ -543,23 +562,30 @@ G_UNARY_FUNCTION(Type, gMin, min, min)
 G_UNARY_FUNCTION(Type, gSum, sum, sum)
 G_UNARY_FUNCTION(Type, gMaxMagSqr, maxMagSqr, maxMagSqr)
 G_UNARY_FUNCTION(Type, gMinMagSqr, minMagSqr, minMagSqr)
-G_UNARY_FUNCTION(scalar, gSumSqr, sumSqr, sum)
-G_UNARY_FUNCTION(scalar, gSumMag, sumMag, sum)
 G_UNARY_FUNCTION(Type, gSumCmptMag, sumCmptMag, sum)
+
+G_UNARY_FUNCTION(MinMax<Type>, gMinMax, minMax, sum)
+G_UNARY_FUNCTION(scalarMinMax, gMinMaxMag, minMaxMag, sum)
+
+G_UNARY_FUNCTION(typename outerProduct1<Type>::type, gSumSqr, sumSqr, sum)
+G_UNARY_FUNCTION(typename typeOfMag<Type>::type, gSumMag, sumMag, sum)
 
 #undef G_UNARY_FUNCTION
 
+
 template<class Type>
-scalar gSumProd
+typename scalarProduct<Type, Type>::type gSumProd
 (
     const UList<Type>& f1,
     const UList<Type>& f2,
     const label comm
 )
 {
-    scalar SumProd = sumProd(f1, f2);
-    reduce(SumProd, sumOp<scalar>(), Pstream::msgType(), comm);
-    return SumProd;
+    typedef typename scalarProduct<Type, Type>::type prodType;
+
+    prodType result = sumProd(f1, f2);
+    reduce(result, sumOp<prodType>(), Pstream::msgType(), comm);
+    return result;
 }
 
 template<class Type>
@@ -592,13 +618,11 @@ Type gAverage
 
         return avrg;
     }
-    else
-    {
-        WarningInFunction
-            << "empty field, returning zero." << endl;
 
-        return Zero;
-    }
+    WarningInFunction
+        << "empty field, returning zero." << endl;
+
+    return Zero;
 }
 
 TMP_UNARY_FUNCTION(Type, gAverage)
@@ -615,6 +639,8 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, max)
 BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
+
+BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clip)
 
 
 /* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
@@ -652,9 +678,9 @@ tmp<Field<typename product<Type1, Type2>::type>>                               \
 operator Op(const UList<Type1>& f1, const UList<Type2>& f2)                    \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    tmp<Field<productType>> tRes(new Field<productType>(f1.size()));           \
-    OpFunc(tRes.ref(), f1, f2);                                                \
-    return tRes;                                                               \
+    auto tres = tmp<Field<productType>>::New(f1.size());                       \
+    OpFunc(tres.ref(), f1, f2);                                                \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template<class Type1, class Type2>                                             \
@@ -662,10 +688,10 @@ tmp<Field<typename product<Type1, Type2>::type>>                               \
 operator Op(const UList<Type1>& f1, const tmp<Field<Type2>>& tf2)              \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    tmp<Field<productType>> tRes = reuseTmp<productType, Type2>::New(tf2);     \
-    OpFunc(tRes.ref(), f1, tf2());                                             \
+    auto tres = reuseTmp<productType, Type2>::New(tf2);                        \
+    OpFunc(tres.ref(), f1, tf2());                                             \
     tf2.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template<class Type1, class Type2>                                             \
@@ -673,10 +699,10 @@ tmp<Field<typename product<Type1, Type2>::type>>                               \
 operator Op(const tmp<Field<Type1>>& tf1, const UList<Type2>& f2)              \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    tmp<Field<productType>> tRes = reuseTmp<productType, Type1>::New(tf1);     \
-    OpFunc(tRes.ref(), tf1(), f2);                                             \
+    auto tres = reuseTmp<productType, Type1>::New(tf1);                        \
+    OpFunc(tres.ref(), tf1(), f2);                                             \
     tf1.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template<class Type1, class Type2>                                             \
@@ -684,12 +710,11 @@ tmp<Field<typename product<Type1, Type2>::type>>                               \
 operator Op(const tmp<Field<Type1>>& tf1, const tmp<Field<Type2>>& tf2)        \
 {                                                                              \
     typedef typename product<Type1, Type2>::type productType;                  \
-    tmp<Field<productType>> tRes =                                             \
-        reuseTmpTmp<productType, Type1, Type1, Type2>::New(tf1, tf2);          \
-    OpFunc(tRes.ref(), tf1(), tf2());                                          \
+    auto tres = reuseTmpTmp<productType, Type1, Type1, Type2>::New(tf1, tf2);  \
+    OpFunc(tres.ref(), tf1(), tf2());                                          \
     tf1.clear();                                                               \
     tf2.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template<class Type, class Form, class Cmpt, direction nCmpt>                  \
@@ -710,9 +735,9 @@ tmp<Field<typename product<Type, Form>::type>>                                 \
 operator Op(const UList<Type>& f1, const VectorSpace<Form,Cmpt,nCmpt>& vs)     \
 {                                                                              \
     typedef typename product<Type, Form>::type productType;                    \
-    tmp<Field<productType>> tRes(new Field<productType>(f1.size()));           \
-    OpFunc(tRes.ref(), f1, static_cast<const Form&>(vs));                      \
-    return tRes;                                                               \
+    auto tres = tmp<Field<productType>>::New(f1.size());                       \
+    OpFunc(tres.ref(), f1, static_cast<const Form&>(vs));                      \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template<class Type, class Form, class Cmpt, direction nCmpt>                  \
@@ -724,10 +749,10 @@ operator Op                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Type, Form>::type productType;                    \
-    tmp<Field<productType>> tRes = reuseTmp<productType, Type>::New(tf1);      \
-    OpFunc(tRes.ref(), tf1(), static_cast<const Form&>(vs));                   \
+    auto tres = reuseTmp<productType, Type>::New(tf1);                         \
+    OpFunc(tres.ref(), tf1(), static_cast<const Form&>(vs));                   \
     tf1.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template<class Form, class Cmpt, direction nCmpt, class Type>                  \
@@ -748,9 +773,9 @@ tmp<Field<typename product<Form, Type>::type>>                                 \
 operator Op(const VectorSpace<Form,Cmpt,nCmpt>& vs, const UList<Type>& f1)     \
 {                                                                              \
     typedef typename product<Form, Type>::type productType;                    \
-    tmp<Field<productType>> tRes(new Field<productType>(f1.size()));           \
-    OpFunc(tRes.ref(), static_cast<const Form&>(vs), f1);                      \
-    return tRes;                                                               \
+    auto tres = tmp<Field<productType>>::New(f1.size());                       \
+    OpFunc(tres.ref(), static_cast<const Form&>(vs), f1);                      \
+    return tres;                                                               \
 }                                                                              \
                                                                                \
 template<class Form, class Cmpt, direction nCmpt, class Type>                  \
@@ -761,10 +786,10 @@ operator Op                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Form, Type>::type productType;                    \
-    tmp<Field<productType>> tRes = reuseTmp<productType, Type>::New(tf1);      \
-    OpFunc(tRes.ref(), static_cast<const Form&>(vs), tf1());                   \
+    auto tres = reuseTmp<productType, Type>::New(tf1);                         \
+    OpFunc(tres.ref(), static_cast<const Form&>(vs), tf1());                   \
     tf1.clear();                                                               \
-    return tRes;                                                               \
+    return tres;                                                               \
 }
 
 PRODUCT_OPERATOR(typeOfSum, +, add)

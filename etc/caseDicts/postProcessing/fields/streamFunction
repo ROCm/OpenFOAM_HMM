@@ -1,12 +1,12 @@
 /*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
-   \\    /   O peration     |
+   \\    /   O peration     | Version:  v1906
     \\  /    A nd           | Web:      www.OpenFOAM.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 Description
-    Writes the steam-function pointScalarField calculated from the specified
+    Writes the stream-function pointScalarField calculated from the specified
     flux surfaceScalarField.
 
 \*---------------------------------------------------------------------------*/

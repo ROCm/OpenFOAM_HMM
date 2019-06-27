@@ -1,18 +1,18 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v1812                                 |
+|  \\    /   O peration     | Version:  v1906                                 |
 |   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
 residuals
 {
-    type            residuals;
-    libs            ("libutilityFunctionObjects.so");
-    writeFields     true;
-    writeControl    outputTime;
-    fields          (p);
+    type                solverInfo;
+    libs                ("libutilityFunctionObjects.so");
+    writeResidualFields true;
+    writeControl        outputTime;
+    fields              (p);
 }
 
 blendingFactor

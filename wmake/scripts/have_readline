@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -52,47 +52,52 @@ echo_readline()
 # -> HAVE_LIBREADLINE, READLINE_INC_DIR, READLINE_LIB_DIR
 have_readline()
 {
-    local header library static settings warn
+    local prefix header library incName libName settings warn
     # warn="==> skip readline"
 
+    # Expected location, include/library names
+    prefix=system
+    incName="readline/readline.h"
+    libName="libreadline"
 
-    # Header/library names
-    header="readline/readline.h"
-    library="libreadline$extLibso"
+    # ----------------------------------
+    if isNone "$prefix"
+    then
+        [ -n "$warn" ] && echo "$warn (disabled)"
+        return 1
+    elif hasAbsdir "$prefix"
+    then
+        header=$(findFirstFile "$prefix/include/$incName")
+        library="$(findExtLib $libName)"
+    elif isSystem "$prefix"
+    then
+        header=$(findFirstFile "/usr/local/include/$incName" "/usr/include/$incName")
+        prefix=$(sysPrefix "$header")
+    else
+        unset prefix
+    fi
+    # ----------------------------------
 
-    # System only?
-    header=$(findFirstFile /usr/local/include/$header /usr/include/$header)
-
-    case "$header" in
-    /usr/local/*)
-        library=$(findFirstFile \
-            /usr/local/lib/$library \
-            /usr/local/lib$WM_COMPILER_LIB_ARCH/$library \
-        )
-        ;;
-
-    *)
-        library=$(findFirstFile \
-            /usr/lib/$library \
-            /usr/lib$WM_COMPILER_LIB_ARCH/$library \
-        )
-        ;;
-    esac
-
-    # Header found?
+    # Header
     [ -n "$header" ] || {
         [ -n "$warn" ] && echo "$warn (no header)"
         return 2
     }
 
-    # Library found?
-    [ -n "$library" ] || {
-        [ -n "$warn" ] && echo "$warn (missing library)"
+    # Library
+    [ -n "$library" ] || library=$(findLibrary \
+        "$prefix/lib/$libName" \
+        "$prefix/lib$WM_COMPILER_LIB_ARCH/$libName" \
+    ) || {
+        [ -n "$warn" ] && echo "$warn (no library)"
         return 2
     }
 
-    header="${header%/*}"     # Strip one-level (include/readline/...)
+    # ----------------------------------
 
+    header="${header%/*}"   # Strip one-level (include/readline/...)
+
+    # OK
     export HAVE_LIBREADLINE=true
     export READLINE_INC_DIR="${header%/*}"     # Basename
     export READLINE_LIB_DIR="${library%/*}"    # Basename

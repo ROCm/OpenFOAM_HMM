@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                 isoAdvector | Copyright (C) 2016-2017 DHI
-              Modified work | Copyright (C) 2018 Johan Roenby
+              Modified work | Copyright (C) 2019 Johan Roenby
 -------------------------------------------------------------------------------
 
 License
@@ -307,8 +307,8 @@ void Foam::isoAdvection::timeIntegratedFlux()
                 // Note: We will like all point neighbours to interface cells to
                 // be checked. Especially if the interface leaves a cell during
                 // a time step, it may enter a point neighbour which should also
-                // be treated like a surface cell. Its interface normal should 
-                // somehow be inherrited from its upwind cells from which it 
+                // be treated like a surface cell. Its interface normal should
+                // somehow be inherrited from its upwind cells from which it
                 // receives the interface.
                 const labelList& nNeighbourCells = cellCells[otherCell];
                 forAll(nNeighbourCells, ni)
@@ -413,14 +413,14 @@ void Foam::isoAdvection::normaliseAndSmooth
 
     vectorField& cellNIn = cellN.primitiveFieldRef();
     cellNIn /= (mag(cellNIn) + SMALL);
-    vectorField vertexN(mesh_.nPoints(), vector::zero);
+    vectorField vertexN(mesh_.nPoints(), Zero);
     vertexN = volPointInterpolation::New(mesh_).interpolate(cellN);
     vertexN /= (mag(vertexN) + SMALL);
     // Interpolate vertex normals back to cells
     forAll(cellNIn, celli)
     {
         const labelList& cp = cellPoints[celli];
-        vector cellNi = vector::zero;
+        vector cellNi(Zero);
         const point& cellCentre = cellCentres[celli];
         forAll(cp, pointI)
         {
@@ -851,6 +851,12 @@ void Foam::isoAdvection::advect()
 
     // Do the isoAdvection on surface cells
     timeIntegratedFlux();
+
+    // Adjust alpha for mesh motion
+    if (mesh_.moving())
+    {
+        alpha1In_ *= (mesh_.Vsc0()/mesh_.Vsc());
+    }
 
     // Adjust dVf for unbounded cells
     limitFluxes();

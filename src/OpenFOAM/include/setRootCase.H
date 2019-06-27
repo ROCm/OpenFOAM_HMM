@@ -15,3 +15,6 @@ if (!args.checkRootCase())
 //  {
 //      Foam::FatalError.exit();
 //  }
+
+// Force dlOpen of FOAM_DLOPEN_LIBS (principally for Windows applications)
+#include "foamDlOpenLibs.H"

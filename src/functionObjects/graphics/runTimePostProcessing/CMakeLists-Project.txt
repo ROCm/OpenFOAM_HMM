@@ -13,13 +13,40 @@ else()
     message(FATAL_ERROR " VTK version is too old - requires VTK6 or newer")
 endif()
 
+#-----------------------------------------------------------------------------
+# Test some characteristics
+set(test_file ${CMAKE_CURRENT_BINARY_DIR}/check_mpi.cxx)
+file(WRITE ${test_file}
+    "#include <vtkMPICommunicator.h>\n"
+    "int main() {\n"
+    "  vtkMPICommunicator* p = vtkMPICommunicator::New();\n"
+    "  p->Delete();\n"
+    "  return 0;\n"
+    "}"
+)
+try_compile(FOAM_USING_VTK_MPI
+    ${CMAKE_CURRENT_BINARY_DIR} ${test_file}
+    LINK_LIBRARIES vtkParallelMPI
+    CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${VTK_INCLUDE_DIRS}"
+)
+if (FOAM_USING_VTK_MPI)
+    add_definitions(-DFOAM_USING_VTK_MPI)
+    message("Building with VTK MPI")
+    include(vtkMPI)
+else()
+    message(WARNING "==== Building without VTK MPI ====")
+endif()
+
+#-----------------------------------------------------------------------------
+
 include_directories(
     ${LIB_SRC}/OpenFOAM/include
     ${LIB_SRC}/OpenFOAM/lnInclude
     ${LIB_SRC}/OSspecific/${WM_OSTYPE}/lnInclude
     ${LIB_SRC}/finiteVolume/lnInclude
-    ${LIB_SRC}/surfMesh/lnInclude
+    ${LIB_SRC}/fileFormats/lnInclude
     ${LIB_SRC}/conversion/lnInclude
+    ${LIB_SRC}/surfMesh/lnInclude
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -45,12 +72,16 @@ set(LIBRARY_OUTPUT_PATH $ENV{FOAM_LIBBIN}
 
 file(GLOB SOURCE_FILES
     fieldVisualisationBase.C
+    scalarBar.C
     functionObjectBase.C
     functionObjectCloud.C
     functionObjectLine.C
     functionObjectSurface.C
     geometryBase.C
+    geometryCloud.C
+    geometryCloudGather.C
     geometryPatches.C
+    geometryPatchesGather.C
     geometrySurface.C
     pathline.C
     pointData.C
@@ -58,15 +89,26 @@ file(GLOB SOURCE_FILES
     runTimePostProcessingFunctionObject.C
     scene.C
     surface.C
+    surfaceGather.C
     text.C
+    contourFilter.C
+    cuttingPlaneFilter.C
+    volumeFilter.C
 )
 
 set(OPENFOAM_LIBRARIES
     OpenFOAM
     finiteVolume
     surfMesh
+    fileFormats
     conversion
 )
+
+if (FOAM_USING_VTK_MPI)
+    set(LINK_LIBRARIES vtkParallelMPI)
+else()
+    set(LINK_LIBRARIES)
+endif()
 
 add_library(
     runTimePostProcessing
@@ -84,6 +126,7 @@ set_target_properties(
 target_link_libraries(
     runTimePostProcessing
     ${VTK_LIBRARIES}
+    ${LINK_LIBRARIES}
     ${OPENFOAM_LIBRARIES}
 )
 

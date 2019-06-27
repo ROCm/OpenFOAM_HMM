@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,7 +23,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamspace
+InNamespace
     Foam
 
 Description
@@ -54,17 +56,6 @@ SourceFiles
 
 namespace Foam
 {
-
-//- Deprecated(2018-07) reference to zero-sized list.
-//  Compare to List::null() which returns null pointer cast as list reference.
-//
-//  \deprecated(2018-07) This cast is disallowed with many modern compilers
-template<class T>
-static const List<T>& emptyList()
-{
-    return *reinterpret_cast<const List<T>*>(&emptyLabelList);
-}
-
 
 //- Renumber the values (not the indices) of a list.
 //  Negative IntListType elements are left untouched.
@@ -372,15 +363,12 @@ List<OutputIntListType> invertManyToMany
     return output;
 }
 
-//- Create identity map of the given length with (map[i] == i)
-//  Optionally with an alternative start index, so that (map[i] == i+start)
-labelList identity(const label len, label start=0);
 
 //- Deprecated(2017-10) search for first occurence of the given element.
 //  \return The index found or return -1 if not found.
 //  \deprecated(2017-10) - use the UList find/found methods
 template<class ListType>
-label findIndex
+label FOAM_DEPRECATED(2017-10) findIndex
 (
     const ListType& input,
     typename ListType::const_reference val,
@@ -594,6 +582,37 @@ struct greater
         return values[b] < values[a];
     }
 };
+
+
+//- Set identity map with (map[i] == i)
+//  Optionally with an alternative start index, so that (map[i] == i+start)
+void identity(labelUList& map, label start=0);
+
+
+//- Find index of the first occurrence that satisfies the predicate.
+//  When start is specified, any occurrences before start are ignored.
+//  Linear search.
+//  \return position in list or -1 if not found.
+template<class ListType, class UnaryPredicate>
+label find
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start=0
+);
+
+
+//- True if there is a value in the list that satisfies the predicate.
+//  When start is specified, any occurences before start are ignored.
+//  Linear search.
+//  \return true if found.
+template<class ListType, class UnaryPredicate>
+bool found
+(
+    const ListType& input,
+    const UnaryPredicate& pred,
+    const label start=0
+);
 
 
 //- Set various locations of the list with a specified value.

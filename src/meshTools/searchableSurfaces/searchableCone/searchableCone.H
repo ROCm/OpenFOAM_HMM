@@ -30,7 +30,7 @@ Description
     \heading Dictionary parameters
     \table
         Property    | Description                       | Required | Default
-        type        | code / searchableCone             | selector |
+        type        | cone / searchableCone             | selector |
         point1      | coordinate of endpoint            | yes   |
         radius1     | radius at point1                  | yes   |
         innerRadius1| inner radius at point1            | no    | 0
@@ -184,6 +184,12 @@ public:
         virtual bool hasVolumeType() const
         {
             return true;
+        }
+
+        //- What is type of points outside bounds
+        virtual volumeType outsideVolumeType() const
+        {
+            return volumeType::OUTSIDE;
         }
 
         //- Range of local indices that can be returned.

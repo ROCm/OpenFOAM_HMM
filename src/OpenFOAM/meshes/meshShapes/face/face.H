@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,17 +151,17 @@ public:
         inline explicit face(const label sz);
 
         //- Copy construct from list of labels
-        inline explicit face(const labelUList& lst);
+        inline explicit face(const labelUList& list);
 
         //- Copy construct from list of labels
-        template<unsigned Size>
-        inline explicit face(const FixedList<label, Size>& lst);
+        template<unsigned N>
+        inline explicit face(const FixedList<label, N>& list);
 
         //- Copy construct from an initializer list of labels
-        inline explicit face(std::initializer_list<label> lst);
+        inline explicit face(std::initializer_list<label> list);
 
         //- Move construct from list of labels
-        inline explicit face(labelList&& lst);
+        inline explicit face(labelList&& list);
 
         //- Copy construct from triFace
         face(const triFace& f);
@@ -200,7 +202,8 @@ public:
 
         //- Legacy name for areaNormal()
         //  \deprecated(2018-06) Deprecated for new use
-        inline vector normal(const UList<point>& p) const
+        vector FOAM_DEPRECATED_FOR(2018-12, "areaNormal() or unitNormal()")
+        normal(const UList<point>& p) const
         {
             return areaNormal(p); // Legacy definition
         }

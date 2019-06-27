@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,14 @@ Class
 Description
     Visualisation of point data
 
+    Dictionary controls
+    \table
+        Property    | Description                           | Required | Default
+        representation| sphere/vector                       | yes |
+        pointColour   | Override point colour               | no  |
+        maxGlyphLength | Limit for glyph representation     | yes |
+    \endtable
+
 SourceFiles
     pointData.C
 
@@ -41,7 +49,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Forward declarations
+// Forward Declarations
 class vtkActor;
 class vtkPolyData;
 class vtkPolyDataMapper;
@@ -63,20 +71,22 @@ class pointData
 {
 public:
 
-    // Public enumerations
+    // Public Enumerations
 
+        //- Point representation types
         enum representationType
         {
-            rtSphere,               //!< Sphere
-            rtVector                //!< Vector
+            rtSphere,           //!< "sphere"
+            rtVector            //!< "vector"
         };
 
+        //- Names for point representation types
         static const Enum<representationType> representationTypeNames;
 
 
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Representation type
         representationType representation_;
@@ -109,7 +119,7 @@ protected:
 public:
 
     //- Run-time type information
-    TypeName("pointData");
+    TypeNameNoDebug("pointData");
 
 
     // Declare run-time constructor selection table
@@ -141,7 +151,7 @@ public:
 
     // Selectors
 
-        //- Return a reference to the selected RAS model
+        //- Return selected pointData
         static autoPtr<pointData> New
         (
             const runTimePostProcessing& parent,

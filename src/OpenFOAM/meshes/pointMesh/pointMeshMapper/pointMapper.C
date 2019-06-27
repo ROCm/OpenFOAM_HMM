@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,7 +120,7 @@ void Foam::pointMapper::calcAddressing() const
             {
                 // Mapped from a single point
                 addr[pointi] = labelList(1, cm[pointi]);
-                w[pointi] = scalarList(1, 1.0);
+                w[pointi] = scalarList(1, scalar(1));
             }
         }
 
@@ -134,8 +136,8 @@ void Foam::pointMapper::calcAddressing() const
             if (addr[pointi].empty())
             {
                 // Mapped from a dummy point. Take point 0 with weight 1.
-                addr[pointi] = labelList(1, label(0));
-                w[pointi] = scalarList(1, 1.0);
+                addr[pointi] = labelList(1, Zero);
+                w[pointi] = scalarList(1, scalar(1));
 
                 insertedPoints[nInsertedPoints] = pointi;
                 nInsertedPoints++;

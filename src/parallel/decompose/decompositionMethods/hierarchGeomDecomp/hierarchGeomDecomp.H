@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,10 +49,10 @@ Description
 
     Method coefficients:
     \table
-        Property  | Description                 | Required | Default
-        n         | (nx ny nz)                  | yes
-        delta     | delta for rotation matrix   | no | 0.001
-        order     | order of operation          | no | xyz
+        Property  | Description                             | Required | Default
+        n         | (nx ny nz)                              | yes |
+        delta     | delta for rotation matrix               | no  | 0.001
+        order     | order of operation                      | no  | xyz
     \endtable
 
 SourceFiles
@@ -76,17 +78,27 @@ class hierarchGeomDecomp
 :
     public geomDecomp
 {
-    // Private data
+    // Private Data
 
         //- Decomposition order in terms of components.
-        FixedList<direction, 3> decompOrder_;
+        FixedList<direction, 3> order_;
 
 
     // Private Member Functions
 
         //- Convert ordering string ("xyz") into list of components.
         //  Checks for bad entries, but no check for duplicate entries.
-        void setDecompOrder();
+        void setOrder();
+
+        //- Find index of value in list between
+        //- first (inclusive) and last (exclusive)
+        static label findLower
+        (
+            const UList<scalar>& list,
+            const scalar val,
+            const label first,
+            const label last
+        );
 
         //- Evaluates the weighted sizes for each sorted point.
         static void calculateSortedWeightedSizes
@@ -97,15 +109,6 @@ class hierarchGeomDecomp
             const label globalCurrentSize,
 
             scalarField& sortedWeightedSizes
-        );
-
-        //- Find index of t in list inbetween indices left and right
-        static label findLower
-        (
-            const List<scalar>&,
-            const scalar t,
-            const label left,
-            const label right
         );
 
         //- Find midValue (at local index mid) such that the number of

@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           |
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2017 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,7 +110,7 @@ Foam::labelList Foam::springRenumber::renumber
         //    << endl;
 
         // Sum force per cell.
-        scalarField sumForce(cellCells.size(), 0.0);
+        scalarField sumForce(cellCells.size(), Zero);
         forAll(cellCells, oldCelli)
         {
             const labelList& cCells = cellCells[oldCelli];

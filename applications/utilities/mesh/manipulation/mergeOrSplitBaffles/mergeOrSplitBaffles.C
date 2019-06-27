@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -550,7 +552,7 @@ int main(int argc, char *argv[])
         // Dump duplicated points (if any)
         const labelList& pointMap = map().pointMap();
 
-        labelList nDupPerPoint(map().nOldPoints(), 0);
+        labelList nDupPerPoint(map().nOldPoints(), Zero);
 
         pointSet dupPoints(mesh, "duplicatedPoints", 100);
 
