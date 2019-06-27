@@ -2,10 +2,10 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#                           | Copyright (C) 2016 OpenFOAM Foundation
+#                           | Copyright (C) 2011-2016 OpenFOAM Foundation
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -84,6 +84,12 @@ case ThirdParty:
         breaksw
     case Gcc82*:
         set gcc_version=gcc-8.2.0
+        breaksw
+    case Gcc83*:
+        set gcc_version=gcc-8.3.0
+        breaksw
+    case Gcc91*:
+        set gcc_version=gcc-9.1.0
         breaksw
     case Clang:
     case Clang37*:
