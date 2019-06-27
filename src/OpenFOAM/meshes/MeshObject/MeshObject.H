@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -100,6 +100,7 @@ public:
 
     // Constructors
 
+        //- Construct on Mesh type
         explicit MeshObject(const Mesh& mesh);
 
     // Selectors
@@ -110,7 +111,7 @@ public:
 
 
     //- Destructor
-    virtual ~MeshObject();
+    virtual ~MeshObject() = default;
 
         //- Static destructor
         static bool Delete(const Mesh& mesh);
@@ -123,7 +124,7 @@ public:
             return mesh_;
         }
 
-        virtual bool writeData(Foam::Ostream&) const
+        virtual bool writeData(Ostream& os) const
         {
             return true;
         }
@@ -145,29 +146,31 @@ public:
 
     // Constructors
 
+        //- Construct from name and instance on registry
         meshObject(const word& typeName, const objectRegistry& obr);
 
 
-    // Static member functions
+    // Static Member Functions
 
         template<class Mesh>
-        static void movePoints(objectRegistry&);
+        static void movePoints(objectRegistry& obr);
 
         template<class Mesh>
-        static void updateMesh(objectRegistry&, const mapPolyMesh&);
+        static void updateMesh(objectRegistry& obr, const mapPolyMesh& mpm);
 
         template<class Mesh, template<class> class MeshObjectType>
-        static void clear(objectRegistry&);
+        static void clear(objectRegistry& obr);
 
-        //- Clear all meshObject derived from FromType up to (but not including)
-        //  ToType. Used to clear e.g. all non-updateable meshObjects
+        //- Clear all meshObject derived from FromType up to
+        //- (but not including) ToType.
+        //  Used to clear e.g. all non-updateable meshObjects
         template
         <
             class Mesh,
             template<class> class FromType,
             template<class> class ToType
         >
-        static void clearUpto(objectRegistry&);
+        static void clearUpto(objectRegistry& obr);
 };
 
 
@@ -182,6 +185,7 @@ class TopologicalMeshObject
 {
 public:
 
+    //- Construct from name and instance on registry
     TopologicalMeshObject(const word& typeName, const objectRegistry& obr)
     :
         meshObject(typeName, obr)
@@ -200,6 +204,7 @@ class GeometricMeshObject
 {
 public:
 
+    //- Construct from name and instance on registry
     GeometricMeshObject(const word& typeName, const objectRegistry& obr)
     :
         TopologicalMeshObject<Mesh>(typeName, obr)
@@ -218,6 +223,7 @@ class MoveableMeshObject
 {
 public:
 
+    //- Construct from name and instance on registry
     MoveableMeshObject(const word& typeName, const objectRegistry& obr)
     :
         GeometricMeshObject<Mesh>(typeName, obr)
@@ -238,6 +244,7 @@ class UpdateableMeshObject
 {
 public:
 
+    //- Construct from name and instance on registry
     UpdateableMeshObject(const word& typeName, const objectRegistry& obr)
     :
         MoveableMeshObject<Mesh>(typeName, obr)

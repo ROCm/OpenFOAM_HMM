@@ -101,16 +101,6 @@ bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
 }
 
 
-template<class Mesh, template<class> class MeshObjectType, class Type>
-Foam::MeshObject<Mesh, MeshObjectType, Type>::~MeshObject()
-{
-    // We should not do a 'release' at this point since that will upset
-    // the destructor of regIOobject itself (which gets called after this).
-    // However this is only a problem for Time-based MeshObject.
-    MeshObjectType<Mesh>::release();
-}
-
-
 template<class Mesh>
 void Foam::meshObject::movePoints(objectRegistry& obr)
 {

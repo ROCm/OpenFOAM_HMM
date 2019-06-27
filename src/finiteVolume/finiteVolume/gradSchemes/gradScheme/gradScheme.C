@@ -100,7 +100,6 @@ Foam::fv::gradScheme<Type>::grad
         if (pgGrad && pgGrad->ownedByRegistry())
         {
             solution::cachePrintMessage("Deleting", name, vsf);
-            pgGrad->release();
             delete pgGrad;
         }
 
@@ -125,7 +124,6 @@ Foam::fv::gradScheme<Type>::grad
         else
         {
             solution::cachePrintMessage("Updating", name, vsf);
-            pgGrad->release();
             delete pgGrad;
 
             pgGrad = calcGrad(vsf, name).ptr();
