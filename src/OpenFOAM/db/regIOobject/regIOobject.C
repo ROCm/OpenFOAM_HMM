@@ -239,7 +239,7 @@ bool Foam::regIOobject::checkOut()
     {
         registered_ = false;
 
-        return db().checkOut(*this);
+        return db().checkOut(this);
     }
 
     return false;

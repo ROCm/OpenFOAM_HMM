@@ -77,13 +77,7 @@ bool Foam::sampledSurface::removeRegistrySurface
 ) const
 {
     polySurface* surfptr = getRegistrySurface(obr, lookupName);
-
-    if (surfptr)
-    {
-        return obr.checkOut(*surfptr);
-    }
-
-    return false;
+    return obr.checkOut(surfptr);
 }
 
 
@@ -124,13 +118,7 @@ Foam::surfMesh* Foam::sampledSurface::storeSurfMesh(word lookupName) const
 bool Foam::sampledSurface::removeSurfMesh(word lookupName) const
 {
     surfMesh* surfptr = getSurfMesh(lookupName);
-
-    if (surfptr)
-    {
-        return mesh().checkOut(*surfptr);
-    }
-
-    return false;
+    return mesh().checkOut(surfptr);
 }
 
 

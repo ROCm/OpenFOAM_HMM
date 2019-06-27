@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -94,7 +94,7 @@ bool Foam::MeshObject<Mesh, MeshObjectType, Type>::Delete(const Mesh& mesh)
                 << Type::typeName << endl;
         }
 
-        return mesh.thisDb().checkOut(*ptr);
+        return mesh.thisDb().checkOut(ptr);
     }
 
     return false;
@@ -118,9 +118,8 @@ void Foam::meshObject::movePoints(objectRegistry& obr)
 
     forAllIters(meshObjects, iter)
     {
-        // Same as (isA<MoveableMeshObject<Mesh>>(*iter()))
-
-        auto* objectPtr = dynamic_cast<MoveableMeshObject<Mesh>*>(iter());
+        // isA<MoveableMeshObject<Mesh>>
+        auto* objectPtr = dynamic_cast<MoveableMeshObject<Mesh>*>(*iter);
 
         if (objectPtr)
         {
@@ -136,7 +135,7 @@ void Foam::meshObject::movePoints(objectRegistry& obr)
             {
                 Pout<< "    Destroying " << iter->name() << endl;
             }
-            obr.checkOut(*iter());
+            obr.checkOut(*iter);
         }
     }
 }
@@ -159,9 +158,8 @@ void Foam::meshObject::updateMesh(objectRegistry& obr, const mapPolyMesh& mpm)
 
     forAllIters(meshObjects, iter)
     {
-        // Same as (isA<UpdateableMeshObject<Mesh>>(*iter()))
-
-        auto* objectPtr = dynamic_cast<UpdateableMeshObject<Mesh>*>(iter());
+        // isA<MoveableMeshObject<Mesh>>
+        auto* objectPtr = dynamic_cast<UpdateableMeshObject<Mesh>*>(*iter);
 
         if (objectPtr)
         {
@@ -177,7 +175,7 @@ void Foam::meshObject::updateMesh(objectRegistry& obr, const mapPolyMesh& mpm)
             {
                 Pout<< "    Destroying " << iter->name() << endl;
             }
-            obr.checkOut(*iter());
+            obr.checkOut(*iter);
         }
     }
 }
@@ -204,7 +202,7 @@ void Foam::meshObject::clear(objectRegistry& obr)
         {
             Pout<< "    Destroying " << iter->name() << endl;
         }
-        obr.checkOut(*iter());
+        obr.checkOut(*iter);
     }
 }
 
@@ -231,13 +229,16 @@ void Foam::meshObject::clearUpto(objectRegistry& obr)
 
     forAllIters(meshObjects, iter)
     {
-        if (!isA<ToType<Mesh>>(*iter()))
+        // isA<ToType<Mesh>
+        auto* objectPtr = dynamic_cast<ToType<Mesh>*>(*iter);
+
+        if (!objectPtr)
         {
             if (meshObject::debug)
             {
                 Pout<< "    Destroying " << iter->name() << endl;
             }
-            obr.checkOut(*iter());
+            obr.checkOut(*iter);
         }
     }
 }
