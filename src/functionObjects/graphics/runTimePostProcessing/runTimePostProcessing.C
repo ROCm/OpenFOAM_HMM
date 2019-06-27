@@ -42,15 +42,14 @@ License
 #include "vtkSmartPointer.h"
 #include "vtkLight.h"
 
+#include "vtkDummyController.h"
+
 #ifdef FOAM_USING_VTK_MPI
 # include "vtkMPICommunicator.h"
 # include "vtkMPIController.h"
+# include "vtkCompositedSynchronizedRenderers.h"
+# include "vtkSynchronizedRenderWindows.h"
 #endif
-#include "vtkDummyController.h"
-
-#include "vtkSynchronizedRenderWindows.h"
-#include "vtkCompositedSynchronizedRenderers.h"
-
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -137,27 +136,21 @@ void Foam::functionObjects::runTimePostProcessing::render
         Log << name() << " render" << endl;
     }
 
-
-    // Normal rendering elements
-    vtkSmartPointer<vtkRenderer> renderer;
-    vtkSmartPointer<vtkRenderWindow> renderWindow;
-
-    // Multi-process synchronization
-    vtkSmartPointer<vtkSynchronizedRenderWindows> syncWindows;
-    vtkSmartPointer<vtkCompositedSynchronizedRenderers> syncRenderers;
-
-
     // Disable any floating point trapping
     // (some low-level rendering functionality does not like it)
 
     sigFpe::ignore sigFpeHandling; //<- disable in local scope
 
 
+    // Normal rendering elements
+    vtkSmartPointer<vtkRenderer> renderer;
+    vtkSmartPointer<vtkRenderWindow> renderWindow;
+
     // Initialise render window
     if (controller || Pstream::master())
     {
-        renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
         renderer = vtkSmartPointer<vtkRenderer>::New();
+        renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
 
         renderWindow->OffScreenRenderingOn();
         renderWindow->SetSize(output_.width_, output_.height_);
@@ -174,14 +167,21 @@ void Foam::functionObjects::runTimePostProcessing::render
         renderWindow->AddRenderer(renderer);
     }
 
-    // Synchronization
+
+    // ---------------------
+    #ifdef FOAM_USING_VTK_MPI
+
+    // Multi-process synchronization
+    vtkSmartPointer<vtkCompositedSynchronizedRenderers> syncRenderers;
+    vtkSmartPointer<vtkSynchronizedRenderWindows> syncWindows;
+
     if (controller)
     {
-        syncWindows =
-            vtkSmartPointer<vtkSynchronizedRenderWindows>::New();
-
         syncRenderers =
             vtkSmartPointer<vtkCompositedSynchronizedRenderers>::New();
+
+        syncWindows =
+            vtkSmartPointer<vtkSynchronizedRenderWindows>::New();
 
         syncWindows->SetRenderWindow(renderWindow);
         syncWindows->SetParallelController(controller);
@@ -193,7 +193,7 @@ void Foam::functionObjects::runTimePostProcessing::render
         syncRenderers->SetRenderer(renderer);
         syncRenderers->SetParallelController(controller);
     }
-
+    #endif
     // ---------------------
 
     scene_.initialise(renderer, output_.name_);
