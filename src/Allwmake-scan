@@ -1,0 +1,18 @@
+#!/bin/sh
+# Allwmake with scan-build (clang)
+
+command -v scan-build > /dev/null || {
+    exec 1>&2
+    echo "No scan-build found, stopping"
+    echo
+    exit 2
+}
+
+comp_cc="$(command -v "$(wmake -show-c)")"
+comp_cxx="$(command -v "$(wmake -show-cxx)")"
+
+set -x
+scan-build --use-cc="$comp_cc" --use-c++="$comp_cxx" \
+    ./Allwmake "$@"
+
+#------------------------------------------------------------------------------
