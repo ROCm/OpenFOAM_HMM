@@ -165,11 +165,11 @@ invBlockGrading #calc "1.0/$blockGrading";
 
 blocks
 (
-    hex (16 17 18 19 12 13 14 15) farField (25 100 1) simplegrading (1 1 1)
+    hex (16 17 18 19 12 13 14 15) farField (25 100 1) simpleGrading (1 1 1)
 
-    hex (3 0 1 4 2 0 1 5) bottomBlock (10 50 1) simplegrading ($edgeNumber 1 1)
+    hex (3 0 1 4 2 0 1 5) bottomBlock (10 50 1) simpleGrading ($edgeNumber 1 1)
 
-    hex (7 8 11 10 6 8 11 9) topBlock (10 35 1) simplegrading ($edgeNumber 1 1)
+    hex (7 8 11 10 6 8 11 9) topBlock (10 35 1) simpleGrading ($edgeNumber 1 1)
 
     hex (25 23 20 22 24 23 20 21)
     centralBlock (10 20 1)
