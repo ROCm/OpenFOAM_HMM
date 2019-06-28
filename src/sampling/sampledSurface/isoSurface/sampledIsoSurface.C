@@ -101,7 +101,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
                         fvm
                     )
                 );
-                volFieldPtr_ = storedVolFieldPtr_.get();
+                volFieldPtr_ = storedVolFieldPtr_.get(); // get(), not release()
             }
             else
             {
@@ -185,7 +185,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
             (
                 pointAverage(*pointFieldPtr_).ptr()
             );
-            volFieldPtr_ = storedVolFieldPtr_.operator->();
+            volFieldPtr_ = storedVolFieldPtr_.get(); // get(), not release()
         }
 
 
@@ -226,7 +226,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
                 ).ptr()
             );
             storedVolSubFieldPtr_->checkOut();
-            volSubFieldPtr_ = storedVolSubFieldPtr_.operator->();
+            volSubFieldPtr_ = storedVolSubFieldPtr_.get(); // not release()
         }
 
 
@@ -285,7 +285,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
             (
                 pointAverage(*pointSubFieldPtr_).ptr()
             );
-            volSubFieldPtr_ = storedVolSubFieldPtr_.operator->();
+            volSubFieldPtr_ = storedVolSubFieldPtr_.get(); // not release()
         }
 
 
