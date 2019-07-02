@@ -299,7 +299,7 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     const DimensionedField<Type, GeoMesh>& df
 )
 :
-    regIOobject(newName, df, newName == df.name()),
+    regIOobject(newName, df, newName != df.name()),
     Field<Type>(df),
     mesh_(df.mesh_),
     dimensions_(df.dimensions_),
