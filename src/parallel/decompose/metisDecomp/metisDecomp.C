@@ -206,8 +206,8 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,                  // num vertices in graph
             &ncon,                      // num balancing constraints
-            xadj_metis.ref().data(),    // indexing into adjncy
-            adjncy_metis.ref().data(),  // neighbour info
+            xadj_metis.constCast().data(),      // indexing into adjncy
+            adjncy_metis.constCast().data(),    // neighbour info
             cellWeights.data(),         // vertex wts
             nullptr,                    // vsize: total communication vol
             faceWeights.data(),         // edge wts
@@ -225,8 +225,8 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,                  // num vertices in graph
             &ncon,                      // num balancing constraints
-            xadj_metis.ref().data(),    // indexing into adjncy
-            adjncy_metis.ref().data(),  // neighbour info
+            xadj_metis.constCast().data(),      // indexing into adjncy
+            adjncy_metis.constCast().data(),    // neighbour info
             cellWeights.data(),         // vertex wts
             nullptr,                    // vsize: total communication vol
             faceWeights.data(),         // edge wts
