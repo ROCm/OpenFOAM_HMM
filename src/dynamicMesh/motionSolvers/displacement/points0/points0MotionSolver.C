@@ -48,58 +48,29 @@ Foam::IOobject Foam::points0MotionSolver::points0IO(const polyMesh& mesh)
             IOobject::READ_IF_PRESENT
         );
 
-    if (instance != mesh.time().constant())
+    IOobject io
+    (
+        "points0",
+        instance,
+        polyMesh::meshSubDir,
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    // If points0 are located in constant directory, verify their existence
+    // or fallback to a copy of the original mesh points
+    if
+    (
+        instance == mesh.time().constant()
+     && !io.typeHeaderOk<pointIOField>()
+    )
     {
-        // points0 written to a time folder
-
-        return
-            IOobject
-            (
-                "points0",
-                instance,
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            );
+        io.rename("points");
     }
-    else
-    {
-        // Check that points0 are actually in constant directory
 
-        IOobject io
-        (
-            "points0",
-            instance,
-            polyMesh::meshSubDir,
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if (io.typeHeaderOk<pointIOField>())
-        {
-            return io;
-        }
-        else
-        {
-            // Copy of original mesh points
-
-            return
-                IOobject
-                (
-                    "points",
-                    instance,
-                    polyMesh::meshSubDir,
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                );
-        }
-    }
+    return io;
 }
 
 

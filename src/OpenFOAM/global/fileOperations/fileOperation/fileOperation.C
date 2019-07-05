@@ -757,8 +757,8 @@ Foam::IOobject Foam::fileOperation::findInstance
         return io;
     }
 
-    // Search back through the time directories to find the time
-    // closest to and lower than current time
+    // Search back through the time directories to find the first time
+    // that is less than or equal to the current time
 
     instantList ts = time.times();
     label instanceI = ts.size()-1;
@@ -771,20 +771,21 @@ Foam::IOobject Foam::fileOperation::findInstance
         }
     }
 
-    // Continue searching from here
+    // Found the time, continue from here
     for (; instanceI >= 0; --instanceI)
     {
+        io.instance() = ts[instanceI].name();
+
         // Shortcut: if actual directory is the timeName we've already tested it
         if
         (
-            ts[instanceI].name() == startIO.instance()
-         && ts[instanceI].name() != stopInstance
+            io.instance() == startIO.instance()
+         && io.instance() != stopInstance
         )
         {
             continue;
         }
 
-        io.instance() = ts[instanceI].name();
         if (exists(io))
         {
             DebugInFunction
@@ -796,7 +797,7 @@ Foam::IOobject Foam::fileOperation::findInstance
         }
 
         // Check if hit minimum instance
-        if (ts[instanceI].name() == stopInstance)
+        if (io.instance() == stopInstance)
         {
             DebugInFunction
                 << "Hit stopInstance " << stopInstance << endl;
