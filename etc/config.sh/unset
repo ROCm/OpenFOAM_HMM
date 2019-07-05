@@ -147,7 +147,6 @@ then
 fi
 
 [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
-[ -n "$LD_PRELOAD" ] || unset LD_PRELOAD
 [ -n "$MANPATH" ] || unset MANPATH
 
 #------------------------------------------------------------------------------

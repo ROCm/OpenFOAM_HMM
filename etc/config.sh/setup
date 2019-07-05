@@ -153,12 +153,6 @@ then
     MANPATH="${MANPATH}:"
 fi
 
-if [ -n "$LD_PRELOAD" ]
-then
-    export LD_PRELOAD
-    _foamClean LD_PRELOAD
-fi
-
 
 # Cleanup temporary information
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
