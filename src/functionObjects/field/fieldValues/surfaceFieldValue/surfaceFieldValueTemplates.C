@@ -411,14 +411,12 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
                     // sqrt: component-wise - doesn't change the type
                     for (direction d=0; d < pTraits<Type>::nComponents; ++d)
                     {
-                        setComponent(result,  d)
-                            = sqrt(mag(component(result,  d)));
+                        setComponent(result, d)
+                            = sqrt(mag(component(result, d)));
                     }
                     break;
                 }
             }
-
-            file()<< tab << result;
 
             // Write state/results information
             word prefix, suffix;
@@ -436,13 +434,34 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::writeValues
                 suffix += ')';
             }
 
-            Log << "    " << prefix << regionName_ << suffix
-                << " of " << fieldName
-                <<  " = " << result << endl;
+            word resultName = prefix + regionName_ + ',' + fieldName + suffix;
 
             // Write state/results information
-            word resultName = prefix + regionName_ + ',' + fieldName + suffix;
-            this->setResult(resultName, result);
+
+            Log << "    " << prefix << regionName_ << suffix
+                << " of " << fieldName << " = ";
+
+            // Operation tagged that it always returns scalar?
+            const bool alwaysScalar(operation_ & typeScalar);
+
+            if (alwaysScalar)
+            {
+                const scalar sresult = component(result, 0);
+
+                file()<< tab << sresult;
+
+                Log << sresult << endl;
+
+                this->setResult(resultName, sresult);
+            }
+            else
+            {
+                file()<< tab << result;
+
+                Log << result << endl;
+
+                this->setResult(resultName, result);
+            }
         }
     }
 

@@ -229,26 +229,30 @@ bool Foam::functionObjects::fieldValues::volFieldValue::writeValues
             }
         }
 
-        // Apply scale factor
-        values *= scaleFactor_;
-
-        Type result = processValues(values, V, weightField);
-
-        file()<< tab << result;
-
-        Log << "    " << operationTypeNames_[operation_]
-            << "(" << this->volRegion::regionName_ << ") of " << fieldName
-            <<  " = " << result << endl;
-
-        // Write state/results information
-        const word& opName = operationTypeNames_[operation_];
-        word outName = fieldName;
-        if (this->volRegion::regionName_ != polyMesh::defaultRegion)
+        if (operation_ != opNone)
         {
-            outName = this->volRegion::regionName_ + ',' + outName;
+            // Apply scale factor
+            values *= scaleFactor_;
+
+            Type result = processValues(values, V, weightField);
+
+            // Write state/results information
+            const word& opName = operationTypeNames_[operation_];
+            word outName = fieldName;
+            if (this->volRegion::regionName_ != polyMesh::defaultRegion)
+            {
+                outName = this->volRegion::regionName_ + ',' + outName;
+            }
+            word resultName = opName + '(' + outName + ')';
+
+            file()<< tab << result;
+
+            Log << "    " << opName
+                << '(' << this->volRegion::regionName_ << ") of " << fieldName
+                <<  " = " << result << endl;
+
+            this->setResult(resultName, result);
         }
-        word resultName = opName + '(' + outName + ')';
-        this->setResult(resultName, result);
     }
 
     return ok;

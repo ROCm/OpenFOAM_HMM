@@ -140,7 +140,7 @@ public:
         enum operationVariant
         {
             typeBase = 0,         //!< Base operation
-            typeWeighted = 0x100, //!< Operation using weighting
+            typeWeighted = 0x200, //!< Operation using weighting
         };
 
         //- Operation type enumeration

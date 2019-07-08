@@ -229,8 +229,9 @@ public:
         enum operationVariant
         {
             typeBase = 0,         //!< Base operation
-            typeWeighted = 0x100, //!< Operation using weighting
-            typeAbsolute = 0x200, //!< Operation using mag (eg, for weighting)
+            typeScalar = 0x100,   //!< Operation returns a scalar
+            typeWeighted = 0x200, //!< Operation using weighting
+            typeAbsolute = 0x400, //!< Operation using mag (eg, for weighting)
         };
 
         //- Operation type enumeration
@@ -252,9 +253,17 @@ public:
             opAreaAverage,          //!< Area average
             opAreaIntegrate,        //!< Area integral
             opCoV,                  //!< Coefficient of variation
-            opAreaNormalAverage,    //!< Area average in normal direction
-            opAreaNormalIntegrate,  //!< Area integral in normal direction
-            opUniformity,           //!< Uniformity index
+
+            // Scalar return values
+
+            //! Area average in normal direction (output is always scalar)
+            opAreaNormalAverage = typeScalar,
+
+            //! Area integral in normal direction (output is always scalar)
+            opAreaNormalIntegrate,
+
+            //! Uniformity index (output is always scalar)
+            opUniformity,
 
             // Weighted variants
 
