@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -52,16 +52,16 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
-                           Class treeDataPoint Declaration
+                        Class treeDataPoint Declaration
 \*---------------------------------------------------------------------------*/
 
 class treeDataPoint
 {
-    // Private data
+    // Private Data
 
         const pointField& points_;
 
@@ -110,8 +110,8 @@ public:
 
         findIntersectOp(const indexedOctree<treeDataPoint>& tree);
 
-        //- Calculate intersection of triangle with ray. Sets result
-        //  accordingly
+        //- Calculate intersection of triangle with ray.
+        //  Sets result accordingly
         bool operator()
         (
             const label index,
@@ -128,17 +128,45 @@ public:
 
     // Constructors
 
-        //- Construct from pointField. Holds reference!
-        treeDataPoint(const pointField&);
+        //- Construct from pointField
+        //  \note Holds reference to the points!
+        explicit treeDataPoint(const pointField& points);
 
-        //- Construct from subset of pointField. Holds reference!
-        treeDataPoint(const pointField&, const labelList&);
+        //- Construct from subset of pointField, copies point ids
+        //  \note Holds reference to the points!
+        treeDataPoint
+        (
+            const pointField& points,
+            const labelUList& pointLabels,
+            const bool useSubsetPoints = true
+        );
+
+        //- Construct from subset of pointField, moves point ids
+        //  \note Holds reference to the points!
+        treeDataPoint
+        (
+            const pointField& points,
+            labelList&& pointLabels,
+            const bool useSubsetPoints = true
+        );
 
 
     // Member Functions
 
         // Access
 
+            //- An empty effective point field?
+            inline bool empty() const
+            {
+                return
+                (
+                    useSubset_
+                  ? pointLabels_.empty()
+                  : points_.empty()
+                );
+            }
+
+            //- The effective point field size
             inline label size() const
             {
                 return
@@ -149,23 +177,48 @@ public:
                 );
             }
 
+            //- The original point field
+            inline const pointField& points() const
+            {
+                return points_;
+            }
+
+            //- The original point ids
             inline const labelList& pointLabels() const
             {
                 return pointLabels_;
             }
 
-            const pointField& points() const
-            {
-                return points_;
-            }
-
-            bool useSubset() const
+            //- Use a subset of points
+            inline bool useSubset() const
             {
                 return useSubset_;
             }
 
-            //- Get representative point cloud for all shapes inside
-            //  (one point per shape)
+            //- The original (non-subset) point label
+            inline label pointLabel(const label index) const
+            {
+                return
+                (
+                    useSubset_ && index >= 0
+                  ? pointLabels_[index]
+                  : index
+                );
+            }
+
+            //- Point at specified index
+            inline const point& shapePoint(const label index) const
+            {
+                return
+                (
+                    useSubset_
+                  ? points_[pointLabels_[index]]
+                  : points_[index]
+                );
+            }
+
+            //- Representative point cloud for all shapes inside
+            //- (one point per shape)
             pointField shapePoints() const;
 
 
@@ -175,8 +228,8 @@ public:
             //  Only makes sense for closed surfaces.
             volumeType getVolumeType
             (
-                const indexedOctree<treeDataPoint>&,
-                const point&
+                const indexedOctree<treeDataPoint>& os,
+                const point& sample
             ) const;
 
             //- Does (bb of) shape at index overlap bb
@@ -193,6 +246,15 @@ public:
                 const point& centre,
                 const scalar radiusSqr
             ) const;
+
+
+    // Member Operators
+
+        //- The point at the specified index
+        inline const point& operator[](const label index) const
+        {
+            return shapePoint(index);
+        }
 };
 
 

@@ -475,13 +475,12 @@ void Foam::treeDataPrimitivePatch<PatchType>::findNearestOp::operator()
 
     const pointField& points = patch.points();
 
-    forAll(indices, i)
+    for (const label index : indices)
     {
-        const label index = indices[i];
         const typename PatchType::FaceType& f = patch[index];
 
-        pointHit nearHit = f.nearestPoint(sample, points);
-        scalar distSqr = sqr(nearHit.distance());
+        const pointHit nearHit = f.nearestPoint(sample, points);
+        const scalar distSqr = sqr(nearHit.distance());
 
         if (distSqr < nearestDistSqr)
         {

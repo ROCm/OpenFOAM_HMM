@@ -170,12 +170,7 @@ bool Foam::treeDataEdge::overlaps
 
     const scalar distSqr = sqr(nearHit.distance());
 
-    if (distSqr <= radiusSqr)
-    {
-        return true;
-    }
-
-    return false;
+    return (distSqr <= radiusSqr);
 }
 
 
@@ -191,15 +186,13 @@ void Foam::treeDataEdge::findNearestOp::operator()
 {
     const treeDataEdge& shape = tree_.shapes();
 
-    forAll(indices, i)
+    for (const label index : indices)
     {
-        const label index = indices[i];
-
         const edge& e = shape.edges()[shape.edgeLabels()[index]];
 
         pointHit nearHit = e.line(shape.points()).nearestDist(sample);
 
-        scalar distSqr = sqr(nearHit.distance());
+        const scalar distSqr = sqr(nearHit.distance());
 
         if (distSqr < nearestDistSqr)
         {
@@ -227,10 +220,8 @@ void Foam::treeDataEdge::findNearestOp::operator()
     // Best so far
     scalar nearestDistSqr = magSqr(linePoint - nearestPoint);
 
-    forAll(indices, i)
+    for (const label index : indices)
     {
-        const label index = indices[i];
-
         const edge& e = shape.edges()[shape.edgeLabels()[index]];
 
         // Note: could do bb test ? Worthwhile?

@@ -479,10 +479,8 @@ void Foam::treeDataFace::findNearestOp::operator()
 {
     const treeDataFace& shape = tree_.shapes();
 
-    forAll(indices, i)
+    for (const label index : indices)
     {
-        const label index = indices[i];
-
         const face& f = shape.mesh().faces()[shape.faceLabels()[index]];
 
         pointHit nearHit = f.nearestPoint(sample, shape.mesh().points());
