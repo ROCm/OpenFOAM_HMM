@@ -37,42 +37,68 @@ using namespace Foam;
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-// Prefix '\\?\' for extended-length path
-inline std::string longName(const std::string& file)
+unsigned maxPath = MAX_PATH;
+
+// Prefix "\\?\" for extended-length path and widen
+// The prefix is only valid with absolute paths
+//
+// In the future, this code will be relocated in MSwindows.C
+
+static inline std::wstring longName(const fileName& file)
 {
-    std::string longName;
-    longName.reserve(4 + file.length());
+    const auto len = file.length();
 
-    longName.append("\\\\?\\");
-    longName.append(file);
+    std::wstring out;
+    out.reserve(4 + len);
 
-    return longName;
+    if (len > maxPath)
+    {
+        if (file.isAbsolute())
+        {
+            out.append(L"\\\\?\\");
+        }
+        else
+        {
+            Warning
+                << "Relative fileName exceeds " << maxPath
+                << " characters" << nl
+                << "    " << file << nl << nl;
+        }
+    }
+
+    // Character-wise copy to get widening
+    for (const auto c : file)
+    {
+        out += c;
+    }
+
+    return out;
 }
 
-bool win_cp(const fileName& src, const fileName& dst)
-{
-    const std::string srcName(longName(src));
-    const std::string dstName(longName(dst));
-
-    return ::CopyFile(srcName.c_str(), dstName.c_str(), false);
-}
 
 bool win_mv(const fileName& src, const fileName& dst)
 {
-    const std::string srcName(longName(src));
-    const std::string dstName(longName(dst));
+    constexpr const int flags
+    (
+        MOVEFILE_COPY_ALLOWED
+      | MOVEFILE_REPLACE_EXISTING
+      | MOVEFILE_WRITE_THROUGH
+    );
 
-    return ::MoveFile(srcName.c_str(), dstName.c_str());
+    if (src.length() > maxPath || dst.length() > maxPath)
+    {
+        const std::wstring srcName(longName(src));
+        const std::wstring dstName(longName(dst));
+
+        Info<< "Windows mv (wide)" << nl;
+        return ::MoveFileExW(srcName.c_str(), dstName.c_str(), flags);
+    }
+
+    Info<< "Windows mv (ansi)" << nl;
+    return ::MoveFileExA(src.c_str(), dst.c_str(), flags);
 }
 
 #else
-
-bool win_cp(const fileName& src, const fileName& dst)
-{
-    Info<< "No Windows cp, using Foam::cp" << nl;
-    return Foam::cp(src, dst);
-}
-
 
 bool win_mv(const fileName& src, const fileName& dst)
 {
@@ -95,14 +121,17 @@ int main(int argc, char *argv[])
 
     #ifdef _WIN32
     argList::addBoolOption("win1", "Foam cp, Windows mv");
-    argList::addBoolOption("win2", "Windows cp, Foam mv");
-    argList::addBoolOption("win3", "Windows cp, Windows mv");
+    argList::addOption("maxPath", "length", "Test with shorter MAX_PATH");
     #endif
 
     argList::addArgument("srcFile");
     argList::addArgument("dstFile");
 
     #include "setRootCase.H"
+
+    #ifdef _WIN32
+    args.readIfPresent("maxPath", maxPath);
+    #endif
 
     const fileName srcFile(fileName::validate(args[1]));
     const fileName dstFile(fileName::validate(args[2]));
@@ -111,10 +140,12 @@ int main(int argc, char *argv[])
     Info<< "src   : " << srcFile << nl
         << "tmp   : " << tmpFile << nl
         << "dst   : " << dstFile << nl
+        #ifdef _WIN32
+        << "test with max-path: " << maxPath << nl
+        #endif
         << nl;
 
     bool cpOk = false, mvOk = false;
-
 
     if (args.found("win1"))
     {
@@ -125,28 +156,6 @@ int main(int argc, char *argv[])
         }
 
         cpOk = Foam::cp(srcFile, tmpFile);
-        mvOk = win_mv(tmpFile, dstFile);
-    }
-    else if (args.found("win2"))
-    {
-        const auto usage = argList::optionUsage.cfind("win2");
-        if (usage.good())
-        {
-            Info<< "    " << (*usage).c_str() << nl;
-        }
-
-        cpOk = win_cp(srcFile, tmpFile);
-        mvOk = Foam::mv(tmpFile, dstFile);
-    }
-    else if (args.found("win3"))
-    {
-        const auto usage = argList::optionUsage.cfind("win3");
-        if (usage.good())
-        {
-            Info<< "    " << (*usage).c_str() << nl;
-        }
-
-        cpOk = win_cp(srcFile, tmpFile);
         mvOk = win_mv(tmpFile, dstFile);
     }
     else

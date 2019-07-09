@@ -24,6 +24,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    MS-Windows versions of the functions declared in OSspecific.H
+
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
@@ -76,6 +79,22 @@ namespace Foam
     }
 
     static bool const abortHandlerInstalled = installAbortHandler();
+
+
+    // Move file, overwriting existing
+    static bool renameFile(const fileName& src, const fileName& dst)
+    {
+        constexpr const int flags
+        (
+            MOVEFILE_COPY_ALLOWED
+          | MOVEFILE_REPLACE_EXISTING
+          | MOVEFILE_WRITE_THROUGH
+        );
+
+        // TODO: handle extra-long paths with ::MoveFileExW
+
+        return ::MoveFileExA(src.c_str(), dst.c_str(), flags);
+    }
 
 } // End namespace Foam
 
@@ -928,10 +947,10 @@ bool Foam::mv(const fileName& src, const fileName& dst, const bool followLink)
     {
         const fileName dstName(dst/src.name());
 
-        return 0 == std::rename(src.c_str(), dstName.c_str());
+        return renameFile(src, dstName);
     }
 
-    return 0 == std::rename(src.c_str(), dst.c_str());
+    return renameFile(src, dst);
 }
 
 
@@ -945,10 +964,10 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
 
     if (exists(src, false))
     {
-        const int maxIndex = 99;
+        constexpr const int maxIndex = 99;
         char index[3];
 
-        for (int n = 0; n <= maxIndex; n++)
+        for (int n = 0; n <= maxIndex; ++n)
         {
             fileName dstName(src + "." + ext);
             if (n)
@@ -961,7 +980,7 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
             // possible index where we have no choice
             if (!exists(dstName, false) || n == maxIndex)
             {
-                return (0 == std::rename(src.c_str(), dstName.c_str()));
+                return renameFile(src, dstName);
             }
         }
     }
