@@ -68,8 +68,8 @@ InfoSwitches
     allowSystemOperations   1;
 
     // Allow space character in fileName (use with caution)
-    // Default: 0 for non-Windows, 1 for Windows
-    //// allowSpaceInFileName    0;
+    // Ignored (always 1) for Windows.
+    allowSpaceInFileName    0;
 }
 
 

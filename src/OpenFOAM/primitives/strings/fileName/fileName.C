@@ -42,7 +42,7 @@ int Foam::fileName::debug(Foam::debug::debugSwitch(fileName::typeName, 0));
 int Foam::fileName::allowSpaceInFileName
 (
     #ifdef _WIN32
-    Foam::debug::infoSwitch("allowSpaceInFileName", 1)
+    1  // Windows: expect spaces to occur
     #else
     Foam::debug::infoSwitch("allowSpaceInFileName", 0)
     #endif
