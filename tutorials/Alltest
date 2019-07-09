@@ -33,16 +33,16 @@ usage()
 usage: ${0##*/} [OPTION]
 
 options:
+  -force        Force overwrite of existing tutorialsTest directory
+  -debug        Adjust DebugSwitches (fvSchemes, solution)
+  -default      Sets up a default scheme on all schemes
   -git          Use git to retrieve the tutorials
   -no-git       Do not use git to retrieve the tutorials
-  -debug        Adjust DebugSwitches (fvSchemes, solution)
-  -root dir     Specify root directory to run tests from
-  -default      Sets up a default scheme on all schemes
+  -root dir     Root directory to start tests from (non-git only)
   -help         Print the usage
 
 Quickly tests the tutorials and writes out the scheme/solver information.
-The default is to detect and use 'git' if possible to obtain a fresh set
-of tutorial files. This can be overridden with -git or -no-git options.
+Detects and uses 'git' to obtain a fresh set of files when possible.
 
 USAGE
     exit 1
@@ -63,10 +63,11 @@ die()
 
 #------------------------------------------------------------------------------
 
-ROOT="./"
+rootDir="./"
 adjustDebugSwitches=false
 useDefaultSchemes=false
 useGit=auto
+unset optForce
 
 # Parse options
 while [ "$#" -gt 0 ]
@@ -75,9 +76,12 @@ do
     -h | -help)
         usage
         ;;
+    -f | -force)
+        optForce=true
+        ;;
     -r | -root)
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
-        ROOT="$2"
+        rootDir="$2"
         shift
         ;;
     -git)
@@ -165,7 +169,6 @@ then
 fi
 
 
-TUTORIALS_DIR=$ROOT
 TEST_RUN_DIR=../tutorialsTest
 FV_SCHEMES=\
 " \
@@ -187,8 +190,15 @@ SOLVERS_TEMP="FvSolution.temp"
 
 if [ -d "$TEST_RUN_DIR" ]
 then
-    echo "Removing old directory: $TEST_RUN_DIR" 1>&2
-    rm -rf $TEST_RUN_DIR
+    if [ "$optForce" = true ]
+    then
+        echo "Removing old directory: $TEST_RUN_DIR" 1>&2
+        rm -rf $TEST_RUN_DIR
+    else
+        echo "Directory already exists: $TEST_RUN_DIR" 1>&2
+        echo "    use -force to remove" 1>&2
+        exit 1
+    fi
 fi
 
 # Remove old build/ directory
@@ -228,17 +238,21 @@ fi
 if [ -n "$gitbase" ]
 then
     echo "Copying the tutorials from current git branch" 1>&2
-    mkdir -p "${TEST_RUN_DIR}"
+    mkdir -p "$TEST_RUN_DIR"
     ( cd "$gitbase/tutorials" && git archive --format=tar HEAD . ) | \
     ( cd "$TEST_RUN_DIR" && tar -xf - )
 else
     echo "Copying the tutorials directory" 1>&2
-    cp -a "$TUTORIALS_DIR" "$TEST_RUN_DIR"
+    cp -a "$rootDir" "$TEST_RUN_DIR"
 fi
 
-cd "${TEST_RUN_DIR}" || exit 1
+cd "$TEST_RUN_DIR" || exit 1
 
-echo 1>&2
+
+# Generate Alltest script (replacement for this one)
+echo "Generating Alltest script" 1>&2
+echo '#!/bin/sh' >| Alltest
+echo 'exec "${0%/*}/Allrun" -test "$@"' >> Alltest
 
 
 # Adjust etc controlDict, and clean up on termination and on Ctrl-C
