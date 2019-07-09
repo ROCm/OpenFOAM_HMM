@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "isoSurfaceTopo.H"
+#include "isoSurface.H"
 #include "polyMesh.H"
 #include "tetMatcher.H"
 #include "tetPointRef.H"
@@ -63,6 +64,11 @@ Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
     const label celli
 ) const
 {
+    if (ignoreCells_.test(celli))
+    {
+        return NOTCUT;
+    }
+
     const cell& cFaces = mesh_.cells()[celli];
 
     if (isTet)
@@ -1154,17 +1160,32 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     const scalarField& cVals,
     const scalarField& pVals,
     const scalar iso,
-    const filterType filter
+    const filterType filter,
+    const boundBox& bounds,
+    const bitSet& ignoreCells
 )
 :
+    isoSurfaceBase(iso, bounds),
     mesh_(mesh),
     cVals_(cVals),
     pVals_(pVals),
-    iso_(iso)
+    ignoreCells_(ignoreCells)
 {
     if (debug)
     {
-        Pout<< "isoSurfaceTopo : iso:" << iso_ << " filter:" << filter << endl;
+        Pout<< "isoSurfaceTopo::"
+            << "    cell min/max  : "
+            << min(cVals_) << " / "
+            << max(cVals_) << nl
+            << "    point min/max : "
+            << min(pVals_) << " / "
+            << max(pVals_) << nl
+            << "    isoValue      : " << iso << nl
+            << "    filter        : " << filter << nl
+            << "    mesh span     : " << mesh.bounds().mag() << nl
+            << "    ignoreCells   : " << ignoreCells_.count()
+            << " / " << cVals_.size() << nl
+            << endl;
     }
 
     fixTetBasePtIs();
@@ -1314,8 +1335,11 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
         }
 
 
-        if (filter == DIAGCELL)
+        if (filter == DIAGCELL && ignoreCells_.empty())
         {
+            // Note that the following only works without cell subsets
+            // thus we skip this when ignoreCells_ is non-empty
+
             // We remove verts on face diagonals. This is in fact just
             // straightening the edges of the face through the cell. This can
             // close off 'pockets' of triangles and create open or
@@ -1324,10 +1348,9 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             // Solved by eroding open-edges
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
             // Mark points on mesh outside. Note that we extend with nCells
             // so we can easily index with pointToVerts_.
-            PackedBoolList isBoundaryPoint(mesh.nPoints() + mesh.nCells());
+            bitSet isBoundaryPoint(mesh.nPoints() + mesh.nCells());
             for
             (
                 label facei = mesh.nInternalFaces();
@@ -1343,7 +1366,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             {
                 const labelList& mp = meshPoints();
 
-                PackedBoolList removeFace(this->size());
+                bitSet removeFace(this->size());
                 label nFaces = 0;
                 {
                     const labelListList& edgeFaces =

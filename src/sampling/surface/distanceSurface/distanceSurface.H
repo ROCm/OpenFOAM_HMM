@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -28,20 +28,20 @@ Class
 
 Description
     A surface defined by a distance from an input searchable surface.
-    Uses an isoSurfaceCell or an isoSurface algorithm for constructing the
+    Uses an iso-surface algorithm (cell, topo, point) for constructing the
     distance surface.
 
 Usage
     Dictionary controls:
     \table
-        Property | Description                             | Required | Default
-        distance | distance from surface                   | yes      |
-        signed   | Use sign when distance is positive      | partly   |
-        cell     | use isoSurfaceCell algorithm            | no       | true
-        regularise | Point snapping for iso-surface        | yes      |
-        bounds   | Limit with bounding box                 | no       |
-        surfaceType | Type of surface                      | yes      |
-        surfaceName | Name of surface in \c triSurface/    | no  | dict name
+        Property | Description                              | Required | Default
+        distance | distance from surface                    | yes |
+        signed   | Use sign when distance is positive       | partly |
+        isoAlgorithm | (cell/topo/point)                    | no  | cell
+        regularise | Point snapping for iso-surface         | no  | true
+        bounds   | Limit with bounding box                  | no  |
+        surfaceType | Type of surface                       | yes |
+        surfaceName | Name of surface in \c triSurface/     | no  | dict name
     \endtable
 
 Note
@@ -53,6 +53,8 @@ Note
       surface. The resulting surface elements will not, however, contain
       partial cell coverage.
 
+    For compatibility, the keyword 'cell' (as a bool) is accepted
+
 SourceFiles
     distanceSurface.C
 
@@ -63,8 +65,9 @@ SourceFiles
 
 #include "sampledSurface.H"
 #include "searchableSurface.H"
-#include "isoSurfaceCell.H"
 #include "isoSurface.H"
+#include "isoSurfaceCell.H"
+#include "isoSurfaceTopo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,11 +94,11 @@ class distanceSurface
         //- Signed distance
         const bool signed_;
 
-        //- Use isoSurfaceCell (true) or isoSurface (false) algorithm
-        const bool cell_;
-
         //- Whether to coarsen iso-surface triangles
         const bool regularise_;
+
+        //- The iso-surface algorithm type
+        const isoSurfaceBase::algorithmType isoAlgo_;
 
         //- Optional bounding box to trim against
         const boundBox bounds_;
@@ -106,12 +109,14 @@ class distanceSurface
         //- Distance to points
         scalarField pointDistance_;
 
-        //- Constructed iso surface
-        autoPtr<isoSurfaceCell> isoSurfCellPtr_;
-
-        //- Constructed iso surface
+        //- Constructed iso surface (ALGO_POINT)
         autoPtr<isoSurface> isoSurfPtr_;
 
+        //- Constructed iso surface (ALGO_CELL)
+        autoPtr<isoSurfaceCell> isoSurfCellPtr_;
+
+        //- Constructed iso surface (ALGO_TOPO)
+        autoPtr<isoSurfaceTopo> isoSurfTopoPtr_;
 
 public:
 
@@ -138,7 +143,7 @@ public:
             const word& surfaceName,
             const scalar distance,
             const bool signedDistance,
-            const bool cell,
+            const isoSurfaceBase::algorithmType algo,
             const bool regularise,
             const boundBox& bounds = boundBox::invertedBox
         );
@@ -169,9 +174,13 @@ public:
         //- The underlying surface
         const meshedSurface& surface() const
         {
-            if (cell_)
+            if (isoSurfCellPtr_)
             {
                 return *isoSurfCellPtr_;
+            }
+            else if (isoSurfTopoPtr_)
+            {
+                return *isoSurfTopoPtr_;
             }
             return *isoSurfPtr_;
         }
@@ -180,9 +189,13 @@ public:
         //- The underlying surface
         meshedSurface& surface()
         {
-            if (cell_)
+            if (isoSurfCellPtr_)
             {
                 return *isoSurfCellPtr_;
+            }
+            else if (isoSurfTopoPtr_)
+            {
+                return *isoSurfTopoPtr_;
             }
             return *isoSurfPtr_;
         }
@@ -190,9 +203,13 @@ public:
         //- For each face, the original cell in mesh
         const labelList& meshCells() const
         {
-            if (cell_)
+            if (isoSurfCellPtr_)
             {
                 return isoSurfCellPtr_->meshCells();
+            }
+            else if (isoSurfTopoPtr_)
+            {
+                return isoSurfTopoPtr_->meshCells();
             }
             return isoSurfPtr_->meshCells();
         }
@@ -200,9 +217,13 @@ public:
         //- For each face, the original cell in mesh
         labelList& meshCells()
         {
-            if (cell_)
+            if (isoSurfCellPtr_)
             {
                 return isoSurfCellPtr_->meshCells();
+            }
+            else if (isoSurfTopoPtr_)
+            {
+                return isoSurfTopoPtr_->meshCells();
             }
             return isoSurfPtr_->meshCells();
         }

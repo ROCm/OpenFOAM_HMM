@@ -87,12 +87,12 @@ class sampledThresholdCellFaces
     public sampledSurface,
     public MeshedSurface<face>
 {
-    //- Private typedefs for convenience
+        //- Private typedefs for convenience
         typedef MeshedSurface<face> MeshStorage;
 
     // Private data
 
-        //- Field to get isoSurface of
+        //- Threshold field
         const word fieldName_;
 
         //- Threshold value

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,31 +23,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "distanceSurface.H"
+#include "isoSurfaceBase.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::tmp<Foam::Field<Type>>
-Foam::distanceSurface::interpolate
+const Foam::Enum
+<
+    Foam::isoSurfaceBase::algorithmType
+>
+Foam::isoSurfaceBase::algorithmNames
+({
+    { algorithmType::ALGO_CELL, "cell" },
+    { algorithmType::ALGO_TOPO, "topo" },
+    { algorithmType::ALGO_POINT, "point" },
+});
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::isoSurfaceBase::isoSurfaceBase
 (
-    const GeometricField<Type, fvPatchField, volMesh>& cellValues,
-    const Field<Type>& pointValues
-) const
-{
-    if (isoSurfCellPtr_)
-    {
-        return isoSurfCellPtr_->interpolate(cellValues, pointValues);
-    }
-    else if (isoSurfTopoPtr_)
-    {
-        return isoSurfTopoPtr_->interpolate(cellValues, pointValues);
-    }
-    else
-    {
-        return isoSurfPtr_->interpolate(cellValues, pointValues);
-    }
-}
+    const scalar iso,
+    const boundBox& bounds
+)
+:
+    meshedSurface(),
+    iso_(iso),
+    bounds_(bounds)
+{}
 
 
 // ************************************************************************* //

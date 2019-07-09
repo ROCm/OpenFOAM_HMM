@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2019 OpenFOAM Foundation
@@ -39,10 +39,9 @@ SourceFiles
 #define isoSurfaceTopo_H
 
 #include "labelPair.H"
-#include "pointIndexHit.H"
-#include "PackedBoolList.H"
-#include "MeshedSurface.H"
+#include "bitSet.H"
 #include "edgeList.H"
+#include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,11 +57,8 @@ class tetMatcher;
 
 class isoSurfaceTopo
 :
-    public MeshedSurface<face>
+    public isoSurfaceBase
 {
-    // Private typedefs for convenience
-    typedef MeshedSurface<face> MeshStorage;
-
 public:
 
         enum filterType
@@ -80,9 +76,9 @@ private:
 
         enum cellCutType
         {
-            NOTCUT,     // Not cut
-            SPHERE,     // All edges to cell centre cut
-            CUT         // Normal cut
+            NOTCUT,     //!< Not cut
+            SPHERE,     //!< All edges to cell centre cut
+            CUT         //!< Normal cut
         };
 
 
@@ -93,17 +89,14 @@ private:
 
         const scalarField& pVals_;
 
-        //- Iso value
-        const scalar iso_;
+        //- Optional cells to ignore
+        const bitSet& ignoreCells_;
 
         //- Corrected version of tetBasePtIs
         labelList tetBasePtIs_;
 
         //- Per point: originating mesh vertex/cc. See encoding above
         edgeList pointToVerts_;
-
-        //- For every face the original cell in mesh
-        labelList meshCells_;
 
         //- For every point the originating face in mesh
         labelList pointToFace_;
@@ -134,6 +127,7 @@ private:
         ) const;
 
         //- Determine for all mesh whether cell is cut
+        //  \return number of cells cut
         label calcCutTypes
         (
             tetMatcher& tet,
@@ -227,17 +221,13 @@ public:
             const scalarField& cellValues,
             const scalarField& pointValues,
             const scalar iso,
-            const filterType filter = DIAGCELL
+            const filterType filter = DIAGCELL,
+            const boundBox& bounds = boundBox::invertedBox,
+            const bitSet& ignoreCells = bitSet()
         );
 
 
     // Member Functions
-
-        //- For every face original cell in mesh
-        const labelList& meshCells() const
-        {
-            return meshCells_;
-        }
 
         //- For every point originating face (pyramid) in mesh
         const labelList& pointToFace() const

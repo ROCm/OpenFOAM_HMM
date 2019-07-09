@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -50,9 +50,7 @@ SourceFiles
 #include "labelPair.H"
 #include "pointIndexHit.H"
 #include "bitSet.H"
-#include "boundBox.H"
-#include "MeshedSurface.H"
-#include "MeshedSurfacesFwd.H"
+#include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,12 +68,8 @@ class triSurface;
 
 class isoSurfaceCell
 :
-    public meshedSurface
+    public isoSurfaceBase
 {
-    // Private typedefs for convenience
-    typedef meshedSurface MeshStorage;
-
-
     // Private data
 
         enum segmentCutType
@@ -100,13 +94,7 @@ class isoSurfaceCell
 
         const scalarField& pVals_;
 
-        //- isoSurfaceCell value
-        const scalar iso_;
-
-        //- Optional bounds
-        const boundBox bounds_;
-
-        //- Optional cells to ignore.
+        //- Optional cells to ignore
         const bitSet& ignoreCells_;
 
         //- When to merge points
@@ -117,9 +105,6 @@ class isoSurfaceCell
 
         //- Estimated number of cut cells
         label nCutCells_;
-
-        //- For every triangle the original cell in mesh
-        labelList meshCells_;
 
         //- For every unmerged triangle point the point in the triSurface
         labelList triPointMergeMap_;
@@ -348,19 +333,6 @@ public:
 
 
     // Member Functions
-
-        //- For each face, the original cell in mesh
-        const labelList& meshCells() const
-        {
-            return meshCells_;
-        }
-
-        //- For each face, the original cell in mesh
-        labelList& meshCells()
-        {
-            return meshCells_;
-        }
-
 
         //- Interpolates cCoords, pCoords.
         template<class Type>

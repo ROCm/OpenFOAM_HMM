@@ -37,25 +37,27 @@ Usage
     (
         surface1
         {
-            type        dDistanceSurface;
+            type        distanceSurface;
         }
     );
     \endverbatim
 
     Where the sub-entries comprise:
     \table
-        Property | Description                             | Required | Default
-        type     | distanceSurface                         | yes      |
-        distance | distance from surface                   | yes      |
-        signed   | apply sign for +ve/-ve distance         | yes      |
-        cell     | use isoSurfaceCell algorithm            | no       | true
-        regularise | point snapping                        | yes      |
-        average  | cell values from averaged point values  | no       | false
-        bounds   | limit with bounding box                 | no       |
-        surfaceType | type of surface                      | yes      |
-        surfaceName | name of surface in triSurface/       | no  | dict name
+        Property | Description                              | Required | Default
+        type     | distanceSurface                          | yes |
+        distance | Distance from surface                    | yes |
+        signed   | Use sign when distance is positive       | partly |
+        isoAlgorithm | (cell/topo/point)                    | no  | cell
+        regularise | Point snapping for iso-surface         | no  | true
+        average  | Cell values from averaged point values   | no  | false
+        bounds   | Limit with bounding box                  | no  |
+        surfaceType | Type of surface                       | yes |
+        surfaceName | Name of surface in \c triSurface/     | no  | dict name
     \endtable
 
+Note
+    For compatibility, the keyword 'cell' (as a bool) is accepted
 
 SourceFiles
     sampledDistanceSurface.C

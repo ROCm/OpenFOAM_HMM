@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -67,7 +67,7 @@ Foam::sampledCuttingPlane::sampleOnPoints
         auto tpointFld =
             volPointInterpolation::New(volSubFld.mesh()).interpolate(volSubFld);
 
-        return surface().interpolate
+        return this->isoSurfaceInterpolate
         (
             (average_ ? pointAverage(tpointFld())() : volSubFld),
             tpointFld()
@@ -78,11 +78,34 @@ Foam::sampledCuttingPlane::sampleOnPoints
     auto tpointFld =
         volPointInterpolation::New(volFld.mesh()).interpolate(volFld);
 
-    return surface().interpolate
+    return this->isoSurfaceInterpolate
     (
         (average_ ? pointAverage(tpointFld())() : volFld),
         tpointFld()
     );
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>>
+Foam::sampledCuttingPlane::isoSurfaceInterpolate
+(
+    const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+    const Field<Type>& pCoords
+) const
+{
+    if (isoSurfCellPtr_)
+    {
+        return isoSurfCellPtr_->interpolate(cCoords, pCoords);
+    }
+    else if (isoSurfTopoPtr_)
+    {
+        return isoSurfTopoPtr_->interpolate(cCoords, pCoords);
+    }
+    else
+    {
+        return isoSurfPtr_->interpolate(cCoords, pCoords);
+    }
 }
 
 

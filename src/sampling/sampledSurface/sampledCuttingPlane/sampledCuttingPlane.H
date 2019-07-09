@@ -27,7 +27,7 @@ Class
     Foam::sampledCuttingPlane
 
 Description
-    A sampledSurface defined by a plane using the iso-surface algorithm
+    A sampledSurface defined by a plane using an iso-surface algorithm
     to \a cut the mesh.
 
     This is often embedded as part of a sampled surfaces function object.
@@ -51,15 +51,16 @@ Usage
 
     Where the sub-entries comprise:
     \table
-        Property | Description                             | Required | Default
-        type     | cuttingPlane                            | yes      |
-        planeType | plane description (pointAndNormal etc) | yes      |
-        mergeTol | tolerance for merging points            | no       | 1e-6
-        regularise | point snapping                        | no       | true
-        bounds   | limit with bounding box                 | no       |
-        zone     | limit to cell zone (name or regex)      | no       |
-        zones    | limit to cell zones (names, regexs)     | no       |
-        exposedPatchName | name for zone subset            | partly   |
+        Property | Description                              | Required | Default
+        type     | cuttingPlane                             | yes |
+        planeType | plane description (pointAndNormal etc)  | yes |
+        mergeTol | tolerance for merging points             | no  | 1e-6
+        isoAlgorithm | (cell/topo/point)                    | no  | point
+        regularise | point snapping                         | no  | true
+        bounds   | limit with bounding box                  | no  |
+        zone     | limit to cell zone (name or regex)       | no  |
+        zones    | limit to cell zones (names, regexs)      | no  |
+        exposedPatchName | name for zone subset             | partly |
     \endtable
 
 Note
@@ -77,10 +78,11 @@ SourceFiles
 #define sampledCuttingPlane_H
 
 #include "sampledSurface.H"
-#include "isoSurface.H"
-//#include "isoSurfaceCell.H"
 #include "plane.H"
 #include "fvMeshSubset.H"
+#include "isoSurface.H"
+#include "isoSurfaceCell.H"
+#include "isoSurfaceTopo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,6 +114,9 @@ class sampledCuttingPlane
         //- Whether to recalculate cell values as average of point values
         const bool average_;
 
+        //- The iso-surface algorithm type
+        const isoSurfaceBase::algorithmType isoAlgo_;
+
         //- The zone or zones in which cutting is to occur
         wordRes zoneNames_;
 
@@ -131,9 +136,14 @@ class sampledCuttingPlane
         //- Distance to points
         scalarField pointDistance_;
 
-        //- Constructed iso surface
-        //autoPtr<isoSurfaceCell> isoSurfCellPtr_;
+        //- Constructed iso surface (ALGO_POINT)
         autoPtr<isoSurface> isoSurfPtr_;
+
+        //- Constructed iso surface (ALGO_CELL)
+        autoPtr<isoSurfaceCell> isoSurfCellPtr_;
+
+        //- Constructed iso surface (ALGO_TOPO)
+        autoPtr<isoSurfaceTopo> isoSurfTopoPtr_;
 
 
     // Private Member Functions
@@ -162,6 +172,13 @@ class sampledCuttingPlane
             const interpolation<Type>& interpolator
         ) const;
 
+        //- Interpolates cCoords,pCoords.
+        template<class Type>
+        tmp<Field<Type>> isoSurfaceInterpolate
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& cCoords,
+            const Field<Type>& pCoords
+        ) const;
 
 public:
 
@@ -185,12 +202,6 @@ public:
 
 
     // Member Functions
-
-        //const isoSurfaceCell& surface() const
-        const isoSurface& surface() const
-        {
-            return *isoSurfPtr_;
-        }
 
         //- Does the surface need an update?
         virtual bool needsUpdate() const;
@@ -242,20 +253,58 @@ public:
 
 
         //- The underlying surface
+        const meshedSurface& surface() const
+        {
+            if (isoSurfCellPtr_)
+            {
+                return *isoSurfCellPtr_;
+            }
+            else if (isoSurfTopoPtr_)
+            {
+                return *isoSurfTopoPtr_;
+            }
+            return *isoSurfPtr_;
+        }
+
+        //- The underlying surface
         meshedSurface& surface()
         {
+            if (isoSurfCellPtr_)
+            {
+                return *isoSurfCellPtr_;
+            }
+            else if (isoSurfTopoPtr_)
+            {
+                return *isoSurfTopoPtr_;
+            }
             return *isoSurfPtr_;
         }
 
         //- For each face, the original cell in mesh
         const labelList& meshCells() const
         {
+            if (isoSurfCellPtr_)
+            {
+                return isoSurfCellPtr_->meshCells();
+            }
+            else if (isoSurfTopoPtr_)
+            {
+                return isoSurfTopoPtr_->meshCells();
+            }
             return isoSurfPtr_->meshCells();
         }
 
         //- For each face, the original cell in mesh
         labelList& meshCells()
         {
+            if (isoSurfCellPtr_)
+            {
+                return isoSurfCellPtr_->meshCells();
+            }
+            else if (isoSurfTopoPtr_)
+            {
+                return isoSurfTopoPtr_->meshCells();
+            }
             return isoSurfPtr_->meshCells();
         }
 

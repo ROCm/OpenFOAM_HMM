@@ -1344,12 +1344,10 @@ Foam::isoSurface::isoSurface
     const scalar mergeTol
 )
 :
-    MeshStorage(),
+    isoSurfaceBase(iso, bounds),
     mesh_(cellValues.mesh()),
     pVals_(pointValues),
-    iso_(iso),
     regularise_(regularise),
-    bounds_(bounds),
     mergeDistance_(mergeTol*mesh_.bounds().mag())
 {
     if (debug)

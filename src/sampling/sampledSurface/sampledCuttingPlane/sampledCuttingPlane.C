@@ -102,7 +102,9 @@ void Foam::sampledCuttingPlane::createGeometry()
     }
 
     // Clear any stored topologies
-    isoSurfPtr_.ptr();
+    isoSurfPtr_.clear();
+    isoSurfCellPtr_.clear();
+    isoSurfTopoPtr_.clear();
     pointDistance_.clear();
     cellDistancePtr_.clear();
 
@@ -291,28 +293,54 @@ void Foam::sampledCuttingPlane::createGeometry()
         pDist.write();
     }
 
-    //- Direct from cell field and point field.
-    isoSurfPtr_.reset
-    (
-        new isoSurface
+
+    // Direct from cell field and point field.
+    if (isoAlgo_ == isoSurfaceBase::ALGO_CELL)
+    {
+        isoSurfCellPtr_.reset
         (
-            cellDistance,
-            pointDistance_,
-            0.0,
-            regularise_,
-            bounds_,
-            mergeTol_
-        )
-        //new isoSurfaceCell
-        //(
-        //    mesh,
-        //    cellDistance,
-        //    pointDistance_,
-        //    0.0,
-        //    regularise_,
-        //    mergeTol_
-        //)
-    );
+            new isoSurfaceCell
+            (
+                fvm,
+                cellDistance,
+                pointDistance_,
+                0,
+                regularise_,
+                bounds_,
+                mergeTol_
+            )
+        );
+    }
+    else if (isoAlgo_ == isoSurfaceBase::ALGO_TOPO)
+    {
+        isoSurfTopoPtr_.reset
+        (
+            new isoSurfaceTopo
+            (
+                fvm,
+                cellDistance,
+                pointDistance_,
+                0,
+                (regularise_ ? isoSurfaceTopo::DIAGCELL : isoSurfaceTopo::NONE),
+                bounds_
+            )
+        );
+    }
+    else
+    {
+        isoSurfPtr_.reset
+        (
+            new isoSurface
+            (
+                cellDistance,
+                pointDistance_,
+                0,
+                regularise_,
+                bounds_,
+                mergeTol_
+            )
+        );
+    }
 
     if (debug)
     {
@@ -337,12 +365,23 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
     mergeTol_(dict.lookupOrDefault("mergeTol", 1e-6)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", false)),
+    isoAlgo_
+    (
+        isoSurfaceBase::algorithmNames.getOrDefault
+        (
+            "isoAlgorithm",
+            dict,
+            isoSurfaceBase::ALGO_POINT
+        )
+    ),
     zoneNames_(),
     exposedPatchName_(),
     needsUpdate_(true),
     subMeshPtr_(nullptr),
     cellDistancePtr_(nullptr),
-    isoSurfPtr_(nullptr)
+    isoSurfPtr_(nullptr),
+    isoSurfCellPtr_(nullptr),
+    isoSurfTopoPtr_(nullptr)
 {
     if (!dict.readIfPresent("zones", zoneNames_) && dict.found("zone"))
     {

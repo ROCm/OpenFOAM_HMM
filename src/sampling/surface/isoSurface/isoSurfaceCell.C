@@ -36,7 +36,6 @@ License
 #include "triSurfaceTools.H"
 #include "Time.H"
 #include "triPoints.H"
-#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1291,12 +1290,10 @@ Foam::isoSurfaceCell::isoSurfaceCell
     const bitSet& ignoreCells
 )
 :
-    MeshStorage(),
+    isoSurfaceBase(iso, bounds),
     mesh_(mesh),
     cVals_(cellValues),
     pVals_(pointValues),
-    iso_(iso),
-    bounds_(bounds),
     ignoreCells_(ignoreCells),
     mergeDistance_(mergeTol*mesh.bounds().mag())
 {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -68,8 +68,7 @@ SourceFiles
 #include "bitSet.H"
 #include "volFields.H"
 #include "slicedVolFields.H"
-#include "MeshedSurface.H"
-#include "MeshedSurfacesFwd.H"
+#include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,12 +88,8 @@ class triSurface;
 
 class isoSurface
 :
-    public meshedSurface
+    public isoSurfaceBase
 {
-    // Private typedefs for convenience
-    typedef meshedSurface MeshStorage;
-
-
     // Private data
 
         enum segmentCutType
@@ -120,14 +115,8 @@ class isoSurface
         //- Input volScalarField with separated coupled patches rewritten
         autoPtr<slicedVolScalarField> cValsPtr_;
 
-        //- Isosurface value
-        const scalar iso_;
-
         //- Regularise?
         const bool regularise_;
-
-        //- Optional bounds
-        const boundBox bounds_;
 
         //- When to merge points
         const scalar mergeDistance_;
@@ -140,9 +129,6 @@ class isoSurface
 
         //- Estimated number of cut cells
         label nCutCells_;
-
-        //- For every triangle the original cell in mesh
-        labelList meshCells_;
 
         //- For every unmerged triangle point the point in the triSurface
         labelList triPointMergeMap_;
@@ -395,8 +381,9 @@ class isoSurface
 
 public:
 
-    //- Declare friendship with isoSurfaceCell to share some functionality
+    //- Declare friendship to share some functionality
     friend class isoSurfaceCell;
+    friend class isoSurfaceTopo;
 
 
     //- Runtime type information
@@ -423,19 +410,6 @@ public:
 
 
     // Member Functions
-
-        //- For each face, the original cell in mesh
-        const labelList& meshCells() const
-        {
-            return meshCells_;
-        }
-
-        //- For each face, the original cell in mesh
-        labelList& meshCells()
-        {
-            return meshCells_;
-        }
-
 
         //- Interpolates cCoords, pCoords.
         //  Uses the references to the original fields used to create the

@@ -29,6 +29,7 @@ surface/cutting/cuttingSurfaceBase.C
 surface/cutting/cuttingSurfaceBaseSelection.C
 surface/distanceSurface/distanceSurface.C
 surface/isoSurface/isoSurface.C
+surface/isoSurface/isoSurfaceBase.C
 surface/isoSurface/isoSurfaceCell.C
 surface/isoSurface/isoSurfaceTopo.C
 surface/thresholdCellFaces/thresholdCellFaces.C

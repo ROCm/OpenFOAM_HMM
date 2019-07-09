@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -40,6 +40,48 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    static isoSurfaceBase::algorithmType getIsoAlgorithm(const dictionary& dict)
+    {
+        // Previously 'cell' (bool), but now 'isoAlgorithm' (enum)
+
+        // Default (bool) for 1906 and earlier
+        bool useCell = true;
+
+        // Default (enum) after 1906
+        isoSurfaceBase::algorithmType algo = isoSurfaceBase::ALGO_CELL;
+
+        if
+        (
+            !isoSurfaceBase::algorithmNames.readIfPresent
+            (
+                "isoAlgorithm", dict, algo
+            )
+            // When above fails, use 'compat' to also get upgrade messages
+         && dict.readIfPresentCompat
+            (
+                "isoAlgorithm", {{"cell", 1906}}, useCell
+            )
+        )
+        {
+            return
+            (
+                useCell
+              ? isoSurfaceBase::ALGO_CELL
+              : isoSurfaceBase::ALGO_POINT
+            );
+        }
+
+        return algo;
+    }
+
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::distanceSurface::distanceSurface
@@ -57,7 +99,7 @@ Foam::distanceSurface::distanceSurface
             dict.get<word>("surfaceType"),
             IOobject
             (
-                dict.lookupOrDefault("surfaceName", defaultSurfaceName),
+                dict.getOrDefault("surfaceName", defaultSurfaceName),
                 mesh.time().constant(), // directory
                 "triSurface",           // instance
                 mesh.time(),            // registry
@@ -72,11 +114,12 @@ Foam::distanceSurface::distanceSurface
     (
         distance_ < 0 || equal(distance_, Zero) || dict.get<bool>("signed")
     ),
-    cell_(dict.lookupOrDefault("cell", true)),
-    regularise_(dict.lookupOrDefault("regularise", true)),
-    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
+    regularise_(dict.getOrDefault("regularise", true)),
+    isoAlgo_(getIsoAlgorithm(dict)),
+    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
+    isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
-    isoSurfPtr_(nullptr)
+    isoSurfTopoPtr_(nullptr)
 {}
 
 
@@ -88,7 +131,7 @@ Foam::distanceSurface::distanceSurface
     const word& surfaceName,
     const scalar distance,
     const bool signedDistance,
-    const bool cell,
+    const isoSurfaceBase::algorithmType algo,
     const bool regularise,
     const boundBox& bounds
 )
@@ -116,11 +159,12 @@ Foam::distanceSurface::distanceSurface
     (
         signedDistance || distance_ < 0 || equal(distance_, Zero)
     ),
-    cell_(cell),
     regularise_(regularise),
+    isoAlgo_(algo),
     bounds_(bounds),
+    isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
-    isoSurfPtr_(nullptr)
+    isoSurfTopoPtr_(nullptr)
 {}
 
 
@@ -134,8 +178,9 @@ void Foam::distanceSurface::createGeometry()
     }
 
     // Clear any stored topologies
-    isoSurfCellPtr_.clear();
     isoSurfPtr_.clear();
+    isoSurfCellPtr_.clear();
+    isoSurfTopoPtr_.clear();
 
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh_);
 
@@ -165,7 +210,11 @@ void Foam::distanceSurface::createGeometry()
     // to limit the extent of open edges.
 
     const bool isZeroDist  = equal(distance_, Zero);
-    const bool filterCells = (cell_ && isZeroDist);
+    const bool filterCells =
+    (
+        isZeroDist
+     && isoAlgo_ != isoSurfaceBase::ALGO_POINT
+    );
 
     bitSet ignoreCells;
     if (filterCells)
@@ -208,6 +257,9 @@ void Foam::distanceSurface::createGeometry()
                 {
                     cellBb.clear();
                     cellBb.add(fvm.points(), fvm.cellPoints(i));
+
+                    // Expand slightly to catch corners
+                    cellBb.inflate(0.1);
 
                     if (!cellBb.contains(nearest[i].hitPoint()))
                     {
@@ -349,7 +401,7 @@ void Foam::distanceSurface::createGeometry()
 
 
     // Direct from cell field and point field.
-    if (cell_)
+    if (isoAlgo_ == isoSurfaceBase::ALGO_CELL)
     {
         isoSurfCellPtr_.reset
         (
@@ -362,6 +414,22 @@ void Foam::distanceSurface::createGeometry()
                 regularise_,
                 bounds_,
                 1e-6,  // mergeTol
+                ignoreCells
+            )
+        );
+    }
+    else if (isoAlgo_ == isoSurfaceBase::ALGO_TOPO)
+    {
+        isoSurfTopoPtr_.reset
+        (
+            new isoSurfaceTopo
+            (
+                fvm,
+                cellDistance,
+                pointDistance_,
+                distance_,
+                (regularise_ ? isoSurfaceTopo::DIAGCELL : isoSurfaceTopo::NONE),
+                bounds_,
                 ignoreCells
             )
         );
