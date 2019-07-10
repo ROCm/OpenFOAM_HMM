@@ -296,6 +296,7 @@ case "$compress" in
     (tgz)
     echo "Using gzip compression with tgz ending" 1>&2
     echo 'gzip -c -9 "$outputDir/$tarName.tar" > "$outputDir/$tarName.tgz"'
+    echo 'rm -f "$outputDir/$tarName.tar"'
     ;;
 
     (bz | bzip | bzip2)
