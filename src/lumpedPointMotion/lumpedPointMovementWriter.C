@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,10 +100,8 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
             format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad);
 
-            for (label i=0; i<nPoints; ++i)
-            {
-                format().write(i);
-            }
+            vtk::writeIdentity(format(), nPoints);
+
             format().flush();
 
             format().endDataArray();
@@ -119,10 +117,8 @@ void Foam::lumpedPointMovement::writeForcesAndMomentsVTP
             format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
 
-            for (label i=0; i<nPoints; ++i)
-            {
-                format().write(i+1);
-            }
+            vtk::writeIdentity(format(), nPoints, 1);
+
             format().flush();
 
             format().endDataArray();
@@ -284,10 +280,8 @@ void Foam::lumpedPointMovement::writeZonesVTP
             format().beginDataArray<label>("zoneId");
             format().writeSize(payLoad);
 
-            forAll(pp, facei)
-            {
-                format().write(zoneI);
-            }
+            vtk::write(format(), zoneI, pp.size());
+
             format().flush();
 
             format().endDataArray();

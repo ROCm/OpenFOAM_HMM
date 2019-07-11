@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,7 +86,7 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
 
     // Number of faces covered by the zones
     label nFaces = 0;
-    for (const auto& z : zones)
+    for (const surfZone& z : zones)
     {
         nFaces += z.size();
     }
@@ -95,12 +95,9 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeCellData
     vtk::legacy::intField<1>(format, "region", nFaces); // 1 component
 
     label zoneId = 0;
-    for (const surfZone& zone : zones)
+    for (const surfZone& z : zones)
     {
-        forAll(zone, i)
-        {
-            format.write(zoneId);
-        }
+        vtk::write(format, zoneId, z.size());
         ++zoneId;
     }
     format.flush();

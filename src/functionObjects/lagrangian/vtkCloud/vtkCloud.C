@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,10 +69,8 @@ void Foam::functionObjects::vtkCloud::writeVerts
         format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
         format().writeSize(payLoad);
 
-        for (label i=0; i < nTotParcels; ++i)
-        {
-            format().write(i);
-        }
+        vtk::writeIdentity(format(), nTotParcels);
+
         format().flush();
         format().endDataArray();
     }
@@ -85,10 +83,8 @@ void Foam::functionObjects::vtkCloud::writeVerts
         format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
         format().writeSize(payLoad);
 
-        for (label i=0; i < nTotParcels; ++i)
-        {
-            format().write(i+1);
-        }
+        vtk::writeIdentity(format(), nTotParcels, 1);
+
         format().flush();
         format().endDataArray();
     }

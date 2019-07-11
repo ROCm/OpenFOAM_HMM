@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "lumpedPointState.H"
 #include "OFstream.H"
+#include "sliceRange.H"
 #include "axesRotation.H"
 #include "coordinateSystem.H"
 #include "foamVtkOutput.H"
@@ -106,10 +107,8 @@ void Foam::lumpedPointState::writeVTP
             format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad);
 
-            forAll(points_, i)
-            {
-                format().write(i);
-            }
+            vtk::writeIdentity(format(), points_.size());
+
             format().flush();
 
             format().endDataArray();
@@ -125,10 +124,8 @@ void Foam::lumpedPointState::writeVTP
             format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
 
-            forAll(points_, i)
-            {
-                format().write(i+1);
-            }
+            vtk::writeIdentity(format(), points_.size(), 1);
+
             format().flush();
 
             format().endDataArray();
@@ -150,10 +147,8 @@ void Foam::lumpedPointState::writeVTP
             format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad);
 
-            forAll(points_, i)
-            {
-                format().write(i);
-            }
+            vtk::writeIdentity(format(), points_.size());
+
             format().flush();
 
             format().endDataArray();
@@ -256,10 +251,8 @@ void Foam::lumpedPointState::writeVTP
             format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
             format().writeSize(payLoad);
 
-            for (label i=0; i < 4*nPolys; ++i)
-            {
-                format().write(i);
-            }
+            vtk::writeIdentity(format(), 4*nPolys);
+
             format().flush();
 
             format().endDataArray();
@@ -275,9 +268,8 @@ void Foam::lumpedPointState::writeVTP
             format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
             format().writeSize(payLoad);
 
-            for (label i=0; i < nPolys; ++i)
+            for (const label off : sliceRange(4, nPolys, 4))
             {
-                const label off = 4 * (i+1);
                 format().write(off);
             }
             format().flush();
@@ -297,10 +289,8 @@ void Foam::lumpedPointState::writeVTP
             format().beginDataArray<label>("zoneId");
             format().writeSize(payLoad);
 
-            for (label i=0; i < nPolys; ++i)
-            {
-                format().write(i);
-            }
+            vtk::writeIdentity(format(), nPolys);
+
             format().flush();
 
             format().endDataArray();

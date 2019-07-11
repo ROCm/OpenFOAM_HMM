@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -86,6 +86,22 @@ Foam::vtk::newFormatter
     }
 
     return fmt;
+}
+
+
+void Foam::vtk::writeIdentity
+(
+    vtk::formatter& fmt,
+    const label len,
+    label start
+)
+{
+    // No nComponents for label, so use fmt.write() directly
+    for (label i=0; i < len; ++i)
+    {
+        fmt.write(start);
+        ++start;
+    }
 }
 
 

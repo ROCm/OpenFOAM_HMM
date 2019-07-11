@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,48 +84,32 @@ namespace vtk
     );
 
 
-    //- Write a list of uint8_t values.
+    //- Write an identity list of labels.
     //  The output does not include the payload size.
-    void writeList
-    (
-        vtk::formatter& fmt,
-        const UList<uint8_t>& values
-    );
+    void writeIdentity(vtk::formatter& fmt, const label len, label start=0);
 
     //- Write a list of uint8_t values.
     //  The output does not include the payload size.
-    void writeListParallel
-    (
-        vtk::formatter& fmt,
-        const UList<uint8_t>& values
-    );
+    void writeList(vtk::formatter& fmt, const UList<uint8_t>& values);
 
-    //- Write a value component-wise.
+    //- Write a list of uint8_t values.
+    //  The output does not include the payload size.
+    void writeListParallel(vtk::formatter& fmt, const UList<uint8_t>& values);
+
+    //- Component-wise write of a value (N times)
     template<class Type>
-    inline void write
-    (
-        vtk::formatter& fmt,
-        const Type& val
-    );
+    inline void write(vtk::formatter& fmt, const Type& val, const label n=1);
 
 
     //- Write a list of values.
     //  The output does not include the payload size.
     template<class Type>
-    void writeList
-    (
-        vtk::formatter& fmt,
-        const UList<Type>& values
-    );
+    void writeList(vtk::formatter& fmt, const UList<Type>& values);
 
     //- Write a list of values.
     //  The output does not include the payload size.
     template<class Type, unsigned N>
-    void writeList
-    (
-        vtk::formatter& fmt,
-        const FixedList<Type, N>& values
-    );
+    void writeList(vtk::formatter& fmt, const FixedList<Type, N>& values);
 
 
     //- Write a list of values via indirect addressing.
@@ -326,22 +310,6 @@ namespace legacy
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Template specialization for symmTensor ordering
-template<>
-inline void write(vtk::formatter& fmt, const symmTensor& val)
-{
-    // symmTensor ( XX, XY, XZ, YY, YZ, ZZ )
-    // VTK order  ( XX, YY, ZZ, XY, YZ, XZ ) -> (0, 3, 5, 1, 4, 2)
-
-    fmt.write(component(val, 0)); // XX
-    fmt.write(component(val, 3)); // YY
-    fmt.write(component(val, 5)); // ZZ
-    fmt.write(component(val, 1)); // XY
-    fmt.write(component(val, 4)); // YZ
-    fmt.write(component(val, 2)); // XZ
-}
-
 
 } // End namespace vtk
 } // End namespace Foam

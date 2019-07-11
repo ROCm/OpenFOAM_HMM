@@ -81,10 +81,7 @@ void Foam::vtk::fileWriter::writeUniform
 
     if (format_)
     {
-        for (label i=0; i < nValues; ++i)
-        {
-            vtk::write(format(), val);
-        }
+        vtk::write(format(), val, nValues);
     }
 
     if (format_)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,13 +32,18 @@ template<class Type>
 inline void Foam::vtk::write
 (
     vtk::formatter& fmt,
-    const Type& val
+    const Type& val,
+    const label n
 )
 {
     const direction nCmpt = pTraits<Type>::nComponents;
-    for (direction cmpt=0; cmpt < nCmpt; ++cmpt)
+
+    for (label i=0; i < n; ++i)
     {
-        fmt.write(component(val, cmpt));
+        for (direction cmpt=0; cmpt < nCmpt; ++cmpt)
+        {
+            fmt.write(component(val, cmpt));
+        }
     }
 }
 

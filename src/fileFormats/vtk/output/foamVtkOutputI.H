@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,26 +32,53 @@ namespace vtk
 
 //- Template specialization for label
 template<>
-inline void write<label>(vtk::formatter& fmt, const label& val)
+inline void write<label>(vtk::formatter& fmt, const label& val, const label n)
 {
-    fmt.write(val);
+    for (label i=0; i < n; ++i)
+    {
+        fmt.write(val);
+    }
 }
 
 
 //- Template specialization for float
 template<>
-inline void write<float>(vtk::formatter& fmt, const float& val)
+inline void write<float>(vtk::formatter& fmt, const float& val, const label n)
 {
-    fmt.write(val);
+    for (label i=0; i < n; ++i)
+    {
+        fmt.write(val);
+    }
 }
 
 
 //- Template specialization for double
 template<>
-inline void write<double>(vtk::formatter& fmt, const double& val)
+inline void write<double>(vtk::formatter& fmt, const double& val, const label n)
 {
-    fmt.write(val);
+    for (label i=0; i < n; ++i)
+    {
+        fmt.write(val);
+    }
 }
+
+
+//- Template specialization for symmTensor ordering
+//  VTK order is (XX, YY, ZZ, XY, YZ, XZ)
+template<>
+inline void write(vtk::formatter& fmt, const symmTensor& val, const label n)
+{
+    for (label i=0; i < n; ++i)
+    {
+        fmt.write(component(val, symmTensor::XX));
+        fmt.write(component(val, symmTensor::YY));
+        fmt.write(component(val, symmTensor::ZZ));
+        fmt.write(component(val, symmTensor::XY));
+        fmt.write(component(val, symmTensor::YZ));
+        fmt.write(component(val, symmTensor::XZ));
+    }
+}
+
 
 } // End namespace vtk
 } // End namespace Foam

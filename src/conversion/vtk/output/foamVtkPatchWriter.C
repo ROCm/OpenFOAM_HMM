@@ -587,13 +587,7 @@ void Foam::vtk::patchWriter::writePatchIDs()
     {
         for (const label patchId : patchIDs_)
         {
-            label count = patches[patchId].size();
-            const label val = patchId;
-
-            while (count--)
-            {
-                format().write(val);
-            }
+            vtk::write(format(), patchId, patches[patchId].size());
         }
     }
 
@@ -615,16 +609,13 @@ void Foam::vtk::patchWriter::writePatchIDs()
 
                 fromSlave >> recv;
 
-                for (label i=0; i < recv.size(); ++i)
+                // Receive as [size, id] pairs
+                for (label i=0; i < recv.size(); i += 2)
                 {
-                    label count = recv[i];
-                    ++i;
-                    const label val = recv[i];
+                    const label len = recv[i];
+                    const label val = recv[i+1];
 
-                    while (count--)
-                    {
-                        format().write(val);
-                    }
+                    vtk::write(format(), val, len);
                 }
             }
         }
@@ -722,12 +713,7 @@ bool Foam::vtk::patchWriter::writeProcIDs()
             // Per-processor ids
             for (label proci=0; proci < Pstream::nProcs(); ++proci)
             {
-                label len = procSizes.localSize(proci);
-
-                while (len--)
-                {
-                    format().write(proci);
-                }
+                vtk::write(format(), proci, procSizes.localSize(proci));
             }
 
             good = true;
@@ -735,14 +721,7 @@ bool Foam::vtk::patchWriter::writeProcIDs()
     }
     else
     {
-        const label proci = Pstream::myProcNo();
-
-        label len = nLocalFaces_;
-
-        while (len--)
-        {
-            format().write(proci);
-        }
+        vtk::write(format(), Pstream::myProcNo(), nLocalFaces_);
 
         good = true;
     }
@@ -811,16 +790,11 @@ bool Foam::vtk::patchWriter::writeNeighIDs()
     {
         for (const label patchId : patchIDs_)
         {
-            label count = patches[patchId].size();
-
             const auto* pp = isA<processorPolyPatch>(patches[patchId]);
 
-            const label val = (pp ?  pp->neighbProcNo() : -1);
+            const label val = (pp ? pp->neighbProcNo() : -1);
 
-            while (count--)
-            {
-                format().write(val);
-            }
+            vtk::write(format(), val, patches[patchId].size());
         }
 
         good = true;
@@ -844,16 +818,13 @@ bool Foam::vtk::patchWriter::writeNeighIDs()
 
                 fromSlave >> recv;
 
-                for (label i=0; i < recv.size(); ++i)
+                // Receive as [size, id] pairs
+                for (label i=0; i < recv.size(); i += 2)
                 {
-                    label count = recv[i];
-                    ++i;
-                    const label val = recv[i];
+                    const label len = recv[i];
+                    const label val = recv[i+1];
 
-                    while (count--)
-                    {
-                        format().write(val);
-                    }
+                    vtk::write(format(), val, len);
                 }
             }
         }

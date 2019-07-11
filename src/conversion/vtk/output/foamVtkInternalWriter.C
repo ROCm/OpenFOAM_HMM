@@ -711,12 +711,7 @@ bool Foam::vtk::internalWriter::writeProcIDs()
         // Per-processor ids
         for (label proci=0; proci < Pstream::nProcs(); ++proci)
         {
-            label len = procMaps.localSize(proci);
-
-            while (len--)
-            {
-                format().write(proci);
-            }
+            vtk::write(format(), proci, procMaps.localSize(proci));
         }
 
         format().flush();

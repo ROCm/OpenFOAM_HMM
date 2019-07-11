@@ -43,9 +43,9 @@ Foam::pointField Foam::vtk::lagrangianWriter::positions() const
 
     auto outIter = pts.begin();
 
-    forAllConstIters(parcels, iter)
+    for (const auto& p : parcels)
     {
-        *outIter = iter().position();
+        *outIter = p.position();
         ++outIter;
     }
 
@@ -74,10 +74,8 @@ void Foam::vtk::lagrangianWriter::writeVerts()
         format().beginDataArray<label>(vtk::dataArrayAttr::CONNECTIVITY);
         format().writeSize(payLoad);
 
-        for (label i=0; i < nVerts; ++i)
-        {
-            format().write(i);
-        }
+        vtk::writeIdentity(format(), nVerts);
+
         format().flush();
         format().endDataArray();
     }
@@ -90,10 +88,8 @@ void Foam::vtk::lagrangianWriter::writeVerts()
         format().beginDataArray<label>(vtk::dataArrayAttr::OFFSETS);
         format().writeSize(payLoad);
 
-        for (label i=0; i < nVerts; ++i)
-        {
-            format().write(i+1);
-        }
+        vtk::writeIdentity(format(), nVerts, 1);
+
         format().flush();
         format().endDataArray();
     }
