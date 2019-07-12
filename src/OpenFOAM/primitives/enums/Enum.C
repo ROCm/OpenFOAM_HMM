@@ -164,7 +164,7 @@ EnumType Foam::Enum<EnumType>::getOrDefault
             IOWarningInFunction(dict)
                 << enumName << " is not in enumeration: " << *this << nl
                 << "using failsafe " << get(deflt)
-                << " (value " << int(deflt) << ")" << endl;
+                << " (value " << int(deflt) << ')' << endl;
         }
         else
         {
@@ -184,7 +184,7 @@ bool Foam::Enum<EnumType>::readEntry
     const word& key,
     const dictionary& dict,
     EnumType& val,
-    bool mandatory
+    const bool mandatory
 ) const
 {
     const entry* eptr = dict.findEntry(key, keyType::LITERAL);
@@ -198,16 +198,12 @@ bool Foam::Enum<EnumType>::readEntry
         if (idx >= 0)
         {
             val = EnumType(vals_[idx]);
-
             return true;
         }
 
-        if (mandatory)
-        {
-            FatalIOErrorInFunction(dict)
-                << enumName << " is not in enumeration: " << *this << nl
-                << exit(FatalIOError);
-        }
+        FatalIOErrorInFunction(dict)
+            << enumName << " is not in enumeration: " << *this << nl
+            << exit(FatalIOError);
     }
     else if (mandatory)
     {

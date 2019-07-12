@@ -26,7 +26,7 @@ Class
 
 Description
     Enum is a wrapper around a list of names/values that represent particular
-    enumeration values.
+    enumeration values. All dictionary searches use a literal (not regex).
 
 SourceFiles
     Enum.C
@@ -143,7 +143,7 @@ public:
 
         //- Get the key in the dictionary and return the corresponding
         //- enumeration element based on its name.
-        //  FatalError if anything is incorrect.
+        //  FatalIOError if anything is incorrect.
         EnumType get
         (
             const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
@@ -154,7 +154,8 @@ public:
         //- enumeration element based on its name.
         //
         //  \return The value found or default if not found in dictionary.
-        //  FatalError (or Warning) if the enumerated name was incorrect.
+        //  FatalIOError if the enumeration is incorrect.
+        //  Specifying failsafe downgrades the FatalIOError to an IOWarning.
         EnumType getOrDefault
         (
             const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
@@ -164,8 +165,8 @@ public:
         ) const;
 
         //- Find entry and assign to T val.
-        //- FatalIOError if it is found and the number of tokens is incorrect,
-        //- or it is mandatory and not found.
+        //  FatalIOError if the enumeration is incorrect,
+        //  or when it is mandatory but was not found.
         //
         //  \return true if the entry was found.
         bool readEntry
@@ -173,11 +174,11 @@ public:
             const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
             const dictionary& dict, //!< dictionary
             EnumType& val,          //!< the value to read into
-            bool mandatory = true   //!< the keyword is mandatory
+            const bool mandatory = true   //!< the keyword is mandatory
         ) const;
 
         //- Find an entry if present, and assign to T val.
-        //- FatalIOError if it is found and the number of tokens is incorrect.
+        //  FatalIOError if the enumeration is incorrect.
         //  Default search: non-recursive with patterns.
         //
         //  \return true if the entry was found.
@@ -230,7 +231,7 @@ public:
         //- enumeration element based on its name.
         //
         //  \return The value found or default if not found in dictionary.
-        //  FatalError (or Warning) if the enumerated name was incorrect.
+        //  FatalError (or Warning) if the enumeration was incorrect.
         EnumType lookupOrDefault
         (
             const word& key,        //!< Lookup key. Uses LITERAL (not REGEX)
@@ -248,19 +249,6 @@ public:
         lookup(const word& key, const dictionary& dict) const
         {
             return get(key, dict);
-        }
-
-        //- Deprecated(2018-10) lookupOrDefault with warnings instead of error.
-        //  \deprecated(2018-10) - use getOrDefault() with failsafe option
-        EnumType FOAM_DEPRECATED_FOR(2018-10, "getOrDefault() method")
-        lookupOrFailsafe
-        (
-            const word& key,
-            const dictionary& dict,
-            const EnumType deflt
-        ) const
-        {
-            return getOrDefault(key, dict, deflt, true);
         }
 };
 
