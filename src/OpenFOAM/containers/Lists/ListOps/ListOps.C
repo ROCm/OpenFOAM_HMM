@@ -38,10 +38,9 @@ Foam::labelList Foam::invert
 {
     labelList inverse(len, -1);
 
-    forAll(map, i)
+    label i = 0;
+    for (const label newIdx : map)
     {
-        const label newIdx = map[i];
-
         if (newIdx >= 0)
         {
             #ifdef FULLDEBUG
@@ -58,16 +57,54 @@ Foam::labelList Foam::invert
             {
                 FatalErrorInFunction
                     << "Map is not one-to-one. At index " << i
-                    << " element " << newIdx << " has already occurred before"
-                    << nl << "Please use invertOneToMany instead"
+                    << " element " << newIdx << " has already occurred\n"
+                    << "Please use invertOneToMany instead"
                     << abort(FatalError);
             }
 
             inverse[newIdx] = i;
         }
+
+        ++i;
     }
 
     return inverse;
+}
+
+
+Foam::labelList Foam::invert
+(
+    const label len,
+    const bitSet& map
+)
+{
+    labelList inverse(len, -1);
+
+    label i = 0;
+    for (const label newIdx : map)
+    {
+        #ifdef FULLDEBUG
+        if (newIdx >= len)
+        {
+            FatalErrorInFunction
+                << "Inverse location " << newIdx
+                << " is out of range. List has size " << len
+                << abort(FatalError);
+        }
+        #endif
+
+        inverse[newIdx] = i;
+
+        ++i;
+    }
+
+    return inverse;
+}
+
+
+Foam::labelList Foam::invert(const bitSet& map)
+{
+    return invert(map.size(), map);
 }
 
 
@@ -95,14 +132,15 @@ Foam::labelListList Foam::invertOneToMany
         sizes[i] = 0; // reset size counter
     }
 
-    forAll(map, i)
+    label i = 0;
+    for (const label newIdx : map)
     {
-        const label newIdx = map[i];
-
         if (newIdx >= 0)
         {
             inverse[newIdx][sizes[newIdx]++] = i;
         }
+
+        ++i;
     }
 
     return inverse;

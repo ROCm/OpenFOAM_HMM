@@ -334,8 +334,28 @@ void inplaceSubsetList
 );
 
 
-//- Invert one-to-one map. Unmapped elements will be -1.
+//- Create an inverse one-to-one mapping.
+//  \param len the output size
+//  \param map the unique indices to map, in a [0..len) range.
+//       Any negative indices are ignored.
+//
+//  \return the inverse mapping with -1 for unmapped elements.
 labelList invert(const label len, const labelUList& map);
+
+//- Create an inverse one-to-one mapping for all 'on' bits of the map.
+//  \param len the output size
+//  \param map the 'on' bits to use for the mapping indices.
+//      The last on bit shall be less than len.
+//
+//  \return the inverse mapping with -1 for unmapped elements.
+labelList invert(const label len, const bitSet& map);
+
+//- Create an inverse one-to-one mapping for all 'on' bits of the map.
+//  The output size is dictated by the map size.
+//  \param map the unique indices to map.
+//
+//  \return the inverse mapping with -1 for unmapped elements.
+labelList invert(const bitSet& map);
 
 //- Invert one-to-many map. Unmapped elements will be size 0.
 labelListList invertOneToMany(const label len, const labelUList& map);

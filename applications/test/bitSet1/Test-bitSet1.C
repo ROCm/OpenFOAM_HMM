@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ Description
 #include "boolList.H"
 #include "bitSet.H"
 #include "HashSet.H"
+#include "ListOps.H"
 #include "cpuTime.H"
 #include <vector>
 #include <unordered_set>
@@ -91,6 +92,9 @@ int main(int argc, char *argv[])
         set3b.unset(FixedList<label, 3>({ 1, 2, 3}));
 
         Info<<"bitSet unset(FixedList<label>): "; report(set3b, true);
+
+        Info<<"bits used: " << flatOutput(set3b.toc()) << nl;
+        Info<<"inverted:  " << flatOutput(invert(set3b)) << nl;
     }
 
     Info<< "End\n" << endl;
