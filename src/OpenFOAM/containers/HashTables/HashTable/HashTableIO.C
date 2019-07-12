@@ -29,28 +29,6 @@ License
 #include "Istream.H"
 #include "Ostream.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class T, class Key, class Hash>
-bool Foam::HashTable<T, Key, Hash>::addEntry(Istream& is, const bool overwrite)
-{
-    typename node_type::key_type key;
-    typename node_type::mapped_type val;
-
-    is >> key >> val;
-
-    const bool ok = this->setEntry(overwrite, key, val);
-
-    is.fatalCheck
-    (
-        "HashTable::addEntry(Istream&) : "
-        "reading entry"
-    );
-
-    return ok;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
@@ -168,11 +146,11 @@ template<class T, class Key, class Hash>
 Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    HashTable<T, Key, Hash>& L
+    HashTable<T, Key, Hash>& tbl
 )
 {
     // Anull existing table
-    L.clear();
+    tbl.clear();
 
     is.fatalCheck(FUNCTION_NAME);
 
@@ -193,23 +171,31 @@ Foam::Istream& Foam::operator>>
 
         if (len)
         {
-            if (2*len > L.capacity_)
-            {
-                L.resize(2*len);
-            }
-
-            if (delimiter == token::BEGIN_LIST)
-            {
-                for (label i=0; i<len; ++i)
-                {
-                    L.addEntry(is);
-                }
-            }
-            else
+            if (delimiter != token::BEGIN_LIST)
             {
                 FatalIOErrorInFunction(is)
                     << "incorrect first token, '(', found " << firstToken.info()
                     << exit(FatalIOError);
+            }
+
+            if (2*len > tbl.capacity())
+            {
+                tbl.resize(2*len);
+            }
+
+            for (label i=0; i<len; ++i)
+            {
+                Key key;
+
+                is >> key;          // Read the key
+                T& val = tbl(key);  // Insert nameless T() into table
+                is >> val;          // Read directly into the table value
+
+                is.fatalCheck
+                (
+                    "operator>>(Istream&, HashTable&) : "
+                    "reading entry"
+                );
             }
         }
 
@@ -236,7 +222,17 @@ Foam::Istream& Foam::operator>>
         {
             is.putBack(lastToken);
 
-            L.addEntry(is);
+            Key key;
+
+            is >> key;          // Read the key
+            T& val = tbl(key);  // Insert nameless T() into table
+            is >> val;          // Read directly into the table value
+
+            is.fatalCheck
+            (
+                "operator>>(Istream&, HashTable&) : "
+                "reading entry"
+            );
 
             is >> lastToken;
         }
@@ -250,7 +246,6 @@ Foam::Istream& Foam::operator>>
     }
 
     is.fatalCheck(FUNCTION_NAME);
-
     return is;
 }
 

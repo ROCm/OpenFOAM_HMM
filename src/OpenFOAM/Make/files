@@ -171,6 +171,7 @@ containers/Bits/bitSet/bitSetIO.C
 containers/Bits/BitOps/BitOps.C
 containers/Bits/PackedList/PackedListCore.C
 containers/HashTables/HashOps/HashOps.C
+containers/HashTables/HashSet/hashSets.C
 containers/HashTables/HashTable/HashTableCore.C
 containers/Lists/SortableList/ParSortableListName.C
 containers/Lists/ListOps/ListOps.C

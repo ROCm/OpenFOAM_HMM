@@ -73,10 +73,7 @@ namespace Foam
 {
 
 // Forward declarations
-template<class Key, class Hash> class HashSet;
-
-template<class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashSet<Key, Hash>& tbl);
+template<class T> class MinMax;
 
 
 /*---------------------------------------------------------------------------*\
@@ -380,15 +377,6 @@ public:
         inline this_type& operator-=(const this_type& rhs);
 
 
-    // IOstream Operator
-
-        friend Ostream& operator<< <Key, Hash>
-        (
-            Ostream& os,
-            const HashSet<Key, Hash>& tbl
-        );
-
-
     // Housekeeping
 
         //- Not applicable for HashSet
@@ -418,7 +406,35 @@ public:
 };
 
 
+// Typedefs
+
+//- A HashSet with word keys.
+typedef HashSet<word> wordHashSet;
+
+//- A HashSet with label keys and label hasher.
+typedef HashSet<label, Hash<label>> labelHashSet;
+
+
+// Global Functions
+
+//- Find the min value in labelHashSet, optionally limited by second argument.
+//  For an empty set, returns the second argument (eg, labelMax).
+label min(const labelHashSet& set, label minValue = labelMax);
+
+//- Find the max value in labelHashSet, optionally limited by second argument.
+//  For an empty set, returns the second argument (eg, labelMin).
+label max(const labelHashSet& set, label maxValue = labelMin);
+
+//- Find the min/max values of labelHashSet
+MinMax<label> minMax(const labelHashSet& set);
+
+
 // Global Operators
+
+//- Write the list of HashSet keys
+template<class Key, class Hash>
+Ostream& operator<<(Ostream& os, const HashSet<Key, Hash>& tbl);
+
 
 //- Combine entries from HashSets
 template<class Key, class Hash>
@@ -445,13 +461,6 @@ HashSet<Key, Hash> operator^
     const HashSet<Key, Hash>& hash1,
     const HashSet<Key, Hash>& hash2
 );
-
-
-//- A HashSet with word keys.
-typedef HashSet<word> wordHashSet;
-
-//- A HashSet with label keys and label hasher.
-typedef HashSet<label, Hash<label>> labelHashSet;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

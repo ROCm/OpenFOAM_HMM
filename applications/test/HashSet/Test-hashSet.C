@@ -32,6 +32,7 @@ Description
 #include "HashOps.H"
 #include "HashSet.H"
 #include "Map.H"
+#include "MinMax.H"
 #include "labelPairHashes.H"
 #include "FlatOutput.H"
 
@@ -183,6 +184,9 @@ int main(int argc, char *argv[])
     {
         1, 11, 42
     };
+
+    Info<<"Set with min/max:" << minMax(setB)
+        << " min:" << min(setB) << " max:" << max(setB) << nl;
 
     setB = FixedList<label, 4>({1, 2, 3, 4});
     setB = {1, 2, 4};

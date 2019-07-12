@@ -104,12 +104,6 @@ template<class T> class UList;
 template<class T, unsigned N> class FixedList;
 template<class T, class Key, class Hash> class HashTable;
 
-template<class T, class Key, class Hash>
-Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& tbl);
-
-template<class T, class Key, class Hash>
-Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& tbl);
-
 
 /*---------------------------------------------------------------------------*\
                           Class HashTable Declaration
@@ -148,10 +142,6 @@ class HashTable
         //- Return the hash index of the Key within the current table size.
         //  No checks for zero-sized tables.
         inline label hashKeyIndex(const Key& key) const;
-
-        //- Read entry (key, val) and assign
-        //  \return True if the new entry was set.
-        bool addEntry(Istream& is, const bool overwrite = false);
 
         //- Assign a new hash-entry to a possibly already existing key.
         //  \return True if the new entry was set.
@@ -732,13 +722,21 @@ public:
             inline reference operator*() const  { return this->val(); }
             inline reference operator()() const { return this->val(); }
 
-            //- For pointer types, allow direct pointer dereferencing
+            //- Direct pointer dereferencing (pointer types)
             template<class TypeT = T>
             typename std::enable_if
             <
                 Detail::isPointer<TypeT>::value,
                 T
             >::type operator->() const { return this->val(); }
+
+            //- Address of iterated value (non-pointer types)
+            template<class TypeT = T>
+            typename std::enable_if
+            <
+                !Detail::isPointer<TypeT>::value,
+                T*
+            >::type operator->() const { return &(this->val()); }
 
             inline iterator& operator++();
             inline iterator operator++(int);
@@ -802,13 +800,21 @@ public:
             inline reference operator*() const  { return this->val(); }
             inline reference operator()() const { return this->val(); }
 
-            //- For pointer types, allow direct pointer dereferencing
+            //- Direct pointer dereferencing (pointer types)
             template<class TypeT = T>
             typename std::enable_if
             <
                 Detail::isPointer<TypeT>::value,
                 const T
             >::type operator->() const { return this->val(); }
+
+            //- Address of iterated value (non-pointer types)
+            template<class TypeT = T>
+            typename std::enable_if
+            <
+                !Detail::isPointer<TypeT>::value,
+                const T*
+            >::type operator->() const { return &(this->val()); }
 
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
@@ -911,22 +917,16 @@ public:
         //- when length exceeds shortLen.
         //  Using '0' suppresses line-breaks entirely.
         Ostream& writeKeys(Ostream& os, const label shortLen=0) const;
-
-
-    // IOstream Operator
-
-        friend Istream& operator>> <T, Key, Hash>
-        (
-            Istream& is,
-            HashTable<T, Key, Hash>& tbl
-        );
-
-        friend Ostream& operator<< <T, Key, Hash>
-        (
-            Ostream& os,
-            const HashTable<T, Key, Hash>& tbl
-        );
 };
+
+
+// IOstream Operators
+
+template<class T, class Key, class Hash>
+Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& tbl);
+
+template<class T, class Key, class Hash>
+Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& tbl);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

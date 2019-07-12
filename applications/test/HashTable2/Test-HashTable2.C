@@ -261,14 +261,24 @@ int main(int argc, char *argv[])
 
         labelList list1(identity(4, -4));
 
-        Info<<"move insert " << list1 << nl;
+        Info<< "move insert " << list1 << nl;
 
         ltable1.insert("pqr", std::move(list1));
 
-        Info<<"after insert " << list1 << nl;
+        Info<< "after insert " << list1 << nl;
 
         Info<< nl << "HashTable<labelList>: "
             << ltable1 << nl;
+
+
+        // Use '->' dereferencing
+        const auto iter = ltable1.cfind("ghi");
+
+        if (iter)
+        {
+            Info<< "got with " << iter->size() << nl;
+        }
+
     }
 
     Info<< "\nEnd\n" << endl;
