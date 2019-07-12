@@ -209,6 +209,9 @@ void Foam::distanceSurface::createGeometry()
                     cellBb.clear();
                     cellBb.add(fvm.points(), fvm.cellPoints(i));
 
+                    // Expand slightly to catch corners
+                    cellBb.inflate(0.1);
+
                     if (!cellBb.contains(nearest[i].hitPoint()))
                     {
                         ignoreCells.set(i);
