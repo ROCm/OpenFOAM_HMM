@@ -54,6 +54,7 @@ SourceFiles
 #include "pointField.H"
 #include "face.H"
 #include "labelledTri.H"
+#include "bitSet.H"
 #include "HashSet.H"
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
@@ -464,20 +465,23 @@ public:
         virtual label triangulate(List<label>& faceMap);
 
         //- Return new surface.
-        //  Returns return pointMap, faceMap from subsetMeshMap
+        //
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from subsetMeshMap
+        //  \param[out] faceMap from subsetMeshMap
+        template<class BoolListType>
         MeshedSurface subsetMesh
         (
-            const labelHashSet& include,
+            const BoolListType& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
 
-        //- Return new surface.
-        MeshedSurface subsetMesh
-        (
-            const labelHashSet& include
-        ) const;
+        //- Return new surface
+        MeshedSurface subsetMesh(const bitSet& include) const;
 
+        //- Return new surface
+        MeshedSurface subsetMesh(const labelHashSet& include) const;
 
         //- Swap contents
         void swap(MeshedSurface<Face>& surf);

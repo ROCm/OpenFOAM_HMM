@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,13 +46,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class dictionary;
-
-// Forward declaration of friend functions and operators
-
-class surfZoneIdentifier;
-Istream& operator>>(Istream& is, surfZoneIdentifier& p);
-Ostream& operator<<(Ostream& os, const surfZoneIdentifier& p);
 
 /*---------------------------------------------------------------------------*\
                      Class surfZoneIdentifier Declaration
@@ -84,7 +77,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null, with index zero
         surfZoneIdentifier();
 
         //- Construct null with specified index
@@ -115,7 +108,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfZoneIdentifier();
+    virtual ~surfZoneIdentifier() = default;
 
 
     // Member Functions
@@ -159,28 +152,18 @@ public:
 
         //- Write identifier as a dictionary
         void write(Ostream& os) const;
-
-
-    // Ostream Operator
-
-        //- Read name/type.
-        friend Istream& operator>>
-        (
-            Istream& is,
-            surfZoneIdentifier& ob
-        );
-
-        //- Write name/type.
-        friend Ostream& operator<<
-        (
-            Ostream& os,
-            const surfZoneIdentifier& obj
-        );
-
 };
 
 
 // Global Operators
+
+// Ostream Operator
+
+//- Read name/type
+Istream& operator>>(Istream& is, surfZoneIdentifier& obj);
+
+//- Write name/type
+Ostream& operator<<(Ostream& os, const surfZoneIdentifier& obj);
 
 //- Compare zone indentifiers for equality
 bool operator==(const surfZoneIdentifier& a, const surfZoneIdentifier& b);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -784,7 +784,7 @@ void Foam::triSurface::subsetMeshMap
 
     pointMap.setSize(nPoints());
 
-    bitSet pointHad(nPoints(), false);
+    bitSet pointHad(nPoints());
 
     forAll(include, oldFacei)
     {
@@ -851,6 +851,13 @@ Foam::triSurface Foam::triSurface::subsetMesh
 
     // Construct sub-surface
     return triSurface(newTriangles, patches(), newPoints, true);
+}
+
+
+Foam::triSurface Foam::triSurface::subsetMesh(const boolList& include) const
+{
+    labelList pointMap, faceMap;
+    return subsetMesh(include, pointMap, faceMap);
 }
 
 

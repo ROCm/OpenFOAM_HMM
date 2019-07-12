@@ -99,18 +99,8 @@ int main(int argc, char *argv[])
         }
 
         // Subset triSurface
-        labelList pointMap;
-        labelList faceMap;
 
-        triSurface subSurf
-        (
-            surf.subsetMesh
-            (
-                includeMap,
-                pointMap,
-                faceMap
-            )
-        );
+        triSurface subSurf(surf.subsetMesh(includeMap));
 
         subSurf.write(outFile);
     }

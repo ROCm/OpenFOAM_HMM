@@ -994,9 +994,10 @@ Foam::label Foam::MeshedSurface<Face>::triangulate
 
 
 template<class Face>
+template<class BoolListType>
 Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
 (
-    const labelHashSet& include,
+    const BoolListType& include,
     labelList& pointMap,
     labelList& faceMap
 ) const
@@ -1069,8 +1070,7 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
         zone.size() = newFacei - zone.start();
     }
 
-
-    // construct a sub-surface
+    // Construct a sub-surface
     return MeshedSurface<Face>
     (
         std::move(newPoints),
@@ -1083,13 +1083,23 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
 template<class Face>
 Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
 (
-    const labelHashSet& include
+    const bitSet& include
 ) const
 {
     labelList pointMap, faceMap;
     return subsetMesh(include, pointMap, faceMap);
 }
 
+
+template<class Face>
+Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
+(
+    const labelHashSet& include
+) const
+{
+    labelList pointMap, faceMap;
+    return subsetMesh(include, pointMap, faceMap);
+}
 
 
 template<class Face>

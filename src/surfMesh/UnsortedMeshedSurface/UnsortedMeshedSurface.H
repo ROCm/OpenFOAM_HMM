@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -332,19 +332,22 @@ public:
         virtual void clear();
 
         //- Return new surface.
-        //  Returns return pointMap, faceMap from subsetMeshMap
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from subsetMeshMap
+        //  \param[out] faceMap from subsetMeshMap
+        template<class BoolListType>
         UnsortedMeshedSurface subsetMesh
         (
-            const labelHashSet& include,
+            const BoolListType& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
 
-        //- Return new surface.
-        UnsortedMeshedSurface subsetMesh
-        (
-            const labelHashSet& include
-        ) const;
+        //- Return new surface
+        UnsortedMeshedSurface subsetMesh(const bitSet& include) const;
+
+        //- Return new surface
+        UnsortedMeshedSurface subsetMesh(const labelHashSet& include) const;
 
 
         //- Swap contents - disabled

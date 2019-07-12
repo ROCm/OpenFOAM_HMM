@@ -177,18 +177,7 @@ void writeParts
             }
         }
 
-        labelList pointMap;
-        labelList faceMap;
-
-        triSurface subSurf
-        (
-            surf.subsetMesh
-            (
-                includeMap,
-                pointMap,
-                faceMap
-            )
-        );
+        triSurface subSurf(surf.subsetMesh(includeMap));
 
         fileName subName
         (
@@ -483,17 +472,7 @@ int main(int argc, char *argv[])
                 boolList isIllegalFace(surf.size(), false);
                 UIndirectList<bool>(isIllegalFace, illegalFaces) = true;
 
-                labelList pointMap;
-                labelList faceMap;
-                triSurface subSurf
-                (
-                    surf.subsetMesh
-                    (
-                        isIllegalFace,
-                        pointMap,
-                        faceMap
-                    )
-                );
+                triSurface subSurf(surf.subsetMesh(isIllegalFace));
 
 
                 // Transcribe faces

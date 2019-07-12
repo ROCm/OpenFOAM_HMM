@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -418,10 +418,11 @@ public:
             labelList& faceZone
         ) const;
 
-        //- 'Create' sub mesh, including only faces for which boolList
-        //- entry is true
-        //  Sets: pointMap: from new to old localPoints
-        //        faceMap: new to old faces
+        //- 'Create' sub mesh
+        //
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from new to old localPoints
+        //  \param[out] faceMap from new to old faces
         void subsetMeshMap
         (
             const boolList& include,
@@ -429,14 +430,22 @@ public:
             labelList& faceMap
         ) const;
 
-        //- Return new surface. Returns pointMap, faceMap from
-        //  subsetMeshMap
+        //- Return new surface
+        //
+        //  \param[in] include the faces to select
+        //  \param[out] pointMap from subsetMeshMap
+        //  \param[out] faceMap from subsetMeshMap
         triSurface subsetMesh
         (
             const boolList& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
+
+        //- Return new surface
+        //
+        //  \param[in] include the faces to select
+        triSurface subsetMesh(const boolList& include) const;
 
 
         //- Swap the list of faces being addressed

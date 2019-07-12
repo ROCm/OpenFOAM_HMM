@@ -198,10 +198,7 @@ int main(int argc, char *argv[])
 
     for (label z = 0; z < nZones; z++)
     {
-
         boolList include(faceZone.size(), false);
-        labelList pointMap;
-        labelList faceMap;
 
         forAll(faceZone, f)
         {
@@ -211,8 +208,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        triSurface zoneSurf = surf.subsetMesh(include, pointMap, faceMap);
-
+        triSurface zoneSurf = surf.subsetMesh(include);
 
         fileName remainingPartFileName =
             outFileBaseName

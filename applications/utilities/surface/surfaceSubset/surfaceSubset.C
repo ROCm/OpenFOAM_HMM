@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -379,12 +379,7 @@ int main(int argc, char *argv[])
 
 
     // Create subsetted surface
-    labelList pointMap;
-    labelList faceMap;
-    triSurface surf2
-    (
-        surf1.subsetMesh(facesToSubset, pointMap, faceMap)
-    );
+    triSurface surf2(surf1.subsetMesh(facesToSubset));
 
     Info<< "Subset:" << endl;
     surf2.writeStats(Info);

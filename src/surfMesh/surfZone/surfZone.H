@@ -83,7 +83,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null with zero start, size
         surfZone();
 
         //- Construct from components

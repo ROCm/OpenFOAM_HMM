@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,9 +118,7 @@ Foam::triSurface Foam::subTriSurfaceMesh::subset
         }
     }
 
-    labelList pointMap;
-    labelList faceMap;
-    return s.subsetMesh(isSelected, pointMap, faceMap);
+    return s.subsetMesh(isSelected);
 }
 
 

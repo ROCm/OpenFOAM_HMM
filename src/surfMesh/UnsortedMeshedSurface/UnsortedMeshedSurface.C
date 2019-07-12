@@ -528,10 +528,11 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
 
 
 template<class Face>
+template<class BoolListType>
 Foam::UnsortedMeshedSurface<Face>
 Foam::UnsortedMeshedSurface<Face>::subsetMesh
 (
-    const labelHashSet& include,
+    const BoolListType& include,
     labelList& pointMap,
     labelList& faceMap
 ) const

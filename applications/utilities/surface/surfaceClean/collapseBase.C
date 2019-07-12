@@ -64,9 +64,7 @@ using namespace Foam;
 //        }
 //    }
 //
-//    labelList pointMap, faceMap;
-//
-//    triSurface regionSurf(surf.subsetMesh(include, pointMap, faceMap));
+//    triSurface regionSurf(surf.subsetMesh(include));
 //
 //    Pout<< "Region " << regionI << " surface:" << nl;
 //    regionSurf.writeStats(Pout);

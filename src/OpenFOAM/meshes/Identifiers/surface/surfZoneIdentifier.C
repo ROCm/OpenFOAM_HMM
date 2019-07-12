@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,12 +89,6 @@ Foam::surfZoneIdentifier::surfZoneIdentifier
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfZoneIdentifier::~surfZoneIdentifier()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::surfZoneIdentifier::write(Ostream& os) const
@@ -127,11 +119,11 @@ bool Foam::operator!=(const surfZoneIdentifier& a, const surfZoneIdentifier& b)
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, surfZoneIdentifier& obj)
 {
-    is >> obj.name_ >> obj.geometricType_;
+    is >> obj.name() >> obj.geometricType();
     return is;
 }
 
@@ -139,7 +131,7 @@ Foam::Istream& Foam::operator>>(Istream& is, surfZoneIdentifier& obj)
 Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIdentifier& obj)
 {
     // Newlines to separate, since that is what triSurface currently expects
-    os  << nl << obj.name_ << nl << obj.geometricType_;
+    os  << nl << obj.name() << nl << obj.geometricType();
     os.check(FUNCTION_NAME);
     return os;
 }
