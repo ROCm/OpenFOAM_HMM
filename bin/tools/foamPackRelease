@@ -272,7 +272,7 @@ fi
 echo
 echo "echo 'Adding manifest'"
 echo 'pushd "$outputDir"'
-echo "tar --append --transform='s|@|/|g' -v -f \"\$tarName.tar\" \"\$manifest\""
+echo "tar --append --owner=root --group=root --transform='s|@|/|g' -v -f \"\$tarName.tar\" \"\$manifest\""
 echo 'rm -f "$manifest"'
 echo 'popd'
 
