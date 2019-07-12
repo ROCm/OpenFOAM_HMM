@@ -79,8 +79,8 @@ public:
         //- Return clone
         autoPtr<optionAdjoint> clone() const
         {
-            notImplemented("autoPtr<optionAdjoint> clone() const");
-            return autoPtr<optionAdjoint>(nullptr);
+            NotImplemented;
+            return nullptr;
         }
 
 

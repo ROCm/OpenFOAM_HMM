@@ -1143,8 +1143,8 @@ Foam::diameterModels::populationBalanceModel::~populationBalanceModel()
 Foam::autoPtr<Foam::diameterModels::populationBalanceModel>
 Foam::diameterModels::populationBalanceModel::clone() const
 {
-    notImplemented("populationBalance::clone() const");
-    return autoPtr<populationBalanceModel>(nullptr);
+    NotImplemented;
+    return nullptr;
 }
 
 

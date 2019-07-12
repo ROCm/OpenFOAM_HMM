@@ -524,7 +524,7 @@ public:
         //- Return the name of the thermo physics
         virtual word thermoName() const
         {
-            NotImplemented
+            NotImplemented;
             return word();
         }
 

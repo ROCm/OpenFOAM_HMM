@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -366,7 +366,7 @@ public:
             //- Return patchField on the opposite patch of a coupled patch
             virtual tmp<Field<Type>> patchNeighbourField() const
             {
-                notImplemented(type() + "patchNeighbourField()");
+                NotImplemented;
                 return *this;
             }
 
@@ -393,11 +393,7 @@ public:
                 const tmp<Field<scalar>>&
             ) const
             {
-                notImplemented
-                (
-                    type()
-                  + "::valueInternalCoeffs(const tmp<Field<scalar>>&)"
-                );
+                NotImplemented;
                 return *this;
             }
 
@@ -408,11 +404,7 @@ public:
                 const tmp<Field<scalar>>&
             ) const
             {
-                notImplemented
-                (
-                    type()
-                  + "::valueBoundaryCoeffs(const tmp<Field<scalar>>&)"
-                );
+                NotImplemented;
                 return *this;
             }
 
@@ -420,7 +412,7 @@ public:
             //  evaluation of the gradient of this patchField
             virtual tmp<Field<Type>> gradientInternalCoeffs() const
             {
-                notImplemented(type() + "::gradientInternalCoeffs()");
+                NotImplemented;
                 return *this;
             }
 
@@ -428,7 +420,7 @@ public:
             //  evaluation of the gradient of this patchField
             virtual tmp<Field<Type>> gradientBoundaryCoeffs() const
             {
-                notImplemented(type() + "::gradientBoundaryCoeffs()");
+                NotImplemented;
                 return *this;
             }
 

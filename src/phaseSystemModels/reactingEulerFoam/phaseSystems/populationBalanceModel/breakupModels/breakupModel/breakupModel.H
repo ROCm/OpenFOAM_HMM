@@ -120,7 +120,7 @@ public:
         autoPtr<breakupModel> clone() const
         {
             NotImplemented;
-            return autoPtr<breakupModel>(nullptr);
+            return nullptr;
         }
 
 

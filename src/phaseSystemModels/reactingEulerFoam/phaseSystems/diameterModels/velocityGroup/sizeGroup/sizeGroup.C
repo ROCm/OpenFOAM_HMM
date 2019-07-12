@@ -99,8 +99,8 @@ Foam::diameterModels::sizeGroup::~sizeGroup()
 Foam::autoPtr<Foam::diameterModels::sizeGroup>
 Foam::diameterModels::sizeGroup::clone() const
 {
-    notImplemented("sizeGroup::clone() const");
-    return autoPtr<sizeGroup>(nullptr);
+    NotImplemented;
+    return nullptr;
 }
 
 

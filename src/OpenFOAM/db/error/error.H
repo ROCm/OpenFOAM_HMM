@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -353,6 +353,14 @@ extern IOerror FatalIOError;
 //  for FUNCTION_NAME in file __FILE__ at line __LINE__
 #define FatalErrorInFunction FatalErrorIn(FUNCTION_NAME)
 
+//- Report an error message using Foam::FatalError
+//  about unknown lookup type in table
+#define FatalErrorInLookup(lookupTag, lookupName, lookupTable)                 \
+    ::Foam::FatalError(FUNCTION_NAME, __FILE__, __LINE__)                      \
+    << "Unknown " << (lookupTag) << " type " << (lookupName)                   \
+    << "\n\nValid " << (lookupTag) << " types :\n"                             \
+    << ((lookupTable).sortedToc()) << '\n'
+
 
 //- Report an error message using Foam::FatalIOError
 //  for functionName in file __FILE__ at line __LINE__
@@ -364,6 +372,15 @@ extern IOerror FatalIOError;
 //  for FUNCTION_NAME in file __FILE__ at line __LINE__
 //  for a particular IOstream
 #define FatalIOErrorInFunction(ios) FatalIOErrorIn(FUNCTION_NAME, ios)
+
+
+//- Report an error message using Foam::FatalIOError
+//  about unknown lookup type in table
+#define FatalIOErrorInLookup(ios, lookupTag, lookupName, lookupTable)          \
+    ::Foam::FatalIOError(FUNCTION_NAME, __FILE__, __LINE__, (ios))             \
+    << "Unknown " << (lookupTag) << " type " << (lookupName)                   \
+    << "\n\nValid " << (lookupTag) << " types :\n"                             \
+    << ((lookupTable).sortedToc()) << '\n'
 
 
 //- Report an error message using Foam::FatalIOError
