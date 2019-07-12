@@ -436,12 +436,12 @@ Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown fileHandler type "
-            << handlerType << nl << nl
-            << "Valid fileHandler types :" << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "fileHandler",
+            handlerType,
+            *wordConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<fileOperation>(cstrIter()(verbose));

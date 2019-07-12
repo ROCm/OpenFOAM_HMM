@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -41,12 +41,12 @@ Foam::autoPtr<Foam::interpolation<Type>> Foam::interpolation<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown interpolation type " << interpolationType
-            << " for field " << psi.name() << nl << nl
-            << "Valid interpolation types : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "interpolation",
+            interpolationType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<interpolation<Type>>(cstrIter()(psi));

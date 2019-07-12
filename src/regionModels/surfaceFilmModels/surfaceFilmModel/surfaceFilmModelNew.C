@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -44,31 +44,24 @@ autoPtr<surfaceFilmModel> surfaceFilmModel::New
     const word& regionType
 )
 {
-    word modelType;
+    word modelType(surfaceFilmModels::noFilm::typeName);
 
     {
-        IOobject surfaceFilmPropertiesDictHeader
+        IOobject dictHeader
         (
             regionType + "Properties",
             mesh.time().constant(),
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            false // Do not register
         );
 
-        if (surfaceFilmPropertiesDictHeader.typeHeaderOk<IOdictionary>())
+        if (dictHeader.typeHeaderOk<IOdictionary>())
         {
-            IOdictionary surfaceFilmPropertiesDict
-            (
-                surfaceFilmPropertiesDictHeader
-            );
+            IOdictionary propDict(dictHeader);
 
-            surfaceFilmPropertiesDict.readEntry("surfaceFilmModel", modelType);
-        }
-        else
-        {
-            modelType = surfaceFilmModels::noFilm::typeName;
+            propDict.readEntry("surfaceFilmModel", modelType);
         }
     }
 
@@ -78,12 +71,12 @@ autoPtr<surfaceFilmModel> surfaceFilmModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown surfaceFilmModel type "
-            << modelType << nl << nl
-            << "Valid surfaceFilmModel types :" << nl
-            << meshConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "surfaceFilmModel",
+            modelType,
+            *meshConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<surfaceFilmModel>

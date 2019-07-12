@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,17 +50,16 @@ Foam::diameterModels::nucleationModel::New
     const dictionary& dict
 )
 {
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(type);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown nucleation model type "
-            << type << nl << nl
-            << "Valid nucleation model types : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "nucleationModel",
+            type,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<nucleationModel>(cstrIter()(popBal, dict));

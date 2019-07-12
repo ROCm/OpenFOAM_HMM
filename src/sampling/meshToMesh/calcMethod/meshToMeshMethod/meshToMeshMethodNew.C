@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2015 OpenFOAM Foundation
@@ -45,12 +45,12 @@ Foam::autoPtr<Foam::meshToMeshMethod> Foam::meshToMeshMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown meshToMesh type "
-            << methodName << nl << nl
-            << "Valid meshToMesh types :" << nl
-            << componentsConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "meshToMesh",
+            methodName,
+            *componentsConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<meshToMeshMethod>(cstrIter()(src, tgt));

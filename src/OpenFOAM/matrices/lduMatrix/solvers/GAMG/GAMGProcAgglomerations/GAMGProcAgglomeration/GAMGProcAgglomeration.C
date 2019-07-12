@@ -360,10 +360,7 @@ Foam::autoPtr<Foam::GAMGProcAgglomeration> Foam::GAMGProcAgglomeration::New
     const dictionary& controlDict
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing GAMGProcAgglomeration" << endl;
-    }
+    DebugInFunction << "Constructing GAMGProcAgglomeration" << endl;
 
     auto cstrIter = GAMGAgglomerationConstructorTablePtr_->cfind(type);
 

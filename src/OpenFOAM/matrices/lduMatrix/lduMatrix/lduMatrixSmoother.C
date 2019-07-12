@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -96,12 +96,13 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(solverControls)
-                << "Unknown symmetric matrix smoother "
-                << name << nl << nl
-                << "Valid symmetric matrix smoothers are :" << endl
-                << symMatrixConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                solverControls,
+                "symmetric matrix smoother",
+                name,
+                *symMatrixConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<lduMatrix::smoother>
@@ -122,12 +123,13 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(solverControls)
-                << "Unknown asymmetric matrix smoother "
-                << name << nl << nl
-                << "Valid asymmetric matrix smoothers are :" << endl
-                << asymMatrixConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                solverControls,
+                "asymmetric matrix smoother",
+                name,
+                *asymMatrixConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<lduMatrix::smoother>

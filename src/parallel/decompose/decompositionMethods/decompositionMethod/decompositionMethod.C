@@ -365,12 +365,12 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown decompositionMethod "
-            << methodType << nl << nl
-            << "Valid decompositionMethods : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "decompositionMethod",
+            methodType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     // verbose

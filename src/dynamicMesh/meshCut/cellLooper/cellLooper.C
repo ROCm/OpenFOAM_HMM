@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -51,12 +51,12 @@ Foam::autoPtr<Foam::cellLooper> Foam::cellLooper::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown cellLooper type "
-            << type << nl << nl
-            << "Valid cellLooper types :" << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "cellLooper",
+            type,
+            *wordConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<cellLooper>(cstrIter()(mesh));

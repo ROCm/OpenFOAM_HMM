@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -37,22 +37,22 @@ Foam::autoPtr<Foam::energyScalingFunction> Foam::energyScalingFunction::New
     const pairPotential& pairPot
 )
 {
-    const word scalingType(propDict.get<word>("energyScalingFunction"));
+    const word modelType(propDict.get<word>("energyScalingFunction"));
 
     Info<< "Selecting energy scaling function "
-        << scalingType << " for "
+        << modelType << " for "
         << name << " potential energy." << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(scalingType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown energyScalingFunction type "
-            << scalingType << nl << nl
-            << "Valid energyScalingFunction types:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "energyScalingFunction",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<energyScalingFunction>(cstrIter()(name, propDict, pairPot));

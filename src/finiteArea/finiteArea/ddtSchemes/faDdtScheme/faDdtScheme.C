@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -69,11 +69,13 @@ tmp<faDdtScheme<Type>> faDdtScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown ddt scheme " << schemeName << nl << nl
-            << "Valid ddt schemes are :" << nl
-            << IstreamConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "ddt",
+            schemeName,
+            *IstreamConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, schemeData);

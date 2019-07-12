@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2018 OpenFOAM Foundation
@@ -36,22 +36,21 @@ Foam::autoPtr<Foam::liftModel> Foam::liftModel::New
     const phasePair& pair
 )
 {
-    word liftModelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting liftModel for "
-        << pair << ": " << liftModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(liftModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown liftModelType type "
-            << liftModelType << endl << endl
-            << "Valid liftModel types are : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "liftModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return cstrIter()(dict, pair);

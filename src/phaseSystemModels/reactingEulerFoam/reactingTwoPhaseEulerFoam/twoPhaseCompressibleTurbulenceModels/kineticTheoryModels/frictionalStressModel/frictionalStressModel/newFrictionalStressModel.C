@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -35,24 +35,20 @@ Foam::kineticTheoryModels::frictionalStressModel::New
     const dictionary& dict
 )
 {
-    word frictionalStressModelType(dict.lookup("frictionalStressModel"));
+    const word modelType(dict.get<word>("frictionalStressModel"));
 
-    Info<< "Selecting frictionalStressModel "
-        << frictionalStressModelType << endl;
+    Info<< "Selecting frictionalStressModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(frictionalStressModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalError
-            << "frictionalStressModel::New(const dictionary&) : " << endl
-            << "    unknown frictionalStressModelType type "
-            << frictionalStressModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid frictionalStressModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "frictionalStressModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<frictionalStressModel>(cstrIter()(dict));

@@ -60,12 +60,12 @@ Foam::radiation::boundaryRadiationPropertiesPatch::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown modelType type "
-            << modelType << nl << nl
-            << "Valid radiation types are : " << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "radiationModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return cstrIter()(dict, pp);

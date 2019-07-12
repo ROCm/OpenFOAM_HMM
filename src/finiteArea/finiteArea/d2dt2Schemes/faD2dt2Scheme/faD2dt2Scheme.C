@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017 Volkswagen AG
@@ -72,11 +72,13 @@ tmp<faD2dt2Scheme<Type>> faD2dt2Scheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown d2dt2 scheme " << schemeName << nl << nl
-            << "Valid d2dt2 schemes are :" << endl
-            << IstreamConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "d2dt2",
+            schemeName,
+            *IstreamConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, schemeData);

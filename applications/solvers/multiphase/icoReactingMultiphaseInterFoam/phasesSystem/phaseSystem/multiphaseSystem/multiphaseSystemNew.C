@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
     const fvMesh& mesh
 )
 {
-    const word multiphaseSystemType
+    const word systemType
     (
         IOdictionary
         (
@@ -48,22 +48,21 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
         ).get<word>("type")
     );
 
-    Info<< "Selecting multiphaseSystem " << multiphaseSystemType << endl;
+    Info<< "Selecting multiphaseSystem " << systemType << endl;
 
-    const auto cstrIter =
-        dictionaryConstructorTablePtr_->cfind(multiphaseSystemType);
+    const auto cstrIter = dictionaryConstructorTablePtr_->cfind(systemType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown multiphaseSystemType type "
-            << multiphaseSystemType << endl
-            << "Valid multiphaseSystem types are : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "multiphaseSystem",
+            systemType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
-    return autoPtr<multiphaseSystem> (cstrIter()(mesh));
+    return autoPtr<multiphaseSystem>(cstrIter()(mesh));
 }
 
 

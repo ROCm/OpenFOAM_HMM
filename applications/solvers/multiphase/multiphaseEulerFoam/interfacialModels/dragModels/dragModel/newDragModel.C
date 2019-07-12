@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -47,12 +47,12 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown dragModel type "
-            << modelType << nl << nl
-            << "Valid dragModel types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "dragModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return cstrIter()(interfaceDict, phase1, phase2);

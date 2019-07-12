@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017 OpenFOAM Foundation
@@ -48,12 +48,12 @@ Foam::autoPtr<Foam::surfaceTensionModel> Foam::surfaceTensionModel::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInFunction
-                << "Unknown surfaceTensionModel type "
-                << modelType << nl << nl
-                << "Valid surfaceTensionModel types :" << endl
-                << dictionaryConstructorTablePtr_->sortedToc()
-                << exit(FatalError);
+            FatalErrorInLookup
+            (
+                "surfaceTensionModel",
+                modelType,
+                *dictionaryConstructorTablePtr_
+            ) << exit(FatalError);
         }
 
         return cstrIter()(sigmaDict, mesh);

@@ -186,8 +186,6 @@ autoPtr<RASModelVariables> RASModelVariables::New
     const solverControl& SolverControl
 )
 {
-    // Get model name, but do not register the dictionary
-    // otherwise it is registered in the database twice
     const word modelType
     (
         IOdictionary
@@ -199,7 +197,7 @@ autoPtr<RASModelVariables> RASModelVariables::New
                 mesh,
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                false // Do not register
             )
         ).subOrEmptyDict("RAS").lookupOrDefault<word>("RASModel", "laminar")
     );
@@ -210,11 +208,12 @@ autoPtr<RASModelVariables> RASModelVariables::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown RASModelVariables type " << modelType << nl << nl
-            << "Valid RASModelVariables types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "RASModelVariables",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<RASModelVariables>(cstrIter()(mesh, SolverControl));

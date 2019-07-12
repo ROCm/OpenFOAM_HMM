@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -123,37 +123,33 @@ Foam::cellSizeFunction::cellSizeFunction
 
 Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
 (
-    const dictionary& cellSizeFunctionDict,
+    const dictionary& dict,
     const searchableSurface& surface,
     const scalar& defaultCellSize,
     const labelList regionIndices
 )
 {
-    const word functionName
-    (
-        cellSizeFunctionDict.get<word>("cellSizeFunction")
-    );
+    const word modelType(dict.get<word>("cellSizeFunction"));
 
-    Info<< indent << "Selecting cellSizeFunction "
-        << functionName << endl;
+    Info<< indent << "Selecting cellSizeFunction " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown cellSizeFunction type "
-            << functionName << nl << nl
-            << "Valid cellSizeFunction types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "cellSizeFunction",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<cellSizeFunction>
     (
         cstrIter()
         (
-            cellSizeFunctionDict,
+            dict,
             surface,
             defaultCellSize,
             regionIndices

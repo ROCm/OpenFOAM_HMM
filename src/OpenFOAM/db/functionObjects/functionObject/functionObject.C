@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -112,12 +112,12 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown function type "
-            << functionType << nl << nl
-            << "Valid function types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << endl
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "function",
+            functionType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<functionObject>(cstrIter()(name, runTime, dict));

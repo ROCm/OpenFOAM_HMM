@@ -70,11 +70,12 @@ Foam::autoPtr<Foam::SIMPLEControl> Foam::SIMPLEControl::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown control type " << managerType << nl << nl
-            << "Valid control types are :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "control",
+            managerType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<SIMPLEControl>(cstrIter()(mesh, managerType, solver));

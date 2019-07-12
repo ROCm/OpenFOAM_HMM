@@ -361,12 +361,12 @@ Foam::Reaction<ReactionThermo>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown reaction type "
-            << reactionTypeName << nl << nl
-            << "Valid reaction types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "reaction",
+            reactionTypeName,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<Reaction<ReactionThermo>>

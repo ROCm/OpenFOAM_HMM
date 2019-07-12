@@ -256,7 +256,7 @@ void variablesSet::renameTurbulenceField
         mesh,
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE,
-        false // do not register temp field to avoid db collisions
+        false // Do not register
     );
 
     if (headerCustomName.typeHeaderOk<VolFieldType>(true))

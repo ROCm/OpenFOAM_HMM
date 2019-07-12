@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2015 OpenFOAM Foundation
@@ -43,7 +43,7 @@ Foam::cellSizeAndAlignmentControl::cellSizeAndAlignmentControl
 (
     const Time& runTime,
     const word& name,
-    const dictionary& controlFunctionDict,
+    const dictionary& dict,
     const conformationSurfaces& geometryToConformTo,
     const scalar& defaultCellSize
 )
@@ -52,7 +52,7 @@ Foam::cellSizeAndAlignmentControl::cellSizeAndAlignmentControl
     defaultCellSize_(defaultCellSize),
     forceInitialPointInsertion_
     (
-        controlFunctionDict.lookupOrDefault<Switch>
+        dict.lookupOrDefault<Switch>
         (
             "forceInitialPointInsertion",
             Switch::OFF
@@ -69,26 +69,26 @@ Foam::cellSizeAndAlignmentControl::New
 (
     const Time& runTime,
     const word& name,
-    const dictionary& controlFunctionDict,
+    const dictionary& dict,
     const conformationSurfaces& geometryToConformTo,
     const scalar& defaultCellSize
 )
 {
-    const word controlType(controlFunctionDict.get<word>("type"));
+    const word modelType(dict.get<word>("type"));
 
     Info<< indent << "Selecting cellSizeAndAlignmentControl "
-        << controlType << endl;
+        << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(controlType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown cellSizeAndAlignmentControl type "
-            << controlType << nl << nl
-            << "Valid cellSizeAndAlignmentControl types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "cellSizeAndAlignmentControl",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<cellSizeAndAlignmentControl>
@@ -97,7 +97,7 @@ Foam::cellSizeAndAlignmentControl::New
         (
             runTime,
             name,
-            controlFunctionDict,
+            dict,
             geometryToConformTo,
             defaultCellSize
         )

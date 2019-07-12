@@ -180,12 +180,12 @@ Foam::functionObjects::runTimePostPro::pathline::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown pathline type "
-            << pathlineType << nl << nl
-            << "Valid pathline types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "pathline",
+            pathlineType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<pathline>(cstrIter()(parent, dict, colours));

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,11 +43,13 @@ Foam::radiation::reflectionModel::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown reflectionModel type " << modelType << nl << nl
-            << "Valid types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "reflectionModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<reflectionModel>(cstrIter()(dict, mesh));

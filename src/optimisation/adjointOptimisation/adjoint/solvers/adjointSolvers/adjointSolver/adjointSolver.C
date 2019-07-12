@@ -82,16 +82,19 @@ Foam::autoPtr<Foam::adjointSolver> Foam::adjointSolver::New
     const word& primalSolverName
 )
 {
-    const word adjointSolverType(dict.get<word>("type"));
-    auto cstrIter = adjointSolverConstructorTablePtr_->cfind(adjointSolverType);
+    const word solverType(dict.get<word>("type"));
+
+    auto cstrIter = adjointSolverConstructorTablePtr_->cfind(solverType);
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown adjointSolver type " << adjointSolverType << nl << nl
-            << "Valid adjointSolver types are :" << nl
-            << adjointSolverConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "adjointSolver",
+            solverType,
+            *adjointSolverConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<adjointSolver>

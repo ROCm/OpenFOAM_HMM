@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -34,7 +34,6 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
     const psiuReactionThermo& ct
 )
 {
-    // do not register the dictionary
     IOdictionary propDict
     (
         IOobject
@@ -44,7 +43,7 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
             ct.T().db(),
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            false // Do not register
         )
     );
 
@@ -56,12 +55,13 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(propDict)
-            << "Unknown laminarFlameSpeed type "
-            << modelType << nl << nl
-            << "Valid laminarFlameSpeed types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            propDict,
+            "laminarFlameSpeedCorrelation",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<laminarFlameSpeed>(cstrIter()(propDict, ct));

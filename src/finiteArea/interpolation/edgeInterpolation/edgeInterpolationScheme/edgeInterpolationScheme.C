@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -64,12 +64,13 @@ Foam::edgeInterpolationScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown discretisation scheme "
-            << schemeName << nl << nl
-            << "Valid schemes are :" << nl
-            << MeshConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "discretisation",
+            schemeName,
+            *MeshConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, schemeData);
@@ -108,12 +109,13 @@ Foam::edgeInterpolationScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown discretisation scheme "
-            << schemeName << nl << nl
-            << "Valid schemes are :" << endl
-            << MeshFluxConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "discretisation",
+            schemeName,
+            *MeshFluxConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, faceFlux, schemeData);

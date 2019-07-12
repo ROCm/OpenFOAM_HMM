@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -93,12 +93,13 @@ Foam::lduMatrix::preconditioner::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(controls)
-                << "Unknown symmetric matrix preconditioner "
-                << name << nl << nl
-                << "Valid symmetric matrix preconditioners :" << endl
-                << symMatrixConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                controls,
+                "symmetric matrix preconditioner",
+                name,
+                *symMatrixConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<lduMatrix::preconditioner>
@@ -116,12 +117,13 @@ Foam::lduMatrix::preconditioner::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(controls)
-                << "Unknown asymmetric matrix preconditioner "
-                << name << nl << nl
-                << "Valid asymmetric matrix preconditioners :" << endl
-                << asymMatrixConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                controls,
+                "asymmetric matrix preconditioner",
+                name,
+                *asymMatrixConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<lduMatrix::preconditioner>

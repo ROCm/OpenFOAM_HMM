@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -58,20 +58,20 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     const labelHashSet& patchIDs
 )
 {
-    const word methodType(dict.get<word>("method"));
+    const word modelType(dict.get<word>("method"));
 
-    Info<< "Selecting patchDistMethod " << methodType << endl;
+    Info<< "Selecting patchDistMethod " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown patchDistMethod type "
-            << methodType << endl << endl
-            << "Valid patchDistMethod types : " << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "patchDistMethod",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return cstrIter()(dict, mesh, patchIDs);
@@ -87,20 +87,19 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     const word& defaultPatchDistMethod
 )
 {
-    word methodType = defaultPatchDistMethod;
-    dict.readIfPresent("method", methodType);
+    const word modelType(dict.getOrDefault("method", defaultPatchDistMethod));
 
-    Info<< "Selecting patchDistMethod " << methodType << endl;
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
+    Info<< "Selecting patchDistMethod " << modelType << endl;
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown patchDistMethodType type "
-            << methodType << endl << endl
-            << "Valid patchDistMethod types : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "patchDistMethod",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return cstrIter()(dict, mesh, patchIDs);

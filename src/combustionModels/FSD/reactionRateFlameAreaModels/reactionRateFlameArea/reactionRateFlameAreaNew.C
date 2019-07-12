@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -48,12 +48,13 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown reactionRateFlameArea type "
-            << modelType << nl << nl
-            << "Valid reaction rate flame area types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "reactionRateFlameArea",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     const word className = modelType.substr(0, modelType.find('<'));

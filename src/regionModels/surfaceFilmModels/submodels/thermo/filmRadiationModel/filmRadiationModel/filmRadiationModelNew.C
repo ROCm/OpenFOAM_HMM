@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -52,12 +52,12 @@ autoPtr<filmRadiationModel> filmRadiationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown radiationModel type "
-            << modelType << nl << nl
-            << "Valid filmRadiationModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "radiationModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<filmRadiationModel>(cstrIter()(model, dict));

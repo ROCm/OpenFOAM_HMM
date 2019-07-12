@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -43,12 +43,12 @@ Foam::kineticTheoryModels::conductivityModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown conductivityModel type "
-            << modelType << nl << nl
-            << "Valid conductivityModel types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "conductivityModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<conductivityModel>(cstrIter()(dict));

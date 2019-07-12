@@ -256,12 +256,12 @@ Foam::functionObjects::runTimePostPro::surface::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown surface type "
-            << surfaceType << nl << nl
-            << "Valid surface types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "surface",
+            surfaceType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<surface>(cstrIter()(parent, dict, colours));

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -35,21 +35,18 @@ Foam::autoPtr<Foam::facePointPatch> Foam::facePointPatch::New
     const pointBoundaryMesh& bm
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing facePointPatch" << endl;
-    }
+    DebugInFunction << "Constructing facePointPatch" << endl;
 
     auto cstrIter = polyPatchConstructorTablePtr_->cfind(patch.type());
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown facePointPatch type "
-            << patch.type() << nl << nl
-            << "Valid facePointPatch types :" << endl
-            << polyPatchConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "facePointPatch",
+            patch.type(),
+            *polyPatchConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<facePointPatch>(cstrIter()(patch, bm));

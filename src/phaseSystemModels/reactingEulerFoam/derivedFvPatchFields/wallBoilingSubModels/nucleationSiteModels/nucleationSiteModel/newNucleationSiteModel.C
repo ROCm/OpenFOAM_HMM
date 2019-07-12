@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2018 OpenFOAM Foundation
@@ -35,22 +35,20 @@ Foam::wallBoilingModels::nucleationSiteModel::New
     const dictionary& dict
 )
 {
-    word nucleationSiteModelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
-    Info<< "Selecting nucleationSiteModel: "
-        << nucleationSiteModelType << endl;
+    Info<< "Selecting nucleationSiteModel: " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(nucleationSiteModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown nucleationSiteModelType type "
-            << nucleationSiteModelType << endl << endl
-            << "Valid nucleationSiteModel types are : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "nucleationSiteModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return cstrIter()(dict);

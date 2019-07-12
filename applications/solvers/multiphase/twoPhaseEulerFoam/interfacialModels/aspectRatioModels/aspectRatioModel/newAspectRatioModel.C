@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2015 OpenFOAM Foundation
@@ -46,12 +46,12 @@ Foam::aspectRatioModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown aspectRatioModel type "
-            << modelType << nl << nl
-            << "Valid aspectRatioModel types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "aspectRatioModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return cstrIter()(dict, pair);

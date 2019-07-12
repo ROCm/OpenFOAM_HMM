@@ -61,18 +61,19 @@ Foam::autoPtr<Foam::primalSolver> Foam::primalSolver::New
     const dictionary& dict
 )
 {
-    const word primalSolverType(dict.get<word>("type"));
+    const word solverType(dict.get<word>("type"));
 
-    auto cstrIter = primalSolverConstructorTablePtr_->cfind(primalSolverType);
+    auto cstrIter = primalSolverConstructorTablePtr_->cfind(solverType);
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown primalSolver type " << primalSolverType
-            << nl << nl
-            << "Valid primalSolver types are :" << nl
-            << primalSolverConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "primalSolver",
+            solverType,
+            *primalSolverConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<primalSolver>(cstrIter()(mesh, managerType, dict));

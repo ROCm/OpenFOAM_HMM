@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -88,12 +88,13 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown convection scheme "
-            << schemeName << nl << nl
-            << "Valid convection schemes are :" << endl
-            << IstreamConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "convection",
+            schemeName,
+            *IstreamConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, faceFlux, schemeData);
@@ -130,12 +131,13 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown convection scheme "
-            << schemeName << nl << nl
-            << "Valid convection schemes are :" << endl
-            << MultivariateConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "convection",
+            schemeName,
+            *MultivariateConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, fields, faceFlux, schemeData);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -36,22 +36,22 @@ Foam::autoPtr<Foam::pairPotential> Foam::pairPotential::New
     const dictionary& propDict
 )
 {
-    const word potentialType(propDict.get<word>("pairPotential"));
+    const word modelType(propDict.get<word>("pairPotential"));
 
     Info<< nl << "Selecting intermolecular pair potential "
-        << potentialType << " for "
+        << modelType << " for "
         << name << " interaction." << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(potentialType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown pairPotential type "
-            << potentialType << nl << nl
-            << "Valid pairPotential types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "pairPotential",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<pairPotential>(cstrIter()(name, propDict));

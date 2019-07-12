@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -40,21 +40,18 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
     const polyBoundaryMesh& bm
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing polyPatch" << endl;
-    }
+    DebugInFunction << "Constructing polyPatch" << endl;
 
     auto cstrIter = wordConstructorTablePtr_->cfind(patchType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown polyPatch type "
-            << patchType << " for patch " << name << nl << nl
-            << "Valid polyPatch types :" << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "polyPatch",
+            patchType,
+            *wordConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<polyPatch>
@@ -80,10 +77,7 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
     const polyBoundaryMesh& bm
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing polyPatch" << endl;
-    }
+    DebugInFunction << "Constructing polyPatch" << endl;
 
     word patchType(dict.get<word>("type"));
     dict.readIfPresent("geometricType", patchType);
@@ -101,10 +95,7 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
     const polyBoundaryMesh& bm
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing polyPatch" << endl;
-    }
+    DebugInFunction << "Constructing polyPatch" << endl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchType);
 
@@ -117,12 +108,13 @@ Foam::autoPtr<Foam::polyPatch> Foam::polyPatch::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(dict)
-                << "Unknown polyPatch type "
-                << patchType << " for patch " << name << nl << nl
-                << "Valid polyPatch types :" << endl
-                << dictionaryConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                dict,
+                "polyPatch",
+                patchType,
+                *dictionaryConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
     }
 

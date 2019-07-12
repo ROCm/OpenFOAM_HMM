@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -86,21 +86,20 @@ Foam::AveragingMethod<Type>::New
     const fvMesh& mesh
 )
 {
-    const word averageType(dict.get<word>(typeName));
+    const word modelType(dict.get<word>(typeName));
 
-    //Info<< "Selecting averaging method "
-    //    << averageType << endl;
+    //Info<< "Selecting averaging method " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(averageType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown averaging method "
-            << averageType  << nl << nl
-            << "Valid averaging methods :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "averaging limiter",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<AveragingMethod<Type>>(cstrIter()(io, dict, mesh));

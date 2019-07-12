@@ -63,7 +63,7 @@ Foam::autoPtr<Foam::fv::optionAdjoint> Foam::fv::optionAdjoint::New
     const fvMesh& mesh
 )
 {
-    word modelType(coeffs.get<word>("type"));
+    const word modelType(coeffs.get<word>("type"));
 
     Info<< indent
         << "Selecting finite volume options model type " << modelType << endl;
@@ -72,11 +72,12 @@ Foam::autoPtr<Foam::fv::optionAdjoint> Foam::fv::optionAdjoint::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown Model type " << modelType << nl << nl
-            << "Valid model types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "model",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<optionAdjoint>(cstrIter()(name, modelType, coeffs, mesh));

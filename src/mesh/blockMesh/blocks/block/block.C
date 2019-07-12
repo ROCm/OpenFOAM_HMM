@@ -109,15 +109,15 @@ Foam::autoPtr<Foam::block> Foam::block::New
 
     const word blockOrCellShapeType(is);
 
-    auto cstr = IstreamConstructorTablePtr_->cfind(blockOrCellShapeType);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(blockOrCellShapeType);
 
-    if (!cstr.found())
+    if (!cstrIter.found())
     {
         is.putBack(token(blockOrCellShapeType));
         return autoPtr<block>::New(dict, index, points, edges, faces, is);
     }
 
-    return autoPtr<block>(cstr()(dict, index, points, edges, faces, is));
+    return autoPtr<block>(cstrIter()(dict, index, points, edges, faces, is));
 }
 
 

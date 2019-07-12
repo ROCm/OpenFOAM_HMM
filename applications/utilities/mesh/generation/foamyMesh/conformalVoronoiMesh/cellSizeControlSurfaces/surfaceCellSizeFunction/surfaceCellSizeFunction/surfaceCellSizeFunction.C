@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -62,34 +62,33 @@ Foam::surfaceCellSizeFunction::surfaceCellSizeFunction
 
 Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
 (
-    const dictionary& surfaceCellSizeFunctionDict,
+    const dictionary& dict,
     const searchableSurface& surface,
     const scalar& defaultCellSize
 )
 {
-    const word functionName
+    const word modelType
     (
-        surfaceCellSizeFunctionDict.get<word>("surfaceCellSizeFunction")
+        dict.get<word>("surfaceCellSizeFunction")
     );
 
-    Info<< indent << "Selecting surfaceCellSizeFunction "
-        << functionName << endl;
+    Info<< indent << "Selecting surfaceCellSizeFunction " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown surfaceCellSizeFunction type "
-            << functionName << nl << nl
-            << "Valid surfaceCellSizeFunction types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "surfaceCellSizeFunction",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<surfaceCellSizeFunction>
     (
-        cstrIter()(surfaceCellSizeFunctionDict, surface, defaultCellSize)
+        cstrIter()(dict, surface, defaultCellSize)
     );
 }
 

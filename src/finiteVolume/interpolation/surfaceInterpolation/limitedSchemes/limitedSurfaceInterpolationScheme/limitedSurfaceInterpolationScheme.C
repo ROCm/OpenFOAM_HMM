@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -62,12 +62,13 @@ Foam::limitedSurfaceInterpolationScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown discretisation scheme "
-            << schemeName << nl << nl
-            << "Valid schemes are :" << endl
-            << MeshConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "discretisation",
+            schemeName,
+            *MeshConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, schemeData);
@@ -106,12 +107,13 @@ Foam::limitedSurfaceInterpolationScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown discretisation scheme "
-            << schemeName << nl << nl
-            << "Valid schemes are :" << endl
-            << MeshFluxConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "discretisation",
+            schemeName,
+            *MeshFluxConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, faceFlux, schemeData);

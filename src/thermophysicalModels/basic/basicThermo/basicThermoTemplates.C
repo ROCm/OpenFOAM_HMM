@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -39,6 +39,8 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 )
 {
     // Lookup the thermo package
+
+    // Table iterator, not const_iterator
     auto cstrIter = tablePtr->find(thermoTypeName);
 
     // Print error message if package not found in the table
@@ -181,16 +183,17 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 
         Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
 
+        // Table iterator, not const_iterator
         auto cstrIter = tablePtr->find(thermoTypeName);
 
         if (!cstrIter.found())
         {
-            FatalErrorInFunction
-                << "Unknown " << Thermo::typeName << " type "
-                << thermoTypeName << nl << nl
-                << "Valid " << Thermo::typeName << " types are:" << nl
-                << tablePtr->sortedToc() << nl
-                << exit(FatalError);
+            FatalErrorInLookup
+            (
+                Thermo::typeName,
+                thermoTypeName,
+                *tablePtr
+            ) << exit(FatalError);
         }
 
         return cstrIter;

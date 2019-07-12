@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -45,12 +45,12 @@ Foam::CompositionModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown compositionModel type "
-            << modelType << nl << nl
-            << "Valid compositionModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << nl
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "compositionModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<CompositionModel<CloudType>>(cstrIter()(dict, owner));

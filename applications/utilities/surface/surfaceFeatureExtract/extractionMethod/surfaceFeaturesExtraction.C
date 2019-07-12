@@ -68,17 +68,19 @@ Foam::surfaceFeaturesExtraction::method::New
     const dictionary& dict
 )
 {
-    const word methodName(dict.get<word>("extractionMethod"));
+    const word modelType(dict.get<word>("extractionMethod"));
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown extractionMethod " << methodName << nl << nl
-            << "Valid extraction methods:" << nl
-            << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "extractionMethod",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<method>(cstrIter.val()(dict));

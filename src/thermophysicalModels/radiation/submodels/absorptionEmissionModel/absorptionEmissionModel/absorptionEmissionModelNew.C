@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -45,12 +45,12 @@ Foam::radiation::absorptionEmissionModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown absorptionEmissionModel type "
-            << modelType << nl << nl
-            << "Valid absorptionEmissionModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "absorptionEmissionModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<absorptionEmissionModel>(cstrIter()(dict, mesh));

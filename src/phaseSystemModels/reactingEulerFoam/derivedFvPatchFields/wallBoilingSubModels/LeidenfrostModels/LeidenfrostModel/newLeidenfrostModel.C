@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,22 +33,20 @@ Foam::wallBoilingModels::LeidenfrostModel::New
     const dictionary& dict
 )
 {
-    word LeidenfrostModelType(dict.lookup("type"));
+    const word modelType(dict.get<word>("type"));
 
-    Info<< "Selecting LeidenfrostModel: "
-        << LeidenfrostModelType << endl;
+    Info<< "Selecting LeidenfrostModel: " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(LeidenfrostModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown LeidenfrostModelType type "
-            << LeidenfrostModelType << endl << endl
-            << "Valid LeidenfrostModel types are : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "LeidenfrostModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return cstrIter()(dict);

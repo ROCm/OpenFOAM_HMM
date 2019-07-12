@@ -87,12 +87,12 @@ Foam::incompressibleAdjointSolver::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown incompressibleAdjointSolver type "
-            << solverType << nl << nl
-            << "Valid incompressibleAdjointSolver types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "incompressibleAdjointSolver",
+            solverType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return

@@ -45,7 +45,7 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
             thermo.db(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            false // Do not register
         )
     );
 

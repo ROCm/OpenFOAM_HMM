@@ -146,9 +146,9 @@ Foam::autoPtr<Foam::optimisationManager> Foam::optimisationManager::New
     fvMesh& mesh
 )
 {
-    word modelType;
-    {
-        IOdictionary dict
+    const word modelType
+    (
+        IOdictionary
         (
             IOobject
             (
@@ -157,12 +157,11 @@ Foam::autoPtr<Foam::optimisationManager> Foam::optimisationManager::New
                 mesh,
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false // do not register
+                false // Do not register
             )
-        );
+        ).get<word>("optimisationManager")
+    );
 
-        modelType = dict.get<word>("optimisationManager");
-    }
 
     Info<< "optimisationManager type : " << modelType << endl;
 
@@ -170,11 +169,12 @@ Foam::autoPtr<Foam::optimisationManager> Foam::optimisationManager::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown optimisationManager type " << modelType << nl << nl
-            << "Valid optimisationManager types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "optimisationManager",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<optimisationManager>(cstrIter()(mesh));

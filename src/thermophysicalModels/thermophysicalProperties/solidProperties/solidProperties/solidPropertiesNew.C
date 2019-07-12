@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -35,21 +35,18 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New
     const word& name
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing solidProperties" << endl;
-    }
+    DebugInFunction << "Constructing solidProperties" << endl;
 
     auto cstrIter = ConstructorTablePtr_->cfind(name);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown solidProperties type "
-            << name << nl << nl
-            << "Valid solidProperties types :" << nl
-            << ConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "solidProperties",
+            name,
+            *ConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<solidProperties>(cstrIter()());
@@ -61,10 +58,7 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New
     const dictionary& dict
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing solid" << endl;
-    }
+    DebugInFunction << "Constructing solid" << endl;
 
     const word solidType(dict.dictName());
 
@@ -87,12 +81,12 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown solidProperties type "
-            << solidType << nl << nl
-            << "Valid solidProperties types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "solidProperties",
+            solidType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<solidProperties>(cstrIter()(dict));

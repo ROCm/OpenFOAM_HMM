@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -52,12 +52,12 @@ Foam::autoPtr<Foam::LESfilter> Foam::LESfilter::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown LESfilter type "
-            << filterType << nl << nl
-            << "Valid LESfilter types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "LESfilter",
+            filterType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<LESfilter>(cstrIter()(mesh, dict));

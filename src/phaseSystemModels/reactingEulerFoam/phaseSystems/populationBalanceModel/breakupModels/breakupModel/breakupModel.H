@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017-2018 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -128,15 +130,14 @@ public:
 
         static autoPtr<breakupModel> New
         (
-            const word& type,
+            const word& modelType,
             const populationBalanceModel& popBal,
             const dictionary& dict
         );
 
 
     //- Destructor
-    virtual ~breakupModel()
-    {}
+    virtual ~breakupModel() = default;
 
 
     // Member Functions

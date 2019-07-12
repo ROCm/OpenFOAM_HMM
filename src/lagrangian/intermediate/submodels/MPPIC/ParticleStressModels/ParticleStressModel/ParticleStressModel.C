@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -71,12 +71,12 @@ Foam::autoPtr<Foam::ParticleStressModel> Foam::ParticleStressModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown particle stress model type "
-            << modelType << nl << nl
-            << "Valid particle stress model types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "particle stress model",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<ParticleStressModel>(cstrIter()(dict));

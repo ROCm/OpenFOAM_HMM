@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2015 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,20 +36,20 @@ Foam::functionObjects::runTimeControls::runTimeCondition::New
     stateFunctionObject& state
 )
 {
-    const word conditionType(dict.get<word>("type"));
+    const word modelType(dict.get<word>("type"));
 
-    Info<< "Selecting runTimeCondition " << conditionType << endl;
+    Info<< "Selecting runTimeCondition " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(conditionType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown runTimeCondition type "
-            << conditionType << nl << nl
-            << "Valid runTimeCondition types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "runTimeCondition",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return

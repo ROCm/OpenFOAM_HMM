@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -68,12 +68,12 @@ Foam::autoPtr<Foam::relaxationModel> Foam::relaxationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown relaxationModel type "
-            << modelType << nl << nl
-            << "Valid relaxationModel types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "relaxationModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<relaxationModel>(cstrIter()(relaxationDict, runTime));

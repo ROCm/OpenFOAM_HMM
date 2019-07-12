@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -59,10 +59,7 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
     Istream& is
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing blockVertex" << endl;
-    }
+    DebugInFunction << "Constructing blockVertex" << endl;
 
     token firstToken(is);
 
@@ -84,12 +81,12 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInFunction
-                << "Unknown blockVertex type "
-                << faceType << nl << nl
-                << "Valid blockVertex types :" << endl
-                << IstreamConstructorTablePtr_->sortedToc()
-                << abort(FatalError);
+            FatalErrorInLookup
+            (
+                "blockVertex",
+                faceType,
+                *IstreamConstructorTablePtr_
+            ) << abort(FatalError);
         }
 
         return autoPtr<blockVertex>(cstrIter()(dict, index, geometry, is));

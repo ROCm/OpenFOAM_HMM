@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -45,12 +45,12 @@ Foam::autoPtr<Foam::tableReader<Type>> Foam::tableReader<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown reader type "
-            << readerType << nl << nl
-            << "Valid reader types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "reader",
+            readerType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<tableReader<Type>>(cstrIter()(spec));

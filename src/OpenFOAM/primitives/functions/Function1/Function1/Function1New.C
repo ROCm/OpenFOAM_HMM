@@ -54,7 +54,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown Function1 type "
-                << Function1Type << " for Function1 "
+                << Function1Type << " for "
                 << entryName << nl << nl
                 << "Valid Function1 types :" << nl
                 << dictionaryConstructorTablePtr_->sortedToc() << nl
@@ -110,7 +110,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown Function1 type "
-                << Function1Type << " for Function1 "
+                << Function1Type << " for "
                 << entryName << nl << nl
                 << "Valid Function1 types :" << nl
                 << dictionaryConstructorTablePtr_->sortedToc() << nl

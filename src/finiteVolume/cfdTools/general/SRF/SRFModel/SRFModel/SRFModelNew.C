@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -34,8 +34,6 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
     const volVectorField& Urel
 )
 {
-    // get model name, but do not register the dictionary
-    // otherwise it is registered in the database twice
     const word modelType
     (
         IOdictionary
@@ -47,9 +45,9 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
                 Urel.db(),
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                false // Do not register
             )
-        ).lookup("SRFModel")
+        ).get<word>("SRFModel")
     );
 
     Info<< "Selecting SRFModel " << modelType << endl;
@@ -58,12 +56,12 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown SRFModel type "
-            << modelType << nl << nl
-            << "Valid SRFModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "SRFModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<SRFModel>(cstrIter()(Urel));

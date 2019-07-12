@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -42,19 +42,19 @@ Foam::functionObjects::fieldValue::New
 
     if (output)
     {
-        Info<< "Selecting " << typeName << " " << modelType << endl;
+        Info<< "Selecting " << typeName << ' ' << modelType << endl;
     }
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown " << typeName << " type "
-            << modelType << nl << nl
-            << "Valid " << typeName << " types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            typeName,
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<fieldValue>(cstrIter()(name, obr, dict));

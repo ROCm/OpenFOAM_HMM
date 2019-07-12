@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         |2011 OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -36,21 +36,18 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
     const DimensionedField<Type, pointMesh>& iF
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing pointPatchField<Type>" << endl;
-    }
+    DebugInFunction << "Constructing pointPatchField<Type>" << endl;
 
     auto cstrIter = pointPatchConstructorTablePtr_->cfind(patchFieldType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown patchFieldType type "
-            << patchFieldType << nl << nl
-            << "Valid patchField types :" << endl
-            << pointPatchConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "patchFieldType",
+            patchFieldType,
+            *pointPatchConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     autoPtr<pointPatchField<Type>> pfPtr(cstrIter()(p, iF));
@@ -111,10 +108,7 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
     const dictionary& dict
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing pointPatchField<Type>" << endl;
-    }
+    DebugInFunction << "Constructing pointPatchField<Type>" << endl;
 
     const word patchFieldType(dict.get<word>("type"));
 
@@ -184,21 +178,18 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
     const pointPatchFieldMapper& pfMapper
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing pointPatchField<Type>" << endl;
-    }
+    DebugInFunction << "Constructing pointPatchField<Type>" << endl;
 
     auto cstrIter = patchMapperConstructorTablePtr_->cfind(ptf.type());
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown patchField type "
-            << ptf.type() << nl << nl
-            << "Valid patchField types :" << endl
-            << patchMapperConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "patchField",
+            ptf.type(),
+            *patchMapperConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return cstrIter()(ptf, p, iF, pfMapper);

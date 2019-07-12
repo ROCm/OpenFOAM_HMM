@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -45,12 +45,12 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown XiGModel type "
-            << modelType << nl << nl
-            << "Valid XiGModel types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "XiGModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<XiGModel>(cstrIter()(propDict, thermo, turbulence, Su));

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -82,10 +82,7 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
     Istream& is
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing blockEdge" << endl;
-    }
+    DebugInFunction << "Constructing blockEdge" << endl;
 
     const word edgeType(is);
 
@@ -93,12 +90,12 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown blockEdge type "
-            << edgeType << nl << nl
-            << "Valid blockEdge types :" << endl
-            << IstreamConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "blockEdge",
+            edgeType,
+            *IstreamConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<blockEdge>(cstrIter()(dict, index, geometry, points, is));

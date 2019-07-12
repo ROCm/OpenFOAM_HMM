@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -87,8 +87,6 @@ Foam::TurbulenceModel<Alpha, Rho, BasicTurbulenceModel, TransportModel>::New
     const word& propertiesName
 )
 {
-    // get model name, but do not register the dictionary
-    // otherwise it is registered in the database twice
     const word modelType
     (
         IOdictionary
@@ -100,7 +98,7 @@ Foam::TurbulenceModel<Alpha, Rho, BasicTurbulenceModel, TransportModel>::New
                 U.db(),
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                false // Do not register
             )
         ).get<word>("simulationType")
     );
@@ -111,12 +109,12 @@ Foam::TurbulenceModel<Alpha, Rho, BasicTurbulenceModel, TransportModel>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown simulationType "
-            << modelType << nl << nl
-            << "Valid simulation types:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "simulationType",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<TurbulenceModel>

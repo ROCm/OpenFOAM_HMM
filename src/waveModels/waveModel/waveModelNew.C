@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 IH-Cantabria
@@ -68,12 +68,13 @@ Foam::autoPtr<Foam::waveModel> Foam::waveModel::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(waveDict)
-            << "Unknown waveModel type "
-            << modelType << nl << nl
-            << "Valid waveModel types :" << nl
-            << patchConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            waveDict,
+            "waveModel",
+            modelType,
+            *patchConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<waveModel>(cstrIter()(patchDict, mesh, patch));

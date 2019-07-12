@@ -54,23 +54,18 @@ Foam::autoPtr<Foam::interpolationWeights> Foam::interpolationWeights::New
     const scalarField& samples
 )
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Selecting interpolationWeights "
-            << type << endl;
-    }
+    DebugInFunction << "Selecting interpolationWeights " << type << endl;
 
     auto cstrIter = wordConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown interpolationWeights type "
-            << type << nl << nl
-            << "Valid interpolationWeights types :" << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "interpolationWeights",
+            type,
+            *wordConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<interpolationWeights>(cstrIter()(samples));

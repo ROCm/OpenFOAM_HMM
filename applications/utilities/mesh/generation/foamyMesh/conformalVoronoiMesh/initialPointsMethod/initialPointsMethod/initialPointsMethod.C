@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -79,21 +79,20 @@ Foam::autoPtr<Foam::initialPointsMethod> Foam::initialPointsMethod::New
     const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 {
-    const word methodName(initialPointsDict.get<word>("initialPointsMethod"));
+    const word modelType(initialPointsDict.get<word>("initialPointsMethod"));
 
-    Info<< nl << "Selecting initialPointsMethod "
-        << methodName << endl;
+    Info<< nl << "Selecting initialPointsMethod " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown initialPointsMethod type "
-            << methodName << nl << nl
-            << "Valid initialPointsMethod types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "initialPointsMethod",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return

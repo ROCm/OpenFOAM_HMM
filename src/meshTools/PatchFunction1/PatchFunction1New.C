@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::PatchFunction1<Type>> Foam::PatchFunction1<Type>::New
     {
         const dictionary& coeffsDict(dict.subDict(entryName));
 
-        const word modelType(coeffsDict.lookup("type"));
+        const word modelType(coeffsDict.getWord("type"));
 
         auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 

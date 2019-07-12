@@ -101,14 +101,12 @@ Foam::laminarModel<BasicTurbulenceModel>::New
             U.db(),
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            false // Do not register
         )
     );
 
     if (modelDict.found("laminar"))
     {
-        // get model name, but do not register the dictionary
-        // otherwise it is registered in the database twice
         const word modelType
         (
             modelDict.subDict("laminar").get<word>("laminarModel")
@@ -120,12 +118,12 @@ Foam::laminarModel<BasicTurbulenceModel>::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInFunction
-                << "Unknown laminarModel type "
-                << modelType << nl << nl
-                << "Valid laminarModel types :" << endl
-                << dictionaryConstructorTablePtr_->sortedToc()
-                << exit(FatalError);
+            FatalErrorInLookup
+            (
+                "laminarModel",
+                modelType,
+                *dictionaryConstructorTablePtr_
+            ) << exit(FatalError);
         }
 
         return autoPtr<laminarModel>

@@ -89,10 +89,7 @@ void Foam::edgeMesh::write
     const edgeMesh& mesh
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Writing to " << name << endl;
-    }
+    DebugInFunction << "Writing to " << name << endl;
 
     const word ext = name.ext();
 
@@ -100,11 +97,12 @@ void Foam::edgeMesh::write
 
     if (!mfIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown file extension " << ext << nl << nl
-            << "Valid types :" << endl
-            << writefileExtensionMemberFunctionTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "extension",
+            ext,
+            *writefileExtensionMemberFunctionTablePtr_
+        ) << exit(FatalError);
     }
     else
     {

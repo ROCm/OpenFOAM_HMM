@@ -86,18 +86,20 @@ autoPtr<zeroATCcells> zeroATCcells::New
 {
     const word modelType
     (
-        dict.lookupOrDefault<word>("maskType", "faceCells")
+        dict.getOrDefault<word>("maskType", "faceCells")
     );
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown zeroATCcells type " << modelType << nl << nl
-            << "Valid zeroATCcells types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "zeroATCcells",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<zeroATCcells> (cstrIter()(mesh,dict));

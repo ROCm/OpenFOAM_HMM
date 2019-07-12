@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -53,12 +53,12 @@ autoPtr<filmThermoModel> filmThermoModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown filmThermoModel type "
-            << modelType << nl << nl
-            << "Valid filmThermoModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "filmThermoModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<filmThermoModel>(cstrIter()(model, dict));

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -102,12 +102,13 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
     // constructor, so just need to print those.
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown coordinate system type "
-            << modelType << nl << nl
-            << "Valid types:  "
-            << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "coordinate system",
+             modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<coordinateSystem>(cstrIter()(dict));
@@ -129,12 +130,13 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown coordinate system type "
-            << modelType << nl << nl
-            << "Valid types:  "
-            << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "coordinate system",
+             modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<coordinateSystem>(cstrIter()(dict));
@@ -188,7 +190,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
         dictPtr = coordinateSystem::subDictCompat(dictPtr);
     }
 
-    word modelType = dictPtr->lookupOrDefault<word>
+    const word modelType = dictPtr->lookupOrDefault<word>
     (
         "type",
         coordSystem::cartesian::typeName_()

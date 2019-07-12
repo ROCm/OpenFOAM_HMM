@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -38,10 +38,7 @@ Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
     const pointZoneMesh& zm
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing pointZone " << name << endl;
-    }
+    DebugInFunction << "Constructing pointZone " << name << endl;
 
     const word zoneType(dict.get<word>("type"));
 
@@ -49,12 +46,13 @@ Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown pointZone type "
-            << zoneType << nl << nl
-            << "Valid pointZone types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "pointZone",
+            zoneType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<pointZone>(cstrIter()(name, dict, index, zm));

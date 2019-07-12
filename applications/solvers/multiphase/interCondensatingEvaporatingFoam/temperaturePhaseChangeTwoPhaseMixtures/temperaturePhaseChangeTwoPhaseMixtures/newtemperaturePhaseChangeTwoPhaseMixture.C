@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,22 +35,20 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
     const fvMesh& mesh
 )
 {
-    IOdictionary phaseChangePropertiesDict
-    (
-        IOobject
-        (
-            "phaseChangeProperties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
     const word modelType
     (
-        phaseChangePropertiesDict.get<word>("phaseChangeTwoPhaseModel")
+        IOdictionary
+        (
+            IOobject
+            (
+                "phaseChangeProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false // Do not register
+            )
+        ).get<word>("phaseChangeTwoPhaseModel")
     );
 
     Info<< "Selecting phaseChange model " << modelType << endl;
@@ -59,16 +57,19 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown temperaturePhaseChangeTwoPhaseMixture type "
-            << modelType << nl << nl
-            << "Valid temperaturePhaseChangeTwoPhaseMixture types :" << endl
-            << componentsConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "temperaturePhaseChangeTwoPhaseMixture",
+            modelType,
+            *componentsConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
-    return autoPtr<temperaturePhaseChangeTwoPhaseMixture>
-        (cstrIter()(thermo, mesh));
+    return
+        autoPtr<temperaturePhaseChangeTwoPhaseMixture>
+        (
+            cstrIter()(thermo, mesh)
+        );
 }
 
 

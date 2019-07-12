@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -45,12 +45,7 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
     Istream& is
 )
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Constructing thermophysicalFunction"
-            << endl;
-    }
+    DebugInFunction << "Constructing thermophysicalFunction" << endl;
 
     const word functionType(is);
 
@@ -58,12 +53,12 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown thermophysicalFunction type "
-            << functionType << nl << nl
-            << "Valid thermophysicalFunction types :" << endl
-            << IstreamConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "thermophysicalFunction",
+            functionType,
+            *IstreamConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<thermophysicalFunction>(cstrIter()(is));
@@ -75,12 +70,7 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
     const dictionary& dict
 )
 {
-    if (debug)
-    {
-        InfoInFunction
-            << "Constructing thermophysicalFunction"
-            << endl;
-    }
+    DebugInFunction << "Constructing thermophysicalFunction" << endl;
 
     const word functionType(dict.get<word>("functionType"));
 
@@ -88,12 +78,12 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown thermophysicalFunction type "
-            << functionType << nl << nl
-            << "Valid thermophysicalFunction types are :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "thermophysicalFunction",
+            functionType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<thermophysicalFunction>(cstrIter()(dict));

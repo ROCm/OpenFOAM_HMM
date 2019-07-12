@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -46,7 +46,6 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
     const word& regionType
 )
 {
-    // get model name, but do not register the dictionary
     const word modelType
     (
         IOdictionary
@@ -58,7 +57,7 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
                 mesh,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                false // Do not register
             )
         ).get<word>("pyrolysisModel")
     );
@@ -69,12 +68,12 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown pyrolysisModel type "
-            << modelType << nl << nl
-            << "Valid pyrolysisModel types :" << nl
-            << meshConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "pyrolysisModel",
+            modelType,
+            *meshConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<pyrolysisModel>(cstrIter()(modelType, mesh, regionType));
@@ -97,12 +96,12 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown pyrolysisModel type "
-            << modelType << nl << nl
-            << "Valid pyrolysisModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "pyrolysisModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<pyrolysisModel>

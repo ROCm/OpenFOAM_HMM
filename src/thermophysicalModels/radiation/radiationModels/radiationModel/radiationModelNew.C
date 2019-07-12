@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -43,7 +43,7 @@ Foam::radiation::radiationModel::New
         T.mesh(),
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
-        false
+        false // Do not register
     );
 
     word modelType("none");
@@ -63,12 +63,12 @@ Foam::radiation::radiationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown radiationModel type "
-            << modelType << nl << nl
-            << "Valid radiationModel types :" << nl
-            << TConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "radiationModel",
+            modelType,
+            *TConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<radiationModel>(cstrIter()(T));
@@ -90,12 +90,12 @@ Foam::radiation::radiationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown radiationModel type "
-            << modelType << nl << nl
-            << "Valid radiationModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "radiationModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<radiationModel>(cstrIter()(dict, T));

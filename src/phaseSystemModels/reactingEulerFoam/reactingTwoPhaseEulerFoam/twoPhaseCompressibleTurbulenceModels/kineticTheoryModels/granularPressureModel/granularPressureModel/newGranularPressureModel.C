@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -35,24 +35,20 @@ Foam::kineticTheoryModels::granularPressureModel::New
     const dictionary& dict
 )
 {
-    word granularPressureModelType(dict.lookup("granularPressureModel"));
+    const word modelType(dict.get<word>("granularPressureModel"));
 
-    Info<< "Selecting granularPressureModel "
-        << granularPressureModelType << endl;
+    Info<< "Selecting granularPressureModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(granularPressureModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalError
-            << "granularPressureModel::New(const dictionary&) : " << endl
-            << "    unknown granularPressureModelType type "
-            << granularPressureModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid granularPressureModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "granularPressureModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<granularPressureModel>(cstrIter()(dict));

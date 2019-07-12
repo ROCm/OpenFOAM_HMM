@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -82,12 +82,12 @@ Foam::autoPtr<Foam::RBD::rigidBody> Foam::RBD::rigidBody::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown rigidBody type "
-            << bodyType << nl << nl
-            << "Valid rigidBody types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "rigidBody",
+            bodyType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<rigidBody>(cstrIter()(name, dict));

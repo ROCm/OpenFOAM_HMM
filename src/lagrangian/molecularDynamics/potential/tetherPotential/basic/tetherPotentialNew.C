@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -35,21 +35,21 @@ Foam::autoPtr<Foam::tetherPotential> Foam::tetherPotential::New
     const dictionary& propDict
 )
 {
-    const word potentialType(propDict.get<word>("tetherPotential"));
+    const word modelType(propDict.get<word>("tetherPotential"));
 
-    Info<< nl << "Selecting tether potential " << potentialType
+    Info<< nl << "Selecting tether potential " << modelType
         << " for " << name << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(potentialType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown tetherPotential type "
-            << potentialType << nl << nl
-            << "Valid tetherPotential types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "tetherPotential",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<tetherPotential>(cstrIter()(name, propDict));

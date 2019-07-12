@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -35,20 +35,20 @@ Foam::kineticTheoryModels::viscosityModel::New
     const dictionary& dict
 )
 {
-    const word modelName(dict.get<word>("viscosityModel"));
+    const word modelType(dict.get<word>("viscosityModel"));
 
-    Info<< "Selecting viscosityModel " << modelName << endl;
+    Info<< "Selecting viscosityModel " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown viscosityModel type "
-            << modelName << nl << nl
-            << "Valid viscosityModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "viscosityModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<viscosityModel>(cstrIter()(dict));

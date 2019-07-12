@@ -66,12 +66,12 @@ autoPtr<boundaryAdjointContribution> boundaryAdjointContribution::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown boundaryAdjointContribution type " << simulationType
-            << endl << endl
-            << "Valid boundaryAdjointContribution types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "boundaryAdjointContribution",
+            simulationType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return

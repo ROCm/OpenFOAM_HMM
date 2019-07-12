@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -36,19 +36,18 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
     const DimensionedField<Type, areaMesh>& iF
 )
 {
-    DebugInFunction
-        << "constructing faPatchField<Type>"
-        << endl;
+    DebugInFunction << "Constructing faPatchField<Type>" << endl;
 
     auto cstrIter = patchConstructorTablePtr_->cfind(patchFieldType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown patchTypefield type " << patchFieldType << nl << nl
-            << "Valid patchField types are :" << nl
-            << patchConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "patchField",
+            patchFieldType,
+            *patchConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     auto patchTypeCstrIter = patchConstructorTablePtr_->cfind(p.type());
@@ -68,17 +67,16 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
             return cstrIter()(p, iF);
         }
     }
-    else
-    {
-        tmp<faPatchField<Type>> tfap = cstrIter()(p, iF);
 
-        // Check if constraint type override and store patchType if so
-        if (patchTypeCstrIter.found())
-        {
-            tfap.ref().patchType() = actualPatchType;
-        }
-        return tfap;
+
+    tmp<faPatchField<Type>> tfap = cstrIter()(p, iF);
+
+    // Check if constraint type override and store patchType if so
+    if (patchTypeCstrIter.found())
+    {
+        tfap.ref().patchType() = actualPatchType;
     }
+    return tfap;
 }
 
 
@@ -102,9 +100,7 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
     const dictionary& dict
 )
 {
-    DebugInFunction
-        << "constructing faPatchField<Type>"
-        << endl;
+    DebugInFunction << "Constructing faPatchField<Type>" << endl;
 
     const word patchFieldType(dict.get<word>("type"));
 
@@ -152,19 +148,18 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
     const faPatchFieldMapper& pfMapper
 )
 {
-    DebugInFunction
-        << "constructing faPatchField<Type>"
-        << endl;
+    DebugInFunction << "Constructing faPatchField<Type>" << endl;
 
     auto cstrIter = patchMapperConstructorTablePtr_->cfind(ptf.type());
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "unknown patchTypefield type " << ptf.type() << nl << nl
-            << "Valid patchField types are :" << nl
-            << patchMapperConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "patchField",
+            ptf.type(),
+            *patchMapperConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     auto patchTypeCstrIter = patchMapperConstructorTablePtr_->cfind(p.type());
@@ -173,10 +168,8 @@ Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::New
     {
         return patchTypeCstrIter()(ptf, p, iF, pfMapper);
     }
-    else
-    {
-        return cstrIter()(ptf, p, iF, pfMapper);
-    }
+
+    return cstrIter()(ptf, p, iF, pfMapper);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -35,32 +35,29 @@ Foam::autoPtr<Foam::diameterModel> Foam::diameterModel::New
     const phaseModel& phase
 )
 {
-    word diameterModelType
-    (
-        dict.lookup("diameterModel")
-    );
+    const word modelType(dict.get<word>("diameterModel"));
 
     Info << "Selecting diameterModel for phase "
         << phase.name()
         << ": "
-        << diameterModelType << endl;
+        << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(diameterModelType);
+    auto cstrIter =
+        dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorInFunction
-           << "Unknown diameterModelType type "
-           << diameterModelType << endl << endl
-           << "Valid diameterModel types are : " << endl
-           << dictionaryConstructorTablePtr_->sortedToc()
-           << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "diameterModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return cstrIter()
     (
-        dict.optionalSubDict(diameterModelType + "Coeffs"),
+        dict.optionalSubDict(modelType + "Coeffs"),
         phase
     );
 }

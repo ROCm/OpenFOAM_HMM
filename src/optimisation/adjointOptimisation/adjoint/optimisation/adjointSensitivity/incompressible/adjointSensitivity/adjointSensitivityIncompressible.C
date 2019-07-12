@@ -77,20 +77,21 @@ autoPtr<adjointSensitivity> adjointSensitivity::New
     fv::optionAdjointList& fvOptionsAdjoint
 )
 {
-    const word sensitivityType(dict.get<word>("type"));
+    const word modelType(dict.get<word>("type"));
 
-    Info<< "adjointSensitivity type : " << sensitivityType << endl;
+    Info<< "adjointSensitivity type : " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(sensitivityType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown adjointSensitivity type " << sensitivityType
-            << nl << nl
-            << "Valid adjointSensitivity types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "adjointSensitivity",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<adjointSensitivity>

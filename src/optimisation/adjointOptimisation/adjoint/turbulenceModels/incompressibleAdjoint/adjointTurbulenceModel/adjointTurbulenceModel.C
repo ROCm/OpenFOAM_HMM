@@ -80,8 +80,6 @@ autoPtr<adjointTurbulenceModel> adjointTurbulenceModel::New
     const word& adjointTurbulenceModelName
 )
 {
-    // Get model name, but do not register the dictionary
-    // otherwise it is registered in the database twice
     const word modelType
     (
         IOdictionary
@@ -93,7 +91,7 @@ autoPtr<adjointTurbulenceModel> adjointTurbulenceModel::New
                 primalVars.U().db(),
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                false // Do not register
             )
         ).get<word>("simulationType")
     );

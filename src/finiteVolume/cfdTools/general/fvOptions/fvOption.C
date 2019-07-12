@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -88,12 +88,12 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown fvOption model type "
-            << modelType << nl << nl
-            << "Valid fvOption types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "fvOption",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<option>(cstrIter()(name, modelType, coeffs, mesh));

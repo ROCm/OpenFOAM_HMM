@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -71,20 +71,20 @@ Foam::motionInterpolation::New(const fvMesh& mesh)
 Foam::autoPtr<Foam::motionInterpolation>
 Foam::motionInterpolation::New(const fvMesh& mesh, Istream& entry)
 {
-    const word type(entry);
+    const word modelType(entry);
 
-    Info<< "Selecting motion interpolation: " << type << endl;
+    Info<< "Selecting motion interpolation: " << modelType << endl;
 
-    auto cstrIter = IstreamConstructorTablePtr_->cfind(type);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown interpolation type "
-            << type << nl << nl
-            << "Valid interpolation types :" << endl
-            << IstreamConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "interpolation",
+            modelType,
+            *IstreamConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<motionInterpolation>(cstrIter()(mesh, entry));

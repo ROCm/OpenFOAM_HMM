@@ -531,12 +531,12 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown sample type "
-            << sampleType << nl << nl
-            << "Valid sample types : " << nl
-            << wordConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "sample",
+            sampleType,
+            *wordConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<sampledSet>

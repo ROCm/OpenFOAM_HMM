@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -49,11 +49,12 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown GAMGInterface type " << coupleType << ".\n"
-            << "Valid GAMGInterface types :"
-            << lduInterfaceConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "GAMGInterface",
+            coupleType,
+            *lduInterfaceConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<GAMGInterface>
@@ -84,11 +85,12 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown GAMGInterface type " << coupleType << ".\n"
-            << "Valid GAMGInterface types :"
-            << IstreamConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "GAMGInterface",
+            coupleType,
+            *IstreamConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<GAMGInterface>(cstrIter()(index, coarseInterfaces, is));

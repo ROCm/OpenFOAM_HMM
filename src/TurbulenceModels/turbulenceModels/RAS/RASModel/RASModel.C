@@ -125,8 +125,6 @@ Foam::RASModel<BasicTurbulenceModel>::New
     const word& propertiesName
 )
 {
-    // get model name, but do not register the dictionary
-    // otherwise it is registered in the database twice
     const word modelType
     (
         IOdictionary
@@ -138,7 +136,7 @@ Foam::RASModel<BasicTurbulenceModel>::New
                 U.db(),
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                false // Do not register
             )
         ).subDict("RAS").get<word>("RASModel")
     );
@@ -149,12 +147,12 @@ Foam::RASModel<BasicTurbulenceModel>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown RASModel type "
-            << modelType << nl << nl
-            << "Valid RASModel types:" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "RASModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<RASModel>

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -44,12 +44,12 @@ Foam::autoPtr<Foam::radiation::scatterModel> Foam::radiation::scatterModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown scatterModel type "
-            << modelType << nl << nl
-            << "Valid scatterModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "scatterModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<scatterModel>(cstrIter()(dict, mesh));

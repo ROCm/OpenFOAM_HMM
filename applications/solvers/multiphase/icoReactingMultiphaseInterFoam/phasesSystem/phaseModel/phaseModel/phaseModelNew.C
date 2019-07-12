@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,12 +43,12 @@ Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown phaseModel type "
-            << modelType << endl << endl
-            << "Valid phaseModel types are : " << endl
-            << phaseSystemConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "phaseModel",
+            modelType,
+            *phaseSystemConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return cstrIter()(fluid, phaseName);

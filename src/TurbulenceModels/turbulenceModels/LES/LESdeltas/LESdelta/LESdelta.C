@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -80,12 +80,12 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown LESdelta type "
-            << deltaType << nl << nl
-            << "Valid LESdelta types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "LESdelta",
+            deltaType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
@@ -119,13 +119,13 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown LESdelta type "
-            << deltaType << nl << nl
-            << "Valid LESdelta types :" << endl
-            << additionalConstructors.sortedToc()
-            << " and "
-            << dictionaryConstructorTablePtr_->sortedToc()
+        FatalErrorInLookup
+        (
+            "LESdelta",
+            deltaType,
+            additionalConstructors
+        )
+            << " and " << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

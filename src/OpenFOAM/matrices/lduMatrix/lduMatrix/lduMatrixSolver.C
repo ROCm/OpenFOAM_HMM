@@ -73,11 +73,13 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(solverControls)
-                << "Unknown symmetric matrix solver " << name << nl << nl
-                << "Valid symmetric matrix solvers are :" << endl
-                << symMatrixConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                solverControls,
+                "symmetric matrix solver",
+                name,
+                *symMatrixConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<lduMatrix::solver>
@@ -99,11 +101,13 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(solverControls)
-                << "Unknown asymmetric matrix solver " << name << nl << nl
-                << "Valid asymmetric matrix solvers are :" << endl
-                << asymMatrixConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                solverControls,
+                "asymmetric matrix solver",
+                name,
+                *asymMatrixConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<lduMatrix::solver>

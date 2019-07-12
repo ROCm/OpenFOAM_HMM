@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017 OpenFOAM Foundation
@@ -58,21 +58,18 @@ Foam::thermophysicalProperties::New
     const word& name
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing thermophysicalProperties" << endl;
-    }
+    DebugInFunction << "Constructing thermophysicalProperties" << endl;
 
     auto cstrIter = ConstructorTablePtr_->cfind(name);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown thermophysicalProperties type "
-            << name << nl << nl
-            << "Valid thermophysicalProperties types are:" << nl
-            << ConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "thermophysicalProperties",
+            name,
+            *ConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<thermophysicalProperties>(cstrIter()());
@@ -85,23 +82,20 @@ Foam::thermophysicalProperties::New
     const dictionary& dict
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing thermophysicalProperties" << endl;
-    }
+    DebugInFunction << "Constructing thermophysicalProperties" << endl;
 
-    const word& propertiesTypeName = dict.dictName();
+    const word& modelType = dict.dictName();
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(propertiesTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown thermophysicalProperties type "
-            << propertiesTypeName << nl << nl
-            << "Valid thermophysicalProperties types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "thermophysicalProperties",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<thermophysicalProperties>(cstrIter()(dict));

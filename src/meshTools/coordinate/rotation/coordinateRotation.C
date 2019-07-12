@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -78,12 +78,13 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown coordinateRotation type "
-            << modelType << nl << nl
-            << "Valid types: "
-            << flatOutput(dictionaryConstructorTablePtr_->sortedToc())
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "coordinateRotation",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<coordinateRotation>(cstrIter()(dict));

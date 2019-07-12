@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -62,12 +62,12 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown set type "
-            << setType << nl << nl
-            << "Valid set types :" << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "set",
+            setType,
+            *wordConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<topoSet>(cstrIter()(mesh, name, r, w));
@@ -87,12 +87,12 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown set type "
-            << setType << nl << nl
-            << "Valid set types :" << endl
-            << sizeConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "set",
+            setType,
+            *sizeConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<topoSet>(cstrIter()(mesh, name, size, w));
@@ -112,12 +112,12 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown set type "
-            << setType << nl << nl
-            << "Valid set types :" << endl
-            << setConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "set",
+            setType,
+            *setConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<topoSet>(cstrIter()(mesh, name, set, w));

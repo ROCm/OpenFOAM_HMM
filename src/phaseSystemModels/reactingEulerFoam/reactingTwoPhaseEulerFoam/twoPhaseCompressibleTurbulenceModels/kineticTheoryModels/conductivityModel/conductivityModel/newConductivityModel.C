@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -35,23 +35,20 @@ Foam::kineticTheoryModels::conductivityModel::New
     const dictionary& dict
 )
 {
-    word conductivityModelType(dict.lookup("conductivityModel"));
+    const word modelType(dict.get<word>("conductivityModel"));
 
-    Info<< "Selecting conductivityModel "
-        << conductivityModelType << endl;
+    Info<< "Selecting conductivityModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(conductivityModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalError
-            << "conductivityModel::New(const dictionary&) : " << endl
-            << "    unknown conductivityModelType type "
-            << conductivityModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid conductivityModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "conductivityModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<conductivityModel>(cstrIter()(dict));

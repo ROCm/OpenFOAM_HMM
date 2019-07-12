@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2015 OpenFOAM Foundation
@@ -147,12 +147,12 @@ Foam::externalDisplacementMeshMover::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown externalDisplacementMeshMover type "
-            << type << nl << nl
-            << "Valid externalDisplacementMeshMover types:" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "externalDisplacementMeshMover",
+            type,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<externalDisplacementMeshMover>

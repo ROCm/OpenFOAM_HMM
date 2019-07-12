@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -52,12 +52,12 @@ autoPtr<phaseChangeModel> phaseChangeModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown phaseChangeModel type "
-            << modelType << nl << nl
-            << "Valid phaseChangeModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "phaseChangeModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<phaseChangeModel>(cstrIter()(model, dict));

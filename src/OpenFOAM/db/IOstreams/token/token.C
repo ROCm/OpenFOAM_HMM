@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -62,12 +62,13 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(is)
-            << "Unknown compound type "
-            << compoundType << nl << nl
-            << "Valid compound types:" << endl
-            << IstreamConstructorTablePtr_->sortedToc()
-            << abort(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            is,
+            "compound",
+            compoundType,
+            *IstreamConstructorTablePtr_
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<Foam::token::compound>(cstrIter()(is));

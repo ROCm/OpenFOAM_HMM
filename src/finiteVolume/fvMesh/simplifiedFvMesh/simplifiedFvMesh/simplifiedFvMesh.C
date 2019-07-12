@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,12 +92,12 @@ Foam::autoPtr<Foam::simplifiedFvMesh> Foam::simplifiedFvMesh::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown simplified fvMesh type "
-            << modelType << nl << nl
-            << "Valid simplified fvMeshes :" << endl
-            << timeConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "simplified fvMesh",
+            modelType,
+            *timeConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<simplifiedFvMesh>(cstrIter()(runTime));

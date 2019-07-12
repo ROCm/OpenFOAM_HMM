@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -35,19 +35,18 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
     const DimensionedField<Type, edgeMesh>& iF
 )
 {
-    DebugInFunction
-        << "constructing faePatchField<Type>"
-        << endl;
+    DebugInFunction << "Constructing faePatchField" << endl;
 
     auto cstrIter = patchConstructorTablePtr_->cfind(patchFieldType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown patchTypefield type " << patchFieldType << nl << nl
-            << "Valid patchField types are :" << nl
-            << patchConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "patchField",
+            patchFieldType,
+            *patchConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     auto patchTypeCstrIter = patchConstructorTablePtr_->cfind(p.type());
@@ -71,9 +70,7 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
     const dictionary& dict
 )
 {
-    DebugInFunction
-        << "constructing faePatchField<Type>"
-        << endl;
+    DebugInFunction << "Constructing faePatchField" << endl;
 
     const word patchFieldType(dict.get<word>("type"));
 
@@ -121,19 +118,18 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
     const faPatchFieldMapper& pfMapper
 )
 {
-    DebugInFunction
-        << "constructing faePatchField<Type>"
-        << endl;
+    DebugInFunction << "Constructing faePatchField<Type>" << endl;
 
     auto cstrIter = patchMapperConstructorTablePtr_->cfind(ptf.type());
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "unknown patchTypefield type " << ptf.type() << endl << endl
-            << "Valid patchField types are :" << endl
-            << patchMapperConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "patchField",
+            ptf.type(),
+            *patchMapperConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     auto patchTypeCstrIter = patchMapperConstructorTablePtr_->cfind(p.type());
@@ -142,10 +138,8 @@ Foam::tmp<Foam::faePatchField<Type>> Foam::faePatchField<Type>::New
     {
         return patchTypeCstrIter()(ptf, p, iF, pfMapper);
     }
-    else
-    {
-        return cstrIter()(ptf, p, iF, pfMapper);
-    }
+
+    return cstrIter()(ptf, p, iF, pfMapper);
 }
 
 

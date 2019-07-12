@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017 OpenFOAM Foundation
@@ -51,12 +51,12 @@ autoPtr<transferModel> transferModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown transferModel type "
-            << modelType << nl << nl
-            << "Valid transferModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "transferModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<transferModel>(cstrIter()(model, dict));

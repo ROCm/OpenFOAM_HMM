@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,11 +37,12 @@ Foam::autoPtr<Foam::surfaceReader> Foam::surfaceReader::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown reader type \"" << readerType << "\"\n\n"
-            << "Valid reader types: "
-            << fileNameConstructorTablePtr_->sortedToc() << nl
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "reader",
+            readerType,
+            *fileNameConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<surfaceReader>(cstrIter()(fName));

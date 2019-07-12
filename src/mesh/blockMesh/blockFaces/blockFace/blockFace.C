@@ -87,12 +87,12 @@ Foam::autoPtr<Foam::blockFace> Foam::blockFace::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown blockFace type "
-            << faceType << nl << nl
-            << "Valid blockFace types :" << endl
-            << IstreamConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "blockFace",
+            faceType,
+            *IstreamConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<blockFace>(cstrIter()(dict, index, geometry, is));

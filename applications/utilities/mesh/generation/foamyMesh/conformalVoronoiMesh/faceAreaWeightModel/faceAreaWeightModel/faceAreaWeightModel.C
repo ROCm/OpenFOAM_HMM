@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2017 OpenFOAM Foundation
@@ -64,12 +64,12 @@ Foam::autoPtr<Foam::faceAreaWeightModel> Foam::faceAreaWeightModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown faceAreaWeightModel type "
-            << modelType << nl << nl
-            << "Valid faceAreaWeightModel types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "faceAreaWeightModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<faceAreaWeightModel>(cstrIter()(relaxationDict));

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -60,7 +60,7 @@ tmp<lnGradScheme<Type>> lnGradScheme<Type>::New
     if (schemeData.eof())
     {
         FatalIOErrorInFunction(schemeData)
-            << "Discretisation scheme not specified" << nl << nl
+            << "Grad scheme not specified" << nl << nl
             << "Valid schemes are :" << endl
             << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -72,12 +72,13 @@ tmp<lnGradScheme<Type>> lnGradScheme<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(schemeData)
-            << "Unknown discretisation scheme "
-            << schemeName << nl << nl
-            << "Valid schemes are :" << nl
-            << MeshConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            schemeData,
+            "grad",
+            schemeName,
+            *MeshConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(mesh, schemeData);

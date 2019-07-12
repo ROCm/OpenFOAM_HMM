@@ -131,11 +131,12 @@ autoPtr<optimisationType> optimisationType::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown optimisationType type " << modelType << nl << nl
-            << "Valid optimisationType types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "optimisationType",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<optimisationType>

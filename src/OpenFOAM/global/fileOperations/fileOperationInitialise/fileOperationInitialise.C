@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017-2018 OpenFOAM Foundation
@@ -58,21 +58,18 @@ Foam::fileOperations::fileOperationInitialise::New
     char**& argv
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing fileOperationInitialise" << endl;
-    }
+    DebugInFunction << "Constructing fileOperationInitialise" << endl;
 
     auto cstrIter = wordConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown fileOperationInitialise type "
-            << type << nl << nl
-            << "Valid fileOperationInitialise types are" << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "fileOperationInitialise",
+            type,
+            *wordConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<fileOperationInitialise>(cstrIter()(argc, argv));

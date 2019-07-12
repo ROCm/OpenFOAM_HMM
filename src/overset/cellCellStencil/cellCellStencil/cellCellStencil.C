@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,10 +65,7 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
     const bool update
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing cellCellStencil" << endl;
-    }
+    DebugInFunction << "Constructing cellCellStencil" << endl;
 
     const word stencilType(dict.get<word>("method"));
 
@@ -76,12 +73,12 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown cellCellStencil type "
-            << stencilType << nl << nl
-            << "Valid cellCellStencil types :" << endl
-            << meshConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "cellCellStencil",
+            stencilType,
+            *meshConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<cellCellStencil>(cstrIter()(mesh, dict, update));

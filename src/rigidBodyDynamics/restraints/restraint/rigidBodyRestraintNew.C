@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -43,12 +43,12 @@ Foam::RBD::restraint::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown restraint type "
-            << restraintType << nl << nl
-            << "Valid restraint types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "restraint",
+            restraintType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<restraint>(cstrIter()(name, dict, model));

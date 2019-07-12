@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -42,12 +42,12 @@ Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown write type "
-            << writeType << nl << nl
-            << "Valid write types :" << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "writer",
+            writeType,
+            *wordConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<writer<Type>>(cstrIter()());

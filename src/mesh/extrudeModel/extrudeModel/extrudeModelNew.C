@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -42,12 +42,12 @@ Foam::autoPtr<Foam::extrudeModel> Foam::extrudeModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown extrudeModel type "
-            << modelType << nl << nl
-            << "Valid extrudeModel types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << nl
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "extrudeModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<extrudeModel>(cstrIter()(dict));

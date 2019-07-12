@@ -92,8 +92,7 @@ autoPtr<lineSearch> lineSearch::New
 {
     autoPtr<lineSearch> lineSrch(nullptr);
 
-    const word modelType =
-        dict.lookupOrDefault<word>("lineSearchType", "none");
+    const word modelType(dict.getOrDefault<word>("lineSearchType", "none"));
 
     Info<< "lineSearch type : " << modelType << endl;
 
@@ -103,12 +102,12 @@ autoPtr<lineSearch> lineSearch::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInFunction
-                << "Unknown lineSearch type " << modelType
-                << nl << nl
-                << "Valid lineSearch types are :" << nl
-                << dictionaryConstructorTablePtr_->sortedToc()
-                << exit(FatalError);
+            FatalErrorInLookup
+            (
+                "lineSearch",
+                modelType,
+                *dictionaryConstructorTablePtr_
+            ) << exit(FatalError);
         }
 
         lineSrch.reset((cstrIter()(dict, time)).ptr());

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -46,7 +46,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
         io.db(),
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
-        false
+        false // Do not register
     );
 
     if (dictHeader.typeHeaderOk<IOdictionary>(true))
@@ -75,12 +75,13 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(dict)
-                << "Unknown dynamicFvMesh type "
-                << modelType << nl << nl
-                << "Valid dynamicFvMesh types are :" << endl
-                << IOobjectConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                dict,
+                "dynamicFvMesh",
+                modelType,
+                *IOobjectConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<dynamicFvMesh>(cstrIter()(io));

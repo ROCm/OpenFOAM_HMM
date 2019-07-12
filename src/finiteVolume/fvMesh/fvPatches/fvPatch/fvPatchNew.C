@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -36,20 +36,18 @@ Foam::autoPtr<Foam::fvPatch> Foam::fvPatch::New
     const fvBoundaryMesh& bm
 )
 {
-    if (debug)
-    {
-        InfoInFunction << "Constructing fvPatch" << endl;
-    }
+    DebugInFunction << "Constructing fvPatch" << endl;
 
     auto cstrIter = polyPatchConstructorTablePtr_->cfind(patch.type());
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown fvPatch type " << patch.type() << nl
-            << "Valid fvPatch types :"
-            << polyPatchConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "fvPatch",
+            patch.type(),
+            *polyPatchConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<fvPatch>(cstrIter()(patch, bm));

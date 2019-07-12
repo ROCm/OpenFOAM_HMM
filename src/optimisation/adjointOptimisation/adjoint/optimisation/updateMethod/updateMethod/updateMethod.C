@@ -239,12 +239,12 @@ Foam::autoPtr<Foam::updateMethod> Foam::updateMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown updateMethod type " << modelType
-            << nl << nl
-            << "Valid updateMethod types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "updateMethod",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<updateMethod>(cstrIter()(mesh, dict));

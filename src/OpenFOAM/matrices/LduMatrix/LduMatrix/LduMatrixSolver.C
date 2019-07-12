@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -59,12 +59,13 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(solverDict)
-                << "Unknown symmetric matrix solver " << solverName
-                << endl << endl
-                << "Valid symmetric matrix solvers are :" << endl
-                << symMatrixConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                solverDict,
+                "symmetric matrix solver",
+                solverName,
+                *symMatrixConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>
@@ -83,12 +84,13 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
 
         if (!cstrIter.found())
         {
-            FatalIOErrorInFunction(solverDict)
-                << "Unknown asymmetric matrix solver " << solverName
-                << endl << endl
-                << "Valid asymmetric matrix solvers are :" << endl
-                << asymMatrixConstructorTablePtr_->sortedToc()
-                << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                solverDict,
+                "asymmetric matrix solver",
+                solverName,
+                *asymMatrixConstructorTablePtr_
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>

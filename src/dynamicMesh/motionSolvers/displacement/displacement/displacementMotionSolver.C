@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -113,12 +113,12 @@ Foam::displacementMotionSolver::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown solver type "
-            << solverTypeName << nl << nl
-            << "Valid solver types :" << endl
-            << displacementConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "solver",
+            solverTypeName,
+            *displacementConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<displacementMotionSolver>

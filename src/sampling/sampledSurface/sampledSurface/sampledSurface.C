@@ -75,12 +75,12 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown sample type "
-            << sampleType << nl << nl
-            << "Valid sample types :" << endl
-            << wordConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "sample",
+            sampleType,
+            *wordConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<sampledSurface>(cstrIter()(name, mesh, dict));

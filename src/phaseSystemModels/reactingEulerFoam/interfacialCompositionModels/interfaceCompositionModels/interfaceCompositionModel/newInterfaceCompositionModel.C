@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2018 OpenFOAM Foundation
@@ -38,9 +38,9 @@ Foam::interfaceCompositionModel::New
     const phasePair& pair
 )
 {
-    word interfaceCompositionModelType
+    const word modelType
     (
-        word(dict.lookup("type"))
+        dict.get<word>("type")
       + "<"
       + pair.phase1().thermo().type()
       + ","
@@ -49,19 +49,18 @@ Foam::interfaceCompositionModel::New
     );
 
     Info<< "Selecting interfaceCompositionModel for "
-        << pair << ": " << interfaceCompositionModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(interfaceCompositionModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown interfaceCompositionModelType type "
-            << interfaceCompositionModelType << endl << endl
-            << "Valid interfaceCompositionModel types are : " << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "interfaceCompositionModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return cstrIter()(dict, pair);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 Wikki Ltd
@@ -38,8 +38,7 @@ Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
     const faBoundaryMesh& bm
 )
 {
-    DebugInFunction
-        << "constructing faPatch" << endl;
+    DebugInFunction << "Constructing faPatch" << endl;
 
     const word patchType(dict.get<word>("type"));
 
@@ -47,11 +46,13 @@ Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown faPatch type " << patchType << nl << nl
-            << "Valid faPatch types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        FatalIOErrorInLookup
+        (
+            dict,
+            "faPatch",
+            patchType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<faPatch>(cstrIter()(name, dict, index, bm));

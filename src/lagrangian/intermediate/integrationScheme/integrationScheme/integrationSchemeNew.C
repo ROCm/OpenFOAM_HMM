@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -36,21 +36,21 @@ Foam::autoPtr<Foam::integrationScheme> Foam::integrationScheme::New
     const dictionary& dict
 )
 {
-    const word schemeName(dict.get<word>(phiName));
+    const word modelType(dict.get<word>(phiName));
 
     Info<< "Selecting " << phiName << " integration scheme "
-        << schemeName << endl;
+        << modelType << endl;
 
-    auto cstrIter = wordConstructorTablePtr_->cfind(schemeName);
+    auto cstrIter = wordConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalIOErrorInFunction(dict)
-            << "Unknown integration scheme type "
-            << schemeName << nl << nl
-            << "Valid integration scheme types are:" << nl
-            << wordConstructorTablePtr_->sortedToc() << nl
-            << exit(FatalIOError);
+        FatalErrorInLookup
+        (
+            "integration scheme",
+            modelType,
+            *wordConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<integrationScheme>(cstrIter()());

@@ -100,21 +100,21 @@ autoPtr<objectiveIncompressible> objectiveIncompressible::New
     const word& primalSolverName
 )
 {
-    const word objectiveName = dict.dictName();
     const word modelType(dict.get<word>("type"));
 
-    Info<< "Creating objective function : " << objectiveName
+    Info<< "Creating objective function : " << dict.dictName()
         << " of type " << modelType << endl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown objectiveIncompressible type " << modelType << nl << nl
-            << "Valid objectiveIncompressible types are :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "objectiveIncompressible",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<objectiveIncompressible>

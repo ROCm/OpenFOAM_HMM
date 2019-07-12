@@ -166,8 +166,6 @@ autoPtr<adjointRASModel> adjointRASModel::New
     const word& adjointTurbulenceModelName
 )
 {
-    // Get model name, but do not register the dictionary
-    // otherwise it is registered in the database twice
     const word modelType
     (
         IOdictionary
@@ -179,7 +177,7 @@ autoPtr<adjointRASModel> adjointRASModel::New
                 primalVars.U().db(),
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                false // Do not register
             )
         ).get<word>("adjointRASModel")
     );
@@ -190,12 +188,12 @@ autoPtr<adjointRASModel> adjointRASModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown adjointRASModel type "
-            << modelType << nl << nl
-            << "Valid adjointRASModel types:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "adjointRASModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<adjointRASModel>

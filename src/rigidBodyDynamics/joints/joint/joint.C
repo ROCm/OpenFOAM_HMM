@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -59,12 +59,12 @@ Foam::autoPtr<Foam::RBD::joint> Foam::RBD::joint::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown joint type "
-            << bodyType << nl << nl
-            << "Valid joint types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "joint",
+            bodyType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<joint>(cstrIter()(dict));

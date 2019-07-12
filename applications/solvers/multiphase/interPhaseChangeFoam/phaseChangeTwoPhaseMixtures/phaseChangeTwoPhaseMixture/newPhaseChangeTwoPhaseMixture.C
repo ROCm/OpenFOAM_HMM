@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -37,22 +37,20 @@ Foam::phaseChangeTwoPhaseMixture::New
     const surfaceScalarField& phi
 )
 {
-    IOdictionary transportPropertiesDict
-    (
-        IOobject
-        (
-            "transportProperties",
-            U.time().constant(),
-            U.db(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        )
-    );
-
     const word modelType
     (
-        transportPropertiesDict.lookup("phaseChangeTwoPhaseMixture")
+        IOdictionary
+        (
+            IOobject
+            (
+                "transportProperties",
+                U.time().constant(),
+                U.db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false // Do not register
+            )
+        ).get<word>("phaseChangeTwoPhaseMixture")
     );
 
     Info<< "Selecting phaseChange model " << modelType << endl;
@@ -61,12 +59,12 @@ Foam::phaseChangeTwoPhaseMixture::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown phaseChangeTwoPhaseMixture type "
-            << modelType << nl << nl
-            << "Valid phaseChangeTwoPhaseMixture types :" << endl
-            << componentsConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "phaseChangeTwoPhaseMixture",
+            modelType,
+            *componentsConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<phaseChangeTwoPhaseMixture>(cstrIter()(U, phi));

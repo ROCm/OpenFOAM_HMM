@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2018 OpenFOAM Foundation
@@ -35,24 +35,20 @@ Foam::kineticTheoryModels::radialModel::New
     const dictionary& dict
 )
 {
-    word radialModelType(dict.lookup("radialModel"));
+    const word modelType(dict.get<word>("radialModel"));
 
-    Info<< "Selecting radialModel "
-        << radialModelType << endl;
+    Info<< "Selecting radialModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(radialModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalError
-            << "radialModel::New(const dictionary&) : " << endl
-            << "    unknown radialModelType type "
-            << radialModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid radialModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInLookup
+        (
+            "radialModel",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << abort(FatalError);
     }
 
     return autoPtr<radialModel>(cstrIter()(dict));

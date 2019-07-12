@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2015 OpenFOAM Foundation
@@ -57,34 +57,30 @@ Foam::cellSizeCalculationType::cellSizeCalculationType
 
 Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
 (
-    const dictionary& cellSizeCalculationTypeDict,
+    const dictionary& dict,
     const triSurfaceMesh& surface,
     const scalar& defaultCellSize
 )
 {
-    const word calculationType
-    (
-        cellSizeCalculationTypeDict.get<word>("cellSizeCalculationType")
-    );
+    const word modelType(dict.get<word>("cellSizeCalculationType"));
 
-    Info<< indent << "Selecting cellSizeCalculationType "
-        << calculationType << endl;
+    Info<< indent << "Selecting cellSizeCalculationType " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(calculationType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown cellSizeCalculationType type "
-            << calculationType << nl << nl
-            << "Valid cellSizeCalculationType types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+        FatalErrorInLookup
+        (
+            "cellSizeCalculationType",
+            modelType,
+            *dictionaryConstructorTablePtr_
+        ) << exit(FatalError);
     }
 
     return autoPtr<cellSizeCalculationType>
     (
-        cstrIter()(cellSizeCalculationTypeDict, surface, defaultCellSize)
+        cstrIter()(dict, surface, defaultCellSize)
     );
 }
 

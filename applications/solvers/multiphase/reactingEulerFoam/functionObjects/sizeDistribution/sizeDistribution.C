@@ -2,8 +2,10 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
+-------------------------------------------------------------------------------
+                            | Copyright (C) 2017-2019 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,9 +108,13 @@ void Foam::functionObjects::sizeDistribution::initialise
 
         default:
         {
-            FatalIOErrorInFunction(dict)
-               << "Unknown functionType. Valid types are:"
-                << functionTypeNames_ << nl << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                dict,
+                "functionType",
+                word::null,
+                functionTypeNames_
+            ) << exit(FatalIOError);
         }
     }
 
@@ -126,9 +132,13 @@ void Foam::functionObjects::sizeDistribution::initialise
 
         default:
         {
-            FatalIOErrorInFunction(dict)
-                << "Unknown abszissaType. Valid types are:"
-                << abszissaTypeNames_ << nl << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                dict,
+                "abszissaType",
+                word::null,
+                abszissaTypeNames_
+            ) << exit(FatalIOError);
         }
     }
 
@@ -139,7 +149,7 @@ void Foam::functionObjects::sizeDistribution::initialise
         FatalIOErrorInFunction(dict)
             << type() << " " << name() << ": "
             << selectionModeTypeNames_[selectionModeType_]
-            << "(" << selectionModeTypeName_ << "):" << nl
+            << '(' << selectionModeTypeName_ << "):" << nl
             << "    Selection has no cells" << exit(FatalIOError);
     }
 
@@ -147,7 +157,7 @@ void Foam::functionObjects::sizeDistribution::initialise
 
     Info<< type() << " " << name() << ":"
         << selectionModeTypeNames_[selectionModeType_]
-        << "(" << selectionModeTypeName_ << "):" << nl
+        << '(' << selectionModeTypeName_ << "):" << nl
         << "    total cells  = " << nCells_ << nl
         << "    total volume = " << volume_
         << nl << endl;
@@ -160,7 +170,7 @@ void Foam::functionObjects::sizeDistribution::setCellZoneCells()
     {
         case rtCellZone:
         {
-            dict().lookup("cellZone") >> selectionModeTypeName_;
+            dict().readEntry("cellZone", selectionModeTypeName_);
 
             label zoneId =
                 mesh().cellZones().findZoneID(selectionModeTypeName_);
@@ -188,9 +198,13 @@ void Foam::functionObjects::sizeDistribution::setCellZoneCells()
 
         default:
         {
-            FatalIOErrorInFunction(dict_)
-               << "Unknown selectionMode type. Valid selectionMode types are:"
-                << selectionModeTypeNames_ << nl << exit(FatalIOError);
+            FatalIOErrorInLookup
+            (
+                dict_,
+                "selectionMode",
+                word::null,
+                selectionModeTypeNames_
+            ) << exit(FatalIOError);
         }
     }
 }
