@@ -48,10 +48,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Istream;
 class Ostream;
-
 class NullObject;
 
 /*---------------------------------------------------------------------------*\
@@ -110,6 +109,30 @@ public:
         inline unsigned long value() const
         {
             return data_[0].val;
+        }
+
+        //- No elements
+        inline constexpr bool empty() const
+        {
+            return true;
+        }
+
+        //- Zero elements
+        inline constexpr label size() const
+        {
+            return 0;
+        }
+
+        //- No-op method (for HashTable replacement)
+        inline const NullObject& toc() const
+        {
+            return *this;
+        }
+
+        //- No-op method (for HashTable replacement)
+        inline const NullObject& sortedToc() const
+        {
+            return *this;
         }
 };
 
