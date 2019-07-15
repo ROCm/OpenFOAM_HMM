@@ -18,7 +18,7 @@
 #     The OpenFOAM environment for POSIX shell (eg, bash,dash,zsh,...).
 #     Source manually or from the ~/.bashrc or ~/.profile files.
 #
-#     Many settings can be overridden using a <prefs.sh> file:
+#     Most settings can be overridden with a <prefs.sh> file:
 #
 #       - Base values (eg, from system admin):
 #         -  $WM_PROJECT_DIR/etc/prefs.sh
@@ -45,25 +45,9 @@
 export WM_PROJECT=OpenFOAM
 export WM_PROJECT_VERSION=com
 
-# [projectDir] - directory containing this OpenFOAM version.
-# \- When this file is located as $WM_PROJECT_DIR/etc/bashrc, the next lines
-#    should work when sourced by BASH or ZSH shells. If this however fails,
-#    set one of the fallback values to an appropriate path.
-#
-#    This can be removed if an absolute path is provided for WM_PROJECT_DIR
-#    later on in this file
-# --
-projectDir="${BASH_SOURCE:-${ZSH_NAME:+$0}}";
-[ -n "$projectDir" ] && projectDir="$(\cd $(dirname $projectDir)/.. && \pwd -L)" ||\
-projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
-# projectDir="/opt/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
-# projectDir="/usr/local/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
-# END OF (NORMAL) USER EDITABLE PART
-################################################################################
-: # Safety statement (if the user removed all fallback values)
-
+#------------------------------------------------------------------------------
 # Configuration environment variables.
-# Should override via <prefs.sh> file instead of editing this file.
+# Override with <prefs.sh> instead of editing here.
 
 # [WM_COMPILER_TYPE] - Compiler location:
 # = system | ThirdParty
@@ -84,8 +68,7 @@ export WM_LABEL_SIZE=32
 
 # [WM_COMPILE_OPTION] - Optimised, debug, profiling, other:
 # = Opt | Debug | Prof
-# Other is processor or packaging specific, for example
-# = OptKNL
+# Other is processor or packaging specific (eg, OptKNL)
 export WM_COMPILE_OPTION=Opt
 
 # [WM_MPLIB] - MPI implementation:
@@ -97,6 +80,22 @@ export WM_MPLIB=SYSTEMOPENMPI
 
 #------------------------------------------------------------------------------
 # (advanced / legacy)
+
+# [projectDir] - directory containing this OpenFOAM version.
+# \- When this file is located as $WM_PROJECT_DIR/etc/bashrc, the next lines
+#    should work when sourced by BASH or ZSH shells. If this however fails,
+#    set one of the fallback values to an appropriate path.
+#
+#    This can be removed if an absolute path is provided for WM_PROJECT_DIR
+#    later on in this file
+# --
+projectDir="${BASH_SOURCE:-${ZSH_NAME:+$0}}";
+[ -n "$projectDir" ] && projectDir="$(\cd $(dirname $projectDir)/.. && \pwd -L)" ||\
+projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
+# projectDir="/opt/openfoam/OpenFOAM-$WM_PROJECT_VERSION"
+# projectDir="/usr/local/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
+################################################################################
+: # Safety statement (if the user removed all fallback values)
 
 # [FOAM_SIGFPE] - Trap floating-point exceptions.
 #               - overrides the 'trapFpe' controlDict entry
@@ -116,8 +115,8 @@ export WM_MPLIB=SYSTEMOPENMPI
 #                - unset: equivalent to ~/.OpenFOAM/jobControl
 # export FOAM_JOB_DIR="$HOME/.OpenFOAM/jobControl"
 
-# [WM_OSTYPE] - Operating System Type
-# = POSIX
+# [WM_OSTYPE] - Operating System Type (set automatically)
+# = POSIX | MSwindows
 #export WM_OSTYPE=POSIX
 
 # [WM_ARCH_OPTION] - compiling with -m32 option on 64-bit system
@@ -127,6 +126,7 @@ export WM_MPLIB=SYSTEMOPENMPI
 #export WM_ARCH_OPTION=64
 
 ################################################################################
+# NO (NORMAL) USER EDITING BELOW HERE
 
 # Capture values of old directories to be cleaned from PATH, LD_LIBRARY_PATH
 foamOldDirs="$WM_PROJECT_DIR $WM_THIRD_PARTY_DIR \
@@ -144,7 +144,7 @@ export WM_PROJECT_USER_DIR="$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION"
 # Normally defined in calling environment
 
 
-# Finalize setup of OpenFOAM environment for POSIX shell
+# Finalize setup of OpenFOAM environment
 if [ -d "$WM_PROJECT_DIR" ]
 then
     if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]

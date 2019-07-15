@@ -18,7 +18,7 @@
 #     The OpenFOAM environment for C-shell (csh, tcsh).
 #     Source manually or from the ~/.cshrc or ~/.login files.
 #
-#     Many settings can be overridden using a <prefs.csh> file:
+#     Most settings can be overridden with a <prefs.csh> file:
 #
 #       - Base values (eg, from system admin):
 #         -  $WM_PROJECT_DIR/etc/prefs.csh
@@ -45,27 +45,9 @@
 setenv WM_PROJECT OpenFOAM
 setenv WM_PROJECT_VERSION com
 
-# [projectDir] - parent directory containing the OpenFOAM installation.
-# \- When this file is located as $WM_PROJECT_DIR/etc/cshrc, the next lines
-#    should work when sourced by CSH or TCSH shells. If this however fails,
-#    set one of the fallback values to an appropriate path.
-#
-#    This can be removed if an absolute path is provided for WM_PROJECT_DIR
-#    later on in this file.
-# --
-# If the directory naming does not match WM_PROJECT, need to change here
-set projectName="$WM_PROJECT"
-set projectDir=`lsof +p $$ |& \
-    sed -ne 's@^[^/]*@@;\@/'"$projectName"'[^/]*/etc/cshrc@{s@/etc/cshrc.*@@p; q}'`
-
-# set projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
-# set projectDir="/opt/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
-# set projectDir="/usr/local/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
-# END OF (NORMAL) USER EDITABLE PART
-################################################################################
-
+#------------------------------------------------------------------------------
 # Configuration environment variables.
-# Should override via <prefs.csh> file instead of editing this file.
+# Override with <prefs.csh> instead of editing here.
 
 # [WM_COMPILER_TYPE] - Compiler location:
 # = system | ThirdParty
@@ -86,8 +68,7 @@ setenv WM_LABEL_SIZE 32
 
 # [WM_COMPILE_OPTION] - Optimised, debug, profiling, other:
 # = Opt | Debug | Prof
-# Other is processor or packaging specific, for example
-# = OptKNL
+# Other is processor or packaging specific (eg, OptKNL)
 setenv WM_COMPILE_OPTION Opt
 
 # [WM_MPLIB] - MPI implementation:
@@ -99,6 +80,24 @@ setenv WM_MPLIB SYSTEMOPENMPI
 
 #------------------------------------------------------------------------------
 # (advanced / legacy)
+
+# [projectDir] - directory containing this OpenFOAM version.
+# \- When this file is located as $WM_PROJECT_DIR/etc/cshrc, the next lines
+#    should work when sourced by CSH or TCSH shells. If this however fails,
+#    set one of the fallback values to an appropriate path.
+#
+#    This can be removed if an absolute path is provided for WM_PROJECT_DIR
+#    later on in this file.
+# --
+# If the directory naming does not match WM_PROJECT, need to change here
+set projectName="$WM_PROJECT"
+set projectDir=`lsof +p $$ |& \
+    sed -ne 's@^[^/]*@@;\@/'"$projectName"'[^/]*/etc/cshrc@{s@/etc/cshrc.*@@p; q}'`
+
+# set projectDir="$HOME/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
+# set projectDir="/opt/openfoam/OpenFOAM-$WM_PROJECT_VERSION"
+# set projectDir="/usr/local/OpenFOAM/OpenFOAM-$WM_PROJECT_VERSION"
+################################################################################
 
 # [FOAM_SIGFPE] - Trap floating-point exceptions.
 #               - overrides the 'trapFpe' controlDict entry
@@ -118,8 +117,8 @@ setenv WM_MPLIB SYSTEMOPENMPI
 #                - unset: equivalent to ~/.OpenFOAM/jobControl
 #setenv FOAM_JOB_DIR "$HOME/.OpenFOAM/jobControl"
 
-# [WM_OSTYPE] - Operating System Type
-# = POSIX
+# [WM_OSTYPE] - Operating System Type (set automatically)
+# = POSIX | MSwindows
 #setenv WM_OSTYPE POSIX
 
 # [WM_ARCH_OPTION] - compiling with -m32 option on 64-bit system
@@ -129,8 +128,9 @@ setenv WM_MPLIB SYSTEMOPENMPI
 #setenv WM_ARCH_OPTION 64
 
 ################################################################################
+# NO (NORMAL) USER EDITING BELOW HERE
 
-# Old directories to be cleaned from PATH, LD_LIBRARY_PATH
+# Capture values of old directories to be cleaned from PATH, LD_LIBRARY_PATH
 set foamOldDirs=
 if ( $?WM_PROJECT_DIR ) then
    set foamOldDirs="$foamOldDirs $WM_PROJECT_DIR"
