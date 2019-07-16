@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -65,6 +65,8 @@ int main(int argc, char *argv[])
     (
         "Laplace equation solver for a scalar quantity."
     );
+
+    #include "postProcess.H"
 
     #include "addCheckCaseOptions.H"
     #include "setRootCaseLists.H"
