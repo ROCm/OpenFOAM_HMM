@@ -45,12 +45,13 @@ Foam::autoPtr<Foam::massTransferModel> Foam::massTransferModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "massTransferModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return cstrIter()(dict, pair);

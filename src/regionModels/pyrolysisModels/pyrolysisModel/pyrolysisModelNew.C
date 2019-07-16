@@ -46,21 +46,20 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
     const word& regionType
 )
 {
-    const word modelType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                regionType + "Properties",
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).get<word>("pyrolysisModel")
+            regionType + "Properties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const word modelType(dict.get<word>("pyrolysisModel"));
 
     Info<< "Selecting pyrolysisModel " << modelType << endl;
 
@@ -68,12 +67,13 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "pyrolysisModel",
             modelType,
             *meshConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<pyrolysisModel>(cstrIter()(modelType, mesh, regionType));
@@ -96,12 +96,13 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "pyrolysisModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<pyrolysisModel>

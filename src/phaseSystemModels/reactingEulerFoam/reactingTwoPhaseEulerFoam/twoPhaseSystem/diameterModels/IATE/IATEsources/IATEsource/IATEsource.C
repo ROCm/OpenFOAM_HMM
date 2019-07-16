@@ -56,12 +56,13 @@ Foam::diameterModels::IATEsource::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "IATEsource",
             type,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<IATEsource>(cstrIter()(iate, dict));

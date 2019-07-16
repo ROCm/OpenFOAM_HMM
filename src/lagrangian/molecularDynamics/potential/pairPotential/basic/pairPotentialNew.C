@@ -33,10 +33,10 @@ License
 Foam::autoPtr<Foam::pairPotential> Foam::pairPotential::New
 (
     const word& name,
-    const dictionary& propDict
+    const dictionary& dict
 )
 {
-    const word modelType(propDict.get<word>("pairPotential"));
+    const word modelType(dict.get<word>("pairPotential"));
 
     Info<< nl << "Selecting intermolecular pair potential "
         << modelType << " for "
@@ -46,15 +46,16 @@ Foam::autoPtr<Foam::pairPotential> Foam::pairPotential::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "pairPotential",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<pairPotential>(cstrIter()(name, propDict));
+    return autoPtr<pairPotential>(cstrIter()(name, dict));
 }
 
 

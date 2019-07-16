@@ -52,12 +52,13 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "filmTurbulenceModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<filmTurbulenceModel>(cstrIter()(model, dict));

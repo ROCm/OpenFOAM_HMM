@@ -45,12 +45,13 @@ Foam::autoPtr<Foam::wallLubricationModel> Foam::wallLubricationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "wallLubricationModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(dict, pair);

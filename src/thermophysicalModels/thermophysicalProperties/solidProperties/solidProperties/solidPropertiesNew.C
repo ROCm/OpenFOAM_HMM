@@ -81,12 +81,13 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "solidProperties",
             solidType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<solidProperties>(cstrIter()(dict));

@@ -137,12 +137,13 @@ Foam::autoPtr<Foam::cellSizeFunction> Foam::cellSizeFunction::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "cellSizeFunction",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<cellSizeFunction>

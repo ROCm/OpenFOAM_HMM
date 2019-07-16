@@ -44,12 +44,13 @@ Foam::autoPtr<Foam::blendingMethod> Foam::blendingMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "blendingMethod",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(dict, phaseNames);

@@ -59,12 +59,13 @@ Foam::autoPtr<Foam::RBD::joint> Foam::RBD::joint::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "joint",
             bodyType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<joint>(cstrIter()(dict));

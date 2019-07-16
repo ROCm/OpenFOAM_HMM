@@ -52,12 +52,13 @@ autoPtr<heatTransferModel> heatTransferModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "heatTransferModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<heatTransferModel>(cstrIter()(model, dict));

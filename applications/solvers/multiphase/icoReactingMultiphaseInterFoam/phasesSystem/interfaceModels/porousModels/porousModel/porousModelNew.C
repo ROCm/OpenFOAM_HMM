@@ -43,12 +43,13 @@ Foam::autoPtr<Foam::porousModel> Foam::porousModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "porousModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(dict, mesh);

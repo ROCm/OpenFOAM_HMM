@@ -57,12 +57,13 @@ Foam::autoPtr<Foam::topoSetPointSource> Foam::topoSetPointSource::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "topoSetPointSource",
             sourceType,
             *wordConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<topoSetPointSource>(cstrIter()(mesh, dict));

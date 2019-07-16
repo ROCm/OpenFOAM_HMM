@@ -45,12 +45,13 @@ Foam::HeatTransferModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "heatTransferModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<HeatTransferModel<CloudType>>(cstrIter()(dict, owner));

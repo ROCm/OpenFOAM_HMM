@@ -147,12 +147,13 @@ Foam::externalDisplacementMeshMover::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "externalDisplacementMeshMover",
             type,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<externalDisplacementMeshMover>

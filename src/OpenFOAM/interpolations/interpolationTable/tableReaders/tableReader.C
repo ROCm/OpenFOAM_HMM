@@ -45,12 +45,13 @@ Foam::autoPtr<Foam::tableReader<Type>> Foam::tableReader<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            spec,
             "reader",
             readerType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<tableReader<Type>>(cstrIter()(spec));

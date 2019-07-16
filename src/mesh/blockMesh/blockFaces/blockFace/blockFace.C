@@ -87,12 +87,13 @@ Foam::autoPtr<Foam::blockFace> Foam::blockFace::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "blockFace",
             faceType,
             *IstreamConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<blockFace>(cstrIter()(dict, index, geometry, is));

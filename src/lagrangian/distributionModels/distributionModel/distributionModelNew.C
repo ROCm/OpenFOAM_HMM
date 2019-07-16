@@ -43,12 +43,13 @@ Foam::autoPtr<Foam::distributionModel> Foam::distributionModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "distribution model",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     const dictionary distributionDict =

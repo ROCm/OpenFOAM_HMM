@@ -57,12 +57,13 @@ Foam::autoPtr<Foam::topoSetCellSource> Foam::topoSetCellSource::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "topoSetCellSource",
             sourceType,
             *wordConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<topoSetCellSource>(cstrIter()(mesh, dict));

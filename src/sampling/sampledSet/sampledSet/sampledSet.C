@@ -531,12 +531,13 @@ Foam::autoPtr<Foam::sampledSet> Foam::sampledSet::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "sample",
             sampleType,
             *wordConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<sampledSet>

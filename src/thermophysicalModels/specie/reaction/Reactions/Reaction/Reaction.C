@@ -361,12 +361,13 @@ Foam::Reaction<ReactionThermo>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "reaction",
             reactionTypeName,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<Reaction<ReactionThermo>>

@@ -70,12 +70,13 @@ Foam::searchableSurfaceModifier::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "searchableSurfaceModifier",
             type,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<searchableSurfaceModifier>(cstrIter()(geometry, dict));

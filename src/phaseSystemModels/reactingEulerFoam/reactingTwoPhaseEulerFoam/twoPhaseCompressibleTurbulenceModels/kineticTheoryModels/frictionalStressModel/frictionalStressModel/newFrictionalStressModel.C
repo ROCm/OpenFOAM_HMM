@@ -43,12 +43,13 @@ Foam::kineticTheoryModels::frictionalStressModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "frictionalStressModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<frictionalStressModel>(cstrIter()(dict));

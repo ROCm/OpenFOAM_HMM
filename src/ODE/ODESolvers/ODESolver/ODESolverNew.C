@@ -42,8 +42,9 @@ Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "ODESolver",
             solverType,
             *dictionaryConstructorTablePtr_

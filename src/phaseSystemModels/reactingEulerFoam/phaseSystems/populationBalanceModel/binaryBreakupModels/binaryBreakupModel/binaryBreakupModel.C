@@ -53,12 +53,13 @@ Foam::diameterModels::binaryBreakupModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "binary breakup model",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<binaryBreakupModel>(cstrIter()(popBal, dict));

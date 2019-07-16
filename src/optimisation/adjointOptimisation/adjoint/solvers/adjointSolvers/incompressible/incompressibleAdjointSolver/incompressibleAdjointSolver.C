@@ -87,12 +87,13 @@ Foam::incompressibleAdjointSolver::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "incompressibleAdjointSolver",
             solverType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return

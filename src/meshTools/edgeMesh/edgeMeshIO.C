@@ -104,10 +104,8 @@ void Foam::edgeMesh::write
             *writefileExtensionMemberFunctionTablePtr_
         ) << exit(FatalError);
     }
-    else
-    {
-        mfIter()(name, mesh);
-    }
+
+    mfIter()(name, mesh);
 }
 
 

@@ -43,10 +43,10 @@ namespace Foam
 
 Foam::autoPtr<Foam::renumberMethod> Foam::renumberMethod::New
 (
-    const dictionary& renumberDict
+    const dictionary& dict
 )
 {
-    const word methodType(renumberDict.get<word>("method"));
+    const word methodType(dict.get<word>("method"));
 
     //Info<< "Selecting renumberMethod " << methodType << endl;
 
@@ -54,15 +54,16 @@ Foam::autoPtr<Foam::renumberMethod> Foam::renumberMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "renumberMethod",
             methodType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<renumberMethod>(cstrIter()(renumberDict));
+    return autoPtr<renumberMethod>(cstrIter()(dict));
 }
 
 

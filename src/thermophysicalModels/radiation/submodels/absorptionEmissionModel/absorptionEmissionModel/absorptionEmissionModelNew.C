@@ -45,12 +45,13 @@ Foam::radiation::absorptionEmissionModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "absorptionEmissionModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<absorptionEmissionModel>(cstrIter()(dict, mesh));

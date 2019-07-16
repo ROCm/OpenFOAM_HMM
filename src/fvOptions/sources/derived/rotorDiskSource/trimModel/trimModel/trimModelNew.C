@@ -43,12 +43,13 @@ Foam::autoPtr<Foam::trimModel> Foam::trimModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             typeName,
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<trimModel>(cstrIter()(rotor, dict));

@@ -69,9 +69,9 @@ Foam::motionInterpolation::New(const fvMesh& mesh)
 
 
 Foam::autoPtr<Foam::motionInterpolation>
-Foam::motionInterpolation::New(const fvMesh& mesh, Istream& entry)
+Foam::motionInterpolation::New(const fvMesh& mesh, Istream& is)
 {
-    const word modelType(entry);
+    const word modelType(is);
 
     Info<< "Selecting motion interpolation: " << modelType << endl;
 
@@ -79,15 +79,16 @@ Foam::motionInterpolation::New(const fvMesh& mesh, Istream& entry)
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            is,
             "interpolation",
             modelType,
             *IstreamConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<motionInterpolation>(cstrIter()(mesh, entry));
+    return autoPtr<motionInterpolation>(cstrIter()(mesh, is));
 }
 
 

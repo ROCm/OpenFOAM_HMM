@@ -45,12 +45,13 @@ Foam::PhaseChangeModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "phaseChangeModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<PhaseChangeModel<CloudType>>(cstrIter()(dict, owner));

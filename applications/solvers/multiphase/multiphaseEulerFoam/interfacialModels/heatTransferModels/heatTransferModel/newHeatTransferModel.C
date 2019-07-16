@@ -51,12 +51,13 @@ Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            interfaceDict,
             "heatTransferModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(interfaceDict, alpha1, phase1, phase2);

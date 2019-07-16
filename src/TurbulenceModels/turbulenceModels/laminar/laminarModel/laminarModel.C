@@ -92,7 +92,7 @@ Foam::laminarModel<BasicTurbulenceModel>::New
     const word& propertiesName
 )
 {
-    IOdictionary modelDict
+    const IOdictionary modelDict
     (
         IOobject
         (
@@ -105,12 +105,13 @@ Foam::laminarModel<BasicTurbulenceModel>::New
         )
     );
 
-    if (modelDict.found("laminar"))
+    const dictionary* dictptr = modelDict.findDict("laminar");
+
+    if (dictptr)
     {
-        const word modelType
-        (
-            modelDict.subDict("laminar").get<word>("laminarModel")
-        );
+        const dictionary& dict = *dictptr;
+
+        const word modelType(dict.get<word>("laminarModel"));
 
         Info<< "Selecting laminar stress model " << modelType << endl;
 
@@ -118,12 +119,13 @@ Foam::laminarModel<BasicTurbulenceModel>::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInLookup
+            FatalIOErrorInLookup
             (
+                dict,
                 "laminarModel",
                 modelType,
                 *dictionaryConstructorTablePtr_
-            ) << exit(FatalError);
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<laminarModel>

@@ -365,12 +365,13 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            decompDict,
             "decompositionMethod",
             methodType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     // verbose

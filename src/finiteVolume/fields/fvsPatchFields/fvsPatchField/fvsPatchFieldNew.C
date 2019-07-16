@@ -62,10 +62,6 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
         {
             return patchTypeCstrIter()(p, iF);
         }
-        else
-        {
-            return cstrIter()(p, iF);
-        }
     }
 
     return cstrIter()(p, iF);

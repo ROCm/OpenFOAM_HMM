@@ -45,12 +45,13 @@ Foam::autoPtr<Foam::integrationScheme> Foam::integrationScheme::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "integration scheme",
             modelType,
             *wordConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<integrationScheme>(cstrIter()());

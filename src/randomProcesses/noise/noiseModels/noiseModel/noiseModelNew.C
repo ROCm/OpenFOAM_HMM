@@ -37,12 +37,13 @@ Foam::autoPtr<Foam::noiseModel> Foam::noiseModel::New(const dictionary& dict)
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "noiseModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<noiseModel>(cstrIter()(dict.subDict(modelType + "Coeffs")));

@@ -78,12 +78,13 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "thermophysicalFunction",
             functionType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<thermophysicalFunction>(cstrIter()(dict));

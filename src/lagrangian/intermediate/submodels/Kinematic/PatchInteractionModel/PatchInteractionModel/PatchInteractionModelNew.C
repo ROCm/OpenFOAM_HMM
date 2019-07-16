@@ -45,12 +45,13 @@ Foam::PatchInteractionModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "patchInteractionModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<PatchInteractionModel<CloudType>>(cstrIter()(dict, owner));

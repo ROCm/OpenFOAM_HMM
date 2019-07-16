@@ -43,12 +43,13 @@ Foam::autoPtr<Foam::surfaceTensionModel> Foam::surfaceTensionModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "surfaceTensionModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(dict, pair, true);

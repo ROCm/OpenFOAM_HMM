@@ -109,12 +109,13 @@ autoPtr<objectiveIncompressible> objectiveIncompressible::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "objectiveIncompressible",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<objectiveIncompressible>

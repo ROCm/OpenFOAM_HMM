@@ -40,30 +40,35 @@ namespace thermalBaffleModels
 
 autoPtr<thermalBaffleModel> thermalBaffleModel::New(const fvMesh& mesh)
 {
-    const word modelType =
-        IOdictionary
+    const IOdictionary dict
+    (
+        IOobject
         (
-            IOobject
-            (
-                "thermalBaffleProperties",
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        ).lookupOrDefault<word>("thermalBaffleModel", "thermalBaffle");
+            "thermalBaffleProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
+    );
+
+    const word modelType
+    (
+        dict.getOrDefault<word>("thermalBaffleModel", "thermalBaffle")
+    );
 
     auto cstrIter = meshConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "thermalBaffleModel",
             modelType,
             *meshConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<thermalBaffleModel>(cstrIter()(modelType, mesh));
@@ -76,19 +81,22 @@ autoPtr<thermalBaffleModel> thermalBaffleModel::New
     const dictionary& dict
 )
 {
-    const word modelType =
-        dict.lookupOrDefault<word>("thermalBaffleModel", "thermalBaffle");
+    const word modelType
+    (
+        dict.getOrDefault<word>("thermalBaffleModel", "thermalBaffle")
+    );
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "thermalBaffleModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<thermalBaffleModel>(cstrIter()(modelType, mesh, dict));

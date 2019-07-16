@@ -42,12 +42,13 @@ Foam::autoPtr<Foam::extrudeModel> Foam::extrudeModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "extrudeModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<extrudeModel>(cstrIter()(dict));

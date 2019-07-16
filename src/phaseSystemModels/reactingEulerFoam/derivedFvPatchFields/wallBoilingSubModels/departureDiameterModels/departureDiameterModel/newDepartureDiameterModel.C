@@ -43,12 +43,13 @@ Foam::wallBoilingModels::departureDiameterModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "departureDiameterModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return cstrIter()(dict);

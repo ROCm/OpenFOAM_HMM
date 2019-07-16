@@ -41,12 +41,13 @@ wallAbsorptionEmissionModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "wallAbsorptionEmissionModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<wallAbsorptionEmissionModel>(cstrIter()(dict, pp));

@@ -45,12 +45,13 @@ Foam::WallModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "wallModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<WallModel<CloudType>>(cstrIter()(dict, owner));

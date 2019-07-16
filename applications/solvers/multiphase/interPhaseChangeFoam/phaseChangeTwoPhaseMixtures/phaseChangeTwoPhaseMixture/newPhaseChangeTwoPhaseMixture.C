@@ -37,21 +37,20 @@ Foam::phaseChangeTwoPhaseMixture::New
     const surfaceScalarField& phi
 )
 {
-    const word modelType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "transportProperties",
-                U.time().constant(),
-                U.db(),
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).get<word>("phaseChangeTwoPhaseMixture")
+            "transportProperties",
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const word modelType(dict.get<word>("phaseChangeTwoPhaseMixture"));
 
     Info<< "Selecting phaseChange model " << modelType << endl;
 
@@ -59,12 +58,13 @@ Foam::phaseChangeTwoPhaseMixture::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "phaseChangeTwoPhaseMixture",
             modelType,
             *componentsConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<phaseChangeTwoPhaseMixture>(cstrIter()(U, phi));

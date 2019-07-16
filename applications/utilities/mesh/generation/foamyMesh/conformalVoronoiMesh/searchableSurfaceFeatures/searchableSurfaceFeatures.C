@@ -51,12 +51,13 @@ Foam::searchableSurfaceFeatures::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "searchableSurfaceFeatures",
             modelType,
             *dictConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<searchableSurfaceFeatures>(cstrIter()(surface, dict));
@@ -80,9 +81,6 @@ Foam::searchableSurfaceFeatures::searchableSurfaceFeatures
 
 Foam::searchableSurfaceFeatures::~searchableSurfaceFeatures()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

@@ -46,57 +46,42 @@ typename Table::iterator Foam::basicThermo::lookupThermo
     // Print error message if package not found in the table
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown " << Thermo::typeName << " type " << nl
-            << "thermoType" << thermoTypeDict << nl << nl
-            << "Valid " << Thermo::typeName << " types are:"
-            << nl << nl;
-
-        // Get the list of all the suitable thermo packages available
-        wordList validThermoTypeNames
-        (
-            tablePtr->sortedToc()
-        );
+        const int nCmpt = cmptNames.size();
 
         // Build a table of the thermo packages constituent parts
         // Note: row-0 contains the names of constituent parts
-        List<wordList> validThermoTypeNameCmpts
-        (
-            validThermoTypeNames.size() + 1
-        );
+        List<wordList> validCmpts(tablePtr->size()+1);
 
-        const int nCmpt = cmptNames.size();
-        validThermoTypeNameCmpts[0].setSize(nCmpt);
-
-        label j = 0;
-        for (const char* cmptName : cmptNames)
-        {
-            validThermoTypeNameCmpts[0][j] = cmptName;
-            ++j;
-        }
+        // Header (row 0)
+        validCmpts[0].resize(nCmpt);
+        std::copy(cmptNames.begin(), cmptNames.end(), validCmpts[0].begin());
 
         // Split the thermo package names into their constituent parts
         // Removing incompatible entries from the list
-        j = 0;
-        forAll(validThermoTypeNames, i)
+        label rowi = 1;
+        for (const word& validName : tablePtr->sortedToc())
         {
-            wordList names
-            (
-                Thermo::splitThermoName(validThermoTypeNames[i], nCmpt)
-            );
+            validCmpts[rowi] = Thermo::splitThermoName(validName, nCmpt);
 
-            if (names.size())
+            if (validCmpts[rowi].size())
             {
-                validThermoTypeNameCmpts[j++] = names;
+                ++rowi;
             }
         }
-        validThermoTypeNameCmpts.setSize(j);
+        validCmpts.resize(rowi);
 
-        // Print the table of available packages
-        // in terms of their constituent parts
-        printTable(validThermoTypeNameCmpts, FatalError);
 
-        FatalError<< exit(FatalError);
+        FatalIOErrorInLookup
+        (
+            thermoTypeDict,
+            Thermo::typeName,
+            word::null, // Suppress long name? Just output dictionary (above)
+            *tablePtr
+        );
+
+        // Table of available packages (as constituent parts)
+        printTable(validCmpts, FatalIOError)
+            << exit(FatalIOError);
     }
 
     return cstrIter;
@@ -112,7 +97,7 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 {
     if (thermoDict.isDict("thermoType"))
     {
-        const dictionary& thermoTypeDict(thermoDict.subDict("thermoType"));
+        const dictionary& thermoTypeDict = thermoDict.subDict("thermoType");
 
         Info<< "Selecting thermodynamics package " << thermoTypeDict << endl;
 
@@ -188,12 +173,13 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 
         if (!cstrIter.found())
         {
-            FatalErrorInLookup
+            FatalIOErrorInLookup
             (
+                thermoDict,
                 Thermo::typeName,
                 thermoTypeName,
                 *tablePtr
-            ) << exit(FatalError);
+            ) << exit(FatalIOError);
         }
 
         return cstrIter;

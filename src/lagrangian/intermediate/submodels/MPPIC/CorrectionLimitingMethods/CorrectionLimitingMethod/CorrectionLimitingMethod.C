@@ -66,12 +66,13 @@ Foam::CorrectionLimitingMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "correction limiter",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<CorrectionLimitingMethod>(cstrIter()(dict));

@@ -66,12 +66,13 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "patchDistMethod",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(dict, mesh, patchIDs);
@@ -94,12 +95,13 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "patchDistMethod",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(dict, mesh, patchIDs);

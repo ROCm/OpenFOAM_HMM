@@ -114,12 +114,13 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "topoSetSource",
             topoSetSourceType,
             *wordConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<topoSetSource>(cstrIter()(mesh, dict));

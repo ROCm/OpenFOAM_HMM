@@ -166,21 +166,20 @@ autoPtr<adjointRASModel> adjointRASModel::New
     const word& adjointTurbulenceModelName
 )
 {
-    const word modelType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "adjointRASProperties",
-                primalVars.U().time().constant(),
-                primalVars.U().db(),
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).get<word>("adjointRASModel")
+            "adjointRASProperties",
+            primalVars.U().time().constant(),
+            primalVars.U().db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const word modelType(dict.get<word>("adjointRASModel"));
 
     Info<< "Selecting adjointRAS turbulence model " << modelType << endl;
 
@@ -188,12 +187,13 @@ autoPtr<adjointRASModel> adjointRASModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "adjointRASModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<adjointRASModel>

@@ -71,7 +71,7 @@ Foam::initialPointsMethod::initialPointsMethod
 
 Foam::autoPtr<Foam::initialPointsMethod> Foam::initialPointsMethod::New
 (
-    const dictionary& initialPointsDict,
+    const dictionary& dict,
     const Time& runTime,
     Random& rndGen,
     const conformationSurfaces& geometryToConformTo,
@@ -79,7 +79,7 @@ Foam::autoPtr<Foam::initialPointsMethod> Foam::initialPointsMethod::New
     const autoPtr<backgroundMeshDecomposition>& decomposition
 )
 {
-    const word modelType(initialPointsDict.get<word>("initialPointsMethod"));
+    const word modelType(dict.get<word>("initialPointsMethod"));
 
     Info<< nl << "Selecting initialPointsMethod " << modelType << endl;
 
@@ -87,12 +87,13 @@ Foam::autoPtr<Foam::initialPointsMethod> Foam::initialPointsMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "initialPointsMethod",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return
@@ -100,7 +101,7 @@ Foam::autoPtr<Foam::initialPointsMethod> Foam::initialPointsMethod::New
         (
             cstrIter()
             (
-                initialPointsDict,
+                dict,
                 runTime,
                 rndGen,
                 geometryToConformTo,

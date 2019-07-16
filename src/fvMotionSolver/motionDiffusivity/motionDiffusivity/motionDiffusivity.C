@@ -49,10 +49,10 @@ Foam::motionDiffusivity::motionDiffusivity(const fvMesh& mesh)
 Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
 (
     const fvMesh& mesh,
-    Istream& mdData
+    Istream& is
 )
 {
-    const word modelType(mdData);
+    const word modelType(is);
 
     Info<< "Selecting motion diffusion: " << modelType << endl;
 
@@ -60,15 +60,16 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            is,
             "diffusion",
             modelType,
             *IstreamConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<motionDiffusivity>(cstrIter()(mesh, mdData));
+    return autoPtr<motionDiffusivity>(cstrIter()(mesh, is));
 }
 
 

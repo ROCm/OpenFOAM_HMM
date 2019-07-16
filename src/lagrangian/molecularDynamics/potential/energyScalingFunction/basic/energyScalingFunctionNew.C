@@ -33,11 +33,11 @@ License
 Foam::autoPtr<Foam::energyScalingFunction> Foam::energyScalingFunction::New
 (
     const word& name,
-    const dictionary& propDict,
+    const dictionary& dict,
     const pairPotential& pairPot
 )
 {
-    const word modelType(propDict.get<word>("energyScalingFunction"));
+    const word modelType(dict.get<word>("energyScalingFunction"));
 
     Info<< "Selecting energy scaling function "
         << modelType << " for "
@@ -47,15 +47,16 @@ Foam::autoPtr<Foam::energyScalingFunction> Foam::energyScalingFunction::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "energyScalingFunction",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<energyScalingFunction>(cstrIter()(name, propDict, pairPot));
+    return autoPtr<energyScalingFunction>(cstrIter()(name, dict, pairPot));
 }
 
 

@@ -41,10 +41,10 @@ defineRunTimeSelectionTable(faceAreaWeightModel, dictionary);
 Foam::faceAreaWeightModel::faceAreaWeightModel
 (
     const word& type,
-    const dictionary& relaxationDict
+    const dictionary& dict
 )
 :
-    dictionary(relaxationDict),
+    dictionary(dict),
     coeffDict_(optionalSubDict(type + "Coeffs"))
 {}
 
@@ -53,10 +53,10 @@ Foam::faceAreaWeightModel::faceAreaWeightModel
 
 Foam::autoPtr<Foam::faceAreaWeightModel> Foam::faceAreaWeightModel::New
 (
-    const dictionary& relaxationDict
+    const dictionary& dict
 )
 {
-    const word modelType(relaxationDict.get<word>("faceAreaWeightModel"));
+    const word modelType(dict.get<word>("faceAreaWeightModel"));
 
     Info<< nl << "Selecting faceAreaWeightModel " << modelType << endl;
 
@@ -64,15 +64,16 @@ Foam::autoPtr<Foam::faceAreaWeightModel> Foam::faceAreaWeightModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "faceAreaWeightModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<faceAreaWeightModel>(cstrIter()(relaxationDict));
+    return autoPtr<faceAreaWeightModel>(cstrIter()(dict));
 }
 
 

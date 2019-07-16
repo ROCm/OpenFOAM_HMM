@@ -82,12 +82,13 @@ Foam::autoPtr<Foam::RBD::rigidBody> Foam::RBD::rigidBody::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "rigidBody",
             bodyType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<rigidBody>(cstrIter()(name, dict));

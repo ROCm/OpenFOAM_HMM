@@ -32,21 +32,20 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
     const fvMesh& mesh
 )
 {
-    const word systemType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                phasePropertiesName,
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
-            )
-        ).get<word>("type")
+            phasePropertiesName,
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const word systemType(dict.get<word>("type"));
 
     Info<< "Selecting multiphaseSystem " << systemType << endl;
 
@@ -54,12 +53,13 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "multiphaseSystem",
             systemType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<multiphaseSystem>(cstrIter()(mesh));

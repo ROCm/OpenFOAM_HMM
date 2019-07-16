@@ -83,12 +83,13 @@ Foam::cellSizeAndAlignmentControl::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "cellSizeAndAlignmentControl",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<cellSizeAndAlignmentControl>

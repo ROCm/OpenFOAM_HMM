@@ -45,12 +45,13 @@ Foam::autoPtr<Foam::phaseTransferModel> Foam::phaseTransferModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "phaseTransferModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return cstrIter()(dict, pair);

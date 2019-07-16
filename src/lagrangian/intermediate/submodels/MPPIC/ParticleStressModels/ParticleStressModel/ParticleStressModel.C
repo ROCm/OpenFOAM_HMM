@@ -71,12 +71,13 @@ Foam::autoPtr<Foam::ParticleStressModel> Foam::ParticleStressModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "particle stress model",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<ParticleStressModel>(cstrIter()(dict));

@@ -34,12 +34,12 @@ License
 Foam::autoPtr<Foam::viscosityModel> Foam::viscosityModel::New
 (
     const word& name,
-    const dictionary& viscosityProperties,
+    const dictionary& dict,
     const volVectorField& U,
     const surfaceScalarField& phi
 )
 {
-    const word modelType(viscosityProperties.get<word>("transportModel"));
+    const word modelType(dict.get<word>("transportModel"));
 
     Info<< "Selecting incompressible transport model " << modelType << endl;
 
@@ -47,16 +47,16 @@ Foam::autoPtr<Foam::viscosityModel> Foam::viscosityModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "viscosityModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<viscosityModel>
-        (cstrIter()(name, viscosityProperties, U, phi));
+    return autoPtr<viscosityModel>(cstrIter()(name, dict, U, phi));
 }
 
 

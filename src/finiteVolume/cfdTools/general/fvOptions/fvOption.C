@@ -88,20 +88,17 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            coeffs,
             "fvOption",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<option>(cstrIter()(name, modelType, coeffs, mesh));
 }
-
-
-Foam::fv::option::~option()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

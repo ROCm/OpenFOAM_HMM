@@ -91,12 +91,13 @@ Foam::incompressiblePrimalSolver::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "incompressiblePrimalSolver",
             solverType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return

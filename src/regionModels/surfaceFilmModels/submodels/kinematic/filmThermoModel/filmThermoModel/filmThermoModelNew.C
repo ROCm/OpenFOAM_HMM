@@ -53,12 +53,13 @@ autoPtr<filmThermoModel> filmThermoModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "filmThermoModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<filmThermoModel>(cstrIter()(model, dict));

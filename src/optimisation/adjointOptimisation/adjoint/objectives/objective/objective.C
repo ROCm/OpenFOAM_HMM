@@ -155,12 +155,13 @@ autoPtr<objective> objective::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "objective",
             objectiveType,
             *objectiveConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<objective>

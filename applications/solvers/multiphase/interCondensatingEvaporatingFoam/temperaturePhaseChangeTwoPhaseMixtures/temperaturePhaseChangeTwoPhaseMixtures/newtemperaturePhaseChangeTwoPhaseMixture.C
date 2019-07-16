@@ -35,21 +35,20 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
     const fvMesh& mesh
 )
 {
-    const word modelType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "phaseChangeProperties",
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).get<word>("phaseChangeTwoPhaseModel")
+            "phaseChangeProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const word modelType(dict.get<word>("phaseChangeTwoPhaseModel"));
 
     Info<< "Selecting phaseChange model " << modelType << endl;
 
@@ -57,12 +56,13 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "temperaturePhaseChangeTwoPhaseMixture",
             modelType,
             *componentsConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return

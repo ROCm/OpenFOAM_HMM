@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -75,12 +75,16 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
     typedef typename CombustionModel::dictionaryConstructorTable cstrTableType;
     cstrTableType* cstrTable = CombustionModel::dictionaryConstructorTablePtr_;
 
-    const word compCombModelName =
-        combModelName + '<' + CombustionModel::reactionThermo::typeName + '>';
+    const word compCombModelName
+    (
+        combModelName + '<' + CombustionModel::reactionThermo::typeName + '>'
+    );
 
-    const word thermoCombModelName =
+    const word thermoCombModelName
+    (
         combModelName + '<' + CombustionModel::reactionThermo::typeName + ','
-      + thermo.thermoName() + '>';
+      + thermo.thermoName() + '>'
+    );
 
     auto compCstrIter = cstrTable->cfind(compCombModelName);
 
@@ -88,28 +92,61 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
 
     if (!compCstrIter.found() && !thermoCstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown " << combustionModel::typeName << " type "
-            << combModelName << endl << endl;
-
-        const wordList names(cstrTable->toc());
-
         wordList thisCmpts;
         thisCmpts.append(word::null);
         thisCmpts.append(CombustionModel::reactionThermo::typeName);
         thisCmpts.append(basicThermo::splitThermoName(thermo.thermoName(), 5));
 
         wordList validNames;
-        forAll(names, i)
+
+        List<wordList> validCmpts2;
+        validCmpts2.append
+        (
+            // Header
+            wordList
+            ({
+                word::null,
+                combustionModel::typeName,
+                "reactionThermo"
+            })
+        );
+
+        List<wordList> validCmpts7;
+        validCmpts7.append
+        (
+            // Header
+            wordList
+            ({
+                word::null,
+                combustionModel::typeName,
+                "reactionThermo",
+                "transport",
+                "thermo",
+                "equationOfState",
+                "specie",
+                "energy"
+            })
+        );
+
+        for (const word& validName : cstrTable->sortedToc())
         {
-            wordList cmpts(basicThermo::splitThermoName(names[i], 2));
-            if (cmpts.size() != 2)
+            wordList cmpts(basicThermo::splitThermoName(validName, 2));
+
+            if (cmpts.size() == 2)
             {
-                cmpts = basicThermo::splitThermoName(names[i], 7);
+                validCmpts2.append(cmpts);
+            }
+            else
+            {
+                cmpts = basicThermo::splitThermoName(validName, 7);
+                if (cmpts.size() == 7)
+                {
+                    validCmpts7.append(cmpts);
+                }
             }
 
             bool isValid = true;
-            for (label i = 1; i < cmpts.size() && isValid; ++ i)
+            for (label i = 1; i < cmpts.size() && isValid; ++i)
             {
                 isValid = isValid && cmpts[i] == thisCmpts[i];
             }
@@ -120,49 +157,25 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
             }
         }
 
-        FatalErrorInFunction
-            << "Valid " << combustionModel::typeName << " types for this "
-            << "thermodynamic model are:" << endl << validNames << endl;
 
-        List<wordList> validCmpts2, validCmpts7;
-        validCmpts2.append(wordList(2, word::null));
-        validCmpts2[0][0] = combustionModel::typeName;
-        validCmpts2[0][1] = "reactionThermo";
-        validCmpts7.append(wordList(7, word::null));
-        validCmpts7[0][0] = combustionModel::typeName;
-        validCmpts7[0][1] = "reactionThermo";
-        validCmpts7[0][2] = "transport";
-        validCmpts7[0][3] = "thermo";
-        validCmpts7[0][4] = "equationOfState";
-        validCmpts7[0][5] = "specie";
-        validCmpts7[0][6] = "energy";
-        forAll(names, i)
-        {
-            const wordList cmpts2(basicThermo::splitThermoName(names[i], 2));
-            const wordList cmpts7(basicThermo::splitThermoName(names[i], 7));
-            if (cmpts2.size() == 2)
-            {
-                validCmpts2.append(cmpts2);
-            }
-            if (cmpts7.size() == 7)
-            {
-                validCmpts7.append(cmpts7);
-            }
-        }
-
-        FatalErrorInFunction
+        FatalErrorInLookup
+        (
+            combustionModel::typeName,
+            combModelName,
+            *cstrTable
+        )
             << "All " << validCmpts2[0][0] << '/' << validCmpts2[0][1]
-            << " combinations are:" << endl << endl;
-        printTable(validCmpts2, FatalErrorInFunction);
+            << " combinations are:" << nl << nl;
 
-        FatalErrorInFunction << endl;
+        printTable(validCmpts2, FatalErrorInFunction)
+            << nl;
 
         FatalErrorInFunction
             << "All " << validCmpts7[0][0] << '/' << validCmpts7[0][1]
-            << "/thermoPhysics combinations are:" << endl << endl;
-        printTable(validCmpts7, FatalErrorInFunction);
+            << "/thermoPhysics combinations are:" << nl << nl;
 
-        FatalErrorInFunction << exit(FatalError);
+        printTable(validCmpts7, FatalErrorInFunction)
+            << exit(FatalError);
     }
 
     return autoPtr<CombustionModel>

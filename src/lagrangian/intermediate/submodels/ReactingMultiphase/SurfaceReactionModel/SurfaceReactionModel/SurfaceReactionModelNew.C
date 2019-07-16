@@ -45,12 +45,13 @@ Foam::SurfaceReactionModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "surfaceReactionModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<SurfaceReactionModel<CloudType>>(cstrIter()(dict, owner));

@@ -75,12 +75,13 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "sample",
             sampleType,
             *wordConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<sampledSurface>(cstrIter()(name, mesh, dict));

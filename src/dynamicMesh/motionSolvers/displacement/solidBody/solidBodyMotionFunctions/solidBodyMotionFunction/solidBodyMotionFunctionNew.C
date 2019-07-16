@@ -31,11 +31,11 @@ License
 
 Foam::autoPtr<Foam::solidBodyMotionFunction> Foam::solidBodyMotionFunction::New
 (
-    const dictionary& SBMFCoeffs,
+    const dictionary& dict,
     const Time& runTime
 )
 {
-    const word motionType(SBMFCoeffs.get<word>("solidBodyMotionFunction"));
+    const word motionType(dict.get<word>("solidBodyMotionFunction"));
 
     Info<< "Selecting solid-body motion function " << motionType << endl;
 
@@ -43,15 +43,16 @@ Foam::autoPtr<Foam::solidBodyMotionFunction> Foam::solidBodyMotionFunction::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "solidBodyMotionFunction",
             motionType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<solidBodyMotionFunction>(cstrIter()(SBMFCoeffs, runTime));
+    return autoPtr<solidBodyMotionFunction>(cstrIter()(dict, runTime));
 }
 
 

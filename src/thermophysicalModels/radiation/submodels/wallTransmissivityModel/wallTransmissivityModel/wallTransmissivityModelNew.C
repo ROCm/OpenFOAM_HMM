@@ -41,12 +41,13 @@ wallTransmissivityModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "wallTransmissivityModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<wallTransmissivityModel>(cstrIter()(dict, pp));

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -32,7 +32,7 @@ License
 Foam::autoPtr<Foam::basicSolidChemistryModel>
 Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
 {
-    IOdictionary chemistryDict
+    const IOdictionary chemistryDict
     (
         IOobject
         (
@@ -45,10 +45,8 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
         )
     );
 
-    const dictionary& chemistryTypeDict
-    (
-        chemistryDict.subDict("chemistryType")
-    );
+    const dictionary& chemistryTypeDict =
+        chemistryDict.subDict("chemistryType");
 
     Info<< "Selecting chemistry type " << chemistryTypeDict << endl;
 
@@ -69,7 +67,7 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
         "energy"
     };
 
-    IOdictionary thermoDict
+    const IOdictionary thermoDict
     (
         IOobject
         (
@@ -82,7 +80,7 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
         )
     );
 
-    const dictionary& solidThermoTypeDict(thermoDict.subDict("thermoType"));
+    const dictionary& solidThermoTypeDict = thermoDict.subDict("thermoType");
     const word solidThermoTypeName
     (
         solidThermoTypeDict.get<word>("transport") + '<'
@@ -92,7 +90,7 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
       + solidThermoTypeDict.get<word>("energy") + ">"
     );
 
-    const dictionary& gasThermoTypeDict(thermoDict.subDict("gasThermoType"));
+    const dictionary& gasThermoTypeDict = thermoDict.subDict("gasThermoType");
     const word gasThermoTypeName
     (
         gasThermoTypeDict.get<word>("transport") + '<'
@@ -117,51 +115,40 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown " << typeName << " type " << nl
-            << "chemistryType" << chemistryTypeDict << nl << nl
-            << "Valid " << typeName << " types are:"
-            << nl << nl;
-
-        // Get the list of all the suitable chemistry packages available
-        wordList validChemistryTypeNames
-        (
-            thermoConstructorTablePtr_->sortedToc()
-        );
-        Info<< validChemistryTypeNames << endl;
+        const int nCmpt = cmptNames.size();
 
         // Build a table of the thermo packages constituent parts
         // Note: row-0 contains the names of constituent parts
-        List<wordList> validChemistryTypeNameCmpts
+        List<wordList> validCmpts(thermoConstructorTablePtr_->size()+1);
+
+        // Header (row 0)
+        validCmpts[0].resize(nCmpt);
+        std::copy(cmptNames.begin(), cmptNames.end(), validCmpts[0].begin());
+
+        label rowi = 1;
+        for (const word& validName : thermoConstructorTablePtr_->sortedToc())
+        {
+            validCmpts[rowi] = basicThermo::splitThermoName(validName, nCmpt);
+
+            if (validCmpts[rowi].size())
+            {
+                ++rowi;
+            }
+        }
+        validCmpts.resize(rowi);
+
+
+        FatalIOErrorInLookup
         (
-            validChemistryTypeNames.size() + 1
+            chemistryTypeDict,
+            typeName,
+            word::null, // Suppress long name? Just output dictionary (above)
+            *thermoConstructorTablePtr_
         );
 
-        const int nCmpt = cmptNames.size();
-        validChemistryTypeNameCmpts[0].setSize(nCmpt);
-
-        label j = 0;
-        for (const char* cmptName : cmptNames)
-        {
-            validChemistryTypeNameCmpts[0][j] = cmptName;
-            ++j;
-        }
-
-        // Split the thermo package names into their constituent parts
-        forAll(validChemistryTypeNames, i)
-        {
-            validChemistryTypeNameCmpts[i+1] = basicThermo::splitThermoName
-            (
-                validChemistryTypeNames[i],
-                nCmpt
-            );
-        }
-
-        // Print the table of available packages
-        // in terms of their constituent parts
-        printTable(validChemistryTypeNameCmpts, FatalError);
-
-        FatalError<< exit(FatalError);
+        // Table of available packages (as constituent parts)
+        printTable(validCmpts, FatalIOError)
+            << exit(FatalIOError);
     }
 
     return

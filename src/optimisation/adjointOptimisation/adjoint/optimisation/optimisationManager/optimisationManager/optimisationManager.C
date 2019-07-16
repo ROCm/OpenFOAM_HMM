@@ -146,22 +146,20 @@ Foam::autoPtr<Foam::optimisationManager> Foam::optimisationManager::New
     fvMesh& mesh
 )
 {
-    const word modelType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "optimisationDict",
-                mesh.time().system(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).get<word>("optimisationManager")
+            "optimisationDict",
+            mesh.time().system(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
 
+    const word modelType(dict.get<word>("optimisationManager"));
 
     Info<< "optimisationManager type : " << modelType << endl;
 
@@ -169,12 +167,13 @@ Foam::autoPtr<Foam::optimisationManager> Foam::optimisationManager::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "optimisationManager",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<optimisationManager>(cstrIter()(mesh));

@@ -70,12 +70,13 @@ Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "cellSizeCalculationType",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<cellSizeCalculationType>

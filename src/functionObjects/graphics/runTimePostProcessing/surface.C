@@ -256,12 +256,13 @@ Foam::functionObjects::runTimePostPro::surface::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "surface",
             surfaceType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<surface>(cstrIter()(parent, dict, colours));

@@ -52,12 +52,13 @@ autoPtr<filmRadiationModel> filmRadiationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "radiationModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<filmRadiationModel>(cstrIter()(model, dict));

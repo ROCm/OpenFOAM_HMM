@@ -239,12 +239,13 @@ Foam::autoPtr<Foam::updateMethod> Foam::updateMethod::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "updateMethod",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<updateMethod>(cstrIter()(mesh, dict));

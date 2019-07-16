@@ -81,12 +81,13 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInLookup
+            FatalIOErrorInLookup
             (
+                dict,
                 "blockVertex",
                 faceType,
                 *IstreamConstructorTablePtr_
-            ) << abort(FatalError);
+            ) << abort(FatalIOError);
         }
 
         return autoPtr<blockVertex>(cstrIter()(dict, index, geometry, is));

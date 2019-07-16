@@ -54,12 +54,13 @@ Foam::diameterModels::nucleationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "nucleationModel",
             type,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<nucleationModel>(cstrIter()(popBal, dict));

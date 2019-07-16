@@ -31,7 +31,7 @@ License
 
 Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
 (
-    const dictionary& propDict,
+    const dictionary& dict,
     const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su,
@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
     const surfaceScalarField& phi
 )
 {
-    const word modelType(propDict.get<word>("XiModel"));
+    const word modelType(dict.get<word>("XiModel"));
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
@@ -48,16 +48,17 @@ Foam::autoPtr<Foam::XiModel> Foam::XiModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "XiModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<XiModel>
-        (cstrIter()(propDict, thermo, turbulence, Su, rho, b, phi));
+        (cstrIter()(dict, thermo, turbulence, Su, rho, b, phi));
 }
 
 

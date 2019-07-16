@@ -31,13 +31,13 @@ License
 
 Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
 (
-    const dictionary& propDict,
+    const dictionary& dict,
     const psiuReactionThermo& thermo,
     const compressible::RASModel& turbulence,
     const volScalarField& Su
 )
 {
-    const word modelType(propDict.get<word>("XiEqModel"));
+    const word modelType(dict.get<word>("XiEqModel"));
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
@@ -45,15 +45,16 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "XiEqModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<XiEqModel>(cstrIter()(propDict, thermo, turbulence, Su));
+    return autoPtr<XiEqModel>(cstrIter()(dict, thermo, turbulence, Su));
 }
 
 

@@ -180,12 +180,13 @@ Foam::functionObjects::runTimePostPro::pathline::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "pathline",
             pathlineType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<pathline>(cstrIter()(parent, dict, colours));

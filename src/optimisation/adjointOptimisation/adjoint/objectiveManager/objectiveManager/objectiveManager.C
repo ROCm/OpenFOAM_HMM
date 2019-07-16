@@ -119,12 +119,13 @@ autoPtr<objectiveManager> objectiveManager::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "objectiveManagerType",
             managerType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<objectiveManager>

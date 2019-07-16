@@ -54,12 +54,13 @@ Foam::diameterModels::driftModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "driftModel",
             type,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<driftModel>(cstrIter()(popBal, dict));

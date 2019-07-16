@@ -45,12 +45,13 @@ Foam::DevolatilisationModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "devolatilisationModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<DevolatilisationModel<CloudType>>(cstrIter()(dict, owner));

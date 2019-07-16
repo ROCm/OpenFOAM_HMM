@@ -43,12 +43,13 @@ Foam::kineticTheoryModels::viscosityModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "viscosityModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<viscosityModel>(cstrIter()(dict));

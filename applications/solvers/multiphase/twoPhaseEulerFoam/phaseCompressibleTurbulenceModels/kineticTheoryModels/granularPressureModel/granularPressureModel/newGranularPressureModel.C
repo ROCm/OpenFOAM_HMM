@@ -43,12 +43,13 @@ Foam::kineticTheoryModels::granularPressureModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "granularPressureModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<granularPressureModel>(cstrIter()(dict));

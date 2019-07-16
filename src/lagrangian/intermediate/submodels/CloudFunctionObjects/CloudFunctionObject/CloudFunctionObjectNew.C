@@ -46,12 +46,13 @@ Foam::CloudFunctionObject<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "cloudFunctionObject",
             objectType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<CloudFunctionObject<CloudType>>

@@ -30,26 +30,22 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New
-(
-    const Foam::IOobject& io
-)
+Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New(const IOobject& io)
 {
-    const word modelType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "engineGeometry",
-                io.time().constant(),
-                io.db(),
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).get<word>("engineMesh")
+            "engineGeometry",
+            io.time().constant(),
+            io.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const word modelType(dict.get<word>("engineMesh"));
 
     Info<< "Selecting engineMesh " << modelType << endl;
 
@@ -57,12 +53,13 @@ Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "engineMesh",
             modelType,
             *IOobjectConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<engineMesh>(cstrIter()(io));

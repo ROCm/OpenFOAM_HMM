@@ -125,21 +125,22 @@ Foam::RASModel<BasicTurbulenceModel>::New
     const word& propertiesName
 )
 {
-    const word modelType
+    const IOdictionary modelDict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName(propertiesName, alphaRhoPhi.group()),
-                U.time().constant(),
-                U.db(),
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).subDict("RAS").get<word>("RASModel")
+            IOobject::groupName(propertiesName, alphaRhoPhi.group()),
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const dictionary& dict = modelDict.subDict("RAS");
+
+    const word modelType(dict.get<word>("RASModel"));
 
     Info<< "Selecting RAS turbulence model " << modelType << endl;
 
@@ -147,12 +148,13 @@ Foam::RASModel<BasicTurbulenceModel>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "RASModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<RASModel>

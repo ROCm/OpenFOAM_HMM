@@ -34,21 +34,20 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
     const volVectorField& Urel
 )
 {
-    const word modelType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                "SRFProperties",
-                Urel.time().constant(),
-                Urel.db(),
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).get<word>("SRFModel")
+            "SRFProperties",
+            Urel.time().constant(),
+            Urel.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const word modelType(dict.get<word>("SRFModel"));
 
     Info<< "Selecting SRFModel " << modelType << endl;
 
@@ -56,12 +55,13 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "SRFModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<SRFModel>(cstrIter()(Urel));

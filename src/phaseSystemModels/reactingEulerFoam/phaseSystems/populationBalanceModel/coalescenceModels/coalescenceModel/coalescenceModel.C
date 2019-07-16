@@ -53,12 +53,13 @@ Foam::diameterModels::coalescenceModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "coalescenceModel",
             type,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<coalescenceModel>(cstrIter()(popBal, dict));

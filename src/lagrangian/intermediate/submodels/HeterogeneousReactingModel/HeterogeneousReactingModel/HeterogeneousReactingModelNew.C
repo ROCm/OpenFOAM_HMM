@@ -43,12 +43,13 @@ Foam::HeterogeneousReactingModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "heterogeneousReactingModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<HeterogeneousReactingModel<CloudType>>

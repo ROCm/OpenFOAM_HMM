@@ -73,12 +73,13 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "cellCellStencil",
             stencilType,
             *meshConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<cellCellStencil>(cstrIter()(mesh, dict, update));

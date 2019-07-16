@@ -72,12 +72,13 @@ Foam::autoPtr<Foam::fv::optionAdjoint> Foam::fv::optionAdjoint::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            coeffs,
             "model",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<optionAdjoint>(cstrIter()(name, modelType, coeffs, mesh));

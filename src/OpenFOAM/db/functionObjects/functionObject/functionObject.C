@@ -102,8 +102,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
     if (!dictionaryConstructorTablePtr_)
     {
         FatalErrorInFunction
-            << "Unknown function type "
-            << functionType << nl << nl
+            << "Cannot load function type " << functionType << nl << nl
             << "Table of functionObjects is empty" << endl
             << exit(FatalError);
     }
@@ -112,6 +111,8 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
 
     if (!cstrIter.found())
     {
+        // FatalError (not FatalIOError) to ensure it can be caught
+        // as an exception and ignored
         FatalErrorInLookup
         (
             "function",

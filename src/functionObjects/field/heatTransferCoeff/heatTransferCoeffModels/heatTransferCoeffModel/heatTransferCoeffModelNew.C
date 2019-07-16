@@ -44,12 +44,13 @@ Foam::autoPtr<Foam::heatTransferCoeffModel> Foam::heatTransferCoeffModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "heatTransferCoeffModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<heatTransferCoeffModel>(cstrIter()(dict, mesh, TName));

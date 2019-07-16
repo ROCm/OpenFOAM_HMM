@@ -137,12 +137,13 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInLookup
+            FatalIOErrorInLookup
             (
+                dict,
                 "liquidProperties",
                 liquidType,
                 *dictionaryConstructorTablePtr_
-            ) << exit(FatalError);
+            ) << exit(FatalIOError);
         }
 
         return autoPtr<liquidProperties>
@@ -158,12 +159,13 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "liquidProperties",
             liquidType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<liquidProperties>(cstrIter()(dict));

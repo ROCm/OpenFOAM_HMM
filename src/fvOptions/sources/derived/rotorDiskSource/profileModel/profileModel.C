@@ -78,12 +78,13 @@ Foam::autoPtr<Foam::profileModel> Foam::profileModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "profileModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<profileModel>(cstrIter()(dict, modelName));

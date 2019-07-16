@@ -94,12 +94,13 @@ Foam::AveragingMethod<Type>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "averaging limiter",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<AveragingMethod<Type>>(cstrIter()(io, dict, mesh));

@@ -43,12 +43,13 @@ Foam::RBD::restraint::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "restraint",
             restraintType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<restraint>(cstrIter()(name, dict, model));

@@ -31,14 +31,14 @@ License
 
 Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
 (
-    const dictionary& PDRProperties,
+    const dictionary& dict,
     const compressible::RASModel& turbulence,
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi
 )
 {
-    const word modelType(PDRProperties.get<word>("PDRDragModel"));
+    const word modelType(dict.get<word>("PDRDragModel"));
 
     Info<< "Selecting drag model " << modelType << endl;
 
@@ -46,16 +46,17 @@ Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "PDRDragModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<PDRDragModel>
-        (cstrIter()(PDRProperties, turbulence, rho, U, phi));
+        (cstrIter()(dict, turbulence, rho, U, phi));
 }
 
 

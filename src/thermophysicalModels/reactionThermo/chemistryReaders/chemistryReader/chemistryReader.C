@@ -49,12 +49,13 @@ Foam::chemistryReader<ThermoType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            thermoDict,
             "chemistryReader",
             readerName,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<chemistryReader<ThermoType>>

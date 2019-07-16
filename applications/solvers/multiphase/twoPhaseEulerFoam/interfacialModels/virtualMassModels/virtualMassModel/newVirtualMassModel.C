@@ -45,12 +45,13 @@ Foam::autoPtr<Foam::virtualMassModel> Foam::virtualMassModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "virtualMassModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(dict, pair, true);

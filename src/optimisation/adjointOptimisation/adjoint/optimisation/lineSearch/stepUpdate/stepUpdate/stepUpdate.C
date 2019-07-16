@@ -59,12 +59,13 @@ autoPtr<stepUpdate> stepUpdate::New(const dictionary& dict)
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "stepUpdate",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<stepUpdate>(cstrIter()(dict));

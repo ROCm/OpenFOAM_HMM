@@ -49,12 +49,13 @@ Foam::functionObjects::fieldValue::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             typeName,
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<fieldValue>(cstrIter()(name, obr, dict));

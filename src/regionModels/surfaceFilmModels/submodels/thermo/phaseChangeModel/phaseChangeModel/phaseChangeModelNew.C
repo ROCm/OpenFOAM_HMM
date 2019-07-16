@@ -52,12 +52,13 @@ autoPtr<phaseChangeModel> phaseChangeModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "phaseChangeModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<phaseChangeModel>(cstrIter()(model, dict));

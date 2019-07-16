@@ -43,12 +43,13 @@ Foam::autoPtr<Foam::sixDoFSolver> Foam::sixDoFSolver::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "sixDoFSolver",
             solverType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(dict, body);

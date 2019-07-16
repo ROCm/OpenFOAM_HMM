@@ -102,12 +102,13 @@ autoPtr<lineSearch> lineSearch::New
 
         if (!cstrIter.found())
         {
-            FatalErrorInLookup
+            FatalIOErrorInLookup
             (
+                dict,
                 "lineSearch",
                 modelType,
                 *dictionaryConstructorTablePtr_
-            ) << exit(FatalError);
+            ) << exit(FatalIOError);
         }
 
         lineSrch.reset((cstrIter()(dict, time)).ptr());

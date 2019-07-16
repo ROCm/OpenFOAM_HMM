@@ -47,12 +47,13 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            interfaceDict,
             "dragModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(interfaceDict, phase1, phase2);

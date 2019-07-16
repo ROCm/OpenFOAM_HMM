@@ -32,10 +32,10 @@ License
 Foam::autoPtr<Foam::tetherPotential> Foam::tetherPotential::New
 (
     const word& name,
-    const dictionary& propDict
+    const dictionary& dict
 )
 {
-    const word modelType(propDict.get<word>("tetherPotential"));
+    const word modelType(dict.get<word>("tetherPotential"));
 
     Info<< nl << "Selecting tether potential " << modelType
         << " for " << name << endl;
@@ -44,15 +44,16 @@ Foam::autoPtr<Foam::tetherPotential> Foam::tetherPotential::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "tetherPotential",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<tetherPotential>(cstrIter()(name, propDict));
+    return autoPtr<tetherPotential>(cstrIter()(name, dict));
 }
 
 

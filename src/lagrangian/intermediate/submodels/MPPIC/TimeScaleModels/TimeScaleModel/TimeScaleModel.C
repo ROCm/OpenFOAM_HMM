@@ -75,12 +75,13 @@ Foam::autoPtr<Foam::TimeScaleModel> Foam::TimeScaleModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "time scale model",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<TimeScaleModel>(cstrIter()(dict));

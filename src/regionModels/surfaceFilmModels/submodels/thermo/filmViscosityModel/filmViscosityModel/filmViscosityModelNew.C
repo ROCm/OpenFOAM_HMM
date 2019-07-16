@@ -53,12 +53,13 @@ autoPtr<filmViscosityModel> filmViscosityModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "filmViscosityModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<filmViscosityModel>(cstrIter()(model, dict, mu));

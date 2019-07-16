@@ -44,12 +44,13 @@ Foam::tabulatedWallFunctions::tabulatedWallFunction::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "tabulatedWallFunction",
             functionName,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<tabulatedWallFunction>(cstrIter()(dict, mesh));

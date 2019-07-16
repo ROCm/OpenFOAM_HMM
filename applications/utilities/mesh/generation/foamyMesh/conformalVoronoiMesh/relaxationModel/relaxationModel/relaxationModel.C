@@ -42,11 +42,11 @@ defineRunTimeSelectionTable(relaxationModel, dictionary);
 Foam::relaxationModel::relaxationModel
 (
     const word& type,
-    const dictionary& relaxationDict,
+    const dictionary& dict,
     const Time& runTime
 )
 :
-    dictionary(relaxationDict),
+    dictionary(dict),
     runTime_(runTime),
     coeffDict_(optionalSubDict(type + "Coeffs"))
 {}
@@ -56,11 +56,11 @@ Foam::relaxationModel::relaxationModel
 
 Foam::autoPtr<Foam::relaxationModel> Foam::relaxationModel::New
 (
-    const dictionary& relaxationDict,
+    const dictionary& dict,
     const Time& runTime
 )
 {
-    const word modelType(relaxationDict.get<word>("relaxationModel"));
+    const word modelType(dict.get<word>("relaxationModel"));
 
     Info<< nl << "Selecting relaxationModel " << modelType << endl;
 
@@ -68,15 +68,16 @@ Foam::autoPtr<Foam::relaxationModel> Foam::relaxationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "relaxationModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
-    return autoPtr<relaxationModel>(cstrIter()(relaxationDict, runTime));
+    return autoPtr<relaxationModel>(cstrIter()(dict, runTime));
 }
 
 

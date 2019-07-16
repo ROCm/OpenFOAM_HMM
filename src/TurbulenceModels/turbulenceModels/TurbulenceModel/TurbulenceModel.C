@@ -87,21 +87,20 @@ Foam::TurbulenceModel<Alpha, Rho, BasicTurbulenceModel, TransportModel>::New
     const word& propertiesName
 )
 {
-    const word modelType
+    const IOdictionary dict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName(propertiesName, alphaRhoPhi.group()),
-                U.time().constant(),
-                U.db(),
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).get<word>("simulationType")
+            IOobject::groupName(propertiesName, alphaRhoPhi.group()),
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const word modelType(dict.get<word>("simulationType"));
 
     Info<< "Selecting turbulence model type " << modelType << endl;
 
@@ -109,12 +108,13 @@ Foam::TurbulenceModel<Alpha, Rho, BasicTurbulenceModel, TransportModel>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "simulationType",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<TurbulenceModel>

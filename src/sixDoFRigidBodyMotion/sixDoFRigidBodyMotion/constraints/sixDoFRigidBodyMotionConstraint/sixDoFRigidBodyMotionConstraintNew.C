@@ -33,30 +33,31 @@ Foam::autoPtr<Foam::sixDoFRigidBodyMotionConstraint>
 Foam::sixDoFRigidBodyMotionConstraint::New
 (
     const word& name,
-    const dictionary& sDoFRBMCDict,
+    const dictionary& dict,
     const sixDoFRigidBodyMotion& motion
 )
 {
-    const word constraintType
+    const word modelType
     (
-        sDoFRBMCDict.get<word>("sixDoFRigidBodyMotionConstraint")
+        dict.get<word>("sixDoFRigidBodyMotionConstraint")
     );
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(constraintType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "sixDoFRigidBodyMotionConstraint",
-            constraintType,
+            modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<sixDoFRigidBodyMotionConstraint>
     (
-        cstrIter()(name, sDoFRBMCDict, motion)
+        cstrIter()(name, dict, motion)
     );
 }
 

@@ -184,7 +184,7 @@ public:
 
 
     //- Destructor
-    virtual ~option();
+    virtual ~option() = default;
 
 
     // Member Functions

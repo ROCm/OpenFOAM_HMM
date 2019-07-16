@@ -36,7 +36,11 @@ Foam::radiation::radiationModel::New
     const volScalarField& T
 )
 {
-    IOobject radIO
+    word modelType("none");
+
+    dictionary dict;
+
+    IOobject io
     (
         "radiationProperties",
         T.time().constant(),
@@ -46,10 +50,13 @@ Foam::radiation::radiationModel::New
         false // Do not register
     );
 
-    word modelType("none");
-    if (radIO.typeHeaderOk<IOdictionary>(true))
+    if (io.typeHeaderOk<IOdictionary>(true))
     {
-        IOdictionary(radIO).readEntry("radiationModel", modelType);
+        IOdictionary propDict(io);
+
+        dict = std::move(propDict);
+
+        dict.readEntry("radiationModel", modelType);
     }
     else
     {
@@ -63,12 +70,13 @@ Foam::radiation::radiationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "radiationModel",
             modelType,
             *TConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<radiationModel>(cstrIter()(T));
@@ -90,12 +98,13 @@ Foam::radiation::radiationModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "radiationModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<radiationModel>(cstrIter()(dict, T));

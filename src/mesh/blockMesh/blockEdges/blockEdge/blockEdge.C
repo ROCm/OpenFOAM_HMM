@@ -90,12 +90,13 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "blockEdge",
             edgeType,
             *IstreamConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return autoPtr<blockEdge>(cstrIter()(dict, index, geometry, points, is));

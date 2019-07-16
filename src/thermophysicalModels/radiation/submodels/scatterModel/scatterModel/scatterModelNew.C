@@ -44,12 +44,13 @@ Foam::autoPtr<Foam::radiation::scatterModel> Foam::radiation::scatterModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "scatterModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<scatterModel>(cstrIter()(dict, mesh));

@@ -49,12 +49,13 @@ Foam::autoPtr<Foam::searchableSurface> Foam::searchableSurface::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "searchableSurface",
             searchableSurfaceType,
             *dictConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<searchableSurface>(cstrIter()(io, dict));

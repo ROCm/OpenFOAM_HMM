@@ -46,23 +46,25 @@ autoPtr<surfaceFilmModel> surfaceFilmModel::New
 {
     word modelType(surfaceFilmModels::noFilm::typeName);
 
+    dictionary dict;
+
+    IOobject io
+    (
+        regionType + "Properties",
+        mesh.time().constant(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false // Do not register
+    );
+
+    if (io.typeHeaderOk<IOdictionary>())
     {
-        IOobject dictHeader
-        (
-            regionType + "Properties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false // Do not register
-        );
+        IOdictionary propDict(io);
 
-        if (dictHeader.typeHeaderOk<IOdictionary>())
-        {
-            IOdictionary propDict(dictHeader);
+        dict = std::move(propDict);
 
-            propDict.readEntry("surfaceFilmModel", modelType);
-        }
+        dict.readEntry("surfaceFilmModel", modelType);
     }
 
     Info<< "Selecting surfaceFilmModel " << modelType << endl;
@@ -71,12 +73,13 @@ autoPtr<surfaceFilmModel> surfaceFilmModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "surfaceFilmModel",
             modelType,
             *meshConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<surfaceFilmModel>

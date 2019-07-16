@@ -45,12 +45,13 @@ Foam::InflowBoundaryModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "InflowBoundaryModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<InflowBoundaryModel<CloudType>>(cstrIter()(dict, owner));

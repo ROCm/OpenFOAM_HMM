@@ -42,11 +42,11 @@ Foam::autoPtr<Foam::engineTime> Foam::engineTime::New
 {
     IFstream engineDictFile("."/constantName/dictName);
 
-    dictionary engineDict(engineDictFile);
+    dictionary dict(engineDictFile);
 
     const word engineType
     (
-        engineDict.lookupOrDefault<word>("engineType", "crankConRod")
+        dict.getOrDefault<word>("engineType", "crankConRod")
     );
 
     Info<< "Selecting engine type " << engineType << endl;
@@ -55,12 +55,13 @@ Foam::autoPtr<Foam::engineTime> Foam::engineTime::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "engine",
             engineType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<engineTime>

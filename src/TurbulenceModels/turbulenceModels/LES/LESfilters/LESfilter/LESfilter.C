@@ -52,12 +52,13 @@ Foam::autoPtr<Foam::LESfilter> Foam::LESfilter::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "LESfilter",
             filterType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<LESfilter>(cstrIter()(mesh, dict));

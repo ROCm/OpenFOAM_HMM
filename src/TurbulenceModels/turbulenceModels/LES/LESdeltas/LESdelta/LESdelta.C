@@ -80,12 +80,13 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "LESdelta",
             deltaType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
@@ -119,14 +120,15 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "LESdelta",
             deltaType,
             additionalConstructors
         )
             << " and " << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalError);
+            << exit(FatalIOError);
     }
 
     return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));

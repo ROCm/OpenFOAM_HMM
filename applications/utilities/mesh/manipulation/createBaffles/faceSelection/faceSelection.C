@@ -74,12 +74,13 @@ Foam::autoPtr<Foam::faceSelection> Foam::faceSelection::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "faceSelection",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<faceSelection>(cstrIter()(name, mesh, dict));

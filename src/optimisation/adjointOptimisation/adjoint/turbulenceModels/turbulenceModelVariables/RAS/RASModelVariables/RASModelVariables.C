@@ -186,21 +186,22 @@ autoPtr<RASModelVariables> RASModelVariables::New
     const solverControl& SolverControl
 )
 {
-    const word modelType
+    const IOdictionary modelDict
     (
-        IOdictionary
+        IOobject
         (
-            IOobject
-            (
-                turbulenceModel::propertiesName,
-                mesh.time().constant(),
-                mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false // Do not register
-            )
-        ).subOrEmptyDict("RAS").lookupOrDefault<word>("RASModel", "laminar")
+            turbulenceModel::propertiesName,
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE,
+            false // Do not register
+        )
     );
+
+    const dictionary dict(modelDict.subOrEmptyDict("RAS"));
+
+    const word modelType(dict.getOrDefault<word>("RASModel", "laminar"));
 
     Info<< "Creating references for RASModel variables : " << modelType << endl;
 
@@ -208,12 +209,13 @@ autoPtr<RASModelVariables> RASModelVariables::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "RASModelVariables",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<RASModelVariables>(cstrIter()(mesh, SolverControl));

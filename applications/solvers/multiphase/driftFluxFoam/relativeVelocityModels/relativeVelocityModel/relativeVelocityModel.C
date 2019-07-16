@@ -114,12 +114,13 @@ Foam::autoPtr<Foam::relativeVelocityModel> Foam::relativeVelocityModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "relative velocity",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << abort(FatalError);
+        ) << abort(FatalIOError);
     }
 
     return

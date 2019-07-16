@@ -91,8 +91,6 @@ Foam::displacementMotionSolver::New
     const pointIOField& points0
 )
 {
-    //const word solverTypeName(solverDict.get<word>("solver"));
-
     Info<< "Selecting motion solver: " << solverTypeName << endl;
 
     const_cast<Time&>(mesh.time()).libs().open
@@ -113,12 +111,13 @@ Foam::displacementMotionSolver::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            solverDict,
             "solver",
             solverTypeName,
             *displacementConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<displacementMotionSolver>

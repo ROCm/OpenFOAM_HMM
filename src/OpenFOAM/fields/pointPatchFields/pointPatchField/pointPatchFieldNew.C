@@ -155,7 +155,7 @@ Foam::autoPtr<Foam::pointPatchField<Type>> Foam::pointPatchField<Type>::New
             if (!patchTypeCstrIter.found())
             {
                 FatalIOErrorInFunction(dict)
-                    << "inconsistent patch and patchField types for \n"
+                    << "Inconsistent patch and patchField types for\n"
                     << "    patch type " << p.type()
                     << " and patchField type " << patchFieldType
                     << exit(FatalIOError);

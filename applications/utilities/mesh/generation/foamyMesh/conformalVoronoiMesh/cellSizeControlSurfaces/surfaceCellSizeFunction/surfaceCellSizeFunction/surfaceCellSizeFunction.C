@@ -67,10 +67,7 @@ Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
     const scalar& defaultCellSize
 )
 {
-    const word modelType
-    (
-        dict.get<word>("surfaceCellSizeFunction")
-    );
+    const word modelType(dict.get<word>("surfaceCellSizeFunction"));
 
     Info<< indent << "Selecting surfaceCellSizeFunction " << modelType << endl;
 
@@ -78,12 +75,13 @@ Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "surfaceCellSizeFunction",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<surfaceCellSizeFunction>

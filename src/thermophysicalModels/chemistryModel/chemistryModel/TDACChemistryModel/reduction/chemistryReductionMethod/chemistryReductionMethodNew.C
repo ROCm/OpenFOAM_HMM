@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 OpenFOAM Foundation
@@ -38,25 +38,23 @@ Foam::chemistryReductionMethod<CompType, ThermoType>::New
     TDACChemistryModel<CompType, ThermoType>& chemistry
 )
 {
-    const dictionary& reductionDict(dict.subDict("reduction"));
+    const dictionary& reductionDict = dict.subDict("reduction");
 
     const word methodName(reductionDict.get<word>("method"));
 
     Info<< "Selecting chemistry reduction method " << methodName << endl;
 
-    const word methodTypeName =
+    const word methodTypeName
+    (
         methodName
-      + '<' + CompType::typeName + ',' + ThermoType::typeName() + '>';
+      + '<' + CompType::typeName + ',' + ThermoType::typeName() + '>'
+    );
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodTypeName);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown " << typeName_() << " type " << methodName << endl
-            << endl;
-
-        const wordList names(dictionaryConstructorTablePtr_->toc());
+        constexpr const int nCmpt = 7;
 
         wordList thisCmpts;
         thisCmpts.append(word::null);
@@ -67,12 +65,37 @@ Foam::chemistryReductionMethod<CompType, ThermoType>::New
         );
 
         wordList validNames;
-        forAll(names, i)
+
+        List<wordList> validCmpts;
+        validCmpts.append
+        (
+            // Header
+            wordList
+            ({
+                typeName_(),
+                "reactionThermo",
+                "transport",
+                "thermo",
+                "equationOfState",
+                "specie",
+                "energy"
+            })
+        );
+
+        for
+        (
+            const word& validName
+          : dictionaryConstructorTablePtr_->sortedToc()
+        )
         {
-            const wordList cmpts(basicThermo::splitThermoName(names[i], 7));
+            validCmpts.append
+            (
+                basicThermo::splitThermoName(validName, nCmpt)
+            );
+            const wordList& cmpts = validCmpts.last();
 
             bool isValid = true;
-            for (label i = 1; i < cmpts.size() && isValid; ++ i)
+            for (label i = 1; i < cmpts.size() && isValid; ++i)
             {
                 isValid = isValid && cmpts[i] == thisCmpts[i];
             }
@@ -83,30 +106,19 @@ Foam::chemistryReductionMethod<CompType, ThermoType>::New
             }
         }
 
-        FatalErrorInFunction
-            << "Valid " << typeName_() << " types for this thermodynamic model "
-            << "are:" << endl << validNames << endl;
 
-        List<wordList> validCmpts;
-        validCmpts.append(wordList(7, word::null));
-        validCmpts[0][0] = typeName_();
-        validCmpts[0][1] = "reactionThermo";
-        validCmpts[0][2] = "transport";
-        validCmpts[0][3] = "thermo";
-        validCmpts[0][4] = "equationOfState";
-        validCmpts[0][5] = "specie";
-        validCmpts[0][6] = "energy";
-        forAll(names, i)
-        {
-            validCmpts.append(basicThermo::splitThermoName(names[i], 7));
-        }
-
-        FatalErrorInFunction
+        FatalErrorInLookup
+        (
+            typeName_(),
+            methodName,
+            *dictionaryConstructorTablePtr_
+        )
             << "All " << validCmpts[0][0] << '/' << validCmpts[0][1]
-            << "/thermoPhysics combinations are:" << endl << endl;
-        printTable(validCmpts, FatalErrorInFunction);
+            << "/thermoPhysics combinations:" << nl << nl;
 
-        FatalErrorInFunction << exit(FatalError);
+        // Table of available packages (as constituent parts)
+        printTable(validCmpts, FatalErrorInFunction)
+            << exit(FatalError);
     }
 
     return autoPtr<chemistryReductionMethod<CompType, ThermoType>>

@@ -143,12 +143,13 @@ Foam::functionObjects::runTimePostPro::pointData::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "pointData",
             pointDataType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<pointData>(cstrIter()(parent, dict, colours));

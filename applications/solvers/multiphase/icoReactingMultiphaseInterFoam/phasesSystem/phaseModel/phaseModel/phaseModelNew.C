@@ -34,7 +34,9 @@ Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::New
     const word& phaseName
 )
 {
-    const word modelType(fluid.subDict(phaseName).get<word>("type"));
+    const dictionary& dict = fluid.subDict(phaseName);
+
+    const word modelType(dict.get<word>("type"));
 
     Info<< "Selecting phaseModel for "
         << phaseName << ": " << modelType << endl;
@@ -43,12 +45,13 @@ Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "phaseModel",
             modelType,
             *phaseSystemConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return cstrIter()(fluid, phaseName);

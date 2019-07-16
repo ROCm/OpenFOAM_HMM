@@ -32,14 +32,14 @@ License
 Foam::autoPtr<Foam::barotropicCompressibilityModel>
 Foam::barotropicCompressibilityModel::New
 (
-    const dictionary& compressibilityProperties,
+    const dictionary& dict,
     const volScalarField& gamma,
     const word& psiName
 )
 {
     const word modelType
     (
-        compressibilityProperties.lookup("barotropicCompressibilityModel")
+        dict.get<word>("barotropicCompressibilityModel")
     );
 
     Info<< "Selecting compressibility model " << modelType << endl;
@@ -48,17 +48,18 @@ Foam::barotropicCompressibilityModel::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "barotropicCompressibilityModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<barotropicCompressibilityModel>
     (
-        cstrIter()(compressibilityProperties, gamma, psiName)
+        cstrIter()(dict, gamma, psiName)
     );
 }
 

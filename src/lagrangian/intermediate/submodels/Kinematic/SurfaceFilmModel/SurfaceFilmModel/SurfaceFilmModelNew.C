@@ -45,12 +45,13 @@ Foam::SurfaceFilmModel<CloudType>::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "surfaceFilmModel",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<SurfaceFilmModel<CloudType>>(cstrIter()(dict, owner));

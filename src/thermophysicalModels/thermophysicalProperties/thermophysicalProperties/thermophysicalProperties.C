@@ -90,12 +90,13 @@ Foam::thermophysicalProperties::New
 
     if (!cstrIter.found())
     {
-        FatalErrorInLookup
+        FatalIOErrorInLookup
         (
+            dict,
             "thermophysicalProperties",
             modelType,
             *dictionaryConstructorTablePtr_
-        ) << exit(FatalError);
+        ) << exit(FatalIOError);
     }
 
     return autoPtr<thermophysicalProperties>(cstrIter()(dict));
