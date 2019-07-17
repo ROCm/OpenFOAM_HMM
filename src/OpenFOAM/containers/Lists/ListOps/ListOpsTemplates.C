@@ -321,6 +321,18 @@ Foam::label Foam::inplaceMapValue
 
 
 template<class T>
+Foam::labelList Foam::sortedOrder
+(
+    const UList<T>& input
+)
+{
+    labelList order(input.size());
+    sortedOrder(input, order, typename UList<T>::less(input));
+    return order;
+}
+
+
+template<class T>
 void Foam::sortedOrder
 (
     const UList<T>& input,
@@ -352,6 +364,18 @@ void Foam::sortedOrder
     ListOps::identity(order);
 
     Foam::stableSort(order, comp);
+}
+
+
+template<class T>
+Foam::labelList Foam::duplicateOrder
+(
+    const UList<T>& input
+)
+{
+    labelList order(input.size());
+    duplicateOrder(input, order, typename UList<T>::less(input));
+    return order;
 }
 
 
@@ -393,6 +417,18 @@ void Foam::duplicateOrder
         }
     }
     order.resize(count);
+}
+
+
+template<class T>
+Foam::labelList Foam::uniqueOrder
+(
+    const UList<T>& input
+)
+{
+    labelList order(input.size());
+    uniqueOrder(input, order, typename UList<T>::less(input));
+    return order;
 }
 
 

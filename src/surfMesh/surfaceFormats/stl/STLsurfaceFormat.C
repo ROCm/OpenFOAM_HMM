@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -164,8 +164,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     {
         // Determine the sorted order:
         // use sortedOrder directly (the intermediate list is discarded anyhow)
-        labelList faceMap;
-        sortedOrder(zoneIds, faceMap);
+        labelList faceMap(sortedOrder(zoneIds));
 
         // Generate sorted faces
         forAll(faceMap, facei)

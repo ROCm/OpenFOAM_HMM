@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -1322,8 +1322,7 @@ void Foam::conformalVoronoiMesh::indexDualVertices
 
                 // Sort the vertices so that they will be in the same order on
                 // each processor
-                labelList oldToNew;
-                sortedOrder(cellVerticesPair, oldToNew);
+                labelList oldToNew(sortedOrder(cellVerticesPair));
                 oldToNew = invert(oldToNew.size(), oldToNew);
                 inplaceReorder(oldToNew, cellVertices);
 
@@ -2406,10 +2405,7 @@ void Foam::conformalVoronoiMesh::sortFaces
         << "Sorting faces, owner and neighbour into upper triangular order"
         << endl;
 
-    labelList oldToNew;
-
-    sortedOrder(ownerNeighbourPair, oldToNew);
-
+    labelList oldToNew(sortedOrder(ownerNeighbourPair));
     oldToNew = invert(oldToNew.size(), oldToNew);
 
     inplaceReorder(oldToNew, faces);
@@ -2459,10 +2455,7 @@ void Foam::conformalVoronoiMesh::sortProcPatches
                     << exit(FatalError) << endl;
             }
 
-            labelList oldToNew;
-
-            sortedOrder(sortingIndices, oldToNew);
-
+            labelList oldToNew(sortedOrder(sortingIndices));
             oldToNew = invert(oldToNew.size(), oldToNew);
 
             inplaceReorder(oldToNew, sortingIndices);

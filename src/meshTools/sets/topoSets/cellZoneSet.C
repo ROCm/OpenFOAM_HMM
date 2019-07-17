@@ -45,8 +45,7 @@ namespace Foam
 
 void Foam::cellZoneSet::updateSet()
 {
-    labelList order;
-    sortedOrder(addressing_, order);
+    labelList order(sortedOrder(addressing_));
     inplaceReorder(order, addressing_);
 
     cellSet::clearStorage();

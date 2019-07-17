@@ -186,11 +186,9 @@ void Foam::meshRefinement::collectAndPrint
 
     scalarField magAllPoints(mag(allPoints-point(-0.317, 0.117, 0.501)));
 
-    labelList visitOrder;
-    sortedOrder(magAllPoints, visitOrder);
-    forAll(visitOrder, i)
+    labelList visitOrder(sortedOrder(magAllPoints));
+    for (const label allPointi : visitOrder)
     {
-        label allPointi = visitOrder[i];
         Info<< allPoints[allPointi] << " : " << allData[allPointi]
             << endl;
     }

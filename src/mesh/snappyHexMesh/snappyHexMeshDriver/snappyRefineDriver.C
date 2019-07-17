@@ -2138,8 +2138,7 @@ Foam::label Foam::snappyRefineDriver::directionalSmooth
             }
 
             // Sort the normalized position
-            labelList order;
-            sortedOrder(normalizedPosition, order);
+            labelList order(sortedOrder(normalizedPosition));
 
             DynamicList<scalar> seedPointDist;
 

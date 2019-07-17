@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                 isoAdvector | Copyright (C) 2016-2017 DHI
@@ -299,8 +299,7 @@ void Foam::isoCutCell::calcIsoFacePointsFromEdges()
     DebugPout<< "Calculated isoFace point angles" << endl;
 
     // Sorting isoface points by angle and inserting into isoFacePoints_
-    labelList order(unsortedIsoFacePointAngles.size());
-    Foam::sortedOrder(unsortedIsoFacePointAngles, order);
+    labelList order(sortedOrder(unsortedIsoFacePointAngles));
     isoFacePoints_.append(unsortedIsoFacePoints[order[0]]);
     for (label pi = 1; pi < order.size(); pi++)
     {
@@ -508,8 +507,7 @@ Foam::label Foam::isoCutCell::vofCutCell
     {
         fvert[pi] = f_[pLabels[pi]];
     }
-    labelList order(fvert.size());
-    sortedOrder(fvert, order);
+    labelList order(sortedOrder(fvert));
     scalar f1 = fvert[order.first()];
     scalar f2 = fvert[order.last()];
 

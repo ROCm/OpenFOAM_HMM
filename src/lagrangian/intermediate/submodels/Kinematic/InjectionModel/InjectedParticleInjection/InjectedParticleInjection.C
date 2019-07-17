@@ -110,8 +110,8 @@ void Foam::InjectedParticleInjection<CloudType>::initialise()
     }
 
     // Sort and renumber to ensure lists in ascending time
-    labelList sortedIndices;
-    Foam::sortedOrder(time, sortedIndices);
+    labelList sortedIndices(Foam::sortedOrder(time));
+
     time_ = UIndirectList<scalar>(time, sortedIndices);
     position_ = UIndirectList<point>(position, sortedIndices);
     diameter_ = UIndirectList<scalar>(diameter, sortedIndices);

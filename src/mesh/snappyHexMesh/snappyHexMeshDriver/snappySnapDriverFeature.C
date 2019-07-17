@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -724,8 +724,7 @@ void Foam::snappySnapDriver::correctAttraction
     // Tangential component along edge
     scalar tang = ((pt-edgePt)&edgeNormal);
 
-    labelList order;
-    Foam::sortedOrder(surfaceCounts, order);
+    labelList order(sortedOrder(surfaceCounts));
 
     if (order[0] < order[1])
     {

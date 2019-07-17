@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -97,8 +97,7 @@ void Foam::PatchPostProcessing<CloudType>::write()
                 accessOp<List<scalar>>()
             );
 
-            labelList indices;
-            sortedOrder(globalTimes, indices);
+            labelList indices(sortedOrder(globalTimes));
 
             string header("# Time currentProc " + parcelType::propertyList_);
             patchOutFile<< header.c_str() << nl;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -725,7 +725,6 @@ void Foam::polyTopoChange::getFaceOrder
         label nFaces = cellFaceOffsets[celli+1] - startOfCell;
 
         // Neighbouring cells
-        //SortableList<label> nbr(nFaces);
         nbr.setSize(nFaces);
 
         for (label i = 0; i < nFaces; i++)
@@ -765,21 +764,10 @@ void Foam::polyTopoChange::getFaceOrder
             }
         }
 
-        //nbr.sort();
-        order.setSize(nFaces);
         sortedOrder(nbr, order);
 
-        //forAll(nbr, i)
-        //{
-        //    if (nbr[i] != -1)
-        //    {
-        //        oldToNew[cellFaces[startOfCell + nbr.indices()[i]]] =
-        //            newFacei++;
-        //    }
-        //}
-        forAll(order, i)
+        for (const label index : order)
         {
-            label index = order[i];
             if (nbr[index] != -1)
             {
                 oldToNew[cellFaces[startOfCell + index]] = newFacei++;
@@ -1672,8 +1660,7 @@ void Foam::polyTopoChange::resetZones
         // Sort the addressing
         forAll(addressing, zonei)
         {
-            labelList newToOld;
-            sortedOrder(addressing[zonei], newToOld);
+            labelList newToOld(sortedOrder(addressing[zonei]));
             {
                 labelList newAddressing(addressing[zonei].size());
                 forAll(newAddressing, i)

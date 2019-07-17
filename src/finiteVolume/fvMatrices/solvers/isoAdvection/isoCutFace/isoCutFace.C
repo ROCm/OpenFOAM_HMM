@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                 isoAdvector | Copyright (C) 2016-2017 DHI
@@ -496,8 +496,7 @@ Foam::scalar Foam::isoCutFace::timeIntegratedArea
     scalar tIntArea = 0.0;
 
     // Finding ordering of vertex points
-    labelList order(pTimes.size());
-    sortedOrder(pTimes, order);
+    labelList order(sortedOrder(pTimes));
     const scalar firstTime = pTimes[order.first()];
     const scalar lastTime = pTimes[order.last()];
 

@@ -177,6 +177,10 @@ template<class Container>
 label inplaceMapValue(const Map<label>& mapper, Container& input);
 
 
+//- Return the (stable) sort order for the list
+template<class T>
+labelList sortedOrder(const UList<T>& input);
+
 //- Generate the (stable) sort order for the list
 template<class T>
 void sortedOrder(const UList<T>& input, labelList& order);
@@ -190,6 +194,10 @@ void sortedOrder
     const ListComparePredicate& comp
 );
 
+
+//- Return (sorted) indices corresponding to duplicate list values
+template<class T>
+labelList duplicateOrder(const UList<T>& input);
 
 //- Generate (sorted) indices corresponding to duplicate list values
 template<class T>
@@ -205,6 +213,10 @@ void duplicateOrder
     const ListComparePredicate& comp
 );
 
+
+//- Return (sorted) indices corresponding to unique list values
+template<class T>
+labelList uniqueOrder(const UList<T>& input);
 
 //- Generate (sorted) indices corresponding to unique list values
 template<class T>

@@ -2639,8 +2639,7 @@ Foam::label Foam::meshRefinement::findRegions
                     );
 
                     // Sort according to curveDist
-                    labelList indexSet;
-                    Foam::sortedOrder(allDist, indexSet);
+                    labelList indexSet(Foam::sortedOrder(allDist));
 
                     allLeakPaths.set
                     (

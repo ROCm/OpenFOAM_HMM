@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -161,8 +161,7 @@ Foam::labelList Foam::springRenumber::renumber
     //writeOBJ("endPosition.obj", cellCells, position);
 
     // Move cells to new position
-    labelList shuffle;
-    sortedOrder(position, shuffle);
+    labelList shuffle(sortedOrder(position));
 
     // Reorder oldToNew
     inplaceReorder(shuffle, oldToNew);

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -226,12 +226,10 @@ labelList getFaceOrder
             }
         }
 
-        order.setSize(nbr.size());
         sortedOrder(nbr, order);
 
-        forAll(order, i)
+        for (const label index : order)
         {
-            label index = order[i];
             if (nbr[index] != -1)
             {
                 oldToNewFace[cFaces[index]] = newFacei++;
@@ -495,8 +493,7 @@ autoPtr<mapPolyMesh> reorderMesh
                     newFlipMap[i] = fZone.flipMap()[i];
                 }
             }
-            labelList newToOld;
-            sortedOrder(newAddressing, newToOld);
+            labelList newToOld(sortedOrder(newAddressing));
             fZone.resetAddressing
             (
                 labelUIndList(newAddressing, newToOld)(),
@@ -1010,8 +1007,7 @@ int main(int argc, char *argv[])
             bndCellMap.setSize(nBndCells);
 
             // Sort
-            labelList order;
-            sortedOrder(bndCellMap, order);
+            labelList order(sortedOrder(bndCellMap));
 
             // Redo newReverseCellOrder
             labelList newReverseCellOrder(mesh.nCells(), -1);

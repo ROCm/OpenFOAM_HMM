@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -46,8 +46,7 @@ namespace Foam
 
 void Foam::pointZoneSet::updateSet()
 {
-    labelList order;
-    sortedOrder(addressing_, order);
+    labelList order(sortedOrder(addressing_));
     inplaceReorder(order, addressing_);
 
     pointSet::clearStorage();

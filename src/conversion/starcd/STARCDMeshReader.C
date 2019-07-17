@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -771,8 +771,10 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
     // Sort according to ascending region numbers, but leave
     // "Default_Boundary_Region" as the final patch
     {
-        labelList sortedIndices;
-        sortedOrder(SubList<label>(origRegion, nPatches-1), sortedIndices);
+        labelList sortedIndices
+        (
+            sortedOrder(SubList<label>(origRegion, nPatches-1))
+        );
 
         labelList oldToNew = identity(nPatches);
         forAll(sortedIndices, i)

@@ -388,8 +388,7 @@ void Foam::functionObjects::externalCoupled::checkOrder
     const wordList& regionNames
 )
 {
-    labelList order;
-    sortedOrder(regionNames, order);
+    labelList order(sortedOrder(regionNames));
     if (order != identity(regionNames.size()))
     {
         FatalErrorInFunction

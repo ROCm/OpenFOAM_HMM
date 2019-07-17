@@ -49,6 +49,10 @@ SourceFiles
 namespace Foam
 {
 
+//- Return (stable) sort order for the list
+template<class T>
+labelList sortedOrder(const UPtrList<T>& input);
+
 //- Generate (stable) sort order for the list
 template<class T>
 void sortedOrder(const UPtrList<T>& input, labelList& order);

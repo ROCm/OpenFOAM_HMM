@@ -375,14 +375,13 @@ void Foam::PairCollision<CloudType>::wallInteraction()
             // ascending distance to their nearest point so that
             // grouping occurs around the closest in any group
 
-            labelList sortedOtherSiteIndices;
+            labelList sortedOtherSiteIndices
+            (
+                sortedOrder(otherSiteDistances)
+            );
 
-            sortedOrder(otherSiteDistances, sortedOtherSiteIndices);
-
-            forAll(sortedOtherSiteIndices, siteI)
+            for (const label orderedIndex : sortedOtherSiteIndices)
             {
-                label orderedIndex = sortedOtherSiteIndices[siteI];
-
                 const point& otherPt = otherSitePoints[orderedIndex];
 
                 if

@@ -190,8 +190,7 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
         }
 
         // Sort according to master and redo restriction
-        labelList newToOld;
-        sortedOrder(coarseToMaster, newToOld);
+        labelList newToOld(sortedOrder(coarseToMaster));
         labelList oldToNew(invert(newToOld.size(), newToOld));
 
         fineToCoarse = labelUIndList(oldToNew, fineToCoarse)();

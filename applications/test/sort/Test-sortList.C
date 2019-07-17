@@ -58,10 +58,12 @@ int main(int argc, char *argv[])
     SortableList<label> list1r(list1.size());
     list1r = list1;
 
-    Info<< "unsorted: " << orig << endl;
+    Info<< "unsorted: " << orig << nl
+        << "order:    " << sortedOrder(list1) << endl;
     sort(list1);
     Info<< "sorted:   " << list1 << nl
-        << "indices:  " << order << endl;
+        << "indices:  " << order << nl
+        << "order:    " << sortedOrder(list1) << endl;
 
     list1r.reverseSort();
     Info<< "reverse ..." << nl;

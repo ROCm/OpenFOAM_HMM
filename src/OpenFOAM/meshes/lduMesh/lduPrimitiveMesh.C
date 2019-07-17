@@ -182,16 +182,14 @@ Foam::labelList Foam::lduPrimitiveMesh::upperTriOrder
         label nNbr = offsets[celli+1] - startOfCell;
 
         nbr.setSize(nNbr);
-        order.setSize(nNbr);
-        forAll(order, i)
+        forAll(nbr, i)
         {
             nbr[i] = upper[cellToFaces[offsets[celli]+i]];
         }
         sortedOrder(nbr, order);
 
-        forAll(order, i)
+        for (const label index : order)
         {
-            label index = order[i];
             oldToNew[cellToFaces[startOfCell + index]] = newFacei++;
         }
     }
@@ -807,8 +805,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
             );
         }
 
-        labelList order;
-        sortedOrder(procPairs, order);
+        labelList order(sortedOrder(procPairs));
 
         // Count
         label n = 0;

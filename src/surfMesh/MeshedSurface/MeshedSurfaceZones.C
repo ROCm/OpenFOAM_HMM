@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -85,8 +85,7 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
 
     // Determine the sorted order:
     // use sortedOrder directly since we discard the intermediate list anyhow
-    List<label> faceMap;
-    sortedOrder(zones, faceMap);
+    labelList faceMap(sortedOrder(zones));
     zones.clear();
 
     // Sorted faces
