@@ -665,9 +665,8 @@ Foam::label Foam::polyTopoChange::getCellOrder
                 nbrs.clear();
                 weights.clear();
 
-                forAll(neighbours, nI)
+                for (const label nbr : neighbours)
                 {
-                    label nbr = neighbours[nI];
                     if (!cellRemoved(nbr) && !visited.test(nbr))
                     {
                         // not visited, add to the list
@@ -678,9 +677,9 @@ Foam::label Foam::polyTopoChange::getCellOrder
                 // 2. Sort
                 sortedOrder(weights, order);
                 // 3. Add in sorted order
-                forAll(order, i)
+                for (const label nbri : order)
                 {
-                    nextCell.append(nbrs[i]);
+                    nextCell.append(nbrs[nbri]);
                 }
             }
         }
