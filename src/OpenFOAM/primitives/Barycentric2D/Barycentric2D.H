@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017 OpenFOAM Foundation
@@ -27,8 +27,8 @@ Class
     Foam::Barycentric2D
 
 Description
-    Templated 2D Barycentric derived from VectorSpace. Has 3 components, one of
-    which is redundant.
+    Templated 2D Barycentric derived from VectorSpace.
+    Has 3 components, one of which is redundant.
 
 SourceFiles
     Barycentric2DI.H
@@ -89,15 +89,25 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            inline const Cmpt& a() const;
-            inline const Cmpt& b() const;
-            inline const Cmpt& c() const;
+        inline const Cmpt& a() const;
+        inline const Cmpt& b() const;
+        inline const Cmpt& c() const;
 
-            inline Cmpt& a();
-            inline Cmpt& b();
-            inline Cmpt& c();
+
+    // Edit
+
+        inline Cmpt& a();
+        inline Cmpt& b();
+        inline Cmpt& c();
+
+
+    // Tests
+
+        //- True if any coordinates are negative
+        inline bool outside() const;
+
 };
 
 

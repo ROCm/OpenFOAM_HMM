@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017 OpenFOAM Foundation
@@ -94,6 +94,13 @@ template<class Cmpt>
 inline Cmpt& Foam::Barycentric2D<Cmpt>::c()
 {
     return this->v_[C];
+}
+
+
+template<class Cmpt>
+inline bool Foam::Barycentric2D<Cmpt>::outside() const
+{
+    return ((this->v_[A] < 0) || (this->v_[B]) < 0 || (this->v_[C] < 0));
 }
 
 
