@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -69,6 +69,12 @@ class Istream
         //- The last token put back on the stream
         token putBackToken_;
 
+        //- The label byte-size (could also be stored as byte)
+        unsigned short labelByteSize_;
+
+        //- The scalar byte-size (could also be stored as byte)
+        unsigned short scalarByteSize_;
+
 
 public:
 
@@ -83,7 +89,9 @@ public:
         )
         :
             IOstream(format, version, compression),
-            putBack_(false)
+            putBack_(false),
+            labelByteSize_(sizeof(Foam::label)),
+            scalarByteSize_(sizeof(Foam::scalar))
         {}
 
 
@@ -91,7 +99,34 @@ public:
     virtual ~Istream() = default;
 
 
-    // Member functions
+    // Member Functions
+
+    // Characteristics
+
+        //- The label byte-size associated with the stream
+        inline unsigned labelByteSize() const
+        {
+            return labelByteSize_;
+        }
+
+        //- The scalar byte-size associated with the stream
+        inline unsigned scalarByteSize() const
+        {
+            return scalarByteSize_;
+        }
+
+        //- Associate a label byte-size with the stream
+        inline void setLabelByteSize(unsigned val)
+        {
+            labelByteSize_ = val;
+        }
+
+        //- Associate a scalar byte-size with the stream
+        inline void setScalarByteSize(unsigned val)
+        {
+            scalarByteSize_ = val;
+        }
+
 
         // Read functions
 

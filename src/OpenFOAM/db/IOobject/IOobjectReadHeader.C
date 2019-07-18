@@ -108,6 +108,9 @@ bool Foam::IOobject::readHeader(Istream& is)
             val = foamVersion::scalarByteSize(arch);
             if (val) scalarByteSize_ = val;
         }
+
+        is.setLabelByteSize(labelByteSize_);
+        is.setScalarByteSize(scalarByteSize_);
     }
     else
     {
