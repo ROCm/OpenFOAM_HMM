@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -46,13 +46,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class pointEdgeStructuredWalk;
 
 Istream& operator>>(Istream&, pointEdgeStructuredWalk&);
@@ -60,12 +56,12 @@ Ostream& operator<<(Ostream&, const pointEdgeStructuredWalk&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class pointEdgeStructuredWalk Declaration
+                   Class pointEdgeStructuredWalk Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointEdgeStructuredWalk
 {
-    // Private data
+    // Private Data
 
         //- Starting location
         point point0_;
@@ -78,6 +74,10 @@ class pointEdgeStructuredWalk
 
         //- Passive data
         vector data_;
+
+        //- Index of passive data (optional)
+        label index_;
+
 
     // Private Member Functions
 
@@ -100,22 +100,29 @@ public:
         //- Construct from components
         inline pointEdgeStructuredWalk
         (
-            const point&,
-            const point&,
-            const scalar,
-            const vector&
+            const point& point0,
+            const point& previousPoint,
+            const scalar dist,
+            const vector& data,
+            const label index = -1
         );
 
 
     // Member Functions
 
-        // Access
+    // Access
 
-            inline bool inZone() const;
+        //- True if starting point is valid (ie, not point::max)
+        inline bool inZone() const;
 
-            inline scalar dist() const;
+        //- The distance information
+        inline scalar dist() const;
 
-            inline const vector& data() const;
+        //- Tracking data
+        inline const vector& data() const;
+
+        //- Index (if any) associated with data
+        inline label index() const;
 
 
         // Needed by meshWave

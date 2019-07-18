@@ -30,7 +30,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Update this with w2.
 template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::update
 (
@@ -45,6 +44,7 @@ inline bool Foam::pointEdgeStructuredWalk::update
         dist_ = w2.dist_ + mag(point0_-w2.previousPoint_);
         previousPoint_ = point0_;
         data_ = w2.data_;
+        index_ = w2.index_;
 
         return true;
     }
@@ -55,29 +55,30 @@ inline bool Foam::pointEdgeStructuredWalk::update
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 inline Foam::pointEdgeStructuredWalk::pointEdgeStructuredWalk()
 :
-    point0_(vector::max),
-    previousPoint_(vector::max),
+    point0_(point::max),
+    previousPoint_(point::max),
     dist_(0),
-    data_(Zero)
+    data_(Zero),
+    index_(-1)
 {}
 
 
-// Construct from origin, distance
 inline Foam::pointEdgeStructuredWalk::pointEdgeStructuredWalk
 (
     const point& point0,
     const point& previousPoint,
     const scalar dist,
-    const vector& data
+    const vector& data,
+    const label index
 )
 :
     point0_(point0),
     previousPoint_(previousPoint),
     dist_(dist),
-    data_(data)
+    data_(data),
+    index_(index)
 {}
 
 
@@ -85,14 +86,8 @@ inline Foam::pointEdgeStructuredWalk::pointEdgeStructuredWalk
 
 inline bool Foam::pointEdgeStructuredWalk::inZone() const
 {
-    return point0_ != vector::max;
+    return point0_ != point::max;
 }
-
-
-//inline const Foam::point& Foam::pointEdgeStructuredWalk::previousPoint() const
-//{
-//    return previousPoint_;
-//}
 
 
 inline Foam::scalar Foam::pointEdgeStructuredWalk::dist() const
@@ -107,10 +102,16 @@ inline const Foam::vector& Foam::pointEdgeStructuredWalk::data() const
 }
 
 
+inline Foam::label Foam::pointEdgeStructuredWalk::index() const
+{
+    return index_;
+}
+
+
 template<class TrackingData>
 inline bool Foam::pointEdgeStructuredWalk::valid(TrackingData& td) const
 {
-    return previousPoint_ != vector::max;
+    return previousPoint_ != point::max;
 }
 
 

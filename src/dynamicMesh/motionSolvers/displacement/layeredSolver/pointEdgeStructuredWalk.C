@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -31,24 +31,25 @@ License
 
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::pointEdgeStructuredWalk& wDist
+    Ostream& os,
+    const pointEdgeStructuredWalk& wDist
 )
 {
     return os
         << wDist.point0_ << wDist.previousPoint_
-        << wDist.dist_ << wDist.data_;
+        << wDist.dist_ << wDist.data_ << wDist.index_;
 }
+
 
 Foam::Istream& Foam::operator>>
 (
-    Foam::Istream& is,
-    Foam::pointEdgeStructuredWalk& wDist
+    Istream& is,
+    pointEdgeStructuredWalk& wDist
 )
 {
     return is
         >> wDist.point0_ >> wDist.previousPoint_
-        >> wDist.dist_ >> wDist.data_;
+        >> wDist.dist_ >> wDist.data_ >> wDist.index_;
 }
 
 

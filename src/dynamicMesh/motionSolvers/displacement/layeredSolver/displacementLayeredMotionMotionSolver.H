@@ -63,14 +63,17 @@ SourceFiles
 #define displacementLayeredMotionMotionSolver_H
 
 #include "displacementMotionSolver.H"
-#include "bitSet.H"
+#include "cylindricalCS.H"
+#include "PtrMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward class declarations
+// Forward Declarations
+class bitSet;
+
 
 /*---------------------------------------------------------------------------*\
              Class displacementLayeredMotionMotionSolver Declaration
@@ -80,7 +83,20 @@ class displacementLayeredMotionMotionSolver
 :
     public displacementMotionSolver
 {
+    // Private Data
+
+       //- Cylindrical coordinate systems (per cellZone)
+       PtrMap<coordSystem::cylindrical> cylSystems_;
+
+
     // Private Member Functions
+
+        //- Get existing or create new cylindrical system
+        const coordSystem::cylindrical& getCylindrical
+        (
+            const label cellZoneI,
+            const dictionary& zoneDict
+        );
 
         void calcZoneMask
         (
@@ -97,7 +113,8 @@ class displacementLayeredMotionMotionSolver
             const labelList& seedPoints,
             const vectorField& seedData,
             scalarField& distance,
-            vectorField& data
+            vectorField& data,
+            labelField& patchPoints
         ) const;
 
         tmp<vectorField> faceZoneEvaluate
@@ -137,23 +154,23 @@ public:
         //- Construct from polyMesh and IOdictionary
         displacementLayeredMotionMotionSolver
         (
-            const polyMesh&,
-            const IOdictionary&
+            const polyMesh& mesh,
+            const IOdictionary& dict
         );
 
-        //- Construct from polyMesh, IOdictionary and displacement and
-        //  zero-time fields
+        //- Construct from polyMesh, IOdictionary, displacement and
+        //- zero-time fields
         displacementLayeredMotionMotionSolver
         (
-            const polyMesh&,
-            const IOdictionary&,
-            const pointVectorField&,
-            const pointIOField&
+            const polyMesh& mesh,
+            const IOdictionary& dict,
+            const pointVectorField& pointDisplacement,
+            const pointIOField& points0
         );
 
 
     //- Destructor
-    ~displacementLayeredMotionMotionSolver();
+    ~displacementLayeredMotionMotionSolver() = default;
 
 
     // Member Functions
@@ -165,7 +182,7 @@ public:
         virtual void solve();
 
         //- Update topology
-        virtual void updateMesh(const mapPolyMesh&);
+        virtual void updateMesh(const mapPolyMesh& mpm);
 };
 
 
