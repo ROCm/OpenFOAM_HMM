@@ -112,13 +112,13 @@ public:
         }
 
         //- No elements
-        inline constexpr bool empty() const
+        inline bool empty() const
         {
             return true;
         }
 
         //- Zero elements
-        inline constexpr label size() const
+        inline label size() const
         {
             return 0;
         }
