@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -64,6 +64,12 @@ public:
 
     //- Runtime type information
     TypeNameNoDebug("cartesian");
+
+
+    // Static Members
+
+        //- Global (identity) cartesian coordinate system
+        static const cartesian null;
 
 
     // Constructors

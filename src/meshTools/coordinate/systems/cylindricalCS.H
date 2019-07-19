@@ -105,6 +105,12 @@ public:
     TypeNameNoDebug("cylindrical");
 
 
+    // Static Members
+
+        //- Global (identity) cylindrical coordinate system
+        static const cylindrical null;
+
+
     // Constructors
 
         //- Construct null (identity coordinateSystem)
