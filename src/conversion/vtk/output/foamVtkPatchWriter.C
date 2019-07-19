@@ -721,7 +721,7 @@ bool Foam::vtk::patchWriter::writeProcIDs()
     }
     else
     {
-        vtk::write(format(), Pstream::myProcNo(), nLocalFaces_);
+        vtk::write(format(), label(Pstream::myProcNo()), nLocalFaces_);
 
         good = true;
     }
