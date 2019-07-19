@@ -254,125 +254,129 @@ void Foam::isoSurfaceTopo::fixTetBasePtIs()
 
 
     // Pre-filter: mark all cells with illegal base points
-    labelHashSet problemCells(cells.size()/128);
+    bitSet problemCells(cells.size());
+
     forAll(tetBasePtIs_, facei)
     {
         if (tetBasePtIs_[facei] == -1)
         {
-            problemCells.insert(faceOwner[facei]);
+            problemCells.set(faceOwner[facei]);
+
             if (mesh_.isInternalFace(facei))
             {
-                problemCells.insert(faceNeighbour[facei]);
+                problemCells.set(faceNeighbour[facei]);
             }
         }
     }
 
 
-    label nAdapted = 0;
+    // Mark all points that are shared by just two faces within an adjacent
+    // problem cell as problematic
+    bitSet problemPoints(mesh_.points().size());
 
-
-    // Number of times a point occurs in a cell. Used to detect dangling
-    // vertices (count = 2)
-    Map<label> pointCount;
-
-    // Analyse problem cells for points shared by two faces only
-    forAll(cells, celli)
     {
-        if (problemCells.found(celli))
-        {
-            const cell& cFaces = cells[celli];
+        // Number of times a point occurs in a cell.
+        // Used to detect dangling vertices (count = 2)
+        Map<label> pointCount;
 
+        // Analyse problem cells for points shared by two faces only
+        for (const label celli : problemCells)
+        {
             pointCount.clear();
 
-            forAll(cFaces, i)
+            for (const label facei : cells[celli])
             {
-                const label facei = cFaces[i];
-                const face& f = faces[facei];
-                forAll(f, fp)
+                for (const label pointi : faces[facei])
                 {
-                    const label pointi = f[fp];
-
-                    Map<label>::iterator pointFnd = pointCount.find(pointi);
-                    if (pointFnd == pointCount.end())
-                    {
-                        pointCount.insert(pointi, 1);
-                    }
-                    else
-                    {
-                        ++pointFnd();
-                    }
+                    ++pointCount(pointi);
                 }
             }
 
-            // Check for any points with count 2
-            bool haveDangling = false;
             forAllConstIters(pointCount, iter)
             {
-                if (iter() == 1)
+                if (iter.val() == 1)
                 {
-                    FatalErrorInFunction << "point:" << iter.key()
+                    FatalErrorInFunction
+                        << "point:" << iter.key()
                         << " at:" << mesh_.points()[iter.key()]
-                        << " only used by one face" << exit(FatalError);
+                        << " only used by one face" << nl
+                        << exit(FatalError);
                 }
-                else if (iter() == 2)
+                else if (iter.val() == 2)
                 {
-                    haveDangling = true;
-                    break;
-                }
-            }
-
-            if (haveDangling)
-            {
-                // Any point next to a dangling point should not be used
-                // as the fan base since this would cause two duplicate
-                // triangles.
-                forAll(cFaces, i)
-                {
-                    const label facei = cFaces[i];
-                    if (tetBasePtIs_[facei] == -1)
-                    {
-                        const face& f = faces[facei];
-
-                        // All the possible base points cause negative tets.
-                        // Choose the least-worst one
-                        scalar maxQ = -GREAT;
-                        label maxFp = -1;
-
-                        label prevCount = pointCount[f.last()];
-                        forAll(f, fp)
-                        {
-                            label nextCount = pointCount[f[f.fcIndex(fp)]];
-
-                            if (prevCount > 2 && nextCount > 2)
-                            {
-                                const scalar q = minTetQ(facei, fp);
-                                if (q > maxQ)
-                                {
-                                    maxQ = q;
-                                    maxFp = fp;
-                                }
-                            }
-                            prevCount = pointCount[f[fp]];
-                        }
-
-                        if (maxFp != -1)
-                        {
-                            // Least worst base point
-                            tetBasePtIs_[facei] = maxFp;
-                        }
-                        else
-                        {
-                            // No point found on face that would not result
-                            // in some duplicate triangle. Very rare. Do what?
-                            tetBasePtIs_[facei] = 0;
-                        }
-
-                        nAdapted++;
-                    }
+                    problemPoints.set(iter.key());
                 }
             }
         }
     }
+
+
+    // For all faces which form a part of a problem-cell, check if the base
+    // point is adjacent to any problem points. If it is, re-calculate the base
+    // point so that it is not.
+    label nAdapted = 0;
+    forAll(tetBasePtIs_, facei)
+    {
+        if
+        (
+            problemCells[faceOwner[facei]]
+         || (mesh_.isInternalFace(facei) && problemCells[faceNeighbour[facei]])
+        )
+        {
+            const face& f = faces[facei];
+
+            // Check if either of the points adjacent to the base point is a
+            // problem point. If not, the existing base point can be retained.
+            const label fp0 = tetBasePtIs_[facei] < 0 ? 0 : tetBasePtIs_[facei];
+
+            if
+            (
+                !problemPoints[f[f.rcIndex(fp0)]]
+             && !problemPoints[f[f.fcIndex(fp0)]]
+            )
+            {
+                continue;
+            }
+
+            // A new base point is required. Pick the point that results in the
+            // least-worst tet and which is not adjacent to any problem points.
+            scalar maxQ = -GREAT;
+            label maxFp = -1;
+            forAll(f, fp)
+            {
+                if
+                (
+                    !problemPoints[f[f.rcIndex(fp)]]
+                 && !problemPoints[f[f.fcIndex(fp)]]
+                )
+                {
+                    const scalar q = minTetQ(facei, fp);
+                    if (q > maxQ)
+                    {
+                        maxQ = q;
+                        maxFp = fp;
+                    }
+                }
+            }
+
+            if (maxFp != -1)
+            {
+                // Success! Set the new base point
+                tetBasePtIs_[facei] = maxFp;
+            }
+            else
+            {
+                // No point was found on face that would not result in some
+                // duplicate triangle. Do what? Continue and hope? Spit an
+                // error? Silently or noisily reduce the filtering level?
+
+                tetBasePtIs_[facei] = 0;
+            }
+
+            ++nAdapted;
+        }
+    }
+
 
     if (debug)
     {
