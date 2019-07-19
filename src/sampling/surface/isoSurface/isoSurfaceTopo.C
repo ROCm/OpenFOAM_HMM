@@ -1181,7 +1181,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             << min(pVals_) << " / "
             << max(pVals_) << nl
             << "    isoValue      : " << iso << nl
-            << "    filter        : " << filter << nl
+            << "    filter        : " << int(filter) << nl
             << "    mesh span     : " << mesh.bounds().mag() << nl
             << "    ignoreCells   : " << ignoreCells_.count()
             << " / " << cVals_.size() << nl
@@ -1270,15 +1270,9 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     }
 
 
-    surfZoneList allZones(1);
-    allZones[0] = surfZone
-    (
-        "allFaces",
-        allTris.size(),     // Size
-        0,                  // Start
-        0                   // Index
-    );
+    surfZoneList allZones(one(), surfZone("allFaces", allTris.size()));
 
+    MeshStorage::clear();
     MeshStorage updated
     (
         std::move(allPoints),
@@ -1302,7 +1296,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
     }
 
 
-    if (filter != NONE)
+    if (filter != filterType::NONE)
     {
         // Triangulate outside (filter edges to cell centres and optionally
         // face diagonals)
@@ -1312,7 +1306,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
         (
             removeInsidePoints
             (
-                (filter == DIAGCELL ? true : false),
+                (filter == filterType::DIAGCELL ? true : false),
                 *this,
                 pointFromDiag,
                 pointToFace_,
@@ -1335,7 +1329,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
         }
 
 
-        if (filter == DIAGCELL && ignoreCells_.empty())
+        if (filter == filterType::DIAGCELL && ignoreCells_.empty())
         {
             // Note that the following only works without cell subsets
             // thus we skip this when ignoreCells_ is non-empty

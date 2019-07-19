@@ -72,6 +72,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfacesFwd.H"
+#include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,14 +99,14 @@ class sampledIsoSurfaceCell
         //- Iso value
         const scalar isoVal_;
 
-        //- Optional bounding box to trim triangles against
-        const boundBox bounds_;
-
-        //- Whether to coarse
-        const bool regularise_;
+        //- Filtering for iso-surface triangles
+        const isoSurfaceBase::filterType filter_;
 
         //- Whether to recalculate cell values as average of point values
         const bool average_;
+
+        //- Optional bounding box to trim triangles against
+        const boundBox bounds_;
 
 
     // Recreated for every isoSurface

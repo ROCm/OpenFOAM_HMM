@@ -56,7 +56,7 @@ Usage
         planeType | plane description (pointAndNormal etc)  | yes |
         mergeTol | tolerance for merging points             | no  | 1e-6
         isoAlgorithm | (cell/topo/point)                    | no  | point
-        regularise | point snapping                         | no  | true
+        regularise | point snapping (bool or enum)          | no  | true
         bounds   | limit with bounding box                  | no  |
         zone     | limit to cell zone (name or regex)       | no  |
         zones    | limit to cell zones (names, regexs)      | no  |
@@ -108,14 +108,14 @@ class sampledCuttingPlane
         //- Merge tolerance
         const scalar mergeTol_;
 
-        //- Whether to coarsen
-        const bool regularise_;
+        //- The iso-surface algorithm type
+        const isoSurfaceBase::algorithmType isoAlgo_;
+
+        //- Filtering for iso-surface triangles
+        const isoSurfaceBase::filterType filter_;
 
         //- Whether to recalculate cell values as average of point values
         const bool average_;
-
-        //- The iso-surface algorithm type
-        const isoSurfaceBase::algorithmType isoAlgo_;
 
         //- The zone or zones in which cutting is to occur
         wordRes zoneNames_;

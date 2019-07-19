@@ -48,17 +48,17 @@ Usage
 
     Where the sub-entries comprise:
     \table
-        Property | Description                             | Required | Default
-        type     | sampledIsoSurface                       | yes      |
-        isoField | field name for obtaining iso-surface    | yes      |
-        isoValue | value of iso-surface                    | yes      |
-        mergeTol | tolerance for merging points            | no       | 1e-6
-        regularise | point snapping                        | yes      |
-        average  | cell values from averaged point values  | no       | false
-        bounds   | limit with bounding box                 | no       |
-        zone     | limit to cell zone (name or regex)      | no       |
-        zones    | limit to cell zones (names, regexs)     | no       |
-        exposedPatchName | name for zone subset            | partly   |
+        Property | Description                              | Required | Default
+        type     | sampledIsoSurface                        | yes |
+        isoField | field name for obtaining iso-surface     | yes |
+        isoValue | value of iso-surface                     | yes |
+        mergeTol | tolerance for merging points             | no  | 1e-6
+        regularise | point snapping (bool or enum)          | no  | true
+        average  | cell values from averaged point values   | no  | false
+        bounds   | limit with bounding box                  | no  |
+        zone     | limit to cell zone (name or regex)       | no  |
+        zones    | limit to cell zones (names, regexs)      | no  |
+        exposedPatchName | name for zone subset             | partly |
     \endtable
 
 SourceFiles
@@ -94,17 +94,17 @@ class sampledIsoSurface
         //- Iso value
         const scalar isoVal_;
 
-        //- Optional bounding box to trim triangles against
-        const boundBox bounds_;
-
         //- Merge tolerance
         const scalar mergeTol_;
 
-        //- Whether to coarsen
-        const bool regularise_;
+        //- Filtering for iso-surface triangles
+        const isoSurfaceBase::filterType filter_;
 
         //- Whether to recalculate cell values as average of point values
         const bool average_;
+
+        //- Optional bounding box to trim triangles against
+        const boundBox bounds_;
 
         //- The zone or zones for the iso-surface
         wordRes zoneNames_;

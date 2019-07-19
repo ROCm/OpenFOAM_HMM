@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -83,8 +83,11 @@ public:
 
     // Constructors
 
-        //- Construct null with zero start, size
+        //- Construct null with zero start, size, index
         surfZone();
+
+        //- Construct with name, size. With zero start, index
+        surfZone(const word& name, const label size);
 
         //- Construct from components
         surfZone

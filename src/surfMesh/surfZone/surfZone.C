@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2012 OpenFOAM Foundation
@@ -43,6 +43,14 @@ Foam::surfZone::surfZone()
 :
     surfZoneIdentifier(),
     size_(0),
+    start_(0)
+{}
+
+
+Foam::surfZone::surfZone(const word& name, const label size)
+:
+    surfZoneIdentifier(name, 0, word::null),
+    size_(size),
     start_(0)
 {}
 

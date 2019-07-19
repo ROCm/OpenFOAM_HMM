@@ -39,6 +39,62 @@ Foam::isoSurfaceBase::algorithmNames
 });
 
 
+const Foam::Enum
+<
+    Foam::isoSurfaceBase::filterType
+>
+Foam::isoSurfaceBase::filterNames
+({
+    { filterType::NONE, "none" },
+    { filterType::CELL, "cell" },
+    { filterType::DIAGCELL, "diagcell" },
+    { filterType::PARTIAL, "partial" },
+    { filterType::FULL, "full" },
+});
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::isoSurfaceBase::filterType
+Foam::isoSurfaceBase::getFilterType
+(
+    const dictionary& dict,
+    const isoSurfaceBase::filterType deflt
+)
+{
+    word filterName;
+
+    if (!dict.readIfPresent("regularise", filterName, keyType::LITERAL))
+    {
+        return deflt;
+    }
+
+    // Try as bool
+    Switch sw(filterName, true);
+
+    if (sw.valid())
+    {
+        return
+        (
+            sw
+          ? deflt
+          : isoSurfaceBase::filterType::NONE
+        );
+    }
+
+    // As enum
+    if (!isoSurfaceBase::filterNames.found(filterName))
+    {
+        FatalIOErrorInFunction(dict)
+            << filterName << " is not in enumeration: "
+            << isoSurfaceBase::filterNames << nl
+            << exit(FatalIOError);
+    }
+
+    return isoSurfaceBase::filterNames[filterName];
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::isoSurfaceBase::isoSurfaceBase

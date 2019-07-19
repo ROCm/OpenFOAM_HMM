@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -362,7 +362,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
                 vfld,
                 *pointSubFieldPtr_,
                 isoVal_,
-                regularise_,
+                filter_,
                 bounds_,
                 mergeTol_
             )
@@ -379,7 +379,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
                 vfld,
                 *pointFieldPtr_,
                 isoVal_,
-                regularise_,
+                filter_,
                 bounds_,
                 mergeTol_
             )
@@ -391,8 +391,8 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     {
         Pout<< "sampledIsoSurface::updateGeometry() : constructed iso:"
             << nl
-            << "    regularise     : " << regularise_ << nl
-            << "    average        : " << average_ << nl
+            << "    filter         : " << Switch(bool(filter_)) << nl
+            << "    average        : " << Switch(average_) << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl;
         if (subMeshPtr_.valid())
@@ -422,10 +422,17 @@ Foam::sampledIsoSurface::sampledIsoSurface
     sampledSurface(name, mesh, dict),
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
-    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
-    mergeTol_(dict.lookupOrDefault("mergeTol", 1e-6)),
-    regularise_(dict.lookupOrDefault("regularise", true)),
-    average_(dict.lookupOrDefault("average", false)),
+    mergeTol_(dict.getOrDefault<scalar>("mergeTol", 1e-6)),
+    filter_
+    (
+        isoSurfaceBase::getFilterType
+        (
+            dict,
+            isoSurfaceBase::filterType::DIAGCELL
+        )
+    ),
+    average_(dict.getOrDefault("average", false)),
+    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
     zoneNames_(),
     exposedPatchName_(),
     surfPtr_(nullptr),

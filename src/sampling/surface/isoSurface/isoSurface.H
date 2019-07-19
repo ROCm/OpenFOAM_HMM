@@ -385,12 +385,32 @@ public:
     friend class isoSurfaceCell;
     friend class isoSurfaceTopo;
 
+    //- Filtering type
+    using isoSurfaceBase::filterType;
+
 
     //- Runtime type information
     TypeName("isoSurface");
 
 
     // Constructors
+
+        //- Construct from cell values and point values.
+        //  Uses boundaryField for boundary values.
+        //  Holds reference to cellIsoVals and pointIsoVals.
+        //
+        //  \param bounds optional bounding box for trimming
+        //  \param mergeTol fraction of mesh bounding box for merging points
+        isoSurface
+        (
+            const volScalarField& cellValues,
+            const scalarField& pointValues,
+            const scalar iso,
+            const isoSurfaceBase::filterType filter,
+            const boundBox& bounds = boundBox::invertedBox,
+            const scalar mergeTol = 1e-6
+        );
+
 
         //- Construct from cell values and point values.
         //  Uses boundaryField for boundary values.

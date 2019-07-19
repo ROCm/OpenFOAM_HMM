@@ -1339,6 +1339,28 @@ Foam::isoSurface::isoSurface
     const volScalarField& cellValues,
     const scalarField& pointValues,
     const scalar iso,
+    const isoSurfaceBase::filterType filter,
+    const boundBox& bounds,
+    const scalar mergeTol
+)
+:
+    isoSurface
+    (
+        cellValues,
+        pointValues,
+        iso,
+        (filter != filterType::NONE),
+        bounds,
+        mergeTol
+    )
+{}
+
+
+Foam::isoSurface::isoSurface
+(
+    const volScalarField& cellValues,
+    const scalarField& pointValues,
+    const scalar iso,
     const bool regularise,
     const boundBox& bounds,
     const scalar mergeTol
@@ -1361,7 +1383,7 @@ Foam::isoSurface::isoSurface
             << min(pVals_) << " / "
             << max(pVals_) << nl
             << "    isoValue      : " << iso << nl
-            << "    regularise    : " << regularise_ << nl
+            << "    filter        : " << Switch(regularise_) << nl
             << "    mergeTol      : " << mergeTol << nl
             << endl;
     }

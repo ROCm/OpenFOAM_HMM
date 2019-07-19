@@ -138,7 +138,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             cellAvg,
             tpointFld().primitiveField(),
             isoVal_,
-            regularise_,
+            filter_,
             bounds_
         );
 
@@ -157,7 +157,7 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
             cellFld.primitiveField(),
             tpointFld().primitiveField(),
             isoVal_,
-            regularise_,
+            filter_,
             bounds_
         );
 
@@ -173,8 +173,8 @@ bool Foam::sampledIsoSurfaceCell::updateGeometry() const
     {
         Pout<< "sampledIsoSurfaceCell::updateGeometry() : constructed iso:"
             << nl
-            << "    regularise     : " << regularise_ << nl
-            << "    average        : " << average_ << nl
+            << "    filter         : " << Switch(bool(filter_)) << nl
+            << "    average        : " << Switch(average_) << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
             << "    bounds         : " << bounds_ << nl
@@ -200,9 +200,16 @@ Foam::sampledIsoSurfaceCell::sampledIsoSurfaceCell
     MeshStorage(),
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
-    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
-    regularise_(dict.lookupOrDefault("regularise", true)),
-    average_(dict.lookupOrDefault("average", true)),
+    filter_
+    (
+        isoSurfaceBase::getFilterType
+        (
+            dict,
+            isoSurfaceBase::filterType::DIAGCELL
+        )
+    ),
+    average_(dict.getOrDefault("average", true)),
+    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
     prevTimeIndex_(-1),
     meshCells_()
 {}

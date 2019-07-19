@@ -46,6 +46,7 @@ namespace Foam
     );
 }
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::sampledCuttingPlane::checkBoundsIntersection
@@ -305,7 +306,7 @@ void Foam::sampledCuttingPlane::createGeometry()
                 cellDistance,
                 pointDistance_,
                 0,
-                regularise_,
+                filter_,
                 bounds_,
                 mergeTol_
             )
@@ -321,7 +322,7 @@ void Foam::sampledCuttingPlane::createGeometry()
                 cellDistance,
                 pointDistance_,
                 0,
-                (regularise_ ? isoSurfaceTopo::DIAGCELL : isoSurfaceTopo::NONE),
+                filter_,
                 bounds_
             )
         );
@@ -335,7 +336,7 @@ void Foam::sampledCuttingPlane::createGeometry()
                 cellDistance,
                 pointDistance_,
                 0,
-                regularise_,
+                filter_,
                 bounds_,
                 mergeTol_
             )
@@ -361,10 +362,8 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
 :
     sampledSurface(name, mesh, dict),
     plane_(dict),
-    bounds_(dict.lookupOrDefault("bounds", boundBox::invertedBox)),
-    mergeTol_(dict.lookupOrDefault("mergeTol", 1e-6)),
-    regularise_(dict.lookupOrDefault("regularise", true)),
-    average_(dict.lookupOrDefault("average", false)),
+    bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
+    mergeTol_(dict.getOrDefault<scalar>("mergeTol", 1e-6)),
     isoAlgo_
     (
         isoSurfaceBase::algorithmNames.getOrDefault
@@ -374,6 +373,15 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
             isoSurfaceBase::ALGO_POINT
         )
     ),
+    filter_
+    (
+        isoSurfaceBase::getFilterType
+        (
+            dict,
+            isoSurfaceBase::filterType::DIAGCELL
+        )
+    ),
+    average_(dict.getOrDefault("average", false)),
     zoneNames_(),
     exposedPatchName_(),
     needsUpdate_(true),

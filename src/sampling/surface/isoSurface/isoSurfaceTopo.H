@@ -59,20 +59,7 @@ class isoSurfaceTopo
 :
     public isoSurfaceBase
 {
-public:
-
-        enum filterType
-        {
-            NONE,       // No filtering
-            DIAGCELL,   // Remove points from face-diagonal and pyramid
-                        // (vertex to cell-centre) edges
-            CELL        // Only remove points from pyramid edges
-        };
-
-
-private:
-
-    // Private data
+    // Private Data
 
         enum cellCutType
         {
@@ -208,6 +195,10 @@ private:
 
 public:
 
+    //- Filtering type
+    using isoSurfaceBase::filterType;
+
+
     //- Runtime type information
     TypeName("isoSurfaceTopo");
 
@@ -221,7 +212,7 @@ public:
             const scalarField& cellValues,
             const scalarField& pointValues,
             const scalar iso,
-            const filterType filter = DIAGCELL,
+            const filterType filter = filterType::DIAGCELL,
             const boundBox& bounds = boundBox::invertedBox,
             const bitSet& ignoreCells = bitSet()
         );

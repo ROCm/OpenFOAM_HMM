@@ -49,12 +49,12 @@ Usage
 
     Where the sub-entries comprise:
     \table
-        Property | Description                             | Required | Default
-        type     | isoSurfaceTopo                          | yes      |
-        isoField | field name for obtaining iso-surface    | yes      |
-        isoValue | value of iso-surface                    | yes      |
-        regularise | filter faces                          | no       | true
-        triangulate | triangulate faces (if regularise)    | no       | false
+        Property | Description                              | Required | Default
+        type     | isoSurfaceTopo                           | yes |
+        isoField | field name for obtaining iso-surface     | yes |
+        isoValue | value of iso-surface                     | yes |
+        regularise | filter faces (bool or enum)            | no  | true
+        triangulate | triangulate faces (if regularise)     | no  | false
     \endtable
 
 Note
@@ -71,6 +71,7 @@ SourceFiles
 #include "sampledSurface.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfacesFwd.H"
+#include "isoSurfaceBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -97,11 +98,12 @@ class sampledIsoSurfaceTopo
         //- Iso value
         const scalar isoVal_;
 
-        //- Whether to coarse
-        const bool regularise_;
+        //- Filtering for iso-surface triangles
+        const isoSurfaceBase::filterType filter_;
 
         //- Whether to triangulate
         const bool triangulate_;
+
 
     // Recreated for every isoSurface
 

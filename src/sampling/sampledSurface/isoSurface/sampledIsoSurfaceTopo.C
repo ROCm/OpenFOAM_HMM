@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2018 OpenFOAM Foundation
@@ -117,7 +117,7 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
         cellFld.primitiveField(),
         tpointFld().primitiveField(),
         isoVal_,
-        (regularise_ ? isoSurfaceTopo::DIAGCELL : isoSurfaceTopo::NONE)
+        filter_
     );
 
     MeshedSurface<face>& mySurface = const_cast<sampledIsoSurfaceTopo&>(*this);
@@ -140,8 +140,9 @@ bool Foam::sampledIsoSurfaceTopo::updateGeometry() const
     {
         Pout<< "sampledIsoSurfaceTopo::updateGeometry() : constructed iso:"
             << nl
-            << "    regularise     : " << regularise_ << nl
-            << "    triangulate    : " << triangulate_ << nl
+            << "    filter         : " << isoSurfaceBase::filterNames[filter_]
+            << nl
+            << "    triangulate    : " << Switch(triangulate_) << nl
             << "    isoField       : " << isoField_ << nl
             << "    isoValue       : " << isoVal_ << nl
             << "    points         : " << points().size() << nl
@@ -166,15 +167,23 @@ Foam::sampledIsoSurfaceTopo::sampledIsoSurfaceTopo
     MeshStorage(),
     isoField_(dict.get<word>("isoField")),
     isoVal_(dict.get<scalar>("isoValue")),
-    regularise_(dict.lookupOrDefault("regularise", true)),
-    triangulate_(dict.lookupOrDefault("triangulate", false)),
+    filter_
+    (
+        isoSurfaceBase::getFilterType
+        (
+            dict,
+            isoSurfaceBase::filterType::DIAGCELL
+        )
+    ),
+    triangulate_(dict.getOrDefault("triangulate", false)),
     prevTimeIndex_(-1),
     meshCells_()
 {
-    if (triangulate_ && !regularise_)
+    if (triangulate_ && filter_ != isoSurfaceBase::filterType::NONE)
     {
-        FatalIOErrorInFunction(dict) << "Cannot both use regularise"
-            << " and triangulate" << exit(FatalIOError);
+        FatalIOErrorInFunction(dict)
+            << "Cannot both use triangulate and regularise" << nl
+            << exit(FatalIOError);
     }
 }
 

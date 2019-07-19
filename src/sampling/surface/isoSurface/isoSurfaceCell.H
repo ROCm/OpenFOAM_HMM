@@ -308,11 +308,32 @@ class isoSurfaceCell
 
 public:
 
+    //- Filtering type
+    using isoSurfaceBase::filterType;
+
+
     //- Runtime type information
     TypeName("isoSurfaceCell");
 
 
     // Constructors
+
+        //- Construct from cell and point values
+        //
+        //  \param bounds optional bounding box for trimming
+        //  \param mergeTol fraction of mesh bounding box for merging points
+        //  \param ignoreCells cells to ignore in the cellValues
+        isoSurfaceCell
+        (
+            const polyMesh& mesh,
+            const scalarField& cellValues,
+            const scalarField& pointValues,
+            const scalar iso,
+            const isoSurfaceBase::filterType filter,
+            const boundBox& bounds = boundBox::invertedBox,
+            const scalar mergeTol = 1e-6,
+            const bitSet& ignoreCells = bitSet()
+        );
 
         //- Construct from cell and point values
         //

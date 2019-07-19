@@ -78,7 +78,6 @@ namespace Foam
         return algo;
     }
 
-
 } // End namespace Foam
 
 
@@ -114,8 +113,15 @@ Foam::distanceSurface::distanceSurface
     (
         distance_ < 0 || equal(distance_, Zero) || dict.get<bool>("signed")
     ),
-    regularise_(dict.getOrDefault("regularise", true)),
     isoAlgo_(getIsoAlgorithm(dict)),
+    filter_
+    (
+        isoSurfaceBase::getFilterType
+        (
+            dict,
+            isoSurfaceBase::filterType::DIAGCELL
+        )
+    ),
     bounds_(dict.getOrDefault("bounds", boundBox::invertedBox)),
     isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
@@ -132,7 +138,7 @@ Foam::distanceSurface::distanceSurface
     const scalar distance,
     const bool signedDistance,
     const isoSurfaceBase::algorithmType algo,
-    const bool regularise,
+    const isoSurfaceBase::filterType filter,
     const boundBox& bounds
 )
 :
@@ -159,8 +165,8 @@ Foam::distanceSurface::distanceSurface
     (
         signedDistance || distance_ < 0 || equal(distance_, Zero)
     ),
-    regularise_(regularise),
     isoAlgo_(algo),
+    filter_(filter),
     bounds_(bounds),
     isoSurfPtr_(nullptr),
     isoSurfCellPtr_(nullptr),
@@ -411,7 +417,7 @@ void Foam::distanceSurface::createGeometry()
                 cellDistance,
                 pointDistance_,
                 distance_,
-                regularise_,
+                filter_,
                 bounds_,
                 1e-6,  // mergeTol
                 ignoreCells
@@ -428,7 +434,7 @@ void Foam::distanceSurface::createGeometry()
                 cellDistance,
                 pointDistance_,
                 distance_,
-                (regularise_ ? isoSurfaceTopo::DIAGCELL : isoSurfaceTopo::NONE),
+                filter_,
                 bounds_,
                 ignoreCells
             )
@@ -443,7 +449,7 @@ void Foam::distanceSurface::createGeometry()
                 cellDistance,
                 pointDistance_,
                 distance_,
-                regularise_,
+                filter_,
                 bounds_,
                 1e-6
             )

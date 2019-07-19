@@ -38,7 +38,7 @@ Usage
         distance | distance from surface                    | yes |
         signed   | Use sign when distance is positive       | partly |
         isoAlgorithm | (cell/topo/point)                    | no  | cell
-        regularise | Point snapping for iso-surface         | no  | true
+        regularise | Point snapping (enum or bool)          | no  | true
         bounds   | Limit with bounding box                  | no  |
         surfaceType | Type of surface                       | yes |
         surfaceName | Name of surface in \c triSurface/     | no  | dict name
@@ -94,11 +94,11 @@ class distanceSurface
         //- Signed distance
         const bool signed_;
 
-        //- Whether to coarsen iso-surface triangles
-        const bool regularise_;
-
         //- The iso-surface algorithm type
         const isoSurfaceBase::algorithmType isoAlgo_;
+
+        //- Filtering for iso-surface triangles
+        const isoSurfaceBase::filterType filter_;
 
         //- Optional bounding box to trim against
         const boundBox bounds_;
@@ -144,7 +144,7 @@ public:
             const scalar distance,
             const bool signedDistance,
             const isoSurfaceBase::algorithmType algo,
-            const bool regularise,
+            const isoSurfaceBase::filterType filter,
             const boundBox& bounds = boundBox::invertedBox
         );
 

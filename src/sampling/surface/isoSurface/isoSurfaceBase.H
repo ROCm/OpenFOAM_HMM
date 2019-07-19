@@ -82,18 +82,45 @@ public:
     };
 
 
+    //- The filtering (regularization) to apply
+    enum class filterType : uint8_t
+    {
+        NONE = 0,   //!< No filtering
+        CELL,       //!< Remove points from pyramid edges
+        DIAGCELL,   //!< Remove points from pyramid edges and face-diagonals
+        PARTIAL = CELL,     //!< Same as CELL
+        FULL = DIAGCELL,    //!< Same as DIAGCELL
+    };
+
+
     // Public Data
 
         //- Names for the iso-surface algorithms
         static const Enum<algorithmType> algorithmNames;
 
+        //- Names for the filtering types
+        static const Enum<filterType> filterNames;
 
-    //- Construct with iso value
-    explicit isoSurfaceBase
-    (
-        const scalar iso,
-        const boundBox& bounds = boundBox::invertedBox
-    );
+
+
+    // Static Member Functions
+
+        //- Get 'regularise' as bool or enumeration
+        static filterType getFilterType
+        (
+            const dictionary& dict,
+            const isoSurfaceBase::filterType deflt
+        );
+
+
+    // Constructors
+
+        //- Construct with iso value
+        explicit isoSurfaceBase
+        (
+            const scalar iso,
+            const boundBox& bounds = boundBox::invertedBox
+        );
 
 
     // Member Functions
