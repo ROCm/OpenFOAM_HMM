@@ -42,21 +42,30 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-bool Foam::isoSurfaceTopo::isTriCut
-(
-    const triFace& tri,
-    const scalarField& pointValues
-) const
+namespace Foam
 {
-    const bool aLower = (pointValues[tri[0]] < iso_);
-    const bool bLower = (pointValues[tri[1]] < iso_);
-    const bool cLower = (pointValues[tri[2]] < iso_);
+    // Does any edge of triangle cross iso value?
+    inline static bool isTriCut
+    (
+        const label a,
+        const label b,
+        const label c,
+        const scalarField& pointValues,
+        const scalar isoValue
+    )
+    {
+        const bool aLower = (pointValues[a] < isoValue);
+        const bool bLower = (pointValues[b] < isoValue);
+        const bool cLower = (pointValues[c] < isoValue);
 
-    return !(aLower == bLower && aLower == cLower);
+        return !(aLower == bLower && aLower == cLower);
+    }
 }
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
 (
@@ -79,9 +88,7 @@ Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
 
             for (label fp = 1; fp < f.size() - 1; ++fp)
             {
-                const triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
-
-                if (isTriCut(tri, pVals_))
+                if (isTriCut(f[0], f[fp], f[f.fcIndex(fp)], pVals_, iso_))
                 {
                     return CUT;
                 }
@@ -89,89 +96,85 @@ Foam::isoSurfaceTopo::cellCutType Foam::isoSurfaceTopo::calcCutType
         }
         return NOTCUT;
     }
-    else
+
+
+    const bool cellLower = (cVals_[celli] < iso_);
+
+    // First check if there is any cut in cell
+    bool edgeCut = false;
+
+    for (const label facei : cFaces)
     {
-        const bool cellLower = (cVals_[celli] < iso_);
+        const face& f = mesh_.faces()[facei];
 
-        // First check if there is any cut in cell
-        bool edgeCut = false;
-
-        for (const label facei : cFaces)
+        // Check pyramids cut
+        for (const label pointi : f)
         {
-            const face& f = mesh_.faces()[facei];
-
-            // Check pyramids cut
-            for (const label pointi : f)
+            if ((pVals_[pointi] < iso_) != cellLower)
             {
-                if ((pVals_[pointi] < iso_) != cellLower)
-                {
-                    edgeCut = true;
-                    break;
-                }
-            }
-
-            if (edgeCut)
-            {
-                break;
-            }
-
-            label fp0 = tetBasePtIs_[facei];
-
-            // Fall back for problem decompositions
-            if (fp0 < 0)
-            {
-                fp0 = 0;
-            }
-
-            label fp = f.fcIndex(fp0);
-            for (label i = 2; i < f.size(); ++i)
-            {
-                label nextFp = f.fcIndex(fp);
-
-                if (isTriCut(triFace(f[fp0], f[fp], f[nextFp]), pVals_))
-                {
-                    edgeCut = true;
-                    break;
-                }
-
-                fp = nextFp;
-            }
-
-            if (edgeCut)
-            {
+                edgeCut = true;
                 break;
             }
         }
 
         if (edgeCut)
         {
-            // Count actual cuts (expensive since addressing needed)
-            // Note: not needed if you don't want to preserve maxima/minima
-            // centred around cellcentre. In that case just always return CUT
+            break;
+        }
 
-            const labelList& cPoints = mesh_.cellPoints(celli);
+        // Check (triangulated) face edges
+        // With fallback for problem decompositions
+        const label fp0 = (tetBasePtIs_[facei] < 0 ? 0 : tetBasePtIs_[facei]);
 
-            label nPyrEdgeCuts = 0;
+        label fp = f.fcIndex(fp0);
+        for (label i = 2; i < f.size(); ++i)
+        {
+            const label nextFp = f.fcIndex(fp);
 
-            for (const label pointi : cPoints)
+            if (isTriCut(f[fp0], f[fp], f[nextFp], pVals_, iso_))
             {
-                if ((pVals_[pointi] < iso_) != cellLower)
-                {
-                    ++nPyrEdgeCuts;
-                }
+                edgeCut = true;
+                break;
             }
 
-            if (nPyrEdgeCuts == cPoints.size())
+            fp = nextFp;
+        }
+
+        if (edgeCut)
+        {
+            break;
+        }
+    }
+
+    if (edgeCut)
+    {
+        // Count actual cuts (expensive since addressing needed)
+        // Note: not needed if you don't want to preserve maxima/minima
+        // centred around cellcentre. In that case just always return CUT
+
+        const labelList& cPoints = mesh_.cellPoints(celli);
+
+        label nPyrCuts = 0;
+
+        for (const label pointi : cPoints)
+        {
+            if ((pVals_[pointi] < iso_) != cellLower)
             {
-                return SPHERE;
-            }
-            else if (nPyrEdgeCuts)
-            {
-                return CUT;
+                ++nPyrCuts;
             }
         }
-        return NOTCUT;
+
+        if (nPyrCuts == cPoints.size())
+        {
+            return SPHERE;
+        }
+        else if (nPyrCuts)
+        {
+            return CUT;
+        }
     }
+
+    return NOTCUT;
 }
 
 
@@ -181,11 +184,10 @@ Foam::label Foam::isoSurfaceTopo::calcCutTypes
     List<cellCutType>& cellCutTypes
 )
 {
-    const cellList& cells = mesh_.cells();
+    cellCutTypes.setSize(mesh_.nCells());
 
-    cellCutTypes.setSize(cells.size());
     label nCutCells = 0;
-    forAll(cells, celli)
+    forAll(cellCutTypes, celli)
     {
         cellCutTypes[celli] = calcCutType(tet.isA(mesh_, celli), celli);
 
@@ -394,22 +396,20 @@ Foam::label Foam::isoSurfaceTopo::generatePoint
     EdgeMap<label>& vertsToPoint
 ) const
 {
-    EdgeMap<label>::const_iterator edgeFnd = vertsToPoint.find(vertices);
-    if (edgeFnd != vertsToPoint.end())
+    const auto edgeFnd = vertsToPoint.cfind(vertices);
+    if (edgeFnd.found())
     {
-        return edgeFnd();
+        return edgeFnd.val();
     }
-    else
-    {
-        // Generate new point
-        label pointi = pointToVerts.size();
 
-        pointToVerts.append(vertices);
-        pointToFace.append(facei);
-        pointFromDiag.append(edgeIsDiag);
-        vertsToPoint.insert(vertices, pointi);
-        return pointi;
-    }
+    // Generate new point
+    label pointi = pointToVerts.size();
+
+    pointToVerts.append(vertices);
+    pointToFace.append(facei);
+    pointFromDiag.append(edgeIsDiag);
+    vertsToPoint.insert(vertices, pointi);
+    return pointi;
 }
 
 
@@ -1181,7 +1181,8 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             << min(pVals_) << " / "
             << max(pVals_) << nl
             << "    isoValue      : " << iso << nl
-            << "    filter        : " << int(filter) << nl
+            << "    filter        : " << isoSurfaceTopo::filterNames[filter]
+            << nl
             << "    mesh span     : " << mesh.bounds().mag() << nl
             << "    ignoreCells   : " << ignoreCells_.count()
             << " / " << cVals_.size() << nl
@@ -1329,11 +1330,8 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
         }
 
 
-        if (filter == filterType::DIAGCELL && ignoreCells_.empty())
+        if (filter == filterType::DIAGCELL)
         {
-            // Note that the following only works without cell subsets
-            // thus we skip this when ignoreCells_ is non-empty
-
             // We remove verts on face diagonals. This is in fact just
             // straightening the edges of the face through the cell. This can
             // close off 'pockets' of triangles and create open or
@@ -1356,43 +1354,71 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
             }
 
 
+            // Include faces that would be exposed from mesh subset
+            if (!ignoreCells_.empty())
+            {
+                const labelList& faceOwner = mesh_.faceOwner();
+                const labelList& faceNeighbour = mesh_.faceNeighbour();
+
+                label nMore = 0;
+                for
+                (
+                    label facei = 0;
+                    facei < mesh.nInternalFaces();
+                    ++facei
+                )
+                {
+                    int n = 0;
+                    if (ignoreCells_.test(faceOwner[facei])) ++n;
+                    if (ignoreCells_.test(faceNeighbour[facei])) ++n;
+
+                    // Only one of the cells is being ignored.
+                    // That means it is an exposed subMesh face.
+                    if (n == 1)
+                    {
+                        isBoundaryPoint.set(mesh.faces()[facei]);
+
+                        ++nMore;
+                    }
+                }
+            }
+
+
+            bitSet faceSelection;
+
             while (true)
             {
+                faceSelection.clear();
+                faceSelection.resize(this->size());
+
                 const labelList& mp = meshPoints();
 
-                bitSet removeFace(this->size());
-                label nFaces = 0;
+                const labelListList& edgeFaces = MeshStorage::edgeFaces();
+
+                forAll(edgeFaces, edgei)
                 {
-                    const labelListList& edgeFaces =
-                        MeshStorage::edgeFaces();
-                    forAll(edgeFaces, edgei)
+                    const labelList& eFaces = edgeFaces[edgei];
+                    if (eFaces.size() == 1)
                     {
-                        const labelList& eFaces = edgeFaces[edgei];
-                        if (eFaces.size() == 1)
+                        // Open edge. Check that vertices do not originate
+                        // from a boundary face
+                        const edge& e = edges()[edgei];
+                        const edge& verts0 = pointToVerts_[mp[e[0]]];
+                        const edge& verts1 = pointToVerts_[mp[e[1]]];
+                        if
+                        (
+                            isBoundaryPoint[verts0[0]]
+                         && isBoundaryPoint[verts0[1]]
+                         && isBoundaryPoint[verts1[0]]
+                         && isBoundaryPoint[verts1[1]]
+                        )
                         {
-                            // Open edge. Check that vertices do not originate
-                            // from a boundary face
-                            const edge& e = edges()[edgei];
-                            const edge& verts0 = pointToVerts_[mp[e[0]]];
-                            const edge& verts1 = pointToVerts_[mp[e[1]]];
-                            if
-                            (
-                                isBoundaryPoint[verts0[0]]
-                             && isBoundaryPoint[verts0[1]]
-                             && isBoundaryPoint[verts1[0]]
-                             && isBoundaryPoint[verts1[1]]
-                            )
-                            {
-                                // Open edge on boundary face. Keep
-                            }
-                            else
-                            {
-                                // Open edge. Mark for erosion
-                                if (removeFace.set(eFaces[0]))
-                                {
-                                    ++nFaces;
-                                }
-                            }
+                            // Open edge on boundary face. Keep
+                        }
+                        else
+                        {
+                            // Open edge. Mark for erosion
+                            faceSelection.set(eFaces[0]);
                         }
                     }
                 }
@@ -1400,24 +1426,18 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
                 if (debug)
                 {
                     Pout<< "isoSurfaceTopo :"
-                        << " removing " << nFaces
+                        << " removing " << faceSelection.count()
                         << " faces since on open edges" << endl;
                 }
 
-                if (returnReduce(nFaces, sumOp<label>()) == 0)
+                if (returnReduce(faceSelection.none(), andOp<bool>()))
                 {
                     break;
                 }
 
-                // Remove the faces
-                labelHashSet keepFaces(2*size());
-                forAll(removeFace, facei)
-                {
-                    if (!removeFace[facei])
-                    {
-                        keepFaces.insert(facei);
-                    }
-                }
+
+                // Flip from remove face -> keep face
+                faceSelection.flip();
 
                 labelList pointMap;
                 labelList faceMap;
@@ -1425,7 +1445,7 @@ Foam::isoSurfaceTopo::isoSurfaceTopo
                 (
                     MeshStorage::subsetMesh
                     (
-                        keepFaces,
+                        faceSelection,
                         pointMap,
                         faceMap
                     )

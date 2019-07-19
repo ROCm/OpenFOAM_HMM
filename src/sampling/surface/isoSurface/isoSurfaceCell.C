@@ -45,6 +45,29 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Does any edge of triangle cross iso value?
+    inline static bool isTriCut
+    (
+        const label a,
+        const label b,
+        const label c,
+        const scalarField& pointValues,
+        const scalar isoValue
+    )
+    {
+        const bool aLower = (pointValues[a] < isoValue);
+        const bool bLower = (pointValues[b] < isoValue);
+        const bool cLower = (pointValues[c] < isoValue);
+
+        return !(aLower == bLower && aLower == cLower);
+    }
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::scalar Foam::isoSurfaceCell::isoFraction
@@ -61,20 +84,6 @@ Foam::scalar Foam::isoSurfaceCell::isoFraction
     }
 
     return -1.0;
-}
-
-
-bool Foam::isoSurfaceCell::isTriCut
-(
-    const triFace& tri,
-    const scalarField& pointValues
-) const
-{
-    const bool aLower = (pointValues[tri[0]] < iso_);
-    const bool bLower = (pointValues[tri[1]] < iso_);
-    const bool cLower = (pointValues[tri[2]] < iso_);
-
-    return !(aLower == bLower && aLower == cLower);
 }
 
 
@@ -101,9 +110,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 
             for (label fp = 1; fp < f.size() - 1; ++fp)
             {
-                triFace tri(f[0], f[fp], f[f.fcIndex(fp)]);
-
-                if (isTriCut(tri, pointValues))
+                if (isTriCut(f[0], f[fp], f[f.fcIndex(fp)], pointValues, iso_))
                 {
                     return CUT;
                 }
@@ -111,6 +118,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
         }
         return NOTCUT;
     }
+
 
     const bool cellLower = (cellValues[celli] < iso_);
 
@@ -137,13 +145,16 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
         }
 
         // Check (triangulated) face edges
-        const label fp0 = mesh_.tetBasePtIs()[facei];
+        // With fallback for problem decompositions
+        const label fp0 =
+            (mesh_.tetBasePtIs()[facei] < 0 ? 0 : mesh_.tetBasePtIs()[facei]);
+
         label fp = f.fcIndex(fp0);
         for (label i = 2; i < f.size(); ++i)
         {
             const label nextFp = f.fcIndex(fp);
 
-            if (isTriCut(triFace(f[fp0], f[fp], f[nextFp]), pointValues))
+            if (isTriCut(f[fp0], f[fp], f[nextFp], pointValues, iso_))
             {
                 edgeCut = true;
                 break;
@@ -167,21 +178,21 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 
         const labelList& cPoints = mesh_.cellPoints(celli);
 
-        label nPyrEdgeCuts = 0;
+        label nPyrCuts = 0;
 
         for (const label pointi : cPoints)
         {
-            if (cellLower != (pointValues[pointi] < iso_))
+            if ((pointValues[pointi] < iso_) != cellLower)
             {
-                ++nPyrEdgeCuts;
+                ++nPyrCuts;
             }
         }
 
-        if (nPyrEdgeCuts == cPoints.size())
+        if (nPyrCuts == cPoints.size())
         {
             return SPHERE;
         }
-        else if (nPyrEdgeCuts)
+        else if (nPyrCuts)
         {
             // There is a pyramid edge cut. E.g. lopping off a tet from a corner
             return CUT;
@@ -206,7 +217,7 @@ void Foam::isoSurfaceCell::calcCutTypes
     // Do now to ensure things stay synchronized.
     (void)mesh_.tetBasePtIs();
 
-    forAll(mesh_.cells(), celli)
+    forAll(cellCutType_, celli)
     {
         cellCutType_[celli] = calcCutType(isTet, cVals, pVals, celli);
 

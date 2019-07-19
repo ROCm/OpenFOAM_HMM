@@ -99,13 +99,6 @@ class isoSurfaceTopo
 
         void fixTetBasePtIs();
 
-        //- Does any edge of triangle cross iso value?
-        bool isTriCut
-        (
-            const triFace& tri,
-            const scalarField& pointValues
-        ) const;
-
         //- Determine whether cell is cut
         cellCutType calcCutType
         (
