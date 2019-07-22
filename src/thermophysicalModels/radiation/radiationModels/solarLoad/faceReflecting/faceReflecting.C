@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -413,23 +413,28 @@ void Foam::faceReflecting::calculate()
     // Fill patchr
     forAll(patchr, patchi)
     {
-        for (label bandI = 0; bandI < nBands; bandI++)
-        {
-            patchr[patchi][bandI] =
-                boundaryRadiation.specReflectivity
-                (
-                    patchi,
-                    bandI,
-                    new vectorField(patches[patchi].size(), sunDir)
-                );
+        const polyPatch& pp = patches[patchi];
 
-            patcha[patchi][bandI] =
-                boundaryRadiation.absorptivity
-                (
-                    patchi,
-                    bandI,
-                    new vectorField(patches[patchi].size(), sunDir)
-                );
+        if (!pp.coupled() && !isA<cyclicAMIPolyPatch>(pp))
+        {
+            for (label bandI = 0; bandI < nBands; bandI++)
+            {
+                patchr[patchi][bandI] =
+                    boundaryRadiation.specReflectivity
+                    (
+                        patchi,
+                        bandI,
+                        new vectorField(patches[patchi].size(), sunDir)
+                    );
+
+                patcha[patchi][bandI] =
+                    boundaryRadiation.absorptivity
+                    (
+                        patchi,
+                        bandI,
+                        new vectorField(patches[patchi].size(), sunDir)
+                    );
+            }
         }
     }
 
