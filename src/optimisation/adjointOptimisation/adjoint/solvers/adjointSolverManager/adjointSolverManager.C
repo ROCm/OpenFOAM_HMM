@@ -260,7 +260,7 @@ Foam::scalar Foam::adjointSolverManager::objectiveValue()
     for (const label solveri : objectiveSolverIDs_)
     {
         objectiveManager& objManager =
-            adjointSolvers_[objectiveSolverIDs_[solveri]].getObjectiveManager();
+            adjointSolvers_[solveri].getObjectiveManager();
         objValue += objManager.print();
     }
 
