@@ -46,7 +46,7 @@ boundaryField
     {
         type            zeroGradient;
     }
-    
+
     bottomWall
     {
         type            zeroGradient;
