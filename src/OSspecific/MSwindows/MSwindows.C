@@ -1197,11 +1197,23 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
 
     void* handle = ::LoadLibrary(libso.c_str());
 
-    if (!handle && !libso.startsWith("lib"))
+    if
+    (
+        !handle
+     && libName.find('/') == std::string::npos
+     && !libso.startsWith("lib")
+    )
     {
         // Try with 'lib' prefix
         libso = "lib" + libso;
         handle = ::LoadLibrary(libso.c_str());
+
+        if (MSwindows::debug)
+        {
+            std::cout
+                << "dlOpen(const fileName&)"
+                << " : dlopen of " << libso << std::endl;
+        }
     }
 
     if (handle)

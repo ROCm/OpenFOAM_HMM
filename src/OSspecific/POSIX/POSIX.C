@@ -1670,11 +1670,22 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     {
         fileName libso;
 
-        if (!libName.startsWith("lib"))
+        if
+        (
+            libName.find('/') == std::string::npos
+         && !libName.startsWith("lib")
+        )
         {
             // Try with 'lib' prefix
             libso = "lib" + libName;
             handle = ::dlopen(libso.c_str(), ldflags);
+
+            if (POSIX::debug)
+            {
+                std::cout
+                    << "dlOpen(const fileName&)"
+                    << " : dlopen of " << libso << std::endl;
+            }
         }
         else
         {
@@ -1687,6 +1698,13 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
         {
             libso = libso.lessExt().ext(EXT_SO);
             handle = ::dlopen(libso.c_str(), ldflags);
+
+            if (POSIX::debug)
+            {
+                std::cout
+                    << "dlOpen(const fileName&)"
+                    << " : dlopen of " << libso << std::endl;
+            }
         }
     }
 
