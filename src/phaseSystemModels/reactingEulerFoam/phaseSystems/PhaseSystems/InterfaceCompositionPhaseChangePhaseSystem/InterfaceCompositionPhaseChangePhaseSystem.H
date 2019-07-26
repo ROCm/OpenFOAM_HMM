@@ -105,10 +105,10 @@ protected:
             interfaceCompositionModelTable interfaceCompositionModels_;
 
             //- The explicit part of the interfacial mass transfer rates
-            iDmdtSuSpTable iDmdtSu_;
+            mutable iDmdtSuSpTable iDmdtSu_;
 
             //- The implicit part of the interfacial mass transfer rates
-            iDmdtSuSpTable iDmdtSp_;
+            mutable iDmdtSuSpTable iDmdtSp_;
 
 
     // Protected member functions
