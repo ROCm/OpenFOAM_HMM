@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
     Info<< "sin: " << sin(fld1) << nl;
 
     Info<< "operator + : " << (fld1 + fld2) << nl;
+    Info<< "operator + : " << (fld1 + fld2 + complex(1,0)) << nl;
 
     // Some operators are still incomplete
 

@@ -146,6 +146,15 @@ complex sumProd(const UList<complex>& f1, const UList<complex>& f2)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+BINARY_TYPE_OPERATOR(complex, complex, complex, +, add)
+BINARY_TYPE_OPERATOR(complex, complex, complex, -, subtract)
+
+BINARY_OPERATOR(complex, complex, complex, *, multiply)
+BINARY_OPERATOR(complex, complex, complex, /, divide)
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 UNARY_FUNCTION(complex, complex, pow3)
 UNARY_FUNCTION(complex, complex, pow4)
 UNARY_FUNCTION(complex, complex, pow5)
