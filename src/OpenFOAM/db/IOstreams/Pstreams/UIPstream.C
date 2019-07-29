@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -70,11 +70,20 @@ inline void Foam::UIPstream::checkEof()
 }
 
 
+inline void Foam::UIPstream::prepareBuffer(const size_t align)
+{
+    if (align > 1)
+    {
+        externalBufPosition_ =
+            align + ((externalBufPosition_ - 1) & ~(align - 1));
+    }
+}
+
+
 template<class T>
 inline void Foam::UIPstream::readFromBuffer(T& val)
 {
-    const size_t align = sizeof(T);
-    externalBufPosition_ = align + ((externalBufPosition_ - 1) & ~(align - 1));
+    prepareBuffer(sizeof(T));
 
     val = reinterpret_cast<T&>(externalBuf_[externalBufPosition_]);
     externalBufPosition_ += sizeof(T);
@@ -85,17 +94,9 @@ inline void Foam::UIPstream::readFromBuffer(T& val)
 inline void Foam::UIPstream::readFromBuffer
 (
     void* data,
-    const size_t count,
-    const size_t align
+    const size_t count
 )
 {
-    if (align > 1)
-    {
-        externalBufPosition_ =
-            align
-          + ((externalBufPosition_ - 1) & ~(align - 1));
-    }
-
     const char* const __restrict__ buf = &externalBuf_[externalBufPosition_];
     char* const __restrict__ output = reinterpret_cast<char*>(data);
 
@@ -383,6 +384,27 @@ Foam::Istream& Foam::UIPstream::read(doubleScalar& val)
 
 Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
 {
+    beginRaw();
+    readRaw(data, count);
+    endRaw();
+
+    return *this;
+}
+
+
+Foam::Istream& Foam::UIPstream::readRaw(char* data, std::streamsize count)
+{
+    // No check for format() == BINARY since this is either done in the
+    // beginRaw() method, or the caller knows what they are doing.
+
+    // Any alignment must have been done prior to this call
+    readFromBuffer(data, count);
+    return *this;
+}
+
+
+bool Foam::UIPstream::beginRaw()
+{
     if (format() != BINARY)
     {
         FatalErrorInFunction
@@ -390,8 +412,10 @@ Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
             << Foam::abort(FatalError);
     }
 
-    readFromBuffer(data, count, 8);
-    return *this;
+    // Alignment = 8, as per read(const char*, streamsize)
+    prepareBuffer(8);
+
+    return true;
 }
 
 

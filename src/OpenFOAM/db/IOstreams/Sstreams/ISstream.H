@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2012 OpenFOAM Foundation
@@ -27,7 +27,7 @@ Class
     Foam::ISstream
 
 Description
-    Generic input stream.
+    Generic input stream using standard (STL) streams.
 
 SourceFiles
     ISstreamI.H
@@ -102,7 +102,7 @@ public:
     virtual ~ISstream() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Inquiry
 
@@ -166,6 +166,15 @@ public:
 
             //- Read binary block
             virtual Istream& read(char* buf, std::streamsize count);
+
+            //- Low-level raw binary read
+            virtual Istream& readRaw(char* data, std::streamsize count);
+
+            //- Start of low-level raw binary read
+            virtual bool beginRaw();
+
+            //- End of low-level raw binary read
+            virtual bool endRaw();
 
             //- Rewind the stream so that it may be read again
             virtual void rewind();

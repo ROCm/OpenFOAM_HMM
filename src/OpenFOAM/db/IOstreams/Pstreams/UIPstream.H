@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -80,18 +80,16 @@ class UIPstream
         //- Check the bufferPosition against messageSize_ for EOF
         inline void checkEof();
 
+        //- Prepare transfer buffer by adjusting alignment
+        inline void prepareBuffer(const size_t align);
+
         //- Read a T from the transfer buffer
         template<class T>
         inline void readFromBuffer(T& val);
 
-        //- Read count bytes of data from the transfer buffer
-        //  using align byte alignment
-        inline void readFromBuffer
-        (
-            void* data,
-            const size_t count,
-            const size_t align
-        );
+        //- Read count bytes of data from the transfer buffer.
+        //  Prior data alignment is done by prepareBuffer
+        inline void readFromBuffer(void* data, const size_t count);
 
         //- Read string length and its content.
         inline Istream& readStringFromBuffer(std::string& str);
@@ -124,7 +122,7 @@ public:
     ~UIPstream();
 
 
-    // Member functions
+    // Member Functions
 
         // Inquiry
 
@@ -171,7 +169,19 @@ public:
             Istream& read(doubleScalar& val);
 
             //- Read binary block with 8-byte alignment.
-            Istream& read(char* data, const std::streamsize count);
+            Istream& read(char* data, std::streamsize count);
+
+            //- Low-level raw binary read
+            Istream& readRaw(char* data, std::streamsize count);
+
+            //- Start of low-level raw binary read
+            bool beginRaw();
+
+            //- End of low-level raw binary read
+            bool endRaw()
+            {
+                return true;
+            }
 
             //- Rewind the stream so that it may be read again
             void rewind();

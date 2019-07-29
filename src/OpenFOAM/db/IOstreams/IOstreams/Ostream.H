@@ -141,11 +141,6 @@ public:
             //- Write binary block.
             virtual Ostream& write(const char* data, std::streamsize count) = 0;
 
-            //- Emit begin marker for low-level raw binary output.
-            //  The count should indicate the number of bytes for subsequent
-            //  writeRaw calls.
-            virtual Ostream& beginRaw(std::streamsize count) = 0;
-
             //- Low-level raw binary output.
             virtual Ostream& writeRaw
             (
@@ -153,8 +148,13 @@ public:
                 std::streamsize count
             ) = 0;
 
+            //- Emit begin marker for low-level raw binary output.
+            //  The count indicates the number of bytes for subsequent
+            //  writeRaw calls.
+            virtual bool beginRaw(std::streamsize count) = 0;
+
             //- Emit end marker for low-level raw binary output.
-            virtual Ostream& endRaw() = 0;
+            virtual bool endRaw() = 0;
 
             //- Add indentation characters
             virtual void indent() = 0;

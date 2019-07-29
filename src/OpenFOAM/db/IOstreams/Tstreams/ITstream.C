@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -272,6 +272,13 @@ Foam::Istream& Foam::ITstream::read(floatScalar&)
 
 
 Foam::Istream& Foam::ITstream::read(doubleScalar&)
+{
+    NotImplemented;
+    return *this;
+}
+
+
+Foam::Istream& Foam::ITstream::readRaw(char*, std::streamsize)
 {
     NotImplemented;
     return *this;

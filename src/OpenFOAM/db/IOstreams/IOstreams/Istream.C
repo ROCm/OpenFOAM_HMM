@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -26,6 +26,26 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Istream.H"
+#include "ISstream.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Return the current get position for std input stream
+    static inline std::streampos tellg(Istream* isptr)
+    {
+        ISstream* sptr = dynamic_cast<ISstream*>(isptr);
+
+        if (sptr)
+        {
+            return sptr->stdStream().tellg();
+        }
+
+        return 0;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -85,26 +105,28 @@ bool Foam::Istream::peekBack(token& tok)
 }
 
 
-Foam::Istream& Foam::Istream::readBegin(const char* funcName)
+bool Foam::Istream::readBegin(const char* funcName)
 {
-    token delimiter(*this);
+    const token delimiter(*this);
+
     if (delimiter != token::BEGIN_LIST)
     {
         setBad();
         FatalIOErrorInFunction(*this)
             << "Expected a '" << token::BEGIN_LIST
             << "' while reading " << funcName
-            << ", found " << delimiter.info()
+            << ", found " << delimiter.info() << nl
             << exit(FatalIOError);
     }
 
-    return *this;
+    return true;
 }
 
 
-Foam::Istream& Foam::Istream::readEnd(const char* funcName)
+bool Foam::Istream::readEnd(const char* funcName)
 {
-    token delimiter(*this);
+    const token delimiter(*this);
+
     if (delimiter != token::END_LIST)
     {
         setBad();
@@ -112,23 +134,17 @@ Foam::Istream& Foam::Istream::readEnd(const char* funcName)
             << "Expected a '" << token::END_LIST
             << "' while reading " << funcName
             << ", found " << delimiter.info()
+            << " at stream position " << tellg(this) << nl
             << exit(FatalIOError);
     }
 
-    return *this;
-}
-
-
-Foam::Istream& Foam::Istream::readEndBegin(const char* funcName)
-{
-    readEnd(funcName);
-    return readBegin(funcName);
+    return true;
 }
 
 
 char Foam::Istream::readBeginList(const char* funcName)
 {
-    token delimiter(*this);
+    const token delimiter(*this);
 
     if (delimiter != token::BEGIN_LIST && delimiter != token::BEGIN_BLOCK)
     {
@@ -149,7 +165,7 @@ char Foam::Istream::readBeginList(const char* funcName)
 
 char Foam::Istream::readEndList(const char* funcName)
 {
-    token delimiter(*this);
+    const token delimiter(*this);
 
     if (delimiter != token::END_LIST && delimiter != token::END_BLOCK)
     {
@@ -159,6 +175,7 @@ char Foam::Istream::readEndList(const char* funcName)
             << "' or a '" << token::END_BLOCK
             << "' while reading " << funcName
             << ", found " << delimiter.info()
+            << " at stream position " << tellg(this) << nl
             << exit(FatalIOError);
 
         return '\0';

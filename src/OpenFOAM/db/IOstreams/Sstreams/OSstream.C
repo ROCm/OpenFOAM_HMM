@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -210,10 +210,7 @@ Foam::Ostream& Foam::OSstream::write
 }
 
 
-Foam::Ostream& Foam::OSstream::beginRaw
-(
-    const std::streamsize count
-)
+bool Foam::OSstream::beginRaw(const std::streamsize count)
 {
     if (format() != BINARY)
     {
@@ -223,10 +220,18 @@ Foam::Ostream& Foam::OSstream::beginRaw
     }
 
     os_ << token::BEGIN_LIST;
-
     setState(os_.rdstate());
 
-    return *this;
+    return os_.good();
+}
+
+
+bool Foam::OSstream::endRaw()
+{
+    os_ << token::END_LIST;
+    setState(os_.rdstate());
+
+    return os_.good();
 }
 
 
@@ -240,15 +245,6 @@ Foam::Ostream& Foam::OSstream::writeRaw
     // beginRaw() method, or the caller knows what they are doing.
 
     os_.write(data, count);
-    setState(os_.rdstate());
-
-    return *this;
-}
-
-
-Foam::Ostream& Foam::OSstream::endRaw()
-{
-    os_ << token::END_LIST;
     setState(os_.rdstate());
 
     return *this;

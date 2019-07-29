@@ -342,25 +342,6 @@ Foam::Ostream& Foam::UOPstream::write
 }
 
 
-Foam::Ostream& Foam::UOPstream::beginRaw
-(
-    const std::streamsize count
-)
-{
-    if (format() != BINARY)
-    {
-        FatalErrorInFunction
-            << "stream format not binary"
-            << Foam::abort(FatalError);
-    }
-
-    // Alignment = 8, as per write(const char*, streamsize)
-    prepareBuffer(count, 8);
-
-    return *this;
-}
-
-
 Foam::Ostream& Foam::UOPstream::writeRaw
 (
     const char* data,
@@ -374,6 +355,22 @@ Foam::Ostream& Foam::UOPstream::writeRaw
     writeToBuffer(data, count, 1);
 
     return *this;
+}
+
+
+bool Foam::UOPstream::beginRaw(const std::streamsize count)
+{
+    if (format() != BINARY)
+    {
+        FatalErrorInFunction
+            << "stream format not binary"
+            << Foam::abort(FatalError);
+    }
+
+    // Alignment = 8, as per write(const char*, streamsize)
+    prepareBuffer(count, 8);
+
+    return true;
 }
 
 

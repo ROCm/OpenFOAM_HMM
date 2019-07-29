@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -776,8 +776,26 @@ Foam::Istream& Foam::ISstream::read(doubleScalar& val)
 }
 
 
-// read binary block
 Foam::Istream& Foam::ISstream::read(char* buf, std::streamsize count)
+{
+    beginRaw();
+    readRaw(buf, count);
+    endRaw();
+
+    return *this;
+}
+
+
+Foam::Istream& Foam::ISstream::readRaw(char* buf, std::streamsize count)
+{
+    is_.read(buf, count);
+    setState(is_.rdstate());
+
+    return *this;
+}
+
+
+bool Foam::ISstream::beginRaw()
 {
     if (format() != BINARY)
     {
@@ -787,12 +805,18 @@ Foam::Istream& Foam::ISstream::read(char* buf, std::streamsize count)
     }
 
     readBegin("binaryBlock");
-    is_.read(buf, count);
-    readEnd("binaryBlock");
-
     setState(is_.rdstate());
 
-    return *this;
+    return is_.good();
+}
+
+
+bool Foam::ISstream::endRaw()
+{
+    readEnd("binaryBlock");
+    setState(is_.rdstate());
+
+    return is_.good();
 }
 
 
@@ -809,7 +833,6 @@ void Foam::ISstream::rewind()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 std::ios_base::fmtflags Foam::ISstream::flags() const
 {

@@ -152,11 +152,6 @@ public:
                 const std::streamsize count
             );
 
-            //- Begin marker for low-level raw binary output.
-            //  The count should indicate the number of bytes for subsequent
-            //  writeRaw calls.
-            virtual Ostream& beginRaw(const std::streamsize count);
-
             //- Low-level raw binary output.
             virtual Ostream& writeRaw
             (
@@ -164,8 +159,13 @@ public:
                 const std::streamsize count
             );
 
+            //- Begin marker for low-level raw binary output.
+            //  The count indicates the number of bytes for subsequent
+            //  writeRaw calls.
+            virtual bool beginRaw(const std::streamsize count);
+
             //- End marker for low-level raw binary output.
-            virtual Ostream& endRaw();
+            virtual bool endRaw();
 
             //- Add indentation characters
             virtual void indent();

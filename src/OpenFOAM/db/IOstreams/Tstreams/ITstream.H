@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -257,7 +257,24 @@ public:
             virtual Istream& read(doubleScalar&);
 
             //- Read binary block
-            virtual Istream& read(char*, std::streamsize);
+            //  \note Not implemented
+            virtual Istream& read(char* data, std::streamsize);
+
+            //- Low-level raw binary read
+            //  \note Not implemented
+            virtual Istream& readRaw(char* data, std::streamsize count);
+
+            //- Start of low-level raw binary read
+            virtual bool beginRaw()
+            {
+                return false;
+            }
+
+            //- End of low-level raw binary read
+            virtual bool endRaw()
+            {
+                return false;
+            }
 
             //- Rewind the stream so that it may be read again
             virtual void rewind();

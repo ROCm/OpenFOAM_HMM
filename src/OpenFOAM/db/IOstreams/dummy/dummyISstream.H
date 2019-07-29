@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2017 OpenFOAM Foundation
@@ -66,9 +66,9 @@ public:
     virtual ~dummyISstream() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Read functions
+        // Read Functions
 
             //- Return next token from stream
             virtual Istream& read(token&)
@@ -126,24 +126,39 @@ public:
                 return *this;
             }
 
-            //- Rewind the stream so that it may be read again
-            virtual void rewind()
+            //- Low-level raw binary read
+            virtual Istream& readRaw(char*, std::streamsize)
             {
                 NotImplemented;
+                return *this;
             }
+
+            //- Start of low-level raw binary read
+            virtual bool beginRaw()
+            {
+                return false;
+            }
+
+            //- End of low-level raw binary read
+            virtual bool endRaw()
+            {
+                return false;
+            }
+
+            //- Rewind the stream so that it may be read again
+            virtual void rewind()
+            {}
 
             //- Return flags of stream
             virtual ios_base::fmtflags flags() const
             {
-                NotImplemented;
                 return ios_base::fmtflags(0);
             }
 
             //- Set flags of stream
-            virtual ios_base::fmtflags flags(const ios_base::fmtflags f)
+            virtual ios_base::fmtflags flags(const ios_base::fmtflags)
             {
-                NotImplemented;
-                return f;
+                return ios_base::fmtflags(0);
             }
 };
 

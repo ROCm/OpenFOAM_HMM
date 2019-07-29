@@ -167,21 +167,39 @@ public:
             //- Read binary block
             virtual Istream& read(char*, std::streamsize) = 0;
 
+            //- Start of low-level raw binary read
+            virtual bool beginRaw() = 0;
+
+            //- End of low-level raw binary read
+            virtual bool endRaw() = 0;
+
+            //- Low-level raw binary read
+            virtual Istream& readRaw(char*, std::streamsize) = 0;
+
             //- Rewind the stream so that it may be read again
             virtual void rewind() = 0;
 
 
         // Read List punctuation tokens
 
-            Istream& readBegin(const char* funcName);
-            Istream& readEnd(const char* funcName);
-            Istream& readEndBegin(const char* funcName);
+            //- Begin read of data chunk, starts with '('.
+            //  \return true or FatalIOError
+            bool readBegin(const char* funcName);
 
+            //- End read of data chunk, ends with ')'
+            //  \return true or FatalIOError
+            bool readEnd(const char* funcName);
+
+            //- Begin read of list data, starts with '(' or '{'
+            //  \return starting delimiter or FatalIOError
             char readBeginList(const char* funcName);
+
+            //- End read of list data, ends with ')' or '}'
+            //  \return closing delimiter or FatalIOError
             char readEndList(const char* funcName);
 
 
-    // Member operators
+    // Member Operators
 
         //- Return a non-const reference to const Istream
         //  Needed for read-constructors where the stream argument is temporary:
