@@ -116,14 +116,9 @@ Foam::Keyed<T>::createList(const UList<T>& lst, const labelUList& keys)
 template<class T>
 inline Foam::Istream& Foam::operator>>(Istream& is, Keyed<T>& item)
 {
-    // Read beginning of Keyed item/key pair
-    is.readBegin("Keyed<T>");
-
-    is >> static_cast<T&>(item);
-    is >> item.key_;
-
-    // Read end of Keyed item/key pair
-    is.readEnd("Keyed<T>");
+    is.readBegin("Keyed");
+    is >> static_cast<T&>(item) >> item.key_;
+    is.readEnd("Keyed");
 
     is.check(FUNCTION_NAME);
     return is;
@@ -134,8 +129,7 @@ template<class T>
 inline Foam::Ostream& Foam::operator<<(Ostream& os, const Keyed<T>& item)
 {
     os  << token::BEGIN_LIST
-        << static_cast<const T&>(item)
-        << token::SPACE << item.key_
+        << static_cast<const T&>(item) << token::SPACE << item.key_
         << token::END_LIST;
 
     return os;

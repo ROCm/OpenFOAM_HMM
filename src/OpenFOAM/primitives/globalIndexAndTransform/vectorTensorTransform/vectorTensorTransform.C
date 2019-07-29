@@ -100,15 +100,12 @@ Foam::tmp<Foam::Field<Foam::scalar>> Foam::vectorTensorTransform::transform
 
 Foam::Istream& Foam::operator>>(Istream& is, vectorTensorTransform& tr)
 {
-    // Read beginning of vectorTensorTransform
     is.readBegin("vectorTensorTransform");
 
     is  >> tr.t_ >> tr.R_ >> tr.hasR_;
 
-    // Read end of vectorTensorTransform
     is.readEnd("vectorTensorTransform");
 
-    // Check state of Istream
     is.check(FUNCTION_NAME);
 
     return is;

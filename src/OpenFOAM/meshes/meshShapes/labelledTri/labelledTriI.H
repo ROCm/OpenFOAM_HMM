@@ -126,12 +126,10 @@ inline Foam::Istream& Foam::operator>>(Istream& is, labelledTri& t)
 {
     if (is.format() == IOstream::ASCII)
     {
-        // Read beginning of labelledTri point pair
         is.readBegin("labelledTri");
 
         is  >> static_cast<triFace&>(t) >> t.region_;
 
-        // Read end of labelledTri point pair
         is.readEnd("labelledTri");
     }
     else

@@ -153,9 +153,9 @@ class SingleKineticRateDevolatilisation
             //- Read from Istream
             friend Istream& operator>>(Istream& is, volatileData& vd)
             {
-                is.readBeginList("volatileData");
+                is.readBegin("volatileData");
                 is  >>  vd.name_  >> vd.A1_  >> vd.E_;
-                is.readEndList("volatileData");
+                is.readEnd("volatileData");
 
                 return is;
             }

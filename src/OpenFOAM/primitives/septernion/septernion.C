@@ -105,12 +105,10 @@ Foam::septernion Foam::average
 
 Foam::Istream& Foam::operator>>(Istream& is, septernion& s)
 {
-    // Read beginning of septernion
     is.readBegin("septernion");
 
     is  >> s.t() >> s.r();
 
-    // Read end of septernion
     is.readEnd("septernion");
 
     is.check(FUNCTION_NAME);

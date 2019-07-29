@@ -101,7 +101,7 @@ Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
                         );
                     }
                 }
-                else if (delimiter == token::BEGIN_BLOCK)
+                else
                 {
                     // Assign for all entries
                     list = list.readValue(is);
@@ -111,13 +111,6 @@ Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
                         "PackedList::read(Istream&) : "
                         "reading the single entry"
                     );
-                }
-                else
-                {
-                    FatalIOErrorInFunction(is)
-                        << "incorrect list token, expected '(' or '{', found "
-                        << firstTok.info()
-                        << exit(FatalIOError);
                 }
             }
 

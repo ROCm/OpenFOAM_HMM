@@ -205,7 +205,7 @@ Foam::Istream& Foam::operator>>
     typename Foam::SolverPerformance<Type>& sp
 )
 {
-    is.readBeginList("SolverPerformance<Type>");
+    is.readBegin("SolverPerformance");
     is  >> sp.solverName_
         >> sp.fieldName_
         >> sp.initialResidual_
@@ -213,7 +213,7 @@ Foam::Istream& Foam::operator>>
         >> sp.nIterations_
         >> sp.converged_
         >> sp.singular_;
-    is.readEndList("SolverPerformance<Type>");
+    is.readEnd("SolverPerformance");
 
     return is;
 }
