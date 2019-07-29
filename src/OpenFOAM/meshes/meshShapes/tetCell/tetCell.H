@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -52,10 +52,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class cellShape;
 
 /*---------------------------------------------------------------------------*\
-                           class tetCell Declaration
+                           Class tetCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class tetCell
@@ -120,11 +121,13 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-//- Data associated with the type are contiguous
-template<>
-inline bool contiguous<tetCell>() {return true;}
+//- Contiguous data for tetCell
+template<> struct is_contiguous<tetCell> : std::true_type {};
+
+//- Contiguous label data for tetCell
+template<> struct is_contiguous_label<tetCell> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -62,7 +62,7 @@ void Foam::Pstream::combineGather
         {
             label belowID = myComm.below()[belowI];
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 T value;
                 UIPstream::read
@@ -114,7 +114,7 @@ void Foam::Pstream::combineGather
                     << " data:" << Value << endl;
             }
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UOPstream::write
                 (
@@ -194,7 +194,7 @@ void Foam::Pstream::combineScatter
         // Receive from up
         if (myComm.above() != -1)
         {
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UIPstream::read
                 (
@@ -236,7 +236,7 @@ void Foam::Pstream::combineScatter
                 Pout<< " sending to " << belowID << " data:" << Value << endl;
             }
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UOPstream::write
                 (
@@ -304,7 +304,7 @@ void Foam::Pstream::listCombineGather
         {
             label belowID = myComm.below()[belowI];
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 List<T> receivedValues(Values.size());
 
@@ -363,7 +363,7 @@ void Foam::Pstream::listCombineGather
                     << " data:" << Values << endl;
             }
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UOPstream::write
                 (
@@ -443,7 +443,7 @@ void Foam::Pstream::listCombineScatter
         // Receive from up
         if (myComm.above() != -1)
         {
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UIPstream::read
                 (
@@ -485,7 +485,7 @@ void Foam::Pstream::listCombineScatter
                 Pout<< " sending to " << belowID << " data:" << Values << endl;
             }
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UOPstream::write
                 (

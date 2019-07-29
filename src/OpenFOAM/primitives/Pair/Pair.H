@@ -173,6 +173,21 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Pair is contiguous if the type is contiguous
+template<class T>
+struct is_contiguous<Pair<T>> : is_contiguous<T> {};
+
+//- Check for Pair of labels
+template<class T>
+struct is_contiguous_label<Pair<T>> : is_contiguous_label<T> {};
+
+//- Check for Pair of scalars
+template<class T>
+struct is_contiguous_scalar<Pair<T>> : is_contiguous_scalar<T> {};
+
+
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
 //- Hashing for Pair data, which uses Hasher for contiguous data and
@@ -182,7 +197,7 @@ struct Hash<Pair<T>>
 {
     inline unsigned operator()(const Pair<T>& obj, unsigned seed=0) const
     {
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             return Hasher(obj.cdata(), sizeof(obj), seed);
         }
@@ -195,8 +210,6 @@ struct Hash<Pair<T>>
 };
 
 
-// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
-
 //- Return reverse of a Pair
 template<class T>
 Pair<T> reverse(const Pair<T>& p)
@@ -204,6 +217,8 @@ Pair<T> reverse(const Pair<T>& p)
     return Pair<T>(p.second(), p.first());
 }
 
+
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 template<class T>
 bool operator==(const Pair<T>& a, const Pair<T>& b)

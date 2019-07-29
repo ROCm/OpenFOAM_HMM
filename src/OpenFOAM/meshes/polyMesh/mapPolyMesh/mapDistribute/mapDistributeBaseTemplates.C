@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2016, 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2017 OpenFOAM Foundation
@@ -392,7 +392,7 @@ void Foam::mapDistributeBase::distribute
     {
         label nOutstanding = Pstream::nRequests();
 
-        if (!contiguous<T>())
+        if (!is_contiguous<T>::value)
         {
             PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking, tag);
 
@@ -890,7 +890,7 @@ void Foam::mapDistributeBase::distribute
     {
         label nOutstanding = Pstream::nRequests();
 
-        if (!contiguous<T>())
+        if (!is_contiguous<T>::value)
         {
             PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking, tag);
 

@@ -27,7 +27,7 @@ Typedef
     Foam::floatTensor
 
 Description
-    A Tensor of values with float precision
+    A Tensor of float precision values
 
 SourceFiles
     floatTensor.C
@@ -38,7 +38,6 @@ SourceFiles
 #define floatTensor_H
 
 #include "Tensor.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,12 +47,6 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 typedef Tensor<float> floatTensor;
-
-//- Data associated with floatTensor type are contiguous
-#if !defined(WM_SP) && !defined(WM_SPDP)
-template<>
-inline bool contiguous<floatTensor>() {return true;}
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

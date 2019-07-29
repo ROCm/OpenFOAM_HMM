@@ -44,9 +44,9 @@ Foam::Ostream& Foam::IndirectListBase<T, Addr>::writeList
     const label len = list.size();
 
     // Write list contents depending on data format
-    if (os.format() == IOstream::ASCII || !contiguous<T>())
+    if (os.format() == IOstream::ASCII || !is_contiguous<T>::value)
     {
-        if (len > 1 && contiguous<T>() && list.uniform())
+        if (len > 1 && is_contiguous<T>::value && list.uniform())
         {
             // Two or more entries, and all entries have identical values.
             os << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
@@ -60,7 +60,7 @@ Foam::Ostream& Foam::IndirectListBase<T, Addr>::writeList
              &&
                 (
                     Detail::ListPolicy::no_linebreak<T>::value
-                 || contiguous<T>()
+                 || is_contiguous<T>::value
                 )
             )
         )

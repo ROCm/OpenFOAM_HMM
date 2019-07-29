@@ -247,7 +247,7 @@ public:
 
             //- Return the binary size in number of characters of the UList
             //- if the element is a primitive type
-            //  i.e. contiguous<T>() == true.
+            //  i.e. is_contiguous<T>::value == true.
             //  Note that is of type streamsize since used in stream ops
             std::streamsize byteSize() const;
 
@@ -524,7 +524,7 @@ public:
                 unsigned seed=0
             ) const
             {
-                if (contiguous<T>())
+                if (is_contiguous<T>::value)
                 {
                     return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
                 }
@@ -591,7 +591,7 @@ struct Hash<UList<T>>
 {
     inline unsigned operator()(const UList<T>& obj, unsigned seed=0) const
     {
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
         }

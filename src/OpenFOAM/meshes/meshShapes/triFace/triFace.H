@@ -294,9 +294,14 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-template<> inline bool contiguous<triFace>()  {return true;}
+//- Contiguous data for triFace
+template<> struct is_contiguous<triFace> : std::true_type {};
+
+//- Contiguous label data for triFace
+template<> struct is_contiguous_label<triFace> : std::true_type {};
+
 
 //- Hash specialization for triFace as a commutative hash value.
 template<>

@@ -353,7 +353,7 @@ struct Hash<List<T>>
 {
     inline unsigned operator()(const UList<T>& obj, unsigned seed=0) const
     {
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             return Hasher(obj.cdata(), obj.size()*sizeof(T), seed);
         }

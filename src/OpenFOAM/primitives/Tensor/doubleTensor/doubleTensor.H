@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Typedef
     Foam::doubleTensor
 
 Description
-    A Tensor of values with double precision
+    A Tensor of double precision values
 
 SourceFiles
     doubleTensor.C
@@ -36,7 +36,6 @@ SourceFiles
 #define doubleTensor_H
 
 #include "Tensor.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,12 +45,6 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 typedef Tensor<double> doubleTensor;
-
-//- Data associated with doubleTensor type are contiguous
-#if !defined(WM_DP)
-template<>
-inline bool contiguous<doubleTensor>() {return true;}
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

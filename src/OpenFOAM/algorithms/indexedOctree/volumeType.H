@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2014 OpenFOAM Foundation
@@ -38,6 +38,7 @@ SourceFiles
 #ifndef volumeType_H
 #define volumeType_H
 
+#include "contiguous.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dictionary;
 class volumeType;
 Istream& operator>>(Istream& is, volumeType& vt);
@@ -128,9 +129,10 @@ public:
 };
 
 
-//- Data associated with volumeType type are contiguous
-template<>
-inline bool contiguous<volumeType>() {return true;}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for volumeType
+template<> struct is_contiguous<volumeType> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

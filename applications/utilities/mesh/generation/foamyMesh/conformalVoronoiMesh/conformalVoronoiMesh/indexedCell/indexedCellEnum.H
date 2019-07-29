@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2015 OpenFOAM Foundation
@@ -36,6 +36,7 @@ SourceFiles
 #ifndef indexedCellEnum_H
 #define indexedCellEnum_H
 
+#include "contiguous.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,11 +64,10 @@ public:
 };
 
 
-template<>
-inline bool contiguous<indexedCellEnum>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for indexedCellEnum
+template<> struct is_contiguous<indexedCellEnum> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

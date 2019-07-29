@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -48,9 +48,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 template<class Type> class wallPointData;
-
-// Forward declaration of friend functions and operators
 
 template<class Type> Istream& operator>>(Istream&, wallPointData<Type>&);
 template<class Type> Ostream& operator<<(Ostream&, const wallPointData<Type>&);
@@ -162,48 +161,22 @@ public:
 };
 
 
-//- Data associated with wallPointData type are contiguous. List the usual
-//  ones.
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-template<>
-inline bool contiguous<wallPointData<bool>>()
-{
-    return contiguous<wallPoint>();
-}
-template<>
-inline bool contiguous<wallPointData<label>>()
-{
-    return contiguous<wallPoint>();
-}
-template<>
-inline bool contiguous<wallPointData<scalar>>()
-{
-    return contiguous<wallPoint>();
-}
-template<>
-inline bool contiguous<wallPointData<vector>>()
-{
-    return contiguous<wallPoint>();
-}
-template<>
-inline bool contiguous<wallPointData<sphericalTensor>>()
-{
-    return contiguous<wallPoint>();
-}
-template<>
-inline bool contiguous<wallPointData<symmTensor>>()
-{
-    return contiguous<wallPoint>();
-}
-template<>
-inline bool contiguous<wallPointData<tensor>>()
-{
-    return contiguous<wallPoint>();
-}
+//- Data are contiguous if data type is contiguous
+template<class Type>
+struct is_contiguous<wallPointData<Type>> : is_contiguous<Type> {};
+
+//- Data are contiguous label if data type is label
+template<class Type>
+struct is_contiguous_label<wallPointData<Type>> : is_contiguous_label<Type> {};
+
+//- Data are contiguous scalar if data type is scalar
+template<class Type>
+struct is_contiguous_scalar<wallPointData<Type>> : is_contiguous_scalar<Type>{};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 } // End namespace Foam
 

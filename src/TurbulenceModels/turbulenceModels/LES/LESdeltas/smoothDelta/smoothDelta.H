@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -271,8 +271,7 @@ public:
 
 
     //- Destructor
-    virtual ~smoothDelta()
-    {}
+    virtual ~smoothDelta() = default;
 
 
     // Member Functions
@@ -289,14 +288,13 @@ public:
 
 } // End namespace LESModels
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Data associated with deltaData type are contiguous
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for deltaData
 template<>
-inline bool contiguous<LESModels::smoothDelta::deltaData>()
-{
-    return true;
-}
+struct is_contiguous<LESModels::smoothDelta::deltaData> : std::true_type {};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

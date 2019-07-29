@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -112,7 +112,7 @@ Ostream& printListOutputType(const char* what)
 {
     Info<< what
         << " (contiguous="
-        << contiguous<T>() << " no_linebreak="
+        << is_contiguous<T>::value << " no_linebreak="
         << Detail::ListPolicy::no_linebreak<T>::value
         << " short_length="
         << Detail::ListPolicy::short_length<T>::value << ')';

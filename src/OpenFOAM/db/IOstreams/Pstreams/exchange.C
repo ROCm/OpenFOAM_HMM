@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -192,10 +192,11 @@ void Foam::Pstream::exchange
     const bool block
 )
 {
-    if (!contiguous<T>())
+    // OR  static_assert(is_contiguous<T>::value, "Contiguous data only!")
+    if (!is_contiguous<T>::value)
     {
         FatalErrorInFunction
-            << "Continuous data only." << sizeof(T) << Foam::abort(FatalError);
+            << "Contiguous data only." << sizeof(T) << Foam::abort(FatalError);
     }
 
     if (sendBufs.size() != UPstream::nProcs(comm))

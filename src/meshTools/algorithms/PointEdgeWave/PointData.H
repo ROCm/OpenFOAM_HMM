@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -46,13 +46,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Istream;
 class Ostream;
-template<class DataType>
-class PointData;
+template<class DataType> class PointData;
 
-// Forward declaration of friend functions and operators
 template<class DataType>
 Ostream& operator<<(Ostream&, const PointData<DataType>&);
 template<class DataType>
@@ -67,8 +65,6 @@ class PointData
 :
     public pointEdgePoint
 {
-private:
-
     // Private data
 
         //- Additional transported data
@@ -178,21 +174,20 @@ public:
         );
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Data associated with PointData types is contiguous
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-template<>
-inline bool contiguous<PointData<scalar>>()
-{
-    return true;
-}
+//- Data are contiguous if data type is contiguous
+template<class DataType>
+struct is_contiguous<PointData<DataType>> : is_contiguous<DataType> {};
 
-template<>
-inline bool contiguous<PointData<vector>>()
-{
-    return true;
-}
+//- Contiguous scalar only when data type is also scalar
+template<class DataType>
+struct is_contiguous_scalar<PointData<DataType>>
+:
+    is_contiguous_scalar<DataType>
+{};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

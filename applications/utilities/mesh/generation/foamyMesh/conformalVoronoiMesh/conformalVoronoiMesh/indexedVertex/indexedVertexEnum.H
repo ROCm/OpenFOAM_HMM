@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -84,14 +84,16 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for indexedVertexEnum
+template<> struct is_contiguous<indexedVertexEnum> : std::true_type {};
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
 Istream& operator>>(Istream&, indexedVertexEnum::vertexType&);
 Ostream& operator<<(Ostream&, const indexedVertexEnum::vertexType&);
-
-template<>
-inline bool contiguous<indexedVertexEnum>()
-{
-    return true;
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

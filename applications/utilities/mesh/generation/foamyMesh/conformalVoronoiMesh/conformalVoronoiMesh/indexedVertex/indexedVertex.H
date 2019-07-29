@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -323,32 +323,26 @@ public:
 
 } // End namespace CGAL
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT
 namespace Foam
 {
     // For inexact representations where the storage type is a double, the data
     // is contiguous. This may not be true for exact number types.
+
     template<>
-    inline bool contiguous
+    struct is_contiguous
     <
-        CGAL::indexedVertex
-        <
-            K,
-            CGAL::Triangulation_vertex_base_3<K>
-        >
-    >()
-    {
-        return true;
-    }
-
+        CGAL::indexedVertex<K, CGAL::Triangulation_vertex_base_3<K>>
+    > : std::true_type {};
 
     template<>
-    inline bool contiguous<CGAL::Triangulation_vertex_base_3<K>::Point>()
-    {
-        return true;
-    }
+    struct is_contiguous
+    <
+        CGAL::Triangulation_vertex_base_3<K>::Point
+    > : std::true_type {};
 
 } // End namespace Foam
 #endif

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -51,13 +51,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class patchEdgeFaceRegion;
 
 Istream& operator>>(Istream&, patchEdgeFaceRegion&);
@@ -181,12 +177,13 @@ public:
 };
 
 
-//- Data associated with patchEdgeFaceRegion type are contiguous
-template<>
-inline bool contiguous<patchEdgeFaceRegion>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for patchEdgeFaceRegion
+template<> struct is_contiguous<patchEdgeFaceRegion> : std::true_type {};
+
+//- Contiguous label data for patchEdgeFaceRegion
+template<> struct is_contiguous_label<patchEdgeFaceRegion> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

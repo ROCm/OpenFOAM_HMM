@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyPatch;
 class polyMesh;
 class pointEdgeStructuredWalk;
@@ -236,12 +236,10 @@ public:
 };
 
 
-//- Data associated with pointEdgeStructuredWalk type are contiguous
-template<>
-inline bool contiguous<pointEdgeStructuredWalk>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for pointEdgeStructuredWalk
+template<> struct is_contiguous<pointEdgeStructuredWalk> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

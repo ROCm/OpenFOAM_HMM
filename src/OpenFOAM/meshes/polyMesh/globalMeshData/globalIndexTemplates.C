@@ -58,7 +58,7 @@ void Foam::globalIndex::gather
             {
                 SubList<Type> procSlot(allFld, off[i+1]-off[i], off[i]);
 
-                if (contiguous<Type>())
+                if (is_contiguous<Type>::value)
                 {
                     IPstream::read
                     (
@@ -88,7 +88,7 @@ void Foam::globalIndex::gather
         {
             // nonBlocking
 
-            if (!contiguous<Type>())
+            if (!is_contiguous<Type>::value)
             {
                 FatalErrorInFunction
                     << "nonBlocking not supported for non-contiguous data"
@@ -125,7 +125,7 @@ void Foam::globalIndex::gather
          || commsType == Pstream::commsTypes::blocking
         )
         {
-            if (contiguous<Type>())
+            if (is_contiguous<Type>::value)
             {
                 OPstream::write
                 (
@@ -154,7 +154,7 @@ void Foam::globalIndex::gather
         {
             // nonBlocking
 
-            if (!contiguous<Type>())
+            if (!is_contiguous<Type>::value)
             {
                 FatalErrorInFunction
                     << "nonBlocking not supported for non-contiguous data"
@@ -311,7 +311,7 @@ void Foam::globalIndex::scatter
                     off[i]
                 );
 
-                if (contiguous<Type>())
+                if (is_contiguous<Type>::value)
                 {
                     OPstream::write
                     (
@@ -341,7 +341,7 @@ void Foam::globalIndex::scatter
         {
             // nonBlocking
 
-            if (!contiguous<Type>())
+            if (!is_contiguous<Type>::value)
             {
                 FatalErrorInFunction
                     << "nonBlocking not supported for non-contiguous data"
@@ -383,7 +383,7 @@ void Foam::globalIndex::scatter
          || commsType == Pstream::commsTypes::blocking
         )
         {
-            if (contiguous<Type>())
+            if (is_contiguous<Type>::value)
             {
                 IPstream::read
                 (
@@ -412,7 +412,7 @@ void Foam::globalIndex::scatter
         {
             // nonBlocking
 
-            if (!contiguous<Type>())
+            if (!is_contiguous<Type>::value)
             {
                 FatalErrorInFunction
                     << "nonBlocking not supported for non-contiguous data"

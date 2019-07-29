@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -45,11 +45,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class findCellParticleCloud;
-
-
-// Forward declaration of friend functions and operators
-
 class findCellParticle;
 
 Ostream& operator<<(Ostream&, const findCellParticle&);
@@ -273,11 +270,10 @@ public:
 };
 
 
-template<>
-inline bool contiguous<findCellParticle>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for findCellParticle
+template<> struct is_contiguous<findCellParticle> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

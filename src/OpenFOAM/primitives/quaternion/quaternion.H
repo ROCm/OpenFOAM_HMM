@@ -42,7 +42,6 @@ SourceFiles
 #include "vector.H"
 #include "tensor.H"
 #include "word.H"
-#include "contiguous.H"
 #include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -239,6 +238,15 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for quaternion
+template<> struct is_contiguous<quaternion> : std::true_type {};
+
+//- Contiguous scalar data for quaternion
+template<> struct is_contiguous_scalar<quaternion> : std::true_type {};
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 inline scalar magSqr(const quaternion& q);
@@ -279,10 +287,6 @@ quaternion pow(const quaternion& q, const label power);
 
 //- Power of a quaternion
 quaternion pow(const quaternion& q, const scalar power);
-
-//- Data associated with quaternion type are contiguous
-template<>
-inline bool contiguous<quaternion>() {return true;}
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //

@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 
 class vectorTensorTransform;
 Istream& operator>>(Istream& is, vectorTensorTransform&);
@@ -172,25 +172,27 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for vectorTensorTransform
+template<> struct is_contiguous<vectorTensorTransform> : std::true_type {};
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Return the inverse of the given vectorTensorTransform
 inline vectorTensorTransform inv(const vectorTensorTransform& tr);
 
-
 //- Return a string representation of a vectorTensorTransform
 word name(const vectorTensorTransform&);
-
-
-//- Data associated with vectorTensorTransform type are contiguous
-template<>
-inline bool contiguous<vectorTensorTransform>() {return true;}
 
 //- Template specialisations
 template<>
 tmp<Field<bool>> vectorTensorTransform::transform(const Field<bool>&) const;
+
 template<>
 tmp<Field<label>> vectorTensorTransform::transform(const Field<label>&) const;
+
 template<>
 tmp<Field<scalar>> vectorTensorTransform::transform(const Field<scalar>&)
 const;

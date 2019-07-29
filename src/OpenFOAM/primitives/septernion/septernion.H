@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -47,15 +47,13 @@ SourceFiles
 #include "quaternion.H"
 #include "spatialTransform.H"
 #include "word.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class septernion;
 Istream& operator>>(Istream& is, septernion&);
 Ostream& operator<<(Ostream& os, const septernion& C);
@@ -67,7 +65,7 @@ Ostream& operator<<(Ostream& os, const septernion& C);
 
 class septernion
 {
-    // private data
+    // Private Data
 
         //- Translation vector
         vector t_;
@@ -154,6 +152,15 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for septernion
+template<> struct is_contiguous<septernion> : std::true_type {};
+
+//- Contiguous scalar data for septernion
+template<> struct is_contiguous_scalar<septernion> : std::true_type {};
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Return the inverse of the given septernion
@@ -176,10 +183,6 @@ septernion average
     const UList<septernion>& ss,
     const UList<scalar> w
 );
-
-//- Data associated with septernion type are contiguous
-template<>
-inline bool contiguous<septernion>() {return true;}
 
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //

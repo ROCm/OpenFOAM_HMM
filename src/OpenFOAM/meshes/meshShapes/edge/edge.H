@@ -306,11 +306,16 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for edge (a pair of labels)
+template<> struct is_contiguous<edge> : std::true_type {};
+
+//- Contiguous label data for edge (a pair of labels)
+template<> struct is_contiguous_label<edge> : std::true_type {};
+
+
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
-
-// Edges are a pair of labels - thus contiguous
-template<> inline bool contiguous<edge>()  {return true;}
-
 
 //- Return reverse of an edge
 inline edge reverse(const edge& e)
@@ -337,6 +342,7 @@ inline bool operator==(const edge& a, const edge& b);
 
 //- Compare edges for non-equal content, ignoring orientation
 inline bool operator!=(const edge& a, const edge& b);
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

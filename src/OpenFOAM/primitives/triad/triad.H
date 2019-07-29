@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -53,12 +53,11 @@ namespace Foam
 
 // Forward declarations
 class triad;
+class quaternion;
 class Istream;
 class Ostream;
 Istream& operator>>(Istream&, triad&);
 Ostream& operator<<(Ostream&, const triad&);
-
-class quaternion;
 
 /*---------------------------------------------------------------------------*\
                            Class triad Declaration
@@ -165,14 +164,19 @@ public:
 };
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for triad
+template<> struct is_contiguous<triad> : std::true_type {};
+
+//- Contiguous 'scalar' data for triad
+template<> struct is_contiguous_scalar<triad> : std::true_type {};
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 //- Return a quantity of the difference between two triads
 scalar diff(const triad& A, const triad& B);
-
-//- Data associated with quaternion type are contiguous
-template<>
-inline bool contiguous<triad>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

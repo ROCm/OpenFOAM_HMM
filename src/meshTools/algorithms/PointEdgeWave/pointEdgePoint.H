@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -51,13 +51,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class pointEdgePoint;
 
 Istream& operator>>(Istream&, pointEdgePoint&);
@@ -237,12 +233,13 @@ public:
 };
 
 
-//- Data associated with pointEdgePoint type are contiguous
-template<>
-inline bool contiguous<pointEdgePoint>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for pointEdgePoint
+template<> struct is_contiguous<pointEdgePoint> : std::true_type {};
+
+//- Contiguous scalar data for pointEdgePoint
+template<> struct is_contiguous_scalar<pointEdgePoint> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

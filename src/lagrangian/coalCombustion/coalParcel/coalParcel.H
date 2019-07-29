@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -62,11 +62,8 @@ namespace Foam
         >
     > coalParcel;
 
-    template<>
-    inline bool contiguous<coalParcel>()
-    {
-        return false;
-    }
+    //- Non-contiguous data for coalParcel
+    template<> struct is_contiguous<coalParcel> : std::false_type {};
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

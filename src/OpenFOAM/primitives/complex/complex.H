@@ -38,12 +38,12 @@ SourceFiles
 #ifndef complex_H
 #define complex_H
 
-#include <complex>
-#include <type_traits>
 #include "scalar.H"
 #include "word.H"
 #include "zero.H"
 #include "contiguous.H"
+#include <complex>
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -344,6 +344,15 @@ namespace Detail
 } // End namespace Detail
 
 
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for complex
+template<> struct is_contiguous<complex> : std::true_type {};
+
+//- Contiguous scalar data for complex
+template<> struct is_contiguous_scalar<complex> : std::true_type {};
+
+
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 Istream& operator>>(Istream& is, complex& c);
@@ -357,10 +366,6 @@ inline complex operator~(const complex& c);
 
 //- Return string representation of complex
 word name(const complex& c);
-
-//- Data associated with complex type are contiguous
-template<>
-inline bool contiguous<complex>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

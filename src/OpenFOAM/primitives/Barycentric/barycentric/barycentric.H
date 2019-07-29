@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016-2017 OpenFOAM Foundation
@@ -36,33 +36,21 @@ Description
 
 #include "scalar.H"
 #include "Barycentric.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Random;
-class cachedRandom;
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 typedef Barycentric<scalar> barycentric;
 
-
 //- Generate a random barycentric coordinate within the unit tetrahedron
 barycentric barycentric01(Random& rndGen);
-
-
-template<>
-inline bool contiguous<barycentric>()
-{
-    return true;
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

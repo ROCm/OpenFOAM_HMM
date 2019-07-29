@@ -431,7 +431,7 @@ public:
                 unsigned seed=0
             ) const
             {
-                if (contiguous<T>())
+                if (is_contiguous<T>::value)
                 {
                     return Hasher(obj.cdata(), N*sizeof(T), seed);
                 }
@@ -444,6 +444,20 @@ public:
             }
         };
 };
+
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- FixedList is contiguous if the type is contiguous
+template<class T, unsigned N>
+struct is_contiguous<FixedList<T, N>> : is_contiguous<T> {};
+
+//- Check for FixedList of labels
+template<class T, unsigned N>
+struct is_contiguous_label<FixedList<T, N>> : is_contiguous_label<T> {};
+
+//- Check for FixedList of scalars
+template<class T, unsigned N>
+struct is_contiguous_scalar<FixedList<T, N>> : is_contiguous_scalar<T> {};
 
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
@@ -465,7 +479,7 @@ struct Hash<FixedList<T, N>>
         unsigned seed=0
     ) const
     {
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             return Hasher(obj.cdata(), N*sizeof(T), seed);
         }

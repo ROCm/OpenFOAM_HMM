@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -47,12 +47,10 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class cellInfo;
 
 Istream& operator>>(Istream&, cellInfo&);
@@ -68,6 +66,7 @@ class cellInfo
     // Private data
 
         label type_;
+
 
     // Private Member Functions
 
@@ -212,12 +211,13 @@ public:
 };
 
 
-//- Data associated with cellInfo type are contiguous
-template<>
-inline bool contiguous<cellInfo>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for cellInfo
+template<> struct is_contiguous<cellInfo> : std::true_type {};
+
+//- Contiguous label data for cellInfo
+template<> struct is_contiguous_label<cellInfo> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

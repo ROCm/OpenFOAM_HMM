@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -46,13 +46,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class pointEdgeCollapse;
 
 Istream& operator>>(Istream&, pointEdgeCollapse&);
@@ -221,12 +217,10 @@ public:
 };
 
 
-//- Data associated with pointEdgeCollapse type are contiguous
-template<>
-inline bool contiguous<pointEdgeCollapse>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for pointEdgeCollapse
+template<> struct is_contiguous<pointEdgeCollapse> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 class trackedParticleCloud;
 class trackedParticle;
@@ -298,17 +298,10 @@ public:
 };
 
 
-template<>
-inline bool contiguous<trackedParticle>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-//template<>
-//void Cloud<trackedParticle>::readFields();
-//
-//template<>
-//void Cloud<trackedParticle>::writeFields() const;
+//- Contiguous data for trackedParticle
+template<> struct is_contiguous<trackedParticle> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

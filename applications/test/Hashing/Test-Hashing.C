@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -78,7 +78,7 @@ void infoHashString
 
 void reportHashList(const UList<string>& list)
 {
-    Info<< "contiguous = " << contiguous<string>() << nl << nl;
+    Info<< "contiguous = " << is_contiguous<string>::value << nl << nl;
 
     for (const string& val : list)
     {
@@ -91,7 +91,7 @@ void reportHashList(const UList<string>& list)
 
 void reportHashList(const UList<label>& list)
 {
-    Info<<"contiguous = " << contiguous<label>() << nl << nl;
+    Info<<"contiguous = " << is_contiguous<label>::value << nl << nl;
 
     for (const label val : list)
     {
@@ -110,7 +110,7 @@ void reportHashList(const UList<label>& list)
 
 void reportHashList(const UList<face>& list)
 {
-    Info<<"contiguous = " << contiguous<label>() << nl << nl;
+    Info<<"contiguous = " << is_contiguous<label>::value << nl << nl;
 
     for (const face& f : list)
     {
@@ -157,7 +157,7 @@ typedef Pair<word> wordPair;
 
 void reportHashList(const UList<wordPair>& list)
 {
-    Info<<"contiguous = " << contiguous<wordPair>() << nl << nl;
+    Info<<"contiguous = " << is_contiguous<wordPair>::value << nl << nl;
 
     for (const wordPair& pr : list)
     {
@@ -182,7 +182,7 @@ void reportHashList(const UList<wordPair>& list)
 
 void reportHashList(const UList<labelPair>& list)
 {
-    Info<<"contiguous = " << contiguous<labelPair>() << nl << nl;
+    Info<<"contiguous = " << is_contiguous<labelPair>::value << nl << nl;
 
     for (const labelPair& pr : list)
     {
@@ -203,7 +203,7 @@ void reportHashList(const UList<labelPair>& list)
 
 void reportHashList(const UList<labelPairPair>& list)
 {
-    Info<<"contiguous = " << contiguous<labelPairPair>() << nl << nl;
+    Info<<"contiguous = " << is_contiguous<labelPairPair>::value << nl << nl;
 
     for (const labelPairPair& pr : list)
     {
@@ -224,7 +224,7 @@ void reportHashList(const UList<labelPairPair>& list)
 
 void reportHashList(const UList<edge>& list)
 {
-    Info<<"contiguous = " << contiguous<edge>() << nl << nl;
+    Info<<"contiguous = " << is_contiguous<edge>::value << nl << nl;
 
     for (const edge& e : list)
     {
@@ -245,7 +245,7 @@ void reportHashList(const UList<edge>& list)
 
 void reportHashList(const UList<triFace>& list)
 {
-    Info<<"contiguous = " << contiguous<triFace>() << nl << nl;
+    Info<<"contiguous = " << is_contiguous<triFace>::value << nl << nl;
 
     for (const triFace& f : list)
     {

@@ -345,11 +345,19 @@ public:
 };
 
 
-//- Data associated with boundBox type are contiguous
-template<>
-inline bool contiguous<boundBox>() {return contiguous<point>();}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-// Global Operators
+//- Contiguous data for boundBox
+template<> struct is_contiguous<boundBox> : is_contiguous<point> {};
+
+//- Contiguous scalar data for boundBox
+template<> struct is_contiguous_scalar<boundBox>
+:
+    is_contiguous_scalar<point>
+{};
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 inline bool operator==(const boundBox& a, const boundBox& b);
 inline bool operator!=(const boundBox& a, const boundBox& b);

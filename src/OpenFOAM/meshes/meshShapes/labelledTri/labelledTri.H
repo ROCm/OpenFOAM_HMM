@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -45,10 +45,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward Declarations
 class labelledTri;
-
 Istream& operator>>(Istream&, labelledTri&);
 Ostream& operator<<(Ostream&, const labelledTri&);
 
@@ -126,8 +124,13 @@ public:
 };
 
 
-template<>
-inline bool contiguous<labelledTri>()  {return true;}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for labelledTri
+template<> struct is_contiguous<labelledTri> : std::true_type {};
+
+//- Contiguous label data for labelledTri
+template<> struct is_contiguous_label<labelledTri> : std::true_type {};
 
 
 //- Specialization to offset faces, used in ListListOps::combineOffset

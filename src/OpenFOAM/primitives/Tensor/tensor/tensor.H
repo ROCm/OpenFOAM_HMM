@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2014 OpenFOAM Foundation
@@ -41,7 +41,6 @@ SourceFiles
 #include "vector.H"
 #include "sphericalTensor.H"
 #include "symmTensor.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,10 +72,6 @@ vector eigenVector
 );
 tensor eigenVectors(const symmTensor& T, const vector& lambdas);
 tensor eigenVectors(const symmTensor& T);
-
-//- Data associated with tensor type are contiguous
-template<>
-inline bool contiguous<tensor>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

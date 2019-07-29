@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -39,7 +39,6 @@ SourceFiles
 
 #include "SphericalTensor.H"
 #include "Identity.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,11 +51,6 @@ typedef SphericalTensor<scalar> sphericalTensor;
 
 static const sphericalTensor oneThirdI(1.0/3.0);
 static const sphericalTensor twoThirdsI(2.0/3.0);
-
-//- Specify data associated with sphericalTensor type are contiguous
-template<>
-inline bool contiguous<sphericalTensor>() {return true;}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

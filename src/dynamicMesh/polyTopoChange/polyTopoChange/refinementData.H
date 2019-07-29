@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -47,12 +47,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class refinementData;
 
 Istream& operator>>(Istream&, refinementData&);
@@ -219,12 +216,13 @@ public:
 };
 
 
-//- Data associated with refinementData type are contiguous
-template<>
-inline bool contiguous<refinementData>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for refinementData
+template<> struct is_contiguous<refinementData> : std::true_type {};
+
+//- Contiguous label data for refinementData
+template<> struct is_contiguous_label<refinementData> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

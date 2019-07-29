@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -64,7 +64,7 @@ void Pstream::gather
         {
             T value;
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UIPstream::read
                 (
@@ -95,7 +95,7 @@ void Pstream::gather
         // Send up Value
         if (myComm.above() != -1)
         {
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UOPstream::write
                 (
@@ -161,7 +161,7 @@ void Pstream::scatter
         // Receive from up
         if (myComm.above() != -1)
         {
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UIPstream::read
                 (
@@ -192,7 +192,7 @@ void Pstream::scatter
         // (only when using a tree schedule!) first.
         forAllReverse(myComm.below(), belowI)
         {
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 UOPstream::write
                 (

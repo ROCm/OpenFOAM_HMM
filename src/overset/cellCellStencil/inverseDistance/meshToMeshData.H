@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,12 +45,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class meshToMeshData;
 
 Istream& operator>>(Istream&, meshToMeshData&);
@@ -210,6 +207,7 @@ public:
                 TrackingData&
             ) const;
 
+
     // Member Operators
 
         // Needed for List IO
@@ -225,12 +223,13 @@ public:
 };
 
 
-//- Data associated with meshToMeshData type are contiguous
-template<>
-inline bool contiguous<meshToMeshData>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for meshToMeshData
+template<> struct is_contiguous<meshToMeshData> : std::true_type {};
+
+//- Contiguous label data for meshToMeshData
+template<> struct is_contiguous_label<meshToMeshData> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

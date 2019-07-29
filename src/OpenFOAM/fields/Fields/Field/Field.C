@@ -634,7 +634,7 @@ void Foam::Field<Type>::writeEntry(const word& keyword, Ostream& os) const
     // The contents are 'uniform' if the list is non-empty
     // and all entries have identical values.
 
-    if (contiguous<Type>() && List<Type>::uniform())
+    if (is_contiguous<Type>::value && List<Type>::uniform())
     {
         os << "uniform " << this->first();
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -49,12 +49,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyPatch;
 class polyMesh;
 class wallPoint;
 
-// Forward declaration of friend functions and operators
 Ostream& operator<<(Ostream&, const wallPoint&);
 Istream& operator>>(Istream&, wallPoint&);
 
@@ -65,7 +64,7 @@ Istream& operator>>(Istream&, wallPoint&);
 
 class wallPoint
 {
-    // Private data
+    // Private Data
 
         //- Position of nearest wall center
         point origin_;
@@ -219,12 +218,13 @@ public:
 };
 
 
-//- Data associated with wallPoint type are contiguous
-template<>
-inline bool contiguous<wallPoint>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for wallPoint
+template<> struct is_contiguous<wallPoint> : std::true_type {};
+
+//- Contiguous scalar data for wallPoint
+template<> struct is_contiguous_scalar<wallPoint> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

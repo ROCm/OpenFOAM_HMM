@@ -56,7 +56,7 @@ void Foam::List<T>::doResize(const label newSize)
             if (overlap)
             {
                 #ifdef USEMEMCPY
-                if (contiguous<T>())
+                if (is_contiguous<T>::value)
                 {
                     memcpy(nv, this->v_, overlap*sizeof(T));
                 }
@@ -189,7 +189,7 @@ Foam::List<T>::List(const UList<T>& a)
         doAlloc();
 
         #ifdef USEMEMCPY
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             memcpy(this->v_, a.v_, this->byteSize());
         }
@@ -217,7 +217,7 @@ Foam::List<T>::List(const List<T>& a)
         doAlloc();
 
         #ifdef USEMEMCPY
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             memcpy(this->v_, a.v_, this->byteSize());
         }
@@ -252,7 +252,7 @@ Foam::List<T>::List(List<T>& a, bool reuse)
         doAlloc();
 
         #ifdef USEMEMCPY
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             memcpy(this->v_, a.v_, this->byteSize());
         }
@@ -456,7 +456,7 @@ void Foam::List<T>::operator=(const UList<T>& a)
     if (this->size_)
     {
         #ifdef USEMEMCPY
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             memcpy(this->v_, a.v_, this->byteSize());
         }

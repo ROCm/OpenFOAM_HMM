@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -64,16 +64,14 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward Declarations
 class polyPatch;
 class polyMesh;
 class primitiveMesh;
 class edge;
 class face;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class directionInfo;
 
 Istream& operator>>(Istream&, directionInfo&);
@@ -86,7 +84,7 @@ Ostream& operator<<(Ostream&, const directionInfo&);
 
 class directionInfo
 {
-    // Private data
+    // Private Data
 
         // Either mesh edge or face point
         label index_;
@@ -262,12 +260,10 @@ public:
 };
 
 
-//- Data associated with directionInfo type are contiguous
-template<>
-inline bool contiguous<directionInfo>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for directionInfo
+template<> struct is_contiguous<directionInfo> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

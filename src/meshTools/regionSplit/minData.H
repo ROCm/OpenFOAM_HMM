@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2014-2016 OpenFOAM Foundation
@@ -45,12 +45,10 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class minData;
 
 Istream& operator>>(Istream&, minData&);
@@ -193,12 +191,13 @@ public:
 };
 
 
-//- Data associated with minData type are contiguous
-template<>
-inline bool contiguous<minData>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for minData
+template<> struct is_contiguous<minData> : std::true_type {};
+
+//- Contiguous label data for minData
+template<> struct is_contiguous_label<minData> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

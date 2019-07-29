@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -27,7 +27,7 @@ Typedef
     Foam::tensor2D
 
 Description
-    Tensor2D or scalars.
+    Tensor2D of scalars.
 
 SourceFiles
     tensor2D.C
@@ -39,7 +39,6 @@ SourceFiles
 
 #include "Tensor2D.H"
 #include "vector2D.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,10 +58,6 @@ vector2D eigenVector
 );
 tensor2D eigenVectors(const tensor2D& t, const vector2D& lambdas);
 tensor2D eigenVectors(const tensor2D& t);
-
-//- Data associated with tensor2D type are contiguous
-template<>
-inline bool contiguous<tensor2D>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

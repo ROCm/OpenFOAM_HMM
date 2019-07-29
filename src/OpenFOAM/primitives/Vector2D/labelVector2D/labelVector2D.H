@@ -37,7 +37,6 @@ SourceFiles
 
 #include "label.H"
 #include "Vector2D.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,12 +46,6 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 typedef Vector2D<label> labelVector2D;
-
-
-//- Data associated with labelVector2D type are contiguous
-template<>
-inline bool contiguous<labelVector2D>() {return true;}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

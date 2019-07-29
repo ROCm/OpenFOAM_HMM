@@ -340,12 +340,19 @@ public:
 };
 
 
-//- Data associated with treeBoundBox type are contiguous
-template<>
-inline bool contiguous<treeBoundBox>() {return contiguous<boundBox>();}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for treeBoundBox
+template<> struct is_contiguous<treeBoundBox> : is_contiguous<boundBox> {};
+
+//- Contiguous scalar data for treeBoundBox
+template<> struct is_contiguous_scalar<treeBoundBox>
+:
+    is_contiguous_scalar<boundBox>
+{};
 
 
-// Global Operators
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 inline bool operator==(const treeBoundBox& a, const treeBoundBox& b);
 inline bool operator!=(const treeBoundBox& a, const treeBoundBox& b);

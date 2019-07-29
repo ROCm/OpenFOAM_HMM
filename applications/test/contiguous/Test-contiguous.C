@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ Description
 #include "IOstreams.H"
 #include "scalar.H"
 #include "vector.H"
+#include "Switch.H"
 
 #include "labelRange.H"
 #include "scalarList.H"
@@ -44,24 +45,43 @@ Description
 #include "FixedList.H"
 #include "Pair.H"
 
+#include "distributedTriSurfaceMesh.H"
+
 namespace Foam
 {
 
 // Wrong, but interesting to test
-// template<> struct contiguous<Pair<word>> : std::true_type {};
+template<> struct is_contiguous<Pair<word>> : std::true_type {};
 
-} // End namespace Foam
+} // end namespace Foam
 
 using namespace Foam;
 
 
 template<class T>
-void printContiguous()
+void printInfo(const char* const name = nullptr)
 {
-    Info<<"contiguous " << typeid(T).name() << " () = "
-        << contiguous<T>()
-        // << " value = " << contiguous<T>::value
-        << nl;
+    if (name == nullptr)
+    {
+        Info<< typeid(T).name();
+    }
+    else
+    {
+        Info<< name;
+    }
+
+    Info<< " contiguous=" <<  Switch(is_contiguous<T>::value);
+
+    if (is_contiguous_label<T>::value)
+    {
+        Info<< " label";
+    }
+    if (is_contiguous_scalar<T>::value)
+    {
+        Info<< " scalar";
+    }
+
+    Info<< nl;
 }
 
 
@@ -74,18 +94,16 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::noFunctionObjects();
 
-    #include "setRootCase.H"
+    printInfo<label>();
+    printInfo<double>();
+    printInfo<FixedList<double, 4>>();
+    printInfo<Pair<long>>();
 
-    printContiguous<label>();
-    printContiguous<double>();
-    printContiguous<FixedList<int, 2>>();
-    printContiguous<FixedList<int, 3>>();
-    printContiguous<Pair<long>>();
+    printInfo<FixedList<word, 2>>();
+    printInfo<Pair<word>>();
 
-    printContiguous<FixedList<word, 2>>();
-    printContiguous<Pair<word>>();
-
-    printContiguous<FixedList<FixedList<int, 2>, 2>>();
+    printInfo<FixedList<FixedList<int, 2>, 2>>();
+    printInfo<segment>();
 
     return 0;
 }

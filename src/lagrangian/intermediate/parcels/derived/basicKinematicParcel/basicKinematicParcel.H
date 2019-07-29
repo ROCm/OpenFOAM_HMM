@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -47,11 +47,8 @@ namespace Foam
 {
     typedef KinematicParcel<particle> basicKinematicParcel;
 
-    template<>
-    inline bool contiguous<basicKinematicParcel>()
-    {
-        return true;
-    }
+    //- Contiguous data for basicKinematicParcel
+    template<> struct is_contiguous<basicKinematicParcel> : std::true_type {};
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

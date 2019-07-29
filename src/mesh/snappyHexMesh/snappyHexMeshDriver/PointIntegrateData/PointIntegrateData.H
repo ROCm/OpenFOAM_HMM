@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,13 +40,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class Istream;
 class Ostream;
-template<class DataType>
-class PointIntegrateData;
+template<class DataType> class PointIntegrateData;
 
-// Forward declaration of friend functions and operators
 template<class DataType>
 Ostream& operator<<(Ostream&, const PointIntegrateData<DataType>&);
 template<class DataType>
@@ -84,7 +82,6 @@ public:
             edgeData_(edgeData)
         {}
     };
-
 
 
     // Constructors
@@ -227,21 +224,16 @@ public:
         );
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Data associated with PointIntegrateData types is contiguous
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
 
-template<>
-inline bool contiguous<PointIntegrateData<scalar>>()
-{
-    return true;
-}
+//- Data are contiguous if the data type is contiguous
+template<class DataType>
+struct is_contiguous<PointIntegrateData<DataType>>
+:
+    is_contiguous<DataType>
+{};
 
-template<>
-inline bool contiguous<PointIntegrateData<vector>>()
-{
-    return true;
-}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

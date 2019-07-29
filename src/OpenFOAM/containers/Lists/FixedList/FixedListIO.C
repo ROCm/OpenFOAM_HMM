@@ -29,7 +29,6 @@ License
 #include "Istream.H"
 #include "Ostream.H"
 #include "token.H"
-#include "contiguous.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -75,7 +74,7 @@ Foam::Ostream& Foam::FixedList<T, N>::writeList
     // small and we desire a consistent appearance.
     // Eg, FixedList<T,2> or Pair<T> as "(-1 -1)", not as "2{-1}"
 
-    if (os.format() == IOstream::ASCII || !contiguous<T>())
+    if (os.format() == IOstream::ASCII || !is_contiguous<T>::value)
     {
         if
         (
@@ -86,7 +85,7 @@ Foam::Ostream& Foam::FixedList<T, N>::writeList
              &&
                 (
                     Detail::ListPolicy::no_linebreak<T>::value
-                 || contiguous<T>()
+                 || is_contiguous<T>::value
                 )
             )
         )
@@ -146,7 +145,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, N>& list)
 {
     is.fatalCheck(FUNCTION_NAME);
 
-    if (is.format() == IOstream::ASCII || !contiguous<T>())
+    if (is.format() == IOstream::ASCII || !is_contiguous<T>::value)
     {
         token firstToken(is);
 

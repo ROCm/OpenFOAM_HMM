@@ -115,7 +115,7 @@ void Foam::UList<T>::deepCopy(const UList<T>& list)
     else if (len)
     {
         #ifdef USEMEMCPY
-        if (contiguous<T>())
+        if (is_contiguous<T>::value)
         {
             memcpy(this->v_, list.v_, this->byteSize());
         }
@@ -180,7 +180,7 @@ void Foam::UList<T>::operator=(const zero)
 template<class T>
 std::streamsize Foam::UList<T>::byteSize() const
 {
-    if (!contiguous<T>())
+    if (!is_contiguous<T>::value)
     {
         FatalErrorInFunction
             << "Cannot return binary size of a list with non-primitive elements"

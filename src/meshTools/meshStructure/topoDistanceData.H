@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -46,12 +46,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class topoDistanceData;
 
 Istream& operator>>(Istream&, topoDistanceData&);
@@ -77,10 +74,10 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null with invalid (-1) for data and distance
         inline topoDistanceData();
 
-        //- Construct from count
+        //- Construct from components
         inline topoDistanceData
         (
             const label data,
@@ -91,7 +88,6 @@ public:
     // Member Functions
 
         // Access
-
 
             inline label data() const
             {
@@ -191,6 +187,7 @@ public:
             template<class TrackingData>
             inline bool equal(const topoDistanceData&, TrackingData& td) const;
 
+
     // Member Operators
 
         // Needed for List IO
@@ -206,12 +203,13 @@ public:
 };
 
 
-//- Data associated with topoDistanceData type are contiguous
-template<>
-inline bool contiguous<topoDistanceData>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for topoDistanceData
+template<> struct is_contiguous<topoDistanceData> : std::true_type {};
+
+//- Contiguous label data for topoDistanceData
+template<> struct is_contiguous_label<topoDistanceData> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

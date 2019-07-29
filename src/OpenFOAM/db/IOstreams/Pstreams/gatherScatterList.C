@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -75,7 +75,7 @@ void Pstream::gatherList
             label belowID = myComm.below()[belowI];
             const labelList& belowLeaves = comms[belowID].allBelow();
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 List<T> receivedValues(belowLeaves.size() + 1);
 
@@ -145,7 +145,7 @@ void Pstream::gatherList
                     << " data:" << Values[UPstream::myProcNo(comm)] << endl;
             }
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 List<T> sendingValues(belowLeaves.size() + 1);
                 sendingValues[0] = Values[UPstream::myProcNo(comm)];
@@ -237,7 +237,7 @@ void Pstream::scatterList
         {
             const labelList& notBelowLeaves = myComm.allNotBelow();
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 List<T> receivedValues(notBelowLeaves.size());
 
@@ -288,7 +288,7 @@ void Pstream::scatterList
             label belowID = myComm.below()[belowI];
             const labelList& notBelowLeaves = comms[belowID].allNotBelow();
 
-            if (contiguous<T>())
+            if (is_contiguous<T>::value)
             {
                 List<T> sendingValues(notBelowLeaves.size());
 

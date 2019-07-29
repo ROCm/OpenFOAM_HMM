@@ -68,7 +68,7 @@ bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
         const label len = size();
 
         // Read list contents depending on data format
-        if (is.format() == IOstream::ASCII || !contiguous<Type>())
+        if (is.format() == IOstream::ASCII || !is_contiguous<Type>::value)
         {
             // Read beginning of contents
             char listDelimiter = is.readBeginList("Matrix");
@@ -147,19 +147,19 @@ Foam::Ostream& Foam::Matrix<Form, Type>::writeMatrix
     os  << mat.m() << token::SPACE << mat.n();
 
     // Write list contents depending on data format
-    if (os.format() == IOstream::ASCII || !contiguous<Type>())
+    if (os.format() == IOstream::ASCII || !is_contiguous<Type>::value)
     {
         if (len)
         {
             const Type* v = mat.cdata();
 
             // Can the contents be considered 'uniform' (ie, identical)
-            if (len > 1 && contiguous<Type>() && mat.uniform())
+            if (len > 1 && is_contiguous<Type>::value && mat.uniform())
             {
                 // Two or more entries, and all entries have identical values.
                 os  << token::BEGIN_BLOCK << v[0] << token::END_BLOCK;
             }
-            else if (len < shortLen && contiguous<Type>())
+            else if (len < shortLen && is_contiguous<Type>::value)
             {
                 // Write start contents delimiter
                 os  << token::BEGIN_LIST;

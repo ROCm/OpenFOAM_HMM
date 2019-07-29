@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -47,12 +47,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyPatch;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class pointTopoDistanceData;
 
 Istream& operator>>(Istream&, pointTopoDistanceData&);
@@ -78,10 +75,10 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null with invalid (-1) for data and distance
         inline pointTopoDistanceData();
 
-        //- Construct from count
+        //- Construct from components
         inline pointTopoDistanceData
         (
             const label data,
@@ -92,7 +89,6 @@ public:
     // Member Functions
 
         // Access
-
 
             inline label data() const
             {
@@ -208,6 +204,7 @@ public:
         inline bool operator==(const pointTopoDistanceData&) const;
         inline bool operator!=(const pointTopoDistanceData&) const;
 
+
     // IOstream Operators
 
         friend Ostream& operator<<(Ostream&, const pointTopoDistanceData&);
@@ -215,12 +212,16 @@ public:
 };
 
 
-//- Data associated with pointTopoDistanceData type are contiguous
-template<>
-inline bool contiguous<pointTopoDistanceData>()
-{
-    return true;
-}
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for pointTopoDistanceData
+template<> struct is_contiguous<pointTopoDistanceData> : std::true_type {};
+
+//- Contiguous label data for pointTopoDistanceData
+template<> struct is_contiguous_label<pointTopoDistanceData>
+:
+    std::true_type
+{};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

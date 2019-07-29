@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -148,16 +148,14 @@ public:
 };
 
 
-//- Data associated with transportData type is same as underlying
+// * * * * * * * * * * * * * * * * * Traits  * * * * * * * * * * * * * * * * //
+
+//- Contiguous data for transportData
 template<>
-inline bool contiguous<transportData>()
-{
-    return contiguous<wallPointData<scalar>>();
-}
+struct is_contiguous<transportData> : is_contiguous<wallPointData<scalar>> {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 } // End namespace Foam
 
