@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,10 +30,92 @@ License
 
 Foam::scalar Foam::readScalar(Istream& is)
 {
-    scalar val;
+    scalar val(0);
     is >> val;
 
     return val;
+}
+
+
+Foam::scalar Foam::readRawScalar(Istream& is)
+{
+    scalar val(0);
+    readRawScalars(is, &val, 1);
+    return val;
+}
+
+
+void Foam::readRawScalars(Istream& is, scalar* data, size_t nElem)
+{
+    // No check for binary vs ascii, the caller knows what they are doing
+
+    #if defined(WM_SP) || defined(WM_SPDP)
+
+    // Defined scalar as a float, non-native type is double
+    // Handle type narrowing limits
+
+    typedef double nonNative;
+
+    if (is.checkScalarSize<nonNative>())
+    {
+        nonNative other;
+
+        for (const scalar* endData = data + nElem; data != endData; ++data)
+        {
+            is.readRaw(reinterpret_cast<char*>(&other), sizeof(nonNative));
+
+            // Type narrowing
+            // Overflow: silently fix, or raise error?
+
+            if (other < -VGREAT)
+            {
+                *data = -VGREAT;
+            }
+            else if (other > VGREAT)
+            {
+                *data = VGREAT;
+            }
+            else if (other > -VSMALL && other < VSMALL)
+            {
+                // Underflow: round to zero
+                *data = 0;
+            }
+            else
+            {
+                *data = scalar(other);
+            }
+        }
+    }
+    else
+    {
+        // Read with native size
+        is.readRaw(reinterpret_cast<char*>(data), nElem*sizeof(scalar));
+    }
+
+    #elif defined(WM_DP)
+
+    // Defined scalar as a double, non-native type is float
+
+    typedef float nonNative;
+
+    if (is.checkScalarSize<nonNative>())
+    {
+        nonNative other;
+
+        for (const scalar* endData = data + nElem; data != endData; ++data)
+        {
+            is.readRaw(reinterpret_cast<char*>(&other), sizeof(nonNative));
+
+            *data = scalar(other);
+        }
+    }
+    else
+    {
+        // Read with native size
+        is.readRaw(reinterpret_cast<char*>(data), nElem*sizeof(scalar));
+    }
+
+    #endif
 }
 
 

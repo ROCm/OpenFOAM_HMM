@@ -30,7 +30,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "scalar.H"
-#include "label.H"
+#include "FlatOutput.H"
+#include "ListStream.H"
 #include "StringStream.H"
 #include "NASCore.H"
 #include "parsing.H"
@@ -64,6 +65,19 @@ inline Switch readSwitch(const std::string& str)
 void printInfo(const Switch& sw)
 {
     Info<<"Switch " << sw.c_str() << " (enum=" << label(sw.type()) << ")\n";
+}
+
+
+Ostream& toString(Ostream& os, const UList<char>& list)
+{
+    os << '"';
+    for (const char c : list)
+    {
+        os << c;
+    }
+    os << '"';
+
+    return os;
 }
 
 
@@ -278,6 +292,59 @@ int main(int argc, char *argv[])
                 { false, " 4294968000  "  },
             }
         );
+    }
+
+    if (true)
+    {
+        #ifdef WM_DP
+        typedef float otherType;
+        #else
+        typedef double otherType;
+        #endif
+
+        Info<< nl << "Test raw binary read of scalar list:"
+            << " write " << sizeof(otherType)
+            << " read " << sizeof(scalar) << nl;
+
+        List<otherType> srcList(15);
+        forAll(srcList, i)
+        {
+            srcList[i] = 1 + 10*i;
+        }
+
+        DynamicList<char> buf;
+
+        OListStream os(std::move(buf), IOstream::BINARY);
+        os << srcList;
+
+        os.swap(buf); // Recover buffer
+
+        // Read back
+        List<scalar> dstList;
+
+        UIListStream is(buf, IOstream::BINARY);
+        is.setScalarByteSize(sizeof(otherType));
+
+        Info<< "Stream scalar-size ("
+            << is.scalarByteSize() << ") is native: "
+            << Switch(is.checkScalarSize<otherType>()) << nl;
+
+
+        token firstToken(is);
+        Info<< "List has " << firstToken.info() << " scalar items" << nl;
+
+        dstList.resize(firstToken.labelToken(), 3.14159);
+
+        is.beginRawRead();
+        // for (scalar& val : dstList)
+        // {
+        //     val = readRawScalar(is);
+        // }
+        readRawScalars(is, dstList.data(), dstList.size());
+        is.endRawRead();
+
+        Info<< "Wrote " << flatOutput(srcList) << nl
+            << "Read " << flatOutput(dstList) << nl;
     }
 
     if (nFail)

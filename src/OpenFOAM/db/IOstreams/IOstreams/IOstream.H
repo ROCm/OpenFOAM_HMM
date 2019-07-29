@@ -249,7 +249,7 @@ public:
         }
 
 
-    // Stream State Functions
+    // Element sizes (precision)
 
         //- The label byte-size associated with the stream
         unsigned labelByteSize() const
@@ -274,6 +274,28 @@ public:
         {
             scalarByteSize_ = nbytes;
         }
+
+
+        //- Check if the label byte-size associated with the stream
+        //- is the same as the given type
+        template<class T = label>
+        typename std::enable_if<std::is_integral<T>::value, bool>::type
+        checkLabelSize() const
+        {
+            return labelByteSize_ == sizeof(T);
+        }
+
+        //- Check if the scalar byte-size associated with the stream
+        //- is the same as the given type
+        template<class T = scalar>
+        typename std::enable_if<std::is_floating_point<T>::value, bool>::type
+        checkScalarSize() const
+        {
+            return scalarByteSize_ == sizeof(T);
+        }
+
+
+    // Stream State Functions
 
         //- Const access to the current stream line number
         label lineNumber() const

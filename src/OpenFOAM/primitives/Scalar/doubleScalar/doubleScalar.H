@@ -51,8 +51,7 @@ namespace Foam
 typedef double doubleScalar;
 
 // Largest and smallest scalar values allowed in certain parts of the code.
-// (15 is the number of significant figures in an
-//  IEEE double precision number.  See limits.h or float.h)
+// See std::numeric_limits max(), min(), epsilon()
 constexpr doubleScalar doubleScalarGREAT = 1.0e+15;
 constexpr doubleScalar doubleScalarVGREAT = 1.0e+300;
 constexpr doubleScalar doubleScalarROOTVGREAT = 1.0e+150;

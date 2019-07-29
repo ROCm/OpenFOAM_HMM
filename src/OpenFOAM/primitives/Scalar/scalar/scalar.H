@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -64,8 +64,6 @@ namespace Foam
     constexpr scalar VSMALL = floatScalarVSMALL;
     constexpr scalar ROOTVSMALL = floatScalarROOTVSMALL;
 
-    scalar readScalar(Istream& is);
-
     inline scalar readScalar(const char* buf)
     {
         return readFloat(buf);
@@ -85,6 +83,19 @@ namespace Foam
     {
         return readFloat(str, val);
     }
+
+    //- Read scalar from stream.
+    scalar readScalar(Istream& is);
+
+    //- Read raw scalar from binary stream.
+    //  \note No internal check for binary vs ascii,
+    //        the caller knows what they are doing
+    scalar readRawScalar(Istream& is);
+
+    //- Read raw scalars from binary stream.
+    //  \note No internal check for binary vs ascii,
+    //        the caller knows what they are doing
+    void readRawScalars(Istream& is, scalar* data, size_t nElem);
 }
 
 #elif defined(WM_DP)
@@ -103,8 +114,6 @@ namespace Foam
     constexpr scalar ROOTSMALL = doubleScalarROOTSMALL;
     constexpr scalar VSMALL = doubleScalarVSMALL;
     constexpr scalar ROOTVSMALL = doubleScalarROOTVSMALL;
-
-    scalar readScalar(Istream& is);
 
     inline scalar readScalar(const char* buf)
     {
@@ -125,6 +134,20 @@ namespace Foam
     {
         return readDouble(str, val);
     }
+
+
+    //- Read scalar from stream.
+    scalar readScalar(Istream& is);
+
+    //- Read raw scalar from binary stream.
+    //  \note No internal check for binary vs ascii,
+    //        the caller knows what they are doing
+    scalar readRawScalar(Istream& is);
+
+    //- Read raw scalars from binary stream.
+    //  \note No internal check for binary vs ascii,
+    //        the caller knows what they are doing
+    void readRawScalars(Istream& is, scalar* data, size_t nElem);
 }
 
 #endif

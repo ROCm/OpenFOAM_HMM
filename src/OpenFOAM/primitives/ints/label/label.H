@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2014 OpenFOAM Foundation
@@ -63,13 +63,6 @@ typedef INT_SIZE(int, _t) label;
 constexpr label labelMin = INT_SIZE(INT, _MIN);
 constexpr label labelMax = INT_SIZE(INT, _MAX);
 
-//- Read label from stream.
-//  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
-inline label readLabel(Istream& is)
-{
-    return INT_SIZE(readInt,) (is);
-}
-
 //- Parse entire buffer as a label, skipping leading/trailing whitespace.
 //  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
 //  \return Parsed value or FatalIOError on any problem
@@ -101,6 +94,24 @@ inline bool readLabel(const std::string& str, label& val)
 {
     return INT_SIZE(readInt,) (str, val);
 }
+
+
+//- Read label from stream.
+//  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
+inline label readLabel(Istream& is)
+{
+    return INT_SIZE(readInt,) (is);
+}
+
+//- Read raw label from binary stream.
+//  \note No internal check for binary vs ascii,
+//        the caller knows what they are doing
+label readRawLabel(Istream& is);
+
+//- Read raw labels from binary stream.
+//  \note No internal check for binary vs ascii,
+//        the caller knows what they are doing
+void readRawLabels(Istream& is, label* data, size_t nElem);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

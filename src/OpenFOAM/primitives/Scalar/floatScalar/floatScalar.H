@@ -51,8 +51,7 @@ namespace Foam
 typedef float floatScalar;
 
 // Largest and smallest scalar values allowed in certain parts of the code.
-// (6 is the number of significant figures in an
-//  IEEE single precision number.  See limits.h or float.h)
+// See std::numeric_limits max(), min(), epsilon()
 constexpr floatScalar floatScalarGREAT = 1.0e+6;
 constexpr floatScalar floatScalarVGREAT = 1.0e+37;
 constexpr floatScalar floatScalarROOTVGREAT = 1.0e+18;
