@@ -161,6 +161,28 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Partial Specializations for non-VectorSpace quantities
+
+template<class Cmpt>
+class typeOfRank<Cmpt, 0>
+{
+public:
+
+    typedef Cmpt type;
+};
+
+
+template<class Cmpt>
+class symmTypeOfRank<Cmpt, 0>
+{
+public:
+
+    typedef Cmpt type;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
