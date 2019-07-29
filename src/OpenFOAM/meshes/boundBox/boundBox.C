@@ -305,8 +305,9 @@ Foam::Istream& Foam::operator>>(Istream& is, boundBox& bb)
     }
     else
     {
-        is.read
+        Detail::readContiguous<boundBox>
         (
+            is,
             reinterpret_cast<char*>(&bb.min_),
             sizeof(boundBox)
         );

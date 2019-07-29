@@ -134,7 +134,12 @@ inline Foam::Istream& Foam::operator>>(Istream& is, labelledTri& t)
     }
     else
     {
-        is.read(reinterpret_cast<char*>(&t), sizeof(labelledTri));
+        Detail::readContiguous<labelledTri>
+        (
+            is,
+            reinterpret_cast<char*>(&t),
+            sizeof(labelledTri)
+        );
     }
 
     is.check(FUNCTION_NAME);

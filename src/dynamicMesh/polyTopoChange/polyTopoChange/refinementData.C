@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -61,8 +61,9 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::refinementData& wDist)
     }
     else
     {
-        is.read
+        Detail::readContiguous<refinementData>
         (
+            is,
             reinterpret_cast<char*>(&wDist.refinementCount_),
             sizeof(refinementData)
         );

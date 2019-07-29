@@ -119,6 +119,8 @@ Foam::Istream& Foam::PackedList<Width>::read(Istream& is)
         }
         else
         {
+            // NOTE: binary content should be independent of WM_LABEL_SIZE
+
             if (len)
             {
                 is.read

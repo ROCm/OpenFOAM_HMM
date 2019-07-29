@@ -495,21 +495,20 @@ Foam::Istream& Foam::operator>>(Istream& is, AABBTree<Type>& tree)
     if (is.format() == IOstream::ASCII)
     {
         is  >> tree.maxLevel_
-            >> tree.minLeafSize_
-            >> tree.boundBoxes_
-            >> tree.addressing_;
+            >> tree.minLeafSize_;
     }
     else
     {
-        is.read
-        (
-            reinterpret_cast<char*>(&tree.maxLevel_),
-            sizeof(tree.maxLevel_)
-          + sizeof(tree.minLeafSize_)
-        );
-        is  >> tree.boundBoxes_
-            >> tree.addressing_;
+        is.beginRawRead();
+
+        readRawLabel(is, &tree.maxLevel_);
+        readRawLabel(is, &tree.minLeafSize_);
+
+        is.endRawRead();
     }
+
+    is  >> tree.boundBoxes_
+        >> tree.addressing_;
 
     is.check(FUNCTION_NAME);
     return is;

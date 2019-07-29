@@ -223,7 +223,12 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, N>& list)
     {
         // Binary and contiguous
 
-        is.read(reinterpret_cast<char*>(list.data()), N*sizeof(T));
+        Detail::readContiguous<T>
+        (
+            is,
+            reinterpret_cast<char*>(list.data()),
+            N*sizeof(T)
+        );
 
         is.fatalCheck
         (

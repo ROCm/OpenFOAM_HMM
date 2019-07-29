@@ -47,6 +47,7 @@ SourceFiles
 
 #include "IOstream.H"
 #include "token.H"
+#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -196,7 +197,47 @@ inline Istream& operator>>(Istream& is, IOstreamManip f)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+namespace Detail
+{
+    //- Read binary block of contiguous data, possibly with conversion
+    template<class T>
+    void readContiguous(Istream& is, char* data, std::streamsize byteCount)
+    {
+        is.beginRawRead();
+
+        if (is_contiguous_label<T>::value)
+        {
+            readRawLabel
+            (
+                is,
+                reinterpret_cast<label*>(data),
+                byteCount/sizeof(label)
+            );
+        }
+        else if (is_contiguous_scalar<T>::value)
+        {
+            readRawScalar
+            (
+                is,
+                reinterpret_cast<scalar*>(data),
+                byteCount/sizeof(scalar)
+            );
+        }
+        else
+        {
+            is.readRaw(data, byteCount);
+        }
+
+        is.endRawRead();
+    }
+
+} // End namespace Detail
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

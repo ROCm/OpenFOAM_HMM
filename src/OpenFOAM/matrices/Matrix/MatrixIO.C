@@ -112,7 +112,12 @@ bool Foam::Matrix<Form, Type>::readMatrix(Istream& is)
         {
             if (len)
             {
-                is.read(reinterpret_cast<char*>(v_), len*sizeof(Type));
+                Detail::readContiguous<Type>
+                (
+                    is,
+                    reinterpret_cast<char*>(v_),
+                    len*sizeof(Type)
+                );
 
                 is.fatalCheck("readMatrix : reading the binary block");
             }

@@ -126,7 +126,12 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& list)
         {
             // Non-empty, binary, contiguous
 
-            is.read(reinterpret_cast<char*>(list.data()), len*sizeof(T));
+            Detail::readContiguous<T>
+            (
+                is,
+                reinterpret_cast<char*>(list.data()),
+                len*sizeof(T)
+            );
 
             is.fatalCheck
             (
