@@ -1045,7 +1045,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                             mDotL_[i] = dmdt_[i]*L[i];
 
                             // No quenching flux
-                            //qq_[i] = 0.0;
+                            qq_[i] = 0.0;
 
                             this->operator[](i) =
                             (
@@ -1104,6 +1104,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                         A1[i] = 1.0;
                         qq_[i] = 0.0;
                         mDotL_[i] = 0.0;
+                        dmdt_[i] = 0.0;
 
                         // Turbulente thermal diffusivity for single phase.
                         this->operator[](i) =
@@ -1141,12 +1142,12 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                     Info<< "  dmdt: " << gMin((dmdt_)) << " - "
                         << gMax((dmdt_)) << endl;
 
-                     Info<< "  alphatlEff: " << gMin(liquidw*(*this + alphaw))
+                    Info<< "  alphatlEff: " << gMin(liquidw*(*this + alphaw))
                         << " - " << gMax(liquidw*(*this + alphaw)) << endl;
 
                     scalar Qeff = gSum(qEff*patch().magSf());
-                    Info<< " Effective heat transfer rate to liquid:" << Qeff
-                        << endl;
+                    Info<< " Effective heat transfer rate to liquid: " << Qeff
+                        << endl << nl;
 
                     if (debug & 2)
                     {
@@ -1186,11 +1187,13 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                             }
                         }
 
-                        Info<< "Sub Cool faces : " << nSubCool << endl;
-                        Info<< "Transient faces : " << nTransient << endl;
-                        Info<< "Film faces : " << nFilm << endl;
-                        Info<< "Non Boiling faces : " << nNonBoiling << endl;
-                        Info<< "Total faces : " << this->size() << endl;
+                        Info<< "Faces regime :  " <<  nl << endl;
+
+                        Info<< "    sub Cool faces : " << nSubCool << endl;
+                        Info<< "    transient faces : " << nTransient << endl;
+                        Info<< "    film faces : " << nFilm << endl;
+                        Info<< "    non-Boiling faces : " << nNonBoiling << endl;
+                        Info<< "    total faces : " << this->size() << endl << nl;
 
                         const scalarField qc
                         (
@@ -1199,7 +1202,7 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                         );
 
                         scalar Qc = gSum(qc*patch().magSf());
-                        Info<< " Convective heat transfer:" << Qc << endl;
+                        Info<< " Convective heat transfer: " << Qc << endl;
 
                         const scalarField qFilm
                         (
@@ -1219,14 +1222,21 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::updateCoeffs()
                         Info<< " Transient boiling heat transfer:" << Qtbtot
                             << endl;
 
-                        Info<< " tDNB: " << gMin(tDNB) << " - " << gMax(tDNB)
+                        Info<< " TDNB: " << gMin(tDNB) << " - " << gMax(tDNB)
                             << endl;
 
-                        scalar QsubCool = gSum
+                        const scalarField qSubCool
                         (
-                            fLiquid*nSubCools*(qq_ + qe())*patch().magSf()
+                            fLiquid*nSubCools*
+                            (
+                                A1*alphatConv_*hew.snGrad()
+                              + qe() + qq()
+                            )
                         );
-                        Info<< " Sub Cool boiling heat transfer:" << QsubCool
+
+                        scalar QsubCool = gSum(qSubCool*patch().magSf());
+
+                        Info<< " Sub Cool boiling heat transfer: " << QsubCool
                             << endl;
 
                         Info<< "  N: " << gMin(nSubCools*N) << " - "
