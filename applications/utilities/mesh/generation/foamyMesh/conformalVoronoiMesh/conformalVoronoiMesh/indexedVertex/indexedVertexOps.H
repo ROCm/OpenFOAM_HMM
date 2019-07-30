@@ -27,6 +27,7 @@ Namespace
     CGAL::indexedVertexOps
 
 Description
+    Operations for indexed vertex types
 
 SourceFiles
     indexedVertexOpsTemplates.C

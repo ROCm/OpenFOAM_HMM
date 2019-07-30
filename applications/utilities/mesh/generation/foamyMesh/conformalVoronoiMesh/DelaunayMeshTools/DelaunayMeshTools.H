@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2016 OpenFOAM Foundation
@@ -23,12 +23,13 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
+Namespace
     Foam::DelaunayMeshTools
 
 Description
-    Collection of functions for operating on a Delaunay mesh. Includes:
+    Collection of functions for operating on a Delaunay mesh.
 
+    Includes:
       - Functions for writing to an OBJ file
       - Functions for extracting fields from the Delaunay triangulation
 

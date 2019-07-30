@@ -27,6 +27,7 @@ Namespace
     CGAL::indexedCellOps
 
 Description
+    Operations for indexed cell types
 
 SourceFiles
     indexedCellOpsTemplates.C
