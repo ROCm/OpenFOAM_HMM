@@ -158,21 +158,8 @@ public:
           + " transmissiveId";
         );
 
-        //- String representation of property types
-        AddToPropertyTypes
-        (
-            particle,
-            "{point"
-          + " point"
-          + " scalar"
-          + " scalar"
-          + " scalar"
-          + " label}"
-        );
-
 
     // Constructors
-
 
         //- Construct from components, with searching for tetFace and
         //  tetPt unless disabled by doCellFacePt = false.

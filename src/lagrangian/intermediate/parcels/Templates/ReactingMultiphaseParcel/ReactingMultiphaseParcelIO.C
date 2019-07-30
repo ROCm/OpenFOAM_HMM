@@ -34,9 +34,6 @@ template<class ParcelType>
 Foam::string Foam::ReactingMultiphaseParcel<ParcelType>::propertyList_ =
     Foam::ReactingMultiphaseParcel<ParcelType>::propertyList();
 
-template<class ParcelType>
-Foam::string Foam::ReactingMultiphaseParcel<ParcelType>::propertyTypes_ =
-    Foam::ReactingMultiphaseParcel<ParcelType>::propertyTypes();
 
 template<class ParcelType>
 const std::size_t Foam::ReactingMultiphaseParcel<ParcelType>::sizeofFields

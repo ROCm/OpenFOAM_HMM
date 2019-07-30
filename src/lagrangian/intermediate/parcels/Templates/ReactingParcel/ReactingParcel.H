@@ -228,13 +228,6 @@ public:
           + " nPhases(Y1..YN)"
         );
 
-        //- String representation of property types
-        AddToPropertyTypes
-        (
-            ParcelType,
-            "{scalar} scalars"
-        );
-
 
     // Constructors
 

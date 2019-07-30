@@ -275,13 +275,6 @@ public:
           + " nSolid(Y1..YN)"
         );
 
-        //- String representation of property types
-        AddToPropertyTypes
-        (
-            ParcelType,
-            " scalars scalars scalars"
-        );
-
 
     // Constructors
 

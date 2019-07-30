@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -64,32 +64,6 @@ namespace Foam
     static string propertyList()                                               \
     {                                                                          \
         return ParcelType::propertyList() + str;                               \
-    }
-
-
-//- Define a static 'propertyTypes' for the types of particle properties
-//  Brace brackets are used to delimit binary write groups
-// \sa AddToPropertyTypes
-#define DefinePropertyTypes(str)                                               \
-                                                                               \
-    static string propertyTypes_;                                              \
-                                                                               \
-    static string propertyTypes()                                              \
-    {                                                                          \
-        return str;                                                            \
-    }
-
-
-//- Add to existing static 'propertyTypes' for the types of particle properties
-//  Brace brackets are used to delimit binary write groups
-// \sa AddToPropertyTypes
-#define AddToPropertyTypes(ParcelType, str)                                    \
-                                                                               \
-    static string propertyTypes_;                                              \
-                                                                               \
-    static string propertyTypes()                                              \
-    {                                                                          \
-        return ParcelType::propertyTypes() + str;                              \
     }
 
 

@@ -36,9 +36,6 @@ template<class ParcelType>
 Foam::string Foam::KinematicParcel<ParcelType>::propertyList_ =
     Foam::KinematicParcel<ParcelType>::propertyList();
 
-template<class ParcelType>
-Foam::string Foam::KinematicParcel<ParcelType>::propertyTypes_ =
-    Foam::KinematicParcel<ParcelType>::propertyTypes();
 
 template<class ParcelType>
 const std::size_t Foam::KinematicParcel<ParcelType>::sizeofFields

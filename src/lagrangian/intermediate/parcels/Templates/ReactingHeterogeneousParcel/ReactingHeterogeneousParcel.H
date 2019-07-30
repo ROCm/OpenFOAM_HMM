@@ -205,13 +205,6 @@ public:
           + " nReactions(F1..FN)"
         );
 
-        //- String representation of property types
-        AddToPropertyTypes
-        (
-            ParcelType,
-            " scalars "
-        );
-
 
     // Constructors
 

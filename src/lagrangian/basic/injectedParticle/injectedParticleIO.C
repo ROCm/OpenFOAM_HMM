@@ -33,8 +33,6 @@ License
 Foam::string Foam::injectedParticle::propertyList_ =
     Foam::injectedParticle::propertyList();
 
-Foam::string Foam::injectedParticle::propertyTypes_ =
-    Foam::injectedParticle::propertyTypes();
 
 const std::size_t Foam::injectedParticle::sizeofFields
 (

@@ -34,9 +34,6 @@ template<class ParcelType>
 Foam::string Foam::ThermoParcel<ParcelType>::propertyList_ =
     Foam::ThermoParcel<ParcelType>::propertyList();
 
-template<class ParcelType>
-Foam::string Foam::ThermoParcel<ParcelType>::propertyTypes_ =
-    Foam::ThermoParcel<ParcelType>::propertyTypes();
 
 template<class ParcelType>
 const std::size_t Foam::ThermoParcel<ParcelType>::sizeofFields

@@ -35,9 +35,6 @@ template<class ParcelType>
 Foam::string Foam::MPPICParcel<ParcelType>::propertyList_ =
     Foam::MPPICParcel<ParcelType>::propertyList();
 
-template<class ParcelType>
-Foam::string Foam::MPPICParcel<ParcelType>::propertyTypes_ =
-    Foam::MPPICParcel<ParcelType>::propertyTypes();
 
 template<class ParcelType>
 const std::size_t Foam::MPPICParcel<ParcelType>::sizeofFields

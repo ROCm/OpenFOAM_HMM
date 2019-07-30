@@ -34,10 +34,6 @@ template<class ParcelType>
 Foam::string Foam::SprayParcel<ParcelType>::propertyList_ =
     Foam::SprayParcel<ParcelType>::propertyList();
 
-template<class ParcelType>
-Foam::string Foam::SprayParcel<ParcelType>::propertyTypes_ =
-    Foam::SprayParcel<ParcelType>::propertyTypes();
-
 
 template<class ParcelType>
 const std::size_t Foam::SprayParcel<ParcelType>::sizeofFields

@@ -33,9 +33,6 @@ template<class ParcelType>
 Foam::string Foam::ReactingHeterogeneousParcel<ParcelType>::propertyList_ =
     Foam::ReactingHeterogeneousParcel<ParcelType>::propertyList();
 
-template<class ParcelType>
-Foam::string Foam::ReactingHeterogeneousParcel<ParcelType>::propertyTypes_ =
-    Foam::ReactingHeterogeneousParcel<ParcelType>::propertyTypes();
 
 template<class ParcelType>
 const std::size_t Foam::ReactingHeterogeneousParcel<ParcelType>::sizeofFields

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -350,12 +350,6 @@ public:
         (
             "(coordinatesa coordinatesb coordinatesc coordinatesd) "
             "celli tetFacei tetPti facei stepFraction origProc origId"
-        );
-
-        //- String representation of property types
-        DefinePropertyTypes
-        (
-            "{vector label label scalar label label label label}"
         );
 
         //- Cumulative particle counter - used to provide unique ID

@@ -31,7 +31,6 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 Foam::string Foam::particle::propertyList_  = Foam::particle::propertyList();
-Foam::string Foam::particle::propertyTypes_ = Foam::particle::propertyTypes();
 
 const std::size_t Foam::particle::sizeofPosition
 (
