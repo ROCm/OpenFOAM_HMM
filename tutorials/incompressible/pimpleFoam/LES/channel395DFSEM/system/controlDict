@@ -65,19 +65,19 @@ functions
         libs            ("libfieldFunctionObjects.so");
         writeControl    writeTime;
     }
-    lambVector1                                                                 
-    {                                                                           
-        type            lambVector;                                                 
-        libs            ("libfieldFunctionObjects.so");                             
-        writeControl    writeTime;                                              
-        field           U;                                                          
-    }                                                                           
-    div1                                                                        
-    {                                                                           
-        type            div;                                                        
-        libs            ("libfieldFunctionObjects.so");                             
-        writeControl    writeTime;                                              
-        field           lambVector;                                                 
+    lambVector1
+    {
+        type            lambVector;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
+        field           U;
+    }
+    div1
+    {
+        type            div;
+        libs            ("libfieldFunctionObjects.so");
+        writeControl    writeTime;
+        field           lambVector;
     }
     fieldAverage1
     {
@@ -102,18 +102,18 @@ functions
                 base        time;
             }
 
-            lambVector                                                          
-            {                                                                   
-                mean        on;                                                 
-                prime2Mean  off;                                                
-                base        time;                                               
-            }                                                                                                                                      
+            lambVector
+            {
+                mean        on;
+                prime2Mean  off;
+                base        time;
+            }
 
-            div(lambVector)                                                     
-            {                                                                   
-                mean        on;                                                 
-                prime2Mean  off;                                                
-                base        time;                                               
+            div(lambVector)
+            {
+                mean        on;
+                prime2Mean  off;
+                base        time;
             }
         );
     }
