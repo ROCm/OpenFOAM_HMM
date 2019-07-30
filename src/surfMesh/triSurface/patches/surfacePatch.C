@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -76,8 +76,7 @@ Foam::surfacePatch::surfacePatch(Istream& is, const label index)
     size_(0),
     start_(0)
 {
-    size_ = readLabel(is);
-    start_ = readLabel(is);
+    is >> size_ >> start_;
 }
 
 

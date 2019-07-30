@@ -62,8 +62,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
     {
         if (is.format() == IOstream::ASCII)
         {
-            T_ = readScalar(is);
-            Cp_ = readScalar(is);
+            is  >> T_ >> Cp_;
         }
         else
         {

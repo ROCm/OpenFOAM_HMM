@@ -77,8 +77,7 @@ Foam::findCellParticle::findCellParticle
     {
         if (is.format() == IOstream::ASCII)
         {
-            is >> start_ >> end_;
-            data_ = readLabel(is);
+            is >> start_ >> end_ >> data_;
         }
         else
         {

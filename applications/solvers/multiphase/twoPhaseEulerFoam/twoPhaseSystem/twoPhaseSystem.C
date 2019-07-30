@@ -363,8 +363,8 @@ void Foam::twoPhaseSystem::solve()
         alpha1.name()
     );
 
-    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
-    label nAlphaCorr(readLabel(alphaControls.lookup("nAlphaCorr")));
+    label nAlphaSubCycles(alphaControls.get<label>("nAlphaSubCycles"));
+    label nAlphaCorr(alphaControls.get<label>("nAlphaCorr"));
 
     word alphaScheme("div(phi," + alpha1.name() + ')');
     word alpharScheme("div(phir," + alpha1.name() + ')');

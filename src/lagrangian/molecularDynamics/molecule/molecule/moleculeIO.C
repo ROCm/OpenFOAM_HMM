@@ -65,18 +65,18 @@ Foam::molecule::molecule
     {
         if (is.format() == IOstream::ASCII)
         {
-            is  >> Q_;
-            is  >> v_;
-            is  >> a_;
-            is  >> pi_;
-            is  >> tau_;
-            is  >> specialPosition_;
-            potentialEnergy_ = readScalar(is);
-            is  >> rf_;
-            special_ = readLabel(is);
-            id_ = readLabel(is);
-            is  >> siteForces_;
-            is  >> sitePositions_;
+            is  >> Q_
+                >> v_
+                >> a_
+                >> pi_
+                >> tau_
+                >> specialPosition_
+                >> potentialEnergy_
+                >> rf_
+                >> special_
+                >> id_
+                >> siteForces_
+                >> sitePositions_;
         }
         else
         {

@@ -98,11 +98,7 @@ Foam::trackedParticle::trackedParticle
     {
         if (is.format() == IOstream::ASCII)
         {
-            is >> start_ >> end_;
-            level_ = readLabel(is);
-            i_ = readLabel(is);
-            j_ = readLabel(is);
-            k_ = readLabel(is);
+            is >> start_ >> end_ >> level_ >> i_ >> j_ >> k_;
         }
         else
         {

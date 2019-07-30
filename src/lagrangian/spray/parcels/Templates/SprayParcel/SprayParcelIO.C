@@ -72,19 +72,19 @@ Foam::SprayParcel<ParcelType>::SprayParcel
     {
         if (is.format() == IOstream::ASCII)
         {
-            d0_ = readScalar(is);
-            is >> position0_;
-            sigma_ = readScalar(is);
-            mu_ = readScalar(is);
-            liquidCore_ = readScalar(is);
-            KHindex_ = readScalar(is);
-            y_ = readScalar(is);
-            yDot_ = readScalar(is);
-            tc_ = readScalar(is);
-            ms_ = readScalar(is);
-            injector_ = readScalar(is);
-            tMom_ = readScalar(is);
-            user_ = readScalar(is);
+            is  >> d0_
+                >> position0_
+                >> sigma_
+                >> mu_
+                >> liquidCore_
+                >> KHindex_
+                >> y_
+                >> yDot_
+                >> tc_
+                >> ms_
+                >> injector_
+                >> tMom_
+                >> user_;
         }
         else
         {

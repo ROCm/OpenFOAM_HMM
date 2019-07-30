@@ -624,7 +624,7 @@ void Foam::multiphaseSystem::solve()
     const Time& runTime = mesh_.time();
 
     const dictionary& alphaControls = mesh_.solverDict("alpha");
-    label nAlphaSubCycles(readLabel(alphaControls.lookup("nAlphaSubCycles")));
+    label nAlphaSubCycles(alphaControls.get<label>("nAlphaSubCycles"));
 
     bool LTS = fv::localEulerDdt::enabled(mesh_);
 

@@ -72,16 +72,16 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     {
         if (is.format() == IOstream::ASCII)
         {
-            active_ = readBool(is);
-            typeId_ = readLabel(is);
-            nParticle_ = readScalar(is);
-            d_ = readScalar(is);
-            dTarget_ = readScalar(is);
-            is >> U_;
-            rho_ = readScalar(is);
-            age_ = readScalar(is);
-            tTurb_ = readScalar(is);
-            is >> UTurb_;
+            is  >> active_
+                >> typeId_
+                >> nParticle_
+                >> d_
+                >> dTarget_
+                >> U_
+                >> rho_
+                >> age_
+                >> tTurb_
+                >> UTurb_;
         }
         else
         {

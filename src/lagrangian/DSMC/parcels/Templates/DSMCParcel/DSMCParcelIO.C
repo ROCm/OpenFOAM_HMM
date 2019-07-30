@@ -59,9 +59,7 @@ Foam::DSMCParcel<ParcelType>::DSMCParcel
     {
         if (is.format() == IOstream::ASCII)
         {
-            is >> U_;
-            Ei_ = readScalar(is);
-            typeId_ = readLabel(is);
+            is  >> U_ >> Ei_ >> typeId_;
         }
         else
         {

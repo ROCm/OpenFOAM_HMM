@@ -67,10 +67,7 @@ Foam::injectedParticle::injectedParticle
 
         if (is.format() == IOstream::ASCII)
         {
-            tag_ = readLabel(is);
-            soi_ = readScalar(is);
-            d_ = readScalar(is);
-            is >> U_;
+            is  >> tag_ >> soi_ >> d_ >> U_;
         }
         else
         {

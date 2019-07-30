@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -222,7 +222,7 @@ void Foam::MULES::limiterCorr
 
     const label nLimiterIter
     (
-        readLabel(MULEScontrols.lookup("nLimiterIter"))
+        MULEScontrols.get<label>("nLimiterIter")
     );
 
     const scalar smoothLimiter

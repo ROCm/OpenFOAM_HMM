@@ -52,8 +52,7 @@ Foam::solidParticle::solidParticle
     {
         if (is.format() == IOstream::ASCII)
         {
-            d_ = readScalar(is);
-            is >> U_;
+            is  >> d_ >> U_;
         }
         else
         {
