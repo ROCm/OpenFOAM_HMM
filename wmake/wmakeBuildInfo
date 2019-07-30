@@ -55,9 +55,9 @@ options:
   -diff         Display differences between make and meta information
                 (exit code 0 for no changes)
   -dry-run      In combination with -update
+  -filter FILE  Filter @API@, @BUILD@ tags in file with make information
+  -remove       Remove meta-info build information and exit
   -update       Update meta-info from make information
-  -filter FILE  Filter/replace @API@, @BUILD@ tags in specified file
-                with corresponding make information
   -query        Report make-info and meta-info
   -query-make   Report make-info values (api, branch, build)
   -query-meta   Report meta-info values (api, branch, build)
@@ -105,6 +105,10 @@ do
     -dry-run)
         optDryRun=true
         ;;
+    -remove)
+        optUpdate=remove
+        break # Stop now
+        ;;
     -update)
         optUpdate=true
         ;;
@@ -132,10 +136,31 @@ do
     shift
 done
 
+# Check environment variables
+[ -d "$WM_PROJECT_DIR" ] || \
+    die "Bad or unset environment variable: \$WM_PROJECT_DIR"
+
+[ -d "$WM_PROJECT_DIR/META-INFO" ] || \
+    die "No META-INFO/ directory for project"
+
+
 #------------------------------------------------------------------------------
 
-if [ "$optFilter" = true ]
+if [ "$optUpdate" = remove ]
 then
+
+    if [ -f "$metaInfoDir/build-info" ]
+    then
+        echo "Removing project META-INFO/build-info" 1>&2
+        rm -f "$metaInfoDir/build-info" 2>/dev/null
+    else
+        echo "Already removed project META-INFO/build-info" 1>&2
+    fi
+    exit 0
+
+elif [ "$optFilter" = true ]
+then
+
     [ -f "$1" ] || {
         echo "Error in ${0##*/}: file not found '$1'" 1>&2
         exit 2
@@ -143,7 +168,9 @@ then
 
     # Disable other methods that generate output to stdout
     unset optCheck optQuery
+
 else
+
     [ "$#" -eq 0 ] || die "Unexpected option/arguments $@"
 
     # Nothing specified? Default to -query-make
@@ -151,6 +178,7 @@ else
     then
         optQuery="make"
     fi
+
 fi
 
 

@@ -30,18 +30,18 @@ Mingw*)
     # 2nd pass: link Pstream.dll against libOpenFOAM.dll
     Pstream/Allwmake $targetType $*
 
-    # Relink libOpenFOAM.dll against libPstream.dll
-    wrmo OpenFOAM/global/global.o 2>/dev/null
-    wmake $targetType OpenFOAM
+    # Force relink libOpenFOAM.dll against libPstream.dll
+    OpenFOAM/Alltouch 2>/dev/null
     ;;
 *)
     Pstream/Allwmake $targetType $*
 
-    # Trigger update of version info (as required)
-    wmakeBuildInfo -check || wrmo OpenFOAM/global/global.o 2>/dev/null
-    wmake $targetType OpenFOAM
+    # Update version info (as required)
+    OpenFOAM/Alltouch -check 2>/dev/null
     ;;
 esac
+
+wmake $targetType OpenFOAM
 
 wmake $targetType fileFormats
 wmake $targetType surfMesh

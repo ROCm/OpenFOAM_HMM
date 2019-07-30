@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 #                           | Copyright (C) 2015 OpenFOAM Foundation
@@ -47,7 +47,7 @@ usage() {
 Usage: $Script [OPTION] [file1 [... fileN]]
 
 options:
-  -a | -all         All platforms (current: $WM_OPTIONS)
+  -a | -all | all   All platforms (current: $WM_OPTIONS)
   -h | -help        Print the usage
 
 Remove all .o files or remove .o file corresponding to <file>
@@ -70,10 +70,8 @@ do
     -h | -help*)
         usage
         ;;
-    # All platforms
-    -a | -all | all)
+    -a | -all | all)    # All platforms
         platform=all
-        shift
         ;;
     -*)
         usage "unknown option: '$1'"
@@ -82,6 +80,7 @@ do
         break
         ;;
     esac
+    shift
 done
 
 # Check environment variables
@@ -94,22 +93,21 @@ checkEnv
 
 objectsDir=$(findObjectDir .) || exit 1 # Fatal
 
-# With the -a/-all option replace the current platform with a wildcard
+# With -a/-all option: replace the current platform with a wildcard
 if [ "$platform" = all ]
 then
-    objectsDir=$(echo $objectsDir | sed s%$WM_OPTIONS%*% )
+    objectsDir=$(echo "$objectsDir" | sed "s%$WM_OPTIONS%*%")
 fi
 
 if [ "$#" -eq 0 ]
 then
-    echo "removing all .o files ..."
-    find $objectsDir -name '*.o' -type f -delete
+    echo "Removing all .o files ..." 1>&2
+    find "$objectsDir" -name '*.o' -type f -delete
 else
-    echo "removing .o files corresponding to"
-    echo "    $@ ..."
+    echo "Removing .o files for: $*" 1>&2
     for file
     do
-        rm $objectsDir/${file%%.*}.o
+        rm -f "$objectsDir/${file%%.*}.o" 2>/dev/null
     done
 fi
 
