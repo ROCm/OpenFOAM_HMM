@@ -116,10 +116,8 @@ void Foam::Cloud<ParticleType>::deleteParticle(ParticleType& p)
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::deleteLostParticles()
 {
-    forAllIters(*this, pIter)
+    for (ParticleType& p : *this)
     {
-        ParticleType& p = pIter();
-
         if (p.cell() == -1)
         {
             WarningInFunction
@@ -208,10 +206,8 @@ void Foam::Cloud<ParticleType>::move
         }
 
         // Loop over all particles
-        forAllIters(*this, pIter)
+        for (ParticleType& p : *this)
         {
-            ParticleType& p = pIter();
-
             // Move the particle
             bool keepParticle = p.move(cloud, td, trackTime);
 
@@ -330,10 +326,8 @@ void Foam::Cloud<ParticleType>::move
 
                 label pI = 0;
 
-                forAllIters(newParticles, newpIter)
+                for (ParticleType& newp : newParticles)
                 {
-                    ParticleType& newp = newpIter();
-
                     label patchi = procPatches[receivePatchIndex[pI++]];
 
                     newp.correctAfterParallelTransfer(patchi, td);

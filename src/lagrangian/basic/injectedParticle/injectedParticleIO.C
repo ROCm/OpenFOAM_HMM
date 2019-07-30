@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,8 @@ Foam::string Foam::injectedParticle::propertyList_ =
 
 const std::size_t Foam::injectedParticle::sizeofFields
 (
-    // Note: does not include position_
-    sizeof(label) + sizeof(scalar) + sizeof(scalar) + sizeof(vector)
+    // Does not include position_
+    sizeof(injectedParticle) - offsetof(injectedParticle, tag_)
 );
 
 
@@ -106,17 +106,14 @@ void Foam::injectedParticle::readFields(Cloud<injectedParticle>& c)
     c.checkFieldIOobject(c, U);
 
     label i = 0;
-
-    forAllIters(c, iter)
+    for (injectedParticle& p : c)
     {
-        injectedParticle& p = iter();
-
         p.tag_ = tag[i];
         p.soi_ = soi[i];
         p.d_ = d[i];
         p.U_ = U[i];
 
-        i++;
+        ++i;
     }
 }
 
@@ -143,10 +140,8 @@ void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
 
     label i = 0;
 
-    forAllConstIters(c, iter)
+    for (const injectedParticle& p : c)
     {
-        const injectedParticle& p = iter();
-
         tag[i] = p.tag();
         soi[i] = p.soi();
         d[i] = p.d();
@@ -190,10 +185,8 @@ void Foam::injectedParticle::writeObjects
 
     label i = 0;
 
-    forAllConstIters(c, iter)
+    for (const injectedParticle& p : c)
     {
-        const injectedParticle& p = iter();
-
         tag[i] = p.tag();
         soi[i] = p.soi();
         d[i] = p.d();

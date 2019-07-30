@@ -69,12 +69,6 @@ class injectedParticle
 :
     public particle
 {
-public:
-
-    //- Size in bytes of the fields
-    static const std::size_t sizeofFields;
-
-
 protected:
 
     // Protected data
@@ -99,7 +93,10 @@ protected:
 
 public:
 
-    // Static data members
+    // Static Data Members
+
+        //- Size in bytes of the fields
+        static const std::size_t sizeofFields;
 
         //- Runtime type information
         TypeName("injectedParticle");

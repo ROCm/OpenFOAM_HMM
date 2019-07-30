@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -443,11 +443,12 @@ void Foam::wallBoundedParticle::readFields(TrackCloudType& c)
     c.checkFieldIOobject(c, diagEdge);
 
     label i = 0;
-    forAllIters(c, iter)
+    for (wallBoundedParticle& p : c)
     {
-        iter().localPosition_ = localPosition[i];
-        iter().meshEdgeStart_ = meshEdgeStart[i];
-        iter().diagEdge_ = diagEdge[i];
+        p.localPosition_ = localPosition[i];
+        p.meshEdgeStart_ = meshEdgeStart[i];
+        p.diagEdge_ = diagEdge[i];
+
         ++i;
     }
 }
@@ -458,7 +459,7 @@ void Foam::wallBoundedParticle::writeFields(const TrackCloudType& c)
 {
     particle::writeFields(c);
 
-    label np =  c.size();
+    label np = c.size();
 
     IOField<point> localPosition
     (
@@ -477,11 +478,12 @@ void Foam::wallBoundedParticle::writeFields(const TrackCloudType& c)
     );
 
     label i = 0;
-    forAllConstIters(c, iter)
+    for (const wallBoundedParticle& p : c)
     {
-        localPosition[i] = iter().localPosition_;
-        meshEdgeStart[i] = iter().meshEdgeStart_;
-        diagEdge[i] = iter().diagEdge_;
+        localPosition[i] = p.localPosition_;
+        meshEdgeStart[i] = p.meshEdgeStart_;
+        diagEdge[i] = p.diagEdge_;
+
         ++i;
     }
 

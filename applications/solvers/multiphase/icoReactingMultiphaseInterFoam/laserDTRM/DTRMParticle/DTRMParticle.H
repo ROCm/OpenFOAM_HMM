@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,9 +63,6 @@ class DTRMParticle
     public particle
 {
     // Private data
-
-        //- Size in bytes of the fields
-        static const std::size_t sizeofFields_;
 
         //- Initial position
         point p0_;
@@ -144,7 +141,12 @@ public:
             inline scalar& Q(label celli);
     };
 
-     // Static data members
+
+    // Static Data Members
+
+        //- Size in bytes of the fields
+        static const std::size_t sizeofFields_;
+
 
         //- String representation of properties
         AddToPropertyList

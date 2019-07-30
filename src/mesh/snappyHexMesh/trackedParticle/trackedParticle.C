@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -26,6 +26,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "trackedParticle.H"
+
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const std::size_t Foam::trackedParticle::sizeofFields_
+(
+    sizeof(trackedParticle) - offsetof(trackedParticle, start_)
+);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -101,8 +109,7 @@ Foam::trackedParticle::trackedParticle
             is.read
             (
                 reinterpret_cast<char*>(&start_),
-                sizeof(start_) + sizeof(end_) + sizeof(level_)
-              + sizeof(i_) + sizeof(j_) + sizeof(k_)
+                sizeofFields_
             );
         }
     }
@@ -288,8 +295,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
         os.write
         (
             reinterpret_cast<const char*>(&p.start_),
-            sizeof(p.start_) + sizeof(p.end_) + sizeof(p.level_)
-          + sizeof(p.i_) + sizeof(p.j_) + sizeof(p.k_)
+            trackedParticle::sizeofFields_
         );
     }
 

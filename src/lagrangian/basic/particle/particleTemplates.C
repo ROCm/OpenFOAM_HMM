@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -50,6 +50,7 @@ void Foam::particle::readFields(TrackCloudType& c)
 
     IOField<label> origProcId(procIO, valid && haveFile);
     c.checkFieldIOobject(c, origProcId);
+
     IOField<label> origId
     (
         c.fieldIOobject("origId", IOobject::MUST_READ),
@@ -58,13 +59,11 @@ void Foam::particle::readFields(TrackCloudType& c)
     c.checkFieldIOobject(c, origId);
 
     label i = 0;
-    forAllIters(c, iter)
+    for (particle& p : c)
     {
-        particle& p = iter();
-
         p.origProc_ = origProcId[i];
         p.origId_ = origId[i];
-        i++;
+        ++i;
     }
 }
 
@@ -103,10 +102,11 @@ void Foam::particle::writeFields(const TrackCloudType& c)
     );
 
     label i = 0;
-    forAllConstIters(c, iter)
+    for (const particle& p : c)
     {
-        origProc[i] = iter().origProc_;
-        origId[i] = iter().origId_;
+        origProc[i] = p.origProc_;
+        origId[i] = p.origId_;
+
         ++i;
     }
 
@@ -125,11 +125,12 @@ void Foam::particle::writeObjects(const CloudType& c, objectRegistry& obr)
     IOField<point>& position(cloud::createIOField<point>("position", np, obr));
 
     label i = 0;
-    forAllConstIters(c, iter)
+    for (const particle& p : c)
     {
-        origProc[i] = iter().origProc_;
-        origId[i] = iter().origId_;
-        position[i] = iter().position();
+        origProc[i] = p.origProc_;
+        origId[i] = p.origId_;
+        position[i] = p.position();
+
         ++i;
     }
 }
