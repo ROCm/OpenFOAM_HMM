@@ -7,9 +7,9 @@
 \*---------------------------------------------------------------------------*/
 
 // An OpenFOAM dictionary of colourTables.
-// The names should match those in the colourTables class.
+// The predefined enumerations in the colourTables class *must* also appear
+// here, but the file can also contain additional custom colour tables too.
 
-6
 (
 
 coolToWarm
@@ -90,6 +90,8 @@ xray
         ( 1   ( 0 0 0 ) )
     );
 }
+
+// Additional tables (without code enumeration)
 
 )
 
