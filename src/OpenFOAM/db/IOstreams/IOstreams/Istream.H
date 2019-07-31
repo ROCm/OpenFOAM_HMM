@@ -61,19 +61,13 @@ class Istream
 :
     public IOstream
 {
-    // Private data
+    // Private Data
 
         //- Has a token been put back on the stream?
         bool putBack_;
 
         //- The last token put back on the stream
         token putBackToken_;
-
-        //- The label byte-size (could also be stored as byte)
-        unsigned short labelByteSize_;
-
-        //- The scalar byte-size (could also be stored as byte)
-        unsigned short scalarByteSize_;
 
 
 public:
@@ -89,9 +83,7 @@ public:
         )
         :
             IOstream(format, version, compression),
-            putBack_(false),
-            labelByteSize_(sizeof(Foam::label)),
-            scalarByteSize_(sizeof(Foam::scalar))
+            putBack_(false)
         {}
 
 
@@ -101,34 +93,7 @@ public:
 
     // Member Functions
 
-    // Characteristics
-
-        //- The label byte-size associated with the stream
-        inline unsigned labelByteSize() const
-        {
-            return labelByteSize_;
-        }
-
-        //- The scalar byte-size associated with the stream
-        inline unsigned scalarByteSize() const
-        {
-            return scalarByteSize_;
-        }
-
-        //- Associate a label byte-size with the stream
-        inline void setLabelByteSize(unsigned val)
-        {
-            labelByteSize_ = val;
-        }
-
-        //- Associate a scalar byte-size with the stream
-        inline void setScalarByteSize(unsigned val)
-        {
-            scalarByteSize_ = val;
-        }
-
-
-        // Read functions
+        // Read Functions
 
             //- Put back token
             //  Only a single put back is permitted
@@ -168,10 +133,10 @@ public:
             virtual Istream& read(char*, std::streamsize) = 0;
 
             //- Start of low-level raw binary read
-            virtual bool beginRaw() = 0;
+            virtual bool beginRawRead() = 0;
 
             //- End of low-level raw binary read
-            virtual bool endRaw() = 0;
+            virtual bool endRawRead() = 0;
 
             //- Low-level raw binary read
             virtual Istream& readRaw(char*, std::streamsize) = 0;
@@ -212,6 +177,7 @@ public:
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
 
+//- An Istream manipulator
 typedef Istream& (*IstreamManip)(Istream&);
 
 //- operator>> handling for manipulators without arguments

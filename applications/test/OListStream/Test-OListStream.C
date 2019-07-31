@@ -73,6 +73,17 @@ void printTokens(Istream& is)
 }
 
 
+// Generate some dictionary-like content
+template<class OS>
+void outputDict(OS& os)
+{
+    os.beginBlock("testDict");
+    os.writeEntry("bool",   "false");
+    os.writeEntry("scalar", 3.14159);
+    os.endBlock();
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -187,6 +198,28 @@ int main(int argc, char *argv[])
     Info<< nl
         << "content size=" << written.size()
         << " capacity=" << written.capacity() << nl;
+
+
+    Info<< nl << "Test dictionary" << nl;
+    {
+        OListStream os1;
+
+        outputDict(os1);
+
+        Info<< "Regular" << nl;
+        printInfo(os1);
+    }
+
+    {
+        OListStream os2;
+        os2.indentSize() = 0;
+
+        outputDict(os2);
+
+        Info<< "Compact" << nl;
+        printInfo(os2);
+    }
+
 
     Info<< "\nEnd\n" << endl;
 

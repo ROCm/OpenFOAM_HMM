@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +40,7 @@ Description
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 
 template<class T> class Smanip;
 template<class T> class Imanip;
@@ -65,6 +63,7 @@ inline Ostream& operator<<(Ostream& os, const Omanip<T>& m);
                         Class Smanip Declaration
 \*---------------------------------------------------------------------------*/
 
+//- An IOstream manipulator taking arguments
 template<class T>
 class Smanip
 {
@@ -104,6 +103,7 @@ inline Ostream& operator<<(Ostream& os, const Smanip<T>& m)
                         Class Imanip Declaration
 \*---------------------------------------------------------------------------*/
 
+//- An Istream manipulator taking arguments
 template<class T>
 class Imanip
 {
@@ -134,6 +134,7 @@ inline Istream& operator>>(Istream& is, const Imanip<T>& m)
                         Class Omanip Declaration
 \*---------------------------------------------------------------------------*/
 
+//- An Ostream manipulator taking arguments
 template<class T>
 class Omanip
 {

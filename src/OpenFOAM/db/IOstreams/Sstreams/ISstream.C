@@ -778,9 +778,9 @@ Foam::Istream& Foam::ISstream::read(doubleScalar& val)
 
 Foam::Istream& Foam::ISstream::read(char* buf, std::streamsize count)
 {
-    beginRaw();
+    beginRawRead();
     readRaw(buf, count);
-    endRaw();
+    endRawRead();
 
     return *this;
 }
@@ -795,7 +795,7 @@ Foam::Istream& Foam::ISstream::readRaw(char* buf, std::streamsize count)
 }
 
 
-bool Foam::ISstream::beginRaw()
+bool Foam::ISstream::beginRawRead()
 {
     if (format() != BINARY)
     {
@@ -811,7 +811,7 @@ bool Foam::ISstream::beginRaw()
 }
 
 
-bool Foam::ISstream::endRaw()
+bool Foam::ISstream::endRawRead()
 {
     readEnd("binaryBlock");
     setState(is_.rdstate());

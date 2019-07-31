@@ -55,19 +55,20 @@ class ISstream
 :
     public Istream
 {
-    // Private data
+    // Private Data
 
         fileName name_;
+
         std::istream& is_;
 
 
     // Private Member Functions
 
+        //- Get the next valid character
         char nextValid();
 
+        //- Get a word token
         void readWordToken(token& t);
-
-    // Private Member Functions
 
 
         //- Read a verbatim string (excluding block delimiters).
@@ -124,7 +125,7 @@ public:
             virtual ios_base::fmtflags flags() const;
 
 
-        // Read functions
+        // Read Functions
 
             //- Raw, low-level get character function.
             inline ISstream& get(char& c);
@@ -171,10 +172,10 @@ public:
             virtual Istream& readRaw(char* data, std::streamsize count);
 
             //- Start of low-level raw binary read
-            virtual bool beginRaw();
+            virtual bool beginRawRead();
 
             //- End of low-level raw binary read
-            virtual bool endRaw();
+            virtual bool endRawRead();
 
             //- Rewind the stream so that it may be read again
             virtual void rewind();

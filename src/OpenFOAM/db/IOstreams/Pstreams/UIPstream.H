@@ -175,10 +175,10 @@ public:
             Istream& readRaw(char* data, std::streamsize count);
 
             //- Start of low-level raw binary read
-            bool beginRaw();
+            bool beginRawRead();
 
             //- End of low-level raw binary read
-            bool endRaw()
+            bool endRawRead()
             {
                 return true;
             }

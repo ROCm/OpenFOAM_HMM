@@ -265,13 +265,13 @@ public:
             virtual Istream& readRaw(char* data, std::streamsize count);
 
             //- Start of low-level raw binary read
-            virtual bool beginRaw()
+            virtual bool beginRawRead()
             {
                 return false;
             }
 
             //- End of low-level raw binary read
-            virtual bool endRaw()
+            virtual bool endRawRead()
             {
                 return false;
             }

@@ -95,7 +95,6 @@ class objectRegistry;
 
 class IOobject
 {
-
 public:
 
     // Public data types
@@ -155,7 +154,7 @@ private:
         //- Local path component
         fileName local_;
 
-        //- objectRegistry reference
+        //- Reference to the objectRegistry
         const objectRegistry& db_;
 
         //- Read option
@@ -230,7 +229,7 @@ public:
         static inline word groupName(StringType name, const word& group);
 
 
-         //- Return group (extension part of name)
+        //- Return group (extension part of name)
         static word group(const word& name);
 
         //- Return member (name without the extension)

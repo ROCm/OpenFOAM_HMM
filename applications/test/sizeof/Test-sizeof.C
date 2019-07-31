@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2009-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -62,6 +62,19 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     cout<<"sizeof\n------\n";
+
+    if (true)
+    {
+        cout<<"IOstream:" << sizeof(IOstream) << nl;
+        cout<<"Istream:" << sizeof(Istream) << nl;
+        cout<<"IPstream:" << sizeof(IPstream) << nl;
+        cout<<"ISstream:" << sizeof(ISstream) << nl;
+
+        cout<<"Ostream:" << sizeof(Ostream) << nl;
+        cout<<"OPstream:" << sizeof(OPstream) << nl;
+        cout<<"OSstream:" << sizeof(OSstream) << nl;
+    }
+
     {
         nil x;
         cout<<"nil:" << sizeof(x) << nl;

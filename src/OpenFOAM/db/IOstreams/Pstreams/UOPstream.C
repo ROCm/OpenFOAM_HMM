@@ -323,11 +323,7 @@ Foam::Ostream& Foam::UOPstream::write(const doubleScalar val)
 }
 
 
-Foam::Ostream& Foam::UOPstream::write
-(
-    const char* data,
-    const std::streamsize count
-)
+Foam::Ostream& Foam::UOPstream::write(const char* data, std::streamsize count)
 {
     if (format() != BINARY)
     {
@@ -345,20 +341,20 @@ Foam::Ostream& Foam::UOPstream::write
 Foam::Ostream& Foam::UOPstream::writeRaw
 (
     const char* data,
-    const std::streamsize count
+    std::streamsize count
 )
 {
     // No check for format() == BINARY since this is either done in the
-    // beginRaw() method, or the caller knows what they are doing.
+    // beginRawWrite() method, or the caller knows what they are doing.
 
-    // Previously aligned and sizes reserved via beginRaw()
+    // Previously aligned and sizes reserved via beginRawWrite()
     writeToBuffer(data, count, 1);
 
     return *this;
 }
 
 
-bool Foam::UOPstream::beginRaw(const std::streamsize count)
+bool Foam::UOPstream::beginRawWrite(std::streamsize count)
 {
     if (format() != BINARY)
     {

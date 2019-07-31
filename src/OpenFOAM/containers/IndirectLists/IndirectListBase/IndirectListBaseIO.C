@@ -102,7 +102,7 @@ Foam::Ostream& Foam::IndirectListBase<T, Addr>::writeList
         {
             // The TOTAL number of bytes to be written.
             // - possibly add start delimiter
-            os.beginRaw(len*sizeof(T));
+            os.beginRawWrite(len*sizeof(T));
 
             // Contents
             for (label i=0; i < len; ++i)
@@ -115,7 +115,7 @@ Foam::Ostream& Foam::IndirectListBase<T, Addr>::writeList
             }
 
             // End delimiter and/or cleanup.
-            os.endRaw();
+            os.endRawWrite();
         }
     }
 

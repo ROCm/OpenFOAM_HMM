@@ -384,9 +384,9 @@ Foam::Istream& Foam::UIPstream::read(doubleScalar& val)
 
 Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
 {
-    beginRaw();
+    beginRawRead();
     readRaw(data, count);
-    endRaw();
+    endRawRead();
 
     return *this;
 }
@@ -395,7 +395,7 @@ Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
 Foam::Istream& Foam::UIPstream::readRaw(char* data, std::streamsize count)
 {
     // No check for format() == BINARY since this is either done in the
-    // beginRaw() method, or the caller knows what they are doing.
+    // beginRawRead() method, or the caller knows what they are doing.
 
     // Any alignment must have been done prior to this call
     readFromBuffer(data, count);
@@ -403,7 +403,7 @@ Foam::Istream& Foam::UIPstream::readRaw(char* data, std::streamsize count)
 }
 
 
-bool Foam::UIPstream::beginRaw()
+bool Foam::UIPstream::beginRawRead()
 {
     if (format() != BINARY)
     {

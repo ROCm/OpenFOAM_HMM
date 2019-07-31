@@ -38,8 +38,7 @@ void Foam::Ostream::decrIndent()
     if (!indentLevel_)
     {
         std::cerr
-            << "Ostream::decrIndent() : attempt to decrement 0 indent level"
-            << std::endl;
+            << "Ostream::decrIndent() : attempt to decrement 0 indent level\n";
     }
     else
     {
@@ -58,6 +57,12 @@ Foam::Ostream& Foam::Ostream::writeKeyword(const keyType& kw)
 {
     indent();
     writeQuoted(kw, kw.isPattern());
+
+    if (indentSize_ <= 1)
+    {
+        write(char(token::SPACE));
+        return *this;
+    }
 
     label nSpaces = entryIndentation_ - label(kw.size());
 

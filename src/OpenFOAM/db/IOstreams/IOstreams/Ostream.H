@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class token;
 
 /*---------------------------------------------------------------------------*\
@@ -57,19 +57,18 @@ class Ostream
 :
     public IOstream
 {
-
 protected:
 
     // Protected data
 
-        //- Number of spaces per indent level
-        static const unsigned short indentSize_ = 4;
-
         //- Indentation of the entry from the start of the keyword
-        static const unsigned short entryIndentation_ = 16;
+        static constexpr const unsigned short entryIndentation_ = 16;
+
+        //- Number of spaces per indent level
+        unsigned short indentSize_ = 4;
 
         //- Current indent level
-        unsigned short indentLevel_;
+        unsigned short indentLevel_ = 0;
 
 
 public:
@@ -84,8 +83,7 @@ public:
             compressionType compression=UNCOMPRESSED
         )
         :
-            IOstream(format, version, compression),
-            indentLevel_(0)
+            IOstream(format, version, compression)
         {}
 
 
@@ -93,9 +91,9 @@ public:
     virtual ~Ostream() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Write functions
+        // Write Functions
 
             //- Write token to stream or otherwise handle it.
             //  \return false if the token type was not handled by this method
@@ -151,13 +149,25 @@ public:
             //- Emit begin marker for low-level raw binary output.
             //  The count indicates the number of bytes for subsequent
             //  writeRaw calls.
-            virtual bool beginRaw(std::streamsize count) = 0;
+            virtual bool beginRawWrite(std::streamsize count) = 0;
 
             //- Emit end marker for low-level raw binary output.
-            virtual bool endRaw() = 0;
+            virtual bool endRawWrite() = 0;
 
             //- Add indentation characters
             virtual void indent() = 0;
+
+            //- Return indent level
+            unsigned short indentSize() const
+            {
+                return indentSize_;
+            }
+
+            //- Access to indent size
+            unsigned short& indentSize()
+            {
+                return indentSize_;
+            }
 
             //- Return indent level
             unsigned short indentLevel() const
@@ -276,6 +286,7 @@ public:
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
 
+//- An Ostream manipulator
 typedef Ostream& (*OstreamManip)(Ostream&);
 
 //- operator<< handling for manipulators without arguments

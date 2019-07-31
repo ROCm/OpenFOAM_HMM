@@ -196,21 +196,17 @@ Foam::Ostream& Foam::OSstream::write(const doubleScalar val)
 }
 
 
-Foam::Ostream& Foam::OSstream::write
-(
-    const char* data,
-    const std::streamsize count
-)
+Foam::Ostream& Foam::OSstream::write(const char* data, std::streamsize count)
 {
-    beginRaw(count);
+    beginRawWrite(count);
     writeRaw(data, count);
-    endRaw();
+    endRawWrite();
 
     return *this;
 }
 
 
-bool Foam::OSstream::beginRaw(const std::streamsize count)
+bool Foam::OSstream::beginRawWrite(std::streamsize count)
 {
     if (format() != BINARY)
     {
@@ -226,7 +222,7 @@ bool Foam::OSstream::beginRaw(const std::streamsize count)
 }
 
 
-bool Foam::OSstream::endRaw()
+bool Foam::OSstream::endRawWrite()
 {
     os_ << token::END_LIST;
     setState(os_.rdstate());
@@ -242,7 +238,7 @@ Foam::Ostream& Foam::OSstream::writeRaw
 )
 {
     // No check for format() == BINARY since this is either done in the
-    // beginRaw() method, or the caller knows what they are doing.
+    // beginRawWrite() method, or the caller knows what they are doing.
 
     os_.write(data, count);
     setState(os_.rdstate());

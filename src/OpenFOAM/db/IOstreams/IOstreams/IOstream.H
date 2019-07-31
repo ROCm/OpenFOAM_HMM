@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -80,7 +80,7 @@ public:
 
     // Public Data Types
 
-        //- Enumeration for whether the stream open or closed
+        //- Enumeration for stream open/closed state
         enum streamAccess : char
         {
             CLOSED = 0,         //!< stream not open
@@ -105,6 +105,13 @@ protected:
 
         ios_base::iostate ioState_;
 
+        //- The label byte-size (could also be stored as byte)
+        unsigned short labelByteSize_;
+
+        //- The scalar byte-size (could also be stored as byte)
+        unsigned short scalarByteSize_;
+
+        //- The file line
         label lineNumber_;
 
 
@@ -147,12 +154,14 @@ public:
             IOstreamOption(option),
             openClosed_(CLOSED),
             ioState_(ios_base::iostate(0)),
+            labelByteSize_(sizeof(label)),
+            scalarByteSize_(sizeof(scalar)),
             lineNumber_(0)
         {
             setBad();
         }
 
-        //- Construct setting format and version
+        //- Construct with format, version
         IOstream
         (
             streamFormat format,
@@ -242,6 +251,30 @@ public:
 
     // Stream State Functions
 
+        //- The label byte-size associated with the stream
+        unsigned labelByteSize() const
+        {
+            return labelByteSize_;
+        }
+
+        //- The scalar byte-size associated with the stream
+        unsigned scalarByteSize() const
+        {
+            return scalarByteSize_;
+        }
+
+        //- Set the label byte-size associated with the stream
+        void setLabelByteSize(unsigned nbytes)
+        {
+            labelByteSize_ = nbytes;
+        }
+
+        //- Set the scalar byte-size associated with the stream
+        void setScalarByteSize(unsigned nbytes)
+        {
+            scalarByteSize_ = nbytes;
+        }
+
         //- Const access to the current stream line number
         label lineNumber() const
         {
@@ -258,7 +291,7 @@ public:
         //  \return the previous value
         label lineNumber(const label num)
         {
-            label old(lineNumber_);
+            const label old(lineNumber_);
             lineNumber_ = num;
             return old;
         }
@@ -345,7 +378,7 @@ public:
 };
 
 
-// Ostream operator
+// Ostream Operator
 
 template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<IOstream>& ip);
@@ -355,6 +388,7 @@ Ostream& operator<<(Ostream& os, const InfoProxy<IOstream>& ip);
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
 
+//- An IOstream manipulator
 typedef IOstream& (*IOstreamManip)(IOstream&);
 
 //- operator<< handling for manipulators without arguments
