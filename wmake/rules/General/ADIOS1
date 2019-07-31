@@ -5,7 +5,7 @@ sinclude $(GENERAL_RULES)/mplib$(WM_MPLIB)
 sinclude $(DEFAULT_RULES)/mplib$(WM_MPLIB)
 
 # Obtain compile/link flags via adios_config
-ADIOS_INC  := $(shell $(ADIOS_ARCH_PATH)/bin/adios_config -c)
-ADIOS_LIBS := $(shell $(ADIOS_ARCH_PATH)/bin/adios_config -l)
+ADIOS_INC  := $(shell $(ADIOS1_ARCH_PATH)/bin/adios_config -c)
+ADIOS_LIBS := $(shell $(ADIOS1_ARCH_PATH)/bin/adios_config -l)
 
 #------------------------------------------------------------------------------

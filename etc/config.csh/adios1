@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -10,18 +10,18 @@
 #     <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/config.csh/ADIOS
+#     etc/config.csh/adios1
 #     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
 #     Setup for ADIOS include/libraries (usually ThirdParty installation).
 #
-#     To disable its use:               adios_version=adios-none
-#     For system-wide installations:    adios_version=adios-system
+#     To disable its use:               adios1_version=adios-none
+#     For system-wide installations:    adios1_version=adios-system
 #
 #     For central installations not located under ThirdParty:
 #       1. use adios-system
-#       2. and provide full path for ADIOS_ARCH_PATH
+#       2. and provide full path for ADIOS1_ARCH_PATH
 #
 # Note
 #     Changes made here MUST be made in the equivalent config.sh version too,
@@ -33,25 +33,21 @@
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-set adios_version=ADIOS-1.13.0
-setenv ADIOS_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios_version
+set adios1_version=ADIOS-1.13.1
+setenv ADIOS1_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios1_version
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if ($?FOAM_VERBOSE && $?prompt) then
-    echo "Using adios ($adios_version)  ->  $ADIOS_ARCH_PATH"
+    echo "Using adios ($adios1_version)  ->  $ADIOS1_ARCH_PATH"
 endif
 
-# If ADIOS_ARCH_PATH does not end with '-system' or '-none',
-# it is located within ThirdParty, or a central installation
-# outside of ThirdParty and should be added to the path.
-
-set ending="${ADIOS_ARCH_PATH:t}"
-if ( "$ending" != "adios-none" && "$ending" != "adios-system" ) then
-    # PATH was already cleaned by etc/cshrc caller
-    _foamAddPath $ADIOS_ARCH_PATH/bin
+# - only add if the directory really exists
+_foamAddLibAuto $ADIOS1_ARCH_PATH
+if ($status == 0) then
+    _foamAddPath $ADIOS1_ARCH_PATH/bin
 endif
 
-unset adios_version ending
+unset adios1_version
 
 #------------------------------------------------------------------------------

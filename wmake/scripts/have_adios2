@@ -58,11 +58,11 @@ have_adios2()
     # warn="==> skip adios2"
 
     # Setup
-    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/ADIOS2)
+    if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/adios2)
     then
         . "$settings"
     else
-        [ -n "$warn" ] && echo "$warn (no config.sh/ADIOS2 settings)"
+        [ -n "$warn" ] && echo "$warn (no config.sh/adios2 settings)"
         return 2
     fi
 
