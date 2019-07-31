@@ -40,15 +40,15 @@ Description
         nread = something.read(buffer.data(),1024); // fill with content
         buffer.resize(nread);               // content size
 
-        // construct dictionary, or something else
+        // Construct dictionary, or something else
         UIListStream is(buffer)
         dictionary dict1(is);
 
-        // sometime later
+        // Sometime later
         nread = something.read(buffer.data(),2048); // fill with content
         buffer.resize(nread);               // content size
 
-        // without intermediate variable
+        // Without intermediate variable
         dictionary dict2(UIListStream(buffer)());
     \endcode
 

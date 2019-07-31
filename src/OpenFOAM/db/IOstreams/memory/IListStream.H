@@ -113,7 +113,7 @@ public:
             reset_gbuffer();
         }
 
-        //- Transfer contents to other list
+        //- Transfer contents to other List
         inline void swap(List<char>& list)
         {
             List<char>::swap(list);
@@ -182,7 +182,7 @@ public:
         {}
 
 
-    // Member functions
+    // Member Functions
 
         //- The current get position in the buffer
         using allocator_type::size;

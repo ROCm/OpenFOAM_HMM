@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,6 @@ See Also
 
 #include "DynamicList.H"
 #include "OSstream.H"
-#include "stdFoam.H"
 #include "memoryStreamBuffer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -84,6 +83,7 @@ class OListStreamAllocator
         //  from the list size and the addressable size known through the
         //  stream pointers.
         List<char> storage_;
+
 
     protected:
 
@@ -192,9 +192,9 @@ class OListStreamAllocator
             init_pbuffer(block_);
         }
 
-        //- Move construct from DynamicList
-        template<int AnySize>
-        dynbuf(DynamicList<char,AnySize>&& buffer)
+        //- Move construct from DynamicList.
+        template<int SizeMin>
+        dynbuf(DynamicList<char,SizeMin>&& buffer)
         :
             storage_(std::move(buffer))
         {
@@ -211,6 +211,7 @@ class OListStreamAllocator
         }
 
         //- Sync put buffer pointers to agree with list dimensions
+        //  Sets put pointer to the begin (rewind).
         inline void sync_pbuffer()
         {
             resetp(storage_.data(), storage_.size());
@@ -223,27 +224,43 @@ class OListStreamAllocator
             sync_pbuffer();
         }
 
-        //- Shrink to addressed storage
+        //- Shrink storage to addressed storage
         inline void shrink()
         {
-            const auto cur = tellp();
+            const auto cur = tellp();   // Addressed area
+
             storage_.resize(cur);
             sync_pbuffer();
             pbump(cur);
         }
 
-        //- Transfer list contents to other list
+        //- Transfer list contents to other List
         inline void swap(List<char>& other)
         {
-            storage_.resize(tellp());   // Addressed area
+            const auto cur = tellp();   // Addressed area
+
             storage_.swap(other);
+            storage_.resize(cur);
+            sync_pbuffer();
+        }
+
+        //- Transfer list contents to a DynamicList
+        template<int SizeMin>
+        inline void swap(DynamicList<char,SizeMin>& other)
+        {
+            const auto cur = tellp();   // Addressed area
+
+            storage_.swap(other);       // Swap full list
+            other.setCapacity(other.size());
+            other.resize(cur);
             sync_pbuffer();
         }
     };
 
+
 protected:
 
-    // Protected data
+    // Protected Data
 
         typedef std::ostream stream_type;
 
@@ -334,8 +351,15 @@ public:
             return buf_.setBlockSize(n);
         }
 
-        //- Transfer list contents to other list
+        //- Transfer list contents to other List
         inline void swap(List<char>& other)
+        {
+            buf_.swap(other);
+        }
+
+        //- Transfer list contents to a DynamicList
+        template<int SizeMin>
+        inline void swap(DynamicList<char,SizeMin>& other)
         {
             buf_.swap(other);
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
     // Create from other storage types
 
-    List<char> written;
+    DynamicList<char> written;
     Info<< nl;
     {
         Info<<"create std::move(List)" << endl;
@@ -157,6 +157,11 @@ int main(int argc, char *argv[])
         toString(Info, list) << endl;
 
         OListStream buf1(std::move(list));
+
+        Info<<"orig:";
+        toString(Info, list) << endl;
+        printInfo(buf1);
+
         for (label i = 0; i < 26; ++i)
         {
             buf1 << char('A' +i);
@@ -179,6 +184,9 @@ int main(int argc, char *argv[])
     Info<<"'captured' content ";
     toString(Info, written);
 
+    Info<< nl
+        << "content size=" << written.size()
+        << " capacity=" << written.capacity() << nl;
 
     Info<< "\nEnd\n" << endl;
 

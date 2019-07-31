@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -178,15 +178,17 @@ protected:
         return count;
     }
 
+
 public:
 
-    //- Construct for character array and number of bytes
+    //- Construct for character array (can be nullptr) and number of bytes
     in(char* s, std::streamsize n)
     {
         resetg(s, n);
     }
 
-    //- Reset for character array and number of bytes
+    //- Reset for character array (can be nullptr) and number of bytes
+    //  Sets get pointer to the begin.
     inline void resetg(char* s, std::streamsize n)
     {
         if (s)
@@ -256,15 +258,17 @@ protected:
         return count;
     }
 
+
 public:
 
-    //- Construct for character array and number of bytes
+    //- Construct for character array (can be nullptr) and number of bytes
     out(char* s, std::streamsize n)
     {
         resetp(s, n);
     }
 
-    //- Reset for character array and number of bytes
+    //- Reset for character array (can be nullptr) and number of bytes.
+    //  Sets put pointer to the begin.
     inline void resetp(char* s, std::streamsize n)
     {
         if (s)
