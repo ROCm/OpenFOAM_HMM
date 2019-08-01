@@ -397,7 +397,11 @@ Foam::ITstream& Foam::dictionary::lookup
 }
 
 
-bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
+bool Foam::dictionary::substituteKeyword
+(
+    const word& keyword,
+    bool mergeEntry
+)
 {
     if (keyword.size() < 2)
     {
@@ -457,10 +461,13 @@ bool Foam::dictionary::substituteScopedKeyword
 }
 
 
-bool Foam::dictionary::isDict(const word& keyword) const
+bool Foam::dictionary::isDict
+(
+    const word& keyword,
+    enum keyType::option matchOpt
+) const
 {
-    // Allow patterns, non-recursive
-    return csearch(keyword, keyType::REGEX).isDict();
+    return csearch(keyword, matchOpt).isDict();
 }
 
 
@@ -484,10 +491,13 @@ const Foam::dictionary* Foam::dictionary::findDict
 }
 
 
-const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
+const Foam::dictionary& Foam::dictionary::subDict
+(
+    const word& keyword,
+    enum keyType::option matchOpt
+) const
 {
-    // Allow patterns, non-recursive
-    const const_searcher finder(csearch(keyword, keyType::REGEX));
+    const const_searcher finder(csearch(keyword, matchOpt));
 
     if (!finder.good())
     {
@@ -501,10 +511,13 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 }
 
 
-Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
+Foam::dictionary& Foam::dictionary::subDict
+(
+    const word& keyword,
+    enum keyType::option matchOpt
+)
 {
-    // Allow patterns, non-recursive
-    searcher finder(search(keyword, keyType::REGEX));
+    searcher finder(search(keyword, matchOpt));
 
     if (!finder.good())
     {
@@ -521,11 +534,11 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 Foam::dictionary Foam::dictionary::subOrEmptyDict
 (
     const word& keyword,
+    enum keyType::option matchOpt,
     const bool mandatory
 ) const
 {
-    // Allow patterns, non-recursive
-    const const_searcher finder(csearch(keyword, keyType::REGEX));
+    const const_searcher finder(csearch(keyword, matchOpt));
 
     if (finder.isDict())
     {
@@ -556,11 +569,11 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
 
 const Foam::dictionary& Foam::dictionary::optionalSubDict
 (
-    const word& keyword
+    const word& keyword,
+    enum keyType::option matchOpt
 ) const
 {
-    // Allow patterns, non-recursive
-    const const_searcher finder(csearch(keyword, keyType::REGEX));
+    const const_searcher finder(csearch(keyword, matchOpt));
 
     if (finder.isDict())
     {

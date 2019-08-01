@@ -610,7 +610,7 @@ public:
         //
         //  \param val the value to read into
         //  \param matchOpt the default search is non-recursive with patterns
-        //  \param mandatory the keyword is mandatory
+        //  \param mandatory the keyword is mandatory (default: true)
         //
         //  \return true if the entry was found.
         template<class T>
@@ -720,29 +720,45 @@ public:
 
         //- Check if entry is found and and is a sub-dictionary.
         //
-        //  Search type: non-recursive with patterns.
-        bool isDict(const word& keyword) const;
+        //  \param matchOpt the default search is non-recursive with patterns
+        //
+        //  \return true if the entry was found.
+        bool isDict
+        (
+            const word& keyword,
+            enum keyType::option matchOpt = keyType::REGEX
+        ) const;
 
         //- Find and return a sub-dictionary.
         //  Fatal if the entry does not exist or is not a sub-dictionary.
         //
-        //  Search type: non-recursive with patterns.
-        const dictionary& subDict(const word& keyword) const;
+        //  \param matchOpt the default search is non-recursive with patterns
+        const dictionary& subDict
+        (
+            const word& keyword,
+            enum keyType::option matchOpt = keyType::REGEX
+        ) const;
 
         //- Find and return a sub-dictionary for manipulation.
         //  Fatal if the entry does not exist or is not a sub-dictionary.
         //
-        //  Search type: non-recursive with patterns.
-        dictionary& subDict(const word& keyword);
+        //  \param matchOpt the default search is non-recursive with patterns
+        dictionary& subDict
+        (
+            const word& keyword,
+            enum keyType::option matchOpt = keyType::REGEX
+        );
 
         //- Find and return a sub-dictionary as a copy, otherwise return
         //- an empty dictionary.
         //  Warn if the entry exists but is not a sub-dictionary.
         //
-        //  Search type: non-recursive with patterns.
+        //  \param matchOpt the default search is non-recursive with patterns
+        //  \param mandatory the keyword is mandatory (default: false)
         dictionary subOrEmptyDict
         (
             const word& keyword,
+            enum keyType::option matchOpt = keyType::REGEX,
             const bool mandatory = false
         ) const;
 
@@ -750,7 +766,11 @@ public:
         //  Warn if the entry exists but is not a sub-dictionary.
         //
         //  Search type: non-recursive with patterns.
-        const dictionary& optionalSubDict(const word& keyword) const;
+        const dictionary& optionalSubDict
+        (
+            const word& keyword,
+            enum keyType::option matchOpt = keyType::REGEX
+        ) const;
 
         //- Return the table of contents
         wordList toc() const;

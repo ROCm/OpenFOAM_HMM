@@ -325,7 +325,12 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
     constProps_(particleProperties_),
     subModelProperties_
     (
-        particleProperties_.subOrEmptyDict("subModels", solution_.active())
+        particleProperties_.subOrEmptyDict
+        (
+            "subModels",
+            keyType::REGEX,
+            solution_.active()
+        )
     ),
     rndGen_(Pstream::myProcNo()),
     cellOccupancyPtr_(),
@@ -342,6 +347,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
         subModelProperties_.subOrEmptyDict
         (
             "particleForces",
+            keyType::REGEX,
             solution_.active()
         ),
         solution_.active()
