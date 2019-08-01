@@ -1,0 +1,30 @@
+solid door
+facet normal 0 0 0
+outer loop
+vertex 0.217568 1.581186 1.050000
+vertex 0.217568 1.581186 -0.000000
+vertex 0.217568 2.349192 -0.000000
+endloop
+endfacet
+facet normal 0 0 0
+outer loop
+vertex 0.217568 2.349192 1.050000
+vertex 0.217568 2.349192 2.100000
+vertex 0.217568 1.581186 2.100000
+endloop
+endfacet
+facet normal 0 0 0
+outer loop
+vertex 0.217568 1.581186 1.050000
+vertex 0.217568 2.349192 -0.000000
+vertex 0.217568 2.349192 1.050000
+endloop
+endfacet
+facet normal 0 0 0
+outer loop
+vertex 0.217568 2.349192 1.050000
+vertex 0.217568 1.581186 2.100000
+vertex 0.217568 1.581186 1.050000
+endloop
+endfacet
+endsolid door
