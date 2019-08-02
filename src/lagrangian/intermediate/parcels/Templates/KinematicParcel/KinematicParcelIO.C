@@ -97,7 +97,7 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
 {
-    bool valid = c.size();
+    const bool valid = c.size();
 
     ParcelType::readFields(c);
 
@@ -197,7 +197,8 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
 {
     ParcelType::writeFields(c);
 
-    label np = c.size();
+    const label np = c.size();
+    const bool valid = np;
 
     IOField<label> active(c.fieldIOobject("active", IOobject::NO_READ), np);
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::NO_READ), np);
@@ -232,8 +233,6 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
         ++i;
     }
 
-    const bool valid = np > 0;
-
     active.write(valid);
     typeId.write(valid);
     nParticle.write(valid);
@@ -249,6 +248,49 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
 
 template<class ParcelType>
 template<class CloudType>
+void Foam::KinematicParcel<ParcelType>::readObjects
+(
+    CloudType& c,
+    const objectRegistry& obr
+)
+{
+    ParcelType::readObjects(c, obr);
+
+    if (!c.size()) return;
+
+    const auto& active = cloud::lookupIOField<label>("active", obr);
+    const auto& typeId = cloud::lookupIOField<label>("typeId", obr);
+    const auto& nParticle = cloud::lookupIOField<scalar>("nParticle", obr);
+    const auto& d = cloud::lookupIOField<scalar>("d", obr);
+    const auto& dTarget = cloud::lookupIOField<scalar>("dTarget", obr);
+    const auto& U = cloud::lookupIOField<vector>("U", obr);
+    const auto& rho = cloud::lookupIOField<scalar>("rho", obr);
+    const auto& age = cloud::lookupIOField<scalar>("age", obr);
+    const auto& tTurb = cloud::lookupIOField<scalar>("tTurb", obr);
+    const auto& UTurb = cloud::lookupIOField<vector>("UTurb", obr);
+
+    label i = 0;
+
+    for (KinematicParcel<ParcelType>& p : c)
+    {
+        p.active_ = active[i];
+        p.typeId_ = typeId[i];
+        p.nParticle_ = nParticle[i];
+        p.d_ = d[i];
+        p.dTarget_ = dTarget[i];
+        p.U_ = U[i];
+        p.rho_ = rho[i];
+        p.age_ = age[i];
+        p.tTurb_ = tTurb[i];
+        p.UTurb_ = UTurb[i];
+
+        ++i;
+    }
+}
+
+
+template<class ParcelType>
+template<class CloudType>
 void Foam::KinematicParcel<ParcelType>::writeObjects
 (
     const CloudType& c,
@@ -257,21 +299,18 @@ void Foam::KinematicParcel<ParcelType>::writeObjects
 {
     ParcelType::writeObjects(c, obr);
 
-    label np = c.size();
+    const label np = c.size();
 
-    IOField<label>& active(cloud::createIOField<label>("active", np, obr));
-    IOField<label>& typeId(cloud::createIOField<label>("typeId", np, obr));
-    IOField<scalar>& nParticle
-    (
-        cloud::createIOField<scalar>("nParticle", np, obr)
-    );
-    IOField<scalar>& d(cloud::createIOField<scalar>("d", np, obr));
-    IOField<scalar>& dTarget(cloud::createIOField<scalar>("dTarget", np, obr));
-    IOField<vector>& U(cloud::createIOField<vector>("U", np, obr));
-    IOField<scalar>& rho(cloud::createIOField<scalar>("rho", np, obr));
-    IOField<scalar>& age(cloud::createIOField<scalar>("age", np, obr));
-    IOField<scalar>& tTurb(cloud::createIOField<scalar>("tTurb", np, obr));
-    IOField<vector>& UTurb(cloud::createIOField<vector>("UTurb", np, obr));
+    auto& active = cloud::createIOField<label>("active", np, obr);
+    auto& typeId = cloud::createIOField<label>("typeId", np, obr);
+    auto& nParticle = cloud::createIOField<scalar>("nParticle", np, obr);
+    auto& d = cloud::createIOField<scalar>("d", np, obr);
+    auto& dTarget = cloud::createIOField<scalar>("dTarget", np, obr);
+    auto& U = cloud::createIOField<vector>("U", np, obr);
+    auto& rho = cloud::createIOField<scalar>("rho", np, obr);
+    auto& age = cloud::createIOField<scalar>("age", np, obr);
+    auto& tTurb = cloud::createIOField<scalar>("tTurb", np, obr);
+    auto&& UTurb = cloud::createIOField<vector>("UTurb", np, obr);
 
     label i = 0;
 

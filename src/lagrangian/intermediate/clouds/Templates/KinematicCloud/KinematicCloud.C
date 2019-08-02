@@ -794,6 +794,13 @@ void Foam::KinematicCloud<CloudType>::info()
 
 
 template<class CloudType>
+void Foam::KinematicCloud<CloudType>::readObjects(const objectRegistry& obr)
+{
+    parcelType::readObjects(*this, obr);
+}
+
+
+template<class CloudType>
 void Foam::KinematicCloud<CloudType>::writeObjects(objectRegistry& obr) const
 {
     parcelType::writeObjects(*this, obr);

@@ -78,7 +78,7 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::ThermoParcel<ParcelType>::readFields(CloudType& c)
 {
-    bool valid = c.size();
+    const bool valid = c.size();
 
     ParcelType::readFields(c);
 
@@ -94,6 +94,7 @@ void Foam::ThermoParcel<ParcelType>::readFields(CloudType& c)
     {
         p.T_ = T[i];
         p.Cp_ = Cp[i];
+
         ++i;
     }
 }
@@ -105,7 +106,8 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const CloudType& c)
 {
     ParcelType::writeFields(c);
 
-    label np = c.size();
+    const label np = c.size();
+    const bool valid = np;
 
     IOField<scalar> T(c.fieldIOobject("T", IOobject::NO_READ), np);
     IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::NO_READ), np);
@@ -115,11 +117,38 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const CloudType& c)
     {
         T[i] = p.T_;
         Cp[i] = p.Cp_;
+
         ++i;
     }
 
-    T.write(np > 0);
-    Cp.write(np > 0);
+    T.write(valid);
+    Cp.write(valid);
+}
+
+
+template<class ParcelType>
+template<class CloudType>
+void Foam::ThermoParcel<ParcelType>::readObjects
+(
+    CloudType& c,
+    const objectRegistry& obr
+)
+{
+    ParcelType::readFields(c);
+
+    if (!c.size()) return;
+
+    auto& T = cloud::lookupIOField<scalar>("T", obr);
+    auto& Cp = cloud::lookupIOField<scalar>("Cp", obr);
+
+    label i = 0;
+    for (ThermoParcel<ParcelType>& p : c)
+    {
+        p.T_ = T[i];
+        p.Cp_ = Cp[i];
+
+        ++i;
+    }
 }
 
 
@@ -133,16 +162,17 @@ void Foam::ThermoParcel<ParcelType>::writeObjects
 {
     ParcelType::writeObjects(c, obr);
 
-    label np = c.size();
+    const label np = c.size();
 
-    IOField<scalar>& T(cloud::createIOField<scalar>("T", np, obr));
-    IOField<scalar>& Cp(cloud::createIOField<scalar>("Cp", np, obr));
+    auto& T = cloud::createIOField<scalar>("T", np, obr);
+    auto& Cp = cloud::createIOField<scalar>("Cp", np, obr);
 
     label i = 0;
     for (const ThermoParcel<ParcelType>& p : c)
     {
         T[i] = p.T_;
         Cp[i] = p.Cp_;
+
         ++i;
     }
 }

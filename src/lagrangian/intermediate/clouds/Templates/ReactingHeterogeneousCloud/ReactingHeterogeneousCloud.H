@@ -243,6 +243,9 @@ public:
             //- Print cloud information
             void info();
 
+            //- Read particle fields as objects from the obr registry
+            virtual void readObjects(const objectRegistry& obr);
+
             //- Write the field data for the cloud
             virtual void writeFields() const;
 

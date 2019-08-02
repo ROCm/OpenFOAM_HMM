@@ -307,6 +307,10 @@ public:
             template<class CloudType>
             static void writeFields(const CloudType& c);
 
+            //- Read particle fields as objects from the obr registry
+            template<class CloudType>
+            static void readObjects(CloudType& c, const objectRegistry& obr);
+
             //- Write particle fields as objects into the obr registry
             template<class CloudType>
             static void writeObjects(const CloudType& c, objectRegistry& obr);

@@ -84,7 +84,7 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::CollidingParcel<ParcelType>::readFields(CloudType& c)
 {
-    bool valid = c.size();
+    const bool valid = c.size();
 
     ParcelType::readFields(c);
 
@@ -192,10 +192,12 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
 {
     ParcelType::writeFields(c);
 
-    label np = c.size();
+    const label np = c.size();
+    const bool valid = np;
+
 
     IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
-    IOField<vector> angularMomentum
+    IOField<vector> angMom
     (
         c.fieldIOobject("angularMomentum", IOobject::NO_READ),
         np
@@ -246,7 +248,7 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
     for (const CollidingParcel<ParcelType>& p : c)
     {
         f[i] = p.f();
-        angularMomentum[i] = p.angularMomentum();
+        angMom[i] = p.angularMomentum();
         torque[i] = p.torque();
 
         collisionRecordsPairAccessed[i] = p.collisionRecords().pairAccessed();
@@ -262,10 +264,8 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
         ++i;
     }
 
-    const bool valid = (np > 0);
-
     f.write(valid);
-    angularMomentum.write(valid);
+    angMom.write(valid);
     torque.write(valid);
 
     collisionRecordsPairAccessed.write(valid);
@@ -280,6 +280,34 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
 
 template<class ParcelType>
 template<class CloudType>
+void Foam::CollidingParcel<ParcelType>::readObjects
+(
+    CloudType& c,
+    const objectRegistry& obr
+)
+{
+    ParcelType::readObjects(c, obr);
+
+    if (!c.size()) return;
+
+    const auto& f = cloud::lookupIOField<vector>("f", obr);
+    const auto& angMom = cloud::lookupIOField<vector>("angularMomentum", obr);
+    const auto& torque = cloud::lookupIOField<vector>("torque", obr);
+
+    label i = 0;
+    for (CollidingParcel<ParcelType>& p : c)
+    {
+        p.f_ = f[i];
+        p.angularMomentum_ = angMom[i];
+        p.torque_ = torque[i];
+
+        ++i;
+    }
+}
+
+
+template<class ParcelType>
+template<class CloudType>
 void Foam::CollidingParcel<ParcelType>::writeObjects
 (
     const CloudType& c,
@@ -288,20 +316,17 @@ void Foam::CollidingParcel<ParcelType>::writeObjects
 {
     ParcelType::writeObjects(c, obr);
 
-    label np = c.size();
+    const label np = c.size();
 
-    IOField<vector>& f(cloud::createIOField<vector>("f", np, obr));
-    IOField<vector>& angularMomentum
-    (
-        cloud::createIOField<vector>("angularMomentum", np, obr)
-    );
-    IOField<vector>& torque(cloud::createIOField<vector>("torque", np, obr));
+    auto& f = cloud::createIOField<vector>("f", np, obr);
+    auto& angMom = cloud::createIOField<vector>("angularMomentum", np, obr);
+    auto& torque = cloud::createIOField<vector>("torque", np, obr);
 
     label i = 0;
     for (const CollidingParcel<ParcelType>& p : c)
     {
         f[i] = p.f();
-        angularMomentum[i] = p.angularMomentum();
+        angMom[i] = p.angularMomentum();
         torque[i] = p.torque();
 
         ++i;

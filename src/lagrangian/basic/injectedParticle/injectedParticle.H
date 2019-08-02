@@ -220,6 +220,13 @@ public:
             //- Write fields
             static void writeFields(const Cloud<injectedParticle>& c);
 
+            //- Read particle fields as objects from the obr registry
+            static void readObjects
+            (
+                Cloud<injectedParticle>& c,
+                const objectRegistry& obr
+            );
+
             //- Write particle fields as objects into the obr registry
             static void writeObjects
             (

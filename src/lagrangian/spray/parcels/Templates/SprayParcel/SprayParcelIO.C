@@ -112,7 +112,7 @@ void Foam::SprayParcel<ParcelType>::readFields
     const CompositionType& compModel
 )
 {
-    bool valid = c.size();
+    const bool valid = c.size();
 
     ParcelType::readFields(c, compModel);
 
@@ -211,6 +211,7 @@ void Foam::SprayParcel<ParcelType>::readFields
         p.injector_ = injector[i];
         p.tMom_ = tMom[i];
         p.user_ = user[i];
+
         ++i;
     }
 }
@@ -234,7 +235,9 @@ void Foam::SprayParcel<ParcelType>::writeFields
 {
     ParcelType::writeFields(c, compModel);
 
-    label np = c.size();
+    const label np = c.size();
+    const bool valid = np;
+
 
     IOField<scalar> d0(c.fieldIOobject("d0", IOobject::NO_READ), np);
     IOField<vector> position0
@@ -281,8 +284,6 @@ void Foam::SprayParcel<ParcelType>::writeFields
         ++i;
     }
 
-    const bool valid = np > 0;
-
     d0.write(valid);
     position0.write(valid);
     sigma.write(valid);
@@ -301,6 +302,18 @@ void Foam::SprayParcel<ParcelType>::writeFields
 
 template<class ParcelType>
 template<class CloudType>
+void Foam::SprayParcel<ParcelType>::readObjects
+(
+    CloudType& c,
+    const objectRegistry& obr
+)
+{
+    ParcelType::readObjects(c, obr);
+}
+
+
+template<class ParcelType>
+template<class CloudType>
 void Foam::SprayParcel<ParcelType>::writeObjects
 (
     const CloudType& c,
@@ -308,6 +321,55 @@ void Foam::SprayParcel<ParcelType>::writeObjects
 )
 {
     ParcelType::writeObjects(c, obr);
+}
+
+
+template<class ParcelType>
+template<class CloudType, class CompositionType>
+void Foam::SprayParcel<ParcelType>::readObjects
+(
+    CloudType& c,
+    const CompositionType& compModel,
+    const objectRegistry& obr
+)
+{
+    ParcelType::readObjects(c, compModel, obr);
+
+    if (!c.size()) return;
+
+    const auto& d0 = cloud::lookupIOField<scalar>("d0", obr);
+    const auto& position0 = cloud::lookupIOField<vector>("position0", obr);
+    const auto& sigma = cloud::lookupIOField<scalar>("sigma", obr);
+    const auto& mu = cloud::lookupIOField<scalar>("mu", obr);
+    const auto& liquidCore = cloud::lookupIOField<scalar>("liquidCore", obr);
+    const auto& KHindex = cloud::lookupIOField<scalar>("KHindex", obr);
+    const auto& y = cloud::lookupIOField<scalar>("y", obr);
+    const auto& yDot = cloud::lookupIOField<scalar>("yDot", obr);
+    const auto& tc = cloud::lookupIOField<scalar>("tc", obr);
+    const auto& ms = cloud::lookupIOField<scalar>("ms", obr);
+    const auto& injector = cloud::lookupIOField<scalar>("injector", obr);
+    const auto& tMom = cloud::lookupIOField<scalar>("tMom", obr);
+    const auto& user = cloud::lookupIOField<scalar>("user", obr);
+
+    label i = 0;
+    for (SprayParcel<ParcelType>& p : c)
+    {
+        p.d0_ = d0[i];
+        p.position0_ = position0[i];
+        p.sigma_ = sigma[i];
+        p.mu_ = mu[i];
+        p.liquidCore_ = liquidCore[i];
+        p.KHindex_ = KHindex[i];
+        p.y_ = y[i];
+        p.yDot_ = yDot[i];
+        p.tc_ = tc[i];
+        p.ms_ = ms[i];
+        p.injector_ = injector[i];
+        p.tMom_ = tMom[i];
+        p.user_ = user[i];
+
+        ++i;
+    }
 }
 
 
@@ -322,30 +384,21 @@ void Foam::SprayParcel<ParcelType>::writeObjects
 {
     ParcelType::writeObjects(c, compModel, obr);
 
-    label np = c.size();
+    const label np = c.size();
 
-    IOField<scalar>& d0(cloud::createIOField<scalar>("d0", np, obr));
-    IOField<vector>& position0
-    (
-        cloud::createIOField<vector>("position0", np, obr)
-    );
-    IOField<scalar>& sigma(cloud::createIOField<scalar>("sigma", np, obr));
-    IOField<scalar>& mu(cloud::createIOField<scalar>("mu", np, obr));
-    IOField<scalar>& liquidCore
-    (
-        cloud::createIOField<scalar>("liquidCore", np, obr)
-    );
-    IOField<scalar>& KHindex(cloud::createIOField<scalar>("KHindex", np, obr));
-    IOField<scalar>& y(cloud::createIOField<scalar>("y", np, obr));
-    IOField<scalar>& yDot(cloud::createIOField<scalar>("yDot", np, obr));
-    IOField<scalar>& tc(cloud::createIOField<scalar>("tc", np, obr));
-    IOField<scalar>& ms(cloud::createIOField<scalar>("ms", np, obr));
-    IOField<scalar>& injector
-    (
-        cloud::createIOField<scalar>("injector", np, obr)
-    );
-    IOField<scalar>& tMom(cloud::createIOField<scalar>("tMom", np, obr));
-    IOField<scalar>& user(cloud::createIOField<scalar>("user", np, obr));
+    auto& d0 = cloud::createIOField<scalar>("d0", np, obr);
+    auto& position0 = cloud::createIOField<vector>("position0", np, obr);
+    auto& sigma = cloud::createIOField<scalar>("sigma", np, obr);
+    auto& mu = cloud::createIOField<scalar>("mu", np, obr);
+    auto& liquidCore = cloud::createIOField<scalar>("liquidCore", np, obr);
+    auto& KHindex = cloud::createIOField<scalar>("KHindex", np, obr);
+    auto& y = cloud::createIOField<scalar>("y", np, obr);
+    auto& yDot= cloud::createIOField<scalar>("yDot", np, obr);
+    auto& tc = cloud::createIOField<scalar>("tc", np, obr);
+    auto& ms = cloud::createIOField<scalar>("ms", np, obr);
+    auto& injector = cloud::createIOField<scalar>("injector", np, obr);
+    auto& tMom = cloud::createIOField<scalar>("tMom", np, obr);
+    auto& user = cloud::createIOField<scalar>("user", np, obr);
 
     label i = 0;
     for (const SprayParcel<ParcelType>& p : c)
@@ -363,6 +416,7 @@ void Foam::SprayParcel<ParcelType>::writeObjects
         injector[i] = p.injector_;
         tMom[i] = p.tMom_;
         user[i] = p.user_;
+
         ++i;
     }
 }

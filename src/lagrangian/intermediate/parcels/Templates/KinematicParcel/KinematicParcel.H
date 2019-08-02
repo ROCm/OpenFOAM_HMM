@@ -658,6 +658,10 @@ public:
             template<class TrackCloudType>
             static void writeFields(const TrackCloudType& c);
 
+            //- Read particle fields as objects from the obr registry
+            template<class CloudType>
+            static void readObjects(CloudType& c, const objectRegistry& obr);
+
             //- Write particle fields as objects into the obr registry
             template<class CloudType>
             static void writeObjects(const CloudType& c, objectRegistry& obr);

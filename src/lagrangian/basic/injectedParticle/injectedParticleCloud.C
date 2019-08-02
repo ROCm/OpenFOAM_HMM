@@ -68,6 +68,12 @@ Foam::injectedParticleCloud::~injectedParticleCloud()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::injectedParticleCloud::readObjects(const objectRegistry& obr)
+{
+    injectedParticle::readObjects(*this, obr);
+}
+
+
 void Foam::injectedParticleCloud::writeObjects(objectRegistry& obr) const
 {
     injectedParticle::writeObjects(*this, obr);

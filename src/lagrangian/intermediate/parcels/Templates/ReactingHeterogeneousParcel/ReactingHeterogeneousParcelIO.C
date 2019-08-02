@@ -85,7 +85,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::readFields
     const CompositionType& compModel
 )
 {
-    bool valid = c.size();
+    const bool valid = c.size();
 
     ParcelType::readFields(c);
 
@@ -183,7 +183,8 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
     // writing Ysolids and F
     ThermoParcel<KinematicParcel<particle>>::writeFields(c);
 
-    label np = c.size();
+    const label np = c.size();
+    const bool valid = np;
 
     IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::NO_READ), np);
 
@@ -199,7 +200,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
         }
         ++i;
     }
-    mass0.write(np > 0);
+    mass0.write(valid);
 
     for (label i = 0; i < nF; i++)
     {
@@ -218,7 +219,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
             F = p0.F()[i];
         }
 
-        F.write(np > 0);
+        F.write(valid);
     }
 
     const label idSolid = compModel.idSolid();
@@ -243,8 +244,20 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
             ++i;
         }
 
-        Y.write(np > 0);
+        Y.write(valid);
     }
+}
+
+
+template<class ParcelType>
+template<class CloudType>
+void Foam::ReactingHeterogeneousParcel<ParcelType>::readObjects
+(
+    CloudType& c,
+    const objectRegistry& obr
+)
+{
+    ParcelType::readObjects(c, obr);
 }
 
 
@@ -262,6 +275,27 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeObjects
 
 template<class ParcelType>
 template<class CloudType, class CompositionType>
+void Foam::ReactingHeterogeneousParcel<ParcelType>::readObjects
+(
+    CloudType& c,
+    const CompositionType& compModel,
+    const objectRegistry& obr
+)
+{
+    //ParcelType::readObjects(c, obr);
+    // Skip Reacting layer
+    ThermoParcel<KinematicParcel<particle>>::readObjects(c, obr);
+
+    // const label np = c.size();
+
+    WarningInFunction
+        << "Reading of objects is still a work-in-progress" << nl;
+
+}
+
+
+template<class ParcelType>
+template<class CloudType, class CompositionType>
 void Foam::ReactingHeterogeneousParcel<ParcelType>::writeObjects
 (
     const CloudType& c,
@@ -273,7 +307,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeObjects
     // Skip Reacting layer
     ThermoParcel<KinematicParcel<particle>>::writeObjects(c, obr);
 
-    label np = c.size();
+    const label np = c.size();
 
     // WIP
     label nF = 0;
@@ -288,10 +322,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeObjects
         for (label i = 0; i < nF; i++)
         {
             const word fieldName = "F" + name(i);
-            IOField<scalar>& F
-            (
-                cloud::createIOField<scalar>(fieldName, np, obr)
-            );
+            auto& F = cloud::createIOField<scalar>(fieldName, np, obr);
 
             label j = 0;
             for (const ReactingHeterogeneousParcel<ParcelType>& p0 : c)
@@ -306,10 +337,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeObjects
         forAll(solidNames, j)
         {
             const word fieldName = "Y" + solidNames[j];
-            IOField<scalar>& Y
-            (
-                cloud::createIOField<scalar>(fieldName, np, obr)
-            );
+            auto& Y = cloud::createIOField<scalar>(fieldName, np, obr);
 
             label i = 0;
             for (const ReactingHeterogeneousParcel<ParcelType>& p0 : c)

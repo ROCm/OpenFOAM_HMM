@@ -239,6 +239,14 @@ void Foam::ReactingHeterogeneousCloud<CloudType>::writeFields() const
 
 template<class CloudType>
 void Foam::ReactingHeterogeneousCloud<CloudType>::
+readObjects(const objectRegistry& obr)
+{
+    CloudType::particleType::readObjects(*this, this->composition(), obr);
+}
+
+
+template<class CloudType>
+void Foam::ReactingHeterogeneousCloud<CloudType>::
 writeObjects(objectRegistry& obr) const
 {
     CloudType::particleType::writeObjects(*this, this->composition(), obr);

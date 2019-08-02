@@ -86,6 +86,12 @@ void Foam::cloud::autoMap(const mapPolyMesh&)
 }
 
 
+void Foam::cloud::readObjects(const objectRegistry& obr)
+{
+    NotImplemented;
+}
+
+
 void Foam::cloud::writeObjects(objectRegistry& obr) const
 {
     NotImplemented;

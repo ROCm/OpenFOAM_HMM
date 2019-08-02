@@ -46,7 +46,7 @@ void Foam::particle::readFields(TrackCloudType& c)
 
     IOobject procIO(c.fieldIOobject("origProcId", IOobject::MUST_READ));
 
-    bool haveFile = procIO.typeHeaderOk<IOField<label>>(true);
+    const bool haveFile = procIO.typeHeaderOk<IOField<label>>(true);
 
     IOField<label> origProcId(procIO, valid && haveFile);
     c.checkFieldIOobject(c, origProcId);
@@ -63,6 +63,7 @@ void Foam::particle::readFields(TrackCloudType& c)
     {
         p.origProc_ = origProcId[i];
         p.origId_ = origId[i];
+
         ++i;
     }
 }
@@ -72,11 +73,12 @@ template<class TrackCloudType>
 void Foam::particle::writeFields(const TrackCloudType& c)
 {
     const label np = c.size();
+    const bool valid = np;
 
     if (writeLagrangianCoordinates)
     {
         IOPosition<TrackCloudType> ioP(c);
-        ioP.write(np > 0);
+        ioP.write(valid);
     }
     else if (!writeLagrangianPositions)
     {
@@ -93,7 +95,7 @@ void Foam::particle::writeFields(const TrackCloudType& c)
             c,
             cloud::geometryType::POSITIONS
         );
-        ioP.write(np > 0);
+        ioP.write(valid);
     }
 
     IOField<label> origProc
@@ -116,8 +118,57 @@ void Foam::particle::writeFields(const TrackCloudType& c)
         ++i;
     }
 
-    origProc.write(np > 0);
-    origId.write(np > 0);
+    origProc.write(valid);
+    origId.write(valid);
+}
+
+
+template<class CloudType>
+void Foam::particle::readObjects(CloudType& c, const objectRegistry& obr)
+{
+    typedef typename CloudType::parcelType parcelType;
+
+    const auto* positionPtr = cloud::findIOPosition(obr);
+
+    const label np = c.size();
+    const label newNp = (positionPtr ? positionPtr->size() : 0);
+
+    // Remove excess parcels
+    for (label i = newNp; i < np; ++i)
+    {
+        parcelType* p = c.last();
+
+        c.deleteParticle(*p);
+    }
+
+    if (newNp)
+    {
+        const auto& position = *positionPtr;
+
+        const auto& origProcId = cloud::lookupIOField<label>("origProc", obr);
+        const auto& origId = cloud::lookupIOField<label>("origId", obr);
+
+        // Create new parcels
+        for (label i = np; i < newNp; ++i)
+        {
+            c.addParticle(new parcelType(c.pMesh(), position[i], -1));
+        }
+
+        label i = 0;
+        for (particle& p : c)
+        {
+            p.origProc_ = origProcId[i];
+            p.origId_ = origId[i];
+
+            if (i < np)
+            {
+                // Use relocate for old particles, not new ones
+                p.relocate(position[i]);
+            }
+
+            ++i;
+        }
+    }
 }
 
 
@@ -126,9 +177,9 @@ void Foam::particle::writeObjects(const CloudType& c, objectRegistry& obr)
 {
     const label np = c.size();
 
-    IOField<label>& origProc(cloud::createIOField<label>("origProc", np, obr));
-    IOField<label>& origId(cloud::createIOField<label>("origId", np, obr));
-    IOField<point>& position(cloud::createIOField<point>("position", np, obr));
+    auto& origProc = cloud::createIOField<label>("origProc", np, obr);
+    auto& origId = cloud::createIOField<label>("origId", np, obr);
+    auto& position = cloud::createIOField<point>("position", np, obr);
 
     label i = 0;
     for (const particle& p : c)

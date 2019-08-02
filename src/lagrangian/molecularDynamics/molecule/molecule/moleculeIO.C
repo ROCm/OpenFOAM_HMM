@@ -91,7 +91,7 @@ Foam::molecule::molecule
 
 void Foam::molecule::readFields(Cloud<molecule>& mC)
 {
-    bool valid = mC.size();
+    const bool valid = mC.size();
 
     particle::readFields(mC);
 
@@ -148,7 +148,8 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
 {
     particle::writeFields(mC);
 
-    label np = mC.size();
+    const label np = mC.size();
+    const bool valid = np;
 
     IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::NO_READ), np);
     IOField<vector> v(mC.fieldIOobject("v", IOobject::NO_READ), np);
@@ -216,8 +217,6 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
 
         ++i;
     }
-
-    const bool valid = np > 0;
 
     Q.write(valid);
     v.write(valid);
