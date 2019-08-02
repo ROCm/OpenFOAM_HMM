@@ -1109,13 +1109,13 @@ void Foam::particle::autoMap
 }
 
 
-void Foam::particle::relocate(const point& position)
+void Foam::particle::relocate(const point& position, const label celli)
 {
     locate
     (
         position,
         nullptr,
-        celli_,
+        celli,
         true,
         "Particle mapped to a location outside of the mesh"
     );
