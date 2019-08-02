@@ -366,16 +366,16 @@ public:
             const label tetPti
         );
 
-        //- Construct from a position and a cell, searching for the rest of the
-        //  required topology
+        //- Construct from a position and a cell.
+        //  Searches for the rest of the required topology.
         particle
         (
             const polyMesh& mesh,
             const vector& position,
-            const label celli
+            const label celli = -1
         );
 
-        //- Construct from components
+        //- Construct from position components
         particle
         (
             const polyMesh& mesh,
@@ -408,8 +408,7 @@ public:
             return autoPtr<particle>::New(*this);
         }
 
-        //- Factory class to read-construct particles used for
-        //  parallel transfer
+        //- Factory class to read-construct particles (for parallel transfer)
         class iNew
         {
             const polyMesh& mesh_;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -63,6 +63,21 @@ public:
 
     // Constructors
 
+        //- Construct from a position and a cell.
+        //  Searches for the rest of the required topology.
+        //  Other properties are zero initialised.
+        indexedParticle
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli = -1,
+            const label index = 0
+        )
+        :
+            particle(mesh, position, celli),
+            index_(index)
+        {}
+
         //- Construct from components
         indexedParticle
         (
@@ -103,7 +118,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         label index() const
         {

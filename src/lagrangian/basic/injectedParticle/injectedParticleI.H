@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,22 @@ License
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::injectedParticle::injectedParticle
+(
+    const polyMesh& mesh,
+    const vector& position,
+    const label celli
+)
+:
+    particle(mesh, position, celli),
+    position_(position),
+    tag_(0),
+    soi_(0),
+    d_(0),
+    U_(Zero)
+{}
+
 
 inline Foam::injectedParticle::injectedParticle
 (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,10 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class passivePositionParticle;
+Ostream& operator<<(Ostream& os, const passivePositionParticle& ppi);
+
 /*---------------------------------------------------------------------------*\
                    Class passivePositionParticle Declaration
 \*---------------------------------------------------------------------------*/
@@ -51,7 +55,7 @@ class passivePositionParticle
 :
     public passiveParticle
 {
-    // Private member data
+    // Private Member Data
 
         //- Cached position
         point position_;
@@ -74,6 +78,19 @@ public:
             position_(position())
         {}
 
+        //- Construct from a position and a cell.
+        //  Searches for the rest of the required topology.
+        passivePositionParticle
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli = -1
+        )
+        :
+            passiveParticle(mesh, position, celli),
+            position_(position)
+        {}
+
         //- Construct as copy
         passivePositionParticle(const passivePositionParticle& p)
         :
@@ -88,8 +105,7 @@ public:
         }
 
 
-        //- Factory class to read-construct particles used for
-        //  parallel transfer
+        //- Factory class to read-construct particles (for parallel transfer)
         class iNew
         {
             const polyMesh& mesh_;

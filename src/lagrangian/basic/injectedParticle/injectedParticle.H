@@ -108,6 +108,16 @@ public:
 
     // Constructors
 
+        //- Construct from a position and a cell.
+        //  Searches for the rest of the required topology.
+        //  Other properties are zero initialised.
+        inline injectedParticle
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli = -1
+        );
+
         //- Construct from components
         inline injectedParticle
         (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -73,17 +73,18 @@ public:
         {}
 
 
-        //- Construct from a position and a cell, searching for the rest of the
-        //  required topology
+        //- Construct from a position and a cell.
+        //  Searches for the rest of the required topology.
         passiveParticle
         (
             const polyMesh& mesh,
             const vector& position,
-            const label celli
+            const label celli = -1
         )
         :
             particle(mesh, position, celli)
         {}
+
 
         //- Construct from Istream
         passiveParticle
@@ -97,11 +98,13 @@ public:
             particle(mesh, is, readFields, newFormat)
         {}
 
+
         //- Construct as copy
         passiveParticle(const passiveParticle& p)
         :
             particle(p)
         {}
+
 
         //- Construct and return a clone
         virtual autoPtr<particle> clone() const
@@ -110,8 +113,7 @@ public:
         }
 
 
-        //- Factory class to read-construct particles used for
-        //  parallel transfer
+        //- Factory class to read-construct particles (for parallel transfer)
         class iNew
         {
             const polyMesh& mesh_;
@@ -125,13 +127,9 @@ public:
 
             autoPtr<passiveParticle> operator()(Istream& is) const
             {
-                return autoPtr<passiveParticle>
-                (
-                    new passiveParticle(mesh_, is, true)
-                );
+                return autoPtr<passiveParticle>::New(mesh_, is, true);
             }
         };
-
 };
 
 

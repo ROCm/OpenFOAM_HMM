@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -41,6 +41,19 @@ inline Foam::solidParticle::trackingData::trackingData
     UInterp_(UInterp),
     nuInterp_(nuInterp),
     g_(g)
+{}
+
+
+inline Foam::solidParticle::solidParticle
+(
+    const polyMesh& mesh,
+    const vector& position,
+    const label celli
+)
+:
+    particle(mesh, position, celli),
+    d_(0),
+    U_(Zero)
 {}
 
 

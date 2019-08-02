@@ -51,11 +51,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+
 class solidParticleCloud;
-
-
-// Forward declaration of friend functions and operators
-
 class solidParticle;
 
 Ostream& operator<<(Ostream&, const solidParticle&);
@@ -69,7 +67,7 @@ class solidParticle
 :
     public particle
 {
-    // Private data
+    // Private Data
 
         //- Diameter
         scalar d_;
@@ -131,6 +129,16 @@ public:
 
     // Constructors
 
+        //- Construct from a position and a cell
+        //  Searches for the rest of the required topology.
+        //  Other properties are zero initialised.
+        inline solidParticle
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli = -1
+        );
+
         //- Construct from components
         inline solidParticle
         (
@@ -158,8 +166,7 @@ public:
             return autoPtr<particle>(new solidParticle(*this));
         }
 
-        //- Factory class to read-construct particles used for
-        //  parallel transfer
+        //- Factory class to read-construct particles (for parallel transfer)
         class iNew
         {
             const polyMesh& mesh_;
@@ -173,10 +180,7 @@ public:
 
             autoPtr<solidParticle> operator()(Istream& is) const
             {
-                return autoPtr<solidParticle>
-                (
-                    new solidParticle(mesh_, is, true)
-                );
+                return autoPtr<solidParticle>::New(mesh_, is, true);
             }
         };
 
