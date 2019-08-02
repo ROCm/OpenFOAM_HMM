@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "cloud.H"
 #include "parcelSelectionDetail.H"
 #include "scalarPredicates.H"
 #include "labelField.H"
@@ -167,7 +168,7 @@ bool Foam::Detail::parcelSelection::calculateFilter
     // Start with all parcels unselected
 
     // Number of parcels (locally)
-    const auto* pointsPtr = obrTmp.findObject<vectorField>("position");
+    const auto* pointsPtr = cloud::findIOPosition(obrTmp);
     label nParcels = pointsPtr->size();
 
     parcelAddr_.reset();

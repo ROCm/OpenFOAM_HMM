@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -67,10 +67,12 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
             );
 
         const word procName("processor" + Foam::name(Pstream::myProcNo()));
-        if (uniformPropsDict.found(procName))
+
+        const dictionary* dictptr = uniformPropsDict.findDict(procName);
+
+        if (dictptr)
         {
-            uniformPropsDict.subDict(procName).lookup("particleCount")
-                >> ParticleType::particleCount_;
+            dictptr->readEntry("particleCount", ParticleType::particleCount_);
         }
     }
     else
@@ -133,7 +135,7 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
 
     IOPosition<Cloud<ParticleType>> ioP(*this, geometryType_);
 
-    bool valid = ioP.headerOk();
+    const bool valid = ioP.headerOk();
     Istream& is = ioP.readStream(checkClass ? typeName : "", valid);
     if (valid)
     {
@@ -265,9 +267,9 @@ bool Foam::Cloud<ParticleType>::writeObject
 // * * * * * * * * * * * * * * * Ostream Operators * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::Ostream& Foam::operator<<(Ostream& os, const Cloud<ParticleType>& pc)
+Foam::Ostream& Foam::operator<<(Ostream& os, const Cloud<ParticleType>& c)
 {
-    pc.writeData(os);
+    c.writeData(os);
 
     os.check(FUNCTION_NAME);
     return os;

@@ -46,7 +46,7 @@ Foam::functionObjects::runTimePostPro::geometryCloud::gatherCloud
     auto multiPiece = vtkSmartPointer<vtkMultiPieceDataSet>::New();
     multiPiece->SetNumberOfPieces(Pstream::nProcs());
 
-    const auto* pointsPtr = obrTmp.findObject<vectorField>("position");
+    const auto* pointsPtr = cloud::findIOPosition(obrTmp);
 
     if (!needsCollective())
     {

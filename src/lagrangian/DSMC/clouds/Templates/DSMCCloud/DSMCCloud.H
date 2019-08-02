@@ -140,7 +140,7 @@ class DSMCCloud
         Random rndGen_;
 
 
-        // boundary value fields
+        // Boundary value fields
 
             //- Boundary temperature
             volScalarField boundaryT_;

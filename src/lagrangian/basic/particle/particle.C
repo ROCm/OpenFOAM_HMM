@@ -46,7 +46,7 @@ bool Foam::particle::writeLagrangianCoordinates = true;
 
 bool Foam::particle::writeLagrangianPositions
 (
-    Foam::debug::infoSwitch("writeLagrangianPositions", 0)
+    Foam::debug::infoSwitch("writeLagrangianPositions", 1)
 );
 
 registerInfoSwitch

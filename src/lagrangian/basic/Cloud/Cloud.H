@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -50,19 +50,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of functions
-template<class ParticleType>
-class Cloud;
-
-template<class ParticleType>
-class IOPosition;
-
-template<class ParticleType>
-Ostream& operator<<
-(
-    Ostream&,
-    const Cloud<ParticleType>&
-);
+// Forward Declarations
+template<class ParticleType> class Cloud;
+template<class ParticleType> class IOPosition;
 
 
 /*---------------------------------------------------------------------------*\
@@ -122,14 +112,15 @@ public:
 
     typedef ParticleType particleType;
 
-    typedef typename IDLList<ParticleType>::iterator iterator;
-    typedef typename IDLList<ParticleType>::const_iterator const_iterator;
+    //- Parcels are just particles
+    typedef ParticleType parcelType;
 
-    //-Runtime type information
+
+    //- Runtime type information
     TypeName("Cloud");
 
 
-    // Static data
+    // Static Data
 
         //- Name of cloud properties dictionary
         static word cloudPropertiesName;
@@ -166,7 +157,10 @@ public:
             }
 
             //- Return the number of particles in the cloud
-            label size() const
+            using IDLList<ParticleType>::size;
+
+            //- Return the number of particles in the cloud
+            virtual label nParcels() const
             {
                 return IDLList<ParticleType>::size();
             };
@@ -178,51 +172,27 @@ public:
             }
 
 
-            // Iterators
+    // Iterators
 
-                const const_iterator begin() const
-                {
-                    return IDLList<ParticleType>::begin();
-                };
+        using typename IDLList<ParticleType>::iterator;
+        using typename IDLList<ParticleType>::const_iterator;
 
-                const const_iterator cbegin() const
-                {
-                    return IDLList<ParticleType>::cbegin();
-                };
-
-                const const_iterator end() const
-                {
-                    return IDLList<ParticleType>::end();
-                };
-
-                const const_iterator cend() const
-                {
-                    return IDLList<ParticleType>::cend();
-                };
-
-                iterator begin()
-                {
-                    return IDLList<ParticleType>::begin();
-                };
-
-                iterator end()
-                {
-                    return IDLList<ParticleType>::end();
-                };
+        using IDLList<ParticleType>::begin;
+        using IDLList<ParticleType>::cbegin;
+        using IDLList<ParticleType>::end;
+        using IDLList<ParticleType>::cend;
 
 
         // Edit
 
-            void clear()
-            {
-                IDLList<ParticleType>::clear();
-            };
+            //- Clear the particle list
+            using IDLList<ParticleType>::clear;
 
             //- Transfer particle to cloud
             void addParticle(ParticleType* pPtr);
 
             //- Remove particle from cloud and delete
-            void deleteParticle(ParticleType&);
+            void deleteParticle(ParticleType& p);
 
             //- Remove lost particles from cloud and delete
             void deleteLostParticles();
@@ -289,19 +259,17 @@ public:
             //- Write positions to \<cloudName\>_positions.obj file
             void writePositions() const;
 
-            //- Call this before a topology change. Stores the particles global
-            //  positions in the database for use during mapping.
+            //- Call this before a topology change.
+            //  Stores the particles global positions in the database
+            //  for use during mapping.
             void storeGlobalPositions() const;
-
-
-    // Ostream Operator
-
-        friend Ostream& operator<< <ParticleType>
-        (
-            Ostream&,
-            const Cloud<ParticleType>&
-        );
 };
+
+
+// Ostream Operator
+
+template<class ParticleType>
+Ostream& operator<<(Ostream& os, const Cloud<ParticleType>& c);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

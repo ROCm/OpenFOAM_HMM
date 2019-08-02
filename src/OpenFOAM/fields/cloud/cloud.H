@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -39,6 +39,7 @@ SourceFiles
 
 #include "objectRegistry.H"
 #include "Enum.H"
+#include "point.H"
 #include "IOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -91,8 +92,11 @@ public:
 
     // Constructors
 
-        //- Construct for the given objectRegistry and named cloud instance
-        cloud(const objectRegistry&, const word& cloudName = defaultName);
+        //- Construct for given objectRegistry and default cloud name
+        explicit cloud(const objectRegistry& obr);
+
+        //- Construct for given objectRegistry and named cloud instance
+        cloud(const objectRegistry& obr, const word& cloudName);
 
 
     //- Destructor
@@ -101,10 +105,16 @@ public:
 
     // Member Functions
 
+        // Sizes
+
+            //- Number of parcels for the hosting cloud
+            virtual label nParcels() const;
+
+
         // Edit
 
             //- Remap the cells of particles corresponding to the
-            //  mesh topology change
+            //- mesh topology change
             virtual void autoMap(const mapPolyMesh&);
 
 
@@ -124,6 +134,40 @@ public:
                 const label nParticle,
                 objectRegistry& obr
             );
+
+            //- Locate an IOField within object registry
+            //  \return nullptr if not found or wrong type
+            template<class Type>
+            inline static const IOField<Type>* findIOField
+            (
+                const word& fieldName,
+                const objectRegistry& obr
+            )
+            {
+                return obr.cfindObject<IOField<Type>>(fieldName);
+            }
+
+            //- Locate the "position" IOField within object registry
+            //  \return nullptr if not found or wrong type
+            inline static const IOField<point>* findIOPosition
+            (
+                const objectRegistry& obr
+            )
+            {
+                return obr.cfindObject<IOField<point>>("position");
+            }
+
+            //- Lookup an IOField within object registry
+            //  Fatal if not found or wrong type
+            template<class Type>
+            inline static const IOField<Type>& lookupIOField
+            (
+                const word& fieldName,
+                const objectRegistry& obr
+            )
+            {
+                return obr.lookupObject<IOField<Type>>(fieldName);
+            }
 };
 
 

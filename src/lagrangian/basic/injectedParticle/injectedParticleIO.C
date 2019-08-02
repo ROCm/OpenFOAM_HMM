@@ -164,13 +164,7 @@ void Foam::injectedParticle::writeObjects
     objectRegistry& obr
 )
 {
-    // Force writing positions instead of coordinates
-    const bool oldWriteCoordinates = particle::writeLagrangianCoordinates;
-    const bool oldWritePositions = particle::writeLagrangianPositions;
-
-    particle::writeLagrangianCoordinates = false;
-    particle::writeLagrangianPositions = true;
-
+    // Always writes "position", not "coordinates"
     particle::writeObjects(c, obr);
 
     label np = c.size();
@@ -191,10 +185,6 @@ void Foam::injectedParticle::writeObjects
 
         ++i;
     }
-
-    // Restore
-    particle::writeLagrangianCoordinates = oldWriteCoordinates;
-    particle::writeLagrangianPositions = oldWritePositions;
 }
 
 

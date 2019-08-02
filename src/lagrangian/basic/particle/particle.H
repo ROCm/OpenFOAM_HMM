@@ -53,11 +53,9 @@ Description
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class particle;
-
 class polyPatch;
-
 class cyclicPolyPatch;
 class cyclicAMIPolyPatch;
 class cyclicACMIPolyPatch;
@@ -67,16 +65,8 @@ class symmetryPolyPatch;
 class wallPolyPatch;
 class wedgePolyPatch;
 
-// Forward declaration of friend functions and operators
-
-Ostream& operator<<
-(
-    Ostream&,
-    const particle&
-);
-
+Ostream& operator<<(Ostream&, const particle&);
 bool operator==(const particle&, const particle&);
-
 bool operator!=(const particle&, const particle&);
 
 /*---------------------------------------------------------------------------*\
@@ -360,7 +350,7 @@ public:
         static bool writeLagrangianCoordinates;
 
         //- Write particle positions file (v1706 format and earlier)
-        //- Default is false
+        //- Default is true (disable in etc/controlDict)
         static bool writeLagrangianPositions;
 
 
@@ -685,14 +675,15 @@ public:
         static void writeFields(const TrackCloudType& c);
 
         //- Write particle fields as objects into the obr registry
+        //  Always writes "position", not "coordinate"
         template<class CloudType>
         static void writeObjects(const CloudType& c, objectRegistry& obr);
 
         //- Write the particle barycentric coordinates and cell info
-        void writeCoordinates(Ostream&) const;
+        void writeCoordinates(Ostream& os) const;
 
-        //- Write the particle position and cell
-        virtual void writePosition(Ostream&) const;
+        //- Write the particle position and cell id
+        virtual void writePosition(Ostream& os) const;
 
 
     // Friend Operators

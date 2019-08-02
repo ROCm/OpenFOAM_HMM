@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,6 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "cloud.H"
 #include "IOField.H"
 #include "OFstream.H"
 #include "ListOps.H"
@@ -171,7 +172,7 @@ bool Foam::functionObjects::dataCloud::writeField
     const objectRegistry& obrTmp
 ) const
 {
-    const auto* pointsPtr = obrTmp.findObject<vectorField>("position");
+    const auto* pointsPtr = cloud::findIOPosition(obrTmp);
 
     if (!pointsPtr)
     {

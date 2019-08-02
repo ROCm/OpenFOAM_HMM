@@ -71,7 +71,7 @@ bool Foam::functionObjects::dataCloud::writeCloud
 
     objPtr->writeObjects(obrTmp);
 
-    const auto* pointsPtr = obrTmp.findObject<vectorField>("position");
+    const auto* pointsPtr = cloud::findIOPosition(obrTmp);
 
     if (!pointsPtr)
     {
