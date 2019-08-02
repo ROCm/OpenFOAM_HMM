@@ -676,9 +676,8 @@ public:
         //- Map after a topology change
         void autoMap(const vector& position, const mapPolyMesh& mapper);
 
-        //- Set the addressing based on the provided position and current cell
-        //  Used for e.g. redistributePar
-        void relocate(const point& position);
+        //- Set the addressing based on the provided position
+        void relocate(const point& position, const label celli = -1);
 
 
     // I-O
