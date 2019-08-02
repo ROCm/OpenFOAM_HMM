@@ -711,6 +711,38 @@ Foam::Time::Time
 }
 
 
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::Time> Foam::Time::New()
+{
+    return
+        autoPtr<Time>::New
+        (
+            ".",            // root-path
+            ".",            // case-name
+            "system",
+            "constant",
+            false,          // No enableFunctionObjects
+            false           // No enableLibs
+        );
+}
+
+
+Foam::autoPtr<Foam::Time> Foam::Time::New(const fileName& caseDir)
+{
+    return
+        autoPtr<Time>::New
+        (
+            caseDir.path(), // root-path
+            caseDir.name(), // case-name
+            "system",
+            "constant",
+            false,          // No enableFunctionObjects
+            false           // No enableLibs
+        );
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::Time::~Time()

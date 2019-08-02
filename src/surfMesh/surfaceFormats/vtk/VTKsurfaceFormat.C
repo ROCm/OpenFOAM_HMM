@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -102,24 +102,15 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     bool sorted = true;
 
 
-    // Construct dummy time so we have something to create an objectRegistry
-    // from
-    Time dummyTime
-    (
-        "dummyRoot",
-        "dummyCase",
-        "system",
-        "constant",
-        false           // enableFunctionObjects
-    );
+    // Use dummy Time for objectRegistry
+    autoPtr<Time> dummyTimePtr(Time::New());
 
-    // Make dummy object registry
     objectRegistry obr
     (
         IOobject
         (
-            "dummy",
-            dummyTime,
+            "vtk::surfaceFormat",
+            *dummyTimePtr,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false

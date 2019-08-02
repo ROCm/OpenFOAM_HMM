@@ -271,6 +271,15 @@ public:
         );
 
 
+    // Selectors
+
+        //- Construct dummy time, without functionObjects or libraries
+        static autoPtr<Time> New();
+
+        //- Construct dummy time, without functionObjects or libraries
+        static autoPtr<Time> New(const fileName& caseDir);
+
+
     //- Destructor
     virtual ~Time();
 

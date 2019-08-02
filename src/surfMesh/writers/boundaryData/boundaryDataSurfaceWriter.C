@@ -112,18 +112,8 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
     }
 
 
-    // Dummy time to use as an objectRegistry
-    const fileName caseDir(argList::envGlobalPath());
-
-    Time dummyTime
-    (
-        caseDir.path(), // root-path,
-        caseDir.name(), // case-name,
-        "system",       //
-        "constant",     //
-        false,          // no function objects
-        false           // no libs
-    );
+    // Dummy Time to use as objectRegistry
+    autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
 
 
     const meshedSurf& surf = surface();
@@ -140,7 +130,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::write()
             IOobject
             (
                 surfaceDir/"points",
-                dummyTime,
+                *dummyTimePtr,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false
@@ -183,18 +173,8 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
     const fileName outputFile(surfaceDir/timeName()/fieldName);
 
 
-    // Dummy time to use as an objectRegistry
-    const fileName caseDir(argList::envGlobalPath());
-
-    Time dummyTime
-    (
-        caseDir.path(), // root-path,
-        caseDir.name(), // case-name,
-        "system",       //
-        "constant",     //
-        false,          // no function objects
-        false           // no libs
-    );
+    // Dummy Time to use as objectRegistry
+    autoPtr<Time> dummyTimePtr(Time::New(argList::envGlobalPath()));
 
 
     // Geometry merge() implicit
@@ -217,7 +197,7 @@ Foam::fileName Foam::surfaceWriters::boundaryDataWriter::writeTemplate
             IOobject
             (
                 surfaceDir/"points",
-                dummyTime,
+                *dummyTimePtr,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
                 false

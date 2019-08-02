@@ -50,22 +50,15 @@ bool Foam::fileFormats::extendedEdgeMeshFormat::read
 {
     clear();
 
-    // Construct dummy time to use as an objectRegistry
-    Time dummyTime
-    (
-        ".",        //rootPath,
-        ".",        //caseName,
-        "system",   //systemName,
-        "constant", //constantName,
-        false       //enableFunctionObjects
-    );
+    // Use dummy Time for objectRegistry
+    autoPtr<Time> dummyTimePtr(Time::New());
 
     // Construct IOobject to re-use the headerOk & readHeader
     // (so we can read ascii and binary)
     IOobject io
     (
         filename,
-        dummyTime,
+        *dummyTimePtr,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
         false

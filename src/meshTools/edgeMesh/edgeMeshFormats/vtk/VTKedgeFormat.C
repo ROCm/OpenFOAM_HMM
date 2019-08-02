@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -98,24 +98,15 @@ bool Foam::fileFormats::VTKedgeFormat::read
             << exit(FatalError);
     }
 
-    // Construct dummy time so we have something to create an objectRegistry
-    // from
-    Time dummyTime
-    (
-        "dummyRoot",
-        "dummyCase",
-        "system",
-        "constant",
-        false           // enableFunctionObjects
-    );
+    // Use dummy Time for objectRegistry
+    autoPtr<Time> dummyTimePtr(Time::New());
 
-    // Make dummy object registry
     objectRegistry obr
     (
         IOobject
         (
-            "dummy",
-            dummyTime,
+            "vtk::edgeFormat",
+            *dummyTimePtr,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
