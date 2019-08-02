@@ -19,7 +19,7 @@
 #     ADIOS2_ARCH_PATH
 #
 # Functions provided
-#     have_adios2, no_adios2, echo_adios2
+#     have_adios2, no_adios2, echo_adios2, hint_adios2
 #
 # Variables set on success
 #     HAVE_ADIOS2
@@ -47,6 +47,22 @@ echo_adios2()
     echo "root=$ADIOS2_ARCH_PATH"
     echo "include=$ADIOS2_INC_DIR"
     echo "library=$ADIOS2_LIB_DIR"
+}
+
+
+# Provide hint for enabling
+hint_adios2()
+{
+    /bin/cat<<INFORMATION 1>&2
+==> adios2 not found?
+
+Enable in the OpenFOAM etc/bashrc, define manually or try with the
+following (POSIX shell):
+
+    eval \$(foamEtcFile -sh -config adios2 -- -force)
+
+==
+INFORMATION
 }
 
 

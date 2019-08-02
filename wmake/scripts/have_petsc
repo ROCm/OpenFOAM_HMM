@@ -19,7 +19,7 @@
 #     PETSC_ARCH_PATH
 #
 # Functions provided
-#     have_petsc, no_petsc, echo_petsc
+#     have_petsc, no_petsc, echo_petsc, hint_petsc
 #
 # Variables set on success
 #     HAVE_PETSC
@@ -47,6 +47,22 @@ echo_petsc()
     echo "root=$PETSC_ARCH_PATH"
     echo "include=$PETSC_INC_DIR"
     echo "library=$PETSC_LIB_DIR"
+}
+
+
+# Provide hint for enabling
+hint_petsc()
+{
+    /bin/cat<<INFORMATION 1>&2
+==> petsc not found?
+
+Enable in the OpenFOAM etc/bashrc, define manually or try with the
+following (POSIX shell):
+
+    eval \$(foamEtcFile -sh -config petsc -- -force)
+
+==
+INFORMATION
 }
 
 

@@ -36,8 +36,9 @@ then
     echo "Using petsc ($petsc_version)  ->  $PETSC_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing (not makePETSC)
+if command -v _foamAddLibAuto > /dev/null 2>&1
 then
+    # Normal sourcing (not makePETSC)
 
     _foamAddLibAuto $PETSC_ARCH_PATH
 

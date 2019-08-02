@@ -44,8 +44,8 @@ fi
 
 if command -v _foamAddLibAuto > /dev/null 2>&1
 then
-    # Normal sourcing (not makeADIOS)
-    # - but only add if the directory really exists
+    # Normal sourcing (not makeAdios1)
+    # Only add to PATH if the directory really exists
 
     if _foamAddLibAuto $ADIOS1_ARCH_PATH
     then

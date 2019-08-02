@@ -28,7 +28,7 @@ if ($?FOAM_VERBOSE && $?prompt) then
     echo "Using adios ($adios2_version)  ->  $ADIOS2_ARCH_PATH"
 endif
 
-# - only add if the directory really exists
+# Only add to PATH if the directory really exists
 _foamAddLibAuto $ADIOS2_ARCH_PATH
 if ($status == 0) then
     _foamAddPath $ADIOS2_ARCH_PATH/bin
