@@ -5,8 +5,6 @@
     \\  /    A nd           |
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
--------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -42,7 +40,13 @@ Description
 
 namespace Foam
 {
-    typedef KinematicCloud<Cloud<basicKinematicParcel>> basicKinematicCloud;
+    typedef KinematicCloud
+    <
+        Cloud
+        <
+            basicKinematicParcel
+        >
+    > basicKinematicCloud;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

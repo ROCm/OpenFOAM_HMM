@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -70,13 +70,14 @@ public:
     //- Type of parcel the cloud was instantiated for
     typedef wallBoundedStreamLineParticle parcelType;
 
+
     // Constructors
 
         //- Construct given mesh
-        wallBoundedStreamLineParticleCloud
+        explicit wallBoundedStreamLineParticleCloud
         (
-            const polyMesh&,
-            const word& cloudName = "defaultCloud",
+            const polyMesh& mesh,
+            const word& cloudName = cloud::defaultName,
             bool readFields = true
         );
 

@@ -50,28 +50,20 @@ namespace Foam
 
 class reactingMultiphaseCloud
 {
-    // Private Member Functions
-
-        //- No copy construct
-        reactingMultiphaseCloud(const reactingMultiphaseCloud&) = delete;
-
-        //- No copy assignment
-        void operator=(const reactingMultiphaseCloud&) = delete;
-
-
 public:
 
     //- Runtime type information
     TypeName("reactingMultiphaseCloud");
 
+
     // Constructors
 
         //- Null constructor
-        reactingMultiphaseCloud();
+        reactingMultiphaseCloud() = default;
 
 
     //- Destructor
-    virtual ~reactingMultiphaseCloud();
+    virtual ~reactingMultiphaseCloud() = default;
 };
 
 

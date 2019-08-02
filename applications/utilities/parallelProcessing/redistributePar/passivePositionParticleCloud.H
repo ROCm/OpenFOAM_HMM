@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,10 +68,10 @@ public:
     // Constructors
 
         //- Construct given mesh
-        passivePositionParticleCloud
+        explicit passivePositionParticleCloud
         (
-            const polyMesh&,
-            const word& cloudName = "defaultCloud",
+            const polyMesh& mesh,
+            const word& cloudName = cloud::defaultName,
             bool readFields = true
         );
 

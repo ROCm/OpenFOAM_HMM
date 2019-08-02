@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2008-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,28 +48,20 @@ namespace Foam
 
 class thermoCloud
 {
-    // Private Member Functions
-
-        //- No copy construct
-        thermoCloud(const thermoCloud&) = delete;
-
-        //- No copy assignment
-        void operator=(const thermoCloud&) = delete;
-
-
 public:
 
     //- Runtime type information
     TypeName("thermoCloud");
 
+
     // Constructors
 
         //- Null constructor
-        thermoCloud();
+        thermoCloud() = default;
 
 
     //- Destructor
-    virtual ~thermoCloud();
+    virtual ~thermoCloud() = default;
 
 
     // Member Functions

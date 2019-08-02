@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -84,10 +84,10 @@ public:
     // Constructors
 
         //- Construct given mesh
-        solidParticleCloud
+        explicit solidParticleCloud
         (
-            const fvMesh&,
-            const word& cloudName = "defaultCloud",
+            const fvMesh& mesh,
+            const word& cloudName = cloud::defaultName,
             bool readFields = true
         );
 

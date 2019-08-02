@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2008-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,15 +49,6 @@ namespace Foam
 
 class kinematicCloud
 {
-    // Private Member Functions
-
-        //- No copy construct
-        kinematicCloud(const kinematicCloud&) = delete;
-
-        //- No copy assignment
-        void operator=(const kinematicCloud&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -69,17 +58,18 @@ public:
     // Constructors
 
         //- Null constructor
-        kinematicCloud();
+        kinematicCloud() = default;
+
 
     //- Destructor
-    virtual ~kinematicCloud();
+    virtual ~kinematicCloud() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Check
 
-            //-  Number of parcels
+            //- Number of parcels
             virtual label nParcels() const = 0;
 
             //- Total mass in system

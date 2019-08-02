@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015 OpenFOAM Foundation
@@ -59,10 +59,10 @@ public:
     // Constructors
 
         //- Construct given mesh
-        unmappedPassivePositionParticleCloud
+        explicit unmappedPassivePositionParticleCloud
         (
             const polyMesh& mesh,
-            const word& cloudName = "defaultCloud",
+            const word& cloudName = cloud::defaultName,
             bool readFields = true
         )
         :
@@ -80,9 +80,12 @@ public:
             passivePositionParticleCloud(mesh, cloudName, particles)
         {}
 
-        //- Destructor
-        virtual ~unmappedPassivePositionParticleCloud()
-        {}
+
+    //- Destructor
+    virtual ~unmappedPassivePositionParticleCloud() = default;
+
+
+    // Member Functions
 
         //- Switch off remapping of cells of particles when
         //  mesh topology changes

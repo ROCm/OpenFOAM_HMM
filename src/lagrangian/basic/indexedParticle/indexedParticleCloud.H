@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2004-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,10 +65,10 @@ public:
     // Constructors
 
         //- Construct given mesh
-        indexedParticleCloud
+        explicit indexedParticleCloud
         (
-            const polyMesh&,
-            const word& cloudName = "defaultCloud",
+            const polyMesh& mesh,
+            const word& cloudName = cloud::defaultName,
             bool readFields = true
         );
 };

@@ -51,15 +51,9 @@ SeeAlso
 namespace Foam
 {
 
+// Forward declarations
 class injectedParticle;
-
-// Forward declaration of friend functions
-
-Ostream& operator<<
-(
-    Ostream&,
-    const injectedParticle&
-);
+Ostream& operator<<(Ostream&, const injectedParticle&);
 
 /*---------------------------------------------------------------------------*\
                          Class injectedParticle Declaration
@@ -210,10 +204,10 @@ public:
 
         // I-O
 
-            //- Read
+            //- Read fields
             static void readFields(Cloud<injectedParticle>& c);
 
-            //- Write
+            //- Write fields
             static void writeFields(const Cloud<injectedParticle>& c);
 
             //- Write particle fields as objects into the obr registry

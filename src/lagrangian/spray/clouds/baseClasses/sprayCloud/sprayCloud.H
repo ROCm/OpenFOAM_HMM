@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2011-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,15 +48,6 @@ namespace Foam
 
 class sprayCloud
 {
-    // Private Member Functions
-
-        //- No copy construct
-        sprayCloud(const sprayCloud&) = delete;
-
-        //- No copy assignment
-        void operator=(const sprayCloud&) = delete;
-
-
 public:
 
     //- Runtime type information
@@ -67,11 +56,11 @@ public:
     // Constructors
 
         //- Null constructor
-        sprayCloud();
+        sprayCloud() = default;
 
 
     //- Destructor
-    virtual ~sprayCloud();
+    virtual ~sprayCloud() = default;
 };
 
 

@@ -45,12 +45,11 @@ Description
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class CloudType>
-class AtomizationModel;
+// Forward Declarations
+template<class CloudType> class AtomizationModel;
+template<class CloudType> class BreakupModel;
+template<class CloudType> class SprayCloud;
 
-template<class CloudType>
-class BreakupModel;
 
 /*---------------------------------------------------------------------------*\
                       Class SprayCloud Declaration
