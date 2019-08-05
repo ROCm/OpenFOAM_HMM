@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -123,29 +123,41 @@ bool Foam::functionObjects::mapFields::writeFieldType() const
 
     wordList fieldNames(this->mesh_.names(VolFieldType::typeName));
     labelList selected = findStrings(fieldNames_, fieldNames);
-    forAll(selected, i)
+    for (const label fieldi : selected)
     {
-        const word& fieldName = fieldNames[selected[i]];
+        const word& fieldName = fieldNames[fieldi];
         const VolFieldType& field = lookupObject<VolFieldType>(fieldName);
 
-        Log << "    " << fieldName;
+        if (!mapRegion.foundObject<VolFieldType>(fieldName))
+        {
+            VolFieldType* tmappedField =
+                new VolFieldType
+                (
+                    IOobject
+                    (
+                        fieldName,
+                        time_.timeName(),
+                        mapRegion,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE
+                    ),
+                    mapRegion,
+                    dimensioned<Type>(field.dimensions(), Zero)
+                );
 
-        IOobject mapRegionIO
-        (
-            fieldName,
-            time_.timeName(),
-            mapRegion
-        );
+            tmappedField->store();
+        }
 
-        tmp<VolFieldType> tfieldMapRegion(interpPtr_->mapTgtToSrc(field));
+        VolFieldType& mappedField =
+            mapRegion.lookupObjectRef<VolFieldType>(fieldName);
 
-        Log << ": interpolated";
+        mappedField = interpPtr_->mapTgtToSrc(field);
 
-        VolFieldType fieldMapRegion(mapRegionIO, tfieldMapRegion);
+        Log << "    " << fieldName << ": interpolated";
 
-        evaluateConstraintTypes(fieldMapRegion);
+        evaluateConstraintTypes(mappedField);
 
-        fieldMapRegion.write();
+        mappedField.write();
 
         Log << " and written" << nl;
     }

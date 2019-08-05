@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,10 +66,12 @@ void Foam::functionObjects::mapFields::createInterpolation
             (
                 mapRegionName,
                 meshTarget.time().constant(),
-                meshTarget.time()
-            )
+                meshTarget.time(),
+                IOobject::MUST_READ
+           )
         )
     );
+
     const fvMesh& mapRegion = mapRegionPtr_();
     const word mapMethodName(dict.get<word>("mapMethod"));
     if (!meshToMesh::interpolationMethodNames_.found(mapMethodName))
@@ -161,11 +163,15 @@ Foam::functionObjects::mapFields::mapFields
 
 bool Foam::functionObjects::mapFields::read(const dictionary& dict)
 {
-    fvMeshFunctionObject::read(dict);
+    if (fvMeshFunctionObject::read(dict))
+    {
+        dict.readEntry("fields", fieldNames_);
+        createInterpolation(dict);
 
-    dict.readEntry("fields", fieldNames_);
-    createInterpolation(dict);
-    return true;
+        return true;
+    }
+
+    return false;
 }
 
 
