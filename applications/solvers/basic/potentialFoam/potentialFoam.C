@@ -83,6 +83,7 @@ Description
     \heading Options
     \plaintable
         -writep   | write the Euler pressure
+        -writephi | Write the final volumetric flux
         -writePhi | Write the final velocity potential
         -initialiseUBCs | Update the velocity boundaries before solving for Phi
     \endplaintable
@@ -112,6 +113,12 @@ int main(int argc, char *argv[])
     (
         "initialiseUBCs",
         "Initialise U boundary conditions"
+    );
+
+    argList::addBoolOption
+    (
+        "writephi",
+        "Write the final volumetric flux field"
     );
 
     argList::addBoolOption
@@ -185,11 +192,16 @@ int main(int argc, char *argv[])
         << (sqrt(sum(sqr(fvc::flux(U) - phi)))/sum(mesh.magSf())).value()
         << endl;
 
-    // Write U and phi
+    // Write U
     U.write();
-    phi.write();
 
-    // Optionally write Phi
+    // Optionally write the volumetric flux, phi
+    if (args.found("writephi"))
+    {
+        phi.write();
+    }
+
+    // Optionally write velocity potential, Phi
     if (args.found("writePhi"))
     {
         Phi.write();
