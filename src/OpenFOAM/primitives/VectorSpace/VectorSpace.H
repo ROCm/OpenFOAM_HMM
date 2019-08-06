@@ -178,6 +178,12 @@ public:
         inline void component(Cmpt&, const direction) const;
         inline void replace(const direction, const Cmpt&);
 
+        //- Return const pointer to the first data element
+        inline const Cmpt* cdata() const noexcept;
+
+        //- Return pointer to the first data element
+        inline Cmpt* data() noexcept;
+
         //- Return a VectorSpace with all elements = s
         inline static Form uniform(const Cmpt& s);
 
@@ -213,7 +219,7 @@ public:
         //- Return an iterator to begin of VectorSpace
         inline iterator begin();
 
-        //- Return an iterator to end of UListVectorSpace
+        //- Return an iterator to end of VectorSpace
         inline iterator end();
 
 

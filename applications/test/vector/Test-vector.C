@@ -87,6 +87,25 @@ void testIterator(const VecSpace& vs)
 }
 
 
+template<class VecSpace>
+void testData(const VecSpace& vs)
+{
+    Info<< "size: " << vs.size() << " for:";
+
+    const auto* data = vs.cdata();
+    for
+    (
+        const auto* endData = data + VecSpace::nComponents;
+        data != endData;
+        ++data
+    )
+    {
+        Info<< " " << *data;
+    }
+    Info<< nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -105,6 +124,7 @@ int main(int argc, char *argv[])
 
         testIterator(vec1);
         testIterator(vec2);
+        testData(vec2);
 
         // Use STL algorithm(s)
 

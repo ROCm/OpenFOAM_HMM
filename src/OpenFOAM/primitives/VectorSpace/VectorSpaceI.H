@@ -194,6 +194,20 @@ Foam::VectorSpace<Form, Cmpt, Ncmpts>::block() const
 // * * * * * * * * * * * * * * * * Iterator  * * * * * * * * * * * * * * * * //
 
 template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::data() noexcept
+{
+    return v_;
+}
+
+
+template<class Form, class Cmpt, Foam::direction Ncmpts>
+inline const Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::cdata() const noexcept
+{
+    return v_;
+}
+
+
+template<class Form, class Cmpt, Foam::direction Ncmpts>
 inline Cmpt* Foam::VectorSpace<Form, Cmpt, Ncmpts>::begin()
 {
     return v_;
