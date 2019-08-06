@@ -227,6 +227,10 @@ public:
             }
             else
             {
+                // TODO (2019-08-06):
+                // cannot properly handle mixed-precision reading
+                // owning to bool and Point type.
+
                 is.read
                 (
                     reinterpret_cast<char*>(&pHit),

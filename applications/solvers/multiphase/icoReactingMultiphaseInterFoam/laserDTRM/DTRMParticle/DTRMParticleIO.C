@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,6 +60,21 @@ Foam::DTRMParticle::DTRMParticle
         if (is.format() == IOstream::ASCII)
         {
             is >> p0_ >> p1_ >> I0_ >> I_ >> dA_ >> transmissiveId_;
+        }
+        else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+
+            is.beginRawRead();
+
+            readRawScalar(is, p0_.data(), vector::nComponents);
+            readRawScalar(is, p1_.data(), vector::nComponents);
+            readRawScalar(is, &I0_);
+            readRawScalar(is, &I_);
+            readRawScalar(is, &dA_);
+            readRawLabel(is, &transmissiveId_);
+
+            is.endRawRead();
         }
         else
         {

@@ -231,6 +231,16 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::directionInfo& wDist)
     {
         is >> wDist.index_ >> wDist.n_;
     }
+    else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+    {
+        // Non-native label or scalar size
+        is.beginRawRead();
+
+        readRawLabel(is, &wDist.index_);
+        readRawScalar(is, wDist.n_.data(), vector::nComponents);
+
+        is.endRawRead();
+    }
     else
     {
         is.read

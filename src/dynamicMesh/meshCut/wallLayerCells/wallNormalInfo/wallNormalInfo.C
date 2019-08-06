@@ -59,6 +59,15 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::wallNormalInfo& wDist)
     {
         is >> wDist.normal_;
     }
+    else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+    {
+        // Non-native label or scalar size
+        is.beginRawRead();
+
+        readRawScalar(is, wDist.normal_.data(), vector::nComponents);
+
+        is.endRawRead();
+    }
     else
     {
         is.read

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -418,7 +418,6 @@ Foam::wallBoundedParticle::wallBoundedParticle
     const label diagEdge
 )
 :
-//    particle(mesh, barycentric(1, 0, 0, 0), celli, tetFacei, tetPti),
     particle(mesh, position, celli, tetFacei, tetPti, false),
     localPosition_(position),
     meshEdgeStart_(meshEdgeStart),
@@ -441,6 +440,18 @@ Foam::wallBoundedParticle::wallBoundedParticle
         if (is.format() == IOstream::ASCII)
         {
             is  >> localPosition_ >> meshEdgeStart_ >> diagEdge_;
+        }
+        if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+
+            is.beginRawRead();
+
+            readRawScalar(is, localPosition_.data(), vector::nComponents);
+            readRawLabel(is, &meshEdgeStart_);
+            readRawLabel(is, &diagEdge_);
+
+            is.endRawRead();
         }
         else
         {

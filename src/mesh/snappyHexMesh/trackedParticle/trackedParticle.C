@@ -99,6 +99,20 @@ Foam::trackedParticle::trackedParticle
         {
             is >> start_ >> end_ >> level_ >> i_ >> j_ >> k_;
         }
+        else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+            is.beginRawRead();
+
+            readRawScalar(is, start_.data(), vector::nComponents);
+            readRawScalar(is, end_.data(), vector::nComponents);
+            readRawLabel(is, &level_);
+            readRawLabel(is, &i_);
+            readRawLabel(is, &j_);
+            readRawLabel(is, &k_);
+
+            is.endRawRead();
+        }
         else
         {
             is.read
