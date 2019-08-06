@@ -86,6 +86,28 @@ Foam::SprayParcel<ParcelType>::SprayParcel
                 >> tMom_
                 >> user_;
         }
+        else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+
+            is.beginRawRead();
+
+            readRawScalar(is, &d0_);
+            readRawScalar(is, position0_.data(), vector::nComponents);
+            readRawScalar(is, &sigma_);
+            readRawScalar(is, &mu_);
+            readRawScalar(is, &liquidCore_);
+            readRawScalar(is, &KHindex_);
+            readRawScalar(is, &y_);
+            readRawScalar(is, &yDot_);
+            readRawScalar(is, &tc_);
+            readRawScalar(is, &ms_);
+            readRawScalar(is, &injector_);
+            readRawScalar(is, &tMom_);
+            readRawScalar(is, &user_);
+
+            is.endRawRead();
+        }
         else
         {
             is.read(reinterpret_cast<char*>(&d0_), sizeofFields);

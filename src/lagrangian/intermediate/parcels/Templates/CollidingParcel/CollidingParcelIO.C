@@ -68,6 +68,18 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
             is >> angularMomentum_;
             is >> torque_;
         }
+        else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+
+            is.beginRawRead();
+
+            readRawScalar(is, f_.data(), vector::nComponents);
+            readRawScalar(is, angularMomentum_.data(), vector::nComponents);
+            readRawScalar(is, torque_.data(), vector::nComponents);
+
+            is.endRawRead();
+        }
         else
         {
             is.read(reinterpret_cast<char*>(&f_), sizeofFields);

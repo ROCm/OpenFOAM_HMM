@@ -69,9 +69,21 @@ Foam::injectedParticle::injectedParticle
         {
             is  >> tag_ >> soi_ >> d_ >> U_;
         }
+        else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+            is.beginRawRead();
+
+            readRawLabel(is, &tag_);
+            readRawScalar(is, &soi_);
+            readRawScalar(is, &d_);
+            readRawScalar(is, U_.data(), vector::nComponents);
+
+            is.endRawRead();
+        }
         else
         {
-            is.read(reinterpret_cast<char*>(&soi_), sizeofFields);
+            is.read(reinterpret_cast<char*>(&tag_), sizeofFields);
         }
     }
 

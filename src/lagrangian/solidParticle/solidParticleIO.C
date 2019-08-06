@@ -54,6 +54,17 @@ Foam::solidParticle::solidParticle
         {
             is  >> d_ >> U_;
         }
+        else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+
+            is.beginRawRead();
+
+            readRawScalar(is, &d_);
+            readRawScalar(is, U_.data(), vector::nComponents);
+
+            is.endRawRead();
+        }
         else
         {
             is.read(reinterpret_cast<char*>(&d_), sizeofFields);

@@ -63,13 +63,24 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
 
         if (is.format() == IOstream::ASCII)
         {
-            is >> mass0_ >> Ymix;
+            is >> mass0_;
+        }
+        else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+
+            is.beginRawRead();
+
+            readRawScalar(is, &mass0_);
+
+            is.endRawRead();
         }
         else
         {
             is.read(reinterpret_cast<char*>(&mass0_), sizeofFields);
-            is >> Ymix;
         }
+
+        is >> Ymix;
 
         Y_.transfer(Ymix);
     }

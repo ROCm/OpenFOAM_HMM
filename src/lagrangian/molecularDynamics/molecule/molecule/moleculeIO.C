@@ -58,8 +58,8 @@ Foam::molecule::molecule
     rf_(Zero),
     special_(0),
     id_(0),
-    siteForces_(0),
-    sitePositions_(0)
+    siteForces_(),
+    sitePositions_()
 {
     if (readFields)
     {
@@ -74,15 +74,33 @@ Foam::molecule::molecule
                 >> potentialEnergy_
                 >> rf_
                 >> special_
-                >> id_
-                >> siteForces_
-                >> sitePositions_;
+                >> id_;
+        }
+        else if (!is.checkLabelSize<>() || !is.checkScalarSize<>())
+        {
+            // Non-native label or scalar size
+
+            is.beginRawRead();
+
+            readRawScalar(is, Q_.data(), tensor::nComponents);
+            readRawScalar(is, v_.data(), vector::nComponents);
+            readRawScalar(is, a_.data(), vector::nComponents);
+            readRawScalar(is, pi_.data(), vector::nComponents);
+            readRawScalar(is, tau_.data(), vector::nComponents);
+            readRawScalar(is, specialPosition_.data(), vector::nComponents);
+            readRawScalar(is, &potentialEnergy_);
+            readRawScalar(is, rf_.data(), tensor::nComponents);
+            readRawLabel(is, &special_);
+            readRawLabel(is, &id_);
+
+            is.endRawRead();
         }
         else
         {
             is.read(reinterpret_cast<char*>(&Q_), sizeofFields);
-            is  >> siteForces_ >> sitePositions_;
         }
+
+        is  >> siteForces_ >> sitePositions_;
     }
 
     is.check(FUNCTION_NAME);
