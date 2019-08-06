@@ -76,7 +76,7 @@ Foam::injectedParticle::injectedParticle
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&soi_), sizeofFields);
+            is.read(reinterpret_cast<char*>(&tag_), sizeofFields);
         }
     }
 
