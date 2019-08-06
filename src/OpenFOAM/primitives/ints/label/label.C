@@ -45,12 +45,12 @@ const char* const Foam::pTraits<int64_t>::typeName = "label";
 Foam::label Foam::readRawLabel(Istream& is)
 {
     label val(0);
-    readRawLabels(is, &val, 1);
+    readRawLabel(is, &val, 1);
     return val;
 }
 
 
-void Foam::readRawLabels(Istream& is, label* data, size_t nElem)
+void Foam::readRawLabel(Istream& is, label* data, size_t nElem)
 {
     // No check for binary vs ascii, the caller knows what they are doing
 

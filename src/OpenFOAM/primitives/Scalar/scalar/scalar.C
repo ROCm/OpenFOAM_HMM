@@ -40,12 +40,12 @@ Foam::scalar Foam::readScalar(Istream& is)
 Foam::scalar Foam::readRawScalar(Istream& is)
 {
     scalar val(0);
-    readRawScalars(is, &val, 1);
+    readRawScalar(is, &val, 1);
     return val;
 }
 
 
-void Foam::readRawScalars(Istream& is, scalar* data, size_t nElem)
+void Foam::readRawScalar(Istream& is, scalar* data, size_t nElem)
 {
     // No check for binary vs ascii, the caller knows what they are doing
 

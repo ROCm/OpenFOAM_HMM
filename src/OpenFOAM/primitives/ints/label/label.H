@@ -108,10 +108,10 @@ inline label readLabel(Istream& is)
 //        the caller knows what they are doing
 label readRawLabel(Istream& is);
 
-//- Read raw labels from binary stream.
+//- Read raw label(s) from binary stream.
 //  \note No internal check for binary vs ascii,
 //        the caller knows what they are doing
-void readRawLabels(Istream& is, label* data, size_t nElem);
+void readRawLabel(Istream& is, label* data, size_t nElem = 1);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

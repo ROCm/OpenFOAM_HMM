@@ -92,10 +92,10 @@ namespace Foam
     //        the caller knows what they are doing
     scalar readRawScalar(Istream& is);
 
-    //- Read raw scalars from binary stream.
+    //- Read raw scalar(s) from binary stream.
     //  \note No internal check for binary vs ascii,
     //        the caller knows what they are doing
-    void readRawScalars(Istream& is, scalar* data, size_t nElem);
+    void readRawScalar(Istream& is, scalar* data, size_t nElem = 1);
 }
 
 #elif defined(WM_DP)
@@ -144,10 +144,10 @@ namespace Foam
     //        the caller knows what they are doing
     scalar readRawScalar(Istream& is);
 
-    //- Read raw scalars from binary stream.
+    //- Read raw scalar(s) from binary stream.
     //  \note No internal check for binary vs ascii,
     //        the caller knows what they are doing
-    void readRawScalars(Istream& is, scalar* data, size_t nElem);
+    void readRawScalar(Istream& is, scalar* data, size_t nElem = 1);
 }
 
 #endif

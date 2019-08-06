@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
         // {
         //     val = readRawScalar(is);
         // }
-        readRawScalars(is, dstList.data(), dstList.size());
+        readRawScalar(is, dstList.data(), dstList.size());
         is.endRawRead();
 
         Info<< "Wrote " << flatOutput(srcList) << nl
