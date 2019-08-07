@@ -216,7 +216,9 @@ namespace stringOps
     );
 
 
-    //- Expand initial tildes and all occurrences of environment variables
+    //- Expand initial tags, tildes, and all occurrences of environment
+    //- variables
+    //
     //  Expansion includes:
     //  -# environment variables
     //    - "$VAR", "${VAR}"
@@ -273,7 +275,9 @@ namespace stringOps
     );
 
 
-    //- Expand initial tildes and all occurrences of environment variables
+    //- Expand initial tags, tildes, and all occurrences of environment
+    //- variables
+    //
     //  Expansion includes:
     //  -# environment variables
     //    - "$VAR", "${VAR}"

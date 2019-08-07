@@ -564,7 +564,7 @@ public:
         inline void operator=(compound* compoundPtr);
 
 
-        //- Deprecated(2016-05) transfer word pointer to the token
+        //- Deprecated(2017-11) transfer word pointer to the token
         //  \deprecated(2017-11) - use move assign from word
         inline void operator=(word* wordPtr);
 

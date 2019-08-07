@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -239,16 +239,8 @@ public:
             const size_type start = 0
         );
 
-        //- Expand initial tildes and all occurrences of environment variables
-        //  Expansion includes:
-        //  -# environment variables
-        //    - "$VAR", "${VAR}"
-        //  -# current directory
-        //    - leading "./" : the current directory
-        //  -# tilde expansion
-        //    - leading "~/" : home directory
-        //    - leading "~user" : home directory for specified user
-        //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
+        //- Inplace expand initial tags, tildes, and all occurrences of
+        //- environment variables as per stringOps::expand
         //
         //  Any unknown entries are removed silently if allowEmpty is true
         //  \sa
