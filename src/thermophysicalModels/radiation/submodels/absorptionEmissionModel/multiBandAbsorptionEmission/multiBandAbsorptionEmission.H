@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,23 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::radiation::multiBandSolidAbsorptionEmission
+    Foam::radiation::multiBandAbsorptionEmission
 
 Group
     grpRadiationAbsorptionEmissionSubModels
 
 Description
 
-    multiBandSolidAbsorptionEmission radiation absorption/emission for solids.
+    multiBandAbsorptionEmission radiation absorption/emission for solids.
 
 
 SourceFiles
-    multiBandSolidAbsorptionEmission.C
+    multiBandAbsorptionEmission.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef multiBandSolidAbsorptionEmission_H
-#define multiBandSolidAbsorptionEmission_H
+#ifndef multiBandAbsorptionEmission_H
+#define multiBandAbsorptionEmission_H
 
 #include "absorptionEmissionModel.H"
 
@@ -50,10 +50,10 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class multiBandSolidAbsorptionEmission Declaration
+                  Class multiBandAbsorptionEmission Declaration
 \*---------------------------------------------------------------------------*/
 
-class multiBandSolidAbsorptionEmission
+class multiBandAbsorptionEmission
 :
     public absorptionEmissionModel
 {
@@ -85,13 +85,13 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("multiBandSolidAbsorptionEmission");
+    TypeName("multiBandAbsorptionEmission");
 
 
     // Constructors
 
         //- Construct from components
-        multiBandSolidAbsorptionEmission
+        multiBandAbsorptionEmission
         (
             const dictionary& dict,
             const fvMesh& mesh
@@ -99,7 +99,7 @@ public:
 
 
     //- Destructor
-    virtual ~multiBandSolidAbsorptionEmission();
+    virtual ~multiBandAbsorptionEmission();
 
 
     // Member Functions

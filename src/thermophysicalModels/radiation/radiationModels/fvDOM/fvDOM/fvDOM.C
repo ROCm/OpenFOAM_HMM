@@ -188,18 +188,18 @@ void Foam::radiation::fvDOM::initialise()
 
     Info<< endl;
 
-    this->readIfPresent("useSolarLoad", useSolarLoad_);
+    coeffs_.readIfPresent("useSolarLoad", useSolarLoad_);
 
     if (useSolarLoad_)
     {
-        const dictionary& solarDict = this->subDict("solarLoarCoeffs");
+        const dictionary& solarDict = this->subDict("solarLoadCoeffs");
         solarLoad_.reset(new solarLoad(solarDict, T_));
 
-        if (solarLoad_->nBands() > 1)
+        if (solarLoad_->nBands() != this->nBands())
         {
             FatalErrorInFunction
                 << "Requested solar radiation with fvDOM. Using "
-                << "more than one band for the solar load is not allowed"
+                << "different number of bands for the solar load is not allowed"
                 << abort(FatalError);
         }
 

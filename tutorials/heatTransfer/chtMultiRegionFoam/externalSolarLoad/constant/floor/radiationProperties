@@ -22,7 +22,7 @@ radiationModel  none;//opaqueSolid;
 
 absorptionEmissionModel none;
 
-multiBandSolidAbsorptionEmissionCoeffs
+multiBandAbsorptionEmissionCoeffs
 {
     absorptivity    (0.3 0.7);
     emissivity      (0.3 0.7);

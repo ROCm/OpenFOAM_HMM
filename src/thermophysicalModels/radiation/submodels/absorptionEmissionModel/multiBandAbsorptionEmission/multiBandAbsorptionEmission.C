@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "multiBandSolidAbsorptionEmission.H"
+#include "multiBandAbsorptionEmission.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -32,12 +32,12 @@ namespace Foam
 {
     namespace radiation
     {
-        defineTypeNameAndDebug(multiBandSolidAbsorptionEmission, 0);
+        defineTypeNameAndDebug(multiBandAbsorptionEmission, 0);
 
         addToRunTimeSelectionTable
         (
             absorptionEmissionModel,
-            multiBandSolidAbsorptionEmission,
+            multiBandAbsorptionEmission,
             dictionary
         );
     }
@@ -46,8 +46,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radiation::multiBandSolidAbsorptionEmission::
-multiBandSolidAbsorptionEmission
+Foam::radiation::multiBandAbsorptionEmission::multiBandAbsorptionEmission
 (
     const dictionary& dict,
     const fvMesh& mesh
@@ -67,15 +66,15 @@ multiBandSolidAbsorptionEmission
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::radiation::multiBandSolidAbsorptionEmission::
-~multiBandSolidAbsorptionEmission()
+Foam::radiation::multiBandAbsorptionEmission::
+~multiBandAbsorptionEmission()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::multiBandSolidAbsorptionEmission::aCont
+Foam::radiation::multiBandAbsorptionEmission::aCont
 (
     const label bandI
 ) const
@@ -102,7 +101,7 @@ Foam::radiation::multiBandSolidAbsorptionEmission::aCont
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::multiBandSolidAbsorptionEmission::eCont
+Foam::radiation::multiBandAbsorptionEmission::eCont
 (
     const label bandI
 ) const
@@ -129,7 +128,7 @@ Foam::radiation::multiBandSolidAbsorptionEmission::eCont
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::multiBandSolidAbsorptionEmission::ECont
+Foam::radiation::multiBandAbsorptionEmission::ECont
 (
     const label bandI
 ) const

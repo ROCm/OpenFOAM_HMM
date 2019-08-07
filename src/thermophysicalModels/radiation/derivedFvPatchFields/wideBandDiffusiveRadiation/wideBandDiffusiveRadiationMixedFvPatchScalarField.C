@@ -218,10 +218,10 @@ updateCoeffs()
         // Looking for primary heat flux single band
         Ir += patch().lookupPatchField<volScalarField,scalar>
         (
-            dom.primaryFluxName_ + "_" + name(lambdaId - 1)
+            dom.primaryFluxName_ + "_" + name(lambdaId)
         );
 
-        word qSecName = dom.relfectedFluxName_ + "_" + name(lambdaId - 1);
+        word qSecName = dom.relfectedFluxName_ + "_" + name(lambdaId);
 
         if (this->db().foundObject<volScalarField>(qSecName))
         {

@@ -88,14 +88,23 @@ void Foam::radiation::radiationModel::initialise()
     {
         solverFreq_ = max(1, lookupOrDefault<label>("solverFreq", 1));
 
-        absorptionEmission_.reset
-        (
-            absorptionEmissionModel::New(*this, mesh_).ptr()
-        );
+        if (this->found("absorptionEmissionModel"))
+        {
+            absorptionEmission_.reset
+            (
+                absorptionEmissionModel::New(*this, mesh_).ptr()
+            );
+        }
 
-        scatter_.reset(scatterModel::New(*this, mesh_).ptr());
+        if (this->found("scatterModel"))
+        {
+            scatter_.reset(scatterModel::New(*this, mesh_).ptr());
+        }
 
-        soot_.reset(sootModel::New(*this, mesh_).ptr());
+        if (this->found("sootModel"))
+        {
+            soot_.reset(sootModel::New(*this, mesh_).ptr());
+        }
     }
 }
 

@@ -18,15 +18,9 @@ FoamFile
 
 radiation       off;
 
-radiationModel  none;//opaqueSolid;
+radiationModel  none;
 
-absorptionEmissionModel none;//multiBandSolidAbsorptionEmission;
-
-multiBandSolidAbsorptionEmissionCoeffs
-{
-    absorptivity    (0.1 0.1);
-    emissivity      (0.1 0.1);
-}
+absorptionEmissionModel none;
 
 scatterModel    none;
 
