@@ -20,7 +20,7 @@
 #
 #------------------------------------------------------------------------------
 setenv WM_ARCH `uname -s`                   # System name
-## if (! $?WM_OSTYPE ) setenv WM_OSTYPE POSIX  # System type (POSIX is default)
+if (! $?WM_COMPILE_OPTION ) setenv WM_COMPILE_OPTION Opt  # Default: Optimize
 
 set archOption=64
 if ($?WM_ARCH_OPTION) then
