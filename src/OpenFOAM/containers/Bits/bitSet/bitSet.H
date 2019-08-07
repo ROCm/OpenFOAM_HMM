@@ -478,6 +478,9 @@ public:
             //- Construct begin iterator
             inline const_iterator(const bitSet* bitset);
 
+            //- Construct iterator, starting at or beyond the given position
+            inline const_iterator(const bitSet* bitset, label pos);
+
         public:
 
             //- Return the current \a on position
@@ -496,6 +499,14 @@ public:
 
         //- Iterator set to the position of the first \a on bit
         inline const_iterator cbegin() const;
+
+        //- Iterator set to the position of the first \a on bit that occurs
+        //- at or beyond the given position
+        inline const_iterator begin(label pos) const;
+
+        //- Iterator set to the position of the first \a on bit that occurs
+        //- at or beyond the given position
+        inline const_iterator cbegin(label pos) const;
 
         //- Iterator beyond the end of the bitSet
         inline const_iterator end() const noexcept;

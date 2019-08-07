@@ -412,6 +412,30 @@ int main(int argc, char *argv[])
     );
 
 
+    // Test begin vs find_first etc
+    {
+        // Clear some values
+        list4.unset(labelRange(0, 10));
+
+        Info<< nl
+            << "Test first vs begin" << nl
+            << "    values:" << flatOutput(list4.toc()) << nl
+            << "    first:" << list4.find_first() << nl
+            << "    begin:" << *(list4.begin()) << nl
+            << "    begin(0):" << *(list4.begin(0)) << nl;
+
+        // With offset
+
+        Info<< nl
+            << "Test first vs begin" << nl
+            << "    next(35):" << list4.find_next(35)
+            << "    begin(35):" << *(list4.begin(35)) << nl
+            << "    next(40):" << list4.find_next(40)
+            << "    begin(40):" << *(list4.begin(40)) << nl
+            << nl;
+    }
+
+
     // Construct from labelUList, labelUIndList
     {
         DynamicList<label> indices({10, 50, 300});

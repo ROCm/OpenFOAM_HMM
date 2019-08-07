@@ -230,6 +230,17 @@ inline Foam::bitSet::const_iterator::const_iterator(const bitSet* parent)
 {}
 
 
+inline Foam::bitSet::const_iterator::const_iterator
+(
+    const bitSet* parent,
+    label pos
+)
+:
+    set_(parent),
+    pos_(set_->find_next(pos-1))
+{}
+
+
 inline Foam::label Foam::bitSet::const_iterator::operator*() const noexcept
 {
     return pos_;
@@ -270,6 +281,18 @@ inline Foam::bitSet::const_iterator Foam::bitSet::begin() const
 inline Foam::bitSet::const_iterator Foam::bitSet::cbegin() const
 {
     return const_iterator(this);
+}
+
+
+inline Foam::bitSet::const_iterator Foam::bitSet::begin(label pos) const
+{
+    return const_iterator(this, pos);
+}
+
+
+inline Foam::bitSet::const_iterator Foam::bitSet::cbegin(label pos) const
+{
+    return const_iterator(this, pos);
 }
 
 
