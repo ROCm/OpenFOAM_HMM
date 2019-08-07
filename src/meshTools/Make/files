@@ -152,6 +152,7 @@ sets/topoSetSource/topoSetSource.C
 
 cellSources = sets/cellSources
 $(cellSources)/topoSetCellSource/topoSetCellSource.C
+$(cellSources)/attachedToCell/attachedToCell.C
 $(cellSources)/boundaryToCell/boundaryToCell.C
 $(cellSources)/boxToCell/boxToCell.C
 $(cellSources)/cellToCell/cellToCell.C
