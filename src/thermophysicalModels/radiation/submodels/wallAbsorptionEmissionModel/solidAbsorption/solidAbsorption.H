@@ -26,18 +26,19 @@ Class
 
 
 Description
-    Radiation absorptivity-emissivity model to be used on walls  on
-    inter-regions patches when the solid opaque radiation model  is used
+    Radiation absorptivity-emissivity model to be used on walls on
+    inter-region patches when the solid opaque radiation model is used
     in the solid and the wall emissivity and absorptivity are taken from
     the solid radiation properties
 
 Usage
+    Example usage
     \verbatim
-
         wallAbsorptionEmissionModel
         {
             type            solidAbsorption;
         };
+    \endverbatim
 
 
 SourceFiles
