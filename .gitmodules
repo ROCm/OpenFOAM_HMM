@@ -7,3 +7,6 @@
 [submodule "catalyst"]
 	path = modules/catalyst
 	url = https://develop.openfoam.com/Community/catalyst.git
+[submodule "adios"]
+	path = modules/adios
+	url = https://develop.openfoam.com/Community/adiosfoam.git

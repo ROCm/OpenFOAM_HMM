@@ -37,6 +37,15 @@ cleanTimeDirectories()
 }
 
 
+cleanAdiosOutput()
+{
+    if [ -d adiosData ] && [ -d system ]
+    then
+        rm -rf adiosData > /dev/null 2>&1
+    fi
+}
+
+
 cleanDynamicCode()
 {
     if [ -d dynamicCode ] && [ -d system ]
@@ -93,6 +102,7 @@ cleanCase()
 {
     cleanTimeDirectories
     cleanPostProcessing
+    cleanAdiosOutput
     cleanDynamicCode
     cleanOptimisation
 
