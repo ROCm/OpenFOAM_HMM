@@ -99,10 +99,7 @@ void Foam::pointToFace::combine
         {
             const labelList& pFaces = mesh_.pointFaces()[pointi];
 
-            for (const label facei : pFaces)
-            {
-                addOrDelete(set, facei, add);
-            }
+            addOrDelete(set, pFaces, add);
         }
     }
     else if (option_ == ALL)

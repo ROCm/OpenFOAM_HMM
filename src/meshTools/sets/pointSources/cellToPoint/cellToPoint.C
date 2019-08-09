@@ -81,10 +81,7 @@ void Foam::cellToPoint::combine
         {
             const face& f = mesh_.faces()[facei];
 
-            for (const label pointi : f)
-            {
-                addOrDelete(set, pointi, add);
-            }
+            addOrDelete(set, f, add);
         }
     }
 }

@@ -89,10 +89,7 @@ void Foam::cellToFace::combine
         {
             const labelList& cFaces = mesh_.cells()[celli];
 
-            for (const label facei : cFaces)
-            {
-                addOrDelete(set, facei, add);
-            }
+            addOrDelete(set, cFaces, add);
         }
     }
     else if (option_ == BOTH)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -164,11 +164,7 @@ void Foam::surfaceToCell::combine(topoSet& set, const bool add) const
 
         forAll(isInside, celli)
         {
-            if (isInside[celli] && includeInside_)
-            {
-                addOrDelete(set, celli, add);
-            }
-            else if (!isInside[celli] && includeOutside_)
+            if (isInside[celli] ? includeInside_ : includeOutside_)
             {
                 addOrDelete(set, celli, add);
             }

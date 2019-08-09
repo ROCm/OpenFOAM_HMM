@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -54,8 +54,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class polyMesh;
+class bitSet;
 class topoSet;
 
 /*---------------------------------------------------------------------------*\
@@ -151,6 +152,14 @@ protected:
         (
             topoSet& set,
             const labelUList& labels,
+            const bool add
+        ) const;
+
+        //- Add or delete labels from set. Add when 'add' is true
+        void addOrDelete
+        (
+            topoSet& set,
+            const bitSet& labels,
             const bool add
         ) const;
 

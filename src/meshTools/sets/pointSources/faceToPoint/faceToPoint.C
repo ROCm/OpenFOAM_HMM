@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -76,10 +76,7 @@ void Foam::faceToPoint::combine
     {
         const face& f = mesh_.faces()[facei];
 
-        for (const label pointi : f)
-        {
-            addOrDelete(set, pointi, add);
-        }
+        addOrDelete(set, f, add);
     }
 }
 

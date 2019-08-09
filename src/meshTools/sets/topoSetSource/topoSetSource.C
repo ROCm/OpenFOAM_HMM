@@ -27,6 +27,7 @@ License
 
 #include "topoSetSource.H"
 #include "polyMesh.H"
+#include "bitSet.H"
 #include "topoSet.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -196,6 +197,30 @@ void Foam::topoSetSource::addOrDelete
     else
     {
         set.unset(labels);
+    }
+}
+
+
+void Foam::topoSetSource::addOrDelete
+(
+    topoSet& set,
+    const bitSet& labels,
+    const bool add
+) const
+{
+    if (add)
+    {
+        for (const label id : labels)
+        {
+            set.set(id);
+        }
+    }
+    else
+    {
+        for (const label id : labels)
+        {
+            set.unset(id);
+        }
     }
 }
 
