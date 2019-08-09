@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "attachedToCell.H"
+#include "haloToCell.H"
 #include "polyMesh.H"
 #include "cellSet.H"
 #include "syncTools.H"
@@ -33,60 +33,44 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(attachedToCell, 0);
-    addToRunTimeSelectionTable(topoSetSource, attachedToCell, word);
-    addToRunTimeSelectionTable(topoSetSource, attachedToCell, istream);
-    addToRunTimeSelectionTable(topoSetCellSource, attachedToCell, word);
-    addToRunTimeSelectionTable(topoSetCellSource, attachedToCell, istream);
+    defineTypeNameAndDebug(haloToCell, 0);
+    addToRunTimeSelectionTable(topoSetSource, haloToCell, word);
+    addToRunTimeSelectionTable(topoSetSource, haloToCell, istream);
+    addToRunTimeSelectionTable(topoSetCellSource, haloToCell, word);
+    addToRunTimeSelectionTable(topoSetCellSource, haloToCell, istream);
     addNamedToRunTimeSelectionTable
     (
         topoSetCellSource,
-        attachedToCell,
+        haloToCell,
         word,
-        attached
+        halo
     );
     addNamedToRunTimeSelectionTable
     (
         topoSetCellSource,
-        attachedToCell,
+        haloToCell,
         istream,
-        attached
+        halo
     );
 }
 
 
-Foam::topoSetSource::addToUsageTable Foam::attachedToCell::usage_
+Foam::topoSetSource::addToUsageTable Foam::haloToCell::usage_
 (
-    attachedToCell::typeName,
-    "\n    Usage: attachedToCell\n\n"
-    "    Select attached cells\n\n"
+    haloToCell::typeName,
+    "\n    Usage: haloToCell\n\n"
+    "    Select halo cells\n\n"
 );
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::attachedToCell::combine(topoSet& set, const bool add) const
+void Foam::haloToCell::combine(topoSet& set, const bool add) const
 {
     const cellList& cells = mesh_.cells();
     const labelList& faceOwn = mesh_.faceOwner();
     const labelList& faceNei = mesh_.faceNeighbour();
-    const label nIntFaces = mesh_.nInternalFaces();
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    boolList isCoupled(mesh_.nBoundaryFaces(), false);
-
-    for (const polyPatch& pp : patches)
-    {
-        if (pp.coupled())
-        {
-            label facei = pp.start();
-            forAll(pp, i)
-            {
-                isCoupled[facei-nIntFaces] = true;
-                ++facei;
-            }
-        }
-    }
 
     // The starting set of cells
     bitSet current(cells.size());
@@ -97,19 +81,16 @@ void Foam::attachedToCell::combine(topoSet& set, const bool add) const
     }
 
     // The perimeter faces of the cell set
-    bitSet outsideFaces(mesh().nFaces());
+    bitSet outsideFaces(mesh_.nFaces());
 
-    // Get coupled cell status
-    boolList neiInSet(mesh_.nFaces()-nIntFaces, false);
-
-    bitSet updates(current);
+    bitSet updates(cells.size());
 
     for (label stepi = 0; stepi < steps_; ++stepi)
     {
-        // Mark up all perimeter faces
-
-        // Don't attempt extra efficiency with caching old values,
-        // this make the parallel transfer too troublesome
+        // Mark up perimeter faces. Each mesh face is attached exactly
+        // (0,1,2) times to a cell in the set. Using flip() each time means
+        // the only 'on' bits correspond to faces that are attached once to
+        // the cell set - ie, faces on the perimeter of the set.
 
         outsideFaces.reset();
         for (const label celli : current)
@@ -120,36 +101,18 @@ void Foam::attachedToCell::combine(topoSet& set, const bool add) const
             }
         }
 
-        // Coupled faces
-        neiInSet = false;
+        // Use xor to eliminate perimeter faces that are actually attached
+        // on both sides of the interface.
 
-        for
+        syncTools::syncFaceList
         (
-            bitSet::const_iterator iter = outsideFaces.cbegin(nIntFaces);
-            iter != outsideFaces.cend();
-            ++iter
-        )
-        {
-            const label facei = *iter;
+            mesh_,
+            outsideFaces,
+            bitXorEqOp<unsigned int>()
+        );
 
-            if (isCoupled[facei-nIntFaces])
-            {
-                neiInSet[facei-nIntFaces] = true;
-            }
-        }
-
-        syncTools::swapBoundaryFaceList(mesh_, neiInSet);
-
-        forAll(neiInSet, bfacei)
-        {
-            if (neiInSet[bfacei])
-            {
-                outsideFaces.flip(bfacei+nIntFaces);
-            }
-        }
-
+        // Select all cells attached to the perimeter faces.
         updates.reset();
-
         for (const label facei : outsideFaces)
         {
             updates.set(faceOwn[facei]);
@@ -161,9 +124,7 @@ void Foam::attachedToCell::combine(topoSet& set, const bool add) const
 
         if (add)
         {
-            // Face information retained for next loop
-
-            // Changed cells
+            // Restrict to cells not already in the current set
             updates -= current;
 
             if (verbose_)
@@ -172,11 +133,12 @@ void Foam::attachedToCell::combine(topoSet& set, const bool add) const
                     << " by " << updates.count() << endl;
             }
 
+            // Add to current set for the next loop
             current |= updates;
         }
         else
         {
-            // Changed cells
+            // Restrict to cells already in the current set
             updates &= current;
 
             if (verbose_)
@@ -185,25 +147,23 @@ void Foam::attachedToCell::combine(topoSet& set, const bool add) const
                     << " by " << updates.count() << endl;
             }
 
+            // Remove from current set for the next loop
             current -= updates;
-        }
-
-        for (const label celli: updates)
-        {
-            addOrDelete(set, celli, add);
         }
 
         if (updates.none())
         {
             break;
         }
+
+        addOrDelete(set, updates, add);
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::attachedToCell::attachedToCell
+Foam::haloToCell::haloToCell
 (
     const polyMesh& mesh,
     const label steps
@@ -214,29 +174,29 @@ Foam::attachedToCell::attachedToCell
 {}
 
 
-Foam::attachedToCell::attachedToCell
+Foam::haloToCell::haloToCell
 (
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
-    attachedToCell(mesh, dict.getOrDefault<label>("steps", 1))
+    haloToCell(mesh, dict.getOrDefault<label>("steps", 1))
 {}
 
 
-Foam::attachedToCell::attachedToCell
+Foam::haloToCell::haloToCell
 (
     const polyMesh& mesh,
     Istream& is
 )
 :
-    attachedToCell(mesh, 1)
+    haloToCell(mesh, 1)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::attachedToCell::applyToSet
+void Foam::haloToCell::applyToSet
 (
     const topoSetSource::setAction action,
     topoSet& set
@@ -246,7 +206,8 @@ void Foam::attachedToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Cannot create new of attached" << endl;
+            Info<< "    Cannot create new of halo (needs a starting set)"
+                << endl;
         }
 
         set.clear();
@@ -255,7 +216,7 @@ void Foam::attachedToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding cells attached to current set, using "
+            Info<< "    Adding halo cells to the current set, using "
                 << steps_ << " step ..." << endl;
         }
 
@@ -265,7 +226,7 @@ void Foam::attachedToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing external cells of current set, using "
+            Info<< "    Removing cells on the perimeter of current set, using "
                 << steps_ << " step ..." << endl;
         }
 

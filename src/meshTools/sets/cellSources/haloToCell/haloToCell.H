@@ -22,10 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::attachedToCell
+    Foam::haloToCell
 
 Description
-    A topoSetCellSource to add/remove cells attached to the current cellSet
+    A topoSetCellSource to add/remove halo cells (cells attached to
+    the outside of the current cellSet).
+    When removing halo cells, this strips off any cells on the boundary
+    of the set.
 
     \heading Dictionary parameters
     \table
@@ -34,12 +37,12 @@ Description
     \endtable
 
 SourceFiles
-    attachedToCell.C
+    haloToCell.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef attachedToCell_H
-#define attachedToCell_H
+#ifndef haloToCell_H
+#define haloToCell_H
 
 #include "topoSetCellSource.H"
 
@@ -49,10 +52,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class attachedToCell Declaration
+                         Class haloToCell Declaration
 \*---------------------------------------------------------------------------*/
 
-class attachedToCell
+class haloToCell
 :
     public topoSetCellSource
 {
@@ -74,23 +77,23 @@ class attachedToCell
 public:
 
     //- Runtime type information
-    TypeName("attachedToCell");
+    TypeName("haloToCell");
 
 
     // Constructors
 
         //- Construct from components
-        explicit attachedToCell(const polyMesh& mesh, const label steps=1);
+        explicit haloToCell(const polyMesh& mesh, const label steps=1);
 
         //- Construct from dictionary
-        attachedToCell(const polyMesh& mesh, const dictionary& dict);
+        haloToCell(const polyMesh& mesh, const dictionary& dict);
 
         //- Construct from Istream
-        attachedToCell(const polyMesh& mesh, Istream& is);
+        haloToCell(const polyMesh& mesh, Istream& is);
 
 
     //- Destructor
-    virtual ~attachedToCell() = default;
+    virtual ~haloToCell() = default;
 
 
     // Member Functions

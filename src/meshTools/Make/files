@@ -152,7 +152,6 @@ sets/topoSetSource/topoSetSource.C
 
 cellSources = sets/cellSources
 $(cellSources)/topoSetCellSource/topoSetCellSource.C
-$(cellSources)/attachedToCell/attachedToCell.C
 $(cellSources)/boundaryToCell/boundaryToCell.C
 $(cellSources)/boxToCell/boxToCell.C
 $(cellSources)/cellToCell/cellToCell.C
@@ -161,6 +160,7 @@ $(cellSources)/cylinderToCell/cylinderToCell.C
 $(cellSources)/faceToCell/faceToCell.C
 $(cellSources)/faceZoneToCell/faceZoneToCell.C
 $(cellSources)/fieldToCell/fieldToCell.C
+$(cellSources)/haloToCell/haloToCell.C
 $(cellSources)/labelToCell/labelToCell.C
 $(cellSources)/nbrToCell/nbrToCell.C
 $(cellSources)/nearestToCell/nearestToCell.C
