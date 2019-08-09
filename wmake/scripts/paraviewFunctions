@@ -121,17 +121,17 @@ have_pvplugin_support()
 
     # Extract the paraview major+minor version from the directory name
     # From /path/paraview-5.6 -> 5.6
-    pv_api=$(echo "${targetDir##*/}" | \
-        sed -n -e 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
+    pv_api=$(echo "$targetDir" | \
+        sed -ne 's@^.*/@@;s/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p')
 
     [ -n "$targetDir" ] || {
-        echo "$warn (could determine target)"
+        echo "$warn (could not determine target)"
         echo "    PV_PLUGIN_PATH=${PV_PLUGIN_PATH:-???}"
         return 1
     }
 
     [ -n "$pv_api" ] || {
-        echo "$warn (could determine major.minor version)"
+        echo "$warn (could not determine major.minor version)"
         return 1
     }
 
