@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -67,7 +67,7 @@ class syncTools
 {
     // Private Member Functions
 
-        //- Combine value with existing value in map.
+        //- Combine val with existing value in pointValues map at given index
         template<class T, class CombineOp>
         static void combine
         (
@@ -77,7 +77,7 @@ class syncTools
             const T& val
         );
 
-        //- Combine val with existing value at (implicit index) e.
+        //- Combine val with existing value in edgeValues at edge index
         template<class T, class CombineOp>
         static void combine
         (
@@ -90,9 +90,8 @@ class syncTools
 
 public:
 
-
-        // Basic routines with user-supplied transformation. Preferably
-        // use specialisations below.
+        // Basic routines with user-supplied transformation.
+        // Preferably use specialisations below.
 
             //- Synchronize values on selected points.
             template<class T, class CombineOp, class TransformOp>
@@ -434,7 +433,7 @@ public:
                 );
             }
 
-            //- Swap coupled boundary face values.
+            //- Swap coupled boundary face values. Uses eqOp
             template<class T>
             static void swapBoundaryFaceList
             (
@@ -451,7 +450,7 @@ public:
                 );
             }
 
-            //- Swap coupled positions.
+            //- Swap coupled positions. Uses eqOp
             static void swapBoundaryFacePositions
             (
                 const polyMesh& mesh,
@@ -467,7 +466,7 @@ public:
                 );
             }
 
-            //- Swap coupled face values.
+            //- Swap coupled face values. Uses eqOp
             template<class T>
             static void swapFaceList
             (
@@ -506,6 +505,7 @@ public:
                 const UList<point>& cellData,
                 List<point>& neighbourCellData
             );
+
 
         // Sparse versions
 
@@ -583,8 +583,29 @@ public:
                 );
             }
 
+
         // PackedList versions
 
+            //- Synchronize face values from PackedList/bitSet
+            //
+            //  \param mesh The mesh
+            //  \param isBoundaryOnly True if faceValues are for the boundary
+            //      only and not the entire mesh. This determines the face
+            //      offset when accessing values.
+            //  \param faceValues The face values to synchronize
+            //  \param cop The combine operation
+            //  \param parRun True if this is a parallel simulation
+            template<unsigned Width, class CombineOp>
+            static void syncFaceList
+            (
+                const polyMesh& mesh,
+                const bool isBoundaryOnly,
+                PackedList<Width>& faceValues,
+                const CombineOp& cop,
+                const bool parRun = Pstream::parRun()
+            );
+
+            //- Synchronize mesh face values from PackedList/bitSet
             template<unsigned Width, class CombineOp>
             static void syncFaceList
             (
@@ -594,8 +615,27 @@ public:
                 const bool parRun = Pstream::parRun()
             );
 
+            //- Synchronize boundary face values from PackedList/bitSet
+            template<unsigned Width, class CombineOp>
+            static void syncBoundaryFaceList
+            (
+                const polyMesh& mesh,
+                PackedList<Width>& faceValues,
+                const CombineOp& cop,
+                const bool parRun = Pstream::parRun()
+            );
+
+            //- Swap coupled face values. Uses eqOp
             template<unsigned Width>
             static void swapFaceList
+            (
+                const polyMesh& mesh,
+                PackedList<Width>& faceValues
+            );
+
+            //- Swap coupled boundary face values. Uses eqOp
+            template<unsigned Width>
+            static void swapBoundaryFaceList
             (
                 const polyMesh& mesh,
                 PackedList<Width>& faceValues
@@ -623,24 +663,23 @@ public:
         // Other
 
             //- Get per point whether it is uncoupled or a master of a
-            //  coupled set of points
+            //- coupled set of points
             static bitSet getMasterPoints(const polyMesh& mesh);
 
             //- Get per edge whether it is uncoupled or a master of a
-            //  coupled set of edges
+            //- coupled set of edges
             static bitSet getMasterEdges(const polyMesh& mesh);
 
             //- Get per face whether it is uncoupled or a master of a
-            //  coupled set of faces
+            //- coupled set of faces
             static bitSet getMasterFaces(const polyMesh& mesh);
 
             //- Get per face whether it is internal or a master of a
-            //  coupled set of faces
+            //- coupled set of faces
             static bitSet getInternalOrMasterFaces(const polyMesh& mesh);
 
             //- Get per face whether it is internal or coupled
             static bitSet getInternalOrCoupledFaces(const polyMesh& mesh);
-
 };
 
 
