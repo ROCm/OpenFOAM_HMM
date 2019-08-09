@@ -69,6 +69,11 @@ Ostream& operator<<(Ostream&, const Field<Type>&);
 template<class Type>
 Ostream& operator<<(Ostream&, const tmp<Field<Type>>&);
 
+// Basic Field types
+typedef Field<bool> boolField;      //!< A Field of bools
+typedef Field<label> labelField;    //!< A Field of labels
+
+
 /*---------------------------------------------------------------------------*\
                            Class Field Declaration
 \*---------------------------------------------------------------------------*/
