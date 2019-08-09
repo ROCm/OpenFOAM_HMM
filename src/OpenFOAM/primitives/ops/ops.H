@@ -46,7 +46,6 @@ namespace Foam
 // Assignment operation taking two parameters, returning void.
 // Alters the value of the first parameter.
 //     Eg, plusEqOp for (x += y)
-
 #define EqOp(opName, op)                                                       \
                                                                                \
     template<class T1, class T2>                                               \
@@ -83,8 +82,10 @@ EqOp(maxMagSqrEq, x = (magSqr(x) >= magSqr(y) ? x : y))
 
 EqOp(andEq, x = (x && y))
 EqOp(orEq,  x = (x || y))
+EqOp(xorEq, x = (x != y))
 EqOp(bitAndEq, x = (x & y))
 EqOp(bitOrEq,  x = (x | y))
+EqOp(bitXorEq, x = (x ^ y))
 
 EqOp(eqMinus, x = -y)
 
@@ -223,11 +224,13 @@ Op(minMagSqr, (magSqr(x)<=magSqr(y) ? x : y))
 Op(maxMagSqr, (magSqr(x)>=magSqr(y) ? x : y))
 Op(minMod, minMod(x, y))
 
-Op(bitOr, (x | y))
 Op(bitAnd, (x & y))
+Op(bitOr,  (x | y))
+Op(bitXor, (x ^ y))
 
 BoolOp(and, x && y)
-BoolOp(or, x || y)
+BoolOp(or,  x || y)
+BoolOp(xor, x != y)     // Or as (!x != !y) to force bool context?
 BoolOp(equal, x == y)
 BoolOp(notEqual, x != y)
 BoolOp(less, x < y)
