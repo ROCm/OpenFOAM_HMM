@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -658,10 +658,10 @@ Foam::label Foam::ptscotchDecomp::decompose
     {
         Pout<< "SCOTCH_dgraphBuild with:" << nl
             << "xadjSize-1      : " << xadjSize-1 << nl
-            << "xadj            : " << uintptr_t(xadj) << nl
-            << "velotab         : " << uintptr_t(velotab.begin()) << nl
+            << "xadj            : " << name(xadj) << nl
+            << "velotab         : " << name(velotab.begin()) << nl
             << "adjncySize      : " << adjncySize << nl
-            << "adjncy          : " << uintptr_t(adjncy) << nl
+            << "adjncy          : " << name(adjncy) << nl
             << endl;
     }
 

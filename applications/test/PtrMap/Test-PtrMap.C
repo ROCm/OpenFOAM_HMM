@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,6 @@ License
 
 Description
 
-
 \*---------------------------------------------------------------------------*/
 
 #include <iostream>
@@ -42,7 +41,7 @@ void printTable(const PtrMap<T>& table)
         Info<< iter.key() << " = ";
         if (ptr)
         {
-            Info<< *ptr << " (" << uintptr_t(ptr) << ")";
+            Info<< *ptr << " (" << name(ptr) << ")";
         }
         else
         {

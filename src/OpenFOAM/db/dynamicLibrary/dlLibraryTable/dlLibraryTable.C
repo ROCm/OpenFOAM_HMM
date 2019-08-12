@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -61,16 +61,14 @@ Foam::dlLibraryTable::~dlLibraryTable()
     {
         if (libPtrs_[i])
         {
-            if (debug)
-            {
-                InfoInFunction
-                    << "Closing " << libNames_[i]
-                    << " with handle " << uintptr_t(libPtrs_[i]) << endl;
-            }
+            DebugInFunction
+                << "Closing " << libNames_[i]
+                << " with handle " << name(libPtrs_[i]) << nl;
+
             if (!dlClose(libPtrs_[i]))
             {
                 WarningInFunction<< "Failed closing " << libNames_[i]
-                    << " with handle " << uintptr_t(libPtrs_[i]) << endl;
+                    << " with handle " << name(libPtrs_[i]) << endl;
             }
         }
     }
@@ -92,12 +90,9 @@ bool Foam::dlLibraryTable::open
 
     void* ptr = dlOpen(fileName(libName).expand(), verbose);
 
-    if (debug)
-    {
-        InfoInFunction
-            << "Opened " << libName
-            << " resulting in handle " << uintptr_t(ptr) << endl;
-    }
+    DebugInFunction
+        << "Opened " << libName
+        << " resulting in handle " << name(ptr) << endl;
 
     if (ptr)
     {
@@ -138,12 +133,9 @@ bool Foam::dlLibraryTable::close
         return false;
     }
 
-    if (debug)
-    {
-        InfoInFunction
-            << "Closing " << libName
-            << " with handle " << uintptr_t(libPtrs_[index]) << endl;
-    }
+    DebugInFunction
+        << "Closing " << libName
+        << " with handle " << name(libPtrs_[index]) << nl;
 
     const bool ok = dlClose(libPtrs_[index]);
 

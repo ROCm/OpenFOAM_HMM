@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +43,7 @@ void printTable(const HashPtrTable<T>& table)
         Info<< iter.key() << " = ";
         if (ptr)
         {
-            Info<< *ptr << " (" << uintptr_t(ptr) << ")";
+            Info<< *ptr << " (" << name(ptr) << ")";
         }
         else
         {

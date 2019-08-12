@@ -36,7 +36,7 @@ template<class T>
 Ostream& print(const IjkField<T>& fld)
 {
     Info<< static_cast<const Field<T>&>(fld).size()
-        << " addr:" << uintptr_t(fld.cdata()) << ' ' << fld.sizes() << ' '
+        << " addr:" << name(fld.cdata()) << ' ' << fld.sizes() << ' '
         << flatOutput(fld);
 
     return Info;
@@ -149,15 +149,15 @@ int main(int argc, char *argv[])
 
 
     Info<< nl
-        << "Before transfer: addr:" << uintptr_t(field1.data())
+        << "Before transfer: addr:" << name(field1.data())
         << " size:" << field1.size() << nl;
 
     Field<scalar> sfield1(std::move(field1));
     field1.clear();
 
     Info<< "After transfer to regular field" << nl
-        << "    source:" << uintptr_t(field1.data()) << nl
-        << "    target:" << uintptr_t(sfield1.data()) << nl
+        << "    source:" << name(field1.data()) << nl
+        << "    target:" << name(sfield1.data()) << nl
         << "Values"
         << "    source:";
     print(field1) << nl;

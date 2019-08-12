@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -50,7 +50,7 @@ void printInfo
         Info<< " size=\"" << lst.size() << "\"";
         if (lst.cdata())
         {
-            Info<< " ptr=\"" << uintptr_t(lst.cdata()) << "\"";
+            Info<< " ptr=\"" << name(lst.cdata()) << "\"";
         }
         else
         {
@@ -76,7 +76,7 @@ void printInfo
             << "\" capacity=\"" << lst.capacity() << "\"";
         if (lst.cdata())
         {
-            Info<< " ptr=\"" << uintptr_t(lst.cdata()) << "\"";
+            Info<< " ptr=\"" << name(lst.cdata()) << "\"";
         }
         else
         {

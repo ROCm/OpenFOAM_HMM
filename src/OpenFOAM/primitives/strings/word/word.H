@@ -228,6 +228,11 @@ word operator&(const word& a, const word& b);
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
+//- A word representation of a memory address as hexadecimal.
+//  No special handling of nullptr (renders as 0x0)
+word name(const void* ptr);
+
+
 //- Extract name (as a word) from an object, typically using its name() method.
 template<class T>
 struct nameOp

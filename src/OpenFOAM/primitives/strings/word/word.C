@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011 OpenFOAM Foundation
@@ -28,6 +28,7 @@ License
 #include "word.H"
 #include "debug.H"
 #include <cctype>
+#include <sstream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -167,6 +168,17 @@ Foam::word Foam::operator&(const word& a, const word& b)
     // Or, if the first string is empty (or both are empty)
 
     return b;
+}
+
+
+// * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
+
+Foam::word Foam::name(const void* ptr)
+{
+    std::ostringstream buf;
+    buf << "0x" << std::hex << uintptr_t(ptr);
+
+    return word(buf.str(), false);  // Needs no stripping
 }
 
 

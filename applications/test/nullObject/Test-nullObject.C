@@ -57,12 +57,12 @@ void printInfo(const UList<T>& list)
 {
     std::cout
         << nl
-        << "List : addr: " << uintptr_t(&list)
+        << "List : addr: " << name(&list)
         << " (null: " << isNull(list) << ")" << nl
         << "    size: " << list.size() << " empty: " << list.empty() << nl
-        << "    data: " << uintptr_t(list.cdata())
-        << " begin=" << uintptr_t(list.begin())
-        << " end=" << uintptr_t(list.end()) << nl;
+        << "    data: " << name(list.cdata())
+        << " begin=" << name(list.begin())
+        << " end=" << name(list.end()) << nl;
 
     Info<< list << nl;
 }
@@ -78,7 +78,7 @@ int main()
     SimpleClass& refToClass(*ptrToClass);
 
     std::cout
-        << "nullObject addr=" << uintptr_t(&(nullObjectPtr)) << nl
+        << "nullObject addr=" << name(&(nullObjectPtr)) << nl
         << "  sizeof(nullObject) = " << sizeof(NullObject::nullObject) << nl
         << "  sizeof(void*) = " << sizeof(void*) << nl
         << "  sizeof(labelList) = " << sizeof(labelList) << nl
@@ -86,7 +86,7 @@ int main()
 
     std::cout
         << "nullObject" << nl
-        << "  pointer:" << uintptr_t(nullObjectPtr->pointer()) << nl
+        << "  pointer:" << name(nullObjectPtr->pointer()) << nl
         << "  value:"   << nullObjectPtr->value() << nl << nl;
 
     if (notNull(ptrToClass))

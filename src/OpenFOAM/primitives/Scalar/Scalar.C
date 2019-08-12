@@ -62,7 +62,8 @@ word name(const Scalar val)
 {
     std::ostringstream buf;
     buf << val;
-    return buf.str();
+
+    return word(buf.str(), false);  // Needs no stripping
 }
 
 

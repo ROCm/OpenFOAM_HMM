@@ -244,8 +244,8 @@ int main(int argc, char *argv[])
             << "Number of elements = " << tab << S.size() << nl
             << "Number of rows/columns = " << tab << S.sizes() << nl
             << "Matrix is empty = " << tab << Switch(S.empty()) << nl
-            << "Constant pointer = " << tab << uintptr_t(S.cdata()) << nl
-            << "Pointer = " << tab << uintptr_t(S.data()) << nl
+            << "Constant pointer = " << tab << name(S.cdata()) << nl
+            << "Pointer = " << tab << name(S.data()) << nl
             << nl;
 
         horizontalLine();

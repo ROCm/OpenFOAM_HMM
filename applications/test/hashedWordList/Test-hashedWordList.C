@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Ostream& printInfo(const hashedWordList& list, bool withAddr=false)
     Info<< flatOutput(list) << nl << list.lookup() << nl;
     if (withAddr)
     {
-        Info<< "addr=" << uintptr_t(list.cdata()) << nl;
+        Info<< "addr=" << name(list.cdata()) << nl;
     }
 
     return Info;

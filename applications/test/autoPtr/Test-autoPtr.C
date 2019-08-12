@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
         const labelList* plist = list;
 
-        Info<<"pointer: " << uintptr_t(plist) << nl
+        Info<<"pointer: " << name(plist) << nl
             <<"content: " << *plist << nl;
 
         Info<<"create: " << autoPtr<labelList>::New(10, label(-1))()
@@ -107,17 +107,17 @@ int main(int argc, char *argv[])
     {
         auto source = identity(8);
         Info<<"move construct from "
-            << flatOutput(source) << " @ " << uintptr_t(source.cdata())
+            << flatOutput(source) << " @ " << name(source.cdata())
             << nl << nl;
 
         auto list = autoPtr<labelList>::New(std::move(source));
 
         Info<<"created: "
-            << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
+            << flatOutput(*list) << " @ " << name(list->cdata())
             << nl << nl;
 
         Info<<"orig: "
-            << flatOutput(source) << " @ " << uintptr_t(source.cdata())
+            << flatOutput(source) << " @ " << name(source.cdata())
             << nl << nl;
     }
 
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 
         auto list = autoPtr<labelList>::New(identity(8));
         Info<<"forward to function from "
-            << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
+            << flatOutput(*list) << " @ " << name(list->cdata())
             << nl << nl;
 
         testTransfer2(std::move(list));
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
         if (list)
         {
             Info<< nl
-                << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
+                << flatOutput(*list) << " @ " << name(list->cdata())
                 << nl;
         }
         else
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
         auto list = autoPtr<labelList>::New(identity(8));
         Info<<"forward to function from "
-            << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
+            << flatOutput(*list) << " @ " << name(list->cdata())
             << nl << nl;
 
         testTransfer2(std::move(list));
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
         if (list.valid())
         {
             Info<< nl
-                << flatOutput(*list) << " @ " << uintptr_t(list->cdata())
+                << flatOutput(*list) << " @ " << name(list->cdata())
                 << nl;
         }
         else

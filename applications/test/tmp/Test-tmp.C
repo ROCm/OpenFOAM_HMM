@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2011 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +44,7 @@ void printInfo(const tmp<T>& tmpItem)
 {
     Info<< "tmp valid:" << tmpItem.valid()
         << " isTmp:" << tmpItem.isTmp()
-        << " addr: " << uintptr_t(tmpItem.get());
+        << " addr: " << name(tmpItem.get());
 
     if (tmpItem.valid())
     {

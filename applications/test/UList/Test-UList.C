@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ using namespace Foam;
 template<class ListType>
 void print(const ListType& list)
 {
-    Info << flatOutput(list) << " data addr: " << uintptr_t(list.cdata()) << nl;
+    Info << flatOutput(list) << " data addr: " << name(list.cdata()) << nl;
 }
 
 
