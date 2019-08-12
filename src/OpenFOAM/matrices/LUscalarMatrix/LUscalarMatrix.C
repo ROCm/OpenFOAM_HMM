@@ -152,40 +152,38 @@ Foam::LUscalarMatrix::LUscalarMatrix
 
     if (Pstream::master(comm_))
     {
-        label mRows = m();
-        label nColumns = n();
-
         if (debug)
         {
-            Pout<< "LUscalarMatrix : size:" << mRows << endl;
-            for (label rowI = 0; rowI < mRows; rowI++)
-            {
-                const scalar* row = operator[](rowI);
+            const label numRows = m();
+            const label numCols = n();
 
-                Pout<< "cell:" << rowI << " diagCoeff:" << row[rowI] << endl;
+            Pout<< "LUscalarMatrix : size:" << numRows << endl;
+            for (label rowi = 0; rowi < numRows; ++rowi)
+            {
+                const scalar* row = operator[](rowi);
+
+                Pout<< "cell:" << rowi << " diagCoeff:" << row[rowi] << endl;
 
                 Pout<< "    connects to upper cells :";
-                for (label columnI = rowI+1; columnI < nColumns; columnI++)
+                for (label coli = rowi+1; coli < numCols; ++coli)
                 {
-                    if (mag(row[columnI]) > SMALL)
+                    if (mag(row[coli]) > SMALL)
                     {
-                        Pout<< ' ' << columnI << " (coeff:" << row[columnI]
-                            << ")";
+                        Pout<< ' ' << coli << " (coeff:" << row[coli] << ')';
                     }
                 }
                 Pout<< endl;
                 Pout<< "    connects to lower cells :";
-                for (label columnI = 0; columnI < rowI; columnI++)
+                for (label coli = 0; coli < rowi; ++coli)
                 {
-                    if (mag(row[columnI]) > SMALL)
+                    if (mag(row[coli]) > SMALL)
                     {
-                        Pout<< ' ' << columnI << " (coeff:" << row[columnI]
-                            << ")";
+                        Pout<< ' ' << coli << " (coeff:" << row[coli] << ')';
                     }
                 }
-                Pout<< endl;
+                Pout<< nl;
             }
-            Pout<< endl;
+            Pout<< nl;
         }
 
         pivotIndices_.setSize(m());
