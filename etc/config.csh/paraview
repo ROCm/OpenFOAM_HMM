@@ -214,9 +214,13 @@ default:
 endsw
 endif
 
-unset cleaned archDir
+
+#------------------------------------------------------------------------------
+
+unsetenv ParaView_VERSION ParaView_QT
+
+unset archDir
 unset cmake cmake_version
 unset pv_api pvLibDir pvPython qtDir qtLibDir
-unsetenv ParaView_VERSION ParaView_QT
 
 #------------------------------------------------------------------------------

@@ -107,27 +107,7 @@ case "$ParaView_VERSION" in
     ;;
 
 (system)
-    # Obtain major.minor from `paraview --version`
-    pv_api="$(paraview --version 2>/dev/null | \
-        sed -ne 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/p')"
-
-    if [ -n "$pv_api" ]
-    then
-        export PV_PLUGIN_PATH="$FOAM_LIBBIN/paraview-$pv_api"
-    else
-        unset ParaView_DIR PV_PLUGIN_PATH
-    fi
-
-    if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
-    then
-        if [ -n "$PV_PLUGIN_PATH" ]
-        then
-            echo "Using paraview (system)" 1>&2
-            echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH" 1>&2
-        else
-            echo "system paraview (not found)" 1>&2
-        fi
-    fi
+    eval "$($WM_PROJECT_DIR/bin/foamEtcFile -sh ${FOAM_CONFIG_NOUSER:+-mode=o} -config paraview-system)"
     ;;
 
 (*)
@@ -217,14 +197,16 @@ case "$ParaView_VERSION" in
     ;;
 esac
 
-unset -f _foamParaviewEval 2> /dev/null
-unset cleaned archDir
-unset cmake cmake_version
-unset pv_api pvLibDir pvPython qtDir qtLibDir
+
+#------------------------------------------------------------------------------
 
 if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
 then
     unset ParaView_VERSION ParaView_QT
 fi
+
+unset archDir
+unset cmake cmake_version
+unset pv_api pvLibDir pvPython qtDir qtLibDir
 
 #------------------------------------------------------------------------------

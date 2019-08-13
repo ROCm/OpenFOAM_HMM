@@ -1,0 +1,96 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.sh/paraview-system
+#     - sourced by OpenFOAM-*/etc/bashrc or via foamPV alias
+#
+# Description
+#     Setup using PARAVIEW system installation
+#
+# Note
+#     When _foamAddLib is unset (eg, called from makeParaView or from foamPV):
+#       - the ParaView_VERSION variable is retained.
+#------------------------------------------------------------------------------
+
+# Compiler-specific location for ThirdParty installations
+archDir="$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER"
+
+# Clean PATH and LD_LIBRARY_PATH
+eval \
+    "$($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=PATH \
+    $ParaView_DIR $archDir/ParaView-)"
+
+eval \
+    "$($WM_PROJECT_DIR/bin/foamCleanPath -sh-env=LD_LIBRARY_PATH \
+    $ParaView_DIR $archDir/ParaView-)"
+
+#------------------------------------------------------------------------------
+
+ParaView_DIR="$(command -v paraview 2>/dev/null)"
+
+# Do have paraview?
+# Obtain major.minor from `paraview --version`
+if [ -n "$ParaView_DIR" ]
+then
+    ParaView_DIR="${ParaView_DIR%/*}"   # Eg, /usr/bin/paraview -> /usr/bin
+    ParaView_DIR="${ParaView_DIR%/*}"   # Eg, /usr/bin -> /usr
+
+    # Obtain major.minor from `paraview --version`
+    pv_api="$(paraview --version 2>/dev/null | \
+        sed -ne 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/p')"
+else
+    unset pv_api
+fi
+
+# The `paraview --version` can fail if the build host doesn't have graphics.
+# Revert to guessing from the directory name if needed.
+if [ -z "$pv_api" ] && [ -d "$ParaView_DIR" ]
+then
+    pv_api="$(find $ParaView_DIR/include -maxdepth 1 -name 'paraview-*' | \
+      sed -ne 's@^*/@@;s/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/p')"
+fi
+
+case "$pv_api" in
+([0-9]*.[0-9]*)
+    export ParaView_DIR
+    export PV_PLUGIN_PATH="$FOAM_LIBBIN/paraview-$pv_api"
+    ;;
+(*)
+    unset ParaView_DIR PV_PLUGIN_PATH
+    ;;
+esac
+
+if [ -n "$FOAM_VERBOSE" ] && [ -n "$PS1" ]
+then
+    if [ -n "$PV_PLUGIN_PATH" ]
+    then
+        echo "Using paraview (system)" 1>&2
+        echo "    PV_PLUGIN_PATH       : $PV_PLUGIN_PATH" 1>&2
+    else
+        echo "system paraview (not found)" 1>&2
+    fi
+fi
+
+
+#------------------------------------------------------------------------------
+
+if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
+then
+    unset ParaView_VERSION
+else
+    ParaView_VERSION=system
+fi
+
+unset archDir
+unset pv_api
+
+#------------------------------------------------------------------------------
