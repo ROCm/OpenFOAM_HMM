@@ -1185,35 +1185,37 @@ void Foam::globalMeshData::calcGlobalEdgeOrientation() const
 
         forAll(coupledPatch().edges(), edgeI)
         {
-            if (masterEdgeVerts[edgeI] == labelPair(labelMax, labelMax))
+            // Test that edge is not single edge on cyclic baffle
+            if (masterEdgeVerts[edgeI] != labelPair(labelMax, labelMax))
             {
-                // Skip single edge on cyclic baffle
-                continue;
-            }
+                const edge& e = coupledPatch().edges()[edgeI];
+                const labelPair masterE
+                (
+                    masterPoint[e[0]],
+                    masterPoint[e[1]]
+                );
 
-            const edge& e = coupledPatch().edges()[edgeI];
-            const labelPair masterE
-            (
-                masterPoint[e[0]],
-                masterPoint[e[1]]
-            );
-
-            const int stat = labelPair::compare
-            (
-                masterE,
-                masterEdgeVerts[edgeI]
-            );
-            if (stat == 0)
-            {
-                FatalErrorInFunction
-                    << "problem : my edge:" << e
-                    << " in master points:" << masterE
-                    << " v.s. masterEdgeVerts:" << masterEdgeVerts[edgeI]
-                    << exit(FatalError);
+                const int stat = labelPair::compare
+                (
+                    masterE,
+                    masterEdgeVerts[edgeI]
+                );
+                if (stat == 0)
+                {
+                    FatalErrorInFunction
+                        << "problem : my edge:" << e
+                        << " in master points:" << masterE
+                        << " v.s. masterEdgeVerts:" << masterEdgeVerts[edgeI]
+                        << exit(FatalError);
+                }
+                else
+                {
+                    globalEdgeOrientation.set(edgeI, (stat == 1));
+                }
             }
             else
             {
-                globalEdgeOrientation.set(edgeI, (stat == 1));
+                globalEdgeOrientation.set(edgeI, true);
             }
         }
     }
