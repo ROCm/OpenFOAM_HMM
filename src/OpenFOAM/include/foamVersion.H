@@ -34,10 +34,6 @@ Note
     directory for easier use by external packages and to allow easier
     modification during packaging.
 
-    The \b OPENFOAM define is mirrored by the
-    \b OPENFOAM_COM and \b OPENFOAM_PLUS defines (in the stdFoam.H file).
-    The \b OPENFOAM_PLUS define was last used for 1712.
-
 SourceFiles
     foamVersion.C
     global.Cver

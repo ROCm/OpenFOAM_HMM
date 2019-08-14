@@ -49,20 +49,6 @@ SeeAlso
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Mirror OPENFOAM define in other variants
-#ifdef OPENFOAM
-// Code base from www.openfoam.com
-# ifndef OPENFOAM_COM
-#  define OPENFOAM_COM OPENFOAM
-# endif
-// Older name (prior to 1806)
-# ifndef OPENFOAM_PLUS
-#  define OPENFOAM_PLUS OPENFOAM
-# endif
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // Compile-time warning for use of deprecated methods (compiler-dependent).
 // Use within the class declaration.
 
