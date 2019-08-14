@@ -27,6 +27,7 @@ License
 
 #include "error.H"
 #include "ITstream.H"
+#include "StringStream.H"
 #include "UIListStream.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -184,6 +185,28 @@ void Foam::ITstream::print(Ostream& os) const
     }
 
     IOstream::print(os);
+}
+
+
+std::string Foam::ITstream::toString() const
+{
+    OStringStream buf;
+
+    const tokenList& tokens = *this;
+
+    label len = tokens.size();
+
+    for (const token& tok : tokens)
+    {
+        buf << tok;
+
+        if (--len)
+        {
+            buf << ' ';
+        }
+    }
+
+    return buf.str();
 }
 
 

@@ -67,6 +67,14 @@ int main(int argc, char *argv[])
             dictionary dict(is);
 
             Info<< dict << endl;
+            for (const entry& e : dict)
+            {
+                if (e.isStream())
+                {
+                    Info<< e.keyword() << " :: "
+                        << e.stream().toString() << nl;
+                }
+            }
         }
     }
 

@@ -192,7 +192,7 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         // Inquiry
 
@@ -233,7 +233,7 @@ public:
             }
 
 
-        // Read functions
+        // Read Functions
 
             //- Return next token from stream
             virtual Istream& read(token& tok);
@@ -289,10 +289,14 @@ public:
             }
 
 
-        // Print
+        // Output
 
             //- Print description of stream to Ostream
             void print(Ostream& os) const;
+
+            //- Concatenate tokens into a space-separated std::string.
+            //- The resulting string may contain quote characters.
+            std::string toString() const;
 };
 
 
