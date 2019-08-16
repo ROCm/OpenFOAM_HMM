@@ -2,10 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
--------------------------------------------------------------------------------
-                            | Copyright (C) 2016 OpenFOAM Foundation
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,75 +22,77 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dynamicMotionSolverListFvMesh
+    Foam::zoneMotion
 
 Description
-    Dynamic mesh able to handle multiple motion solvers.
-    NOTE: If the word entry "solvers" is not found it falls back to a single
-    motion solver behavior.
+
 
 SourceFiles
-    dynamicMotionSolverListFvMesh.C
+    zoneMotion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynamicMotionSolverListFvMesh_H
-#define dynamicMotionSolverListFvMesh_H
+#ifndef zoneMotion_H
+#define zoneMotion_H
 
-#include "dynamicFvMesh.H"
+#include "labelList.H"
+#include "dictionary.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class motionSolver;
+class polyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class dynamicMotionSolverListFvMesh Declaration
+                           Class zoneMotion Declaration
 \*---------------------------------------------------------------------------*/
 
-class dynamicMotionSolverListFvMesh
-:
-    public dynamicFvMesh
+class zoneMotion
 {
-    // Private data
+     // Private data
 
-        PtrList<motionSolver> motionSolvers_;
+
+        //- Points to move when cell zone is supplied
+        labelList pointIDs_;
+
+        //- Flag to indicate whether all cells should move
+        bool moveAllCells_;
 
 
     // Private Member Functions
 
         //- No copy construct
-        dynamicMotionSolverListFvMesh
-        (
-            const dynamicMotionSolverListFvMesh&
-        ) = delete;
+        zoneMotion(const zoneMotion&) = delete;
 
         //- No copy assignment
-        void operator=(const dynamicMotionSolverListFvMesh&) = delete;
-
+        void operator=(const zoneMotion&) = delete;
 
 public:
 
-    //- Runtime type information
-    TypeName("dynamicMotionSolverListFvMesh");
+    // Member functions
 
+        //- Return pointsID
+        const labelList& pointIDs() const;
+
+        //- Return flag
+        bool moveAllCells() const;
 
     // Constructors
 
-        //- Construct from IOobject
-        dynamicMotionSolverListFvMesh(const IOobject& io);
+        //- Construct from dictionary
+        zoneMotion
+        (
+            const dictionary&,
+            const polyMesh&
+        );
 
 
     //- Destructor
-    ~dynamicMotionSolverListFvMesh();
+    virtual ~zoneMotion();
 
-
-    // Member Functions
-
-        //- Dummy update function which does not change the mesh
-        virtual bool update();
 };
 
 

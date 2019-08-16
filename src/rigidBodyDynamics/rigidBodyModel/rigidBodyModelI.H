@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -113,6 +113,11 @@ Foam::RBD::rigidBodyModel::v(const label i) const
     return v_[i];
 }
 
+inline const Foam::spatialVector&
+Foam::RBD::rigidBodyModel::a(const label i) const
+{
+    return a_[i];
+}
 
 inline bool Foam::RBD::rigidBodyModel::merged(label bodyID) const
 {

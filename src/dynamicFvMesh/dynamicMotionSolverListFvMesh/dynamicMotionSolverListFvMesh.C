@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -53,22 +53,57 @@ Foam::dynamicMotionSolverListFvMesh::dynamicMotionSolverListFvMesh
 )
 :
     dynamicFvMesh(io),
-    motionSolvers_
+    motionSolvers_()
+{
+    IOobject ioDict
     (
-        IOdictionary
-        (
-            IOobject
-            (
-                "dynamicMeshDict",
-                time().constant(),
-                *this,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::AUTO_WRITE
-            )
-        ).lookup("solvers"),
-        motionSolver::iNew(*this)
-    )
-{}
+        "dynamicMeshDict",
+        time().constant(),
+        *this,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    IOdictionary dict(ioDict);
+
+    label i = 0;
+    if (dict.found("solvers"))
+    {
+        const dictionary& solvertDict = dict.subDict("solvers");
+
+        motionSolvers_.setSize(solvertDict.size());
+
+        for (const entry& dEntry : solvertDict)
+        {
+            if (dEntry.isDict())
+            {
+                IOobject io(ioDict);
+                io.readOpt() = IOobject::NO_READ;
+                io.writeOpt() = IOobject::AUTO_WRITE;
+                io.rename(dEntry.dict().dictName());
+
+                IOdictionary IOsolverDict
+                (
+                    io,
+                    dEntry.dict()
+                );
+
+                motionSolvers_.set
+                (
+                    i++,
+                    motionSolver::New(*this,  IOsolverDict)
+                );
+            }
+        }
+        motionSolvers_.setSize(i);
+    }
+    else
+    {
+        motionSolvers_.setSize(1);
+        motionSolvers_.set(i++, motionSolver::New(*this));
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

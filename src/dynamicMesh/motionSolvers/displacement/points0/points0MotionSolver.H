@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2016 OpenFOAM Foundation
@@ -41,6 +41,7 @@ SourceFiles
 #include "motionSolver.H"
 #include "pointFields.H"
 #include "pointIOField.H"
+#include "zoneMotion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,7 +56,8 @@ class mapPolyMesh;
 
 class points0MotionSolver
 :
-    public motionSolver
+    public motionSolver,
+    public zoneMotion
 {
 protected:
 

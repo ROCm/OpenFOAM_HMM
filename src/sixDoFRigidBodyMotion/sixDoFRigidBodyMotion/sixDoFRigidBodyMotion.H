@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2009-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -72,6 +72,9 @@ class sixDoFRigidBodyMotion
     friend class sixDoFSolver;
 
     // Private data
+
+        //- Reference to time database
+        const Time& time_;
 
         //- Motion state data object
         sixDoFRigidBodyMotionState motionState_;
@@ -193,9 +196,6 @@ class sixDoFRigidBodyMotion
             //- Return non-const access to the orientation
             inline tensor& Q();
 
-            //- Return non-const access to vector
-            inline vector& v();
-
             //- Return non-const access to acceleration
             inline vector& a();
 
@@ -211,13 +211,14 @@ public:
     // Constructors
 
         //- Construct null
-        sixDoFRigidBodyMotion();
+        sixDoFRigidBodyMotion(const Time&);
 
         //- Construct from constant and state dictionaries
         sixDoFRigidBodyMotion
         (
             const dictionary& dict,
-            const dictionary& stateDict
+            const dictionary& stateDict,
+            const Time& time
         );
 
         //- Construct as copy
@@ -261,10 +262,17 @@ public:
             //- Return the current velocity
             inline const vector& v() const;
 
+            //- Return non-const access to vector
+            inline vector& v();
+
+            //- Return the current momentArm
             inline vector momentArm() const;
 
             //- Return the report Switch
             inline bool report() const;
+
+            //- Return time
+            inline const Time& time() const;
 
 
         // Edit

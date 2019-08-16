@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2014-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -369,7 +369,9 @@ void Foam::dynamicOversetFvMesh::addInterpolation
     inplaceReorder(reverseFaceMap_, lower);
 
 
-    const label nOldInterfaces = dynamicMotionSolverFvMesh::interfaces().size();
+    //const label nOldInterfaces = dynamicMotionSolverFvMesh::interfaces().size();
+    const label nOldInterfaces = dynamicFvMesh::interfaces().size();
+
 
     if (interfaces.size() > nOldInterfaces)
     {
@@ -666,7 +668,8 @@ Foam::SolverPerformance<Type> Foam::dynamicOversetFvMesh::solve
                 << " bypassing matrix adjustment for field " << m.psi().name()
                 << endl;
         }
-        return dynamicMotionSolverFvMesh::solve(m, dict);
+        //return dynamicMotionSolverFvMesh::solve(m, dict);
+        return dynamicFvMesh::solve(m, dict);
     }
 
     if (debug)
@@ -742,7 +745,8 @@ Foam::SolverPerformance<Type> Foam::dynamicOversetFvMesh::solve
     //}
 
     // Use lower level solver
-    SolverPerformance<Type> s(dynamicMotionSolverFvMesh::solve(m, dict));
+    //SolverPerformance<Type> s(dynamicMotionSolverFvMesh::solve(m, dict));
+    SolverPerformance<Type> s(dynamicFvMesh::solve(m, dict));
 
     // Restore boundary field
     bpsi.setSize(oldSize);

@@ -52,9 +52,8 @@ Foam::IOobject Foam::motionSolver::stealRegistration
     {
         // De-register if necessary
         const_cast<IOdictionary&>(dict).checkOut();
-
-        io.registerObject() = true;
     }
+    io.registerObject() = true;
 
     return io;
 }

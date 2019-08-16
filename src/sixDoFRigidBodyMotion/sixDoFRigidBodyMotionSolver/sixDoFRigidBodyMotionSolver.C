@@ -81,7 +81,8 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
                 false
             )
         )
-      : coeffDict()
+      : coeffDict(),
+        mesh.time()
     ),
     patches_(coeffDict().get<wordRes>("patches")),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
@@ -104,7 +105,8 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
         pointMesh::New(mesh),
         dimensionedScalar(dimless, Zero)
     ),
-    curTimeIndex_(-1)
+    curTimeIndex_(-1),
+    CofGvelocity_(coeffDict().lookupOrDefault<word>("CofGvelocity", "none"))
 {
     if (rhoName_ == "rhoInf")
     {
@@ -163,7 +165,23 @@ Foam::sixDoFRigidBodyMotionSolver::motion() const
 Foam::tmp<Foam::pointField>
 Foam::sixDoFRigidBodyMotionSolver::curPoints() const
 {
-    return points0() + pointDisplacement_.primitiveField();
+    tmp<pointField> newPoints
+    (
+        points0() + pointDisplacement_.primitiveField()
+    );
+
+    if (!moveAllCells())
+    {
+        tmp<pointField> ttransformedPts(new pointField(mesh().points()));
+        pointField& transformedPts = ttransformedPts.ref();
+
+        UIndirectList<point>(transformedPts, pointIDs()) =
+            pointField(newPoints.ref(), pointIDs());
+
+        return ttransformedPts;
+    }
+
+    return newPoints;
 }
 
 
@@ -240,6 +258,25 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
             t.deltaTValue(),
             t.deltaT0Value()
         );
+
+        if (CofGvelocity_ != "none")
+        {
+            if
+            (
+                db().time().foundObject<uniformDimensionedVectorField>
+                (
+                    CofGvelocity_
+                )
+            )
+            {
+                uniformDimensionedVectorField& vel =
+                    db().time().lookupObjectRef<uniformDimensionedVectorField>
+                    (
+                        CofGvelocity_
+                    );
+                vel = motion_.v();
+            }
+        }
     }
 
     // Update the displacements

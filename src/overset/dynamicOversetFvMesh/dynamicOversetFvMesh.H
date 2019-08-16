@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,7 @@ SourceFiles
 #ifndef dynamicOversetFvMesh_H
 #define dynamicOversetFvMesh_H
 
-#include "dynamicMotionSolverFvMesh.H"
+#include "dynamicMotionSolverListFvMesh.H"
 #include "labelIOList.H"
 #include "fvMeshPrimitiveLduAddressing.H"
 #include "lduInterfaceFieldPtrsList.H"
@@ -56,7 +56,7 @@ class GAMGAgglomeration;
 
 class dynamicOversetFvMesh
 :
-    public dynamicMotionSolverFvMesh
+    public dynamicMotionSolverListFvMesh
 {
 protected:
 

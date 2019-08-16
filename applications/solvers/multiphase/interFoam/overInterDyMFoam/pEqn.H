@@ -17,13 +17,6 @@
         #include "interpolatedFaces.H"
     }
 
-    if (runTime.outputTime())
-    {
-        H.write();
-        rAU.write();
-        HbyA.write();
-    }
-
     surfaceScalarField phiHbyA("phiHbyA", fvc::flux(HbyA));
 
     if (ddtCorr)

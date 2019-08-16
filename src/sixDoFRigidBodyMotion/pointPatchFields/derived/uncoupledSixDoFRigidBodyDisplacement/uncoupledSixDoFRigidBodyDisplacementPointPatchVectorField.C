@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2009-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -48,7 +48,7 @@ uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF),
-    motion_(),
+    motion_(db().time()),
     initialPoints_(p.localPoints()),
     curTimeIndex_(-1)
 {}
@@ -63,7 +63,7 @@ uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField
 )
 :
     fixedValuePointPatchField<vector>(p, iF, dict),
-    motion_(dict, dict),
+    motion_(dict, dict, db().time()),
     curTimeIndex_(-1)
 {
     if (!dict.found("value"))

@@ -33,6 +33,7 @@ restraints/linearDamper/linearDamper.C
 restraints/linearAxialAngularSpring/linearAxialAngularSpring.C
 restraints/sphericalAngularDamper/sphericalAngularDamper.C
 restraints/prescribedRotation/prescribedRotation.C
+restraints/softWall/softWall.C
 
 rigidBodyModel/rigidBodyModel.C
 rigidBodyModel/forwardDynamics.C
