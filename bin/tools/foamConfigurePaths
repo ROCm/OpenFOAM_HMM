@@ -51,6 +51,8 @@ MPI
   -openmpi-third      use ThirdParty openmpi (using default version)
 
 Components
+  -adios VER          specify 'adios2_version'
+  -adios-path DIR     specify 'ADIOS2_ARCH_PATH'
   -boost VER          specify 'boost_version'
   -boost-path DIR     specify 'BOOST_ARCH_PATH'
   -cgal ver           specify 'cgal_version'
@@ -463,6 +465,24 @@ do
 
 
 ## Components ##
+
+    -adios | -adios2)
+        # Replace adios2_version=...
+        optionValue=$(getOptionValue "$@")
+        replace etc/config.sh/adios2   adios2_version "$optionValue"
+        replace etc/config.csh/adios2  adios2_version "$optionValue"
+        adjusted=true
+        shift
+        ;;
+
+    -adios-path | -adios2-path)
+        # Replace ADIOS2_ARCH_PATH=...
+        optionValue=$(getOptionValue "$@")
+        replace    etc/config.sh/adios2   ADIOS2_ARCH_PATH "\"$optionValue\""
+        replaceCsh etc/config.csh/adios2  ADIOS2_ARCH_PATH "\"$optionValue\""
+        adjusted=true
+        shift
+        ;;
 
     -boost)
         # Replace boost_version=...
