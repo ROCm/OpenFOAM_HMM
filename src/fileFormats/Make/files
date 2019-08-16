@@ -24,7 +24,7 @@ stl/STLCore.C
 stl/STLReader.C
 stl/STLAsciiParseFlex.L
 stl/STLAsciiParseManual.C
-stl/STLAsciiParseRagel.C
+stl/STLAsciiParseRagel.cc
 
 vtk/file/foamVtkFileWriter.C
 vtk/file/foamVtkSeriesWriter.C

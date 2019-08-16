@@ -1,0 +1,9 @@
+SUFFIXES += .ly .lyy
+
+lytoo = $E $(call QUIET_MESSAGE,lemon,$(<F)) \
+    $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-lemon -q $< $(AND) \
+    $(cc) $(cFLAGS) -c $(@D)/$(<F).c -o $@
+
+lyytoo = $E $(call QUIET_MESSAGE,lemon,$(<F)) \
+    $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-lemon -q $< $(AND) \
+    $(CC) $(c++FLAGS) -c $(@D)/$(<F).cc -o $@

@@ -37,7 +37,7 @@ Description
     The scanner is built with Ragel.
     The goto-based finite state machine (FSM) is generated with
 
-        ragel -G2 -o wmkdepend.cpp wmkdepend.rl
+        ragel -G2 -o wmkdepend.cc wmkdepend.rl
 
     The FSM can be visualized (eg, in a browser) with the following command
 

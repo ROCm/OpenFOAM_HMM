@@ -39,7 +39,7 @@ Description
     The scanner is built with Ragel.
     The goto-based finite state machine (FSM) is generated with
 
-        ragel -G2 -o wmkdepend.cpp wmkdepend.rl
+        ragel -G2 -o wmkdepend.cc wmkdepend.rl
 
     The FSM can be visualized (eg, in a browser) with the following command
 
@@ -321,7 +321,7 @@ namespace Files
 //
 
 
-#line 325 "wmkdepend.cpp"
+#line 325 "wmkdepend.cc"
 static const int wmkdep_start = 21;
 static const int wmkdep_error = 0;
 
@@ -367,7 +367,7 @@ void processFile(std::string fileName)
     int act, cs;
 
     
-#line 371 "wmkdepend.cpp"
+#line 371 "wmkdepend.cc"
 	{
 	cs = wmkdep_start;
 	ts = 0;
@@ -420,7 +420,7 @@ void processFile(std::string fileName)
         }
 
         
-#line 424 "wmkdepend.cpp"
+#line 424 "wmkdepend.cc"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -480,7 +480,7 @@ st21:
 case 21:
 #line 1 "NONE"
 	{ts = p;}
-#line 484 "wmkdepend.cpp"
+#line 484 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 11: goto tr34;
@@ -508,7 +508,7 @@ st22:
 	if ( ++p == pe )
 		goto _test_eof22;
 case 22:
-#line 512 "wmkdepend.cpp"
+#line 512 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 11: goto tr34;
@@ -537,7 +537,7 @@ st24:
 	if ( ++p == pe )
 		goto _test_eof24;
 case 24:
-#line 541 "wmkdepend.cpp"
+#line 541 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto st23;
 		case 32: goto tr34;
@@ -642,7 +642,7 @@ st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 646 "wmkdepend.cpp"
+#line 646 "wmkdepend.cc"
 	switch( (*p) ) {
 		case 10: goto tr15;
 		case 34: goto tr16;
@@ -662,7 +662,7 @@ st25:
 	if ( ++p == pe )
 		goto _test_eof25;
 case 25:
-#line 666 "wmkdepend.cpp"
+#line 666 "wmkdepend.cc"
 	if ( (*p) == 34 )
 		goto tr19;
 	goto st12;
@@ -684,7 +684,7 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 688 "wmkdepend.cpp"
+#line 688 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st13;
@@ -699,7 +699,7 @@ st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 703 "wmkdepend.cpp"
+#line 703 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr21;
 	goto st14;
@@ -730,7 +730,7 @@ st26:
 	if ( ++p == pe )
 		goto _test_eof26;
 case 26:
-#line 734 "wmkdepend.cpp"
+#line 734 "wmkdepend.cc"
 	if ( (*p) == 42 )
 		goto st18;
 	goto st17;
@@ -770,7 +770,7 @@ st27:
 	if ( ++p == pe )
 		goto _test_eof27;
 case 27:
-#line 774 "wmkdepend.cpp"
+#line 774 "wmkdepend.cc"
 	if ( (*p) == 10 )
 		goto tr2;
 	goto st1;

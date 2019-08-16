@@ -84,7 +84,7 @@ $(WMAKE_BIN)/wmkdep$(EXT_EXE): wmkdep.l
 	$E flex -o $@.c $(<F) && $(cc) $(cFLAGS) $@.c -o $@
 	@rm -f $@.c 2>/dev/null
 
-$(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.cpp
+$(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.cc
 	@mkdir -p $(WMAKE_BIN)
 	$(call QUIET_MESSAGE,wmkdepend,$(<F))
 	$E $(CC) $(c++FLAGS) $(c++LESSWARN) $(<F) -o $@
@@ -92,7 +92,7 @@ $(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.cpp
 # $(WMAKE_BIN)/wmkdepend$(EXT_EXE): wmkdepend.rl
 # 	@mkdir -p $(WMAKE_BIN)
 # 	$(call QUIET_MESSAGE,ragel,$(<F))
-# 	$E ragel -G2 -o $@.cpp $(<F) && $(CC) $(c++FLAGS) $(c++LESSWARN) $@.cpp -o $@
-# 	@rm -f $@.cpp 2>/dev/null
+# 	$E ragel -G2 -o $@.cc $(<F) && $(CC) $(c++FLAGS) $(c++LESSWARN) $@.cc -o $@
+# 	@rm -f $@.cc 2>/dev/null
 
 #------------------------------------------------------------------------------

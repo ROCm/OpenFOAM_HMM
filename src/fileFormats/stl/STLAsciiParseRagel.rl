@@ -25,7 +25,7 @@ Description
     Ragel-based parsing of STL ASCII format.
     The goto-based finite state machine (FSM) is generated with
 
-        ragel -G2 -o STLAsciiParseRagel.C STLAsciiParseRagel.rl
+        ragel -G2 -o STLAsciiParseRagel.cc STLAsciiParseRagel.rl
 
 \*---------------------------------------------------------------------------*/
 

@@ -27,7 +27,7 @@ Description
     Ragel-based parsing of STL ASCII format.
     The goto-based finite state machine (FSM) is generated with
 
-        ragel -G2 -o STLAsciiParseRagel.C STLAsciiParseRagel.rl
+        ragel -G2 -o STLAsciiParseRagel.cc STLAsciiParseRagel.rl
 
 \*---------------------------------------------------------------------------*/
 
@@ -90,7 +90,7 @@ Description
 //
 
 
-#line 94 "STLAsciiParseRagel.C"
+#line 94 "STLAsciiParseRagel.cc"
 static const int stlAscii_start = 1;
 static const int stlAscii_error = 0;
 
@@ -149,7 +149,7 @@ void Foam::Detail::STLAsciiParseRagel::execute(std::istream& is)
     int cs;
 
     
-#line 153 "STLAsciiParseRagel.C"
+#line 153 "STLAsciiParseRagel.cc"
 	{
 	cs = stlAscii_start;
 	}
@@ -208,7 +208,7 @@ void Foam::Detail::STLAsciiParseRagel::execute(std::istream& is)
         }
 
         
-#line 212 "STLAsciiParseRagel.C"
+#line 212 "STLAsciiParseRagel.cc"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -222,7 +222,7 @@ st1:
 	if ( ++p == pe )
 		goto _test_eof1;
 case 1:
-#line 226 "STLAsciiParseRagel.C"
+#line 226 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr2;
 		case 32: goto st1;
@@ -312,7 +312,7 @@ tr233:
 #line 98 "STLAsciiParseRagel.rl"
 	{ die("endsolid", p, pe); }
 	goto st0;
-#line 316 "STLAsciiParseRagel.C"
+#line 316 "STLAsciiParseRagel.cc"
 st0:
 cs = 0;
 	goto _out;
@@ -324,7 +324,7 @@ st2:
 	if ( ++p == pe )
 		goto _test_eof2;
 case 2:
-#line 328 "STLAsciiParseRagel.C"
+#line 328 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 79: goto st3;
 		case 111: goto st3;
@@ -377,7 +377,7 @@ st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 381 "STLAsciiParseRagel.C"
+#line 381 "STLAsciiParseRagel.cc"
 	if ( (*p) == 10 )
 		goto tr11;
 	goto st7;
@@ -395,7 +395,7 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 399 "STLAsciiParseRagel.C"
+#line 399 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 32: goto tr13;
 		case 67: goto tr14;
@@ -416,7 +416,7 @@ st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 420 "STLAsciiParseRagel.C"
+#line 420 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr13;
 		case 32: goto st9;
@@ -438,7 +438,7 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 442 "STLAsciiParseRagel.C"
+#line 442 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 79: goto st11;
 		case 111: goto st11;
@@ -500,7 +500,7 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 504 "STLAsciiParseRagel.C"
+#line 504 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr28;
 		case 32: goto st16;
@@ -520,7 +520,7 @@ st17:
 	if ( ++p == pe )
 		goto _test_eof17;
 case 17:
-#line 524 "STLAsciiParseRagel.C"
+#line 524 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 78: goto st18;
 		case 110: goto st18;
@@ -607,7 +607,7 @@ st165:
 	if ( ++p == pe )
 		goto _test_eof165;
 case 165:
-#line 611 "STLAsciiParseRagel.C"
+#line 611 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr234;
 		case 32: goto st165;
@@ -625,7 +625,7 @@ st25:
 	if ( ++p == pe )
 		goto _test_eof25;
 case 25:
-#line 629 "STLAsciiParseRagel.C"
+#line 629 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 65: goto st26;
 		case 97: goto st26;
@@ -684,7 +684,7 @@ st31:
 	if ( ++p == pe )
 		goto _test_eof31;
 case 31:
-#line 688 "STLAsciiParseRagel.C"
+#line 688 "STLAsciiParseRagel.cc"
 	if ( (*p) == 10 )
 		goto st32;
 	goto st31;
@@ -696,7 +696,7 @@ st32:
 	if ( ++p == pe )
 		goto _test_eof32;
 case 32:
-#line 700 "STLAsciiParseRagel.C"
+#line 700 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 32: goto tr50;
 		case 79: goto tr51;
@@ -713,7 +713,7 @@ st33:
 	if ( ++p == pe )
 		goto _test_eof33;
 case 33:
-#line 717 "STLAsciiParseRagel.C"
+#line 717 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr50;
 		case 32: goto st33;
@@ -731,7 +731,7 @@ st34:
 	if ( ++p == pe )
 		goto _test_eof34;
 case 34:
-#line 735 "STLAsciiParseRagel.C"
+#line 735 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 85: goto st35;
 		case 117: goto st35;
@@ -842,7 +842,7 @@ st45:
 	if ( ++p == pe )
 		goto _test_eof45;
 case 45:
-#line 846 "STLAsciiParseRagel.C"
+#line 846 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr66;
 		case 32: goto st45;
@@ -860,7 +860,7 @@ st46:
 	if ( ++p == pe )
 		goto _test_eof46;
 case 46:
-#line 864 "STLAsciiParseRagel.C"
+#line 864 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 69: goto st47;
 		case 101: goto st47;
@@ -938,7 +938,7 @@ st53:
 	if ( ++p == pe )
 		goto _test_eof53;
 case 53:
-#line 942 "STLAsciiParseRagel.C"
+#line 942 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st54;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -952,7 +952,7 @@ st54:
 	if ( ++p == pe )
 		goto _test_eof54;
 case 54:
-#line 956 "STLAsciiParseRagel.C"
+#line 956 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st55;
 	goto tr68;
@@ -986,7 +986,7 @@ st56:
 	if ( ++p == pe )
 		goto _test_eof56;
 case 56:
-#line 990 "STLAsciiParseRagel.C"
+#line 990 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st56;
 		case 32: goto st56;
@@ -1008,7 +1008,7 @@ st57:
 	if ( ++p == pe )
 		goto _test_eof57;
 case 57:
-#line 1012 "STLAsciiParseRagel.C"
+#line 1012 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st58;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -1022,7 +1022,7 @@ st58:
 	if ( ++p == pe )
 		goto _test_eof58;
 case 58:
-#line 1026 "STLAsciiParseRagel.C"
+#line 1026 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st59;
 	goto tr68;
@@ -1056,7 +1056,7 @@ st60:
 	if ( ++p == pe )
 		goto _test_eof60;
 case 60:
-#line 1060 "STLAsciiParseRagel.C"
+#line 1060 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st60;
 		case 32: goto st60;
@@ -1078,7 +1078,7 @@ st61:
 	if ( ++p == pe )
 		goto _test_eof61;
 case 61:
-#line 1082 "STLAsciiParseRagel.C"
+#line 1082 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st62;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -1092,7 +1092,7 @@ st62:
 	if ( ++p == pe )
 		goto _test_eof62;
 case 62:
-#line 1096 "STLAsciiParseRagel.C"
+#line 1096 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st63;
 	goto tr68;
@@ -1127,7 +1127,7 @@ st64:
 	if ( ++p == pe )
 		goto _test_eof64;
 case 64:
-#line 1131 "STLAsciiParseRagel.C"
+#line 1131 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st64;
 		case 10: goto st65;
@@ -1150,7 +1150,7 @@ st65:
 	if ( ++p == pe )
 		goto _test_eof65;
 case 65:
-#line 1154 "STLAsciiParseRagel.C"
+#line 1154 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 32: goto tr106;
 		case 86: goto tr107;
@@ -1167,7 +1167,7 @@ st66:
 	if ( ++p == pe )
 		goto _test_eof66;
 case 66:
-#line 1171 "STLAsciiParseRagel.C"
+#line 1171 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr106;
 		case 32: goto st66;
@@ -1185,7 +1185,7 @@ st67:
 	if ( ++p == pe )
 		goto _test_eof67;
 case 67:
-#line 1189 "STLAsciiParseRagel.C"
+#line 1189 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 69: goto st68;
 		case 101: goto st68;
@@ -1263,7 +1263,7 @@ st74:
 	if ( ++p == pe )
 		goto _test_eof74;
 case 74:
-#line 1267 "STLAsciiParseRagel.C"
+#line 1267 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st75;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -1277,7 +1277,7 @@ st75:
 	if ( ++p == pe )
 		goto _test_eof75;
 case 75:
-#line 1281 "STLAsciiParseRagel.C"
+#line 1281 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st76;
 	goto tr68;
@@ -1311,7 +1311,7 @@ st77:
 	if ( ++p == pe )
 		goto _test_eof77;
 case 77:
-#line 1315 "STLAsciiParseRagel.C"
+#line 1315 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st77;
 		case 32: goto st77;
@@ -1333,7 +1333,7 @@ st78:
 	if ( ++p == pe )
 		goto _test_eof78;
 case 78:
-#line 1337 "STLAsciiParseRagel.C"
+#line 1337 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st79;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -1347,7 +1347,7 @@ st79:
 	if ( ++p == pe )
 		goto _test_eof79;
 case 79:
-#line 1351 "STLAsciiParseRagel.C"
+#line 1351 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st80;
 	goto tr68;
@@ -1381,7 +1381,7 @@ st81:
 	if ( ++p == pe )
 		goto _test_eof81;
 case 81:
-#line 1385 "STLAsciiParseRagel.C"
+#line 1385 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st81;
 		case 32: goto st81;
@@ -1403,7 +1403,7 @@ st82:
 	if ( ++p == pe )
 		goto _test_eof82;
 case 82:
-#line 1407 "STLAsciiParseRagel.C"
+#line 1407 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st83;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -1417,7 +1417,7 @@ st83:
 	if ( ++p == pe )
 		goto _test_eof83;
 case 83:
-#line 1421 "STLAsciiParseRagel.C"
+#line 1421 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st84;
 	goto tr68;
@@ -1452,7 +1452,7 @@ st85:
 	if ( ++p == pe )
 		goto _test_eof85;
 case 85:
-#line 1456 "STLAsciiParseRagel.C"
+#line 1456 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st85;
 		case 10: goto st86;
@@ -1475,7 +1475,7 @@ st86:
 	if ( ++p == pe )
 		goto _test_eof86;
 case 86:
-#line 1479 "STLAsciiParseRagel.C"
+#line 1479 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 32: goto tr145;
 		case 86: goto tr146;
@@ -1492,7 +1492,7 @@ st87:
 	if ( ++p == pe )
 		goto _test_eof87;
 case 87:
-#line 1496 "STLAsciiParseRagel.C"
+#line 1496 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr145;
 		case 32: goto st87;
@@ -1510,7 +1510,7 @@ st88:
 	if ( ++p == pe )
 		goto _test_eof88;
 case 88:
-#line 1514 "STLAsciiParseRagel.C"
+#line 1514 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 69: goto st89;
 		case 101: goto st89;
@@ -1588,7 +1588,7 @@ st95:
 	if ( ++p == pe )
 		goto _test_eof95;
 case 95:
-#line 1592 "STLAsciiParseRagel.C"
+#line 1592 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st96;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -1602,7 +1602,7 @@ st96:
 	if ( ++p == pe )
 		goto _test_eof96;
 case 96:
-#line 1606 "STLAsciiParseRagel.C"
+#line 1606 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st97;
 	goto tr68;
@@ -1636,7 +1636,7 @@ st98:
 	if ( ++p == pe )
 		goto _test_eof98;
 case 98:
-#line 1640 "STLAsciiParseRagel.C"
+#line 1640 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st98;
 		case 32: goto st98;
@@ -1658,7 +1658,7 @@ st99:
 	if ( ++p == pe )
 		goto _test_eof99;
 case 99:
-#line 1662 "STLAsciiParseRagel.C"
+#line 1662 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st100;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -1672,7 +1672,7 @@ st100:
 	if ( ++p == pe )
 		goto _test_eof100;
 case 100:
-#line 1676 "STLAsciiParseRagel.C"
+#line 1676 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st101;
 	goto tr68;
@@ -1706,7 +1706,7 @@ st102:
 	if ( ++p == pe )
 		goto _test_eof102;
 case 102:
-#line 1710 "STLAsciiParseRagel.C"
+#line 1710 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st102;
 		case 32: goto st102;
@@ -1728,7 +1728,7 @@ st103:
 	if ( ++p == pe )
 		goto _test_eof103;
 case 103:
-#line 1732 "STLAsciiParseRagel.C"
+#line 1732 "STLAsciiParseRagel.cc"
 	if ( (*p) == 46 )
 		goto st104;
 	if ( 48 <= (*p) && (*p) <= 57 )
@@ -1742,7 +1742,7 @@ st104:
 	if ( ++p == pe )
 		goto _test_eof104;
 case 104:
-#line 1746 "STLAsciiParseRagel.C"
+#line 1746 "STLAsciiParseRagel.cc"
 	if ( 48 <= (*p) && (*p) <= 57 )
 		goto st105;
 	goto tr68;
@@ -1777,7 +1777,7 @@ st106:
 	if ( ++p == pe )
 		goto _test_eof106;
 case 106:
-#line 1781 "STLAsciiParseRagel.C"
+#line 1781 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto st106;
 		case 10: goto st107;
@@ -1800,7 +1800,7 @@ st107:
 	if ( ++p == pe )
 		goto _test_eof107;
 case 107:
-#line 1804 "STLAsciiParseRagel.C"
+#line 1804 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 32: goto tr185;
 		case 69: goto tr186;
@@ -1817,7 +1817,7 @@ st108:
 	if ( ++p == pe )
 		goto _test_eof108;
 case 108:
-#line 1821 "STLAsciiParseRagel.C"
+#line 1821 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr185;
 		case 32: goto st108;
@@ -1835,7 +1835,7 @@ st109:
 	if ( ++p == pe )
 		goto _test_eof109;
 case 109:
-#line 1839 "STLAsciiParseRagel.C"
+#line 1839 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 78: goto st110;
 		case 110: goto st110;
@@ -1913,7 +1913,7 @@ st117:
 	if ( ++p == pe )
 		goto _test_eof117;
 case 117:
-#line 1917 "STLAsciiParseRagel.C"
+#line 1917 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 10: goto tr198;
 		case 32: goto st117;
@@ -1931,7 +1931,7 @@ st118:
 	if ( ++p == pe )
 		goto _test_eof118;
 case 118:
-#line 1935 "STLAsciiParseRagel.C"
+#line 1935 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 78: goto st119;
 		case 110: goto st119;
@@ -2006,7 +2006,7 @@ st126:
 	if ( ++p == pe )
 		goto _test_eof126;
 case 126:
-#line 2010 "STLAsciiParseRagel.C"
+#line 2010 "STLAsciiParseRagel.cc"
 	if ( (*p) == 10 )
 		goto st127;
 	goto st126;
@@ -2018,7 +2018,7 @@ st127:
 	if ( ++p == pe )
 		goto _test_eof127;
 case 127:
-#line 2022 "STLAsciiParseRagel.C"
+#line 2022 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 32: goto tr28;
 		case 69: goto tr15;
@@ -2070,7 +2070,7 @@ st131:
 	if ( ++p == pe )
 		goto _test_eof131;
 case 131:
-#line 2074 "STLAsciiParseRagel.C"
+#line 2074 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr179;
 		case 10: goto tr180;
@@ -2125,7 +2125,7 @@ st135:
 	if ( ++p == pe )
 		goto _test_eof135;
 case 135:
-#line 2129 "STLAsciiParseRagel.C"
+#line 2129 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr170;
 		case 32: goto tr170;
@@ -2179,7 +2179,7 @@ st139:
 	if ( ++p == pe )
 		goto _test_eof139;
 case 139:
-#line 2183 "STLAsciiParseRagel.C"
+#line 2183 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr161;
 		case 32: goto tr161;
@@ -2234,7 +2234,7 @@ st143:
 	if ( ++p == pe )
 		goto _test_eof143;
 case 143:
-#line 2238 "STLAsciiParseRagel.C"
+#line 2238 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr140;
 		case 10: goto tr141;
@@ -2289,7 +2289,7 @@ st147:
 	if ( ++p == pe )
 		goto _test_eof147;
 case 147:
-#line 2293 "STLAsciiParseRagel.C"
+#line 2293 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr131;
 		case 32: goto tr131;
@@ -2343,7 +2343,7 @@ st151:
 	if ( ++p == pe )
 		goto _test_eof151;
 case 151:
-#line 2347 "STLAsciiParseRagel.C"
+#line 2347 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr122;
 		case 32: goto tr122;
@@ -2398,7 +2398,7 @@ st155:
 	if ( ++p == pe )
 		goto _test_eof155;
 case 155:
-#line 2402 "STLAsciiParseRagel.C"
+#line 2402 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr101;
 		case 10: goto tr102;
@@ -2453,7 +2453,7 @@ st159:
 	if ( ++p == pe )
 		goto _test_eof159;
 case 159:
-#line 2457 "STLAsciiParseRagel.C"
+#line 2457 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr92;
 		case 32: goto tr92;
@@ -2507,7 +2507,7 @@ st163:
 	if ( ++p == pe )
 		goto _test_eof163;
 case 163:
-#line 2511 "STLAsciiParseRagel.C"
+#line 2511 "STLAsciiParseRagel.cc"
 	switch( (*p) ) {
 		case 9: goto tr83;
 		case 32: goto tr83;
@@ -2914,7 +2914,7 @@ case 163:
 #line 98 "STLAsciiParseRagel.rl"
 	{ die("endsolid", p, pe); }
 	break;
-#line 2918 "STLAsciiParseRagel.C"
+#line 2918 "STLAsciiParseRagel.cc"
 	}
 	}
 

@@ -1,0 +1,34 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     wrap-lemon
+#
+# Usage
+#     wrap-lemon [lemon-options]
+#
+# Description
+#     A wrapper to use lemon compiled with OpenFOAM with the appropriate
+#     parser template.
+#
+#------------------------------------------------------------------------------
+
+binDir="${WMAKE_BIN:-$WM_PROJECT_DIR/wmake/platforms/$WM_ARCH$WM_COMPILER}"
+etcDir="${WM_DIR:-$WM_PROJECT_DIR/wmake}/etc"
+
+# Or another location
+"$binDir/lemon" "-T${etcDir}/lempar.c" $*
+rc=$?
+
+exit "$rc"   # Exit with lemon return code
+
+#------------------------------------------------------------------------------
