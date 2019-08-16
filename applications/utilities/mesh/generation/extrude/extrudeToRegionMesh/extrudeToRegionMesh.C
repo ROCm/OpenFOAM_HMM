@@ -149,7 +149,7 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-label findPatchID(const List<polyPatch*>& newPatches, const word& name)
+label findPatchID(const UList<polyPatch*>& newPatches, const word& name)
 {
     forAll(newPatches, i)
     {
@@ -160,6 +160,20 @@ label findPatchID(const List<polyPatch*>& newPatches, const word& name)
     }
     return -1;
 }
+
+
+#ifdef FULLDEBUG
+void printPatches(Ostream& os, const UList<polyPatch*>& newPatches)
+{
+    for (const polyPatch* ppPtr : newPatches)
+    {
+        const polyPatch& pp = *ppPtr;
+        os  << "    name:" << pp.name() << " index:" << pp.index()
+            << " start:" << pp.start() << " size:" << pp.size()
+            << " type:" << pp.type() << nl;
+    }
+}
+#endif
 
 
 template<class PatchType>
@@ -198,6 +212,12 @@ label addPatch
         startFacei = pp.start()+pp.size();
     }
 
+    #ifdef FULLDEBUG
+    Pout<< "addPatch : starting newPatches:"
+        << " patch:" << patchi << " startFace:" << startFacei << nl;
+    printPatches(Pout, newPatches);
+    Pout<< "*** end of addPatch:" << endl;
+    #endif
 
     newPatches.append
     (
@@ -253,6 +273,15 @@ label addPatch
         startFacei = pp.start()+pp.size();
     }
 
+
+    #ifdef FULLDEBUG
+    Pout<< "addPatch : starting newPatches:"
+        << " patch:" << patchi << " startFace:" << startFacei << nl;
+    printPatches(Pout, newPatches);
+    Pout<< "*** end of addPatch:" << endl;
+    #endif
+
+
     dictionary patchDict(dict);
     patchDict.set("type", PatchType::typeName);
     patchDict.set("nFaces", 0);
@@ -300,7 +329,7 @@ void deleteEmptyPatches(fvMesh& mesh)
             if (isA<processorPolyPatch>(patches[patchi]))
             {
                 // Similar named processor patch? Not 'possible'.
-                if (patches[patchi].size() == 0)
+                if (patches[patchi].empty())
                 {
                     Pout<< "Deleting processor patch " << patchi
                         << " name:" << patches[patchi].name()
@@ -315,7 +344,7 @@ void deleteEmptyPatches(fvMesh& mesh)
             else
             {
                 // Common patch.
-                if (returnReduce(patches[patchi].size(), sumOp<label>()) == 0)
+                if (returnReduce(patches[patchi].empty(), andOp<bool>()))
                 {
                     Pout<< "Deleting patch " << patchi
                         << " name:" << patches[patchi].name()
@@ -337,7 +366,7 @@ void deleteEmptyPatches(fvMesh& mesh)
         {
             // Unique to this processor. Note: could check that these are
             // only processor patches.
-            if (patches[patchi].size() == 0)
+            if (patches[patchi].empty())
             {
                 Pout<< "Deleting processor patch " << patchi
                     << " name:" << patches[patchi].name()
@@ -1125,8 +1154,16 @@ void setCouplingInfo
         if (!newPatches[patchi])
         {
             newPatches[patchi] = patches[patchi].clone(patches).ptr();
+            //newPatches[patchi].index() = patchi;
         }
     }
+
+
+    #ifdef FULLDEBUG
+    Pout<< "*** setCouplingInfo addFvPAtches:" << nl;
+    printPatches(Pout, newPatches);
+    Pout<< "*** setCouplingInfo end of addFvPAtches:" << endl;
+    #endif
 
     mesh.removeFvBoundary();
     mesh.addFvPatches(newPatches, true);
@@ -1921,14 +1958,19 @@ int main(int argc, char *argv[])
     {
         // Add coupling patches to mesh
 
-        // Clone existing patches
+        // 1. Clone existing global patches
         DynamicList<polyPatch*> newPatches(patches.size());
         forAll(patches, patchi)
         {
-            newPatches.append(patches[patchi].clone(patches).ptr());
+            if (!isA<processorPolyPatch>(patches[patchi]))
+            {
+                autoPtr<polyPatch> clonedPatch(patches[patchi].clone(patches));
+                clonedPatch->index() = newPatches.size();
+                newPatches.append(clonedPatch.ptr());
+            }
         }
 
-        // Add new patches
+        // 2. Add new patches
         addCouplingPatches
         (
             mesh,
@@ -1943,6 +1985,25 @@ int main(int argc, char *argv[])
             interMeshTopPatch,
             interMeshBottomPatch
         );
+
+        // 3. Clone processor patches
+        forAll(patches, patchi)
+        {
+            if (isA<processorPolyPatch>(patches[patchi]))
+            {
+                autoPtr<polyPatch> clonedPatch(patches[patchi].clone(patches));
+                clonedPatch->index() = newPatches.size();
+                newPatches.append(clonedPatch.ptr());
+            }
+        }
+
+
+        #ifdef FULLDEBUG
+        Pout<< "*** adaptMesh : addFvPAtches:" << nl;
+        printPatches(Pout, newPatches);
+        Pout<< "*** end of adaptMesh : addFvPAtches:" << endl;
+        #endif
+
 
         // Add to mesh
         mesh.clearOut();
@@ -2326,6 +2387,14 @@ int main(int argc, char *argv[])
         regionPatches[patchi] = ppPtr->clone(regionMesh.boundaryMesh()).ptr();
         delete ppPtr;
     }
+
+    #ifdef FULLDEBUG
+    Pout<< "*** regionPatches : regionPatches:" << nl;
+    printPatches(Pout, regionPatches);
+    Pout<< "*** end of regionPatches : regionPatches:" << endl;
+    #endif
+
+
     regionMesh.clearOut();
     regionMesh.removeFvBoundary();
     regionMesh.addFvPatches(regionPatches, true);
