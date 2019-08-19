@@ -49,7 +49,7 @@ namespace cellCellStencils
 }
 
 Foam::scalar
-Foam::cellCellStencils::cellVolumeWeight::defaultOverlapTolerance_ = 1e-9;
+Foam::cellCellStencils::cellVolumeWeight::defaultOverlapTolerance_ = 1e-6;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -953,7 +953,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                     // Interpolate. Check if enough overlap
                     scalar v = mesh_.V()[cellI];
                     scalar overlapVol = sum(allWeights[cellI]);
-                    if (overlapVol > (1.0-overlapTolerance_)*v)
+                    if (overlapVol > overlapTolerance_*v)
                     {
                         allCellTypes[cellI] = INTERPOLATED;
                     }
@@ -971,7 +971,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
         }
     }
 
-
+/*
     // Knock out cell with insufficient interpolation weights
     forAll(allCellTypes, cellI)
     {
@@ -989,7 +989,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
             }
         }
     }
-
+*/
     if (debug)
     {
         tmp<volScalarField> tfld
