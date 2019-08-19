@@ -102,14 +102,27 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
     label nFaces = returnReduce(mesh.faces().size(), sumOp<label>());
     label nIntFaces = returnReduce(mesh.faceNeighbour().size(), sumOp<label>());
     label nCells = returnReduce(mesh.cells().size(), sumOp<label>());
+    label nPatches = mesh.boundaryMesh().size();
 
     Info<< "    faces:            " << nFaces << nl
         << "    internal faces:   " << nIntFaces << nl
         << "    cells:            " << nCells << nl
         << "    faces per cell:   "
         << (scalar(nFaces) + scalar(nIntFaces))/max(1, nCells) << nl
-        << "    boundary patches: " << mesh.boundaryMesh().size() << nl
-        << "    point zones:      " << mesh.pointZones().size() << nl
+        << "    boundary patches: ";
+
+    if (Pstream::parRun())
+    {
+        // Number of global patches and min-max range of total patches
+        Info<< mesh.boundaryMesh().nNonProcessor() << ' '
+            << returnReduce(labelMinMax(nPatches), minMaxOp<label>()) << nl;
+    }
+    else
+    {
+        Info<< nPatches << nl;
+    }
+
+    Info<< "    point zones:      " << mesh.pointZones().size() << nl
         << "    face zones:       " << mesh.faceZones().size() << nl
         << "    cell zones:       " << mesh.cellZones().size() << nl
         << endl;
