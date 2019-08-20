@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,10 +43,8 @@ bool Foam::foamVersion::patched()
 
 void Foam::foamVersion::printBuildInfo(const bool full)
 {
-    // Can use #if OPENFOAM directly
-
     Info<< "Using: OpenFOAM-" << foamVersion::version.c_str()
-        << " (" << OPENFOAM << ") (see www.OpenFOAM.com)" << nl
+        << " (" << foamVersion::api << ") (see www.OpenFOAM.com)\n"
         << "Build: " << foamVersion::build.c_str();
 
     if (foamVersion::patched())

@@ -31,6 +31,7 @@ License
 #include "dictionary.H"
 #include "JobInfo.H"
 #include "Pstream.H"
+#include "foamVersion.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -49,12 +50,12 @@ void Foam::error::warnAboutAge(const char* what, const int version)
             << "    This " << what << " is considered to be VERY old!\n"
             << std::endl;
     }
-    else if (version < OPENFOAM)
+    else if (version < foamVersion::api)
     {
         const int months =
         (
             // YYMM -> months
-            (12 * (OPENFOAM/100) + (OPENFOAM % 100))
+            (12 * (foamVersion::api/100) + (foamVersion::api % 100))
           - (12 * (version/100)  + (version % 100))
         );
 
@@ -63,7 +64,7 @@ void Foam::error::warnAboutAge(const char* what, const int version)
             << " months old.\n"
             << std::endl;
     }
-    // No warning for (OPENFOAM < version).
+    // No warning for (foamVersion::api < version).
     // We use this to denote future expiry dates of transition features.
 }
 

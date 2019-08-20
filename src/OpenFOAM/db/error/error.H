@@ -103,7 +103,7 @@ public:
         //  \param what description for the warning
         //  \param version is the old version (YYMM) for determining the
         //      age in months compared to the current OpenFOAM version
-        //      as conveyed by the \c OPENFOAM compiler define.
+        //      as conveyed by the \c foamVersion::api value.
         static void warnAboutAge(const char* what, const int version);
 
 
