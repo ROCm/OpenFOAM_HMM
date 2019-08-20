@@ -34,7 +34,7 @@ Foam::token Foam::dictionaryTokens::keywordToken(const entry& e)
 
     if (k.empty())
     {
-        return token::undefinedToken;
+        return token();
     }
     if (k.isPattern())
     {

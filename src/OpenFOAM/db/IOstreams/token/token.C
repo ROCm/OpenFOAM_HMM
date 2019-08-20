@@ -36,7 +36,6 @@ namespace Foam
     defineRunTimeSelectionTable(tokenCompound, Istream);
 }
 
-const char* const Foam::token::typeName = "token";
 const Foam::token Foam::token::undefinedToken;
 
 

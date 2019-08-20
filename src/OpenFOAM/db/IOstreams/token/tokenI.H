@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -89,45 +89,6 @@ inline void Foam::token::setUndefined()
 }
 
 
-inline void Foam::token::clear()
-{
-    switch (type_)
-    {
-        case tokenType::WORD:
-        {
-            delete data_.wordPtr;
-            break;
-        }
-
-        case tokenType::STRING:
-        case tokenType::VARIABLE:
-        case tokenType::VERBATIMSTRING:
-        {
-            delete data_.stringPtr;
-            break;
-        }
-
-        case tokenType::COMPOUND:
-        {
-            if (data_.compoundPtr->unique())
-            {
-                delete data_.compoundPtr;
-            }
-            else
-            {
-                data_.compoundPtr->refCount::operator--();
-            }
-            break;
-        }
-
-        default:
-            break;
-    }
-
-    setUndefined();
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline constexpr Foam::token::token() noexcept
@@ -186,42 +147,6 @@ inline Foam::token::token(token&& tok)
     tok.setUndefined(); // zero the union content without any checking
     tok.lineNumber_ = 0;
 }
-
-
-inline Foam::token::token(punctuationToken p)
-:
-    token(p, 0)
-{}
-
-
-inline Foam::token::token(const word& w)
-:
-    token(w, 0)
-{}
-
-
-inline Foam::token::token(const string& str)
-:
-    token(str, 0)
-{}
-
-
-inline Foam::token::token(const label val)
-:
-    token(val, 0)
-{}
-
-
-inline Foam::token::token(const floatScalar val)
-:
-    token(val, 0)
-{}
-
-
-inline Foam::token::token(const doubleScalar val)
-:
-    token(val, 0)
-{}
 
 
 inline Foam::token::token(punctuationToken p, label lineNumber)
@@ -284,15 +209,74 @@ inline Foam::token::token(const string& str, label lineNumber)
 }
 
 
+inline Foam::token::token(word&& w, label lineNumber)
+:
+    data_(),
+    type_(tokenType::WORD),
+    lineNumber_(lineNumber)
+{
+    data_.wordPtr = new word(std::move(w));
+}
+
+
+inline Foam::token::token(string&& str, label lineNumber)
+:
+    data_(),
+    type_(tokenType::STRING),
+    lineNumber_(lineNumber)
+{
+    data_.stringPtr = new string(std::move(str));
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 inline Foam::token::~token()
 {
-    clear();
+    reset();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline void Foam::token::reset()
+{
+    switch (type_)
+    {
+        case tokenType::WORD:
+        {
+            delete data_.wordPtr;
+            break;
+        }
+
+        case tokenType::STRING:
+        case tokenType::VARIABLE:
+        case tokenType::VERBATIMSTRING:
+        {
+            delete data_.stringPtr;
+            break;
+        }
+
+        case tokenType::COMPOUND:
+        {
+            if (data_.compoundPtr->unique())
+            {
+                delete data_.compoundPtr;
+            }
+            else
+            {
+                data_.compoundPtr->refCount::operator--();
+            }
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    setUndefined();
+}
+
 
 inline void Foam::token::swap(token& tok)
 {
@@ -401,7 +385,7 @@ inline bool Foam::token::isBool() const
 
 inline bool Foam::token::boolToken() const
 {
-    if (type_ == tokenType::BOOL)
+    if (type_ == tokenType::BOOL || type_ == tokenType::LABEL)
     {
         return data_.labelVal;
     }
@@ -577,12 +561,6 @@ inline const Foam::word& Foam::token::wordToken() const
 }
 
 
-inline bool Foam::token::isVariable() const
-{
-    return (type_ == tokenType::VARIABLE);
-}
-
-
 inline bool Foam::token::isString() const
 {
     return
@@ -591,6 +569,24 @@ inline bool Foam::token::isString() const
      || type_ == tokenType::VARIABLE
      || type_ == tokenType::VERBATIMSTRING
     );
+}
+
+
+inline bool Foam::token::isVariable() const
+{
+    return (type_ == tokenType::VARIABLE);
+}
+
+
+inline bool Foam::token::isVerbatim() const
+{
+    return (type_ == tokenType::VERBATIMSTRING);
+}
+
+
+inline bool Foam::token::isStringType() const
+{
+    return (isWord() || isString());
 }
 
 
@@ -604,6 +600,11 @@ inline const Foam::string& Foam::token::stringToken() const
     )
     {
         return *data_.stringPtr;
+    }
+    else if (type_ == tokenType::WORD)
+    {
+        // Upcast to string
+        return static_cast<const string&>(*data_.wordPtr);
     }
 
     parseError("string");
@@ -631,7 +632,7 @@ inline const Foam::token::compound& Foam::token::compoundToken() const
 
 inline void Foam::token::setBad()
 {
-    clear();
+    reset();
     type_ = tokenType::ERROR;
 }
 
@@ -640,7 +641,7 @@ inline void Foam::token::setBad()
 
 inline void Foam::token::operator=(const token& tok)
 {
-    clear();
+    reset();
 
     type_ = tok.type_;
     data_ = tok.data_;  // bit-wise copy of union content
@@ -681,7 +682,7 @@ inline void Foam::token::operator=(const token& tok)
 
 inline void Foam::token::operator=(token&& tok)
 {
-    clear();
+    reset();
     lineNumber_ = 0;
     swap(tok);
 }
@@ -689,7 +690,7 @@ inline void Foam::token::operator=(token&& tok)
 
 inline void Foam::token::operator=(const punctuationToken p)
 {
-    clear();
+    reset();
     type_ = tokenType::PUNCTUATION;
     data_.punctuationVal = p;
 }
@@ -697,7 +698,7 @@ inline void Foam::token::operator=(const punctuationToken p)
 
 inline void Foam::token::operator=(const label val)
 {
-    clear();
+    reset();
     type_ = tokenType::LABEL;
     data_.labelVal = val;
 }
@@ -705,7 +706,7 @@ inline void Foam::token::operator=(const label val)
 
 inline void Foam::token::operator=(const floatScalar val)
 {
-    clear();
+    reset();
     type_ = tokenType::FLOAT_SCALAR;
     data_.floatVal = val;
 }
@@ -713,31 +714,15 @@ inline void Foam::token::operator=(const floatScalar val)
 
 inline void Foam::token::operator=(const doubleScalar val)
 {
-    clear();
+    reset();
     type_ = tokenType::DOUBLE_SCALAR;
     data_.doubleVal = val;
 }
 
 
-inline void Foam::token::operator=(word* wordPtr)
-{
-    clear();
-    type_ = tokenType::WORD;
-    data_.wordPtr = wordPtr;
-}
-
-
-inline void Foam::token::operator=(string* stringPtr)
-{
-    clear();
-    type_ = tokenType::STRING;
-    data_.stringPtr = stringPtr;
-}
-
-
 inline void Foam::token::operator=(const word& w)
 {
-    clear();
+    reset();
     type_ = tokenType::WORD;
     data_.wordPtr = new word(w);
 }
@@ -745,7 +730,7 @@ inline void Foam::token::operator=(const word& w)
 
 inline void Foam::token::operator=(const string& str)
 {
-    clear();
+    reset();
     type_ = tokenType::STRING;
     data_.stringPtr = new string(str);
 }
@@ -753,25 +738,23 @@ inline void Foam::token::operator=(const string& str)
 
 inline void Foam::token::operator=(word&& w)
 {
-    clear();
+    reset();
     type_ = tokenType::WORD;
-    data_.wordPtr = new word;
-    data_.wordPtr->swap(w);
+    data_.wordPtr = new word(std::move(w));
 }
 
 
 inline void Foam::token::operator=(string&& s)
 {
-    clear();
+    reset();
     type_ = tokenType::STRING;
-    data_.stringPtr = new string;
-    data_.stringPtr->swap(s);
+    data_.stringPtr = new string(std::move(s));
 }
 
 
 inline void Foam::token::operator=(Foam::token::compound* compoundPtr)
 {
-    clear();
+    reset();
     type_ = tokenType::COMPOUND;
     data_.compoundPtr = compoundPtr;
 }
@@ -832,22 +815,13 @@ inline bool Foam::token::operator==(const punctuationToken p) const
 }
 
 
-inline bool Foam::token::operator==(const word& w) const
-{
-    return (type_ == tokenType::WORD && wordToken() == w);
-}
-
-
-inline bool Foam::token::operator==(const string& str) const
+inline bool Foam::token::operator==(const std::string& s) const
 {
     return
     (
-        (
-            type_ == tokenType::STRING
-         || type_ == tokenType::VARIABLE
-         || type_ == tokenType::VERBATIMSTRING
-        )
-     && stringToken() == str
+        type_ == tokenType::WORD
+      ? s == *data_.wordPtr
+      : isString() && s == *data_.stringPtr
     );
 }
 
@@ -882,9 +856,9 @@ inline bool Foam::token::operator==(const doubleScalar val) const
 }
 
 
-inline bool Foam::token::operator!=(const token& t) const
+inline bool Foam::token::operator!=(const token& tok) const
 {
-    return !operator==(t);
+    return !operator==(tok);
 }
 
 
@@ -912,15 +886,9 @@ inline bool Foam::token::operator!=(const doubleScalar val) const
 }
 
 
-inline bool Foam::token::operator!=(const word& w) const
+inline bool Foam::token::operator!=(const std::string& s) const
 {
-    return !operator==(w);
-}
-
-
-inline bool Foam::token::operator!=(const string& str) const
-{
-    return !operator==(str);
+    return !operator==(s);
 }
 
 

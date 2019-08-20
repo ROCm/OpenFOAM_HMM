@@ -98,7 +98,7 @@ bool Foam::Istream::peekBack(token& tok)
     }
     else
     {
-        tok = token::undefinedToken;
+        tok.reset();
     }
 
     return putBack_;

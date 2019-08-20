@@ -152,7 +152,7 @@ Foam::word Foam::token::name() const
 
 Foam::Istream& Foam::operator>>(Istream& is, token& tok)
 {
-    tok.clear();
+    tok.reset();
     return is.read(tok);
 }
 
@@ -167,10 +167,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
                 << "Undefined token" << endl;
         break;
 
-        case token::tokenType::BOOL:
-            os << tok.data_.labelVal;
-        break;
-
         case token::tokenType::FLAG:
             // Swallow the flag
         break;
@@ -179,6 +175,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
             os << tok.data_.punctuationVal;
         break;
 
+        case token::tokenType::BOOL:
         case token::tokenType::LABEL:
             os << tok.data_.labelVal;
         break;

@@ -37,7 +37,7 @@ Foam::label Foam::ITstream::parseStream(ISstream& is, tokenList& tokens)
     label nTok = 0;
 
     tokens.clear();
-    tokens.setSize(64, token::undefinedToken);
+    tokens.resize(64, token());
 
     token tok;
     while (!is.read(tok).bad() && tok.good())
@@ -45,7 +45,7 @@ Foam::label Foam::ITstream::parseStream(ISstream& is, tokenList& tokens)
         tokens.newElmt(nTok++) = std::move(tok);
     }
 
-    tokens.setSize(nTok);
+    tokens.resize(nTok);
 
     return nTok;
 }
@@ -243,7 +243,7 @@ Foam::Istream& Foam::ITstream::read(token& tok)
             setEof();
         }
 
-        tok = token::undefinedToken;
+        tok.reset();
 
         if (size())
         {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -57,12 +57,9 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
-
+// Forward Declarations
 class token;
-
-Istream& operator>>(Istream& is, token& t);
-Ostream& operator<<(Ostream& os, const token& t);
+Ostream& operator<<(Ostream& os, const token& tok);
 
 
 /*---------------------------------------------------------------------------*\
@@ -81,9 +78,9 @@ public:
         UNDEFINED = 0,    //!< An undefined token-type
 
         // Fundamental types
-        BOOL,             //!< boolean type
         FLAG,             //!< stream flag (1-byte bitmask)
         PUNCTUATION,      //!< single character punctuation
+        BOOL,             //!< boolean type
         LABEL,            //!< label (integer) type
         FLOAT_SCALAR,     //!< float (single-precision) type
         DOUBLE_SCALAR,    //!< double (double-precision) type
@@ -106,12 +103,12 @@ public:
     {
         NO_FLAG = 0,   //!< No flags
         ASCII   = 1,   //!< ASCII-mode stream
-        BINARY  = 2,   //!< BINARY-mode stream
+        BINARY  = 2    //!< BINARY-mode stream
     };
 
 
     //- Standard punctuation tokens (a character)
-    enum punctuationToken
+    enum punctuationToken : char
     {
         NULL_TOKEN     = '\0',
         SPACE          = ' ',
@@ -247,7 +244,7 @@ public:
     };
 
 
-    //- Static undefined token
+    //- An undefined token
     static const token undefinedToken;
 
 
@@ -273,7 +270,7 @@ private:
     };
 
 
-    // Private data
+    // Private Data
 
         //- The data content (as a union).
         //  For memory alignment this should appear as the first member.
@@ -291,23 +288,21 @@ private:
         //- Set as UNDEFINED and zero the union content without any checking
         inline void setUndefined();
 
-        //- Clear any allocated storage (word or string) and set to UNDEFINED
-        inline void clear();
-
         // Parse error, expected 'expected', found ...
         void parseError(const char* expected) const;
 
 
 public:
 
-    // Static data members
+    // Static Data Members
 
-        static const char* const typeName;
+        //- The type name is "token"
+        static constexpr const char* const typeName = "token";
 
 
     // Constructors
 
-        //- Construct null
+        //- Construct null, initialized to an UNDEFINED token.
         inline constexpr token() noexcept;
 
         //- Copy construct
@@ -317,44 +312,31 @@ public:
         inline token(token&& t);
 
         //- Construct punctuation character token
-        inline explicit token(punctuationToken p);
+        inline explicit token(punctuationToken p, label lineNumber=0);
 
         //- Construct label token
-        inline explicit token(const label val);
+        inline explicit token(const label val, label lineNumber=0);
 
-        //- Construct floatScalar token
-        inline explicit token(const floatScalar val);
+        //- Construct float token
+        inline explicit token(const floatScalar val, label lineNumber=0);
 
-        //- Construct doubleScalar token
-        inline explicit token(const doubleScalar val);
+        //- Construct double token
+        inline explicit token(const doubleScalar val, label lineNumber=0);
 
-        //- Construct word token by copying word contents
-        inline explicit token(const word& w);
+        //- Copy construct word token
+        inline explicit token(const word& w, label lineNumber=0);
 
-        //- Construct string token by copying string contents
-        inline explicit token(const string& str);
+        //- Copy construct string token
+        inline explicit token(const string& str, label lineNumber=0);
 
+        //- Move construct word token
+        inline explicit token(word&& w, label lineNumber=0);
 
-        //- Construct punctuation character token
-        inline token(punctuationToken p, const label lineNumber);
-
-        //- Construct label token
-        inline token(const label val, const label lineNumber);
-
-        //- Construct floatScalar token
-        inline token(const floatScalar val, const label lineNumber);
-
-        //- Construct doubleScalar token
-        inline token(const doubleScalar val, const label lineNumber);
-
-        //- Construct word token by copying word contents
-        inline token(const word& w, const label lineNumber);
-
-        //- Construct string token by copying string contents
-        inline token(const string& str, const label lineNumber);
+        //- Move construct string token
+        inline explicit token(string&& str, label lineNumber=0);
 
         //- Construct from Istream
-        token(Istream& is);
+        explicit token(Istream& is);
 
 
     //- Destructor
@@ -380,7 +362,7 @@ public:
         inline static bool isseparator(int c);
 
 
-    // Member functions
+    // Member Functions
 
     // Status
 
@@ -392,7 +374,7 @@ public:
 
         //- Change the token type, for similar types.
         //  This can be used to change between string-like variants
-        //  (eg, STRING, VARIABLE, VERBATIMSTRING)
+        //  (eg, STRING, VARIABLE, etc)
         //  To change types entirely (eg, STRING to DOUBLE_SCALAR),
         //  use the corresponding assignment operator.
         //
@@ -444,11 +426,17 @@ public:
         //- True if token is WORD
         inline bool isWord() const;
 
-        //- True if token is STRING, VARIABLE or VERBATIMSTRING
+        //- True if token is STRING, VARIABLE or VERBATIM string
         inline bool isString() const;
 
         //- True if token is VARIABLE
         inline bool isVariable() const;
+
+        //- True if token is VERBATIM string
+        inline bool isVerbatim() const;
+
+        //- True if token is WORD, STRING, VARIABLE or VERBATIM
+        inline bool isStringType() const;
 
         //- True if token is COMPOUND
         inline bool isCompound() const;
@@ -457,7 +445,7 @@ public:
     // Access
 
         //- Return boolean token value.
-        //  Report FatalIOError and return false if token is not BOOL
+        //  Report FatalIOError and return false if token is not BOOL or LABEL
         inline bool boolToken() const;
 
         //- Return flag bitmask value.
@@ -473,20 +461,20 @@ public:
         inline label labelToken() const;
 
         //- Return float value.
-        //  Report FatalIOError and return \b 0.0 if token is not FLOAT_SCALAR
+        //  Report FatalIOError and return \b 0 if token is not FLOAT_SCALAR
         inline floatScalar floatScalarToken() const;
 
         //- Return double value.
-        //  Report FatalIOError and return \b 0.0 if token is not DOUBLE_SCALAR
+        //  Report FatalIOError and return \b 0 if token is not DOUBLE_SCALAR
         inline doubleScalar doubleScalarToken() const;
 
         //- Return float or double value.
-        //  Report FatalIOError and return \b 0.0 if token is not a
+        //  Report FatalIOError and return \b 0 if token is not a
         //  FLOAT_SCALAR or DOUBLE_SCALAR
         inline scalar scalarToken() const;
 
         //- Return label, float or double value.
-        //  Report FatalIOError and return \b 0.0 if token is not a
+        //  Report FatalIOError and return \b 0 if token is not a
         //  LABEL, FLOAT_SCALAR or DOUBLE_SCALAR
         inline scalar number() const;
 
@@ -496,7 +484,7 @@ public:
 
         //- Return const reference to the string contents.
         //  Report FatalIOError and return \b "" if token is not a
-        //  STRING, VARIABLE or VERBATIMSTRING
+        //  STRING, VARIABLE, VERBATIM or an upcast WORD
         inline const string& stringToken() const;
 
         //- Read access for compound token
@@ -510,7 +498,10 @@ public:
 
     // Edit
 
-        //- Clear token and set to be in an error state.
+        //- Reset token to UNDEFINED and clear any allocated storage
+        inline void reset();
+
+        //- Clear token and set to be ERROR.
         inline void setBad();
 
         //- Swap token contents: type, data, line-number
@@ -526,7 +517,7 @@ public:
         }
 
 
-    // Member operators
+    // Member Operators
 
     // Assignment
 
@@ -564,58 +555,63 @@ public:
         inline void operator=(compound* compoundPtr);
 
 
-        //- Deprecated(2017-11) transfer word pointer to the token
-        //  \deprecated(2017-11) - use move assign from word
-        inline void operator=(word* wordPtr);
-
-        //- Deprecated(2017-11) transfer string pointer to the token
-        //  \deprecated(2017-11) - use move assign from string
-        inline void operator=(string* stringPtr);
-
-
     // Equality
 
-        inline bool operator==(const token& t) const;
-
+        inline bool operator==(const token& tok) const;
         inline bool operator==(const punctuationToken p) const;
         inline bool operator==(const label val) const;
         inline bool operator==(const floatScalar val) const;
         inline bool operator==(const doubleScalar val) const;
-        inline bool operator==(const word& w) const;
-        inline bool operator==(const string& str) const;
+        inline bool operator==(const std::string& s) const;
 
 
     // Inequality
 
-        inline bool operator!=(const token& t) const;
+        inline bool operator!=(const token& tok) const;
         inline bool operator!=(const punctuationToken p) const;
         inline bool operator!=(const label val) const;
         inline bool operator!=(const floatScalar val) const;
         inline bool operator!=(const doubleScalar val) const;
-        inline bool operator!=(const word& w) const;
-        inline bool operator!=(const string& str) const;
+        inline bool operator!=(const std::string& s) const;
 
 
-    // IOstream operators
+    // IOstream Operators
 
-        friend Istream& operator>>(Istream& is, token& t);
-        friend Ostream& operator<<(Ostream& os, const token& t);
+        friend Ostream& operator<<(Ostream& os, const token& tok);
 
-        friend Ostream& operator<<(Ostream&, const punctuationToken&);
-        friend ostream& operator<<(ostream&, const punctuationToken&);
+        friend Ostream& operator<<(Ostream& os, const punctuationToken& pt);
+        friend ostream& operator<<(ostream& os, const punctuationToken& pt);
 
-        friend ostream& operator<<(ostream&, const InfoProxy<token>&);
+        friend ostream& operator<<(ostream& os, const InfoProxy<token>& ct);
+
+
+    // Housekeeping
+
+        //- Deprecated(2017-11) transfer word pointer to the token
+        //  \deprecated(2017-11) - use move assign from word
+        void operator=(word*) = delete;
+
+        //- Deprecated(2017-11) transfer string pointer to the token
+        //  \deprecated(2017-11) - use move assign from string
+        void operator=(string*) = delete;
 };
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream&, const token::punctuationToken&);
-ostream& operator<<(ostream&, const token::punctuationToken&);
-Ostream& operator<<(Ostream&, const token::compound&);
+// IOstream Operators
 
-ostream& operator<<(ostream&, const InfoProxy<token>&);
+Istream& operator>>(Istream& is, token& tok);
+Ostream& operator<<(Ostream& os, const token::punctuationToken& pt);
+ostream& operator<<(ostream& os, const token::punctuationToken& pt);
+Ostream& operator<<(Ostream& os, const token::compound& ct);
+
+ostream& operator<<(ostream& os, const InfoProxy<token>& ip);
 
 template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<token>& ip);
+
+
+// Handling of compound types
 
 #define defineCompoundTypeName(Type, Name)                                     \
     defineTemplateTypeNameAndDebugWithName(token::Compound<Type>, #Type, 0);
