@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2016 OpenFOAM Foundation
@@ -69,8 +69,7 @@ Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 {
     if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
     {
-        Pout<< "** messageStream with comm:" << communicator
-            << endl;
+        Pout<< "** messageStream with comm:" << communicator << endl;
         error::printStack(Pout);
     }
 
@@ -132,20 +131,23 @@ Foam::OSstream& Foam::messageStream::operator()
 {
     OSstream& os = operator OSstream&();
 
-    os  << endl
-        << "    From function " << functionName << endl
+    os  << nl
+        << "    From function " << functionName << nl
         << "    in file " << sourceFileName
-        << " at line " << sourceFileLineNumber << endl
+        << " at line " << sourceFileLineNumber << nl
         << "    Reading " << ioFileName;
 
-    if (ioStartLineNumber >= 0 && ioEndLineNumber >= 0)
+    if (ioStartLineNumber >= 0)
     {
-        os  << " from line " << ioStartLineNumber
-            << " to line " << ioEndLineNumber;
-    }
-    else if (ioStartLineNumber >= 0)
-    {
-        os  << " at line " << ioStartLineNumber;
+        if (ioStartLineNumber < ioEndLineNumber)
+        {
+            os  << " from line " << ioStartLineNumber
+                << " to line " << ioEndLineNumber;
+        }
+        else
+        {
+            os  << " at line " << ioStartLineNumber;
+        }
     }
 
     os << endl  << "    ";
@@ -201,21 +203,21 @@ Foam::messageStream::operator Foam::OSstream&()
         const bool collect = (severity_ == INFO || severity_ == WARNING);
 
         // Report the error
-        if (!Pstream::master() && collect)
+        if (collect && !Pstream::master())
         {
             return Snull;
         }
         else
         {
-            if (title().size())
+            if (!title().empty())
             {
-                if (Pstream::parRun() && !collect)
+                if (collect || !Pstream::parRun())
                 {
-                    Pout<< title().c_str();
+                    Sout<< title().c_str();
                 }
                 else
                 {
-                    Sout<< title().c_str();
+                    Pout<< title().c_str();
                 }
             }
 
@@ -231,13 +233,13 @@ Foam::messageStream::operator Foam::OSstream&()
                 }
             }
 
-            if (Pstream::parRun() && !collect)
+            if (collect || !Pstream::parRun())
             {
-                return Pout;
+                return Sout;
             }
             else
             {
-                return Sout;
+                return Pout;
             }
         }
     }

@@ -143,16 +143,12 @@ void Foam::IOerror::SafeFatalIOError
         std::cerr
             << nl
             << "--> FOAM FATAL IO ERROR:" << nl
-            << msg
-            << nl
+            << msg << nl
             << "file: " << ioStream.name()
-            << " at line " << ioStream.lineNumber() << '.'
-            << nl << nl
-            << "    From function " << functionName
-            << nl
+            << " at line " << ioStream.lineNumber() << '.' << nl << nl
+            << "    From function " << functionName << nl
             << "    in file " << sourceFileName
-            << " at line " << sourceFileLineNumber << '.'
-            << std::endl;
+            << " at line " << sourceFileLineNumber << '.' << std::endl;
         std::exit(1);
     }
 }
@@ -264,28 +260,41 @@ void Foam::IOerror::write(Ostream& os, const bool includeTitle) const
     if (!os.bad())
     {
         os  << nl;
-        if (includeTitle)
+        if (includeTitle && !title().empty())
         {
             os  << title().c_str() << nl;
         }
+
         os  << message().c_str() << nl << nl;
 
-        os  << "file: " << ioFileName().c_str();
+        const bool hasFile = !ioFileName().empty();
 
-        if (ioStartLineNumber() >= 0 && ioEndLineNumber() >= 0)
+        if (hasFile)
         {
-            os  << " from line " << ioStartLineNumber()
-                << " to line " << ioEndLineNumber() << '.';
-        }
-        else if (ioStartLineNumber() >= 0)
-        {
-            os  << " at line " << ioStartLineNumber() << '.';
+            os  << "file: " << ioFileName().c_str();
+
+            if (ioStartLineNumber() >= 0)
+            {
+                if (ioStartLineNumber() < ioEndLineNumber())
+                {
+                    os  << " from line " << ioStartLineNumber()
+                        << " to line " << ioEndLineNumber() << '.';
+                }
+                else
+                {
+                    os  << " at line " << ioStartLineNumber() << '.';
+                }
+            }
         }
 
         if (IOerror::level >= 2 && sourceFileLineNumber())
         {
-            os  << nl << nl
-                << "    From function " << functionName().c_str() << nl
+            if (hasFile)
+            {
+                os  << nl << nl;
+            }
+
+            os  << "    From function " << functionName().c_str() << nl
                 << "    in file " << sourceFileName().c_str()
                 << " at line " << sourceFileLineNumber() << '.';
         }

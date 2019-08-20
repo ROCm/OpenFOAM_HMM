@@ -84,10 +84,10 @@ public:
     // Constructors
 
         //- Construct from title string
-        error(const string& title);
+        explicit error(const string& title);
 
         //- Construct from dictionary
-        error(const dictionary& errDict);
+        explicit error(const dictionary& errDict);
 
         //- Construct as copy
         error(const error& err);
@@ -190,15 +190,15 @@ public:
         operator dictionary() const;
 
 
-        //- Helper function to print a stack (if OpenFOAM IO not yet
-        //  initialised)
+        //- Helper function to print a stack,
+        //- used when OpenFOAM IO not yet initialised.
         static void safePrintStack(std::ostream& os);
 
         //- Helper function to print a stack
         static void printStack(Ostream& os);
 
         //- Exit : can be called for any error to exit program.
-        //  Prints stack before exiting.
+        //  Prints stack before exiting, when FOAM_ABORT is on.
         void exit(const int errNo = 1);
 
         //- Abort : used to stop code for fatal errors.
@@ -277,7 +277,7 @@ public:
             const char* functionName,
             const char* sourceFileName,
             const int sourceFileLineNumber,
-            const IOstream&
+            const IOstream& ioStream
         );
 
         //- Convert to OSstream
@@ -287,17 +287,18 @@ public:
             const char* functionName,
             const char* sourceFileName,
             const int sourceFileLineNumber,
-            const dictionary&
+            const dictionary& dict
         );
 
-        //- Print basic message and exit. Uses cerr if streams not constructed
-        //  yet (at startup). Use in startup parsing instead of FatalError.
+        //- Print basic message and exit.
+        //  Uses cerr if streams not yet constructed (at startup).
+        //  Use in startup parsing instead of FatalError.
         static void SafeFatalIOError
         (
             const char* functionName,
             const char* sourceFileName,
             const int sourceFileLineNumber,
-            const IOstream&,
+            const IOstream& ioStream,
             const string& msg
         );
 

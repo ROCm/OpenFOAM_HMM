@@ -165,24 +165,23 @@ Foam::ITstream::ITstream
 
 void Foam::ITstream::print(Ostream& os) const
 {
-    os  << "ITstream : " << name_.c_str();
+    os  << "ITstream : " << name_.c_str() << ", line ";
 
     if (size())
     {
-        if (begin()->lineNumber() == rbegin()->lineNumber())
+        os  << tokenList::first().lineNumber();
+
+        if (tokenList::first().lineNumber() < tokenList::last().lineNumber())
         {
-            os  << ", line " << begin()->lineNumber() << ", ";
-        }
-        else
-        {
-            os  << ", lines " << begin()->lineNumber()
-                << '-' << rbegin()->lineNumber() << ", ";
+            os  << '-' << tokenList::last().lineNumber();
         }
     }
     else
     {
-        os  << ", line " << lineNumber() << ", ";
+        os  << lineNumber();
     }
+
+    os  << ", ";
 
     IOstream::print(os);
 }
