@@ -404,7 +404,11 @@ bool Foam::entry::New
                 if (keyName.find_first_of("\"'") == 0)
                 {
                     // Begins with a quote - treat as pattern
-                    key = keyType(string::validate<keyType>(keyName), true);
+                    key = keyType
+                    (
+                        string::validate<keyType>(keyName),
+                        keyType::REGEX
+                    );
                 }
                 else
                 {

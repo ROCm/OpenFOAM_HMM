@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     Foam::string s2("this .* file");
     const char * s3 = "this .* file";
 
-    keyType keyre("x.*", true);
+    keyType keyre("x.*", keyType::REGEX);
 
     wordReList wordrelist
     {

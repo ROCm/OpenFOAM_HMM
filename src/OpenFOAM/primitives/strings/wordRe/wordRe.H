@@ -183,7 +183,7 @@ public:
 
         //- Make wordRe a literal again, instead of a regular expression.
         //  Optionally strip invalid word characters.
-        inline void uncompile(bool doStrip = false);
+        inline void uncompile(bool adjust = false);
 
 
     // Editing

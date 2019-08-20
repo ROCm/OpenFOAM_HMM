@@ -42,6 +42,7 @@ SourceFiles
 #define keyType_H
 
 #include "word.H"
+#include "stdFoam.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,10 +61,32 @@ class keyType
 :
     public word
 {
+public:
+
+    // Public Data Types
+
+        //- Enumeration for the data type and search/match modes (bitmask)
+        //  eg, (keyType::REGEX | keyType::RECURSIVE)
+        enum option : unsigned char
+        {
+            // Base stored types
+            LITERAL = 0,        //!< String literal
+            REGEX   = 1,        //!< Regular expression
+
+            // Variants for search/match only
+            RECURSIVE = 0x80,   //!< Recursive search (eg, in dictionary)
+            LITERAL_RECURSIVE = (LITERAL | RECURSIVE),
+            REGEX_RECURSIVE   = (REGEX | RECURSIVE)
+        };
+
+
+private:
+
     // Private Data
 
-        //- Treat keyType as a pattern (regular expression)
-        bool isPattern_;
+        //- Treat keyType as literal, regex etc.
+        //  Never contains RECURSIVE values.
+        option type_;
 
 
     // Private Member Functions
@@ -78,20 +101,6 @@ public:
 
         //- An empty keyType
         static const keyType null;
-
-
-    // Public Data Types
-
-        //- Enumeration for search/match modes as bitmask
-        //  eg, (keyType::REGEX | keyType::RECURSIVE)
-        enum option
-        {
-            LITERAL = 0,        //!< String literal
-            REGEX   = 1,        //!< Regular expression
-            RECURSIVE = 0x10,   //!< Recursive search (eg, in dictionary)
-            LITERAL_RECURSIVE = (LITERAL | RECURSIVE),
-            REGEX_RECURSIVE   = (REGEX | RECURSIVE)
-        };
 
 
     // Constructors
@@ -112,7 +121,7 @@ public:
         inline keyType(const char* s);
 
         //- Copy construct from std::string with specified treatment
-        inline keyType(const std::string& s, bool isPattern);
+        inline keyType(const std::string& s, option opt);
 
         //- Move construct, retaining type (literal or regex)
         inline keyType(keyType&& s);
@@ -124,7 +133,7 @@ public:
         inline keyType(string&& s);
 
         //- Move construct from std::string with specified treatment
-        inline keyType(std::string&& s, bool isPattern);
+        inline keyType(std::string&& s, option opt);
 
         //- Construct from Istream
         //  Treat as regular expression if surrounded by quotation marks.
@@ -150,12 +159,15 @@ public:
 
     // Infrastructure
 
+        //- Change the representation
+        inline void setType(option opt, bool adjust = false);
+
         //- Mark as regular expression
         inline bool compile();
 
         //- Mark as literal, instead of a regular expression.
         //  Optionally strip invalid word characters.
-        inline void uncompile(bool doStrip = false);
+        inline void uncompile(bool adjust = false);
 
 
     // Editing
@@ -197,6 +209,17 @@ public:
 
         //- Assign as word, treat as literal
         inline void operator=(const char* s);
+
+
+    // Housekeeping
+
+        //- Deprecated(2019-08) construct as literal/regex
+        //  \deprecated(2019-08) - use Construct with option
+        FOAM_DEPRECATED_FOR(2019-08, "Construct with option")
+        keyType(const std::string& s, bool isPattern)
+        :
+            keyType(s, (isPattern ? option::REGEX : option::LITERAL))
+        {}
 };
 
 

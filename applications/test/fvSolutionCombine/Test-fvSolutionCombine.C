@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
                 if (names[nameI] != oldNames[nameI])
                 {
                     // make "(abc|def)" pattern
-                    keyType renamed( "(" + names[nameI] + ")", true);
+                    keyType renamed("(" + names[nameI] + ")", keyType::REGEX);
 
                     solverDict.changeKeyword(oldNames[nameI], renamed);
 

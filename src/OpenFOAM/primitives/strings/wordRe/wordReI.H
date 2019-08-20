@@ -208,10 +208,10 @@ inline bool Foam::wordRe::compile()
 }
 
 
-inline void Foam::wordRe::uncompile(bool doStrip)
+inline void Foam::wordRe::uncompile(bool adjust)
 {
     // Only strip when debug is active (potentially costly operation)
-    if (re_.clear() && doStrip && word::debug)
+    if (re_.clear() && adjust && word::debug)
     {
         string::stripInvalid<word>(*this);
     }
@@ -227,12 +227,12 @@ inline void Foam::wordRe::clear()
 
 inline bool Foam::wordRe::match(const std::string& text, bool literal) const
 {
-    if (literal || !re_.exists())
+    if (!literal && re_.exists())
     {
-        return !compare(text);  // Compare as literal string
+        return re_.match(text);  // Match as regex
     }
 
-    return re_.match(text);     // Match as regex
+    return !compare(text);  // Compare as literal
 }
 
 

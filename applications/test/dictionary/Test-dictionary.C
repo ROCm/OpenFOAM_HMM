@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
         {
             dictionary dict(IFstream("testDictRegex")());
-            dict.add(keyType("fooba[rz]", true), "anything");
+            dict.add(keyType("fooba[rz]", keyType::REGEX), "anything");
 
             dict.writeEntry("testDictRegex", Info);
             Info<< nl

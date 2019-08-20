@@ -39,7 +39,7 @@ const Foam::keyType Foam::keyType::null;
 Foam::keyType::keyType(Istream& is)
 :
     word(),
-    isPattern_(false)
+    type_(option::LITERAL)
 {
     is  >> *this;
 }
@@ -49,12 +49,12 @@ Foam::keyType::keyType(Istream& is)
 
 bool Foam::keyType::match(const std::string& text, bool literal) const
 {
-    if (literal || !isPattern_)
+    if (!literal && isPattern())
     {
-        return !compare(text);          // Compare as literal string
+        return regExp(*this).match(text);  // Match as regex
     }
 
-    return regExp(*this).match(text);   // Match as regex
+    return !compare(text);  // Compare as literal
 }
 
 
@@ -76,13 +76,13 @@ Foam::Istream& Foam::operator>>(Istream& is, keyType& val)
     if (t.isWord())
     {
         val = t.wordToken();
-        val.uncompile();  // Non-regex
+        val.setType(keyType::LITERAL);
     }
     else if (t.isString())
     {
         // Assign from string, treat as regular expression
         val = t.stringToken();
-        val.compile();   // As regex
+        val.setType(keyType::REGEX);
 
         // Flag empty strings as an error
         if (val.empty())
