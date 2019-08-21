@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2013-2017 OpenFOAM Foundation
@@ -264,7 +264,7 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::omega
     for (label s=0; s<Nl; s++)
     {
         label si = R.lhs()[s].index;
-        const scalar exp = R.lhs()[si].exponent;
+        const scalar exp = R.lhs()[s].exponent;
 
         kf *=
             pow(c1[si]/Ys0_[si][celli], exp)
