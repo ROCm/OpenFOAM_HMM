@@ -3,7 +3,7 @@
 ## Minimum version
 
 The mingw cross-compiler should be at least version 8.2.0 (tested) or
-slightly older. Versions that are much older may have faultly regex
+slightly older. Versions that are much older may have faulty regex
 implementations.
 
 ## Host setup

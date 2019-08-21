@@ -1,6 +1,12 @@
 # About OpenFOAM
-OpenFOAM is a free, open source CFD software [released and developed primarily by OpenCFD Ltd](http://www.openfoam.com) since 2004. It has a large user base across most areas of engineering and science, from both commercial and academic organisations. OpenFOAM has an extensive range of features to solve anything from complex fluid flows involving chemical reactions, turbulence and heat transfer, to acoustics, solid mechanics and electromagnetics.  [More...](http://www.openfoam.com/documentation)
 
+OpenFOAM is a free, open source CFD software [released and developed
+primarily by OpenCFD Ltd](http://www.openfoam.com) since 2004. It has
+a large user base across most areas of engineering and science, from
+both commercial and academic organisations. OpenFOAM has an extensive
+range of features to solve anything from complex fluid flows involving
+chemical reactions, turbulence and heat transfer, to acoustics, solid
+mechanics and electromagnetics.
 
 OpenFOAM is professionally released every six months to include
 customer sponsored developments and contributions from the community -
@@ -11,15 +17,27 @@ one OpenFOAM.
 
 
 # Copyright
-OpenFOAM is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.  See the file COPYING in this directory or [http://www.gnu.org/licenses/](http://www.gnu.org/licenses), for a description of the GNU General Public License terms under which you can copy the files.
+
+OpenFOAM is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.  See the file COPYING in this directory or
+[http://www.gnu.org/licenses/](http://www.gnu.org/licenses), for a
+description of the GNU General Public License terms under which you
+may redistribute files.
 
 
 # OpenFOAM Trademark
-OpenCFD Ltd grants use of its OpenFOAM trademark by Third Parties on a licence basis. ESI Group and OpenFOAM Foundation Ltd are currently permitted to use the Name and agreed Domain Name. For information on trademark use, please refer to the [trademark policy guidelines](http://www.openfoam.com/legal/trademark-policy.php).
 
-Please [contact OpenCFD](http://www.openfoam.com/contact) if you have any questions on the use of the OpenFOAM trademark.
+OpenCFD Ltd grants use of its OpenFOAM trademark by Third Parties on a
+licence basis. ESI Group and OpenFOAM Foundation Ltd are currently
+permitted to use the Name and agreed Domain Name. For information on
+trademark use, please refer to the [trademark policy guidelines](http://www.openfoam.com/legal/trademark-policy.php).
 
-Violations of the Trademark are continuously monitored, and will be duly prosecuted.
+Please [contact OpenCFD](http://www.openfoam.com/contact) if you have
+any questions on the use of the OpenFOAM trademark.
+
+Violations of the Trademark are monitored, and will be duly prosecuted.
 
 
 # Using OpenFOAM
@@ -125,7 +143,8 @@ There are, however, many cases where this simple convention is inadequate:
   developing various different features but wish to use or reuse the
   same 3rd party software for them all.
 
-The solution for these problems is a newer, more intelligent discovery when locating the ThirdParty directory with the following precedence:
+The solution for these problems is a newer, more intelligent discovery
+when locating the ThirdParty directory with the following precedence:
 
 1. PROJECT/ThirdParty
    * for single-directory installations
@@ -145,8 +164,11 @@ The solution for these problems is a newer, more intelligent discovery when loca
      experienced user who are aware of potential version
      incompatibilities
 
-If none of these directories are found to be suitable, it reverts to using PROJECT/ThirdParty as a dummy location (even if the directory does not exist). This is a safe fallback value since it is within the OpenFOAM directory structure and can be trusted to have no negative side-effects.
-In the above, the following notation has been used:
+If none of these directories are found to be suitable, it reverts to
+using PROJECT/ThirdParty as a dummy location (even if the directory
+does not exist). This is a safe fallback value since it is within the
+OpenFOAM directory structure and can be trusted to have no negative
+side-effects. In the above, the following notation has been used:
 
 | name          | value         | meaning       |
 |---------------|---------------|---------------|
@@ -178,10 +200,13 @@ ThirdParty directory will contain either an `Allwmake` file or a
 
 
 # Useful Links
-- [Download and installation instructions](http://www.openfoam.com/download/)
+
+- Download [source](https://sourceforge.net/projects/openfoam/files/) and [download and installation instructions](http://www.openfoam.com/download/)
 - [Documentation](http://www.openfoam.com/documentation)
 - [Reporting bugs/issues/feature requests](http://www.openfoam.com/code/bug-reporting.php)
-- [OpenFOAM Community](http://www.openfoam.com/community/)
+- [Issue tracker](https://develop.openfoam.com/Development/OpenFOAM-plus/issues)
+- [Community](http://www.openfoam.com/community/)
+- [Wiki](http://wiki.openfoam.com/) and [code wiki](https://develop.openfoam.com/Development/OpenFOAM-plus/wikis/)
 - [Contacting OpenCFD](http://www.openfoam.com/contact/)
 
 Copyright 2016-2019 OpenCFD Ltd

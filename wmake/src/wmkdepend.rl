@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 2018 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 2018-2019 OpenCFD Ltd.
     \\/      M anipulation   |
 ------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ Description
 
     The FSM can be visualized (eg, in a browser) with the following command
 
-        ragel -pV wmkdepend.cpp | dot -Tsvg -owmkdepend.svg
+        ragel -pV wmkdepend.rl | dot -Tsvg -owmkdepend.svg
 
 Usage
     wmkdepend [-Idir..] [-iheader...] [-eENV...] [-oFile] filename
