@@ -4,7 +4,7 @@
         fvm::ddt(rho, T) + fvm::div(rhoPhi, T) - fvm::Sp(contErr, T)
       - fvm::laplacian(turbulence.alphaEff(), T)
       + (
-             (divU*p)() - contErr/rho*p
+             divUp - contErr/rho*p
           +  (fvc::ddt(rho, K) + fvc::div(rhoPhi, K))() - contErr*K
         )
        *(
