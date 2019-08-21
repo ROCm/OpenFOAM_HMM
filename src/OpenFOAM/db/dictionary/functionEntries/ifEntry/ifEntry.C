@@ -45,8 +45,8 @@ namespace functionEntries
         dictionaryIstream,
         if
     );
-}
-}
+} // End namespace functionEntries
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

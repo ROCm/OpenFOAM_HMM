@@ -86,13 +86,6 @@ class ifEntry
             Istream& is
         );
 
-        //- Disallow default bitwise copy construct
-        ifEntry(const ifEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const ifEntry&);
-
-
 public:
 
     //- Runtime type information

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2017 OpenFOAM Foundation
@@ -59,8 +59,27 @@ namespace functionEntries
         primitiveEntryIstream,
         includeEtc
     );
-}
-}
+
+    addNamedToMemberFunctionSelectionTable
+    (
+        functionEntry,
+        sincludeEtcEntry,
+        execute,
+        dictionaryIstream,
+        sincludeEtc
+    );
+
+    addNamedToMemberFunctionSelectionTable
+    (
+        functionEntry,
+        sincludeEtcEntry,
+        execute,
+        primitiveEntryIstream,
+        sincludeEtc
+    );
+} // End namespace functionEntries
+} // End namespace Foam
+
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -86,10 +105,9 @@ Foam::fileName Foam::functionEntries::includeEtcEntry::resolveEtcFile
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 bool Foam::functionEntries::includeEtcEntry::execute
 (
+    const bool mandatory,
     dictionary& parentDict,
     Istream& is
 )
@@ -110,6 +128,11 @@ bool Foam::functionEntries::includeEtcEntry::execute
         return true;
     }
 
+    if (!mandatory)
+    {
+        return true; // Never fails if optional
+    }
+
     FatalIOErrorInFunction(is)
         << "Cannot open etc file "
         << (ifs.name().size() ? ifs.name() : rawName)
@@ -122,6 +145,7 @@ bool Foam::functionEntries::includeEtcEntry::execute
 
 bool Foam::functionEntries::includeEtcEntry::execute
 (
+    const bool mandatory,
     const dictionary& parentDict,
     primitiveEntry& entry,
     Istream& is
@@ -143,6 +167,11 @@ bool Foam::functionEntries::includeEtcEntry::execute
         return true;
     }
 
+    if (!mandatory)
+    {
+        return true; // Never fails if optional
+    }
+
     FatalIOErrorInFunction(is)
         << "Cannot open etc file "
         << (ifs.name().size() ? ifs.name() : rawName)
@@ -150,6 +179,50 @@ bool Foam::functionEntries::includeEtcEntry::execute
         << exit(FatalIOError);
 
     return false;
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionEntries::includeEtcEntry::execute
+(
+    dictionary& parentDict,
+    Istream& is
+)
+{
+    return includeEtcEntry::execute(true, parentDict, is);
+}
+
+
+bool Foam::functionEntries::includeEtcEntry::execute
+(
+    const dictionary& parentDict,
+    primitiveEntry& entry,
+    Istream& is
+)
+{
+    return includeEtcEntry::execute(true, parentDict, entry, is);
+}
+
+
+bool Foam::functionEntries::sincludeEtcEntry::execute
+(
+    dictionary& parentDict,
+    Istream& is
+)
+{
+    return includeEtcEntry::execute(false, parentDict, is);
+}
+
+
+bool Foam::functionEntries::sincludeEtcEntry::execute
+(
+    const dictionary& parentDict,
+    primitiveEntry& entry,
+    Istream& is
+)
+{
+    return includeEtcEntry::execute(false, parentDict, entry, is);
 }
 
 

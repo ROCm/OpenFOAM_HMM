@@ -43,8 +43,8 @@ namespace functionEntries
         dictionaryIstream,
         includeFunc
     );
-}
-}
+} // End namespace functionEntries
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2015-2016 OpenFOAM Foundation
@@ -80,9 +80,26 @@ protected:
             const dictionary& dict
         );
 
+        //- Include file in a sub-dict context
+        static bool execute
+        (
+            const bool mandatory,
+            dictionary& parentDict,
+            Istream& is
+        );
+
+        //- Include file in a primitiveEntry context
+        static bool execute
+        (
+            const bool mandatory,
+            const dictionary& parentDict,
+            primitiveEntry& entry,
+            Istream& is
+        );
+
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Report to stdout which file is included
         static bool log;
@@ -90,16 +107,45 @@ public:
 
     // Member Functions
 
-        //- Include file in a sub-dict context
+        //- Include etc file in a sub-dict context
         static bool execute(dictionary& parentDict, Istream& is);
 
-        //- Include file in a primitiveEntry context
+        //- Include etc file in a primitiveEntry context
         static bool execute
         (
             const dictionary& parentDict,
             primitiveEntry& entry,
             Istream& is
         );
+};
+
+
+/*---------------------------------------------------------------------------*\
+                        Class sincludeEtcEntry Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A dictionary directive for conditionally including an etc file,
+//- expects a single string to follow.
+//
+//  The \c \#sincludeEtc directive is identically to the
+//  \c \#includeEtc directive, but does not generate an error
+//  if the file does not exist.
+class sincludeEtcEntry
+:
+    public includeEtcEntry
+{
+public:
+
+    //- Include etc file (if it exists) in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
+
+    //- Include etc file (if it exists) in a primitiveEntry context
+    static bool execute
+    (
+        const dictionary& parentDict,
+        primitiveEntry& entry,
+        Istream& is
+    );
 };
 
 

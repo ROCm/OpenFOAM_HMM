@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2013 OpenFOAM Foundation
@@ -53,14 +53,12 @@ SourceFiles
 #ifndef calcEntry_H
 #define calcEntry_H
 
-#include "functionEntry.H"
+#include "codeStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-class dlLibraryTable;
-
 namespace functionEntries
 {
 
@@ -70,21 +68,26 @@ namespace functionEntries
 
 class calcEntry
 :
-    public functionEntry
+    public codeStream
 {
+    // Private Member Functions
+
+    //- Evaluate dynamically compiled code, returning result as string
+    static string evaluate(const dictionary& parentDict, Istream& is);
+
+
 public:
 
     //- Execute in a primitiveEntry context
     static bool execute
     (
         const dictionary& parentDict,
-        primitiveEntry& thisEntry,
+        primitiveEntry& entry,
         Istream& is
     );
 
     //- Execute in a sub-dict context
     static bool execute(dictionary& parentDict, Istream& is);
-
 };
 
 

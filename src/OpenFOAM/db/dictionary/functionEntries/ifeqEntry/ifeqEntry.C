@@ -47,8 +47,8 @@ namespace functionEntries
         dictionaryIstream,
         ifeq
     );
-}
-}
+} // End namespace functionEntries
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -81,7 +81,7 @@ Foam::token Foam::functionEntries::ifeqEntry::expand
 {
     if (keyword[0] == '$')
     {
-        const word varName(keyword.substr(1, keyword.size()-1));
+        const word varName(keyword.substr(1));
 
         // Lookup the variable name in the given dictionary
         const entry* ePtr = dict.findScoped(varName, keyType::REGEX_RECURSIVE);
@@ -264,7 +264,8 @@ void Foam::functionEntries::ifeqEntry::skipUntil
     }
 
     FatalIOErrorInFunction(parentDict)
-        << "Did not find matching " << endWord << exit(FatalIOError);
+        << "Did not find matching " << endWord << nl
+        << exit(FatalIOError);
 }
 
 

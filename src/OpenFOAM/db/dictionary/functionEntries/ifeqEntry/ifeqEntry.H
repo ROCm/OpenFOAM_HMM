@@ -158,17 +158,6 @@ protected:
         );
 
 
-private:
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        ifeqEntry(const ifeqEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const ifeqEntry&);
-
-
 public:
 
     //- Runtime type information

@@ -13,6 +13,7 @@
   #sinclude         | dict/primitive    | string
   #includeIfPresent | dict/primitive    | string
   #includeEtc       | dict/primitive    | string
+  #sincludeEtc      | dict/primitive    | string
   #includeFunc      | dict              | word
                     |                   |
   #calc             | dict/primitive    | string
@@ -30,4 +31,4 @@ Pending future extensions
   #undef            | dict              | keyType or List<keyType>
 
 
-2018-05-28
+2019-08-21

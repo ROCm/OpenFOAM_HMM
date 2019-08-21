@@ -117,15 +117,15 @@ class codeStream
 :
     public functionEntry
 {
+protected:
 
         //- Interpreter function type
         typedef void (*streamingFunctionType)(Ostream&, const dictionary&);
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
-        //- Helper function: access IOobject for master-only-reading
-        //  functionality
+        //- Helper: access IOobject for master-only-reading functionality
         static bool doingMasterOnlyReading(const dictionary& dict);
 
         //- Helper function: access to dlLibraryTable of Time
@@ -139,27 +139,14 @@ class codeStream
         );
 
 
-        //- No copy construct
-        codeStream(const codeStream&) = delete;
-
-        //- No copy assignment
-        void operator=(const codeStream&) = delete;
+        //- Evaluate dynamically compiled code, returning result as string
+        static string evaluate(const dictionary& parentDict, Istream& is);
 
 
 public:
 
-    // Static Data Members
-
-        //- Name of the C code template to be used
-        static constexpr const char* const codeTemplateC
-            = "codeStreamTemplate.C";
-
-
-    // Related types
-
-        //- Declare friendship with the calcEntry class
-        friend class calcEntry;
-
+    //- Name of the C code template to be used
+    static constexpr const char* const codeTemplateC = "codeStreamTemplate.C";
 
     //- Runtime type information
     ClassName("codeStream");
@@ -167,10 +154,7 @@ public:
 
     // Member Functions
 
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream& is);
-
-        //- Execute the functionEntry in a primitiveEntry context
+        //- Execute in a primitiveEntry context
         static bool execute
         (
             const dictionary& parentDict,
@@ -178,6 +162,8 @@ public:
             Istream& is
         );
 
+        //- Execute in a sub-dict context
+        static bool execute(dictionary& parentDict, Istream& is);
 };
 
 

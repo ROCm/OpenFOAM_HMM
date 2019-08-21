@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,25 +32,25 @@ template<class StringType>
 Foam::List<StringType>
 Foam::functionEntry::readStringList(Istream& is)
 {
+    List<StringType> list;
+
     ISstream& iss = dynamic_cast<ISstream&>(is);
     token firstToken(iss);
 
-    List<StringType> list;
+    const bool isStringTok = firstToken.isStringType();
 
-    if (firstToken.isWord() || firstToken.isString())
+    iss.putBack(firstToken);
+
+    if (isStringTok)
     {
         // The first token appears viable as non-list
-        // - treated like list with one entry
+        // - treated like list with a single entry
 
-        iss.putBack(firstToken);
-
-        list.setSize(1);
-
-        iss >> list[0];
+        list.resize(1);
+        iss >> list.first();
     }
     else
     {
-        iss.putBack(firstToken);
         iss >> list;
     }
 

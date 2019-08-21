@@ -84,10 +84,27 @@ protected:
             const dictionary& dict
         );
 
+        //- Include file in a sub-dict context
+        static bool execute
+        (
+            const bool mandatory,
+            dictionary& parentDict,
+            Istream& is
+        );
+
+        //- Include file in a primitiveEntry context
+        static bool execute
+        (
+            const bool mandatory,
+            const dictionary& parentDict,
+            primitiveEntry& entry,
+            Istream& is
+        );
+
 
 public:
 
-    // Static data members
+    // Static Data Members
 
         //- Report to stdout which file is included
         static bool log;
@@ -115,8 +132,8 @@ public:
 //- A dictionary directive for conditionally including a file,
 //- expects a single string to follow.
 //
-//  The \c \#sinclude directive (and the \c \#includeIfPresent alias) behaves
-//  identically to the \c \#include directive, but does not generate an error
+//  The \c \#sinclude directive behaves identically to the
+//  \c \#include directive, but does not generate an error
 //  if the file does not exist.
 class sincludeEntry
 :

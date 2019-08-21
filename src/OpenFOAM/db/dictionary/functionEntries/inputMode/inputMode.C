@@ -86,8 +86,8 @@ namespace functionEntries
         dictionaryIstream,
         error
     );
-}
-}
+} // End namespace functionEntries
+} // End namespace Foam
 
 
 const Foam::Enum
@@ -119,7 +119,7 @@ bool Foam::functionEntries::inputMode::execute
     // Like Enum::lookupOrDefault() with failsafe behaviour
     if (selectableNames.found(modeName))
     {
-        entry::globalInputMode = selectableNames[modeName];
+        entry::globalInputMode = selectableNames.get(modeName);
     }
     else
     {

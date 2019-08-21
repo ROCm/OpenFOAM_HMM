@@ -46,7 +46,7 @@ namespace Foam
         execute,
         primitiveEntryIstream
     );
-}
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -90,9 +90,8 @@ bool Foam::functionEntry::execute
 
     if (!executedictionaryIstreamMemberFunctionTablePtr_)
     {
-        cerr<< "functionEntry::execute"
-            << "(const word&, dictionary&, Istream&)"
-            << " not yet initialized, function = "
+        cerr<< FUNCTION_NAME << nl
+            << "Not yet initialized, function = "
             << functionName.c_str() << std::endl;
 
         // Return true to keep reading
@@ -129,12 +128,11 @@ bool Foam::functionEntry::execute
 
     if (!executeprimitiveEntryIstreamMemberFunctionTablePtr_)
     {
-        cerr<< "functionEntry::execute"
-            << "(const word&, const dictionary&, primitiveEntry&, Istream&)"
-            << " not yet initialized, function = "
+        cerr<< FUNCTION_NAME << nl
+            << "Not yet initialized, function = "
             << functionName.c_str() << std::endl;
 
-        // return true to keep reading anyhow
+        // Return true to keep reading anyhow
         return true;
     }
 

@@ -57,8 +57,8 @@ namespace functionEntries
         primitiveEntryIstream,
         codeStream
     );
-}
-}
+} // End namespace functionEntries
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -327,12 +327,9 @@ Foam::functionEntries::codeStream::getFunction
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::functionEntries::codeStream::execute
+Foam::string Foam::functionEntries::codeStream::evaluate
 (
     const dictionary& parentDict,
-    primitiveEntry& entry,
     Istream& is
 )
 {
@@ -342,23 +339,35 @@ bool Foam::functionEntries::codeStream::execute
 
     dynamicCode::checkSecurity
     (
-        "functionEntries::codeStream::execute(..)",
+        "functionEntries::codeStream::evaluate(..)",
         parentDict
     );
 
-    // get code dictionary
-    // must reference parent for stringOps::expand to work nicely
+    // Get code dictionary
     dictionary codeDict("#codeStream", parentDict, is);
 
-    streamingFunctionType function = getFunction(parentDict, codeDict);
-
-    // use function to write stream
+    // Use function to write stream
     OStringStream os(is.format());
+
+    streamingFunctionType function = getFunction(parentDict, codeDict);
     (*function)(os, parentDict);
 
-    // get the entry from this stream
-    IStringStream resultStream(os.str());
-    entry.read(parentDict, resultStream);
+    // Return evaluated content as string
+    return os.str();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionEntries::codeStream::execute
+(
+    const dictionary& parentDict,
+    primitiveEntry& entry,
+    Istream& is
+)
+{
+    IStringStream result(evaluate(parentDict, is));
+    entry.read(parentDict, result);
 
     return true;
 }
@@ -370,29 +379,8 @@ bool Foam::functionEntries::codeStream::execute
     Istream& is
 )
 {
-    DetailInfo
-        << "Using #codeStream at line " << is.lineNumber()
-        << " in file " <<  parentDict.name() << endl;
-
-    dynamicCode::checkSecurity
-    (
-        "functionEntries::codeStream::execute(..)",
-        parentDict
-    );
-
-    // get code dictionary
-    // must reference parent for stringOps::expand to work nicely
-    dictionary codeDict("#codeStream", parentDict, is);
-
-    streamingFunctionType function = getFunction(parentDict, codeDict);
-
-    // use function to write stream
-    OStringStream os(is.format());
-    (*function)(os, parentDict);
-
-    // get the entry from this stream
-    IStringStream resultStream(os.str());
-    parentDict.read(resultStream);
+    IStringStream result(evaluate(parentDict, is));
+    parentDict.read(result);
 
     return true;
 }
