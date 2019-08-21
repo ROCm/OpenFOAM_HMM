@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2018 OpenFOAM Foundation
@@ -82,18 +82,19 @@ Foam::fileName Foam::functionObjects::writeFile::baseTimeDir() const
 Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
 (
     const word& name,
-    const scalar time0
+    scalar timeValue
 ) const
 {
     autoPtr<OFstream> osPtr;
 
     if (Pstream::master() && writeToFile_)
     {
-        const scalar time = useUserTime_ ?
-            fileObr_.time().timeToUserTime(time0)
-          : time0;
+        if (useUserTime_)
+        {
+            timeValue = fileObr_.time().timeToUserTime(timeValue);
+        }
 
-        const word timeName = Time::timeName(time);
+        const word timeName = Time::timeName(timeValue);
 
         fileName outputDir(baseFileDir()/prefix_/timeName);
 
@@ -154,12 +155,13 @@ Foam::Omanip<int> Foam::functionObjects::writeFile::valueWidth
 Foam::functionObjects::writeFile::writeFile
 (
     const objectRegistry& obr,
-    const word& prefix
+    const word& prefix,
+    const word& file
 )
 :
     fileObr_(obr),
     prefix_(prefix),
-    fileName_("undefined"),
+    fileName_(file),
     filePtr_(),
     writePrecision_(IOstream::defaultPrecision()),
     writeToFile_(true),
@@ -173,19 +175,11 @@ Foam::functionObjects::writeFile::writeFile
 (
     const objectRegistry& obr,
     const word& prefix,
-    const word& fileName,
+    const word& file,
     const dictionary& dict
 )
 :
-    fileObr_(obr),
-    prefix_(prefix),
-    fileName_(fileName),
-    filePtr_(),
-    writePrecision_(IOstream::defaultPrecision()),
-    writeToFile_(true),
-    writtenHeader_(false),
-    useUserTime_(true),
-    startTime_(obr.time().startTime().value())
+    writeFile(obr, prefix, file)
 {
     read(dict);
 
@@ -203,9 +197,9 @@ bool Foam::functionObjects::writeFile::read(const dictionary& dict)
     writePrecision_ =
         dict.lookupOrDefault("writePrecision", IOstream::defaultPrecision());
 
-    // Only write on master process
-    writeToFile_ = dict.lookupOrDefault("writeToFile", true);
-    writeToFile_ = writeToFile_ && Pstream::master();
+    // Only write on master
+    writeToFile_ =
+        Pstream::master() && dict.lookupOrDefault("writeToFile", true);
 
     // Use user time, e.g. CA deg in preference to seconds
     useUserTime_ = dict.lookupOrDefault("useUserTime", true);
@@ -224,7 +218,7 @@ Foam::OFstream& Foam::functionObjects::writeFile::file()
     if (!filePtr_.valid())
     {
         FatalErrorInFunction
-            << "File pointer not allocated";
+            << "File pointer not allocated\n";
     }
 
     return *filePtr_;
@@ -282,11 +276,14 @@ void Foam::functionObjects::writeFile::writeHeader
 
 void Foam::functionObjects::writeFile::writeTime(Ostream& os) const
 {
-    scalar timeNow = useUserTime_ ?
-        fileObr_.time().timeOutputValue()
-      : fileObr_.time().value();
+    const scalar timeValue =
+    (
+        useUserTime_
+      ? fileObr_.time().timeOutputValue()
+      : fileObr_.time().value()
+    );
 
-    os  << setw(charWidth()) << Time::timeName(timeNow);
+    os  << setw(charWidth()) << Time::timeName(timeValue);
 }
 
 

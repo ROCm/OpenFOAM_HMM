@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2012-2016 OpenFOAM Foundation
@@ -103,14 +103,14 @@ protected:
         //- Return the base directory for the current time value
         fileName baseTimeDir() const;
 
-        //- Return an autoPtr to a new file for a given time
+        //- Return autoPtr to a new file for a given time
         virtual autoPtr<OFstream> createFile
         (
             const word& name,
-            const scalar time
+            scalar timeValue
         ) const;
 
-        //- Return an autoPtr to a new file
+        //- Return autoPtr to a new file using the simulation start time
         virtual autoPtr<OFstream> createFile
         (
             const word& name
@@ -138,20 +138,21 @@ public:
 
     // Constructors
 
-        //- Construct from objectRegistry and prefix
-        writeFile
-        (
-            const objectRegistry& obr,
-            const word& prefix
-        );
-
-        //- Construct from objectRegistry and prefix, and read options
-        //  from dictionary
+        //- Construct from objectRegistry, prefix, fileName
         writeFile
         (
             const objectRegistry& obr,
             const word& prefix,
-            const word& fileName,
+            const word& file = "undefined"
+        );
+
+        //- Construct from objectRegistry, prefix, fileName
+        //- and read options from dictionary
+        writeFile
+        (
+            const objectRegistry& obr,
+            const word& prefix,
+            const word& file,
             const dictionary& dict
         );
 
