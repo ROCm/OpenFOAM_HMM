@@ -47,5 +47,10 @@ graphFormat     raw;
 
 runTimeModifiable true;
 
+functions
+{
+    #include "sampling"
+}
+
 
 // ************************************************************************* //

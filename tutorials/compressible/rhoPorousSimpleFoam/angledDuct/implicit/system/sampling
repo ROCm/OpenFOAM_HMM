@@ -1,0 +1,123 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1906                                 |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+cellZoneID
+{
+    type    coded;
+    libs    ("utilityFunctionObjects");
+    name    cellZoneID;
+
+    executeControl  writeTime;
+
+    localCode
+    #{
+        static const word fieldName("cellZoneID");
+
+        // Create and populate a "cellZoneID" volScalarField for cellZones.
+        // Return nullptr if there are not any such zones.
+        //
+        // Could be improved for mesh motion etc
+        // but is fairly low overhead anyhow
+        volScalarField* getZoneField(const fvMesh& mesh)
+        {
+            volScalarField* volZonePtr =
+                mesh.getObjectPtr<volScalarField>(fieldName);
+
+            const cellZoneMesh& zones = mesh.cellZones();
+
+            if (!zones.empty())
+            {
+                if (!volZonePtr)
+                {
+                    volZonePtr = new volScalarField
+                    (
+                        IOobject
+                        (
+                            fieldName,
+                            mesh.time().timeName(),
+                            mesh,
+                            IOobject::NO_READ,
+                            IOobject::NO_WRITE,
+                            true  // Register
+                        ),
+                        mesh,
+                        dimless,
+                        zeroGradientFvPatchField<scalar>::typeName
+                    );
+
+                    volZonePtr->store();
+
+                    Info<< "Creating " << fieldName
+                        << " field for postProcessing" << nl;
+                }
+            }
+            else
+            {
+                Info<< "No cellZones - not creating " << fieldName
+                    << " field for postProcessing" << nl;
+            }
+
+            if (volZonePtr)
+            {
+                // Copy zone id as scalar.
+                // For consistency, do this whenever the volField exists,
+                // even if there are no zones.
+
+                auto& field = *volZonePtr;
+
+                auto& internal = field.primitiveFieldRef();
+                internal = scalar(-1);
+
+                for (const cellZone& zn : zones)
+                {
+                    UIndirectList<scalar>(internal, zn) = scalar(zn.index());
+                }
+
+                field.correctBoundaryConditions();
+            }
+
+            return volZonePtr;
+        }
+    #};
+
+    codeExecute
+    #{
+        // Don't need the return value, just the contents on the registry.
+        (void) getZoneField(mesh());
+    #};
+}
+
+
+plane
+{
+    type    surfaces;
+    libs    ("sampling");
+
+    writeControl    writeTime;
+
+    surfaceFormat   vtk;
+    fields          ( cellZoneID );
+
+    surfaces
+    (
+        zNormal
+        {
+            type            cuttingPlane;
+            planeType       pointAndNormal;
+            pointAndNormalDict
+            {
+                point   (0 0 0);
+                normal  (0 0 1);
+            }
+            interpolate     false;
+        }
+    );
+}
+
+
+// ************************************************************************* //
