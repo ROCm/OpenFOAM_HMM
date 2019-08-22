@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::faSchemes::debug(Foam::debug::debugSwitch("faSchemes", false));
+int Foam::faSchemes::debug(Foam::debug::debugSwitch("faSchemes", 0));
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //

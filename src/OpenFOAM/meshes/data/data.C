@@ -30,7 +30,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::data::debug(Foam::debug::debugSwitch("data", false));
+int Foam::data::debug(Foam::debug::debugSwitch("data", 0));
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

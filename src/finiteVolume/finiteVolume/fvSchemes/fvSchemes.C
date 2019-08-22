@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::fvSchemes::debug(Foam::debug::debugSwitch("fvSchemes", false));
+int Foam::fvSchemes::debug(Foam::debug::debugSwitch("fvSchemes", 0));
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
