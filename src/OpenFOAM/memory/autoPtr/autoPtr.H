@@ -191,6 +191,7 @@ public:
     // Other
 
         //- Construct copy by invoking clone on underlying managed object
+        //  A no-op if no pointer is managed
         //  \param args list of arguments for clone
         template<class... Args>
         inline autoPtr<T> clone(Args&&... args) const;
@@ -199,31 +200,31 @@ public:
     // Member Operators
 
         //- Return reference to the managed object.
-        //  Fatal error if no pointer is managed
+        //  FatalError if no pointer is managed
         inline T& operator*();
 
         //- Return const reference to the object.
-        //  Fatal error if no pointer is managed
+        //  FatalError if no pointer is managed
         inline const T& operator*() const;
 
         //- Dereferences (non-const) pointer to the managed object
-        //  Fatal error if no pointer is managed
+        //  FatalError if no pointer is managed
         inline T* operator->();
 
         //- Dereferences (const) pointer to the managed object
-        //  Fatal error if no pointer is managed
+        //  FatalError if no pointer is managed
         inline const T* operator->() const;
 
         //- Return reference to the object data.
-        //  Fatal error if no pointer is managed
+        //  FatalError if no pointer is managed
         inline T& operator()();
 
         //- Return const reference to the object data
-        //  Fatal error if no pointer is managed
+        //  FatalError if no pointer is managed
         inline const T& operator()() const;
 
         //- Deprecated(2019-01) Automatic cast conversion to underlying type
-        //  Fatal error if no pointer is managed
+        //  FatalError if no pointer is managed
         //  \deprecated(2019-01) Can result in inadvertent conversions
         //      where the user should really know or check if the pointer
         //      is valid prior to using.
