@@ -31,6 +31,23 @@ actions
         source  setToCellZone;
         set     porousCells;
     }
+
+    {
+        name    airIntake;
+        type    faceSet;
+        action  new;
+        source  patchToFace;
+        patch   body;
+    }
+    {
+        name    airIntake;
+        type    faceSet;
+        action  subset;
+        source  boxToFace;
+        box     (2.6 0.75 0)(2.64 0.8 0.1);
+    }
+
+
 );
 
 // ************************************************************************* //

@@ -24,30 +24,20 @@ boundaryField
     inlet
     {
         type            fixedValue;
-        value           uniform 0.375;
+        value           $internalField;
     }
-    outlet
-    {
-        type            zeroGradient;
-    }
-    upperWall
+    "(body|upperWall|lowerWall)"
     {
         type            kqRWallFunction;
-        value           uniform 0.375;
-    }
-    lowerWall
-    {
-        type            kqRWallFunction;
-        value           uniform 0.375;
-    }
-    body
-    {
-        type            kqRWallFunction;
-        value           uniform 0.375;
+        value           $internalField;
     }
     frontAndBack
     {
         type            empty;
+    }
+    ".*"
+    {
+        type            zeroGradient;
     }
 }
 

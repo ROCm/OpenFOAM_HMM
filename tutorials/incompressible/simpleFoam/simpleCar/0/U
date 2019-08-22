@@ -18,12 +18,42 @@ dimensions      [0 1 -1 0 0 0 0];
 
 internalField   uniform (10 0 0);
 
+// Surface normal with time ramping
+intakeType1
+{
+    type            surfaceNormalFixedValue;
+    refValue        uniform 1.2;
+    ramp            table ((0 0) (10 1));
+}
+
+// Uniform surface normal with Function1 for ramping
+intakeType2
+{
+    type            uniformNormalFixedValue;
+    uniformValue    table ((0 0) (10 1.2));
+}
+
+// Uniform surface normal with time ramping
+intakeType3
+{
+    // Or directly with uniform value (ramping also possible)
+    type            uniformNormalFixedValue;
+    uniformValue    constant 1.2;
+    ramp            table ((0 0) (10 1));
+}
+
+
 boundaryField
 {
     inlet
     {
         type            fixedValue;
-        value           uniform (10 0 0);
+        value           $internalField;
+    }
+
+    airIntake
+    {
+        $intakeType1;
     }
 
     outlet
@@ -43,5 +73,9 @@ boundaryField
         type            empty;
     }
 }
+
+
+#remove "intakeType.*"
+
 
 // ************************************************************************* //

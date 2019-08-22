@@ -5,8 +5,6 @@
     \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
--------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -24,19 +22,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::surfaceNormalFixedValueFvPatchVectorField
+    Foam::uniformNormalFixedValueFvPatchVectorField
 
 Group
     grpGenericBoundaryConditions grpInletBoundaryConditions
 
 Description
-    This boundary condition provides a surface-normal vector boundary condition
-    by its magnitude.
+    This boundary condition provides a uniform surface-normal
+    vector boundary condition by its magnitude.
 
 Usage
     \table
         Property     | Description                          | Required | Default
-        refValue     | reference value                      | yes |
+        uniformValue | uniform value                        | yes |
         ramp         | time-based ramping                   | no  |
     \endtable
 
@@ -44,8 +42,8 @@ Usage
     \verbatim
     <patchName>
     {
-        type            surfaceNormalFixedValue;
-        refValue        uniform -10;           // 10 INTO the domain
+        type            uniformNormalFixedValue;
+        uniformValue    constant -10;          // 10 INTO the domain
     }
     \endverbatim
 
@@ -54,19 +52,22 @@ Note
     - the value is positive for outward-pointing vectors
 
 See also
+    Foam::Function1Types
     Foam::fixedValueFvPatchField
+    Foam::surfaceNormalFixedValueFvPatchVectorField
+    Foam::uniformFixedValueFvPatchVectorField
 
 SourceFiles
-    surfaceNormalFixedValueFvPatchVectorField.C
+    uniformNormalFixedValueFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceNormalFixedValueFvPatchVectorField_H
-#define surfaceNormalFixedValueFvPatchVectorField_H
+#ifndef uniformNormalFixedValueFvPatchVectorField_H
+#define uniformNormalFixedValueFvPatchVectorField_H
 
 #include "fvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
-#include "Function1.H"
+#include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,16 +75,16 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class surfaceNormalFixedValueFvPatchVectorField Declaration
+          Class uniformNormalFixedValueFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfaceNormalFixedValueFvPatchVectorField
+class uniformNormalFixedValueFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
     // Private Data
 
-        scalarField refValue_;
+        autoPtr<PatchFunction1<scalar>> uniformValue_;
 
         //- Optional time ramping
         autoPtr<Function1<scalar>> ramp_;
@@ -92,20 +93,20 @@ class surfaceNormalFixedValueFvPatchVectorField
 public:
 
     //- Runtime type information
-    TypeName("surfaceNormalFixedValue");
+    TypeName("uniformNormalFixedValue");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        surfaceNormalFixedValueFvPatchVectorField
+        uniformNormalFixedValueFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        surfaceNormalFixedValueFvPatchVectorField
+        uniformNormalFixedValueFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
@@ -113,20 +114,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  surfaceNormalFixedValueFvPatchVectorField
+        //  uniformNormalFixedValueFvPatchVectorField
         //  onto a new patch
-        surfaceNormalFixedValueFvPatchVectorField
+        uniformNormalFixedValueFvPatchVectorField
         (
-            const surfaceNormalFixedValueFvPatchVectorField&,
+            const uniformNormalFixedValueFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        surfaceNormalFixedValueFvPatchVectorField
+        uniformNormalFixedValueFvPatchVectorField
         (
-            const surfaceNormalFixedValueFvPatchVectorField&
+            const uniformNormalFixedValueFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -134,14 +135,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new surfaceNormalFixedValueFvPatchVectorField(*this)
+                new uniformNormalFixedValueFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        surfaceNormalFixedValueFvPatchVectorField
+        uniformNormalFixedValueFvPatchVectorField
         (
-            const surfaceNormalFixedValueFvPatchVectorField&,
+            const uniformNormalFixedValueFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -153,7 +154,7 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new surfaceNormalFixedValueFvPatchVectorField
+                new uniformNormalFixedValueFvPatchVectorField
                 (
                     *this,
                     iF
@@ -162,9 +163,9 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Mapping functions
+        // Mapping Functions
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap
@@ -180,14 +181,14 @@ public:
             );
 
 
-        // Evaluation functions
+        // Evaluation Functions
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

@@ -5,8 +5,6 @@
     \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-                            | Copyright (C) 2011-2016 OpenFOAM Foundation
--------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -25,28 +23,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceNormalFixedValueFvPatchVectorField.H"
+#include "uniformNormalFixedValueFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "fvPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::surfaceNormalFixedValueFvPatchVectorField::
-surfaceNormalFixedValueFvPatchVectorField
+Foam::uniformNormalFixedValueFvPatchVectorField::
+uniformNormalFixedValueFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
 )
 :
     fixedValueFvPatchVectorField(p, iF),
-    refValue_(p.size()),
+    uniformValue_(nullptr),
     ramp_(nullptr)
 {}
 
 
-Foam::surfaceNormalFixedValueFvPatchVectorField::
-surfaceNormalFixedValueFvPatchVectorField
+Foam::uniformNormalFixedValueFvPatchVectorField::
+uniformNormalFixedValueFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -54,7 +52,7 @@ surfaceNormalFixedValueFvPatchVectorField
 )
 :
     fixedValueFvPatchVectorField(p, iF, dict, false),
-    refValue_("refValue", dict, p.size()),
+    uniformValue_(PatchFunction1<scalar>::New(p.patch(), "uniformValue", dict)),
     ramp_(nullptr)
 {
     if (dict.found("ramp"))
@@ -62,84 +60,90 @@ surfaceNormalFixedValueFvPatchVectorField
         ramp_ = Function1<scalar>::New("ramp", dict);
     }
 
-    tmp<vectorField> tvalues(refValue_*patch().nf());
-
-    if (ramp_)
+    if (dict.found("value"))
     {
-        tvalues.ref() *= ramp_->value(this->db().time().timeOutputValue());
+        fvPatchVectorField::operator=
+        (
+            vectorField("value", dict, p.size())
+        );
     }
-
-    fvPatchVectorField::operator=(tvalues);
+    else
+    {
+        this->evaluate();
+    }
 }
 
 
-Foam::surfaceNormalFixedValueFvPatchVectorField::
-surfaceNormalFixedValueFvPatchVectorField
+Foam::uniformNormalFixedValueFvPatchVectorField::
+uniformNormalFixedValueFvPatchVectorField
 (
-    const surfaceNormalFixedValueFvPatchVectorField& ptf,
+    const uniformNormalFixedValueFvPatchVectorField& ptf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchVectorField(p, iF),
-    refValue_(ptf.refValue_, mapper, pTraits<scalar>::zero),
+    fixedValueFvPatchVectorField(p, iF),   // Don't map
+    uniformValue_(ptf.uniformValue_.clone(p.patch())),
     ramp_(ptf.ramp_.clone())
 {
-    // Note: refValue_ will have default value of 0 for unmapped faces. This
-    // can temporarily happen during e.g. redistributePar. We should not
-    // access ptf.patch() instead since redistributePar has destroyed this
-    // at the time of mapping.
-
-    tmp<vectorField> tvalues(refValue_*patch().nf());
-
-    if (ramp_)
+    if (mapper.direct() && !mapper.hasUnmapped())
     {
-        tvalues.ref() *= ramp_->value(this->db().time().timeOutputValue());
+        // Use mapping instead of re-evaluation
+        this->map(ptf, mapper);
     }
-
-    fvPatchVectorField::operator=(tvalues);
+    else
+    {
+        // Evaluate since value not mapped
+        this->evaluate();
+    }
 }
 
 
-Foam::surfaceNormalFixedValueFvPatchVectorField::
-surfaceNormalFixedValueFvPatchVectorField
+Foam::uniformNormalFixedValueFvPatchVectorField::
+uniformNormalFixedValueFvPatchVectorField
 (
-    const surfaceNormalFixedValueFvPatchVectorField& ptf
+    const uniformNormalFixedValueFvPatchVectorField& ptf
 )
 :
     fixedValueFvPatchVectorField(ptf),
-    refValue_(ptf.refValue_),
+    uniformValue_(ptf.uniformValue_.clone(this->patch().patch())),
     ramp_(ptf.ramp_.clone())
 {}
 
 
-Foam::surfaceNormalFixedValueFvPatchVectorField::
-surfaceNormalFixedValueFvPatchVectorField
+Foam::uniformNormalFixedValueFvPatchVectorField::
+uniformNormalFixedValueFvPatchVectorField
 (
-    const surfaceNormalFixedValueFvPatchVectorField& ptf,
+    const uniformNormalFixedValueFvPatchVectorField& ptf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
     fixedValueFvPatchVectorField(ptf, iF),
-    refValue_(ptf.refValue_),
+    uniformValue_(ptf.uniformValue_.clone(this->patch().patch())),
     ramp_(ptf.ramp_.clone())
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::surfaceNormalFixedValueFvPatchVectorField::autoMap
+void Foam::uniformNormalFixedValueFvPatchVectorField::autoMap
 (
     const fvPatchFieldMapper& mapper
 )
 {
     fixedValueFvPatchVectorField::autoMap(mapper);
-    refValue_.autoMap(mapper);
+    uniformValue_().autoMap(mapper);
+
+    if (uniformValue_().constant())
+    {
+        // If mapper is not dependent on time we're ok to evaluate
+        this->evaluate();
+    }
 }
 
 
-void Foam::surfaceNormalFixedValueFvPatchVectorField::rmap
+void Foam::uniformNormalFixedValueFvPatchVectorField::rmap
 (
     const fvPatchVectorField& ptf,
     const labelList& addr
@@ -147,25 +151,27 @@ void Foam::surfaceNormalFixedValueFvPatchVectorField::rmap
 {
     fixedValueFvPatchVectorField::rmap(ptf, addr);
 
-    const surfaceNormalFixedValueFvPatchVectorField& tiptf =
-        refCast<const surfaceNormalFixedValueFvPatchVectorField>(ptf);
+    const uniformNormalFixedValueFvPatchVectorField& tiptf =
+        refCast<const uniformNormalFixedValueFvPatchVectorField>(ptf);
 
-    refValue_.rmap(tiptf.refValue_, addr);
+    uniformValue_().rmap(tiptf.uniformValue_(), addr);
 }
 
 
-void Foam::surfaceNormalFixedValueFvPatchVectorField::updateCoeffs()
+void Foam::uniformNormalFixedValueFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
         return;
     }
 
-    tmp<vectorField> tvalues(refValue_*patch().nf());
+    const scalar t = this->db().time().timeOutputValue();
+
+    tmp<vectorField> tvalues(uniformValue_->value(t)*patch().nf());
 
     if (ramp_)
     {
-        tvalues.ref() *= ramp_->value(this->db().time().timeOutputValue());
+        tvalues.ref() *= ramp_->value(t);
     }
 
     fvPatchVectorField::operator=(tvalues);
@@ -173,14 +179,15 @@ void Foam::surfaceNormalFixedValueFvPatchVectorField::updateCoeffs()
 }
 
 
-void Foam::surfaceNormalFixedValueFvPatchVectorField::write(Ostream& os) const
+void Foam::uniformNormalFixedValueFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    refValue_.writeEntry("refValue", os);
+    uniformValue_->writeData(os);
     if (ramp_)
     {
         ramp_->writeData(os);
     }
+    this->writeEntry("value", os);
 }
 
 
@@ -191,7 +198,7 @@ namespace Foam
     makePatchTypeField
     (
         fvPatchVectorField,
-        surfaceNormalFixedValueFvPatchVectorField
+        uniformNormalFixedValueFvPatchVectorField
     );
 }
 

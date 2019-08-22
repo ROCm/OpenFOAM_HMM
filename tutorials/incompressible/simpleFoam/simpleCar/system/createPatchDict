@@ -9,43 +9,35 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    location    "0";
-    object      epsilon;
+    class       dictionary;
+    object      createPatchDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+pointSync false;
 
-internalField   uniform 0.125;
-
-boundaryField
-{
-    inlet
+// Patches to create
+patches
+(
     {
-        type            fixedValue;
-        value           $internalField;
-    }
+        // Name of new patch
+        name airIntake;
 
-    "(body|upperWall|lowerWall)"
-    {
-        type            epsilonWallFunction;
-        value           $internalField;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-    }
+        // Dictionary to construct new patch from
+        patchInfo
+        {
+            type patch;
+        }
 
-    frontAndBack
-    {
-        type            empty;
-    }
+        // How to construct: either from 'patches' or 'set'
+        constructFrom set;
 
-    ".*"
-    {
-        type            zeroGradient;
-    }
-}
+        // If constructFrom = patches : names of patches. Wildcards allowed.
+        patches ();
 
+        // If constructFrom = set : name of faceSet
+        set airIntake;
+    }
+);
 
 // ************************************************************************* //

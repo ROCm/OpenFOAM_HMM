@@ -21,43 +21,24 @@ internalField   uniform 0;
 
 boundaryField
 {
-    inlet
-    {
-        type            calculated;
-        value           uniform 0;
-    }
-    outlet
-    {
-        type            calculated;
-        value           uniform 0;
-    }
-    upperWall
+    "(body|upperWall|lowerWall)"
     {
         type            nutkWallFunction;
         Cmu             0.09;
         kappa           0.41;
         E               9.8;
-        value           uniform 0;
+        value           $internalField;
     }
-    lowerWall
-    {
-        type            nutkWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 0;
-    }
-    body
-    {
-        type            nutkWallFunction;
-        Cmu             0.09;
-        kappa           0.41;
-        E               9.8;
-        value           uniform 0;
-    }
+
     frontAndBack
     {
         type            empty;
+    }
+
+    ".*"
+    {
+        type            calculated;
+        value           $internalField;
     }
 }
 

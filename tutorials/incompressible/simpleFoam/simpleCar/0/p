@@ -20,26 +20,22 @@ internalField   uniform 0;
 
 boundaryField
 {
-    inlet
-    {
-        type            zeroGradient;
-    }
-
     outlet
     {
         type            fixedValue;
-        value           uniform 0;
-    }
-
-    "(body|upperWall|lowerWall)"
-    {
-        type            zeroGradient;
+        value           $internalField;
     }
 
     frontAndBack
     {
         type            empty;
     }
+
+    ".*"
+    {
+        type            zeroGradient;
+    }
+
 }
 
 // ************************************************************************* //
