@@ -104,7 +104,7 @@ class turbulentDFSEMInletFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
-    // Private data
+    // Private Data
 
         //- Maximum number of attempts when seeding eddies
         static label seedIterMax_;
@@ -136,17 +136,17 @@ class turbulentDFSEMInletFvPatchVectorField
             //- Flag to identify to interpolate the R field
             bool interpolateR_;
 
-            //- Reynolds stress tensor
-            symmTensorField R_;
-
             //- Flag to identify to interpolate the L field
             bool interpolateL_;
 
-            //- Length scale
-            scalarField L_;
-
             //- Flag to identify to interpolate the U field
             bool interpolateU_;
+
+            //- Reynolds stress tensor
+            symmTensorField R_;
+
+            //- Length scale
+            scalarField L_;
 
             //- Inlet velocity
             vectorField U_;

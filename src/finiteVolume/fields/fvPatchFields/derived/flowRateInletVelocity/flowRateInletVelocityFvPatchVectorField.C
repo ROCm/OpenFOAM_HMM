@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -41,9 +41,9 @@ flowRateInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(p, iF),
     flowRate_(),
-    volumetric_(false),
     rhoName_("rho"),
     rhoInlet_(0.0),
+    volumetric_(false),
     extrapolateProfile_(false)
 {}
 
@@ -57,7 +57,9 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict, false),
+    rhoName_("rho"),
     rhoInlet_(dict.lookupOrDefault<scalar>("rhoInlet", -VGREAT)),
+    volumetric_(false),
     extrapolateProfile_
     (
         dict.lookupOrDefault<Switch>("extrapolateProfile", false)
@@ -67,7 +69,6 @@ flowRateInletVelocityFvPatchVectorField
     {
         volumetric_ = true;
         flowRate_ = Function1<scalar>::New("volumetricFlowRate", dict);
-        rhoName_ = "rho";
     }
     else if (dict.found("massFlowRate"))
     {
@@ -79,7 +80,8 @@ flowRateInletVelocityFvPatchVectorField
     {
         FatalIOErrorInFunction(dict)
             << "Please supply either 'volumetricFlowRate' or"
-            << " 'massFlowRate' and 'rho'" << exit(FatalIOError);
+            << " 'massFlowRate' and 'rho'" << nl
+            << exit(FatalIOError);
     }
 
     // Value field require if mass based
@@ -108,9 +110,9 @@ flowRateInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
+    volumetric_(ptf.volumetric_),
     extrapolateProfile_(ptf.extrapolateProfile_)
 {}
 
@@ -123,9 +125,9 @@ flowRateInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
+    volumetric_(ptf.volumetric_),
     extrapolateProfile_(ptf.extrapolateProfile_)
 {}
 
@@ -139,9 +141,9 @@ flowRateInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, iF),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
+    volumetric_(ptf.volumetric_),
     extrapolateProfile_(ptf.extrapolateProfile_)
 {}
 

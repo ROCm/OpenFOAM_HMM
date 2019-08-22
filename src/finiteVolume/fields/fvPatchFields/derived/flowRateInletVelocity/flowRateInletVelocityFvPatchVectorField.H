@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           |
+    \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
                             | Copyright (C) 2011-2017 OpenFOAM Foundation
@@ -121,14 +121,14 @@ class flowRateInletVelocityFvPatchVectorField
         //- Inlet integral flow rate
         autoPtr<Function1<scalar>> flowRate_;
 
-        //- Is volumetric?
-        bool volumetric_;
-
         //- Name of the density field used to normalize the mass flux
         word rhoName_;
 
         //- Rho initialisation value (for start; if value not supplied)
         scalar rhoInlet_;
+
+        //- Is volumetric?
+        bool volumetric_;
 
         //- Set true to extrapolate the velocity profile from the interior
         Switch extrapolateProfile_;

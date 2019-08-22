@@ -54,9 +54,9 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(p, iF),
     fanCurve_(),
     direction_(ffdOut),
-    nonDimensional_(false),
-    rpm_(0.0),
-    dm_(0.0)
+    rpm_(0),
+    dm_(0),
+    nonDimensional_(false)
 {}
 
 
@@ -71,9 +71,9 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(ptf, p, iF, mapper),
     fanCurve_(ptf.fanCurve_),
     direction_(ptf.direction_),
-    nonDimensional_(ptf.nonDimensional_),
     rpm_(ptf.rpm_),
-    dm_(ptf.dm_)
+    dm_(ptf.dm_),
+    nonDimensional_(ptf.nonDimensional_)
 {}
 
 
@@ -87,9 +87,9 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(p, iF, dict),
     fanCurve_(dict),
     direction_(fanFlowDirectionNames_.get("direction", dict)),
-    nonDimensional_(dict.lookupOrDefault<Switch>("nonDimensional", false)),
-    rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
-    dm_(dict.lookupOrDefault<scalar>("dm", 0.0))
+    rpm_(0),
+    dm_(0),
+    nonDimensional_(dict.lookupOrDefault("nonDimensional", false))
 {
     if (nonDimensional_)
     {
@@ -107,9 +107,9 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(pfopsf),
     fanCurve_(pfopsf.fanCurve_),
     direction_(pfopsf.direction_),
-    nonDimensional_(pfopsf.nonDimensional_),
     rpm_(pfopsf.rpm_),
-    dm_(pfopsf.dm_)
+    dm_(pfopsf.dm_),
+    nonDimensional_(pfopsf.nonDimensional_)
 {}
 
 
@@ -122,9 +122,9 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
     totalPressureFvPatchScalarField(pfopsf, iF),
     fanCurve_(pfopsf.fanCurve_),
     direction_(pfopsf.direction_),
-    nonDimensional_(pfopsf.nonDimensional_),
     rpm_(pfopsf.rpm_),
-    dm_(pfopsf.dm_)
+    dm_(pfopsf.dm_),
+    nonDimensional_(pfopsf.nonDimensional_)
 {}
 
 
@@ -198,9 +198,12 @@ void Foam::fanPressureFvPatchScalarField::write(Ostream& os) const
     totalPressureFvPatchScalarField::write(os);
     fanCurve_.write(os);
     os.writeEntry("direction", fanFlowDirectionNames_[direction_]);
-    os.writeEntry("nonDimensional", nonDimensional_);
-    os.writeEntry("rpm", rpm_);
-    os.writeEntry("dm", dm_);
+    if (nonDimensional_)
+    {
+        os.writeEntry("nonDimensional", "true");
+        os.writeEntry("rpm", rpm_);
+        os.writeEntry("dm", dm_);
+    }
 }
 
 

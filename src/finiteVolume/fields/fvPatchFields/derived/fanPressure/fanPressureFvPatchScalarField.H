@@ -131,7 +131,7 @@ public:
 
 private:
 
-    // Private data
+    // Private Data
 
         //- Tabulated fan curve
         interpolationTable<scalar> fanCurve_;
@@ -139,16 +139,14 @@ private:
         //- Direction of flow through the fan relative to patch
         fanFlowDirection direction_;
 
-        //- Switch for using non-dimensional curve
-        Switch nonDimensional_;
+        //- Fan rpm (for non-dimensional curve)
+        scalar rpm_;
 
-        // Parameters for non-dimensional table
+        //- Fan mean diameter (for non-dimensional curve)
+        scalar dm_;
 
-            //- Fan rpm
-            scalar rpm_;
-
-            //- Fan mean diameter
-            scalar dm_;
+        //- Use non-dimensional curve
+        bool nonDimensional_;
 
 
 public:
@@ -230,7 +228,7 @@ public:
         virtual void updateCoeffs();
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

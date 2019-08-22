@@ -123,9 +123,9 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     rpm_(),
     rEff_(0.0),
     fanEff_(1.0),
-    useRealRadius_(false),
     rInner_(0.0),
-    rOuter_(0.0)
+    rOuter_(0.0),
+    useRealRadius_(false)
 {}
 
 
@@ -158,9 +158,9 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     ),
     rEff_(dict.lookupOrDefault<scalar>("rEff", 0)),
     fanEff_(dict.lookupOrDefault<scalar>("fanEff", 1)),
-    useRealRadius_(dict.lookupOrDefault("useRealRadius", false)),
     rInner_(dict.lookupOrDefault<scalar>("rInner", 0)),
-    rOuter_(dict.lookupOrDefault<scalar>("rOuter", 0))
+    rOuter_(dict.lookupOrDefault<scalar>("rOuter", 0)),
+    useRealRadius_(dict.lookupOrDefault("useRealRadius", false))
 {}
 
 
@@ -180,9 +180,9 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     rpm_(ptf.rpm_.clone()),
     rEff_(ptf.rEff_),
     fanEff_(ptf.fanEff_),
-    useRealRadius_(ptf.useRealRadius_),
     rInner_(ptf.rInner_),
-    rOuter_(ptf.rOuter_)
+    rOuter_(ptf.rOuter_),
+    useRealRadius_(ptf.useRealRadius_)
 {}
 
 
@@ -198,9 +198,9 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     origin_(ptf.origin_),
     rpm_(ptf.rpm_.clone()),
     rEff_(ptf.rEff_),
-    useRealRadius_(ptf.useRealRadius_),
     rInner_(ptf.rInner_),
-    rOuter_(ptf.rOuter_)
+    rOuter_(ptf.rOuter_),
+    useRealRadius_(ptf.useRealRadius_)
 {}
 
 
@@ -217,9 +217,9 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     origin_(ptf.origin_),
     rpm_(ptf.rpm_.clone()),
     rEff_(ptf.rEff_),
-    useRealRadius_(ptf.useRealRadius_),
     rInner_(ptf.rInner_),
-    rOuter_(ptf.rOuter_)
+    rOuter_(ptf.rOuter_),
+    useRealRadius_(ptf.useRealRadius_)
 {}
 
 
