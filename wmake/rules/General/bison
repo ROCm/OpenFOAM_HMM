@@ -1,4 +1,4 @@
-SUFFIXES += .y .Y
+SUFFIXES += .Y .y .yy
 
 ytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
     $(WM_SCHEDULER) bison -v -d -y $< $(AND) \
@@ -11,3 +11,8 @@ Ytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
     mv y.tab.c $(@D)/$(<F).C $(AND) \
     mv y.tab.h $(@D)/$(<F).H $(AND) \
     $(CC) $(c++FLAGS) -c  $(@D)/$(<F).C -o $@
+
+yytoo = $E $(call QUIET_MESSAGE,bison,$(<F)) \
+    $(WM_SCHEDULER) $(WM_SCRIPTS)/wrap-bison \
+    -input=$< -output=$(@D)/$(*F).tab.cc -v -d $(AND) \
+    $(cc) $(cFLAGS) -c $(@D)/$(*F).tab.cc -o $@

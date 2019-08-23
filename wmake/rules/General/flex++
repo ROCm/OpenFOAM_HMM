@@ -1,5 +1,11 @@
-SUFFIXES += .L
+SUFFIXES += .L .ll
 
+# Use C++-aware Flex
 Ltoo = $E $(call QUIET_MESSAGE,flex++,$(<F)) \
-    $(WM_SCHEDULER) flex -+ -o$(@D)/$(<F).C -f $< $(AND) \
+    $(WM_SCHEDULER) flex -+ -f -o $(@D)/$(<F).C $< $(AND) \
     $(CC) $(c++FLAGS) $(c++LESSWARN) -c $(@D)/$(<F).C -o $@
+
+# Use regular (C) Flex, but compile result as C++
+lltoo = $E $(call QUIET_MESSAGE,flex,$(<F)) \
+    $(WM_SCHEDULER) flex -f -o $(@D)/$(<F).cc $< $(AND) \
+    $(CC) $(c++FLAGS) $(c++LESSWARN) -c $(@D)/$(<F).cc -o $@

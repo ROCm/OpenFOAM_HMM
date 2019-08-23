@@ -1,0 +1,191 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     wrap-bison
+#
+# Usage
+#     wrap-bison -input=*.yy -output=*.cc [bison-options]
+#
+# Description
+#     A wrapper to handle renaming/relocation of bison-generated files.
+#
+#     When bison is used, it generates several output files.
+#     The names of the regular output files may not match our expectations.
+#     The skeleton files are always named the same, which can cause
+#     file-name collisions in some cases.
+#
+#     Input:
+#       - myFile.yy
+#
+#     Output: <myFile.yy>
+#       - myFile.tab.hh
+#       - myFile.tab.cc
+#       - location.hh
+#       - position.hh
+#       - stack.hh
+#
+#     Approach
+#       - call bison from within a local Make/some-name/ directory.
+#       - use sed to modify the #include contents and rename files.
+#         From location.hh -> myFile.location.hh
+#       - place generated *.hh files directly into lnInclude/
+#       - place generated *.cc file into the build/ directory
+#
+# Note
+#     General idea lifted from swak
+#------------------------------------------------------------------------------
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+Usage: ${0##*/} -file=<name> [bison-options]
+
+options:
+  -input=NAME       Perform the renaming actions
+  -output=NAME      Perform the renaming actions
+  -h, -help         Print the usage
+
+A bison wrapper to handle renaming of the skeleton files
+
+USAGE
+    exit 1
+}
+
+# The file extensions used
+extCode="cc"
+extHead="hh"
+
+#------------------------------------------------------------------------------
+# Parse arguments and options
+#------------------------------------------------------------------------------
+
+# bison -input=... -output=...
+unset inputFile outputFile
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    (-h | -help*) usage ;;
+
+    (-input=*)   inputFile="${1#*=}" ;;
+    (-output=*)  outputFile="${1#*=}" ;;
+
+    (*) break ;;
+    esac
+    shift
+done
+
+# No rename action supplied? Juet execute bison directly.
+if [ -z "$inputFile" ]
+then
+    bison $*
+    exit $?
+fi
+
+#------------------------------------------------------------------------------
+# Renaming requested
+
+# Need lnInclude/ directory
+[ -d lnInclude ] || mkdir lnInclude 2>/dev/null || {
+    echo "Cannot continue without an lnInclude directory" 1>&2
+    pwd -L
+    exit 1
+}
+
+# Get a baseName (stem) for the output
+baseName="${inputFile##*/}"
+baseName="${baseName%.*}"
+
+# Fallback for output
+if [ -z "$outputFile" ]
+then
+    outputFile="$(dirname ${inputFile})/${baseName}.$extCode"
+fi
+
+# Run bison in temporary directory (keeps files together)
+cwd="$(pwd -L)"
+tmpDir="Make/bisonWrapper-$baseName"
+rm -rf "$tmpDir" 2>/dev/null
+mkdir "$tmpDir" 2>/dev/null
+
+cd "$tmpDir" || exit 1
+rc=1
+
+# DO WE WANT THIS?
+# trap 'cd $cwd; rm -f $tmpDir 2>/dev/null; exit $rc' EXIT TERM INT
+
+bison "$@" "../../$inputFile"
+rc=$?
+
+cd "../.." || exit 1
+
+if [ "$rc" -ne 0 ]
+then
+    rm -rf $tmpDir 2>/dev/null
+    exit "$rc"   # Exit with bison return code
+fi
+
+
+# Check for/remove .tab. tag?
+unset untabFilter
+
+# withTab=$/include *"stack/s/"/"'"${baseName}."'/;' \
+
+hasTab="${outputFile##*/}"
+hasTab="${hasTab%.*}"
+
+if [ "$hasTab" = "${hasTab%.tab}" ]
+then
+    untab='/^#.*".*\.tab\./s/\.tab\././'
+fi
+
+# Filter include names to generate new files
+# "$1" = input
+# "$2" = output
+filterRename()
+{
+    if [ -f "$1" ] && [ -n "$2" ]
+    then
+        sed \
+            -e '/include *"location/s/"/"'"${baseName}."'/;' \
+            -e '/include *"position/s/"/"'"${baseName}."'/;' \
+            -e '/include *"stack/s/"/"'"${baseName}."'/;' \
+            -e "$untab;" \
+            "$1" >| "$2"
+    fi
+}
+
+
+# Boilerplate -> lnInclude/ directory with new name
+for file in position location stack
+do
+    filterRename \
+        "${tmpDir}/${file}.$extHead" \
+        "lnInclude/${baseName}.${file}.$extHead"
+done
+
+# Header -> lnInclude/ directory, possibly with .tab.hh to .hh
+filterRename \
+    "${tmpDir}/${baseName}.tab.$extHead" \
+    "lnInclude/${baseName}${untab:-.tab}.$extHead"
+
+# Code -> build directory, possibly with .tab.hh to .hh
+filterRename \
+    "${tmpDir}/${baseName}.tab.$extCode" \
+    "${outputFile}"
+
+
+rm -rf $tmpDir 2>/dev/null
+exit "$rc"   # Exit with bison return code
+
+#------------------------------------------------------------------------------
