@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,15 +40,15 @@ Foam::Function1Types::TableBase<Type>::interpolator() const
     {
         // Re-work table into linear list
         tableSamplesPtr_.reset(new scalarField(table_.size()));
-        scalarField& tableSamples = tableSamplesPtr_();
+        scalarField& samples = *tableSamplesPtr_;
         forAll(table_, i)
         {
-            tableSamples[i] = table_[i].first();
+            samples[i] = table_[i].first();
         }
         interpolatorPtr_ = interpolationWeights::New
         (
             interpolationScheme_,
-            tableSamples
+            samples
         );
     }
 
@@ -116,21 +117,23 @@ void Foam::Function1Types::TableBase<Type>::check() const
             << nl << exit(FatalError);
     }
 
-    const label n = table_.size();
-    scalar prevValue = table_[0].first();
+    scalar prevValue(0);
 
-    for (label i = 1; i < n; ++i)
+    label i = 0;
+    for (const auto& item : table_)
     {
-        const scalar currValue = table_[i].first();
+        const scalar& currValue = item.first();
 
-        // avoid duplicate values (divide-by-zero error)
-        if (currValue <= prevValue)
+        // Avoid duplicate values (divide-by-zero error)
+        if (i && currValue <= prevValue)
         {
             FatalErrorInFunction
-                << "out-of-order value: " << currValue << " at index " << i
+                << "out-of-order value: "
+                << currValue << " at index " << i << nl
                 << exit(FatalError);
         }
         prevValue = currValue;
+        ++i;
     }
 }
 
@@ -142,45 +145,44 @@ bool Foam::Function1Types::TableBase<Type>::checkMinBounds
     scalar& xDash
 ) const
 {
-    if (x < table_.first().first())
+    const scalar minLimit = table_.first().first();
+    const scalar maxLimit = table_.last().first();
+
+    if (x < minLimit)
     {
         switch (bounding_)
         {
             case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
-                    << "value (" << x << ") underflow"
+                    << "value (" << x << ") less than lower "
+                    << "bound (" << minLimit << ")" << nl
                     << exit(FatalError);
                 break;
             }
             case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
-                    << "value (" << x << ") underflow" << nl
-                    << endl;
+                    << "value (" << x << ") less than lower "
+                    << "bound (" << minLimit << ")" << nl
+                    << "    Continuing with the first entry" << endl;
 
                 // Behaviour as per CLAMP
-                xDash = table_.first().first();
+                xDash = minLimit;
                 return true;
                 break;
             }
             case bounds::repeatableBounding::CLAMP:
             {
-                xDash = table_.first().first();
+                xDash = minLimit;
                 return true;
                 break;
             }
             case bounds::repeatableBounding::REPEAT:
             {
-                // adjust x to >= minX
-                const scalar span =
-                    table_.last().first() - table_.first().first();
-
-                xDash =
-                (
-                    fmod(x - table_.first().first(), span)
-                  + table_.first().first()
-                );
+                // Adjust x to >= minX
+                const scalar span = maxLimit - minLimit;
+                xDash = fmod(x - minLimit, span) + minLimit;
                 break;
             }
         }
@@ -201,45 +203,44 @@ bool Foam::Function1Types::TableBase<Type>::checkMaxBounds
     scalar& xDash
 ) const
 {
-    if (x > table_.last().first())
+    const scalar minLimit = table_.first().first();
+    const scalar maxLimit = table_.last().first();
+
+    if (x > maxLimit)
     {
         switch (bounding_)
         {
             case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
-                    << "value (" << x << ") overflow"
+                    << "value (" << x << ") greater than upper "
+                    << "bound (" << maxLimit << ")" << nl
                     << exit(FatalError);
                 break;
             }
             case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
-                    << "value (" << x << ") overflow" << nl
-                    << endl;
+                    << "value (" << x << ") greater than upper "
+                    << "bound (" << maxLimit << ")" << nl
+                    << "    Continuing with the last entry" << endl;
 
                 // Behaviour as per CLAMP
-                xDash = table_.last().first();
+                xDash = maxLimit;
                 return true;
                 break;
             }
             case bounds::repeatableBounding::CLAMP:
             {
-                xDash = table_.last().first();
+                xDash = maxLimit;
                 return true;
                 break;
             }
             case bounds::repeatableBounding::REPEAT:
             {
-                // adjust x to >= minX
-                const scalar span =
-                    table_.last().first() - table_.first().first();
-
-                xDash =
-                (
-                    fmod(x - table_.first().first(), span)
-                  + table_.first().first()
-                );
+                // Adjust x to >= minX
+                const scalar span = maxLimit - minLimit;
+                xDash = fmod(x - minLimit, span) + minLimit;
                 break;
             }
         }
@@ -256,10 +257,9 @@ bool Foam::Function1Types::TableBase<Type>::checkMaxBounds
 template<class Type>
 void Foam::Function1Types::TableBase<Type>::convertTimeBase(const Time& t)
 {
-    forAll(table_, i)
+    for (auto& item : table_)
     {
-        scalar value = table_[i].first();
-        table_[i].first() = t.userTimeToTime(value);
+        item.first() = t.userTimeToTime(item.first());
     }
 
     tableSamplesPtr_.clear();
@@ -318,8 +318,8 @@ Type Foam::Function1Types::TableBase<Type>::integrate
 template<class Type>
 Foam::tmp<Foam::scalarField> Foam::Function1Types::TableBase<Type>::x() const
 {
-    tmp<scalarField> tfld(new scalarField(table_.size(), Zero));
-    scalarField& fld = tfld.ref();
+    auto tfld = tmp<scalarField>::New(table_.size(), Zero);
+    auto& fld = tfld.ref();
 
     forAll(table_, i)
     {
@@ -333,8 +333,8 @@ Foam::tmp<Foam::scalarField> Foam::Function1Types::TableBase<Type>::x() const
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::Function1Types::TableBase<Type>::y() const
 {
-    tmp<Field<Type>> tfld(new Field<Type>(table_.size(), Zero));
-    Field<Type>& fld = tfld.ref();
+    auto tfld = tmp<Field<Type>>::New(table_.size(), Zero);
+    auto& fld = tfld.ref();
 
     forAll(table_, i)
     {
@@ -348,12 +348,14 @@ Foam::tmp<Foam::Field<Type>> Foam::Function1Types::TableBase<Type>::y() const
 template<class Type>
 void Foam::Function1Types::TableBase<Type>::writeEntries(Ostream& os) const
 {
-    os.writeEntryIfDifferent<word>
-    (
-        "outOfBounds",
-        bounds::repeatableBoundingNames[bounds::repeatableBounding::CLAMP],
-        bounds::repeatableBoundingNames[bounding_]
-    );
+    if (bounds::repeatableBounding::CLAMP != bounding_)
+    {
+        os.writeEntry
+        (
+            "outOfBounds",
+            bounds::repeatableBoundingNames[bounding_]
+        );
+    }
 
     os.writeEntryIfDifferent<word>
     (

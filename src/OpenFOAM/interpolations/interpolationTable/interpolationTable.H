@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +37,6 @@ Description
     If \c repeat is chosen for the out-of-bounds handling, the final time
     value is treated as being equivalent to time=0 for the following periods.
 
-
     The construct from dictionary reads a filename from a dictionary and
     has an optional readerType. Default is to read OpenFOAM format. The only
     other format is csv (comma separated values):
@@ -65,10 +65,10 @@ SourceFiles
 
 #include "List.H"
 #include "Tuple2.H"
-
 #include "tableBounds.H"
 #include "tableReader.H"
 #include "autoPtr.H"
+#include "Field.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,7 +84,7 @@ class interpolationTable
 :
     public List<Tuple2<scalar, Type>>
 {
-    // Private data
+    // Private Data
 
         //- Handling for out-of-bound values
         bounds::repeatableBounding bounding_;
@@ -104,6 +104,15 @@ class interpolationTable
 
 public:
 
+    // Public Data Types
+
+        //- The element data type
+        typedef Tuple2<scalar, Type> value_type;
+
+        //- The mapped data type
+        typedef Type mapped_type;
+
+
     // Constructors
 
         //- Construct null
@@ -118,18 +127,27 @@ public:
         );
 
         //- Construct given the name of the file containing the table of data
-        interpolationTable(const fileName& fName);
+        explicit interpolationTable(const fileName& fName);
 
         //- Construct by reading file name and outOfBounds from dictionary
-        //  and read the table from that file.
+        //- and read the table from that file.
         //  This is a specialised constructor used by patchFields
-        interpolationTable(const dictionary& dict);
+        explicit interpolationTable(const dictionary& dict);
 
-        //- Construct copy
+        //- Copy construct
         interpolationTable(const interpolationTable& interpTable);
 
 
     // Member Functions
+
+        //- Return an interpolated value in List
+        static Type interpolateValue
+        (
+            const List<Tuple2<scalar, Type>>& list,
+            scalar lookupValue,
+            bounds::repeatableBounding = bounds::repeatableBounding::CLAMP
+        );
+
 
         //- Check that list is monotonically increasing
         //  Exit with a FatalError if there is a problem
@@ -139,17 +157,26 @@ public:
         void write(Ostream& os) const;
 
         //- Return the rate of change at the interpolation location
-        //  for the give value
-        Type rateOfChange(const scalar) const;
+        //- for the given lookup value
+        Type rateOfChange(scalar lookupValue) const;
+
+        //- Return an interpolated value
+        Type interpolateValue(scalar lookupValue) const;
+
+        //- Return multiple interpolated values
+        tmp<Field<Type>> interpolateValues
+        (
+            const UList<scalar>& vals
+        ) const;
 
 
     // Member Operators
 
         //- Return an element of constant Tuple2<scalar, Type>
-        const Tuple2<scalar, Type>& operator[](const label) const;
+        const Tuple2<scalar, Type>& operator[](label idx) const;
 
         //- Return an interpolated value
-        Type operator()(const scalar) const;
+        Type operator()(scalar lookupValue) const;
 };
 
 

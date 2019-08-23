@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +28,8 @@ Class
     Foam::interpolation2DTable
 
 Description
-    2D table interpolation. The data must be in ascending order in both
-    dimensions x and y.
+    2D table interpolation.
+    The data must be in ascending order in both dimensions x and y.
 
 SourceFiles
     interpolation2DTable.C
@@ -38,10 +39,7 @@ SourceFiles
 #ifndef interpolation2DTable_H
 #define interpolation2DTable_H
 
-#include "List.H"
-#include "Tuple2.H"
-#include "tableBounds.H"
-#include "tableReader.H"
+#include "interpolationTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,17 +55,7 @@ class interpolation2DTable
 :
     public List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>
 {
-public:
-
-    // Public data types
-
-        //- Convenience typedef
-        typedef List<Tuple2<scalar, List<Tuple2<scalar, Type>>>> table;
-
-
-private:
-
-    // Private data
+    // Private Data
 
         //- Handling for out-of-bound values
         bounds::normalBounding bounding_;
@@ -84,11 +72,11 @@ private:
         //- Read the table of data from file
         void readTable();
 
-        //- Return interpolated value in List
+        //- Interpolated value within 1-D list
         Type interpolateValue
         (
-            const List<Tuple2<scalar, Type>>& data,
-            const scalar
+            const List<Tuple2<scalar, Type>>& list,
+            scalar lookupValue
         ) const;
 
         //- Return an X index from the matrix
@@ -102,6 +90,15 @@ private:
 
 
 public:
+
+    // Public Data Types
+
+        //- The element data type
+        typedef Tuple2<scalar, List<Tuple2<scalar, Type>>> value_type;
+
+        //- Convenience typedef
+        typedef List<Tuple2<scalar, List<Tuple2<scalar, Type>>>> table;
+
 
     // Constructors
 
@@ -117,12 +114,12 @@ public:
         );
 
         //- Construct given the name of the file containing the table of data
-        interpolation2DTable(const fileName& fName);
+        explicit interpolation2DTable(const fileName& fName);
 
         //- Construct by reading file name and outOfBounds from dictionary
-        interpolation2DTable(const dictionary& dict);
+        explicit interpolation2DTable(const dictionary& dict);
 
-        //- Construct copy
+        //- Copy construct
         interpolation2DTable(const interpolation2DTable& interpTable);
 
 
@@ -130,7 +127,7 @@ public:
 
         //- Check that list is monotonically increasing
         //  Exit with a FatalError if there is a problem
-        void checkOrder() const;
+        void check() const;
 
         //- Write
         void write(Ostream& os) const;
@@ -138,11 +135,15 @@ public:
 
     // Member Operators
 
-        //- Return an element of constant List<Tuple2<scalar, Type>>
-        const List<Tuple2<scalar, Type>>& operator[](const label) const;
-
         //- Return an interpolated value
         Type operator()(const scalar valueX, const scalar valueY) const;
+
+
+    // Housekeeping
+
+        //- Deprecated(2019-08) check list is monotonically increasing
+        //  \deprecated(2019-08) - older name for check() method
+        void checkOrder() const { check(); }
 };
 
 

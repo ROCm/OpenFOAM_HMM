@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ void Foam::interpolation2DTable<Type>::readTable()
     }
 
     // Check that the data are in ascending order
-    checkOrder();
+    check();
 }
 
 
@@ -56,7 +56,7 @@ void Foam::interpolation2DTable<Type>::readTable()
 template<class Type>
 Foam::interpolation2DTable<Type>::interpolation2DTable()
 :
-    List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(),
+    List<value_type>(),
     bounding_(bounds::normalBounding::WARN),
     fileName_("fileNameIsUndefined"),
     reader_(nullptr)
@@ -71,7 +71,7 @@ Foam::interpolation2DTable<Type>::interpolation2DTable
     const fileName& fName
 )
 :
-    List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(values),
+    List<value_type>(values),
     bounding_(bounding),
     fileName_(fName),
     reader_(nullptr)
@@ -81,7 +81,7 @@ Foam::interpolation2DTable<Type>::interpolation2DTable
 template<class Type>
 Foam::interpolation2DTable<Type>::interpolation2DTable(const fileName& fName)
 :
-    List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(),
+    List<value_type>(),
     bounding_(bounds::normalBounding::WARN),
     fileName_(fName),
     reader_(new openFoamTableReader<Type>(dictionary()))
@@ -93,7 +93,7 @@ Foam::interpolation2DTable<Type>::interpolation2DTable(const fileName& fName)
 template<class Type>
 Foam::interpolation2DTable<Type>::interpolation2DTable(const dictionary& dict)
 :
-    List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(),
+    List<value_type>(),
     bounding_
     (
         bounds::normalBoundingNames.lookupOrDefault
@@ -104,7 +104,7 @@ Foam::interpolation2DTable<Type>::interpolation2DTable(const dictionary& dict)
             true  // Failsafe behaviour
         )
     ),
-    fileName_(dict.lookup("file")),
+    fileName_(dict.get<fileName>("file")),
     reader_(tableReader<Type>::New(dict))
 {
     readTable();
@@ -117,12 +117,11 @@ Foam::interpolation2DTable<Type>::interpolation2DTable
      const interpolation2DTable& interpTable
 )
 :
-    List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(interpTable),
+    List<value_type>(interpTable),
     bounding_(interpTable.bounding_),
     fileName_(interpTable.fileName_),
     reader_(interpTable.reader_)    // note: steals reader. Used in write().
 {}
-
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -130,108 +129,16 @@ Foam::interpolation2DTable<Type>::interpolation2DTable
 template<class Type>
 Type Foam::interpolation2DTable<Type>::interpolateValue
 (
-    const List<Tuple2<scalar, Type>>& data,
-    const scalar lookupValue
+    const List<Tuple2<scalar, Type>>& list,
+    scalar lookupValue
 ) const
 {
-    const label n = data.size();
-
-    const scalar minLimit = data.first().first();
-    const scalar maxLimit = data.last().first();
-
-    if (lookupValue < minLimit)
-    {
-        switch (bounding_)
-        {
-            case bounds::normalBounding::ERROR:
-            {
-                FatalErrorInFunction
-                    << "value (" << lookupValue << ") less than lower "
-                    << "bound (" << minLimit << ")" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case bounds::normalBounding::WARN:
-            {
-                WarningInFunction
-                    << "value (" << lookupValue << ") less than lower "
-                    << "bound (" << minLimit << ")" << nl
-                    << "    Continuing with the first entry"
-                    << endl;
-
-                // Behaviour as per CLAMP
-                return data.first().second();
-                break;
-            }
-            case bounds::normalBounding::CLAMP:
-            {
-                return data.first().second();
-                break;
-            }
-        }
-    }
-    else if (lookupValue >= maxLimit)
-    {
-        switch (bounding_)
-        {
-            case bounds::normalBounding::ERROR:
-            {
-                FatalErrorInFunction
-                    << "value (" << lookupValue << ") greater than upper "
-                    << "bound (" << maxLimit << ")" << nl
-                    << exit(FatalError);
-                break;
-            }
-            case bounds::normalBounding::WARN:
-            {
-                WarningInFunction
-                    << "value (" << lookupValue << ") greater than upper "
-                    << "bound (" << maxLimit << ")" << nl
-                    << "    Continuing with the last entry"
-                    << endl;
-
-                // Behaviour as per CLAMP
-                return data.last().second();
-                break;
-            }
-            case bounds::normalBounding::CLAMP:
-            {
-                return data.last().second();
-                break;
-            }
-        }
-    }
-
-    // look for the correct range in X
-    label lo = 0;
-    label hi = 0;
-
-    for (label i = 0; i < n; ++i)
-    {
-        if (lookupValue >= data[i].first())
-        {
-            lo = hi = i;
-        }
-        else
-        {
-            hi = i;
-            break;
-        }
-    }
-
-    if (lo == hi)
-    {
-        return data[lo].second();
-    }
-    else
-    {
-        Type m =
-            (data[hi].second() - data[lo].second())
-           /(data[hi].first() - data[lo].first());
-
-        // normal interpolation
-        return data[lo].second() + m*(lookupValue - data[lo].first());
-    }
+    return interpolationTable<Type>::interpolateValue
+    (
+        list,
+        lookupValue,
+        bounds::repeatableBounding(bounding_)
+    );
 }
 
 
@@ -244,7 +151,7 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
     const bool reverse
 ) const
 {
-    const table& t = *this;
+    const List<value_type>& t = *this;
 
     label limitI = 0;
     if (reverse)
@@ -259,15 +166,14 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
             case bounds::normalBounding::ERROR:
             {
                 FatalErrorInFunction
-                    << "value (" << valueX << ") out of bounds"
+                    << "value (" << valueX << ") out of bounds" << nl
                     << exit(FatalError);
                 break;
             }
             case bounds::normalBounding::WARN:
             {
                 WarningInFunction
-                    << "value (" << valueX << ") out of bounds"
-                    << endl;
+                    << "value (" << valueX << ") out of bounds" << nl;
 
                 // Behaviour as per CLAMP
                 return limitI;
@@ -290,11 +196,11 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
     label i = 0;
     if (reverse)
     {
-        label nX = t.size();
+        const label nX = t.size();
         i = 0;
         while ((i < nX) && (valueX > t[i].first()))
         {
-            i++;
+            ++i;
         }
     }
     else
@@ -302,7 +208,7 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
         i = t.size() - 1;
         while ((i > 0) && (valueX < t[i].first()))
         {
-            i--;
+            --i;
         }
     }
 
@@ -319,66 +225,61 @@ Type Foam::interpolation2DTable<Type>::operator()
     const scalar valueY
 ) const
 {
-    // Considers all of the list in Y being equal
-    const label nX = this->size();
+    const List<value_type>& t = *this;
 
-    const table& t = *this;
+    // Assumes all of the list in Y being equal length
+    const label nX = t.size();
 
     if (nX == 0)
     {
         WarningInFunction
-            << "cannot interpolate a zero-sized table - returning zero" << endl;
+            << "Cannot interpolate zero-sized table - returning zero" << nl;
 
         return Zero;
     }
     else if (nX == 1)
     {
-        // only 1 column (in X) - interpolate to find Y value
+        // Only 1 column (in X) - simply interpolate to find Y value
         return interpolateValue(t.first().second(), valueY);
     }
-    else
+
+
+    // Find low and high indices in the X range that bound valueX
+    const label lo = Xi(lessOp<scalar>(), valueX, false);
+    const label hi = Xi(greaterOp<scalar>(), valueX, true);
+
+    if (lo == hi)
     {
-        // have 2-D data, interpolate
-
-        // find low and high indices in the X range that bound valueX
-        const label x0i = Xi(lessOp<scalar>(), valueX, false);
-        const label x1i = Xi(greaterOp<scalar>(), valueX, true);
-
-        if (x0i == x1i)
-        {
-            return interpolateValue(t[x0i].second(), valueY);
-        }
-        else
-        {
-            Type y0(interpolateValue(t[x0i].second(), valueY));
-            Type y1(interpolateValue(t[x1i].second(), valueY));
-
-            // gradient in X
-            const scalar x0 = t[x0i].first();
-            const scalar x1 = t[x1i].first();
-            Type mX = (y1 - y0)/(x1 - x0);
-
-            // interpolate
-            return y0 + mX*(valueX - x0);
-        }
+        return interpolateValue(t[lo].second(), valueY);
     }
+
+
+    // Normal interpolation
+
+    const Type y0(interpolateValue(t[lo].second(), valueY));
+    const Type y1(interpolateValue(t[hi].second(), valueY));
+
+    const scalar& x0 = t[lo].first();
+    const scalar& x1 = t[hi].first();
+
+    return (y0 + (y1 - y0)*(valueX - x0)/(x1 - x0));
 }
 
 
 template<class Type>
-void Foam::interpolation2DTable<Type>::checkOrder() const
+void Foam::interpolation2DTable<Type>::check() const
 {
-    const label n = this->size();
-    const table& t = *this;
+    const List<value_type>& list = *this;
 
-    scalar prevValue = t[0].first();
+    scalar prevValue(0);
 
-    for (label i=1; i<n; ++i)
+    label i = 0;
+    for (const auto& item : list)
     {
-        const scalar currValue = t[i].first();
+        const scalar& currValue = item.first();
 
-        // avoid duplicate values (divide-by-zero error)
-        if (currValue <= prevValue)
+        // Avoid duplicate values (divide-by-zero error)
+        if (i && currValue <= prevValue)
         {
             FatalErrorInFunction
                 << "out-of-order value: "
@@ -386,6 +287,7 @@ void Foam::interpolation2DTable<Type>::checkOrder() const
                 << exit(FatalError);
         }
         prevValue = currValue;
+        ++i;
     }
 }
 
