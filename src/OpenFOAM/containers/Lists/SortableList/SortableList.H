@@ -32,6 +32,11 @@ Description
 
     Uses the std::stable_sort() algorithm.
 
+Note
+    In many cases you may wish to reuse list storage.
+    The Foam::sortedOrder() function and the Foam::SortList container
+    provide two other alternatives.
+
 SourceFiles
     SortableList.C
 
@@ -56,9 +61,9 @@ class SortableList
 :
     public List<T>
 {
-    // Private data
+    // Private Data
 
-        //- Original indices
+        //- Indices from last sort()
         labelList indices_;
 
 
