@@ -33,11 +33,8 @@
 # Description
 #     Link all the source files in the <dir> directory into <dir>/lnInclude
 #
-#     The desired source files:
-#         *.C *.H *.h *.cpp *.cxx *.hpp *.hxx
-#
-#     Avoid
-#         *.c (C source)
+#     C files:      .c .h
+#     C++ files:    .C .cc .cpp .cxx .H .hh .hpp .hxx
 #
 #------------------------------------------------------------------------------
 Script="${0##*/}"           # Use 'Script' for error messages in wmakeFunctions
@@ -203,7 +200,9 @@ find .. \
     \( -name lnInclude -o -name Make -o -name config -o -name noLink \) \
     -prune \
     -o \( \
-        -name '*.[CHh]' \
+        -name '*.[CHch]' \
+        -o -name '*.cc' \
+        -o -name '*.hh' \
         -o -name '*.[ch]xx' \
         -o -name '*.[ch]pp' \
         -o -name '*.type' \
