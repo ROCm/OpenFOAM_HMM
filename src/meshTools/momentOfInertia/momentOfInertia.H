@@ -31,6 +31,17 @@ Description
     polyhedra/cells/triSurfaces.  Inertia can either be of the solid body or
     of a thin shell.
 
+    References:
+    \verbatim
+        "Fast and Accurate Computation of Polyhedral Mass Properties",
+        Brian Mirtich,
+        Journal of Graphics Tools, Volume 1, Number 2, 1996.
+    \endverbatim
+
+    https://people.eecs.berkeley.edu/~jfc/mirtich/massProps.html
+    https://people.eecs.berkeley.edu/~jfc/mirtich/papers/volInt.ps.gz
+    https://people.eecs.berkeley.edu/~jfc/mirtich/code/volumeIntegration.tar
+
 SourceFiles
     momentOfInertia.H
 
