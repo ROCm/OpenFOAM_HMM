@@ -26,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "FDICSmoother.H"
-#include "FDICPreconditioner.H"
+#include "DICPreconditioner.H"
 #include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -59,13 +59,13 @@ Foam::FDICSmoother::FDICSmoother
         interfaceIntCoeffs,
         interfaces
     ),
-    rD_(matrix_.diag()),
+    rD_(matrix_.diag().size()),
     rDuUpper_(matrix_.upper().size()),
     rDlUpper_(matrix_.upper().size())
 {
-    scalar* __restrict__ rDPtr = rD_.begin();
-    scalar* __restrict__ rDuUpperPtr = rDuUpper_.begin();
-    scalar* __restrict__ rDlUpperPtr = rDlUpper_.begin();
+    solveScalar* __restrict__ rDPtr = rD_.begin();
+    solveScalar* __restrict__ rDuUpperPtr = rDuUpper_.begin();
+    solveScalar* __restrict__ rDlUpperPtr = rDlUpper_.begin();
 
     const label* const __restrict__ uPtr =
         matrix_.lduAddr().upperAddr().begin();
@@ -74,19 +74,12 @@ Foam::FDICSmoother::FDICSmoother
     const scalar* const __restrict__ upperPtr =
         matrix_.upper().begin();
 
-    const label nCells = rD_.size();
     const label nFaces = matrix_.upper().size();
 
-    for (label face=0; face<nFaces; face++)
-    {
-        rDPtr[uPtr[face]] -= sqr(upperPtr[face])/rDPtr[lPtr[face]];
-    }
+    const scalarField& diag = matrix_.diag();
+    std::copy(diag.begin(), diag.end(), rD_.begin());
 
-    // Generate reciprocal FDIC
-    for (label cell=0; cell<nCells; cell++)
-    {
-        rDPtr[cell] = 1.0/rDPtr[cell];
-    }
+    DICPreconditioner::calcReciprocalD(rD_, matrix_);
 
     for (label face=0; face<nFaces; face++)
     {
@@ -106,8 +99,8 @@ void Foam::FDICSmoother::smooth
     const label nSweeps
 ) const
 {
-    const scalar* const __restrict__ rDuUpperPtr = rDuUpper_.begin();
-    const scalar* const __restrict__ rDlUpperPtr = rDlUpper_.begin();
+    const solveScalar* const __restrict__ rDuUpperPtr = rDuUpper_.begin();
+    const solveScalar* const __restrict__ rDlUpperPtr = rDlUpper_.begin();
 
     const label* const __restrict__ uPtr =
         matrix_.lduAddr().upperAddr().begin();
@@ -130,7 +123,10 @@ void Foam::FDICSmoother::smooth
             cmpt
         );
 
-        rA *= rD_;
+        forAll(rA, i)
+        {
+            rA[i] *= rD_[i];
+        }
 
         const label nFaces = matrix_.upper().size();
         for (label face=0; face<nFaces; face++)

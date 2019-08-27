@@ -59,9 +59,9 @@ class FDICSmoother
     // Private data
 
         //- The reciprocal preconditioned diagonal
-        scalarField rD_;
-        scalarField rDuUpper_;
-        scalarField rDlUpper_;
+        solveScalarField rD_;
+        solveScalarField rDuUpper_;
+        solveScalarField rDlUpper_;
 
 
 public:
