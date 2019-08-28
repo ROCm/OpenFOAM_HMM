@@ -165,6 +165,45 @@ Foam::dimensioned<Type>::dimensioned
 template<class Type>
 Foam::dimensioned<Type>::dimensioned
 (
+    const primitiveEntry& e
+)
+:
+    name_(e.name()),
+    dimensions_(),
+    value_(Zero)
+{
+    ITstream& is = e.stream();
+
+    // no checkDims
+    initialize(is, false);
+
+    e.checkITstream(is);
+}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
+    const primitiveEntry& e,
+    const dimensionSet& dims
+)
+:
+    name_(e.name()),
+    dimensions_(dims),
+    value_(Zero)
+{
+    ITstream& is = e.stream();
+
+    // checkDims
+    initialize(is, true);
+
+    e.checkITstream(is);
+}
+
+
+template<class Type>
+Foam::dimensioned<Type>::dimensioned
+(
     const word& name,
     const dictionary& dict
 )

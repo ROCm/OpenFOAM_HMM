@@ -26,6 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dictionary.H"
+#include "primitiveEntry.H"
+#include "dimensionedScalar.H"
 #include "dimensionedTensor.H"
 
 using namespace Foam;
@@ -161,7 +163,24 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Dictionary is now: " << dict << nl;
 
-    Info<< "End\n" << endl;
+
+    {
+        primitiveEntry entry1("scalar1", token(15.0));
+
+        // The same:
+        // primitiveEntry entry1("scalar1", ITstream::parse(" 15.0 "));
+
+        // This fails (as it should):
+        // primitiveEntry entry1("scalar1", ITstream::parse(" 15.0 25.0 "));
+
+        dimensionedScalar ds1(entry1);
+
+        Info<< "construct from entry: "
+            << entry1 << nl
+            << "    = " << ds1 << nl;
+    }
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

@@ -50,6 +50,7 @@ namespace Foam
 // Forward declarations
 class zero;
 class dictionary;
+class primitiveEntry;
 
 template<class Type> class dimensioned;
 
@@ -146,8 +147,31 @@ public:
             const Type& val
         );
 
+        //- Construct from primitive entry with given name.
+        //  The entry may contain optional name and dimensions.
+        //  \verbatim
+        //  [name] [dims] value
+        //  \endverbatim
+        //  If the optional name is found, it is used for renaming.
+        //  If the optional dimensions are present, they are read and
+        //  used without further verification.
+        //  If no dimensions are found, the quantity is dimensionless.
+        //  Fatal if not a primitiveEntry or if the number of tokens is incorrect.
+        explicit dimensioned(const primitiveEntry& e);
+
+        //- Construct from primitive entry with given name and dimensions.
+        //  The entry may contain optional name and dimensions.
+        //  \verbatim
+        //  [name] [dims] value
+        //  \endverbatim
+        //  If the optional name is found, it is used for renaming.
+        //  If the optional dimensions are present, they are read and
+        //  verified against the expected dimensions.
+        //  Fatal if not a primitiveEntry or if the number of tokens is incorrect.
+        explicit dimensioned(const primitiveEntry& e, const dimensionSet& dims);
+
         //- Construct from dictionary lookup with a given name.
-        //  The dictionary entry may contain optional name and dimensions.
+        //  The entry may contain optional name and dimensions.
         //  \verbatim
         //  [name] [dims] value
         //  \endverbatim
@@ -158,7 +182,7 @@ public:
         dimensioned(const word& name, const dictionary& dict);
 
         //- Construct from dictionary lookup with a given name and dimensions.
-        //  The dictionary entry may contain optional name and dimensions.
+        //  The entry may contain optional name and dimensions.
         //  \verbatim
         //  [name] [dims] value
         //  \endverbatim
@@ -173,7 +197,7 @@ public:
         );
 
         //- Construct from dictionary lookup with a given name and dimensions.
-        //  The dictionary entry may contain optional name and dimensions.
+        //  The entry may contain optional name and dimensions.
         //  \verbatim
         //  [name] [dims] value
         //  \endverbatim
@@ -190,7 +214,7 @@ public:
 
         //- Construct from components (name, dimensions, value) with
         //- optional dictionary override.
-        //  The dictionary entry may contain optional name and dimensions.
+        //  The entry may contain optional name and dimensions.
         //  \verbatim
         //  [name] [dims] value
         //  \endverbatim
@@ -341,14 +365,16 @@ public:
         //- Deprecated(2018-11) Construct from Istream
         //- (expects name, dimensions, value)
         //  \deprecated(2018-11) - should generally use construct from
-        //      dictionary instead (additional checks on the input stream).
+        //      dictionary or primitiveEntry instead
+        //      (additional checks on the input stream).
         explicit dimensioned(Istream& is)
         FOAM_DEPRECATED(2018-11);
 
         //- Deprecated(2018-11) Construct from Istream with given name
         //- (expects dimensions, value)
         //  \deprecated(2018-11) - should generally use construct from
-        //      dictionary instead (additional checks on the input stream).
+        //      dictionary or primitiveEntry instead
+        //      (additional checks on the input stream).
         dimensioned(const word& name, Istream& is)
         FOAM_DEPRECATED(2018-11);
 
@@ -358,7 +384,8 @@ public:
         //  If the optional dimensions are present, they are read and
         //  verified against the expected dimensions.
         //  \deprecated(2018-11) - should generally use construct from
-        //      dictionary instead (additional checks on the input stream).
+        //      dictionary or primitiveEntry instead
+        //      (additional checks on the input stream).
         dimensioned(const word& name, const dimensionSet& dims, Istream& is)
         FOAM_DEPRECATED(2018-11);
 
