@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2019 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 #                           | Copyright (C) 2011-2015 OpenFOAM Foundation
@@ -32,6 +32,9 @@
 #     Redirects the output to 'log' in the case directory.
 #
 #------------------------------------------------------------------------------
+# If dispatching via foamExec
+foamExec="$WM_PROJECT_DIR/bin/tools/foamExec"
+
 usage() {
     exec 1>&2
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
@@ -40,80 +43,30 @@ usage() {
 Usage: ${0##*/} [OPTION] <application> ...
 options:
   -case <dir>       specify alternative case directory, default is the cwd
-  -parallel         parallel run of processors
-  -screen           also sends output to screen
-  -append           append to log file instead of overwriting it
+  -parallel         run in parallel (with mpirun)
+  -screen           also send output to screen
+  -append           append to existing log file instead of overwriting it
+  -log=FILE         specify the log file
+  -log-app          Use log.{appName} for the log file
+  -no-check         run without fewer checks (eg, processor dirs etc)
+  -no-log           run without log file
   -wait             wait for execution to complete (when not using -screen)
-  -version=VER      specify an alternative OpenFOAM version
   -help             print the usage
 
-* run an OpenFOAM job in background.
-  Redirects the output to 'log' in the case directory
+Run an OpenFOAM job in background, redirecting output to a 'log' file
+in the case directory
 
 USAGE
     exit 1
 }
 
-# Echo strings that have single quotes
-echoArgs() {
-    addSpace=""
-
-    for stringItem in "$@"
-    do
-        echo -n "${addSpace}"
-
-        if [ "${stringItem##* }" = "$stringItem" ]
-        then
-            echo -n "$stringItem"
-            addSpace=" "
-        else
-            echo -n "'$stringItem'"
-            addSpace=" "
-        fi
-    done
-
-    unset stringItem addSpace
-}
-
-
-# Replacement for possibly buggy 'which'
-findExec() {
-    case "$1" in
-    */*)
-        if [ -x "$1" ]
-        then
-            echo "$1"
-            return 0
-        fi
-        ;;
-    esac
-
-    oldIFS=$IFS
-    IFS=':'
-    for d in $PATH
-    do
-        # echo "testing: $d/$1" 1>&2
-        if [ -x "$d/$1" -a ! -d "$d/$1" ]
-        then
-            # echo "Found exec: $d/$1" 1>&2
-            IFS=$oldIFS
-            echo "$d/$1"
-            return 0
-        fi
-     done
-     IFS=$oldIFS
-     echo ""
-     return 1
-}
-
-
-
-# Main script
-#~~~~~~~~~~~~
-unset parallelOpt screenOpt waitOpt
-unset projectVersion
-
+#------------------------------------------------------------------------------
 # Parse options
+
+logFile="log"
+optCheck=true
+unset optParallel optScreen optWait logMode
+
 while [ "$#" -gt 0 ]
 do
     case "$1" in
@@ -122,27 +75,41 @@ do
         ;;
     -case)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        cd "$2" 2>/dev/null || usage "directory does not exist:  '$2'"
+        cd "$2" 2>/dev/null || usage "directory does not exist: '$2'"
         shift
         ;;
     -p | -parallel)
-        parallelOpt=true
+        optParallel=true
         ;;
     -s | -screen)
-        screenOpt=true
+        optScreen=true
         ;;
     -a | -append)
-        appendOpt=true
+        logMode=append
         ;;
     -w | -wait)
-        waitOpt=true
+        optWait=true
+        ;;
+    -no-check*)
+        unset optCheck
+        ;;
+    -no-log)
+        logMode=none
+        logFile=log     # Consistency if -append toggles it back on
+        ;;
+    -log=*)
+        logFile="${1##*=}"
+        [ -n "$logFile" ] || logFile="log"
+        ;;
+    -log-app)
+        logFile="{LOG_APPNAME}"  # Tag for log.appName output
         ;;
     -version=*)
-        projectVersion="${1#*=}"    # for foamExec
+        echo "Ignoring version option" 1>&2
         ;;
     -v | -version)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        projectVersion="$2"         # for foamExec
+        echo "Ignoring version option" 1>&2
         shift
         ;;
     --)
@@ -166,65 +133,74 @@ done
 # The requested application
 appName="$1"
 
-# Use foamExec for a specified version
-# Also need foamExec for remote (parallel) runs
-if [ -n "$projectVersion" -o "$parallelOpt" = true ]
+# Does application even exist?
+APPLICATION="$(command -v "$appName")" || \
+    usage "Application '$appName' not found"
+
+if [ "$logFile" = "{LOG_APPNAME}" ]
 then
-    # When possible, determine if application even exists
-    if [ -z "$projectVersion" ]
-    then
-        findExec "$appName" >/dev/null || usage "Application '$appName' not found"
-    fi
+    logFile="log.${appName##*/}"
+fi
 
+
+# Need foamExec for remote (parallel) runs
+if [ "$optParallel" = true ]
+then
     # Use foamExec for dispatching
-    APPLICATION=$(findExec foamExec) || usage "'foamExec' not found"
+    [ -x "$foamExec" ] || usage "File not found: $foamExec"
 
-    [ -n "$projectVersion" ] && APPLICATION="$APPLICATION -version $projectVersion"
-
+    APPLICATION="$foamExec"
 else
-    APPLICATION=$(findExec "$appName") || usage "Application '$appName' not found"
-    echo "Application : $appName"
+    # Drop first argument in favour of fully qualified APPLICATION
     shift
 fi
 
 
-if [ "$parallelOpt" = true ]
-then
-    # parallel
-    # ~~~~~~~~
+# Stringify args, adding single quotes for args with spaces
+echoArgs()
+{
+    unset stringifiedArgs
 
+    for stringItem in "$@"
+    do
+        case "$stringItem" in (*' '*) stringItem="'$stringItem'" ;; esac
+        stringifiedArgs="${stringifiedArgs}${stringifiedArgs:+ }${stringItem}"
+    done
+    echo "$stringifiedArgs"
+}
+
+
+if [ "$optParallel" = true ]
+then
     #
-    # Check if the case decomposed
+    # Parallel
     #
-    if [ -r "processor0" -o -r "processors" ]
+    dict="system/decomposeParDict"
+
+    [ -r "$dict" ] || {
+        echo "No $dict found, which is required for parallel running."
+        exit 1
+    }
+
+    nProcs="$(foamDictionary -entry numberOfSubdomains -value $dict 2>/dev/null)"
+
+    # Check if case is decomposed
+    if [ "$optCheck" = true ]
     then
-        nprocs="$(foamDictionary -entry numberOfSubdomains -value system/decomposeParDict 2>/dev/null)"
-    else
-        echo "Case is not currently decomposed"
-        if [ -r system/decomposeParDict ]
-        then
-            echo "system/decomposeParDict exists"
-            echo "Try decomposing with \"foamJob decomposePar\""
+        [ -r "processor0" ] || [ -r "processors" ] || {
+            echo "Case is not currently decomposed"
+            echo "Try decomposing first with \"foamJob decomposePar\""
             exit 1
-        else
-            echo "Cannot find system/decomposeParDict file required to decompose the case for parallel running."
-            echo "Please consult the User Guide for details of parallel running"
-            exit 1
-        fi
+        }
     fi
 
-    #
-    # Find mpirun
-    #
-    mpirun=$(findExec mpirun) || usage "'mpirun' not found"
-    mpiopts="-np $nprocs"
+    # Locate mpirun
+    mpirun=$(command -v mpirun) || usage "'mpirun' not found"
+    mpiopts="-n $nProcs"
 
-    #
     # Check if the machine ready to run parallel
-    #
-    echo "Parallel processing using $WM_MPLIB with $nprocs processors"
     case "$WM_MPLIB" in
-    *OPENMPI)
+    *OPENMPI*)
         # Add hostfile info
         for hostfile in \
             hostfile \
@@ -233,7 +209,7 @@ then
             system/machines \
             ;
         do
-            if [ -r $hostfile ]
+            if [ -r "$hostfile" ]
             then
                 mpiopts="$mpiopts -hostfile $hostfile"
                 break
@@ -242,59 +218,107 @@ then
 
         # Send FOAM_SETTINGS to parallel processes, so that the proper
         # definitions are sent as well.
-        mpiopts="$mpiopts -x FOAM_SETTINGS"
+        if [ -n "$FOAM_SETTINGS" ]
+        then
+            mpiopts="$mpiopts -x FOAM_SETTINGS"
+        fi
         ;;
     esac
 
     #
     # Run (in parallel)
     #
-    if [ "$screenOpt" = true ]
+    echo "Application : $appName ($nProcs processes)"
+    if [ "$logMode" != "none" ]
     then
-        [ "$appendOpt" = true ] && teeOpts=" -a"
-        echo "Executing: $mpirun $mpiopts $APPLICATION $(echoArgs "$@") -parallel | tee $teeOpts log"
-        $mpirun $mpiopts $APPLICATION "$@" -parallel | tee $teeOpts log
+    echo "Output      : $logFile"
+    fi
+    echo "Executing   : $mpirun $mpiopts $APPLICATION $(echoArgs "$@") -parallel"
+    if [ "$optScreen" = true ]
+    then
+        case "$logMode" in
+        none)
+            "$mpirun" $mpiopts "$APPLICATION" "$@" -parallel
+            ;;
+        append)
+            "$mpirun" $mpiopts "$APPLICATION" "$@" -parallel | tee -a "$logFile"
+            ;;
+        *)
+            "$mpirun" $mpiopts "$APPLICATION" "$@" -parallel | tee "$logFile"
+            ;;
+        esac
     else
-        if [ "$appendOpt" = true ]
-        then
-            echo "Executing: $mpirun $mpiopts $APPLICATION $(echoArgs "$@") -parallel >> log 2>&1"
-            $mpirun $mpiopts $APPLICATION "$@" -parallel >> log 2>&1 &
-        else
-            echo "Executing: $mpirun $mpiopts $APPLICATION $(echoArgs "$@") -parallel > log 2>&1"
-            $mpirun $mpiopts $APPLICATION "$@" -parallel > log 2>&1 &
-        fi
+        case "$logMode" in
+        none)
+            "$mpirun" $mpiopts "$APPLICATION" "$@" -parallel > /dev/null 2>&1 &
+            ;;
+        append)
+            "$mpirun" $mpiopts "$APPLICATION" "$@" -parallel >> "$logFile" 2>&1 &
+            ;;
+        *)
+            "$mpirun" $mpiopts "$APPLICATION" "$@" -parallel > "$logFile" 2>&1 &
+            ;;
+        esac
 
         pid=$!
-        if [ "$waitOpt" = true ]
+        if [ "$optWait" = true ]
         then
-            wait $pid
+            echo "Waiting for process $pid to finish"
+            wait "$pid"
+            echo "Process $pid finished"
+        else
+            echo "Process id  : $pid"
         fi
     fi
 
 else
     #
-    # Run (on single processor)
+    # Serial
     #
-    if [ "$screenOpt" = true ]
+    echo "Application : $appName ($nProcs processes)"
+    if [ "$logMode" != "none" ]
     then
-        [ "$appendOpt" = true ] && teeOpts=" -a"
-        echo "Executing: $APPLICATION $(echoArgs "$@") | tee $teeOpts log &"
-        $APPLICATION "$@" | tee $teeOpts log &
-        wait $!
-    else
-        if [ "$appendOpt" = true ]
-        then
-            echo "Executing: $APPLICATION $(echoArgs "$@") >> log 2>&1 &"
-            $APPLICATION "$@" >> log 2>&1 &
-        else
-            echo "Executing: $APPLICATION $(echoArgs "$@") > log 2>&1 &"
-            $APPLICATION "$@" > log 2>&1 &
-        fi
+    echo "Output      : $logFile"
+    fi
+    echo "Executing   : $APPLICATION $(echoArgs "$@")"
+    if [ "$optScreen" = true ]
+    then
+        case "$logMode" in
+        none)
+            "$APPLICATION" "$@" &
+            ;;
+        append)
+            "$APPLICATION" "$@" | tee -a "$logFile" &
+            ;;
+        *)
+            "$APPLICATION" "$@" | tee "$logFile" &
+            ;;
+        esac
 
         pid=$!
-        if [ "$waitOpt" = true ]
+        echo "Process id  : $pid"
+        wait "$pid"
+    else
+        case "$logMode" in
+        none)
+            "$APPLICATION" "$@" > /dev/null 2>&1 &
+            ;;
+        append)
+            "$APPLICATION" "$@" >> "$logFile" 2>&1 &
+            ;;
+        *)
+            "$APPLICATION" "$@" > "$logFile" 2>&1 &
+            ;;
+        esac
+
+        pid=$!
+        if [ "$optWait" = true ]
         then
-            wait $pid
+            echo "Waiting for process $pid to finish"
+            wait "$pid"
+            echo "Process $pid finished"
+        else
+            echo "Process id  : $pid"
         fi
     fi
 fi
