@@ -152,14 +152,20 @@ void Foam::combineFaces::regioniseFaces
 
         // Face can be merged if
         // - small angle
-        // - mergeAcrossPatches=false : same non-coupled patch
-        // - mergeAcrossPatches=true  : always
+        // - mergeAcrossPatches=false : same non-constraint patch
+        // - mergeAcrossPatches=true  : always (if non-constraint patch)
+        //   (this logic could be extended to e.g. merge faces on symm plane
+        //    if they have similar normals. But there might be lots of other
+        //    constraints which disallow merging so this decision ideally should
+        //    be up to patch type)
         if
         (
             p0 != -1
          && p1 != -1
-         && !patches[p0].coupled()
-         && !patches[p1].coupled()
+         && !(
+                polyPatch::constraintType(patches[p0].type())
+             || polyPatch::constraintType(patches[p1].type())
+            )
         )
         {
             if (!mergeAcrossPatches && (p0 != p1))
